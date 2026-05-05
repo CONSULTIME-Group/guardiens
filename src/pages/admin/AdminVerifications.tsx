@@ -435,6 +435,28 @@ const AdminVerifications = () => {
                           >
                             <ExternalLink className="h-3.5 w-3.5" /> Profil
                           </Button>
+                          {user.identity_verification_status === "pending" && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 gap-1 text-xs text-success hover:text-success"
+                                disabled={busyUserId === user.id}
+                                onClick={() => handleApprove(user.id)}
+                              >
+                                <ShieldCheck className="h-3.5 w-3.5" /> Valider
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 gap-1 text-xs text-destructive hover:text-destructive"
+                                disabled={busyUserId === user.id}
+                                onClick={() => setRejectModal({ open: true, userId: user.id, reason: "", customReason: "" })}
+                              >
+                                <ShieldX className="h-3.5 w-3.5" /> Invalider
+                              </Button>
+                            </>
+                          )}
                           {user.identity_verification_status === "verified" && (
                             <Button
                               size="sm"
