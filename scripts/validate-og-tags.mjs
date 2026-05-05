@@ -609,11 +609,17 @@ async function validateSitemap(origin, routes, siteUrl) {
   const entries = parseSitemap(xml);
   const locSet = new Map(entries.map((e) => [e.loc, e]));
 
-  // On s'attend à trouver chaque route publique (sauf /login) avec bonne priorité
-  const EXCLUDED = new Set(["/login"]);
   const diffs = [];
   for (const r of routes) {
-    if (EXCLUDED.has(r.path)) continue;
+    // F1/F5 : routes index:false → on vérifie l'ABSENCE du sitemap.
+    if (r.indexable === false) {
+      const expectedLoc = `${siteUrl}${r.path === "/" ? "" : r.path}`;
+      const entry = locSet.get(expectedLoc) || locSet.get(`${expectedLoc}/`);
+      if (entry) {
+        diffs.push({ path: r.path, issue: `présent dans le sitemap alors que index:false` });
+      }
+      continue;
+    }
     const expectedLoc = `${siteUrl}${r.path === "/" ? "" : r.path}`;
     // Le sitemap sert la home en "https://guardiens.fr/" OU "https://guardiens.fr"
     const entry = locSet.get(expectedLoc) || locSet.get(`${expectedLoc}/`);
@@ -643,10 +649,10 @@ async function validateRobots(origin, routes, siteUrl) {
     issues.push(`Sitemap absent ou différent (attendu : ${expectedSitemap}, trouvé : ${sitemaps.join(", ") || "(aucun)"})`);
   }
 
-  // Conflits : route publique indexable mais disallowée
-  const EXCLUDED = new Set(["/login"]);
+  // Conflits : route publique indexable mais disallowée. F1/F5 : routes
+  // index:false ne sont pas concernées (Disallow attendu).
   for (const r of routes) {
-    if (EXCLUDED.has(r.path) || r.path === "/") continue;
+    if (r.indexable === false || r.path === "/") continue;
     const conflicts = disallow.filter((d) => r.path === d || r.path.startsWith(d.replace(/\/$/, "") + "/"));
     if (conflicts.length > 0) {
       issues.push(`${r.path} est dans sitemap mais Disallow: ${conflicts.join(", ")}`);
