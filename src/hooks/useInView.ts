@@ -13,24 +13,35 @@ export function useInView<T extends Element = HTMLDivElement>(
 
   useEffect(() => {
     const node = ref.current;
-    if (!node || typeof IntersectionObserver === "undefined") {
+    const IO =
+      typeof window !== "undefined"
+        ? (window as unknown as { IntersectionObserver?: typeof IntersectionObserver })
+            .IntersectionObserver
+        : undefined;
+    if (!node || typeof IO !== "function") {
+      // Pas d'IntersectionObserver (vieux WebView, in-app browser…) → on affiche tout.
       setInView(true);
       return;
     }
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          if (once) observer.unobserve(entry.target);
-        } else if (!once) {
-          setInView(false);
-        }
-      },
-      { root, rootMargin, threshold }
-    );
-
-    observer.observe(node);
+    let observer: IntersectionObserver;
+    try {
+      observer = new IO(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setInView(true);
+            if (once) observer.unobserve(entry.target);
+          } else if (!once) {
+            setInView(false);
+          }
+        },
+        { root, rootMargin, threshold }
+      );
+      observer.observe(node);
+    } catch {
+      setInView(true);
+      return;
+    }
     return () => observer.disconnect();
   }, [once, root, rootMargin, threshold]);
 
