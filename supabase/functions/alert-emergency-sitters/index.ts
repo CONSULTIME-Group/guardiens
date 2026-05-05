@@ -47,10 +47,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { sitId, sitCity } = await req.json();
+    const { sitId, sitCity, countOnly, radiusKm } = await req.json();
 
-    if (!sitId || !sitCity) {
-      return new Response(JSON.stringify({ error: "sitId and sitCity required" }), {
+    if (!sitCity || (!countOnly && !sitId)) {
+      return new Response(JSON.stringify({ error: "sitCity required (sitId required unless countOnly)" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
