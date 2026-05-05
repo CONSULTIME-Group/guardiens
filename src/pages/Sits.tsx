@@ -325,25 +325,33 @@ const Sits = () => {
   const activeSits = useMemo(() => sits.filter(s => !isArchived(s)), [sits]);
   const archivedSits = useMemo(() => sits.filter(s => isArchived(s)), [sits]);
 
+  // Comptages onglets sitter (vue inchangée)
   const tabCounts = useMemo(() => {
     const counts: Record<Tab, number> = { upcoming: 0, in_progress: 0, completed: 0, cancelled: 0 };
+    if (isOwnerView) return counts;
     activeSits.forEach((s) => {
       const es = s.effectiveStatus || s.status;
-      if (activeRole === "owner") {
-        if (es === "in_progress") counts.in_progress++;
-        else if (es === "cancelled") counts.cancelled++;
-        else if (es === "completed") counts.completed++;
-        else counts.upcoming++;
-      } else {
-        const appStatus = s.application_status;
-        if (appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled") counts.cancelled++;
-        else if (es === "completed") counts.completed++;
-        else if (es === "in_progress" && appStatus === "accepted") counts.in_progress++;
-        else counts.upcoming++;
-      }
+      const appStatus = s.application_status;
+      if (appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled") counts.cancelled++;
+      else if (es === "completed") counts.completed++;
+      else if (es === "in_progress" && appStatus === "accepted") counts.in_progress++;
+      else counts.upcoming++;
     });
     return counts;
-  }, [activeSits, activeRole]);
+  }, [activeSits, isOwnerView]);
+
+  // Comptages onglets owner — Actives / Brouillons / Archivées
+  const ownerTabCounts = useMemo(() => {
+    const counts: Record<OwnerTab, number> = { active: 0, drafts: 0, archived: 0 };
+    if (!isOwnerView) return counts;
+    sits.forEach((s) => {
+      const es = s.effectiveStatus || s.status;
+      if (isArchived(s)) counts.archived++;
+      else if (es === "draft") counts.drafts++;
+      else counts.active++;
+    });
+    return counts;
+  }, [sits, isOwnerView]);
 
   const filteredSits = useMemo(() => {
     return activeSits.filter((s) => {
