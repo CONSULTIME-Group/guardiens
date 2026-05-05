@@ -19,6 +19,12 @@ interface ConseilsAnnoncePersoProps {
   hasHouseGuide?: boolean
   articleSlug?: string
   articleTitle?: string
+  /** Phrase courte décrivant les animaux pour personnaliser la routine, ex « deux chats », « un chien et un perroquet » */
+  petsContext?: string
+  /** Paragraphe spécifique sur la qualité/cohérence des photos (optionnel) */
+  photosNote?: string
+  /** Inclure le rappel de choisir une photo de couverture */
+  remindCoverPhoto?: boolean
 }
 
 const ConseilsAnnoncePersoEmail = ({
