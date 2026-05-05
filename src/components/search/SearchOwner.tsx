@@ -911,7 +911,7 @@ const SearchOwner = () => {
                         <p className="text-sm font-semibold truncate">
                           {firstName}
                           {profile?.identity_verified && (
-                            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium ml-1.5 inline-block align-middle">✓ Vérifié</span>
+                            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium ml-1.5 inline-block align-middle">Vérifié</span>
                           )}
                           {profile?.city && <span className="text-muted-foreground font-normal"> · {profile.city}</span>}
                           {distLabel && <span className="text-muted-foreground font-normal"> · {distLabel}</span>}
