@@ -229,6 +229,7 @@ const OwnerGallery = () => {
     if (successCount > 0) {
       toast({ title: successCount === 1 ? "Photo ajoutée" : `${successCount} photos ajoutées` });
       await loadPhotos();
+      window.dispatchEvent(new Event("owner-gallery:changed"));
     }
   };
 
