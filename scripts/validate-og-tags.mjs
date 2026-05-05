@@ -870,10 +870,42 @@ async function main() {
         try {
           const html = await fetchAsBot(url);
           const { tags, metaRobots } = parseMetaTags(html);
+
+          // F1/F5 : route publique noindex (index:false). On vérifie
+          // uniquement la PRÉSENCE du noindex et on skippe og/canonical.
+          if (route.indexable === false) {
+            const pageIssues = [];
+            if (enabledChecks.has("meta-robots")) {
+              if (!metaRobots || !/noindex/i.test(metaRobots)) {
+                pageIssues.push({
+                  kind: "meta-robots",
+                  severity: "always",
+                  msg: `index:false attendu mais meta robots = ${metaRobots ?? "(absent)"}`,
+                });
+              }
+            }
+            return { route, url, ok: true, ogDiffs: [], pageIssues };
+          }
+
           const expected = buildExpectedTags(route);
           const tolerantKeys = tolerantKeysFor(route);
+          // F3 : titres dynamiques avec sampleParams → check soft (présence
+          // du param interpolé + suffixe).
+          const softTitleKeys = new Set();
+          let softTitleParam = null;
+          if (route.isDynamic && route.dynamicTitle && route.sampleParams) {
+            const firstParamKey = Object.keys(route.sampleParams)[0];
+            if (firstParamKey) {
+              softTitleParam = route.sampleParams[firstParamKey];
+              // En soft on retire de tolerantKeys (présence != bon contenu)
+              tolerantKeys.delete("og:title");
+              tolerantKeys.delete("twitter:title");
+              softTitleKeys.add("og:title");
+              softTitleKeys.add("twitter:title");
+            }
+          }
           const ogDiffs = enabledChecks.has("og")
-            ? diffTags(tags, expected.tags, { tolerantKeys })
+            ? diffTags(tags, expected.tags, { tolerantKeys, softTitleKeys, softTitleParam })
             : [];
 
           // Chaque issue a un `severity` : "always" (toujours bloquant) ou
