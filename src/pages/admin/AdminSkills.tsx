@@ -461,7 +461,8 @@ const AdminSkills = () => {
                         )}
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
