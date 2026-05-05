@@ -58,12 +58,19 @@ const appStatusConfig: Record<string, { label: string; className: string }> = {
 };
 
 type Tab = "upcoming" | "in_progress" | "completed" | "cancelled";
+type OwnerTab = "active" | "drafts" | "archived";
 
 const tabs: { value: Tab; label: string; icon: typeof Calendar }[] = [
   { value: "upcoming", label: "À venir", icon: Calendar },
   { value: "in_progress", label: "En cours", icon: Clock },
   { value: "completed", label: "Passées", icon: CheckCircle },
   { value: "cancelled", label: "Annulées", icon: XCircle },
+];
+
+const ownerTabs: { value: OwnerTab; label: string; icon: typeof Calendar }[] = [
+  { value: "active", label: "Actives", icon: Calendar },
+  { value: "drafts", label: "Brouillons", icon: Pencil },
+  { value: "archived", label: "Archivées", icon: Archive },
 ];
 
 const formatShortDate = (d: string | null) =>
@@ -106,18 +113,21 @@ const Sits = () => {
 
   // Onglet actif synchronisé avec l'URL (?tab=...) — partageable, retour navigateur OK
   const validTabs: Tab[] = ["upcoming", "in_progress", "completed", "cancelled"];
-  const urlTab = searchParams.get("tab") as Tab | null;
-  const activeTab: Tab = urlTab && validTabs.includes(urlTab) ? urlTab : "upcoming";
-  const setActiveTab = useCallback((tab: Tab) => {
+  const validOwnerTabs: OwnerTab[] = ["active", "drafts", "archived"];
+  const urlTab = searchParams.get("tab");
+  const isOwnerView = activeRole === "owner";
+  const activeTab: Tab = (urlTab && validTabs.includes(urlTab as Tab) ? urlTab : "upcoming") as Tab;
+  const activeOwnerTab: OwnerTab = (urlTab && validOwnerTabs.includes(urlTab as OwnerTab) ? urlTab : "active") as OwnerTab;
+  const setActiveTab = useCallback((tab: Tab | OwnerTab) => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
-      if (tab === "upcoming") next.delete("tab");
+      if (tab === "upcoming" || tab === "active") next.delete("tab");
       else next.set("tab", tab);
       return next;
     }, { replace: true });
   }, [setSearchParams]);
 
-  const [showArchived, setShowArchived] = useState(false);
+  // (showArchived state removed — replaced by tabs)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [archiveConfirm, setArchiveConfirm] = useState<string | null>(null);
   const [openGuideId, setOpenGuideId] = useState<string | null>(null);
@@ -313,69 +323,84 @@ const Sits = () => {
   const isExpired = (s: any) => s.cancellation_reason === "expired";
 
   const activeSits = useMemo(() => sits.filter(s => !isArchived(s)), [sits]);
-  const archivedSits = useMemo(() => sits.filter(s => isArchived(s)), [sits]);
+  
 
+  // Comptages onglets sitter (vue inchangée)
   const tabCounts = useMemo(() => {
     const counts: Record<Tab, number> = { upcoming: 0, in_progress: 0, completed: 0, cancelled: 0 };
+    if (isOwnerView) return counts;
     activeSits.forEach((s) => {
       const es = s.effectiveStatus || s.status;
-      if (activeRole === "owner") {
-        if (es === "in_progress") counts.in_progress++;
-        else if (es === "cancelled") counts.cancelled++;
-        else if (es === "completed") counts.completed++;
-        else counts.upcoming++;
-      } else {
-        const appStatus = s.application_status;
-        if (appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled") counts.cancelled++;
-        else if (es === "completed") counts.completed++;
-        else if (es === "in_progress" && appStatus === "accepted") counts.in_progress++;
-        else counts.upcoming++;
-      }
+      const appStatus = s.application_status;
+      if (appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled") counts.cancelled++;
+      else if (es === "completed") counts.completed++;
+      else if (es === "in_progress" && appStatus === "accepted") counts.in_progress++;
+      else counts.upcoming++;
     });
     return counts;
-  }, [activeSits, activeRole]);
+  }, [activeSits, isOwnerView]);
+
+  // Comptages onglets owner — Actives / Brouillons / Archivées
+  const ownerTabCounts = useMemo(() => {
+    const counts: Record<OwnerTab, number> = { active: 0, drafts: 0, archived: 0 };
+    if (!isOwnerView) return counts;
+    sits.forEach((s) => {
+      const es = s.effectiveStatus || s.status;
+      if (isArchived(s)) counts.archived++;
+      else if (es === "draft") counts.drafts++;
+      else counts.active++;
+    });
+    return counts;
+  }, [sits, isOwnerView]);
 
   const filteredSits = useMemo(() => {
+    if (isOwnerView) {
+      // Vue owner : 3 onglets
+      return sits.filter((s) => {
+        const es = s.effectiveStatus || s.status;
+        switch (activeOwnerTab) {
+          case "drafts":
+            return es === "draft" && !isArchived(s);
+          case "archived":
+            return isArchived(s);
+          case "active":
+          default:
+            return !isArchived(s) && es !== "draft";
+        }
+      });
+    }
+    // Vue sitter (inchangée)
     return activeSits.filter((s) => {
       const es = s.effectiveStatus || s.status;
       const appStatus = s.application_status;
-      if (activeRole === "owner") {
-        switch (activeTab) {
-          case "in_progress": return es === "in_progress";
-          case "completed": return es === "completed";
-          case "cancelled": return es === "cancelled";
-          case "upcoming": return !["in_progress", "completed", "cancelled"].includes(es);
-        }
-      } else {
-        switch (activeTab) {
-          case "in_progress": return es === "in_progress" && appStatus === "accepted";
-          case "completed": return es === "completed";
-          case "cancelled": return appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled";
-          case "upcoming": return !["completed", "cancelled"].includes(es) && !["cancelled", "rejected"].includes(appStatus) && es !== "in_progress";
-        }
+      switch (activeTab) {
+        case "in_progress": return es === "in_progress" && appStatus === "accepted";
+        case "completed": return es === "completed";
+        case "cancelled": return appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled";
+        case "upcoming": return !["completed", "cancelled"].includes(es) && !["cancelled", "rejected"].includes(appStatus) && es !== "in_progress";
       }
       return false;
     });
-  }, [activeSits, activeRole, activeTab]);
+  }, [activeSits, sits, isOwnerView, activeTab, activeOwnerTab]);
 
   // Sous-titre contextuel : informations utiles plutôt que générique
   const headerSubtitle = useMemo(() => {
-    const upcoming = tabCounts.upcoming;
-    const inProgress = tabCounts.in_progress;
-    if (activeRole === "owner") {
+    if (isOwnerView) {
       const pendingApps = activeSits.reduce((sum, s) => sum + (s.pendingApplicationCount || 0), 0);
+      const inProgress = activeSits.filter((s) => (s.effectiveStatus || s.status) === "in_progress").length;
       const parts: string[] = [];
       if (pendingApps > 0) parts.push(`${pendingApps} candidature${pendingApps > 1 ? "s" : ""} en attente`);
       if (inProgress > 0) parts.push(`${inProgress} garde${inProgress > 1 ? "s" : ""} en cours`);
-      else if (upcoming > 0) parts.push(`${upcoming} annonce${upcoming > 1 ? "s" : ""} active${upcoming > 1 ? "s" : ""}`);
+      else if (ownerTabCounts.active > 0) parts.push(`${ownerTabCounts.active} annonce${ownerTabCounts.active > 1 ? "s" : ""} active${ownerTabCounts.active > 1 ? "s" : ""}`);
       return parts.length > 0 ? parts.join(" · ") : "Gérez vos annonces et suivez vos gardes.";
-    } else {
-      const parts: string[] = [];
-      if (inProgress > 0) parts.push(`${inProgress} garde${inProgress > 1 ? "s" : ""} en cours`);
-      if (upcoming > 0) parts.push(`${upcoming} à venir`);
-      return parts.length > 0 ? parts.join(" · ") : "Suivez vos candidatures et gardes.";
     }
-  }, [tabCounts, activeSits, activeRole]);
+    const upcoming = tabCounts.upcoming;
+    const inProgress = tabCounts.in_progress;
+    const parts: string[] = [];
+    if (inProgress > 0) parts.push(`${inProgress} garde${inProgress > 1 ? "s" : ""} en cours`);
+    if (upcoming > 0) parts.push(`${upcoming} à venir`);
+    return parts.length > 0 ? parts.join(" · ") : "Suivez vos candidatures et gardes.";
+  }, [tabCounts, ownerTabCounts, activeSits, isOwnerView]);
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in pb-24 md:pb-8">
@@ -407,30 +432,57 @@ const Sits = () => {
 
       {/* Tabs */}
       <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
-        {tabs.map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => setActiveTab(tab.value)}
-            className={cn(
-              "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors shrink-0 flex items-center gap-1.5",
-              activeTab === tab.value
-                ? "bg-primary text-primary-foreground"
-                : "bg-accent text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {tab.label}
-            {tabCounts[tab.value] > 0 && (
-              <span className={cn(
-                "text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold",
+        {isOwnerView ? (
+          ownerTabs.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setActiveTab(tab.value)}
+              className={cn(
+                "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors shrink-0 flex items-center gap-1.5",
+                activeOwnerTab === tab.value
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-accent text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {tab.label}
+              {ownerTabCounts[tab.value] > 0 && (
+                <span className={cn(
+                  "text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold",
+                  activeOwnerTab === tab.value
+                    ? "bg-primary-foreground/20 text-primary-foreground"
+                    : "bg-muted-foreground/15 text-muted-foreground"
+                )}>
+                  {ownerTabCounts[tab.value]}
+                </span>
+              )}
+            </button>
+          ))
+        ) : (
+          tabs.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setActiveTab(tab.value)}
+              className={cn(
+                "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors shrink-0 flex items-center gap-1.5",
                 activeTab === tab.value
-                  ? "bg-primary-foreground/20 text-primary-foreground"
-                  : "bg-muted-foreground/15 text-muted-foreground"
-              )}>
-                {tabCounts[tab.value]}
-              </span>
-            )}
-          </button>
-        ))}
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-accent text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {tab.label}
+              {tabCounts[tab.value] > 0 && (
+                <span className={cn(
+                  "text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold",
+                  activeTab === tab.value
+                    ? "bg-primary-foreground/20 text-primary-foreground"
+                    : "bg-muted-foreground/15 text-muted-foreground"
+                )}>
+                  {tabCounts[tab.value]}
+                </span>
+              )}
+            </button>
+          ))
+        )}
       </div>
 
       {/* Content */}
@@ -446,17 +498,31 @@ const Sits = () => {
         </div>
       ) : filteredSits.length === 0 ? (
         <>
-          {activeTab === "upcoming" && activeRole === "owner" && (
+          {isOwnerView && activeOwnerTab === "active" && (
             <EmptyState
               illustration="emptyCalendar"
-              title="Aucune annonce à venir"
+              title="Aucune annonce active"
               description="Publiez votre première annonce pour trouver un gardien de confiance près de chez vous."
               actionLabel="Publier une annonce"
               actionTo="/sits/create"
               actionIcon={Plus}
             />
           )}
-          {activeTab === "upcoming" && activeRole === "sitter" && (
+          {isOwnerView && activeOwnerTab === "drafts" && (
+            <EmptyState
+              illustration="emptyCalendar"
+              title="Aucun brouillon"
+              description="Vos annonces non publiées apparaîtront ici. Vous pouvez les compléter à tout moment."
+            />
+          )}
+          {isOwnerView && activeOwnerTab === "archived" && (
+            <EmptyState
+              illustration="quietLeaf"
+              title="Aucune annonce archivée"
+              description="Vos annonces archivées, expirées ou annulées s'afficheront ici."
+            />
+          )}
+          {!isOwnerView && activeTab === "upcoming" && (
             <EmptyState
               illustration="sitterReady"
               title="Aucune garde à venir"
@@ -466,25 +532,21 @@ const Sits = () => {
               actionIcon={Eye}
             />
           )}
-          {activeTab === "in_progress" && (
+          {!isOwnerView && activeTab === "in_progress" && (
             <EmptyState
               illustration="sleepingCat"
               title="Aucune garde en cours"
-              description={activeRole === "owner"
-                ? "Vos gardes en cours apparaîtront ici dès qu'une période démarre."
-                : "Vos gardes en cours apparaîtront ici dès le jour J."}
+              description="Vos gardes en cours apparaîtront ici dès le jour J."
             />
           )}
-          {activeTab === "completed" && (
+          {!isOwnerView && activeTab === "completed" && (
             <EmptyState
               illustration="emptyCalendar"
               title="Aucune garde passée"
-              description={activeRole === "owner"
-                ? "Vos gardes terminées s'archiveront ici, avec leurs avis."
-                : "Vos gardes terminées s'afficheront ici, avec les avis reçus."}
+              description="Vos gardes terminées s'afficheront ici, avec les avis reçus."
             />
           )}
-          {activeTab === "cancelled" && (
+          {!isOwnerView && activeTab === "cancelled" && (
             <EmptyState
               illustration="quietLeaf"
               title="Rien à signaler ici"
@@ -494,17 +556,23 @@ const Sits = () => {
         </>
       ) : (
         <div className="space-y-3">
-          {filteredSits.map((sit: any) => (
-            <SitCard
-              key={sit.id + (sit.application_id || "")}
-              sit={sit}
-              isOwner={activeRole === "owner"}
-              onArchive={() => setArchiveConfirm(sit.id)}
-              onDelete={() => setDeleteConfirm(sit.id)}
-              onRepublish={() => handleRepublish(sit.id)}
-              onOpenGuide={(id) => setOpenGuideId(id)}
-            />
-          ))}
+          {filteredSits.map((sit: any) => {
+            // En onglet "archived", on force l'effectiveStatus pour le bon rendu de la card
+            const cardSit = isOwnerView && activeOwnerTab === "archived"
+              ? { ...sit, effectiveStatus: isExpired(sit) ? "expired" : "cancelled" }
+              : sit;
+            return (
+              <SitCard
+                key={sit.id + (sit.application_id || "")}
+                sit={cardSit}
+                isOwner={isOwnerView}
+                onArchive={() => setArchiveConfirm(sit.id)}
+                onDelete={() => setDeleteConfirm(sit.id)}
+                onRepublish={() => handleRepublish(sit.id)}
+                onOpenGuide={(id) => setOpenGuideId(id)}
+              />
+            );
+          })}
         </div>
       )}
 
@@ -604,33 +672,7 @@ const Sits = () => {
         </div>
       )}
 
-      {/* Archived section */}
-      {activeRole === "owner" && archivedSits.length > 0 && (
-        <div className="mt-10 border-t border-border pt-6">
-          <button
-            onClick={() => setShowArchived(!showArchived)}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
-          >
-            <Archive className="h-4 w-4" />
-            {showArchived ? "Masquer" : "Voir"} les annonces archivées ({archivedSits.length})
-          </button>
-          {showArchived && (
-            <div className="space-y-3 mt-4">
-              {archivedSits.map((sit: any) => (
-                <SitCard
-                  key={sit.id}
-                  sit={{ ...sit, effectiveStatus: isExpired(sit) ? "expired" : "cancelled" }}
-                  isOwner
-                  onArchive={() => {}}
-                  onDelete={() => setDeleteConfirm(sit.id)}
-                  onRepublish={() => handleRepublish(sit.id)}
-                  onOpenGuide={(id) => setOpenGuideId(id)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+
 
       {/* Confirm dialogs */}
       <AlertDialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
@@ -983,19 +1025,31 @@ const ActionsMenu = ({
   sit: any; effectiveStatus: string;
   onArchive: () => void; onDelete: () => void; onRepublish: () => void;
 }) => {
-  const canDelete = sit.applicationCount === 0;
-  const showMenu = ["confirmed", "in_progress", "published", "draft", "expired"].includes(effectiveStatus);
+  const showMenu = ["confirmed", "in_progress", "published", "draft", "expired", "cancelled"].includes(effectiveStatus);
   if (!showMenu) return null;
+
+  const canEdit = ["draft", "published"].includes(effectiveStatus);
+  const canRepublish = ["expired", "cancelled"].includes(effectiveStatus);
+  const canArchive = ["published", "draft"].includes(effectiveStatus) && sit.applicationCount > 0;
+  const canDelete = ["published", "draft", "expired", "cancelled"].includes(effectiveStatus) && sit.applicationCount === 0;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="p-1 rounded-md hover:bg-accent transition-colors opacity-0 group-hover:opacity-100">
+        <button
+          className="p-1.5 rounded-md hover:bg-accent transition-colors"
+          aria-label="Actions sur l'annonce"
+        >
           <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        {["draft", "published"].includes(effectiveStatus) && (
+      <DropdownMenuContent align="end" className="w-52">
+        <DropdownMenuItem asChild>
+          <Link to={`/sits/${sit.id}`} className="flex items-center gap-2">
+            <Eye className="h-4 w-4" /> Voir l'annonce
+          </Link>
+        </DropdownMenuItem>
+        {canEdit && (
           <DropdownMenuItem asChild>
             <Link to={`/sits/${sit.id}/edit`} className="flex items-center gap-2">
               <Pencil className="h-4 w-4" /> Modifier
@@ -1009,24 +1063,21 @@ const ActionsMenu = ({
             </Link>
           </DropdownMenuItem>
         )}
-        {effectiveStatus === "expired" && (
+        {canRepublish && (
           <DropdownMenuItem onClick={onRepublish} className="flex items-center gap-2">
             <RefreshCw className="h-4 w-4" /> Republier
           </DropdownMenuItem>
         )}
-        {["published", "draft"].includes(effectiveStatus) && (
-          <>
-            <DropdownMenuSeparator />
-            {sit.applicationCount > 0 ? (
-              <DropdownMenuItem onClick={onArchive} className="flex items-center gap-2 text-muted-foreground">
-                <Archive className="h-4 w-4" /> Archiver
-              </DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem onClick={onDelete} className="flex items-center gap-2 text-destructive">
-                <Trash2 className="h-4 w-4" /> Supprimer
-              </DropdownMenuItem>
-            )}
-          </>
+        {(canArchive || canDelete) && <DropdownMenuSeparator />}
+        {canArchive && (
+          <DropdownMenuItem onClick={onArchive} className="flex items-center gap-2 text-muted-foreground">
+            <Archive className="h-4 w-4" /> Archiver
+          </DropdownMenuItem>
+        )}
+        {canDelete && (
+          <DropdownMenuItem onClick={onDelete} className="flex items-center gap-2 text-destructive">
+            <Trash2 className="h-4 w-4" /> Supprimer
+          </DropdownMenuItem>
         )}
       </DropdownMenuContent>
     </DropdownMenu>
