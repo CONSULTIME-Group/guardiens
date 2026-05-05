@@ -2,9 +2,11 @@
  * Encart de conseils affiché au-dessus des zones d'upload de photos
  * (logement + galerie). Vouvoiement, pas d'icônes Lucide décoratives.
  */
+import PhotoExamplesDialog from "./PhotoExamplesDialog";
+
 const PhotoTipsAlert = () => {
   return (
-    <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-2">
+    <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
       <p className="font-heading font-semibold text-sm text-foreground">
         Soignez vos photos — c'est ce qui déclenche les candidatures
       </p>
@@ -20,8 +22,12 @@ const PhotoTipsAlert = () => {
         <li>Variez les angles : pièces de vie, chambre du gardien, extérieur, quartier.</li>
         <li>Évitez les photos sombres, floues, ou prises à la verticale en intérieur étroit.</li>
       </ul>
+      <div className="pt-1">
+        <PhotoExamplesDialog />
+      </div>
     </div>
   );
 };
 
 export default PhotoTipsAlert;
+
