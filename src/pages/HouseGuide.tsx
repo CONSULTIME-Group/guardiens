@@ -106,6 +106,8 @@ const HouseGuide = () => {
   const handleSave = async () => {
     if (!guide || !user) return;
     setSaving(true);
+    // Snapshot pour rollback en cas d'échec
+    const snapshot: GuideData = { ...guide };
     const payload = { ...guide, user_id: user.id };
     delete (payload as any).id;
 
@@ -128,10 +130,12 @@ const HouseGuide = () => {
       toast({ title: "Guide sauvegardé" });
     } catch (err: any) {
       console.error("[HouseGuide] save failed", err);
+      // Rétablir l'état du formulaire tel qu'avant la tentative de sauvegarde
+      setGuide(snapshot);
       toast({
         variant: "destructive",
         title: "Sauvegarde impossible",
-        description: err?.message || "Vérifiez votre connexion et réessayez.",
+        description: (err?.message || "Vérifiez votre connexion et réessayez.") + " Vos modifications ont été restaurées localement.",
       });
     } finally {
       setSaving(false);
