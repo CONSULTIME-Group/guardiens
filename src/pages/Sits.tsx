@@ -211,6 +211,7 @@ const Sits = () => {
             acceptedSitter: sitterRes.data?.sitter ? sitterRes.data.sitter : null,
             pets: petRes.data || [],
             hasReviewed: !!reviewRes.data,
+            ownerCity,
           };
         })
       );
