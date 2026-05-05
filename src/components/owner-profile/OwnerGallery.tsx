@@ -126,6 +126,15 @@ const OwnerGallery = () => {
 
   return (
     <div className="space-y-6">
+      {fromSitId && (
+        <Link
+          to={`/sits/${fromSitId}/edit`}
+          className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+        >
+          <ArrowLeft className="h-4 w-4" /> Retour à l'édition de l'annonce
+        </Link>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-heading text-2xl font-bold">Ma galerie</h2>
@@ -133,6 +142,14 @@ const OwnerGallery = () => {
             {photos.length}/30 photos — Montrez aux gardiens ce qui rend votre maison unique
           </p>
         </div>
+      </div>
+
+      <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/40 p-3">
+        <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+        <p className="text-xs text-muted-foreground">
+          Ces photos alimentent <strong>toutes vos annonces</strong>. La photo de couverture de chaque annonce se choisit
+          ensuite directement depuis l'écran de création ou d'édition de l'annonce concernée.
+        </p>
       </div>
 
       <PhotoTipsAlert />
