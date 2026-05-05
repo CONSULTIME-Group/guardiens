@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
   // 1. Récupérer les sits publiés dans la fenêtre
   const { data: sits, error: sitsError } = await supabase
     .from('sits')
-    .select('id, user_id, title, daily_routine, region_highlights, cover_photo_url, created_at, properties(photos, cover_photo_url)')
+    .select('id, user_id, title, daily_routine, cover_photo_url, created_at, properties(photos, cover_photo_url, region_highlights)')
     .eq('status', 'published')
     .gte('created_at', minDate)
     .lte('created_at', maxDate)
@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
             city: profile.city || '',
             nbPhotos: photos.length,
             hasDailyRoutine: !!(sit.daily_routine && sit.daily_routine.length > 30),
-            hasRegionHighlights: !!(sit.region_highlights && sit.region_highlights.length > 30),
+            hasRegionHighlights: !!((property as any)?.region_highlights && (property as any).region_highlights.length > 30),
             hasHouseGuide: (guideCount ?? 0) > 0,
             hasCoverPhoto,
           },
