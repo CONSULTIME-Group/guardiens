@@ -672,33 +672,7 @@ const Sits = () => {
         </div>
       )}
 
-      {/* Archived section */}
-      {activeRole === "owner" && archivedSits.length > 0 && (
-        <div className="mt-10 border-t border-border pt-6">
-          <button
-            onClick={() => setShowArchived(!showArchived)}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
-          >
-            <Archive className="h-4 w-4" />
-            {showArchived ? "Masquer" : "Voir"} les annonces archivées ({archivedSits.length})
-          </button>
-          {showArchived && (
-            <div className="space-y-3 mt-4">
-              {archivedSits.map((sit: any) => (
-                <SitCard
-                  key={sit.id}
-                  sit={{ ...sit, effectiveStatus: isExpired(sit) ? "expired" : "cancelled" }}
-                  isOwner
-                  onArchive={() => {}}
-                  onDelete={() => setDeleteConfirm(sit.id)}
-                  onRepublish={() => handleRepublish(sit.id)}
-                  onOpenGuide={(id) => setOpenGuideId(id)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+
 
       {/* Confirm dialogs */}
       <AlertDialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
