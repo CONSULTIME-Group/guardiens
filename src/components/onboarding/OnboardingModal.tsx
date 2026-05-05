@@ -30,10 +30,10 @@ const LIFESTYLE_OPTIONS = [
 ];
 
 const SKILL_CATEGORIES = [
-  { key: "jardin", label: "🌿 Jardin" },
-  { key: "animaux", label: "🐾 Animaux" },
-  { key: "competences", label: "📚 Compétences & Savoirs" },
-  { key: "coups_de_main", label: "🤝 Coups de main" },
+  { key: "jardin", label: "Jardin" },
+  { key: "animaux", label: "Animaux" },
+  { key: "competences", label: "Compétences & Savoirs" },
+  { key: "coups_de_main", label: "Coups de main" },
 ];
 
 const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalProps) => {
