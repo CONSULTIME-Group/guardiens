@@ -181,7 +181,7 @@ export function BadgeSceau({
               className="text-xs font-medium"
               style={{ color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }}
             >
-              {isActive ? '✓ Actif' : 'Expiré'}
+              {isActive ? 'Actif' : 'Expiré'}
             </p>
           </div>
         </DialogContent>
