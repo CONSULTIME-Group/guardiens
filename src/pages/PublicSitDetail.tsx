@@ -44,7 +44,7 @@ import PublicSitTrustStrip from "@/components/sits/public/PublicSitTrustStrip";
 import {
  ENV_LABELS as envLabels,
  TYPE_LABELS as typeLabels,
- SPECIES_EMOJI as speciesEmoji,
+ 
  SPECIES_LABEL as speciesLabel,
 } from "@/components/sits/shared/sitConstants";
 
