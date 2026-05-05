@@ -160,6 +160,14 @@ export function useSitterProfile() {
       skill_categories: (p as any)?.skill_categories || [],
       available_for_help: (p as any)?.available_for_help || false,
       competences: (s as any)?.competences || [],
+      // Step 3 — Animaux (nouveaux champs persistés)
+      ...( {
+        dog_sizes_accepted: (s as any)?.dog_sizes_accepted || [],
+        demanding_breeds_ok: (s as any)?.demanding_breeds_ok || false,
+        indoor_cats_only: (s as any)?.indoor_cats_only || false,
+        own_animals: (s as any)?.own_animals || [],
+        guard_experience: (s as any)?.guard_experience || "",
+      } as any),
     };
 
     setData(merged);
