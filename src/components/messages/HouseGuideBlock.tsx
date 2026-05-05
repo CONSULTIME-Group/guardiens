@@ -97,9 +97,9 @@ const HouseGuideBlock = ({ propertyId }: HouseGuideBlockProps) => {
           {hasInstructions && (
             <GuideSection icon={Info} title="Consignes">
               {guide.detailed_instructions && <p className="text-sm whitespace-pre-line">{guide.detailed_instructions}</p>}
-              {guide.trash_days && <p className="text-sm">🗑 Poubelles : {guide.trash_days}</p>}
-              {guide.heating_instructions && <p className="text-sm whitespace-pre-line">🌡 {guide.heating_instructions}</p>}
-              {guide.appliance_notes && <p className="text-sm whitespace-pre-line">⚡ {guide.appliance_notes}</p>}
+              {guide.trash_days && <p className="text-sm"><span className="font-medium">Poubelles :</span> {guide.trash_days}</p>}
+              {guide.heating_instructions && <p className="text-sm whitespace-pre-line"><span className="font-medium">Chauffage :</span> {guide.heating_instructions}</p>}
+              {guide.appliance_notes && <p className="text-sm whitespace-pre-line"><span className="font-medium">Appareils :</span> {guide.appliance_notes}</p>}
             </GuideSection>
           )}
         </div>
