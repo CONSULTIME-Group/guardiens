@@ -120,6 +120,7 @@ const EditSit = () => {
       open_to: openTo,
       is_urgent: isUrgent,
       min_gardien_sits: minGardienSits,
+      cover_photo_url: coverPhotoUrl,
     } as any).eq("id", id).eq("user_id", user.id);
     setSaving(false);
     if (error) {
