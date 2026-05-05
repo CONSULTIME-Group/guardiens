@@ -18,6 +18,11 @@ interface SkillRow {
   created_at: string;
   first_submitted_by: string | null;
   merged_into: string | null;
+  ai_verdict: string | null;
+  ai_reason: string | null;
+  ai_duplicate_of_label: string | null;
+  ai_suggested_label: string | null;
+  ai_checked_at: string | null;
 }
 
 interface CompetenceRow {
@@ -345,13 +350,27 @@ const AdminSkills = () => {
                     <th className="text-left px-4 py-3 font-medium">Label soumis</th>
                     <th className="text-left px-4 py-3 font-medium">Normalisé</th>
                     <th className="text-left px-4 py-3 font-medium">Catégorie</th>
+                    <th className="text-left px-4 py-3 font-medium">Journal IA</th>
                     <th className="text-center px-4 py-3 font-medium">Utilisations</th>
                     <th className="text-left px-4 py-3 font-medium">Date</th>
                     <th className="text-right px-4 py-3 font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {skills.map(skill => (
+                  {skills.map(skill => {
+                    const verdictMeta = (() => {
+                      switch (skill.ai_verdict) {
+                        case "inappropriate":
+                          return { label: "Inapproprié", cls: "bg-destructive/10 text-destructive" };
+                        case "duplicate":
+                          return { label: "Doublon", cls: "bg-warning/15 text-warning-foreground" };
+                        case "to_review":
+                          return { label: "À examiner", cls: "bg-info/10 text-info-foreground" };
+                        default:
+                          return null;
+                      }
+                    })();
+                    return (
                     <tr
                       key={skill.id}
                       className={skill.status === "pending" && isStale(skill.created_at) ? "bg-warning-soft/40" : ""}
@@ -365,6 +384,37 @@ const AdminSkills = () => {
                           </span>
                         ) : (
                           <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 align-top">
+                        {verdictMeta ? (
+                          <div className="flex flex-col gap-1 max-w-xs">
+                            <span className={`inline-flex w-fit text-xs rounded-full px-2 py-0.5 font-medium ${verdictMeta.cls}`}>
+                              {verdictMeta.label}
+                            </span>
+                            {skill.ai_suggested_label && skill.ai_suggested_label !== skill.label && (
+                              <span className="text-xs text-muted-foreground">
+                                Suggestion : <em>{skill.ai_suggested_label}</em>
+                              </span>
+                            )}
+                            {skill.ai_duplicate_of_label && (
+                              <span className="text-xs text-muted-foreground">
+                                Doublon de : <em>{skill.ai_duplicate_of_label}</em>
+                              </span>
+                            )}
+                            {skill.ai_reason && (
+                              <span className="text-xs text-muted-foreground italic line-clamp-2" title={skill.ai_reason}>
+                                {skill.ai_reason}
+                              </span>
+                            )}
+                            {skill.ai_checked_at && (
+                              <span className="text-[10px] text-muted-foreground">
+                                Analysé le {format(new Date(skill.ai_checked_at), "dd MMM HH:mm", { locale: fr })}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Non analysé</span>
                         )}
                       </td>
                       <td className="px-4 py-3 text-center">{skill.usage_count}</td>
@@ -411,7 +461,8 @@ const AdminSkills = () => {
                         )}
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

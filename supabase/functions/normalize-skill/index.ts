@@ -120,24 +120,27 @@ Retourne uniquement des suggestions destinées à un modérateur humain :
       return new Response(JSON.stringify({ status: "parse_failed" }), { headers: corsHeaders });
     }
 
-    // Update UNIQUEMENT label normalisé + catégorie (pas de status, pas de merged_into)
-    const updates: Record<string, unknown> = {};
-    if (parsed.normalized && typeof parsed.normalized === "string") {
-      updates.label = parsed.normalized;
-      updates.normalized_label = parsed.normalized
-        .toLowerCase()
-        .trim()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/\s+/g, " ");
-    }
+    // Verdict de l'IA (uniquement consultatif — l'admin tranche)
+    const verdict: "inappropriate" | "duplicate" | "to_review" =
+      parsed.flag_inappropriate
+        ? "inappropriate"
+        : parsed.duplicate_of_label
+          ? "duplicate"
+          : "to_review";
+
+    // Update : suggestions IA + journal de décision (jamais le status)
+    const updates: Record<string, unknown> = {
+      ai_verdict: verdict,
+      ai_reason: parsed.flag_reason || null,
+      ai_duplicate_of_label: parsed.duplicate_of_label || null,
+      ai_suggested_label: parsed.normalized || null,
+      ai_checked_at: new Date().toISOString(),
+    };
     if (parsed.category && typeof parsed.category === "string") {
       updates.category = parsed.category;
     }
 
-    if (Object.keys(updates).length > 0) {
-      await adminClient.from("skills_library").update(updates).eq("id", skill_id);
-    }
+    await adminClient.from("skills_library").update(updates).eq("id", skill_id);
 
     // Trace dans les logs serveur (visibles côté Lovable Cloud) pour aider l'admin
     if (parsed.flag_inappropriate || parsed.duplicate_of_label) {
