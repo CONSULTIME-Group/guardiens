@@ -4232,6 +4232,10 @@ export type Database = {
         Args: { p_content: string; p_target_user_id: string }
         Returns: string
       }
+      admin_top_message_users: {
+        Args: { _limit?: number; _since?: string }
+        Returns: Json
+      }
       admin_update_skill_status: {
         Args: { p_new_label?: string; p_new_status: string; p_skill_id: string }
         Returns: number
