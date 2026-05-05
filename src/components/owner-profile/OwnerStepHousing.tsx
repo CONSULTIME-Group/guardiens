@@ -92,33 +92,27 @@ const OwnerStepHousing = ({ data, onChange }: Props) => {
         <ChipSelect options={EQUIPMENTS} selected={data.equipments} onChange={v => onChange({ equipments: v })} />
       </div>
 
-      {/* Photos */}
-      <div className="space-y-3">
-        <Label>Photos du logement (3 à 10)</Label>
-        <PhotoTipsAlert />
-        <div className="flex flex-wrap gap-3">
-          {data.photos.map((url, i) => (
-            <div key={i} className="relative w-24 h-24 rounded-lg overflow-hidden border border-border">
-              <img src={url} alt="" className="w-full h-full object-cover" />
-              <button type="button" onClick={() => removePhoto(i)}
-                className="absolute top-1 right-1 bg-background/80 rounded-full p-0.5 hover:bg-destructive hover:text-destructive-foreground">
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          ))}
-          {data.photos.length < 10 && (
-            <button type="button" onClick={() => fileRef.current?.click()}
-              className="w-24 h-24 rounded-lg border-2 border-dashed border-border flex items-center justify-center hover:border-primary transition-colors">
-              <Plus className="w-6 h-6 text-muted-foreground" />
-            </button>
-          )}
+      {/* Photos — désormais centralisées dans la Galerie */}
+      <div className="rounded-xl border border-border bg-muted/30 p-4 flex items-start gap-3">
+        <Images className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+        <div className="flex-1 space-y-1">
+          <p className="text-sm font-medium text-foreground">Photos du logement</p>
+          <p className="text-xs text-muted-foreground">
+            Toutes vos photos se gèrent au même endroit, dans la <strong>Galerie</strong>.
+            Vous pourrez aussi y choisir la photo de couverture pour chaque annonce.
+          </p>
+          <a
+            href="#galerie"
+            onClick={(e) => {
+              e.preventDefault();
+              const evt = new CustomEvent("owner-profile:goto-section", { detail: "gallery" });
+              window.dispatchEvent(evt);
+            }}
+            className="inline-block text-sm text-primary hover:underline mt-1"
+          >
+            Aller à la Galerie →
+          </a>
         </div>
-        <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handlePhotos} />
-        {data.photos.length > 0 && (
-          <div className="pt-1">
-            <PhotoQualityChecker photos={data.photos} />
-          </div>
-        )}
       </div>
 
       <div className="space-y-2">
