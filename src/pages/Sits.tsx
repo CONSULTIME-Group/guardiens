@@ -161,10 +161,20 @@ const Sits = () => {
     setLoading(true);
 
     if (activeRole === "owner") {
-      // Charge la ville du proprio (sert de "ville de l'annonce" dans la liste)
-      const { data: ownerProfile } = await supabase
-        .from("profiles").select("city").eq("id", user.id).maybeSingle();
+      // Charge la ville du proprio + sa galerie photos (source unique de photos owner)
+      const [{ data: ownerProfile }, { data: galleryRows }] = await Promise.all([
+        supabase.from("profiles").select("city").eq("id", user.id).maybeSingle(),
+        supabase
+          .from("owner_gallery")
+          .select("photo_url, position")
+          .eq("user_id", user.id)
+          .order("position", { ascending: true }),
+      ]);
       const ownerCity = ownerProfile?.city || null;
+      const ownerGalleryPhotos = (galleryRows || [])
+        .map((g: any) => g.photo_url)
+        .filter(Boolean);
+      const firstGalleryPhoto = ownerGalleryPhotos[0] || null;
 
       const { data } = await supabase
         .from("sits")
@@ -177,7 +187,6 @@ const Sits = () => {
         s.end_date && ["published"].includes(s.status) && isBefore(parseISO(s.end_date), new Date())
       );
       if (toExpire.length > 0) {
-        // Mark as cancelled with reason 'expired' in DB
         for (const s of toExpire) {
           await supabase.from("sits").update({
             status: "cancelled" as any,
@@ -199,7 +208,6 @@ const Sits = () => {
 
           return {
             ...sit,
-            // Override status for expired ones we just updated
             status: toExpire.find((e: any) => e.id === sit.id) ? "cancelled" : sit.status,
             cancellation_reason: toExpire.find((e: any) => e.id === sit.id) ? "expired" : sit.cancellation_reason,
             effectiveStatus: getEffectiveStatus({
@@ -212,6 +220,7 @@ const Sits = () => {
             pets: petRes.data || [],
             hasReviewed: !!reviewRes.data,
             ownerCity,
+            ownerGalleryFirstPhoto: firstGalleryPhoto,
           };
         })
       );
