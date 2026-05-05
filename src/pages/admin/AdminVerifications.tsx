@@ -338,11 +338,37 @@ const AdminVerifications = () => {
                               status: user.identity_verification_status,
                             })}
                           />
-                        ) : <div className="w-full h-48 rounded-lg border bg-muted flex items-center justify-center text-xs text-muted-foreground">Document inaccessible ou non fourni</div>}
+                        ) : (
+                          <div className="w-full h-48 rounded-lg border bg-muted flex flex-col items-center justify-center gap-1 text-xs text-muted-foreground px-2 text-center">
+                            {user.identity_document_url ? (
+                              <>
+                                <AlertTriangle className="h-4 w-4 text-warning" />
+                                <span>Document déposé mais inaccessible</span>
+                                <span className="text-[10px] opacity-70 break-all">{user.identity_document_url}</span>
+                              </>
+                            ) : (
+                              <span>Pièce d'identité non fournie</span>
+                            )}
+                          </div>
+                        )}
                       </div>
                       <div className="space-y-1">
                         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Selfie</p>
-                        {user.identity_selfie_signed_url ? <img src={user.identity_selfie_signed_url} alt="Selfie" className="w-full h-48 object-contain rounded-lg border bg-muted" /> : <div className="w-full h-48 rounded-lg border bg-muted flex items-center justify-center text-xs text-muted-foreground">Non fourni</div>}
+                        {user.identity_selfie_signed_url ? (
+                          <img src={user.identity_selfie_signed_url} alt="Selfie" className="w-full h-48 object-contain rounded-lg border bg-muted" />
+                        ) : (
+                          <div className="w-full h-48 rounded-lg border bg-muted flex flex-col items-center justify-center gap-1 text-xs text-muted-foreground px-2 text-center">
+                            {user.identity_selfie_url ? (
+                              <>
+                                <AlertTriangle className="h-4 w-4 text-warning" />
+                                <span>Selfie déposé mais inaccessible</span>
+                                <span className="text-[10px] opacity-70 break-all">{user.identity_selfie_url}</span>
+                              </>
+                            ) : (
+                              <span>Selfie non fourni</span>
+                            )}
+                          </div>
+                        )}
                       </div>
                       <div className="space-y-1">
                         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Photo de profil</p>
