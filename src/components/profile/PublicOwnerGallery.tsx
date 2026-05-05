@@ -78,8 +78,8 @@ const PublicOwnerGallery = ({ photos, firstName, city }: Props) => {
               </p>
             </div>
             {photo.season && (
-              <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-full bg-black/40 text-white text-[10px]">
-                {SEASON_ICONS[photo.season] || ""} {photo.season}
+              <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-full bg-black/40 text-white text-[10px] capitalize">
+                {photo.season}
               </span>
             )}
           </button>
