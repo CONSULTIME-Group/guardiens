@@ -354,46 +354,53 @@ const Sits = () => {
   }, [sits, isOwnerView]);
 
   const filteredSits = useMemo(() => {
+    if (isOwnerView) {
+      // Vue owner : 3 onglets
+      return sits.filter((s) => {
+        const es = s.effectiveStatus || s.status;
+        switch (activeOwnerTab) {
+          case "drafts":
+            return es === "draft" && !isArchived(s);
+          case "archived":
+            return isArchived(s);
+          case "active":
+          default:
+            return !isArchived(s) && es !== "draft";
+        }
+      });
+    }
+    // Vue sitter (inchangée)
     return activeSits.filter((s) => {
       const es = s.effectiveStatus || s.status;
       const appStatus = s.application_status;
-      if (activeRole === "owner") {
-        switch (activeTab) {
-          case "in_progress": return es === "in_progress";
-          case "completed": return es === "completed";
-          case "cancelled": return es === "cancelled";
-          case "upcoming": return !["in_progress", "completed", "cancelled"].includes(es);
-        }
-      } else {
-        switch (activeTab) {
-          case "in_progress": return es === "in_progress" && appStatus === "accepted";
-          case "completed": return es === "completed";
-          case "cancelled": return appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled";
-          case "upcoming": return !["completed", "cancelled"].includes(es) && !["cancelled", "rejected"].includes(appStatus) && es !== "in_progress";
-        }
+      switch (activeTab) {
+        case "in_progress": return es === "in_progress" && appStatus === "accepted";
+        case "completed": return es === "completed";
+        case "cancelled": return appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled";
+        case "upcoming": return !["completed", "cancelled"].includes(es) && !["cancelled", "rejected"].includes(appStatus) && es !== "in_progress";
       }
       return false;
     });
-  }, [activeSits, activeRole, activeTab]);
+  }, [activeSits, sits, isOwnerView, activeTab, activeOwnerTab]);
 
   // Sous-titre contextuel : informations utiles plutôt que générique
   const headerSubtitle = useMemo(() => {
-    const upcoming = tabCounts.upcoming;
-    const inProgress = tabCounts.in_progress;
-    if (activeRole === "owner") {
+    if (isOwnerView) {
       const pendingApps = activeSits.reduce((sum, s) => sum + (s.pendingApplicationCount || 0), 0);
+      const inProgress = activeSits.filter((s) => (s.effectiveStatus || s.status) === "in_progress").length;
       const parts: string[] = [];
       if (pendingApps > 0) parts.push(`${pendingApps} candidature${pendingApps > 1 ? "s" : ""} en attente`);
       if (inProgress > 0) parts.push(`${inProgress} garde${inProgress > 1 ? "s" : ""} en cours`);
-      else if (upcoming > 0) parts.push(`${upcoming} annonce${upcoming > 1 ? "s" : ""} active${upcoming > 1 ? "s" : ""}`);
+      else if (ownerTabCounts.active > 0) parts.push(`${ownerTabCounts.active} annonce${ownerTabCounts.active > 1 ? "s" : ""} active${ownerTabCounts.active > 1 ? "s" : ""}`);
       return parts.length > 0 ? parts.join(" · ") : "Gérez vos annonces et suivez vos gardes.";
-    } else {
-      const parts: string[] = [];
-      if (inProgress > 0) parts.push(`${inProgress} garde${inProgress > 1 ? "s" : ""} en cours`);
-      if (upcoming > 0) parts.push(`${upcoming} à venir`);
-      return parts.length > 0 ? parts.join(" · ") : "Suivez vos candidatures et gardes.";
     }
-  }, [tabCounts, activeSits, activeRole]);
+    const upcoming = tabCounts.upcoming;
+    const inProgress = tabCounts.in_progress;
+    const parts: string[] = [];
+    if (inProgress > 0) parts.push(`${inProgress} garde${inProgress > 1 ? "s" : ""} en cours`);
+    if (upcoming > 0) parts.push(`${upcoming} à venir`);
+    return parts.length > 0 ? parts.join(" · ") : "Suivez vos candidatures et gardes.";
+  }, [tabCounts, ownerTabCounts, activeSits, isOwnerView]);
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in pb-24 md:pb-8">
