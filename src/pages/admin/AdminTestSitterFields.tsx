@@ -55,7 +55,7 @@ export default function AdminTestSitterFields() {
       }
 
       toast.success("Données de test injectées. Rechargement…");
-      setTimeout(() => window.location.assign("/sitter-profile?step=experience"), 800);
+      setTimeout(() => window.location.assign("/profile?role=sitter&step=experience"), 800);
     } finally {
       setLoading(false);
     }
