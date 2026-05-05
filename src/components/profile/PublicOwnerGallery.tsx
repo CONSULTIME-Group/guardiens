@@ -1,18 +1,11 @@
 import { useState } from "react";
 
 const CATEGORY_LABELS: Record<string, string> = {
-  home_life: "🏠 Maison",
-  animals_life: "🐾 Animaux",
-  garden: "🌿 Jardin",
-  neighborhood: "🏘️ Quartier",
-  seasonal: "🍂 Saisons",
-};
-
-const SEASON_ICONS: Record<string, string> = {
-  printemps: "🌸",
-  été: "☀️",
-  automne: "🍂",
-  hiver: "❄️",
+  home_life: "Maison",
+  animals_life: "Animaux",
+  garden: "Jardin",
+  neighborhood: "Quartier",
+  seasonal: "Saisons",
 };
 
 interface Photo {
