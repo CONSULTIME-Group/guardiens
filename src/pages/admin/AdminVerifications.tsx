@@ -491,7 +491,7 @@ const AdminVerifications = () => {
       </Dialog>
 
       {/* Document viewer modal */}
-      <Dialog open={docModal.open} onOpenChange={(o) => !o && setDocModal({ open: false, docUrl: null, selfieUrl: null, name: "" })}>
+      <Dialog open={docModal.open} onOpenChange={(o) => !o && setDocModal({ open: false, userId: null, docUrl: null, selfieUrl: null, name: "", status: null })}>
         <DialogContent className="max-w-3xl w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Documents — {docModal.name}</DialogTitle></DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -504,6 +504,40 @@ const AdminVerifications = () => {
               {docModal.selfieUrl ? <img src={docModal.selfieUrl} alt="Selfie" className="w-full rounded-lg border" /> : <div className="h-48 rounded-lg border bg-muted flex items-center justify-center text-sm text-muted-foreground">Non fourni</div>}
             </div>
           </div>
+          {docModal.userId && docModal.status !== "verified" && (
+            <DialogFooter className="gap-2 sm:gap-2 flex-wrap">
+              <Button
+                variant="outline"
+                onClick={() => setDocModal({ open: false, userId: null, docUrl: null, selfieUrl: null, name: "", status: null })}
+              >
+                Fermer
+              </Button>
+              <Button
+                variant="destructive"
+                className="gap-1.5"
+                disabled={busyUserId === docModal.userId || !docModal.docUrl || !docModal.selfieUrl}
+                onClick={() => {
+                  setRejectModal({ open: true, userId: docModal.userId!, reason: "", customReason: "" });
+                  setDocModal({ open: false, userId: null, docUrl: null, selfieUrl: null, name: "", status: null });
+                }}
+                title={!docModal.docUrl || !docModal.selfieUrl ? "Dossier incomplet" : undefined}
+              >
+                <ShieldX className="h-4 w-4" /> Invalider
+              </Button>
+              <Button
+                className="gap-1.5"
+                disabled={busyUserId === docModal.userId || !docModal.docUrl || !docModal.selfieUrl}
+                onClick={async () => {
+                  const uid = docModal.userId!;
+                  setDocModal({ open: false, userId: null, docUrl: null, selfieUrl: null, name: "", status: null });
+                  await handleApprove(uid);
+                }}
+                title={!docModal.docUrl || !docModal.selfieUrl ? "Dossier incomplet" : undefined}
+              >
+                <ShieldCheck className="h-4 w-4" /> Valider
+              </Button>
+            </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
 
