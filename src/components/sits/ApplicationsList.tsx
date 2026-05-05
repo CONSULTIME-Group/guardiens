@@ -458,7 +458,12 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
               {sitter?.is_founder && <FounderBadge size="sm" />}
             </div>
             <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
-              {sitter?.city && <span>📍 {sitter.city}</span>}
+              {sitter?.city && (
+                <span className="inline-flex items-center gap-1">
+                  <MapPin className="h-3 w-3" />
+                  {sitter.city}
+                </span>
+              )}
               <span>{completedSits} garde{completedSits !== 1 ? "s" : ""} sur Guardiens</span>
             </div>
           </div>
