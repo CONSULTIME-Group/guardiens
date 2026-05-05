@@ -19,6 +19,12 @@ interface ConseilsAnnoncePersoProps {
   hasHouseGuide?: boolean
   articleSlug?: string
   articleTitle?: string
+  /** Phrase courte décrivant les animaux pour personnaliser la routine, ex « deux chats », « un chien et un perroquet » */
+  petsContext?: string
+  /** Paragraphe spécifique sur la qualité/cohérence des photos (optionnel) */
+  photosNote?: string
+  /** Inclure le rappel de choisir une photo de couverture */
+  remindCoverPhoto?: boolean
 }
 
 const ConseilsAnnoncePersoEmail = ({
@@ -32,10 +38,12 @@ const ConseilsAnnoncePersoEmail = ({
   hasHouseGuide = false,
   articleSlug = 'rediger-bonne-annonce-house-sitting',
   articleTitle = "Rédiger une bonne annonce : ce qui attire les bons gardiens",
+  petsContext,
+  photosNote,
+  remindCoverPhoto = false,
 }: ConseilsAnnoncePersoProps) => {
   const name = firstName?.trim() || ''
   const editUrl = sitId ? `${SITE_URL}/sits/${sitId}/edit` : `${SITE_URL}/sits`
-  const guideUrl = `${SITE_URL}/sits`
   const articleUrl = `${SITE_URL}/articles/${articleSlug}`
 
   return (
@@ -89,21 +97,39 @@ const ConseilsAnnoncePersoEmail = ({
 
           <Heading as="h2" style={h2}>Nos conseils concrets</Heading>
 
-          <Text style={listTitle}>1. Étoffer la galerie photos</Text>
-          <Text style={listItem}>• La pièce de vie, baignée de lumière naturelle</Text>
-          <Text style={listItem}>• La chambre où le gardien dormira</Text>
+          <Text style={listTitle}>1. Étoffer et soigner la galerie photos</Text>
+          {photosNote && (
+            <Text style={text}>{photosNote}</Text>
+          )}
+          <Text style={listItem}>• La pièce de vie, rangée et baignée de lumière naturelle</Text>
+          <Text style={listItem}>• La chambre où le gardien dormira (lit fait, espace dégagé)</Text>
           <Text style={listItem}>• La cuisine et les équipements à disposition</Text>
-          <Text style={listItem}>• Le jardin et les extérieurs</Text>
-          <Text style={listItem}>• Une ou deux photos des environs (rue, village, paysages)</Text>
-          <Text style={listItem}>• Vos animaux dans leur cadre habituel — Sam, vos chats, vos perroquets, votre chien</Text>
+          <Text style={listItem}>• Le jardin et les extérieurs s'il y en a</Text>
+          <Text style={listItem}>• Une ou deux photos du quartier (rue, village, points de vue)</Text>
+          <Text style={listItem}>• Vos animaux dans leur cadre habituel, en gros plan et de bonne qualité</Text>
+          <Text style={text}>
+            Quelques conseils simples : prenez les photos en plein jour, à l'horizontale, sans contre-jour.
+            Avant de photographier, prenez 5 minutes pour ranger : c'est ce que verront les gardiens
+            et c'est ce qui leur permet de se projeter.
+          </Text>
+          {remindCoverPhoto && (
+            <Text style={text}>
+              <strong>Pensez aussi à choisir votre photo de couverture</strong> dans la galerie
+              (la première que verront les gardiens). Préférez la photo la plus lumineuse et
+              la plus représentative de l'ambiance de votre logement.
+            </Text>
+          )}
 
           <Text style={listTitle}>2. Détailler la journée type</Text>
           <Text style={text}>
-            Avec un chat diabétique, une tribu de chats, deux perroquets et un chien,
-            les gardiens ont besoin de savoir précisément à quoi ressemblent leurs journées :
-            horaires des repas, injections d'insuline pour Sam, sorties du chien, sociabilité
-            des perroquets, temps de jeu. Plus c'est concret, plus vous attirez des gardiens
-            réellement à l'aise avec ce type de garde.
+            {petsContext
+              ? <>Avec {petsContext}, les gardiens ont besoin de savoir à quoi ressemble une journée
+                  chez vous : horaires des repas, sorties éventuelles, soins ou traitements,
+                  habitudes et niveau de sociabilité de chacun. Plus c'est concret, plus vous
+                  attirez des gardiens réellement à l'aise avec votre situation.</>
+              : <>Les gardiens ont besoin de savoir à quoi ressemble une journée chez vous :
+                  horaires des repas, soins, sorties, habitudes des animaux. Plus c'est
+                  concret, plus vous attirez les bons profils.</>}
           </Text>
 
           <Text style={listTitle}>3. Présenter les environs</Text>
@@ -114,9 +140,10 @@ const ConseilsAnnoncePersoEmail = ({
 
           <Text style={listTitle}>4. Compléter le guide de la maison</Text>
           <Text style={text}>
-            Le guide (wifi, voisins, vétérinaire, instructions appareils, jours des poubelles,
-            consignes pour les plantes) n'est partagé qu'au gardien retenu, mais le mentionner
-            dans votre annonce montre votre niveau de préparation et rassure énormément.
+            Le guide (wifi, vétérinaire, instructions appareils, jours des poubelles,
+            consignes pour les plantes, contacts utiles) n'est partagé qu'au gardien retenu,
+            mais le mentionner dans votre annonce montre votre niveau de préparation
+            et rassure énormément.
           </Text>
 
           <Section style={ctaSection}>
@@ -170,6 +197,9 @@ export const template = {
     hasDailyRoutine: false,
     hasRegionHighlights: false,
     hasHouseGuide: false,
+    petsContext: '4 chats, 2 perroquets et un chien',
+    photosNote: "Les photos actuelles ne permettent pas vraiment aux gardiens de se projeter chez vous. Quelques clichés bien cadrés et lumineux changeraient tout.",
+    remindCoverPhoto: true,
     articleSlug: 'rediger-bonne-annonce-house-sitting',
     articleTitle: "Rédiger une bonne annonce : ce qui attire les bons gardiens",
   },
