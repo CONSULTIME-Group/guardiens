@@ -98,7 +98,8 @@ const SitDetail = () => {
       setPendingAppCount(counts?.pending_app_count || 0);
 
       if (user) {
-        const [spRes, appRes, reviewRes] = await Promise.all([
+        const isOwnerView = sitData.user_id === user.id;
+        const queries: Promise<any>[] = [
           supabase.from("sitter_profiles").select("*").eq("user_id", user.id).limit(1),
           supabase
             .from("applications")
@@ -112,10 +113,26 @@ const SitDetail = () => {
             .eq("sit_id", id!)
             .eq("reviewer_id", user.id)
             .limit(1),
-        ]);
+        ];
+        if (isOwnerView) {
+          queries.push(
+            supabase
+              .from("owner_gallery")
+              .select("id, photo_url, position")
+              .eq("user_id", user.id)
+              .order("position", { ascending: true }) as any,
+          );
+        }
+        const results = await Promise.all(queries);
+        const [spRes, appRes, reviewRes, galleryRes] = results;
         setSitterProfile(spRes.data?.[0] ?? null);
         if (appRes.data?.[0]) setHasApplied(true);
         setHasReviewedThisSit(!!reviewRes.data?.[0]);
+        if (isOwnerView && galleryRes?.data) {
+          setOwnerGallery(
+            galleryRes.data.map((g: any) => ({ id: g.id, photo_url: g.photo_url })),
+          );
+        }
       }
 
       setLoading(false);
