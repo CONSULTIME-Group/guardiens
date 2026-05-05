@@ -1309,7 +1309,7 @@ const SearchSitter = () => {
  onClick={() => handleRegionSelect(r.code)}
  className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors flex items-center gap-2"
  >
- <span className="text-base">🗺️</span>
+ <MapPin className="h-4 w-4 text-muted-foreground" />
  <span>{r.name}</span>
  <span className="ml-auto text-[11px] text-muted-foreground">région</span>
  </button>
