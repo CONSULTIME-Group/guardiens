@@ -34,6 +34,7 @@ import { template as relanceProfilIncomplet } from './relance-profil-incomplet.t
 import { template as nearbySitAlert } from './nearby-sit-alert.tsx'
 import { template as sitConfirmed } from './sit-confirmed.tsx'
 import { template as conseilsAnnoncePersonnalises } from './conseils-annonce-personnalises.tsx'
+import { template as conseilsPublicationAnnonce } from './conseils-publication-annonce.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'nearby-sit-alert': nearbySitAlert,
@@ -61,4 +62,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'review-received': reviewReceived,
   'relance-profil-incomplet': relanceProfilIncomplet,
   'conseils-annonce-personnalises': conseilsAnnoncePersonnalises,
+  'conseils-publication-annonce': conseilsPublicationAnnonce,
 }
