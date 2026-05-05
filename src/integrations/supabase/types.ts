@@ -3555,6 +3555,11 @@ export type Database = {
       }
       skills_library: {
         Row: {
+          ai_checked_at: string | null
+          ai_duplicate_of_label: string | null
+          ai_reason: string | null
+          ai_suggested_label: string | null
+          ai_verdict: string | null
           category: string | null
           created_at: string
           first_submitted_by: string | null
@@ -3566,6 +3571,11 @@ export type Database = {
           usage_count: number
         }
         Insert: {
+          ai_checked_at?: string | null
+          ai_duplicate_of_label?: string | null
+          ai_reason?: string | null
+          ai_suggested_label?: string | null
+          ai_verdict?: string | null
           category?: string | null
           created_at?: string
           first_submitted_by?: string | null
@@ -3577,6 +3587,11 @@ export type Database = {
           usage_count?: number
         }
         Update: {
+          ai_checked_at?: string | null
+          ai_duplicate_of_label?: string | null
+          ai_reason?: string | null
+          ai_suggested_label?: string | null
+          ai_verdict?: string | null
           category?: string | null
           created_at?: string
           first_submitted_by?: string | null
