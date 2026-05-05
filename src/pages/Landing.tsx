@@ -260,8 +260,8 @@ const Landing = () => {
  return (
  <div className="min-h-screen bg-background text-foreground">
  <PageMeta
-  title="Home sitting & garde animaux à domicile | Guardiens"
-  description="Quelqu'un du coin veille sur votre maison. Home sitting et garde d'animaux à domicile partout en France. Sans abonnement pour les propriétaires."
+        title="Home sitting & petites missions d'entraide locale | Guardiens"
+        description="Home sitting et petites missions d'entraide entre gens du coin. Confiez votre maison, demandez un coup de main au quartier. Partout en France."
  path="/"
  image={HOME_OG_IMAGE}
  />
@@ -366,7 +366,7 @@ const Landing = () => {
  Quelqu'un du coin veille sur votre maison.
  </h1>
  <p className="font-heading text-2xl md:text-3xl lg:text-4xl italic text-white/85 leading-snug mb-6 animate-hero-fade-up animation-delay-700">
- Home sitting et garde d'animaux à domicile, partout en France.
+ Home sitting, garde d'animaux et petites missions d'entraide. La vie de quartier qui revient, partout en France.
  </p>
  <p className="font-body text-base md:text-lg text-white/70 max-w-lg mb-3 leading-relaxed animate-hero-fade-up animation-delay-700">
  Confiez vos animaux à un gardien près de chez vous. Osez demander un coup de main. Osez en proposer un.
