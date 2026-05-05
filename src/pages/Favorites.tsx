@@ -74,7 +74,7 @@ const Favorites = () => {
           <EmptyState
             illustration="heartBookmark"
             title="Aucun favori pour l'instant"
-            description="Parcourez les profils de gardiens ou les annonces et cliquez sur le ❤️ pour les retrouver ici."
+            description="Parcourez les profils de gardiens ou les annonces et cliquez sur l'icône cœur pour les retrouver ici."
             actionLabel="Explorer les gardiens"
             actionTo="/search"
             actionIcon={Search}
