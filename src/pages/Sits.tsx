@@ -323,7 +323,7 @@ const Sits = () => {
   const isExpired = (s: any) => s.cancellation_reason === "expired";
 
   const activeSits = useMemo(() => sits.filter(s => !isArchived(s)), [sits]);
-  const archivedSits = useMemo(() => sits.filter(s => isArchived(s)), [sits]);
+  
 
   // Comptages onglets sitter (vue inchangée)
   const tabCounts = useMemo(() => {
