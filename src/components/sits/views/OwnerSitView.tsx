@@ -160,11 +160,16 @@ const OwnerSitView = ({
   // - draft / completed / cancelled / expired : pas d'annulation pertinente
   const canCancel = sit.status === "published" || sit.status === "confirmed";
 
-  // Tab par défaut intelligent :
-  // - draft : pas de candidatures possibles → on ouvre directement sur "Logement"
-  //   (la zone que l'owner remplit le plus souvent avant publication).
-  // - autres statuts : on garde "Candidatures" comme accueil naturel.
-  const defaultTab = isDraft ? "housing" : "candidatures";
+  // Critères de complétude pour la checklist de publication.
+  const description = (sit.specific_expectations || "").trim();
+  const checklist = {
+    hasTitle: Boolean((sit.title || "").trim()),
+    hasDates: Boolean(sit.flexible_dates || (sit.start_date && sit.end_date)),
+    hasDescription: description.length >= 50,
+    hasPhoto: ownerGallery.length > 0,
+    hasPet: Array.isArray(pets) && pets.length > 0,
+  };
+  const canPublish = Object.values(checklist).every(Boolean);
 
   // Dérivés partagés (avgRating + formatDate) — voir useSitDerived.
   const { avgRating, formatDate } = useSitDerived({
