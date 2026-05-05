@@ -137,8 +137,8 @@ export default function News() {
   return (
     <>
       <PageMeta
-        title="Guides & Conseils — House-sitting & guides locaux"
-        description="Articles, témoignages et guides pratiques pour le house-sitting de proximité. Conseils pour gardiens et propriétaires."
+        title="Articles"
+        description="Conseils house-sitting, guides pratiques, témoignages et actualités de la communauté Guardiens. Tout pour bien préparer une garde."
         path="/actualites"
       />
     <PublicHeader />

@@ -159,6 +159,11 @@ function loadSiteConfig() {
       /changeFreq:\s*(["'])(daily|weekly|monthly|yearly)\1/,
     );
     const changeFreq = changeFreqMatch ? changeFreqMatch[2] : null;
+    // F1/F5 : `index: false` → page publique noindex (pas dans sitemap, pas
+    // de check OG/canonical/sitemap-inclusion ; on vérifie seulement la
+    // présence de noindex + l'absence du sitemap).
+    const indexMatch = block.match(/index:\s*(true|false)/);
+    const indexable = indexMatch ? indexMatch[1] === "true" : true;
 
     routes.push({
       path: path_,
@@ -168,6 +173,7 @@ function loadSiteConfig() {
       sitemapPriority,
       changeFreq,
       isDynamic: false,
+      indexable,
     });
   }
   if (routes.length === 0) throw new Error("Aucune route statique extraite");
@@ -305,6 +311,9 @@ async function expandDynamicRoutes(dynamicConfigs, origin, siteUrl, defaultOgIma
         pathPattern: cfg.pathPattern,
         dynamicTitle: cfg.dynamicTitle,
         dynamicDescription: cfg.dynamicDescription,
+        // F3 : expose les valeurs de l'instance comme "sampleParams" pour
+        // permettre au worker un check soft (présence du param + suffixe).
+        sampleParams: values,
       });
     }
   }
@@ -372,6 +381,11 @@ function computeFinalTitle(rawTitle, path_) {
 
 function buildExpectedTags(route) {
   const finalTitle = computeFinalTitle(route.rawTitle, route.path);
+  // F2 : pour les articles de blog (/actualites/:slug), og:type="article" est
+  // attendu (au lieu de "website").
+  const isArticle = route.pathPattern === "/actualites/:slug"
+    || /^\/actualites\/[^/]+$/.test(route.path);
+  const ogType = isArticle ? "article" : "website";
   return {
     finalTitle,
     image: route.image,
@@ -380,7 +394,7 @@ function buildExpectedTags(route) {
       "og:title": finalTitle,
       "og:description": route.description,
       "og:image": route.image,
-      "og:type": "website",
+      "og:type": ogType,
       "og:site_name": SITE_NAME,
       "og:locale": "fr_FR",
       "twitter:card": "summary_large_image",
@@ -491,19 +505,58 @@ async function runWithConcurrency(items, limit, worker) {
 // 5. Diff attendu vs. observé
 // ──────────────────────────────────────────────────────────────
 
+/**
+ * F4 : normalise une valeur de titre en retirant le suffixe " | Guardiens"
+ * (ou " — Guardiens"). Permet de comparer titre attendu vs réel sans
+ * faux positif structurel quand l'un porte le suffixe et l'autre non.
+ */
+function stripSiteSuffix(s) {
+  if (typeof s !== "string") return s;
+  return s
+    .replace(/\s*\|\s*Guardiens\s*$/i, "")
+    .replace(/\s*—\s*Guardiens\s*$/i, "")
+    .trim();
+}
+
 function diffTags(actualTags, expectedTags, options = {}) {
-  const { tolerantKeys = new Set() } = options;
+  const { tolerantKeys = new Set(), softTitleKeys = new Set(), softTitleParam = null } = options;
   const diffs = [];
   for (const [key, expected] of Object.entries(expectedTags)) {
     const actual = actualTags[key];
     if (actual == null) {
       diffs.push({ key, status: "MISSING", expected, actual: null });
-    } else if (tolerantKeys.has(key)) {
+      continue;
+    }
+    if (tolerantKeys.has(key)) {
       // Mode tolérant : on vérifie juste que la valeur existe et n'est pas vide
       if (!actual.trim()) {
         diffs.push({ key, status: "EMPTY", expected: "(valeur non vide attendue)", actual });
       }
-    } else if (actual !== expected) {
+      continue;
+    }
+    // F3 : titre dynamique avec sampleParams → check soft : présence du param
+    // interpolé + suffixe " | Guardiens".
+    if (softTitleKeys.has(key)) {
+      const hasSuffix = /\|\s*Guardiens\s*$/i.test(actual) || /—\s*Guardiens\s*$/i.test(actual);
+      const hasParam = softTitleParam
+        ? actual.toLowerCase().includes(softTitleParam.toLowerCase())
+        : true;
+      if (!hasSuffix || !hasParam) {
+        diffs.push({
+          key,
+          status: "SOFT_TITLE_MISMATCH",
+          expected: `contient "${softTitleParam ?? "(param)"}" et suffixe " | Guardiens"`,
+          actual,
+        });
+      }
+      continue;
+    }
+    // F4 : si l'un des deux porte le suffixe " | Guardiens" et pas l'autre,
+    // comparer sans suffixe (évite faux positif index.html vs route).
+    if (key === "og:title" || key === "twitter:title") {
+      if (stripSiteSuffix(actual) === stripSiteSuffix(expected)) continue;
+    }
+    if (actual !== expected) {
       diffs.push({ key, status: "MISMATCH", expected, actual });
     }
   }
@@ -603,11 +656,17 @@ async function validateSitemap(origin, routes, siteUrl) {
   const entries = parseSitemap(xml);
   const locSet = new Map(entries.map((e) => [e.loc, e]));
 
-  // On s'attend à trouver chaque route publique (sauf /login) avec bonne priorité
-  const EXCLUDED = new Set(["/login"]);
   const diffs = [];
   for (const r of routes) {
-    if (EXCLUDED.has(r.path)) continue;
+    // F1/F5 : routes index:false → on vérifie l'ABSENCE du sitemap.
+    if (r.indexable === false) {
+      const expectedLoc = `${siteUrl}${r.path === "/" ? "" : r.path}`;
+      const entry = locSet.get(expectedLoc) || locSet.get(`${expectedLoc}/`);
+      if (entry) {
+        diffs.push({ path: r.path, issue: `présent dans le sitemap alors que index:false` });
+      }
+      continue;
+    }
     const expectedLoc = `${siteUrl}${r.path === "/" ? "" : r.path}`;
     // Le sitemap sert la home en "https://guardiens.fr/" OU "https://guardiens.fr"
     const entry = locSet.get(expectedLoc) || locSet.get(`${expectedLoc}/`);
@@ -637,10 +696,10 @@ async function validateRobots(origin, routes, siteUrl) {
     issues.push(`Sitemap absent ou différent (attendu : ${expectedSitemap}, trouvé : ${sitemaps.join(", ") || "(aucun)"})`);
   }
 
-  // Conflits : route publique indexable mais disallowée
-  const EXCLUDED = new Set(["/login"]);
+  // Conflits : route publique indexable mais disallowée. F1/F5 : routes
+  // index:false ne sont pas concernées (Disallow attendu).
   for (const r of routes) {
-    if (EXCLUDED.has(r.path) || r.path === "/") continue;
+    if (r.indexable === false || r.path === "/") continue;
     const conflicts = disallow.filter((d) => r.path === d || r.path.startsWith(d.replace(/\/$/, "") + "/"));
     if (conflicts.length > 0) {
       issues.push(`${r.path} est dans sitemap mais Disallow: ${conflicts.join(", ")}`);
@@ -814,10 +873,42 @@ async function main() {
         try {
           const html = await fetchAsBot(url);
           const { tags, metaRobots } = parseMetaTags(html);
+
+          // F1/F5 : route publique noindex (index:false). On vérifie
+          // uniquement la PRÉSENCE du noindex et on skippe og/canonical.
+          if (route.indexable === false) {
+            const pageIssues = [];
+            if (enabledChecks.has("meta-robots")) {
+              if (!metaRobots || !/noindex/i.test(metaRobots)) {
+                pageIssues.push({
+                  kind: "meta-robots",
+                  severity: "always",
+                  msg: `index:false attendu mais meta robots = ${metaRobots ?? "(absent)"}`,
+                });
+              }
+            }
+            return { route, url, ok: true, ogDiffs: [], pageIssues };
+          }
+
           const expected = buildExpectedTags(route);
           const tolerantKeys = tolerantKeysFor(route);
+          // F3 : titres dynamiques avec sampleParams → check soft (présence
+          // du param interpolé + suffixe).
+          const softTitleKeys = new Set();
+          let softTitleParam = null;
+          if (route.isDynamic && route.dynamicTitle && route.sampleParams) {
+            const firstParamKey = Object.keys(route.sampleParams)[0];
+            if (firstParamKey) {
+              softTitleParam = route.sampleParams[firstParamKey];
+              // En soft on retire de tolerantKeys (présence != bon contenu)
+              tolerantKeys.delete("og:title");
+              tolerantKeys.delete("twitter:title");
+              softTitleKeys.add("og:title");
+              softTitleKeys.add("twitter:title");
+            }
+          }
           const ogDiffs = enabledChecks.has("og")
-            ? diffTags(tags, expected.tags, { tolerantKeys })
+            ? diffTags(tags, expected.tags, { tolerantKeys, softTitleKeys, softTitleParam })
             : [];
 
           // Chaque issue a un `severity` : "always" (toujours bloquant) ou

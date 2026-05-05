@@ -6,8 +6,8 @@ const Privacy = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
-        title="Politique de confidentialité — Guardiens"
-        description="Comment Guardiens collecte, utilise et protège vos données personnelles, conformément au RGPD et à la loi Informatique et Libertés."
+        title="Politique de confidentialité | Guardiens"
+        description="Comment Guardiens protège vos données personnelles : collecte, conservation, partage, cookies et exercice de vos droits RGPD en France."
         path="/confidentialite"
       />
       <PublicHeader />

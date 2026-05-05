@@ -6,8 +6,8 @@ const Terms = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
-        title="Conditions Générales d'Utilisation — Guardiens"
-        description="Consultez les conditions générales d'utilisation (version 5) de la plateforme Guardiens."
+        title="Conditions générales d'utilisation | Guardiens"
+        description="Consultez les conditions générales d'utilisation de la plateforme Guardiens : engagements, responsabilités, droits et obligations des membres."
         path="/cgu"
       />
       <PublicHeader />
