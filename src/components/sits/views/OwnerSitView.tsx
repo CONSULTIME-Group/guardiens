@@ -203,28 +203,19 @@ const OwnerSitView = ({
 
   return (
     <>
-      {/* Draft banner */}
+      {/* Brouillon : checklist de publication (remplace l'ancien bandeau) */}
       {isDraft && (
-        <div className="mb-6 rounded-xl border border-border bg-accent/50 p-4 md:p-5">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="font-heading text-base font-semibold">
-                Cette annonce est encore en brouillon
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Publiez-la pour qu'elle apparaisse dans la recherche.
-              </p>
-            </div>
-            <Button
-              onClick={() => setPublishConfirmOpen(true)}
-              disabled={publishing}
-              className="gap-2 md:self-start"
-            >
-              <Send className="h-4 w-4" />
-              {publishing ? "Publication..." : "Publier l'annonce"}
-            </Button>
-          </div>
-        </div>
+        <DraftChecklist
+          hasTitle={checklist.hasTitle}
+          hasDates={checklist.hasDates}
+          hasDescription={checklist.hasDescription}
+          hasPhoto={checklist.hasPhoto}
+          hasPet={checklist.hasPet}
+          publishing={publishing}
+          onPublish={() => {
+            if (canPublish) setPublishConfirmOpen(true);
+          }}
+        />
       )}
 
       {/* Confirmation publication — rappel des dates exactes */}
