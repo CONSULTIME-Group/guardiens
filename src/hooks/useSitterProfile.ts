@@ -279,11 +279,30 @@ export function useSitterProfile() {
   }, [user, data, sitterProfileId, fetchData, refreshCompletion, refreshProfile, toast]);
 
   const addPastAnimal = useCallback(async (animal: PastAnimal) => {
-    if (!sitterProfileId) return;
-    const { data: created } = await supabase
+    if (!user) return;
+
+    // Auto-create sitter_profiles row if missing — sinon le bouton "Ajouter
+    // cet animal" échouait silencieusement pour les nouveaux comptes qui
+    // n'avaient pas encore sauvegardé l'onglet "Profil gardien".
+    let profileId = sitterProfileId;
+    if (!profileId) {
+      const { data: created, error: createErr } = await supabase
+        .from("sitter_profiles")
+        .insert({ user_id: user.id })
+        .select("id")
+        .single();
+      if (createErr || !created) {
+        toast({ variant: "destructive", title: "Erreur", description: "Impossible de créer votre profil gardien." });
+        return;
+      }
+      profileId = created.id;
+      setSitterProfileId(profileId);
+    }
+
+    const { data: created, error } = await supabase
       .from("past_animals")
       .insert({
-        sitter_profile_id: sitterProfileId,
+        sitter_profile_id: profileId,
         species: animal.species,
         name: animal.name,
         photo_url: animal.photo_url || null,
@@ -291,8 +310,13 @@ export function useSitterProfile() {
       } as any)
       .select()
       .single();
-    if (created) setPastAnimals(prev => [...prev, { id: created.id, species: created.species, name: created.name, breed: (created as any).breed || undefined, photo_url: created.photo_url || undefined }]);
-  }, [sitterProfileId]);
+    if (error || !created) {
+      toast({ variant: "destructive", title: "Erreur", description: "Impossible d'ajouter cet animal." });
+      return;
+    }
+    setPastAnimals(prev => [...prev, { id: created.id, species: created.species, name: created.name, breed: (created as any).breed || undefined, photo_url: created.photo_url || undefined }]);
+    toast({ title: "Animal ajouté", description: `${created.name} a été ajouté à vos expériences.` });
+  }, [user, sitterProfileId, toast]);
 
   const removePastAnimal = useCallback(async (id: string) => {
     await supabase.from("past_animals").delete().eq("id", id);
