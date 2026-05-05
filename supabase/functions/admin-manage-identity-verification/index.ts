@@ -225,7 +225,7 @@ Deno.serve(async (req) => {
       return json({ success: true, missing });
     }
 
-    return new Response(JSON.stringify({ error: "Action inconnue" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return json({ error: "Action inconnue" }, 400);
   } catch (error) {
     console.error("admin-manage-identity-verification error", error);
     return json({ error: error instanceof Error ? error.message : "Erreur interne" }, 500);
