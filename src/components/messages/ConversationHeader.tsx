@@ -193,7 +193,7 @@ const ConversationHeader = ({
       .eq("sit_id", conv.sit_id)
       .eq("sitter_id", conv.sitter_id);
     if (error) { toast.error("Erreur"); return; }
-    toast.success(`Candidature de ${sitterName} acceptée ✅`);
+    toast.success(`Candidature de ${sitterName} acceptée`);
 
     // Email transactionnel — sitter informé de l'acceptation (non-bloquant)
     sendTransactionalEmail({
