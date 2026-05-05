@@ -181,8 +181,8 @@ const OwnerProfilePage = () => {
       ok: pets.length > 0, hint: "Onglet Animaux." },
     { section: "housing", kind: "essential", label: "Logement décrit (≥ 50 caractères)", points: 15,
       ok: (mergedData.description?.length ?? 0) >= 50, hint: `${mergedData.description?.length ?? 0}/50 caractères.` },
-    { section: "gallery", kind: "essential", label: "Au moins 1 photo du logement", points: 15,
-      ok: (mergedData.photos?.length ?? 0) > 0, hint: "Onglet Galerie." },
+    { section: "gallery", kind: "essential", label: "Au moins 1 photo dans la Galerie", points: 15,
+      ok: galleryCount > 0, hint: "Onglet Galerie." },
     // Bonus — 25 pts
     { section: "identity", kind: "bonus", label: "Bio ≥ 50 caractères", points: 10,
       ok: (mergedData.bio?.length ?? 0) >= 50, hint: `${mergedData.bio?.length ?? 0}/50 caractères.` },
