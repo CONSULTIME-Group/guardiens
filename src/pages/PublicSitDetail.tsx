@@ -420,20 +420,20 @@ const PublicSitDetail = () => {
  {pet.photo_url ? (
  <img
  src={pet.photo_url}
- alt={`Photo de ${pet.name}`}
+ alt={`Photo de ${capitalize(pet.name)}`}
  loading="lazy"
  className="w-12 h-12 rounded-full object-cover shrink-0"
  />
  ) : (
  <span
- className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-xl shrink-0"
+ className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center font-heading text-base font-bold text-primary shrink-0"
  aria-hidden="true"
  >
- {speciesEmoji[pet.species] || "🐾"}
+ {capitalize(pet.name).charAt(0) || "?"}
  </span>
  )}
  <div className="min-w-0">
- <p className="font-semibold text-sm truncate">{pet.name}</p>
+ <p className="font-semibold text-sm truncate">{capitalize(pet.name)}</p>
  <p className="text-xs text-muted-foreground truncate">
  {speciesLabel[pet.species] || pet.species}
  {pet.breed ? ` · ${pet.breed}` : ""}
