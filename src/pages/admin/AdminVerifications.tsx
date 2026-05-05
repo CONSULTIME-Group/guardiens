@@ -151,14 +151,26 @@ const AdminVerifications = () => {
   }, [historyFilter, historyPage]);
 
   const [attemptCounts, setAttemptCounts] = useState<Record<string, number>>({});
+  const [userLogs, setUserLogs] = useState<Record<string, Array<{ result: string; rejection_reason: string | null; document_type: string | null; created_at: string }>>>({});
   useEffect(() => {
     if (!queue.length) return;
     const ids = queue.map(u => u.id);
-    supabase.from("identity_verification_logs").select("user_id").in("user_id", ids).then(({ data }) => {
-      const counts: Record<string, number> = {};
-      data?.forEach((log: any) => { counts[log.user_id] = (counts[log.user_id] || 0) + 1; });
-      setAttemptCounts(counts);
-    });
+    supabase
+      .from("identity_verification_logs")
+      .select("user_id, result, rejection_reason, document_type, created_at")
+      .in("user_id", ids)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        const counts: Record<string, number> = {};
+        const logs: Record<string, any[]> = {};
+        data?.forEach((log: any) => {
+          counts[log.user_id] = (counts[log.user_id] || 0) + 1;
+          if (!logs[log.user_id]) logs[log.user_id] = [];
+          logs[log.user_id].push(log);
+        });
+        setAttemptCounts(counts);
+        setUserLogs(logs);
+      });
   }, [queue]);
 
   useEffect(() => { fetchQueue(); }, [fetchQueue]);
