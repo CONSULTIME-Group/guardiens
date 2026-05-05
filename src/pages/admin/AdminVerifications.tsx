@@ -625,24 +625,24 @@ const AdminVerifications = () => {
               <Button
                 variant="destructive"
                 className="gap-1.5"
-                disabled={busyUserId === docModal.userId || !docModal.docUrl || !docModal.selfieUrl}
+                disabled={busyUserId === docModal.userId}
                 onClick={() => {
                   setRejectModal({ open: true, userId: docModal.userId!, reason: "", customReason: "" });
                   setDocModal({ open: false, userId: null, docUrl: null, selfieUrl: null, name: "", status: null });
                 }}
-                title={!docModal.docUrl || !docModal.selfieUrl ? "Dossier incomplet" : undefined}
+                title={!docModal.docUrl || !docModal.selfieUrl ? "Dossier incomplet — décision possible sur la base des éléments fournis" : undefined}
               >
                 <ShieldX className="h-4 w-4" /> Invalider
               </Button>
               <Button
                 className="gap-1.5"
-                disabled={busyUserId === docModal.userId || !docModal.docUrl || !docModal.selfieUrl}
+                disabled={busyUserId === docModal.userId}
                 onClick={async () => {
                   const uid = docModal.userId!;
                   setDocModal({ open: false, userId: null, docUrl: null, selfieUrl: null, name: "", status: null });
                   await handleApprove(uid);
                 }}
-                title={!docModal.docUrl || !docModal.selfieUrl ? "Dossier incomplet" : undefined}
+                title={!docModal.docUrl || !docModal.selfieUrl ? "Dossier incomplet — validation possible sur la base des éléments fournis (selfie + photo de profil)" : undefined}
               >
                 <ShieldCheck className="h-4 w-4" /> Valider
               </Button>
