@@ -32,8 +32,8 @@ const AdminVerifications = () => {
   const PAGE_SIZE = 20;
 
   // Document viewer modal
-  const [docModal, setDocModal] = useState<{ open: boolean; docUrl: string | null; selfieUrl: string | null; name: string }>({
-    open: false, docUrl: null, selfieUrl: null, name: ""
+  const [docModal, setDocModal] = useState<{ open: boolean; userId: string | null; docUrl: string | null; selfieUrl: string | null; name: string; status: string | null }>({
+    open: false, userId: null, docUrl: null, selfieUrl: null, name: "", status: null
   });
 
   // Revoke modal
@@ -319,9 +319,11 @@ const AdminVerifications = () => {
                             className="w-full h-48 object-contain rounded-lg border bg-muted cursor-pointer hover:opacity-80 transition-opacity"
                             onClick={() => setDocModal({
                               open: true,
+                              userId: user.id,
                               docUrl: user.identity_document_signed_url,
                               selfieUrl: user.identity_selfie_signed_url,
-                              name: `${user.first_name} ${user.last_name}`
+                              name: `${user.first_name} ${user.last_name}`,
+                              status: user.identity_verification_status,
                             })}
                           />
                         ) : <div className="w-full h-48 rounded-lg border bg-muted flex items-center justify-center text-xs text-muted-foreground">Document inaccessible ou non fourni</div>}
@@ -416,9 +418,11 @@ const AdminVerifications = () => {
                             className="h-8 gap-1 text-xs"
                             onClick={() => setDocModal({
                               open: true,
+                              userId: user.id,
                               docUrl: user.identity_document_signed_url,
                               selfieUrl: user.identity_selfie_signed_url,
-                              name: `${user.first_name} ${user.last_name}`
+                              name: `${user.first_name} ${user.last_name}`,
+                              status: user.identity_verification_status,
                             })}
                           >
                             <Eye className="h-3.5 w-3.5" /> Doc
@@ -431,6 +435,28 @@ const AdminVerifications = () => {
                           >
                             <ExternalLink className="h-3.5 w-3.5" /> Profil
                           </Button>
+                          {user.identity_verification_status === "pending" && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 gap-1 text-xs text-success hover:text-success"
+                                disabled={busyUserId === user.id}
+                                onClick={() => handleApprove(user.id)}
+                              >
+                                <ShieldCheck className="h-3.5 w-3.5" /> Valider
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 gap-1 text-xs text-destructive hover:text-destructive"
+                                disabled={busyUserId === user.id}
+                                onClick={() => setRejectModal({ open: true, userId: user.id, reason: "", customReason: "" })}
+                              >
+                                <ShieldX className="h-3.5 w-3.5" /> Invalider
+                              </Button>
+                            </>
+                          )}
                           {user.identity_verification_status === "verified" && (
                             <Button
                               size="sm"
@@ -487,7 +513,7 @@ const AdminVerifications = () => {
       </Dialog>
 
       {/* Document viewer modal */}
-      <Dialog open={docModal.open} onOpenChange={(o) => !o && setDocModal({ open: false, docUrl: null, selfieUrl: null, name: "" })}>
+      <Dialog open={docModal.open} onOpenChange={(o) => !o && setDocModal({ open: false, userId: null, docUrl: null, selfieUrl: null, name: "", status: null })}>
         <DialogContent className="max-w-3xl w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Documents — {docModal.name}</DialogTitle></DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -500,6 +526,40 @@ const AdminVerifications = () => {
               {docModal.selfieUrl ? <img src={docModal.selfieUrl} alt="Selfie" className="w-full rounded-lg border" /> : <div className="h-48 rounded-lg border bg-muted flex items-center justify-center text-sm text-muted-foreground">Non fourni</div>}
             </div>
           </div>
+          {docModal.userId && docModal.status !== "verified" && (
+            <DialogFooter className="gap-2 sm:gap-2 flex-wrap">
+              <Button
+                variant="outline"
+                onClick={() => setDocModal({ open: false, userId: null, docUrl: null, selfieUrl: null, name: "", status: null })}
+              >
+                Fermer
+              </Button>
+              <Button
+                variant="destructive"
+                className="gap-1.5"
+                disabled={busyUserId === docModal.userId || !docModal.docUrl || !docModal.selfieUrl}
+                onClick={() => {
+                  setRejectModal({ open: true, userId: docModal.userId!, reason: "", customReason: "" });
+                  setDocModal({ open: false, userId: null, docUrl: null, selfieUrl: null, name: "", status: null });
+                }}
+                title={!docModal.docUrl || !docModal.selfieUrl ? "Dossier incomplet" : undefined}
+              >
+                <ShieldX className="h-4 w-4" /> Invalider
+              </Button>
+              <Button
+                className="gap-1.5"
+                disabled={busyUserId === docModal.userId || !docModal.docUrl || !docModal.selfieUrl}
+                onClick={async () => {
+                  const uid = docModal.userId!;
+                  setDocModal({ open: false, userId: null, docUrl: null, selfieUrl: null, name: "", status: null });
+                  await handleApprove(uid);
+                }}
+                title={!docModal.docUrl || !docModal.selfieUrl ? "Dossier incomplet" : undefined}
+              >
+                <ShieldCheck className="h-4 w-4" /> Valider
+              </Button>
+            </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
 
