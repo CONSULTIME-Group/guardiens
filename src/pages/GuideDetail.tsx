@@ -297,7 +297,7 @@ const GuideDetail = () => {
                           {place.tips && (
                             <div className="bg-accent/50 rounded-md p-2.5 mt-2">
                               <p className="text-xs italic text-muted-foreground">
-                                💡 {place.tips}
+                                Bon à savoir : {place.tips}
                               </p>
                             </div>
                           )}
