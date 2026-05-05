@@ -124,7 +124,7 @@ const EditSit = () => {
       toast({ variant: "destructive", title: "Erreur", description: "Impossible de sauvegarder." });
       return;
     }
-    toast({ title: "Annonce mise à jour ✓" });
+    toast({ title: "Annonce mise à jour" });
     navigate(`/sits/${id}`);
   };
 
