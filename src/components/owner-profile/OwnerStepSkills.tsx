@@ -6,10 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 import CompetenceAutocomplete from "@/components/profile/CompetenceAutocomplete";
 
 const SKILL_CATEGORIES = [
-  { key: "jardin", label: "🌿 Jardin" },
-  { key: "animaux", label: "🐾 Animaux" },
-  { key: "competences", label: "📚 Compétences & Savoirs" },
-  { key: "coups_de_main", label: "🤝 Coups de main" },
+  { key: "jardin", label: "Jardin" },
+  { key: "animaux", label: "Animaux" },
+  { key: "competences", label: "Compétences & Savoirs" },
+  { key: "coups_de_main", label: "Coups de main" },
 ] as const;
 
 interface Props {
