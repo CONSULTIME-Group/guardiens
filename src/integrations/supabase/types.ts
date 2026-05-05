@@ -2499,6 +2499,7 @@ export type Database = {
           email: string | null
           email_preferences: Json
           first_name: string | null
+          first_sit_email_sent_at: string | null
           free_months_credit: number | null
           hero_image_index: number | null
           id: string
@@ -2538,6 +2539,7 @@ export type Database = {
           email?: string | null
           email_preferences?: Json
           first_name?: string | null
+          first_sit_email_sent_at?: string | null
           free_months_credit?: number | null
           hero_image_index?: number | null
           id: string
@@ -2577,6 +2579,7 @@ export type Database = {
           email?: string | null
           email_preferences?: Json
           first_name?: string | null
+          first_sit_email_sent_at?: string | null
           free_months_credit?: number | null
           hero_image_index?: number | null
           id?: string
@@ -2628,6 +2631,7 @@ export type Database = {
           accessible: boolean | null
           bedrooms_count: number | null
           car_required: boolean | null
+          cover_photo_url: string | null
           created_at: string
           description: string | null
           environment:
@@ -2645,6 +2649,7 @@ export type Database = {
           accessible?: boolean | null
           bedrooms_count?: number | null
           car_required?: boolean | null
+          cover_photo_url?: string | null
           created_at?: string
           description?: string | null
           environment?:
@@ -2662,6 +2667,7 @@ export type Database = {
           accessible?: boolean | null
           bedrooms_count?: number | null
           car_required?: boolean | null
+          cover_photo_url?: string | null
           created_at?: string
           description?: string | null
           environment?:
@@ -3225,6 +3231,7 @@ export type Database = {
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
+          cover_photo_url: string | null
           created_at: string
           daily_routine: string | null
           end_date: string | null
@@ -3254,6 +3261,7 @@ export type Database = {
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
+          cover_photo_url?: string | null
           created_at?: string
           daily_routine?: string | null
           end_date?: string | null
@@ -3283,6 +3291,7 @@ export type Database = {
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
+          cover_photo_url?: string | null
           created_at?: string
           daily_routine?: string | null
           end_date?: string | null
