@@ -38,6 +38,7 @@ const SitDetail = () => {
   const [hasReviewedThisSit, setHasReviewedThisSit] = useState(false);
   const [initialLogementOverride, setInitialLogementOverride] = useState("");
   const [initialAnimauxOverride, setInitialAnimauxOverride] = useState("");
+  const [ownerGallery, setOwnerGallery] = useState<{ id: string; photo_url: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
