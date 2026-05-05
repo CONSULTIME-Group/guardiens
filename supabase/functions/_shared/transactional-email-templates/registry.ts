@@ -64,4 +64,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'relance-profil-incomplet': relanceProfilIncomplet,
   'conseils-annonce-personnalises': conseilsAnnoncePersonnalises,
   'conseils-publication-annonce': conseilsPublicationAnnonce,
+  'relance-piece-identite': relancePieceIdentite,
 }
