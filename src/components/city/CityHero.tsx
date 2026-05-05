@@ -60,33 +60,31 @@ export default function CityHero({
 
         <div className="relative z-10 w-full max-w-6xl mx-auto px-4 pb-10 pt-24 md:pb-14">
           {/* Breadcrumb */}
-          <nav className="text-sm text-white/70 mb-4" aria-label="Breadcrumb">
-            <ol className="flex items-center gap-1.5 flex-wrap" itemScope itemType="https://schema.org/BreadcrumbList">
-              <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
-                <Link to="/" className="hover:text-white transition-colors" itemProp="item">
-                  <span itemProp="name">Guardiens</span>
+          {/* Fil d'Ariane visuel — le BreadcrumbList structuré est fourni en JSON-LD via CitySchemaOrg pour éviter les doublons et les éléments invalides détectés par GSC. */}
+          <nav className="text-sm text-white/70 mb-4" aria-label="Fil d'Ariane">
+            <ol className="flex items-center gap-1.5 flex-wrap">
+              <li>
+                <Link to="/" className="hover:text-white transition-colors">
+                  Guardiens
                 </Link>
-                <meta itemProp="position" content="1" />
               </li>
               <li className="text-white/40">/</li>
               {department && (
                 <>
-                  <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+                  <li>
                     {departmentSlug ? (
-                      <Link to={`/departement/${departmentSlug}`} className="hover:text-white transition-colors" itemProp="item">
-                        <span itemProp="name">{department}</span>
+                      <Link to={`/departement/${departmentSlug}`} className="hover:text-white transition-colors">
+                        {department}
                       </Link>
                     ) : (
-                      <span itemProp="name">{department}</span>
+                      <span>{department}</span>
                     )}
-                    <meta itemProp="position" content="2" />
                   </li>
                   <li className="text-white/40">/</li>
                 </>
               )}
-              <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
-                <span itemProp="name" className="text-white font-medium">{city}</span>
-                <meta itemProp="position" content={department ? "3" : "2"} />
+              <li>
+                <span className="text-white font-medium">{city}</span>
               </li>
             </ol>
           </nav>
