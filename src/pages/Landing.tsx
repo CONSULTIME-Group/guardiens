@@ -313,7 +313,7 @@ const Landing = () => {
   serviceType: ["Pet sitting", "House sitting", "Garde d'animaux", "Gardiennage de maison", "Garde de chien", "Garde de chat"],
   offers: [
   { "@type": "Offer", name: "Espace propriétaire", price: "0", priceCurrency: "EUR", description: "Publication d'annonces et mise en relation sans abonnement pour les propriétaires. Sans carte bancaire." },
-  { "@type": "Offer", name: "Abonnement gardien", price: "6.99", priceCurrency: "EUR", description: "Abonnement gardien à 6,99 €/mois après le 13 juin 2026 — accès sans abonnement jusqu'à cette date." },
+  { "@type": "Offer", name: "Abonnement gardien", price: "6.99", priceCurrency: "EUR", description: "Abonnement gardien à 6,99 €/mois après le 13 juillet 2026 — accès sans abonnement jusqu'à cette date." },
   { "@type": "Offer", name: "Entraide entre gens du coin", price: "0", priceCurrency: "EUR", description: "Petites missions et entraide sans abonnement pour tous." },
   ],
  }),
@@ -327,7 +327,7 @@ const Landing = () => {
  "@type": "FAQPage",
  mainEntity: [
  { "@type": "Question", name: "Qu'est-ce que le house sitting ?", acceptedAnswer: { "@type": "Answer", text: "Le house sitting est un échange de services : un gardien habite gratuitement dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties." } },
-  { "@type": "Question", name: "Faut-il payer pour s'inscrire en tant que propriétaire ?", acceptedAnswer: { "@type": "Answer", text: "L'inscription, la publication d'annonces et les échanges avec les gardiens sont sans abonnement requis pour les propriétaires. Aucune carte bancaire demandée. Les gardiens bénéficient d'un accès sans abonnement jusqu'au 13 juin 2026, puis l'abonnement est à 6,99 €/mois. L'entraide entre gens du coin reste sans abonnement pour tous." } },
+  { "@type": "Question", name: "Faut-il payer pour s'inscrire en tant que propriétaire ?", acceptedAnswer: { "@type": "Answer", text: "L'inscription, la publication d'annonces et les échanges avec les gardiens sont sans abonnement requis pour les propriétaires. Aucune carte bancaire demandée. Les gardiens bénéficient d'un accès sans abonnement jusqu'au 13 juillet 2026, puis l'abonnement est à 6,99 €/mois. L'entraide entre gens du coin reste sans abonnement pour tous." } },
   { "@type": "Question", name: "Comment trouver un pet sitter près de chez moi ?", acceptedAnswer: { "@type": "Answer", text: "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous." } },
   { "@type": "Question", name: "Qui sont les gardiens sur Guardiens ?", acceptedAnswer: { "@type": "Answer", text: "Des gens du coin, vérifiés par notre équipe. Chaque profil passe une vérification d'identité (pièce d'identité + selfie) traitée sous 24h. Vous voyez aussi leurs avis publiés par les propriétaires précédents." } },
   { "@type": "Question", name: "Comment se déroule une garde sur Guardiens ?", acceptedAnswer: { "@type": "Answer", text: "Vous publiez votre annonce, les gardiens du coin postulent, vous choisissez après une rencontre, puis votre gardien s'installe. Un accord de garde optionnel encadre les engagements de chacun pendant la garde." } },
@@ -417,7 +417,7 @@ const Landing = () => {
  </div>
 
  <p className="mt-4 text-xs text-white/60 font-body animate-hero-fade-up animation-delay-1100">
- Badge Fondateur pour les inscrits avant le 13 mai.
+ Badge Fondateur pour les inscrits avant le 13 juin.
  </p>
 
  {(kpiMaisons > 0 || kpiAnimaux > 0 || kpiInscrits > 0 || kpiMissions > 0) && (
@@ -1301,10 +1301,10 @@ const Landing = () => {
  <span className="font-body text-xs text-white uppercase tracking-widest">Fondateurs</span>
  </div>
  <h2 className="font-heading text-4xl md:text-5xl font-bold text-white leading-snug mb-6">
- Inscrivez-vous avant le 13 mai.
+ Inscrivez-vous avant le 13 juin.
  </h2>
  <p className="font-body text-lg text-white/85 leading-relaxed mb-10">
- Badge Fondateur. Accès gratuit jusqu'au 13 juin. Et surtout, vous serez parmi les premiers à vivre ça. Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie. Il préfère offrir l'accès plutôt que recevoir des chaussettes.
+ Badge Fondateur. Accès gratuit jusqu'au 13 juillet. Et surtout, vous serez parmi les premiers à vivre ça. Pourquoi le 13 juin ? C'est l'anniversaire de Jérémie. Il préfère offrir l'accès plutôt que recevoir des chaussettes.
  </p>
  <button
  onClick={() => navigate("/inscription")}
@@ -1349,7 +1349,7 @@ const Landing = () => {
  Découvrir l'entraide de quartier
  </button>
  <p className="mt-8 text-xs text-white/40 font-body">
- Badge Fondateur · Accès offert jusqu'au 13 juin · L'entraide reste sans frais
+ Badge Fondateur · Accès offert jusqu'au 13 juillet · L'entraide reste sans frais
  </p>
  </RevealSection>
  </section>
