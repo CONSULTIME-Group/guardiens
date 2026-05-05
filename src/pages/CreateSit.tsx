@@ -509,18 +509,42 @@ const CreateSit = () => {
                 </div>
               )}
 
-              {/* CORRECTION 5 — Aperçu photos */}
+              {/* CORRECTION 5 — Aperçu photos + sélection couverture */}
               <div className="mt-3">
-                <p className="text-sm font-medium text-foreground mb-2">Photos affichées sur l'annonce</p>
+                <p className="text-sm font-medium text-foreground mb-1">Photos affichées sur l'annonce</p>
                 {ownerPhotos.length > 0 ? (
-                  <div className="grid grid-cols-4 gap-2">
-                    {ownerPhotos.slice(0, 4).map((url, i) => (
-                      <img key={i} src={url} alt={`Photo ${i + 1}`} className="rounded-lg object-cover h-16 w-full" />
-                    ))}
-                  </div>
+                  <>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Cliquez sur une photo pour la définir comme photo de couverture de cette annonce.
+                    </p>
+                    <div className="grid grid-cols-4 gap-2">
+                      {ownerPhotos.slice(0, 8).map((url, i) => {
+                        const isCover = coverPhotoUrl === url || (!coverPhotoUrl && i === 0);
+                        return (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => setCoverPhotoUrl(url)}
+                            className={cn(
+                              "relative rounded-lg overflow-hidden h-16 w-full border-2 transition-all",
+                              isCover ? "border-primary ring-2 ring-primary/30" : "border-transparent hover:border-primary/50"
+                            )}
+                            aria-label={`Définir la photo ${i + 1} comme couverture`}
+                          >
+                            <img src={url} alt={`Photo ${i + 1}`} className="object-cover h-full w-full" />
+                            {isCover && (
+                              <span className="absolute bottom-0 inset-x-0 bg-primary text-primary-foreground text-[10px] font-medium py-0.5 text-center">
+                                Couverture
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
                 ) : (
                   <div className="bg-muted rounded-xl p-3">
-                    <p className="text-xs text-muted-foreground">Aucune photo — les annonces avec photos reçoivent 3× plus de candidatures</p>
+                    <p className="text-xs text-muted-foreground">Aucune photo — les annonces avec photos reçoivent davantage de candidatures.</p>
                   </div>
                 )}
                 <Link to="/owner-profile#galerie" className="text-xs text-primary hover:underline mt-2 inline-block">
