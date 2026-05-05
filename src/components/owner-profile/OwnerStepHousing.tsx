@@ -109,6 +109,7 @@ const OwnerStepHousing = ({ data, onChange, onUploadPhoto }: Props) => {
       {/* Photos */}
       <div className="space-y-3">
         <Label>Photos du logement (3 à 10)</Label>
+        <PhotoTipsAlert />
         <div className="flex flex-wrap gap-3">
           {data.photos.map((url, i) => (
             <div key={i} className="relative w-24 h-24 rounded-lg overflow-hidden border border-border">
