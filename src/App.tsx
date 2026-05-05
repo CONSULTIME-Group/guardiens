@@ -123,6 +123,7 @@ const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
 const AdminErrors = lazy(() => import("./pages/admin/AdminErrors"));
 const AdminDiagnostics = lazy(() => import("./pages/admin/AdminDiagnostics"));
+const AdminTestSitterFields = lazy(() => import("./pages/admin/AdminTestSitterFields"));
 const EmergencySitter = lazy(() => import("./pages/EmergencySitter"));
 const MySubscription = lazy(() => import("./pages/MySubscription"));
 const Favorites = lazy(() => import("./pages/Favorites"));
