@@ -16,8 +16,10 @@ interface GuideData {
   user_id: string;
   exact_address: string;
   access_codes: string;
+  key_instructions: string;
   wifi_name: string;
   wifi_password: string;
+  wifi_instructions: string;
   vet_name: string;
   vet_phone: string;
   vet_address: string;
@@ -31,6 +33,12 @@ interface GuideData {
   trash_days: string;
   heating_instructions: string;
   appliance_notes: string;
+  parking_instructions: string;
+  mail_instructions: string;
+  plants_watering: string;
+  forbidden_zones: string;
+  owner_message: string;
+  published: boolean;
 }
 
 const emptyGuide = (propertyId: string, userId: string): GuideData => ({
@@ -38,8 +46,10 @@ const emptyGuide = (propertyId: string, userId: string): GuideData => ({
   user_id: userId,
   exact_address: "",
   access_codes: "",
+  key_instructions: "",
   wifi_name: "",
   wifi_password: "",
+  wifi_instructions: "",
   vet_name: "",
   vet_phone: "",
   vet_address: "",
@@ -53,6 +63,12 @@ const emptyGuide = (propertyId: string, userId: string): GuideData => ({
   trash_days: "",
   heating_instructions: "",
   appliance_notes: "",
+  parking_instructions: "",
+  mail_instructions: "",
+  plants_watering: "",
+  forbidden_zones: "",
+  owner_message: "",
+  published: false,
 });
 
 const Section = ({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) => (
