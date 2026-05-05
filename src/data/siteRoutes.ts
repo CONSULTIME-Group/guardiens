@@ -189,15 +189,15 @@ metaDescription: "Home sitting et petites missions d'entraide entre gens du coin
  title: "Contact — Nous écrire ou poser une question | Guardiens",
  metaDescription: "Contactez l'équipe Guardiens. Une question, une suggestion, un problème technique ou un partenariat ? Nous vous répondons sous 48 heures ouvrées.",
  h1: "Contactez-nous",
- sitemapPriority: "0.5",
- changeFreq: "monthly",
+ sitemapPriority: "0.8",
+ changeFreq: "weekly",
  },
  {
  path: "/a-propos",
  title: "À propos — Notre histoire et nos valeurs | Guardiens",
  metaDescription: "Découvrez l'histoire de Guardiens, notre vision du house-sitting de proximité, nos engagements de confiance et l'équipe derrière la plateforme.",
  h1: "À propos de Guardiens",
- sitemapPriority: "0.5",
+ sitemapPriority: "0.6",
  changeFreq: "monthly",
  },
  {
@@ -217,6 +217,8 @@ metaDescription: "Home sitting et petites missions d'entraide entre gens du coin
  h1: "Créer un compte",
  sitemapPriority: "0.6",
  changeFreq: "monthly",
+ // Anti-cannibalisation brand : on laisse remonter / et /tarifs sur la marque.
+ index: false,
  },
  {
  path: "/cgu",
