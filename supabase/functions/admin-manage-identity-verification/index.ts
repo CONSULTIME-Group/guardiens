@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-type Action = "preview" | "approve" | "reject" | "request_resend" | "revoke";
+type Action = "preview" | "approve" | "reject" | "request_resend" | "revoke" | "remind";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
