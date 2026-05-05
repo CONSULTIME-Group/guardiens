@@ -847,7 +847,7 @@ const Landing = () => {
  Ce n'est pas un aveu de faiblesse — c'est un acte de confiance. Et quelqu'un près de chez vous n'attend que ça.
  </p>
  <p className="text-sm font-body font-medium text-primary">
- Pas d'argent. Pas d'abonnement. Jamais.
+ Pas d'argent. Pas d'abonnement. C'est le pari.
  </p>
  </div>
  </RevealSection>
