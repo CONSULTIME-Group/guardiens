@@ -210,6 +210,7 @@ const SearchMapView = ({
           const coords = getCoords(activeItem);
           if (!coords) return null;
           const photos: string[] = activeItem.property?.photos || [];
+          const coverPhoto = (activeItem as any).cover_photo_url || activeItem.property?.cover_photo_url || photos[0] || null;
           const petGroups: Record<string, string[]> = {};
           (activeItem.pets || []).forEach((p: any) => {
             if (!petGroups[p.species]) petGroups[p.species] = [];
@@ -231,8 +232,8 @@ const SearchMapView = ({
                   Annonce d'exemple
                 </div>
               )}
-              {photos.length > 0 && (
-                <img src={photos[0]} alt="Aperçu de l'annonce" loading="lazy" className={`w-full h-[120px] object-cover ${isDemo ? "saturate-[0.85]" : ""}`} />
+              {coverPhoto && (
+                <img src={coverPhoto} alt="Aperçu de l'annonce" loading="lazy" className={`w-full h-[120px] object-cover ${isDemo ? "saturate-[0.85]" : ""}`} />
               )}
               <div className="p-3">
                 <h4 className="text-sm font-semibold text-foreground line-clamp-2 mb-1">
