@@ -795,13 +795,19 @@ const SitCard = ({
             <div className="min-w-0 flex-1">
               <Link to={`/sits/${sit.id}`} className="hover:underline">
                 <h3 className="font-heading font-semibold truncate text-sm md:text-base">
-                  {dynamicTitle}
+                  {displayTitle}
                 </h3>
               </Link>
               <div className="flex items-center gap-2 mt-1 flex-wrap">
-                {duration && (
+                {city && (
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Calendar className="h-3 w-3" /> {duration}
+                    <MapPin className="h-3 w-3" /> {city}
+                  </span>
+                )}
+                {dateRange && (
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Calendar className="h-3 w-3" /> {dateRange}
+                    {duration && <span className="text-muted-foreground/70">· {duration}</span>}
                   </span>
                 )}
                 {sit.flexible_dates && (
