@@ -43,7 +43,7 @@ const PhotoQualityChecker = ({ photos }: Props) => {
     }
     setOpen(true);
     setLoading(true);
-    const init = photos.map((url) => ({ url }));
+    const init: Array<{ url: string; result?: PhotoQualityResult; error?: string }> = photos.map((url) => ({ url }));
     setResults(init);
 
     const updated = [...init];
