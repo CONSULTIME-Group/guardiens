@@ -204,7 +204,7 @@ const SitterEmergencyCard = ({ hasEmergencyProfile }: SitterEmergencyCardProps) 
               <p>Alertes SMS : <span className="font-medium text-foreground">{effectiveProfile.sms_alerts ? "activées" : "désactivées"}</span></p>
               {(effectiveProfile as any).interventions_count > 0 && (
                 <p className="text-amber-700 font-medium pt-1">
-                  {(effectiveProfile as any).interventions_count} intervention{(effectiveProfile as any).interventions_count > 1 ? "s" : ""} — {(effectiveProfile as any).interventions_count * 3} mois offert{(effectiveProfile as any).interventions_count * 3 > 1 ? "s" : ""}
+                  {(effectiveProfile as any).interventions_count} intervention{(effectiveProfile as any).interventions_count > 1 ? "s" : ""} — {(effectiveProfile as any).interventions_count} mois offert{(effectiveProfile as any).interventions_count > 1 ? "s" : ""}
                 </p>
               )}
             </div>
@@ -245,14 +245,14 @@ const SitterEmergencyCard = ({ hasEmergencyProfile }: SitterEmergencyCardProps) 
 
   // ─── ÉTAT 1 & 2 ───
   const items = [
-    { label: `Gardes : ${effectiveChecks.completedSits}/3`, ok: effectiveChecks.completedSits >= 3 },
+    { label: `Gardes : ${effectiveChecks.completedSits}/5`, ok: effectiveChecks.completedSits >= 5 },
     { label: `Note : ${effectiveChecks.avgRating || "—"}/4.7`, ok: effectiveChecks.avgRating >= 4.7 },
     { label: `Annulations (6 mois) : ${effectiveChecks.recentCancellations}`, ok: effectiveChecks.recentCancellations === 0 },
     { label: "Identité vérifiée", ok: effectiveChecks.identityVerified },
     { label: "Abonnement actif", ok: effectiveChecks.hasSubscription },
   ];
   const allOk = previewMode === "eligible" ? true : items.every(i => i.ok);
-  const remaining = Math.max(0, 3 - effectiveChecks.completedSits);
+  const remaining = Math.max(0, 5 - effectiveChecks.completedSits);
 
   // ─── ÉTAT 2 — ELIGIBLE ───
   if (allOk) {

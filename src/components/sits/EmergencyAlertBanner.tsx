@@ -67,7 +67,7 @@ const EmergencyAlertBanner = ({ sitId, sitCity, startDate }: EmergencyAlertBanne
           <p className="text-sm text-muted-foreground">
             Votre garde commence dans <strong>{daysUntilStart} jour{daysUntilStart > 1 ? "s" : ""}</strong>.
             Vous pouvez alerter les <strong>gardiens d'urgence</strong> à proximité de {sitCity} — des membres
-            expérimentés (3+ gardes, note ≥ 4.7, identité vérifiée) mobilisables en quelques heures.
+            expérimentés (5+ gardes, note ≥ 4.7, identité vérifiée) mobilisables en quelques heures.
           </p>
           <p className="text-xs text-muted-foreground">
             Ils recevront une notification et pourront consulter votre annonce pour postuler.{" "}
