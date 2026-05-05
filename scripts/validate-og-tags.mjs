@@ -159,6 +159,11 @@ function loadSiteConfig() {
       /changeFreq:\s*(["'])(daily|weekly|monthly|yearly)\1/,
     );
     const changeFreq = changeFreqMatch ? changeFreqMatch[2] : null;
+    // F1/F5 : `index: false` → page publique noindex (pas dans sitemap, pas
+    // de check OG/canonical/sitemap-inclusion ; on vérifie seulement la
+    // présence de noindex + l'absence du sitemap).
+    const indexMatch = block.match(/index:\s*(true|false)/);
+    const indexable = indexMatch ? indexMatch[1] === "true" : true;
 
     routes.push({
       path: path_,
@@ -168,6 +173,7 @@ function loadSiteConfig() {
       sitemapPriority,
       changeFreq,
       isDynamic: false,
+      indexable,
     });
   }
   if (routes.length === 0) throw new Error("Aucune route statique extraite");
