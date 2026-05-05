@@ -235,6 +235,7 @@ const CreateSit = () => {
         max_applications: maxApplications,
         owner_message: ownerMessage.trim() || null,
         daily_routine: dailyRoutine.trim() || null,
+        cover_photo_url: coverPhotoUrl,
       } as any).select("id").single();
 
       if (error) throw error;
