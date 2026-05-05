@@ -549,7 +549,10 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
 
         {app.status === "accepted" && (
           <div className="mt-4 space-y-2">
-            <p className="text-sm text-primary font-medium">✓ Garde confirmée</p>
+            <p className="text-sm text-primary font-medium inline-flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4" />
+              Garde confirmée
+            </p>
             <button
               onClick={async () => {
                 const { data: conv } = await supabase
