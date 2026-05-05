@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-type Action = "preview" | "approve" | "reject" | "request_resend" | "revoke";
+type Action = "preview" | "approve" | "reject" | "request_resend" | "revoke" | "remind";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -180,6 +180,49 @@ Deno.serve(async (req) => {
       ]);
 
       return json({ success: true });
+    }
+
+    if (action === "remind") {
+      const hasDoc = !!profile.identity_document_url;
+      const hasSelfie = !!profile.identity_selfie_url;
+      const missing = !hasDoc && !hasSelfie
+        ? "votre pièce d'identité et votre selfie"
+        : !hasDoc
+          ? "votre pièce d'identité"
+          : !hasSelfie
+            ? "votre selfie"
+            : null;
+
+      const email = await getUserEmail(userId);
+      const idempotencyKey = `identity-remind-${userId}-${Date.now()}`;
+
+      if (missing) {
+        // Dossier incomplet : on relance pour compléter
+        await Promise.allSettled([
+          adminClient.from("notifications").insert({
+            user_id: userId,
+            type: "identity_remind_complete",
+            title: "Complétez votre vérification d'identité",
+            body: `Il manque ${missing} pour finaliser votre vérification. Rendez-vous dans vos paramètres.`,
+            link: "/settings",
+          }),
+          email ? sendEmail("identity-remind-complete", email, idempotencyKey, { missing }) : Promise.resolve(),
+        ]);
+      } else {
+        // Dossier complet : on informe que la vérification est en cours
+        await Promise.allSettled([
+          adminClient.from("notifications").insert({
+            user_id: userId,
+            type: "identity_remind_review",
+            title: "Vérification d'identité en cours",
+            body: "Votre dossier est bien reçu et en cours d'examen par notre équipe.",
+            link: "/settings",
+          }),
+          email ? sendEmail("identity-remind-review", email, idempotencyKey) : Promise.resolve(),
+        ]);
+      }
+
+      return json({ success: true, missing });
     }
 
     return json({ error: "Action inconnue" }, 400);

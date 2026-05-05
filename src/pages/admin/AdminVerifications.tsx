@@ -61,12 +61,24 @@ const AdminVerifications = () => {
     );
   };
 
-  const runIdentityAction = async (action: "approve" | "reject" | "request_resend" | "revoke", userId: string, reason?: string) => {
+  const runIdentityAction = async (action: "approve" | "reject" | "request_resend" | "revoke" | "remind", userId: string, reason?: string) => {
     const { error } = await supabase.functions.invoke("admin-manage-identity-verification", {
       body: { action, userId, reason },
     });
 
     if (error) throw error;
+  };
+
+  const handleRemind = async (userId: string) => {
+    setBusyUserId(userId);
+    try {
+      await runIdentityAction("remind", userId);
+      toast.success("Relance envoyée au membre");
+    } catch (error: any) {
+      toast.error(error?.message || "Impossible d'envoyer la relance");
+    } finally {
+      setBusyUserId(null);
+    }
   };
 
   const fetchQueue = useCallback(async () => {
@@ -326,7 +338,8 @@ const AdminVerifications = () => {
                     <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-border">
                       <Button size="sm" className="gap-1.5" disabled={busyUserId === user.id || isIncomplete} onClick={() => handleApprove(user.id)} title={isIncomplete ? "Dossier incomplet : impossible de valider" : undefined}><ShieldCheck className="h-4 w-4" /> {busyUserId === user.id ? "Validation..." : "Valider"}</Button>
                       <Button size="sm" variant="destructive" className="gap-1.5" disabled={busyUserId === user.id || isIncomplete} onClick={() => setRejectModal({ open: true, userId: user.id, reason: "", customReason: "" })}><ShieldX className="h-4 w-4" /> Refuser</Button>
-                      <Button size="sm" variant="outline" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => handleRequestResend(user.id)}><RotateCcw className="h-4 w-4" /> {isIncomplete ? "Relancer (compléter le dossier)" : "Demander nouveau document"}</Button>
+                      <Button size="sm" variant="outline" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => handleRequestResend(user.id)}><RotateCcw className="h-4 w-4" /> {isIncomplete ? "Réinitialiser le dossier" : "Demander nouveau document"}</Button>
+                      <Button size="sm" variant="secondary" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => handleRemind(user.id)} title="Renvoyer une notification + email pour relancer le membre"><RotateCcw className="h-4 w-4" /> Relancer</Button>
                     </div>
                   </CardContent>
                 </Card>
