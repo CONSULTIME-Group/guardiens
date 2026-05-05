@@ -378,6 +378,11 @@ function computeFinalTitle(rawTitle, path_) {
 
 function buildExpectedTags(route) {
   const finalTitle = computeFinalTitle(route.rawTitle, route.path);
+  // F2 : pour les articles de blog (/actualites/:slug), og:type="article" est
+  // attendu (au lieu de "website").
+  const isArticle = route.pathPattern === "/actualites/:slug"
+    || /^\/actualites\/[^/]+$/.test(route.path);
+  const ogType = isArticle ? "article" : "website";
   return {
     finalTitle,
     image: route.image,
@@ -386,7 +391,7 @@ function buildExpectedTags(route) {
       "og:title": finalTitle,
       "og:description": route.description,
       "og:image": route.image,
-      "og:type": "website",
+      "og:type": ogType,
       "og:site_name": SITE_NAME,
       "og:locale": "fr_FR",
       "twitter:card": "summary_large_image",
