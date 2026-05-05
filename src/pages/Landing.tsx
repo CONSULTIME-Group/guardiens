@@ -275,7 +275,7 @@ const Landing = () => {
  name: "Guardiens",
  url: "https://guardiens.fr",
  logo: "https://guardiens.fr/favicon.ico",
- description: "Plateforme de pet sitting et house sitting de proximité — service gratuit pour les propriétaires.",
+ description: "Plateforme de pet sitting et house sitting de proximité — service sans abonnement pour les propriétaires.",
  areaServed: { "@type": "Country", name: "France" },
  knowsAbout: ["House-sitting", "Pet-sitting", "Garde d'animaux à domicile", "Entraide entre gens du coin", "Petites missions entre gens du coin", "Proximité"],
  slogan: "Quelqu'un du coin veille sur votre maison.",
