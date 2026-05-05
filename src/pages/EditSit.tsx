@@ -43,17 +43,15 @@ const EditSit = () => {
   const [sitStatus, setSitStatus] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [ownerPhotos, setOwnerPhotos] = useState<string[]>([]);
-  const [coverPhotoUrl, setCoverPhotoUrl] = useState<string | null>(null);
-
   useEffect(() => {
     if (!id || !user) return;
     const load = async () => {
-      const [sitRes, galleryRes] = await Promise.all([
-        supabase.from("sits").select("*").eq("id", id).eq("user_id", user.id).single(),
-        supabase.from("owner_gallery").select("photo_url").eq("user_id", user.id).limit(8),
-      ]);
-      const data = sitRes.data;
+      const { data } = await supabase
+        .from("sits")
+        .select("*")
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .single();
       if (!data) { navigate("/sits"); return; }
       setTitle(data.title || "");
       setStartDate(data.start_date || "");
@@ -64,8 +62,6 @@ const EditSit = () => {
       setIsUrgent(data.is_urgent || false);
       setMinGardienSits((data as any).min_gardien_sits || 0);
       setSitStatus(data.status || "");
-      setOwnerPhotos((galleryRes.data || []).map((g: any) => g.photo_url));
-      setCoverPhotoUrl((data as any).cover_photo_url || null);
       setLoading(false);
     };
     load();
