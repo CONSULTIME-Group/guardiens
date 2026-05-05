@@ -31,7 +31,7 @@ const appStatusBadge: Record<string, { label: string; className: string }> = {
   pending: { label: "En attente", className: "bg-amber-50 text-amber-700" },
   viewed: { label: "En attente", className: "bg-amber-50 text-amber-700" },
   discussing: { label: "En discussion", className: "bg-blue-50 text-blue-700" },
-  accepted: { label: "Acceptée ✓", className: "bg-primary/10 text-primary" },
+  accepted: { label: "Acceptée", className: "bg-primary/10 text-primary" },
   rejected: { label: "Déclinée", className: "bg-muted text-muted-foreground" },
   cancelled: { label: "Déclinée", className: "bg-muted text-muted-foreground" },
 };
