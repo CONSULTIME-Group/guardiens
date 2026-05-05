@@ -115,6 +115,7 @@ const CreateSit = () => {
   const [maxApplications, setMaxApplications] = useState<number | null>(10);
   const [ownerMessage, setOwnerMessage] = useState("");
   const [dailyRoutine, setDailyRoutine] = useState("");
+  const [coverPhotoUrl, setCoverPhotoUrl] = useState<string | null>(null);
 
   const [property, setProperty] = useState<PropertySummary | null>(null);
   const [pets, setPets] = useState<PetSummary[]>([]);
