@@ -116,8 +116,8 @@ Deno.serve(async (req) => {
     const radiusMap = new Map<string, number>();
     emergencySitters.forEach((s) => radiusMap.set(s.user_id, s.radius_km));
 
-    // Find sitters within 35km of the sit
-    const MAX_RADIUS = 35;
+    // Find sitters within radius of the sit
+    const MAX_RADIUS = countOnly ? (radiusKm || 100) : 35;
     const eligibleSitterIds: string[] = [];
 
     for (const profile of sitterProfiles) {
@@ -126,11 +126,19 @@ Deno.serve(async (req) => {
       if (!geo) continue;
 
       const distance = haversine(sitLat, sitLng, geo.lat, geo.lng);
-      const sitterRadius = Math.min(radiusMap.get(profile.id) || 20, MAX_RADIUS);
-
-      if (distance <= sitterRadius) {
-        eligibleSitterIds.push(profile.id);
+      if (countOnly) {
+        if (distance <= MAX_RADIUS) eligibleSitterIds.push(profile.id);
+      } else {
+        const sitterRadius = Math.min(radiusMap.get(profile.id) || 20, MAX_RADIUS);
+        if (distance <= sitterRadius) eligibleSitterIds.push(profile.id);
       }
+    }
+
+    if (countOnly) {
+      return new Response(
+        JSON.stringify({ count: eligibleSitterIds.length }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     if (eligibleSitterIds.length === 0) {
