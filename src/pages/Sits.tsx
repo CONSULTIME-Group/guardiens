@@ -432,30 +432,57 @@ const Sits = () => {
 
       {/* Tabs */}
       <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
-        {tabs.map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => setActiveTab(tab.value)}
-            className={cn(
-              "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors shrink-0 flex items-center gap-1.5",
-              activeTab === tab.value
-                ? "bg-primary text-primary-foreground"
-                : "bg-accent text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {tab.label}
-            {tabCounts[tab.value] > 0 && (
-              <span className={cn(
-                "text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold",
+        {isOwnerView ? (
+          ownerTabs.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setActiveTab(tab.value)}
+              className={cn(
+                "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors shrink-0 flex items-center gap-1.5",
+                activeOwnerTab === tab.value
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-accent text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {tab.label}
+              {ownerTabCounts[tab.value] > 0 && (
+                <span className={cn(
+                  "text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold",
+                  activeOwnerTab === tab.value
+                    ? "bg-primary-foreground/20 text-primary-foreground"
+                    : "bg-muted-foreground/15 text-muted-foreground"
+                )}>
+                  {ownerTabCounts[tab.value]}
+                </span>
+              )}
+            </button>
+          ))
+        ) : (
+          tabs.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setActiveTab(tab.value)}
+              className={cn(
+                "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors shrink-0 flex items-center gap-1.5",
                 activeTab === tab.value
-                  ? "bg-primary-foreground/20 text-primary-foreground"
-                  : "bg-muted-foreground/15 text-muted-foreground"
-              )}>
-                {tabCounts[tab.value]}
-              </span>
-            )}
-          </button>
-        ))}
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-accent text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {tab.label}
+              {tabCounts[tab.value] > 0 && (
+                <span className={cn(
+                  "text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold",
+                  activeTab === tab.value
+                    ? "bg-primary-foreground/20 text-primary-foreground"
+                    : "bg-muted-foreground/15 text-muted-foreground"
+                )}>
+                  {tabCounts[tab.value]}
+                </span>
+              )}
+            </button>
+          ))
+        )}
       </div>
 
       {/* Content */}
@@ -471,17 +498,31 @@ const Sits = () => {
         </div>
       ) : filteredSits.length === 0 ? (
         <>
-          {activeTab === "upcoming" && activeRole === "owner" && (
+          {isOwnerView && activeOwnerTab === "active" && (
             <EmptyState
               illustration="emptyCalendar"
-              title="Aucune annonce à venir"
+              title="Aucune annonce active"
               description="Publiez votre première annonce pour trouver un gardien de confiance près de chez vous."
               actionLabel="Publier une annonce"
               actionTo="/sits/create"
               actionIcon={Plus}
             />
           )}
-          {activeTab === "upcoming" && activeRole === "sitter" && (
+          {isOwnerView && activeOwnerTab === "drafts" && (
+            <EmptyState
+              illustration="emptyCalendar"
+              title="Aucun brouillon"
+              description="Vos annonces non publiées apparaîtront ici. Vous pouvez les compléter à tout moment."
+            />
+          )}
+          {isOwnerView && activeOwnerTab === "archived" && (
+            <EmptyState
+              illustration="quietLeaf"
+              title="Aucune annonce archivée"
+              description="Vos annonces archivées, expirées ou annulées s'afficheront ici."
+            />
+          )}
+          {!isOwnerView && activeTab === "upcoming" && (
             <EmptyState
               illustration="sitterReady"
               title="Aucune garde à venir"
@@ -491,25 +532,21 @@ const Sits = () => {
               actionIcon={Eye}
             />
           )}
-          {activeTab === "in_progress" && (
+          {!isOwnerView && activeTab === "in_progress" && (
             <EmptyState
               illustration="sleepingCat"
               title="Aucune garde en cours"
-              description={activeRole === "owner"
-                ? "Vos gardes en cours apparaîtront ici dès qu'une période démarre."
-                : "Vos gardes en cours apparaîtront ici dès le jour J."}
+              description="Vos gardes en cours apparaîtront ici dès le jour J."
             />
           )}
-          {activeTab === "completed" && (
+          {!isOwnerView && activeTab === "completed" && (
             <EmptyState
               illustration="emptyCalendar"
               title="Aucune garde passée"
-              description={activeRole === "owner"
-                ? "Vos gardes terminées s'archiveront ici, avec leurs avis."
-                : "Vos gardes terminées s'afficheront ici, avec les avis reçus."}
+              description="Vos gardes terminées s'afficheront ici, avec les avis reçus."
             />
           )}
-          {activeTab === "cancelled" && (
+          {!isOwnerView && activeTab === "cancelled" && (
             <EmptyState
               illustration="quietLeaf"
               title="Rien à signaler ici"
