@@ -36,7 +36,7 @@ const EmergencyActivation = ({ onActivated }: EmergencyActivationProps) => {
       toast({ title: "Erreur", description: "Impossible d'activer le mode.", variant: "destructive" });
       return;
     }
-    toast({ title: "Mode Gardien d'urgence activé ⚡" });
+    toast({ title: "Mode Gardien d'urgence activé" });
     onActivated();
   };
 

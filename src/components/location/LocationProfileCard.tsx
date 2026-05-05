@@ -19,12 +19,12 @@ interface Props {
   editable?: boolean;
 }
 
-const fields: { key: keyof LocationProfile; label: string; emoji: string }[] = [
-  { key: "neighborhood_type", label: "Quartier", emoji: "🏘️" },
-  { key: "nature_access", label: "Nature", emoji: "🌿" },
-  { key: "amenities", label: "Services", emoji: "🏪" },
-  { key: "transport", label: "Transports", emoji: "🚆" },
-  { key: "activities", label: "Activités", emoji: "🎭" },
+const fields: { key: keyof LocationProfile; label: string }[] = [
+  { key: "neighborhood_type", label: "Quartier" },
+  { key: "nature_access", label: "Nature" },
+  { key: "amenities", label: "Services" },
+  { key: "transport", label: "Transports" },
+  { key: "activities", label: "Activités" },
 ];
 
 const LocationProfileCard = ({ city, postalCode, onUseDescription, editable = false }: Props) => {
@@ -110,10 +110,10 @@ const LocationProfileCard = ({ city, postalCode, onUseDescription, editable = fa
       </div>
 
       <div className="space-y-2">
-        {fields.map(({ key, label, emoji }) => (
+        {fields.map(({ key, label }) => (
           profile[key] ? (
             <div key={key} className="text-sm">
-              <span className="font-medium">{emoji} {label} :</span>{" "}
+              <span className="font-medium">{label} :</span>{" "}
               <span className="text-muted-foreground">{profile[key]}</span>
             </div>
           ) : null
@@ -123,7 +123,7 @@ const LocationProfileCard = ({ city, postalCode, onUseDescription, editable = fa
       {/* Ideal for — highlighted */}
       {profile.ideal_for && (
         <p className="text-sm italic text-primary font-medium pt-1">
-          ✨ {profile.ideal_for}
+          {profile.ideal_for}
         </p>
       )}
 

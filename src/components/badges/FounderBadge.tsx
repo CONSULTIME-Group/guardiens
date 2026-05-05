@@ -37,7 +37,7 @@ export default function FounderBadge({ size = 'md', className = '' }: FounderBad
  alt="Badge Fondateur"
  className="h-28 w-auto object-contain mx-auto"
  />
- <h3 className="font-heading font-bold text-lg">Membre Fondateur 🎉</h3>
+ <h3 className="font-heading font-bold text-lg">Membre Fondateur</h3>
  <p className="text-sm text-muted-foreground leading-relaxed">
  Merci d'avoir fait partie des premiers à rejoindre Guardiens&nbsp;!
  Votre confiance dès le début compte énormément pour nous.

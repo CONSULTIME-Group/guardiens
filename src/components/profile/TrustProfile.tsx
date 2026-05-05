@@ -39,7 +39,7 @@ const TrustProfile = ({ emailVerified, identityVerified, hasAvatar, profileCompl
           <div className="flex items-center gap-2">
             <ShieldCheck className={`h-5 w-5 ${allDone ? "text-green-600" : "text-primary"}`} />
             <h3 className="font-heading text-base font-semibold">Profil de confiance</h3>
-            {allDone && <span className="text-xs text-green-600 font-medium">Complet ✓</span>}
+            {allDone && <span className="text-xs text-green-600 font-medium">Complet</span>}
             <span className="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
               {completedCount}/5
               <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />

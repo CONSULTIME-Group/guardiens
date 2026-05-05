@@ -136,12 +136,12 @@ const SearchSitter = () => {
  // Environment (visual only for now)
  const [environments, setEnvironments] = useState<string[]>([]);
  const envOptions = [
- { key: "city", label: "🏙️ Ville" },
- { key: "countryside", label: "🌿 Campagne" },
- { key: "mountain", label: "⛰️ Montagne" },
- { key: "lake", label: "🏞️ Lac" },
- { key: "vineyard", label: "🍇 Vignes" },
- { key: "forest", label: "🌲 Forêt" },
+ { key: "city", label: "Ville" },
+ { key: "countryside", label: "Campagne" },
+ { key: "mountain", label: "Montagne" },
+ { key: "lake", label: "Lac" },
+ { key: "vineyard", label: "Vignes" },
+ { key: "forest", label: "Forêt" },
  ];
 
  // Derive housingType for existing filter logic (backward compat)
@@ -1309,7 +1309,7 @@ const SearchSitter = () => {
  onClick={() => handleRegionSelect(r.code)}
  className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors flex items-center gap-2"
  >
- <span className="text-base">🗺️</span>
+ <MapPin className="h-4 w-4 text-muted-foreground" />
  <span>{r.name}</span>
  <span className="ml-auto text-[11px] text-muted-foreground">région</span>
  </button>
@@ -1361,14 +1361,14 @@ const SearchSitter = () => {
  onClick={() => setZoneMode("radius")}
  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${zoneMode === "radius" ? "bg-primary/10 text-primary font-medium" : "hover:bg-accent text-foreground"}`}
  >
- 📍 Autour de moi <span className="text-xs text-muted-foreground">({radius[0]} km · {densityCounts.radius} {densityCounts.radius > 1 ? "résultats" : "résultat"})</span>
+ Autour de moi <span className="text-xs text-muted-foreground">({radius[0]} km · {densityCounts.radius} {densityCounts.radius > 1 ? "résultats" : "résultat"})</span>
  </button>
  <button
  onClick={() => setZoneMode("dept")}
  disabled={!getDeptCode(userPostalCode)}
  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${zoneMode === "dept" ? "bg-primary/10 text-primary font-medium" : "hover:bg-accent text-foreground"}`}
  >
- 🏛️ Mon département {getDeptCode(userPostalCode) && (
+ Mon département {getDeptCode(userPostalCode) && (
  <span className="text-xs text-muted-foreground">
  ({getDeptCode(userPostalCode)} {DEPT_NAMES[getDeptCode(userPostalCode)!]} · {densityCounts.dept})
  </span>
@@ -1379,7 +1379,7 @@ const SearchSitter = () => {
  disabled={!getRegionCode(getDeptCode(userPostalCode))}
  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${zoneMode === "region" ? "bg-primary/10 text-primary font-medium" : "hover:bg-accent text-foreground"}`}
  >
- 🗺️ Ma région {getRegionName(getDeptCode(userPostalCode)) && (
+ Ma région {getRegionName(getDeptCode(userPostalCode)) && (
  <span className="text-xs text-muted-foreground">
  ({getRegionName(getDeptCode(userPostalCode))} · {densityCounts.region})
  </span>
@@ -1389,7 +1389,7 @@ const SearchSitter = () => {
  onClick={() => setZoneMode("france")}
  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${zoneMode === "france" ? "bg-primary/10 text-primary font-medium" : "hover:bg-accent text-foreground"}`}
  >
- 🇫🇷 Toute la France <span className="text-xs text-muted-foreground">({densityCounts.france})</span>
+ Toute la France <span className="text-xs text-muted-foreground">({densityCounts.france})</span>
  </button>
  </div>
  {zoneMode === "radius" && (

@@ -1,18 +1,11 @@
 import { useState } from "react";
 
 const CATEGORY_LABELS: Record<string, string> = {
-  home_life: "🏠 Maison",
-  animals_life: "🐾 Animaux",
-  garden: "🌿 Jardin",
-  neighborhood: "🏘️ Quartier",
-  seasonal: "🍂 Saisons",
-};
-
-const SEASON_ICONS: Record<string, string> = {
-  printemps: "🌸",
-  été: "☀️",
-  automne: "🍂",
-  hiver: "❄️",
+  home_life: "Maison",
+  animals_life: "Animaux",
+  garden: "Jardin",
+  neighborhood: "Quartier",
+  seasonal: "Saisons",
 };
 
 interface Photo {
@@ -85,8 +78,8 @@ const PublicOwnerGallery = ({ photos, firstName, city }: Props) => {
               </p>
             </div>
             {photo.season && (
-              <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-full bg-black/40 text-white text-[10px]">
-                {SEASON_ICONS[photo.season] || ""} {photo.season}
+              <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-full bg-black/40 text-white text-[10px] capitalize">
+                {photo.season}
               </span>
             )}
           </button>

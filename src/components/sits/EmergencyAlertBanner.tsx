@@ -36,7 +36,7 @@ const EmergencyAlertBanner = ({ sitId, sitCity, startDate }: EmergencyAlertBanne
       setAlerted(true);
       toast.success(
         count > 0
-          ? `${count} gardien${count > 1 ? "s" : ""} d'urgence alerté${count > 1 ? "s" : ""} à proximité de ${sitCity} ⚡`
+          ? `${count} gardien${count > 1 ? "s" : ""} d'urgence alerté${count > 1 ? "s" : ""} à proximité de ${sitCity}.`
           : "Aucun gardien d'urgence disponible dans votre zone pour le moment."
       );
     } catch {
@@ -77,7 +77,7 @@ const EmergencyAlertBanner = ({ sitId, sitCity, startDate }: EmergencyAlertBanne
           <div className="flex items-center gap-3 pt-1">
             {alerted ? (
               <Button size="sm" variant="outline" disabled className="gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-primary" /> Gardiens alertés ✓
+                <CheckCircle2 className="h-4 w-4 text-primary" /> Gardiens alertés
               </Button>
             ) : (
               <Button size="sm" onClick={handleAlert} disabled={alerting} className="gap-1.5">

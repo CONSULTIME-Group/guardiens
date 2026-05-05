@@ -191,7 +191,7 @@ const MySubscription = () => {
  document.body.removeChild(el);
  } catch { /* silencieux */ }
  }
- setCopyLabel("Lien copié ✓");
+ setCopyLabel("Lien copié");
  trackEvent("referral_link_copied", { source: "pre_launch_page" });
  setTimeout(() => setCopyLabel("Copier mon lien"), 2500);
  };

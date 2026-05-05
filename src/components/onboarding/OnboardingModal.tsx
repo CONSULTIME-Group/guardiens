@@ -30,10 +30,10 @@ const LIFESTYLE_OPTIONS = [
 ];
 
 const SKILL_CATEGORIES = [
-  { key: "jardin", label: "🌿 Jardin" },
-  { key: "animaux", label: "🐾 Animaux" },
-  { key: "competences", label: "📚 Compétences & Savoirs" },
-  { key: "coups_de_main", label: "🤝 Coups de main" },
+  { key: "jardin", label: "Jardin" },
+  { key: "animaux", label: "Animaux" },
+  { key: "competences", label: "Compétences & Savoirs" },
+  { key: "coups_de_main", label: "Coups de main" },
 ];
 
 const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalProps) => {
@@ -535,7 +535,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                   />
                   <p className={`text-xs ${bio.length >= 50 ? "text-primary" : "text-muted-foreground"}`}>
                     {bio.length}/50 caractères min.
-                    {bio.length >= 50 && " ✓"}
+                    {bio.length >= 50 && " — OK"}
                   </p>
                 </div>
               </div>

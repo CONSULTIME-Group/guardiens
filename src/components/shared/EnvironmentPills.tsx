@@ -1,21 +1,21 @@
 import { useToast } from "@/hooks/use-toast";
 
 const ENV_OPTIONS = [
-  { key: "ville", label: "🏙️ Ville" },
-  { key: "campagne", label: "🌿 Campagne" },
-  { key: "montagne", label: "⛰️ Montagne" },
-  { key: "lac", label: "🏞️ Lac" },
-  { key: "vignes", label: "🍇 Vignes" },
-  { key: "foret", label: "🌲 Forêt" },
+  { key: "ville", label: "Ville" },
+  { key: "campagne", label: "Campagne" },
+  { key: "montagne", label: "Montagne" },
+  { key: "lac", label: "Lac" },
+  { key: "vignes", label: "Vignes" },
+  { key: "foret", label: "Forêt" },
 ] as const;
 
 export const ENV_LABEL_MAP: Record<string, string> = {
-  ville: "🏙️ Ville",
-  campagne: "🌿 Campagne",
-  montagne: "⛰️ Montagne",
-  lac: "🏞️ Lac",
-  vignes: "🍇 Vignes",
-  foret: "🌲 Forêt",
+  ville: "Ville",
+  campagne: "Campagne",
+  montagne: "Montagne",
+  lac: "Lac",
+  vignes: "Vignes",
+  foret: "Forêt",
 };
 
 interface EnvironmentPillsProps {

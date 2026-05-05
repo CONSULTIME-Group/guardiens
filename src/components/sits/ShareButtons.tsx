@@ -93,7 +93,7 @@ const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_de
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      toast({ title: "Lien copié ✓", description: "Vous pouvez maintenant le partager." });
+      toast({ title: "Lien copié", description: "Vous pouvez maintenant le partager." });
       setTimeout(() => setCopied(false), 2400);
     } catch {
       toast({ variant: "destructive", title: "Impossible de copier le lien" });
@@ -125,7 +125,7 @@ const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_de
       a.remove();
       URL.revokeObjectURL(blobUrl);
       toast({
-        title: "Visuel téléchargé ✓",
+        title: "Visuel téléchargé",
         description: "Attachez-le à votre publication Facebook avant de coller le lien.",
       });
     } catch {

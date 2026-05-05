@@ -316,7 +316,7 @@ const CompetenceAutocomplete = ({
                     </span>
                     {s.source === "validated" && (
                       <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-xs shrink-0">
-                        ✓ Validée
+                        Validée
                       </span>
                     )}
                     {s.source === "community" && (

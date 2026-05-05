@@ -31,7 +31,7 @@ const appStatusBadge: Record<string, { label: string; className: string }> = {
   pending: { label: "En attente", className: "bg-amber-50 text-amber-700" },
   viewed: { label: "En attente", className: "bg-amber-50 text-amber-700" },
   discussing: { label: "En discussion", className: "bg-blue-50 text-blue-700" },
-  accepted: { label: "Acceptée ✓", className: "bg-primary/10 text-primary" },
+  accepted: { label: "Acceptée", className: "bg-primary/10 text-primary" },
   rejected: { label: "Déclinée", className: "bg-muted text-muted-foreground" },
   cancelled: { label: "Déclinée", className: "bg-muted text-muted-foreground" },
 };
@@ -193,7 +193,7 @@ const ConversationHeader = ({
       .eq("sit_id", conv.sit_id)
       .eq("sitter_id", conv.sitter_id);
     if (error) { toast.error("Erreur"); return; }
-    toast.success(`Candidature de ${sitterName} acceptée ✅`);
+    toast.success(`Candidature de ${sitterName} acceptée`);
 
     // Email transactionnel — sitter informé de l'acceptation (non-bloquant)
     sendTransactionalEmail({
@@ -329,7 +329,7 @@ const ConversationHeader = ({
             className="text-sm font-medium text-foreground truncate"
             title={conv.sit.title}
           >
-            🏡 {conv.sit.title}
+            {conv.sit.title}
           </p>
           {(conv.sit?.start_date || conv.sit?.city) && (
             <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mt-0.5">
@@ -384,7 +384,7 @@ const ConversationHeader = ({
       {isSmallMission && missionData && responseData && responseData.status === "accepted" && (
         <div className="px-4 py-2 bg-green-50 border-t border-green-200 flex items-center gap-2">
           <CheckCircle className="text-green-600 w-4 h-4 shrink-0" />
-          <span className="text-sm text-green-700 font-medium">Échange accepté ✓</span>
+          <span className="text-sm text-green-700 font-medium">Échange accepté</span>
           {missionData.date_needed && isPast(new Date(missionData.date_needed)) && (
             <Button
               size="sm"
@@ -427,7 +427,7 @@ const ConversationHeader = ({
           on doit quand même voir titre + date + lieu pour s'y retrouver. */}
       {isSmallMission && !responseData && (
         <div className="px-4 py-2 border-t border-border/50 bg-accent/30">
-          <p className="text-xs text-muted-foreground mb-0.5">🌿 Petite mission</p>
+          <p className="text-xs text-muted-foreground mb-0.5">Petite mission</p>
           {missionData?.title && (
             <p className="text-sm font-medium text-foreground truncate" title={missionData.title}>
               {missionData.title}

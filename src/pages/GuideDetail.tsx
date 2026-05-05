@@ -286,7 +286,7 @@ const GuideDetail = () => {
                           <p className="text-sm text-foreground/80 mb-2">{place.description}</p>
                           <div className="flex items-center gap-2 mb-2">
                             {place.dogs_welcome && (
-                              <Badge variant="outline" className="text-xs">🐕 Chiens bienvenus</Badge>
+                              <Badge variant="outline" className="text-xs">Chiens bienvenus</Badge>
                             )}
                             {place.leash_required !== null && (
                               <Badge variant="outline" className="text-xs">
@@ -297,7 +297,7 @@ const GuideDetail = () => {
                           {place.tips && (
                             <div className="bg-accent/50 rounded-md p-2.5 mt-2">
                               <p className="text-xs italic text-muted-foreground">
-                                💡 {place.tips}
+                                Bon à savoir : {place.tips}
                               </p>
                             </div>
                           )}

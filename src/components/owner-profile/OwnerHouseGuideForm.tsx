@@ -276,7 +276,7 @@ const OwnerHouseGuideForm = () => {
       if (error) throw error;
 
       setGuide(prev => ({ ...prev, published: true }));
-      toast.success("Guide enregistré ✓", {
+      toast.success("Guide enregistré", {
         description: "Guide enregistré. Il sera visible uniquement par votre gardien confirmé, pendant la durée de la garde.",
         duration: 3000,
       });
