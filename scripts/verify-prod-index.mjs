@@ -53,7 +53,12 @@ async function fetchHtml(url) {
 async function checkUrl(url) {
   console.log(`\n→ ${url}`);
   const { status, html } = await fetchHtml(url);
-  const head = html.slice(0, 8000); // suffisant pour <head>
+  // Scan complet du document : Prerender.io peut injecter les balises OG/Twitter
+  // après les 8000 premiers caractères (scripts inline volumineux, CSS critique…).
+  // On cible uniquement le <head> pour éviter les faux positifs sur le <body>
+  // (ex. mention "gens du coin" dans le contenu de la home).
+  const headEnd = html.search(/<\/head>/i);
+  const head = headEnd > 0 ? html.slice(0, headEnd) : html;
 
   const missing = REQUIRED_SNIPPETS.filter((s) => !head.includes(s));
   const forbidden = FORBIDDEN_SNIPPETS.filter((s) => head.includes(s));
