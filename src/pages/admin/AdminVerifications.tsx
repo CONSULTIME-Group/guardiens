@@ -32,8 +32,8 @@ const AdminVerifications = () => {
   const PAGE_SIZE = 20;
 
   // Document viewer modal
-  const [docModal, setDocModal] = useState<{ open: boolean; docUrl: string | null; selfieUrl: string | null; name: string }>({
-    open: false, docUrl: null, selfieUrl: null, name: ""
+  const [docModal, setDocModal] = useState<{ open: boolean; userId: string | null; docUrl: string | null; selfieUrl: string | null; name: string; status: string | null }>({
+    open: false, userId: null, docUrl: null, selfieUrl: null, name: "", status: null
   });
 
   // Revoke modal
