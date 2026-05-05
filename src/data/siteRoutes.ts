@@ -283,7 +283,7 @@ export const dynamicRoutes: DynamicRouteConfig[] = [
  source: "sitemap",
  title: "House-sitting à {city} | Guardiens",
  metaDescription: "Trouvez un gardien de maison à {city}. House-sitting local, propriétaires et gardiens vérifiés.",
- sitemapPriority: "0.7",
+ sitemapPriority: "0.8",
  changeFreq: "weekly",
  dynamicTitle: true, // les pages géo ont un titre SEO précis, non strict
  dynamicDescription: true,
