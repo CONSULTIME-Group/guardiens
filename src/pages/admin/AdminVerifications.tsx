@@ -71,16 +71,18 @@ const AdminVerifications = () => {
 
   const fetchQueue = useCallback(async () => {
     setLoading(true);
+    // Inclut : (a) les profils en "pending" (dossier complet à modérer)
+    //          (b) les profils "not_submitted" qui ont quand même déposé au moins un fichier (selfie OU pièce) → dossier incomplet à relancer
     const { data } = await supabase
       .from("profiles")
       .select("id, first_name, last_name, email, avatar_url, identity_document_url, identity_selfie_url, identity_verification_status, created_at, updated_at")
-      .eq("identity_verification_status", "pending")
+      .or("identity_verification_status.eq.pending,and(identity_verification_status.eq.not_submitted,or(identity_document_url.not.is.null,identity_selfie_url.not.is.null))")
       .order("updated_at", { ascending: true });
     setQueue(await hydrateIdentityAssets(data || []));
 
     const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 }).toISOString();
     const [pendingRes, verifiedRes, rejectedRes] = await Promise.all([
-      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "pending"),
+      supabase.from("profiles").select("id", { count: "exact", head: true }).or("identity_verification_status.eq.pending,and(identity_verification_status.eq.not_submitted,or(identity_document_url.not.is.null,identity_selfie_url.not.is.null))"),
       supabase.from("identity_verification_logs").select("id", { count: "exact", head: true }).eq("result", "verified").gte("created_at", weekStart),
       supabase.from("identity_verification_logs").select("id", { count: "exact", head: true }).eq("result", "rejected").gte("created_at", weekStart),
     ]);
