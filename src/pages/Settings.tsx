@@ -940,10 +940,16 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
               </Button>
             </label>
 
-            {/* Selfie section */}
+            {/* Selfie section — accessible uniquement après upload de la pièce */}
             <div className="pt-3 border-t border-border space-y-2">
-              <p className="text-sm font-medium text-foreground">Selfie de vérification</p>
-              <p className="text-xs text-muted-foreground">Prenez un selfie pour confirmer que le document vous appartient. Formats : JPG, PNG · Max 5 Mo</p>
+              <p className="text-sm font-medium text-foreground">
+                Étape 2 — Selfie de vérification
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {documentUrl
+                  ? "Prenez un selfie pour confirmer que la pièce vous appartient. Formats : JPG, PNG · Max 5 Mo"
+                  : "Envoyez d'abord votre pièce d'identité (étape 1) pour débloquer le selfie."}
+              </p>
 
               {selfiePreview && (
                 <img src={selfiePreview} alt="Aperçu selfie" className="max-h-32 rounded-lg border border-border object-contain" />
@@ -955,13 +961,19 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
                   accept="image/jpeg,image/png,image/webp"
                   capture="user"
                   onChange={handleSelfieUpload}
-                  disabled={uploadingSelfie}
+                  disabled={uploadingSelfie || !documentUrl}
                   className="hidden"
                 />
-                <Button variant="outline" size="sm" className="gap-2 cursor-pointer" disabled={uploadingSelfie} asChild>
+                <Button variant="outline" size="sm" className="gap-2 cursor-pointer" disabled={uploadingSelfie || !documentUrl} asChild>
                   <span>
                     <Upload className="h-4 w-4" />
-                    {uploadingSelfie ? "Envoi en cours..." : selfieUrl ? "Changer le selfie" : "Prendre / envoyer un selfie"}
+                    {!documentUrl
+                      ? "Pièce d'identité requise"
+                      : uploadingSelfie
+                        ? "Envoi en cours..."
+                        : selfieUrl
+                          ? "Changer le selfie"
+                          : "Prendre / envoyer un selfie"}
                   </span>
                 </Button>
               </label>
