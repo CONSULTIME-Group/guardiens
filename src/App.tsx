@@ -292,6 +292,7 @@ const AppRoutes = () => (
         <Route path="/admin/analytics" element={<AdminAnalytics />} />
         <Route path="/admin/errors" element={<AdminErrors />} />
         <Route path="/admin/diagnostics" element={<AdminDiagnostics />} />
+        <Route path="/admin/test-sitter-fields" element={<AdminTestSitterFields />} />
       </Route>
       {/* App routes */}
       <Route path="/dashboard" element={<DashboardRouteShell />} />
