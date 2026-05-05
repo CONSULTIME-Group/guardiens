@@ -721,18 +721,23 @@ const SitCard = ({
 }) => {
   const effectiveStatus = sit.effectiveStatus || sit.status;
   const duration = getDuration(sit.start_date, sit.end_date);
-  const photo = sit.properties?.photos?.[0];
+  // Couverture : photo de couv choisie sur la fiche en priorité, sinon 1ère photo du logement
+  const photo = sit.cover_photo_url || sit.properties?.photos?.[0];
 
   const otherParty = isOwner ? sit.acceptedSitter : sit.owner;
 
-  // Build dynamic title
+  // Titre principal : on respecte le titre saisi par le propriétaire.
+  // Fallback automatique uniquement si aucun titre n'a été défini.
   const petNames = sit.pets?.map((p: any) => capitalize(p.name)).join(" + ") || "";
   const dateRange = sit.start_date && sit.end_date
     ? `${formatShortDate(sit.start_date)} → ${formatShortDate(sit.end_date)}`
     : "";
-  const dynamicTitle = petNames && dateRange
+  const fallbackTitle = petNames && dateRange
     ? `${petNames} · ${dateRange}`
-    : sit.title || "Sans titre";
+    : petNames || dateRange || "Sans titre";
+  const displayTitle = (sit.title && sit.title.trim()) ? sit.title : fallbackTitle;
+  // Ville (côté propriétaire = sa propre ville via property/owner ; côté gardien = ville du proprio)
+  const city = sit.properties?.city || otherParty?.city || sit.owner?.city || null;
 
   // Status badge
   let displayStatus: { label: string; className: string };
