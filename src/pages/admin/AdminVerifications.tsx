@@ -319,9 +319,11 @@ const AdminVerifications = () => {
                             className="w-full h-48 object-contain rounded-lg border bg-muted cursor-pointer hover:opacity-80 transition-opacity"
                             onClick={() => setDocModal({
                               open: true,
+                              userId: user.id,
                               docUrl: user.identity_document_signed_url,
                               selfieUrl: user.identity_selfie_signed_url,
-                              name: `${user.first_name} ${user.last_name}`
+                              name: `${user.first_name} ${user.last_name}`,
+                              status: user.identity_verification_status,
                             })}
                           />
                         ) : <div className="w-full h-48 rounded-lg border bg-muted flex items-center justify-center text-xs text-muted-foreground">Document inaccessible ou non fourni</div>}
