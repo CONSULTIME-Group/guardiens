@@ -7,7 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const JUNE_14_2026_UTC = new Date("2026-06-14T00:00:00Z");
+const JULY_14_2026_UTC = new Date("2026-07-14T00:00:00Z");
 
 const PRICE_IDS = {
   monthly:  "price_1TPPawIR9gPuLbxmH9vC614f", // 6,99€/mois récurrent (prod_UOByEwqFtArM7W)
@@ -169,8 +169,8 @@ Deno.serve(async (req) => {
       const now = new Date();
       let trialEnd: number;
 
-      if (isFounder && now < JUNE_14_2026_UTC) {
-        const endDate = new Date(JUNE_14_2026_UTC);
+      if (isFounder && now < JULY_14_2026_UTC) {
+        const endDate = new Date(JULY_14_2026_UTC);
         if (freeMonths > 0) endDate.setMonth(endDate.getMonth() + freeMonths);
         trialEnd = Math.floor(endDate.getTime() / 1000);
       } else {

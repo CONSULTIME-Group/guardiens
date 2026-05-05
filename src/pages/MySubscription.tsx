@@ -133,11 +133,11 @@ const PRE_LAUNCH_ADVANTAGES: { label: string; href: string | null }[] = [
 
 const FOUNDER_FAQ = [
  {
- q: "C’est vraiment offert jusqu’au 14 juin ?",
- a: "Oui. Aucune carte bancaire demandée avant le 14 juin. Après cette date, vous choisissez librement de souscrire — rien ne démarre automatiquement.",
+ q: "C’est vraiment offert jusqu’au 14 juillet ?",
+ a: "Oui. Aucune carte bancaire demandée avant le 14 juillet. Après cette date, vous choisissez librement de souscrire — rien ne démarre automatiquement.",
  },
  {
- q: "Que se passe-t-il après le 14 juin ?",
+ q: "Que se passe-t-il après le 14 juillet ?",
  a: "Une seule formule : 6,99 €/mois sans engagement, avec 7 jours d’essai. Vous décidez librement au moment voulu.",
  },
  {
@@ -353,7 +353,7 @@ const MySubscription = () => {
  <span className="text-primary text-lg mt-0.5 flex-shrink-0" aria-hidden="true">{"✓"}</span>
  <div>
  <p className="text-sm font-semibold text-primary font-body">Bienvenue chez Guardiens.</p>
- <p className="text-sm text-foreground/70 font-body mt-0.5">Votre compte est actif. Toutes les fonctionnalités sont disponibles jusqu'au 13 mai.</p>
+ <p className="text-sm text-foreground/70 font-body mt-0.5">Votre compte est actif. Toutes les fonctionnalités sont disponibles jusqu'au 13 juin.</p>
  </div>
  </div>
  )}
@@ -366,7 +366,7 @@ const MySubscription = () => {
  Pré-lancement {"·"} Bêta
  </span>
  <h1 className="font-heading text-2xl sm:text-3xl font-semibold text-foreground leading-tight">
- Tout est offert jusqu'au 13 mai.
+ Tout est offert jusqu'au 13 juin.
  </h1>
  <p className="text-base text-foreground/70 font-body max-w-sm leading-relaxed">
  Guardiens est en version bêta. Toutes les fonctionnalités sont ouvertes — sans restriction.
@@ -389,8 +389,8 @@ const MySubscription = () => {
  <div className="absolute top-3 left-8 right-8 h-px bg-border" aria-hidden="true" />
  {[
  { label: "Maintenant", sub: "Accès complet", active: true, amber: false },
- { label: "13 mai", sub: "Badge Fondateur", active: false, amber: true },
- { label: "14 juin", sub: "Fin de grâce", active: false, amber: false },
+ { label: "13 juin", sub: "Badge Fondateur", active: false, amber: true },
+ { label: "14 juillet", sub: "Fin de grâce", active: false, amber: false },
  { label: "Ensuite", sub: "6,99 €/mois · 7 jours d’essai", active: false, amber: false },
  ].map(({ label, sub: subText, active, amber }) => (
  <div key={label} role="listitem" className="flex flex-col items-center gap-1.5 z-10 flex-1">
@@ -427,14 +427,14 @@ const MySubscription = () => {
  <div className="w-full bg-amber-100 rounded-full h-2 overflow-hidden" role="progressbar" aria-valuenow={countdown.progressPct} aria-valuemin={0} aria-valuemax={100} aria-label="Progression vers le lancement">
  <div className="bg-amber-400 h-2 rounded-full transition-all duration-700" ref={(el) => { if (el) el.style.width = `${countdown.progressPct}%`; }} />
  </div>
- <p className="text-xs text-foreground/50 font-body">Lancement officiel le 13 mai 2026</p>
+ <p className="text-xs text-foreground/50 font-body">Lancement officiel le 13 juin 2026</p>
  </div>
 
  {/* Profile nudge */}
  {profileCompletion < 60 && (
  <div className="px-6 sm:px-8 py-4 border-b border-border/50 bg-muted/30 flex items-center justify-between gap-4 flex-wrap">
  <div className="space-y-1.5 flex-1 min-w-0">
- <p className="text-sm font-medium text-foreground font-body">Complétez votre profil pour être visible le 13 mai.</p>
+ <p className="text-sm font-medium text-foreground font-body">Complétez votre profil pour être visible le 13 juin.</p>
  <div className="flex items-center gap-2">
  <div className="w-24 bg-border rounded-full h-1.5 overflow-hidden flex-shrink-0">
  <div className="bg-primary h-1.5 rounded-full transition-all" ref={(el) => { if (el) el.style.width = `${profileCompletion}%`; }} />
@@ -481,9 +481,9 @@ const MySubscription = () => {
  <div className="flex items-start gap-3 mb-3">
  <FounderBadge size="lg" />
  <div className="space-y-1">
- <p className="text-sm font-semibold text-amber-800 font-body">Vous devenez Fondateur le 13 mai.</p>
+ <p className="text-sm font-semibold text-amber-800 font-body">Vous devenez Fondateur le 13 juin.</p>
  <p className="text-sm text-amber-700 font-body leading-relaxed">
- Chaque membre inscrit avant le 13 mai bénéficie d'un mois supplémentaire offert jusqu'au 14 juin, et reçoit le badge Fondateur, visible sur son profil public.
+ Chaque membre inscrit avant le 13 juin bénéficie d'un mois supplémentaire offert jusqu'au 14 juillet, et reçoit le badge Fondateur, visible sur son profil public.
  </p>
  </div>
  </div>
@@ -511,13 +511,13 @@ const MySubscription = () => {
  <SearchIcon className="w-4 h-4" aria-hidden="true" />
  Explorer les annonces
  </Link>
- <p className="text-xs text-foreground/40 font-body text-center">Revenez ici le 13 mai pour choisir votre formule.</p>
+ <p className="text-xs text-foreground/40 font-body text-center">Revenez ici le 13 juin pour choisir votre formule.</p>
  </div>
  </div>
 
  {/* Pricing preview */}
  <div className="bg-card border border-border/60 rounded-xl p-5 space-y-3">
- <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">Après le 14 juin — la formule</p>
+ <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">Après le 14 juillet — la formule</p>
  <div className="flex flex-col items-center text-center space-y-1">
  <p className="font-heading text-3xl font-bold text-primary">6,99 €<span className="text-sm font-normal text-foreground/50">/mois</span></p>
  <p className="text-xs text-foreground/60 font-body">Sans engagement · 7 jours d’essai</p>
@@ -592,7 +592,7 @@ const MySubscription = () => {
  <div className="flex flex-col items-center text-center space-y-3">
  <BadgeSceauLarge id="fondateur" size={52} />
  <h2 className="font-heading text-2xl font-semibold text-foreground">Vous êtes Fondateur Guardiens.</h2>
- <p className="text-base text-foreground/70 font-body">Votre accès complet est offert jusqu'au 14 juin 2026.</p>
+ <p className="text-base text-foreground/70 font-body">Votre accès complet est offert jusqu'au 14 juillet 2026.</p>
  </div>
 
  <div className="bg-amber-50 rounded-xl py-4 px-6 space-y-2">
@@ -600,7 +600,7 @@ const MySubscription = () => {
  <div className="w-full bg-amber-200 rounded-full h-2 overflow-hidden">
  <div className="bg-amber-400 h-2 rounded-full transition-all duration-500" ref={(el) => { if (el) el.style.width = `${progressPct}%`; }} />
  </div>
- <p className="text-xs text-amber-600 font-body">Accès offert jusqu'au 14 juin 2026</p>
+ <p className="text-xs text-amber-600 font-body">Accès offert jusqu'au 14 juillet 2026</p>
  </div>
 
  <div className="bg-muted/30 rounded-xl p-5">
@@ -620,7 +620,7 @@ const MySubscription = () => {
  Soutenir Guardiens maintenant
  </Button>
  <p className="text-xs text-foreground/50 italic text-center max-w-xs font-body">
- Votre abonnement démarrera le 14 juin — vous ne perdrez pas un seul jour.
+ Votre abonnement démarrera le 14 juillet — vous ne perdrez pas un seul jour.
  </p>
  </div>
 
@@ -637,7 +637,7 @@ const MySubscription = () => {
  <DialogTitle className="font-heading text-xl">Choisissez votre formule</DialogTitle>
  </DialogHeader>
  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 font-body mb-4">
- En choisissant maintenant, votre abonnement démarrera le 14 juin 2026. Votre accès fondateur reste intact jusqu'à cette date.
+ En choisissant maintenant, votre abonnement démarrera le 14 juillet 2026. Votre accès fondateur reste intact jusqu'à cette date.
  </div>
  <PricingCardsCheckout />
  </DialogContent>
