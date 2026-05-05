@@ -736,8 +736,8 @@ const SitCard = ({
 }) => {
   const effectiveStatus = sit.effectiveStatus || sit.status;
   const duration = getDuration(sit.start_date, sit.end_date);
-  // Couverture : photo de couv choisie sur la fiche en priorité, sinon 1ère photo du logement
-  const photo = sit.cover_photo_url || sit.properties?.photos?.[0];
+  // Couverture : photo de couv choisie sur la fiche en priorité, puis 1re photo de la galerie owner, puis ancien fallback property.
+  const photo = sit.cover_photo_url || sit.ownerGalleryFirstPhoto || sit.properties?.photos?.[0];
 
   const otherParty = isOwner ? sit.acceptedSitter : sit.owner;
 
