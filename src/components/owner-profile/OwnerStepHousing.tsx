@@ -11,6 +11,7 @@ import AiSuggestButton from "../profile/AiSuggestButton";
 import LocationProfileCard from "../location/LocationProfileCard";
 import EnvironmentPills from "../shared/EnvironmentPills";
 import PhotoTipsAlert from "./PhotoTipsAlert";
+import PhotoQualityChecker from "./PhotoQualityChecker";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
 
 const TYPES = ["Appartement", "Maison", "Ferme", "Chalet", "Autre"];
