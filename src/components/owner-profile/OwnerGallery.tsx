@@ -256,6 +256,7 @@ const OwnerGallery = () => {
       return;
     }
     toast({ title: "Photo supprimée" });
+    window.dispatchEvent(new Event("owner-gallery:changed"));
   };
 
   const handleEditCaption = async (id: string, caption: string) => {
