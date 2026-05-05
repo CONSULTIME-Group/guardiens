@@ -109,14 +109,33 @@ const HouseGuide = () => {
     const payload = { ...guide, user_id: user.id };
     delete (payload as any).id;
 
-    if (guide.id) {
-      await supabase.from("house_guides").update(payload as any).eq("id", guide.id);
-    } else {
-      const { data } = await supabase.from("house_guides").insert(payload as any).select("id").single();
-      if (data) setGuide({ ...guide, id: data.id });
+    try {
+      if (guide.id) {
+        const { error } = await supabase
+          .from("house_guides")
+          .update(payload as any)
+          .eq("id", guide.id);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase
+          .from("house_guides")
+          .insert(payload as any)
+          .select("id")
+          .single();
+        if (error) throw error;
+        if (data) setGuide({ ...guide, id: data.id });
+      }
+      toast({ title: "Guide sauvegardé" });
+    } catch (err: any) {
+      console.error("[HouseGuide] save failed", err);
+      toast({
+        variant: "destructive",
+        title: "Sauvegarde impossible",
+        description: err?.message || "Vérifiez votre connexion et réessayez.",
+      });
+    } finally {
+      setSaving(false);
     }
-    toast({ title: "Guide sauvegardé ✓" });
-    setSaving(false);
   };
 
   if (loading) return <div className="p-6 text-muted-foreground">Chargement...</div>;
