@@ -260,8 +260,8 @@ const Landing = () => {
  return (
  <div className="min-h-screen bg-background text-foreground">
  <PageMeta
- title="Guardiens — Partez l'esprit tranquille"
- description="Un gardien près de chez vous — ou ailleurs en France — veille sur votre maison et vos animaux. Gratuit pour les propriétaires. Sans carte bancaire."
+  title="Home sitting & garde animaux à domicile | Guardiens"
+  description="Quelqu'un du coin veille sur votre maison. Home sitting et garde d'animaux à domicile partout en France. Sans abonnement pour les propriétaires."
  path="/"
  image={HOME_OG_IMAGE}
  />
@@ -307,15 +307,15 @@ const Landing = () => {
  "@context": "https://schema.org",
  "@type": "Service",
  name: "Pet sitting & House sitting de proximité",
- description: "Service de garde d'animaux et house sitting de proximité. Avis croisés, service gratuit pour les propriétaires.",
- provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
- areaServed: { "@type": "Country", name: "France" },
- serviceType: ["Pet sitting", "House sitting", "Garde d'animaux", "Gardiennage de maison", "Garde de chien", "Garde de chat"],
- offers: [
- { "@type": "Offer", name: "Espace propriétaire", price: "0", priceCurrency: "EUR", description: "Publication d'annonces et mise en relation gratuites pour les propriétaires. Sans carte bancaire." },
- { "@type": "Offer", name: "Abonnement gardien", price: "6.99", priceCurrency: "EUR", description: "Abonnement gardien à 6,99 €/mois après le 13 juin 2026 — accès gratuit jusqu'à cette date." },
- { "@type": "Offer", name: "Entraide entre gens du coin", price: "0", priceCurrency: "EUR", description: "Petites missions et entraide gratuites pour tous." },
- ],
+  description: "Service de garde d'animaux et house sitting de proximité. Avis croisés, service sans abonnement pour les propriétaires.",
+  provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
+  areaServed: { "@type": "Country", name: "France" },
+  serviceType: ["Pet sitting", "House sitting", "Garde d'animaux", "Gardiennage de maison", "Garde de chien", "Garde de chat"],
+  offers: [
+  { "@type": "Offer", name: "Espace propriétaire", price: "0", priceCurrency: "EUR", description: "Publication d'annonces et mise en relation sans abonnement pour les propriétaires. Sans carte bancaire." },
+  { "@type": "Offer", name: "Abonnement gardien", price: "6.99", priceCurrency: "EUR", description: "Abonnement gardien à 6,99 €/mois après le 13 juin 2026 — accès sans abonnement jusqu'à cette date." },
+  { "@type": "Offer", name: "Entraide entre gens du coin", price: "0", priceCurrency: "EUR", description: "Petites missions et entraide sans abonnement pour tous." },
+  ],
  }),
  }}
  />
@@ -327,9 +327,12 @@ const Landing = () => {
  "@type": "FAQPage",
  mainEntity: [
  { "@type": "Question", name: "Qu'est-ce que le house sitting ?", acceptedAnswer: { "@type": "Answer", text: "Le house sitting est un échange de services : un gardien habite gratuitement dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties." } },
- { "@type": "Question", name: "Guardiens est-il offert pour les propriétaires ?", acceptedAnswer: { "@type": "Answer", text: "Oui, Guardiens est entièrement gratuit pour les propriétaires, sans carte bancaire. Les gardiens bénéficient d'un accès gratuit jusqu'au 13 juin 2026, puis l'abonnement est à 6,99 €/mois. L'entraide entre gens du coin reste offerte pour tous, gratuit." } },
- { "@type": "Question", name: "Comment trouver un pet sitter près de chez moi ?", acceptedAnswer: { "@type": "Answer", text: "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous." } },
- ],
+  { "@type": "Question", name: "Faut-il payer pour s'inscrire en tant que propriétaire ?", acceptedAnswer: { "@type": "Answer", text: "L'inscription, la publication d'annonces et les échanges avec les gardiens sont sans abonnement requis pour les propriétaires. Aucune carte bancaire demandée. Les gardiens bénéficient d'un accès sans abonnement jusqu'au 13 juin 2026, puis l'abonnement est à 6,99 €/mois. L'entraide entre gens du coin reste sans abonnement pour tous." } },
+  { "@type": "Question", name: "Comment trouver un pet sitter près de chez moi ?", acceptedAnswer: { "@type": "Answer", text: "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous." } },
+  { "@type": "Question", name: "Qui sont les gardiens sur Guardiens ?", acceptedAnswer: { "@type": "Answer", text: "Des gens du coin, vérifiés par notre équipe. Chaque profil passe une vérification d'identité (pièce d'identité + selfie) traitée sous 24h. Vous voyez aussi leurs avis publiés par les propriétaires précédents." } },
+  { "@type": "Question", name: "Comment se déroule une garde sur Guardiens ?", acceptedAnswer: { "@type": "Answer", text: "Vous publiez votre annonce, les gardiens du coin postulent, vous choisissez après une rencontre, puis votre gardien s'installe. Un accord de garde optionnel encadre les engagements de chacun pendant la garde." } },
+  { "@type": "Question", name: "Guardiens est-il disponible partout en France ?", acceptedAnswer: { "@type": "Answer", text: "Oui. Le réseau Guardiens s'étend dans toutes les régions de France, du Pays basque à la Bretagne, en passant par les Alpes et le Nord. Vous trouverez un gardien près de chez vous quel que soit votre département." } },
+  ],
  }),
  }}
  />
@@ -363,7 +366,7 @@ const Landing = () => {
  Quelqu'un du coin veille sur votre maison.
  </h1>
  <p className="font-heading text-2xl md:text-3xl lg:text-4xl italic text-white/85 leading-snug mb-6 animate-hero-fade-up animation-delay-700">
- Et l'entraide de quartier redevient naturelle.
+ Home sitting et garde d'animaux à domicile, partout en France.
  </p>
  <p className="font-body text-base md:text-lg text-white/70 max-w-lg mb-3 leading-relaxed animate-hero-fade-up animation-delay-700">
  Confiez vos animaux à un gardien près de chez vous. Osez demander un coup de main. Osez en proposer un.
@@ -649,7 +652,7 @@ const Landing = () => {
  <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Entraide</p>
  <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Un coup de main. Un échange.</h3>
  <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
- Arroser un potager, promener un chien, partager une compétence. Sans argent. C'est l'âme de Guardiens — et ça ne changera jamais.
+ Arroser un potager, promener un chien, partager une compétence. Sans argent. C'est l'âme de Guardiens — et c'est ce qui rend Guardiens unique.
  </p>
  <Link to="/petites-missions" className="text-sm font-body text-primary font-medium hover:underline">
  Découvrir l'entraide →
@@ -823,7 +826,7 @@ const Landing = () => {
  <div className="max-w-5xl mx-auto px-6">
  <RevealSection>
  <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
- Pour tous · Pour toujours
+ Pour tous · Sans abonnement
  </span>
  <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-6">
  Osez demander un coup de main.
@@ -1234,9 +1237,9 @@ const Landing = () => {
  </p>
  </RevealSection>
 
- <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
- <RevealSection delay={0.1}>
- <Link to="/house-sitting/lyon" className="group block">
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+  <RevealSection delay={0.1}>
+  <Link to="/house-sitting/lyon" className="group block">
  <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full border border-border group-hover:border-primary/30 transition-colors">
  <h3 className="text-xl font-heading font-semibold text-foreground mb-3">House-sitting à Lyon</h3>
  <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
@@ -1271,14 +1274,28 @@ const Landing = () => {
  Au pied de trois massifs. Des gardiens qui connaissent la cuvette, la pollution, et les sentiers de la Bastille.
  </p>
  <span className="text-sm font-body text-primary font-medium group-hover:underline inline-flex items-center gap-1">
- Voir les gardiens à Grenoble <ArrowRight className="h-3.5 w-3.5" />
- </span>
- </div>
- </Link>
- </RevealSection>
- </div>
- </div>
- </section>
+  Voir les gardiens à Grenoble <ArrowRight className="h-3.5 w-3.5" />
+  </span>
+  </div>
+  </Link>
+  </RevealSection>
+
+  <RevealSection delay={0.4}>
+  <Link to="/inscription" className="group block">
+  <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full border border-border group-hover:border-primary/30 transition-colors">
+  <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Partout en France</h3>
+  <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
+  Du Pays basque à la Bretagne, en passant par les Alpes et le Nord. Le réseau s'étend dans toutes les régions.
+  </p>
+  <span className="text-sm font-body text-primary font-medium group-hover:underline inline-flex items-center gap-1">
+  Découvrir Guardiens <ArrowRight className="h-3.5 w-3.5" />
+  </span>
+  </div>
+  </Link>
+  </RevealSection>
+  </div>
+  </div>
+  </section>
 
 
  {/* ═══════════════ SECTION 10 — ENCART FONDATEUR ═══════════════ */}
