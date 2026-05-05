@@ -1025,19 +1025,31 @@ const ActionsMenu = ({
   sit: any; effectiveStatus: string;
   onArchive: () => void; onDelete: () => void; onRepublish: () => void;
 }) => {
-  const canDelete = sit.applicationCount === 0;
-  const showMenu = ["confirmed", "in_progress", "published", "draft", "expired"].includes(effectiveStatus);
+  const showMenu = ["confirmed", "in_progress", "published", "draft", "expired", "cancelled"].includes(effectiveStatus);
   if (!showMenu) return null;
+
+  const canEdit = ["draft", "published"].includes(effectiveStatus);
+  const canRepublish = ["expired", "cancelled"].includes(effectiveStatus);
+  const canArchive = ["published", "draft"].includes(effectiveStatus) && sit.applicationCount > 0;
+  const canDelete = ["published", "draft", "expired", "cancelled"].includes(effectiveStatus) && sit.applicationCount === 0;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="p-1 rounded-md hover:bg-accent transition-colors opacity-0 group-hover:opacity-100">
+        <button
+          className="p-1.5 rounded-md hover:bg-accent transition-colors"
+          aria-label="Actions sur l'annonce"
+        >
           <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        {["draft", "published"].includes(effectiveStatus) && (
+      <DropdownMenuContent align="end" className="w-52">
+        <DropdownMenuItem asChild>
+          <Link to={`/sits/${sit.id}`} className="flex items-center gap-2">
+            <Eye className="h-4 w-4" /> Voir l'annonce
+          </Link>
+        </DropdownMenuItem>
+        {canEdit && (
           <DropdownMenuItem asChild>
             <Link to={`/sits/${sit.id}/edit`} className="flex items-center gap-2">
               <Pencil className="h-4 w-4" /> Modifier
@@ -1051,24 +1063,21 @@ const ActionsMenu = ({
             </Link>
           </DropdownMenuItem>
         )}
-        {effectiveStatus === "expired" && (
+        {canRepublish && (
           <DropdownMenuItem onClick={onRepublish} className="flex items-center gap-2">
             <RefreshCw className="h-4 w-4" /> Republier
           </DropdownMenuItem>
         )}
-        {["published", "draft"].includes(effectiveStatus) && (
-          <>
-            <DropdownMenuSeparator />
-            {sit.applicationCount > 0 ? (
-              <DropdownMenuItem onClick={onArchive} className="flex items-center gap-2 text-muted-foreground">
-                <Archive className="h-4 w-4" /> Archiver
-              </DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem onClick={onDelete} className="flex items-center gap-2 text-destructive">
-                <Trash2 className="h-4 w-4" /> Supprimer
-              </DropdownMenuItem>
-            )}
-          </>
+        {(canArchive || canDelete) && <DropdownMenuSeparator />}
+        {canArchive && (
+          <DropdownMenuItem onClick={onArchive} className="flex items-center gap-2 text-muted-foreground">
+            <Archive className="h-4 w-4" /> Archiver
+          </DropdownMenuItem>
+        )}
+        {canDelete && (
+          <DropdownMenuItem onClick={onDelete} className="flex items-center gap-2 text-destructive">
+            <Trash2 className="h-4 w-4" /> Supprimer
+          </DropdownMenuItem>
         )}
       </DropdownMenuContent>
     </DropdownMenu>
