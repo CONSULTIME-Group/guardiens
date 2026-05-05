@@ -426,8 +426,8 @@ const AdminVerifications = () => {
                       );
                     })()}
                     <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-border">
-                      <Button size="sm" className="gap-1.5" disabled={busyUserId === user.id || isIncomplete} onClick={() => handleApprove(user.id)} title={isIncomplete ? "Dossier incomplet : impossible de valider" : undefined}><ShieldCheck className="h-4 w-4" /> {busyUserId === user.id ? "Validation..." : "Valider"}</Button>
-                      <Button size="sm" variant="destructive" className="gap-1.5" disabled={busyUserId === user.id || isIncomplete} onClick={() => setRejectModal({ open: true, userId: user.id, reason: "", customReason: "" })}><ShieldX className="h-4 w-4" /> Refuser</Button>
+                      <Button size="sm" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => handleApprove(user.id)} title={isIncomplete ? "Dossier incomplet — validation possible sur la base des éléments fournis" : undefined}><ShieldCheck className="h-4 w-4" /> {busyUserId === user.id ? "Validation..." : "Valider"}</Button>
+                      <Button size="sm" variant="destructive" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => setRejectModal({ open: true, userId: user.id, reason: "", customReason: "" })} title={isIncomplete ? "Dossier incomplet — décision possible sur la base des éléments fournis" : undefined}><ShieldX className="h-4 w-4" /> Refuser</Button>
                       <Button size="sm" variant="outline" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => handleRequestResend(user.id)}><RotateCcw className="h-4 w-4" /> {isIncomplete ? "Réinitialiser le dossier" : "Demander nouveau document"}</Button>
                       <Button size="sm" variant="secondary" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => handleRemind(user.id)} title="Renvoyer une notification + email pour relancer le membre"><RotateCcw className="h-4 w-4" /> Relancer</Button>
                     </div>
