@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, Save, Home, Phone, Key, Wifi, Trash2, Thermometer, Info } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { ArrowLeft, Save, Home, Phone, Key, Wifi, Trash2, Thermometer, Info, Car, Mail, Sprout, Ban, MessageSquare } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 
 interface GuideData {
