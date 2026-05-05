@@ -58,6 +58,24 @@ const OwnerProfilePage = () => {
 
   const [localData, setLocalData] = useState<Partial<OwnerProfileData>>({});
   const [activeSection, setActiveSection] = useState("identity");
+  const [galleryCount, setGalleryCount] = useState(0);
+
+  // Compte les photos dans owner_gallery (source de vérité unique).
+  useEffect(() => {
+    if (!user) return;
+    let mounted = true;
+    const fetchCount = async () => {
+      const { count } = await supabase
+        .from("owner_gallery")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id);
+      if (mounted) setGalleryCount(count || 0);
+    };
+    fetchCount();
+    const handler = () => fetchCount();
+    window.addEventListener("owner-gallery:changed", handler);
+    return () => { mounted = false; window.removeEventListener("owner-gallery:changed", handler); };
+  }, [user]);
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
   const draftKey = user ? `guardiens_owner_profile_draft_${user.id}` : null;
