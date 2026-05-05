@@ -418,9 +418,11 @@ const AdminVerifications = () => {
                             className="h-8 gap-1 text-xs"
                             onClick={() => setDocModal({
                               open: true,
+                              userId: user.id,
                               docUrl: user.identity_document_signed_url,
                               selfieUrl: user.identity_selfie_signed_url,
-                              name: `${user.first_name} ${user.last_name}`
+                              name: `${user.first_name} ${user.last_name}`,
+                              status: user.identity_verification_status,
                             })}
                           >
                             <Eye className="h-3.5 w-3.5" /> Doc
