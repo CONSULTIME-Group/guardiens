@@ -487,7 +487,7 @@ const PublicSitDetail = () => {
  )}
 
  {/* ─── PROFIL TYPE DE GARDIEN RECHERCHÉ ─────────────────────────── */}
- {sit.open_to && sit.open_to.length > 0 && (
+ {sit.open_to && sit.open_to.length > 0 && !sit.open_to.every((t: string) => ["any", "no_preference", "Sans préférence"].includes(t)) && (
  <section className="mb-6">
  <h2 className="font-heading text-base font-semibold mb-2.5 text-foreground">
  Le gardien idéal
