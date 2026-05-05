@@ -12,10 +12,9 @@
  * - Bloc "Gérer cette garde" (OwnerSitManagement) + modal d'annulation
  */
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Calendar, MapPin, Send, Star, PawPrint, Home, ClipboardList, Users } from "lucide-react";
+import { Calendar, MapPin, Send, Star, Home, Users, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +25,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -38,6 +42,8 @@ import ApplicationsList from "@/components/sits/ApplicationsList";
 import PostConfirmationChecklist from "@/components/sits/PostConfirmationChecklist";
 import CancelSitModal from "@/components/sits/CancelSitModal";
 import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
+import SitPhotoManager from "@/components/sits/owner/SitPhotoManager";
+import DraftChecklist from "@/components/sits/owner/DraftChecklist";
 
 import SitDetailHeader from "./SitDetailHeader";
 import SitFooterReassurance from "./SitFooterReassurance";
@@ -47,6 +53,11 @@ import { useSitDerived } from "./useSitDerived";
 import SitImmersiveContent from "./SitImmersiveContent";
 import ReviewsTab from "./tabs/ReviewsTab";
 import type { SitData } from "./types";
+
+interface OwnerGalleryPhoto {
+  id: string;
+  photo_url: string;
+}
 
 interface OwnerSitViewProps {
   sit: SitData;
@@ -62,6 +73,8 @@ interface OwnerSitViewProps {
   hasReviewedThisSit: boolean;
   initialLogementOverride: string;
   initialAnimauxOverride: string;
+  ownerGallery: OwnerGalleryPhoto[];
+  setOwnerGallery: (photos: OwnerGalleryPhoto[]) => void;
   currentUserId: string;
 }
 
@@ -80,6 +93,8 @@ const OwnerSitView = ({
   hasReviewedThisSit,
   initialLogementOverride,
   initialAnimauxOverride,
+  ownerGallery,
+  setOwnerGallery,
   currentUserId,
 }: OwnerSitViewProps) => {
   const { toast } = useToast();
@@ -145,11 +160,16 @@ const OwnerSitView = ({
   // - draft / completed / cancelled / expired : pas d'annulation pertinente
   const canCancel = sit.status === "published" || sit.status === "confirmed";
 
-  // Tab par défaut intelligent :
-  // - draft : pas de candidatures possibles → on ouvre directement sur "Logement"
-  //   (la zone que l'owner remplit le plus souvent avant publication).
-  // - autres statuts : on garde "Candidatures" comme accueil naturel.
-  const defaultTab = isDraft ? "housing" : "candidatures";
+  // Critères de complétude pour la checklist de publication.
+  const description = (sit.specific_expectations || "").trim();
+  const checklist = {
+    hasTitle: Boolean((sit.title || "").trim()),
+    hasDates: Boolean(sit.flexible_dates || (sit.start_date && sit.end_date)),
+    hasDescription: description.length >= 50,
+    hasPhoto: ownerGallery.length > 0,
+    hasPet: Array.isArray(pets) && pets.length > 0,
+  };
+  const canPublish = Object.values(checklist).every(Boolean);
 
   // Dérivés partagés (avgRating + formatDate) — voir useSitDerived.
   const { avgRating, formatDate } = useSitDerived({
@@ -183,28 +203,19 @@ const OwnerSitView = ({
 
   return (
     <>
-      {/* Draft banner */}
+      {/* Brouillon : checklist de publication (remplace l'ancien bandeau) */}
       {isDraft && (
-        <div className="mb-6 rounded-xl border border-border bg-accent/50 p-4 md:p-5">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="font-heading text-base font-semibold">
-                Cette annonce est encore en brouillon
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Publiez-la pour qu'elle apparaisse dans la recherche.
-              </p>
-            </div>
-            <Button
-              onClick={() => setPublishConfirmOpen(true)}
-              disabled={publishing}
-              className="gap-2 md:self-start"
-            >
-              <Send className="h-4 w-4" />
-              {publishing ? "Publication..." : "Publier l'annonce"}
-            </Button>
-          </div>
-        </div>
+        <DraftChecklist
+          hasTitle={checklist.hasTitle}
+          hasDates={checklist.hasDates}
+          hasDescription={checklist.hasDescription}
+          hasPhoto={checklist.hasPhoto}
+          hasPet={checklist.hasPet}
+          publishing={publishing}
+          onPublish={() => {
+            if (canPublish) setPublishConfirmOpen(true);
+          }}
+        />
       )}
 
       {/* Confirmation publication — rappel des dates exactes */}
@@ -275,7 +286,7 @@ const OwnerSitView = ({
         </div>
       )}
 
-      {/* Header partagé */}
+      {/* Header partagé (compact) — actions Modifier / Aperçu gardien + statut */}
       <SitDetailHeader
         sitId={sit.id}
         sitTitle={sit.title}
@@ -315,8 +326,30 @@ const OwnerSitView = ({
         </div>
       )}
 
-      {/* Candidatures reçues — bloc dédié, en haut */}
-      <section className="mt-2 mb-8 rounded-2xl border border-border bg-card p-5 md:p-6">
+      {/* Photos & couverture — gestion intégrée à la fiche */}
+      <SitPhotoManager
+        sitId={sit.id}
+        ownerId={currentUserId}
+        initialCoverPhotoUrl={(sit as any).cover_photo_url ?? null}
+        initialGallery={ownerGallery}
+        onCoverChange={(url) => {
+          setSit({ ...sit, cover_photo_url: url } as any);
+        }}
+      />
+
+      {/* Aperçu de l'annonce — vue identique à celle des gardiens, EN PREMIER pour
+          que le propriétaire visualise immédiatement à quoi ressemble son annonce. */}
+      <SitImmersiveContent
+        sit={sit}
+        owner={owner}
+        property={property}
+        pets={pets}
+        ownerProfile={ownerProfile}
+      />
+
+      {/* Candidatures reçues — APRÈS l'aperçu : on voit d'abord son annonce,
+          puis qui y a postulé. */}
+      <section className="mt-8 mb-8 rounded-2xl border border-border bg-card p-5 md:p-6">
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <Users className="h-5 w-5 text-primary" />
           Candidatures reçues ({internalAppCount})
@@ -350,37 +383,37 @@ const OwnerSitView = ({
         />
       </section>
 
-      {/* Contenu immersif — vue identique à celle qu'auront les gardiens */}
-      <SitImmersiveContent
-        sit={sit}
-        owner={owner}
-        property={property}
-        pets={pets}
-        ownerProfile={ownerProfile}
-      />
-
-      {/* Personnalisations spécifiques à cette annonce (overrides logement/animaux) */}
-      <section className="mt-8 rounded-2xl border border-border bg-card p-5 md:p-6 space-y-4">
-        <div>
-          <h2 className="text-lg font-semibold mb-1 flex items-center gap-2">
-            <Home className="h-5 w-5 text-primary" /> Personnaliser cette annonce
-          </h2>
-          <p className="text-sm text-muted-foreground">
+      {/* Notes spécifiques à cette garde — accordion fermé par défaut. */}
+      <Collapsible className="mt-2 mb-8 rounded-2xl border border-border bg-card">
+        <CollapsibleTrigger className="group w-full flex items-center justify-between gap-2 p-5 md:p-6 text-left">
+          <div>
+            <h2 className="text-base font-semibold flex items-center gap-2">
+              <Home className="h-5 w-5 text-primary" /> Notes spécifiques à cette garde
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Précisions logement / animaux qui ne s'appliquent qu'à cette annonce
+              (optionnel).
+            </p>
+          </div>
+          <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0 transition-transform group-data-[state=open]:rotate-180" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="px-5 md:px-6 pb-5 md:pb-6 space-y-4">
+          <p className="text-xs text-muted-foreground">
             Le logement et les animaux se gèrent depuis votre profil — les modifications
             s'appliquent à toutes vos annonces.{" "}
             <Link to="/owner-profile" className="text-primary hover:underline">
               Modifier mon profil →
             </Link>
           </p>
-        </div>
-        <SitOverridesEditor
-          logementOverride={logementOverride}
-          setLogementOverride={setLogementOverride}
-          animauxOverride={animauxOverride}
-          setAnimauxOverride={setAnimauxOverride}
-          saveOverride={saveOverride}
-        />
-      </section>
+          <SitOverridesEditor
+            logementOverride={logementOverride}
+            setLogementOverride={setLogementOverride}
+            animauxOverride={animauxOverride}
+            setAnimauxOverride={setAnimauxOverride}
+            saveOverride={saveOverride}
+          />
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Avis */}
       <section className="mt-8">
