@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, Camera, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import PhotoTipsAlert from "./PhotoTipsAlert";
 
 const CATEGORIES = [
   { value: "home_life", label: "🏠 La vie à la maison" },
