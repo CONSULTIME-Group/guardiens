@@ -556,17 +556,23 @@ const Sits = () => {
         </>
       ) : (
         <div className="space-y-3">
-          {filteredSits.map((sit: any) => (
-            <SitCard
-              key={sit.id + (sit.application_id || "")}
-              sit={sit}
-              isOwner={activeRole === "owner"}
-              onArchive={() => setArchiveConfirm(sit.id)}
-              onDelete={() => setDeleteConfirm(sit.id)}
-              onRepublish={() => handleRepublish(sit.id)}
-              onOpenGuide={(id) => setOpenGuideId(id)}
-            />
-          ))}
+          {filteredSits.map((sit: any) => {
+            // En onglet "archived", on force l'effectiveStatus pour le bon rendu de la card
+            const cardSit = isOwnerView && activeOwnerTab === "archived"
+              ? { ...sit, effectiveStatus: isExpired(sit) ? "expired" : "cancelled" }
+              : sit;
+            return (
+              <SitCard
+                key={sit.id + (sit.application_id || "")}
+                sit={cardSit}
+                isOwner={isOwnerView}
+                onArchive={() => setArchiveConfirm(sit.id)}
+                onDelete={() => setDeleteConfirm(sit.id)}
+                onRepublish={() => handleRepublish(sit.id)}
+                onOpenGuide={(id) => setOpenGuideId(id)}
+              />
+            );
+          })}
         </div>
       )}
 
