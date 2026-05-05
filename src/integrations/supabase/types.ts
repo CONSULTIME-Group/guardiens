@@ -2104,6 +2104,7 @@ export type Database = {
           created_at: string
           id: string
           photo_url: string
+          position: number
           season: string | null
           user_id: string
         }
@@ -2113,6 +2114,7 @@ export type Database = {
           created_at?: string
           id?: string
           photo_url: string
+          position?: number
           season?: string | null
           user_id: string
         }
@@ -2122,6 +2124,7 @@ export type Database = {
           created_at?: string
           id?: string
           photo_url?: string
+          position?: number
           season?: string | null
           user_id?: string
         }
