@@ -44,7 +44,7 @@ import PublicSitTrustStrip from "@/components/sits/public/PublicSitTrustStrip";
 import {
  ENV_LABELS as envLabels,
  TYPE_LABELS as typeLabels,
- SPECIES_EMOJI as speciesEmoji,
+ 
  SPECIES_LABEL as speciesLabel,
 } from "@/components/sits/shared/sitConstants";
 
@@ -216,11 +216,12 @@ const PublicSitDetail = () => {
  })();
 
  // Résumé des animaux pour le pitch (« 2 chats », « un chien et un chat »)
+ const capitalize = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
  const petsPitchSummary = (() => {
  if (pets.length === 0) return "leurs animaux";
  if (pets.length === 1) {
  const p = pets[0];
- return `${p.name} (${speciesLabel[p.species] || p.species})`;
+ return `${capitalize(p.name)} (${speciesLabel[p.species] || p.species})`;
  }
  // Groupe par espèce
  const byKind: Record<string, number> = {};
@@ -419,20 +420,20 @@ const PublicSitDetail = () => {
  {pet.photo_url ? (
  <img
  src={pet.photo_url}
- alt={`Photo de ${pet.name}`}
+ alt={`Photo de ${capitalize(pet.name)}`}
  loading="lazy"
  className="w-12 h-12 rounded-full object-cover shrink-0"
  />
  ) : (
  <span
- className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-xl shrink-0"
+ className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center font-heading text-base font-bold text-primary shrink-0"
  aria-hidden="true"
  >
- {speciesEmoji[pet.species] || "🐾"}
+ {capitalize(pet.name).charAt(0) || "?"}
  </span>
  )}
  <div className="min-w-0">
- <p className="font-semibold text-sm truncate">{pet.name}</p>
+ <p className="font-semibold text-sm truncate">{capitalize(pet.name)}</p>
  <p className="text-xs text-muted-foreground truncate">
  {speciesLabel[pet.species] || pet.species}
  {pet.breed ? ` · ${pet.breed}` : ""}
@@ -486,7 +487,7 @@ const PublicSitDetail = () => {
  )}
 
  {/* ─── PROFIL TYPE DE GARDIEN RECHERCHÉ ─────────────────────────── */}
- {sit.open_to && sit.open_to.length > 0 && (
+ {sit.open_to && sit.open_to.length > 0 && !sit.open_to.every((t: string) => ["any", "no_preference", "Sans préférence"].includes(t)) && (
  <section className="mb-6">
  <h2 className="font-heading text-base font-semibold mb-2.5 text-foreground">
  Le gardien idéal
@@ -619,14 +620,7 @@ const PublicSitDetail = () => {
  {/* ─── CTA STICKY ───────────────────────────────────────────────── */}
  <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 z-40 pb-20 md:pb-4">
  <div className="max-w-4xl mx-auto">
- {/* Réassurance pré-CTA — visible uniquement pour les anonymes (audience d'acquisition) */}
- {!isAuthenticated && (sit as any).accepting_applications && (
- <div className="hidden sm:flex items-center justify-center gap-x-4 text-xs text-muted-foreground mb-2">
- <span className="flex items-center gap-1"><ShieldCheck className="h-3.5 w-3.5 text-primary" /> Identités vérifiées</span>
- <span className="flex items-center gap-1"><Heart className="h-3.5 w-3.5 text-primary" /> 100&nbsp;% gratuit</span>
- <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5 text-primary" /> Communauté de gardiens</span>
- </div>
- )}
+ {/* Réassurance pré-CTA supprimée — déjà couverte par PublicSitTrustStrip et le bloc final */}
  {!(sit as any).accepting_applications ? (
  <Button className="w-full h-12 text-base font-semibold" disabled>
  Candidatures en cours d'analyse
