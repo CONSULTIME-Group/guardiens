@@ -1389,7 +1389,7 @@ const SearchSitter = () => {
  onClick={() => setZoneMode("france")}
  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${zoneMode === "france" ? "bg-primary/10 text-primary font-medium" : "hover:bg-accent text-foreground"}`}
  >
- 🇫🇷 Toute la France <span className="text-xs text-muted-foreground">({densityCounts.france})</span>
+ Toute la France <span className="text-xs text-muted-foreground">({densityCounts.france})</span>
  </button>
  </div>
  {zoneMode === "radius" && (
