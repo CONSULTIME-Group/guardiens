@@ -743,7 +743,7 @@ const SitCard = ({
     : petNames || dateRange || "Sans titre";
   const displayTitle = (sit.title && sit.title.trim()) ? sit.title : fallbackTitle;
   // Ville (côté propriétaire = sa propre ville via property/owner ; côté gardien = ville du proprio)
-  const city = sit.properties?.city || otherParty?.city || sit.owner?.city || null;
+  const city = sit.ownerCity || sit.properties?.city || otherParty?.city || sit.owner?.city || null;
 
   // Status badge
   let displayStatus: { label: string; className: string };
