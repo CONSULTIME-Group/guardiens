@@ -13,7 +13,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
               <li><Link to="/house-sitting/annecy" className="font-body text-sm text-white/50 hover:text-white transition-colors">House-sitting Annecy</Link></li>
               <li><Link to="/house-sitting/grenoble" className="font-body text-sm text-white/50 hover:text-white transition-colors">House-sitting Grenoble</Link></li>
               <li><Link to="/house-sitting/chambery" className="font-body text-sm text-white/50 hover:text-white transition-colors">House-sitting Chambéry</Link></li>
-              <li><Link to="/house-sitting/caluire-et-cuire" className="font-body text-sm text-white/50 hover:text-white transition-colors">House-sitting Caluire</Link></li>
+              
             </ul>
           </div>
           <div>
