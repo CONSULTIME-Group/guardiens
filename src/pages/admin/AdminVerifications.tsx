@@ -73,21 +73,29 @@ const AdminVerifications = () => {
     setLoading(true);
     // Inclut : (a) les profils en "pending" (dossier complet à modérer)
     //          (b) les profils "not_submitted" qui ont quand même déposé au moins un fichier (selfie OU pièce) → dossier incomplet à relancer
-    const { data } = await supabase
-      .from("profiles")
-      .select("id, first_name, last_name, email, avatar_url, identity_document_url, identity_selfie_url, identity_verification_status, created_at, updated_at")
-      .or("identity_verification_status.eq.pending,and(identity_verification_status.eq.not_submitted,or(identity_document_url.not.is.null,identity_selfie_url.not.is.null))")
-      .order("updated_at", { ascending: true });
-    setQueue(await hydrateIdentityAssets(data || []));
+    // NB : on fait deux requêtes séparées car PostgREST gère mal les `or()` imbriqués dans un `and()`.
+    const SELECT = "id, first_name, last_name, email, avatar_url, identity_document_url, identity_selfie_url, identity_verification_status, created_at, updated_at";
+    const [pendingFull, incompleteDoc, incompleteSelfie] = await Promise.all([
+      supabase.from("profiles").select(SELECT).eq("identity_verification_status", "pending"),
+      supabase.from("profiles").select(SELECT).eq("identity_verification_status", "not_submitted").not("identity_document_url", "is", null),
+      supabase.from("profiles").select(SELECT).eq("identity_verification_status", "not_submitted").not("identity_selfie_url", "is", null),
+    ]);
+    const map = new Map<string, any>();
+    [...(pendingFull.data || []), ...(incompleteDoc.data || []), ...(incompleteSelfie.data || [])].forEach((p: any) => {
+      map.set(p.id, p);
+    });
+    const merged = Array.from(map.values()).sort((a, b) =>
+      new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime()
+    );
+    setQueue(await hydrateIdentityAssets(merged));
 
     const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 }).toISOString();
-    const [pendingRes, verifiedRes, rejectedRes] = await Promise.all([
-      supabase.from("profiles").select("id", { count: "exact", head: true }).or("identity_verification_status.eq.pending,and(identity_verification_status.eq.not_submitted,or(identity_document_url.not.is.null,identity_selfie_url.not.is.null))"),
+    const [verifiedRes, rejectedRes] = await Promise.all([
       supabase.from("identity_verification_logs").select("id", { count: "exact", head: true }).eq("result", "verified").gte("created_at", weekStart),
       supabase.from("identity_verification_logs").select("id", { count: "exact", head: true }).eq("result", "rejected").gte("created_at", weekStart),
     ]);
     setMetrics({
-      pending: pendingRes.count || 0,
+      pending: merged.length,
       verifiedWeek: verifiedRes.count || 0,
       rejectedWeek: rejectedRes.count || 0,
     });
