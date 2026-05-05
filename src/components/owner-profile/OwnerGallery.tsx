@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Trash2, Camera, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PhotoTipsAlert from "./PhotoTipsAlert";
+import PhotoQualityChecker from "./PhotoQualityChecker";
 
 const CATEGORIES = [
   { value: "home_life", label: "🏠 La vie à la maison" },
