@@ -160,6 +160,14 @@ export function useSitterProfile() {
       skill_categories: (p as any)?.skill_categories || [],
       available_for_help: (p as any)?.available_for_help || false,
       competences: (s as any)?.competences || [],
+      // Step 3 — Animaux (nouveaux champs persistés)
+      ...( {
+        dog_sizes_accepted: (s as any)?.dog_sizes_accepted || [],
+        demanding_breeds_ok: (s as any)?.demanding_breeds_ok || false,
+        indoor_cats_only: (s as any)?.indoor_cats_only || false,
+        own_animals: (s as any)?.own_animals || [],
+        guard_experience: (s as any)?.guard_experience || "",
+      } as any),
     };
 
     setData(merged);
@@ -236,6 +244,8 @@ export function useSitterProfile() {
         "preferences_notes", "meeting_preference", "handover_preference",
         "languages", "bonus_skills", "interests", "competences",
         "min_stay_duration", "preferred_frequency", "min_notice", "preferred_periods", "preferred_environments",
+        // Step 3 — Animaux (étaient dans le formulaire mais perdus à la sauvegarde)
+        "dog_sizes_accepted", "demanding_breeds_ok", "indoor_cats_only", "own_animals", "guard_experience",
       ] as const;
 
       const sitterUpdate: any = {};
@@ -277,11 +287,30 @@ export function useSitterProfile() {
   }, [user, data, sitterProfileId, fetchData, refreshCompletion, refreshProfile, toast]);
 
   const addPastAnimal = useCallback(async (animal: PastAnimal) => {
-    if (!sitterProfileId) return;
-    const { data: created } = await supabase
+    if (!user) return;
+
+    // Auto-create sitter_profiles row if missing — sinon le bouton "Ajouter
+    // cet animal" échouait silencieusement pour les nouveaux comptes qui
+    // n'avaient pas encore sauvegardé l'onglet "Profil gardien".
+    let profileId = sitterProfileId;
+    if (!profileId) {
+      const { data: created, error: createErr } = await supabase
+        .from("sitter_profiles")
+        .insert({ user_id: user.id })
+        .select("id")
+        .single();
+      if (createErr || !created) {
+        toast({ variant: "destructive", title: "Erreur", description: "Impossible de créer votre profil gardien." });
+        return;
+      }
+      profileId = created.id;
+      setSitterProfileId(profileId);
+    }
+
+    const { data: created, error } = await supabase
       .from("past_animals")
       .insert({
-        sitter_profile_id: sitterProfileId,
+        sitter_profile_id: profileId,
         species: animal.species,
         name: animal.name,
         photo_url: animal.photo_url || null,
@@ -289,8 +318,13 @@ export function useSitterProfile() {
       } as any)
       .select()
       .single();
-    if (created) setPastAnimals(prev => [...prev, { id: created.id, species: created.species, name: created.name, breed: (created as any).breed || undefined, photo_url: created.photo_url || undefined }]);
-  }, [sitterProfileId]);
+    if (error || !created) {
+      toast({ variant: "destructive", title: "Erreur", description: "Impossible d'ajouter cet animal." });
+      return;
+    }
+    setPastAnimals(prev => [...prev, { id: created.id, species: created.species, name: created.name, breed: (created as any).breed || undefined, photo_url: created.photo_url || undefined }]);
+    toast({ title: "Animal ajouté", description: `${created.name} a été ajouté à vos expériences.` });
+  }, [user, sitterProfileId, toast]);
 
   const removePastAnimal = useCallback(async (id: string) => {
     await supabase.from("past_animals").delete().eq("id", id);
