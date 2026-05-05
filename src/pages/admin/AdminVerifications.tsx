@@ -61,12 +61,24 @@ const AdminVerifications = () => {
     );
   };
 
-  const runIdentityAction = async (action: "approve" | "reject" | "request_resend" | "revoke", userId: string, reason?: string) => {
+  const runIdentityAction = async (action: "approve" | "reject" | "request_resend" | "revoke" | "remind", userId: string, reason?: string) => {
     const { error } = await supabase.functions.invoke("admin-manage-identity-verification", {
       body: { action, userId, reason },
     });
 
     if (error) throw error;
+  };
+
+  const handleRemind = async (userId: string) => {
+    setBusyUserId(userId);
+    try {
+      await runIdentityAction("remind", userId);
+      toast.success("Relance envoyée au membre");
+    } catch (error: any) {
+      toast.error(error?.message || "Impossible d'envoyer la relance");
+    } finally {
+      setBusyUserId(null);
+    }
   };
 
   const fetchQueue = useCallback(async () => {
