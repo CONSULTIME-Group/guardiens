@@ -71,16 +71,18 @@ const AdminVerifications = () => {
 
   const fetchQueue = useCallback(async () => {
     setLoading(true);
+    // Inclut : (a) les profils en "pending" (dossier complet à modérer)
+    //          (b) les profils "not_submitted" qui ont quand même déposé au moins un fichier (selfie OU pièce) → dossier incomplet à relancer
     const { data } = await supabase
       .from("profiles")
       .select("id, first_name, last_name, email, avatar_url, identity_document_url, identity_selfie_url, identity_verification_status, created_at, updated_at")
-      .eq("identity_verification_status", "pending")
+      .or("identity_verification_status.eq.pending,and(identity_verification_status.eq.not_submitted,or(identity_document_url.not.is.null,identity_selfie_url.not.is.null))")
       .order("updated_at", { ascending: true });
     setQueue(await hydrateIdentityAssets(data || []));
 
     const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 }).toISOString();
     const [pendingRes, verifiedRes, rejectedRes] = await Promise.all([
-      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "pending"),
+      supabase.from("profiles").select("id", { count: "exact", head: true }).or("identity_verification_status.eq.pending,and(identity_verification_status.eq.not_submitted,or(identity_document_url.not.is.null,identity_selfie_url.not.is.null))"),
       supabase.from("identity_verification_logs").select("id", { count: "exact", head: true }).eq("result", "verified").gte("created_at", weekStart),
       supabase.from("identity_verification_logs").select("id", { count: "exact", head: true }).eq("result", "rejected").gte("created_at", weekStart),
     ]);
@@ -258,6 +260,9 @@ const AdminVerifications = () => {
           <div className="space-y-6">
             {queue.map((user, idx) => {
               const attempts = attemptCounts[user.id] || 0;
+              const hasDoc = !!user.identity_document_url;
+              const hasSelfie = !!user.identity_selfie_url;
+              const isIncomplete = user.identity_verification_status === "not_submitted" && (!hasDoc || !hasSelfie);
               return (
                 <Card key={user.id} className="overflow-hidden">
                   <CardContent className="p-5 space-y-4">
@@ -274,6 +279,11 @@ const AdminVerifications = () => {
                         </div>
                       </div>
                       <div className="flex flex-wrap items-center gap-2">
+                        {isIncomplete && (
+                          <Badge className="bg-warning-soft text-warning-foreground border-0 text-xs">
+                            <AlertTriangle className="h-3 w-3 mr-1" /> Dossier incomplet ({hasSelfie ? "pièce manquante" : "selfie manquant"})
+                          </Badge>
+                        )}
                         {attempts > 0 && <Badge variant="outline" className="text-xs"><AlertTriangle className="h-3 w-3 mr-1" /> Tentative n°{attempts + 1}</Badge>}
                         <Badge variant="secondary" className="text-xs"><Clock className="h-3 w-3 mr-1" /> {format(new Date(user.updated_at), "d MMM yyyy HH:mm", { locale: fr })}</Badge>
                         <span className="text-xs text-muted-foreground font-mono">#{idx + 1}</span>
@@ -306,9 +316,9 @@ const AdminVerifications = () => {
                       </div>
                     </div>
                     <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-border">
-                      <Button size="sm" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => handleApprove(user.id)}><ShieldCheck className="h-4 w-4" /> {busyUserId === user.id ? "Validation..." : "Valider"}</Button>
-                      <Button size="sm" variant="destructive" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => setRejectModal({ open: true, userId: user.id, reason: "", customReason: "" })}><ShieldX className="h-4 w-4" /> Refuser</Button>
-                      <Button size="sm" variant="outline" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => handleRequestResend(user.id)}><RotateCcw className="h-4 w-4" /> Demander nouveau document</Button>
+                      <Button size="sm" className="gap-1.5" disabled={busyUserId === user.id || isIncomplete} onClick={() => handleApprove(user.id)} title={isIncomplete ? "Dossier incomplet : impossible de valider" : undefined}><ShieldCheck className="h-4 w-4" /> {busyUserId === user.id ? "Validation..." : "Valider"}</Button>
+                      <Button size="sm" variant="destructive" className="gap-1.5" disabled={busyUserId === user.id || isIncomplete} onClick={() => setRejectModal({ open: true, userId: user.id, reason: "", customReason: "" })}><ShieldX className="h-4 w-4" /> Refuser</Button>
+                      <Button size="sm" variant="outline" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => handleRequestResend(user.id)}><RotateCcw className="h-4 w-4" /> {isIncomplete ? "Relancer (compléter le dossier)" : "Demander nouveau document"}</Button>
                     </div>
                   </CardContent>
                 </Card>
