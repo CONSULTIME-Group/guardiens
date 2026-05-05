@@ -70,6 +70,16 @@ const OwnerProfilePage = () => {
     setSaved(false);
   }, []);
 
+  // Permet aux composants enfants (ex. OwnerStepHousing) de demander un changement de section.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (typeof detail === "string") setActiveSection(detail);
+    };
+    window.addEventListener("owner-profile:goto-section", handler);
+    return () => window.removeEventListener("owner-profile:goto-section", handler);
+  }, []);
+
   useEffect(() => {
     if (!draftKey || loading || draftHydratedRef.current) return;
     draftHydratedRef.current = true;
