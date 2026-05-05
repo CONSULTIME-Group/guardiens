@@ -356,6 +356,10 @@ const Landing = () => {
  <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-24">
  <div className="max-w-2xl lg:max-w-3xl">
 
+  <p className="font-body text-xs text-white/70 tracking-[0.2em] uppercase mb-4">
+  Home sitting · Entraide locale
+  </p>
+
  {/* Badge Gratuit propriétaires */}
  <div className="inline-flex items-center rounded-full px-4 py-1.5 mb-6 bg-white/15 border border-white/30 backdrop-blur-sm animate-hero-fade-up">
  <span className="font-body text-xs text-white tracking-wide">Gratuit pour les propriétaires</span>
@@ -458,12 +462,12 @@ const Landing = () => {
  Des gardiens près de chez vous, vérifiés, pour partir l'esprit tranquille.
  </p>
 
- <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
+  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6 mt-12">
  <div className="bg-card border border-border rounded-xl p-6">
  <p className="text-xs tracking-widest uppercase text-primary/70 font-body">01</p>
  <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Gratuit pour les propriétaires</h3>
  <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
- Publier votre annonce, recevoir des candidatures, échanger avec les gardiens : tout est gratuit pour les propriétaires. Sans limite de temps.
+ Publier votre annonce, recevoir des candidatures, échanger avec les gardiens : tout est gratuit pour les propriétaires. Sans abonnement requis.
  </p>
  </div>
 
@@ -480,14 +484,6 @@ const Landing = () => {
  <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Des profils vérifiés</h3>
  <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
  Chaque gardien est vérifié par notre équipe : pièce d'identité, avis des propriétaires précédents, historique de gardes réalisées.
- </p>
- </div>
-
- <div className="bg-card border border-border rounded-xl p-6">
- <p className="text-xs tracking-widest uppercase text-primary/70 font-body">04</p>
- <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Local par envie, national par liberté</h3>
- <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
- Notre cœur, c'est la proximité : un gardien à quelques kilomètres. Mais rien ne vous y oblige : élargissez le rayon, explorez d'autres régions, créez du lien partout en France.
  </p>
  </div>
  </div>
@@ -851,7 +847,7 @@ const Landing = () => {
  Ce n'est pas un aveu de faiblesse — c'est un acte de confiance. Et quelqu'un près de chez vous n'attend que ça.
  </p>
  <p className="text-sm font-body font-medium text-primary">
- Pas d'argent. Pas d'abonnement. Jamais.
+ Pas d'argent. Pas d'abonnement. C'est le pari.
  </p>
  </div>
  </RevealSection>
