@@ -311,6 +311,9 @@ async function expandDynamicRoutes(dynamicConfigs, origin, siteUrl, defaultOgIma
         pathPattern: cfg.pathPattern,
         dynamicTitle: cfg.dynamicTitle,
         dynamicDescription: cfg.dynamicDescription,
+        // F3 : expose les valeurs de l'instance comme "sampleParams" pour
+        // permettre au worker un check soft (présence du param + suffixe).
+        sampleParams: values,
       });
     }
   }
