@@ -289,46 +289,16 @@ const EditSit = () => {
           </div>
         )}
 
-        {/* Photos + sélection couverture */}
-        <div className="bg-card rounded-lg border border-border p-5">
-          <p className="text-sm font-medium text-foreground mb-1">Photos affichées sur l'annonce</p>
-          {ownerPhotos.length > 0 ? (
-            <>
-              <p className="text-xs text-muted-foreground mb-3">
-                Cliquez sur une photo pour la définir comme couverture de cette annonce.
-              </p>
-              <div className="grid grid-cols-4 gap-2">
-                {ownerPhotos.slice(0, 8).map((url, i) => {
-                  const isCover = coverPhotoUrl === url || (!coverPhotoUrl && i === 0);
-                  return (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => setCoverPhotoUrl(url)}
-                      className={cn(
-                        "relative rounded-lg overflow-hidden h-16 w-full border-2 transition-all",
-                        isCover ? "border-primary ring-2 ring-primary/30" : "border-transparent hover:border-primary/50"
-                      )}
-                      aria-label={`Définir la photo ${i + 1} comme couverture`}
-                    >
-                      <img src={url} alt={`Photo ${i + 1}`} className="object-cover h-full w-full" />
-                      {isCover && (
-                        <span className="absolute bottom-0 inset-x-0 bg-primary text-primary-foreground text-[10px] font-medium py-0.5 text-center">
-                          Couverture
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </>
-          ) : (
-            <div className="bg-muted rounded-xl p-3">
-              <p className="text-xs text-muted-foreground">Aucune photo — les annonces avec photos reçoivent davantage de candidatures.</p>
-            </div>
-          )}
-          <Link to={`/owner-profile?from=sit:${id}#galerie`} className="text-xs text-primary hover:underline mt-3 inline-block">
-            Ajouter ou modifier mes photos →
+        {/* Photos & couverture : déplacés sur la fiche annonce pour une gestion inline.
+            Lien direct pour rester cohérent. */}
+        <div className="bg-muted/30 rounded-lg border border-dashed border-border p-4 text-sm">
+          <p className="font-medium mb-1">Photos & photo de couverture</p>
+          <p className="text-muted-foreground text-xs mb-2">
+            La gestion des photos et le choix de la couverture se font directement sur la fiche
+            de votre annonce.
+          </p>
+          <Link to={`/sits/${id}`} className="text-primary text-xs hover:underline">
+            Gérer les photos sur la fiche annonce →
           </Link>
         </div>
       </div>
