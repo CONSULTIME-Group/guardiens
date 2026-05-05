@@ -12,10 +12,9 @@
  * - Bloc "Gérer cette garde" (OwnerSitManagement) + modal d'annulation
  */
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Calendar, MapPin, Send, Star, PawPrint, Home, ClipboardList, Users } from "lucide-react";
+import { Calendar, MapPin, Send, Star, Home, Users, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +25,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -38,6 +42,8 @@ import ApplicationsList from "@/components/sits/ApplicationsList";
 import PostConfirmationChecklist from "@/components/sits/PostConfirmationChecklist";
 import CancelSitModal from "@/components/sits/CancelSitModal";
 import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
+import SitPhotoManager from "@/components/sits/owner/SitPhotoManager";
+import DraftChecklist from "@/components/sits/owner/DraftChecklist";
 
 import SitDetailHeader from "./SitDetailHeader";
 import SitFooterReassurance from "./SitFooterReassurance";
@@ -47,6 +53,11 @@ import { useSitDerived } from "./useSitDerived";
 import SitImmersiveContent from "./SitImmersiveContent";
 import ReviewsTab from "./tabs/ReviewsTab";
 import type { SitData } from "./types";
+
+interface OwnerGalleryPhoto {
+  id: string;
+  photo_url: string;
+}
 
 interface OwnerSitViewProps {
   sit: SitData;
@@ -62,6 +73,8 @@ interface OwnerSitViewProps {
   hasReviewedThisSit: boolean;
   initialLogementOverride: string;
   initialAnimauxOverride: string;
+  ownerGallery: OwnerGalleryPhoto[];
+  setOwnerGallery: (photos: OwnerGalleryPhoto[]) => void;
   currentUserId: string;
 }
 
