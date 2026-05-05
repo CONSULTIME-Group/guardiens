@@ -1368,7 +1368,7 @@ const SearchSitter = () => {
  disabled={!getDeptCode(userPostalCode)}
  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${zoneMode === "dept" ? "bg-primary/10 text-primary font-medium" : "hover:bg-accent text-foreground"}`}
  >
- 🏛️ Mon département {getDeptCode(userPostalCode) && (
+ Mon département {getDeptCode(userPostalCode) && (
  <span className="text-xs text-muted-foreground">
  ({getDeptCode(userPostalCode)} {DEPT_NAMES[getDeptCode(userPostalCode)!]} · {densityCounts.dept})
  </span>
