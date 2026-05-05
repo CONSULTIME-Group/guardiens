@@ -110,10 +110,10 @@ const LocationProfileCard = ({ city, postalCode, onUseDescription, editable = fa
       </div>
 
       <div className="space-y-2">
-        {fields.map(({ key, label, emoji }) => (
+        {fields.map(({ key, label }) => (
           profile[key] ? (
             <div key={key} className="text-sm">
-              <span className="font-medium">{emoji} {label} :</span>{" "}
+              <span className="font-medium">{label} :</span>{" "}
               <span className="text-muted-foreground">{profile[key]}</span>
             </div>
           ) : null
