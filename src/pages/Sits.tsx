@@ -113,12 +113,15 @@ const Sits = () => {
 
   // Onglet actif synchronisé avec l'URL (?tab=...) — partageable, retour navigateur OK
   const validTabs: Tab[] = ["upcoming", "in_progress", "completed", "cancelled"];
-  const urlTab = searchParams.get("tab") as Tab | null;
-  const activeTab: Tab = urlTab && validTabs.includes(urlTab) ? urlTab : "upcoming";
-  const setActiveTab = useCallback((tab: Tab) => {
+  const validOwnerTabs: OwnerTab[] = ["active", "drafts", "archived"];
+  const urlTab = searchParams.get("tab");
+  const isOwnerView = activeRole === "owner";
+  const activeTab: Tab = (urlTab && validTabs.includes(urlTab as Tab) ? urlTab : "upcoming") as Tab;
+  const activeOwnerTab: OwnerTab = (urlTab && validOwnerTabs.includes(urlTab as OwnerTab) ? urlTab : "active") as OwnerTab;
+  const setActiveTab = useCallback((tab: Tab | OwnerTab) => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
-      if (tab === "upcoming") next.delete("tab");
+      if (tab === "upcoming" || tab === "active") next.delete("tab");
       else next.set("tab", tab);
       return next;
     }, { replace: true });
