@@ -161,6 +161,11 @@ const Sits = () => {
     setLoading(true);
 
     if (activeRole === "owner") {
+      // Charge la ville du proprio (sert de "ville de l'annonce" dans la liste)
+      const { data: ownerProfile } = await supabase
+        .from("profiles").select("city").eq("id", user.id).maybeSingle();
+      const ownerCity = ownerProfile?.city || null;
+
       const { data } = await supabase
         .from("sits")
         .select("*, properties(type, environment, photos, user_id)")
