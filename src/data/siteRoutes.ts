@@ -144,7 +144,7 @@ metaDescription: "Home sitting et petites missions d'entraide entre gens du coin
  },
  {
  path: "/actualites",
- title: "Blog — Actualités et conseils | Guardiens",
+ title: "Articles | Guardiens",
  metaDescription: "Conseils house-sitting, guides pratiques, témoignages et actualités de la communauté Guardiens. Tout pour bien préparer une garde.",
  h1: "Actualités",
  sitemapPriority: "0.8",
