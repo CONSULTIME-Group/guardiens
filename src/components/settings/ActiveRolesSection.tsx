@@ -26,6 +26,8 @@ const ActiveRolesSection = () => {
   const [activateDialog, setActivateDialog] = useState<"gardien" | "proprio" | null>(null);
   const [loading, setLoading] = useState(false);
   const [openingPortal, setOpeningPortal] = useState(false);
+  const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
+  const [availLoading, setAvailLoading] = useState(false);
 
   if (!user) return null;
 
@@ -33,6 +35,36 @@ const ActiveRolesSection = () => {
   const sitterActive = role === "sitter" || role === "both";
   const ownerActive = role === "owner" || role === "both";
   const hasBothRoles = role === "both";
+
+  // Charge la disponibilité gardien
+  if (sitterActive && isAvailable === null) {
+    supabase
+      .from("sitter_profiles")
+      .select("is_available")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => setIsAvailable(!!data?.is_available));
+  }
+
+  const toggleAvailability = async (next: boolean) => {
+    if (!user) return;
+    setAvailLoading(true);
+    const { error } = await supabase
+      .from("sitter_profiles")
+      .update({ is_available: next })
+      .eq("user_id", user.id);
+    setAvailLoading(false);
+    if (error) {
+      toast.error("Impossible de mettre à jour votre disponibilité.");
+      return;
+    }
+    setIsAvailable(next);
+    toast.success(
+      next
+        ? "Vous êtes désormais visible comme disponible."
+        : "Vous n'apparaissez plus comme disponible. Votre compte reste actif.",
+    );
+  };
 
   const handleSetDefault = (next: "owner" | "sitter") => {
     if (next === activeRole) return;
@@ -148,6 +180,24 @@ const ActiveRolesSection = () => {
               aria-label="Activer ou désactiver l'espace gardien"
             />
           </div>
+
+          {sitterActive && (
+            <div className="flex items-center justify-between gap-4 rounded-md bg-muted/40 border border-border/60 p-3">
+              <div className="space-y-0.5">
+                <Label className="text-sm font-medium">Disponible pour garder</Label>
+                <p className="text-xs text-muted-foreground">
+                  Désactivez simplement ce bouton pour ne plus apparaître comme gardien
+                  disponible. Vous gardez votre compte, vos avis et votre historique.
+                </p>
+              </div>
+              <Switch
+                checked={!!isAvailable}
+                disabled={availLoading || isAvailable === null}
+                onCheckedChange={toggleAvailability}
+                aria-label="Indiquer si vous êtes disponible pour garder"
+              />
+            </div>
+          )}
 
           {hasBothRoles && (
             <div className="border-t border-border pt-4 mt-2">
