@@ -260,6 +260,9 @@ const AdminVerifications = () => {
           <div className="space-y-6">
             {queue.map((user, idx) => {
               const attempts = attemptCounts[user.id] || 0;
+              const hasDoc = !!user.identity_document_url;
+              const hasSelfie = !!user.identity_selfie_url;
+              const isIncomplete = user.identity_verification_status === "not_submitted" && (!hasDoc || !hasSelfie);
               return (
                 <Card key={user.id} className="overflow-hidden">
                   <CardContent className="p-5 space-y-4">
@@ -276,6 +279,11 @@ const AdminVerifications = () => {
                         </div>
                       </div>
                       <div className="flex flex-wrap items-center gap-2">
+                        {isIncomplete && (
+                          <Badge className="bg-warning-soft text-warning-foreground border-0 text-xs">
+                            <AlertTriangle className="h-3 w-3 mr-1" /> Dossier incomplet ({hasSelfie ? "pièce manquante" : "selfie manquant"})
+                          </Badge>
+                        )}
                         {attempts > 0 && <Badge variant="outline" className="text-xs"><AlertTriangle className="h-3 w-3 mr-1" /> Tentative n°{attempts + 1}</Badge>}
                         <Badge variant="secondary" className="text-xs"><Clock className="h-3 w-3 mr-1" /> {format(new Date(user.updated_at), "d MMM yyyy HH:mm", { locale: fr })}</Badge>
                         <span className="text-xs text-muted-foreground font-mono">#{idx + 1}</span>
@@ -308,9 +316,9 @@ const AdminVerifications = () => {
                       </div>
                     </div>
                     <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-border">
-                      <Button size="sm" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => handleApprove(user.id)}><ShieldCheck className="h-4 w-4" /> {busyUserId === user.id ? "Validation..." : "Valider"}</Button>
-                      <Button size="sm" variant="destructive" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => setRejectModal({ open: true, userId: user.id, reason: "", customReason: "" })}><ShieldX className="h-4 w-4" /> Refuser</Button>
-                      <Button size="sm" variant="outline" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => handleRequestResend(user.id)}><RotateCcw className="h-4 w-4" /> Demander nouveau document</Button>
+                      <Button size="sm" className="gap-1.5" disabled={busyUserId === user.id || isIncomplete} onClick={() => handleApprove(user.id)} title={isIncomplete ? "Dossier incomplet : impossible de valider" : undefined}><ShieldCheck className="h-4 w-4" /> {busyUserId === user.id ? "Validation..." : "Valider"}</Button>
+                      <Button size="sm" variant="destructive" className="gap-1.5" disabled={busyUserId === user.id || isIncomplete} onClick={() => setRejectModal({ open: true, userId: user.id, reason: "", customReason: "" })}><ShieldX className="h-4 w-4" /> Refuser</Button>
+                      <Button size="sm" variant="outline" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => handleRequestResend(user.id)}><RotateCcw className="h-4 w-4" /> {isIncomplete ? "Relancer (compléter le dossier)" : "Demander nouveau document"}</Button>
                     </div>
                   </CardContent>
                 </Card>
