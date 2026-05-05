@@ -144,7 +144,7 @@ export const DEMO_SITS: DemoSit[] = [
     schedule: {
       morning: "Sortie running ou vélo avec Laïka 45 min, gamelles, ouverture cage de Coco 1h.",
       midday: "Visite rapide au jardin, fontaine à eau à recharger, quelques mots à Coco — il adore.",
-      evening: "Promenade Laïka 45 min, repas du soir, brossage de Milo, câlins obligatoires 🥰",
+      evening: "Promenade Laïka 45 min, repas du soir, brossage de Milo, câlins obligatoires.",
       notes:
         "Comptez environ 2h30 de présence active par jour. Laïka a besoin de se dépenser — un gardien sportif sera ravi.",
     },
