@@ -3426,13 +3426,17 @@ export type Database = {
           bonus_skills: string[] | null
           competences: string[] | null
           created_at: string
+          demanding_breeds_ok: boolean
+          dog_sizes_accepted: string[]
           experience_years: string | null
           farm_animals_ok: boolean | null
           geographic_radius: number | null
+          guard_experience: string
           handover_preference: string | null
           has_license: boolean | null
           has_vehicle: boolean | null
           id: string
+          indoor_cats_only: boolean
           interests: string[] | null
           is_available: boolean
           languages: string[] | null
@@ -3443,6 +3447,7 @@ export type Database = {
           min_notice: string | null
           min_stay_duration: string | null
           motivation: string | null
+          own_animals: string[]
           prefer_visitors: boolean | null
           preferences_notes: string | null
           preferred_environments: string[] | null
@@ -3463,13 +3468,17 @@ export type Database = {
           bonus_skills?: string[] | null
           competences?: string[] | null
           created_at?: string
+          demanding_breeds_ok?: boolean
+          dog_sizes_accepted?: string[]
           experience_years?: string | null
           farm_animals_ok?: boolean | null
           geographic_radius?: number | null
+          guard_experience?: string
           handover_preference?: string | null
           has_license?: boolean | null
           has_vehicle?: boolean | null
           id?: string
+          indoor_cats_only?: boolean
           interests?: string[] | null
           is_available?: boolean
           languages?: string[] | null
@@ -3480,6 +3489,7 @@ export type Database = {
           min_notice?: string | null
           min_stay_duration?: string | null
           motivation?: string | null
+          own_animals?: string[]
           prefer_visitors?: boolean | null
           preferences_notes?: string | null
           preferred_environments?: string[] | null
@@ -3500,13 +3510,17 @@ export type Database = {
           bonus_skills?: string[] | null
           competences?: string[] | null
           created_at?: string
+          demanding_breeds_ok?: boolean
+          dog_sizes_accepted?: string[]
           experience_years?: string | null
           farm_animals_ok?: boolean | null
           geographic_radius?: number | null
+          guard_experience?: string
           handover_preference?: string | null
           has_license?: boolean | null
           has_vehicle?: boolean | null
           id?: string
+          indoor_cats_only?: boolean
           interests?: string[] | null
           is_available?: boolean
           languages?: string[] | null
@@ -3517,6 +3531,7 @@ export type Database = {
           min_notice?: string | null
           min_stay_duration?: string | null
           motivation?: string | null
+          own_animals?: string[]
           prefer_visitors?: boolean | null
           preferences_notes?: string | null
           preferred_environments?: string[] | null
