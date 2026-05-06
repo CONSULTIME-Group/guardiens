@@ -90,14 +90,17 @@ const PublicSitDetail = () => {
           supabase.from("properties").select("*").eq("id", sitData.property_id).limit(1),
           supabase.from("reviews").select("id, overall_rating, comment, created_at").eq("reviewee_id", sitData.user_id).eq("published", true).order("created_at", { ascending: false }),
           supabase.from("badge_attributions").select("badge_id").eq("user_id", sitData.user_id),
-          supabase.from("owner_gallery").select("photo_url, position").eq("user_id", sitData.user_id).order("position", { ascending: true }),
+          supabase.from("owner_gallery").select("photo_url, position, width, height").eq("user_id", sitData.user_id).order("position", { ascending: true }),
         ]);
 
         const ownerData = ownerRes.data?.[0] ?? null;
         const propertyData = propRes.data?.[0] ?? null;
-        const galleryUrls = (galleryRes.data || []).map((g: any) => g.photo_url).filter(Boolean);
+        const galleryRows = (galleryRes.data || []) as any[];
+        const galleryUrls = galleryRows.map((g) => g.photo_url).filter(Boolean);
+        // Photos « qualité indexation » : largeur connue ≥ 800px
+        const galleryHiQualityCount = galleryRows.filter((g) => (g.width || 0) >= 800 && (g.height || 0) >= 600).length;
         const enrichedProperty = propertyData
-          ? { ...propertyData, photos: galleryUrls.length > 0 ? galleryUrls : (propertyData as any).photos }
+          ? { ...propertyData, photos: galleryUrls.length > 0 ? galleryUrls : (propertyData as any).photos, _hiQualityCount: galleryHiQualityCount }
           : propertyData;
 
         if (!ownerData) {
@@ -372,11 +375,20 @@ const PublicSitDetail = () => {
  },
  };
 
- // Critère d'indexation : photos suffisantes + description ou routine substantielle.
- // Sinon noindex pour éviter le thin content sur les nouvelles annonces.
- const galleryCount = property?.photos?.length || 0;
- const richTextLength = (property?.description || "").length + (sit.daily_routine || "").length;
- const isIndexable = galleryCount >= 3 && richTextLength >= 150;
+  // Critère d'indexation (qualité minimum pour éviter le thin content) :
+  // - ≥3 photos dont au moins 2 en haute résolution (≥800×600px)
+  // - ≥200 caractères de texte substantiel (description + routine)
+  // - titre personnalisé (≥10 caractères)
+  // - au moins 1 animal renseigné
+  // Tolérance : si aucune photo n'a ses dimensions stockées (anciennes annonces),
+  // on garde le filtre simple par nombre de photos.
+  const galleryCount = property?.photos?.length || 0;
+  const hiQualityCount: number = (property as any)?._hiQualityCount ?? 0;
+  const photosOk = galleryCount >= 3 && (hiQualityCount === 0 || hiQualityCount >= 2);
+  const richTextLength = (property?.description || "").length + (sit.daily_routine || "").length;
+  const hasCustomTitle = typeof sit.title === "string" && sit.title.trim().length >= 10;
+  const hasPets = pets.length > 0;
+  const isIndexable = photosOk && richTextLength >= 200 && hasCustomTitle && hasPets;
 
  const citySlug = (cityForTitle || "")
  .toLowerCase()

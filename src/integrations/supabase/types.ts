@@ -2102,31 +2102,37 @@ export type Database = {
           caption: string
           category: Database["public"]["Enums"]["owner_gallery_category"]
           created_at: string
+          height: number | null
           id: string
           photo_url: string
           position: number
           season: string | null
           user_id: string
+          width: number | null
         }
         Insert: {
           caption?: string
           category?: Database["public"]["Enums"]["owner_gallery_category"]
           created_at?: string
+          height?: number | null
           id?: string
           photo_url: string
           position?: number
           season?: string | null
           user_id: string
+          width?: number | null
         }
         Update: {
           caption?: string
           category?: Database["public"]["Enums"]["owner_gallery_category"]
           created_at?: string
+          height?: number | null
           id?: string
           photo_url?: string
           position?: number
           season?: string | null
           user_id?: string
+          width?: number | null
         }
         Relationships: [
           {
