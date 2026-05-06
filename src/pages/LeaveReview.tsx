@@ -202,6 +202,21 @@ const LeaveReview = () => {
       return;
     }
 
+    // Attribution des écussons sélectionnés
+    if (selectedBadges.length > 0) {
+      const badgeRows = selectedBadges.map((badge_id) => ({
+        user_id: reviewee.id,
+        giver_id: user.id,
+        sit_id: sitId,
+        badge_id,
+        is_manual: false,
+      }));
+      const { error: badgeError } = await supabase.from("badge_attributions").insert(badgeRows);
+      if (badgeError) {
+        logger.warn("Badge attribution failed", { err: String(badgeError) });
+      }
+    }
+
     // Send email to the other party inviting them to leave their review
     try {
       const { data: rawRevieweeProfile } = await supabase
