@@ -89,22 +89,8 @@ const BreedProfileCard = ({ species, breed, ownerNote, ownerFirstName, onNoteCha
         <h4 className="text-sm font-semibold">Fiche race — {breedLabel}</h4>
       </div>
 
-      <div className="space-y-2">
-        {fields.map(({ key, label, icon }) => (
-          profile[key] ? (
-            <div key={key} className="text-sm flex items-start gap-2">
-              <span className="mt-0.5 shrink-0">{icon}</span>
-              <div>
-                <span className="font-medium">{label} :</span>{" "}
-                <span className="text-muted-foreground">{profile[key]}</span>
-              </div>
-            </div>
-          ) : null
-        ))}
-      </div>
-
       {editable && onNoteChange && (
-        <div className="pt-2 border-t border-border/50">
+        <div>
           <label className="text-xs font-medium text-muted-foreground block mb-1">
             Votre nuance personnelle
           </label>
@@ -119,13 +105,28 @@ const BreedProfileCard = ({ species, breed, ownerNote, ownerFirstName, onNoteCha
       )}
 
       {!editable && ownerNote && ownerFirstName && (
-        <div className="pt-2 border-t border-border/50">
+        <div>
           <p className="text-sm">
             <span className="font-medium">Selon {ownerFirstName} :</span>{" "}
             <span className="text-muted-foreground italic">{ownerNote}</span>
           </p>
         </div>
       )}
+
+      <div className="space-y-2 pt-2 border-t border-border/50">
+        <p className="text-xs font-medium text-muted-foreground">Suggestion générée automatiquement</p>
+        {fields.map(({ key, label, icon }) => (
+          profile[key] ? (
+            <div key={key} className="text-sm flex items-start gap-2">
+              <span className="mt-0.5 shrink-0">{icon}</span>
+              <div>
+                <span className="font-medium">{label} :</span>{" "}
+                <span className="text-muted-foreground">{profile[key]}</span>
+              </div>
+            </div>
+          ) : null
+        ))}
+      </div>
     </div>
   );
 };
