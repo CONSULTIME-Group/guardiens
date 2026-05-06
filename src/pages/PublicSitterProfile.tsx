@@ -688,7 +688,7 @@ export default function PublicSitterProfile() {
         noindex={shouldNoindex}
       />
       <Helmet>
-        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+        {/* JSON-LD Person détaillé géré par <ProfileSchemaOrg /> ci-dessus */}
       </Helmet>
 
       {/* ── Contenu principal z-1 ── */}
