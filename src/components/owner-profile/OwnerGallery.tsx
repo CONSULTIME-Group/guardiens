@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImageFile } from "@/lib/compressImage";
 import { getImageDimensions } from "@/lib/imageDimensions";
+import { backfillOwnerGalleryDimensions } from "@/lib/backfillGalleryDimensions";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -185,6 +186,18 @@ const OwnerGallery = () => {
   }, [user]);
 
   useEffect(() => { loadPhotos(); }, [loadPhotos]);
+
+  // Revalidation silencieuse de l'indexation : mesure et persiste les dimensions
+  // manquantes des photos historiques pour réactiver le filtre `isIndexable` SEO.
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      const updated = await backfillOwnerGalleryDimensions(user.id);
+      if (!cancelled && updated > 0) loadPhotos();
+    })();
+    return () => { cancelled = true; };
+  }, [user, loadPhotos]);
 
   const uploadFiles = async (files: File[]) => {
     if (!user || files.length === 0) return;
