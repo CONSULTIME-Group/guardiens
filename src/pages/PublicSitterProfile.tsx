@@ -1525,7 +1525,7 @@ export default function PublicSitterProfile() {
           {/* ── ANNONCES ── */}
           <div className="space-y-3">
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
-              Gardes publiées{ownerSits.length > 0 && ` (${ownerSits.length})`}
+              Gardes publiées{ownerSitsTotal > 0 && ` (${ownerSitsTotal})`}
             </p>
             {ownerSits.length > 0 ? (
               <div className="space-y-2">
