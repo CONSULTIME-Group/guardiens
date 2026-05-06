@@ -93,6 +93,35 @@ const PublicSitDetail = () => {
    ? { ...propertyData, photos: galleryUrls.length > 0 ? galleryUrls : (propertyData as any).photos }
    : propertyData;
 
+ // ── Diagnostics public pages : trace silencieuse en prod, console en dev.
+ // Permet de repérer les annonces dont le profil public ou la galerie owner
+ // ne renvoient rien (RLS, données manquantes, hôte supprimé…).
+ if (!ownerData) {
+   logger.warn("[PublicSitDetail] public_profiles vide", {
+     sit_id: sitData.id,
+     user_id: sitData.user_id,
+     error: ownerRes.error?.message,
+   });
+ }
+ if (galleryUrls.length === 0) {
+   logger.warn("[PublicSitDetail] owner_gallery vide", {
+     sit_id: sitData.id,
+     user_id: sitData.user_id,
+     property_id: sitData.property_id,
+     property_photos_count: Array.isArray((propertyData as any)?.photos)
+       ? (propertyData as any).photos.length
+       : 0,
+     error: galleryRes.error?.message,
+   });
+ }
+ if (ownerData && !ownerData.city) {
+   logger.info("[PublicSitDetail] public_profiles.city manquant", {
+     sit_id: sitData.id,
+     user_id: sitData.user_id,
+     has_postal_code: Boolean((ownerData as any).postal_code),
+   });
+ }
+
  // Fallback ville : si public_profiles ne renvoie pas city mais a un code postal,
  // on résout la commune via l'API officielle geo.api.gouv.fr (FR uniquement, 5 chiffres).
  let enrichedOwner = ownerData;
