@@ -126,6 +126,7 @@ export default function PublicSitterProfile() {
       <button
         type="button"
         onClick={() => setShowAll(!showAll)}
+        aria-expanded={showAll}
         className="text-sm text-primary hover:underline font-body mt-2"
       >
         {showAll ? 'Voir moins' : `Voir les ${items.length - VISIBLE_COUNT} autres`}
@@ -518,6 +519,19 @@ export default function PublicSitterProfile() {
 
     loadEntraideData();
   }, [activeTab, id]);
+
+  // Lightbox keyboard navigation (Escape to close, arrows to navigate)
+  useEffect(() => {
+    if (lightboxIdx === null) return;
+    const max = gallery.slice(0, 9).length;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxIdx(null);
+      else if (e.key === 'ArrowLeft' && lightboxIdx > 0) setLightboxIdx(lightboxIdx - 1);
+      else if (e.key === 'ArrowRight' && lightboxIdx < max - 1) setLightboxIdx(lightboxIdx + 1);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [lightboxIdx, gallery]);
 
   if (loading) {
     return (
@@ -1314,12 +1328,35 @@ export default function PublicSitterProfile() {
                 <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
                   Avis ({reviewCount})
                 </h2>
-                <ReviewGrid
-                  reviews={gardeReviews.length > 0 ? gardeReviews : missionReviews}
-                  showAll={showAllGardeReviews}
-                  setShowAll={setShowAllGardeReviews}
-                  badgesBySitId={badgesBySitId}
-                />
+                <Tabs defaultValue={gardeReviews.length > 0 ? "gardes" : "missions"} className="w-full">
+                  <TabsList className="mb-3">
+                    <TabsTrigger value="gardes">Gardes{gardeReviews.length > 0 ? ` (${gardeReviews.length})` : ''}</TabsTrigger>
+                    <TabsTrigger value="missions">Missions{missionReviews.length > 0 ? ` (${missionReviews.length})` : ''}</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="gardes" forceMount>
+                    {gardeReviews.length === 0 ? (
+                      <p className="text-sm text-muted-foreground italic py-2 font-body">Pas encore d'avis de garde.</p>
+                    ) : (
+                      <ReviewGrid
+                        reviews={gardeReviews}
+                        showAll={showAllGardeReviews}
+                        setShowAll={setShowAllGardeReviews}
+                        badgesBySitId={badgesBySitId}
+                      />
+                    )}
+                  </TabsContent>
+                  <TabsContent value="missions" forceMount>
+                    {missionReviews.length === 0 ? (
+                      <p className="text-sm text-muted-foreground italic py-2 font-body">Pas encore d'avis de mission.</p>
+                    ) : (
+                      <ReviewGrid
+                        reviews={missionReviews}
+                        showAll={showAllMissionReviewsTab}
+                        setShowAll={setShowAllMissionReviewsTab}
+                      />
+                    )}
+                  </TabsContent>
+                </Tabs>
               </section>
             )}
 
