@@ -1597,7 +1597,19 @@ export default function PublicSitterProfile() {
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
               Gardes publiées{ownerSitsTotal > 0 && ` (${ownerSitsTotal})`}
             </p>
-            {ownerSits.length > 0 ? (
+            {ownerDataLoading ? (
+              <div className="space-y-2" aria-busy="true" aria-label="Chargement des annonces">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="flex items-center justify-between gap-4 bg-card border border-border rounded-xl px-4 py-3">
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <Skeleton className="h-4 w-2/3" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                    <Skeleton className="h-6 w-20 rounded-full" />
+                  </div>
+                ))}
+              </div>
+            ) : ownerSits.length > 0 ? (
               <div className="space-y-2">
                 {(showAllOwnerSits ? ownerSits : ownerSits.slice(0, VISIBLE_COUNT)).map((sit) => {
                   const statusMap: Record<string, { label: string; style: string }> = {
