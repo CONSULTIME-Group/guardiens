@@ -195,8 +195,8 @@ const OwnerProfilePage = () => {
   const ownerEssentials = scoredCriteria.filter(c => c.kind === "essential");
   const ownerBonuses = scoredCriteria.filter(c => c.kind === "bonus");
   const liveScore = Math.min(100, scoredCriteria.reduce((s, c) => s + (c.ok ? c.points : 0), 0));
-  const essentialsScore = ownerEssentials.reduce((s, c) => s + (c.ok ? c.points : 0), 0);
-  const essentialsMax = ownerEssentials.reduce((s, c) => s + c.points, 0);
+  // Sous-totaux disponibles si on souhaite afficher "essentiels X/75" ailleurs.
+  void ownerEssentials.reduce((s, c) => s + (c.ok ? c.points : 0), 0);
 
   const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => {
     const labels = missingLabelsFor(s.id, scoredCriteria);
