@@ -126,21 +126,29 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, lo
       )
       : undefined;
 
+  // Si aucune candidature non lue mais des consultées : on n'affiche pas le doublon
+  // d'empty state (déjà couvert par MonAnnonceCard) et on titre directement
+  // « Candidatures reçues déjà consultées ».
+  const onlyRead = !loading && unread.length === 0 && read.length > 0;
+  const sectionTitle = onlyRead
+    ? "Candidatures reçues déjà consultées"
+    : "Candidatures reçues non lues";
+
   return (
-    <DashSection title="Candidatures reçues non lues" action={seeAllAction}>
+    <DashSection title={sectionTitle} action={seeAllAction}>
       {loading ? (
         <div className="space-y-3" role="status" aria-busy="true" aria-label="Chargement des candidatures reçues">
           <AppCardSkeleton />
           <AppCardSkeleton />
           <span className="sr-only">Chargement des candidatures reçues…</span>
         </div>
-      ) : unread.length === 0 ? (
+      ) : unread.length === 0 && read.length === 0 ? (
         <p className="text-sm text-muted-foreground font-sans italic py-4 text-center">Aucune candidature reçue en attente</p>
-      ) : (
+      ) : unread.length > 0 ? (
         <div className="space-y-3">
           {unread.map(a => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} />)}
         </div>
-      )}
+      ) : null}
       {loading ? (
         <Accordion type="single" collapsible defaultValue="read-loading" className="mt-4">
           <AccordionItem value="read-loading" className="border rounded-xl">
@@ -166,10 +174,12 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, lo
           </AccordionItem>
         </Accordion>
       ) : read.length > 0 ? (
-        <Accordion type="single" collapsible className="mt-4">
+        <Accordion type="single" collapsible className={onlyRead ? "" : "mt-4"}>
           <AccordionItem value="read" className="border rounded-xl">
             <AccordionTrigger className="px-4 py-3 text-sm text-muted-foreground hover:no-underline">
-              Candidatures reçues déjà consultées ({read.length})
+              {onlyRead
+                ? `Voir les ${read.length} candidature${read.length > 1 ? "s" : ""} consultée${read.length > 1 ? "s" : ""}`
+                : `Candidatures reçues déjà consultées (${read.length})`}
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4">
               <div className="space-y-3">
@@ -178,11 +188,7 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, lo
             </AccordionContent>
           </AccordionItem>
         </Accordion>
-      ) : (
-        <p className="mt-4 text-sm text-muted-foreground font-sans italic py-3 text-center border border-dashed border-border rounded-xl">
-          Aucune candidature consultée
-        </p>
-      )}
+      ) : null}
     </DashSection>
   );
 });
