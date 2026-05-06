@@ -281,6 +281,30 @@ export function useOwnerDashboardData(userId: string | undefined) {
 
     load();
     return () => { cancelled = true; };
+  }, [userId, refreshTick]);
+
+  // Re-fetch automatique : retour onglet + realtime sur applications
+  useEffect(() => {
+    if (!userId) return;
+
+    const triggerRefresh = () => setRefreshTick(t => t + 1);
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") triggerRefresh();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    const channel = supabase
+      .channel(`owner-dashboard-${userId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "applications" }, triggerRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "sits", filter: `user_id=eq.${userId}` }, triggerRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "reviews", filter: `reviewee_id=eq.${userId}` }, triggerRefresh)
+      .subscribe();
+
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      supabase.removeChannel(channel);
+    };
   }, [userId]);
 
   return { data, loading, error };
