@@ -90,7 +90,7 @@ const PublicSitDetail = () => {
           supabase.from("properties").select("*").eq("id", sitData.property_id).limit(1),
           supabase.from("reviews").select("id, overall_rating, comment, created_at").eq("reviewee_id", sitData.user_id).eq("published", true).order("created_at", { ascending: false }),
           supabase.from("badge_attributions").select("badge_id").eq("user_id", sitData.user_id),
-          supabase.from("owner_gallery").select("photo_url, position").eq("user_id", sitData.user_id).order("position", { ascending: true }),
+          supabase.from("owner_gallery").select("photo_url, position, width, height").eq("user_id", sitData.user_id).order("position", { ascending: true }),
         ]);
 
         const ownerData = ownerRes.data?.[0] ?? null;
