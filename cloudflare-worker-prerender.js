@@ -103,6 +103,60 @@ async function fetchOrigin(request) {
 
 // URL de la fonction sitemap Supabase
 const SITEMAP_URL = 'https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/sitemap';
+// URL de la fonction profile-jsonld (SSR du Schema.org pour Rich Results)
+const PROFILE_JSONLD_URL = 'https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/profile-jsonld';
+// Match /gardiens/:uuid (et tolère un slash final)
+const PROFILE_PATH_RE = /^\/gardiens\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/?$/i;
+
+/**
+ * Injecte le JSON-LD (Person + Service) dans le <head> du HTML servi aux
+ * humains. Garantit que Google + crawlers IA voient le Schema.org même sans
+ * exécuter le JS de la SPA. Les bots SEO passent déjà par Prerender.io qui
+ * exécute Helmet — ce chemin couvre les humains et les crawlers light.
+ */
+async function injectProfileJsonLd(originResponse, profileId) {
+  const ct = originResponse.headers.get('content-type') || '';
+  if (!ct.includes('text/html')) return originResponse;
+  try {
+    const [html, jsonldResp] = await Promise.all([
+      originResponse.text(),
+      fetch(`${PROFILE_JSONLD_URL}?id=${profileId}`, {
+        headers: { 'accept': 'text/html' },
+      }),
+    ]);
+    if (!jsonldResp.ok) {
+      return new Response(html, {
+        status: originResponse.status,
+        headers: originResponse.headers,
+      });
+    }
+    const jsonldHtml = await jsonldResp.text();
+    if (!jsonldHtml) {
+      return new Response(html, {
+        status: originResponse.status,
+        headers: originResponse.headers,
+      });
+    }
+    // Évite la double-injection si le HTML d'origine contient déjà notre marqueur.
+    const marker = 'data-ssr-jsonld="profile"';
+    const tagged = jsonldHtml.replace(
+      /<script type="application\/ld\+json">/g,
+      `<script type="application/ld+json" ${marker}>`,
+    );
+    const patched = html.includes(marker)
+      ? html
+      : html.replace(/<\/head>/i, `${tagged}</head>`);
+    const headers = new Headers(originResponse.headers);
+    headers.delete('content-length');
+    headers.set('x-prerender-jsonld-injected', '1');
+    return new Response(patched, {
+      status: originResponse.status,
+      headers,
+    });
+  } catch (err) {
+    return originResponse;
+  }
+}
 
 // robots.txt servi en dur (rapide, fiable)
 const ROBOTS_TXT = `User-agent: *
@@ -161,7 +215,11 @@ export default {
 
     if (!shouldPrerender) {
       const originResp = await fetchOrigin(request);
-      return withDiagHeaders(originResp, {
+      const profileMatch = pathname.match(PROFILE_PATH_RE);
+      const finalResp = profileMatch
+        ? await injectProfileJsonLd(originResp, profileMatch[1])
+        : originResp;
+      return withDiagHeaders(finalResp, {
         ...baseDiag,
         'X-Prerender-Status': 'bypass',
       });
