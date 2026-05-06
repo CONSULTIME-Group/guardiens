@@ -428,6 +428,13 @@ const PublicSitDetail = () => {
  </>
  )}
 
+ {/* ─── GALERIE PHOTOS ─────────────────────────────────────────────── */}
+ <PublicSitGallery
+   photos={photos}
+   city={owner?.city}
+   ownerFirstName={owner?.first_name}
+ />
+
  {/* ─── ANIMAUX ──────────────────────────────────────────────────── */}
  {pets.length > 0 && (
  <section className="mb-6">
