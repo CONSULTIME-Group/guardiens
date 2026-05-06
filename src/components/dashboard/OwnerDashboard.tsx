@@ -32,7 +32,7 @@ import StatsStrip from "./owner/StatsStrip";
 import PendingReviewsCard from "./owner/PendingReviewsCard";
 import MobileStickyCTA from "./owner/MobileStickyCTA";
 import {
-  SPECIES_LABEL, PROPRIO_SPECIAL_IDS, BANNER_STYLES,
+  SPECIES_LABEL, PROPRIO_SPECIAL_IDS,
   capitalize, capitalizeWords,
 } from "./owner/helpers";
 import type { Pet } from "./owner/types";
@@ -106,9 +106,7 @@ const OwnerDashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ongoingSit, sits, pendingAppCount]);
 
-  // Banner contextuel désactivé : verif & candidatures non lues sont désormais
-  // affichées en chips inline dans le hero, OngoingSitHero couvre le reste.
-  const banner = null as null | { variant: "info"; label: string; to: string; ctaLabel: string };
+  // Banner contextuel supprimé : verif & candidatures non lues affichées en chips inline dans le hero.
 
   // CTA bas de page supprimé : redondant avec le hero (action principale toujours
   // visible en haut) et avec MonAnnonceCard (qui guide déjà sur l'action contextuelle).
@@ -220,20 +218,6 @@ const OwnerDashboard = () => {
             sitterProfiles={sitterProfiles}
             coverPhoto={propertyCoverPhoto}
           />
-        </div>
-      )}
-
-      {/* ═══ Banner contextuel (vérification, candidatures non lues) ═══ */}
-      {banner && (
-        <div className="px-5 md:px-8">
-          <div className={`p-4 rounded-2xl border ${BANNER_STYLES[banner.variant]} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2`}>
-            <p className="text-sm font-medium">{banner.label}</p>
-            {banner.ctaLabel && banner.to && (
-              <Link to={banner.to} className="text-sm font-semibold hover:underline shrink-0">
-                {banner.ctaLabel}
-              </Link>
-            )}
-          </div>
         </div>
       )}
 
