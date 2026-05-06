@@ -126,6 +126,7 @@ export default function PublicSitterProfile() {
       <button
         type="button"
         onClick={() => setShowAll(!showAll)}
+        aria-expanded={showAll}
         className="text-sm text-primary hover:underline font-body mt-2"
       >
         {showAll ? 'Voir moins' : `Voir les ${items.length - VISIBLE_COUNT} autres`}
