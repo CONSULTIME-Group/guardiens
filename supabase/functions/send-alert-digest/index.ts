@@ -10,6 +10,20 @@ const AURA_DEPARTMENTS = [
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
+// Palette alignée avec la marque (HSL → hex)
+const C = {
+  bg: "#F8F4EC",         // background sable
+  card: "#FFFFFF",
+  ink: "#1B1B1A",        // foreground
+  inkSoft: "#5C5A55",    // muted-foreground
+  primary: "#2C7553",    // vert Guardiens
+  primarySoft: "#E8F1EC",
+  border: "#E8E1D2",
+  accent: "#A56A3D",     // secondary terre
+  urgent: "#B8341E",
+  urgentSoft: "#FBE9E5",
+};
+
 Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
@@ -18,9 +32,8 @@ Deno.serve(async (req) => {
     const now = new Date();
     const currentHour = now.getUTCHours() + 2; // Europe/Paris (+2 été)
     const currentHourStr = `${String(currentHour).padStart(2, "0")}:00`;
-    const dayOfWeek = now.getDay(); // 0=dim, 1=lun
+    const dayOfWeek = now.getDay();
 
-    // 1. Récupérer toutes les préférences actives correspondant à l'heure
     let prefsQuery = supabase
       .from("alert_preferences")
       .select(`
@@ -53,10 +66,8 @@ Deno.serve(async (req) => {
       const profile = pref.profiles;
       if (!profile?.email) { skipped++; continue; }
 
-      // Fréquence hebdo : envoyer uniquement le lundi
       if (pref.frequence === "hebdo" && dayOfWeek !== 1) { skipped++; continue; }
 
-      // Résoudre les coordonnées de la zone d'alerte
       let alertLat: number | null = null;
       let alertLng: number | null = null;
 
@@ -79,20 +90,18 @@ Deno.serve(async (req) => {
       let sits: any[] = [];
       let missions: any[] = [];
 
-      // 2a. Fetch sits dans la zone
+      // 2a. Gardes
       if (alertTypes.includes("gardes")) {
-        const sitsQuery = supabase
+        const { data: rawSits } = await supabase
           .from("sits")
           .select(`
-            id, title, start_date, end_date, is_urgent,
-            profiles:user_id (city, postal_code),
-            properties:property_id (photos, type, pets (name, species))
+            id, title, description, start_date, end_date, is_urgent, cover_photo_url,
+            profiles:user_id (first_name, city, postal_code, avatar_url),
+            properties:property_id (photos, type, pets (name, species, photo_url))
           `)
           .eq("status", "published")
           .gte("created_at", sinceISO)
-          .limit(10);
-
-        const { data: rawSits } = await sitsQuery;
+          .limit(20);
 
         if (rawSits) {
           for (const sit of rawSits) {
@@ -123,16 +132,14 @@ Deno.serve(async (req) => {
         }
       }
 
-      // 2b. Fetch missions dans la zone
+      // 2b. Missions d'entraide
       if (alertTypes.includes("missions")) {
-        const missionsQuery = supabase
+        const { data: rawMissions } = await supabase
           .from("small_missions")
-          .select("id, title, city, postal_code, latitude, longitude, category, date_needed")
+          .select("id, title, description, city, postal_code, latitude, longitude, category, date_needed, photos, exchange_offer")
           .eq("status", "open")
           .gte("created_at", sinceISO)
-          .limit(10);
-
-        const { data: rawMissions } = await missionsQuery;
+          .limit(20);
 
         if (rawMissions) {
           for (const m of rawMissions) {
@@ -151,10 +158,8 @@ Deno.serve(async (req) => {
         }
       }
 
-      // 3. Skip si rien de nouveau
       if (sits.length === 0 && missions.length === 0) { skipped++; continue; }
 
-      // 4. Envoyer l'email
       const html = buildDigestEmail(profile.first_name, pref.label, sits, missions);
 
       const res = await fetch("https://api.resend.com/emails", {
@@ -195,16 +200,168 @@ function haversine(lat1: number, lng1: number, lat2: number, lng2: number): numb
     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
+function toRad(deg: number): number { return (deg * Math.PI) / 180; }
 
-function toRad(deg: number): number {
-  return (deg * Math.PI) / 180;
+function capitalize(s: string): string {
+  if (!s) return "";
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 }
 
 function buildSubject(sits: number, missions: number, label: string): string {
-  const parts = [];
+  const parts: string[] = [];
   if (sits > 0) parts.push(`${sits} garde${sits > 1 ? "s" : ""}`);
-  if (missions > 0) parts.push(`${missions} mission${missions > 1 ? "s" : ""}`);
-  return `🏡 ${parts.join(" · ")} près de ${label}`;
+  if (missions > 0) parts.push(`${missions} demande${missions > 1 ? "s" : ""} d'entraide`);
+  return `${parts.join(" et ")} à découvrir près de ${label}`;
+}
+
+const PROPERTY_TYPE: Record<string, string> = {
+  apartment: "Appartement",
+  house: "Maison",
+  farm: "Ferme",
+  other: "Logement",
+};
+
+const SPECIES: Record<string, string> = {
+  dog: "Chien",
+  cat: "Chat",
+  bird: "Oiseau",
+  fish: "Poisson",
+  reptile: "Reptile",
+  rodent: "Rongeur",
+  rabbit: "Lapin",
+  horse: "Cheval",
+  other: "Autre",
+};
+
+const MISSION_CATEGORY: Record<string, string> = {
+  walk: "Promenade",
+  visit: "Visite à domicile",
+  feeding: "Repas / gamelle",
+  transport: "Transport",
+  vet: "Visite vétérinaire",
+  house: "Coup de main maison",
+  other: "Coup de main",
+};
+
+function formatDateRange(start?: string | null, end?: string | null): { main: string; days: string | null } {
+  if (!start) return { main: "Dates flexibles", days: null };
+  const s = new Date(start);
+  const opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "long" };
+  if (!end) {
+    return { main: `À partir du ${s.toLocaleDateString("fr-FR", { ...opts, year: "numeric" })}`, days: null };
+  }
+  const e = new Date(end);
+  const days = Math.max(1, Math.round((e.getTime() - s.getTime()) / 86400000));
+  return {
+    main: `Du ${s.toLocaleDateString("fr-FR", opts)} au ${e.toLocaleDateString("fr-FR", { ...opts, year: "numeric" })}`,
+    days: `${days} jour${days > 1 ? "s" : ""}`,
+  };
+}
+
+function pickSitImage(sit: any): string | null {
+  if (sit.cover_photo_url) return sit.cover_photo_url;
+  const photos = sit.properties?.photos;
+  if (Array.isArray(photos) && photos.length > 0 && photos[0]) return photos[0];
+  const pets = sit.properties?.pets || [];
+  for (const p of pets) if (p?.photo_url) return p.photo_url;
+  return null;
+}
+
+function pickMissionImage(m: any): string | null {
+  const photos = m.photos;
+  if (Array.isArray(photos) && photos.length > 0 && photos[0]) return photos[0];
+  return null;
+}
+
+function truncate(text: string, max = 140): string {
+  if (!text) return "";
+  const clean = text.replace(/\s+/g, " ").trim();
+  return clean.length > max ? `${clean.slice(0, max).trim()}…` : clean;
+}
+
+function renderSitCard(sit: any): string {
+  const ownerCity = capitalize((sit.profiles as any)?.city || "");
+  const ownerName = capitalize((sit.profiles as any)?.first_name || "");
+  const pets: any[] = sit.properties?.pets || [];
+  const speciesCounts: Record<string, number> = {};
+  pets.forEach((p) => {
+    const k = SPECIES[p.species] || capitalize(p.species || "Animal");
+    speciesCounts[k] = (speciesCounts[k] || 0) + 1;
+  });
+  const animalLine = Object.entries(speciesCounts)
+    .map(([k, n]) => (n > 1 ? `${n} ${k.toLowerCase()}s` : k))
+    .join(" · ");
+
+  const propertyLabel = PROPERTY_TYPE[sit.properties?.type] || "Logement";
+  const dates = formatDateRange(sit.start_date, sit.end_date);
+  const img = pickSitImage(sit);
+  const desc = truncate(sit.description || "", 130);
+  const link = `https://guardiens.fr/sits/${sit.id}`;
+
+  const imageBlock = img
+    ? `<a href="${link}" style="text-decoration:none;display:block;">
+         <img src="${img}" width="600" height="240" alt="${propertyLabel} à ${ownerCity}"
+              style="display:block;width:100%;max-width:600px;height:240px;object-fit:cover;border:0;border-radius:12px 12px 0 0;" />
+       </a>`
+    : `<div style="height:8px;background:${C.primarySoft};border-radius:12px 12px 0 0;"></div>`;
+
+  return `
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 16px;background:${C.card};border:1px solid ${C.border};border-radius:12px;overflow:hidden;">
+    <tr><td style="padding:0;">${imageBlock}</td></tr>
+    <tr><td style="padding:18px 22px 20px;">
+      ${sit.is_urgent ? `<div style="display:inline-block;background:${C.urgentSoft};color:${C.urgent};font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;padding:4px 10px;border-radius:999px;margin-bottom:10px;">Demande urgente</div><br/>` : ""}
+      <a href="${link}" style="text-decoration:none;color:${C.ink};">
+        <h3 style="margin:0 0 6px;font-size:18px;line-height:1.3;font-weight:700;font-family:Georgia,serif;color:${C.ink};">
+          ${propertyLabel}${ownerCity ? ` à ${ownerCity}` : ""}
+        </h3>
+      </a>
+      <p style="margin:0 0 12px;color:${C.inkSoft};font-size:14px;line-height:1.5;">
+        ${dates.main}${dates.days ? ` · <span style="color:${C.accent};font-weight:600;">${dates.days}</span>` : ""}
+      </p>
+      ${animalLine ? `<p style="margin:0 0 10px;color:${C.ink};font-size:14px;font-weight:600;">${animalLine}</p>` : ""}
+      ${desc ? `<p style="margin:0 0 14px;color:${C.inkSoft};font-size:14px;line-height:1.55;">${desc}</p>` : ""}
+      <a href="${link}" style="display:inline-block;color:${C.primary};font-size:14px;font-weight:600;text-decoration:none;border-bottom:1px solid ${C.primary};padding-bottom:1px;">
+        Découvrir cette garde${ownerName ? ` chez ${ownerName}` : ""} →
+      </a>
+    </td></tr>
+  </table>`;
+}
+
+function renderMissionCard(m: any): string {
+  const cat = MISSION_CATEGORY[m.category] || "Coup de main";
+  const city = capitalize(m.city || "");
+  const date = m.date_needed ? new Date(m.date_needed).toLocaleDateString("fr-FR", { day: "numeric", month: "long" }) : "Dès que possible";
+  const desc = truncate(m.description || "", 120);
+  const img = pickMissionImage(m);
+  const link = `https://guardiens.fr/entraide/${m.id}`;
+
+  const imageBlock = img
+    ? `<a href="${link}" style="text-decoration:none;display:block;">
+         <img src="${img}" width="600" height="200" alt="${cat}${city ? ` à ${city}` : ""}"
+              style="display:block;width:100%;max-width:600px;height:200px;object-fit:cover;border:0;border-radius:12px 12px 0 0;" />
+       </a>`
+    : "";
+
+  return `
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 16px;background:${C.card};border:1px solid ${C.border};border-radius:12px;overflow:hidden;">
+    ${imageBlock ? `<tr><td style="padding:0;">${imageBlock}</td></tr>` : ""}
+    <tr><td style="padding:18px 22px 20px;">
+      <div style="display:inline-block;background:${C.primarySoft};color:${C.primary};font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;padding:4px 10px;border-radius:999px;margin-bottom:10px;">${cat}</div>
+      <a href="${link}" style="text-decoration:none;color:${C.ink};">
+        <h3 style="margin:0 0 6px;font-size:17px;line-height:1.3;font-weight:700;font-family:Georgia,serif;color:${C.ink};">
+          ${m.title || "Demande d'entraide"}
+        </h3>
+      </a>
+      <p style="margin:0 0 10px;color:${C.inkSoft};font-size:14px;">
+        ${city ? `${city} · ` : ""}${date}
+      </p>
+      ${desc ? `<p style="margin:0 0 14px;color:${C.inkSoft};font-size:14px;line-height:1.55;">${desc}</p>` : ""}
+      ${m.exchange_offer ? `<p style="margin:0 0 14px;padding:10px 12px;background:${C.bg};border-radius:8px;color:${C.ink};font-size:13px;line-height:1.5;"><strong style="color:${C.accent};">En échange :</strong> ${truncate(m.exchange_offer, 100)}</p>` : ""}
+      <a href="${link}" style="display:inline-block;color:${C.primary};font-size:14px;font-weight:600;text-decoration:none;border-bottom:1px solid ${C.primary};padding-bottom:1px;">
+        Proposer mon aide →
+      </a>
+    </td></tr>
+  </table>`;
 }
 
 function buildDigestEmail(
@@ -213,141 +370,93 @@ function buildDigestEmail(
   sits: any[],
   missions: any[]
 ): string {
-  const speciesLabel: Record<string, string> = { dog: "Chien", cat: "Chat", bird: "Oiseau", fish: "Poisson", reptile: "Reptile", rodent: "Rongeur", other: "Autre" };
+  const niceName = capitalize(firstName || "");
+  const totalNew = sits.length + missions.length;
 
-  const sitsHtml = sits.slice(0, 10).map((s: any) => {
-    const photoUrl = s.properties?.photos?.[0] || null;
-    const city = (s.profiles as any)?.city || "";
-    const pets: any[] = s.properties?.pets || [];
-    const petSummary = pets.length > 0
-      ? pets.map((p: any) => p.name).join(", ")
-      : "";
-    const petSpecies = pets.length > 0
-      ? [...new Set(pets.map((p: any) => speciesLabel[p.species] || p.species))].join(", ")
-      : "";
-    const propertyType = s.properties?.type || "";
-    const typeLabel: Record<string, string> = { apartment: "Appartement", house: "Maison", farm: "Ferme", other: "Autre" };
+  const sitsBlock = sits.length > 0 ? `
+    <h2 style="margin:24px 0 14px;font-size:14px;font-weight:700;color:${C.primary};text-transform:uppercase;letter-spacing:1.2px;font-family:Arial,sans-serif;">
+      Gardes proposées · ${sits.length}
+    </h2>
+    ${sits.slice(0, 6).map(renderSitCard).join("")}
+  ` : "";
 
-    // Dates
-    let dateStr = "Dates flexibles";
-    if (s.start_date && s.end_date) {
-      const start = new Date(s.start_date);
-      const end = new Date(s.end_date);
-      const days = Math.round((end.getTime() - start.getTime()) / 86400000);
-      dateStr = `Du ${start.toLocaleDateString("fr-FR", { day: "numeric", month: "long" })} au ${end.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}`;
-      if (days > 0) dateStr += `<br/><span style="color:#9ca3af;font-size:12px;">${days} jour${days > 1 ? "s" : ""}</span>`;
-    } else if (s.start_date) {
-      dateStr = `À partir du ${new Date(s.start_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}`;
-    }
+  const missionsBlock = missions.length > 0 ? `
+    <h2 style="margin:32px 0 14px;font-size:14px;font-weight:700;color:${C.primary};text-transform:uppercase;letter-spacing:1.2px;font-family:Arial,sans-serif;">
+      Demandes d'entraide · ${missions.length}
+    </h2>
+    ${missions.slice(0, 6).map(renderMissionCard).join("")}
+  ` : "";
 
-    const imageCol = photoUrl
-      ? `<td width="180" valign="top" style="padding:0;">
-           <a href="https://guardiens.fr/sits/${s.id}" style="text-decoration:none;">
-             <img src="${photoUrl}" width="180" height="160" alt="" style="display:block;width:180px;height:160px;object-fit:cover;border:0;border-radius:6px;" />
-           </a>
-         </td>
-         <td width="16" style="font-size:0;line-height:0;">&nbsp;</td>`
-      : '';
-
-    return `
-    <tr><td style="padding:12px 0;border-bottom:1px solid #f0ece4;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          ${imageCol}
-          <td valign="top" style="padding:${photoUrl ? '4px 0' : '0'};">
-            <a href="https://guardiens.fr/sits/${s.id}" style="text-decoration:none;">
-              <strong style="color:#1A3C34;font-size:16px;line-height:1.3;">${city}</strong>
-            </a>
-            ${s.is_urgent ? `<br/><span style="display:inline-block;margin-top:4px;background:#fef2f2;color:#dc2626;font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600;">⚡ Urgent</span>` : ""}
-            <br/>
-            <span style="color:#6b7280;font-size:13px;line-height:1.5;">
-              ${typeLabel[propertyType] ? typeLabel[propertyType] : ""}
-            </span>
-            <br/>
-            <span style="color:#6b7280;font-size:13px;line-height:1.5;">${dateStr}</span>
-            ${petSpecies ? `<br/><span style="font-weight:600;color:#1A3C34;font-size:13px;margin-top:4px;display:inline-block;">${petSpecies}</span>` : ""}
-          </td>
-        </tr>
-      </table>
-    </td></tr>`;
-  }).join("");
-
-  const missionsHtml = missions.slice(0, 10).map((m: any) => `
-    <tr>
-      <td style="padding:12px 0;border-bottom:1px solid #f0f0f0">
-        <strong style="color:#1a1a1a;font-size:15px">${m.title}</strong><br/>
-        <span style="color:#666;font-size:13px">
-          ${m.city || ""} · ${m.date_needed ? new Date(m.date_needed).toLocaleDateString("fr-FR") : ""}
-        </span>
-      </td>
-    </tr>`).join("");
-
-  const overflow = (sits.length + missions.length) > 10
-    ? `<tr><td style="padding:16px 0;text-align:center">
-        <span style="color:#666;font-size:13px;font-style:italic">
-        Et d'autres annonces disponibles sur la plateforme.
-        </span>
-       </td></tr>` : "";
+  const overflow = totalNew > 12 ? `
+    <p style="margin:18px 0 0;text-align:center;color:${C.inkSoft};font-size:13px;font-style:italic;">
+      Et d'autres opportunités vous attendent dans votre zone…
+    </p>` : "";
 
   return `<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"/></head>
-<body style="margin:0;padding:0;background-color:#FAF9F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
-<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#FAF9F6;padding:32px 0">
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Votre veille Guardiens — ${zoneLabel}</title>
+</head>
+<body style="margin:0;padding:0;background:${C.bg};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:${C.ink};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.bg};padding:32px 12px;">
 <tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden">
 
-    <tr><td style="padding:32px 40px 24px;text-align:center;background-color:#FAF9F6">
-      <img src="https://guardiens.fr/logo.png" alt="Guardiens" width="140" style="display:block;margin:0 auto"/>
-      <h1 style="margin:16px 0 0;font-size:20px;color:#1a1a1a;font-weight:700">Votre veille — ${zoneLabel}</h1>
-    </td></tr>
+<table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
 
-    <tr><td style="padding:32px 40px">
-      <p style="margin:0 0 8px;font-size:15px;color:#333">Bonjour ${firstName},</p>
-      <p style="margin:0 0 24px;font-size:15px;color:#333;line-height:1.6">
-        Voici les nouvelles annonces publiées près de <strong>${zoneLabel}</strong> depuis hier.
-      </p>
+  <tr><td style="padding:0 4px 24px;text-align:center;">
+    <a href="https://guardiens.fr" style="text-decoration:none;color:${C.primary};font-family:Georgia,serif;font-size:22px;font-weight:700;letter-spacing:0.5px;">
+      Guardiens
+    </a>
+    <p style="margin:6px 0 0;font-size:12px;color:${C.inkSoft};letter-spacing:1.5px;text-transform:uppercase;">
+      House-sitting de proximité
+    </p>
+  </td></tr>
 
-      ${sits.length > 0 ? `
-        <h2 style="margin:0 0 12px;font-size:16px;color:#16a34a;border-bottom:2px solid #16a34a;padding-bottom:8px">
-          🐾 Gardes (${sits.length})
-        </h2>
-        <table width="100%" cellpadding="0" cellspacing="0">
-        ${sitsHtml}
-        </table>
-        <br/>
-      ` : ""}
+  <tr><td style="background:${C.card};border:1px solid ${C.border};border-radius:16px;padding:32px 28px;">
+    <h1 style="margin:0 0 6px;font-family:Georgia,serif;font-size:24px;line-height:1.25;color:${C.ink};font-weight:700;">
+      Bonjour ${niceName},
+    </h1>
+    <p style="margin:0 0 4px;font-size:16px;line-height:1.55;color:${C.ink};">
+      ${totalNew} nouveauté${totalNew > 1 ? "s" : ""} à découvrir dans votre veille
+      <strong style="color:${C.primary};">${zoneLabel}</strong>.
+    </p>
+    <p style="margin:0;font-size:14px;color:${C.inkSoft};line-height:1.6;">
+      Nous parcourons la communauté chaque jour pour vous signaler les annonces qui correspondent à votre zone et à vos préférences.
+    </p>
 
-      ${missions.length > 0 ? `
-        <h2 style="margin:0 0 12px;font-size:16px;color:#2563eb;border-bottom:2px solid #2563eb;padding-bottom:8px">
-          🤝 Petites missions (${missions.length})
-        </h2>
-        <table width="100%" cellpadding="0" cellspacing="0">
-        ${missionsHtml}
-        </table>
-        <br/>
-      ` : ""}
+    ${sitsBlock}
+    ${missionsBlock}
+    ${overflow}
 
-      ${overflow}
+    <div style="text-align:center;margin:32px 0 8px;">
+      <a href="https://guardiens.fr/search"
+         style="display:inline-block;padding:14px 32px;background:${C.primary};color:#ffffff;text-decoration:none;border-radius:10px;font-weight:600;font-size:15px;letter-spacing:0.3px;">
+        Voir toutes les annonces
+      </a>
+    </div>
+    <p style="margin:14px 0 0;text-align:center;font-size:13px;color:${C.inkSoft};">
+      <a href="https://guardiens.fr/messagerie" style="color:${C.primary};text-decoration:none;">Ou répondez directement aux propriétaires</a>
+    </p>
+  </td></tr>
 
-      <tr><td style="padding:24px 0 0;text-align:center">
-        <a href="https://guardiens.fr/search" style="display:inline-block;padding:12px 28px;background-color:#16a34a;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;font-size:16px">
-          Voir toutes les annonces
-        </a>
-      </td></tr>
-
-    </td></tr>
-
-    <tr><td style="padding:24px 40px;border-top:1px solid #e5e5e5;text-align:center">
-      <p style="margin:0;font-size:12px;color:#999999">
-        Vous recevez cet email car vous avez configuré une veille sur Guardiens.
-      </p>
-      <p style="margin:8px 0 0;font-size:11px">
-        <a href="https://guardiens.fr/settings" style="color:#bbbbbb">Gérer mes alertes</a>
-      </p>
-    </td></tr>
+  <tr><td style="padding:24px 8px 8px;text-align:center;">
+    <p style="margin:0 0 8px;font-size:12px;color:${C.inkSoft};line-height:1.6;">
+      Vous recevez cet email parce que vous avez configuré une veille sur Guardiens.
+    </p>
+    <p style="margin:0;font-size:12px;">
+      <a href="https://guardiens.fr/settings" style="color:${C.primary};text-decoration:none;">Modifier mes préférences d'alerte</a>
+      <span style="color:${C.border};margin:0 6px;">·</span>
+      <a href="https://guardiens.fr/settings" style="color:${C.inkSoft};text-decoration:none;">Me désabonner</a>
+    </p>
+    <p style="margin:14px 0 0;font-size:11px;color:${C.inkSoft};">
+      Guardiens — house-sitting de confiance, partout en France.
+    </p>
+  </td></tr>
 
 </table>
+
 </td></tr></table>
 </body>
 </html>`;
