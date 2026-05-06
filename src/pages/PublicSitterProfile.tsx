@@ -1672,7 +1672,21 @@ export default function PublicSitterProfile() {
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
               Avis des gardiens{ownerReviews.length > 0 && ` (${ownerReviews.length})`}
             </p>
-            {ownerReviews.length > 0 ? (
+            {ownerDataLoading ? (
+              <div className="space-y-3" aria-busy="true" aria-label="Chargement des avis">
+                {[0, 1].map((i) => (
+                  <div key={i} className="bg-card border border-border rounded-xl p-4 space-y-2">
+                    <div className="flex items-center gap-2.5">
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                      <Skeleton className="h-3 w-24" />
+                      <Skeleton className="h-3 w-16 ml-auto" />
+                    </div>
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-4/5" />
+                  </div>
+                ))}
+              </div>
+            ) : ownerReviews.length > 0 ? (
               <div className="space-y-3">
                 {(showAllOwnerReviews ? ownerReviews : ownerReviews.slice(0, VISIBLE_COUNT)).map((review) => {
                   const stars = Math.min(5, Math.max(0, Number(review.overall_rating) || 0));
