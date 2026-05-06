@@ -31,6 +31,7 @@ import EmptyCard from "./owner/EmptyCard";
 import StatsStrip from "./owner/StatsStrip";
 import PendingReviewsCard from "./owner/PendingReviewsCard";
 import MobileStickyCTA from "./owner/MobileStickyCTA";
+import TodoCard, { type TodoItem } from "./owner/TodoCard";
 import {
   SPECIES_LABEL, PROPRIO_SPECIAL_IDS,
   capitalize, capitalizeWords,
