@@ -690,12 +690,29 @@ const SearchSitter = () => {
  // Hydrate owner data from public_profiles (safe public view) in a single batched call
  const ownerIds = Array.from(new Set(items.map((s: any) => s.user_id).filter(Boolean)));
  if (ownerIds.length > 0) {
- const { data: owners } = await supabase
+ const [{ data: owners }, { data: galleryRows }] = await Promise.all([
+   supabase
 .from("public_profiles")
 .select("id, first_name, avatar_url, city, postal_code, identity_verified, is_founder")
-.in("id", ownerIds);
+.in("id", ownerIds),
+   supabase
+.from("owner_gallery")
+.select("user_id, photo_url, position")
+.in("user_id", ownerIds)
+.order("position", { ascending: true }),
+ ]);
  const ownerMap = new Map((owners || []).map((o: any) => [o.id, o]));
- items = items.map((s: any) => ({...s, owner: ownerMap.get(s.user_id) || null }));
+ const galleryFirstMap = new Map<string, string>();
+ (galleryRows || []).forEach((g: any) => {
+   if (g?.user_id && g?.photo_url && !galleryFirstMap.has(g.user_id)) {
+     galleryFirstMap.set(g.user_id, g.photo_url);
+   }
+ });
+ items = items.map((s: any) => ({
+   ...s,
+   owner: ownerMap.get(s.user_id) || null,
+   ownerGalleryFirstPhoto: galleryFirstMap.get(s.user_id) || null,
+ }));
  }
  // Mark assigned/completed sits (will be rendered greyed-out, non-clickable)
  items = items.map((s: any) => ({
@@ -956,7 +973,7 @@ const SearchSitter = () => {
  // ─── Card renderer ───
  const renderCard = (item: any, listIndex?: number) => {
  const photos: string[] = item.property?.photos || [];
- const coverPhoto = (item as any).cover_photo_url || item.property?.cover_photo_url || photos[0] || null;
+ const coverPhoto = (item as any).cover_photo_url || item.property?.cover_photo_url || photos[0] || (item as any).ownerGalleryFirstPhoto || null;
  const petGroups: Record<string, string[]> = {};
  (item.pets || []).forEach((p: any) => {
  if (!petGroups[p.species]) petGroups[p.species] = [];

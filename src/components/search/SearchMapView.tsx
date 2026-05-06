@@ -210,7 +210,7 @@ const SearchMapView = ({
           const coords = getCoords(activeItem);
           if (!coords) return null;
           const photos: string[] = activeItem.property?.photos || [];
-          const coverPhoto = (activeItem as any).cover_photo_url || activeItem.property?.cover_photo_url || photos[0] || null;
+          const coverPhoto = (activeItem as any).cover_photo_url || activeItem.property?.cover_photo_url || photos[0] || (activeItem as any).ownerGalleryFirstPhoto || null;
           const petGroups: Record<string, string[]> = {};
           (activeItem.pets || []).forEach((p: any) => {
             if (!petGroups[p.species]) petGroups[p.species] = [];
