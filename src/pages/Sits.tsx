@@ -513,7 +513,7 @@ const Sits = () => {
       </div>
 
       {/* Recherche rapide */}
-      {sits.length > 4 && (
+      {sits.length > 0 && (
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" aria-hidden="true" />
           <input
