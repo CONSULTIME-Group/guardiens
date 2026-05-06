@@ -151,6 +151,7 @@ const PublicSitDetail = () => {
  if (reviews.length > 0) {
  setAvgRating((reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1));
  }
+ setLatestReviews((latestReviewsRes.data || []) as any);
 
  const badgeMap = new Map<string, number>();
  (badgeRes.data || []).forEach((b: any) => badgeMap.set(b.badge_key, (badgeMap.get(b.badge_key) || 0) + 1));
