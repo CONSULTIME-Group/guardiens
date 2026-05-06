@@ -171,17 +171,38 @@ const OwnerDashboard = () => {
               {user?.isFounder && <FounderBadge size="sm" />}
             </div>
             <p className="text-sm text-muted-foreground font-sans mt-1">{subtitle}</p>
-            {user?.id ? (
-              <Link
-                to={`/gardiens/${user.id}?tab=proprio`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
-                aria-label="Voir mon profil public (nouvel onglet)"
-              >
-                <Eye className="w-3 h-3" aria-hidden="true" /> Voir mon profil public
-              </Link>
-            ) : null}
+            {/* Mini-indicateurs inline (verif + candidatures non lues) — densifie le hero
+                en évitant le banner séparé quand l'info tient en chips. */}
+            <div className="flex items-center gap-2 mt-2 flex-wrap">
+              {verificationStatus !== "verified" && verificationStatus !== "pending" && (
+                <Link
+                  to="/settings#verification"
+                  className="inline-flex items-center gap-1 text-[11px] rounded-full px-2 py-0.5 border border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-warning" aria-hidden="true" />
+                  Identité à vérifier
+                </Link>
+              )}
+              {pendingAppCount > 0 && (
+                <Link
+                  to="/sits"
+                  className="inline-flex items-center gap-1 text-[11px] rounded-full px-2 py-0.5 border border-primary/40 bg-primary/5 text-primary hover:bg-primary/10 transition-colors font-medium"
+                >
+                  {pendingAppCount} candidature{pendingAppCount > 1 ? "s" : ""} non lue{pendingAppCount > 1 ? "s" : ""}
+                </Link>
+              )}
+              {user?.id ? (
+                <Link
+                  to={`/gardiens/${user.id}?tab=proprio`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] rounded-full px-2 py-0.5 text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  aria-label="Voir mon profil public (nouvel onglet)"
+                >
+                  <Eye className="w-3 h-3" aria-hidden="true" /> Mon profil public
+                </Link>
+              ) : null}
+            </div>
           </div>
           <Button
             size="lg"
