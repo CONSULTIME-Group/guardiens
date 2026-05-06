@@ -104,6 +104,9 @@ export default function PublicSitterProfile() {
   const [activeTab, setActiveTab] = useState<ProfileTab>('gardien');
   const [pets, setPets] = useState<any[]>([]);
   const [ownerSits, setOwnerSits] = useState<any[]>([]);
+  const [ownerSitsTotal, setOwnerSitsTotal] = useState<number>(0);
+  const [ownerSitsLoadingMore, setOwnerSitsLoadingMore] = useState(false);
+  const OWNER_SITS_PAGE_SIZE = 50;
   const [ownerReviews, setOwnerReviews] = useState<any[]>([]);
   const [missionFeedbacks, setMissionFeedbacks] = useState<any[]>([]);
   const [missionsPublished, setMissionsPublished] = useState<any[]>([]);
@@ -452,16 +455,17 @@ export default function PublicSitterProfile() {
       }
       setPets(fetchedPets);
 
-      // Query 2 — Annonces publiées (limite raisonnable, UI tronque via "Voir plus")
-      const { data: sitsData, error: sitsErr } = await supabase
+      // Query 2 — Annonces publiées (pagination progressive : 50 par lot, "Voir plus" charge la suite)
+      const { data: sitsData, error: sitsErr, count: sitsCount } = await supabase
         .from('sits')
-        .select('id, title, start_date, end_date, status, created_at')
+        .select('id, title, start_date, end_date, status, created_at', { count: 'exact' })
         .eq('user_id', id)
         .in('status', ['published', 'confirmed', 'completed'])
         .order('created_at', { ascending: false })
-        .limit(50);
+        .range(0, OWNER_SITS_PAGE_SIZE - 1);
       if (sitsErr) console.error('[sits]', sitsErr);
       setOwnerSits(sitsData ?? []);
+      setOwnerSitsTotal(sitsCount ?? (sitsData?.length ?? 0));
 
       // Query 3 — Avis reçus en tant que propriétaire (laissés par les gardiens
       // après une garde, OU laissés directement comme avis "proprio/owner").
@@ -532,6 +536,24 @@ export default function PublicSitterProfile() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [lightboxIdx, gallery]);
+
+  const loadMoreOwnerSits = async () => {
+    if (!id || ownerSitsLoadingMore) return;
+    if (ownerSits.length >= ownerSitsTotal) return;
+    setOwnerSitsLoadingMore(true);
+    const from = ownerSits.length;
+    const to = from + OWNER_SITS_PAGE_SIZE - 1;
+    const { data, error } = await supabase
+      .from('sits')
+      .select('id, title, start_date, end_date, status, created_at')
+      .eq('user_id', id)
+      .in('status', ['published', 'confirmed', 'completed'])
+      .order('created_at', { ascending: false })
+      .range(from, to);
+    if (error) console.error('[ownerSits loadMore]', error);
+    if (data && data.length) setOwnerSits((prev) => [...prev, ...data]);
+    setOwnerSitsLoadingMore(false);
+  };
 
   if (loading) {
     return (
@@ -1503,7 +1525,7 @@ export default function PublicSitterProfile() {
           {/* ── ANNONCES ── */}
           <div className="space-y-3">
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
-              Gardes publiées{ownerSits.length > 0 && ` (${ownerSits.length})`}
+              Gardes publiées{ownerSitsTotal > 0 && ` (${ownerSitsTotal})`}
             </p>
             {ownerSits.length > 0 ? (
               <div className="space-y-2">
@@ -1541,7 +1563,22 @@ export default function PublicSitterProfile() {
                     </div>
                   );
                 })}
-                <ShowMoreBtn items={ownerSits} showAll={showAllOwnerSits} setShowAll={setShowAllOwnerSits} />
+                <div className="flex flex-col items-start gap-2 mt-2">
+                  <ShowMoreBtn items={ownerSits} showAll={showAllOwnerSits} setShowAll={setShowAllOwnerSits} />
+                  {showAllOwnerSits && ownerSits.length < ownerSitsTotal && (
+                    <button
+                      type="button"
+                      onClick={loadMoreOwnerSits}
+                      disabled={ownerSitsLoadingMore}
+                      className="text-sm text-primary hover:underline font-body disabled:opacity-50"
+                      aria-label={`Charger ${Math.min(OWNER_SITS_PAGE_SIZE, ownerSitsTotal - ownerSits.length)} annonces supplémentaires`}
+                    >
+                      {ownerSitsLoadingMore
+                        ? 'Chargement…'
+                        : `Charger ${Math.min(OWNER_SITS_PAGE_SIZE, ownerSitsTotal - ownerSits.length)} annonces de plus (${ownerSits.length}/${ownerSitsTotal})`}
+                    </button>
+                  )}
+                </div>
               </div>
             ) : (
               <p className="text-sm text-foreground/50 font-body italic">Aucune garde publiée pour l'instant.</p>
