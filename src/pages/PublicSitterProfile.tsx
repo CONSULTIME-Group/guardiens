@@ -537,6 +537,24 @@ export default function PublicSitterProfile() {
     return () => window.removeEventListener('keydown', onKey);
   }, [lightboxIdx, gallery]);
 
+  const loadMoreOwnerSits = async () => {
+    if (!id || ownerSitsLoadingMore) return;
+    if (ownerSits.length >= ownerSitsTotal) return;
+    setOwnerSitsLoadingMore(true);
+    const from = ownerSits.length;
+    const to = from + OWNER_SITS_PAGE_SIZE - 1;
+    const { data, error } = await supabase
+      .from('sits')
+      .select('id, title, start_date, end_date, status, created_at')
+      .eq('user_id', id)
+      .in('status', ['published', 'confirmed', 'completed'])
+      .order('created_at', { ascending: false })
+      .range(from, to);
+    if (error) console.error('[ownerSits loadMore]', error);
+    if (data && data.length) setOwnerSits((prev) => [...prev, ...data]);
+    setOwnerSitsLoadingMore(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
