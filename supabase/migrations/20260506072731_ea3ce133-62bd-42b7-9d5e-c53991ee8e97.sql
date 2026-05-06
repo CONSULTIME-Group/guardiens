@@ -1,0 +1,2 @@
+REVOKE EXECUTE ON FUNCTION public.recalc_completed_sits_count(uuid) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.trg_reviews_recalc_completed_sits() FROM PUBLIC, anon, authenticated;

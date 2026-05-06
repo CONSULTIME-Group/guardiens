@@ -4406,6 +4406,10 @@ export type Database = {
           read_ct: number
         }[]
       }
+      recalc_completed_sits_count: {
+        Args: { _user_id: string }
+        Returns: undefined
+      }
       recalculate_cancellations: {
         Args: { p_role: string; p_user_id: string }
         Returns: undefined

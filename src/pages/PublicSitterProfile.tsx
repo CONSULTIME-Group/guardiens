@@ -217,10 +217,10 @@ export default function PublicSitterProfile() {
         <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Zone d'intervention</h3>
         <p className="text-sm text-foreground/70 font-body">
           {props.hasVehicle
-            ? `Avec véhicule${props.radius ? ` — rayon ${props.radius} km${props.city ? ` · ${props.city}` : ''}` : ''}`
+            ? `Avec véhicule${props.radius ? ` — peut intervenir jusqu'à ${props.radius} km${props.city ? ` autour de ${props.city}` : ''}` : ''}`
             : props.radius
-              ? `Rayon ${props.radius} km${props.city ? ` · ${props.city}` : ''}`
-              : 'Rayon non renseigné'}
+              ? `Jusqu'à ${props.radius} km${props.city ? ` autour de ${props.city}` : ''}`
+              : 'Zone d\'intervention non précisée'}
         </p>
       </div>
       {props.competences.length > 0 && (
@@ -594,12 +594,10 @@ export default function PublicSitterProfile() {
   const animalTypes: string[] = sitterProfile?.animal_types || [];
   const hasVehicle = sitterProfile?.has_vehicle || false;
   const rawRadius = sitterProfile?.geographic_radius;
-  // Cohérence : on aligne completedSits avec le nombre d'avis de garde reçus.
-  // Chaque avis de garde correspond à une garde réalisée — on prend donc le max
-  // entre le compteur DB (profile.completed_sits_count) et gardeReviews.length
-  // pour éviter qu'un onglet affiche "3 gardes" pendant qu'un autre montre "5 avis garde".
+  // Cohérence : la valeur DB est désormais maintenue par un trigger sur la table
+  // reviews (recalc_completed_sits_count). Plus besoin de Math.max côté client.
   const gardeReviewsCount = reviews.filter((r: any) => r.sit_id !== null).length;
-  const completedSits = Math.max(profile?.completed_sits_count || 0, gardeReviewsCount);
+  const completedSits = profile?.completed_sits_count ?? 0;
   const cancellations = profile?.cancellation_count || 0;
   const radius = rawRadius && rawRadius > 0 ? rawRadius : null;
   const isOwn = auth?.user?.id === id;
@@ -644,17 +642,32 @@ export default function PublicSitterProfile() {
 
    // SEO
   const animalLabels = animalTypes.map(a => ANIMAL_LABELS[a] || a).join(", ");
-  const rawTitle = city ? `${firstName} — Gardien à ${city}` : `${firstName} — Gardien de maison`;
-  const pageTitle = rawTitle;
-  const pageDesc = ((bio || motivation || "") as string).slice(0, 160) || `${firstName} garde des ${animalLabels || "animaux"} à ${city || "France"}. Profil vérifié sur Guardiens.fr.`;
+  // Title structuré : nom · ville · signaux de confiance — limité à ~60 caractères.
+  const trustSignals: string[] = [];
+  if (profile?.identity_verified) trustSignals.push("identité vérifiée");
+  if (avgRating > 0 && reviewCount > 0) trustSignals.push(`${avgRating.toFixed(1)} ★`);
+  const trustPart = trustSignals.length ? ` — ${trustSignals.join(" · ")}` : "";
+  const baseTitle = city ? `${firstName}, gardien à ${city}` : `${firstName}, gardien d'animaux`;
+  const candidateTitle = `${baseTitle}${trustPart}`;
+  const pageTitle = candidateTitle.length <= 60 ? candidateTitle : baseTitle;
+  // Meta description structurée : promesse + animaux + zone + signaux de confiance.
+  const animalsForDesc = animalLabels || "animaux";
+  const cityForDesc = city ? `à ${city}${radius ? ` (rayon ${radius} km)` : ''}` : "près de chez vous";
+  const trustForDesc = [
+    profile?.identity_verified ? "identité vérifiée" : null,
+    completedSits > 0 ? `${completedSits} garde${completedSits > 1 ? 's' : ''}` : null,
+    reviewCount > 0 ? `${avgRating.toFixed(1)}/5 (${reviewCount} avis)` : null,
+  ].filter(Boolean).join(" · ");
+  const descBase = `${firstName} garde vos ${animalsForDesc} ${cityForDesc}.`;
+  const pageDesc = (descBase + (trustForDesc ? ` ${trustForDesc}.` : '')).slice(0, 160);
   const pageUrl = buildAbsoluteUrl(`/gardiens/${id}`);
-  // Politique : profils riches indexables (≥3 avis publics + identité vérifiée + bio).
-  // Sinon noindex (RGPD + thin content).
+  // Politique : profils riches indexables (≥1 avis publié OU ≥1 garde réalisée),
+  // identité vérifiée et bio substantielle. Sinon noindex (RGPD + thin content).
+  const hasSubstantialBio = ((bio || motivation || "") as string).length >= 80;
   const isRichProfile =
-    reviewCount >= 3 &&
+    (reviewCount >= 1 || completedSits >= 1) &&
     !!profile?.identity_verified &&
-    !!(bio || motivation) &&
-    ((bio || motivation || "").length >= 80);
+    hasSubstantialBio;
   const shouldNoindex = !isRichProfile;
 
   const jsonLd = {
@@ -764,7 +777,7 @@ export default function PublicSitterProfile() {
         const isOwnProfile = !!auth.user?.id && auth.user.id === id;
         return (
           <div
-            className="relative overflow-hidden w-full flex items-end bg-[hsl(var(--hero-paper))]"
+            className="relative overflow-hidden w-full flex items-end bg-[hsl(var(--hero-paper))] max-h-[420px] md:max-h-[520px]"
             style={{ aspectRatio: "1536 / 544" }}
           >
             {/* Illustration de fond — sketchbook style, déterministe par profil.
@@ -978,6 +991,9 @@ export default function PublicSitterProfile() {
             >
               <Home className="w-4 h-4" aria-hidden="true" />
               Gardien
+              {completedSits > 0 && (
+                <span className="ml-1 text-xs font-normal opacity-70">({completedSits})</span>
+              )}
             </button>
           )}
           {hasOwnerProfile && (
@@ -1014,6 +1030,9 @@ export default function PublicSitterProfile() {
             >
               <Handshake className="w-4 h-4" aria-hidden="true" />
               Entraide
+              {missionCount > 0 && (
+                <span className="ml-1 text-xs font-normal opacity-70">({missionCount})</span>
+              )}
             </button>
           )}
         </div>
@@ -1072,9 +1091,9 @@ export default function PublicSitterProfile() {
                     {radius || city ? (
                       <p className="text-xs sm:text-sm text-foreground font-body leading-snug break-words">
                         {radius && city ? (
-                          <><span className="font-semibold whitespace-nowrap">Rayon {radius} km</span> <span className="text-muted-foreground">·</span> <span className="break-words">{city}</span></>
+                          <><span className="break-words">{city}</span> <span className="text-muted-foreground">·</span> <span className="font-semibold whitespace-nowrap">jusqu'à {radius} km</span></>
                         ) : radius ? (
-                          <span className="font-semibold whitespace-nowrap">Rayon {radius} km</span>
+                          <span className="font-semibold whitespace-nowrap">Jusqu'à {radius} km autour</span>
                         ) : (
                           <>Secteur : <span className="font-semibold break-words">{city}</span></>
                         )}
@@ -1125,7 +1144,9 @@ export default function PublicSitterProfile() {
                           {reviewCount > 0 ? (
                             <>
                               <span className="font-semibold whitespace-nowrap">{avgRating.toFixed(1)}<span className="text-primary">★</span></span>
-                              <span className="text-muted-foreground text-[11px] sm:text-xs">({reviewCount} avis)</span>
+                              <span className="text-muted-foreground text-[11px] sm:text-xs">
+                                ({reviewCount} avis{reviewCount === 1 ? ' — premier retour' : ''})
+                              </span>
                             </>
                           ) : identityVerified ? (
                             <span className="text-foreground/80 text-[11px] sm:text-xs">Identité vérifiée</span>
