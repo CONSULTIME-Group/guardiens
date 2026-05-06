@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, ThumbsUp, ThumbsDown, CheckCircle2 } from "lucide-react";
 import StarRating from "@/components/reviews/StarRating";
+import { BadgeSelector } from "@/components/badges/BadgeSelector";
 import { Helmet } from "react-helmet-async";
 
 type ReviewDirection = "owner_to_sitter" | "sitter_to_owner";
@@ -47,6 +48,7 @@ const LeaveReview = () => {
   const [subRatings, setSubRatings] = useState<Record<string, number>>({});
   const [wouldRecommend, setWouldRecommend] = useState<boolean | null>(null);
   const [comment, setComment] = useState("");
+  const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
 
   const [reviewDirection, setReviewDirection] = useState<ReviewDirection>("owner_to_sitter");
 
@@ -198,6 +200,21 @@ const LeaveReview = () => {
       });
       setSubmitting(false);
       return;
+    }
+
+    // Attribution des écussons sélectionnés
+    if (selectedBadges.length > 0) {
+      const badgeRows = selectedBadges.map((badge_id) => ({
+        user_id: reviewee.id,
+        giver_id: user.id,
+        sit_id: sitId,
+        badge_id,
+        is_manual: false,
+      }));
+      const { error: badgeError } = await supabase.from("badge_attributions").insert(badgeRows);
+      if (badgeError) {
+        logger.warn("Badge attribution failed", { err: String(badgeError) });
+      }
     }
 
     // Send email to the other party inviting them to leave their review
@@ -384,6 +401,15 @@ const LeaveReview = () => {
             <ThumbsDown className="h-4 w-4" /> Non
           </button>
         </div>
+      </div>
+
+      <div className="mb-8">
+        <BadgeSelector
+          target={isOwnerReview ? "gardien" : "proprio"}
+          selected={selectedBadges}
+          onChange={setSelectedBadges}
+          max={3}
+        />
       </div>
 
       <div className="mb-6">
