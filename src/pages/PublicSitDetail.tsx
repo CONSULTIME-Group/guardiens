@@ -64,6 +64,7 @@ const PublicSitDetail = () => {
  const [badges, setBadges] = useState<{ badge_key: string; count: number }[]>([]);
  const [avgRating, setAvgRating] = useState<string | null>(null);
  const [reviewCount, setReviewCount] = useState(0);
+ const [latestReviews, setLatestReviews] = useState<{ overall_rating: number; comment: string; created_at: string }[]>([]);
  const [loading, setLoading] = useState(true);
  const [applyOpen, setApplyOpen] = useState(false);
  const [hasApplied, setHasApplied] = useState(false);
