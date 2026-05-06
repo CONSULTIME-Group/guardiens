@@ -428,23 +428,28 @@ const PublicSitDetail = () => {
  {/* Header public — anonymes uniquement (identité de marque + nav minimale) */}
  {!isAuthenticated && <PublicHeader />}
 
- {/* Mini-barre sticky pour les membres connectés (la page publique n'a pas le header app) */}
- {isAuthenticated && (
- <div className="sticky top-0 z-30 bg-primary/10 backdrop-blur-sm border-b border-primary/20 px-4 py-2 flex flex-wrap items-center justify-between gap-2">
- <Link
- to="/dashboard"
- className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
- >
- <ArrowLeft className="h-4 w-4" /> Retour au dashboard
- </Link>
- <Button asChild size="sm" className="h-8">
- <Link to={`/sits/${sit.id}`} className="inline-flex items-center gap-1.5">
- {viewerType === "owner_of_sit" ? "Aller à mon annonce" : "Voir la fiche complète"}
- <ExternalLink className="h-3.5 w-3.5" />
- </Link>
- </Button>
- </div>
- )}
+      {/* Bandeau preview pour le propriétaire de l'annonce — clair, non-intrusif */}
+      {viewerType === "owner_of_sit" && (
+        <div className="bg-primary/5 border-b border-primary/15">
+          <div className="max-w-4xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs md:text-sm text-foreground/80">
+              <span className="font-medium text-foreground">Aperçu public</span> · ce que voient les visiteurs partageant le lien.
+            </p>
+            <div className="flex items-center gap-2">
+              <Button asChild variant="ghost" size="sm" className="h-8 text-xs">
+                <Link to="/dashboard" className="inline-flex items-center gap-1.5">
+                  <ArrowLeft className="h-3.5 w-3.5" /> Dashboard
+                </Link>
+              </Button>
+              <Button asChild size="sm" className="h-8 text-xs">
+                <Link to={`/sits/${sit.id}`} className="inline-flex items-center gap-1.5">
+                  Gérer mon annonce <ExternalLink className="h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
  <div className="max-w-4xl mx-auto">
  {/* ─── HERO ÉDITORIAL ─────────────────────────────────────────────── */}
