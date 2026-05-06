@@ -65,8 +65,9 @@ describe("LeaveReview — insertion badge_attributions", () => {
   });
 
   it("owner_to_sitter : insère les écussons sélectionnés pour le gardien", async () => {
+    const badges = ["soin_exemplaire", "communication_top", "on_refait_ca"];
     await attributeBadges({
-      selectedBadges: ["soin_exemplaire", "communication_top", "on_refait_ca"],
+      selectedBadges: badges,
       revieweeId: SITTER_ID,
       reviewerId: OWNER_ID,
       sitId: SIT_ID,
@@ -74,24 +75,37 @@ describe("LeaveReview — insertion badge_attributions", () => {
 
     expect(inserted.badge_attributions).toHaveLength(1);
     const rows = inserted.badge_attributions[0] as any[];
-    expect(rows).toHaveLength(3);
-    rows.forEach((r) => {
-      expect(r.user_id).toBe(SITTER_ID);
-      expect(r.giver_id).toBe(OWNER_ID);
-      expect(r.sit_id).toBe(SIT_ID);
-      expect(r.is_manual).toBe(false);
-      expect(typeof r.badge_id).toBe("string");
+    expect(rows).toHaveLength(badges.length);
+
+    // Shape exact ligne par ligne
+    rows.forEach((r, i) => {
+      expect(r).toEqual({
+        user_id: SITTER_ID,
+        giver_id: OWNER_ID,
+        sit_id: SIT_ID,
+        badge_id: badges[i],
+        is_manual: false,
+      });
     });
-    expect(rows.map((r) => r.badge_id)).toEqual([
-      "soin_exemplaire",
-      "communication_top",
-      "on_refait_ca",
-    ]);
+
+    // Direction : auteur (giver) ≠ cible (user), et auteur = OWNER, cible = SITTER
+    rows.forEach((r) => {
+      expect(r.giver_id).toBe(OWNER_ID);
+      expect(r.user_id).toBe(SITTER_ID);
+      expect(r.giver_id).not.toBe(r.user_id);
+      expect(r.sit_id).toBe(SIT_ID);
+      expect(r.badge_id).toMatch(/^[a-z0-9_]+$/);
+    });
+
+    // Pas de doublons sur badge_id
+    const ids = rows.map((r) => r.badge_id);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
   it("sitter_to_owner : insère les écussons sélectionnés pour le propriétaire", async () => {
+    const badges = ["annonce_fidele", "accueil_chaleureux"];
     await attributeBadges({
-      selectedBadges: ["annonce_fidele", "accueil_chaleureux"],
+      selectedBadges: badges,
       revieweeId: OWNER_ID,
       reviewerId: SITTER_ID,
       sitId: SIT_ID,
@@ -99,13 +113,41 @@ describe("LeaveReview — insertion badge_attributions", () => {
 
     expect(inserted.badge_attributions).toHaveLength(1);
     const rows = inserted.badge_attributions[0] as any[];
-    expect(rows).toHaveLength(2);
-    rows.forEach((r) => {
-      expect(r.user_id).toBe(OWNER_ID);
-      expect(r.giver_id).toBe(SITTER_ID);
-      expect(r.sit_id).toBe(SIT_ID);
-      expect(r.is_manual).toBe(false);
+    expect(rows).toHaveLength(badges.length);
+
+    rows.forEach((r, i) => {
+      expect(r).toEqual({
+        user_id: OWNER_ID,
+        giver_id: SITTER_ID,
+        sit_id: SIT_ID,
+        badge_id: badges[i],
+        is_manual: false,
+      });
     });
+
+    // Direction inversée : auteur = SITTER, cible = OWNER
+    rows.forEach((r) => {
+      expect(r.giver_id).toBe(SITTER_ID);
+      expect(r.user_id).toBe(OWNER_ID);
+      expect(r.giver_id).not.toBe(r.user_id);
+      expect(r.sit_id).toBe(SIT_ID);
+      expect(r.badge_id).toMatch(/^[a-z0-9_]+$/);
+    });
+
+    const ids = rows.map((r) => r.badge_id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("respecte l'ordre exact des badges sélectionnés", async () => {
+    const badges = ["c_badge", "a_badge", "b_badge"];
+    await attributeBadges({
+      selectedBadges: badges,
+      revieweeId: SITTER_ID,
+      reviewerId: OWNER_ID,
+      sitId: SIT_ID,
+    });
+    const rows = inserted.badge_attributions[0] as any[];
+    expect(rows.map((r) => r.badge_id)).toEqual(badges);
   });
 
   it("aucun badge sélectionné : aucun insert n'est effectué", async () => {
