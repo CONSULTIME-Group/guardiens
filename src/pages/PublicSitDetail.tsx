@@ -231,8 +231,26 @@ const PublicSitDetail = () => {
  </div>
  );
  }
- if (!sit) return <div className="p-6 md:p-10"><p>Annonce introuvable.</p></div>;
- if (sit.status !== "published") return <div className="p-6 md:p-10"><p>Cette annonce n'est plus disponible.</p></div>;
+  if (loadError === "not_found" || (!loading && !sit)) {
+    return (
+      <div className="max-w-2xl mx-auto p-6 md:p-10 text-center space-y-3">
+        <h1 className="font-heading text-2xl font-semibold">Annonce introuvable</h1>
+        <p className="text-muted-foreground text-sm">Cette annonce a peut-être été retirée par son auteur, ou le lien est incorrect.</p>
+        <Link to="/" className="inline-flex text-primary text-sm font-medium hover:underline">Retour à l'accueil</Link>
+      </div>
+    );
+  }
+  if (loadError === "error") {
+    return (
+      <div className="max-w-2xl mx-auto p-6 md:p-10 text-center space-y-3">
+        <h1 className="font-heading text-2xl font-semibold">Une erreur est survenue</h1>
+        <p className="text-muted-foreground text-sm">Impossible de charger cette annonce pour le moment. Veuillez réessayer dans un instant.</p>
+        <button onClick={() => window.location.reload()} className="inline-flex text-primary text-sm font-medium hover:underline">Recharger la page</button>
+      </div>
+    );
+  }
+  if (!sit) return null;
+  if (sit.status !== "published") return <div className="max-w-2xl mx-auto p-6 md:p-10 text-center"><p className="text-muted-foreground">Cette annonce n'est plus disponible.</p></div>;
 
  const photos: string[] = property?.photos || [];
  const formatDate = (d: string | null) => d ? format(new Date(d), "d MMMM yyyy", { locale: fr }) : "";
