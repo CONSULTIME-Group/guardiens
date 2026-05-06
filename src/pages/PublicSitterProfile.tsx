@@ -104,6 +104,9 @@ export default function PublicSitterProfile() {
   const [activeTab, setActiveTab] = useState<ProfileTab>('gardien');
   const [pets, setPets] = useState<any[]>([]);
   const [ownerSits, setOwnerSits] = useState<any[]>([]);
+  const [ownerSitsTotal, setOwnerSitsTotal] = useState<number>(0);
+  const [ownerSitsLoadingMore, setOwnerSitsLoadingMore] = useState(false);
+  const OWNER_SITS_PAGE_SIZE = 50;
   const [ownerReviews, setOwnerReviews] = useState<any[]>([]);
   const [missionFeedbacks, setMissionFeedbacks] = useState<any[]>([]);
   const [missionsPublished, setMissionsPublished] = useState<any[]>([]);
