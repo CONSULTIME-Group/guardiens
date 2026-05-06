@@ -204,6 +204,7 @@ const OwnerGallery = () => {
     for (const f of toUpload) {
       try {
         const compressed = await compressImageFile(f, 5, 1200);
+        const dims = await getImageDimensions(compressed);
         const ext = (compressed.name.split(".").pop() || "jpg").toLowerCase();
         const path = `${user.id}/owner-gallery/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
         const { error: uploadErr } = await supabase.storage.from("property-photos").upload(path, compressed);
@@ -216,6 +217,8 @@ const OwnerGallery = () => {
           category: defaultCategory as any,
           season: defaultSeason || null,
           position: nextPosition,
+          width: dims.width || null,
+          height: dims.height || null,
         } as any);
         if (insertErr) throw insertErr;
         nextPosition += 1;
