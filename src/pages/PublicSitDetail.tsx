@@ -803,16 +803,10 @@ const PublicSitDetail = () => {
         </details>
       )}
 
- {/* ─── GESTION — propriétaire de l'annonce uniquement ───────────── */}
- {viewerType === "owner_of_sit" && property && (
- <OwnerSitManagement
- sitId={sit.id}
- propertyId={property.id}
- status={sit.status}
- canCancel={sit.status === "published" || sit.status === "confirmed"}
- onCancelClick={() => navigate(`/sits/${sit.id}?action=cancel`)}
- />
- )}
+ {/* ─── GESTION ─── Volontairement supprimée de l'aperçu public.
+     La page /annonces/:id est un aperçu visiteur ; toutes les actions
+     (Modifier, Guide maison, Annuler) vivent sur /sits/:id, accessible
+     via le bouton « Gérer mon annonce » du bandeau supérieur. */}
 
  {/* ─── MINI-FAQ — visiteurs anonymes uniquement ─────────────────── */}
  {!isAuthenticated && <PublicSitFAQ />}
