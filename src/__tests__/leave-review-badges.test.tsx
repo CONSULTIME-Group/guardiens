@@ -140,4 +140,37 @@ describe("LeaveReview — insertion badge_attributions", () => {
     expect(fromSpy).not.toHaveBeenCalled();
     expect(insertSpy).not.toHaveBeenCalled();
   });
+
+  /**
+   * Comportement actuel documenté : `buildBadgeAttributionRows` NE déduplique
+   * PAS côté client. Si la même `badge_id` est passée deux fois, deux lignes
+   * identiques sont envoyées à Supabase. La déduplication finale est censée
+   * être assurée côté DB par une contrainte UNIQUE
+   * `(user_id, giver_id, sit_id, badge_id)`.
+   *
+   * Ce test gèle ce contrat : si on décide un jour de dédupliquer côté client,
+   * il faudra le mettre à jour ET retirer la dépendance à la contrainte DB.
+   */
+  it("badges en double : NE déduplique PAS côté client (contrat DB)", async () => {
+    const badges = ["soin_exemplaire", "soin_exemplaire", "communication_top"];
+    await attributeBadges({
+      selectedBadges: badges,
+      revieweeId: SITTER_ID,
+      reviewerId: OWNER_ID,
+      sitId: SIT_ID,
+    });
+
+    expect(insertSpy).toHaveBeenCalledTimes(1);
+    const rows = lastInsertOn("badge_attributions")!;
+
+    // Aucune déduplication : 3 lignes envoyées telles quelles, dans l'ordre.
+    expect(rows).toHaveLength(3);
+    expect(rows.map((r) => r.badge_id)).toEqual(badges);
+
+    // Deux lignes strictement identiques sont bien présentes : la déduplication
+    // devra être assurée par la contrainte UNIQUE côté base de données.
+    const occurrences = rows.filter((r) => r.badge_id === "soin_exemplaire");
+    expect(occurrences).toHaveLength(2);
+    expect(occurrences[0]).toEqual(occurrences[1]);
+  });
 });
