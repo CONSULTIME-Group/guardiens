@@ -446,14 +446,17 @@ export default function PublicSitterProfile() {
       if (sitsErr) console.error('[sits]', sitsErr);
       setOwnerSits(sitsData ?? []);
 
-      // Query 3 — Avis reçus en tant que proprio
+      // Query 3 — Avis reçus en tant que propriétaire (laissés par les gardiens
+      // après une garde, OU laissés directement comme avis "proprio/owner").
+      // On ne filtre PAS sur review_type : `reviewee_id` suffit à cibler les
+      // avis reçus par ce compte. Exclure les annulations uniquement.
       const { data: revData, error: revErr } = await supabase
         .from('reviews')
-        .select('id, overall_rating, comment, created_at, review_type, reviewer_id')
+        .select('id, overall_rating, comment, created_at, review_type, reviewer_id, sit_id')
         .eq('reviewee_id', id)
         .eq('published', true)
         .eq('moderation_status', 'valide')
-        .in('review_type', ['proprio', 'owner'])
+        .neq('review_type', 'annulation')
         .order('created_at', { ascending: false });
       if (revErr) console.error('[ownerReviews]', revErr);
       const enrichedOwnerReviews = await hydrateReviewers((revData ?? []) as any[]);
