@@ -145,10 +145,16 @@ const SitterSitView = ({
     userRole: user?.role ?? null,
     userFirstName: user?.firstName ?? null,
   });
-  // Détecte l'arrivée via le toggle "Voir comme gardien" (compte both)
-  // pour proposer un retour rapide vers l'aperçu public `/annonces/:id`.
+  // Bandeau "Retour à l'aperçu public" : visible uniquement si l'utilisateur
+  // est arrivé via le toggle côté propriétaire (compte both connecté avec
+  // ?view=sitter dans l'URL). Pour tout autre cas (anonyme, gardien pur,
+  // sitter only, lien partagé recopié), le bandeau n'a pas de sens et
+  // pointerait vers un aperçu non pertinent — on le masque.
   const [searchParams] = useSearchParams();
-  const fromOwnerToggle = searchParams.get("view") === "sitter";
+  const fromOwnerToggle =
+    searchParams.get("view") === "sitter" &&
+    !!user &&
+    (user as any).role === "both";
 
   return (
     <>
