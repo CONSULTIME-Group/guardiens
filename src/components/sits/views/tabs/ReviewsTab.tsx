@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ReviewsDisplay from "@/components/reviews/ReviewsDisplay";
+import AwardBadgeButton from "@/components/badges/AwardBadgeButton";
 
 interface ReviewsTabProps {
   sitId: string;
@@ -40,6 +41,13 @@ const ReviewsTab = ({
           <CheckCircle2 aria-hidden="true" className="h-4 w-4 text-primary shrink-0" />
           Vous avez déjà laissé votre avis pour cette garde.
         </p>
+      )}
+      {sitStatus === "completed" && currentUserId && (
+        <AwardBadgeButton
+          sitId={sitId}
+          sitOwnerId={sitOwnerId}
+          currentUserId={currentUserId}
+        />
       )}
     </>
   );
