@@ -1563,7 +1563,22 @@ export default function PublicSitterProfile() {
                     </div>
                   );
                 })}
-                <ShowMoreBtn items={ownerSits} showAll={showAllOwnerSits} setShowAll={setShowAllOwnerSits} />
+                <div className="flex flex-col items-start gap-2 mt-2">
+                  <ShowMoreBtn items={ownerSits} showAll={showAllOwnerSits} setShowAll={setShowAllOwnerSits} />
+                  {showAllOwnerSits && ownerSits.length < ownerSitsTotal && (
+                    <button
+                      type="button"
+                      onClick={loadMoreOwnerSits}
+                      disabled={ownerSitsLoadingMore}
+                      className="text-sm text-primary hover:underline font-body disabled:opacity-50"
+                      aria-label={`Charger ${Math.min(OWNER_SITS_PAGE_SIZE, ownerSitsTotal - ownerSits.length)} annonces supplémentaires`}
+                    >
+                      {ownerSitsLoadingMore
+                        ? 'Chargement…'
+                        : `Charger ${Math.min(OWNER_SITS_PAGE_SIZE, ownerSitsTotal - ownerSits.length)} annonces de plus (${ownerSits.length}/${ownerSitsTotal})`}
+                    </button>
+                  )}
+                </div>
               </div>
             ) : (
               <p className="text-sm text-foreground/50 font-body italic">Aucune garde publiée pour l'instant.</p>
