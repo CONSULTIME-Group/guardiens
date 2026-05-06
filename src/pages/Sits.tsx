@@ -411,6 +411,34 @@ const Sits = () => {
     });
   }, [activeSits, sits, isOwnerView, activeTab, activeOwnerTab, searchQuery]);
 
+  // Suggestions de recherche : titres, villes, gardiens/propriétaires, animaux (uniques)
+  const searchSuggestions = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q || q.length < 1) return [] as { label: string; type: string }[];
+    const seen = new Set<string>();
+    const out: { label: string; type: string }[] = [];
+    const push = (label: string | undefined | null, type: string) => {
+      if (!label) return;
+      const key = `${type}:${label.toLowerCase()}`;
+      if (seen.has(key)) return;
+      if (!label.toLowerCase().includes(q)) return;
+      seen.add(key);
+      out.push({ label, type });
+    };
+    for (const s of sits) {
+      push(s.title, "Annonce");
+      push(s.city || s.ownerCity, "Ville");
+      if (isOwnerView) {
+        push(s.acceptedSitter?.first_name, "Gardien");
+      } else {
+        push(s.owner?.first_name, "Propriétaire");
+      }
+      (s.pets || []).forEach((p: any) => push(p?.name, "Animal"));
+      if (out.length >= 30) break;
+    }
+    return out.slice(0, 8);
+  }, [sits, searchQuery, isOwnerView]);
+
   // Sous-titre contextuel : informations utiles plutôt que générique
   const headerSubtitle = useMemo(() => {
     if (isOwnerView) {
