@@ -205,13 +205,12 @@ const LeaveReview = () => {
 
     // Attribution des écussons sélectionnés
     if (selectedBadges.length > 0) {
-      const badgeRows = selectedBadges.map((badge_id) => ({
-        user_id: reviewee.id,
-        giver_id: user.id,
-        sit_id: sitId,
-        badge_id,
-        is_manual: false,
-      }));
+      const badgeRows = buildBadgeAttributionRows({
+        selectedBadges,
+        revieweeId: reviewee.id,
+        reviewerId: user.id,
+        sitId,
+      });
       const { error: badgeError } = await supabase.from("badge_attributions").insert(badgeRows);
       if (badgeError) {
         logger.warn("Badge attribution failed", { err: String(badgeError) });
