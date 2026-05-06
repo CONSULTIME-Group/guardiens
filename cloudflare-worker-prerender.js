@@ -215,7 +215,11 @@ export default {
 
     if (!shouldPrerender) {
       const originResp = await fetchOrigin(request);
-      return withDiagHeaders(originResp, {
+      const profileMatch = pathname.match(PROFILE_PATH_RE);
+      const finalResp = profileMatch
+        ? await injectProfileJsonLd(originResp, profileMatch[1])
+        : originResp;
+      return withDiagHeaders(finalResp, {
         ...baseDiag,
         'X-Prerender-Status': 'bypass',
       });
