@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, ThumbsUp, ThumbsDown, CheckCircle2 } from "lucide-react";
 import StarRating from "@/components/reviews/StarRating";
+import { BadgeSelector } from "@/components/badges/BadgeSelector";
 import { Helmet } from "react-helmet-async";
 
 type ReviewDirection = "owner_to_sitter" | "sitter_to_owner";
