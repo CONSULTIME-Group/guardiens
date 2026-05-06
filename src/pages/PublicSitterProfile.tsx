@@ -1144,7 +1144,9 @@ export default function PublicSitterProfile() {
                           {reviewCount > 0 ? (
                             <>
                               <span className="font-semibold whitespace-nowrap">{avgRating.toFixed(1)}<span className="text-primary">★</span></span>
-                              <span className="text-muted-foreground text-[11px] sm:text-xs">({reviewCount} avis)</span>
+                              <span className="text-muted-foreground text-[11px] sm:text-xs">
+                                ({reviewCount} avis{reviewCount === 1 ? ' — premier retour' : ''})
+                              </span>
                             </>
                           ) : identityVerified ? (
                             <span className="text-foreground/80 text-[11px] sm:text-xs">Identité vérifiée</span>
