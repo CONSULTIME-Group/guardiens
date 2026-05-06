@@ -1136,15 +1136,24 @@ export default function PublicSitterProfile() {
             {/* CTA primaire — visible immédiatement */}
             {showCTA && (
               <div className="mt-4 md:mt-5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-                {!isAuthenticated && (
+                {isOwn ? (
+                  <button
+                    type="button"
+                    disabled
+                    title="Ceci est votre profil public — utilisez « Modifier mon profil » pour le mettre à jour."
+                    aria-disabled="true"
+                    className="inline-flex items-center justify-center bg-muted text-muted-foreground rounded-lg px-6 py-3 text-sm font-medium flex-1 sm:flex-initial cursor-not-allowed opacity-70"
+                  >
+                    Aperçu de votre profil
+                  </button>
+                ) : !isAuthenticated ? (
                   <Link
                     to={`/inscription?redirect=/gardiens/${id}`}
                     className="inline-flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-6 py-3 text-sm font-medium hover:bg-primary/90 transition-colors flex-1 sm:flex-initial"
                   >
                     S'inscrire pour contacter {firstName}
                   </Link>
-                )}
-                {isAuthenticated && isOwner && (
+                ) : isOwner ? (
                   <button
                     onClick={async () => {
                       if (!auth?.user?.id || !id) return;
@@ -1167,9 +1176,9 @@ export default function PublicSitterProfile() {
                   >
                     Contacter {firstName}
                   </button>
-                )}
+                ) : null}
                 <p className="text-[11px] sm:text-xs text-muted-foreground font-body sm:ml-2 self-center text-center sm:text-left leading-snug break-words">
-                  Contact direct, sans intermédiaire.
+                  {isOwn ? "Vous voyez cette page comme un visiteur." : "Contact direct, sans intermédiaire."}
                 </p>
               </div>
             )}
