@@ -198,10 +198,13 @@ const OwnerProfilePage = () => {
 
   const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => {
     const labels = missingLabelsFor(s.id, scoredCriteria);
+    // Sections optionnelles : "complete" si au moins un bonus rempli, sinon neutre.
+    const sectionBonuses = scoredCriteria.filter(c => c.section === s.id && c.kind === "bonus");
+    const optionalDone = s.optional && sectionBonuses.length > 0 && sectionBonuses.some(c => c.ok);
     return {
       ...s,
-      complete: s.optional ? false : sectionComplete(s.id, scoredCriteria),
-      missingCount: s.optional ? 0 : labels.length,
+      complete: s.optional ? !!optionalDone : sectionComplete(s.id, scoredCriteria),
+      missingCount: s.optional ? 0 : labels.filter(l => !ownerBonuses.find(b => b.label === l)).length,
       missingLabels: s.optional ? [] : labels,
     };
   });
