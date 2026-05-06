@@ -779,7 +779,7 @@ const PublicSitDetail = () => {
  )}
 
  {/* ─── CTA STICKY ───────────────────────────────────────────────── */}
- <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 z-40 pb-20 md:pb-4">
+ <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] z-40 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.08)]">
  <div className="max-w-4xl mx-auto">
  {/* Réassurance pré-CTA supprimée — déjà couverte par PublicSitTrustStrip et le bloc final */}
  {!(sit as any).accepting_applications ? (
