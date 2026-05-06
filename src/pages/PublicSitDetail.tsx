@@ -263,6 +263,20 @@ const PublicSitDetail = () => {
  return Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1);
  })();
 
+ // Jours avant le début (pour le badge d'urgence)
+ const daysUntilStart = (() => {
+ if (!sit.start_date) return null;
+ const diff = Math.ceil((new Date(sit.start_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+ return diff;
+ })();
+ const urgencyLabel = (() => {
+ if (daysUntilStart == null || daysUntilStart < 0) return null;
+ if (daysUntilStart === 0) return "Commence aujourd'hui";
+ if (daysUntilStart === 1) return "Commence demain";
+ if (daysUntilStart <= 14) return `Dans ${daysUntilStart} jours`;
+ return null;
+ })();
+
  // Label date naturel : « Du 5 au 15 août 2026 · 11 jours »
  const naturalDateLabel = (() => {
  if (!sit.start_date || !sit.end_date) return "Dates flexibles";
