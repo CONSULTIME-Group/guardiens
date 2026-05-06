@@ -70,13 +70,17 @@ export function useOwnerDashboardData(userId: string | undefined) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [refreshTick, setRefreshTick] = useState(0);
+
   useEffect(() => {
     if (!userId) return;
     let cancelled = false;
 
-    // Anti-flicker reset
-    setData(INITIAL);
-    setLoading(true);
+    // Anti-flicker reset uniquement au premier load (pas sur refetch silencieux)
+    if (refreshTick === 0) {
+      setData(INITIAL);
+      setLoading(true);
+    }
     setError(null);
 
     const load = async () => {
