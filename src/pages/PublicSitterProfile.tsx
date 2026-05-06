@@ -594,12 +594,10 @@ export default function PublicSitterProfile() {
   const animalTypes: string[] = sitterProfile?.animal_types || [];
   const hasVehicle = sitterProfile?.has_vehicle || false;
   const rawRadius = sitterProfile?.geographic_radius;
-  // Cohérence : on aligne completedSits avec le nombre d'avis de garde reçus.
-  // Chaque avis de garde correspond à une garde réalisée — on prend donc le max
-  // entre le compteur DB (profile.completed_sits_count) et gardeReviews.length
-  // pour éviter qu'un onglet affiche "3 gardes" pendant qu'un autre montre "5 avis garde".
+  // Cohérence : la valeur DB est désormais maintenue par un trigger sur la table
+  // reviews (recalc_completed_sits_count). Plus besoin de Math.max côté client.
   const gardeReviewsCount = reviews.filter((r: any) => r.sit_id !== null).length;
-  const completedSits = Math.max(profile?.completed_sits_count || 0, gardeReviewsCount);
+  const completedSits = profile?.completed_sits_count ?? 0;
   const cancellations = profile?.cancellation_count || 0;
   const radius = rawRadius && rawRadius > 0 ? rawRadius : null;
   const isOwn = auth?.user?.id === id;
