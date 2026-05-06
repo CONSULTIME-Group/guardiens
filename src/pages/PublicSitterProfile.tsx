@@ -1495,6 +1495,45 @@ export default function PublicSitterProfile() {
       {activeTab === 'proprio' && (
         <div className="max-w-4xl mx-auto px-4 py-8 space-y-10">
 
+          {/* ── MINI RÉSUMÉ PROPRIÉTAIRE ── */}
+          {(() => {
+            const ownerAvg =
+              ownerReviews.length > 0
+                ? ownerReviews.reduce((s, r) => s + (Number(r.overall_rating) || 0), 0) / ownerReviews.length
+                : 0;
+            return (
+              <div className="grid grid-cols-3 gap-3 bg-card border border-border rounded-2xl p-4">
+                <div className="text-center">
+                  <p className="text-2xl font-display text-foreground">{ownerSitsTotal}</p>
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-body mt-1">
+                    Annonce{ownerSitsTotal > 1 ? 's' : ''}
+                  </p>
+                </div>
+                <div className="text-center border-x border-border">
+                  <p className="text-2xl font-display text-foreground">{ownerReviews.length}</p>
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-body mt-1">
+                    Avis reçu{ownerReviews.length > 1 ? 's' : ''}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-display text-foreground">
+                    {ownerAvg > 0 ? (
+                      <>
+                        {ownerAvg.toFixed(1)}
+                        <span className="text-primary text-base ml-0.5">★</span>
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </p>
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-body mt-1">
+                    Note moyenne
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* ── DESCRIPTION + ENVIRONNEMENTS ── */}
           {(ownerProfile?.environments?.length ?? 0) > 0 && (
             <div className="space-y-4">
