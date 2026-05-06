@@ -32,7 +32,7 @@ import StatsStrip from "./owner/StatsStrip";
 import PendingReviewsCard from "./owner/PendingReviewsCard";
 import MobileStickyCTA from "./owner/MobileStickyCTA";
 import {
-  SPECIES_LABEL, PROPRIO_SPECIAL_IDS, BANNER_STYLES,
+  SPECIES_LABEL, PROPRIO_SPECIAL_IDS,
   capitalize, capitalizeWords,
 } from "./owner/helpers";
 import type { Pet } from "./owner/types";
