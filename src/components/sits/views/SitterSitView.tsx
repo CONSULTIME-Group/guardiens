@@ -10,7 +10,8 @@
  * - Bouton "Annuler ma participation" si gardien candidat sur garde confirmée
  */
 import { useState, useEffect } from "react";
-import { CheckCircle2, Star, PawPrint, Home, ClipboardList, XCircle, MapPin, CalendarDays, Users } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { CheckCircle2, Star, PawPrint, Home, ClipboardList, XCircle, MapPin, CalendarDays, Users, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -144,8 +145,26 @@ const SitterSitView = ({
     userRole: user?.role ?? null,
     userFirstName: user?.firstName ?? null,
   });
+  // Détecte l'arrivée via le toggle "Voir comme gardien" (compte both)
+  // pour proposer un retour rapide vers l'aperçu public `/annonces/:id`.
+  const [searchParams] = useSearchParams();
+  const fromOwnerToggle = searchParams.get("view") === "sitter";
+
   return (
     <>
+      {fromOwnerToggle && (
+        <div className="mb-4 rounded-xl border border-border bg-secondary/30 px-3 py-2 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs md:text-sm text-foreground/80">
+            Vous consultez cette annonce <span className="font-medium text-foreground">comme gardien</span>.
+          </p>
+          <Button asChild size="sm" variant="outline" className="h-8 text-xs">
+            <Link to={`/annonces/${sit.id}`} className="inline-flex items-center gap-1.5">
+              <ArrowLeft className="h-3.5 w-3.5" /> Retour à l'aperçu public
+            </Link>
+          </Button>
+        </div>
+      )}
+
       {/* Bandeau d'état terminal — affiché en premier pour que le gardien
           comprenne immédiatement que l'annonce n'est pas/plus actionnable. */}
       <SitterStatusBanner status={sit.status} />
