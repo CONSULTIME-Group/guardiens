@@ -376,19 +376,21 @@ const PublicSitDetail = () => {
  };
 
   // Critère d'indexation (qualité minimum pour éviter le thin content) :
-  // - ≥3 photos dont au moins 2 en haute résolution (≥800×600px)
-  // - ≥200 caractères de texte substantiel (description + routine)
-  // - titre personnalisé (≥10 caractères)
-  // - au moins 1 animal renseigné
-  // Tolérance : si aucune photo n'a ses dimensions stockées (anciennes annonces),
-  // on garde le filtre simple par nombre de photos.
-  const galleryCount = property?.photos?.length || 0;
-  const hiQualityCount: number = (property as any)?._hiQualityCount ?? 0;
-  const photosOk = galleryCount >= 3 && (hiQualityCount === 0 || hiQualityCount >= 2);
-  const richTextLength = (property?.description || "").length + (sit.daily_routine || "").length;
-  const hasCustomTitle = typeof sit.title === "string" && sit.title.trim().length >= 10;
-  const hasPets = pets.length > 0;
-  const isIndexable = photosOk && richTextLength >= 200 && hasCustomTitle && hasPets;
+   // - ≥3 photos dont au moins 2 en haute résolution (≥800×600px)
+   // - ≥200 caractères de texte substantiel (description + routine)
+   // - titre personnalisé (≥10 caractères)
+   // - au moins 1 animal renseigné
+   // - bio propriétaire ≥50 caractères (signal de profil complet)
+   // Tolérance : si aucune photo n'a ses dimensions stockées (anciennes annonces),
+   // on garde le filtre simple par nombre de photos.
+   const galleryCount = property?.photos?.length || 0;
+   const hiQualityCount: number = (property as any)?._hiQualityCount ?? 0;
+   const photosOk = galleryCount >= 3 && (hiQualityCount === 0 || hiQualityCount >= 2);
+   const richTextLength = (property?.description || "").length + (sit.daily_routine || "").length;
+   const hasCustomTitle = typeof sit.title === "string" && sit.title.trim().length >= 10;
+   const hasPets = pets.length > 0;
+   const hasOwnerBio = (owner?.bio || "").trim().length >= 50;
+   const isIndexable = photosOk && richTextLength >= 200 && hasCustomTitle && hasPets && hasOwnerBio;
 
  const citySlug = (cityForTitle || "")
  .toLowerCase()
