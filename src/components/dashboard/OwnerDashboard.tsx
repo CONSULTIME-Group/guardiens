@@ -238,7 +238,11 @@ const OwnerDashboard = () => {
           {/* Stats fusionnées : strip compact directement sous la carte annonce */}
           <StatsStrip
             items={[
-              { value: completedSits.length, label: "Gardes réalisées" },
+              {
+                value: completedSits.length,
+                label: "Gardes réalisées",
+                emptyHint: "Aucune garde encore",
+              },
               {
                 value: avgRating > 0 ? `${avgRating} ★` : null,
                 fallback: "Pas encore",
@@ -246,8 +250,17 @@ const OwnerDashboard = () => {
                 highlight: avgRating > 0,
                 to: user?.id ? `/gardiens/${user.id}?tab=proprio#avis` : undefined,
               },
-              { value: activeSits.length, label: "Annonces actives", to: "/sits" },
-              { value: trustedSitterCount, label: "Gardiens de confiance" },
+              {
+                value: activeSits.length,
+                label: "Annonces actives",
+                to: "/sits",
+                emptyHint: "Aucune annonce active",
+              },
+              {
+                value: trustedSitterCount,
+                label: "Gardiens de confiance",
+                emptyHint: "À construire avec le temps",
+              },
             ]}
           />
 
