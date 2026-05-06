@@ -702,6 +702,36 @@ const PublicSitDetail = () => {
  </section>
  )}
 
+ {/* ─── DERNIERS AVIS REÇUS ───────────────────────────────────────── */}
+ {latestReviews.length > 0 && (
+ <section className="mb-6">
+ <h2 className="font-heading text-xl font-semibold mb-3 flex items-center gap-2">
+ <Star className="h-5 w-5 text-secondary fill-secondary" />
+ Ce que disent les gardiens précédents
+ </h2>
+ <div className="space-y-3">
+ {latestReviews.map((r, i) => (
+ <article key={i} className="bg-card border border-border rounded-2xl p-4 md:p-5">
+ <div className="flex items-center gap-1.5 mb-1.5">
+ {Array.from({ length: 5 }).map((_, k) => (
+ <Star
+ key={k}
+ className={`h-4 w-4 ${k < Math.round(r.overall_rating) ? "text-secondary fill-secondary" : "text-muted-foreground/30"}`}
+ />
+ ))}
+ <span className="text-xs text-muted-foreground ml-1">
+ {format(new Date(r.created_at), "MMMM yyyy", { locale: fr })}
+ </span>
+ </div>
+ <p className="text-sm text-foreground/85 leading-relaxed line-clamp-4">
+ « {r.comment} »
+ </p>
+ </article>
+ ))}
+ </div>
+ </section>
+ )}
+
  {/* ─── PARTAGE — propriétaire de l'annonce uniquement ───────────── */}
  {viewerType === "owner_of_sit" && (
  <div className="mb-8">
