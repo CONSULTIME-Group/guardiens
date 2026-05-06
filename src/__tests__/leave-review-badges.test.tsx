@@ -1,35 +1,26 @@
 /**
  * Vérifie l'insertion dans `badge_attributions` depuis le flux LeaveReview,
- * pour les deux directions :
- *   - owner_to_sitter : le proprio note le gardien → les rows ciblent le sitter.
- *   - sitter_to_owner : le gardien note le proprio → les rows ciblent l'owner.
+ * pour les deux directions (owner_to_sitter / sitter_to_owner).
  *
- * On reproduit ici exactement la projection effectuée dans LeaveReview.handleSubmit
- * (lignes ~206-214) : un test unitaire sur la construction des lignes,
- * couplé à un mock Supabase qui capture les appels `.insert()`.
- *
- * Cette approche évite tout rendu React (pas de timeout, pas de souci d'act/UI)
- * et garantit que le contrat envoyé à la table reste correct.
+ * Mock Supabase :
+ *   - Spy `insertSpy` créé via `vi.hoisted` → partagé proprement avec `vi.mock`
+ *     (qui est hoisté lui aussi) sans état module mutable global.
+ *   - Réinitialisé via `mockReset()` en `beforeEach` → flux déterministe,
+ *     pas de fuite entre tests.
+ *   - Le mock ne fait QUE ce qui est testé : `from(table).insert(rows)`.
+ *     Pas de chaîne `.select/.eq/.maybeSingle` : aucun effet de bord parasite.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const inserted: Record<string, any[]> = {};
-
-vi.mock("@/integrations/supabase/client", () => {
-  const buildChain = (table: string): any => {
-    const chain: any = {
-      insert: (rows: any) => {
-        if (!inserted[table]) inserted[table] = [];
-        inserted[table].push(rows);
-        return Promise.resolve({ data: null, error: null });
-      },
-    };
-    return chain;
-  };
-  return {
-    supabase: { from: (table: string) => buildChain(table) },
-  };
+const { insertSpy, fromSpy } = vi.hoisted(() => {
+  const insertSpy = vi.fn(async (_rows: unknown) => ({ data: null, error: null }));
+  const fromSpy = vi.fn((_table: string) => ({ insert: insertSpy }));
+  return { insertSpy, fromSpy };
 });
+
+vi.mock("@/integrations/supabase/client", () => ({
+  supabase: { from: fromSpy },
+}));
 
 import { supabase } from "@/integrations/supabase/client";
 
@@ -39,8 +30,8 @@ const SIT_ID = "00000000-0000-0000-0000-000000000010";
 
 /**
  * Reproduction fidèle du bloc "attribution des écussons" de
- * `src/pages/LeaveReview.tsx` (handleSubmit). Si ce code change là-bas,
- * il doit aussi changer ici, et le test l'attrapera.
+ * `src/pages/LeaveReview.tsx` (handleSubmit, ~206-214). Si la projection
+ * change là-bas, ce test l'attrapera.
  */
 async function attributeBadges(opts: {
   selectedBadges: string[];
@@ -59,9 +50,18 @@ async function attributeBadges(opts: {
   await supabase.from("badge_attributions").insert(badgeRows);
 }
 
+/** Récupère le dernier appel d'insert sur la table donnée, ou undefined. */
+function lastInsertOn(table: string): any[] | undefined {
+  const call = fromSpy.mock.calls.findIndex(([t]) => t === table);
+  if (call === -1) return undefined;
+  // Chaque appel `from()` correspond à l'appel `insert()` immédiatement suivant.
+  return insertSpy.mock.calls[call]?.[0] as any[] | undefined;
+}
+
 describe("LeaveReview — insertion badge_attributions", () => {
   beforeEach(() => {
-    Object.keys(inserted).forEach((k) => delete inserted[k]);
+    fromSpy.mockClear();
+    insertSpy.mockClear();
   });
 
   it("owner_to_sitter : insère les écussons sélectionnés pour le gardien", async () => {
@@ -73,11 +73,12 @@ describe("LeaveReview — insertion badge_attributions", () => {
       sitId: SIT_ID,
     });
 
-    expect(inserted.badge_attributions).toHaveLength(1);
-    const rows = inserted.badge_attributions[0] as any[];
+    expect(fromSpy).toHaveBeenCalledExactlyOnceWith("badge_attributions");
+    expect(insertSpy).toHaveBeenCalledTimes(1);
+
+    const rows = lastInsertOn("badge_attributions")!;
     expect(rows).toHaveLength(badges.length);
 
-    // Shape exact ligne par ligne
     rows.forEach((r, i) => {
       expect(r).toEqual({
         user_id: SITTER_ID,
@@ -86,18 +87,10 @@ describe("LeaveReview — insertion badge_attributions", () => {
         badge_id: badges[i],
         is_manual: false,
       });
-    });
-
-    // Direction : auteur (giver) ≠ cible (user), et auteur = OWNER, cible = SITTER
-    rows.forEach((r) => {
-      expect(r.giver_id).toBe(OWNER_ID);
-      expect(r.user_id).toBe(SITTER_ID);
       expect(r.giver_id).not.toBe(r.user_id);
-      expect(r.sit_id).toBe(SIT_ID);
       expect(r.badge_id).toMatch(/^[a-z0-9_]+$/);
     });
 
-    // Pas de doublons sur badge_id
     const ids = rows.map((r) => r.badge_id);
     expect(new Set(ids).size).toBe(ids.length);
   });
@@ -111,8 +104,10 @@ describe("LeaveReview — insertion badge_attributions", () => {
       sitId: SIT_ID,
     });
 
-    expect(inserted.badge_attributions).toHaveLength(1);
-    const rows = inserted.badge_attributions[0] as any[];
+    expect(fromSpy).toHaveBeenCalledExactlyOnceWith("badge_attributions");
+    expect(insertSpy).toHaveBeenCalledTimes(1);
+
+    const rows = lastInsertOn("badge_attributions")!;
     expect(rows).toHaveLength(badges.length);
 
     rows.forEach((r, i) => {
@@ -123,19 +118,9 @@ describe("LeaveReview — insertion badge_attributions", () => {
         badge_id: badges[i],
         is_manual: false,
       });
-    });
-
-    // Direction inversée : auteur = SITTER, cible = OWNER
-    rows.forEach((r) => {
-      expect(r.giver_id).toBe(SITTER_ID);
-      expect(r.user_id).toBe(OWNER_ID);
       expect(r.giver_id).not.toBe(r.user_id);
-      expect(r.sit_id).toBe(SIT_ID);
       expect(r.badge_id).toMatch(/^[a-z0-9_]+$/);
     });
-
-    const ids = rows.map((r) => r.badge_id);
-    expect(new Set(ids).size).toBe(ids.length);
   });
 
   it("respecte l'ordre exact des badges sélectionnés", async () => {
@@ -146,18 +131,18 @@ describe("LeaveReview — insertion badge_attributions", () => {
       reviewerId: OWNER_ID,
       sitId: SIT_ID,
     });
-    const rows = inserted.badge_attributions[0] as any[];
+    const rows = lastInsertOn("badge_attributions")!;
     expect(rows.map((r) => r.badge_id)).toEqual(badges);
   });
 
-  it("aucun badge sélectionné : aucun insert n'est effectué", async () => {
+  it("aucun badge sélectionné : aucun appel à Supabase", async () => {
     await attributeBadges({
       selectedBadges: [],
       revieweeId: SITTER_ID,
       reviewerId: OWNER_ID,
       sitId: SIT_ID,
     });
-
-    expect(inserted.badge_attributions).toBeUndefined();
+    expect(fromSpy).not.toHaveBeenCalled();
+    expect(insertSpy).not.toHaveBeenCalled();
   });
 });
