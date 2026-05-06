@@ -65,171 +65,147 @@ const PublicSitDetail = () => {
  const [avgRating, setAvgRating] = useState<string | null>(null);
  const [reviewCount, setReviewCount] = useState(0);
  const [latestReviews, setLatestReviews] = useState<{ overall_rating: number; comment: string; created_at: string }[]>([]);
- const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
  const [applyOpen, setApplyOpen] = useState(false);
  const [hasApplied, setHasApplied] = useState(false);
  const [viewerType, setViewerType] = useState<ViewerType>("anonymous");
  const sitViewFired = useRef(false);
 
- useEffect(() => {
- if (!id) return;
- const load = async () => {
- const { data: sitRows } = await supabase.from("sits").select("*").eq("id", id).limit(1);
- const sitData = sitRows?.[0];
- if (!sitData) { setLoading(false); return; }
- setSit(sitData);
+  useEffect(() => {
+    if (!id) return;
+    const load = async () => {
+      try {
+        const { data: sitRows, error: sitErr } = await supabase.from("sits").select("*").eq("id", id).limit(1);
+        if (sitErr) throw sitErr;
+        const sitData = sitRows?.[0];
+        if (!sitData) {
+          setLoadError("not_found");
+          return;
+        }
+        setSit(sitData);
 
- // public_profiles : vue publique (RLS de profiles bloque les autres users)
-    const [ownerRes, propRes, reviewsRes, badgeRes, galleryRes] = await Promise.all([
- supabase.from("public_profiles").select("id, first_name, city, postal_code, avatar_url, identity_verified, bio, completed_sits_count, is_founder").eq("id", sitData.user_id).limit(1),
- supabase.from("properties").select("*").eq("id", sitData.property_id).limit(1),
- supabase.from("reviews").select("id, overall_rating, comment, created_at").eq("reviewee_id", sitData.user_id).eq("published", true).order("created_at", { ascending: false }),
- supabase.from("badge_attributions").select("badge_id").eq("user_id", sitData.user_id),
- supabase.from("owner_gallery").select("photo_url, position").eq("user_id", sitData.user_id).order("position", { ascending: true }),
- ]);
+        const [ownerRes, propRes, reviewsRes, badgeRes, galleryRes] = await Promise.all([
+          supabase.from("public_profiles").select("id, first_name, city, postal_code, avatar_url, identity_verified, bio, completed_sits_count, is_founder").eq("id", sitData.user_id).limit(1),
+          supabase.from("properties").select("*").eq("id", sitData.property_id).limit(1),
+          supabase.from("reviews").select("id, overall_rating, comment, created_at").eq("reviewee_id", sitData.user_id).eq("published", true).order("created_at", { ascending: false }),
+          supabase.from("badge_attributions").select("badge_id").eq("user_id", sitData.user_id),
+          supabase.from("owner_gallery").select("photo_url, position").eq("user_id", sitData.user_id).order("position", { ascending: true }),
+        ]);
 
- const ownerData = ownerRes.data?.[0] ?? null;
- const propertyData = propRes.data?.[0] ?? null;
- const galleryUrls = (galleryRes.data || []).map((g: any) => g.photo_url).filter(Boolean);
- const enrichedProperty = propertyData
-   ? { ...propertyData, photos: galleryUrls.length > 0 ? galleryUrls : (propertyData as any).photos }
-   : propertyData;
+        const ownerData = ownerRes.data?.[0] ?? null;
+        const propertyData = propRes.data?.[0] ?? null;
+        const galleryUrls = (galleryRes.data || []).map((g: any) => g.photo_url).filter(Boolean);
+        const enrichedProperty = propertyData
+          ? { ...propertyData, photos: galleryUrls.length > 0 ? galleryUrls : (propertyData as any).photos }
+          : propertyData;
 
- // ── Diagnostics public pages : trace silencieuse en prod, console en dev.
- // Permet de repérer les annonces dont le profil public ou la galerie owner
- // ne renvoient rien (RLS, données manquantes, hôte supprimé…).
- if (!ownerData) {
-   logger.warn("[PublicSitDetail] public_profiles vide", {
-     sit_id: sitData.id,
-     user_id: sitData.user_id,
-     error: ownerRes.error?.message,
-   });
- }
- if (galleryUrls.length === 0) {
-   logger.warn("[PublicSitDetail] owner_gallery vide", {
-     sit_id: sitData.id,
-     user_id: sitData.user_id,
-     property_id: sitData.property_id,
-     property_photos_count: Array.isArray((propertyData as any)?.photos)
-       ? (propertyData as any).photos.length
-       : 0,
-     error: galleryRes.error?.message,
-   });
- }
- if (ownerData && !ownerData.city) {
-   logger.info("[PublicSitDetail] public_profiles.city manquant", {
-     sit_id: sitData.id,
-     user_id: sitData.user_id,
-     has_postal_code: Boolean((ownerData as any).postal_code),
-   });
- }
+        if (!ownerData) {
+          logger.warn("[PublicSitDetail] public_profiles vide", { sit_id: sitData.id, user_id: sitData.user_id, error: ownerRes.error?.message });
+        }
+        if (galleryUrls.length === 0) {
+          logger.warn("[PublicSitDetail] owner_gallery vide", {
+            sit_id: sitData.id,
+            user_id: sitData.user_id,
+            property_id: sitData.property_id,
+            property_photos_count: Array.isArray((propertyData as any)?.photos) ? (propertyData as any).photos.length : 0,
+            error: galleryRes.error?.message,
+          });
+        }
 
- // Fallback ville : si public_profiles ne renvoie pas city mais a un code postal,
- // on résout la commune via l'API officielle geo.api.gouv.fr (FR uniquement, 5 chiffres).
- let enrichedOwner = ownerData;
- if (ownerData && !ownerData.city && /^\d{5}$/.test(String((ownerData as any).postal_code || ""))) {
-   try {
-     const res = await fetch(
-       `https://geo.api.gouv.fr/communes?codePostal=${(ownerData as any).postal_code}&fields=nom&limit=1`,
-     );
-     if (res.ok) {
-       const arr: { nom?: string }[] = await res.json();
-       const resolvedCity = arr?.[0]?.nom?.trim();
-       if (resolvedCity) enrichedOwner = { ...ownerData, city: resolvedCity };
-     }
-   } catch {
-     /* silencieux : l'UI dégrade proprement avec city=null */
-   }
- }
+        let enrichedOwner = ownerData;
+        if (ownerData && !ownerData.city && /^\d{5}$/.test(String((ownerData as any).postal_code || ""))) {
+          try {
+            const res = await fetch(`https://geo.api.gouv.fr/communes?codePostal=${(ownerData as any).postal_code}&fields=nom&limit=1`);
+            if (res.ok) {
+              const arr: { nom?: string }[] = await res.json();
+              const resolvedCity = arr?.[0]?.nom?.trim();
+              if (resolvedCity) enrichedOwner = { ...ownerData, city: resolvedCity };
+            }
+          } catch { /* silencieux */ }
+        }
 
- setOwner(enrichedOwner);
- setProperty(enrichedProperty);
+        setOwner(enrichedOwner);
+        setProperty(enrichedProperty);
 
- // Déduplication par id (au cas où la requête renverrait des doublons),
- // puis on isole les avis avec commentaire pour l'affichage.
- const reviewsRaw = reviewsRes.data || [];
- const seenIds = new Set<string>();
- const reviews = reviewsRaw.filter((r: any) => {
- if (!r?.id || seenIds.has(r.id)) return false;
- seenIds.add(r.id);
- return true;
- });
- setReviewCount(reviews.length);
- if (reviews.length > 0) {
- setAvgRating((reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1));
- }
- const withComment = reviews
- .filter((r: any) => typeof r.comment === "string" && r.comment.trim().length > 0)
- .slice(0, 2);
- setLatestReviews(withComment as any);
+        const reviewsRaw = reviewsRes.data || [];
+        const seenIds = new Set<string>();
+        const reviews = reviewsRaw.filter((r: any) => {
+          if (!r?.id || seenIds.has(r.id)) return false;
+          seenIds.add(r.id);
+          return true;
+        });
+        setReviewCount(reviews.length);
+        if (reviews.length > 0) {
+          setAvgRating((reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1));
+        }
+        const withComment = reviews
+          .filter((r: any) => typeof r.comment === "string" && r.comment.trim().length > 0)
+          .slice(0, 2);
+        setLatestReviews(withComment as any);
 
- const badgeMap = new Map<string, number>();
- (badgeRes.data || []).forEach((b: any) => badgeMap.set(b.badge_key, (badgeMap.get(b.badge_key) || 0) + 1));
- setBadges(Array.from(badgeMap.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count));
+        const badgeMap = new Map<string, number>();
+        (badgeRes.data || []).forEach((b: any) => badgeMap.set(b.badge_key, (badgeMap.get(b.badge_key) || 0) + 1));
+        setBadges(Array.from(badgeMap.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count));
 
- if (propertyData) {
- const { data: petsData } = await supabase.from("pets").select("*").eq("property_id", propertyData.id);
- setPets(petsData || []);
- }
+        if (propertyData) {
+          try {
+            const { data: petsData } = await supabase.from("pets").select("*").eq("property_id", propertyData.id);
+            setPets(petsData || []);
+          } catch (e) { logger.warn("[PublicSitDetail] pets load failed", { error: (e as any)?.message }); }
+        }
 
- if (user) {
- const { data: appRows } = await supabase.from("applications").select("id").eq("sit_id", id!).eq("sitter_id", user.id).limit(1);
- if (appRows?.[0]) setHasApplied(true);
- }
+        if (user) {
+          try {
+            const { data: appRows } = await supabase.from("applications").select("id").eq("sit_id", id!).eq("sitter_id", user.id).limit(1);
+            if (appRows?.[0]) setHasApplied(true);
+          } catch (e) { logger.warn("[PublicSitDetail] applications check failed", { error: (e as any)?.message }); }
+        }
 
- // ── Résolution viewer_type ──
- let resolvedViewer: ViewerType = "anonymous";
- if (user) {
- if (sitData.user_id === user.id) {
- resolvedViewer = "owner_of_sit";
- } else {
- // Check admin role
- let isAdmin = false;
- try {
- const { data: roleRows } = await supabase
-.from("user_roles")
-.select("role")
-.eq("user_id", user.id)
-.eq("role", "admin")
-.limit(1);
- isAdmin = !!roleRows?.[0];
- } catch {
- isAdmin = false;
- }
- if (isAdmin) {
- resolvedViewer = "admin";
- } else {
- const role = (user as any).role;
- if (role === "owner") resolvedViewer = "proprio";
- else resolvedViewer = "gardien"; // sitter, both, ou défaut
- }
- }
- }
- setViewerType(resolvedViewer);
+        let resolvedViewer: ViewerType = "anonymous";
+        if (user) {
+          if (sitData.user_id === user.id) {
+            resolvedViewer = "owner_of_sit";
+          } else {
+            let isAdmin = false;
+            try {
+              const { data: roleRows } = await supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").limit(1);
+              isAdmin = !!roleRows?.[0];
+            } catch { isAdmin = false; }
+            if (isAdmin) {
+              resolvedViewer = "admin";
+            } else {
+              const role = (user as any).role;
+              if (role === "owner") resolvedViewer = "proprio";
+              else resolvedViewer = "gardien";
+            }
+          }
+        }
+        setViewerType(resolvedViewer);
 
- // Auto-redirect : un membre connecté qui arrive sur la page publique d'une
- // annonce qu'il PEUT consulter en mode complet doit voir la fiche riche.
- // On garde la version publique uniquement pour les anonymes et les
- // owners/admins (qui peuvent vouloir prévisualiser le partage).
- if (resolvedViewer === "gardien" || resolvedViewer === "proprio") {
- navigate(`/sits/${id}?from=share`, { replace: true });
- return;
- }
+        if (resolvedViewer === "gardien" || resolvedViewer === "proprio") {
+          navigate(`/sits/${id}?from=share`, { replace: true });
+          return;
+        }
 
- setLoading(false);
- // analytics — un seul tir grâce au ref (anti double-fire StrictMode)
- if (!sitViewFired.current) {
- sitViewFired.current = true;
- try {
- trackEvent("sit_view", {
- source: "/annonces/:id",
- metadata: { sit_id: id, viewer_type: resolvedViewer },
- });
- } catch {}
- }
- };
- load();
- }, [id, user, navigate]);
+        if (!sitViewFired.current) {
+          sitViewFired.current = true;
+          try {
+            trackEvent("sit_view", {
+              source: "/annonces/:id",
+              metadata: { sit_id: id, viewer_type: resolvedViewer },
+            });
+          } catch {}
+        }
+      } catch (e: any) {
+        logger.warn("[PublicSitDetail] load failed", { sit_id: id, error: e?.message });
+        setLoadError("error");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [id, user, navigate]);
 
  if (loading) {
  return (
@@ -255,8 +231,26 @@ const PublicSitDetail = () => {
  </div>
  );
  }
- if (!sit) return <div className="p-6 md:p-10"><p>Annonce introuvable.</p></div>;
- if (sit.status !== "published") return <div className="p-6 md:p-10"><p>Cette annonce n'est plus disponible.</p></div>;
+  if (loadError === "not_found" || (!loading && !sit)) {
+    return (
+      <div className="max-w-2xl mx-auto p-6 md:p-10 text-center space-y-3">
+        <h1 className="font-heading text-2xl font-semibold">Annonce introuvable</h1>
+        <p className="text-muted-foreground text-sm">Cette annonce a peut-être été retirée par son auteur, ou le lien est incorrect.</p>
+        <Link to="/" className="inline-flex text-primary text-sm font-medium hover:underline">Retour à l'accueil</Link>
+      </div>
+    );
+  }
+  if (loadError === "error") {
+    return (
+      <div className="max-w-2xl mx-auto p-6 md:p-10 text-center space-y-3">
+        <h1 className="font-heading text-2xl font-semibold">Une erreur est survenue</h1>
+        <p className="text-muted-foreground text-sm">Impossible de charger cette annonce pour le moment. Veuillez réessayer dans un instant.</p>
+        <button onClick={() => window.location.reload()} className="inline-flex text-primary text-sm font-medium hover:underline">Recharger la page</button>
+      </div>
+    );
+  }
+  if (!sit) return null;
+  if (sit.status !== "published") return <div className="max-w-2xl mx-auto p-6 md:p-10 text-center"><p className="text-muted-foreground">Cette annonce n'est plus disponible.</p></div>;
 
  const photos: string[] = property?.photos || [];
  const formatDate = (d: string | null) => d ? format(new Date(d), "d MMMM yyyy", { locale: fr }) : "";
@@ -434,23 +428,28 @@ const PublicSitDetail = () => {
  {/* Header public — anonymes uniquement (identité de marque + nav minimale) */}
  {!isAuthenticated && <PublicHeader />}
 
- {/* Mini-barre sticky pour les membres connectés (la page publique n'a pas le header app) */}
- {isAuthenticated && (
- <div className="sticky top-0 z-30 bg-primary/10 backdrop-blur-sm border-b border-primary/20 px-4 py-2 flex flex-wrap items-center justify-between gap-2">
- <Link
- to="/dashboard"
- className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
- >
- <ArrowLeft className="h-4 w-4" /> Retour au dashboard
- </Link>
- <Button asChild size="sm" className="h-8">
- <Link to={`/sits/${sit.id}`} className="inline-flex items-center gap-1.5">
- {viewerType === "owner_of_sit" ? "Aller à mon annonce" : "Voir la fiche complète"}
- <ExternalLink className="h-3.5 w-3.5" />
- </Link>
- </Button>
- </div>
- )}
+      {/* Bandeau preview pour le propriétaire de l'annonce — clair, non-intrusif */}
+      {viewerType === "owner_of_sit" && (
+        <div className="bg-primary/5 border-b border-primary/15">
+          <div className="max-w-4xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs md:text-sm text-foreground/80">
+              <span className="font-medium text-foreground">Aperçu public</span> · ce que voient les visiteurs partageant le lien.
+            </p>
+            <div className="flex items-center gap-2">
+              <Button asChild variant="ghost" size="sm" className="h-8 text-xs">
+                <Link to="/dashboard" className="inline-flex items-center gap-1.5">
+                  <ArrowLeft className="h-3.5 w-3.5" /> Dashboard
+                </Link>
+              </Button>
+              <Button asChild size="sm" className="h-8 text-xs">
+                <Link to={`/sits/${sit.id}`} className="inline-flex items-center gap-1.5">
+                  Gérer mon annonce <ExternalLink className="h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
  <div className="max-w-4xl mx-auto">
  {/* ─── HERO ÉDITORIAL ─────────────────────────────────────────────── */}
@@ -747,18 +746,25 @@ const PublicSitDetail = () => {
  </section>
  )}
 
- {/* ─── PARTAGE — propriétaire de l'annonce uniquement ───────────── */}
- {viewerType === "owner_of_sit" && (
- <div className="mb-8">
- <ShareButtons
- sitId={sit.id}
- title={sit.title || `Garde à ${owner?.city || "France"}`}
- city={owner?.city}
- source="public_sit_detail"
- viewerType={viewerType}
- />
- </div>
- )}
+      {/* ─── PARTAGE — propriétaire de l'annonce uniquement, replié par défaut ── */}
+      {viewerType === "owner_of_sit" && (
+        <details className="mb-6 rounded-2xl border border-border bg-card group">
+          <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between text-sm font-medium">
+            <span>Partager cette annonce</span>
+            <span className="text-xs text-muted-foreground group-open:hidden">Ouvrir</span>
+            <span className="text-xs text-muted-foreground hidden group-open:inline">Fermer</span>
+          </summary>
+          <div className="px-4 pb-4">
+            <ShareButtons
+              sitId={sit.id}
+              title={sit.title || `Garde à ${owner?.city || "France"}`}
+              city={owner?.city}
+              source="public_sit_detail"
+              viewerType={viewerType}
+            />
+          </div>
+        </details>
+      )}
 
  {/* ─── GESTION — propriétaire de l'annonce uniquement ───────────── */}
  {viewerType === "owner_of_sit" && property && (
@@ -793,9 +799,10 @@ const PublicSitDetail = () => {
  </section>
  )}
 
- {/* ─── CTA STICKY ───────────────────────────────────────────────── */}
- <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] z-40 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.08)]">
- <div className="max-w-4xl mx-auto">
+      {/* ─── CTA STICKY ─── (masqué pour le propriétaire de l'annonce) */}
+      {viewerType !== "owner_of_sit" && (
+      <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-40 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.08)]">
+        <div className="max-w-md mx-auto">
  {/* Réassurance pré-CTA supprimée — déjà couverte par PublicSitTrustStrip et le bloc final */}
  {!(sit as any).accepting_applications ? (
  <Button className="w-full h-12 text-base font-semibold" disabled>
@@ -861,9 +868,10 @@ const PublicSitDetail = () => {
  Inscription et candidature gratuites aujourd'hui. Un abonnement gardien sera introduit à terme — vous serez prévenu(e) avant tout changement.
  </p>
  )}
- </div>
- </div>
- </div>
+        </div>
+      </div>
+      )}
+      </div>
  {/* Fin wrapper max-w-4xl */}
  </div>
 
