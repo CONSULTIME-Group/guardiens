@@ -644,17 +644,32 @@ export default function PublicSitterProfile() {
 
    // SEO
   const animalLabels = animalTypes.map(a => ANIMAL_LABELS[a] || a).join(", ");
-  const rawTitle = city ? `${firstName} — Gardien à ${city}` : `${firstName} — Gardien de maison`;
-  const pageTitle = rawTitle;
-  const pageDesc = ((bio || motivation || "") as string).slice(0, 160) || `${firstName} garde des ${animalLabels || "animaux"} à ${city || "France"}. Profil vérifié sur Guardiens.fr.`;
+  // Title structuré : nom · ville · signaux de confiance — limité à ~60 caractères.
+  const trustSignals: string[] = [];
+  if (profile?.identity_verified) trustSignals.push("identité vérifiée");
+  if (avgRating > 0 && reviewCount > 0) trustSignals.push(`${avgRating.toFixed(1)} ★`);
+  const trustPart = trustSignals.length ? ` — ${trustSignals.join(" · ")}` : "";
+  const baseTitle = city ? `${firstName}, gardien à ${city}` : `${firstName}, gardien d'animaux`;
+  const candidateTitle = `${baseTitle}${trustPart}`;
+  const pageTitle = candidateTitle.length <= 60 ? candidateTitle : baseTitle;
+  // Meta description structurée : promesse + animaux + zone + signaux de confiance.
+  const animalsForDesc = animalLabels || "animaux";
+  const cityForDesc = city ? `à ${city}${radius ? ` (rayon ${radius} km)` : ''}` : "près de chez vous";
+  const trustForDesc = [
+    profile?.identity_verified ? "identité vérifiée" : null,
+    completedSits > 0 ? `${completedSits} garde${completedSits > 1 ? 's' : ''}` : null,
+    reviewCount > 0 ? `${avgRating.toFixed(1)}/5 (${reviewCount} avis)` : null,
+  ].filter(Boolean).join(" · ");
+  const descBase = `${firstName} garde vos ${animalsForDesc} ${cityForDesc}.`;
+  const pageDesc = (descBase + (trustForDesc ? ` ${trustForDesc}.` : '')).slice(0, 160);
   const pageUrl = buildAbsoluteUrl(`/gardiens/${id}`);
-  // Politique : profils riches indexables (≥3 avis publics + identité vérifiée + bio).
-  // Sinon noindex (RGPD + thin content).
+  // Politique : profils riches indexables (≥1 avis publié OU ≥1 garde réalisée),
+  // identité vérifiée et bio substantielle. Sinon noindex (RGPD + thin content).
+  const hasSubstantialBio = ((bio || motivation || "") as string).length >= 80;
   const isRichProfile =
-    reviewCount >= 3 &&
+    (reviewCount >= 1 || completedSits >= 1) &&
     !!profile?.identity_verified &&
-    !!(bio || motivation) &&
-    ((bio || motivation || "").length >= 80);
+    hasSubstantialBio;
   const shouldNoindex = !isRichProfile;
 
   const jsonLd = {
@@ -764,7 +779,7 @@ export default function PublicSitterProfile() {
         const isOwnProfile = !!auth.user?.id && auth.user.id === id;
         return (
           <div
-            className="relative overflow-hidden w-full flex items-end bg-[hsl(var(--hero-paper))]"
+            className="relative overflow-hidden w-full flex items-end bg-[hsl(var(--hero-paper))] max-h-[420px] md:max-h-[520px]"
             style={{ aspectRatio: "1536 / 544" }}
           >
             {/* Illustration de fond — sketchbook style, déterministe par profil.
