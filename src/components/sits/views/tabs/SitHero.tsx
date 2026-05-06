@@ -85,7 +85,23 @@ const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHer
     };
   }, [lightboxOpen, next, prev]);
 
-  if (total === 0) return null;
+  if (total === 0) {
+    return (
+      <div
+        role="status"
+        aria-live="polite"
+        className="rounded-3xl border border-dashed border-border bg-muted/30 mb-6 px-6 py-10 md:py-14 text-center"
+      >
+        <p className="font-heading text-base md:text-lg text-foreground">
+          Galerie indisponible
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground max-w-md mx-auto">
+          L'hôte n'a pas encore ajouté de photos de son logement.
+          {cityName ? ` Annonce située à ${cityName}${department ? ` (${department})` : ""}.` : ""}
+        </p>
+      </div>
+    );
+  }
 
   const current = slides[index];
 
