@@ -604,6 +604,19 @@ const PublicSitDetail = () => {
  </section>
  )}
 
+ {/* ─── ROUTINE QUOTIDIENNE ──────────────────────────────────────── */}
+ {sit.daily_routine && (
+ <section className="mb-6 bg-card border border-border rounded-2xl p-5 md:p-6">
+ <h2 className="font-heading text-xl font-semibold mb-3 flex items-center gap-2">
+ <Calendar className="h-5 w-5 text-primary" />
+ La routine quotidienne
+ </h2>
+ <p className="text-sm text-foreground/85 leading-relaxed whitespace-pre-line">
+ {sit.daily_routine}
+ </p>
+ </section>
+ )}
+
  {/* ─── PROFIL TYPE DE GARDIEN RECHERCHÉ ─────────────────────────── */}
  {sit.open_to && sit.open_to.length > 0 && !sit.open_to.every((t: string) => ["any", "no_preference", "Sans préférence"].includes(t)) && (
  <section className="mb-6">
