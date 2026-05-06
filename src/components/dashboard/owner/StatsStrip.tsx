@@ -7,6 +7,8 @@ interface StatItem {
   fallback?: string;
   highlight?: boolean;
   to?: string;
+  /** Si défini et value === 0, affiche un placeholder neutre (« — ») au lieu d'un « 0 » grisé. */
+  emptyHint?: string;
 }
 
 interface StatsStripProps {
