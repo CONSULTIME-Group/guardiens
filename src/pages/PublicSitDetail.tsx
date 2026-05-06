@@ -413,6 +413,7 @@ const PublicSitDetail = () => {
 
  {/* JSON-LD : lu par Google après rendu JS, indépendant des OG. */}
  <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+ <script type="application/ld+json">{JSON.stringify(breadcrumbLd)}</script>
  </Helmet>
 
  {/* Header public — anonymes uniquement (identité de marque + nav minimale) */}
