@@ -632,7 +632,7 @@ export default function PublicSitterProfile() {
   const missionReviews = reviews.filter((r: any) => r.sit_id === null);
   const visibleGallery = gallery.slice(0, 9);
 
-  const showCTA = !(isOwn || (isAuthenticated && isSitter));
+  const showCTA = !(isAuthenticated && isSitter); // visible aussi pour soi-même (état désactivé)
 
    // SEO
   const animalLabels = animalTypes.map(a => ANIMAL_LABELS[a] || a).join(", ");
@@ -640,8 +640,14 @@ export default function PublicSitterProfile() {
   const pageTitle = rawTitle;
   const pageDesc = ((bio || motivation || "") as string).slice(0, 160) || `${firstName} garde des ${animalLabels || "animaux"} à ${city || "France"}. Profil vérifié sur Guardiens.fr.`;
   const pageUrl = buildAbsoluteUrl(`/gardiens/${id}`);
-  // Politique : tous les profils gardiens en noindex (RGPD + données personnelles + thin content)
-  const shouldNoindex = true;
+  // Politique : profils riches indexables (≥3 avis publics + identité vérifiée + bio).
+  // Sinon noindex (RGPD + thin content).
+  const isRichProfile =
+    reviewCount >= 3 &&
+    !!profile?.identity_verified &&
+    !!(bio || motivation) &&
+    ((bio || motivation || "").length >= 80);
+  const shouldNoindex = !isRichProfile;
 
   const jsonLd = {
     "@context": "https://schema.org",
