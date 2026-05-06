@@ -973,7 +973,7 @@ const SearchSitter = () => {
  // ─── Card renderer ───
  const renderCard = (item: any, listIndex?: number) => {
  const photos: string[] = item.property?.photos || [];
- const coverPhoto = (item as any).cover_photo_url || item.property?.cover_photo_url || photos[0] || null;
+ const coverPhoto = (item as any).cover_photo_url || item.property?.cover_photo_url || photos[0] || (item as any).ownerGalleryFirstPhoto || null;
  const petGroups: Record<string, string[]> = {};
  (item.pets || []).forEach((p: any) => {
  if (!petGroups[p.species]) petGroups[p.species] = [];
