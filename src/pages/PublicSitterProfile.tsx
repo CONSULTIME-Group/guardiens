@@ -1328,12 +1328,35 @@ export default function PublicSitterProfile() {
                 <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
                   Avis ({reviewCount})
                 </h2>
-                <ReviewGrid
-                  reviews={gardeReviews.length > 0 ? gardeReviews : missionReviews}
-                  showAll={showAllGardeReviews}
-                  setShowAll={setShowAllGardeReviews}
-                  badgesBySitId={badgesBySitId}
-                />
+                <Tabs defaultValue={gardeReviews.length > 0 ? "gardes" : "missions"} className="w-full">
+                  <TabsList className="mb-3">
+                    <TabsTrigger value="gardes">Gardes{gardeReviews.length > 0 ? ` (${gardeReviews.length})` : ''}</TabsTrigger>
+                    <TabsTrigger value="missions">Missions{missionReviews.length > 0 ? ` (${missionReviews.length})` : ''}</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="gardes" forceMount>
+                    {gardeReviews.length === 0 ? (
+                      <p className="text-sm text-muted-foreground italic py-2 font-body">Pas encore d'avis de garde.</p>
+                    ) : (
+                      <ReviewGrid
+                        reviews={gardeReviews}
+                        showAll={showAllGardeReviews}
+                        setShowAll={setShowAllGardeReviews}
+                        badgesBySitId={badgesBySitId}
+                      />
+                    )}
+                  </TabsContent>
+                  <TabsContent value="missions" forceMount>
+                    {missionReviews.length === 0 ? (
+                      <p className="text-sm text-muted-foreground italic py-2 font-body">Pas encore d'avis de mission.</p>
+                    ) : (
+                      <ReviewGrid
+                        reviews={missionReviews}
+                        showAll={showAllMissionReviewsTab}
+                        setShowAll={setShowAllMissionReviewsTab}
+                      />
+                    )}
+                  </TabsContent>
+                </Tabs>
               </section>
             )}
 
