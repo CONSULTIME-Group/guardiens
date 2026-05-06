@@ -180,13 +180,17 @@ const PublicSitDetail = () => {
             } else {
               const role = (user as any).role;
               if (role === "owner") resolvedViewer = "proprio";
+              else if (role === "both") resolvedViewer = "proprio"; // par défaut : aperçu public, toggle dispo
               else resolvedViewer = "gardien";
             }
           }
         }
         setViewerType(resolvedViewer);
 
-        if (resolvedViewer === "gardien" || resolvedViewer === "proprio") {
+        // Rôle simple "gardien" : redirection auto vers la vue gardien.
+        // "proprio" (incluant "both" par défaut) : on reste sur l'aperçu public ;
+        // les "both" voient un toggle pour basculer en vue gardien.
+        if (resolvedViewer === "gardien") {
           navigate(`/sits/${id}?from=share`, { replace: true });
           return;
         }
