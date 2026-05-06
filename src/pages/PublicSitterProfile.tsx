@@ -455,16 +455,17 @@ export default function PublicSitterProfile() {
       }
       setPets(fetchedPets);
 
-      // Query 2 — Annonces publiées (limite raisonnable, UI tronque via "Voir plus")
-      const { data: sitsData, error: sitsErr } = await supabase
+      // Query 2 — Annonces publiées (pagination progressive : 50 par lot, "Voir plus" charge la suite)
+      const { data: sitsData, error: sitsErr, count: sitsCount } = await supabase
         .from('sits')
-        .select('id, title, start_date, end_date, status, created_at')
+        .select('id, title, start_date, end_date, status, created_at', { count: 'exact' })
         .eq('user_id', id)
         .in('status', ['published', 'confirmed', 'completed'])
         .order('created_at', { ascending: false })
-        .limit(50);
+        .range(0, OWNER_SITS_PAGE_SIZE - 1);
       if (sitsErr) console.error('[sits]', sitsErr);
       setOwnerSits(sitsData ?? []);
+      setOwnerSitsTotal(sitsCount ?? (sitsData?.length ?? 0));
 
       // Query 3 — Avis reçus en tant que propriétaire (laissés par les gardiens
       // après une garde, OU laissés directement comme avis "proprio/owner").
