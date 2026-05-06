@@ -64,6 +64,7 @@ const PublicSitDetail = () => {
  const [badges, setBadges] = useState<{ badge_key: string; count: number }[]>([]);
  const [avgRating, setAvgRating] = useState<string | null>(null);
  const [reviewCount, setReviewCount] = useState(0);
+ const [latestReviews, setLatestReviews] = useState<{ overall_rating: number; comment: string; created_at: string }[]>([]);
  const [loading, setLoading] = useState(true);
  const [applyOpen, setApplyOpen] = useState(false);
  const [hasApplied, setHasApplied] = useState(false);
@@ -79,10 +80,11 @@ const PublicSitDetail = () => {
  setSit(sitData);
 
  // public_profiles : vue publique (RLS de profiles bloque les autres users)
-    const [ownerRes, propRes, reviewsRes, badgeRes, galleryRes] = await Promise.all([
+    const [ownerRes, propRes, reviewsRes, latestReviewsRes, badgeRes, galleryRes] = await Promise.all([
  supabase.from("public_profiles").select("id, first_name, city, postal_code, avatar_url, identity_verified, bio, completed_sits_count, is_founder").eq("id", sitData.user_id).limit(1),
  supabase.from("properties").select("*").eq("id", sitData.property_id).limit(1),
  supabase.from("reviews").select("overall_rating").eq("reviewee_id", sitData.user_id).eq("published", true),
+ supabase.from("reviews").select("overall_rating, comment, created_at").eq("reviewee_id", sitData.user_id).eq("published", true).not("comment", "is", null).order("created_at", { ascending: false }).limit(2),
  supabase.from("badge_attributions").select("badge_id").eq("user_id", sitData.user_id),
  supabase.from("owner_gallery").select("photo_url, position").eq("user_id", sitData.user_id).order("position", { ascending: true }),
  ]);
@@ -149,6 +151,7 @@ const PublicSitDetail = () => {
  if (reviews.length > 0) {
  setAvgRating((reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1));
  }
+ setLatestReviews((latestReviewsRes.data || []) as any);
 
  const badgeMap = new Map<string, number>();
  (badgeRes.data || []).forEach((b: any) => badgeMap.set(b.badge_key, (badgeMap.get(b.badge_key) || 0) + 1));
@@ -260,6 +263,20 @@ const PublicSitDetail = () => {
  return Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1);
  })();
 
+ // Jours avant le début (pour le badge d'urgence)
+ const daysUntilStart = (() => {
+ if (!sit.start_date) return null;
+ const diff = Math.ceil((new Date(sit.start_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+ return diff;
+ })();
+ const urgencyLabel = (() => {
+ if (daysUntilStart == null || daysUntilStart < 0) return null;
+ if (daysUntilStart === 0) return "Commence aujourd'hui";
+ if (daysUntilStart === 1) return "Commence demain";
+ if (daysUntilStart <= 14) return `Dans ${daysUntilStart} jours`;
+ return null;
+ })();
+
  // Label date naturel : « Du 5 au 15 août 2026 · 11 jours »
  const naturalDateLabel = (() => {
  if (!sit.start_date || !sit.end_date) return "Dates flexibles";
@@ -351,14 +368,29 @@ const PublicSitDetail = () => {
  },
  };
 
+ // Critère d'indexation : photos suffisantes + description ou routine substantielle.
+ // Sinon noindex pour éviter le thin content sur les nouvelles annonces.
+ const galleryCount = property?.photos?.length || 0;
+ const richTextLength = (property?.description || "").length + (sit.daily_routine || "").length;
+ const isIndexable = galleryCount >= 3 && richTextLength >= 150;
+
+ const breadcrumbLd = {
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ itemListElement: [
+ { "@type": "ListItem", position: 1, name: "Accueil", item: canonicalUrl.replace(/\/annonces\/.*$/, "/") },
+ { "@type": "ListItem", position: 2, name: cityForTitle, item: canonicalUrl.replace(/\/annonces\/.*$/, `/gardien-animaux/${(cityForTitle || "").toLowerCase()}`) },
+ { "@type": "ListItem", position: 3, name: sit.title || "Annonce de garde", item: canonicalUrl },
+ ],
+ };
+
  return (
  <div className="pb-32 bg-background">
  <Helmet>
  <title>{truncatedTitle}</title>
  <meta name="description" content={truncatedSeoDesc} />
  <link rel="canonical" href={canonicalUrl} />
- {/* noindex, follow — thin content protection (V1). */}
- <meta name="robots" content="noindex, follow" />
+ <meta name="robots" content={isIndexable ? "index, follow" : "noindex, follow"} />
 
  {/* Open Graph — Facebook, LinkedIn, Slack, WhatsApp */}
  <meta property="og:type" content="article" />
@@ -381,6 +413,7 @@ const PublicSitDetail = () => {
 
  {/* JSON-LD : lu par Google après rendu JS, indépendant des OG. */}
  <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+ <script type="application/ld+json">{JSON.stringify(breadcrumbLd)}</script>
  </Helmet>
 
  {/* Header public — anonymes uniquement (identité de marque + nav minimale) */}
@@ -434,8 +467,13 @@ const PublicSitDetail = () => {
  <div className="mt-5 mb-3 flex flex-wrap items-center gap-2">
  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
  <Sparkles className="h-3.5 w-3.5" />
- Mission de gardien · Logement offert
+ Mission de gardien · Hébergement inclus
  </span>
+ {urgencyLabel && (
+ <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-secondary/20 text-secondary-foreground border border-secondary/30">
+ {urgencyLabel}
+ </span>
+ )}
  {owner?.city && (
  <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-muted text-foreground">
  <MapPin className="h-3.5 w-3.5 text-primary/70" />
@@ -566,6 +604,19 @@ const PublicSitDetail = () => {
  </section>
  )}
 
+ {/* ─── ROUTINE QUOTIDIENNE ──────────────────────────────────────── */}
+ {sit.daily_routine && (
+ <section className="mb-6 bg-card border border-border rounded-2xl p-5 md:p-6">
+ <h2 className="font-heading text-xl font-semibold mb-3 flex items-center gap-2">
+ <Calendar className="h-5 w-5 text-primary" />
+ La routine quotidienne
+ </h2>
+ <p className="text-sm text-foreground/85 leading-relaxed whitespace-pre-line">
+ {sit.daily_routine}
+ </p>
+ </section>
+ )}
+
  {/* ─── PROFIL TYPE DE GARDIEN RECHERCHÉ ─────────────────────────── */}
  {sit.open_to && sit.open_to.length > 0 && !sit.open_to.every((t: string) => ["any", "no_preference", "Sans préférence"].includes(t)) && (
  <section className="mb-6">
@@ -651,6 +702,36 @@ const PublicSitDetail = () => {
  </section>
  )}
 
+ {/* ─── DERNIERS AVIS REÇUS ───────────────────────────────────────── */}
+ {latestReviews.length > 0 && (
+ <section className="mb-6">
+ <h2 className="font-heading text-xl font-semibold mb-3 flex items-center gap-2">
+ <Star className="h-5 w-5 text-secondary fill-secondary" />
+ Ce que disent les gardiens précédents
+ </h2>
+ <div className="space-y-3">
+ {latestReviews.map((r, i) => (
+ <article key={i} className="bg-card border border-border rounded-2xl p-4 md:p-5">
+ <div className="flex items-center gap-1.5 mb-1.5">
+ {Array.from({ length: 5 }).map((_, k) => (
+ <Star
+ key={k}
+ className={`h-4 w-4 ${k < Math.round(r.overall_rating) ? "text-secondary fill-secondary" : "text-muted-foreground/30"}`}
+ />
+ ))}
+ <span className="text-xs text-muted-foreground ml-1">
+ {format(new Date(r.created_at), "MMMM yyyy", { locale: fr })}
+ </span>
+ </div>
+ <p className="text-sm text-foreground/85 leading-relaxed line-clamp-4">
+ « {r.comment} »
+ </p>
+ </article>
+ ))}
+ </div>
+ </section>
+ )}
+
  {/* ─── PARTAGE — propriétaire de l'annonce uniquement ───────────── */}
  {viewerType === "owner_of_sit" && (
  <div className="mb-8">
@@ -698,7 +779,7 @@ const PublicSitDetail = () => {
  )}
 
  {/* ─── CTA STICKY ───────────────────────────────────────────────── */}
- <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 z-40 pb-20 md:pb-4">
+ <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] z-40 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.08)]">
  <div className="max-w-4xl mx-auto">
  {/* Réassurance pré-CTA supprimée — déjà couverte par PublicSitTrustStrip et le bloc final */}
  {!(sit as any).accepting_applications ? (
