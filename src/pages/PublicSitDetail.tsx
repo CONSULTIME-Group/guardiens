@@ -39,6 +39,7 @@ import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import PublicSitPitch from "@/components/sits/public/PublicSitPitch";
+import PublicSitGallery from "@/components/sits/public/PublicSitGallery";
 import PublicSitFAQ from "@/components/sits/public/PublicSitFAQ";
 import PublicSitTrustStrip from "@/components/sits/public/PublicSitTrustStrip";
 import {
