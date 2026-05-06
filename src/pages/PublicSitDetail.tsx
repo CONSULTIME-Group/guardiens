@@ -95,9 +95,12 @@ const PublicSitDetail = () => {
 
         const ownerData = ownerRes.data?.[0] ?? null;
         const propertyData = propRes.data?.[0] ?? null;
-        const galleryUrls = (galleryRes.data || []).map((g: any) => g.photo_url).filter(Boolean);
+        const galleryRows = (galleryRes.data || []) as any[];
+        const galleryUrls = galleryRows.map((g) => g.photo_url).filter(Boolean);
+        // Photos « qualité indexation » : largeur connue ≥ 800px
+        const galleryHiQualityCount = galleryRows.filter((g) => (g.width || 0) >= 800 && (g.height || 0) >= 600).length;
         const enrichedProperty = propertyData
-          ? { ...propertyData, photos: galleryUrls.length > 0 ? galleryUrls : (propertyData as any).photos }
+          ? { ...propertyData, photos: galleryUrls.length > 0 ? galleryUrls : (propertyData as any).photos, _hiQualityCount: galleryHiQualityCount }
           : propertyData;
 
         if (!ownerData) {
