@@ -91,6 +91,7 @@ const SitPhotoManager = ({
       for (const file of Array.from(files)) {
         try {
           const compressed = await compressImageFile(file, 5, 1200);
+          const dims = await getImageDimensions(compressed);
           const ext = (compressed.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
           const path = `${ownerId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
           const { error: upErr } = await supabase.storage
@@ -107,6 +108,8 @@ const SitPhotoManager = ({
               user_id: ownerId,
               photo_url,
               position: nextPosition,
+              width: dims.width || null,
+              height: dims.height || null,
             } as any)
             .select("id, photo_url")
             .single();
