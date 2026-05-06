@@ -439,59 +439,61 @@ export default function PublicSitterProfile() {
     if (!id || loading) return;
 
     const loadOwnerData = async () => {
-      // Query 1 — Animaux via properties
-      let fetchedPets: any[] = [];
-      const { data: userProperties } = await supabase
-        .from('properties')
-        .select('id')
-        .eq('user_id', id);
-      const propertyIds = (userProperties || []).map((p: any) => p.id);
-      if (propertyIds.length > 0) {
-        const { data: petsData, error: petsErr } = await supabase
-          .from('pets')
-          .select('id, name, species, breed, age, photo_url, character')
-          .in('property_id', propertyIds);
-        if (petsErr) console.error('[pets]', petsErr);
-        else fetchedPets = petsData ?? [];
+      setOwnerDataLoading(true);
+      try {
+        // Query 1 — Animaux via properties
+        let fetchedPets: any[] = [];
+        const { data: userProperties } = await supabase
+          .from('properties')
+          .select('id')
+          .eq('user_id', id);
+        const propertyIds = (userProperties || []).map((p: any) => p.id);
+        if (propertyIds.length > 0) {
+          const { data: petsData, error: petsErr } = await supabase
+            .from('pets')
+            .select('id, name, species, breed, age, photo_url, character')
+            .in('property_id', propertyIds);
+          if (petsErr) console.error('[pets]', petsErr);
+          else fetchedPets = petsData ?? [];
+        }
+        setPets(fetchedPets);
+
+        // Query 2 — Annonces publiées (pagination progressive : 50 par lot, "Voir plus" charge la suite)
+        const { data: sitsData, error: sitsErr, count: sitsCount } = await supabase
+          .from('sits')
+          .select('id, title, start_date, end_date, status, created_at', { count: 'exact' })
+          .eq('user_id', id)
+          .in('status', ['published', 'confirmed', 'completed'])
+          .order('created_at', { ascending: false })
+          .range(0, OWNER_SITS_PAGE_SIZE - 1);
+        if (sitsErr) console.error('[sits]', sitsErr);
+        setOwnerSits(sitsData ?? []);
+        setOwnerSitsTotal(sitsCount ?? (sitsData?.length ?? 0));
+
+        // Query 3 — Avis reçus en tant que propriétaire
+        const { data: revData, error: revErr } = await supabase
+          .from('reviews')
+          .select('id, overall_rating, comment, created_at, review_type, reviewer_id, sit_id')
+          .eq('reviewee_id', id)
+          .eq('published', true)
+          .eq('moderation_status', 'valide')
+          .neq('review_type', 'annulation')
+          .order('created_at', { ascending: false });
+        if (revErr) console.error('[ownerReviews]', revErr);
+        const enrichedOwnerReviews = await hydrateReviewers((revData ?? []) as any[]);
+        setOwnerReviews(enrichedOwnerReviews);
+
+        // Query 4 — Feedbacks missions
+        const { data: fbData, error: fbErr } = await supabase
+          .from('mission_feedbacks')
+          .select('id, positive, comment, created_at, badge_key')
+          .eq('receiver_id', id)
+          .order('created_at', { ascending: false });
+        if (fbErr && fbErr.code !== 'PGRST116') console.error('[missionFeedbacks]', fbErr);
+        setMissionFeedbacks(fbData ?? []);
+      } finally {
+        setOwnerDataLoading(false);
       }
-      setPets(fetchedPets);
-
-      // Query 2 — Annonces publiées (pagination progressive : 50 par lot, "Voir plus" charge la suite)
-      const { data: sitsData, error: sitsErr, count: sitsCount } = await supabase
-        .from('sits')
-        .select('id, title, start_date, end_date, status, created_at', { count: 'exact' })
-        .eq('user_id', id)
-        .in('status', ['published', 'confirmed', 'completed'])
-        .order('created_at', { ascending: false })
-        .range(0, OWNER_SITS_PAGE_SIZE - 1);
-      if (sitsErr) console.error('[sits]', sitsErr);
-      setOwnerSits(sitsData ?? []);
-      setOwnerSitsTotal(sitsCount ?? (sitsData?.length ?? 0));
-
-      // Query 3 — Avis reçus en tant que propriétaire (laissés par les gardiens
-      // après une garde, OU laissés directement comme avis "proprio/owner").
-      // On ne filtre PAS sur review_type : `reviewee_id` suffit à cibler les
-      // avis reçus par ce compte. Exclure les annulations uniquement.
-      const { data: revData, error: revErr } = await supabase
-        .from('reviews')
-        .select('id, overall_rating, comment, created_at, review_type, reviewer_id, sit_id')
-        .eq('reviewee_id', id)
-        .eq('published', true)
-        .eq('moderation_status', 'valide')
-        .neq('review_type', 'annulation')
-        .order('created_at', { ascending: false });
-      if (revErr) console.error('[ownerReviews]', revErr);
-      const enrichedOwnerReviews = await hydrateReviewers((revData ?? []) as any[]);
-      setOwnerReviews(enrichedOwnerReviews);
-
-      // Query 4 — Feedbacks missions
-      const { data: fbData, error: fbErr } = await supabase
-        .from('mission_feedbacks')
-        .select('id, positive, comment, created_at, badge_key')
-        .eq('receiver_id', id)
-        .order('created_at', { ascending: false });
-      if (fbErr && fbErr.code !== 'PGRST116') console.error('[missionFeedbacks]', fbErr);
-      setMissionFeedbacks(fbData ?? []);
     };
 
     loadOwnerData();
