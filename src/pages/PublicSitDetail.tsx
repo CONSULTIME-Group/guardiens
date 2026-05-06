@@ -145,12 +145,23 @@ const PublicSitDetail = () => {
  setOwner(enrichedOwner);
  setProperty(enrichedProperty);
 
- const reviews = reviewsRes.data || [];
+ // Déduplication par id (au cas où la requête renverrait des doublons),
+ // puis on isole les avis avec commentaire pour l'affichage.
+ const reviewsRaw = reviewsRes.data || [];
+ const seenIds = new Set<string>();
+ const reviews = reviewsRaw.filter((r: any) => {
+ if (!r?.id || seenIds.has(r.id)) return false;
+ seenIds.add(r.id);
+ return true;
+ });
  setReviewCount(reviews.length);
  if (reviews.length > 0) {
  setAvgRating((reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1));
  }
- setLatestReviews((latestReviewsRes.data || []) as any);
+ const withComment = reviews
+ .filter((r: any) => typeof r.comment === "string" && r.comment.trim().length > 0)
+ .slice(0, 2);
+ setLatestReviews(withComment as any);
 
  const badgeMap = new Map<string, number>();
  (badgeRes.data || []).forEach((b: any) => badgeMap.set(b.badge_key, (badgeMap.get(b.badge_key) || 0) + 1));
