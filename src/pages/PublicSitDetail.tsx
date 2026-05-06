@@ -78,7 +78,7 @@ const PublicSitDetail = () => {
 
  // public_profiles : vue publique (RLS de profiles bloque les autres users)
     const [ownerRes, propRes, reviewsRes, badgeRes, galleryRes] = await Promise.all([
- supabase.from("public_profiles").select("id, first_name, city, avatar_url, identity_verified, bio, completed_sits_count, is_founder").eq("id", sitData.user_id).limit(1),
+ supabase.from("public_profiles").select("id, first_name, city, postal_code, avatar_url, identity_verified, bio, completed_sits_count, is_founder").eq("id", sitData.user_id).limit(1),
  supabase.from("properties").select("*").eq("id", sitData.property_id).limit(1),
  supabase.from("reviews").select("overall_rating").eq("reviewee_id", sitData.user_id).eq("published", true),
  supabase.from("badge_attributions").select("badge_id").eq("user_id", sitData.user_id),
@@ -92,7 +92,25 @@ const PublicSitDetail = () => {
    ? { ...propertyData, photos: galleryUrls.length > 0 ? galleryUrls : (propertyData as any).photos }
    : propertyData;
 
- setOwner(ownerData);
+ // Fallback ville : si public_profiles ne renvoie pas city mais a un code postal,
+ // on résout la commune via l'API officielle geo.api.gouv.fr (FR uniquement, 5 chiffres).
+ let enrichedOwner = ownerData;
+ if (ownerData && !ownerData.city && /^\d{5}$/.test(String((ownerData as any).postal_code || ""))) {
+   try {
+     const res = await fetch(
+       `https://geo.api.gouv.fr/communes?codePostal=${(ownerData as any).postal_code}&fields=nom&limit=1`,
+     );
+     if (res.ok) {
+       const arr: { nom?: string }[] = await res.json();
+       const resolvedCity = arr?.[0]?.nom?.trim();
+       if (resolvedCity) enrichedOwner = { ...ownerData, city: resolvedCity };
+     }
+   } catch {
+     /* silencieux : l'UI dégrade proprement avec city=null */
+   }
+ }
+
+ setOwner(enrichedOwner);
  setProperty(enrichedProperty);
 
  const reviews = reviewsRes.data || [];
