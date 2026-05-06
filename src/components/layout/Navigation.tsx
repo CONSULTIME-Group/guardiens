@@ -461,11 +461,14 @@ export const BottomNav = () => {
               <button className="flex flex-col items-center gap-0.5 px-2 py-1 text-[10px] text-muted-foreground transition-colors min-w-[56px] relative">
                 <div className="relative">
                   <MoreHorizontal className="h-5 w-5" strokeWidth={1.8} />
-                  {missionBadgeCount > 0 && (
-                    <span className="absolute -top-1 -right-2 bg-destructive text-destructive-foreground text-[8px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 font-bold">
-                      {missionBadgeCount > 99 ? "99+" : missionBadgeCount}
-                    </span>
-                  )}
+                  {(() => {
+                    const moreBadge = pendingAppsCount + missionBadgeCount;
+                    return moreBadge > 0 ? (
+                      <span className="absolute -top-1 -right-2 bg-destructive text-destructive-foreground text-[8px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 font-bold">
+                        {moreBadge > 99 ? "99+" : moreBadge}
+                      </span>
+                    ) : null;
+                  })()}
                 </div>
                 <span className="font-medium">Plus</span>
               </button>
