@@ -469,6 +469,25 @@ const PublicSitDetail = () => {
         </div>
       )}
 
+      {/* Bandeau toggle pour les comptes "both" (propriétaire + gardien) :
+          ils peuvent choisir de voir la page comme un gardien (= postuler) ou rester en aperçu public. */}
+      {viewerType === "proprio" && user && (user as any).role === "both" && (
+        <div className="bg-secondary/30 border-b border-border">
+          <div className="max-w-4xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs md:text-sm text-foreground/80">
+              Vous consultez cette annonce <span className="font-medium text-foreground">comme propriétaire</span> (aperçu public).
+            </p>
+            <div className="flex items-center gap-2">
+              <Button asChild size="sm" variant="outline" className="h-8 text-xs">
+                <Link to={`/sits/${sit.id}?from=share&view=sitter`} className="inline-flex items-center gap-1.5">
+                  Voir comme gardien <ExternalLink className="h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
  <div className="max-w-4xl mx-auto">
  {/* ─── HERO ÉDITORIAL ─────────────────────────────────────────────── */}
  <div className="px-4 md:px-10 pt-4 md:pt-6">
