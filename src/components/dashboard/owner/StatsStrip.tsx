@@ -27,6 +27,7 @@ const StatsStrip = memo(({ items }: StatsStripProps) => {
     >
       {items.map((item, idx) => {
         const isZero = item.value === 0 || item.value === "0";
+        const showEmptyHint = isZero && !!item.emptyHint;
         const valueColor = item.highlight
           ? "text-primary"
           : isZero
@@ -35,12 +36,14 @@ const StatsStrip = memo(({ items }: StatsStripProps) => {
 
         const inner = (clickable: boolean) => (
           <div className="px-4 py-3 text-center md:text-left">
-            {item.value !== null ? (
+            {item.value !== null && !showEmptyHint ? (
               <p
                 className={`text-xl md:text-2xl font-heading font-bold leading-none transition-transform duration-200 ease-out ${valueColor} ${clickable ? "group-hover:-translate-y-0.5" : ""}`}
               >
                 {item.value}
               </p>
+            ) : showEmptyHint ? (
+              <p className="text-xl md:text-2xl font-heading font-bold leading-none text-muted-foreground/40" aria-label={item.emptyHint}>—</p>
             ) : (
               <p className="text-sm text-muted-foreground leading-none mt-1">{item.fallback}</p>
             )}
