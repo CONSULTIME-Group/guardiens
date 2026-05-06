@@ -370,9 +370,9 @@ const Sits = () => {
   }, [sits, isOwnerView]);
 
   const filteredSits = useMemo(() => {
+    let base: any[] = [];
     if (isOwnerView) {
-      // Vue owner : 3 onglets
-      return sits.filter((s) => {
+      base = sits.filter((s) => {
         const es = s.effectiveStatus || s.status;
         switch (activeOwnerTab) {
           case "drafts":
@@ -384,20 +384,31 @@ const Sits = () => {
             return !isArchived(s) && es !== "draft";
         }
       });
+    } else {
+      base = activeSits.filter((s) => {
+        const es = s.effectiveStatus || s.status;
+        const appStatus = s.application_status;
+        switch (activeTab) {
+          case "in_progress": return es === "in_progress" && appStatus === "accepted";
+          case "completed": return es === "completed";
+          case "cancelled": return appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled";
+          case "upcoming": return !["completed", "cancelled"].includes(es) && !["cancelled", "rejected"].includes(appStatus) && es !== "in_progress";
+        }
+        return false;
+      });
     }
-    // Vue sitter (inchangée)
-    return activeSits.filter((s) => {
-      const es = s.effectiveStatus || s.status;
-      const appStatus = s.application_status;
-      switch (activeTab) {
-        case "in_progress": return es === "in_progress" && appStatus === "accepted";
-        case "completed": return es === "completed";
-        case "cancelled": return appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled";
-        case "upcoming": return !["completed", "cancelled"].includes(es) && !["cancelled", "rejected"].includes(appStatus) && es !== "in_progress";
-      }
-      return false;
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return base;
+    return base.filter((s) => {
+      const fields = [
+        s.title, s.city, s.ownerCity,
+        s.owner?.first_name, s.owner?.city,
+        s.acceptedSitter?.first_name, s.acceptedSitter?.city,
+        ...(s.pets || []).map((p: any) => p.name),
+      ].filter(Boolean).join(" ").toLowerCase();
+      return fields.includes(q);
     });
-  }, [activeSits, sits, isOwnerView, activeTab, activeOwnerTab]);
+  }, [activeSits, sits, isOwnerView, activeTab, activeOwnerTab, searchQuery]);
 
   // Sous-titre contextuel : informations utiles plutôt que générique
   const headerSubtitle = useMemo(() => {
