@@ -632,7 +632,7 @@ export default function PublicSitterProfile() {
   const missionReviews = reviews.filter((r: any) => r.sit_id === null);
   const visibleGallery = gallery.slice(0, 9);
 
-  const showCTA = !(isOwn || (isAuthenticated && isSitter));
+  const showCTA = !(isAuthenticated && isSitter); // visible aussi pour soi-même (état désactivé)
 
    // SEO
   const animalLabels = animalTypes.map(a => ANIMAL_LABELS[a] || a).join(", ");
@@ -640,8 +640,14 @@ export default function PublicSitterProfile() {
   const pageTitle = rawTitle;
   const pageDesc = ((bio || motivation || "") as string).slice(0, 160) || `${firstName} garde des ${animalLabels || "animaux"} à ${city || "France"}. Profil vérifié sur Guardiens.fr.`;
   const pageUrl = buildAbsoluteUrl(`/gardiens/${id}`);
-  // Politique : tous les profils gardiens en noindex (RGPD + données personnelles + thin content)
-  const shouldNoindex = true;
+  // Politique : profils riches indexables (≥3 avis publics + identité vérifiée + bio).
+  // Sinon noindex (RGPD + thin content).
+  const isRichProfile =
+    reviewCount >= 3 &&
+    !!profile?.identity_verified &&
+    !!(bio || motivation) &&
+    ((bio || motivation || "").length >= 80);
+  const shouldNoindex = !isRichProfile;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -892,9 +898,17 @@ export default function PublicSitterProfile() {
                     </span>
                   )}
                   {profile?.identity_verified && (
-                    <span className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const el = document.getElementById('confiance');
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }}
+                      aria-label="Voir les détails de confiance et vérifications"
+                      className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm hover:bg-background hover:border-primary/40 transition-colors cursor-pointer"
+                    >
                       <Shield size={11} className="text-primary" /> ID vérifiée
-                    </span>
+                    </button>
                   )}
                   {profile?.is_founder && (
                     <span className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm">
@@ -1130,15 +1144,24 @@ export default function PublicSitterProfile() {
             {/* CTA primaire — visible immédiatement */}
             {showCTA && (
               <div className="mt-4 md:mt-5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-                {!isAuthenticated && (
+                {isOwn ? (
+                  <button
+                    type="button"
+                    disabled
+                    title="Ceci est votre profil public — utilisez « Modifier mon profil » pour le mettre à jour."
+                    aria-disabled="true"
+                    className="inline-flex items-center justify-center bg-muted text-muted-foreground rounded-lg px-6 py-3 text-sm font-medium flex-1 sm:flex-initial cursor-not-allowed opacity-70"
+                  >
+                    Aperçu de votre profil
+                  </button>
+                ) : !isAuthenticated ? (
                   <Link
                     to={`/inscription?redirect=/gardiens/${id}`}
                     className="inline-flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-6 py-3 text-sm font-medium hover:bg-primary/90 transition-colors flex-1 sm:flex-initial"
                   >
                     S'inscrire pour contacter {firstName}
                   </Link>
-                )}
-                {isAuthenticated && isOwner && (
+                ) : isOwner ? (
                   <button
                     onClick={async () => {
                       if (!auth?.user?.id || !id) return;
@@ -1161,9 +1184,9 @@ export default function PublicSitterProfile() {
                   >
                     Contacter {firstName}
                   </button>
-                )}
+                ) : null}
                 <p className="text-[11px] sm:text-xs text-muted-foreground font-body sm:ml-2 self-center text-center sm:text-left leading-snug break-words">
-                  Contact direct, sans intermédiaire.
+                  {isOwn ? "Vous voyez cette page comme un visiteur." : "Contact direct, sans intermédiaire."}
                 </p>
               </div>
             )}
@@ -1471,6 +1494,45 @@ export default function PublicSitterProfile() {
       {/* ── ONGLET PROPRIO ── */}
       {activeTab === 'proprio' && (
         <div className="max-w-4xl mx-auto px-4 py-8 space-y-10">
+
+          {/* ── MINI RÉSUMÉ PROPRIÉTAIRE ── */}
+          {(() => {
+            const ownerAvg =
+              ownerReviews.length > 0
+                ? ownerReviews.reduce((s, r) => s + (Number(r.overall_rating) || 0), 0) / ownerReviews.length
+                : 0;
+            return (
+              <div className="grid grid-cols-3 gap-3 bg-card border border-border rounded-2xl p-4">
+                <div className="text-center">
+                  <p className="text-2xl font-display text-foreground">{ownerSitsTotal}</p>
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-body mt-1">
+                    Annonce{ownerSitsTotal > 1 ? 's' : ''}
+                  </p>
+                </div>
+                <div className="text-center border-x border-border">
+                  <p className="text-2xl font-display text-foreground">{ownerReviews.length}</p>
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-body mt-1">
+                    Avis reçu{ownerReviews.length > 1 ? 's' : ''}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-display text-foreground">
+                    {ownerAvg > 0 ? (
+                      <>
+                        {ownerAvg.toFixed(1)}
+                        <span className="text-primary text-base ml-0.5">★</span>
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </p>
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-body mt-1">
+                    Note moyenne
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* ── DESCRIPTION + ENVIRONNEMENTS ── */}
           {(ownerProfile?.environments?.length ?? 0) > 0 && (
