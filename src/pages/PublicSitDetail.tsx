@@ -72,165 +72,140 @@ const PublicSitDetail = () => {
  const [viewerType, setViewerType] = useState<ViewerType>("anonymous");
  const sitViewFired = useRef(false);
 
- useEffect(() => {
- if (!id) return;
- const load = async () => {
- const { data: sitRows } = await supabase.from("sits").select("*").eq("id", id).limit(1);
- const sitData = sitRows?.[0];
- if (!sitData) { setLoading(false); return; }
- setSit(sitData);
+  useEffect(() => {
+    if (!id) return;
+    const load = async () => {
+      try {
+        const { data: sitRows, error: sitErr } = await supabase.from("sits").select("*").eq("id", id).limit(1);
+        if (sitErr) throw sitErr;
+        const sitData = sitRows?.[0];
+        if (!sitData) {
+          setLoadError("not_found");
+          return;
+        }
+        setSit(sitData);
 
- // public_profiles : vue publique (RLS de profiles bloque les autres users)
-    const [ownerRes, propRes, reviewsRes, badgeRes, galleryRes] = await Promise.all([
- supabase.from("public_profiles").select("id, first_name, city, postal_code, avatar_url, identity_verified, bio, completed_sits_count, is_founder").eq("id", sitData.user_id).limit(1),
- supabase.from("properties").select("*").eq("id", sitData.property_id).limit(1),
- supabase.from("reviews").select("id, overall_rating, comment, created_at").eq("reviewee_id", sitData.user_id).eq("published", true).order("created_at", { ascending: false }),
- supabase.from("badge_attributions").select("badge_id").eq("user_id", sitData.user_id),
- supabase.from("owner_gallery").select("photo_url, position").eq("user_id", sitData.user_id).order("position", { ascending: true }),
- ]);
+        const [ownerRes, propRes, reviewsRes, badgeRes, galleryRes] = await Promise.all([
+          supabase.from("public_profiles").select("id, first_name, city, postal_code, avatar_url, identity_verified, bio, completed_sits_count, is_founder").eq("id", sitData.user_id).limit(1),
+          supabase.from("properties").select("*").eq("id", sitData.property_id).limit(1),
+          supabase.from("reviews").select("id, overall_rating, comment, created_at").eq("reviewee_id", sitData.user_id).eq("published", true).order("created_at", { ascending: false }),
+          supabase.from("badge_attributions").select("badge_id").eq("user_id", sitData.user_id),
+          supabase.from("owner_gallery").select("photo_url, position").eq("user_id", sitData.user_id).order("position", { ascending: true }),
+        ]);
 
- const ownerData = ownerRes.data?.[0] ?? null;
- const propertyData = propRes.data?.[0] ?? null;
- const galleryUrls = (galleryRes.data || []).map((g: any) => g.photo_url).filter(Boolean);
- const enrichedProperty = propertyData
-   ? { ...propertyData, photos: galleryUrls.length > 0 ? galleryUrls : (propertyData as any).photos }
-   : propertyData;
+        const ownerData = ownerRes.data?.[0] ?? null;
+        const propertyData = propRes.data?.[0] ?? null;
+        const galleryUrls = (galleryRes.data || []).map((g: any) => g.photo_url).filter(Boolean);
+        const enrichedProperty = propertyData
+          ? { ...propertyData, photos: galleryUrls.length > 0 ? galleryUrls : (propertyData as any).photos }
+          : propertyData;
 
- // ── Diagnostics public pages : trace silencieuse en prod, console en dev.
- // Permet de repérer les annonces dont le profil public ou la galerie owner
- // ne renvoient rien (RLS, données manquantes, hôte supprimé…).
- if (!ownerData) {
-   logger.warn("[PublicSitDetail] public_profiles vide", {
-     sit_id: sitData.id,
-     user_id: sitData.user_id,
-     error: ownerRes.error?.message,
-   });
- }
- if (galleryUrls.length === 0) {
-   logger.warn("[PublicSitDetail] owner_gallery vide", {
-     sit_id: sitData.id,
-     user_id: sitData.user_id,
-     property_id: sitData.property_id,
-     property_photos_count: Array.isArray((propertyData as any)?.photos)
-       ? (propertyData as any).photos.length
-       : 0,
-     error: galleryRes.error?.message,
-   });
- }
- if (ownerData && !ownerData.city) {
-   logger.info("[PublicSitDetail] public_profiles.city manquant", {
-     sit_id: sitData.id,
-     user_id: sitData.user_id,
-     has_postal_code: Boolean((ownerData as any).postal_code),
-   });
- }
+        if (!ownerData) {
+          logger.warn("[PublicSitDetail] public_profiles vide", { sit_id: sitData.id, user_id: sitData.user_id, error: ownerRes.error?.message });
+        }
+        if (galleryUrls.length === 0) {
+          logger.warn("[PublicSitDetail] owner_gallery vide", {
+            sit_id: sitData.id,
+            user_id: sitData.user_id,
+            property_id: sitData.property_id,
+            property_photos_count: Array.isArray((propertyData as any)?.photos) ? (propertyData as any).photos.length : 0,
+            error: galleryRes.error?.message,
+          });
+        }
 
- // Fallback ville : si public_profiles ne renvoie pas city mais a un code postal,
- // on résout la commune via l'API officielle geo.api.gouv.fr (FR uniquement, 5 chiffres).
- let enrichedOwner = ownerData;
- if (ownerData && !ownerData.city && /^\d{5}$/.test(String((ownerData as any).postal_code || ""))) {
-   try {
-     const res = await fetch(
-       `https://geo.api.gouv.fr/communes?codePostal=${(ownerData as any).postal_code}&fields=nom&limit=1`,
-     );
-     if (res.ok) {
-       const arr: { nom?: string }[] = await res.json();
-       const resolvedCity = arr?.[0]?.nom?.trim();
-       if (resolvedCity) enrichedOwner = { ...ownerData, city: resolvedCity };
-     }
-   } catch {
-     /* silencieux : l'UI dégrade proprement avec city=null */
-   }
- }
+        let enrichedOwner = ownerData;
+        if (ownerData && !ownerData.city && /^\d{5}$/.test(String((ownerData as any).postal_code || ""))) {
+          try {
+            const res = await fetch(`https://geo.api.gouv.fr/communes?codePostal=${(ownerData as any).postal_code}&fields=nom&limit=1`);
+            if (res.ok) {
+              const arr: { nom?: string }[] = await res.json();
+              const resolvedCity = arr?.[0]?.nom?.trim();
+              if (resolvedCity) enrichedOwner = { ...ownerData, city: resolvedCity };
+            }
+          } catch { /* silencieux */ }
+        }
 
- setOwner(enrichedOwner);
- setProperty(enrichedProperty);
+        setOwner(enrichedOwner);
+        setProperty(enrichedProperty);
 
- // Déduplication par id (au cas où la requête renverrait des doublons),
- // puis on isole les avis avec commentaire pour l'affichage.
- const reviewsRaw = reviewsRes.data || [];
- const seenIds = new Set<string>();
- const reviews = reviewsRaw.filter((r: any) => {
- if (!r?.id || seenIds.has(r.id)) return false;
- seenIds.add(r.id);
- return true;
- });
- setReviewCount(reviews.length);
- if (reviews.length > 0) {
- setAvgRating((reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1));
- }
- const withComment = reviews
- .filter((r: any) => typeof r.comment === "string" && r.comment.trim().length > 0)
- .slice(0, 2);
- setLatestReviews(withComment as any);
+        const reviewsRaw = reviewsRes.data || [];
+        const seenIds = new Set<string>();
+        const reviews = reviewsRaw.filter((r: any) => {
+          if (!r?.id || seenIds.has(r.id)) return false;
+          seenIds.add(r.id);
+          return true;
+        });
+        setReviewCount(reviews.length);
+        if (reviews.length > 0) {
+          setAvgRating((reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1));
+        }
+        const withComment = reviews
+          .filter((r: any) => typeof r.comment === "string" && r.comment.trim().length > 0)
+          .slice(0, 2);
+        setLatestReviews(withComment as any);
 
- const badgeMap = new Map<string, number>();
- (badgeRes.data || []).forEach((b: any) => badgeMap.set(b.badge_key, (badgeMap.get(b.badge_key) || 0) + 1));
- setBadges(Array.from(badgeMap.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count));
+        const badgeMap = new Map<string, number>();
+        (badgeRes.data || []).forEach((b: any) => badgeMap.set(b.badge_key, (badgeMap.get(b.badge_key) || 0) + 1));
+        setBadges(Array.from(badgeMap.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count));
 
- if (propertyData) {
- const { data: petsData } = await supabase.from("pets").select("*").eq("property_id", propertyData.id);
- setPets(petsData || []);
- }
+        if (propertyData) {
+          try {
+            const { data: petsData } = await supabase.from("pets").select("*").eq("property_id", propertyData.id);
+            setPets(petsData || []);
+          } catch (e) { logger.warn("[PublicSitDetail] pets load failed", { error: (e as any)?.message }); }
+        }
 
- if (user) {
- const { data: appRows } = await supabase.from("applications").select("id").eq("sit_id", id!).eq("sitter_id", user.id).limit(1);
- if (appRows?.[0]) setHasApplied(true);
- }
+        if (user) {
+          try {
+            const { data: appRows } = await supabase.from("applications").select("id").eq("sit_id", id!).eq("sitter_id", user.id).limit(1);
+            if (appRows?.[0]) setHasApplied(true);
+          } catch (e) { logger.warn("[PublicSitDetail] applications check failed", { error: (e as any)?.message }); }
+        }
 
- // ── Résolution viewer_type ──
- let resolvedViewer: ViewerType = "anonymous";
- if (user) {
- if (sitData.user_id === user.id) {
- resolvedViewer = "owner_of_sit";
- } else {
- // Check admin role
- let isAdmin = false;
- try {
- const { data: roleRows } = await supabase
-.from("user_roles")
-.select("role")
-.eq("user_id", user.id)
-.eq("role", "admin")
-.limit(1);
- isAdmin = !!roleRows?.[0];
- } catch {
- isAdmin = false;
- }
- if (isAdmin) {
- resolvedViewer = "admin";
- } else {
- const role = (user as any).role;
- if (role === "owner") resolvedViewer = "proprio";
- else resolvedViewer = "gardien"; // sitter, both, ou défaut
- }
- }
- }
- setViewerType(resolvedViewer);
+        let resolvedViewer: ViewerType = "anonymous";
+        if (user) {
+          if (sitData.user_id === user.id) {
+            resolvedViewer = "owner_of_sit";
+          } else {
+            let isAdmin = false;
+            try {
+              const { data: roleRows } = await supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").limit(1);
+              isAdmin = !!roleRows?.[0];
+            } catch { isAdmin = false; }
+            if (isAdmin) {
+              resolvedViewer = "admin";
+            } else {
+              const role = (user as any).role;
+              if (role === "owner") resolvedViewer = "proprio";
+              else resolvedViewer = "gardien";
+            }
+          }
+        }
+        setViewerType(resolvedViewer);
 
- // Auto-redirect : un membre connecté qui arrive sur la page publique d'une
- // annonce qu'il PEUT consulter en mode complet doit voir la fiche riche.
- // On garde la version publique uniquement pour les anonymes et les
- // owners/admins (qui peuvent vouloir prévisualiser le partage).
- if (resolvedViewer === "gardien" || resolvedViewer === "proprio") {
- navigate(`/sits/${id}?from=share`, { replace: true });
- return;
- }
+        if (resolvedViewer === "gardien" || resolvedViewer === "proprio") {
+          navigate(`/sits/${id}?from=share`, { replace: true });
+          return;
+        }
 
- setLoading(false);
- // analytics — un seul tir grâce au ref (anti double-fire StrictMode)
- if (!sitViewFired.current) {
- sitViewFired.current = true;
- try {
- trackEvent("sit_view", {
- source: "/annonces/:id",
- metadata: { sit_id: id, viewer_type: resolvedViewer },
- });
- } catch {}
- }
- };
- load();
- }, [id, user, navigate]);
+        if (!sitViewFired.current) {
+          sitViewFired.current = true;
+          try {
+            trackEvent("sit_view", {
+              source: "/annonces/:id",
+              metadata: { sit_id: id, viewer_type: resolvedViewer },
+            });
+          } catch {}
+        }
+      } catch (e: any) {
+        logger.warn("[PublicSitDetail] load failed", { sit_id: id, error: e?.message });
+        setLoadError("error");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [id, user, navigate]);
 
  if (loading) {
  return (
