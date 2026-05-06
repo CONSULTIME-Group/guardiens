@@ -467,8 +467,13 @@ const PublicSitDetail = () => {
  <div className="mt-5 mb-3 flex flex-wrap items-center gap-2">
  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
  <Sparkles className="h-3.5 w-3.5" />
- Mission de gardien · Logement offert
+ Mission de gardien · Hébergement inclus
  </span>
+ {urgencyLabel && (
+ <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-secondary/20 text-secondary-foreground border border-secondary/30">
+ {urgencyLabel}
+ </span>
+ )}
  {owner?.city && (
  <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-muted text-foreground">
  <MapPin className="h-3.5 w-3.5 text-primary/70" />
