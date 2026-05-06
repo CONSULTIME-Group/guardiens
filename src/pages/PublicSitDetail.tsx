@@ -368,14 +368,29 @@ const PublicSitDetail = () => {
  },
  };
 
+ // Critère d'indexation : photos suffisantes + description ou routine substantielle.
+ // Sinon noindex pour éviter le thin content sur les nouvelles annonces.
+ const galleryCount = property?.photos?.length || 0;
+ const richTextLength = (property?.description || "").length + (sit.daily_routine || "").length;
+ const isIndexable = galleryCount >= 3 && richTextLength >= 150;
+
+ const breadcrumbLd = {
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ itemListElement: [
+ { "@type": "ListItem", position: 1, name: "Accueil", item: canonicalUrl.replace(/\/annonces\/.*$/, "/") },
+ { "@type": "ListItem", position: 2, name: cityForTitle, item: canonicalUrl.replace(/\/annonces\/.*$/, `/gardien-animaux/${(cityForTitle || "").toLowerCase()}`) },
+ { "@type": "ListItem", position: 3, name: sit.title || "Annonce de garde", item: canonicalUrl },
+ ],
+ };
+
  return (
  <div className="pb-32 bg-background">
  <Helmet>
  <title>{truncatedTitle}</title>
  <meta name="description" content={truncatedSeoDesc} />
  <link rel="canonical" href={canonicalUrl} />
- {/* noindex, follow — thin content protection (V1). */}
- <meta name="robots" content="noindex, follow" />
+ <meta name="robots" content={isIndexable ? "index, follow" : "noindex, follow"} />
 
  {/* Open Graph — Facebook, LinkedIn, Slack, WhatsApp */}
  <meta property="og:type" content="article" />
