@@ -1726,7 +1726,20 @@ export default function PublicSitterProfile() {
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
               Avis d'entraide{missionFeedbacks.length > 0 && ` (${missionFeedbacks.length})`}
             </p>
-            {missionFeedbacks.length > 0 ? (
+            {ownerDataLoading ? (
+              <div className="space-y-3" aria-busy="true" aria-label="Chargement des avis d'entraide">
+                {[0, 1].map((i) => (
+                  <div key={i} className="bg-card border border-border rounded-xl p-4 space-y-2">
+                    <div className="flex items-center gap-2.5">
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                      <Skeleton className="h-5 w-20 rounded-full" />
+                      <Skeleton className="h-3 w-16 ml-auto" />
+                    </div>
+                    <Skeleton className="h-3 w-3/4" />
+                  </div>
+                ))}
+              </div>
+            ) : missionFeedbacks.length > 0 ? (
               <div className="space-y-3">
                 {(showAllOwnerFeedbacks ? missionFeedbacks : missionFeedbacks.slice(0, VISIBLE_COUNT)).map((fb) => (
                   <div key={fb.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
