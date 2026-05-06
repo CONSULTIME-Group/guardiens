@@ -868,9 +868,10 @@ const PublicSitDetail = () => {
  Inscription et candidature gratuites aujourd'hui. Un abonnement gardien sera introduit à terme — vous serez prévenu(e) avant tout changement.
  </p>
  )}
- </div>
- </div>
- </div>
+        </div>
+      </div>
+      )}
+      </div>
  {/* Fin wrapper max-w-4xl */}
  </div>
 
