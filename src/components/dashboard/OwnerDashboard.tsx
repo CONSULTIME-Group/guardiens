@@ -106,15 +106,9 @@ const OwnerDashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ongoingSit, sits, pendingAppCount]);
 
-  const banner = useMemo(() => {
-    // Si une garde est en cours, l'info est portée par <OngoingSitHero/> → pas de banner redondant.
-    if (ongoingSit) return null;
-    if (verificationStatus !== "verified" && verificationStatus !== "pending")
-      return { variant: "info" as const, label: "Recommandé : vérifiez votre identité pour rassurer les gardiens qui consultent votre annonce.", to: "/settings#verification", ctaLabel: "Vérifier mon identité →" };
-    if (pendingAppCount > 0)
-      return { variant: "info" as const, label: `Vous avez ${pendingAppCount} candidature${pendingAppCount > 1 ? "s" : ""} non lue${pendingAppCount > 1 ? "s" : ""}.`, to: "/sits", ctaLabel: "Voir les candidatures →" };
-    return null;
-  }, [verificationStatus, ongoingSit, pendingAppCount]);
+  // Banner contextuel désactivé : verif & candidatures non lues sont désormais
+  // affichées en chips inline dans le hero, OngoingSitHero couvre le reste.
+  const banner = null as null | { variant: "info"; label: string; to: string; ctaLabel: string };
 
   // CTA bas de page supprimé : redondant avec le hero (action principale toujours
   // visible en haut) et avec MonAnnonceCard (qui guide déjà sur l'action contextuelle).
