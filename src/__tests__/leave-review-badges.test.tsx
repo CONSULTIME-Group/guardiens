@@ -23,15 +23,16 @@ vi.mock("@/integrations/supabase/client", () => ({
 }));
 
 import { supabase } from "@/integrations/supabase/client";
+import { buildBadgeAttributionRows } from "@/lib/buildBadgeAttributionRows";
 
 const OWNER_ID = "00000000-0000-0000-0000-00000000000a";
 const SITTER_ID = "00000000-0000-0000-0000-00000000000b";
 const SIT_ID = "00000000-0000-0000-0000-000000000010";
 
 /**
- * Reproduction fidèle du bloc "attribution des écussons" de
- * `src/pages/LeaveReview.tsx` (handleSubmit, ~206-214). Si la projection
- * change là-bas, ce test l'attrapera.
+ * Orchestration utilisant la fonction utilitaire partagée avec
+ * `src/pages/LeaveReview.tsx`. Si la logique de construction change,
+ * ce test l'attrapera car il importe le même module.
  */
 async function attributeBadges(opts: {
   selectedBadges: string[];
@@ -39,15 +40,9 @@ async function attributeBadges(opts: {
   reviewerId: string;
   sitId: string;
 }) {
-  if (opts.selectedBadges.length === 0) return;
-  const badgeRows = opts.selectedBadges.map((badge_id) => ({
-    user_id: opts.revieweeId,
-    giver_id: opts.reviewerId,
-    sit_id: opts.sitId,
-    badge_id,
-    is_manual: false,
-  }));
-  await supabase.from("badge_attributions").insert(badgeRows);
+  const rows = buildBadgeAttributionRows(opts);
+  if (rows.length === 0) return;
+  await supabase.from("badge_attributions").insert(rows);
 }
 
 /** Récupère le dernier appel d'insert sur la table donnée, ou undefined. */
