@@ -746,18 +746,25 @@ const PublicSitDetail = () => {
  </section>
  )}
 
- {/* ─── PARTAGE — propriétaire de l'annonce uniquement ───────────── */}
- {viewerType === "owner_of_sit" && (
- <div className="mb-8">
- <ShareButtons
- sitId={sit.id}
- title={sit.title || `Garde à ${owner?.city || "France"}`}
- city={owner?.city}
- source="public_sit_detail"
- viewerType={viewerType}
- />
- </div>
- )}
+      {/* ─── PARTAGE — propriétaire de l'annonce uniquement, replié par défaut ── */}
+      {viewerType === "owner_of_sit" && (
+        <details className="mb-6 rounded-2xl border border-border bg-card group">
+          <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between text-sm font-medium">
+            <span>Partager cette annonce</span>
+            <span className="text-xs text-muted-foreground group-open:hidden">Ouvrir</span>
+            <span className="text-xs text-muted-foreground hidden group-open:inline">Fermer</span>
+          </summary>
+          <div className="px-4 pb-4">
+            <ShareButtons
+              sitId={sit.id}
+              title={sit.title || `Garde à ${owner?.city || "France"}`}
+              city={owner?.city}
+              source="public_sit_detail"
+              viewerType={viewerType}
+            />
+          </div>
+        </details>
+      )}
 
  {/* ─── GESTION — propriétaire de l'annonce uniquement ───────────── */}
  {viewerType === "owner_of_sit" && property && (
