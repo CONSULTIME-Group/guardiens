@@ -548,19 +548,42 @@ const Sits = () => {
           <input
             type="search"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
             placeholder={isOwnerView ? "Rechercher (titre, ville, gardien, animal)…" : "Rechercher (ville, propriétaire, animal)…"}
             className="w-full pl-9 pr-9 py-2 rounded-lg border border-border bg-card text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50"
             aria-label="Rechercher dans mes annonces"
+            autoComplete="off"
           />
           {searchQuery && (
             <button
-              onClick={() => setSearchQuery("")}
+              onClick={() => { setSearchQuery(""); setShowSuggestions(false); }}
               className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
               aria-label="Effacer la recherche"
             >
               <X className="h-4 w-4" />
             </button>
+          )}
+          {showSuggestions && searchSuggestions.length > 0 && (
+            <ul
+              role="listbox"
+              className="absolute z-20 left-0 right-0 mt-1 max-h-72 overflow-auto rounded-lg border border-border bg-popover shadow-lg py-1"
+            >
+              {searchSuggestions.map((s, i) => (
+                <li key={`${s.type}-${s.label}-${i}`}>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => { setSearchQuery(s.label); setShowSuggestions(false); }}
+                    className="w-full flex items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
+                  >
+                    <span className="truncate">{s.label}</span>
+                    <span className="text-[11px] uppercase tracking-wide text-muted-foreground shrink-0">{s.type}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       )}
