@@ -403,6 +403,15 @@ const LeaveReview = () => {
         </div>
       </div>
 
+      <div className="mb-8">
+        <BadgeSelector
+          target={isOwnerReview ? "gardien" : "proprio"}
+          selected={selectedBadges}
+          onChange={setSelectedBadges}
+          max={3}
+        />
+      </div>
+
       <div className="mb-6">
         <label className="text-sm font-medium mb-2 block">
           Commentaire <span className="text-muted-foreground font-normal">(min. 50 caractères)</span>
