@@ -109,6 +109,7 @@ export default function PublicSitterProfile() {
   const OWNER_SITS_PAGE_SIZE = 50;
   const [ownerReviews, setOwnerReviews] = useState<any[]>([]);
   const [missionFeedbacks, setMissionFeedbacks] = useState<any[]>([]);
+  const [ownerDataLoading, setOwnerDataLoading] = useState(true);
   const [missionsPublished, setMissionsPublished] = useState<any[]>([]);
   const [missionsHelped, setMissionsHelped] = useState<any[]>([]);
   const [externalExperiences, setExternalExperiences] = useState<any[]>([]);
@@ -438,59 +439,61 @@ export default function PublicSitterProfile() {
     if (!id || loading) return;
 
     const loadOwnerData = async () => {
-      // Query 1 — Animaux via properties
-      let fetchedPets: any[] = [];
-      const { data: userProperties } = await supabase
-        .from('properties')
-        .select('id')
-        .eq('user_id', id);
-      const propertyIds = (userProperties || []).map((p: any) => p.id);
-      if (propertyIds.length > 0) {
-        const { data: petsData, error: petsErr } = await supabase
-          .from('pets')
-          .select('id, name, species, breed, age, photo_url, character')
-          .in('property_id', propertyIds);
-        if (petsErr) console.error('[pets]', petsErr);
-        else fetchedPets = petsData ?? [];
+      setOwnerDataLoading(true);
+      try {
+        // Query 1 — Animaux via properties
+        let fetchedPets: any[] = [];
+        const { data: userProperties } = await supabase
+          .from('properties')
+          .select('id')
+          .eq('user_id', id);
+        const propertyIds = (userProperties || []).map((p: any) => p.id);
+        if (propertyIds.length > 0) {
+          const { data: petsData, error: petsErr } = await supabase
+            .from('pets')
+            .select('id, name, species, breed, age, photo_url, character')
+            .in('property_id', propertyIds);
+          if (petsErr) console.error('[pets]', petsErr);
+          else fetchedPets = petsData ?? [];
+        }
+        setPets(fetchedPets);
+
+        // Query 2 — Annonces publiées (pagination progressive : 50 par lot, "Voir plus" charge la suite)
+        const { data: sitsData, error: sitsErr, count: sitsCount } = await supabase
+          .from('sits')
+          .select('id, title, start_date, end_date, status, created_at', { count: 'exact' })
+          .eq('user_id', id)
+          .in('status', ['published', 'confirmed', 'completed'])
+          .order('created_at', { ascending: false })
+          .range(0, OWNER_SITS_PAGE_SIZE - 1);
+        if (sitsErr) console.error('[sits]', sitsErr);
+        setOwnerSits(sitsData ?? []);
+        setOwnerSitsTotal(sitsCount ?? (sitsData?.length ?? 0));
+
+        // Query 3 — Avis reçus en tant que propriétaire
+        const { data: revData, error: revErr } = await supabase
+          .from('reviews')
+          .select('id, overall_rating, comment, created_at, review_type, reviewer_id, sit_id')
+          .eq('reviewee_id', id)
+          .eq('published', true)
+          .eq('moderation_status', 'valide')
+          .neq('review_type', 'annulation')
+          .order('created_at', { ascending: false });
+        if (revErr) console.error('[ownerReviews]', revErr);
+        const enrichedOwnerReviews = await hydrateReviewers((revData ?? []) as any[]);
+        setOwnerReviews(enrichedOwnerReviews);
+
+        // Query 4 — Feedbacks missions
+        const { data: fbData, error: fbErr } = await supabase
+          .from('mission_feedbacks')
+          .select('id, positive, comment, created_at, badge_key')
+          .eq('receiver_id', id)
+          .order('created_at', { ascending: false });
+        if (fbErr && fbErr.code !== 'PGRST116') console.error('[missionFeedbacks]', fbErr);
+        setMissionFeedbacks(fbData ?? []);
+      } finally {
+        setOwnerDataLoading(false);
       }
-      setPets(fetchedPets);
-
-      // Query 2 — Annonces publiées (pagination progressive : 50 par lot, "Voir plus" charge la suite)
-      const { data: sitsData, error: sitsErr, count: sitsCount } = await supabase
-        .from('sits')
-        .select('id, title, start_date, end_date, status, created_at', { count: 'exact' })
-        .eq('user_id', id)
-        .in('status', ['published', 'confirmed', 'completed'])
-        .order('created_at', { ascending: false })
-        .range(0, OWNER_SITS_PAGE_SIZE - 1);
-      if (sitsErr) console.error('[sits]', sitsErr);
-      setOwnerSits(sitsData ?? []);
-      setOwnerSitsTotal(sitsCount ?? (sitsData?.length ?? 0));
-
-      // Query 3 — Avis reçus en tant que propriétaire (laissés par les gardiens
-      // après une garde, OU laissés directement comme avis "proprio/owner").
-      // On ne filtre PAS sur review_type : `reviewee_id` suffit à cibler les
-      // avis reçus par ce compte. Exclure les annulations uniquement.
-      const { data: revData, error: revErr } = await supabase
-        .from('reviews')
-        .select('id, overall_rating, comment, created_at, review_type, reviewer_id, sit_id')
-        .eq('reviewee_id', id)
-        .eq('published', true)
-        .eq('moderation_status', 'valide')
-        .neq('review_type', 'annulation')
-        .order('created_at', { ascending: false });
-      if (revErr) console.error('[ownerReviews]', revErr);
-      const enrichedOwnerReviews = await hydrateReviewers((revData ?? []) as any[]);
-      setOwnerReviews(enrichedOwnerReviews);
-
-      // Query 4 — Feedbacks missions
-      const { data: fbData, error: fbErr } = await supabase
-        .from('mission_feedbacks')
-        .select('id, positive, comment, created_at, badge_key')
-        .eq('receiver_id', id)
-        .order('created_at', { ascending: false });
-      if (fbErr && fbErr.code !== 'PGRST116') console.error('[missionFeedbacks]', fbErr);
-      setMissionFeedbacks(fbData ?? []);
     };
 
     loadOwnerData();
@@ -1594,7 +1597,19 @@ export default function PublicSitterProfile() {
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
               Gardes publiées{ownerSitsTotal > 0 && ` (${ownerSitsTotal})`}
             </p>
-            {ownerSits.length > 0 ? (
+            {ownerDataLoading ? (
+              <div className="space-y-2" aria-busy="true" aria-label="Chargement des annonces">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="flex items-center justify-between gap-4 bg-card border border-border rounded-xl px-4 py-3">
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <Skeleton className="h-4 w-2/3" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                    <Skeleton className="h-6 w-20 rounded-full" />
+                  </div>
+                ))}
+              </div>
+            ) : ownerSits.length > 0 ? (
               <div className="space-y-2">
                 {(showAllOwnerSits ? ownerSits : ownerSits.slice(0, VISIBLE_COUNT)).map((sit) => {
                   const statusMap: Record<string, { label: string; style: string }> = {
@@ -1657,7 +1672,21 @@ export default function PublicSitterProfile() {
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
               Avis des gardiens{ownerReviews.length > 0 && ` (${ownerReviews.length})`}
             </p>
-            {ownerReviews.length > 0 ? (
+            {ownerDataLoading ? (
+              <div className="space-y-3" aria-busy="true" aria-label="Chargement des avis">
+                {[0, 1].map((i) => (
+                  <div key={i} className="bg-card border border-border rounded-xl p-4 space-y-2">
+                    <div className="flex items-center gap-2.5">
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                      <Skeleton className="h-3 w-24" />
+                      <Skeleton className="h-3 w-16 ml-auto" />
+                    </div>
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-4/5" />
+                  </div>
+                ))}
+              </div>
+            ) : ownerReviews.length > 0 ? (
               <div className="space-y-3">
                 {(showAllOwnerReviews ? ownerReviews : ownerReviews.slice(0, VISIBLE_COUNT)).map((review) => {
                   const stars = Math.min(5, Math.max(0, Number(review.overall_rating) || 0));
@@ -1697,7 +1726,20 @@ export default function PublicSitterProfile() {
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
               Avis d'entraide{missionFeedbacks.length > 0 && ` (${missionFeedbacks.length})`}
             </p>
-            {missionFeedbacks.length > 0 ? (
+            {ownerDataLoading ? (
+              <div className="space-y-3" aria-busy="true" aria-label="Chargement des avis d'entraide">
+                {[0, 1].map((i) => (
+                  <div key={i} className="bg-card border border-border rounded-xl p-4 space-y-2">
+                    <div className="flex items-center gap-2.5">
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                      <Skeleton className="h-5 w-20 rounded-full" />
+                      <Skeleton className="h-3 w-16 ml-auto" />
+                    </div>
+                    <Skeleton className="h-3 w-3/4" />
+                  </div>
+                ))}
+              </div>
+            ) : missionFeedbacks.length > 0 ? (
               <div className="space-y-3">
                 {(showAllOwnerFeedbacks ? missionFeedbacks : missionFeedbacks.slice(0, VISIBLE_COUNT)).map((fb) => (
                   <div key={fb.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
