@@ -18,6 +18,7 @@ import SitDetailSkeleton from "@/components/skeletons/SitDetailSkeleton";
 import OwnerSitView from "@/components/sits/views/OwnerSitView";
 import SitterSitView from "@/components/sits/views/SitterSitView";
 import { useSitRealtime } from "@/components/sits/views/useSitRealtime";
+import { backfillOwnerGalleryDimensions } from "@/lib/backfillGalleryDimensions";
 import type { SitData } from "@/components/sits/views/types";
 
 const SitDetail = () => {
@@ -153,6 +154,14 @@ const SitDetail = () => {
     onSitChange: handleSitPatch,
     onApplicationsChange: handleApplicationsCounts,
   });
+
+  // Revalidation silencieuse de l'indexation SEO : si le visiteur est l'owner,
+  // on mesure et persiste les dimensions des photos historiques manquantes
+  // pour réactiver le filtre `isIndexable` sur la page publique.
+  useEffect(() => {
+    if (!user || !sit || user.id !== (sit as any).user_id) return;
+    backfillOwnerGalleryDimensions(user.id);
+  }, [user, sit]);
 
   if (loading) return <SitDetailSkeleton />;
   if (!sit)
