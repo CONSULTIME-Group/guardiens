@@ -30,6 +30,7 @@ import ShareButtons from "@/components/sits/ShareButtons";
 import { trackEvent } from "@/lib/analytics";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { getOgImageAbsoluteUrl } from "@/lib/ogImages";
+import { logger } from "@/lib/logger";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ApplicationModal from "@/components/sits/ApplicationModal";
