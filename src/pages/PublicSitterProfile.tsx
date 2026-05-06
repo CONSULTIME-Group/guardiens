@@ -109,6 +109,7 @@ export default function PublicSitterProfile() {
   const OWNER_SITS_PAGE_SIZE = 50;
   const [ownerReviews, setOwnerReviews] = useState<any[]>([]);
   const [missionFeedbacks, setMissionFeedbacks] = useState<any[]>([]);
+  const [ownerDataLoading, setOwnerDataLoading] = useState(true);
   const [missionsPublished, setMissionsPublished] = useState<any[]>([]);
   const [missionsHelped, setMissionsHelped] = useState<any[]>([]);
   const [externalExperiences, setExternalExperiences] = useState<any[]>([]);
