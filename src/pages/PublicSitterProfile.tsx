@@ -217,10 +217,10 @@ export default function PublicSitterProfile() {
         <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Zone d'intervention</h3>
         <p className="text-sm text-foreground/70 font-body">
           {props.hasVehicle
-            ? `Avec véhicule${props.radius ? ` — rayon ${props.radius} km${props.city ? ` · ${props.city}` : ''}` : ''}`
+            ? `Avec véhicule${props.radius ? ` — peut intervenir jusqu'à ${props.radius} km${props.city ? ` autour de ${props.city}` : ''}` : ''}`
             : props.radius
-              ? `Rayon ${props.radius} km${props.city ? ` · ${props.city}` : ''}`
-              : 'Rayon non renseigné'}
+              ? `Jusqu'à ${props.radius} km${props.city ? ` autour de ${props.city}` : ''}`
+              : 'Zone d\'intervention non précisée'}
         </p>
       </div>
       {props.competences.length > 0 && (
