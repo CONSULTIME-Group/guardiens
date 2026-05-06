@@ -898,9 +898,17 @@ export default function PublicSitterProfile() {
                     </span>
                   )}
                   {profile?.identity_verified && (
-                    <span className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const el = document.getElementById('confiance');
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }}
+                      aria-label="Voir les détails de confiance et vérifications"
+                      className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm hover:bg-background hover:border-primary/40 transition-colors cursor-pointer"
+                    >
                       <Shield size={11} className="text-primary" /> ID vérifiée
-                    </span>
+                    </button>
                   )}
                   {profile?.is_founder && (
                     <span className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm">
