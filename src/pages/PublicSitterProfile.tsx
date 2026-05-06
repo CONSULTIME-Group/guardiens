@@ -304,8 +304,7 @@ export default function PublicSitterProfile() {
             .eq("published", true)
             .eq("moderation_status", "valide")
             .neq("review_type", "annulation")
-            .order("created_at", { ascending: false })
-            .limit(10),
+            .order("created_at", { ascending: false }),
           supabase.from("sitter_gallery").select("*").eq("user_id", id).order("created_at", { ascending: false }),
           supabase.from("emergency_sitter_profiles").select("is_active").eq("user_id", id).maybeSingle(),
           supabase.from("subscriptions").select("status").eq("user_id", id).eq("status", "active").limit(1),
@@ -389,19 +388,36 @@ export default function PublicSitterProfile() {
       const hasEntraide = fetchedMissionCount > 0;
       const currentTabParam = searchParams.get('tab');
 
+      const tabAvailability: Record<ProfileTab, boolean> = {
+        gardien: hasSitterProfile,
+        proprio: hasOwnerProfile,
+        entraide: hasEntraide,
+      };
+      const tabLabels: Record<ProfileTab, string> = {
+        gardien: 'Gardien',
+        proprio: 'Propriétaire',
+        entraide: 'Entraide',
+      };
+
       let defaultTab: ProfileTab = 'gardien';
-      if (currentTabParam === 'gardien' && hasSitterProfile) {
-        defaultTab = 'gardien';
-      } else if (currentTabParam === 'proprio' && hasOwnerProfile) {
-        defaultTab = 'proprio';
-      } else if (currentTabParam === 'entraide' && hasEntraide) {
-        defaultTab = 'entraide';
-      } else if (hasSitterProfile) {
-        defaultTab = 'gardien';
-      } else if (hasOwnerProfile) {
-        defaultTab = 'proprio';
-      } else if (hasEntraide) {
-        defaultTab = 'entraide';
+      const requested = currentTabParam as ProfileTab | null;
+      if (requested && tabAvailability[requested]) {
+        defaultTab = requested;
+      } else {
+        if (hasSitterProfile) defaultTab = 'gardien';
+        else if (hasOwnerProfile) defaultTab = 'proprio';
+        else if (hasEntraide) defaultTab = 'entraide';
+
+        // Toast si l'onglet demandé n'est pas disponible
+        if (requested && tabAvailability[requested] === false) {
+          import('sonner').then(({ toast }) => {
+            toast.info(`L'onglet « ${tabLabels[requested]} » n'est pas disponible pour ce profil.`);
+          });
+          // Nettoie l'URL pour éviter de re-déclencher
+          const sp = new URLSearchParams(searchParams);
+          sp.delete('tab');
+          setSearchParams(sp, { replace: true });
+        }
       }
 
       setActiveTab(defaultTab);
@@ -435,14 +451,14 @@ export default function PublicSitterProfile() {
       }
       setPets(fetchedPets);
 
-      // Query 2 — Annonces publiées
+      // Query 2 — Annonces publiées (limite raisonnable, UI tronque via "Voir plus")
       const { data: sitsData, error: sitsErr } = await supabase
         .from('sits')
         .select('id, title, start_date, end_date, status, created_at')
         .eq('user_id', id)
         .in('status', ['published', 'confirmed', 'completed'])
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(50);
       if (sitsErr) console.error('[sits]', sitsErr);
       setOwnerSits(sitsData ?? []);
 
@@ -640,10 +656,15 @@ export default function PublicSitterProfile() {
         <ProfileSchemaOrg
           name={firstName}
           city={city || undefined}
+          postalCode={profile.postal_code || undefined}
           avatarUrl={profile.avatar_url || undefined}
-          bio={bio || undefined}
+          bio={bio || motivation || undefined}
           avgRating={avgRating}
           reviewCount={reviewCount}
+          completedSits={completedSits}
+          identityVerified={profile.identity_verified || false}
+          knowsAbout={animalLabels ? animalLabels.split(', ') : undefined}
+          role={hasSitterProfile && hasOwnerProfile ? 'both' : hasSitterProfile ? 'sitter' : hasOwnerProfile ? 'owner' : undefined}
           url={`https://guardiens.fr/gardiens/${id}`}
         />
       )}
@@ -693,7 +714,7 @@ export default function PublicSitterProfile() {
         const isOwnProfile = !!auth.user?.id && auth.user.id === id;
         return (
           <div
-            className="relative overflow-hidden w-full flex items-end bg-[#FBF6EC]"
+            className="relative overflow-hidden w-full flex items-end bg-[hsl(var(--hero-paper))]"
             style={{ aspectRatio: "1536 / 544" }}
           >
             {/* Illustration de fond — sketchbook style, déterministe par profil.

@@ -98,6 +98,8 @@
     --badge-success-foreground: 153 50% 25%;
     --sitter-hero: 153 50% 18%;
     --toggle-active: 153 55% 55%;
+    /* Papier sketchbook (hero profils gardiens) — équivalent #FBF6EC */
+    --hero-paper: 40 60% 95%;
 
     /* Warning (utilisé pour les bandeaux d'avertissement non bloquants : spam, conseils mobiles, etc.) */
     --warning: 38 92% 50%;
