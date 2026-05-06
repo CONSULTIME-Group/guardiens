@@ -520,6 +520,19 @@ export default function PublicSitterProfile() {
     loadEntraideData();
   }, [activeTab, id]);
 
+  // Lightbox keyboard navigation (Escape to close, arrows to navigate)
+  useEffect(() => {
+    if (lightboxIdx === null) return;
+    const max = gallery.slice(0, 9).length;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxIdx(null);
+      else if (e.key === 'ArrowLeft' && lightboxIdx > 0) setLightboxIdx(lightboxIdx - 1);
+      else if (e.key === 'ArrowRight' && lightboxIdx < max - 1) setLightboxIdx(lightboxIdx + 1);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [lightboxIdx, gallery]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
