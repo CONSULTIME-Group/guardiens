@@ -991,6 +991,9 @@ export default function PublicSitterProfile() {
             >
               <Home className="w-4 h-4" aria-hidden="true" />
               Gardien
+              {completedSits > 0 && (
+                <span className="ml-1 text-xs font-normal opacity-70">({completedSits})</span>
+              )}
             </button>
           )}
           {hasOwnerProfile && (
@@ -1027,6 +1030,9 @@ export default function PublicSitterProfile() {
             >
               <Handshake className="w-4 h-4" aria-hidden="true" />
               Entraide
+              {missionCount > 0 && (
+                <span className="ml-1 text-xs font-normal opacity-70">({missionCount})</span>
+              )}
             </button>
           )}
         </div>
