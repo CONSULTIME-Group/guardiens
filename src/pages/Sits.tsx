@@ -5,7 +5,7 @@ import {
   MapPin, Clock, MoreHorizontal, XCircle, CheckCircle,
   Image as ImageIcon, ChevronRight, Archive, Trash2, RefreshCw,
   AlertTriangle, Pencil, Lock, MessageCircle,
-  KeyRound, Home, ClipboardList, X, Copy, Check, Loader2,
+  KeyRound, Home, ClipboardList, X, Copy, Check, Loader2, Search,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
