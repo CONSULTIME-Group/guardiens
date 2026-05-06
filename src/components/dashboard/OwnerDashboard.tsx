@@ -142,6 +142,39 @@ const OwnerDashboard = () => {
   const hasReadApps = recentApps.some(a => a.status !== "pending");
   const showApplicationsSection = loading || hasReadApps;
 
+  // Construit la liste unifiée "À faire" : actions urgentes regroupées en un seul bloc
+  // au lieu d'être éparpillées (chips hero + cards séparées).
+  const todoItems: TodoItem[] = [];
+  if (verificationStatus !== "verified" && verificationStatus !== "pending") {
+    todoItems.push({
+      key: "identity",
+      label: "Vérifier votre identité",
+      hint: "Indispensable pour rassurer les gardiens",
+      to: "/settings#verification",
+      tone: "warning",
+    });
+  }
+  if (pendingAppCount > 0) {
+    todoItems.push({
+      key: "applications",
+      label: `${pendingAppCount} candidature${pendingAppCount > 1 ? "s" : ""} à examiner`,
+      hint: "Répondez sous 48 h pour garder vos chances",
+      to: "/sits",
+      tone: "primary",
+    });
+  }
+  if (pendingReviews.length > 0) {
+    todoItems.push({
+      key: "reviews",
+      label: `${pendingReviews.length} avis à laisser`,
+      hint: "Aidez la communauté à choisir en confiance",
+      to: pendingReviews[0]
+        ? `/review/${pendingReviews[0].sitId}?reviewee=${pendingReviews[0].sitterId}`
+        : "/dashboard",
+      tone: "info",
+    });
+  }
+
   return (
     <div className="space-y-6 md:space-y-8 pb-24 md:pb-8">
 
@@ -150,7 +183,7 @@ const OwnerDashboard = () => {
         <RoleActivationBanner userRole={user?.role || "owner"} />
       </div>
 
-      {/* ═══ Hero header (épuré, light) ═══ */}
+      {/* ═══ Hero header (épuré) ═══ */}
       <header className="px-5 md:px-8 pt-2 animate-fade-in">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div className="min-w-0">
@@ -164,38 +197,17 @@ const OwnerDashboard = () => {
               {user?.isFounder && <FounderBadge size="sm" />}
             </div>
             <p className="text-sm text-muted-foreground font-sans mt-1">{subtitle}</p>
-            {/* Mini-indicateurs inline (verif + candidatures non lues) — densifie le hero
-                en évitant le banner séparé quand l'info tient en chips. */}
-            <div className="flex items-center gap-2 mt-2 flex-wrap">
-              {verificationStatus !== "verified" && verificationStatus !== "pending" && (
-                <Link
-                  to="/settings#verification"
-                  className="inline-flex items-center gap-1 text-[11px] rounded-full px-2 py-0.5 border border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-warning" aria-hidden="true" />
-                  Identité à vérifier
-                </Link>
-              )}
-              {pendingAppCount > 0 && (
-                <Link
-                  to="/sits"
-                  className="inline-flex items-center gap-1 text-[11px] rounded-full px-2 py-0.5 border border-primary/40 bg-primary/5 text-primary hover:bg-primary/10 transition-colors font-medium"
-                >
-                  {pendingAppCount} candidature{pendingAppCount > 1 ? "s" : ""} non lue{pendingAppCount > 1 ? "s" : ""}
-                </Link>
-              )}
-              {user?.id ? (
-                <Link
-                  to={`/gardiens/${user.id}?tab=proprio`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[11px] rounded-full px-2 py-0.5 text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  aria-label="Voir mon profil public (nouvel onglet)"
-                >
-                  <Eye className="w-3 h-3" aria-hidden="true" /> Mon profil public
-                </Link>
-              ) : null}
-            </div>
+            {user?.id && (
+              <Link
+                to={`/gardiens/${user.id}?tab=proprio`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[11px] mt-2 text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+                aria-label="Voir mon profil public (nouvel onglet)"
+              >
+                <Eye className="w-3 h-3" aria-hidden="true" /> Mon profil public
+              </Link>
+            )}
           </div>
           <Button
             size="lg"
@@ -211,7 +223,14 @@ const OwnerDashboard = () => {
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
       </div>
 
-      {/* ═══ Hero "garde en cours" (prioritaire, contextuel) ═══ */}
+      {/* ═══ Bloc unifié "À faire maintenant" ═══ */}
+      {todoItems.length > 0 && (
+        <div className="px-5 md:px-8">
+          <TodoCard items={todoItems} />
+        </div>
+      )}
+
+      {/* ═══ Garde en cours (prioritaire, contextuel) ═══ */}
       {ongoingSit && (
         <div className="px-5 md:px-8">
           <OngoingSitHero
@@ -224,7 +243,7 @@ const OwnerDashboard = () => {
 
       {/* ═══ PILOTAGE (gauche) + CONTEXTE (droite) ═══ */}
       <div className="px-5 md:px-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Colonne pilotage : annonce, stats, avis à laisser, candidatures consultées */}
+        {/* Colonne pilotage : annonce, animaux, avis, candidatures */}
         <div className="lg:col-span-2 space-y-6">
           <MonAnnonceCard
             sits={sits}
@@ -235,49 +254,7 @@ const OwnerDashboard = () => {
             coverPhoto={propertyCoverPhoto}
           />
 
-          {/* Stats fusionnées : strip compact directement sous la carte annonce */}
-          <StatsStrip
-            items={[
-              {
-                value: completedSits.length,
-                label: "Gardes réalisées",
-                emptyHint: "Aucune garde encore",
-              },
-              {
-                value: avgRating > 0 ? `${avgRating} ★` : null,
-                fallback: "Pas encore",
-                label: "Note moyenne",
-                highlight: avgRating > 0,
-                to: user?.id ? `/gardiens/${user.id}?tab=proprio#avis` : undefined,
-              },
-              {
-                value: activeSits.length,
-                label: "Annonces actives",
-                to: "/sits",
-                emptyHint: "Aucune annonce active",
-              },
-              {
-                value: trustedSitterCount,
-                label: "Gardiens de confiance",
-                emptyHint: "À construire avec le temps",
-              },
-            ]}
-          />
-
-          {pendingReviews.length > 0 && (
-            <PendingReviewsCard pendingReviews={pendingReviews} />
-          )}
-
-          {showApplicationsSection && (
-            <ApplicationsSection
-              recentApps={recentApps}
-              sitterProfiles={sitterProfiles}
-              sitterBadges={sitterBadges}
-              loading={loading}
-            />
-          )}
-
-          {/* Mes animaux dans la colonne principale */}
+          {/* Mes animaux — remonté juste après l'annonce (logique : maison → animaux) */}
           <DashSection
             eyebrow="Famille"
             title="Mes animaux"
@@ -329,26 +306,73 @@ const OwnerDashboard = () => {
               </>
             )}
           </DashSection>
+
+          {pendingReviews.length > 0 && (
+            <PendingReviewsCard pendingReviews={pendingReviews} />
+          )}
+
+          {showApplicationsSection && (
+            <ApplicationsSection
+              recentApps={recentApps}
+              sitterProfiles={sitterProfiles}
+              sitterBadges={sitterBadges}
+              loading={loading}
+            />
+          )}
         </div>
 
-        {/* Colonne contexte : urgence + missions unifiées */}
+        {/* Colonne contexte : stats compactes + urgence + missions */}
         <aside className="space-y-6">
+          <StatsStrip
+            items={[
+              {
+                value: completedSits.length,
+                label: "Gardes",
+                emptyHint: "Aucune garde",
+              },
+              {
+                value: avgRating > 0 ? `${avgRating} ★` : null,
+                fallback: "—",
+                label: "Note",
+                highlight: avgRating > 0,
+                to: user?.id ? `/gardiens/${user.id}?tab=proprio#avis` : undefined,
+              },
+              {
+                value: activeSits.length,
+                label: "Annonces",
+                to: "/sits",
+                emptyHint: "Aucune",
+              },
+              {
+                value: trustedSitterCount,
+                label: "Confiance",
+                emptyHint: "—",
+              },
+            ]}
+          />
           <NearbyEmergencySitters />
           <MissionsTabsCard myMissions={myMissions} nearbyMissions={smallMissions} />
         </aside>
       </div>
 
-      {/* ═══ Coups de coeur ═══ */}
-      {highlights.length > 0 && (
-        <div className="px-5 md:px-8 pt-2 border-t border-border/40">
-          <DashSection
-            eyebrow="Social proof"
-            title="Ce que les gardiens disent de votre maison"
-            description="Les moments forts partagés après chaque garde."
-          >
-            <div className="space-y-2">
+      {/* ═══ Sections éditoriales (repliées par défaut) ═══ */}
+      <div className="px-5 md:px-8 pt-2 space-y-3 border-t border-border/40">
+        {highlights.length > 0 && (
+          <details className="group rounded-2xl bg-card border border-border overflow-hidden">
+            <summary className="cursor-pointer list-none px-4 md:px-5 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
+              <div>
+                <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
+                  Social proof
+                </p>
+                <h2 className="font-heading text-base font-bold text-foreground leading-tight">
+                  Ce que les gardiens disent de votre maison
+                </h2>
+              </div>
+              <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
+            </summary>
+            <div className="px-4 md:px-5 pb-4 space-y-2">
               {highlights.slice(0, 3).map(h => (
-                <div key={h.id} className="flex items-start gap-3 p-3 rounded-2xl bg-card border border-border">
+                <div key={h.id} className="flex items-start gap-3 p-3 rounded-2xl bg-muted/30">
                   {h.sitter?.avatar_url ? (
                     <img src={h.sitter.avatar_url} alt={`Photo de ${h.sitter.first_name || 'gardien'}`} loading="lazy" className="w-10 h-10 rounded-full object-cover shrink-0" />
                   ) : (
@@ -364,26 +388,50 @@ const OwnerDashboard = () => {
                 </div>
               ))}
             </div>
-          </DashSection>
-        </div>
-      )}
+          </details>
+        )}
 
-      {/* ═══ Ressources éditoriales (descendues : moins prioritaires) ═══ */}
-      <div className="px-5 md:px-8 pt-2 border-t border-border/40">
-        <ContextualResources annoncesCount={sits.length} gardesCount={completedSits.length} loading={loading} />
+        <details className="group rounded-2xl bg-card border border-border overflow-hidden">
+          <summary className="cursor-pointer list-none px-4 md:px-5 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
+            <div>
+              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
+                Ressources
+              </p>
+              <h2 className="font-heading text-base font-bold text-foreground leading-tight">
+                Conseils & guides pour propriétaires
+              </h2>
+            </div>
+            <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
+          </summary>
+          <div className="px-4 md:px-5 pb-4">
+            <ContextualResources annoncesCount={sits.length} gardesCount={completedSits.length} loading={loading} />
+          </div>
+        </details>
+
+        <details className="group rounded-2xl bg-card border border-border overflow-hidden">
+          <summary className="cursor-pointer list-none px-4 md:px-5 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
+            <div>
+              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
+                Reconnaissance
+              </p>
+              <h2 className="font-heading text-base font-bold text-foreground leading-tight">
+                Vos badges
+              </h2>
+            </div>
+            <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
+          </summary>
+          <div className="px-4 md:px-5 pb-4">
+            <BadgeGridSection
+              title=""
+              badgeIds={PROPRIO_BADGE_IDS}
+              userBadges={userBadges}
+              specialBadgeIds={PROPRIO_SPECIAL_IDS}
+            />
+          </div>
+        </details>
       </div>
 
-      {/* ═══ Badges (vanity, en bas) ═══ */}
-      <div className="px-5 md:px-8 pt-2 mb-6 md:mb-8 border-t border-border/40">
-        <BadgeGridSection
-          title="Vos Badges"
-          badgeIds={PROPRIO_BADGE_IDS}
-          userBadges={userBadges}
-          specialBadgeIds={PROPRIO_SPECIAL_IDS}
-        />
-      </div>
-
-      {/* ═══ CTA sticky mobile (action principale toujours accessible) ═══ */}
+      {/* ═══ CTA sticky mobile ═══ */}
       {pendingAppCount > 0 ? (
         <MobileStickyCTA
           label="Voir les candidatures"
@@ -398,3 +446,4 @@ const OwnerDashboard = () => {
 };
 
 export default OwnerDashboard;
+
