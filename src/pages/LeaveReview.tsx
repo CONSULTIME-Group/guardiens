@@ -48,6 +48,7 @@ const LeaveReview = () => {
   const [subRatings, setSubRatings] = useState<Record<string, number>>({});
   const [wouldRecommend, setWouldRecommend] = useState<boolean | null>(null);
   const [comment, setComment] = useState("");
+  const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
 
   const [reviewDirection, setReviewDirection] = useState<ReviewDirection>("owner_to_sitter");
 
