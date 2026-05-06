@@ -221,20 +221,6 @@ const OwnerDashboard = () => {
         </div>
       )}
 
-      {/* ═══ Banner contextuel (vérification, candidatures non lues) ═══ */}
-      {banner && (
-        <div className="px-5 md:px-8">
-          <div className={`p-4 rounded-2xl border ${BANNER_STYLES[banner.variant]} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2`}>
-            <p className="text-sm font-medium">{banner.label}</p>
-            {banner.ctaLabel && banner.to && (
-              <Link to={banner.to} className="text-sm font-semibold hover:underline shrink-0">
-                {banner.ctaLabel}
-              </Link>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* ═══ PILOTAGE (gauche) + CONTEXTE (droite) ═══ */}
       <div className="px-5 md:px-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Colonne pilotage : annonce, stats, avis à laisser, candidatures consultées */}
