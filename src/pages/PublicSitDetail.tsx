@@ -799,9 +799,10 @@ const PublicSitDetail = () => {
  </section>
  )}
 
- {/* ─── CTA STICKY ───────────────────────────────────────────────── */}
- <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] z-40 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.08)]">
- <div className="max-w-4xl mx-auto">
+      {/* ─── CTA STICKY ─── (masqué pour le propriétaire de l'annonce) */}
+      {viewerType !== "owner_of_sit" && (
+      <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-40 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.08)]">
+        <div className="max-w-md mx-auto">
  {/* Réassurance pré-CTA supprimée — déjà couverte par PublicSitTrustStrip et le bloc final */}
  {!(sit as any).accepting_applications ? (
  <Button className="w-full h-12 text-base font-semibold" disabled>
