@@ -29,7 +29,8 @@ const ProfileSchemaOrg = ({
   url,
   role,
 }: ProfileSchemaProps) => {
-  const schema: Record<string, any> = {
+  // ── Person de base (toujours présent) ──
+  const person: Record<string, any> = {
     "@context": "https://schema.org",
     "@type": "Person",
     name,
@@ -42,10 +43,6 @@ const ProfileSchemaOrg = ({
         addressLocality: city,
         ...(postalCode && { postalCode }),
         addressCountry: "FR",
-      },
-      areaServed: {
-        "@type": "City",
-        name: city,
       },
     }),
     ...(role === "sitter" || role === "both"
@@ -63,30 +60,48 @@ const ProfileSchemaOrg = ({
     }),
   };
 
-  if (avgRating && avgRating > 0 && reviewCount && reviewCount > 0) {
-    schema.aggregateRating = {
-      "@type": "AggregateRating",
-      ratingValue: Number(avgRating.toFixed(1)),
-      reviewCount,
-      bestRating: 5,
-      worstRating: 1,
-    };
-  }
+  // ── Service (éligible Rich Results — porte aggregateRating + zone desservie) ──
+  // Ne crée le bloc Service que pour les gardiens (pas pour les propriétaires purs).
+  const isSitter = role === "sitter" || role === "both";
+  const hasRating = !!(avgRating && avgRating > 0 && reviewCount && reviewCount > 0);
 
-  if (completedSits && completedSits > 0) {
-    schema.interactionStatistic = {
-      "@type": "InteractionCounter",
-      // Schema.org attend une référence à une Action enum, pas une URL string brute.
-      // PerformAction n'est pas un type valide ; on utilise une référence formatée.
-      interactionType: { "@type": "Action", name: "Garde réalisée" },
-      userInteractionCount: completedSits,
-      name: "Gardes réalisées",
+  let service: Record<string, any> | null = null;
+  if (isSitter) {
+    service = {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      serviceType: "Garde d'animaux à domicile (house-sitting)",
+      provider: { "@type": "Person", name, url, ...(avatarUrl && { image: avatarUrl }) },
+      ...(city && { areaServed: { "@type": "City", name: city, addressCountry: "FR" } }),
+      ...(bio && { description: bio.slice(0, 200) }),
+      url,
     };
+    if (hasRating) {
+      service.aggregateRating = {
+        "@type": "AggregateRating",
+        ratingValue: Number(avgRating!.toFixed(1)),
+        reviewCount,
+        bestRating: 5,
+        worstRating: 1,
+      };
+    }
+    if (completedSits && completedSits > 0) {
+      service.interactionStatistic = {
+        "@type": "InteractionCounter",
+        // URL d'enum Action standard (PerformAction = action générique de réalisation)
+        interactionType: "https://schema.org/PerformAction",
+        userInteractionCount: completedSits,
+        name: "Gardes réalisées",
+      };
+    }
   }
 
   return (
     <Helmet>
-      <script type="application/ld+json">{JSON.stringify(schema)}</script>
+      <script type="application/ld+json">{JSON.stringify(person)}</script>
+      {service && (
+        <script type="application/ld+json">{JSON.stringify(service)}</script>
+      )}
     </Helmet>
   );
 };
