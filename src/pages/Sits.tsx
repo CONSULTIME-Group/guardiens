@@ -5,7 +5,7 @@ import {
   MapPin, Clock, MoreHorizontal, XCircle, CheckCircle,
   Image as ImageIcon, ChevronRight, Archive, Trash2, RefreshCw,
   AlertTriangle, Pencil, Lock, MessageCircle,
-  KeyRound, Home, ClipboardList, X, Copy, Check, Loader2,
+  KeyRound, Home, ClipboardList, X, Copy, Check, Loader2, Search,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -130,6 +130,7 @@ const Sits = () => {
   // (showArchived state removed — replaced by tabs)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [archiveConfirm, setArchiveConfirm] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [openGuideId, setOpenGuideId] = useState<string | null>(null);
   const [openGuide, setOpenGuide] = useState<any | null>(null);
   const [guideLoading, setGuideLoading] = useState(false);
@@ -369,9 +370,9 @@ const Sits = () => {
   }, [sits, isOwnerView]);
 
   const filteredSits = useMemo(() => {
+    let base: any[] = [];
     if (isOwnerView) {
-      // Vue owner : 3 onglets
-      return sits.filter((s) => {
+      base = sits.filter((s) => {
         const es = s.effectiveStatus || s.status;
         switch (activeOwnerTab) {
           case "drafts":
@@ -383,20 +384,31 @@ const Sits = () => {
             return !isArchived(s) && es !== "draft";
         }
       });
+    } else {
+      base = activeSits.filter((s) => {
+        const es = s.effectiveStatus || s.status;
+        const appStatus = s.application_status;
+        switch (activeTab) {
+          case "in_progress": return es === "in_progress" && appStatus === "accepted";
+          case "completed": return es === "completed";
+          case "cancelled": return appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled";
+          case "upcoming": return !["completed", "cancelled"].includes(es) && !["cancelled", "rejected"].includes(appStatus) && es !== "in_progress";
+        }
+        return false;
+      });
     }
-    // Vue sitter (inchangée)
-    return activeSits.filter((s) => {
-      const es = s.effectiveStatus || s.status;
-      const appStatus = s.application_status;
-      switch (activeTab) {
-        case "in_progress": return es === "in_progress" && appStatus === "accepted";
-        case "completed": return es === "completed";
-        case "cancelled": return appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled";
-        case "upcoming": return !["completed", "cancelled"].includes(es) && !["cancelled", "rejected"].includes(appStatus) && es !== "in_progress";
-      }
-      return false;
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return base;
+    return base.filter((s) => {
+      const fields = [
+        s.title, s.city, s.ownerCity,
+        s.owner?.first_name, s.owner?.city,
+        s.acceptedSitter?.first_name, s.acceptedSitter?.city,
+        ...(s.pets || []).map((p: any) => p.name),
+      ].filter(Boolean).join(" ").toLowerCase();
+      return fields.includes(q);
     });
-  }, [activeSits, sits, isOwnerView, activeTab, activeOwnerTab]);
+  }, [activeSits, sits, isOwnerView, activeTab, activeOwnerTab, searchQuery]);
 
   // Sous-titre contextuel : informations utiles plutôt que générique
   const headerSubtitle = useMemo(() => {
@@ -499,6 +511,30 @@ const Sits = () => {
           ))
         )}
       </div>
+
+      {/* Recherche rapide */}
+      {sits.length > 4 && (
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" aria-hidden="true" />
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={isOwnerView ? "Rechercher (titre, ville, gardien, animal)…" : "Rechercher (ville, propriétaire, animal)…"}
+            className="w-full pl-9 pr-9 py-2 rounded-lg border border-border bg-card text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50"
+            aria-label="Rechercher dans mes annonces"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
+              aria-label="Effacer la recherche"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Content */}
       {loading ? (
