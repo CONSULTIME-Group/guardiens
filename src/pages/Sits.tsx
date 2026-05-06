@@ -131,6 +131,7 @@ const Sits = () => {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [archiveConfirm, setArchiveConfirm] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [openGuideId, setOpenGuideId] = useState<string | null>(null);
   const [openGuide, setOpenGuide] = useState<any | null>(null);
   const [guideLoading, setGuideLoading] = useState(false);
