@@ -95,10 +95,10 @@ const PublicSitDetail = () => {
  // Fallback ville : si public_profiles ne renvoie pas city mais a un code postal,
  // on résout la commune via l'API officielle geo.api.gouv.fr (FR uniquement, 5 chiffres).
  let enrichedOwner = ownerData;
- if (ownerData && !ownerData.city && /^\d{5}$/.test(String(ownerData.postal_code || ""))) {
+ if (ownerData && !ownerData.city && /^\d{5}$/.test(String((ownerData as any).postal_code || ""))) {
    try {
      const res = await fetch(
-       `https://geo.api.gouv.fr/communes?codePostal=${ownerData.postal_code}&fields=nom&limit=1`,
+       `https://geo.api.gouv.fr/communes?codePostal=${(ownerData as any).postal_code}&fields=nom&limit=1`,
      );
      if (res.ok) {
        const arr: { nom?: string }[] = await res.json();
