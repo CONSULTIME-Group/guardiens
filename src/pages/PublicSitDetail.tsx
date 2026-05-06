@@ -384,13 +384,18 @@ const PublicSitDetail = () => {
  const richTextLength = (property?.description || "").length + (sit.daily_routine || "").length;
  const isIndexable = galleryCount >= 3 && richTextLength >= 150;
 
+ const citySlug = (cityForTitle || "")
+ .toLowerCase()
+ .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+ .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+ const origin = canonicalUrl.replace(/\/annonces\/.*$/, "");
  const breadcrumbLd = {
  "@context": "https://schema.org",
  "@type": "BreadcrumbList",
  itemListElement: [
- { "@type": "ListItem", position: 1, name: "Accueil", item: canonicalUrl.replace(/\/annonces\/.*$/, "/") },
- { "@type": "ListItem", position: 2, name: cityForTitle, item: canonicalUrl.replace(/\/annonces\/.*$/, `/gardien-animaux/${(cityForTitle || "").toLowerCase()}`) },
- { "@type": "ListItem", position: 3, name: sit.title || "Annonce de garde", item: canonicalUrl },
+ { "@type": "ListItem", position: 1, name: "Accueil", item: `${origin}/` },
+ ...(citySlug ? [{ "@type": "ListItem", position: 2, name: cityForTitle, item: `${origin}/house-sitting/${citySlug}` }] : []),
+ { "@type": "ListItem", position: citySlug ? 3 : 2, name: sit.title || "Annonce de garde", item: canonicalUrl },
  ],
  };
 
