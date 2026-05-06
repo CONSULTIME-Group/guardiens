@@ -195,13 +195,18 @@ const OwnerProfilePage = () => {
   const ownerEssentials = scoredCriteria.filter(c => c.kind === "essential");
   const ownerBonuses = scoredCriteria.filter(c => c.kind === "bonus");
   const liveScore = Math.min(100, scoredCriteria.reduce((s, c) => s + (c.ok ? c.points : 0), 0));
+  const essentialsScore = ownerEssentials.reduce((s, c) => s + (c.ok ? c.points : 0), 0);
+  const essentialsMax = ownerEssentials.reduce((s, c) => s + c.points, 0);
 
   const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => {
     const labels = missingLabelsFor(s.id, scoredCriteria);
+    // Sections optionnelles : "complete" si au moins un bonus rempli, sinon neutre.
+    const sectionBonuses = scoredCriteria.filter(c => c.section === s.id && c.kind === "bonus");
+    const optionalDone = s.optional && sectionBonuses.length > 0 && sectionBonuses.some(c => c.ok);
     return {
       ...s,
-      complete: s.optional ? false : sectionComplete(s.id, scoredCriteria),
-      missingCount: s.optional ? 0 : labels.length,
+      complete: s.optional ? !!optionalDone : sectionComplete(s.id, scoredCriteria),
+      missingCount: s.optional ? 0 : labels.filter(l => !ownerBonuses.find(b => b.label === l)).length,
       missingLabels: s.optional ? [] : labels,
     };
   });
