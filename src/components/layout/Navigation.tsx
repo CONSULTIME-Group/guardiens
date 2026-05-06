@@ -375,7 +375,7 @@ export const BottomNav = () => {
     return () => clearInterval(interval);
   }, [user]);
 
-  const totalBadge = unreadCount + pendingAppsCount + missionBadgeCount;
+  
 
   // Adapt tabs to active role
   const isOwnerView = effectiveRole === "owner";
