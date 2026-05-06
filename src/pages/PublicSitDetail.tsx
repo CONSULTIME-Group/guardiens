@@ -408,6 +408,25 @@ const PublicSitDetail = () => {
  {/* ─── HERO ÉDITORIAL ─────────────────────────────────────────────── */}
  <div className="px-4 md:px-10 pt-4 md:pt-6">
  <SitHero photos={photos} city={owner?.city} priority />
+ {viewerType === "owner_of_sit" && photos.length === 0 && (
+   <div
+     role="status"
+     className="mt-3 rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+   >
+     <div>
+       <p className="text-sm font-semibold text-foreground">Votre annonce n'a aucune photo</p>
+       <p className="text-xs text-muted-foreground mt-0.5">
+         Les annonces avec photos reçoivent davantage de candidatures. Ajoutez quelques images de votre logement et de vos animaux.
+       </p>
+     </div>
+     <Button asChild size="sm" className="shrink-0">
+       <Link to={`/sits/${sit.id}/edit`} className="inline-flex items-center gap-1.5">
+         Ajouter des photos
+         <ExternalLink className="h-3.5 w-3.5" />
+       </Link>
+     </Button>
+   </div>
+ )}
  </div>
 
  <div className="px-5 md:px-10 pb-6 md:pb-10">
