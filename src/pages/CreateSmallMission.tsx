@@ -128,7 +128,7 @@ const CreateSmallMission = () => {
  coords = null;
  }
 
- const { error } = await supabase.from("small_missions").insert({
+ const { data: inserted, error } = await supabase.from("small_missions").insert({
  user_id: user.id,
  title: title.trim(),
  description: description.trim(),
@@ -141,23 +141,27 @@ const CreateSmallMission = () => {
  photos,
  latitude: coords?.lat ?? null,
  longitude: coords?.lng ?? null,
- } as any);
+ } as any).select("id").maybeSingle();
 
  setSubmitting(false);
  if (error) {
  toast({ title: "Erreur", description: error.message, variant: "destructive" });
- } else {
- try { await trackFirstAction("mission_created", { category, mission_type: missionType }); } catch {}
- // Refresh the public list so the new mission shows up immediately
- await queryClient.invalidateQueries({ queryKey: ["small-missions-all"] });
- toast({
- title: "Bravo d'avoir osé.",
- description: missionType === "offre"
- ? "Votre proposition d'aide est en ligne — les gens du coin peuvent vous trouver."
- : "Votre demande est en ligne — les gens du coin vont la voir.",
- });
- navigate("/petites-missions");
+ return;
  }
+
+ try { await trackFirstAction("mission_created", { category, mission_type: missionType }); } catch {}
+ await queryClient.invalidateQueries({ queryKey: ["small-missions-all"] });
+
+ const insertedId = inserted?.id;
+ if (!insertedId) {
+ // Fallback : re-select bloqué (RLS) ou réponse vide. Publication OK, pas de bandeau.
+ toast({ title: "Mission publiée.", description: "On vous emmène la voir.", duration: 3000 });
+ navigate("/petites-missions");
+ return;
+ }
+
+ toast({ title: "Mission publiée.", description: "On vous emmène la voir.", duration: 3000 });
+ navigate(`/petites-missions/${insertedId}?published=1`);
  };
 
  return (

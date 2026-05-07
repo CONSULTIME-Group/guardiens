@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { logger } from "@/lib/logger";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowLeft, MapPin, Calendar, Clock, Dog, Flower2, Handshake,
   Heart, MessageSquare, CheckCircle2, Users, XCircle, ThumbsUp,
-  ThumbsDown, Star, RotateCcw, Send, Home,
+  ThumbsDown, Star, RotateCcw, Send, Home, X,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
