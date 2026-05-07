@@ -478,11 +478,24 @@ const SmallMissionDetail = () => {
   const acceptedResponses = responses.filter(r => r.status === "accepted");
   const pendingResponses = responses.filter(r => r.status === "pending");
   const isDatePassed = mission.date_needed && new Date(mission.date_needed) < new Date();
-  const showPublishedBanner = Boolean(
-    user?.id &&
-    isAuthor &&
-    searchParams.get("published") === "1"
-  );
+  const hasPublishedFlag = searchParams.get("published") === "1";
+  const showPublishedBanner = Boolean(user?.id && isAuthor && hasPublishedFlag);
+
+  // Trace les tentatives d'affichage du bandeau via manipulation d'URL :
+  // ?published=1 présent mais le visiteur n'est pas l'auteur (anonyme ou
+  // utilisateur tiers). Sert d'observabilité — n'affecte pas l'UI.
+  useEffect(() => {
+    if (!loading && mission && hasPublishedFlag && !isAuthor) {
+      logger.warn("mission_published_banner.unauthorized_attempt", {
+        missionId: mission.id,
+        viewerId: user?.id ?? null,
+        authorId: mission.user_id,
+        anonymous: !user?.id,
+        path: typeof window !== "undefined" ? window.location.pathname : null,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, mission?.id, hasPublishedFlag, isAuthor, user?.id]);
 
   const handleClosePublishedBanner = () => {
     // Supprime tous les paramètres d'URL (notamment ?published=1)
