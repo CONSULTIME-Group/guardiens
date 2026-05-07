@@ -18,7 +18,7 @@ import AccessGateBanner from "@/components/access/AccessGateBanner";
 import MissionPhotoUpload from "@/components/missions/MissionPhotoUpload";
 import { geocodeCity } from "@/lib/geocode";
 import { trackFirstAction } from "@/lib/analytics";
-import { templatesFor, type MissionTemplate } from "@/data/missionTemplates";
+import { templatesFor, MISSION_TEMPLATES, type MissionTemplate } from "@/data/missionTemplates";
 
 const EURO_REGEX = /\d+\s*[€]|[€]\s*\d+|\d+\s*euro/i;
 
@@ -79,6 +79,25 @@ const CreateSmallMission = () => {
  };
 
  const visibleTemplates = templatesFor(missionType);
+
+ // Effet ?type= — synchronise le type de mission depuis l'URL.
+ // (Doit s'exécuter AVANT l'effet ?template= pour qu'un éventuel template applique la dernière source de vérité.)
+ useEffect(() => {
+   const t = searchParams.get("type");
+   if (t === "besoin" || t === "offre") setMissionType(t);
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, []);
+
+ // Effet ?template= — pré-applique un modèle si le formulaire est vierge.
+ // Garde-fou : ne JAMAIS écraser une saisie en cours (titre ou description non vides).
+ useEffect(() => {
+   const templateId = searchParams.get("template");
+   if (!templateId) return;
+   if (title.trim() || description.trim()) return;
+   const tpl = MISSION_TEMPLATES.find((t) => t.id === templateId);
+   if (tpl) applyTemplate(tpl);
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, []);
 
  const handleExchangeChange = (val: string) => {
  setExchangeOffer(val);
