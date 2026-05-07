@@ -31,11 +31,6 @@ export interface MissionPublishedBannerProps {
   onToast: (toast: { title: string; description: string; variant?: "destructive" }) => void;
   /** Route du dashboard. Par défaut /dashboard. */
   dashboardHref?: string;
-  /**
-   * Override pour les tests : si fourni, utilisé comme URL de base au lieu de
-   * `window.location.href`. Permet de tester sans dépendre du JSDOM URL.
-   */
-  currentUrlOverride?: string;
 }
 
 export function MissionPublishedBanner({
@@ -45,14 +40,13 @@ export function MissionPublishedBanner({
   onClose,
   onToast,
   dashboardHref = "/dashboard",
-  currentUrlOverride,
 }: MissionPublishedBannerProps) {
   // Verrou de défense en profondeur : si l'une des deux conditions tombe,
   // on ne rend rien — même si le parent appelle ce composant à tort.
   if (!published || !isAuthor) return null;
 
   const handleShare = async () => {
-    const base = currentUrlOverride ?? (typeof window !== "undefined" ? window.location.href : "");
+    const base = typeof window !== "undefined" ? window.location.href : "";
     const cleanUrl = base.split("?")[0];
     if (typeof navigator !== "undefined" && (navigator as any).share) {
       try {
