@@ -437,7 +437,11 @@ const SmallMissionDetail = () => {
   // immédiatement un squelette de bandeau pour que la confirmation soit
   // perceptible en < 500 ms (au lieu d'attendre la fin du load).
   // Le squelette ne révèle aucune donnée (pas de titre, pas d'auteur).
-  const pendingPublishedFlag = searchParams.get("published") === "1";
+  // Verrou : on n'affiche le squelette QUE si un utilisateur est connecté.
+  // Un visiteur non connecté ne peut, par définition, pas être l'auteur ;
+  // on évite ainsi tout pré-calcul/affichage lié au bandeau pour lui.
+  const pendingPublishedFlag =
+    Boolean(user?.id) && searchParams.get("published") === "1";
 
   if (loading) {
     return (
