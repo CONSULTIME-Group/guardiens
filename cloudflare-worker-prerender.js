@@ -101,8 +101,6 @@ async function fetchOrigin(request) {
   });
 }
 
-// URL de la fonction sitemap Supabase
-const SITEMAP_URL = 'https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/sitemap';
 // URL de la fonction profile-jsonld (SSR du Schema.org pour Rich Results)
 const PROFILE_JSONLD_URL = 'https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/profile-jsonld';
 // Match /gardiens/:uuid (et tolère un slash final)
@@ -181,26 +179,6 @@ export default {
           'x-prerender-status': 'worker-served',
         },
       });
-    }
-
-    if (pathname === '/sitemap.xml') {
-      try {
-        const sitemapResp = await fetch(SITEMAP_URL, {
-          headers: { 'accept': 'application/xml' },
-        });
-        const body = await sitemapResp.text();
-        return new Response(body, {
-          status: sitemapResp.status,
-          headers: {
-            'content-type': 'application/xml; charset=utf-8',
-            'cache-control': 'public, max-age=3600',
-            'x-prerender-worker': 'guardiens-prerender-v3',
-            'x-prerender-status': 'sitemap-proxy',
-          },
-        });
-      } catch (err) {
-        return new Response('Sitemap unavailable', { status: 503 });
-      }
     }
 
     const { shouldPrerender, isBot, ua, reasons } = detectBot(request);
