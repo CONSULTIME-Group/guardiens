@@ -141,7 +141,7 @@ const InlineFeedbackForm = ({
 const SmallMissionDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const { hasAccess } = useSubscriptionAccess();
   const { level: accessLevel, profileCompletion, canApplyMissions } = useAccessLevel();
@@ -445,7 +445,9 @@ const SmallMissionDetail = () => {
   const showPublishedBanner = searchParams.get("published") === "1" && isAuthor;
 
   const handleClosePublishedBanner = () => {
-    navigate(`/petites-missions/${id}`, { replace: true });
+    // Supprime tous les paramètres d'URL (notamment ?published=1)
+    // pour que F5 ne réaffiche pas le bandeau.
+    setSearchParams({}, { replace: true });
   };
 
   const handleSharePublishedLink = async () => {
