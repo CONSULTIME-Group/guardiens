@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { logger } from "@/lib/logger";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -138,6 +138,28 @@ const InlineFeedbackForm = ({
     </div>
   );
 };
+
+/**
+ * Squelette du bandeau de publication, affiché pendant le fetch initial
+ * quand l'URL contient ?published=1 et qu'un utilisateur est connecté.
+ * Mémoïsé : ne dépend d'aucune prop et ne doit jamais re-rendre pendant
+ * le loading (évite tout clignotement).
+ */
+const PublishedBannerSkeleton = memo(() => (
+  <div
+    aria-hidden="true"
+    className="rounded-xl border border-primary/20 bg-primary/5 p-5 mb-6 animate-pulse animate-fade-in motion-reduce:animate-none transition-opacity duration-300"
+  >
+    <div className="h-5 w-2/3 rounded bg-muted" />
+    <div className="mt-3 h-4 w-full rounded bg-muted" />
+    <div className="mt-2 h-4 w-5/6 rounded bg-muted" />
+    <div className="mt-4 flex gap-3">
+      <div className="h-9 w-32 rounded bg-muted" />
+      <div className="h-4 w-40 rounded bg-muted" />
+    </div>
+  </div>
+));
+PublishedBannerSkeleton.displayName = "PublishedBannerSkeleton";
 
 /* ── Main Page ── */
 const SmallMissionDetail = () => {
@@ -434,54 +456,25 @@ const SmallMissionDetail = () => {
     }
   };
 
-  // Pendant le fetch initial, si l'URL contient ?published=1, on affiche
-  // immédiatement un squelette de bandeau pour que la confirmation soit
-  // perceptible en < 500 ms (au lieu d'attendre la fin du load).
-  // Le squelette ne révèle aucune donnée (pas de titre, pas d'auteur).
+  // ── Valeurs dérivées stables (calculées même pendant le loading) ──
+  // Mémoïsées pour éviter de recalculer à chaque re-render et stabiliser
+  // les dépendances du useEffect de logging et l'apparition du bandeau.
+  const hasPublishedFlag = useMemo(
+    () => searchParams.get("published") === "1",
+    [searchParams],
+  );
+  const isAuthor = useMemo(
+    () => isAuthorOf(user?.id, mission),
+    [user?.id, mission],
+  );
   // Verrou : on n'affiche le squelette QUE si un utilisateur est connecté.
-  // Un visiteur non connecté ne peut, par définition, pas être l'auteur ;
-  // on évite ainsi tout pré-calcul/affichage lié au bandeau pour lui.
-  const pendingPublishedFlag =
-    Boolean(user?.id) && searchParams.get("published") === "1";
+  // Un visiteur non connecté ne peut, par définition, pas être l'auteur.
+  const pendingPublishedFlag = Boolean(user?.id) && hasPublishedFlag;
+  const showPublishedBanner = Boolean(user?.id) && isAuthor && hasPublishedFlag;
 
-  if (loading) {
-    return (
-      <div className="p-6 md:p-10 max-w-3xl mx-auto">
-        {pendingPublishedFlag && (
-          <div
-            aria-hidden="true"
-            className="rounded-xl border border-primary/20 bg-primary/5 p-5 mb-6 animate-pulse animate-fade-in motion-reduce:animate-none transition-opacity duration-300"
-          >
-            <div className="h-5 w-2/3 rounded bg-muted" />
-            <div className="mt-3 h-4 w-full rounded bg-muted" />
-            <div className="mt-2 h-4 w-5/6 rounded bg-muted" />
-            <div className="mt-4 flex gap-3">
-              <div className="h-9 w-32 rounded bg-muted" />
-              <div className="h-4 w-40 rounded bg-muted" />
-            </div>
-          </div>
-        )}
-        <div className="text-muted-foreground">Chargement...</div>
-      </div>
-    );
-  }
-  if (!mission) return <div className="p-6 md:p-10"><p>Mission introuvable.</p><Link to="/petites-missions" className="text-primary underline mt-2 inline-block">Retour aux missions</Link></div>;
-
-  // Verrou strict centralisé : voir src/lib/ownership.ts
-  // (user connecté + ids non vides + égalité stricte).
-  const isAuthor = isAuthorOf(user?.id, mission);
-  const catMeta = CATEGORY_META[mission.category] || CATEGORY_META.animals;
-  const CatIcon = catMeta.icon;
-  const statusMeta = STATUS_LABELS[mission.status] || STATUS_LABELS.open;
-  const acceptedResponses = responses.filter(r => r.status === "accepted");
-  const pendingResponses = responses.filter(r => r.status === "pending");
-  const isDatePassed = mission.date_needed && new Date(mission.date_needed) < new Date();
-  const hasPublishedFlag = searchParams.get("published") === "1";
-  const showPublishedBanner = Boolean(user?.id && isAuthor && hasPublishedFlag);
-
-  // Trace les tentatives d'affichage du bandeau via manipulation d'URL :
-  // ?published=1 présent mais le visiteur n'est pas l'auteur (anonyme ou
-  // utilisateur tiers). Sert d'observabilité — n'affecte pas l'UI.
+  // Trace les tentatives d'affichage du bandeau via manipulation d'URL.
+  // Placé AVANT les early returns pour respecter les règles des Hooks
+  // (sinon l'ordre des hooks change selon loading / mission).
   useEffect(() => {
     if (!loading && mission && hasPublishedFlag && !isAuthor) {
       logger.warn("mission_published_banner.unauthorized_attempt", {
@@ -492,14 +485,30 @@ const SmallMissionDetail = () => {
         path: typeof window !== "undefined" ? window.location.pathname : null,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, mission?.id, hasPublishedFlag, isAuthor, user?.id]);
+  }, [loading, mission, hasPublishedFlag, isAuthor, user?.id]);
 
-  const handleClosePublishedBanner = () => {
+  const handleClosePublishedBanner = useCallback(() => {
     // Supprime tous les paramètres d'URL (notamment ?published=1)
     // pour que F5 ne réaffiche pas le bandeau.
     setSearchParams({}, { replace: true });
-  };
+  }, [setSearchParams]);
+
+  if (loading) {
+    return (
+      <div className="p-6 md:p-10 max-w-3xl mx-auto">
+        {pendingPublishedFlag && <PublishedBannerSkeleton />}
+        <div className="text-muted-foreground">Chargement...</div>
+      </div>
+    );
+  }
+  if (!mission) return <div className="p-6 md:p-10"><p>Mission introuvable.</p><Link to="/petites-missions" className="text-primary underline mt-2 inline-block">Retour aux missions</Link></div>;
+
+  const catMeta = CATEGORY_META[mission.category] || CATEGORY_META.animals;
+  const CatIcon = catMeta.icon;
+  const statusMeta = STATUS_LABELS[mission.status] || STATUS_LABELS.open;
+  const acceptedResponses = responses.filter(r => r.status === "accepted");
+  const pendingResponses = responses.filter(r => r.status === "pending");
+  const isDatePassed = mission.date_needed && new Date(mission.date_needed) < new Date();
 
   const handleSharePublishedLink = async () => {
     const cleanUrl = window.location.href.split("?")[0];
