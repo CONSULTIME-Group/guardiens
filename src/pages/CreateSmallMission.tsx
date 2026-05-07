@@ -18,7 +18,7 @@ import AccessGateBanner from "@/components/access/AccessGateBanner";
 import MissionPhotoUpload from "@/components/missions/MissionPhotoUpload";
 import { geocodeCity } from "@/lib/geocode";
 import { trackFirstAction } from "@/lib/analytics";
-import { templatesFor, type MissionTemplate } from "@/data/missionTemplates";
+import { templatesFor, MISSION_TEMPLATES, type MissionTemplate } from "@/data/missionTemplates";
 
 const EURO_REGEX = /\d+\s*[€]|[€]\s*\d+|\d+\s*euro/i;
 
