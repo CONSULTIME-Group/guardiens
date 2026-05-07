@@ -466,12 +466,9 @@ const SmallMissionDetail = () => {
   }
   if (!mission) return <div className="p-6 md:p-10"><p>Mission introuvable.</p><Link to="/petites-missions" className="text-primary underline mt-2 inline-block">Retour aux missions</Link></div>;
 
-  // Verrou strict : user connecté ET ids non vides ET égalité stricte.
-  // Empêche tout affichage du bandeau pour un visiteur non-auteur,
-  // même si l'URL contient ?published=1.
-  const isAuthor = Boolean(
-    user?.id && mission?.user_id && mission.user_id === user.id
-  );
+  // Verrou strict centralisé : voir src/lib/ownership.ts
+  // (user connecté + ids non vides + égalité stricte).
+  const isAuthor = isAuthorOf(user?.id, mission);
   const catMeta = CATEGORY_META[mission.category] || CATEGORY_META.animals;
   const CatIcon = catMeta.icon;
   const statusMeta = STATUS_LABELS[mission.status] || STATUS_LABELS.open;
