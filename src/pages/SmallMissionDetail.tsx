@@ -139,6 +139,28 @@ const InlineFeedbackForm = ({
   );
 };
 
+/**
+ * Squelette du bandeau de publication, affiché pendant le fetch initial
+ * quand l'URL contient ?published=1 et qu'un utilisateur est connecté.
+ * Mémoïsé : ne dépend d'aucune prop et ne doit jamais re-rendre pendant
+ * le loading (évite tout clignotement).
+ */
+const PublishedBannerSkeleton = memo(() => (
+  <div
+    aria-hidden="true"
+    className="rounded-xl border border-primary/20 bg-primary/5 p-5 mb-6 animate-pulse animate-fade-in motion-reduce:animate-none transition-opacity duration-300"
+  >
+    <div className="h-5 w-2/3 rounded bg-muted" />
+    <div className="mt-3 h-4 w-full rounded bg-muted" />
+    <div className="mt-2 h-4 w-5/6 rounded bg-muted" />
+    <div className="mt-4 flex gap-3">
+      <div className="h-9 w-32 rounded bg-muted" />
+      <div className="h-4 w-40 rounded bg-muted" />
+    </div>
+  </div>
+));
+PublishedBannerSkeleton.displayName = "PublishedBannerSkeleton";
+
 /* ── Main Page ── */
 const SmallMissionDetail = () => {
   const { id } = useParams<{ id: string }>();
