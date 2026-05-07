@@ -77,7 +77,7 @@ export function MissionPublishedBanner({
   return (
     <div
       data-testid="mission-published-banner"
-      className="relative rounded-xl border border-primary/20 bg-primary/5 p-5 mb-6"
+      className="relative rounded-xl border border-primary/20 bg-primary/5 p-5 mb-6 animate-fade-in motion-reduce:animate-none"
     >
       <button
         type="button"
