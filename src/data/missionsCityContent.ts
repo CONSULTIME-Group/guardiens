@@ -37,7 +37,7 @@ export const MISSIONS_LYON: MissionsCityContent = {
     {
       heading: "Pourquoi l'entraide à domicile prend tout son sens à Lyon",
       body:
-        "Lyon est une ville dense où la vie de quartier reste forte malgré la taille de la métropole. Entre les pentes de la Croix-Rousse, les traboules du Vieux-Lyon, les immeubles haussmanniens de la Presqu'île et les maisons de Monchat ou de Saint-Just, on croise des voisins de palier sans jamais leur parler. Les petites missions inversent cette logique. Elles donnent un prétexte simple — un service ponctuel à domicile — pour entrer en relation avec quelqu'un qui habite à quelques rues. Pas besoin d'attendre une panne de courant ou un déménagement pour faire connaissance.",
+        "Lyon est une ville dense où la vie de quartier reste forte malgré la taille de la métropole. Entre les pentes de la Croix-Rousse, les traboules du Vieux-Lyon, les immeubles haussmanniens de la Presqu'île et les maisons de Monchat ou de Saint-Just, on croise des personnes de palier sans jamais leur parler. Les petites missions inversent cette logique. Elles donnent un prétexte simple — un service ponctuel à domicile — pour entrer en relation avec quelqu'un qui habite à quelques rues. Pas besoin d'attendre une panne de courant ou un déménagement pour faire connaissance.",
     },
     {
       heading: "Quelles missions s'échangent à Lyon et autour",
@@ -47,7 +47,7 @@ export const MISSIONS_LYON: MissionsCityContent = {
     {
       heading: "Comment publier ou répondre à une mission près de chez vous",
       body:
-        "Si vous habitez à Lyon ou dans un rayon de 25 kilomètres autour de Bellecour, vous pouvez à la fois publier une mission et proposer votre aide. Pour publier, vous décrivez en quelques lignes ce dont vous avez besoin, vous précisez votre quartier ou votre commune, et vous indiquez ce que vous proposez en échange — un produit, un service futur, un simple moment partagé. Les gens du coin voient votre demande et vous contactent par messagerie privée. Si vous voulez aider, vous parcourez les missions ouvertes affichées plus bas sur cette page : elles sont triées par proximité avec Lyon. Les missions d'entraide sont gratuites pour tous, sans abonnement, sans commission.",
+        "Si vous habitez à Lyon ou dans un rayon de 25 kilomètres autour de Bellecour, vous pouvez à la fois publier une mission et proposer votre aide. Pour publier, vous décrivez en quelques lignes ce dont vous avez besoin, vous précisez votre quartier ou votre commune, et vous indiquez ce que vous proposez en échange — un produit, un service futur, un simple moment partagé. Les gens du coin voient votre demande et vous contactent par messagerie privée. Si vous voulez aider, vous parcourez les missions ouvertes affichées plus bas sur cette page : elles sont triées par proximité avec Lyon. Les missions d'entraide sont accessibles à toutes les personnes inscrites, sans abonnement, sans commission.",
     },
     {
       heading: "Une logique d'échange, pas de prestation",
