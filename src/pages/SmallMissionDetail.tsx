@@ -435,14 +435,23 @@ const SmallMissionDetail = () => {
   if (loading) return <div className="p-6 md:p-10 text-muted-foreground">Chargement...</div>;
   if (!mission) return <div className="p-6 md:p-10"><p>Mission introuvable.</p><Link to="/petites-missions" className="text-primary underline mt-2 inline-block">Retour aux missions</Link></div>;
 
-  const isAuthor = mission.user_id === user?.id;
+  // Verrou strict : user connecté ET ids non vides ET égalité stricte.
+  // Empêche tout affichage du bandeau pour un visiteur non-auteur,
+  // même si l'URL contient ?published=1.
+  const isAuthor = Boolean(
+    user?.id && mission?.user_id && mission.user_id === user.id
+  );
   const catMeta = CATEGORY_META[mission.category] || CATEGORY_META.animals;
   const CatIcon = catMeta.icon;
   const statusMeta = STATUS_LABELS[mission.status] || STATUS_LABELS.open;
   const acceptedResponses = responses.filter(r => r.status === "accepted");
   const pendingResponses = responses.filter(r => r.status === "pending");
   const isDatePassed = mission.date_needed && new Date(mission.date_needed) < new Date();
-  const showPublishedBanner = searchParams.get("published") === "1" && isAuthor;
+  const showPublishedBanner = Boolean(
+    user?.id &&
+    isAuthor &&
+    searchParams.get("published") === "1"
+  );
 
   const handleClosePublishedBanner = () => {
     // Supprime tous les paramètres d'URL (notamment ?published=1)
