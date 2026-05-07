@@ -450,7 +450,7 @@ const SmallMissionDetail = () => {
         {pendingPublishedFlag && (
           <div
             aria-hidden="true"
-            className="rounded-xl border border-primary/20 bg-primary/5 p-5 mb-6 animate-pulse"
+            className="rounded-xl border border-primary/20 bg-primary/5 p-5 mb-6 animate-pulse animate-fade-in motion-reduce:animate-none transition-opacity duration-300"
           >
             <div className="h-5 w-2/3 rounded bg-muted" />
             <div className="mt-3 h-4 w-full rounded bg-muted" />
