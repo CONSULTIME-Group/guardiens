@@ -109,6 +109,7 @@ const Pricing = lazy(() => import("./pages/Pricing"));
 const SmallMissions = lazy(() => import("./pages/SmallMissions"));
 const SmallMissionsPublic = lazy(() => import("./pages/SmallMissionsPublic"));
 const SmallMissionDetail = lazy(() => import("./pages/SmallMissionDetail"));
+const MissionsCityPage = lazy(() => import("./pages/MissionsCityPage"));
 const CreateSmallMission = lazy(() => import("./pages/CreateSmallMission"));
 const MentionsLegales = lazy(() => import("./pages/MentionsLegales"));
 const AdminSmallMissions = lazy(() => import("./pages/admin/AdminSmallMissions"));
@@ -254,6 +255,7 @@ const AppRoutes = () => (
       <Route path="/gardien-urgence" element={<EmergencySitter />} />
       <Route path="/petites-missions" element={<SmallMissionsRoute />} />
       <Route path="/petites-missions/creer" element={<ProtectedRoute><CreateSmallMission /></ProtectedRoute>} />
+      <Route path="/petites-missions/lyon" element={<MissionsCityPage />} />
       <Route path="/petites-missions/:id" element={<SmallMissionDetail />} />
       {/* Legacy: garde longue durée supprimée — redirige vers la home publique */}
       <Route path="/long-stays/:id" element={<Navigate to="/" replace />} />
