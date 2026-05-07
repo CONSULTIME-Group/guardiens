@@ -141,7 +141,7 @@ const InlineFeedbackForm = ({
 const SmallMissionDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const { hasAccess } = useSubscriptionAccess();
   const { level: accessLevel, profileCompletion, canApplyMissions } = useAccessLevel();
