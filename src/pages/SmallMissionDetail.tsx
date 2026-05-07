@@ -442,6 +442,27 @@ const SmallMissionDetail = () => {
   const acceptedResponses = responses.filter(r => r.status === "accepted");
   const pendingResponses = responses.filter(r => r.status === "pending");
   const isDatePassed = mission.date_needed && new Date(mission.date_needed) < new Date();
+  const showPublishedBanner = searchParams.get("published") === "1" && isAuthor;
+
+  const handleClosePublishedBanner = () => {
+    navigate(`/petites-missions/${id}`, { replace: true });
+  };
+
+  const handleSharePublishedLink = async () => {
+    const cleanUrl = window.location.href.split("?")[0];
+    if (typeof navigator !== "undefined" && (navigator as any).share) {
+      try {
+        await (navigator as any).share({ title: mission.title, url: cleanUrl });
+        return;
+      } catch { /* annulé → fallback presse-papier */ }
+    }
+    try {
+      await navigator.clipboard.writeText(cleanUrl);
+      toast({ title: "Lien copié.", description: "Vous pouvez le partager où vous voulez." });
+    } catch {
+      toast({ title: "Copie impossible.", description: "Sélectionnez l'URL manuellement.", variant: "destructive" });
+    }
+  };
 
   return (
     <div className="animate-fade-in pb-32">
