@@ -18,6 +18,7 @@ import AccessGateBanner from "@/components/access/AccessGateBanner";
 import MissionPhotoUpload from "@/components/missions/MissionPhotoUpload";
 import { geocodeCity } from "@/lib/geocode";
 import { trackFirstAction } from "@/lib/analytics";
+import { templatesFor, type MissionTemplate } from "@/data/missionTemplates";
 
 const EURO_REGEX = /\d+\s*[€]|[€]\s*\d+|\d+\s*euro/i;
 
@@ -56,6 +57,28 @@ const CreateSmallMission = () => {
  const [duration, setDuration] = useState("");
  const [submitting, setSubmitting] = useState(false);
  const [photos, setPhotos] = useState<string[]>([]);
+ const [appliedTemplateId, setAppliedTemplateId] = useState<string | null>(null);
+
+ const applyTemplate = (t: MissionTemplate) => {
+ setMissionType(t.type);
+ setCategory(t.category);
+ setTitle(t.title);
+ setDescription(t.description);
+ setExchangeOffer(t.exchange);
+ setExchangeError("");
+ setDuration(t.duration);
+ setAppliedTemplateId(t.id);
+ };
+
+ const clearTemplate = () => {
+ setAppliedTemplateId(null);
+ setTitle("");
+ setDescription("");
+ setExchangeOffer("");
+ setDuration("");
+ };
+
+ const visibleTemplates = templatesFor(missionType);
 
  const handleExchangeChange = (val: string) => {
  setExchangeOffer(val);
@@ -177,6 +200,48 @@ const CreateSmallMission = () => {
  onClick={() => setMissionType("offre")}>
  Une offre d'aide
  </Button>
+ </div>
+ </div>
+
+ {/* Modèles tout prêts — lèvent la friction de la page blanche */}
+ <div className="space-y-2 rounded-xl border border-primary/20 bg-primary/5 p-4">
+ <div className="flex items-center justify-between gap-2">
+ <div>
+ <p className="text-sm font-semibold text-foreground">
+ {missionType === "offre" ? "Inspirez-vous d'un exemple" : "Pas sûr·e quoi écrire ?"}
+ </p>
+ <p className="text-xs text-muted-foreground">
+ Cliquez un modèle pour pré-remplir le formulaire — vous pourrez tout ajuster ensuite.
+ </p>
+ </div>
+ {appliedTemplateId && (
+ <button
+ type="button"
+ onClick={clearTemplate}
+ className="text-xs text-primary hover:underline whitespace-nowrap"
+ >
+ Repartir de zéro
+ </button>
+ )}
+ </div>
+ <div className="flex flex-wrap gap-2">
+ {visibleTemplates.map((t) => {
+ const isActive = appliedTemplateId === t.id;
+ return (
+ <button
+ key={t.id}
+ type="button"
+ onClick={() => applyTemplate(t)}
+ className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
+ isActive
+ ? "bg-primary text-primary-foreground border-primary"
+ : "bg-background text-foreground border-border hover:border-primary/40"
+ }`}
+ >
+ {t.label}
+ </button>
+ );
+ })}
  </div>
  </div>
  {/* Catégorie */}
