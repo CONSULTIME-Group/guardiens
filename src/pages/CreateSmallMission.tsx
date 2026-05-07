@@ -57,6 +57,28 @@ const CreateSmallMission = () => {
  const [duration, setDuration] = useState("");
  const [submitting, setSubmitting] = useState(false);
  const [photos, setPhotos] = useState<string[]>([]);
+ const [appliedTemplateId, setAppliedTemplateId] = useState<string | null>(null);
+
+ const applyTemplate = (t: MissionTemplate) => {
+ setMissionType(t.type);
+ setCategory(t.category);
+ setTitle(t.title);
+ setDescription(t.description);
+ setExchangeOffer(t.exchange);
+ setExchangeError("");
+ setDuration(t.duration);
+ setAppliedTemplateId(t.id);
+ };
+
+ const clearTemplate = () => {
+ setAppliedTemplateId(null);
+ setTitle("");
+ setDescription("");
+ setExchangeOffer("");
+ setDuration("");
+ };
+
+ const visibleTemplates = templatesFor(missionType);
 
  const handleExchangeChange = (val: string) => {
  setExchangeOffer(val);
