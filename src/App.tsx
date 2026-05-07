@@ -323,6 +323,7 @@ const AppRoutes = () => (
       <Route path="/admin/hero-weights" element={<AdminHeroWeights />} />
       <Route path="/test/error-boundary" element={<TestErrorBoundary />} />
       <Route path="/test/empty-states" element={<TestEmptyStates />} />
+      <Route path="/test/mission-published-banner" element={<TestMissionPublishedBanner />} />
       <Route path="/dev/preview/ongoing-sit-hero" element={<PreviewOngoingSitHero />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />
       <Route path="*" element={<NotFound />} />
