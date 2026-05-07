@@ -202,6 +202,48 @@ const CreateSmallMission = () => {
  </Button>
  </div>
  </div>
+
+ {/* Modèles tout prêts — lèvent la friction de la page blanche */}
+ <div className="space-y-2 rounded-xl border border-primary/20 bg-primary/5 p-4">
+ <div className="flex items-center justify-between gap-2">
+ <div>
+ <p className="text-sm font-semibold text-foreground">
+ {missionType === "offre" ? "Inspirez-vous d'un exemple" : "Pas sûr·e quoi écrire ?"}
+ </p>
+ <p className="text-xs text-muted-foreground">
+ Cliquez un modèle pour pré-remplir le formulaire — vous pourrez tout ajuster ensuite.
+ </p>
+ </div>
+ {appliedTemplateId && (
+ <button
+ type="button"
+ onClick={clearTemplate}
+ className="text-xs text-primary hover:underline whitespace-nowrap"
+ >
+ Repartir de zéro
+ </button>
+ )}
+ </div>
+ <div className="flex flex-wrap gap-2">
+ {visibleTemplates.map((t) => {
+ const isActive = appliedTemplateId === t.id;
+ return (
+ <button
+ key={t.id}
+ type="button"
+ onClick={() => applyTemplate(t)}
+ className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
+ isActive
+ ? "bg-primary text-primary-foreground border-primary"
+ : "bg-background text-foreground border-border hover:border-primary/40"
+ }`}
+ >
+ {t.label}
+ </button>
+ );
+ })}
+ </div>
+ </div>
  {/* Catégorie */}
  <div className="space-y-2">
  <Label>Catégorie *</Label>
