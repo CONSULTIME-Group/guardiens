@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { logger } from "@/lib/logger";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowLeft, MapPin, Calendar, Clock, Dog, Flower2, Handshake,
   Heart, MessageSquare, CheckCircle2, Users, XCircle, ThumbsUp,
-  ThumbsDown, Star, RotateCcw, Send, Home,
+  ThumbsDown, Star, RotateCcw, Send, Home, X,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -141,6 +141,7 @@ const InlineFeedbackForm = ({
 const SmallMissionDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { hasAccess } = useSubscriptionAccess();
   const { level: accessLevel, profileCompletion, canApplyMissions } = useAccessLevel();
@@ -441,6 +442,27 @@ const SmallMissionDetail = () => {
   const acceptedResponses = responses.filter(r => r.status === "accepted");
   const pendingResponses = responses.filter(r => r.status === "pending");
   const isDatePassed = mission.date_needed && new Date(mission.date_needed) < new Date();
+  const showPublishedBanner = searchParams.get("published") === "1" && isAuthor;
+
+  const handleClosePublishedBanner = () => {
+    navigate(`/petites-missions/${id}`, { replace: true });
+  };
+
+  const handleSharePublishedLink = async () => {
+    const cleanUrl = window.location.href.split("?")[0];
+    if (typeof navigator !== "undefined" && (navigator as any).share) {
+      try {
+        await (navigator as any).share({ title: mission.title, url: cleanUrl });
+        return;
+      } catch { /* annulé → fallback presse-papier */ }
+    }
+    try {
+      await navigator.clipboard.writeText(cleanUrl);
+      toast({ title: "Lien copié.", description: "Vous pouvez le partager où vous voulez." });
+    } catch {
+      toast({ title: "Copie impossible.", description: "Sélectionnez l'URL manuellement.", variant: "destructive" });
+    }
+  };
 
   return (
     <div className="animate-fade-in pb-32">
@@ -460,6 +482,32 @@ const SmallMissionDetail = () => {
       </div>
 
       <div className="p-6 md:p-10 max-w-3xl mx-auto">
+        {showPublishedBanner && (
+          <div className="relative rounded-xl border border-primary/20 bg-primary/5 p-5 mb-6">
+            <button
+              type="button"
+              onClick={handleClosePublishedBanner}
+              aria-label="Fermer la confirmation"
+              className="absolute right-3 top-3 rounded-md p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <h2 className="font-heading font-semibold text-foreground pr-8">
+              Votre mission est en ligne.
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Elle est visible dès maintenant pour les membres qui consultent les petites missions près de chez eux. Les membres ayant activé une alerte dans votre zone seront prévenus au prochain envoi quotidien.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <Button type="button" size="sm" onClick={handleSharePublishedLink}>
+                Partager le lien
+              </Button>
+              <Link to="/dashboard" className="text-sm text-primary hover:underline">
+                Retour à mon tableau de bord
+              </Link>
+            </div>
+          </div>
+        )}
         {/* Category + status */}
         <div className="flex items-center gap-3 mb-3">
           <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-accent ${catMeta.colorClass}`}>
