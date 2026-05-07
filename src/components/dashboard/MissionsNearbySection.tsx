@@ -83,18 +83,34 @@ const MissionsNearbySection = () => {
           : "Des gens du coin qui cherchent de l'aide, d'autres qui proposent la leur."}
       </p>
 
-      {/* Two action buttons */}
-      <div className="flex gap-3 mb-4">
-        <Link to="/petites-missions/creer?type=besoin" className="flex-1">
-          <Button className="w-full rounded-full text-sm font-semibold gap-1.5" size="sm">
-            Publier un besoin <ArrowRight className="h-3.5 w-3.5" />
-          </Button>
-        </Link>
-        <Link to="/petites-missions/creer?type=offre" className="flex-1">
-          <Button variant="outline" className="w-full rounded-full text-sm font-semibold border-primary text-primary gap-1.5" size="sm">
-            Proposer mon aide <ArrowRight className="h-3.5 w-3.5" />
-          </Button>
-        </Link>
+      {/* Tuiles thématiques de modèles — pré-remplissent le formulaire */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
+        {[
+          { type: "besoin", id: "need-dog-walk",  label: "Promener mon chien"  },
+          { type: "besoin", id: "need-cat-feed",  label: "Nourrir mon chat"    },
+          { type: "besoin", id: "need-plants",    label: "Arroser les plantes" },
+          { type: "besoin", id: "need-handyman",  label: "Petit bricolage"     },
+          { type: "offre",  id: "offer-skill",    label: "Partager un savoir"  },
+          { type: "offre",  id: "offer-garden",   label: "Coup de main jardin" },
+        ].map((tile) => {
+          const isBesoin = tile.type === "besoin";
+          return (
+            <Link
+              key={tile.id}
+              to={`/petites-missions/creer?type=${tile.type}&template=${tile.id}`}
+              className="flex flex-col gap-1.5 p-3 rounded-xl border border-border bg-card hover:border-primary/50 hover:bg-accent/50 transition-colors"
+            >
+              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full self-start ${
+                isBesoin ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"
+              }`}>
+                {isBesoin ? "Besoin" : "Offre"}
+              </span>
+              <span className="text-sm font-heading font-semibold text-foreground leading-tight">
+                {tile.label}
+              </span>
+            </Link>
+          );
+        })}
       </div>
 
       {/* Mission cards */}
