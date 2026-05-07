@@ -159,6 +159,14 @@ metaDescription: "Home sitting et petites missions d'entraide entre gens du coin
  changeFreq: "weekly",
  },
  {
+ path: "/petites-missions/lyon",
+ title: "Petites missions d'entraide à domicile à Lyon | Guardiens",
+ metaDescription: "Petites missions d'entraide à domicile à Lyon : garde animaux, jardin, courses. Sans contrepartie financière, entre gens du coin. Publiez ou aidez.",
+ h1: "Petites missions d'entraide à domicile à Lyon",
+ sitemapPriority: "0.7",
+ changeFreq: "weekly",
+ },
+ {
  path: "/gardien-urgence",
  title: "Gardien d'urgence — Garde en moins de 24h | Guardiens",
  metaDescription: "Besoin d'un gardien en urgence pour vos animaux ? Activez l'alerte Guardiens et trouvez un gardien vérifié près de chez vous en moins de 24 heures.",
