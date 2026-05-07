@@ -432,7 +432,33 @@ const SmallMissionDetail = () => {
     }
   };
 
-  if (loading) return <div className="p-6 md:p-10 text-muted-foreground">Chargement...</div>;
+  // Pendant le fetch initial, si l'URL contient ?published=1, on affiche
+  // immédiatement un squelette de bandeau pour que la confirmation soit
+  // perceptible en < 500 ms (au lieu d'attendre la fin du load).
+  // Le squelette ne révèle aucune donnée (pas de titre, pas d'auteur).
+  const pendingPublishedFlag = searchParams.get("published") === "1";
+
+  if (loading) {
+    return (
+      <div className="p-6 md:p-10 max-w-3xl mx-auto">
+        {pendingPublishedFlag && (
+          <div
+            aria-hidden="true"
+            className="rounded-xl border border-primary/20 bg-primary/5 p-5 mb-6 animate-pulse"
+          >
+            <div className="h-5 w-2/3 rounded bg-muted" />
+            <div className="mt-3 h-4 w-full rounded bg-muted" />
+            <div className="mt-2 h-4 w-5/6 rounded bg-muted" />
+            <div className="mt-4 flex gap-3">
+              <div className="h-9 w-32 rounded bg-muted" />
+              <div className="h-4 w-40 rounded bg-muted" />
+            </div>
+          </div>
+        )}
+        <div className="text-muted-foreground">Chargement...</div>
+      </div>
+    );
+  }
   if (!mission) return <div className="p-6 md:p-10"><p>Mission introuvable.</p><Link to="/petites-missions" className="text-primary underline mt-2 inline-block">Retour aux missions</Link></div>;
 
   // Verrou strict : user connecté ET ids non vides ET égalité stricte.
