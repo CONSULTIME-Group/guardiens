@@ -521,30 +521,13 @@ const SmallMissionDetail = () => {
 
       <div className="p-6 md:p-10 max-w-3xl mx-auto">
         {showPublishedBanner && (
-          <div className="relative rounded-xl border border-primary/20 bg-primary/5 p-5 mb-6">
-            <button
-              type="button"
-              onClick={handleClosePublishedBanner}
-              aria-label="Fermer la confirmation"
-              className="absolute right-3 top-3 rounded-md p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
-            <h2 className="font-heading font-semibold text-foreground pr-8">
-              Votre mission est en ligne.
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Elle est visible dès maintenant pour les membres qui consultent les petites missions près de chez eux. Les membres ayant activé une alerte dans votre zone seront prévenus au prochain envoi quotidien.
-            </p>
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <Button type="button" size="sm" onClick={handleSharePublishedLink}>
-                Partager le lien
-              </Button>
-              <Link to="/dashboard" className="text-sm text-primary hover:underline">
-                Retour à mon tableau de bord
-              </Link>
-            </div>
-          </div>
+          <MissionPublishedBanner
+            missionTitle={mission.title}
+            isAuthor={isAuthor}
+            published
+            onClose={handleClosePublishedBanner}
+            onToast={(t) => toast(t)}
+          />
         )}
         {/* Category + status */}
         <div className="flex items-center gap-3 mb-3">
