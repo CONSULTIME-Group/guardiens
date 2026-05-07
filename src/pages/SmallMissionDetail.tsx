@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { logger } from "@/lib/logger";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -138,28 +138,6 @@ const InlineFeedbackForm = ({
     </div>
   );
 };
-
-/**
- * Squelette du bandeau de publication, affiché pendant le fetch initial
- * quand l'URL contient ?published=1 et qu'un utilisateur est connecté.
- * Mémoïsé : ne dépend d'aucune prop et ne doit jamais re-rendre pendant
- * le loading (évite tout clignotement).
- */
-const PublishedBannerSkeleton = memo(() => (
-  <div
-    aria-hidden="true"
-    className="rounded-xl border border-primary/20 bg-primary/5 p-5 mb-6 animate-pulse animate-fade-in motion-reduce:animate-none transition-opacity duration-300"
-  >
-    <div className="h-5 w-2/3 rounded bg-muted" />
-    <div className="mt-3 h-4 w-full rounded bg-muted" />
-    <div className="mt-2 h-4 w-5/6 rounded bg-muted" />
-    <div className="mt-4 flex gap-3">
-      <div className="h-9 w-32 rounded bg-muted" />
-      <div className="h-4 w-40 rounded bg-muted" />
-    </div>
-  </div>
-));
-PublishedBannerSkeleton.displayName = "PublishedBannerSkeleton";
 
 /* ── Main Page ── */
 const SmallMissionDetail = () => {
@@ -456,25 +434,13 @@ const SmallMissionDetail = () => {
     }
   };
 
-  // ── Valeurs dérivées stables (calculées même pendant le loading) ──
-  // Mémoïsées pour éviter de recalculer à chaque re-render et stabiliser
-  // les dépendances du useEffect de logging et l'apparition du bandeau.
-  const hasPublishedFlag = useMemo(
-    () => searchParams.get("published") === "1",
-    [searchParams],
-  );
-  const isAuthor = useMemo(
-    () => isAuthorOf(user?.id, mission),
-    [user?.id, mission],
-  );
-  // Verrou : on n'affiche le squelette QUE si un utilisateur est connecté.
-  // Un visiteur non connecté ne peut, par définition, pas être l'auteur.
-  const pendingPublishedFlag = Boolean(user?.id) && hasPublishedFlag;
+  // Valeurs dérivées (calculées à chaque render — pas de mémoïsation prématurée).
+  const hasPublishedFlag = searchParams.get("published") === "1";
+  const isAuthor = isAuthorOf(user?.id, mission);
   const showPublishedBanner = Boolean(user?.id) && isAuthor && hasPublishedFlag;
 
-  // Trace les tentatives d'affichage du bandeau via manipulation d'URL.
-  // Placé AVANT les early returns pour respecter les règles des Hooks
-  // (sinon l'ordre des hooks change selon loading / mission).
+  // useEffect placé AVANT les early returns pour respecter les règles des Hooks
+  // (sinon l'ordre des hooks change entre loading=true et loading=false).
   useEffect(() => {
     if (!loading && mission && hasPublishedFlag && !isAuthor) {
       logger.warn("mission_published_banner.unauthorized_attempt", {
@@ -487,16 +453,13 @@ const SmallMissionDetail = () => {
     }
   }, [loading, mission, hasPublishedFlag, isAuthor, user?.id]);
 
-  const handleClosePublishedBanner = useCallback(() => {
-    // Supprime tous les paramètres d'URL (notamment ?published=1)
-    // pour que F5 ne réaffiche pas le bandeau.
+  const handleClosePublishedBanner = () => {
     setSearchParams({}, { replace: true });
-  }, [setSearchParams]);
+  };
 
   if (loading) {
     return (
       <div className="p-6 md:p-10 max-w-3xl mx-auto">
-        {pendingPublishedFlag && <PublishedBannerSkeleton />}
         <div className="text-muted-foreground">Chargement...</div>
       </div>
     );
