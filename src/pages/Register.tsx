@@ -482,8 +482,13 @@ const Register = () => {
  Vous ne voyez rien dans votre boîte de réception ?
  </p>
  <ul className="text-xs text-warning-foreground/85 leading-relaxed space-y-1 list-disc pl-4">
- <li>
+  <li>
  Vérifiez vos <strong>spams / courriers indésirables</strong> et l'onglet <strong>Promotions</strong>.
+ </li>
+ <li>
+ <strong>Hotmail, Outlook ou Live ?</strong> Nos emails y atterrissent
+ souvent dans les indésirables — pensez à les marquer « non spam » pour
+ recevoir les suivants directement en boîte de réception.
  </li>
  <li>
  L'expéditeur est{" "}
