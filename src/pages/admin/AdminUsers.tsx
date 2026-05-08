@@ -245,6 +245,28 @@ const AdminUsers = () => {
     else { toast.success("Identité validée"); fetchUsers(); }
   };
 
+  const handleResendConfirmation = async (email: string | undefined | null) => {
+    if (!email) {
+      toast.error("Aucune adresse e-mail connue pour ce compte");
+      return;
+    }
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/confirm`,
+      },
+    });
+    if (error) {
+      const msg = /already|confirmed/i.test(error.message)
+        ? "Ce compte est déjà confirmé."
+        : `Échec de l'envoi : ${error.message}`;
+      toast.error(msg);
+    } else {
+      toast.success(`E-mail de confirmation renvoyé à ${email}`);
+    }
+  };
+
   const handleSaveNote = async () => {
     const { error } = await supabase
       .from("profile_moderation")
