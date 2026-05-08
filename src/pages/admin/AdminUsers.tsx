@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, Crown, ChevronLeft, ChevronRight, MessageSquare, FileText } from "lucide-react";
+import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, Crown, ChevronLeft, ChevronRight, MessageSquare, FileText, MailCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { SuspendUserDialog } from "./_components/users/SuspendUserDialog";
 import { NoteUserDialog } from "./_components/users/NoteUserDialog";
@@ -243,6 +243,28 @@ const AdminUsers = () => {
       .eq("id", userId);
     if (error) toast.error("Erreur");
     else { toast.success("Identité validée"); fetchUsers(); }
+  };
+
+  const handleResendConfirmation = async (email: string | undefined | null) => {
+    if (!email) {
+      toast.error("Aucune adresse e-mail connue pour ce compte");
+      return;
+    }
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/confirm`,
+      },
+    });
+    if (error) {
+      const msg = /already|confirmed/i.test(error.message)
+        ? "Ce compte est déjà confirmé."
+        : `Échec de l'envoi : ${error.message}`;
+      toast.error(msg);
+    } else {
+      toast.success(`E-mail de confirmation renvoyé à ${email}`);
+    }
   };
 
   const handleSaveNote = async () => {
@@ -517,6 +539,14 @@ const AdminUsers = () => {
                           })}
                         >
                           <StickyNote className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Renvoyer l'e-mail de confirmation"
+                          onClick={() => handleResendConfirmation(user.email)}
+                        >
+                          <MailCheck className="h-4 w-4" />
                         </Button>
                         {user.account_status === "suspended" ? (
                           <Button
