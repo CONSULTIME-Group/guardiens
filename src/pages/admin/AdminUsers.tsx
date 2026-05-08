@@ -540,6 +540,14 @@ const AdminUsers = () => {
                         >
                           <StickyNote className="h-4 w-4" />
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Renvoyer l'e-mail de confirmation"
+                          onClick={() => handleResendConfirmation(user.email)}
+                        >
+                          <MailCheck className="h-4 w-4" />
+                        </Button>
                         {user.account_status === "suspended" ? (
                           <Button
                             variant="ghost"
