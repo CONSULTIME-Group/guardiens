@@ -560,7 +560,7 @@ const AdminNurturing = () => {
             <p className="text-sm text-muted-foreground py-4 text-center">Aucune séquence configurée.</p>
           ) : (
             sequences.map((s) => {
-              const m = sequenceMetrics.get(s.key) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0 };
+              const m = sequenceMetrics.get(s.key) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0, opens: 0, clicks: 0, actions: 0 };
               const steps = stepsBySequence.get(s.key) ?? [];
               const ruleType = s.enrollment_rule?.type ?? "—";
               const ruleLabel = RULE_TYPE_LABELS[ruleType] ?? ruleType;
