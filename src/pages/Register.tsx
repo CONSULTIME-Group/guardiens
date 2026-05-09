@@ -693,46 +693,75 @@ const Register = () => {
  </div>
  </div>
 
+ {/* Bandeau ETA — rassure sur la durée restante */}
+ <div className="flex items-center justify-center gap-2 -mt-1 mb-1 text-xs text-muted-foreground">
+  <span className="inline-flex items-center justify-center min-w-[1.75rem] h-6 px-2 rounded-full bg-primary/10 text-primary font-semibold tabular-nums">
+   {etaSeconds > 0 ? `${etaSeconds}s` : "✓"}
+  </span>
+  <span>{etaSeconds > 0 ? "Plus que quelques secondes" : "C'est presque fini !"}</span>
+ </div>
+
  <div className="space-y-2">
- <Label htmlFor="email">Email</Label>
- <Input
- id="email"
- type="email"
- placeholder="vous@exemple.com"
- value={email}
- onChange={(e) => setEmail(e.target.value)}
- required
- autoComplete="email"
- className="rounded-lg h-12"
- />
+  <Label htmlFor="email">Email</Label>
+  <Input
+   id="email"
+   type="email"
+   placeholder="vous@exemple.com"
+   value={email}
+   onChange={(e) => setEmail(e.target.value)}
+   onFocus={() => { try { trackEvent("signup_form_focused" as any, { source: "/inscription", metadata: { field: "email" } }); } catch {} }}
+   required
+   autoComplete="email"
+   className="rounded-lg h-12"
+  />
+  <p className="text-xs text-muted-foreground">
+   Nous vous enverrons un lien à valider en 1 clic. Pensez à vérifier vos spams (notamment Hotmail / Outlook).
+  </p>
  </div>
  <div className="space-y-2">
- <Label htmlFor="password">Mot de passe</Label>
- <div className="relative">
- <Input
- id="password"
- type={showPassword ? "text" : "password"}
- placeholder="Ex : MonChat!adore2dormir"
- value={password}
- onChange={(e) => { setPassword(e.target.value); setFormError(null); }}
- required
- minLength={8}
- autoComplete="new-password"
- className="rounded-lg h-12 pr-12"
- />
- <button
- type="button"
- onClick={() => setShowPassword(!showPassword)}
- aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
- aria-pressed={showPassword}
- className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
- >
- {showPassword ? <EyeOff className="h-5 w-5" aria-hidden="true" /> : <Eye className="h-5 w-5" aria-hidden="true" />}
- </button>
- </div>
- <p className="text-xs text-muted-foreground">
- 8 caractères min. · mélangez majuscules, chiffres et symboles · évitez les mots de passe courants (ex : « Password1 »)
- </p>
+  <div className="flex items-center justify-between">
+   <Label htmlFor="password">Mot de passe</Label>
+   <button
+    type="button"
+    onClick={() => { const pw = generateSuggestedPassword(); setPassword(pw); setShowPassword(true); setFormError(null); }}
+    className="text-xs text-primary hover:underline"
+   >
+    Suggérer un mot de passe fort
+   </button>
+  </div>
+  <div className="relative">
+   <Input
+    id="password"
+    type={showPassword ? "text" : "password"}
+    placeholder="Au moins 8 caractères"
+    value={password}
+    onChange={(e) => { setPassword(e.target.value); setFormError(null); }}
+    onFocus={() => { try { trackEvent("signup_form_focused" as any, { source: "/inscription", metadata: { field: "password" } }); } catch {} }}
+    required
+    minLength={8}
+    autoComplete="new-password"
+    className="rounded-lg h-12 pr-12"
+   />
+   <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+    aria-pressed={showPassword}
+    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+   >
+    {showPassword ? <EyeOff className="h-5 w-5" aria-hidden="true" /> : <Eye className="h-5 w-5" aria-hidden="true" />}
+   </button>
+  </div>
+  <p className="text-xs text-muted-foreground">
+   8 caractères min. · majuscules, chiffres ou symboles · évitez les mots de passe courants
+  </p>
+
+  {/* Détection live des mots de passe trop courants — évite l'erreur HIBP au submit */}
+  {password.length >= 6 && isObviouslyWeak(password) && (
+   <p className="text-xs text-warning-foreground bg-warning-soft border border-warning-border rounded px-2 py-1.5 animate-in fade-in-0">
+    Ce mot de passe est trop courant. Utilisez « Suggérer un mot de passe fort » ou ajoutez chiffres / symboles.
+   </p>
+  )}
 
  {/* Password strength indicator */}
  {password.length > 0 && (
