@@ -1,5 +1,7 @@
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
+import { useLocation, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -11,8 +13,16 @@ import {
  AccordionItem,
  AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Link } from "react-router-dom";
 import { HelpCircle } from "lucide-react";
+
+// Slug stable et déterministe pour les ancres URL
+const slug = (s: string): string =>
+ (s || "")
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, "-")
+  .replace(/^-+|-+$/g, "");
 
 interface FaqEntry {
  id: string;
