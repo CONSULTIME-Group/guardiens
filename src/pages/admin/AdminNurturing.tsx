@@ -84,6 +84,8 @@ const AdminNurturing = () => {
   const [queue, setQueue] = useState<QueueRow[]>([]);
   const [logsTruncated, setLogsTruncated] = useState(false);
   const [nurturingTemplates, setNurturingTemplates] = useState<string[]>([]);
+  const [lastRunAt, setLastRunAt] = useState<string | null>(null);
+  const [lastRunSent, setLastRunSent] = useState<boolean>(false);
 
   const fetchData = async () => {
     setLoading(true);
