@@ -189,20 +189,28 @@ const FAQ = () => {
  </p>
  ) : (
  <div className="space-y-10">
- {categories.map((cat) => {
- const catEntries = entries.filter((e) => e.category === cat);
- return (
- <section key={cat}>
- <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
- {categoryLabels[cat] || cat}
- </h2>
- <Accordion type="multiple" className="space-y-2">
- {catEntries.map((entry) => (
- <AccordionItem
- key={entry.id}
- value={entry.id}
- className="border border-border rounded-lg px-5 data-[state=open]:bg-accent/30"
- >
+  {categories.map((cat) => {
+  const catEntries = entries.filter((e) => e.category === cat);
+  const catLabel = categoryLabels[cat] || cat;
+  const catSlug = slug(catLabel);
+  return (
+  <section key={cat} id={catSlug} className="scroll-mt-24">
+  <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
+  {catLabel}
+  </h2>
+  <Accordion
+  type="multiple"
+  className="space-y-2"
+  value={openItems[cat] ?? []}
+  onValueChange={(v) => setOpenItems((prev) => ({ ...prev, [cat]: v }))}
+  >
+  {catEntries.map((entry) => (
+  <AccordionItem
+  key={entry.id}
+  value={entry.id}
+  id={slug(entry.question)}
+  className="border border-border rounded-lg px-5 scroll-mt-24 data-[state=open]:bg-accent/30"
+  >
  <AccordionTrigger className="text-left font-medium text-foreground hover:no-underline py-4">
  {entry.question}
  </AccordionTrigger>
