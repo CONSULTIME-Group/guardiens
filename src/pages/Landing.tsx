@@ -1053,10 +1053,10 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 7 — TÉMOIGNAGES ═══════════════ */}
-      <section className="py-24 md:py-32 bg-background">
+      <section id="temoignages" className="py-24 md:py-32 bg-background scroll-mt-24">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
-            <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug">
+            <h2 id="ils-ont-ose" className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug scroll-mt-24">
               Ils ont osé. Voici ce qu'il leur reste.
             </h2>
             <p className="mt-4 font-body text-sm text-foreground/55 max-w-xl mx-auto">
