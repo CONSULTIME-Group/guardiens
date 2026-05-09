@@ -265,77 +265,216 @@ const Landing = () => {
  path="/"
  image={HOME_OG_IMAGE}
  />
- {/* JSON-LD: Organization */}
- <script
- type="application/ld+json"
- dangerouslySetInnerHTML={{
- __html: JSON.stringify({
- "@context": "https://schema.org",
- "@type": "Organization",
- name: "Guardiens",
- url: "https://guardiens.fr",
- logo: "https://guardiens.fr/favicon.ico",
- description: "Plateforme de pet sitting et house sitting de proximité — service sans abonnement pour les propriétaires.",
- areaServed: { "@type": "Country", name: "France" },
- knowsAbout: ["House-sitting", "Pet-sitting", "Garde d'animaux à domicile", "Entraide entre gens du coin", "Petites missions entre gens du coin", "Proximité"],
- slogan: "Quelqu'un du coin veille sur votre maison.",
- founder: [{ "@type": "Person", name: "Jérémie" }, { "@type": "Person", name: "Elisa" }],
- sameAs: [],
- }),
- }}
- />
- <script
- type="application/ld+json"
- dangerouslySetInnerHTML={{
- __html: JSON.stringify({
- "@context": "https://schema.org",
- "@type": "WebSite",
- name: "Guardiens",
- url: "https://guardiens.fr",
- potentialAction: {
- "@type": "SearchAction",
- target: { "@type": "EntryPoint", urlTemplate: "https://guardiens.fr/recherche?q={search_term_string}" },
- "query-input": "required name=search_term_string",
- },
- }),
- }}
- />
- <script
- type="application/ld+json"
- dangerouslySetInnerHTML={{
- __html: JSON.stringify({
- "@context": "https://schema.org",
- "@type": "Service",
- name: "Pet sitting & House sitting de proximité",
-  description: "Service de garde d'animaux et house sitting de proximité. Avis croisés, service sans abonnement pour les propriétaires.",
-  provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
-  areaServed: { "@type": "Country", name: "France" },
-  serviceType: ["Pet sitting", "House sitting", "Garde d'animaux", "Gardiennage de maison", "Garde de chien", "Garde de chat"],
-  offers: [
-  { "@type": "Offer", name: "Espace propriétaire", price: "0", priceCurrency: "EUR", description: "Publication d'annonces et mise en relation sans abonnement pour les propriétaires. Sans carte bancaire." },
-  { "@type": "Offer", name: "Abonnement gardien", price: "6.99", priceCurrency: "EUR", description: "Abonnement gardien à 6,99 €/mois après le 14 juillet 2026 — accès sans abonnement jusqu'à cette date." },
-  { "@type": "Offer", name: "Entraide entre gens du coin", price: "0", priceCurrency: "EUR", description: "Petites missions et entraide sans abonnement pour tous." },
-  ],
- }),
- }}
- />
- <script
- type="application/ld+json"
- dangerouslySetInnerHTML={{
- __html: JSON.stringify({
- "@context": "https://schema.org",
- "@type": "FAQPage",
- mainEntity: [
- { "@type": "Question", name: "Qu'est-ce que le house sitting ?", acceptedAnswer: { "@type": "Answer", text: "Le house sitting est un échange de services : un gardien habite gratuitement dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties." } },
-  { "@type": "Question", name: "Faut-il payer pour s'inscrire en tant que propriétaire ?", acceptedAnswer: { "@type": "Answer", text: "L'inscription, la publication d'annonces et les échanges avec les gardiens sont sans abonnement requis pour les propriétaires. Aucune carte bancaire demandée. Les gardiens bénéficient d'un accès sans abonnement jusqu'au 14 juillet 2026, puis l'abonnement est à 6,99 €/mois. L'entraide entre gens du coin reste sans abonnement pour tous." } },
-  { "@type": "Question", name: "Comment trouver un pet sitter près de chez moi ?", acceptedAnswer: { "@type": "Answer", text: "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous." } },
-  { "@type": "Question", name: "Qui sont les gardiens sur Guardiens ?", acceptedAnswer: { "@type": "Answer", text: "Des gens du coin, vérifiés par notre équipe. Chaque profil passe une vérification d'identité (pièce d'identité + selfie) traitée sous 24h. Vous voyez aussi leurs avis publiés par les propriétaires précédents." } },
-  { "@type": "Question", name: "Comment se déroule une garde sur Guardiens ?", acceptedAnswer: { "@type": "Answer", text: "Vous publiez votre annonce, les gardiens du coin postulent, vous choisissez après une rencontre, puis votre gardien s'installe. Un accord de garde optionnel encadre les engagements de chacun pendant la garde." } },
-  { "@type": "Question", name: "Guardiens est-il disponible partout en France ?", acceptedAnswer: { "@type": "Answer", text: "Oui. Le réseau Guardiens s'étend dans toutes les régions de France, du Pays basque à la Bretagne, en passant par les Alpes et le Nord. Vous trouverez un gardien près de chez vous quel que soit votre département." } },
-  ],
- }),
- }}
- />
+      {/* JSON-LD consolidé : un seul @graph (Organization, WebSite, WebPage,
+          BreadcrumbList, Service, FAQPage). Plus lisible pour Google qu'une
+          collection de scripts indépendants, et permet de relier WebPage →
+          mainEntity → FAQPage + Service. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "Organization",
+                "@id": "https://guardiens.fr/#organization",
+                name: "Guardiens",
+                alternateName: ["Guardiens.fr", "Home sitting Guardiens"],
+                url: "https://guardiens.fr",
+                logo: {
+                  "@type": "ImageObject",
+                  url: "https://guardiens.fr/icons/icon-512.png",
+                  width: 512,
+                  height: 512,
+                },
+                description:
+                  "Plateforme de home sitting, garde d'animaux à domicile et petites missions d'entraide entre gens du coin. Sans abonnement pour les propriétaires.",
+                areaServed: [
+                  { "@type": "Country", name: "France" },
+                  { "@type": "City", name: "Lyon" },
+                  { "@type": "City", name: "Annecy" },
+                  { "@type": "City", name: "Grenoble" },
+                ],
+                knowsAbout: [
+                  "House-sitting",
+                  "Pet-sitting",
+                  "Garde d'animaux à domicile",
+                  "Garde de chien",
+                  "Garde de chat",
+                  "Entraide entre gens du coin",
+                  "Petites missions de proximité",
+                ],
+                slogan: "Quelqu'un du coin veille sur votre maison.",
+                founder: [
+                  { "@type": "Person", name: "Jérémie Martinot" },
+                  { "@type": "Person", name: "Elisa" },
+                ],
+              },
+              {
+                "@type": "WebSite",
+                "@id": "https://guardiens.fr/#website",
+                name: "Guardiens",
+                url: "https://guardiens.fr",
+                inLanguage: "fr-FR",
+                publisher: { "@id": "https://guardiens.fr/#organization" },
+                potentialAction: {
+                  "@type": "SearchAction",
+                  target: {
+                    "@type": "EntryPoint",
+                    urlTemplate:
+                      "https://guardiens.fr/recherche?q={search_term_string}",
+                  },
+                  "query-input": "required name=search_term_string",
+                },
+              },
+              {
+                "@type": "WebPage",
+                "@id": "https://guardiens.fr/#webpage",
+                url: "https://guardiens.fr/",
+                name: "Home sitting & petites missions d'entraide locale | Guardiens",
+                description:
+                  "Home sitting et petites missions d'entraide entre gens du coin. Confiez votre maison, demandez un coup de main au quartier. Partout en France.",
+                inLanguage: "fr-FR",
+                isPartOf: { "@id": "https://guardiens.fr/#website" },
+                about: { "@id": "https://guardiens.fr/#organization" },
+                primaryImageOfPage: {
+                  "@type": "ImageObject",
+                  url: HOME_OG_IMAGE,
+                },
+                mainEntity: [
+                  { "@id": "https://guardiens.fr/#service" },
+                  { "@id": "https://guardiens.fr/#faq" },
+                ],
+              },
+              {
+                "@type": "BreadcrumbList",
+                "@id": "https://guardiens.fr/#breadcrumb",
+                itemListElement: [
+                  {
+                    "@type": "ListItem",
+                    position: 1,
+                    name: "Accueil",
+                    item: "https://guardiens.fr/",
+                  },
+                ],
+              },
+              {
+                "@type": "Service",
+                "@id": "https://guardiens.fr/#service",
+                name: "Home sitting, garde d'animaux et entraide entre gens du coin",
+                description:
+                  "Home sitting et garde d'animaux à domicile, complétés par des petites missions d'entraide locale. Avis croisés, vérification d'identité, sans commission.",
+                provider: { "@id": "https://guardiens.fr/#organization" },
+                areaServed: [
+                  { "@type": "Country", name: "France" },
+                  { "@type": "City", name: "Lyon" },
+                  { "@type": "City", name: "Annecy" },
+                  { "@type": "City", name: "Grenoble" },
+                ],
+                serviceType: [
+                  "Home sitting",
+                  "House sitting",
+                  "Pet sitting",
+                  "Garde d'animaux à domicile",
+                  "Garde de chien",
+                  "Garde de chat",
+                  "Entraide locale",
+                ],
+                offers: [
+                  {
+                    "@type": "Offer",
+                    name: "Espace propriétaire",
+                    priceSpecification: {
+                      "@type": "PriceSpecification",
+                      price: "0",
+                      priceCurrency: "EUR",
+                      description:
+                        "Publication d'annonces et mise en relation sans abonnement pour les propriétaires. Sans carte bancaire.",
+                    },
+                  },
+                  {
+                    "@type": "Offer",
+                    name: "Abonnement gardien",
+                    priceSpecification: {
+                      "@type": "PriceSpecification",
+                      price: "6.99",
+                      priceCurrency: "EUR",
+                      unitCode: "MON",
+                      description:
+                        "Abonnement gardien à 6,99 €/mois après le 14 juillet 2026 — accès sans abonnement jusqu'à cette date.",
+                    },
+                  },
+                  {
+                    "@type": "Offer",
+                    name: "Entraide entre gens du coin",
+                    priceSpecification: {
+                      "@type": "PriceSpecification",
+                      price: "0",
+                      priceCurrency: "EUR",
+                      description:
+                        "Petites missions et entraide sans abonnement pour tous.",
+                    },
+                  },
+                ],
+              },
+              {
+                "@type": "FAQPage",
+                "@id": "https://guardiens.fr/#faq",
+                mainEntity: [
+                  {
+                    "@type": "Question",
+                    name: "Qu'est-ce que le house sitting ?",
+                    acceptedAnswer: {
+                      "@type": "Answer",
+                      text: "Le house sitting est un échange de services : un gardien habite gratuitement dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties.",
+                    },
+                  },
+                  {
+                    "@type": "Question",
+                    name: "Faut-il payer pour s'inscrire en tant que propriétaire ?",
+                    acceptedAnswer: {
+                      "@type": "Answer",
+                      text: "L'inscription, la publication d'annonces et les échanges avec les gardiens sont sans abonnement requis pour les propriétaires. Aucune carte bancaire demandée. Les gardiens bénéficient d'un accès sans abonnement jusqu'au 14 juillet 2026, puis l'abonnement est à 6,99 €/mois. L'entraide entre gens du coin reste sans abonnement pour tous.",
+                    },
+                  },
+                  {
+                    "@type": "Question",
+                    name: "Comment trouver un pet sitter près de chez moi ?",
+                    acceptedAnswer: {
+                      "@type": "Answer",
+                      text: "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous.",
+                    },
+                  },
+                  {
+                    "@type": "Question",
+                    name: "Qui sont les gardiens sur Guardiens ?",
+                    acceptedAnswer: {
+                      "@type": "Answer",
+                      text: "Des gens du coin, vérifiés par notre équipe. Chaque profil passe une vérification d'identité (pièce d'identité + selfie) traitée sous 24h. Vous voyez aussi leurs avis publiés par les propriétaires précédents.",
+                    },
+                  },
+                  {
+                    "@type": "Question",
+                    name: "Comment se déroule une garde sur Guardiens ?",
+                    acceptedAnswer: {
+                      "@type": "Answer",
+                      text: "Vous publiez votre annonce, les gardiens du coin postulent, vous choisissez après une rencontre, puis votre gardien s'installe. Un accord de garde optionnel encadre les engagements de chacun pendant la garde.",
+                    },
+                  },
+                  {
+                    "@type": "Question",
+                    name: "Guardiens est-il disponible partout en France ?",
+                    acceptedAnswer: {
+                      "@type": "Answer",
+                      text: "Oui. Le réseau Guardiens s'étend dans toutes les régions de France, du Pays basque à la Bretagne, en passant par les Alpes et le Nord. Vous trouverez un gardien près de chez vous quel que soit votre département.",
+                    },
+                  },
+                ],
+              },
+            ],
+          }),
+        }}
+      />
 
       {/* ═══════════════ NAVBAR + BANDEAU GRATUITÉ ═══════════════ */}
       <PublicHeader />
