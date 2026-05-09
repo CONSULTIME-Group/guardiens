@@ -29,8 +29,6 @@ Disallow: /auth/
 
 # Routes publiques marquées index:false dans staticRoutes
 # (outils internes / pages d'auth — cohérent avec <meta robots> + sitemap)
-Disallow: /recherche
-Disallow: /login
 
 # Profils publics : /gardiens/:id reste indexable.
 # Le sitemap filtre déjà les profils non-publics (politique : seuls sitter/both publics).
