@@ -282,8 +282,8 @@ const Landing = () => {
  return (
  <div className="min-h-screen bg-background text-foreground">
  <PageMeta
-        title="Home sitting & petites missions d'entraide locale | Guardiens"
-        description="Home sitting et petites missions d'entraide entre gens du coin. Confiez votre maison, demandez un coup de main au quartier. Partout en France."
+        title="Garde d'animaux à domicile entre particuliers | Guardiens"
+        description="Trouvez un gardien du coin pour votre maison et vos animaux. Home sitting et entraide entre particuliers, vérifiés et notés. Partout en France."
  path="/"
  image={HOME_OG_IMAGE}
  />
