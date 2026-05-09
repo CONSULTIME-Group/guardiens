@@ -45,9 +45,46 @@ const FAQ = () => {
  if (error) throw error;
  return (data || []) as unknown as FaqEntry[];
  },
- });
+  });
 
  const categories = [...new Set(entries.map((e) => e.category))];
+
+ // Map slug -> entry id, pour ouvrir l'accordion ciblé via URL hash
+ const slugToEntryId = useMemo(() => {
+  const m = new Map<string, string>();
+  for (const e of entries) m.set(slug(e.question), e.id);
+  return m;
+ }, [entries]);
+
+ const location = useLocation();
+ const [openItems, setOpenItems] = useState<Record<string, string[]>>({});
+
+ useEffect(() => {
+  if (!entries.length) return;
+  const raw = decodeURIComponent((location.hash || "").replace(/^#/, "")).trim();
+  if (!raw) return;
+
+  // 1) Ancre = slug de question : ouvrir + scroller
+  const targetEntryId = slugToEntryId.get(raw);
+  if (targetEntryId) {
+   const entry = entries.find((e) => e.id === targetEntryId);
+   if (entry) {
+    setOpenItems((prev) => {
+     const cur = new Set(prev[entry.category] ?? []);
+     cur.add(entry.id);
+     return { ...prev, [entry.category]: Array.from(cur) };
+    });
+   }
+  }
+
+  // 2) Scroll vers l'élément (slug question OU slug catégorie)
+  // Léger délai pour laisser le DOM monter l'accordion ouvert
+  const t = window.setTimeout(() => {
+   const el = document.getElementById(raw);
+   if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 80);
+  return () => window.clearTimeout(t);
+ }, [entries, location.hash, slugToEntryId]);
 
  const categoryLabels: Record<string, string> = {
  general: "Questions générales",
