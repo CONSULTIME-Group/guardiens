@@ -135,13 +135,11 @@ const Register = () => {
  useEffect(() => {
  let cancelled = false;
  (async () => {
- const { data } = await supabase
-.from("public_stats")
-.select("total_inscrits")
-.single();
- if (!cancelled && data?.total_inscrits && typeof data.total_inscrits === "number") {
- setTotalInscrits(data.total_inscrits);
- }
+        const { data: rows } = await supabase.rpc('get_public_stats');
+        const data = Array.isArray(rows) ? rows[0] : rows;
+        if (!cancelled && data?.total_inscrits && typeof data.total_inscrits === "number") {
+          setTotalInscrits(data.total_inscrits);
+        }
  })();
  return () => { cancelled = true; };
  }, []);
