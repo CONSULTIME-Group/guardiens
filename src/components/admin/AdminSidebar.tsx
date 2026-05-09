@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Users, Megaphone, CalendarCheck, Star, Flag,
   ShieldCheck, Mail, FileText, LogOut, ArrowLeft, MapPin, HelpCircle,
   Compass, Handshake, Briefcase, CreditCard, MessageSquare, ScrollText, Settings,
-  Lightbulb, AlertTriangle, Bug, Stethoscope,
+  Lightbulb, AlertTriangle, Bug, Stethoscope, Sprout,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -102,6 +102,7 @@ const adminNavGroups: NavGroup[] = [
     label: "SYSTÈME",
     items: [
       { to: "/admin/emails", icon: Mail, label: "Emails" },
+      { to: "/admin/nurturing", icon: Sprout, label: "Nurturing" },
       { to: "/admin/legal", icon: ScrollText, label: "Pages légales" },
       { to: "/admin/settings", icon: Settings, label: "Paramètres" },
       { to: "/admin/diagnostics", icon: Stethoscope, label: "Diagnostic" },

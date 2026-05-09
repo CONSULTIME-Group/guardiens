@@ -47,6 +47,77 @@ interface QueueRow {
   metadata: { source?: string } | null;
 }
 
+interface SequenceRow {
+  key: string;
+  audience: string;
+  description: string | null;
+  active: boolean;
+  anchor_field: string;
+  enrollment_rule: { type?: string; days?: number; window_days?: number; min_age_days?: number } | null;
+}
+
+interface SequenceStepRow {
+  sequence_key: string;
+  step_order: number;
+  template_name: string;
+  delay_hours: number;
+  exit_condition: { type?: string; threshold?: number; days?: number } | null;
+}
+
+// Libellés humains pour traduire les clés techniques
+const SEQUENCE_LABELS: Record<string, string> = {
+  "onboarding-owner": "Onboarding Propriétaire",
+  "onboarding-sitter": "Onboarding Gardien",
+  "reactivation-d30": "Réactivation des inactifs (J+30)",
+  "sitter-encourage-candidature": "Gardiens sans candidature (J+14)",
+};
+
+const TEMPLATE_LABELS: Record<string, string> = {
+  "onboarding-j1": "Bienvenue (J+1)",
+  "conseils-publication-annonce": "Conseils pour publier l'annonce",
+  "conseils-annonce-personnalises": "Conseils personnalisés sur l'annonce",
+  "relance-profil-incomplet": "Relance profil incomplet",
+  "availability-nudge": "Rappel disponibilités",
+  "reactivation-d30": "Réactivation après inactivité",
+  "sitter-encourage-candidature": "Encouragement à candidater",
+};
+
+const REASON_LABELS: Record<string, string> = {
+  exit_condition_met: "Objectif atteint (sortie normale)",
+  no_email: "Pas d'adresse email",
+  send_failed_400: "Erreur 400 à l'envoi",
+  send_failed_500: "Erreur 500 à l'envoi",
+  send_failed: "Échec d'envoi",
+  template_not_found: "Template introuvable",
+  user_unsubscribed: "Désinscrit",
+  user_not_found: "Utilisateur introuvable",
+  unknown: "Raison inconnue",
+};
+
+const AUDIENCE_LABELS: Record<string, string> = {
+  owner: "Propriétaires",
+  sitter: "Gardiens",
+  all: "Tous",
+};
+
+const RULE_TYPE_LABELS: Record<string, string> = {
+  signup: "À l'inscription",
+  inactivity: "Inactivité prolongée",
+  sitter_no_application: "Gardien sans candidature",
+  owner_no_sit: "Propriétaire sans annonce",
+};
+
+const formatDelay = (hours: number): string => {
+  if (hours === 0) return "immédiat";
+  if (hours < 24) return `${hours} h`;
+  const days = Math.round(hours / 24);
+  return `J+${days}`;
+};
+
+const labelSequence = (key: string) => SEQUENCE_LABELS[key] ?? key;
+const labelTemplate = (key: string) => TEMPLATE_LABELS[key] ?? key;
+const labelReason = (key: string | null) => REASON_LABELS[key ?? "unknown"] ?? (key ?? "—");
+
 const StatCard = ({
   label,
   value,
@@ -87,6 +158,8 @@ const AdminNurturing = () => {
   const [nurturingTemplates, setNurturingTemplates] = useState<string[]>([]);
   const [lastRunAt, setLastRunAt] = useState<string | null>(null);
   const [lastRunSent, setLastRunSent] = useState<boolean>(false);
+  const [sequences, setSequences] = useState<SequenceRow[]>([]);
+  const [sequenceSteps, setSequenceSteps] = useState<SequenceStepRow[]>([]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -163,6 +236,33 @@ const AdminNurturing = () => {
       setLastRunSent(false);
     }
 
+    // Métadonnées des séquences (pour affichage humain)
+    const [seqRes, stepsRes] = await Promise.all([
+      supabase
+        .from("nurturing_sequences")
+        .select("key, audience, description, active, anchor_field, enrollment_rule")
+        .order("key"),
+      supabase
+        .from("nurturing_steps")
+        .select("step_order, template_name, delay_hours, exit_condition, nurturing_sequences!inner(key)")
+        .order("step_order"),
+    ]);
+    if (!seqRes.error) setSequences((seqRes.data ?? []) as unknown as SequenceRow[]);
+    if (!stepsRes.error) {
+      const rows = (stepsRes.data ?? []) as unknown as Array<
+        SequenceStepRow & { nurturing_sequences: { key: string } }
+      >;
+      setSequenceSteps(
+        rows.map((r) => ({
+          sequence_key: r.nurturing_sequences.key,
+          step_order: r.step_order,
+          template_name: r.template_name,
+          delay_hours: r.delay_hours,
+          exit_condition: r.exit_condition,
+        }))
+      );
+    }
+
     setLoading(false);
   };
 
@@ -207,7 +307,7 @@ const AdminNurturing = () => {
     const map = new Map<string, { sequence: string; sent: number; failed: number; exited: number }>();
     for (const l of logs) {
       const key = l.user_journeys?.sequence_key ?? "unknown";
-      const r = map.get(key) ?? { sequence: key, sent: 0, failed: 0, exited: 0 };
+      const r = map.get(key) ?? { sequence: labelSequence(key), sent: 0, failed: 0, exited: 0 };
       if (l.sent) r.sent++;
       else if (l.reason === "exit_condition_met") r.exited++;
       else r.failed++;
@@ -220,7 +320,8 @@ const AdminNurturing = () => {
     const map = new Map<string, { template: string; sent: number; failed: number; exited: number }>();
     for (const l of logs) {
       const key = `${l.template_name} · step ${l.step_order}`;
-      const r = map.get(key) ?? { template: key, sent: 0, failed: 0, exited: 0 };
+      const display = `${labelTemplate(l.template_name)} (étape ${l.step_order})`;
+      const r = map.get(key) ?? { template: display, sent: 0, failed: 0, exited: 0 };
       if (l.sent) r.sent++;
       else if (l.reason === "exit_condition_met") r.exited++;
       else r.failed++;
@@ -287,6 +388,38 @@ const AdminNurturing = () => {
     [logs]
   );
 
+  // Stats agrégées par séquence (logs + journeys de la période)
+  const sequenceMetrics = useMemo(() => {
+    const m = new Map<string, { sent: number; failed: number; exited: number; activeJourneys: number; totalJourneys: number }>();
+    for (const l of logs) {
+      const k = l.user_journeys?.sequence_key;
+      if (!k) continue;
+      const r = m.get(k) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0 };
+      if (l.sent) r.sent++;
+      else if (l.reason === "exit_condition_met") r.exited++;
+      else r.failed++;
+      m.set(k, r);
+    }
+    for (const j of journeys) {
+      const r = m.get(j.sequence_key) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0 };
+      r.totalJourneys++;
+      if (j.status === "active") r.activeJourneys++;
+      m.set(j.sequence_key, r);
+    }
+    return m;
+  }, [logs, journeys]);
+
+  const stepsBySequence = useMemo(() => {
+    const m = new Map<string, SequenceStepRow[]>();
+    for (const s of sequenceSteps) {
+      const arr = m.get(s.sequence_key) ?? [];
+      arr.push(s);
+      m.set(s.sequence_key, arr);
+    }
+    for (const arr of m.values()) arr.sort((a, b) => a.step_order - b.step_order);
+    return m;
+  }, [sequenceSteps]);
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -326,6 +459,111 @@ const AdminNurturing = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Glossaire — comprendre la page */}
+      <Card className="bg-muted/30">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Comment lire cette page</CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm text-muted-foreground space-y-2">
+          <p>
+            <strong className="text-foreground">Séquence</strong> : campagne d'emails automatiques (ex. « Onboarding Propriétaire »). Chaque séquence cible une audience et déclenche selon une règle (inscription, inactivité…).
+          </p>
+          <p>
+            <strong className="text-foreground">Étape</strong> : un email donné dans une séquence, envoyé après un délai (J+1, J+3…). Une séquence contient plusieurs étapes successives.
+          </p>
+          <p>
+            <strong className="text-foreground">Parcours (journey)</strong> : un utilisateur inscrit dans une séquence. Il avance d'étape en étape, ou « sort » si l'objectif est atteint avant.
+          </p>
+          <p>
+            <strong className="text-foreground">Evaluator</strong> : le cron qui décide d'envoyer ou non chaque étape (toutes les heures). <strong className="text-foreground">Queue</strong> : la file d'attente d'envoi des emails (Lovable Cloud).
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Séquences actives — vue métier */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Séquences actives</CardTitle>
+          <p className="text-xs text-muted-foreground mt-1">
+            Les campagnes de nurturing en cours. Chiffres calculés sur la fenêtre sélectionnée ({range === "24h" ? "24 h" : range === "7d" ? "7 jours" : "30 jours"}).
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {sequences.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">Aucune séquence configurée.</p>
+          ) : (
+            sequences.map((s) => {
+              const m = sequenceMetrics.get(s.key) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0 };
+              const steps = stepsBySequence.get(s.key) ?? [];
+              const ruleType = s.enrollment_rule?.type ?? "—";
+              const ruleLabel = RULE_TYPE_LABELS[ruleType] ?? ruleType;
+              const ruleDetail =
+                ruleType === "inactivity" && s.enrollment_rule?.days
+                  ? ` (après ${s.enrollment_rule.days} j d'inactivité)`
+                  : ruleType === "sitter_no_application" && s.enrollment_rule?.min_age_days
+                    ? ` (après ${s.enrollment_rule.min_age_days} j sans candidature)`
+                    : "";
+              return (
+                <div key={s.key} className="border border-border rounded-lg p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div>
+                      <h3 className="font-semibold text-foreground">{labelSequence(s.key)}</h3>
+                      {s.description && <p className="text-xs text-muted-foreground mt-1 max-w-2xl">{s.description}</p>}
+                    </div>
+                    <div className="flex gap-1.5 flex-wrap">
+                      <Badge variant={s.active ? "default" : "outline"}>{s.active ? "Active" : "Inactive"}</Badge>
+                      <Badge variant="secondary">{AUDIENCE_LABELS[s.audience] ?? s.audience}</Badge>
+                      <Badge variant="outline">{ruleLabel}{ruleDetail}</Badge>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
+                    <div className="bg-muted/40 rounded px-2 py-1.5">
+                      <p className="text-muted-foreground">Parcours actifs</p>
+                      <p className="font-semibold text-foreground text-base">{m.activeJourneys}</p>
+                    </div>
+                    <div className="bg-muted/40 rounded px-2 py-1.5">
+                      <p className="text-muted-foreground">Nouveaux (période)</p>
+                      <p className="font-semibold text-foreground text-base">{m.totalJourneys}</p>
+                    </div>
+                    <div className="bg-muted/40 rounded px-2 py-1.5">
+                      <p className="text-muted-foreground">Emails envoyés</p>
+                      <p className="font-semibold text-success text-base">{m.sent}</p>
+                    </div>
+                    <div className="bg-muted/40 rounded px-2 py-1.5">
+                      <p className="text-muted-foreground">Échecs</p>
+                      <p className={`font-semibold text-base ${m.failed > 0 ? "text-destructive" : "text-foreground"}`}>{m.failed}</p>
+                    </div>
+                    <div className="bg-muted/40 rounded px-2 py-1.5">
+                      <p className="text-muted-foreground">Sorties (objectif)</p>
+                      <p className="font-semibold text-foreground text-base">{m.exited}</p>
+                    </div>
+                  </div>
+
+                  {steps.length > 0 && (
+                    <div className="text-xs">
+                      <p className="text-muted-foreground mb-1.5">Étapes ({steps.length}) :</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {steps.map((st) => (
+                          <span
+                            key={st.step_order}
+                            className="inline-flex items-center gap-1.5 bg-background border border-border rounded px-2 py-1"
+                            title={`Template : ${st.template_name}`}
+                          >
+                            <span className="font-mono text-muted-foreground">{formatDelay(st.delay_hours)}</span>
+                            <span>{labelTemplate(st.template_name)}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </CardContent>
+      </Card>
 
       {loading ? (
         <div className="grid gap-4 md:grid-cols-4">
@@ -445,7 +683,7 @@ const AdminNurturing = () => {
                     <TableBody>
                       {reasonBreakdown.map((r) => (
                         <TableRow key={r.reason}>
-                          <TableCell className="font-mono text-xs">{r.reason}</TableCell>
+                          <TableCell className="text-sm" title={r.reason}>{labelReason(r.reason)}</TableCell>
                           <TableCell className="text-right">
                             <Badge
                               variant={
@@ -516,7 +754,7 @@ const AdminNurturing = () => {
                       const rate = sendable > 0 ? (s.failed / sendable) * 100 : 0;
                       return (
                         <TableRow key={s.template}>
-                          <TableCell className="font-mono text-xs">{s.template}</TableCell>
+                          <TableCell className="text-sm">{s.template}</TableCell>
                           <TableCell className="text-right">{s.sent}</TableCell>
                           <TableCell className="text-right">
                             {s.failed > 0 ? <span className="text-destructive font-medium">{s.failed}</span> : 0}
@@ -564,11 +802,11 @@ const AdminNurturing = () => {
                         <TableCell className="text-xs whitespace-nowrap">
                           {format(new Date(l.created_at), "dd MMM HH:mm", { locale: fr })}
                         </TableCell>
-                        <TableCell className="font-mono text-xs">{l.user_journeys?.sequence_key ?? "—"}</TableCell>
+                        <TableCell className="text-sm" title={l.user_journeys?.sequence_key ?? ""}>{labelSequence(l.user_journeys?.sequence_key ?? "—")}</TableCell>
                         <TableCell>{l.step_order}</TableCell>
-                        <TableCell className="font-mono text-xs">{l.template_name}</TableCell>
+                        <TableCell className="text-sm" title={l.template_name}>{labelTemplate(l.template_name)}</TableCell>
                         <TableCell>
-                          <Badge variant="destructive">{l.reason ?? "unknown"}</Badge>
+                          <Badge variant="destructive" title={l.reason ?? ""}>{labelReason(l.reason)}</Badge>
                         </TableCell>
                         <TableCell className="font-mono text-[11px] max-w-md truncate" title={l.error_detail?.body_excerpt ?? ""}>
                           {l.error_detail?.status ? `${l.error_detail.status} · ${l.error_detail.body_excerpt?.slice(0, 80) ?? ""}` : "—"}
