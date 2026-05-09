@@ -485,6 +485,32 @@ const AdminNurturing = () => {
     return m;
   }, [logs, journeys, eventsByMid]);
 
+  // Santé de la mesure d'engagement : un envoi sans message_id ne peut être
+  // corrélé aux ouvertures / clics → les taux d'engagement sont sous-estimés.
+  const measurementHealth = useMemo(() => {
+    const sentLogs = logs.filter((l) => l.sent);
+    const sent = sentLogs.length;
+    const missing = sentLogs.filter((l) => !l.message_id).length;
+    const missingRate = sent > 0 ? Math.round((missing / sent) * 1000) / 10 : 0;
+    let tone: "ok" | "warn" | "err" = "ok";
+    let label = "Mesure fiable";
+    let hint = "Tous les envois sont corrélés aux ouvertures et clics.";
+    if (sent === 0) {
+      tone = "ok";
+      label = "Aucun envoi";
+      hint = "Pas d'envoi sur la période — rien à corréler.";
+    } else if (missingRate >= 20) {
+      tone = "err";
+      label = "Mesure dégradée";
+      hint = `${missing} envoi(s) sans message_id (${missingRate}%) — taux d'ouverture/clic sous-estimés.`;
+    } else if (missing > 0) {
+      tone = "warn";
+      label = "Mesure partielle";
+      hint = `${missing} envoi(s) sans message_id (${missingRate}%) — légère sous-estimation possible.`;
+    }
+    return { sent, missing, missingRate, tone, label, hint };
+  }, [logs]);
+
   // Engagement global
   const engagementStats = useMemo(() => {
     let sent = 0, opens = 0, clicks = 0, actions = 0;
