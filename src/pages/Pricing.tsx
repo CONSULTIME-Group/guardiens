@@ -412,8 +412,8 @@ const Pricing = () => {
  </Card>
 
  {/* Sitter Card */}
-    <Card className="border-2 border-primary/30 relative shadow-xl rounded-2xl h-full flex flex-col bg-primary/5">
-  <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center justify-center bg-primary text-primary-foreground text-[11px] sm:text-xs font-body font-semibold tracking-wide leading-none px-3.5 py-1.5 rounded-full whitespace-nowrap max-w-[calc(100%-1.5rem)] shadow-sm">
+    <Card data-testid="sitter-card" className="border-2 border-primary/30 relative shadow-xl rounded-2xl h-full flex flex-col bg-primary/5">
+  <div data-testid="badge-sitter" className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center justify-center bg-primary text-primary-foreground text-[11px] sm:text-xs font-body font-semibold tracking-wide leading-none px-3.5 py-1.5 rounded-full whitespace-nowrap max-w-[calc(100%-1.5rem)] shadow-sm">
  {before
  ? (daysLeft > 99
  ? `Offert ${Math.ceil(daysLeft / 30)} mois`
