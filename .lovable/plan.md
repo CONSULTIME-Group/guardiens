@@ -1,80 +1,63 @@
-# KPI engagement nurturing — Plan d'exécution
+## Refonte AdminNurturing — Contrôle complet de l'engagement
 
-## Objectif
-
-Mesurer **ce que produisent réellement les emails de nurturing** : ouvertures, clics CTA, et surtout **taux d'action** (l'utilisateur a-t-il fait ce que l'email visait à déclencher).
-
-Définition retenue : **action réussie = clic CTA OU sortie par exit_condition_met dans les 7 jours suivant l'envoi.**
+Aujourd'hui le dashboard agrège tout au niveau séquence. On va descendre jusqu'à **l'étape**, **l'utilisateur** et **le CTA cliqué** pour pouvoir répondre à : *quel contenu fonctionne, qui agit, sur quoi ?*
 
 ---
 
-## Architecture
+### Nouveaux blocs ajoutés à `/admin/nurturing`
 
-### 1. Tracking infrastructure (nouveau)
+**1. Classement des étapes par taux d'action (Top / Flop)**
+Tableau triable agrégé par `(sequence_key, step_order, template_name)` :
+- Envoyés · Ouvertures (%) · Clics CTA (%) · **Taux d'action (%)** · Sorties objectif
+- Tri par défaut : taux d'action décroissant
+- Surligne les étapes avec ≥ 10 envois (signal statistique minimal) en vert si ≥ 30% d'action, rouge si < 10%
+- Permet de voir d'un coup d'œil quels emails *créent vraiment de l'action*
 
-**Table `email_engagement_events`** (append-only)
-- `message_id` (jointure avec `journey_step_log` via `idempotency_key`)
-- `event_type` : `open` | `click`
-- `target_url` (si click)
-- `user_agent`, `ip` (anonymisé /16 IPv4)
-- `created_at`
+**2. Classement des CTA cliqués (par URL)**
+Tableau agrégé sur `email_engagement_events.target_url` (event_type = click) :
+- URL · Template d'origine · Nombre de clics · Cliqueurs uniques
+- Trié par clics décroissants
+- Répond à : « quel bouton/lien fait bouger les gens ? »
 
-**Edge function `track-email-pixel`** (GET)
-- Reçoit `?mid=<message_id>` 
-- Insert ligne `open` (premier seulement par mid → unique partiel)
-- Renvoie un GIF transparent 1×1
-- `verify_jwt = false`, public
+**3. Drill-down par séquence : « Voir les destinataires »**
+Bouton sur chaque carte séquence → ouvre une modale avec la liste des utilisateurs du parcours :
+- Nom + email · Étape actuelle · Statut (active / exited / dropped)
+- Timeline mini : pour chaque step, indicateurs Envoyé / Ouvert / Cliqué (3 pastilles colorées)
+- Date de sortie + raison (`exit_condition_met` / `dropped` / `failed`)
+- Lien vers le profil utilisateur
+- Pagination (50 par page)
 
-**Edge function `track-email-click`** (GET)
-- Reçoit `?mid=<message_id>&u=<base64-url>`
-- Insert ligne `click` + URL
-- Redirect 302 vers l'URL décodée (whitelist domaine `guardiens.fr`)
-- `verify_jwt = false`, public
-
-### 2. Templates — wrapping automatique
-
-Helper `wrapTrackedHtml(html, messageId)` côté `send-transactional-email` :
-- Ajoute `<img src=".../track-email-pixel?mid=...">` avant `</body>`
-- Remplace tous les `href="https://guardiens.fr/..."` par `href=".../track-email-click?mid=...&u=...`
-- Appliqué **uniquement** aux emails avec `metadata.source` commençant par `journey:` (pas aux emails transactionnels purs)
-
-### 3. Journey log — colonne `message_id`
-
-Ajouter `message_id` (uuid) dans `journey_step_log`, généré côté `evaluate-journeys` AVANT l'appel à `send-transactional-email` et passé en `idempotencyKey`. Permet la jointure events ↔ step.
-
-### 4. Dashboard `/admin/nurturing`
-
-Bloc « Engagement » dans chaque carte de séquence :
-- **Envoyés** (déjà présent)
-- **Taux d'ouverture** : `opens distincts / sent`
-- **Taux de clic** : `clicks distincts / sent`
-- **Taux d'action** : `(users avec click OU exit goal_met dans 7j) / sent`
-
-Métriques globales en haut de page : 4 cartes (envois, ouverture moyenne, clic moyen, **action moyenne**).
-
-Vue par étape : on garde la timeline, on ajoute open/click/action par step.
+**4. Filtre temporel global**
+Sélecteur déjà présent (24h / 7j / 30j) appliqué partout : KPI globaux, KPI par séquence, classements, drill-down.
 
 ---
 
-## Détails techniques
+### Détails techniques
 
-- **Idempotence des events** : index unique partiel `(message_id) WHERE event_type='open'` → un seul open compté par email (le premier).
-- **RLS** : `email_engagement_events` lecture admin uniquement, écriture service_role.
-- **Anonymisation IP** : on stocke `192.168.0.0/16` au lieu de l'IP complète (RGPD, base légale 6.1.f, déjà couverte par mention email).
-- **Pas de tracking sur les emails transactionnels classiques** (signup, contact-reply, sit-confirmed…) — seulement nurturing, pour limiter le périmètre RGPD et garder ces emails propres.
-- **Pas d'intégration provider externe** (Resend webhooks) : on garde le pixel maison, plus simple et indépendant.
+**Pas de migration DB** : tout est calculable depuis les tables existantes (`journey_step_log`, `email_engagement_events`, `journey_enrollments`, `profiles`).
 
-## Limites assumées
+**Agrégations** :
+- Top étapes : group by `(sequence_key, step_order)` sur `journey_step_log` joint à `email_engagement_events` via `message_id`
+- Top URLs : group by `target_url` sur `email_engagement_events` filtré `event_type='click'` joint au log pour récupérer le template
+- Drill-down : query lazy au clic sur le bouton, pas chargé d'office (perf)
 
-- Le **taux d'ouverture** sera sous-estimé : Apple Mail Privacy Protection, clients texte, prefetch — ce KPI est indicatif, pas absolu.
-- Le **taux d'action** est le KPI qui compte vraiment et n'est pas affecté par ces limites.
-- Pas de tracking par lien individuel — on agrège tous les clics par email.
+**Définition « action »** : conservée — clic CTA OU `exit_condition_met` dans les 7 jours suivant l'envoi.
 
-## Ordre d'exécution
+**Composants nouveaux** :
+- `<TopStepsTable>` : rangée Top/Flop dans une `Card` après les KPI globaux engagement
+- `<TopCtaTable>` : à côté ou en dessous
+- `<SequenceRecipientsDialog>` : modale shadcn, déclenchée par bouton « Voir destinataires »
 
-1. Migration DB : table `email_engagement_events` + colonne `message_id` sur `journey_step_log`
-2. Edge functions `track-email-pixel` + `track-email-click`
-3. Modif `evaluate-journeys` : génère et persiste `message_id`
-4. Modif `send-transactional-email` : wrapping HTML conditionnel
-5. UI `AdminNurturing` : agrégations + 4 cartes + bloc engagement par séquence
-6. Test bout-en-bout : envoi → ouverture → clic → KPI à jour
+**Aucun changement** côté edge functions ou tracking — les données sont déjà collectées depuis l'implémentation précédente.
+
+---
+
+### Ordre d'exécution
+
+1. Hook `useTopSteps` + composant `<TopStepsTable>`
+2. Hook `useTopCtas` + composant `<TopCtaTable>`
+3. Bouton + dialog `<SequenceRecipientsDialog>` avec query lazy
+4. Insertion dans `AdminNurturing.tsx` après le bloc Engagement global
+5. Vérif build + visuel
+
+Estimation : ~300-400 lignes ajoutées, réparties en 3 nouveaux fichiers + insertion dans la page existante.
