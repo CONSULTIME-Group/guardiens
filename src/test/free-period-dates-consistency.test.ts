@@ -5,22 +5,22 @@ import { FOUNDER_START, LAUNCH_DATE, GRACE_END } from "@/lib/constants";
 
 /**
  * Garde-fou éditorial : la promesse publique est
- *   • Lancement : 14 juin 2026
- *   • Statut Fondateur : réservé aux inscrits AVANT le 13 juin 2026
+ *   • Lancement public : 14 juillet 2026 (fête nationale, après 3 mois de gratuité)
+ *   • Statut Fondateur : réservé aux inscrits AVANT le 13 juillet 2026
  *   • Gratuité pour TOUS : jusqu'au 14 juillet 2026 inclus
  *   • Tarif gardien (6,99 €/mois) : à partir du 15 juillet 2026
  *
  * Toute mention d'une autre date dans la copie utilisateur ou dans les
  * constantes métier doit faire échouer ce test pour éviter les régressions
- * (ex. « 30 juin », « 1er juillet », « 14 juillet 2027 »…).
+ * (ex. « 30 juin », « 1er juillet », « 13 juin »…).
  */
 
 const ROOT = path.resolve(__dirname, "../..");
 
 // Constantes attendues
 const EXPECTED = {
-  founderStart: "2026-06-13T00:00:00.000Z",
-  launchDate: "2026-06-14T00:00:00.000Z",
+  founderStart: "2026-07-13T00:00:00.000Z",
+  launchDate: "2026-07-14T00:00:00.000Z",
   graceEnd: "2026-07-15T00:00:00.000Z",
 } as const;
 
