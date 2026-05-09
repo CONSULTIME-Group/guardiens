@@ -30,6 +30,7 @@ interface LogRow {
   template_name: string;
   sent: boolean;
   reason: string | null;
+  error_detail: { status?: number; body_excerpt?: string; template?: string; at?: string } | null;
   created_at: string;
   user_journeys: { sequence_key: string } | null;
 }
