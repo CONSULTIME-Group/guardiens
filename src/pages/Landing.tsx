@@ -570,13 +570,11 @@ const Landing = () => {
             </p>
 
             <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6 animate-hero-fade-up animation-delay-400 max-w-3xl">
-              La garde d'animaux, le coup de main, <span className="text-white/80">la rencontre.</span>
+              Deux façons de rendre service. <span className="text-white/80">Aucune ne passe avant l'autre.</span>
             </h1>
 
-            <p className="font-body text-lg md:text-xl text-white/85 max-w-xl mb-4 leading-relaxed animate-hero-fade-up animation-delay-700">
-              Deux usages, indépendants l'un de l'autre.
-              D'un côté, faire garder votre maison et vos animaux par quelqu'un du coin.
-              De l'autre, demander ou rendre un coup de main près de chez vous — sans qu'aucun animal n'ait besoin d'entrer dans l'histoire.
+            <p className="font-body text-lg md:text-xl text-white/85 max-w-2xl mb-4 leading-relaxed animate-hero-fade-up animation-delay-700">
+              Confier sa maison à un gardien le temps d'un voyage, ou ramasser les légumes de Nadine en échange d'un plat maison : ce sont deux gestes du même tissu local. Guardiens les héberge à parts égales, sans qu'aucun n'ait à exister pour l'autre.
             </p>
             <p className="font-body text-base md:text-lg text-white/70 max-w-xl mb-10 leading-relaxed italic animate-hero-fade-up animation-delay-700">
               Et derrière chaque échange, une rencontre qu'on n'aurait pas cherchée.
