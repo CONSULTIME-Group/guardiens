@@ -3,6 +3,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Hr,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
+import { BrandHeader } from './_brand-header.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -34,6 +35,7 @@ const DisputeResolvedEmail = ({ firstName, decision, category, adminNote }: Disp
         </Preview>
       <Body style={main}>
         <Container style={container}>
+        <BrandHeader />
           <Heading style={h1}>
             {accepted ? 'Votre contestation a été acceptée' : 'Votre contestation a été examinée'}
           </Heading>

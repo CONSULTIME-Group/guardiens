@@ -3,6 +3,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Hr,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
+import { BrandHeader } from './_brand-header.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -16,6 +17,7 @@ const ApplicationAcceptedEmail = ({ sitTitle, ownerFirstName }: Props) => (
     <Preview>Bonne nouvelle — votre candidature est acceptée !</Preview>
     <Body style={main}>
       <Container style={container}>
+        <BrandHeader />
         <Heading style={h1}>Candidature acceptée !</Heading>
         <Text style={text}>
           {ownerFirstName || 'Le propriétaire'} a accepté votre candidature

@@ -3,6 +3,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Hr,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
+import { BrandHeader } from './_brand-header.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -33,6 +34,7 @@ const ReportResolvedEmail = ({ reason, status, adminNotes }: ReportResolvedProps
     <Preview>Votre signalement a été {statusLabels[status || 'resolved'] || 'traité'} — {SITE_NAME}</Preview>
     <Body style={main}>
       <Container style={container}>
+        <BrandHeader />
         <Heading style={h1}>
           Mise à jour de votre signalement
         </Heading>

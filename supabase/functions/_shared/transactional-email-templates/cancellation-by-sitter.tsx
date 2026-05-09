@@ -3,6 +3,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Hr,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
+import { BrandHeader } from './_brand-header.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -21,6 +22,7 @@ const CancellationBySitterEmail = ({ cancellerFirstName, sitTitle, startDate, re
     <Preview>{cancellerFirstName || 'Le gardien'} a annulé la garde</Preview>
     <Body style={main}>
       <Container style={container}>
+        <BrandHeader />
         <Heading style={h1}>Garde annulée par le gardien</Heading>
         <Text style={text}>
           <strong>{cancellerFirstName || 'Le gardien'}</strong> a annulé la garde

@@ -3,6 +3,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Hr, Section,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
+import { BrandHeader } from './_brand-header.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -29,6 +30,7 @@ const ReviewReminderEmail = ({ firstName, sitTitle, revieweeName, sitId, isOwner
       <Preview>Comment s'est passée la garde ? Partagez votre retour</Preview>
       <Body style={main}>
         <Container style={container}>
+        <BrandHeader />
           {/* Stars header */}
           <Section style={starsSection}>
             <Text style={starsText}>⭐⭐⭐⭐⭐</Text>

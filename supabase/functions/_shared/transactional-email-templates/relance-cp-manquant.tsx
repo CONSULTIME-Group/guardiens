@@ -3,6 +3,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Hr, Section,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
+import { BrandHeader } from './_brand-header.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -22,6 +23,7 @@ const RelanceCpManquantEmail = ({ prenom, cta_url }: RelanceCpProps) => {
       <Preview>Indiquez votre ville pour voir les annonces près de chez vous</Preview>
       <Body style={main}>
         <Container style={container}>
+        <BrandHeader />
           <Heading style={h1}>
             {name ? `Bonjour ${name},` : 'Bonjour,'}
           </Heading>

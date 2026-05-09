@@ -3,6 +3,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Hr,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
+import { BrandHeader } from './_brand-header.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -19,6 +20,7 @@ const CancellationResponsePublishedEmail = ({ responderFirstName, profileUrl }: 
     <Preview>{responderFirstName || 'Un membre'} a répondu à votre avis</Preview>
     <Body style={main}>
       <Container style={container}>
+        <BrandHeader />
         <Heading style={h1}>Réponse à votre avis</Heading>
         <Text style={text}>
           <strong>{responderFirstName || 'Un membre'}</strong> a répondu à votre avis d'annulation. La réponse a été validée et est désormais visible sur son profil.
