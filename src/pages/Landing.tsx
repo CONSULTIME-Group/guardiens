@@ -1402,8 +1402,8 @@ const Landing = () => {
             Votre histoire commence ici.
           </h2>
           <p className="font-body text-lg text-white/85 leading-relaxed max-w-lg mx-auto mb-10">
-            Garder une maison. Donner un coup de main. Recevoir de l'aide.
-            Des gestes simples — mais ils changent tout.
+            Vous partirez l'esprit léger. Vous rentrerez avec une histoire —
+            un coin découvert, une rencontre, des gens que vous n'auriez jamais croisés.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
             <button
