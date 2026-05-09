@@ -921,19 +921,32 @@ const Landing = () => {
             <div className="overflow-hidden px-3">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {(testimonialPages[selectedIndex] ?? []).map((t) => (
-                  <div key={t.name} className="min-w-0">
-                    <div className="rounded-2xl p-10 h-full bg-card border border-border shadow-sm">
-                      <span className="block font-heading text-7xl leading-none mb-3 select-none text-primary/40">
+                  <figure key={t.name} className="min-w-0">
+                    <blockquote className="rounded-2xl p-10 h-full bg-card border border-border shadow-sm flex flex-col">
+                      <span aria-hidden className="block font-heading text-7xl leading-none mb-3 select-none text-primary/40">
                         "
                       </span>
-                      <p className="font-body text-base md:text-lg text-foreground/70 leading-relaxed italic mb-6">
+                      <p className="font-body text-base md:text-lg text-foreground/70 leading-relaxed italic mb-6 flex-1">
                         {t.text}
                       </p>
-                      <p className="font-body text-xs text-foreground/50 uppercase tracking-widest">
-                        {t.name} — {t.detail}
-                      </p>
-                    </div>
-                  </div>
+                      <figcaption className="flex items-center gap-3 pt-4 border-t border-border/60">
+                        <span aria-hidden className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-heading text-sm font-semibold">
+                          {getInitials(t.name)}
+                        </span>
+                        <span className="flex flex-col leading-tight">
+                          <span className="font-body text-sm font-semibold text-foreground">
+                            {t.name}
+                          </span>
+                          <span className="font-body text-xs text-foreground/55">
+                            {t.detail}
+                          </span>
+                          <span className="font-body text-[11px] text-foreground/40 mt-0.5 uppercase tracking-widest">
+                            {t.period} · Programme Fondateurs
+                          </span>
+                        </span>
+                      </figcaption>
+                    </blockquote>
+                  </figure>
                 ))}
               </div>
             </div>
