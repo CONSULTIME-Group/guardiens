@@ -726,7 +726,7 @@ const Landing = () => {
               Ce qu'on n'écrit jamais dans une annonce
             </span>
             <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.15] text-foreground text-center mb-10">
-              Bien plus qu'un échange<br className="hidden md:inline" /> de services.
+              Le vrai prétexte,<br className="hidden md:inline" /> c'est la rencontre.
             </h2>
 
             <div className="border-l-4 border-primary pl-6 md:pl-8 max-w-2xl mx-auto">
