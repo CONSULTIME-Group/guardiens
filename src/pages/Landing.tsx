@@ -1033,7 +1033,7 @@ const Landing = () => {
               Ils ont osé. Voici ce qu'il leur reste.
             </h2>
             <p className="mt-4 font-body text-sm text-foreground/55 max-w-xl mx-auto">
-              Témoignages recueillis auprès des membres du Programme Fondateurs (janvier – mai 2026). Prénoms et villes réels, récits anonymisés à leur demande.
+              Témoignages recueillis auprès des membres du programme Fondateur (janvier – mai 2026). Prénoms et villes réels, récits anonymisés à leur demande.
             </p>
           </RevealSection>
 
