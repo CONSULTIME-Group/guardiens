@@ -119,8 +119,8 @@ export interface DynamicRouteConfig {
 export const staticRoutes: SiteRoute[] = [
  {
  path: "/",
-title: "Home sitting & petites missions d'entraide locale | Guardiens",
-metaDescription: "Home sitting et petites missions d'entraide entre gens du coin. Confiez votre maison, demandez un coup de main au quartier. Partout en France.",
+title: "Garde d'animaux à domicile entre particuliers | Guardiens",
+metaDescription: "Trouvez un gardien du coin pour votre maison et vos animaux. Home sitting et entraide entre particuliers, vérifiés et notés. Partout en France.",
  h1: "Guardiens — Comme confier ses clés à quelqu'un du coin",
  sitemapPriority: "1.0",
  changeFreq: "daily",
