@@ -220,6 +220,32 @@ export default function ArticleDetail() {
  fetchAll();
  }, [slug]);
 
+ // CTA tracking — listen for clicks on data-article-cta links inside the rendered article
+ useEffect(() => {
+   if (!article) return;
+   const handler = (e: Event) => {
+     const target = (e.target as HTMLElement | null)?.closest?.(
+       "a[data-article-cta='true']"
+     ) as HTMLAnchorElement | null;
+     if (!target) return;
+     const ctaPosition = target.getAttribute("data-cta-position") || undefined;
+     const ctaRole = target.getAttribute("data-cta-role") || undefined;
+     const articleSlug =
+       target.getAttribute("data-article-slug") || article.slug;
+     trackEvent("cta_click", {
+       source: `article:${articleSlug}`,
+       metadata: {
+         article_slug: articleSlug,
+         cta_position: ctaPosition,
+         cta_role: ctaRole,
+         href: target.getAttribute("href"),
+       },
+     });
+   };
+   document.addEventListener("click", handler, { capture: true });
+   return () => document.removeEventListener("click", handler, { capture: true } as any);
+ }, [article]);
+
  if (loading) {
  return (
  <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
