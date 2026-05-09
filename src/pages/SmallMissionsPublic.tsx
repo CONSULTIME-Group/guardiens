@@ -95,7 +95,8 @@ const SmallMissionsPublic = () => {
  // (PGRST116). On dégrade silencieusement : les KPIs restent à 0 et
  // l'erreur ne pollue pas le moniteur d'`unhandled_rejection`.
  try {
- const { data } = await supabase.from("public_stats").select("*").maybeSingle();
+        const { data: rows } = await supabase.rpc("get_public_stats");
+        const data = Array.isArray(rows) ? rows[0] : rows;
  if (data) {
  if (typeof data.missions_entraide === "number") setKpiMissions(data.missions_entraide);
  if (typeof data.total_inscrits === "number") setKpiHelpers(data.total_inscrits);
