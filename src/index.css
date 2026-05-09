@@ -346,6 +346,13 @@
     color: hsl(var(--primary)) !important;
   }
 
+  /* Masque le CTA mid-article pour les utilisateurs connectés —
+     stratégie « hide-when-logged-in » : on n'altère pas le href, on
+     escamote simplement le bloc et le contenu éditorial coule autour. */
+  .article-rich-content[data-user-logged-in="true"] [data-cta-block="mid"] {
+    display: none;
+  }
+
   .article-rich-content ul, .article-rich-content ol {
     @apply my-5 pl-0;
     list-style: none;
