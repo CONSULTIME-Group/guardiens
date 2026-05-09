@@ -160,6 +160,7 @@ const AdminNurturing = () => {
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [journeys, setJourneys] = useState<JourneyRow[]>([]);
   const [queue, setQueue] = useState<QueueRow[]>([]);
+  const [engagement, setEngagement] = useState<EngagementRow[]>([]);
   const [logsTruncated, setLogsTruncated] = useState(false);
   const [nurturingTemplates, setNurturingTemplates] = useState<string[]>([]);
   const [lastRunAt, setLastRunAt] = useState<string | null>(null);
