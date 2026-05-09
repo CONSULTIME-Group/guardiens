@@ -598,9 +598,21 @@ const AdminNurturing = () => {
   }, [sequenceSteps]);
 
   // --- Pour l'onglet Vue d'ensemble : Top 3 winners / losers ---
+  // Seuil de fiabilité 10 envois ; fallback sur tous les steps quand pas assez de volume.
   const reliableSteps = topSteps.filter((s) => s.sent + s.exited >= 10);
-  const winners = [...reliableSteps].sort((a, b) => b.actionRate - a.actionRate).slice(0, 3);
-  const losers = [...reliableSteps].filter((s) => s.actionRate < 10).sort((a, b) => a.actionRate - b.actionRate).slice(0, 3);
+  const winnersBase = reliableSteps.length >= 1 ? reliableSteps : topSteps.filter((s) => s.sent > 0);
+  const winners = [...winnersBase].sort((a, b) => b.actionRate - a.actionRate || b.sent - a.sent).slice(0, 3);
+  const losersBase = reliableSteps.length >= 1
+    ? reliableSteps.filter((s) => s.actionRate < 10)
+    : topSteps.filter((s) => s.sent > 0 && s.actionRate < 10);
+  const losers = [...losersBase].sort((a, b) => a.actionRate - b.actionRate || b.sent - a.sent).slice(0, 3);
+
+  // --- Activité du jour pour Vue d'ensemble ---
+  const todayKey = format(new Date(), "yyyy-MM-dd");
+  const today = timeSeries.find((b) => b.date === todayKey) ?? { sent: 0, failed: 0, exited: 0 };
+
+  // --- Flux d'envois récents pour Performance (10 derniers) ---
+  const recentSends = logs.filter((l) => l.sent).slice(0, 10);
 
   // --- Santé du système (3 pastilles) ---
   const queueHealthy = queueStats.failed === 0 && queueStats.pending < 20;
@@ -717,6 +729,13 @@ const AdminNurturing = () => {
 
           {/* =========== ONGLET 1 : VUE D'ENSEMBLE =========== */}
           <TabsContent value="overview" className="space-y-6">
+            <div className="grid gap-4 md:grid-cols-4">
+              <StatCard label="Aujourd'hui — envoyés" value={today.sent} tone="ok" hint={today.sent > 0 ? "Le nurturing tourne" : "Pas encore d'envoi aujourd'hui"} />
+              <StatCard label="Aujourd'hui — échecs" value={today.failed} tone={today.failed > 0 ? "err" : "ok"} />
+              <StatCard label="Parcours actifs" value={journeyStats.active} hint={`${journeyStats.total} créés sur la période`} />
+              <StatCard label="Sortis (objectif atteint)" value={journeyStats.exited} hint="Utilisateurs qui ont fait l'action attendue" />
+            </div>
+
             <Card>
               <CardHeader>
                 <CardTitle>Engagement global — l'email a-t-il déclenché de l'action ?</CardTitle>
@@ -752,15 +771,17 @@ const AdminNurturing = () => {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">Ce qui marche le mieux</CardTitle>
-                  <p className="text-xs text-muted-foreground">Top 3 contenus par taux d'action (≥ 10 envois)</p>
+                  <p className="text-xs text-muted-foreground">
+                    Top 3 par taux d'action {reliableSteps.length === 0 ? "(petit volume — indicatif)" : "(≥ 10 envois)"}
+                  </p>
                 </CardHeader>
                 <CardContent>
                   {winners.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4 text-center">Pas encore assez de données fiables.</p>
+                    <p className="text-sm text-muted-foreground py-4 text-center">Aucun envoi encore enregistré sur la période.</p>
                   ) : (
                     <ul className="space-y-3">
                       {winners.map((s) => (
-                        <li key={`${s.sequenceKey}-${s.stepOrder}-${s.templateName}`} className="flex items-center justify-between gap-3">
+                        <li key={`w-${s.sequenceKey}-${s.stepOrder}-${s.templateName}`} className="flex items-center justify-between gap-3">
                           <div>
                             <p className="text-sm font-medium">{labelTemplate(s.templateName)}</p>
                             <p className="text-[11px] text-muted-foreground">{labelSequence(s.sequenceKey)} · étape {s.stepOrder} · {s.sent} envois</p>
@@ -776,15 +797,17 @@ const AdminNurturing = () => {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">Ce qu'il faudrait retravailler</CardTitle>
-                  <p className="text-xs text-muted-foreground">Taux d'action &lt; 10 % (≥ 10 envois)</p>
+                  <p className="text-xs text-muted-foreground">
+                    Taux d'action &lt; 10 % {reliableSteps.length === 0 ? "(petit volume — indicatif)" : "(≥ 10 envois)"}
+                  </p>
                 </CardHeader>
                 <CardContent>
                   {losers.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4 text-center">Aucun contenu sous-performant — bravo !</p>
+                    <p className="text-sm text-muted-foreground py-4 text-center">Aucun contenu sous-performant — bravo.</p>
                   ) : (
                     <ul className="space-y-3">
                       {losers.map((s) => (
-                        <li key={`${s.sequenceKey}-${s.stepOrder}-${s.templateName}`} className="flex items-center justify-between gap-3">
+                        <li key={`l-${s.sequenceKey}-${s.stepOrder}-${s.templateName}`} className="flex items-center justify-between gap-3">
                           <div>
                             <p className="text-sm font-medium">{labelTemplate(s.templateName)}</p>
                             <p className="text-[11px] text-muted-foreground">{labelSequence(s.sequenceKey)} · étape {s.stepOrder} · {s.sent} envois</p>
@@ -1044,6 +1067,47 @@ const AdminNurturing = () => {
                       </div>
                     );
                   })
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Derniers envois</CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">10 emails de nurturing les plus récents (avec engagement).</p>
+              </CardHeader>
+              <CardContent className="overflow-x-auto">
+                {recentSends.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-6 text-center">Aucun envoi sur la période.</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Séquence</TableHead>
+                        <TableHead>Étape</TableHead>
+                        <TableHead>Engagement</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {recentSends.map((l) => {
+                        const ev = l.message_id ? eventsByMid.get(l.message_id) : undefined;
+                        return (
+                          <TableRow key={l.id}>
+                            <TableCell className="text-xs whitespace-nowrap">{format(new Date(l.created_at), "dd MMM HH:mm", { locale: fr })}</TableCell>
+                            <TableCell className="text-sm">{labelSequence(l.user_journeys?.sequence_key ?? "—")}</TableCell>
+                            <TableCell className="text-sm">{labelTemplate(l.template_name)} <span className="text-[10px] text-muted-foreground">· étape {l.step_order}</span></TableCell>
+                            <TableCell>
+                              <div className="flex gap-1">
+                                <Badge variant={ev?.open ? "default" : "outline"} className="text-[10px]">{ev?.open ? "Ouvert" : "Non ouvert"}</Badge>
+                                {ev?.click && <Badge variant="default" className="bg-success text-success-foreground text-[10px]">Cliqué</Badge>}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
                 )}
               </CardContent>
             </Card>
