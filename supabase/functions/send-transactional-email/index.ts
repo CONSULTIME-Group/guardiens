@@ -507,6 +507,40 @@ Deno.serve(async (req) => {
   }
   plainText = `${plainText}${footerText}`
 
+  // 4c. Engagement tracking — only for nurturing emails (idempotencyKey "journey-*").
+  // Adds a 1x1 open pixel and rewrites guardiens.fr links through the click tracker.
+  const isNurturing = typeof idempotencyKey === 'string' && idempotencyKey.startsWith('journey-')
+  if (isNurturing) {
+    const trackBase = `${supabaseUrl}/functions/v1`
+    const pixelUrl = `${trackBase}/track-email-pixel?mid=${messageId}`
+    const pixelHtml = `<img src="${pixelUrl}" width="1" height="1" alt="" style="display:none;width:1px;height:1px;border:0;" />`
+
+    // Wrap guardiens.fr links via click tracker
+    const wrap = (raw: string) => {
+      try {
+        const u = new URL(raw)
+        const host = u.hostname.toLowerCase()
+        const isAllowed = host === 'guardiens.fr' || host === 'www.guardiens.fr'
+        // Don't wrap unsubscribe / preference links so the user always reaches them
+        const isOptOut = u.pathname.startsWith('/unsubscribe') || u.pathname.startsWith('/preferences-email')
+        if (!isAllowed || isOptOut) return raw
+        const b64 = btoa(raw).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+        return `${trackBase}/track-email-click?mid=${messageId}&u=${b64}`
+      } catch {
+        return raw
+      }
+    }
+
+    html = html.replace(/href="(https:\/\/(?:www\.)?guardiens\.fr[^"]*)"/g, (_m, raw) => `href="${wrap(raw)}"`)
+
+    if (html.includes('</body>')) {
+      html = html.replace('</body>', `${pixelHtml}</body>`)
+    } else {
+      html = `${html}${pixelHtml}`
+    }
+  }
+
+
   // Resolve subject — supports static string or dynamic function
   const resolvedSubject =
     typeof template.subject === 'function'
