@@ -43,14 +43,15 @@ export const LegalFooter = ({ purpose, basis = '6.1.b', extra }: LegalFooterProp
   <Section>
     <Hr style={hr} />
     <Text style={legal}>
-      Cet e-mail vous est envoyé par <strong>{SITE_NAME}</strong> (Jérémie Martinot,
-      auto-entrepreneur, SIRET 894 864 040 00015) dans le cadre de {purpose}{' '}
-      (art. {basis} RGPD — {BASIS_LABEL[basis]}).
+      Email envoyé par <strong>{SITE_NAME}</strong> — SIRET 894 864 040 00015,
+      dans le cadre de {purpose} (art. {basis} RGPD —{' '}
+      {BASIS_LABEL[basis]}).
     </Text>
     {extra ? <Text style={legal}>{extra}</Text> : null}
     <Text style={legal}>
-      Vous disposez d'un droit d'accès, de rectification, d'effacement et
-      d'opposition sur vos données personnelles. Pour exercer ces droits :{' '}
+      Vous disposez d'un droit d'accès, de rectification, d'effacement, de
+      limitation, de portabilité et d'opposition sur vos données. Pour
+      exercer ces droits ou pour toute question :{' '}
       <a href="mailto:contact@guardiens.fr" style={link}>contact@guardiens.fr</a>.
     </Text>
     <Text style={signature}>L'équipe {SITE_NAME}</Text>

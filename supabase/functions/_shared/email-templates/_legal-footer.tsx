@@ -27,15 +27,15 @@ export const LegalFooter = () => (
   <Section>
     <Hr style={hr} />
     <Text style={legal}>
-      Cet e-mail vous est envoyé par <strong>{SITE_NAME}</strong> (Jérémie Martinot,
-      auto-entrepreneur, SIRET 894 864 040 00015) dans le cadre de la création
-      ou de la sécurisation de votre compte (art. 6.1.b RGPD — exécution de
-      mesures précontractuelles ou contractuelles).
+      Email envoyé par <strong>{SITE_NAME}</strong> — SIRET 894 864 040 00015,
+      dans le cadre de la création ou de la sécurisation de votre compte
+      (art. 6.1.b RGPD — exécution de mesures précontractuelles ou
+      contractuelles).
     </Text>
     <Text style={legal}>
-      Cet email d'authentification ne contient aucun contenu marketing.
-      Vous disposez d'un droit d'accès, de rectification, d'effacement et
-      d'opposition sur vos données personnelles. Pour exercer ces droits :{' '}
+      Email d'authentification, sans contenu marketing. Vous disposez d'un
+      droit d'accès, de rectification, d'effacement, de limitation, de
+      portabilité et d'opposition sur vos données. Pour exercer ces droits :{' '}
       <a href="mailto:contact@guardiens.fr" style={link}>contact@guardiens.fr</a>.
     </Text>
     <Text style={signature}>L'équipe {SITE_NAME}</Text>
