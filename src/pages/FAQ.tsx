@@ -55,18 +55,47 @@ const FAQ = () => {
  "Mon compte": "Mon compte",
  };
 
- const faqJsonLd = {
- "@context": "https://schema.org",
- "@type": "FAQPage",
- mainEntity: entries.map((e) => ({
- "@type": "Question",
- name: e.question,
- acceptedAnswer: {
- "@type": "Answer",
- text: e.answer,
- },
- })),
- };
+	// Convertit le markdown en HTML simple toléré par Schema.org/FAQPage
+	// (Google accepte <p>, <br>, <ol>, <ul>, <li>, <a>, <strong>, <em>).
+	const markdownToFaqHtml = (md: string): string => {
+		if (!md) return "";
+		let html = md.trim();
+		// Liens [texte](url)
+		html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+		// Gras **texte** et italique *texte*
+		html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+		html = html.replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>");
+		// Listes à puces (lignes commençant par - ou *)
+		html = html.replace(/((?:^[-*] .+(?:\n|$))+)/gm, (block) => {
+			const items = block
+				.trim()
+				.split(/\n/)
+				.map((l) => l.replace(/^[-*]\s+/, "").trim())
+				.filter(Boolean)
+				.map((t) => `<li>${t}</li>`)
+				.join("");
+			return `<ul>${items}</ul>`;
+		});
+		// Paragraphes
+		html = html
+			.split(/\n{2,}/)
+			.map((p) => (p.startsWith("<ul>") ? p : `<p>${p.replace(/\n/g, "<br>")}</p>`))
+			.join("");
+		return html;
+	};
+
+	const faqJsonLd = {
+		"@context": "https://schema.org",
+		"@type": "FAQPage",
+		mainEntity: entries.map((e) => ({
+			"@type": "Question",
+			name: e.question,
+			acceptedAnswer: {
+				"@type": "Answer",
+				text: markdownToFaqHtml(e.answer),
+			},
+		})),
+	};
 
  return (
  <>
