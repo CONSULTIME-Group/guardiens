@@ -461,11 +461,15 @@ const CreateSit = () => {
             <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} min={startDate || today} className="mt-1.5" />
           </div>
         </div>
-        {dateError && (
+        {dateError ? (
           <p className="text-sm text-destructive flex items-center gap-1.5 -mt-2">
             <AlertCircle className="h-3.5 w-3.5" /> {dateError}
           </p>
-        )}
+        ) : nDays > 0 ? (
+          <p className="text-xs text-muted-foreground -mt-2">
+            Durée : <span className="font-medium text-foreground">{nDays} {nDays > 1 ? "jours" : "jour"}</span>
+          </p>
+        ) : null}
 
         {/* Option dates flexibles */}
         <div className="flex items-start gap-3">
