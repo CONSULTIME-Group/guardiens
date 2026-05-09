@@ -284,10 +284,16 @@ async function enrollForSequence(
   let candidates: Array<{ id: string; anchor_at: string }> = []
 
   if (rule.type === 'signup') {
+    // Optional min_age_days targets users older than N days.
+    // Candidates: created between (min_age_days + window_days) and min_age_days ago.
+    const minAge = (rule as { min_age_days?: number }).min_age_days ?? 0
+    const upperBound = new Date(nowMs - minAge * 86400_000).toISOString()
+    const lowerBound = new Date(nowMs - (minAge + windowDays) * 86400_000).toISOString()
     let q = supabase
       .from('profiles')
       .select('id, role, created_at')
-      .gte('created_at', new Date(nowMs - windowDays * 86400_000).toISOString())
+      .gte('created_at', lowerBound)
+      .lte('created_at', upperBound)
       .not('email', 'is', null)
       .eq('account_status', 'active')
     if (audienceFilter) q = q.in('role', audienceFilter)
@@ -432,6 +438,16 @@ async function checkExitCondition(
         .select('last_seen_at').eq('id', userId).maybeSingle()
       if (!data?.last_seen_at) return false
       return Date.now() - new Date(data.last_seen_at).getTime() < days * 86400_000
+    }
+    case 'has_mutual_aid_activity': {
+      // User has either posted a small mission OR responded to one
+      const [posted, responded] = await Promise.all([
+        supabase.from('small_missions')
+          .select('id', { count: 'exact', head: true }).eq('user_id', userId),
+        supabase.from('small_mission_responses')
+          .select('id', { count: 'exact', head: true }).eq('responder_id', userId),
+      ])
+      return ((posted.count ?? 0) + (responded.count ?? 0)) > 0
     }
     default:
       return false
