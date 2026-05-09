@@ -573,9 +573,13 @@ const Landing = () => {
               Garde d'animaux à domicile, par un gardien du coin.
             </h1>
 
-            <p className="font-body text-lg md:text-xl text-white/85 max-w-xl mb-10 leading-relaxed animate-hero-fade-up animation-delay-700">
-              Home sitting solidaire : confiez vos animaux et votre maison à une
-              personne de confiance, près de chez vous, partout en France.
+            <p className="font-body text-lg md:text-xl text-white/85 max-w-xl mb-4 leading-relaxed animate-hero-fade-up animation-delay-700">
+              Confiez vos animaux et votre maison à une personne de confiance,
+              près de chez vous, partout en France.
+            </p>
+            <p className="font-body text-base md:text-lg text-white/70 max-w-xl mb-10 leading-relaxed italic animate-hero-fade-up animation-delay-700">
+              Et derrière chaque garde, une rencontre, un coin de France à vivre,
+              des histoires qu'on n'aurait pas cherchées.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 animate-hero-fade-up animation-delay-900">
@@ -684,7 +688,8 @@ const Landing = () => {
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Entraide</p>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Un coup de main. Un échange.</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  Arroser un potager, promener un chien, partager une compétence. Sans argent. C'est l'âme de Guardiens — et c'est ce qui rend Guardiens unique.
+                  Arroser un potager, promener un chien, partager une compétence. Sans argent.
+                  Et souvent, ce qu'on en retient, ce n'est pas le service rendu — c'est la rencontre.
                 </p>
                 <Link to="/petites-missions" className="text-sm font-body text-primary font-medium hover:underline">
                   Découvrir l'entraide →
@@ -714,28 +719,31 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 2bis — CE QUI ARRIVE EN PLUS ═══════════════ */}
-      <section className="py-24 md:py-32 bg-background">
-        <div className="max-w-4xl mx-auto px-6 text-center">
+      <section className="py-28 md:py-36 bg-accent/40 border-y border-accent">
+        <div className="max-w-3xl mx-auto px-6">
           <RevealSection>
-            <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
+            <span className="text-xs tracking-widest uppercase text-primary/70 font-body mb-6 block text-center">
               Ce qu'on n'écrit jamais dans une annonce
             </span>
-            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-6">
-              Bien plus qu'un échange de services.
+            <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.15] text-foreground text-center mb-10">
+              Bien plus qu'un échange<br className="hidden md:inline" /> de services.
             </h2>
-            <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/75 mb-6">
-              Garder une maison, ce n'est pas rendre service à un propriétaire.
-              Confier ses clés, ce n'est pas céder un toit en échange d'une garde.
-            </p>
-            <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/75 mb-6">
-              C'est, surtout, une façon de vivre des expériences qu'on n'aurait jamais cherchées :
-              découvrir une région, une autre manière d'habiter, une histoire de famille,
-              un coin de France qu'on n'aurait jamais visité, des gens qu'on n'aurait jamais croisés.
-            </p>
-            <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/85 font-medium">
-              On apprend, on découvre, on s'attache —
-              sans aller le chercher. Juste en laissant la place à ce qui peut arriver.
-            </p>
+
+            <div className="border-l-4 border-primary pl-6 md:pl-8 max-w-2xl mx-auto">
+              <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/80 mb-5">
+                Garder une maison, ce n'est pas rendre service à un propriétaire.
+                Confier ses clés, ce n'est pas céder un toit en échange d'une garde.
+              </p>
+              <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/80 mb-5">
+                C'est, surtout, une façon de vivre des expériences qu'on n'aurait jamais cherchées :
+                découvrir une région, une autre manière d'habiter, une histoire de famille,
+                un coin de France qu'on n'aurait jamais visité, des gens qu'on n'aurait jamais croisés.
+              </p>
+              <p className="font-heading text-xl md:text-2xl italic text-foreground leading-snug">
+                On apprend, on découvre, on s'attache —
+                sans aller le chercher. Juste en laissant la place à ce qui peut arriver.
+              </p>
+            </div>
           </RevealSection>
         </div>
       </section>
@@ -910,9 +918,9 @@ const Landing = () => {
 
               <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">04</p>
-                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Périmètre libre, de 5 km à toute la France</h3>
+                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">De votre rue à l'autre bout de la France</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Hyper-local pour un dépannage, élargi pour découvrir une autre région : c'est vous qui décidez jusqu'où vous voulez aller.
+                  Hyper-local pour un dépannage, élargi pour découvrir une autre région : c'est vous qui décidez jusqu'où vous voulez aller — et chaque garde devient une porte qui s'ouvre.
                 </p>
               </article>
             </RevealOnScroll>
@@ -1394,8 +1402,8 @@ const Landing = () => {
             Votre histoire commence ici.
           </h2>
           <p className="font-body text-lg text-white/85 leading-relaxed max-w-lg mx-auto mb-10">
-            Garder une maison. Donner un coup de main. Recevoir de l'aide.
-            Des gestes simples — mais ils changent tout.
+            Vous partirez l'esprit léger. Vous rentrerez avec une histoire —
+            un coin découvert, une rencontre, des gens que vous n'auriez jamais croisés.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
             <button
