@@ -51,6 +51,7 @@ interface QueueRow {
 interface EngagementRow {
   message_id: string;
   event_type: "open" | "click";
+  target_url: string | null;
 }
 
 interface SequenceRow {
