@@ -882,6 +882,32 @@ const AdminNurturing = () => {
 
           {/* =========== ONGLET 2 : PERFORMANCE =========== */}
           <TabsContent value="performance" className="space-y-6">
+            {measurementHealth.tone !== "ok" && (
+              <Card
+                className={
+                  measurementHealth.tone === "err"
+                    ? "border-destructive/50 bg-destructive/5"
+                    : "border-warning/50 bg-warning/5"
+                }
+              >
+                <CardContent className="py-3 flex items-start gap-3 text-sm">
+                  <span
+                    className={`inline-block h-2 w-2 rounded-full mt-1.5 ${
+                      measurementHealth.tone === "err" ? "bg-destructive" : "bg-warning"
+                    }`}
+                  />
+                  <div>
+                    <div className="font-medium">
+                      Santé de la mesure d'engagement : {measurementHealth.label}
+                    </div>
+                    <p className="text-muted-foreground text-xs mt-0.5">
+                      {measurementHealth.hint} Les taux d'ouverture et de clic ci-dessous sont
+                      calculés uniquement sur les envois corrélés à un message_id.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             <div className="grid gap-4 lg:grid-cols-2">
               <Card>
                 <CardHeader>
