@@ -4,7 +4,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -56,26 +58,38 @@ const STATUS_LABEL: Record<string, string> = {
   failed: "Échec",
 };
 
+const PAGE_SIZE = 25;
+
 export const SequenceRecipientsDialog = ({ open, onOpenChange, sequenceKey, sequenceLabel, sinceIso }: Props) => {
   const [loading, setLoading] = useState(false);
   const [journeys, setJourneys] = useState<JourneyRow[]>([]);
   const [stepLogs, setStepLogs] = useState<StepLogRow[]>([]);
   const [events, setEvents] = useState<EventRow[]>([]);
+  const [page, setPage] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+
+  // Reset page when dialog (re)opens or sequence changes
+  useEffect(() => {
+    if (open) setPage(0);
+  }, [open, sequenceKey, sinceIso]);
 
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
     (async () => {
       setLoading(true);
-      // 1) Parcours de la séquence sur la période
+      const from = page * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      // 1) Parcours de la séquence sur la période (paginé)
       const jr = await supabase
         .from("user_journeys")
-        .select("id, user_id, status, current_step, exit_reason, started_at, completed_at")
+        .select("id, user_id, status, current_step, exit_reason, started_at, completed_at", { count: "exact" })
         .eq("sequence_key", sequenceKey)
         .gte("started_at", sinceIso)
         .order("started_at", { ascending: false })
-        .limit(200);
+        .range(from, to);
       const journeyRowsRaw = (jr.data ?? []) as Array<Omit<JourneyRow, "profiles">>;
+      const count = jr.count ?? 0;
 
       // Fetch profiles séparément
       const userIds = Array.from(new Set(journeyRowsRaw.map((j) => j.user_id)));
@@ -121,13 +135,16 @@ export const SequenceRecipientsDialog = ({ open, onOpenChange, sequenceKey, sequ
         setJourneys(journeyRows);
         setStepLogs(logsRows);
         setEvents(evRows);
+        setTotalCount(count);
         setLoading(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [open, sequenceKey, sinceIso]);
+  }, [open, sequenceKey, sinceIso, page]);
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   const eventsByMid = new Map<string, { open: boolean; click: boolean }>();
   for (const e of events) {
@@ -242,6 +259,37 @@ export const SequenceRecipientsDialog = ({ open, onOpenChange, sequenceKey, sequ
               })}
             </TableBody>
           </Table>
+        )}
+
+        {!loading && totalCount > 0 && (
+          <div className="flex items-center justify-between pt-3 border-t mt-2">
+            <p className="text-xs text-muted-foreground">
+              {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, totalCount)} sur {totalCount}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={page === 0}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Précédent
+              </Button>
+              <span className="text-xs text-muted-foreground">
+                Page {page + 1} / {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={page >= totalPages - 1}
+              >
+                Suivant
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         )}
       </DialogContent>
     </Dialog>
