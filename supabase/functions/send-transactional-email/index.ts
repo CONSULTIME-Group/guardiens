@@ -223,6 +223,37 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Compute category once — used by gating, footer and List-Unsubscribe header
+  const category: EmailCategory = getEmailCategory(templateName)
+
+  // 1c. Category preference gating (transactional always passes)
+  if (category !== 'transactional') {
+    const { data: prefRow } = await supabase
+      .rpc('get_email_preferences_by_email', { p_email: effectiveRecipient.toLowerCase() })
+      .maybeSingle()
+
+    if (prefRow) {
+      const allowed =
+        (category === 'product' && (prefRow as any).product_emails) ||
+        (category === 'digest' && (prefRow as any).digest_emails) ||
+        (category === 'alert' && (prefRow as any).alert_emails)
+      if (!allowed) {
+        await supabase.from('email_send_log').insert({
+          message_id: messageId,
+          template_name: templateName,
+          recipient_email: effectiveRecipient,
+          status: 'unsubscribed_category',
+          metadata: { idempotency_key: idempotencyKey, category },
+        })
+        console.log('Email blocked by category preference', { effectiveRecipient, category, templateName })
+        return new Response(
+          JSON.stringify({ success: false, reason: 'unsubscribed_category', category }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    }
+  }
+
   // 2. Check suppression list (fail-closed: if we can't verify, don't send)
   const { data: suppressed, error: suppressionError } = await supabase
     .from('suppressed_emails')
