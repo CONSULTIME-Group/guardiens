@@ -126,6 +126,11 @@ const CreateSit = () => {
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [isRepublish, setIsRepublish] = useState(false);
+  const [draftId, setDraftId] = useState<string | null>(null);
+  const [savingDraft, setSavingDraft] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const hasUserEditedRef = useRef(false);
+  const initialLoadedRef = useRef(false);
 
   useEffect(() => {
     if (!user) return;
