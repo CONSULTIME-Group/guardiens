@@ -563,6 +563,7 @@ const AdminNurturing = () => {
   }, [engagement, logs]);
 
 
+  const stepsBySequence = useMemo(() => {
     const m = new Map<string, SequenceStepRow[]>();
     for (const s of sequenceSteps) {
       const arr = m.get(s.sequence_key) ?? [];
