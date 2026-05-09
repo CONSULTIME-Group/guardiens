@@ -123,7 +123,8 @@ const SmallMissionsPublic = () => {
 
  <div className="min-h-screen bg-background font-body">
  {/* ═══ HEADER ═══ */}
- <PublicHeader />
+  <PublicHeader />
+  <FreePeriodBanner />
  <PageBreadcrumb items={[{ label: "Petites missions" }]} />
 
  {/* ═══ SECTION 1 — HERO ═══ */}
