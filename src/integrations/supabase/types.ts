@@ -3237,6 +3237,7 @@ export type Database = {
         Row: {
           accepting_applications: boolean
           animaux_override: string | null
+          availability_nudge_sent_at: string | null
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
@@ -3267,6 +3268,7 @@ export type Database = {
         Insert: {
           accepting_applications?: boolean
           animaux_override?: string | null
+          availability_nudge_sent_at?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -3297,6 +3299,7 @@ export type Database = {
         Update: {
           accepting_applications?: boolean
           animaux_override?: string | null
+          availability_nudge_sent_at?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -4277,6 +4280,7 @@ export type Database = {
         Args: { p_referred_id: string }
         Returns: undefined
       }
+      auto_flag_urgent_sits: { Args: never; Returns: number }
       award_badge: {
         Args: {
           p_badge_id: string
@@ -4344,6 +4348,14 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      find_available_sitters_for_nudge: {
+        Args: { p_department: string; p_end_date: string; p_start_date: string }
+        Returns: {
+          email: string
+          first_name: string
+          user_id: string
+        }[]
+      }
       find_duplicate_gmail_account: {
         Args: { _user_id: string }
         Returns: {
@@ -4406,6 +4418,18 @@ export type Database = {
       is_profile_ready_for_action: {
         Args: { p_user_id?: string }
         Returns: boolean
+      }
+      list_sits_needing_availability_nudge: {
+        Args: never
+        Returns: {
+          city: string
+          department: string
+          end_date: string
+          owner_id: string
+          sit_id: string
+          start_date: string
+          title: string
+        }[]
       }
       log_client_error: {
         Args: {
