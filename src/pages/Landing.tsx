@@ -283,7 +283,7 @@ const Landing = () => {
  <div className="min-h-screen bg-background text-foreground">
  <PageMeta
         title="Garde d'animaux & home sitting entre particuliers | Guardiens"
-        description="Confiez votre maison et vos animaux à un gardien du coin. Home sitting, pet sitting et entraide entre particuliers vérifiés. Partout en France."
+        description="Confiez votre maison et vos animaux à un gardien du coin. Et, à côté, demandez ou rendez de petits services entre gens du coin. Partout en France."
  path="/"
  image={HOME_OG_IMAGE}
  />
@@ -430,9 +430,9 @@ const Landing = () => {
               {
                 "@type": "Service",
                 "@id": "https://guardiens.fr/#service",
-                name: "Home sitting, garde d'animaux et entraide entre gens du coin",
+                name: "Home sitting, garde d'animaux et entraide locale entre gens du coin",
                 description:
-                  "Home sitting et garde d'animaux à domicile, complétés par des petites missions d'entraide locale. Avis croisés, vérification d'identité, sans commission.",
+                  "Deux services indépendants : home sitting et garde d'animaux à domicile d'un côté ; petites missions d'entraide entre gens du coin de l'autre. Avis croisés, vérification d'identité, sans commission.",
                 provider: { "@id": "https://guardiens.fr/#organization" },
                 areaServed: [
                   { "@type": "Country", name: "France" },
@@ -574,11 +574,12 @@ const Landing = () => {
             </h1>
 
             <p className="font-body text-lg md:text-xl text-white/85 max-w-xl mb-4 leading-relaxed animate-hero-fade-up animation-delay-700">
-              Confier ses clés le temps d'un week-end. Aider Nadine à ramasser ses légumes,
-              et repartir avec son plat maison. Promener le chien d'à côté. Près de chez vous, partout en France.
+              Deux usages, indépendants l'un de l'autre.
+              D'un côté, faire garder votre maison et vos animaux par quelqu'un du coin.
+              De l'autre, demander ou rendre un coup de main près de chez vous — sans qu'aucun animal n'ait besoin d'entrer dans l'histoire.
             </p>
             <p className="font-body text-base md:text-lg text-white/70 max-w-xl mb-10 leading-relaxed italic animate-hero-fade-up animation-delay-700">
-              Derrière chaque échange, une rencontre qu'on n'aurait pas cherchée.
+              Et derrière chaque échange, une rencontre qu'on n'aurait pas cherchée.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 animate-hero-fade-up animation-delay-900">
@@ -642,10 +643,10 @@ const Landing = () => {
               Ce qu'on fait ensemble
             </span>
             <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-3">
-              Trois manières de s'engager, à votre rythme.
+              Deux usages distincts, une même communauté.
             </h2>
             <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16 italic">
-              Home sitting, garde d'animaux, ou simple coup de main : choisissez votre porte d'entrée.
+              Le home sitting d'un côté. L'entraide entre gens du coin de l'autre. À vous de choisir — l'un, l'autre, ou les deux.
             </p>
           </RevealSection>
 
@@ -684,11 +685,11 @@ const Landing = () => {
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-body font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
                   Sans abonnement
                 </div>
-                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Entraide</p>
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Entraide locale — indépendante de la garde</p>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Un coup de main, un échange.</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  Arroser un potager, promener un chien, partager une compétence. Pas de tarif, pas de facture.
-                  Ce qu'on en garde, ce n'est pas le service rendu — c'est la rencontre.
+                  Arroser un potager, monter une étagère, partager une compétence, rendre une visite à une personne isolée.
+                  Aucune garde, aucun animal nécessaire — juste des gens du coin qui s'entraident.
                 </p>
                 <Link to="/petites-missions" className="text-sm font-body text-primary font-medium hover:underline">
                   Découvrir l'entraide →
@@ -730,15 +731,15 @@ const Landing = () => {
 
             <div className="border-l-4 border-primary pl-6 md:pl-8 max-w-2xl mx-auto">
               <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/80 mb-5">
-                Ce qu'on raconte rarement, c'est ce qui se passe <em>autour</em> :
-                connaître la mami du coin et son histoire parce qu'on l'a aidée à ramasser
+                Ce qu'on raconte rarement, c'est ce qui se passe <em>autour</em>.
+                Connaître la mami du coin et son histoire parce qu'on l'a aidée à ramasser
                 ses fruits du jardin. Échanger avec Gerardo pendant qu'il vous donne
                 un coup de main pour bricoler — et lui proposer un repas fait maison en retour.
               </p>
               <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/80 mb-5">
-                Garder une maison, promener un chien, tailler une haie : ce sont des prétextes.
-                Ce qui compte vraiment, c'est la place qu'on se redonne à vivre des choses
-                inattendues, à recréer un tissu local, à oser demander, à oser proposer.
+                Aucun animal n'a besoin d'apparaître pour qu'une rencontre commence.
+                Demander un coup de main, en proposer un, c'est déjà ouvrir une porte.
+                Garder une maison, c'est en ouvrir une autre — différente, mais animée du même mouvement.
               </p>
               <p className="font-heading text-xl md:text-2xl italic text-foreground leading-snug">
                 On apprend, on découvre, on s'attache —
@@ -988,17 +989,17 @@ const Landing = () => {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 max-w-5xl mx-auto">
               {[
                 "Arroser les plantes",
-                "Garder les poules",
-                "Promener le chien",
                 "Petit bricolage",
                 "Tailler le jardin",
-                "Séance de Reiki",
                 "Cours de pain maison",
+                "Séance de Reiki",
                 "Réceptionner un colis",
                 "Covoiturage rdv",
                 "Bouture, semis",
-                "Visite d'un chat",
                 "Café & écoute",
+                "Aide aux courses",
+                "Coup de main déménagement",
+                "Apprendre la couture",
               ].map((label) => (
                 <div
                   key={label}
@@ -1146,7 +1147,7 @@ const Landing = () => {
                 C'est ça que le village faisait naturellement.
               </p>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                Guardiens, c'est le prétexte qui manquait. Les petites missions d'abord : un potager arrosé contre un repas, une compétence contre une autre, l'échange en nature entre gens du coin. La garde ensuite : vos clés confiées à quelqu'un que vous avez regardé dans les yeux.
+                Guardiens, c'est le prétexte qui manquait. D'un côté, les petites missions d'entraide entre gens du coin : un potager arrosé contre un repas, une compétence contre une autre, un coup de main qui se rend en nature. De l'autre, indépendamment, le home sitting : vos clés confiées à quelqu'un que vous avez regardé dans les yeux.
               </p>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
                 Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous, on ne s'attendait pas à ce que ça compte autant.
