@@ -688,7 +688,8 @@ const Landing = () => {
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Entraide</p>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Un coup de main. Un échange.</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  Arroser un potager, promener un chien, partager une compétence. Sans argent. C'est l'âme de Guardiens — et c'est ce qui rend Guardiens unique.
+                  Arroser un potager, promener un chien, partager une compétence. Sans argent.
+                  Et souvent, ce qu'on en retient, ce n'est pas le service rendu — c'est la rencontre.
                 </p>
                 <Link to="/petites-missions" className="text-sm font-body text-primary font-medium hover:underline">
                   Découvrir l'entraide →
