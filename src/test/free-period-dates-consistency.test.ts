@@ -5,22 +5,22 @@ import { FOUNDER_START, LAUNCH_DATE, GRACE_END } from "@/lib/constants";
 
 /**
  * Garde-fou éditorial : la promesse publique est
- *   • Lancement : 14 juin 2026
- *   • Statut Fondateur : réservé aux inscrits AVANT le 13 juin 2026
+ *   • Lancement public : 14 juillet 2026 (fête nationale, après 3 mois de gratuité)
+ *   • Statut Fondateur : réservé aux inscrits AVANT le 13 juillet 2026
  *   • Gratuité pour TOUS : jusqu'au 14 juillet 2026 inclus
  *   • Tarif gardien (6,99 €/mois) : à partir du 15 juillet 2026
  *
  * Toute mention d'une autre date dans la copie utilisateur ou dans les
  * constantes métier doit faire échouer ce test pour éviter les régressions
- * (ex. « 30 juin », « 1er juillet », « 14 juillet 2027 »…).
+ * (ex. « 30 juin », « 1er juillet », « 13 juin »…).
  */
 
 const ROOT = path.resolve(__dirname, "../..");
 
 // Constantes attendues
 const EXPECTED = {
-  founderStart: "2026-06-13T00:00:00.000Z",
-  launchDate: "2026-06-14T00:00:00.000Z",
+  founderStart: "2026-07-13T00:00:00.000Z",
+  launchDate: "2026-07-14T00:00:00.000Z",
   graceEnd: "2026-07-15T00:00:00.000Z",
 } as const;
 
@@ -42,6 +42,8 @@ const COPY_FILES = [
 const FORBIDDEN_PATTERNS: { pattern: RegExp; reason: string }[] = [
   { pattern: /30\s+juin\s+2026/gi, reason: "Date '30 juin 2026' obsolète, utiliser 14 juillet 2026." },
   { pattern: /1er\s+juillet\s+2026/gi, reason: "Date '1er juillet 2026' obsolète, utiliser 15 juillet 2026." },
+  { pattern: /\b13\s+juin\s+2026\b/gi, reason: "Date '13 juin 2026' obsolète, le statut Fondateur clôture désormais le 13 juillet 2026." },
+  { pattern: /2026-06-13/g, reason: "Date '2026-06-13' obsolète, utiliser 2026-07-13." },
   { pattern: /2026-06-30/g, reason: "Date '2026-06-30' obsolète, utiliser 2026-07-14." },
   { pattern: /2026-07-01/g, reason: "Date '2026-07-01' obsolète, utiliser 2026-07-15." },
   { pattern: /\b14\s+juillet\s+2027\b/gi, reason: "Année incorrecte (2027)." },
@@ -87,8 +89,8 @@ describe("Cohérence des dates de gratuité", () => {
 
   describe("présence des dates canoniques", () => {
     const REQUIRED_PRESENCE: Record<string, RegExp[]> = {
-      "src/pages/Pricing.tsx": [/14\s+juillet\s+2026/, /15\s+juillet\s+2026/, /13\s+juin\s+2026/],
-      "src/pages/Cgs.tsx": [/14\s+juillet\s+2026/, /15\s+juillet\s+2026/, /13\s+juin\s+2026/],
+      "src/pages/Pricing.tsx": [/14\s+juillet\s+2026/, /15\s+juillet\s+2026/, /13\s+juillet\s+2026/],
+      "src/pages/Cgs.tsx": [/14\s+juillet\s+2026/, /15\s+juillet\s+2026/, /13\s+juillet\s+2026/],
       "src/pages/Landing.tsx": [/14\s+juillet\s+2026/],
     };
     for (const [file, patterns] of Object.entries(REQUIRED_PRESENCE)) {

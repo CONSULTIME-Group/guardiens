@@ -61,9 +61,9 @@ Cette gratuité totale ne dépend pas du programme Fondateur. Que vous vous insc
 
 **La gratuité totale jusqu'au 14 juillet 2026** concerne **tous les inscrits**, sans condition de date. Personne ne paie avant cette date.
 
-**Le programme Fondateur** est un statut symbolique réservé aux personnes inscrites **avant le 13 juin 2026**. Il donne droit à un badge Fondateur affiché sur le profil sur le profil — ce badge ne sera plus jamais attribué après cette date.
+**Le programme Fondateur** est un statut symbolique réservé aux personnes inscrites **avant le 13 juillet 2026**. Il donne droit à un badge Fondateur affiché sur le profil sur le profil — ce badge ne sera plus jamais attribué après cette date.
 
-En clair : tout le monde est gratuit jusqu'au 14 juillet, et seuls les premiers inscrits (avant le 13 juin) reçoivent en plus le badge Fondateur.`,
+En clair : tout le monde est gratuit jusqu'au 14 juillet, et seuls les premiers inscrits (avant le 13 juillet) reçoivent en plus le badge Fondateur.`,
  },
  {
  q: "Pourquoi c'est gratuit pour les propriétaires ?",
@@ -86,12 +86,12 @@ Aucun prélèvement automatique. À la fin de l'essai, vous choisissez si vous s
 Avant le 14 juillet 2026, cet essai n'a pas lieu d'être : tout est déjà gratuit pour tout le monde.`,
  },
  {
- q: "Pourquoi le 13 juin ?",
- a: `C'est l'anniversaire de Jérémie, cofondateur de Guardiens.
+ q: "Pourquoi le 14 juillet ?",
+ a: `Il fallait une date après trois mois de gratuité — un repère simple, partagé par tout le monde. Le **14 juillet 2026, fête nationale**, s'est imposé naturellement.
 
-Plutôt que de recevoir des cadeaux, il a décidé de marquer cette date avec le programme Fondateur : les personnes inscrites avant le 13 juin 2026 reçoivent un **badge Fondateur affiché sur le profil** sur leur profil. Ce badge ne sera plus jamais attribué après cette date.
+C'est ce jour-là que la gratuité prend fin pour les gardiens. Le **13 juillet 2026**, dernier jour avant la fête, marque la clôture du **programme Fondateur** : les personnes inscrites avant cette date reçoivent un **badge Fondateur permanent** sur leur profil. Ce badge ne sera plus jamais attribué après.
 
-À ne pas confondre avec la gratuité : **tout le monde est gratuit jusqu'au 14 juillet 2026**, qu'il s'inscrive avant ou après le 13 juin. Le 13 juin concerne uniquement le badge.`,
+À ne pas confondre avec la gratuité : **tout le monde est gratuit jusqu'au 14 juillet 2026**, qu'il s'inscrive avant ou après le 13 juillet. Le 13 juillet concerne uniquement le badge.`,
  },
  {
  q: "Y a-t-il des frais cachés ?",
@@ -201,7 +201,7 @@ const Pricing = () => {
  <div className="w-full max-w-5xl mx-auto bg-gradient-to-br from-amber-50 to-amber-100/50 border border-amber-200/60 rounded-2xl overflow-hidden">
  <div className="bg-amber-100 px-6 py-2.5 text-center">
  <span className="text-sm font-medium text-amber-800 font-body tracking-wide">
- Programme Fondateur — clôture le 13 juin 2026
+ Programme Fondateur — clôture le 13 juillet 2026
  </span>
  </div>
 
@@ -218,7 +218,7 @@ const Pricing = () => {
 
  <div className="flex-1 text-center md:text-left">
  <p className="font-heading text-lg md:text-xl font-semibold text-amber-900 leading-snug mb-1">
- Inscrivez-vous avant le 13 juin pour recevoir le badge Fondateur
+ Inscrivez-vous avant le 13 juillet pour recevoir le badge Fondateur
  </p>
  <p className="text-xs md:text-sm text-amber-800/80 font-body">
  Un sceau honorifique gravé sur votre profil — il ne sera plus jamais attribué après cette date.
@@ -241,7 +241,7 @@ const Pricing = () => {
  <section className="rounded-2xl p-6 md:p-8 text-center space-y-3 border-2 border-amber-300 bg-amber-50 mb-12 max-w-5xl mx-auto">
  <h2 className="font-heading text-2xl font-bold text-foreground">Les Fondateurs ont jusqu'au 14 juillet</h2>
  <p className="text-muted-foreground max-w-2xl mx-auto font-body">
- Les membres inscrits avant le 13 juin conservent leur accès gratuit jusqu'au 14 juillet.
+ Les membres inscrits avant le 13 juillet conservent leur accès gratuit jusqu'au 14 juillet.
  Après cette date, l'abonnement à 6,99 €/mois sera nécessaire. Le badge Fondateur reste affiché sur votre profil.
  </p>
  </section>

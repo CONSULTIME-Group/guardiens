@@ -1426,7 +1426,7 @@ const Landing = () => {
             </button>
           </div>
           <p className="text-xs text-white/70 font-body">
-            Sans carte bancaire · Inscription en 2 minutes · Badge Fondateur pour les inscrits avant le 13 juin 2026.
+            Sans carte bancaire · Inscription en 2 minutes · Badge Fondateur pour les inscrits avant le 13 juillet 2026.
           </p>
         </RevealSection>
       </section>
