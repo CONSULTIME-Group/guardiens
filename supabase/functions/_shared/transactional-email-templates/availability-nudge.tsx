@@ -52,16 +52,11 @@ const AvailabilityNudgeEmail = ({
 
           <Button style={button} href={ctaHref}>Voir l'annonce</Button>
 
-          <Hr style={hr} />
-          <Text style={legal}>
-            Vous recevez ce message une seule fois pour cette annonce, parce que
-            vous êtes inscrit·e comme gardien·ne dans le même département. Vous
-            pouvez ajuster vos préférences d'alerte depuis votre espace personnel.
-          </Text>
-          <Text style={legal}>
-            {SITE_NAME} — Jérémie Martinot (SIRET 894 864 040 00015) ·
-            contact@guardiens.fr
-          </Text>
+          <LegalFooter
+            purpose="du bon fonctionnement de votre compte"
+            basis="6.1.f"
+            extra="Vous recevez ce message une seule fois pour cette annonce, parce que vous êtes inscrit comme gardien dans le même département. Vous pouvez ajuster vos préférences d'alerte depuis votre espace personnel."
+          />
           </Container>
           </Body>
           </Html>
