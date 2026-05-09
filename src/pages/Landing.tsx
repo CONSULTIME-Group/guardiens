@@ -642,7 +642,7 @@ const Landing = () => {
               Home sitting, garde d'animaux et entraide entre gens du coin.
             </h2>
             <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16 italic">
-              Trois façons de vivre quelque chose.
+              Trois façons de s'engager, à votre rythme.
             </p>
           </RevealSection>
 
