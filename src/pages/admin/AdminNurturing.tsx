@@ -475,8 +475,94 @@ const AdminNurturing = () => {
     return { sent, opens, clicks, actions, openRate: pct(opens), clickRate: pct(clicks), actionRate: pct(actions) };
   }, [sequenceMetrics]);
 
+  // Classement des étapes (template_name + step_order) par taux d'action
+  type StepStat = {
+    sequenceKey: string;
+    stepOrder: number;
+    templateName: string;
+    sent: number;
+    opens: number;
+    clicks: number;
+    exited: number;
+    actions: number;
+    openRate: number;
+    clickRate: number;
+    actionRate: number;
+  };
+  const topSteps = useMemo<StepStat[]>(() => {
+    const map = new Map<string, StepStat>();
+    for (const l of logs) {
+      const seqKey = l.user_journeys?.sequence_key ?? "—";
+      const k = `${seqKey}::${l.step_order}::${l.template_name}`;
+      const r =
+        map.get(k) ??
+        ({
+          sequenceKey: seqKey,
+          stepOrder: l.step_order,
+          templateName: l.template_name,
+          sent: 0,
+          opens: 0,
+          clicks: 0,
+          exited: 0,
+          actions: 0,
+          openRate: 0,
+          clickRate: 0,
+          actionRate: 0,
+        } as StepStat);
+      if (l.sent) {
+        r.sent++;
+        const ev = l.message_id ? eventsByMid.get(l.message_id) : undefined;
+        if (ev?.open) r.opens++;
+        if (ev?.click) {
+          r.clicks++;
+          r.actions++;
+        }
+      } else if (l.reason === "exit_condition_met") {
+        r.exited++;
+        r.actions++;
+      }
+      map.set(k, r);
+    }
+    const arr = Array.from(map.values());
+    for (const r of arr) {
+      r.openRate = r.sent > 0 ? Math.round((r.opens / r.sent) * 1000) / 10 : 0;
+      r.clickRate = r.sent > 0 ? Math.round((r.clicks / r.sent) * 1000) / 10 : 0;
+      const denom = r.sent + r.exited;
+      r.actionRate = denom > 0 ? Math.round((r.actions / denom) * 1000) / 10 : 0;
+    }
+    return arr.sort((a, b) => b.actionRate - a.actionRate || b.sent - a.sent);
+  }, [logs, eventsByMid]);
 
-  const stepsBySequence = useMemo(() => {
+  // Classement des CTA cliqués (par target_url)
+  type CtaStat = { url: string; clicks: number; uniqueSends: number; templates: Set<string> };
+  const topCtas = useMemo<CtaStat[]>(() => {
+    const tplByMid = new Map<string, string>();
+    for (const l of logs) {
+      if (l.message_id) tplByMid.set(l.message_id, l.template_name);
+    }
+    const map = new Map<string, CtaStat>();
+    const sendsByUrl = new Map<string, Set<string>>();
+    for (const e of engagement) {
+      if (e.event_type !== "click" || !e.target_url) continue;
+      const r =
+        map.get(e.target_url) ??
+        ({ url: e.target_url, clicks: 0, uniqueSends: 0, templates: new Set<string>() } as CtaStat);
+      r.clicks++;
+      const tpl = tplByMid.get(e.message_id);
+      if (tpl) r.templates.add(tpl);
+      map.set(e.target_url, r);
+      const s = sendsByUrl.get(e.target_url) ?? new Set<string>();
+      s.add(e.message_id);
+      sendsByUrl.set(e.target_url, s);
+    }
+    for (const [url, set] of sendsByUrl) {
+      const r = map.get(url);
+      if (r) r.uniqueSends = set.size;
+    }
+    return Array.from(map.values()).sort((a, b) => b.clicks - a.clicks);
+  }, [engagement, logs]);
+
+
     const m = new Map<string, SequenceStepRow[]>();
     for (const s of sequenceSteps) {
       const arr = m.get(s.sequence_key) ?? [];
