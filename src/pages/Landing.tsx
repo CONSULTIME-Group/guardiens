@@ -957,13 +957,13 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 6 — OSEZ L'ENTRAIDE ═══════════════ */}
-      <section className="py-24 md:py-32 bg-accent">
+      <section id="entraide" className="py-24 md:py-32 bg-accent scroll-mt-24">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
               Pour tous · Sans abonnement · Sans argent
             </span>
-            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-6">
+            <h2 id="osez-l-entraide" className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-6 scroll-mt-24">
               Osez demander. Osez proposer.
             </h2>
             <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-4 text-lg leading-relaxed">
