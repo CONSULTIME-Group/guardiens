@@ -802,11 +802,11 @@ const AdminNurturing = () => {
                         <TableCell className="text-xs whitespace-nowrap">
                           {format(new Date(l.created_at), "dd MMM HH:mm", { locale: fr })}
                         </TableCell>
-                        <TableCell className="font-mono text-xs">{l.user_journeys?.sequence_key ?? "—"}</TableCell>
+                        <TableCell className="text-sm" title={l.user_journeys?.sequence_key ?? ""}>{labelSequence(l.user_journeys?.sequence_key ?? "—")}</TableCell>
                         <TableCell>{l.step_order}</TableCell>
-                        <TableCell className="font-mono text-xs">{l.template_name}</TableCell>
+                        <TableCell className="text-sm" title={l.template_name}>{labelTemplate(l.template_name)}</TableCell>
                         <TableCell>
-                          <Badge variant="destructive">{l.reason ?? "unknown"}</Badge>
+                          <Badge variant="destructive" title={l.reason ?? ""}>{labelReason(l.reason)}</Badge>
                         </TableCell>
                         <TableCell className="font-mono text-[11px] max-w-md truncate" title={l.error_detail?.body_excerpt ?? ""}>
                           {l.error_detail?.status ? `${l.error_detail.status} · ${l.error_detail.body_excerpt?.slice(0, 80) ?? ""}` : "—"}
