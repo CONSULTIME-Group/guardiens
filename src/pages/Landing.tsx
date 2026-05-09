@@ -566,20 +566,20 @@ const Landing = () => {
           <div className="max-w-2xl lg:max-w-3xl">
 
             <p className="font-body text-xs text-white/70 tracking-[0.2em] uppercase mb-6 animate-hero-fade-up">
-              Home sitting · Garde d'animaux · Entraide
+              Entraide · Garde d'animaux · Home sitting
             </p>
 
             <h1 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 animate-hero-fade-up animation-delay-400">
-              Garde d'animaux à domicile, par un gardien du coin.
+              Et si on osait, à nouveau, demander un coup de main ?
             </h1>
 
             <p className="font-body text-lg md:text-xl text-white/85 max-w-xl mb-4 leading-relaxed animate-hero-fade-up animation-delay-700">
-              Confiez vos animaux et votre maison à une personne de confiance,
-              près de chez vous, partout en France.
+              Garder une maison, promener un chien, arroser un potager, donner un coup de main à la mami du coin.
+              Près de chez vous, partout en France — sans argent qui circule.
             </p>
             <p className="font-body text-base md:text-lg text-white/70 max-w-xl mb-10 leading-relaxed italic animate-hero-fade-up animation-delay-700">
-              Et derrière chaque garde, une rencontre, un coin de France à vivre,
-              des histoires qu'on n'aurait pas cherchées.
+              Et derrière chaque échange, une rencontre, une histoire,
+              une expérience qu'on n'aurait jamais cherchée.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 animate-hero-fade-up animation-delay-900">
