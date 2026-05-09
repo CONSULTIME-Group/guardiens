@@ -1107,8 +1107,8 @@ const QuickActions = ({
 
   if (effectiveStatus === "draft" && isOwner) {
     return (
-      <Link to={`/sits/${sit.id}/edit`} className={cn(btnClass, "bg-accent text-muted-foreground hover:text-foreground")}>
-        <Pencil className="h-3.5 w-3.5" /> Modifier
+      <Link to={`/sits/create?draftId=${sit.id}`} className={cn(btnClass, "bg-accent text-muted-foreground hover:text-foreground")}>
+        <Pencil className="h-3.5 w-3.5" /> Reprendre
       </Link>
     );
   }
