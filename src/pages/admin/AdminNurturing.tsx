@@ -307,7 +307,7 @@ const AdminNurturing = () => {
     const map = new Map<string, { sequence: string; sent: number; failed: number; exited: number }>();
     for (const l of logs) {
       const key = l.user_journeys?.sequence_key ?? "unknown";
-      const r = map.get(key) ?? { sequence: key, sent: 0, failed: 0, exited: 0 };
+      const r = map.get(key) ?? { sequence: labelSequence(key), sent: 0, failed: 0, exited: 0 };
       if (l.sent) r.sent++;
       else if (l.reason === "exit_condition_met") r.exited++;
       else r.failed++;
