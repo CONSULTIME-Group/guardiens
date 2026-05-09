@@ -84,6 +84,8 @@ const AdminNurturing = () => {
   const [queue, setQueue] = useState<QueueRow[]>([]);
   const [logsTruncated, setLogsTruncated] = useState(false);
   const [nurturingTemplates, setNurturingTemplates] = useState<string[]>([]);
+  const [lastRunAt, setLastRunAt] = useState<string | null>(null);
+  const [lastRunSent, setLastRunSent] = useState<boolean>(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -144,6 +146,22 @@ const AdminNurturing = () => {
       }
       setQueue(Array.from(latest.values()) as QueueRow[]);
     }
+
+    // Dernier run du cron evaluate-journeys (toutes périodes confondues)
+    const lastRunRes = await supabase
+      .from("journey_step_log")
+      .select("created_at, sent")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!lastRunRes.error && lastRunRes.data) {
+      setLastRunAt(lastRunRes.data.created_at);
+      setLastRunSent(lastRunRes.data.sent);
+    } else {
+      setLastRunAt(null);
+      setLastRunSent(false);
+    }
+
     setLoading(false);
   };
 
@@ -235,10 +253,33 @@ const AdminNurturing = () => {
   const journeyStats = useMemo(() => {
     const total = journeys.length;
     const active = journeys.filter((j) => j.status === "active").length;
-    const completed = journeys.filter((j) => j.status === "completed").length;
     const exited = journeys.filter((j) => j.status === "exited").length;
-    return { total, active, completed, exited };
+    return { total, active, exited };
   }, [journeys]);
+
+  const cronHealth = useMemo(() => {
+    if (!lastRunAt) return { label: "Jamais exécuté", tone: "err" as const, ageMin: null as number | null };
+    const ageMin = Math.round((Date.now() - new Date(lastRunAt).getTime()) / 60_000);
+    let tone: "ok" | "warn" | "err" = "ok";
+    if (ageMin > 24 * 60) tone = "err";
+    else if (ageMin > 60) tone = "warn";
+    const label = ageMin < 60 ? `il y a ${ageMin} min` : `il y a ${Math.round(ageMin / 60)} h`;
+    return { label, tone, ageMin };
+  }, [lastRunAt]);
+
+  // Bannière contextuelle : tous les échecs de la fenêtre concentrés sur 1 seul jour ancien
+  // ET dernier run récent et propre → on rassure plutôt que d'alarmer.
+  const failureBurst = useMemo(() => {
+    const failures = logs.filter((l) => !l.sent && l.reason !== "exit_condition_met");
+    if (failures.length === 0) return null;
+    const days = new Set(failures.map((f) => f.created_at.slice(0, 10)));
+    if (days.size > 1) return null;
+    const onlyDay = Array.from(days)[0];
+    const ageDays = Math.floor((Date.now() - new Date(onlyDay).getTime()) / 86400_000);
+    if (ageDays < 1) return null;
+    const lastRunOk = !!lastRunAt && Date.now() - new Date(lastRunAt).getTime() < 6 * 3600_000 && lastRunSent;
+    return { count: failures.length, day: onlyDay, ageDays, lastRunOk };
+  }, [logs, lastRunAt, lastRunSent]);
 
   const recentFailures = useMemo(
     () => logs.filter((l) => !l.sent && l.reason !== "exit_condition_met").slice(0, 30),
@@ -270,6 +311,17 @@ const AdminNurturing = () => {
         <Card className="border-warning bg-warning-soft">
           <CardContent className="p-4 text-sm text-warning-foreground">
             Plus de 10 000 entrées sur la période — les chiffres affichés sont tronqués. Réduisez la fenêtre.
+          </CardContent>
+        </Card>
+      )}
+
+      {failureBurst && failureBurst.lastRunOk && (
+        <Card className="border-success/40 bg-success/5">
+          <CardContent className="p-4 text-sm">
+            <strong>Bonne nouvelle :</strong> les {failureBurst.count} échecs de la période sont
+            tous concentrés sur le {format(new Date(failureBurst.day), "dd MMMM yyyy", { locale: fr })} (il y a {failureBurst.ageDays} j).
+            Le dernier passage du cron, {cronHealth.label}, s'est terminé par un envoi réussi —
+            l'incident est résolu, les chiffres restent visibles à titre historique.
           </CardContent>
         </Card>
       )}
@@ -330,9 +382,20 @@ const AdminNurturing = () => {
 
           <div className="grid gap-4 md:grid-cols-4">
             <StatCard label="Parcours créés (période)" value={journeyStats.total} />
-            <StatCard label="Actifs" value={journeyStats.active} />
-            <StatCard label="Complétés" value={journeyStats.completed} tone="ok" />
+            <StatCard label="Actifs" value={journeyStats.active} tone="ok" />
             <StatCard label="Sortis (objectif atteint)" value={journeyStats.exited} />
+            <StatCard
+              label="Cron evaluate-journeys"
+              value={cronHealth.label}
+              tone={cronHealth.tone}
+              hint={
+                cronHealth.ageMin === null
+                  ? "Aucun log trouvé"
+                  : lastRunSent
+                    ? "Dernier log = envoi réussi"
+                    : "Dernier log = échec ou sortie"
+              }
+            />
           </div>
 
           <Card>
@@ -475,6 +538,11 @@ const AdminNurturing = () => {
           <Card>
             <CardHeader>
               <CardTitle>Échecs récents</CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">
+                Le détail HTTP (status, body) n'est pas encore stocké en base — il est consultable
+                dans les logs de la fonction <code className="font-mono">evaluate-journeys</code>.
+                Étape 2 du chantier : ajouter une colonne <code className="font-mono">error_detail</code>.
+              </p>
             </CardHeader>
             <CardContent className="overflow-x-auto">
               {recentFailures.length === 0 ? (
