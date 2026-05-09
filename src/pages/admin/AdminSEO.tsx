@@ -319,6 +319,14 @@ const AdminSEO = () => {
         <ContentToCreate />
       </section>
 
+      {/* SECTION — Performance CTAs articles */}
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold text-foreground border-b pb-2">
+          Performance CTAs articles
+        </h2>
+        <ArticleCtaPerformance />
+      </section>
+
       {/* Quick links */}
       <div className="flex flex-wrap gap-3 pb-6">
         <Button variant="outline" asChild>
