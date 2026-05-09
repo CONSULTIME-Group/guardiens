@@ -32,12 +32,12 @@ const AvailabilityNudgeEmail = ({
 
           <Text style={text}>
             Bonjour{sitterFirstName ? ` ${sitterFirstName}` : ''},
-</Text>
+          </Text>
 
           <Text style={text}>
             Une annonce publiée près de chez vous n'a encore reçu aucune candidature.
             Si vous êtes disponible, votre profil pourrait vraiment aider cette personne.
-</Text>
+          </Text>
 
           <Section style={card}>
             {sitTitle ? <Text style={cardTitle}>{sitTitle}</Text> : null}
@@ -46,7 +46,7 @@ const AvailabilityNudgeEmail = ({
             {startDate && endDate ? (
               <Text style={cardLine}>Du {startDate} au {endDate}</Text>
             ) : null}
-</Section>
+          </Section>
 
           <Button style={button} href={ctaHref}>Voir l'annonce</Button>
 
@@ -55,14 +55,14 @@ const AvailabilityNudgeEmail = ({
             Vous recevez ce message une seule fois pour cette annonce, parce que
             vous êtes inscrit·e comme gardien·ne dans le même département. Vous
             pouvez ajuster vos préférences d'alerte depuis votre espace personnel.
-</Text>
+          </Text>
           <Text style={legal}>
             {SITE_NAME} — Jérémie Martinot (SIRET 894 864 040 00015) ·
             contact@guardiens.fr
-</Text>
-</Container>
-</Body>
-</Html>
+          </Text>
+          </Container>
+          </Body>
+          </Html>
   )
 }
 

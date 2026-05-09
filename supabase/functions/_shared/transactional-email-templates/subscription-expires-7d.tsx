@@ -35,27 +35,27 @@ const SubscriptionExpires7dEmail = ({ firstName = '', renewalDate }: Subscriptio
         <Heading style={h1}>Plus que 7 jours ⏳</Heading>
         <Text style={text}>
           Bonjour{firstName ? ` ${firstName}` : ''},
-</Text>
+        </Text>
         <Text style={text}>
           Votre abonnement {SITE_NAME} expire dans <strong>7 jours</strong>
           {dateLabel ? <> (le <strong>{dateLabel}</strong>)</> : null}.
-</Text>
+        </Text>
         <Text style={text}>
           Sans renouvellement, vous perdrez l'accès aux fonctionnalités premium. Renouvelez maintenant pour ne rien manquer.
-</Text>
+        </Text>
         <Button style={button} href={`${SITE_URL}/mon-abonnement`}>
           Renouveler maintenant
-</Button>
+        </Button>
         <Hr style={hr} />
         <Text style={legal}>
           Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
           dans le cadre de la gestion de votre abonnement (art. 6.1.b RGPD — exécution du contrat).
           Pour exercer vos droits : contact@guardiens.fr.
-</Text>
+        </Text>
         <Text style={footer}>L'équipe {SITE_NAME}</Text>
-</Container>
-</Body>
-</Html>
+      </Container>
+      </Body>
+      </Html>
   )
 }
 

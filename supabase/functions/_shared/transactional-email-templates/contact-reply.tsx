@@ -21,7 +21,7 @@ const ContactReplyEmail = ({ firstName, originalMessage, replyBody }: ContactRep
       <Container style={container}>
         <Heading style={h1}>
           {firstName ? `Bonjour ${firstName},` : 'Bonjour,'}
-</Heading>
+        </Heading>
         <Text style={text}>Merci pour votre message.</Text>
         {originalMessage ? (
           <Text style={blockquote}>{originalMessage}</Text>
@@ -34,14 +34,14 @@ const ContactReplyEmail = ({ firstName, originalMessage, replyBody }: ContactRep
           Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
           en réponse à votre demande de contact (art. 6.1.b RGPD — exécution d'une mesure précontractuelle).
           Pour exercer vos droits (accès, rectification, suppression) : contact@guardiens.fr.
-</Text>
+        </Text>
         <Text style={footer}>
           L'équipe {SITE_NAME} —{' '}
           <Link href="https://guardiens.fr" style={link}>guardiens.fr</Link>
-</Text>
-</Container>
-</Body>
-</Html>
+        </Text>
+        </Container>
+        </Body>
+        </Html>
 )
 
 export const template = {

@@ -19,23 +19,23 @@ const ApplicationDeclinedEmail = ({ sitTitle }: Props) => (
         <Heading style={h1}>Candidature non retenue</Heading>
         <Text style={text}>
           Malheureusement, votre candidature{sitTitle ? ` pour "${sitTitle}"` : ''} n'a pas été retenue par le propriétaire.
-</Text>
+        </Text>
         <Text style={text}>
           Ne vous découragez pas ! De nouvelles gardes sont publiées chaque jour. Continuez à postuler, le bon match arrivera bientôt
-</Text>
+        </Text>
         <Button style={button} href={`${SITE_URL}/sits`}>
           Voir les gardes disponibles
-</Button>
+        </Button>
         <Hr style={hr} />
         <Text style={legal}>
           Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
           dans le cadre du traitement de votre candidature (art. 6.1.b RGPD — exécution du contrat).
           Pour exercer vos droits : contact@guardiens.fr.
-</Text>
+        </Text>
         <Text style={footer}>L'équipe {SITE_NAME}</Text>
-</Container>
-</Body>
-</Html>
+      </Container>
+      </Body>
+      </Html>
 )
 
 export const template = {

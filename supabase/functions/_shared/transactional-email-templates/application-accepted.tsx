@@ -20,23 +20,23 @@ const ApplicationAcceptedEmail = ({ sitTitle, ownerFirstName }: Props) => (
         <Text style={text}>
           {ownerFirstName || 'Le propriétaire'} a accepté votre candidature
           {sitTitle ? ` pour "${sitTitle}"` : ''} !
-</Text>
+        </Text>
         <Text style={text}>
           Vous pouvez maintenant échanger via la messagerie pour organiser la garde et consulter le carnet de maison.
-</Text>
+        </Text>
         <Button style={button} href={`${SITE_URL}/messages`}>
           Ouvrir la messagerie
-</Button>
+        </Button>
         <Hr style={hr} />
         <Text style={legal}>
           Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
           dans le cadre du traitement de votre candidature (art. 6.1.b RGPD — exécution du contrat).
           Pour exercer vos droits : contact@guardiens.fr.
-</Text>
+        </Text>
         <Text style={footer}>L'équipe {SITE_NAME}</Text>
-</Container>
-</Body>
-</Html>
+      </Container>
+      </Body>
+      </Html>
 )
 
 export const template = {

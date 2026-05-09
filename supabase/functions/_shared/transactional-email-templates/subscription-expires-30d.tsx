@@ -33,28 +33,28 @@ const SubscriptionExpires30dEmail = ({ firstName = '', renewalDate }: Subscripti
         <Heading style={h1}>Renouvellement dans 30 jours</Heading>
         <Text style={text}>
           Bonjour{firstName ? ` ${firstName}` : ''},
-</Text>
+        </Text>
         <Text style={text}>
           Votre abonnement {SITE_NAME} sera renouvelé automatiquement le{' '}
           <strong>{formatFrenchDate(renewalDate)}</strong> au tarif de <strong>9€/mois</strong>.
-</Text>
+        </Text>
         <Text style={text}>
           Si vous souhaitez résilier avant cette date, c'est simple :
-</Text>
+        </Text>
         <Button style={button} href={`${SITE_URL}/mon-abonnement`}>
           Gérer mon abonnement
-</Button>
+        </Button>
         <Hr style={hr} />
         <Text style={legal}>
           Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
           dans le cadre de la gestion de votre abonnement (art. 6.1.b RGPD — exécution du contrat).
           Conformément à l'article L. 215-1 du Code de la consommation, vous êtes informé(e) du renouvellement
           automatique de votre abonnement. Pour exercer vos droits : contact@guardiens.fr.
-</Text>
+        </Text>
         <Text style={footer}>L'équipe {SITE_NAME}</Text>
-</Container>
-</Body>
-</Html>
+      </Container>
+      </Body>
+      </Html>
 )
 
 export const template = {

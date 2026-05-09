@@ -31,31 +31,31 @@ const DisputeResolvedEmail = ({ firstName, decision, category, adminNote }: Disp
         {accepted
           ? `Votre contestation a été acceptée — ${SITE_NAME}`
           : `Votre contestation a été examinée — ${SITE_NAME}`}
-</Preview>
+        </Preview>
       <Body style={main}>
         <Container style={container}>
           <Heading style={h1}>
             {accepted ? 'Votre contestation a été acceptée' : 'Votre contestation a été examinée'}
-</Heading>
+          </Heading>
           <Text style={text}>
             {firstName ? `Bonjour ${firstName},` : 'Bonjour,'}
-</Text>
+          </Text>
           <Text style={text}>
             Notre équipe a examiné la contestation que vous aviez soumise
             {category ? ` au motif « ${categoryLabels[category] || category} »` : ''}.
-</Text>
+          </Text>
 
           {accepted ? (
             <Text style={text}>
               <strong>Décision : acceptée.</strong> L'avis concerné a été retiré et ne s'affiche
               plus sur votre profil public.
-</Text>
+            </Text>
           ) : (
             <Text style={text}>
               <strong>Décision : refusée.</strong> Après examen, l'avis ne contrevient pas à nos
               règles et reste publié. Vous gardez la possibilité d'y répondre publiquement depuis
               la page « Mes avis ».
-</Text>
+            </Text>
           )}
 
           {adminNote ? (
@@ -63,22 +63,22 @@ const DisputeResolvedEmail = ({ firstName, decision, category, adminNote }: Disp
               <Hr style={hr} />
               <Text style={noteLabel}>Note de l'équipe :</Text>
               <Text style={noteText}>{adminNote}</Text>
-</>
+            </>
           ) : null}
 
           <Hr style={hr} />
           <Text style={text}>
             Merci de contribuer à la qualité et à la fiabilité des avis sur {SITE_NAME}.
-</Text>
+          </Text>
           <Text style={legal}>
             Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
             dans le cadre de l'intérêt légitime lié à la modération de la communauté (art. 6.1.f RGPD).
             Pour exercer vos droits : contact@guardiens.fr.
-</Text>
+          </Text>
           <Text style={footer}>L'équipe {SITE_NAME}</Text>
-</Container>
-</Body>
-</Html>
+        </Container>
+        </Body>
+        </Html>
   )
 }
 

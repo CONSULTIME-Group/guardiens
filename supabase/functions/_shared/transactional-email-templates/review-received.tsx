@@ -28,7 +28,7 @@ const ReviewReceivedEmail = ({ firstName, reviewerName, sitTitle, sitId }: Props
         <Container style={container}>
           <Section style={starsSection}>
             <Text style={starsText}></Text>
-</Section>
+          </Section>
 
           <Heading style={h1}>Un avis vous attend</Heading>
 
@@ -37,24 +37,24 @@ const ReviewReceivedEmail = ({ firstName, reviewerName, sitTitle, sitId }: Props
           <Text style={text}>
             {reviewer} a pris le temps de laisser un avis suite à la garde{sitTitle ? ` « ${sitTitle} »` : ''}.
             Partagez à votre tour votre expérience — cela ne prend que 2 minutes.
-</Text>
+          </Text>
 
           <Section style={infoBox}>
             <Text style={infoTitle}>Bon à savoir</Text>
             <Text style={infoItem}>
               Les avis sont publiés simultanément, une fois que les deux parties ont donné le leur.
               Ni vous ni l'autre partie ne pouvez voir l'avis de l'autre avant publication.
-</Text>
+            </Text>
             <Text style={infoItem}>
               Ce système « double aveugle » garantit des retours sincères et équitables.
-</Text>
-</Section>
+            </Text>
+            </Section>
 
           <Section style={ctaSection}>
             <Button style={button} href={reviewUrl}>
               Laisser mon avis
-</Button>
-</Section>
+            </Button>
+            </Section>
 
           <Hr style={hr} />
 
@@ -63,18 +63,18 @@ const ReviewReceivedEmail = ({ firstName, reviewerName, sitTitle, sitId }: Props
               Conformément au RGPD (art. 6.1.f), cet e-mail est envoyé dans le cadre de l'intérêt légitime
               lié au bon fonctionnement du service d'avis entre membres. Vos données personnelles ne sont
               utilisées que pour l'envoi de cette notification et ne sont pas transmises à des tiers.
-</Text>
+            </Text>
             <Text style={legalText}>
               Les avis publiés sur {SITE_NAME} sont modérés conformément aux articles L. 111-7-2
               du Code de la consommation et au décret n° 2017-1436. Chaque avis émane d'un membre
               ayant effectivement participé à la garde concernée.
-</Text>
-</Section>
+            </Text>
+            </Section>
 
           <Text style={footer}>L'équipe {SITE_NAME}</Text>
-</Container>
-</Body>
-</Html>
+        </Container>
+        </Body>
+        </Html>
   )
 }
 

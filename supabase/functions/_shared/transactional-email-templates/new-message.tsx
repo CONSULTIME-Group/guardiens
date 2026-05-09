@@ -54,7 +54,7 @@ const NewMessageEmail = ({
           <Heading style={h1}>{title} {emoji}</Heading>
           <Text style={text}>
             <strong>{sender}</strong> — {lead.replace(`${sender} `, '')}
-</Text>
+          </Text>
 
           {hasDetails ? (
             <Section style={detailsBox}>
@@ -64,33 +64,33 @@ const NewMessageEmail = ({
               {contextDates ? (
                 <Text style={detailLine}><strong>Dates :</strong> {contextDates}</Text>
               ) : null}
-</Section>
+            </Section>
           ) : null}
 
           {messagePreview ? (
             <Section style={quoteBox}>
               <Text style={quoteText}>« {messagePreview} »</Text>
-</Section>
+            </Section>
           ) : null}
 
           <Text style={text}>
             Connectez-vous pour lire et répondre. Une réponse rapide augmente fortement vos chances de finaliser un échange.
-</Text>
+          </Text>
 
           <Section style={{ textAlign: 'center', margin: '24px 0' }}>
             <Button style={button} href={link}>Lire et répondre</Button>
-</Section>
+          </Section>
 
           <Hr style={hr} />
           <Text style={legal}>
             Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
             dans le cadre de l'intérêt légitime lié au bon fonctionnement du service de messagerie (art. 6.1.f RGPD).
             Pour exercer vos droits : contact@guardiens.fr.
-</Text>
+          </Text>
           <Text style={footer}>L'équipe {SITE_NAME}</Text>
-</Container>
-</Body>
-</Html>
+        </Container>
+        </Body>
+        </Html>
   )
 }
 

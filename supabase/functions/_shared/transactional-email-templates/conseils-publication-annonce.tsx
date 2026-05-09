@@ -57,14 +57,14 @@ const ConseilsPublicationEmail = ({
             avec vous ce qui fait, sur Guardiens, la différence entre une annonce
             qui reçoit quelques messages et une annonce qui attire des gardiens vraiment
             adaptés à votre foyer.
-</Text>
+          </Text>
 
           <Text style={text}>
             Un gardien va vivre chez vous plusieurs jours. Avant de candidater, il
             cherche à se projeter : voir les pièces, comprendre le quotidien des
             animaux, sentir l'ambiance des environs. Plus votre annonce répond à
             ces questions, plus vous recevrez de candidatures pertinentes.
-</Text>
+          </Text>
 
           <Heading as="h2" style={h2}>Les 4 leviers qui changent tout</Heading>
 
@@ -76,28 +76,28 @@ const ConseilsPublicationEmail = ({
             Vous pouvez aussi définir la <strong>photo de couverture</strong> de
             l'annonce — c'est la première image que verront les gardiens en parcourant
             les résultats. Choisissez celle qui donne le plus envie de cliquer.
-</Text>
+          </Text>
 
           <Text style={listTitle}>2. Une journée type détaillée</Text>
           <Text style={text}>
             Horaires des repas, sorties, soins éventuels, temps de jeu, moments
             calmes — décrire le déroulé matin / midi / soir aide les gardiens à
             évaluer la charge de travail et à se projeter concrètement.
-</Text>
+          </Text>
 
           <Text style={listTitle}>3. Une description des environs</Text>
           <Text style={text}>
             Que peut-on faire autour de chez vous ? Balades, commerces, marchés,
             points d'intérêt. Cette section transforme une garde « utile » en garde
             « attirante ».
-</Text>
+          </Text>
 
           <Text style={listTitle}>4. Le guide de la maison</Text>
           <Text style={text}>
             Wifi, vétérinaire, instructions des appareils, jours de poubelles,
             consignes pour les plantes — le guide n'est partagé qu'au gardien retenu,
             mais le mentionner dans l'annonce témoigne de votre niveau de préparation.
-</Text>
+          </Text>
 
           {isPerfect ? (
             <Section style={successBox}>
@@ -108,48 +108,48 @@ const ConseilsPublicationEmail = ({
                 environs et un guide de la maison prêt. C'est ce niveau de soin qui
                 attire les meilleurs gardiens. Bravo, et merci pour la qualité que vous
                 apportez à la communauté.
-</Text>
-</Section>
+              </Text>
+              </Section>
           ) : (
             <Section style={highlightBox}>
               <Text style={highlightTitle}>Ce que nous avons remarqué sur votre annonce</Text>
               <Text style={highlightItem}>
                 • <strong>Photos du logement :</strong> {nbPhotos} photo{nbPhotos > 1 ? 's' : ''} actuellement.
                 {nbPhotos < 6 ? ' Visez 6 à 12 photos pour donner aux gardiens de quoi se projeter.' : ' Très bon volume.'}
-</Text>
+              </Text>
               {!hasCoverPhoto && nbPhotos > 0 && (
                 <Text style={highlightItem}>
                   • <strong>Photo de couverture :</strong> non définie. La première image
                   de la galerie est utilisée par défaut — pensez à choisir celle qui
                   représente le mieux votre annonce.
-</Text>
+                </Text>
               )}
               {!hasDailyRoutine && (
                 <Text style={highlightItem}>
                   • <strong>Journée type :</strong> non renseignée. C'est l'un des éléments
                   que les gardiens lisent en premier pour évaluer la charge de travail.
-</Text>
+                </Text>
               )}
               {!hasRegionHighlights && (
                 <Text style={highlightItem}>
                   • <strong>Description des environs :</strong> non renseignée. Mentionner
                   ce qu'il y a à faire autour rassure et donne envie.
-</Text>
+                </Text>
               )}
               {!hasHouseGuide && (
                 <Text style={highlightItem}>
                   • <strong>Guide de la maison :</strong> non créé. Il n'est partagé qu'aux
                   gardiens confirmés, mais sa présence rassure dès la lecture de l'annonce.
-</Text>
+                </Text>
               )}
-</Section>
+            </Section>
           )}
 
           <Section style={ctaSection}>
             <Button style={button} href={isPerfect ? sitUrl : editUrl}>
               {isPerfect ? 'Voir mon annonce' : 'Compléter mon annonce'}
-</Button>
-</Section>
+            </Button>
+            </Section>
 
           <Hr style={hr} />
 
@@ -160,28 +160,28 @@ const ConseilsPublicationEmail = ({
             poser toutes vos questions, puis confirmer la garde quand vous êtes
             tous les deux prêts. La signature de l'accord se fait directement sur
             le site, en quelques clics. Vous gardez la main à chaque étape.
-</Text>
+          </Text>
 
           <Section style={articleBox}>
             <Text style={articleLabel}>POUR ALLER PLUS LOIN</Text>
             <Link href={articleUrl} style={articleLink}>{articleTitle}</Link>
-</Section>
+          </Section>
 
           <Text style={text}>
             Une question, un doute, une relecture ? Répondez simplement à cet email,
             nous sommes là pour vous accompagner.
-</Text>
+          </Text>
 
           <Text style={legal}>
             Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
             dans le cadre de l'intérêt légitime lié au bon fonctionnement de votre annonce
             (art. 6.1.f RGPD). Pour exercer vos droits : contact@guardiens.fr.
-</Text>
+          </Text>
 
           <Text style={footer}>L'équipe {SITE_NAME}</Text>
-</Container>
-</Body>
-</Html>
+        </Container>
+        </Body>
+        </Html>
   )
 }
 

@@ -19,28 +19,28 @@ const IdentityRejectedEmail = ({ reason }: Props) => (
         <Heading style={h1}>Vérification d'identité</Heading>
         <Text style={text}>
           Votre demande de vérification d'identité n'a pas pu être validée.
-</Text>
+        </Text>
         {reason && (
           <Text style={{ ...text, backgroundColor: 'hsl(37, 22%, 95%)', padding: '12px 16px', borderRadius: '8px' }}>
             <strong>Raison :</strong> {reason}
-</Text>
+          </Text>
         )}
         <Text style={text}>
           Vous pouvez soumettre un nouveau document depuis votre profil. Assurez-vous que la photo est nette et que toutes les informations sont lisibles.
-</Text>
+        </Text>
         <Button style={button} href={`${SITE_URL}/dashboard`}>
           Soumettre un nouveau document
-</Button>
+        </Button>
         <Hr style={hr} />
         <Text style={legal}>
           Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
           dans le cadre du traitement de votre demande de vérification d'identité (art. 6.1.b RGPD).
           Pour exercer vos droits : contact@guardiens.fr.
-</Text>
+        </Text>
         <Text style={footer}>L'équipe {SITE_NAME}</Text>
-</Container>
-</Body>
-</Html>
+      </Container>
+      </Body>
+      </Html>
 )
 
 export const template = {

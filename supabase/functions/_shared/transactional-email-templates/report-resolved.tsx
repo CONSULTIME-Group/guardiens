@@ -35,34 +35,34 @@ const ReportResolvedEmail = ({ reason, status, adminNotes }: ReportResolvedProps
       <Container style={container}>
         <Heading style={h1}>
           Mise à jour de votre signalement
-</Heading>
+        </Heading>
         <Text style={text}>
           Bonjour,
-</Text>
+        </Text>
         <Text style={text}>
           Nous avons bien examiné votre signalement{reason ? ` pour motif « ${reasonLabels[reason] || reason} »` : ''}.
           Celui-ci est maintenant <strong>{statusLabels[status || 'resolved'] || 'traité'}</strong>.
-</Text>
+        </Text>
         {adminNotes ? (
           <>
             <Hr style={hr} />
             <Text style={noteLabel}>Note de l'équipe :</Text>
             <Text style={noteText}>{adminNotes}</Text>
-</>
+          </>
         ) : null}
         <Hr style={hr} />
         <Text style={text}>
           Merci de contribuer à la sécurité de notre communauté. Si vous avez des questions, n'hésitez pas à nous contacter.
-</Text>
+        </Text>
         <Text style={legal}>
           Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
           dans le cadre de l'intérêt légitime lié à la modération de la communauté (art. 6.1.f RGPD).
           Pour exercer vos droits : contact@guardiens.fr.
-</Text>
+        </Text>
         <Text style={footer}>L'équipe {SITE_NAME}</Text>
-</Container>
-</Body>
-</Html>
+      </Container>
+      </Body>
+      </Html>
 )
 
 export const template = {

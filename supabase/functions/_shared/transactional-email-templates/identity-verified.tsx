@@ -17,23 +17,23 @@ const IdentityVerifiedEmail = () => (
         <Heading style={h1}>Identité vérifiée</Heading>
         <Text style={text}>
           Votre identité a été vérifiée avec succès. Votre profil affiche maintenant le badge de confiance.
-</Text>
+        </Text>
         <Text style={text}>
           Ce badge rassure les autres membres de la communauté et augmente vos chances d'être sélectionné(e).
-</Text>
+        </Text>
         <Button style={button} href={`${SITE_URL}/dashboard`}>
           Voir mon profil
-</Button>
+        </Button>
         <Hr style={hr} />
         <Text style={legal}>
           Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
           dans le cadre du traitement de votre demande de vérification d'identité (art. 6.1.b RGPD).
           Pour exercer vos droits : contact@guardiens.fr.
-</Text>
+        </Text>
         <Text style={footer}>L'équipe {SITE_NAME}</Text>
-</Container>
-</Body>
-</Html>
+      </Container>
+      </Body>
+      </Html>
 )
 
 export const template = {

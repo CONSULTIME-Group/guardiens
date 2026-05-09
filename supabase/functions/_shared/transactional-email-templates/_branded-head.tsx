@@ -46,7 +46,7 @@ export const BrandedHead = () => (
         __html: '<!--[if mso]><style>* { font-family: Arial, sans-serif !important; }</style><![endif]-->',
       }}
     />
-</Head>
+  </Head>
 )
 
 export default BrandedHead

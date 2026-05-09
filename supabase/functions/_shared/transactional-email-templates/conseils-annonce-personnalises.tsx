@@ -59,7 +59,7 @@ const ConseilsAnnoncePersoEmail = ({
             {city ? <> à <strong>{city}</strong></> : null} et nous voulions
             vous partager quelques observations qui pourraient vous aider à trouver
             le bon gardien plus rapidement.
-</Text>
+          </Text>
 
           <Text style={text}>
             Sur Guardiens, l'expérience est centrale : un gardien va vivre chez vous
@@ -67,33 +67,33 @@ const ConseilsAnnoncePersoEmail = ({
             les pièces, sentir l'ambiance, comprendre les environs. Une annonce avec
             peu d'informations visuelles, surtout dans une zone moins dense en gardiens,
             a naturellement plus de mal à convaincre.
-</Text>
+          </Text>
 
           <Section style={highlightBox}>
             <Text style={highlightTitle}>Ce que nous avons remarqué sur votre annonce</Text>
             <Text style={highlightItem}>
               {nbPhotos <= 1 ? '•' : '•'} <strong>Photos du logement :</strong> {nbPhotos} photo{nbPhotos > 1 ? 's' : ''} actuellement.
               Les annonces qui reçoivent le plus de candidatures en proposent entre 6 et 12.
-</Text>
+            </Text>
             {!hasDailyRoutine && (
               <Text style={highlightItem}>
                 • <strong>Journée type :</strong> non renseignée. C'est l'un des éléments
                 que les gardiens lisent en premier pour évaluer la charge de travail.
-</Text>
+              </Text>
             )}
             {!hasRegionHighlights && (
               <Text style={highlightItem}>
                 • <strong>Description des environs :</strong> non renseignée. Mentionner
                 ce qu'il y a à faire autour rassure et donne envie.
-</Text>
+              </Text>
             )}
             {!hasHouseGuide && (
               <Text style={highlightItem}>
                 • <strong>Guide de la maison :</strong> non créé. Il n'est partagé qu'aux
                 gardiens confirmés, mais sa présence rassure dès la lecture de l'annonce.
-</Text>
+              </Text>
             )}
-</Section>
+          </Section>
 
           <Heading as="h2" style={h2}>Nos conseils concrets</Heading>
 
@@ -111,13 +111,13 @@ const ConseilsAnnoncePersoEmail = ({
             Quelques conseils simples : prenez les photos en plein jour, à l'horizontale, sans contre-jour.
             Avant de photographier, prenez 5 minutes pour ranger : c'est ce que verront les gardiens
             et c'est ce qui leur permet de se projeter.
-</Text>
+          </Text>
           {remindCoverPhoto && (
             <Text style={text}>
               <strong>Pensez aussi à choisir votre photo de couverture</strong> dans la galerie
               (la première que verront les gardiens). Préférez la photo la plus lumineuse et
               la plus représentative de l'ambiance de votre logement.
-</Text>
+            </Text>
           )}
 
           <Text style={listTitle}>2. Détailler la journée type</Text>
@@ -130,13 +130,13 @@ const ConseilsAnnoncePersoEmail = ({
               : <>Les gardiens ont besoin de savoir à quoi ressemble une journée chez vous :
                   horaires des repas, soins, sorties, habitudes des animaux. Plus c'est
                   concret, plus vous attirez les bons profils.</>}
-</Text>
+                </Text>
 
           <Text style={listTitle}>3. Présenter les environs</Text>
           <Text style={text}>
             Que peut-on faire autour de chez vous ? Balades, commerces, marchés, points
             d'intérêt. Cette section transforme une garde « utile » en garde « attirante ».
-</Text>
+          </Text>
 
           <Text style={listTitle}>4. Compléter le guide de la maison</Text>
           <Text style={text}>
@@ -144,13 +144,13 @@ const ConseilsAnnoncePersoEmail = ({
             consignes pour les plantes, contacts utiles) n'est partagé qu'au gardien retenu,
             mais le mentionner dans votre annonce montre votre niveau de préparation
             et rassure énormément.
-</Text>
+          </Text>
 
           <Section style={ctaSection}>
             <Button style={button} href={editUrl}>
               Mettre à jour mon annonce
-</Button>
-</Section>
+            </Button>
+            </Section>
 
           <Hr style={hr} />
 
@@ -158,29 +158,29 @@ const ConseilsAnnoncePersoEmail = ({
             Nous avons écrit un article complet sur le sujet, qui détaille tout ce qui
             fait la différence entre une annonce qui reste sans réponse et une annonce qui
             attire les bons profils :
-</Text>
+          </Text>
 
           <Section style={articleBox}>
             <Text style={articleLabel}>À LIRE</Text>
             <Link href={articleUrl} style={articleLink}>{articleTitle}</Link>
-</Section>
+          </Section>
 
           <Text style={text}>
             Et bien sûr, si vous avez la moindre question ou si vous souhaitez qu'on
             relise votre annonce une fois mise à jour, répondez simplement à cet email.
             Nous sommes là pour vous accompagner.
-</Text>
+          </Text>
 
           <Text style={legal}>
             Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
             dans le cadre de l'intérêt légitime lié au bon fonctionnement de votre annonce
             (art. 6.1.f RGPD). Pour exercer vos droits : contact@guardiens.fr.
-</Text>
+          </Text>
 
           <Text style={footer}>L'équipe {SITE_NAME}</Text>
-</Container>
-</Body>
-</Html>
+        </Container>
+        </Body>
+        </Html>
   )
 }
 
