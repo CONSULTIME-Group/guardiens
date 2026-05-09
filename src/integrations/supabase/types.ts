@@ -4339,6 +4339,15 @@ export type Database = {
         Returns: string
       }
       get_own_email: { Args: never; Returns: string }
+      get_public_stats: {
+        Args: never
+        Returns: {
+          total_missions: number
+          total_pets: number
+          total_properties: number
+          total_users: number
+        }[]
+      }
       get_sit_application_counts: {
         Args: { p_sit_id: string }
         Returns: {
