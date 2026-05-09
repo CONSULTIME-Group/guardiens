@@ -228,6 +228,27 @@ const AdminNurturing = () => {
       setQueue(Array.from(latest.values()) as QueueRow[]);
     }
 
+    // Engagement events (opens/clicks) pour les message_ids des logs de la fenêtre
+    const messageIds = Array.from(
+      new Set(((logsRes.data ?? []) as LogRow[]).map((l) => l.message_id).filter(Boolean) as string[])
+    );
+    if (messageIds.length > 0) {
+      // Supabase IN limite ~ 1000, on découpe par lots
+      const chunks: string[][] = [];
+      for (let i = 0; i < messageIds.length; i += 500) chunks.push(messageIds.slice(i, i + 500));
+      const all: EngagementRow[] = [];
+      for (const c of chunks) {
+        const r = await supabase
+          .from("email_engagement_events")
+          .select("message_id, event_type")
+          .in("message_id", c);
+        if (!r.error && r.data) all.push(...(r.data as EngagementRow[]));
+      }
+      setEngagement(all);
+    } else {
+      setEngagement([]);
+    }
+
     // Dernier run du cron evaluate-journeys (toutes périodes confondues)
     const lastRunRes = await supabase
       .from("journey_step_log")
