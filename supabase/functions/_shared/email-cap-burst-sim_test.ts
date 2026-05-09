@@ -28,6 +28,7 @@ interface QueueRow {
   status: 'pending' | 'sent' | 'failed'
   reason: string
   attempts: number
+  isUrgent: boolean
 }
 
 class FakeSystem {
