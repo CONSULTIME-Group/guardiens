@@ -431,12 +431,22 @@ const CreateSit = () => {
       {/* Form fields */}
       <div className="space-y-6">
         <div>
-          <Label className="text-sm font-medium">Titre de l'annonce *</Label>
+          <div className="flex items-center justify-between mb-1.5">
+            <Label className="text-sm font-medium">Titre de l'annonce *</Label>
+            {nDays > 0 && pets.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setTitle(buildSuggestedTitle())}
+                className="text-xs text-primary hover:underline"
+              >
+                Suggérer un titre
+              </button>
+            )}
+          </div>
           <Input
-            placeholder="Ex : Garde de 2 chats à Écully — 10 jours en août"
+            placeholder={nDays > 0 ? buildSuggestedTitle() : "Ex : Garde de 2 chats à Écully — 10 jours en août"}
             value={title}
             onChange={e => setTitle(e.target.value)}
-            className="mt-1.5"
           />
         </div>
 
