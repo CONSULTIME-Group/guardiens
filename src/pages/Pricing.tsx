@@ -484,7 +484,37 @@ const Pricing = () => {
  </p>
  </div>
  </CardContent>
- </Card>
+  </Card>
+ </section>
+
+ {/* ═══ Entraide — exemple concret, hors animaux ═══ */}
+ <section className="mb-12 md:mb-16 max-w-4xl mx-auto">
+ <div className="rounded-2xl border border-border/40 bg-card p-6 md:p-8">
+ <div className="flex items-baseline justify-between flex-wrap gap-3 mb-4">
+ <h2 className="font-heading text-xl md:text-2xl font-semibold text-foreground">
+ L'entraide, indépendante de la garde
+ </h2>
+ <span className="text-xs uppercase tracking-wider font-body text-primary">
+ Gratuite pour tous
+ </span>
+ </div>
+ <p className="text-sm md:text-base font-body text-foreground/70 leading-relaxed mb-4">
+ Les petites missions n'ont pas besoin d'un animal pour exister. Nadine demande un
+ coup de main pour ramasser ses légumes ; Jacques passe une heure dans son jardin
+ et repart avec un plat maison. Aucune garde, aucune carte bancaire, aucune
+ commission — juste un échange entre gens du coin.
+ </p>
+ <p className="text-sm font-body text-foreground/55 italic mb-5">
+ Cours de cuisine, arrosage de plantes, montage d'un meuble, prêt d'une perceuse,
+ trajet partagé jusqu'à la gare : tout passe par l'entraide, sans abonnement requis.
+ </p>
+ <Link
+ to="/petites-missions"
+ className="inline-flex items-center gap-2 text-sm font-body font-medium text-primary hover:underline"
+ >
+ Découvrir les petites missions →
+ </Link>
+ </div>
  </section>
 
  {/* ═══ SÉCURITÉ & VÉRIFICATIONS ═══ */}
