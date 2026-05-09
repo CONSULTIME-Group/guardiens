@@ -459,7 +459,111 @@ const AdminNurturing = () => {
         </Card>
       )}
 
-      {loading ? (
+      {/* Glossaire — comprendre la page */}
+      <Card className="bg-muted/30">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Comment lire cette page</CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm text-muted-foreground space-y-2">
+          <p>
+            <strong className="text-foreground">Séquence</strong> : campagne d'emails automatiques (ex. « Onboarding Propriétaire »). Chaque séquence cible une audience et déclenche selon une règle (inscription, inactivité…).
+          </p>
+          <p>
+            <strong className="text-foreground">Étape</strong> : un email donné dans une séquence, envoyé après un délai (J+1, J+3…). Une séquence contient plusieurs étapes successives.
+          </p>
+          <p>
+            <strong className="text-foreground">Parcours (journey)</strong> : un utilisateur inscrit dans une séquence. Il avance d'étape en étape, ou « sort » si l'objectif est atteint avant.
+          </p>
+          <p>
+            <strong className="text-foreground">Evaluator</strong> : le cron qui décide d'envoyer ou non chaque étape (toutes les heures). <strong className="text-foreground">Queue</strong> : la file d'attente d'envoi des emails (Lovable Cloud).
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Séquences actives — vue métier */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Séquences actives</CardTitle>
+          <p className="text-xs text-muted-foreground mt-1">
+            Les campagnes de nurturing en cours. Chiffres calculés sur la fenêtre sélectionnée ({range === "24h" ? "24 h" : range === "7d" ? "7 jours" : "30 jours"}).
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {sequences.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">Aucune séquence configurée.</p>
+          ) : (
+            sequences.map((s) => {
+              const m = sequenceMetrics.get(s.key) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0 };
+              const steps = stepsBySequence.get(s.key) ?? [];
+              const ruleType = s.enrollment_rule?.type ?? "—";
+              const ruleLabel = RULE_TYPE_LABELS[ruleType] ?? ruleType;
+              const ruleDetail =
+                ruleType === "inactivity" && s.enrollment_rule?.days
+                  ? ` (après ${s.enrollment_rule.days} j d'inactivité)`
+                  : ruleType === "sitter_no_application" && s.enrollment_rule?.min_age_days
+                    ? ` (après ${s.enrollment_rule.min_age_days} j sans candidature)`
+                    : "";
+              return (
+                <div key={s.key} className="border border-border rounded-lg p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div>
+                      <h3 className="font-semibold text-foreground">{labelSequence(s.key)}</h3>
+                      {s.description && <p className="text-xs text-muted-foreground mt-1 max-w-2xl">{s.description}</p>}
+                    </div>
+                    <div className="flex gap-1.5 flex-wrap">
+                      <Badge variant={s.active ? "default" : "outline"}>{s.active ? "Active" : "Inactive"}</Badge>
+                      <Badge variant="secondary">{AUDIENCE_LABELS[s.audience] ?? s.audience}</Badge>
+                      <Badge variant="outline">{ruleLabel}{ruleDetail}</Badge>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
+                    <div className="bg-muted/40 rounded px-2 py-1.5">
+                      <p className="text-muted-foreground">Parcours actifs</p>
+                      <p className="font-semibold text-foreground text-base">{m.activeJourneys}</p>
+                    </div>
+                    <div className="bg-muted/40 rounded px-2 py-1.5">
+                      <p className="text-muted-foreground">Nouveaux (période)</p>
+                      <p className="font-semibold text-foreground text-base">{m.totalJourneys}</p>
+                    </div>
+                    <div className="bg-muted/40 rounded px-2 py-1.5">
+                      <p className="text-muted-foreground">Emails envoyés</p>
+                      <p className="font-semibold text-success text-base">{m.sent}</p>
+                    </div>
+                    <div className="bg-muted/40 rounded px-2 py-1.5">
+                      <p className="text-muted-foreground">Échecs</p>
+                      <p className={`font-semibold text-base ${m.failed > 0 ? "text-destructive" : "text-foreground"}`}>{m.failed}</p>
+                    </div>
+                    <div className="bg-muted/40 rounded px-2 py-1.5">
+                      <p className="text-muted-foreground">Sorties (objectif)</p>
+                      <p className="font-semibold text-foreground text-base">{m.exited}</p>
+                    </div>
+                  </div>
+
+                  {steps.length > 0 && (
+                    <div className="text-xs">
+                      <p className="text-muted-foreground mb-1.5">Étapes ({steps.length}) :</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {steps.map((st) => (
+                          <span
+                            key={st.step_order}
+                            className="inline-flex items-center gap-1.5 bg-background border border-border rounded px-2 py-1"
+                            title={`Template : ${st.template_name}`}
+                          >
+                            <span className="font-mono text-muted-foreground">{formatDelay(st.delay_hours)}</span>
+                            <span>{labelTemplate(st.template_name)}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </CardContent>
+      </Card>
+
         <div className="grid gap-4 md:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-28" />
