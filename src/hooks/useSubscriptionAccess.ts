@@ -15,7 +15,7 @@ export type SubStatus = "founder_grace" | "founder_expired" | "premium" | "expir
  * Avant le 14 juin 2026 : pré-lancement, accès libre pour tous.
  * Du 14 juin au 14 juillet 2026 inclus : gratuité pour TOUS (fondateurs ou non).
  * À partir du 15 juillet 2026 : abonnement actif requis. Le statut is_founder
- * (réservé aux inscrits avant le 13 juin) ne donne plus d'accès, seulement le badge.
+ * (réservé aux inscrits avant le 13 juillet) ne donne plus d'accès, seulement le badge.
  */
 export const useSubscriptionAccess = () => {
   const { user, activeRole } = useAuth();

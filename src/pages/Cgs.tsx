@@ -94,10 +94,10 @@ const Cgs = () => {
           </p>
 
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">3.4 Programme Fondateur</h3>
-          <p>Les utilisateurs inscrits avant le 13 juin 2026 bénéficient du statut de <strong className="text-foreground">Fondateur</strong> et des conditions préférentielles suivantes&nbsp;:</p>
+          <p>Les utilisateurs inscrits avant le 13 juillet 2026 bénéficient du statut de <strong className="text-foreground">Fondateur</strong> et des conditions préférentielles suivantes&nbsp;:</p>
           <ul className="list-disc pl-6 space-y-1">
             <li>Accès gratuit à l'ensemble des fonctionnalités Gardien jusqu'au 14 juillet 2026 (gratuité étendue à tous les inscrits sur cette période)&nbsp;;</li>
-            <li>Badge Fondateur permanent affiché sur leur profil, réservé aux inscrits avant le 13 juin 2026&nbsp;;</li>
+            <li>Badge Fondateur permanent affiché sur leur profil, réservé aux inscrits avant le 13 juillet 2026&nbsp;;</li>
             <li>Reconduction au tarif standard de 6,99&nbsp;€ TTC/mois à compter du 15 juillet 2026, sauf résiliation préalable.</li>
           </ul>
 

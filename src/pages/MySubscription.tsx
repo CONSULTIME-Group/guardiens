@@ -389,7 +389,7 @@ const MySubscription = () => {
  <div className="absolute top-3 left-8 right-8 h-px bg-border" aria-hidden="true" />
  {[
  { label: "Maintenant", sub: "Accès complet", active: true, amber: false },
- { label: "13 juin", sub: "Badge Fondateur", active: false, amber: true },
+ { label: "13 juillet", sub: "Badge Fondateur", active: false, amber: true },
  { label: "15 juillet", sub: "Fin de grâce", active: false, amber: false },
  { label: "Ensuite", sub: "6,99 €/mois · 7 jours d’essai", active: false, amber: false },
  ].map(({ label, sub: subText, active, amber }) => (
@@ -481,9 +481,9 @@ const MySubscription = () => {
  <div className="flex items-start gap-3 mb-3">
  <FounderBadge size="lg" />
  <div className="space-y-1">
- <p className="text-sm font-semibold text-amber-800 font-body">Vous devenez Fondateur le 13 juin.</p>
+ <p className="text-sm font-semibold text-amber-800 font-body">Vous devenez Fondateur le 13 juillet.</p>
  <p className="text-sm text-amber-700 font-body leading-relaxed">
- Chaque membre inscrit avant le 13 juin 2026 reçoit le badge Fondateur, visible sur son profil public. La gratuité, elle, est étendue à tous les inscrits jusqu'au 14 juillet 2026.
+ Chaque membre inscrit avant le 13 juillet 2026 reçoit le badge Fondateur, visible sur son profil public. La gratuité, elle, est étendue à tous les inscrits jusqu'au 14 juillet 2026.
  </p>
  </div>
  </div>
