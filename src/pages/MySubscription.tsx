@@ -434,7 +434,7 @@ const MySubscription = () => {
  {profileCompletion < 60 && (
  <div className="px-6 sm:px-8 py-4 border-b border-border/50 bg-muted/30 flex items-center justify-between gap-4 flex-wrap">
  <div className="space-y-1.5 flex-1 min-w-0">
- <p className="text-sm font-medium text-foreground font-body">Complétez votre profil pour être visible le 13 juin.</p>
+ <p className="text-sm font-medium text-foreground font-body">Complétez votre profil pour être visible dès le lancement.</p>
  <div className="flex items-center gap-2">
  <div className="w-24 bg-border rounded-full h-1.5 overflow-hidden flex-shrink-0">
  <div className="bg-primary h-1.5 rounded-full transition-all" ref={(el) => { if (el) el.style.width = `${profileCompletion}%`; }} />
