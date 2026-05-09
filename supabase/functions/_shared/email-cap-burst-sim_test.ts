@@ -349,18 +349,18 @@ Deno.test('SIM 8 — __urgent avec cap horaire saturé : envoyé immédiatement,
 Deno.test('SIM 9 — __urgent avec cap journalier saturé : envoyé immédiatement, queue vide', () => {
   const sys = new FakeSystem()
   const t = parisAt('2026-01-15', 10) // heure active
-  // 3 envois normaux pour saturer le cap journalier
+  // 3 envois normaux espacés de 2h pour saturer le cap journalier sans toucher le cap horaire
   for (let i = 0; i < 3; i++) {
-    sys.send(new Date(t.getTime() + i * 1000), 'user@x.com', 'review-reminder', `day-${i}`)
+    sys.send(new Date(t.getTime() + i * 2 * 3600_000), 'user@x.com', 'review-reminder', `day-${i}`)
   }
   assertEquals(sys.sentRows().length, 3)
 
   // 4e envoi normal → defer (cap jour)
-  const rNormal = sys.send(new Date(t.getTime() + 4000), 'user@x.com', 'review-reminder', 'day-3')
+  const rNormal = sys.send(new Date(t.getTime() + 6 * 3600_000 + 1000), 'user@x.com', 'review-reminder', 'day-3')
   assertEquals(rNormal.result, 'deferred')
 
   // Urgent → passe
-  const rUrgent = sys.send(new Date(t.getTime() + 5000), 'user@x.com', 'review-reminder', 'urgent-day', true)
+  const rUrgent = sys.send(new Date(t.getTime() + 6 * 3600_000 + 2000), 'user@x.com', 'review-reminder', 'urgent-day', true)
   assertEquals(rUrgent.result, 'sent')
   assertEquals(sys.queue.filter((q) => q.status === 'pending').length, 1)
   assertEquals(sys.sentRows().length, 4)
