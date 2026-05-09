@@ -885,7 +885,7 @@ const Landing = () => {
       </RevealSection>
 
       {/* ═══════════════ SECTION 5 — CONFIANCE & PÉRIMÈTRE (fusion) ═══════════════ */}
-      <section className="bg-background py-24 md:py-32" aria-labelledby="trust-heading">
+      <section id="confiance" className="bg-background py-24 md:py-32 scroll-mt-24" aria-labelledby="trust-heading">
         <div className="max-w-6xl mx-auto px-5 sm:px-6">
           <RevealSection className="text-center max-w-3xl mx-auto mb-16">
             <p className="text-xs md:text-[13px] tracking-[0.2em] uppercase text-primary font-body font-medium">
