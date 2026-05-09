@@ -1,6 +1,7 @@
 // evaluate-journeys
-// Cron worker: enrolls new users in onboarding sequences and dispatches due steps.
-// Triggered hourly by pg_cron.
+// Cron worker: enrolls users into nurturing sequences based on declarative
+// `enrollment_rule` (signup window, inactivity, behavioural conditions) and
+// dispatches due steps via send-transactional-email.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const corsHeaders = {
@@ -14,14 +15,31 @@ type ExitCondition =
   | { type: 'has_completed_sit' }
   | { type: 'has_published_sit' }
   | { type: 'has_application_received' }
+  | { type: 'reactivated'; days?: number }
   | Record<string, never>
+
+type EnrollmentRule =
+  | { type: 'signup'; window_days?: number }
+  | { type: 'inactivity'; days: number; window_days?: number }
+  | { type: 'owner_no_sit'; min_age_days?: number; window_days?: number }
+  | { type: 'sitter_no_application'; min_age_days?: number; window_days?: number }
 
 interface Step {
   id: string
+  sequence_id: string
   step_order: number
   delay_hours: number
   template_name: string
   exit_condition: ExitCondition | null
+}
+
+interface Sequence {
+  id: string
+  key: string
+  audience: string
+  active: boolean
+  enrollment_rule: EnrollmentRule
+  anchor_field: string
 }
 
 Deno.serve(async (req) => {
@@ -40,13 +58,13 @@ Deno.serve(async (req) => {
 
   const stats = { enrolled: 0, sent: 0, exited: 0, completed: 0, skipped: 0, errors: 0 }
 
-  // 1. Load active sequences + steps
-  const { data: sequences } = await supabase
+  const { data: sequencesRaw } = await supabase
     .from('nurturing_sequences')
-    .select('id, key, audience, active')
+    .select('id, key, audience, active, enrollment_rule, anchor_field')
     .eq('active', true)
 
-  if (!sequences?.length) {
+  const sequences = (sequencesRaw ?? []) as Sequence[]
+  if (!sequences.length) {
     return new Response(JSON.stringify({ ok: true, stats, note: 'no active sequences' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
@@ -57,59 +75,24 @@ Deno.serve(async (req) => {
     .order('step_order', { ascending: true })
 
   const stepsBySeq = new Map<string, Step[]>()
-  for (const s of stepsRaw ?? []) {
+  for (const s of (stepsRaw ?? []) as Step[]) {
     const arr = stepsBySeq.get(s.sequence_id) ?? []
-    arr.push(s as Step)
+    arr.push(s)
     stepsBySeq.set(s.sequence_id, arr)
   }
 
-  // 2. AUTO-ENROLLMENT — users created in last 7 days not yet enrolled
+  // 1. ENROLLMENT — dispatched per enrollment_rule
   for (const seq of sequences) {
-    const audienceFilter =
-      seq.audience === 'sitter' ? ['sitter', 'both']
-      : seq.audience === 'owner' ? ['owner', 'both']
-      : null
-
-    let q = supabase
-      .from('profiles')
-      .select('id, role, created_at')
-      .gte('created_at', new Date(Date.now() - 7 * 24 * 3600_000).toISOString())
-      .not('email', 'is', null)
-      .eq('account_status', 'active')
-
-    if (audienceFilter) q = q.in('role', audienceFilter)
-
-    const { data: candidates } = await q.limit(500)
-    if (!candidates?.length) continue
-
-    // Existing journeys for this sequence
-    const { data: existing } = await supabase
-      .from('user_journeys')
-      .select('user_id')
-      .eq('sequence_key', seq.key)
-      .in('user_id', candidates.map((c) => c.id))
-    const existingSet = new Set((existing ?? []).map((e) => e.user_id))
-
-    const toInsert = candidates
-      .filter((c) => !existingSet.has(c.id))
-      .map((c) => ({
-        user_id: c.id,
-        sequence_key: seq.key,
-        started_at: c.created_at, // anchor delays on signup, not on enrollment
-        status: 'active',
-        current_step: 0,
-      }))
-
-    if (toInsert.length && !dryRun) {
-      const { error } = await supabase.from('user_journeys').insert(toInsert)
-      if (!error) stats.enrolled += toInsert.length
-      else stats.errors++
-    } else if (dryRun) {
-      stats.enrolled += toInsert.length
+    try {
+      const enrolled = await enrollForSequence(supabase, seq, dryRun)
+      stats.enrolled += enrolled
+    } catch (e) {
+      console.error('[enrollment] failed', seq.key, e)
+      stats.errors++
     }
   }
 
-  // 3. EVALUATE active journeys
+  // 2. EVALUATE active journeys
   const { data: activeJourneys } = await supabase
     .from('user_journeys')
     .select('id, user_id, sequence_key, current_step, started_at, last_step_at')
@@ -136,7 +119,7 @@ Deno.serve(async (req) => {
         continue
       }
 
-      // Time check
+      // Time check (anchor on started_at, which already reflects anchor_field at enrollment)
       const dueAt = new Date(j.started_at).getTime() + nextStep.delay_hours * 3600_000
       if (Date.now() < dueAt) continue
 
@@ -158,13 +141,11 @@ Deno.serve(async (req) => {
         continue
       }
 
-      // Send via send-transactional-email (centralized: handles prefs, freq cap, quiet hours)
       if (dryRun) { stats.sent++; continue }
 
-      // Fetch user email
       const { data: profile } = await supabase
         .from('profiles')
-        .select('email, first_name')
+        .select('email, first_name, last_seen_at')
         .eq('id', j.user_id)
         .maybeSingle()
       if (!profile?.email) {
@@ -195,6 +176,9 @@ Deno.serve(async (req) => {
             first_name: profile.first_name,
             journey_id: j.id,
             step: nextStep.step_order,
+            daysSinceLastSeen: profile.last_seen_at
+              ? Math.floor((Date.now() - new Date(profile.last_seen_at).getTime()) / 86400_000)
+              : undefined,
           },
           metadata: { source: `journey:${j.sequence_key}:${nextStep.step_order}`, user_id: j.user_id },
         }),
@@ -202,26 +186,30 @@ Deno.serve(async (req) => {
 
       const sendOk = sendRes.ok
       let reason: string | null = null
+      let errorDetail: Record<string, unknown> | null = null
       if (!sendOk) {
         const errBody = await sendRes.text().catch(() => '')
         reason = `send_failed_${sendRes.status}`
+        errorDetail = {
+          status: sendRes.status,
+          body_excerpt: errBody.slice(0, 1000),
+          template: nextStep.template_name,
+          at: new Date().toISOString(),
+        }
         console.error('[ALERT] Journey step send failed', {
           journey_id: j.id,
           sequence: j.sequence_key,
           step: nextStep.step_order,
-          template: nextStep.template_name,
-          status: sendRes.status,
-          body: errBody.slice(0, 500),
+          ...errorDetail,
         })
       }
 
       await supabase.from('journey_step_log').insert({
         journey_id: j.id, step_order: nextStep.step_order,
-        template_name: nextStep.template_name, sent: sendOk, reason,
+        template_name: nextStep.template_name, sent: sendOk, reason, error_detail: errorDetail,
       })
 
-      // Always advance the cursor (even if email was suppressed by prefs/freq cap),
-      // so the journey progresses in time. Suppressions are logged centrally.
+      // Always advance the cursor
       await supabase.from('user_journeys').update({
         current_step: nextStep.step_order,
         last_step_at: new Date().toISOString(),
@@ -240,6 +228,133 @@ Deno.serve(async (req) => {
   })
 })
 
+// ---------------------------------------------------------------------------
+// Enrollment dispatch
+// ---------------------------------------------------------------------------
+async function enrollForSequence(
+  supabase: ReturnType<typeof createClient>,
+  seq: Sequence,
+  dryRun: boolean,
+): Promise<number> {
+  const audienceFilter =
+    seq.audience === 'sitter' ? ['sitter', 'both']
+    : seq.audience === 'owner' ? ['owner', 'both']
+    : null
+
+  const rule = seq.enrollment_rule ?? { type: 'signup', window_days: 7 }
+  const windowDays = rule.window_days ?? 7
+  const nowMs = Date.now()
+
+  // Build candidates list according to rule type
+  let candidates: Array<{ id: string; anchor_at: string }> = []
+
+  if (rule.type === 'signup') {
+    let q = supabase
+      .from('profiles')
+      .select('id, role, created_at')
+      .gte('created_at', new Date(nowMs - windowDays * 86400_000).toISOString())
+      .not('email', 'is', null)
+      .eq('account_status', 'active')
+    if (audienceFilter) q = q.in('role', audienceFilter)
+    const { data } = await q.limit(500)
+    candidates = (data ?? []).map((c: { id: string; created_at: string }) => ({
+      id: c.id, anchor_at: c.created_at,
+    }))
+  } else if (rule.type === 'inactivity') {
+    const minAgo = new Date(nowMs - rule.days * 86400_000).toISOString()
+    const maxAgo = new Date(nowMs - (rule.days + windowDays) * 86400_000).toISOString()
+    let q = supabase
+      .from('profiles')
+      .select('id, role, last_seen_at')
+      .lt('last_seen_at', minAgo)
+      .gt('last_seen_at', maxAgo)
+      .not('email', 'is', null)
+      .eq('account_status', 'active')
+    if (audienceFilter) q = q.in('role', audienceFilter)
+    const { data } = await q.limit(500)
+    candidates = (data ?? [])
+      .filter((c: { last_seen_at: string | null }) => !!c.last_seen_at)
+      .map((c: { id: string; last_seen_at: string }) => ({ id: c.id, anchor_at: c.last_seen_at }))
+  } else if (rule.type === 'owner_no_sit') {
+    const minAge = rule.min_age_days ?? 7
+    const minAgeAt = new Date(nowMs - minAge * 86400_000).toISOString()
+    const windowAt = new Date(nowMs - (minAge + windowDays) * 86400_000).toISOString()
+    let q = supabase
+      .from('profiles')
+      .select('id, role, created_at')
+      .lt('created_at', minAgeAt)
+      .gt('created_at', windowAt)
+      .not('email', 'is', null)
+      .eq('account_status', 'active')
+      .in('role', ['owner', 'both'])
+    const { data } = await q.limit(500)
+    const ownerIds = (data ?? []).map((c: { id: string }) => c.id)
+    if (ownerIds.length === 0) return 0
+    const { data: withSit } = await supabase
+      .from('sits').select('user_id').in('user_id', ownerIds)
+    const withSitSet = new Set((withSit ?? []).map((s: { user_id: string }) => s.user_id))
+    candidates = (data ?? [])
+      .filter((c: { id: string }) => !withSitSet.has(c.id))
+      .map((c: { id: string; created_at: string }) => ({ id: c.id, anchor_at: c.created_at }))
+  } else if (rule.type === 'sitter_no_application') {
+    const minAge = rule.min_age_days ?? 14
+    const minAgeAt = new Date(nowMs - minAge * 86400_000).toISOString()
+    const windowAt = new Date(nowMs - (minAge + windowDays) * 86400_000).toISOString()
+    let q = supabase
+      .from('profiles')
+      .select('id, role, created_at')
+      .lt('created_at', minAgeAt)
+      .gt('created_at', windowAt)
+      .not('email', 'is', null)
+      .eq('account_status', 'active')
+      .in('role', ['sitter', 'both'])
+    const { data } = await q.limit(500)
+    const sitterIds = (data ?? []).map((c: { id: string }) => c.id)
+    if (sitterIds.length === 0) return 0
+    const { data: withApp } = await supabase
+      .from('applications').select('sitter_id').in('sitter_id', sitterIds)
+    const withAppSet = new Set((withApp ?? []).map((a: { sitter_id: string }) => a.sitter_id))
+    candidates = (data ?? [])
+      .filter((c: { id: string }) => !withAppSet.has(c.id))
+      .map((c: { id: string; created_at: string }) => ({ id: c.id, anchor_at: c.created_at }))
+  } else {
+    console.warn('[enrollment] unknown rule type', rule)
+    return 0
+  }
+
+  if (!candidates.length) return 0
+
+  const { data: existing } = await supabase
+    .from('user_journeys')
+    .select('user_id')
+    .eq('sequence_key', seq.key)
+    .in('user_id', candidates.map((c) => c.id))
+  const existingSet = new Set((existing ?? []).map((e: { user_id: string }) => e.user_id))
+
+  const toInsert = candidates
+    .filter((c) => !existingSet.has(c.id))
+    .map((c) => ({
+      user_id: c.id,
+      sequence_key: seq.key,
+      started_at: c.anchor_at,
+      status: 'active',
+      current_step: 0,
+    }))
+
+  if (!toInsert.length) return 0
+  if (dryRun) return toInsert.length
+
+  const { error } = await supabase.from('user_journeys').insert(toInsert)
+  if (error) {
+    console.error('[enrollment] insert failed', seq.key, error.message)
+    return 0
+  }
+  return toInsert.length
+}
+
+// ---------------------------------------------------------------------------
+// Exit condition evaluation
+// ---------------------------------------------------------------------------
 async function checkExitCondition(
   supabase: ReturnType<typeof createClient>,
   userId: string,
@@ -274,6 +389,14 @@ async function checkExitCondition(
         .from('applications').select('id, sit:sits!inner(user_id)', { count: 'exact', head: true })
         .eq('sit.user_id', userId)
       return (count ?? 0) > 0
+    }
+    case 'reactivated': {
+      // User came back: last_seen_at within last `days` (default 3)
+      const days = cond.days ?? 3
+      const { data } = await supabase.from('profiles')
+        .select('last_seen_at').eq('id', userId).maybeSingle()
+      if (!data?.last_seen_at) return false
+      return Date.now() - new Date(data.last_seen_at).getTime() < days * 86400_000
     }
     default:
       return false
