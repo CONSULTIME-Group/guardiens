@@ -118,20 +118,20 @@ Les deux usages sont indépendants : vous pouvez activer l'un, l'autre, ou les d
  },
  {
  q: "Quels types d'échanges sont possibles ?",
- a: `Les échanges sur Guardiens passent par **du temps, des compétences ou des objets** — jamais par une transaction financière directe entre membres.
+  a: `Les échanges sur Guardiens passent par **du temps, des compétences ou des objets** — jamais par un paiement direct entre membres.
 
-**Côté garde :** vous accueillez un gardien chez vous, il prend soin de votre maison et de vos animaux. Pas d'argent qui circule entre vous : l'échange se joue dans le service rendu (un toit, une présence).
+**Côté garde :** vous accueillez un gardien chez vous, il prend soin de votre maison et de vos animaux. Aucun argent ne circule entre vous : l'échange se joue dans le service rendu — un toit contre une présence.
 
-**Côté entraide :** un service rendu peut être remercié par un autre service, un objet partagé, un repas, un cours, du temps. Quelques exemples concrets :
+**Côté entraide :** un service rendu peut être remercié par un autre service, un objet partagé, un repas, un cours ou simplement du temps. Quelques exemples concrets :
 - Ramasser des légumes contre un plat maison.
-- Arroser des plantes pendant un week-end.
+- Arroser des plantes le temps d'un week-end.
 - Prêter une perceuse, un sécateur, une remorque.
 - Partager un trajet jusqu'à la gare ou au marché.
 - Donner un cours (pain, couture, jardinage, informatique).
-- Garder un colis, recevoir une livraison.
+- Garder un colis, réceptionner une livraison.
 - Aider à porter un meuble, monter une étagère.
 
-Chaque échange est libre, négocié entre les deux personnes, et n'engage que vous. Guardiens fournit l'outil et la mise en relation — pas la facture.`,
+Chaque échange est libre, négocié entre les deux personnes et n'engage que vous. Guardiens fournit l'outil et la mise en relation — pas la facture.`,
  },
 ];
 
