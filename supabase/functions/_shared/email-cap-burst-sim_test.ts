@@ -311,3 +311,72 @@ Deno.test('SIM 6 — 50 destinataires distincts : tous envoyés immédiatement',
   assertEquals(sys.sentRows().length, 50)
   assertEquals(sys.queue.length, 0)
 })
+
+// =============================================================
+// SIM 7 — __urgent pendant quiet hours : envoi immédiat, queue vide
+// =============================================================
+Deno.test('SIM 7 — __urgent à 23h Paris : envoyé immédiatement, aucune ligne en queue', () => {
+  const sys = new FakeSystem()
+  const t = parisAt('2026-01-15', 23) // quiet hours
+  const r = sys.send(t, 'user@x.com', 'review-reminder', 'urgent-quiet', true)
+
+  assertEquals(r.result, 'sent')
+  assertEquals(sys.sentRows().length, 1)
+  assertEquals(sys.queue.length, 0, 'aucune insertion dans la file différée')
+})
+
+// =============================================================
+// SIM 8 — __urgent avec cap horaire dépassé : envoi immédiat, queue vide
+// =============================================================
+Deno.test('SIM 8 — __urgent avec cap horaire saturé : envoyé immédiatement, queue vide', () => {
+  const sys = new FakeSystem()
+  const t = parisAt('2026-01-15', 14) // heure active
+  // Saturation du cap horaire avec 2 envois normaux
+  sys.send(t, 'user@x.com', 'review-reminder', 'normal-1')
+  sys.send(new Date(t.getTime() + 1000), 'user@x.com', 'review-reminder', 'normal-2')
+
+  // 3e envoi normal serait defer
+  const rNormal = sys.send(new Date(t.getTime() + 2000), 'user@x.com', 'review-reminder', 'normal-3')
+  assertEquals(rNormal.result, 'deferred')
+
+  // Même destinataire, même template, mais urgent → passe
+  const rUrgent = sys.send(new Date(t.getTime() + 3000), 'user@x.com', 'review-reminder', 'urgent-cap', true)
+  assertEquals(rUrgent.result, 'sent')
+  assertEquals(sys.queue.filter((q) => q.status === 'pending').length, 1, 'seul normal-3 en queue')
+  assertEquals(sys.sentRows().length, 3, '3 sent total (normal-1, normal-2, urgent-cap)')
+})
+
+// =============================================================
+// SIM 9 — __urgent avec cap journalier dépassé : envoi immédiat, queue vide
+// =============================================================
+Deno.test('SIM 9 — __urgent avec cap journalier saturé : envoyé immédiatement, queue vide', () => {
+  const sys = new FakeSystem()
+  const t = parisAt('2026-01-15', 10) // heure active
+  // 3 envois normaux pour saturer le cap journalier
+  for (let i = 0; i < 3; i++) {
+    sys.send(new Date(t.getTime() + i * 1000), 'user@x.com', 'review-reminder', `day-${i}`)
+  }
+  assertEquals(sys.sentRows().length, 3)
+
+  // 4e envoi normal → defer (cap jour)
+  const rNormal = sys.send(new Date(t.getTime() + 4000), 'user@x.com', 'review-reminder', 'day-3')
+  assertEquals(rNormal.result, 'deferred')
+
+  // Urgent → passe
+  const rUrgent = sys.send(new Date(t.getTime() + 5000), 'user@x.com', 'review-reminder', 'urgent-day', true)
+  assertEquals(rUrgent.result, 'sent')
+  assertEquals(sys.queue.filter((q) => q.status === 'pending').length, 1)
+  assertEquals(sys.sentRows().length, 4)
+})
+
+// =============================================================
+// SIM 10 — Bypass template (identity-verified) pendant quiet hours
+// =============================================================
+Deno.test('SIM 10 — bypass template en quiet hours : envoyé immédiatement, queue vide', () => {
+  const sys = new FakeSystem()
+  const t = parisAt('2026-01-15', 23) // quiet hours
+  const r = sys.send(t, 'user@x.com', 'identity-verified', 'bypass-quiet')
+
+  assertEquals(r.result, 'sent')
+  assertEquals(sys.sentRows().length, 1)
+  assertEquals(sys.queue.length, 0, 'aucune insertion dans la file différée pour bypass template')
