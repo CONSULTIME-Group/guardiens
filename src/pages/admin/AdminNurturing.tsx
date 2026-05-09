@@ -706,6 +706,32 @@ const AdminNurturing = () => {
             <StatCard label="Queue — suppressed" value={queueStats.suppressed} />
           </div>
 
+          <Card>
+            <CardHeader>
+              <CardTitle>Engagement global — l'email a-t-il déclenché de l'action ?</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-3">
+                <StatCard
+                  label="Taux d'ouverture"
+                  value={engagementStats.sent > 0 ? `${engagementStats.openRate}%` : "—"}
+                  hint={`${engagementStats.opens} / ${engagementStats.sent} envois (sous-estimé : Apple Mail Privacy)`}
+                />
+                <StatCard
+                  label="Taux de clic CTA"
+                  value={engagementStats.sent > 0 ? `${engagementStats.clickRate}%` : "—"}
+                  hint={`${engagementStats.clicks} / ${engagementStats.sent} envois`}
+                />
+                <StatCard
+                  label="Taux d'action"
+                  value={engagementStats.sent > 0 ? `${engagementStats.actionRate}%` : "—"}
+                  tone="ok"
+                  hint={`${engagementStats.actions} / ${engagementStats.sent} — clic CTA ou objectif atteint`}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
           <div className="grid gap-4 md:grid-cols-4">
             <StatCard label="Parcours créés (période)" value={journeyStats.total} />
             <StatCard label="Actifs" value={journeyStats.active} tone="ok" />
