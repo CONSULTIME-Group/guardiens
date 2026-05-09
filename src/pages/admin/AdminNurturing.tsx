@@ -607,7 +607,29 @@ const AdminNurturing = () => {
                     </div>
                   </div>
 
-                  {steps.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div className="bg-primary/5 border border-primary/15 rounded px-2 py-1.5">
+                      <p className="text-muted-foreground">Taux d'ouverture</p>
+                      <p className="font-semibold text-foreground text-base">
+                        {m.sent > 0 ? `${Math.round((m.opens / m.sent) * 100)}%` : "—"}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">{m.opens} / {m.sent}</p>
+                    </div>
+                    <div className="bg-primary/5 border border-primary/15 rounded px-2 py-1.5">
+                      <p className="text-muted-foreground">Taux de clic CTA</p>
+                      <p className="font-semibold text-foreground text-base">
+                        {m.sent > 0 ? `${Math.round((m.clicks / m.sent) * 100)}%` : "—"}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">{m.clicks} / {m.sent}</p>
+                    </div>
+                    <div className="bg-success/10 border border-success/25 rounded px-2 py-1.5">
+                      <p className="text-muted-foreground">Taux d'action</p>
+                      <p className="font-semibold text-success text-base">
+                        {m.sent > 0 ? `${Math.round((m.actions / m.sent) * 100)}%` : "—"}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">clic ou objectif</p>
+                    </div>
+                  </div>
                     <div className="text-xs">
                       <p className="text-muted-foreground mb-1.5">Étapes ({steps.length}) :</p>
                       <div className="flex flex-wrap gap-1.5">
