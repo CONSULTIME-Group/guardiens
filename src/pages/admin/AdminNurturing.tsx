@@ -169,6 +169,8 @@ const AdminNurturing = () => {
   const [lastRunSent, setLastRunSent] = useState<boolean>(false);
   const [sequences, setSequences] = useState<SequenceRow[]>([]);
   const [sequenceSteps, setSequenceSteps] = useState<SequenceStepRow[]>([]);
+  const [recipientsDialog, setRecipientsDialog] = useState<{ key: string; label: string } | null>(null);
+  const sinceIso = useMemo(() => new Date(Date.now() - RANGE_HOURS[range] * 3600_000).toISOString(), [range]);
 
   const fetchData = async () => {
     setLoading(true);
