@@ -232,10 +232,11 @@ const CreateSit = () => {
     load();
   }, [user, fromSitId, draftIdParam]);
 
-  // Auto-save draft (debounced) — fires after user edits
+  // Auto-save draft (debounced) — fires after first user edit
   useEffect(() => {
     if (!user || !property || !initialLoadedRef.current) return;
-    if (!hasUserEditedRef.current) return;
+    // Mark as edited on first state change after initial load
+    hasUserEditedRef.current = true;
     const t = setTimeout(async () => {
       await saveDraft({ silent: true });
     }, 1500);
