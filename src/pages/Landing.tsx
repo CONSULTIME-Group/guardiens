@@ -865,10 +865,10 @@ const Landing = () => {
               Guides &amp; villes
             </span>
             <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug mb-4">
-              Trouvez votre coin, lisez les bons conseils.
+              House-sitting près de chez vous : guides et villes.
             </h2>
             <p className="text-lg font-body text-foreground/70 max-w-2xl mx-auto">
-              Des guides pratiques pour préparer votre garde, et des hubs locaux pour les villes les plus actives.
+              Des guides pratiques pour préparer votre garde d'animaux, et des hubs locaux pour les villes les plus actives — Lyon, Annecy, Grenoble et toute la France.
             </p>
           </RevealSection>
 
