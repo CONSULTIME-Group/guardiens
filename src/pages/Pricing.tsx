@@ -300,7 +300,7 @@ const Pricing = () => {
  ? "Jusqu'au 14 juillet 2026, l'accès complet est offert — gardiens comme propriétaires. Aucune carte bancaire demandée."
  : "Gratuit pour les propriétaires. 6,99 €/mois pour les gardiens, avec 7 jours d'essai. C'est tout."}
  </p>
- <div className="flex flex-col sm:flex-row gap-3 justify-center">
+ <div data-testid="pricing-hero-cta" className="flex flex-col sm:flex-row gap-3 justify-center">
  <Link
  to={registerLink("owner")}
  className="inline-flex items-center justify-center bg-primary text-primary-foreground font-body font-semibold text-sm px-7 py-3.5 rounded-full hover:bg-primary/90 transition-colors min-h-[44px]"
