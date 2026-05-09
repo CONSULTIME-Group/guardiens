@@ -37,10 +37,10 @@ const IdentityRejectedEmail = ({ reason }: Props) => (
           dans le cadre du traitement de votre demande de vérification d'identité (art. 6.1.b RGPD).
           Pour exercer vos droits : contact@guardiens.fr.
         </Text>
-        <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
+        <Text style={footer}>L'équipe {SITE_NAME}</Text>
       </Container>
-    </Body>
-  </Html>
+      </Body>
+      </Html>
 )
 
 export const template = {

@@ -40,7 +40,7 @@ const NearbySitAlertEmail = ({
       </Preview>
       <Body style={main}>
         <Container style={container}>
-          <Heading style={h1}>Une annonce près de chez vous 🐾</Heading>
+          <Heading style={h1}>Une annonce près de chez vous</Heading>
 
           <Text style={text}>
             Bonjour{sitterFirstName ? ` ${sitterFirstName}` : ''},
@@ -55,13 +55,13 @@ const NearbySitAlertEmail = ({
           <Section style={card}>
             {sitTitle ? <Text style={cardTitle}>{sitTitle}</Text> : null}
             {ownerFirstName ? (
-              <Text style={cardLine}>👤 Proposée par {ownerFirstName}</Text>
+              <Text style={cardLine}>Proposée par {ownerFirstName}</Text>
             ) : null}
             {animalsSummary ? (
-              <Text style={cardLine}>🐾 {animalsSummary}</Text>
+              <Text style={cardLine}>{animalsSummary}</Text>
             ) : null}
             {startDate && endDate ? (
-              <Text style={cardLine}>📅 Du {startDate} au {endDate}</Text>
+              <Text style={cardLine}>Du {startDate} au {endDate}</Text>
             ) : null}
           </Section>
 
@@ -84,10 +84,10 @@ const NearbySitAlertEmail = ({
             {SITE_NAME} — Jérémie Martinot (SIRET 894 864 040 00015) ·
             contact@guardiens.fr
           </Text>
-          <Text style={footer}>À très vite, l'équipe {SITE_NAME} 🐾</Text>
+          <Text style={footer}>À très vite, l'équipe {SITE_NAME}</Text>
         </Container>
-      </Body>
-    </Html>
+        </Body>
+        </Html>
   )
 }
 

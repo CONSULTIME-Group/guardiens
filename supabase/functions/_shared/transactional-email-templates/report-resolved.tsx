@@ -59,10 +59,10 @@ const ReportResolvedEmail = ({ reason, status, adminNotes }: ReportResolvedProps
           dans le cadre de l'intérêt légitime lié à la modération de la communauté (art. 6.1.f RGPD).
           Pour exercer vos droits : contact@guardiens.fr.
         </Text>
-        <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
+        <Text style={footer}>L'équipe {SITE_NAME}</Text>
       </Container>
-    </Body>
-  </Html>
+      </Body>
+      </Html>
 )
 
 export const template = {

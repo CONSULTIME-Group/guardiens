@@ -41,10 +41,10 @@ const CancellationBySitterEmail = ({ cancellerFirstName, sitTitle, startDate, re
           dans le cadre du suivi de votre garde (art. 6.1.b RGPD — exécution du contrat).
           Pour exercer vos droits : contact@guardiens.fr.
         </Text>
-        <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
+        <Text style={footer}>L'équipe {SITE_NAME}</Text>
       </Container>
-    </Body>
-  </Html>
+      </Body>
+      </Html>
 )
 
 export const template = {

@@ -109,7 +109,7 @@ const ConseilsPublicationEmail = ({
                 attire les meilleurs gardiens. Bravo, et merci pour la qualité que vous
                 apportez à la communauté.
               </Text>
-            </Section>
+              </Section>
           ) : (
             <Section style={highlightBox}>
               <Text style={highlightTitle}>Ce que nous avons remarqué sur votre annonce</Text>
@@ -149,7 +149,7 @@ const ConseilsPublicationEmail = ({
             <Button style={button} href={isPerfect ? sitUrl : editUrl}>
               {isPerfect ? 'Voir mon annonce' : 'Compléter mon annonce'}
             </Button>
-          </Section>
+            </Section>
 
           <Hr style={hr} />
 
@@ -180,8 +180,8 @@ const ConseilsPublicationEmail = ({
 
           <Text style={footer}>L'équipe {SITE_NAME}</Text>
         </Container>
-      </Body>
-    </Html>
+        </Body>
+        </Html>
   )
 }
 

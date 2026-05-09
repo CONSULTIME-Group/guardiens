@@ -35,7 +35,7 @@ const RelancePieceIdentiteEmail = ({ firstName }: RelancePieceIdentiteProps) => 
               Tant que les deux fichiers (selfie + pièce d'identité) ne sont pas déposés ensemble,
               votre dossier ne peut pas être soumis à notre équipe et reste invisible côté modération.
             </Text>
-          </Section>
+            </Section>
 
           <Text style={text}>
             <strong>2 minutes suffisent</strong> pour finaliser&nbsp;:
@@ -49,7 +49,7 @@ const RelancePieceIdentiteEmail = ({ firstName }: RelancePieceIdentiteProps) => 
             <Button style={button} href={`${SITE_URL}/settings?tab=identity`}>
               Finaliser ma vérification
             </Button>
-          </Section>
+            </Section>
 
           <Text style={subtext}>
             Une fois la pièce déposée, notre équipe valide votre dossier sous 24 à 48&nbsp;h ouvrées
@@ -70,8 +70,8 @@ const RelancePieceIdentiteEmail = ({ firstName }: RelancePieceIdentiteProps) => 
 
           <Text style={footer}>À très vite sur {SITE_NAME}</Text>
         </Container>
-      </Body>
-    </Html>
+        </Body>
+        </Html>
   )
 }
 

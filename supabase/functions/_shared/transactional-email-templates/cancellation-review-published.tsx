@@ -36,10 +36,10 @@ const CancellationReviewPublishedEmail = ({ targetFirstName, profileUrl }: Props
           Les avis sont modérés conformément aux articles L. 111-7-2 du Code de la consommation.
           Pour exercer vos droits : contact@guardiens.fr.
         </Text>
-        <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
+        <Text style={footer}>L'équipe {SITE_NAME}</Text>
       </Container>
-    </Body>
-  </Html>
+      </Body>
+      </Html>
 )
 
 export const template = {

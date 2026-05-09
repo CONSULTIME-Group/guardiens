@@ -31,7 +31,7 @@ const DisputeResolvedEmail = ({ firstName, decision, category, adminNote }: Disp
         {accepted
           ? `Votre contestation a été acceptée — ${SITE_NAME}`
           : `Votre contestation a été examinée — ${SITE_NAME}`}
-      </Preview>
+        </Preview>
       <Body style={main}>
         <Container style={container}>
           <Heading style={h1}>
@@ -75,10 +75,10 @@ const DisputeResolvedEmail = ({ firstName, decision, category, adminNote }: Disp
             dans le cadre de l'intérêt légitime lié à la modération de la communauté (art. 6.1.f RGPD).
             Pour exercer vos droits : contact@guardiens.fr.
           </Text>
-          <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
+          <Text style={footer}>L'équipe {SITE_NAME}</Text>
         </Container>
-      </Body>
-    </Html>
+        </Body>
+        </Html>
   )
 }
 

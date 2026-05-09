@@ -27,7 +27,7 @@ const ReviewReceivedEmail = ({ firstName, reviewerName, sitTitle, sitId }: Props
       <Body style={main}>
         <Container style={container}>
           <Section style={starsSection}>
-            <Text style={starsText}>📝</Text>
+            <Text style={starsText}></Text>
           </Section>
 
           <Heading style={h1}>Un avis vous attend</Heading>
@@ -40,7 +40,7 @@ const ReviewReceivedEmail = ({ firstName, reviewerName, sitTitle, sitId }: Props
           </Text>
 
           <Section style={infoBox}>
-            <Text style={infoTitle}>📋 Bon à savoir</Text>
+            <Text style={infoTitle}>Bon à savoir</Text>
             <Text style={infoItem}>
               Les avis sont publiés simultanément, une fois que les deux parties ont donné le leur.
               Ni vous ni l'autre partie ne pouvez voir l'avis de l'autre avant publication.
@@ -48,13 +48,13 @@ const ReviewReceivedEmail = ({ firstName, reviewerName, sitTitle, sitId }: Props
             <Text style={infoItem}>
               Ce système « double aveugle » garantit des retours sincères et équitables.
             </Text>
-          </Section>
+            </Section>
 
           <Section style={ctaSection}>
             <Button style={button} href={reviewUrl}>
               Laisser mon avis
             </Button>
-          </Section>
+            </Section>
 
           <Hr style={hr} />
 
@@ -69,12 +69,12 @@ const ReviewReceivedEmail = ({ firstName, reviewerName, sitTitle, sitId }: Props
               du Code de la consommation et au décret n° 2017-1436. Chaque avis émane d'un membre
               ayant effectivement participé à la garde concernée.
             </Text>
-          </Section>
+            </Section>
 
-          <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
+          <Text style={footer}>L'équipe {SITE_NAME}</Text>
         </Container>
-      </Body>
-    </Html>
+        </Body>
+        </Html>
   )
 }
 

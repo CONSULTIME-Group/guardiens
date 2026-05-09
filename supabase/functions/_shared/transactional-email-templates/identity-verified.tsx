@@ -11,10 +11,10 @@ const SITE_URL = "https://guardiens.fr"
 const IdentityVerifiedEmail = () => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
-    <Preview>Votre identité a été vérifiée ✓</Preview>
+    <Preview>Votre identité a été vérifiée</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Identité vérifiée ✅</Heading>
+        <Heading style={h1}>Identité vérifiée</Heading>
         <Text style={text}>
           Votre identité a été vérifiée avec succès. Votre profil affiche maintenant le badge de confiance.
         </Text>
@@ -30,15 +30,15 @@ const IdentityVerifiedEmail = () => (
           dans le cadre du traitement de votre demande de vérification d'identité (art. 6.1.b RGPD).
           Pour exercer vos droits : contact@guardiens.fr.
         </Text>
-        <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
+        <Text style={footer}>L'équipe {SITE_NAME}</Text>
       </Container>
-    </Body>
-  </Html>
+      </Body>
+      </Html>
 )
 
 export const template = {
   component: IdentityVerifiedEmail,
-  subject: 'Votre identité a été vérifiée ✓',
+  subject: 'Votre identité a été vérifiée',
   displayName: 'Identité vérifiée',
   previewData: {},
 } satisfies TemplateEntry

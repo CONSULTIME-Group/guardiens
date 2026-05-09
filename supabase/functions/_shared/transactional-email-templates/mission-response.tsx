@@ -16,7 +16,7 @@ const MissionResponseEmail = ({ responderFirstName, missionTitle }: Props) => (
     <Preview>{responderFirstName || 'Un membre'} a répondu à votre mission</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Réponse à votre mission 🤝</Heading>
+        <Heading style={h1}>Réponse à votre mission</Heading>
         <Text style={text}>
           <strong>{responderFirstName || 'Un membre'}</strong> a répondu à votre mission
           {missionTitle ? ` "${missionTitle}"` : ''}.
@@ -33,10 +33,10 @@ const MissionResponseEmail = ({ responderFirstName, missionTitle }: Props) => (
           dans le cadre de l'intérêt légitime lié au bon fonctionnement du service d'entraide (art. 6.1.f RGPD).
           Pour exercer vos droits : contact@guardiens.fr.
         </Text>
-        <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
+        <Text style={footer}>L'équipe {SITE_NAME}</Text>
       </Container>
-    </Body>
-  </Html>
+      </Body>
+      </Html>
 )
 
 export const template = {

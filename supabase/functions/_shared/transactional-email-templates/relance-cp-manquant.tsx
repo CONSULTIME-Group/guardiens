@@ -40,7 +40,7 @@ const RelanceCpManquantEmail = ({ prenom, cta_url }: RelanceCpProps) => {
             <Button style={button} href={link}>
               Ajouter mon code postal
             </Button>
-          </Section>
+            </Section>
 
           <Text style={textMuted}>
             Sans cette information, votre profil n'est pas visible et vous
@@ -55,10 +55,10 @@ const RelanceCpManquantEmail = ({ prenom, cta_url }: RelanceCpProps) => {
             Pour exercer vos droits : contact@guardiens.fr.
           </Text>
 
-          <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
+          <Text style={footer}>L'équipe {SITE_NAME}</Text>
         </Container>
-      </Body>
-    </Html>
+        </Body>
+        </Html>
   )
 }
 

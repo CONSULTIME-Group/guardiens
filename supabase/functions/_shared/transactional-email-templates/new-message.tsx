@@ -59,10 +59,10 @@ const NewMessageEmail = ({
           {hasDetails ? (
             <Section style={detailsBox}>
               {contextCity ? (
-                <Text style={detailLine}><strong>📍 Lieu :</strong> {contextCity}</Text>
+                <Text style={detailLine}><strong>Lieu :</strong> {contextCity}</Text>
               ) : null}
               {contextDates ? (
-                <Text style={detailLine}><strong>📅 Dates :</strong> {contextDates}</Text>
+                <Text style={detailLine}><strong>Dates :</strong> {contextDates}</Text>
               ) : null}
             </Section>
           ) : null}
@@ -87,10 +87,10 @@ const NewMessageEmail = ({
             dans le cadre de l'intérêt légitime lié au bon fonctionnement du service de messagerie (art. 6.1.f RGPD).
             Pour exercer vos droits : contact@guardiens.fr.
           </Text>
-          <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
+          <Text style={footer}>L'équipe {SITE_NAME}</Text>
         </Container>
-      </Body>
-    </Html>
+        </Body>
+        </Html>
   )
 }
 

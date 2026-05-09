@@ -52,10 +52,10 @@ const SubscriptionExpires7dEmail = ({ firstName = '', renewalDate }: Subscriptio
           dans le cadre de la gestion de votre abonnement (art. 6.1.b RGPD — exécution du contrat).
           Pour exercer vos droits : contact@guardiens.fr.
         </Text>
-        <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
+        <Text style={footer}>L'équipe {SITE_NAME}</Text>
       </Container>
-    </Body>
-  </Html>
+      </Body>
+      </Html>
   )
 }
 

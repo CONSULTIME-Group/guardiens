@@ -45,20 +45,20 @@ const ReviewReminderEmail = ({ firstName, sitTitle, revieweeName, sitId, isOwner
 
           <Section style={benefitsBox}>
             <Text style={benefitTitle}>Pourquoi laisser un avis ?</Text>
-            <Text style={benefitItem}>🤝 Aidez la communauté à faire les bons choix</Text>
-            <Text style={benefitItem}>🏆 Valorisez {who} pour son investissement</Text>
-            <Text style={benefitItem}>📈 Améliorez votre propre score de confiance</Text>
+            <Text style={benefitItem}>Aidez la communauté à faire les bons choix</Text>
+            <Text style={benefitItem}>Valorisez {who} pour son investissement</Text>
+            <Text style={benefitItem}>Améliorez votre propre score de confiance</Text>
           </Section>
 
           <Section style={ctaSection}>
             <Button style={button} href={reviewUrl}>
               Laisser mon avis
             </Button>
-          </Section>
+            </Section>
 
           <Text style={note}>
             Votre avis sera publié une fois que les deux parties auront partagé le leur.
-            C'est plus juste pour tout le monde ! ✌️
+            C'est plus juste pour tout le monde !
           </Text>
 
           <Hr style={hr} />
@@ -69,10 +69,10 @@ const ReviewReminderEmail = ({ firstName, sitTitle, revieweeName, sitId, isOwner
             conformément aux articles L. 111-7-2 du Code de la consommation et au décret n° 2017-1436.
           </Text>
 
-          <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
+          <Text style={footer}>L'équipe {SITE_NAME}</Text>
         </Container>
-      </Body>
-    </Html>
+        </Body>
+        </Html>
   )
 }
 

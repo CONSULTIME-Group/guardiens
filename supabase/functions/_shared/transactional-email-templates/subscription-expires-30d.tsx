@@ -51,10 +51,10 @@ const SubscriptionExpires30dEmail = ({ firstName = '', renewalDate }: Subscripti
           Conformément à l'article L. 215-1 du Code de la consommation, vous êtes informé(e) du renouvellement
           automatique de votre abonnement. Pour exercer vos droits : contact@guardiens.fr.
         </Text>
-        <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
+        <Text style={footer}>L'équipe {SITE_NAME}</Text>
       </Container>
-    </Body>
-  </Html>
+      </Body>
+      </Html>
 )
 
 export const template = {

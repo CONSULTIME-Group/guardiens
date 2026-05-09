@@ -30,7 +30,7 @@ const SitConfirmedEmail = ({
     <Preview>Garde confirmée — votre gardien est sélectionné</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Garde confirmée 🎉</Heading>
+        <Heading style={h1}>Garde confirmée</Heading>
         <Text style={text}>
           Vous avez sélectionné <strong>{sitterFirstName || 'un gardien'}</strong> pour
           {sitTitle ? ` votre garde « ${sitTitle} »` : ' votre garde'}.
@@ -51,7 +51,7 @@ const SitConfirmedEmail = ({
           <Text style={cardLine}>
             <strong>Gardien :</strong> {sitterFirstName || '—'}
           </Text>
-        </Section>
+          </Section>
 
         <Text style={text}>
           <strong>Prochaines étapes :</strong>
@@ -72,18 +72,18 @@ const SitConfirmedEmail = ({
           dans le cadre de la confirmation de votre garde (art. 6.1.b RGPD — exécution du contrat).
           Pour exercer vos droits : contact@guardiens.fr.
         </Text>
-        <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
+        <Text style={footer}>L'équipe {SITE_NAME}</Text>
       </Container>
-    </Body>
-  </Html>
+      </Body>
+      </Html>
 )
 
 export const template = {
   component: SitConfirmedEmail,
   subject: (data: Record<string, any>) =>
     data?.sitterFirstName
-      ? `Garde confirmée avec ${data.sitterFirstName} 🎉`
-      : 'Garde confirmée 🎉',
+      ? `Garde confirmée avec ${data.sitterFirstName}`
+      : 'Garde confirmée',
   displayName: 'Garde confirmée (propriétaire)',
   previewData: {
     sitTitle: 'Garde Mistigri & Pacha',

@@ -29,26 +29,26 @@ const RelanceProfilIncompletEmail = ({ firstName }: RelanceProfilIncompletProps)
           </Text>
 
           <Section style={highlightBox}>
-            <Text style={highlightTitle}>⚠️ Votre profil est actuellement invisible</Text>
+            <Text style={highlightTitle}>Votre profil est actuellement invisible</Text>
             <Text style={highlightText}>
               Tant que votre profil n'atteint pas <strong>60 % de complétion</strong>, il n'apparaît
               pas dans les recherches et vous ne pouvez ni candidater à une garde, ni proposer la vôtre.
             </Text>
-          </Section>
+            </Section>
 
           <Text style={text}>
             <strong>3 informations suffisent</strong> pour débloquer votre profil :
           </Text>
 
-          <Text style={listItem}>✅ Une photo de profil</Text>
-          <Text style={listItem}>✅ Votre code postal</Text>
-          <Text style={listItem}>✅ Une courte présentation (3 lignes)</Text>
+          <Text style={listItem}>Une photo de profil</Text>
+          <Text style={listItem}>Votre code postal</Text>
+          <Text style={listItem}>Une courte présentation (3 lignes)</Text>
 
           <Section style={ctaSection}>
             <Button style={button} href={`${SITE_URL}/profile`}>
               Compléter mon profil maintenant
             </Button>
-          </Section>
+            </Section>
 
           <Text style={subtext}>
             ⏱ Temps estimé : 3 minutes — et votre profil rejoint les centaines de membres
@@ -67,10 +67,10 @@ const RelanceProfilIncompletEmail = ({ firstName }: RelanceProfilIncompletProps)
             Pour exercer vos droits (accès, rectification, suppression) : contact@guardiens.fr.
           </Text>
 
-          <Text style={footer}>À très vite sur {SITE_NAME} 🐾</Text>
+          <Text style={footer}>À très vite sur {SITE_NAME}</Text>
         </Container>
-      </Body>
-    </Html>
+        </Body>
+        </Html>
   )
 }
 

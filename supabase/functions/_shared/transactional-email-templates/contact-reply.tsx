@@ -36,12 +36,12 @@ const ContactReplyEmail = ({ firstName, originalMessage, replyBody }: ContactRep
           Pour exercer vos droits (accès, rectification, suppression) : contact@guardiens.fr.
         </Text>
         <Text style={footer}>
-          L'équipe {SITE_NAME} 🐾 —{' '}
+          L'équipe {SITE_NAME} —{' '}
           <Link href="https://guardiens.fr" style={link}>guardiens.fr</Link>
         </Text>
-      </Container>
-    </Body>
-  </Html>
+        </Container>
+        </Body>
+        </Html>
 )
 
 export const template = {

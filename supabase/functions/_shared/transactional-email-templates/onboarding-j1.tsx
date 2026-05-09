@@ -38,7 +38,7 @@ const OnboardingJ1Email = ({ firstName }: OnboardingJ1Props) => {
             <Button style={button} href={`${SITE_URL}/profile`}>
               Compléter mon profil
             </Button>
-          </Section>
+            </Section>
 
           <Hr style={hr} />
 
@@ -48,10 +48,10 @@ const OnboardingJ1Email = ({ firstName }: OnboardingJ1Props) => {
             Pour exercer vos droits (accès, rectification, suppression) : contact@guardiens.fr.
           </Text>
 
-          <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
+          <Text style={footer}>L'équipe {SITE_NAME}</Text>
         </Container>
-      </Body>
-    </Html>
+        </Body>
+        </Html>
   )
 }
 

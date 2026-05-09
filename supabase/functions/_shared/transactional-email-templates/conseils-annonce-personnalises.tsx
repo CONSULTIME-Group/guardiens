@@ -130,7 +130,7 @@ const ConseilsAnnoncePersoEmail = ({
               : <>Les gardiens ont besoin de savoir à quoi ressemble une journée chez vous :
                   horaires des repas, soins, sorties, habitudes des animaux. Plus c'est
                   concret, plus vous attirez les bons profils.</>}
-          </Text>
+                </Text>
 
           <Text style={listTitle}>3. Présenter les environs</Text>
           <Text style={text}>
@@ -150,7 +150,7 @@ const ConseilsAnnoncePersoEmail = ({
             <Button style={button} href={editUrl}>
               Mettre à jour mon annonce
             </Button>
-          </Section>
+            </Section>
 
           <Hr style={hr} />
 
@@ -179,8 +179,8 @@ const ConseilsAnnoncePersoEmail = ({
 
           <Text style={footer}>L'équipe {SITE_NAME}</Text>
         </Container>
-      </Body>
-    </Html>
+        </Body>
+        </Html>
   )
 }
 

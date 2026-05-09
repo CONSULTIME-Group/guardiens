@@ -16,7 +16,7 @@ const ApplicationAcceptedEmail = ({ sitTitle, ownerFirstName }: Props) => (
     <Preview>Bonne nouvelle — votre candidature est acceptée !</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Candidature acceptée ! 🎉</Heading>
+        <Heading style={h1}>Candidature acceptée !</Heading>
         <Text style={text}>
           {ownerFirstName || 'Le propriétaire'} a accepté votre candidature
           {sitTitle ? ` pour "${sitTitle}"` : ''} !
@@ -33,10 +33,10 @@ const ApplicationAcceptedEmail = ({ sitTitle, ownerFirstName }: Props) => (
           dans le cadre du traitement de votre candidature (art. 6.1.b RGPD — exécution du contrat).
           Pour exercer vos droits : contact@guardiens.fr.
         </Text>
-        <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
+        <Text style={footer}>L'équipe {SITE_NAME}</Text>
       </Container>
-    </Body>
-  </Html>
+      </Body>
+      </Html>
 )
 
 export const template = {

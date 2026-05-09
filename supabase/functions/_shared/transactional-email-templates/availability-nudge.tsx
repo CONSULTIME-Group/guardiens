@@ -60,9 +60,9 @@ const AvailabilityNudgeEmail = ({
             {SITE_NAME} — Jérémie Martinot (SIRET 894 864 040 00015) ·
             contact@guardiens.fr
           </Text>
-        </Container>
-      </Body>
-    </Html>
+          </Container>
+          </Body>
+          </Html>
   )
 }
 

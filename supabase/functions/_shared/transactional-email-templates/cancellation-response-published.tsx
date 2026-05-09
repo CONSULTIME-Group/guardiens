@@ -32,10 +32,10 @@ const CancellationResponsePublishedEmail = ({ responderFirstName, profileUrl }: 
           dans le cadre de la gestion des avis (art. 6.1.f RGPD — intérêt légitime).
           Pour exercer vos droits : contact@guardiens.fr.
         </Text>
-        <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
+        <Text style={footer}>L'équipe {SITE_NAME}</Text>
       </Container>
-    </Body>
-  </Html>
+      </Body>
+      </Html>
 )
 
 export const template = {

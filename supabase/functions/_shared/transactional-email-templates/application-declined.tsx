@@ -21,7 +21,7 @@ const ApplicationDeclinedEmail = ({ sitTitle }: Props) => (
           Malheureusement, votre candidature{sitTitle ? ` pour "${sitTitle}"` : ''} n'a pas été retenue par le propriétaire.
         </Text>
         <Text style={text}>
-          Ne vous découragez pas ! De nouvelles gardes sont publiées chaque jour. Continuez à postuler, le bon match arrivera bientôt 💪
+          Ne vous découragez pas ! De nouvelles gardes sont publiées chaque jour. Continuez à postuler, le bon match arrivera bientôt
         </Text>
         <Button style={button} href={`${SITE_URL}/sits`}>
           Voir les gardes disponibles
@@ -32,10 +32,10 @@ const ApplicationDeclinedEmail = ({ sitTitle }: Props) => (
           dans le cadre du traitement de votre candidature (art. 6.1.b RGPD — exécution du contrat).
           Pour exercer vos droits : contact@guardiens.fr.
         </Text>
-        <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
+        <Text style={footer}>L'équipe {SITE_NAME}</Text>
       </Container>
-    </Body>
-  </Html>
+      </Body>
+      </Html>
 )
 
 export const template = {
