@@ -254,6 +254,17 @@ const StatusBadge = ({ status }: { status: string }) => {
   return <Badge variant={config.variant} className="text-xs">{config.label}</Badge>;
 };
 
+const UrgencyBadge = ({ metadata }: { metadata?: { bypass?: boolean; isUrgent?: boolean } | null }) => {
+  if (!metadata) return <Badge variant="outline" className="text-muted-foreground text-[10px]">Standard</Badge>;
+  if (metadata.isUrgent) {
+    return <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 text-[10px]">Urgent</Badge>;
+  }
+  if (metadata.bypass) {
+    return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-[10px]">Bypass</Badge>;
+  }
+  return <Badge variant="outline" className="text-muted-foreground text-[10px]">Standard</Badge>;
+};
+
 // ── Logs tab ──
 const LogsTab = () => {
   const [logs, setLogs] = useState<any[]>([]);
