@@ -682,7 +682,7 @@ const AdminNurturing = () => {
                     <TableBody>
                       {reasonBreakdown.map((r) => (
                         <TableRow key={r.reason}>
-                          <TableCell className="font-mono text-xs">{r.reason}</TableCell>
+                          <TableCell className="text-sm" title={r.reason}>{labelReason(r.reason)}</TableCell>
                           <TableCell className="text-right">
                             <Badge
                               variant={
