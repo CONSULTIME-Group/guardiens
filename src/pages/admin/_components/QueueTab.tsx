@@ -255,7 +255,7 @@ export function QueueTab() {
                 <TableBody>
                   {logRows.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="text-center text-sm text-muted-foreground py-8">
+                      <TableCell colSpan={10} className="text-center text-sm text-muted-foreground py-8">
                         Aucun résultat.
                       </TableCell>
                     </TableRow>
@@ -264,6 +264,7 @@ export function QueueTab() {
                       <TableRow key={r.id}>
                         <TableCell className="text-xs whitespace-nowrap">{fmt(r.created_at)}</TableCell>
                         <TableCell className="text-xs font-mono">{r.template_name}</TableCell>
+                        <TableCell>{urgencyBadge(r.metadata)}</TableCell>
                         <TableCell className="text-sm">{r.recipient_email}</TableCell>
                         <TableCell>{statusBadge(r.status)}</TableCell>
                         <TableCell className="text-xs whitespace-nowrap">{fmt(r.delivered_at)}</TableCell>
