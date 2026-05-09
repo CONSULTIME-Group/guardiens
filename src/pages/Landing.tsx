@@ -897,7 +897,7 @@ const Landing = () => {
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">01</p>
                 <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Gratuit pour les propriétaires</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Annonce, candidatures, messagerie : tout est sans frais, sans abonnement requis. Pas de carte bancaire demandée.
+                  Annonce, candidatures, messagerie : tout est sans frais, sans abonnement. Pas de carte bancaire demandée.
                 </p>
               </article>
 
