@@ -710,8 +710,19 @@ const Landing = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <RevealSection delay={0.1}>
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                  <span className="text-2xl font-heading font-bold text-primary">1</span>
+                <div className="relative mx-auto mb-6 w-40 h-40 rounded-2xl overflow-hidden bg-card border border-border">
+                  <img
+                    src={howtoStep1}
+                    alt="Illustration gouache d'une porte de cottage en pierre avec une petite annonce épinglée."
+                    width={768}
+                    height={768}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-2 left-2 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-base shadow-md">
+                    1
+                  </div>
                 </div>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Décrivez votre garde</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70">
@@ -722,8 +733,19 @@ const Landing = () => {
 
             <RevealSection delay={0.2}>
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                  <span className="text-2xl font-heading font-bold text-primary">2</span>
+                <div className="relative mx-auto mb-6 w-40 h-40 rounded-2xl overflow-hidden bg-card border border-border">
+                  <img
+                    src={howtoStep2}
+                    alt="Illustration gouache de deux mains qui se rapprochent autour d'une table avec deux tasses de thé et un chat endormi."
+                    width={768}
+                    height={768}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-2 left-2 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-base shadow-md">
+                    2
+                  </div>
                 </div>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Recevez des candidatures</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70">
@@ -734,8 +756,19 @@ const Landing = () => {
 
             <RevealSection delay={0.3}>
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                  <span className="text-2xl font-heading font-bold text-primary">3</span>
+                <div className="relative mx-auto mb-6 w-40 h-40 rounded-2xl overflow-hidden bg-card border border-border">
+                  <img
+                    src={howtoStep3}
+                    alt="Illustration gouache d'une petite valise vintage devant une fenêtre, un chat sur le rebord."
+                    width={768}
+                    height={768}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-2 left-2 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-base shadow-md">
+                    3
+                  </div>
                 </div>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Partez sereinement</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70">
