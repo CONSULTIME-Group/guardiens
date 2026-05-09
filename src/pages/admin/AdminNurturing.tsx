@@ -253,10 +253,33 @@ const AdminNurturing = () => {
   const journeyStats = useMemo(() => {
     const total = journeys.length;
     const active = journeys.filter((j) => j.status === "active").length;
-    const completed = journeys.filter((j) => j.status === "completed").length;
     const exited = journeys.filter((j) => j.status === "exited").length;
-    return { total, active, completed, exited };
+    return { total, active, exited };
   }, [journeys]);
+
+  const cronHealth = useMemo(() => {
+    if (!lastRunAt) return { label: "Jamais exécuté", tone: "err" as const, ageMin: null as number | null };
+    const ageMin = Math.round((Date.now() - new Date(lastRunAt).getTime()) / 60_000);
+    let tone: "ok" | "warn" | "err" = "ok";
+    if (ageMin > 24 * 60) tone = "err";
+    else if (ageMin > 60) tone = "warn";
+    const label = ageMin < 60 ? `il y a ${ageMin} min` : `il y a ${Math.round(ageMin / 60)} h`;
+    return { label, tone, ageMin };
+  }, [lastRunAt]);
+
+  // Bannière contextuelle : tous les échecs de la fenêtre concentrés sur 1 seul jour ancien
+  // ET dernier run récent et propre → on rassure plutôt que d'alarmer.
+  const failureBurst = useMemo(() => {
+    const failures = logs.filter((l) => !l.sent && l.reason !== "exit_condition_met");
+    if (failures.length === 0) return null;
+    const days = new Set(failures.map((f) => f.created_at.slice(0, 10)));
+    if (days.size > 1) return null;
+    const onlyDay = Array.from(days)[0];
+    const ageDays = Math.floor((Date.now() - new Date(onlyDay).getTime()) / 86400_000);
+    if (ageDays < 1) return null;
+    const lastRunOk = !!lastRunAt && Date.now() - new Date(lastRunAt).getTime() < 6 * 3600_000 && lastRunSent;
+    return { count: failures.length, day: onlyDay, ageDays, lastRunOk };
+  }, [logs, lastRunAt, lastRunSent]);
 
   const recentFailures = useMemo(
     () => logs.filter((l) => !l.sent && l.reason !== "exit_condition_met").slice(0, 30),
