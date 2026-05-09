@@ -87,8 +87,8 @@ export const template = {
   component: DisputeResolvedEmail,
   subject: (data: Record<string, any>) =>
     data?.decision === 'accepted'
-      ? 'Votre contestation a été acceptée'
-      : 'Votre contestation a été examinée',
+      ? 'Votre contestation a été acceptée — Guardiens'
+      : 'Votre contestation a été examinée — Guardiens',
   displayName: "Contestation d'avis résolue",
   previewData: { firstName: 'Camille', decision: 'accepted', category: 'diffamation', adminNote: "Propos jugés excessifs au regard du contexte." },
 } satisfies TemplateEntry

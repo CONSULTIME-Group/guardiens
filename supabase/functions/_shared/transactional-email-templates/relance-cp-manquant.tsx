@@ -64,7 +64,7 @@ const RelanceCpManquantEmail = ({ prenom, cta_url }: RelanceCpProps) => {
 
 export const template = {
   component: RelanceCpManquantEmail,
-  subject: 'Indiquez votre ville pour voir les annonces près de chez vous',
+  subject: 'Indiquez votre ville pour voir les annonces près de chez vous — Guardiens',
   displayName: 'Relance code postal manquant',
   previewData: { prenom: 'Marie', cta_url: 'https://guardiens.fr/profile?focus=postal_code' },
 } satisfies TemplateEntry

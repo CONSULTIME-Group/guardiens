@@ -82,8 +82,8 @@ export const template = {
   component: SitConfirmedEmail,
   subject: (data: Record<string, any>) =>
     data?.sitterFirstName
-      ? `Garde confirmée avec ${data.sitterFirstName}`
-      : 'Garde confirmée',
+      ? `Garde confirmée avec ${data.sitterFirstName} — Guardiens`
+      : 'Garde confirmée — Guardiens',
   displayName: 'Garde confirmée (propriétaire)',
   previewData: {
     sitTitle: 'Garde Mistigri & Pacha',

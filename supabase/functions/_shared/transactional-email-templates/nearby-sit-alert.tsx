@@ -91,8 +91,8 @@ export const template = {
   component: NearbySitAlertEmail,
   subject: (data: Record<string, any>) =>
     data.city
-      ? `Nouvelle annonce à ${data.city} — un coup de patte ?`
-      : `Nouvelle annonce près de chez vous — un coup de patte ?`,
+      ? `Nouvelle annonce à ${data.city} — Guardiens`
+      : 'Nouvelle annonce près de chez vous — Guardiens',
   displayName: 'Alerte annonce locale (gardien)',
   previewData: {
     sitterFirstName: 'Faïza',

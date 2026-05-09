@@ -186,7 +186,7 @@ const ConseilsAnnoncePersoEmail = ({
 
 export const template = {
   component: ConseilsAnnoncePersoEmail,
-  subject: 'Quelques conseils pour rendre votre annonce irrésistible',
+  subject: 'Quelques conseils pour rendre votre annonce irrésistible — Guardiens',
   displayName: 'Conseils annonce personnalisés',
   previewData: {
     firstName: 'Patricia',

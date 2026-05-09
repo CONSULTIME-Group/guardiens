@@ -58,7 +58,7 @@ const SubscriptionExpires30dEmail = ({ firstName = '', renewalDate }: Subscripti
 
 export const template = {
   component: SubscriptionExpires30dEmail,
-  subject: 'Votre abonnement Guardiens se renouvelle dans 30 jours',
+  subject: 'Votre abonnement se renouvelle dans 30 jours — Guardiens',
   displayName: 'Renouvellement abonnement dans 30 jours',
   previewData: { firstName: 'Marie', renewalDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() },
 } satisfies TemplateEntry

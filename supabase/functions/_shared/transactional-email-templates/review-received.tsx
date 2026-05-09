@@ -74,8 +74,8 @@ export const template = {
   component: ReviewReceivedEmail,
   subject: (data: Record<string, any>) =>
     data.reviewerName
-      ? `${data.reviewerName} a laissé un avis — à votre tour !`
-      : 'Un avis a été laissé — à votre tour !',
+      ? `${data.reviewerName} a laissé un avis — à votre tour — Guardiens`
+      : 'Un avis a été laissé — à votre tour — Guardiens',
   displayName: 'Invitation avis (autre partie)',
   previewData: {
     firstName: 'Marie',

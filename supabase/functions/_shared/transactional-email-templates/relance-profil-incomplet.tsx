@@ -76,7 +76,7 @@ const RelanceProfilIncompletEmail = ({ firstName }: RelanceProfilIncompletProps)
 
 export const template = {
   component: RelanceProfilIncompletEmail,
-  subject: 'Votre profil Guardiens est encore invisible — débloquez-le en 3 minutes',
+  subject: 'Votre profil est encore invisible — débloquez-le en 3 minutes — Guardiens',
   displayName: 'Relance profil incomplet (J+2)',
   previewData: { firstName: 'Marie' },
 } satisfies TemplateEntry

@@ -68,7 +68,7 @@ const ReportResolvedEmail = ({ reason, status, adminNotes }: ReportResolvedProps
 
 export const template = {
   component: ReportResolvedEmail,
-  subject: 'Votre signalement a été traité',
+  subject: 'Votre signalement a été traité — Guardiens',
   displayName: 'Signalement traité',
   previewData: { reason: 'inappropriate', status: 'resolved', adminNotes: 'Le contenu a été retiré.' },
 } satisfies TemplateEntry
