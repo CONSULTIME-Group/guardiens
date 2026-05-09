@@ -745,13 +745,13 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 2bis — CE QUI ARRIVE EN PLUS ═══════════════ */}
-      <section className="py-28 md:py-36 bg-accent/40 border-y border-accent">
+      <section id="rencontre" className="py-28 md:py-36 bg-accent/40 border-y border-accent scroll-mt-24">
         <div className="max-w-3xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/70 font-body mb-6 block text-center">
               Ce qu'on n'écrit jamais dans une annonce
             </span>
-            <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.15] text-foreground text-center mb-10">
+            <h2 id="le-vrai-pretexte" className="font-heading text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.15] text-foreground text-center mb-10 scroll-mt-24">
               Le vrai prétexte,<br className="hidden md:inline" /> c'est la rencontre.
             </h2>
 
