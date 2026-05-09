@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import notreHistoirePanorama from "@/assets/story-photo.webp";
 import franceLocalNational from "@/assets/illustrations/france-local-national.webp";
-import howtoStep1 from "@/assets/illustrations/howto-step-1-annonce.jpg";
-import howtoStep2 from "@/assets/illustrations/howto-step-2-rencontre.jpg";
-import howtoStep3 from "@/assets/illustrations/howto-step-3-depart.jpg";
+import howtoStep1 from "@/assets/illustrations/howto-step-1-annonce.png";
+import howtoStep2 from "@/assets/illustrations/howto-step-2-rencontre.png";
+import howtoStep3 from "@/assets/illustrations/howto-step-3-depart.png";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft } from "lucide-react";
@@ -713,17 +713,17 @@ const Landing = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <RevealSection delay={0.1}>
               <div className="text-center">
-                <div className="relative mx-auto mb-6 w-40 h-40 rounded-2xl overflow-hidden bg-card border border-border">
+                <div className="relative mx-auto mb-4 w-56 h-56">
                   <img
                     src={howtoStep1}
-                    alt="Illustration gouache d'une porte de cottage en pierre avec une petite annonce épinglée."
-                    width={768}
-                    height={768}
+                    alt="Illustration gouache d'un cottage en pierre avec un chat à la fenêtre et un chien à la porte."
+                    width={1024}
+                    height={1024}
                     loading="lazy"
                     decoding="async"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
-                  <div className="absolute top-2 left-2 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-base shadow-md">
+                  <div className="absolute top-0 left-0 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-base shadow-md">
                     1
                   </div>
                 </div>
@@ -736,17 +736,17 @@ const Landing = () => {
 
             <RevealSection delay={0.2}>
               <div className="text-center">
-                <div className="relative mx-auto mb-6 w-40 h-40 rounded-2xl overflow-hidden bg-card border border-border">
+                <div className="relative mx-auto mb-4 w-56 h-56">
                   <img
                     src={howtoStep2}
-                    alt="Illustration gouache de deux mains qui se rapprochent autour d'une table avec deux tasses de thé et un chat endormi."
-                    width={768}
-                    height={768}
+                    alt="Illustration gouache de deux personnes qui se serrent la main autour d'une table, un chat et un chien à leurs côtés."
+                    width={1024}
+                    height={1024}
                     loading="lazy"
                     decoding="async"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
-                  <div className="absolute top-2 left-2 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-base shadow-md">
+                  <div className="absolute top-0 left-0 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-base shadow-md">
                     2
                   </div>
                 </div>
@@ -759,17 +759,17 @@ const Landing = () => {
 
             <RevealSection delay={0.3}>
               <div className="text-center">
-                <div className="relative mx-auto mb-6 w-40 h-40 rounded-2xl overflow-hidden bg-card border border-border">
+                <div className="relative mx-auto mb-4 w-56 h-56">
                   <img
                     src={howtoStep3}
-                    alt="Illustration gouache d'une petite valise vintage devant une fenêtre, un chat sur le rebord."
-                    width={768}
-                    height={768}
+                    alt="Illustration gouache d'une valise vintage prête au départ avec un chat et un chien à côté."
+                    width={1024}
+                    height={1024}
                     loading="lazy"
                     decoding="async"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
-                  <div className="absolute top-2 left-2 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-base shadow-md">
+                  <div className="absolute top-0 left-0 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-base shadow-md">
                     3
                   </div>
                 </div>
