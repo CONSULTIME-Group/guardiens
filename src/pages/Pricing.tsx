@@ -10,6 +10,7 @@ import { Check, MapPin } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import PublicHeader from "@/components/layout/PublicHeader";
+import FreePeriodBanner from "@/components/marketing/FreePeriodBanner";
 import PublicFooter from "@/components/layout/PublicFooter";
 import FreeAccountSection from "@/components/subscription/FreeAccountSection";
 import SecurityTrustSection from "@/components/subscription/SecurityTrustSection";
