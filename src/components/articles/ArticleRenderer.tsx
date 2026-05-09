@@ -217,9 +217,12 @@ export default function ArticleRenderer({ content, userRole, slug }: ArticleRend
   html = addEndCTA(html, slug);
   html = adaptEndCTAsForRole(html, userRole);
 
+  // `data-user-logged-in` permet de masquer le CTA mid en CSS pour les
+  // utilisateurs connectés (cf. règle dans index.css).
   return (
     <div
       className="article-rich-content"
+      data-user-logged-in={userRole ? "true" : "false"}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
