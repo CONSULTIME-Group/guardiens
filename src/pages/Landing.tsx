@@ -430,9 +430,12 @@ const Landing = () => {
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
               Ce qu'on fait ensemble
             </span>
-            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-16">
-              Trois façons de vivre quelque chose.
+            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-3">
+              Home sitting, garde d'animaux et entraide entre gens du coin.
             </h2>
+            <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16 italic">
+              Trois façons de vivre quelque chose.
+            </p>
           </RevealSection>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
