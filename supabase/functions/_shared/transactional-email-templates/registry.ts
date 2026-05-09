@@ -76,4 +76,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'sitter-encourage-candidature': sitterEncourageCandidature,
   'discover-mutual-aid-1': discoverMutualAid1,
   'discover-mutual-aid-2': discoverMutualAid2,
+  'discover-mutual-aid-0': discoverMutualAid0,
 }
