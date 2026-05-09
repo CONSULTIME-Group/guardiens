@@ -1,63 +1,97 @@
-## Refonte AdminNurturing — Contrôle complet de l'engagement
 
-Aujourd'hui le dashboard agrège tout au niveau séquence. On va descendre jusqu'à **l'étape**, **l'utilisateur** et **le CTA cliqué** pour pouvoir répondre à : *quel contenu fonctionne, qui agit, sur quoi ?*
+## 1. Pourquoi « plein de msgs envoyés » alors que la page vient d'être mise en ligne
 
----
+La page `/admin/nurturing` est **un nouveau tableau de bord**, mais **le moteur de nurturing tourne depuis avril 2026**. Le cron `evaluate-journeys` parcourt les utilisateurs toutes les heures et envoie les bons emails au bon moment, sans dashboard.
 
-### Nouveaux blocs ajoutés à `/admin/nurturing`
+Ce que disent les données aujourd'hui (9 mai) :
 
-**1. Classement des étapes par taux d'action (Top / Flop)**
-Tableau triable agrégé par `(sequence_key, step_order, template_name)` :
-- Envoyés · Ouvertures (%) · Clics CTA (%) · **Taux d'action (%)** · Sorties objectif
-- Tri par défaut : taux d'action décroissant
-- Surligne les étapes avec ≥ 10 envois (signal statistique minimal) en vert si ≥ 30% d'action, rouge si < 10%
-- Permet de voir d'un coup d'œil quels emails *créent vraiment de l'action*
+- **124 emails de nurturing envoyés ce jour** (rien d'anormal — rattrapage de tous les profils éligibles depuis l'activation des nouvelles séquences) :
+  - 45 « Bienvenue J+1 »
+  - 37 « Encouragement à candidater » (gardiens sans candidature)
+  - 24 « Relance profil incomplet »
+  - 18 « Conseils pour publier l'annonce »
+- Les **533 « signup » et 460 « welcome »** visibles dans `email_send_log` ne sont **PAS du nurturing** : ce sont des emails **transactionnels / auth** envoyés par Supabase à chaque inscription. Ils n'apparaissent pas dans cette page.
 
-**2. Classement des CTA cliqués (par URL)**
-Tableau agrégé sur `email_engagement_events.target_url` (event_type = click) :
-- URL · Template d'origine · Nombre de clics · Cliqueurs uniques
-- Trié par clics décroissants
-- Répond à : « quel bouton/lien fait bouger les gens ? »
-
-**3. Drill-down par séquence : « Voir les destinataires »**
-Bouton sur chaque carte séquence → ouvre une modale avec la liste des utilisateurs du parcours :
-- Nom + email · Étape actuelle · Statut (active / exited / dropped)
-- Timeline mini : pour chaque step, indicateurs Envoyé / Ouvert / Cliqué (3 pastilles colorées)
-- Date de sortie + raison (`exit_condition_met` / `dropped` / `failed`)
-- Lien vers le profil utilisateur
-- Pagination (50 par page)
-
-**4. Filtre temporel global**
-Sélecteur déjà présent (24h / 7j / 30j) appliqué partout : KPI globaux, KPI par séquence, classements, drill-down.
+Concrètement : la page ne « génère » aucun envoi, elle ne fait que **révéler** ce que le système faisait déjà en silence.
 
 ---
 
-### Détails techniques
+## 2. Audit UX de la page actuelle
 
-**Pas de migration DB** : tout est calculable depuis les tables existantes (`journey_step_log`, `email_engagement_events`, `journey_enrollments`, `profiles`).
+La page fait **1 151 lignes** et empile une dizaine de blocs sans hiérarchie claire. Problèmes :
 
-**Agrégations** :
-- Top étapes : group by `(sequence_key, step_order)` sur `journey_step_log` joint à `email_engagement_events` via `message_id`
-- Top URLs : group by `target_url` sur `email_engagement_events` filtré `event_type='click'` joint au log pour récupérer le template
-- Drill-down : query lazy au clic sur le bouton, pas chargé d'office (perf)
-
-**Définition « action »** : conservée — clic CTA OU `exit_condition_met` dans les 7 jours suivant l'envoi.
-
-**Composants nouveaux** :
-- `<TopStepsTable>` : rangée Top/Flop dans une `Card` après les KPI globaux engagement
-- `<TopCtaTable>` : à côté ou en dessous
-- `<SequenceRecipientsDialog>` : modale shadcn, déclenchée par bouton « Voir destinataires »
-
-**Aucun changement** côté edge functions ou tracking — les données sont déjà collectées depuis l'implémentation précédente.
+| Constat | Impact |
+|---|---|
+| Plage par défaut = **30 jours** | Difficile de voir ce qui se passe « en ce moment » |
+| Titre « Suivi des envois » | Ne dit pas à quoi sert la page |
+| Pas d'indicateur unique de **santé du système** (cron + queue + taux d'envoi) | L'admin doit lire 5 cartes pour savoir si tout va bien |
+| Glossaire + Séquences + Top steps + Top CTA + Erreurs + Queue + Timeline + Reason breakdown sur **une seule page scrollable** | Surcharge cognitive |
+| Pas de bouton « **Lancer evaluate-journeys maintenant** » | Pour tester ou rattraper, il faut attendre l'heure pile |
+| Pas de vue « **prochains envois prévus** » | On voit ce qui est parti, jamais ce qui va partir |
+| Carte « Top contenus » et « Top CTA » noyées en bas | Le levier d'optimisation est invisible |
 
 ---
 
-### Ordre d'exécution
+## 3. Refonte proposée
 
-1. Hook `useTopSteps` + composant `<TopStepsTable>`
-2. Hook `useTopCtas` + composant `<TopCtaTable>`
-3. Bouton + dialog `<SequenceRecipientsDialog>` avec query lazy
-4. Insertion dans `AdminNurturing.tsx` après le bloc Engagement global
-5. Vérif build + visuel
+### a. En-tête « Pilotage du nurturing »
 
-Estimation : ~300-400 lignes ajoutées, réparties en 3 nouveaux fichiers + insertion dans la page existante.
+Renommer + ajouter un **bandeau de santé** unique avec 3 pastilles :
+- **Cron** (vert si dernier passage < 70 min)
+- **Queue** (vert si pas de pending qui s'accumule)
+- **Délivrabilité** (vert si taux d'envoi ≥ 95 % sur 7 j)
+
+Bouton **« Lancer une évaluation maintenant »** (invoke `evaluate-journeys`).
+
+### b. Plage par défaut = **7 jours** (au lieu de 30 j)
+
+### c. Réorganisation en 3 onglets (`Tabs` shadcn)
+
+```text
+┌─────────────────────────────────────────────────┐
+│  Vue d'ensemble │ Performance │ Diagnostic     │
+└─────────────────────────────────────────────────┘
+```
+
+**Onglet 1 — Vue d'ensemble** *(ce que je dois savoir en 10 secondes)*
+- KPI globaux : envoyés / ouverts / cliqués / actions
+- Carte « Top 3 contenus qui marchent » (top action rate)
+- Carte « Top 3 contenus à retravailler » (action rate < 10 %, ≥ 10 envois)
+- Bloc « Séquences actives » (compact, sans les étapes — un lien « Détail »)
+
+**Onglet 2 — Performance** *(comprendre quoi optimiser)*
+- Tableau complet `topSteps` (déjà existant) — triable
+- Tableau complet `topCtas` (déjà existant) — quels liens cliqués
+- Détail par séquence avec étapes + bouton « Voir destinataires »
+
+**Onglet 3 — Diagnostic** *(quand quelque chose cloche)*
+- Time series sent/failed/exited
+- Reason breakdown
+- 30 derniers échecs avec error_detail
+- Queue stats (pending / sent / failed / suppressed)
+
+### d. Glossaire → repositionné en `Popover` discret « Comment lire cette page ? » dans l'en-tête, plus en pavé qui prend 200 px de haut.
+
+### e. Petit picto contextuel sur chaque KPI : au survol, le calcul exact (ex. « action = clic CTA OU sortie via objectif atteint dans les 7 j »).
+
+---
+
+## 4. Détails techniques
+
+- Aucune modification de `evaluate-journeys`, des templates, ni des tables — uniquement réorganisation du fichier `src/pages/admin/AdminNurturing.tsx`.
+- Extraire 3 composants : `NurturingHealthBar`, `NurturingOverviewTab`, `NurturingPerformanceTab`, `NurturingDiagnosticTab` sous `src/components/admin/nurturing/` pour ramener le fichier page à ~200 lignes.
+- Réutiliser `SequenceRecipientsDialog` tel quel.
+- Bouton « Lancer évaluation » : `supabase.functions.invoke('evaluate-journeys', { body: { manual: true } })` + toast + refresh.
+- Default `range` passe de `"30d"` à `"7d"`.
+
+---
+
+## 5. Hors scope (à valider plus tard si vous le souhaitez)
+
+- Vue « Prochains envois prévus dans les 24 h » (nécessite un nouveau endpoint dans `evaluate-journeys` en mode dry-run).
+- Édition des séquences/étapes depuis l'admin (actuellement read-only).
+- Export CSV des destinataires.
+
+---
+
+**Validez-vous cette refonte ?** Si oui, je l'applique d'un seul coup. Si vous voulez ajuster (ex. garder la plage 30 j par défaut, ne pas faire les onglets, supprimer un bloc), dites-le et j'adapte avant de coder.
