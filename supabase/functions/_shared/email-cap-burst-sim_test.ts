@@ -380,3 +380,4 @@ Deno.test('SIM 10 — bypass template en quiet hours : envoyé immédiatement, q
   assertEquals(r.result, 'sent')
   assertEquals(sys.sentRows().length, 1)
   assertEquals(sys.queue.length, 0, 'aucune insertion dans la file différée pour bypass template')
+})
