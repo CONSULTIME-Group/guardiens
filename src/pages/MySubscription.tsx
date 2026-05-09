@@ -366,7 +366,7 @@ const MySubscription = () => {
  Pré-lancement {"·"} Bêta
  </span>
  <h1 className="font-heading text-2xl sm:text-3xl font-semibold text-foreground leading-tight">
- Tout est offert jusqu'au 13 juin.
+ Tout est offert jusqu'au 14 juillet 2026.
  </h1>
  <p className="text-base text-foreground/70 font-body max-w-sm leading-relaxed">
  Guardiens est en version bêta. Toutes les fonctionnalités sont ouvertes — sans restriction.
