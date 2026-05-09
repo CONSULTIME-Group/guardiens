@@ -156,32 +156,49 @@ interface ArticleRendererProps {
   slug?: string;
 }
 
-/** Replace inscription CTAs based on user role — preserves existing attributes */
-function adaptCTAsForRole(html: string, role?: "owner" | "sitter" | "both"): string {
+/**
+ * Adapte UNIQUEMENT les CTAs end-article (data-cta-position="end") au rôle.
+ *
+ * Les liens éditoriaux placés à la main dans le markdown
+ * (ex. `[s'inscrire](/inscription?role=owner)` dans un paragraphe pédagogique)
+ * ne sont JAMAIS touchés — ils n'ont pas l'attribut `data-cta-position="end"`.
+ *
+ * Le CTA mid-article n'est pas réécrit non plus : il est masqué en CSS pour
+ * les utilisateurs logués via le sélecteur `[data-cta-block="mid"]`.
+ */
+function adaptEndCTAsForRole(html: string, role?: "owner" | "sitter" | "both"): string {
   if (!role) return html;
 
-  // Replace only the href value and inner text, keeping all other attributes intact
-  const replaceHref = (html: string, fromHref: string, toHref: string, newText: string) =>
-    html.replace(
-      new RegExp(`(<a\\s[^>]*?)href="${fromHref.replace(/[?]/g, '\\$&')}"([^>]*>)[^<]*`, 'g'),
-      `$1href="${toHref}"$2${newText}`
-    );
+  // Capture une balise <a ... data-cta-position="end" ...> avec son inner text,
+  // en ignorant les balises sans cet attribut. Le DOTALL ([\s\S]) couvre les
+  // attributs sur plusieurs lignes par sécurité.
+  return html.replace(
+    /<a\b([^>]*?\bdata-cta-position="end"[^>]*?)>([^<]*)<\/a>/g,
+    (full, attrs: string, _inner: string) => {
+      const dataRole =
+        attrs.match(/\bdata-cta-role="([^"]+)"/)?.[1] || null;
 
-  if (role === "owner") {
-    html = replaceHref(html, "/inscription\\?role=owner", "/sits/create", "Publier une annonce →");
-    html = replaceHref(html, "/inscription\\?role=guardian", "/search", "Trouver une garde près de chez vous →");
-    html = replaceHref(html, "/inscription", "/sits/create", "Publier une annonce →");
-  } else if (role === "sitter") {
-    html = replaceHref(html, "/inscription\\?role=guardian", "/search", "Trouver une garde près de chez vous →");
-    html = replaceHref(html, "/inscription\\?role=owner", "/sits/create", "Publier une annonce →");
-    html = replaceHref(html, "/inscription", "/search", "Trouver une garde près de chez vous →");
-  } else if (role === "both") {
-    html = replaceHref(html, "/inscription\\?role=owner", "/sits/create", "Publier une annonce →");
-    html = replaceHref(html, "/inscription\\?role=guardian", "/search", "Trouver une garde près de chez vous →");
-    html = replaceHref(html, "/inscription", "/sits/create", "Publier une annonce →");
-  }
-
-  return html;
+      // owner logué → tous les CTAs end pointent vers une action proprio utile
+      if (role === "owner" || role === "both") {
+        if (dataRole === "owner") {
+          const newAttrs = attrs.replace(/href="[^"]*"/, 'href="/sits/create"');
+          return `<a${newAttrs}>Publier une annonce →</a>`;
+        }
+        if (dataRole === "sitter") {
+          const newAttrs = attrs.replace(/href="[^"]*"/, 'href="/search"');
+          return `<a${newAttrs}>Trouver une garde près de chez vous →</a>`;
+        }
+      }
+      // sitter logué → tous les CTAs end pointent vers la recherche de gardes
+      if (role === "sitter") {
+        if (dataRole === "sitter" || dataRole === "owner") {
+          const newAttrs = attrs.replace(/href="[^"]*"/, 'href="/search"');
+          return `<a${newAttrs}>Trouver une garde près de chez vous →</a>`;
+        }
+      }
+      return full;
+    }
+  );
 }
 
 /** Strip leading H1 from content to avoid double-H1 */
