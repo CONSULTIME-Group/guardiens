@@ -260,6 +260,37 @@ export const SequenceRecipientsDialog = ({ open, onOpenChange, sequenceKey, sequ
             </TableBody>
           </Table>
         )}
+
+        {!loading && totalCount > 0 && (
+          <div className="flex items-center justify-between pt-3 border-t mt-2">
+            <p className="text-xs text-muted-foreground">
+              {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, totalCount)} sur {totalCount}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={page === 0}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Précédent
+              </Button>
+              <span className="text-xs text-muted-foreground">
+                Page {page + 1} / {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={page >= totalPages - 1}
+              >
+                Suivant
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
