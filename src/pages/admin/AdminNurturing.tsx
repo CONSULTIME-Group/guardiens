@@ -309,7 +309,15 @@ const AdminNurturing = () => {
           </div>
 
           <div className="grid gap-4 md:grid-cols-5">
-            <StatCard label="Queue — total" value={queueStats.total} hint="Source = journey:*" />
+            <StatCard
+              label="Queue — total"
+              value={queueStats.total}
+              hint={
+                nurturingTemplates.length > 0
+                  ? `${nurturingTemplates.length} templates suivis (dédup. par message_id)`
+                  : "Aucun template configuré"
+              }
+            />
             <StatCard label="Queue — sent" value={queueStats.sent} tone="ok" />
             <StatCard label="Queue — pending" value={queueStats.pending} tone={queueStats.pending > 0 ? "warn" : "ok"} />
             <StatCard
