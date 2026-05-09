@@ -944,8 +944,7 @@ const Landing = () => {
               qui venait fixer un volet. Quelqu'un à qui on offrait une part de gâteau ou un coup de main en retour.
             </p>
             <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-16 text-lg leading-relaxed">
-              Ce n'est pas du passé. C'est juste qu'on n'ose plus. Guardiens, c'est le prétexte pour recommencer —
-              et au passage, vivre des expériences qu'aucun voyage organisé ne vous offrira.
+              Cette habitude n'a pas disparu — on n'ose simplement plus la première question. Guardiens, c'est le prétexte pour la reposer — et au passage, vivre des expériences qu'aucun voyage organisé ne vous offrira.
             </p>
           </RevealSection>
 
