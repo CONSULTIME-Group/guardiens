@@ -19,6 +19,7 @@ import {
 } from "recharts";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { SequenceRecipientsDialog } from "@/components/admin/SequenceRecipientsDialog";
 
 type Range = "24h" | "7d" | "30d";
 const RANGE_HOURS: Record<Range, number> = { "24h": 24, "7d": 24 * 7, "30d": 24 * 30 };
@@ -51,6 +52,7 @@ interface QueueRow {
 interface EngagementRow {
   message_id: string;
   event_type: "open" | "click";
+  target_url: string | null;
 }
 
 interface SequenceRow {
@@ -167,6 +169,8 @@ const AdminNurturing = () => {
   const [lastRunSent, setLastRunSent] = useState<boolean>(false);
   const [sequences, setSequences] = useState<SequenceRow[]>([]);
   const [sequenceSteps, setSequenceSteps] = useState<SequenceStepRow[]>([]);
+  const [recipientsDialog, setRecipientsDialog] = useState<{ key: string; label: string } | null>(null);
+  const sinceIso = useMemo(() => new Date(Date.now() - RANGE_HOURS[range] * 3600_000).toISOString(), [range]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -240,7 +244,7 @@ const AdminNurturing = () => {
       for (const c of chunks) {
         const r = await supabase
           .from("email_engagement_events")
-          .select("message_id, event_type")
+          .select("message_id, event_type, target_url")
           .in("message_id", c);
         if (!r.error && r.data) all.push(...(r.data as EngagementRow[]));
       }
@@ -474,6 +478,93 @@ const AdminNurturing = () => {
     return { sent, opens, clicks, actions, openRate: pct(opens), clickRate: pct(clicks), actionRate: pct(actions) };
   }, [sequenceMetrics]);
 
+  // Classement des étapes (template_name + step_order) par taux d'action
+  type StepStat = {
+    sequenceKey: string;
+    stepOrder: number;
+    templateName: string;
+    sent: number;
+    opens: number;
+    clicks: number;
+    exited: number;
+    actions: number;
+    openRate: number;
+    clickRate: number;
+    actionRate: number;
+  };
+  const topSteps = useMemo<StepStat[]>(() => {
+    const map = new Map<string, StepStat>();
+    for (const l of logs) {
+      const seqKey = l.user_journeys?.sequence_key ?? "—";
+      const k = `${seqKey}::${l.step_order}::${l.template_name}`;
+      const r =
+        map.get(k) ??
+        ({
+          sequenceKey: seqKey,
+          stepOrder: l.step_order,
+          templateName: l.template_name,
+          sent: 0,
+          opens: 0,
+          clicks: 0,
+          exited: 0,
+          actions: 0,
+          openRate: 0,
+          clickRate: 0,
+          actionRate: 0,
+        } as StepStat);
+      if (l.sent) {
+        r.sent++;
+        const ev = l.message_id ? eventsByMid.get(l.message_id) : undefined;
+        if (ev?.open) r.opens++;
+        if (ev?.click) {
+          r.clicks++;
+          r.actions++;
+        }
+      } else if (l.reason === "exit_condition_met") {
+        r.exited++;
+        r.actions++;
+      }
+      map.set(k, r);
+    }
+    const arr = Array.from(map.values());
+    for (const r of arr) {
+      r.openRate = r.sent > 0 ? Math.round((r.opens / r.sent) * 1000) / 10 : 0;
+      r.clickRate = r.sent > 0 ? Math.round((r.clicks / r.sent) * 1000) / 10 : 0;
+      const denom = r.sent + r.exited;
+      r.actionRate = denom > 0 ? Math.round((r.actions / denom) * 1000) / 10 : 0;
+    }
+    return arr.sort((a, b) => b.actionRate - a.actionRate || b.sent - a.sent);
+  }, [logs, eventsByMid]);
+
+  // Classement des CTA cliqués (par target_url)
+  type CtaStat = { url: string; clicks: number; uniqueSends: number; templates: Set<string> };
+  const topCtas = useMemo<CtaStat[]>(() => {
+    const tplByMid = new Map<string, string>();
+    for (const l of logs) {
+      if (l.message_id) tplByMid.set(l.message_id, l.template_name);
+    }
+    const map = new Map<string, CtaStat>();
+    const sendsByUrl = new Map<string, Set<string>>();
+    for (const e of engagement) {
+      if (e.event_type !== "click" || !e.target_url) continue;
+      const r =
+        map.get(e.target_url) ??
+        ({ url: e.target_url, clicks: 0, uniqueSends: 0, templates: new Set<string>() } as CtaStat);
+      r.clicks++;
+      const tpl = tplByMid.get(e.message_id);
+      if (tpl) r.templates.add(tpl);
+      map.set(e.target_url, r);
+      const s = sendsByUrl.get(e.target_url) ?? new Set<string>();
+      s.add(e.message_id);
+      sendsByUrl.set(e.target_url, s);
+    }
+    for (const [url, set] of sendsByUrl) {
+      const r = map.get(url);
+      if (r) r.uniqueSends = set.size;
+    }
+    return Array.from(map.values()).sort((a, b) => b.clicks - a.clicks);
+  }, [engagement, logs]);
+
 
   const stepsBySequence = useMemo(() => {
     const m = new Map<string, SequenceStepRow[]>();
@@ -577,10 +668,18 @@ const AdminNurturing = () => {
                       <h3 className="font-semibold text-foreground">{labelSequence(s.key)}</h3>
                       {s.description && <p className="text-xs text-muted-foreground mt-1 max-w-2xl">{s.description}</p>}
                     </div>
-                    <div className="flex gap-1.5 flex-wrap">
+                    <div className="flex gap-1.5 flex-wrap items-center">
                       <Badge variant={s.active ? "default" : "outline"}>{s.active ? "Active" : "Inactive"}</Badge>
                       <Badge variant="secondary">{AUDIENCE_LABELS[s.audience] ?? s.audience}</Badge>
                       <Badge variant="outline">{ruleLabel}{ruleDetail}</Badge>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-6 text-xs"
+                        onClick={() => setRecipientsDialog({ key: s.key, label: labelSequence(s.key) })}
+                      >
+                        Voir destinataires
+                      </Button>
                     </div>
                   </div>
 
@@ -731,6 +830,109 @@ const AdminNurturing = () => {
               </div>
             </CardContent>
           </Card>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Top contenus — quelles étapes créent de l'action ?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {topSteps.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-6 text-center">Aucun envoi sur la période.</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Étape</TableHead>
+                        <TableHead className="text-right">Envoyés</TableHead>
+                        <TableHead className="text-right">Ouv.</TableHead>
+                        <TableHead className="text-right">Clic</TableHead>
+                        <TableHead className="text-right">Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {topSteps.slice(0, 15).map((s) => {
+                        const reliable = s.sent >= 10;
+                        const tone =
+                          !reliable
+                            ? "text-muted-foreground"
+                            : s.actionRate >= 30
+                              ? "text-success font-semibold"
+                              : s.actionRate < 10
+                                ? "text-destructive"
+                                : "text-foreground";
+                        return (
+                          <TableRow key={`${s.sequenceKey}-${s.stepOrder}-${s.templateName}`}>
+                            <TableCell>
+                              <div className="text-sm font-medium">{labelTemplate(s.templateName)}</div>
+                              <div className="text-[11px] text-muted-foreground">
+                                {labelSequence(s.sequenceKey)} · étape {s.stepOrder}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right text-sm">{s.sent}</TableCell>
+                            <TableCell className="text-right text-sm">{s.sent > 0 ? `${s.openRate}%` : "—"}</TableCell>
+                            <TableCell className="text-right text-sm">{s.sent > 0 ? `${s.clickRate}%` : "—"}</TableCell>
+                            <TableCell className={`text-right text-sm ${tone}`}>
+                              {s.sent + s.exited > 0 ? `${s.actionRate}%` : "—"}
+                              {!reliable && s.sent > 0 && (
+                                <span className="text-[9px] text-muted-foreground ml-1">(n&lt;10)</span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
+                <p className="text-[10px] text-muted-foreground mt-2">
+                  Action = clic CTA ou objectif atteint. Surlignage à partir de 10 envois.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Top CTA — quels liens font cliquer ?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {topCtas.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-6 text-center">Aucun clic sur la période.</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>URL cliquée</TableHead>
+                        <TableHead>Templates</TableHead>
+                        <TableHead className="text-right">Clics</TableHead>
+                        <TableHead className="text-right">Uniques</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {topCtas.slice(0, 15).map((c) => (
+                        <TableRow key={c.url}>
+                          <TableCell>
+                            <a
+                              href={c.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-sm text-primary hover:underline break-all"
+                            >
+                              {c.url.replace(/^https?:\/\/[^/]+/, "")}
+                            </a>
+                          </TableCell>
+                          <TableCell className="text-[11px] text-muted-foreground">
+                            {Array.from(c.templates).map(labelTemplate).join(", ") || "—"}
+                          </TableCell>
+                          <TableCell className="text-right text-sm font-semibold">{c.clicks}</TableCell>
+                          <TableCell className="text-right text-sm text-muted-foreground">{c.uniqueSends}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
           <div className="grid gap-4 md:grid-cols-4">
             <StatCard label="Parcours créés (période)" value={journeyStats.total} />
@@ -932,6 +1134,15 @@ const AdminNurturing = () => {
             </CardContent>
           </Card>
         </>
+      )}
+      {recipientsDialog && (
+        <SequenceRecipientsDialog
+          open={!!recipientsDialog}
+          onOpenChange={(v) => !v && setRecipientsDialog(null)}
+          sequenceKey={recipientsDialog.key}
+          sequenceLabel={recipientsDialog.label}
+          sinceIso={sinceIso}
+        />
       )}
     </div>
   );
