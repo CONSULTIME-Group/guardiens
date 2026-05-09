@@ -3,6 +3,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Hr, Section,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
+import { BrandHeader } from './_brand-header.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -21,6 +22,7 @@ const OnboardingJ1Email = ({ firstName }: OnboardingJ1Props) => {
       <Preview>Votre profil {SITE_NAME} vous attend — 5 minutes suffisent</Preview>
       <Body style={main}>
         <Container style={container}>
+        <BrandHeader />
           <Heading style={h1}>{name ? `Bonjour ${name},` : 'Bonjour,'}</Heading>
 
           <Text style={text}>

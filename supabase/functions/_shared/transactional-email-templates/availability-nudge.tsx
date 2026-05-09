@@ -3,6 +3,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Hr, Section,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
+import { BrandHeader } from './_brand-header.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = 'Guardiens'
@@ -28,6 +29,7 @@ const AvailabilityNudgeEmail = ({
       <Preview>Une garde près de chez vous cherche encore un gardien</Preview>
       <Body style={main}>
         <Container style={container}>
+        <BrandHeader />
           <Heading style={h1}>Une garde de votre département cherche un gardien</Heading>
 
           <Text style={text}>

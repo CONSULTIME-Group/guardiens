@@ -3,6 +3,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Hr,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
+import { BrandHeader } from './_brand-header.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -16,6 +17,7 @@ const ApplicationDeclinedEmail = ({ sitTitle }: Props) => (
     <Preview>Votre candidature n'a pas été retenue</Preview>
     <Body style={main}>
       <Container style={container}>
+        <BrandHeader />
         <Heading style={h1}>Candidature non retenue</Heading>
         <Text style={text}>
           Malheureusement, votre candidature{sitTitle ? ` pour "${sitTitle}"` : ''} n'a pas été retenue par le propriétaire.

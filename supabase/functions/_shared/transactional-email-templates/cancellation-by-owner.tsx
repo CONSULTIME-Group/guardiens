@@ -3,6 +3,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Hr,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
+import { BrandHeader } from './_brand-header.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -21,6 +22,7 @@ const CancellationByOwnerEmail = ({ cancellerFirstName, sitTitle, startDate, rea
     <Preview>Votre garde {startDate ? `du ${startDate} ` : ''}a été annulée</Preview>
     <Body style={main}>
       <Container style={container}>
+        <BrandHeader />
         <Heading style={h1}>Garde annulée</Heading>
         <Text style={text}>
           <strong>{cancellerFirstName || 'Le propriétaire'}</strong> a annulé la garde

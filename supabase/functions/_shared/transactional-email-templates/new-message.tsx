@@ -3,6 +3,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Hr, Section,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
+import { BrandHeader } from './_brand-header.tsx'
 import type { TemplateEntry } from './registry.ts'
 import {
   buildLeadSentence,
@@ -51,6 +52,7 @@ const NewMessageEmail = ({
       <Preview>{`${sender} vous a envoyé un message sur ${SITE_NAME}`}</Preview>
       <Body style={main}>
         <Container style={container}>
+        <BrandHeader />
           <Heading style={h1}>{title} {emoji}</Heading>
           <Text style={text}>
             <strong>{sender}</strong> — {lead.replace(`${sender} `, '')}
