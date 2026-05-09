@@ -1230,6 +1230,30 @@ const Landing = () => {
                   Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous. Vous choisissez après une rencontre.
                 </dd>
               </div>
+              <div className="bg-card border border-border rounded-2xl p-6">
+                <dt className="font-heading font-semibold text-foreground mb-2">
+                  Qui sont les gardiens sur Guardiens ?
+                </dt>
+                <dd className="text-sm text-foreground/70 leading-relaxed">
+                  Des gens du coin, vérifiés par notre équipe. Chaque profil passe une vérification d'identité (pièce d'identité + selfie) traitée sous 24 h. Vous voyez aussi leurs avis publiés par les propriétaires précédents.
+                </dd>
+              </div>
+              <div className="bg-card border border-border rounded-2xl p-6">
+                <dt className="font-heading font-semibold text-foreground mb-2">
+                  Comment se déroule une garde sur Guardiens ?
+                </dt>
+                <dd className="text-sm text-foreground/70 leading-relaxed">
+                  Vous publiez votre annonce, les gardiens du coin postulent, vous choisissez après une rencontre, puis votre gardien s'installe. Un accord de garde optionnel encadre les engagements de chacun pendant la garde.
+                </dd>
+              </div>
+              <div className="bg-card border border-border rounded-2xl p-6">
+                <dt className="font-heading font-semibold text-foreground mb-2">
+                  Guardiens est-il disponible partout en France ?
+                </dt>
+                <dd className="text-sm text-foreground/70 leading-relaxed">
+                  Oui. Le réseau Guardiens s'étend dans toutes les régions de France, du Pays basque à la Bretagne, en passant par les Alpes et le Nord. Vous trouverez un gardien près de chez vous quel que soit votre département.
+                </dd>
+              </div>
             </dl>
           </RevealSection>
         </div>
