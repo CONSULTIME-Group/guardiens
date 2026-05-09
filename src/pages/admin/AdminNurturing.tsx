@@ -729,6 +729,13 @@ const AdminNurturing = () => {
 
           {/* =========== ONGLET 1 : VUE D'ENSEMBLE =========== */}
           <TabsContent value="overview" className="space-y-6">
+            <div className="grid gap-4 md:grid-cols-4">
+              <StatCard label="Aujourd'hui — envoyés" value={today.sent} tone="ok" hint={today.sent > 0 ? "Le nurturing tourne" : "Pas encore d'envoi aujourd'hui"} />
+              <StatCard label="Aujourd'hui — échecs" value={today.failed} tone={today.failed > 0 ? "err" : "ok"} />
+              <StatCard label="Parcours actifs" value={journeyStats.active} hint={`${journeyStats.total} créés sur la période`} />
+              <StatCard label="Sortis (objectif atteint)" value={journeyStats.exited} hint="Utilisateurs qui ont fait l'action attendue" />
+            </div>
+
             <Card>
               <CardHeader>
                 <CardTitle>Engagement global — l'email a-t-il déclenché de l'action ?</CardTitle>
