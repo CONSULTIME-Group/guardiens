@@ -11,11 +11,11 @@ export type SubStatus = "founder_grace" | "founder_expired" | "premium" | "expir
 
 /**
  * Returns whether the current sitter has full access (can message, apply, etc.)
- * Checks subscription status directly from the subscriptions table.
- * Before May 13: everyone has access.
- * Between May 13 and June 13: founders have access.
- * After June 13: everyone needs an active subscription (founders included).
  * Owners always have access.
+ * Avant le 14 juin 2026 : pré-lancement, accès libre pour tous.
+ * Du 14 juin au 14 juillet 2026 inclus : gratuité pour TOUS (fondateurs ou non).
+ * À partir du 15 juillet 2026 : abonnement actif requis. Le statut is_founder
+ * (réservé aux inscrits avant le 13 juin) ne donne plus d'accès, seulement le badge.
  */
 export const useSubscriptionAccess = () => {
   const { user, activeRole } = useAuth();
@@ -64,8 +64,9 @@ export const useSubscriptionAccess = () => {
         } else if (hasActiveSub) {
           setStatus("premium");
           setHasAccess(true);
-        } else if (isFounder && now < GRACE_END_DATE) {
-          setStatus("founder_grace");
+        } else if (now < GRACE_END_DATE) {
+          // Gratuité pour tous jusqu'au 14 juillet 2026, fondateurs ou non
+          setStatus(isFounder ? "founder_grace" : "founder_grace");
           setHasAccess(true);
         } else if (isFounder && !hasActiveSub) {
           setStatus("founder_expired");
