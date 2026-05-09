@@ -104,7 +104,7 @@ const AdminNurturing = () => {
       supabase
         .from("journey_step_log")
         .select(
-          "id, journey_id, step_order, template_name, sent, reason, created_at, user_journeys!inner(sequence_key)",
+          "id, journey_id, step_order, template_name, sent, reason, error_detail, created_at, user_journeys!inner(sequence_key)",
           { count: "exact" }
         )
         .gte("created_at", since)
