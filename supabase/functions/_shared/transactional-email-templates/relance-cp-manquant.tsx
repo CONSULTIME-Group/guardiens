@@ -52,10 +52,10 @@ const RelanceCpManquantEmail = ({ prenom, cta_url }: RelanceCpProps) => {
 
           <Hr style={hr} />
 
-<LegalFooter
-  purpose="du bon fonctionnement de votre compte"
-  basis="6.1.f"
-/>
+        <LegalFooter
+          purpose="du bon fonctionnement de votre compte"
+          basis="6.1.f"
+        />
         </Container>
         </Body>
         </Html>

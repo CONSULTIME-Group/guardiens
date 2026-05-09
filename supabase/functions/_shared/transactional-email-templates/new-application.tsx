@@ -33,10 +33,10 @@ const NewApplicationEmail = ({ sitterFirstName, sitTitle }: Props) => (
         <Button style={button} href={`${SITE_URL}/dashboard`}>
           Voir la candidature
         </Button>
-<LegalFooter
-  purpose="du fonctionnement de votre annonce"
-  basis="6.1.b"
-/>
+        <LegalFooter
+          purpose="du fonctionnement de votre annonce"
+          basis="6.1.b"
+        />
       </Container>
       </Body>
       </Html>

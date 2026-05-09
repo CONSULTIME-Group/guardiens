@@ -49,10 +49,10 @@ const SubscriptionExpires7dEmail = ({ firstName = '', renewalDate }: Subscriptio
         <Button style={button} href={`${SITE_URL}/mon-abonnement`}>
           Renouveler maintenant
         </Button>
-<LegalFooter
-  purpose="de la gestion de votre abonnement"
-  basis="6.1.b"
-/>
+        <LegalFooter
+          purpose="de la gestion de votre abonnement"
+          basis="6.1.b"
+        />
       </Container>
       </Body>
       </Html>

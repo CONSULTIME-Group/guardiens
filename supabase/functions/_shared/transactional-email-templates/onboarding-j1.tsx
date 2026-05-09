@@ -45,10 +45,10 @@ const OnboardingJ1Email = ({ firstName }: OnboardingJ1Props) => {
 
           <Hr style={hr} />
 
-<LegalFooter
-  purpose="du bon fonctionnement de votre compte"
-  basis="6.1.f"
-/>
+        <LegalFooter
+          purpose="du bon fonctionnement de votre compte"
+          basis="6.1.f"
+        />
         </Container>
         </Body>
         </Html>

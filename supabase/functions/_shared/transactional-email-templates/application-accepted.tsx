@@ -30,10 +30,10 @@ const ApplicationAcceptedEmail = ({ sitTitle, ownerFirstName }: Props) => (
         <Button style={button} href={`${SITE_URL}/messages`}>
           Ouvrir la messagerie
         </Button>
-<LegalFooter
-  purpose="du traitement de votre candidature"
-  basis="6.1.b"
-/>
+        <LegalFooter
+          purpose="du traitement de votre candidature"
+          basis="6.1.b"
+        />
       </Container>
       </Body>
       </Html>

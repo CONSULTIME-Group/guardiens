@@ -32,10 +32,10 @@ const CancellationReviewPublishedEmail = ({ targetFirstName, profileUrl }: Props
         <Button style={button} href={profileUrl || `${SITE_URL}/dashboard`}>
           Voir mon profil
         </Button>
-<LegalFooter
-  purpose="de la gestion des avis"
-  basis="6.1.f"
-  extra={
+        <LegalFooter
+          purpose="de la gestion des avis"
+          basis="6.1.f"
+          extra={
     "Les avis publiés sur Guardiens sont modérés conformément à l'article L. 111-7-2 du Code de la consommation."
   }
 />

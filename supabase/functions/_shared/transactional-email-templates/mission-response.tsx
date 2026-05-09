@@ -30,10 +30,10 @@ const MissionResponseEmail = ({ responderFirstName, missionTitle }: Props) => (
         <Button style={button} href={`${SITE_URL}/petites-missions`}>
           Voir la réponse
         </Button>
-<LegalFooter
-  purpose="du bon fonctionnement du service d'entraide"
-  basis="6.1.f"
-/>
+        <LegalFooter
+          purpose="du bon fonctionnement du service d'entraide"
+          basis="6.1.f"
+        />
       </Container>
       </Body>
       </Html>

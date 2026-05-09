@@ -174,10 +174,10 @@ const ConseilsAnnoncePersoEmail = ({
             Nous sommes là pour vous accompagner.
           </Text>
 
-<LegalFooter
-  purpose="du bon fonctionnement de votre annonce"
-  basis="6.1.f"
-/>
+        <LegalFooter
+          purpose="du bon fonctionnement de votre annonce"
+          basis="6.1.f"
+        />
         </Container>
         </Body>
         </Html>

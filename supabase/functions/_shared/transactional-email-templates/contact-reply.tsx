@@ -32,10 +32,10 @@ const ContactReplyEmail = ({ firstName, originalMessage, replyBody }: ContactRep
         {replyBody ? (
           <Text style={text}>{replyBody}</Text>
         ) : null}
-<LegalFooter
-  purpose="de la réponse à votre demande de contact"
-  basis="6.1.b"
-/>
+        <LegalFooter
+          purpose="de la réponse à votre demande de contact"
+          basis="6.1.b"
+        />
         </Container>
         </Body>
         </Html>

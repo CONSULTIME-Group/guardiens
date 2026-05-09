@@ -38,10 +38,10 @@ const CancellationBySitterEmail = ({ cancellerFirstName, sitTitle, startDate, re
         <Button style={button} href={`${SITE_URL}/recherche-gardiens`}>
           Trouver un autre gardien
         </Button>
-<LegalFooter
-  purpose="du suivi de votre garde"
-  basis="6.1.b"
-/>
+        <LegalFooter
+          purpose="du suivi de votre garde"
+          basis="6.1.b"
+        />
       </Container>
       </Body>
       </Html>

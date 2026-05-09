@@ -84,10 +84,10 @@ const NewMessageEmail = ({
             <Button style={button} href={link}>Lire et répondre</Button>
           </Section>
 
-<LegalFooter
-  purpose="du bon fonctionnement du service de messagerie"
-  basis="6.1.f"
-/>
+        <LegalFooter
+          purpose="du bon fonctionnement du service de messagerie"
+          basis="6.1.f"
+        />
         </Container>
         </Body>
         </Html>

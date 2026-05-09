@@ -27,10 +27,10 @@ const IdentityVerifiedEmail = () => (
         <Button style={button} href={`${SITE_URL}/dashboard`}>
           Voir mon profil
         </Button>
-<LegalFooter
-  purpose="du traitement de votre demande de vérification d'identité"
-  basis="6.1.b"
-/>
+        <LegalFooter
+          purpose="du traitement de votre demande de vérification d'identité"
+          basis="6.1.b"
+        />
       </Container>
       </Body>
       </Html>

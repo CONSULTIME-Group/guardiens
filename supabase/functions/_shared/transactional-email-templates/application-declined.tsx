@@ -29,10 +29,10 @@ const ApplicationDeclinedEmail = ({ sitTitle }: Props) => (
         <Button style={button} href={`${SITE_URL}/sits`}>
           Voir les gardes disponibles
         </Button>
-<LegalFooter
-  purpose="du traitement de votre candidature"
-  basis="6.1.b"
-/>
+        <LegalFooter
+          purpose="du traitement de votre candidature"
+          basis="6.1.b"
+        />
       </Container>
       </Body>
       </Html>

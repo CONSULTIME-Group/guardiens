@@ -65,10 +65,10 @@ const RelancePieceIdentiteEmail = ({ firstName }: RelancePieceIdentiteProps) => 
             Une question ou un blocage ? Répondez simplement à cet email, nous lisons tout.
           </Text>
 
-<LegalFooter
-  purpose="du bon fonctionnement de votre compte"
-  basis="6.1.f"
-/>
+        <LegalFooter
+          purpose="du bon fonctionnement de votre compte"
+          basis="6.1.f"
+        />
         </Container>
         </Body>
         </Html>
