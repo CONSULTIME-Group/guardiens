@@ -764,15 +764,17 @@ const AdminNurturing = () => {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">Ce qui marche le mieux</CardTitle>
-                  <p className="text-xs text-muted-foreground">Top 3 contenus par taux d'action (≥ 10 envois)</p>
+                  <p className="text-xs text-muted-foreground">
+                    Top 3 par taux d'action {reliableSteps.length === 0 ? "(petit volume — indicatif)" : "(≥ 10 envois)"}
+                  </p>
                 </CardHeader>
                 <CardContent>
                   {winners.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4 text-center">Pas encore assez de données fiables.</p>
+                    <p className="text-sm text-muted-foreground py-4 text-center">Aucun envoi encore enregistré sur la période.</p>
                   ) : (
                     <ul className="space-y-3">
                       {winners.map((s) => (
-                        <li key={`${s.sequenceKey}-${s.stepOrder}-${s.templateName}`} className="flex items-center justify-between gap-3">
+                        <li key={`w-${s.sequenceKey}-${s.stepOrder}-${s.templateName}`} className="flex items-center justify-between gap-3">
                           <div>
                             <p className="text-sm font-medium">{labelTemplate(s.templateName)}</p>
                             <p className="text-[11px] text-muted-foreground">{labelSequence(s.sequenceKey)} · étape {s.stepOrder} · {s.sent} envois</p>
