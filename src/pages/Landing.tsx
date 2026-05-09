@@ -916,6 +916,28 @@ const Landing = () => {
                   </li>
                   <li>
                     <Link
+                      to="/actualites/garde-animaux-savoie-guide"
+                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
+                    >
+                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
+                      <span className="text-sm leading-relaxed">
+                        Garde d'animaux en Savoie : le guide complet
+                      </span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/actualites/garde-animaux-haute-savoie-guide"
+                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
+                    >
+                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
+                      <span className="text-sm leading-relaxed">
+                        Garde d'animaux en Haute-Savoie : le guide complet
+                      </span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
                       to="/actualites/garde-animaux-croix-rousse-lyon"
                       className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
                     >
