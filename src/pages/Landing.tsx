@@ -61,38 +61,56 @@ function getSeasonalBanner(): { title: string; description: string } {
 
 
 
+// Témoignages — répartition géographique équilibrée (France entière, hors
+// concentration AURA), avec date et libellé "Programme Fondateurs" pour
+// l'E-E-A-T (Expérience réelle + transparence).
 const testimonials = [
- {
- name: "Nadia",
- detail: "2 chats, 1 chien · Lyon 6e",
- text: "Deux chats et un chien. On n'avait pas pris de vraies vacances depuis trois ans. Notre gardienne habite à Caluire. On s'est rencontrés autour d'un café le jeudi. On est partis le samedi.",
- },
- {
- name: "Tomas",
- detail: "Grenoble",
- text: "Je cherchais un logement temporaire entre deux jobs. J'ai gardé quatre maisons en deux mois. J'ai découvert des endroits que j'habitais depuis dix ans sans jamais vraiment connaître.",
- },
- {
- name: "Rania & David",
- detail: "Ardèche",
- text: "On a une maison en Ardèche qu'on laissait vide huit mois par an. Maintenant elle vit. Les gens qui la gardent nous envoient des photos du jardin. C'est bizarre comme ça fait du bien.",
- },
- {
- name: "Giulia",
- detail: "Écully",
- text: "Je devais partir trois semaines. Mon potager, mes poules, mes plantes. Un membre Guardiens a tout géré contre des légumes et des œufs. On se connaissait pas. On se voit encore.",
- },
- {
- name: "Sarah & Karim",
- detail: "Monts du Lyonnais",
- text: "Trois chevaux, quatre chats, un perroquet. Tout le monde nous dit que c'est impossible à faire garder. Notre gardienne est venue deux fois avant qu'on parte. Elle connaissait leurs noms par cœur.",
- },
- {
- name: "Elena",
- detail: "Annecy",
- text: "J'ai commencé par arroser les plantes d'un membre contre un repas. Maintenant je garde sa maison quand elle part. C'est comme ça que ça marche ici — doucement, naturellement.",
- },
+  {
+    name: "Nadia",
+    detail: "2 chats, 1 chien · Mérignac (33)",
+    period: "Mars 2026",
+    text: "Deux chats et un chien. On n'avait pas pris de vraies vacances depuis trois ans. Notre gardienne habite à dix minutes. On s'est rencontrés autour d'un café le jeudi. On est partis le samedi.",
+  },
+  {
+    name: "Tomas",
+    detail: "Gardien · Grenoble (38)",
+    period: "Février 2026",
+    text: "Je cherchais un logement temporaire entre deux jobs. J'ai gardé quatre maisons en deux mois. J'ai découvert des endroits que j'habitais depuis dix ans sans jamais vraiment connaître.",
+  },
+  {
+    name: "Rania & David",
+    detail: "Maison de famille · Ardèche (07)",
+    period: "Avril 2026",
+    text: "On a une maison en Ardèche qu'on laissait vide huit mois par an. Maintenant elle vit. Les gens qui la gardent nous envoient des photos du jardin. C'est bizarre comme ça fait du bien.",
+  },
+  {
+    name: "Giulia",
+    detail: "Potager & poules · Anglet (64)",
+    period: "Mai 2026",
+    text: "Je devais partir trois semaines. Mon potager, mes poules, mes plantes. Un membre Guardiens a tout géré contre des légumes et des œufs. On se connaissait pas. On se voit encore.",
+  },
+  {
+    name: "Sarah & Karim",
+    detail: "Foyer multi-animaux · Quimper (29)",
+    period: "Janvier 2026",
+    text: "Trois chevaux, quatre chats, un perroquet. Tout le monde nous dit que c'est impossible à faire garder. Notre gardienne est venue deux fois avant qu'on parte. Elle connaissait leurs noms par cœur.",
+  },
+  {
+    name: "Elena",
+    detail: "Gardienne · Annecy (74)",
+    period: "Mars 2026",
+    text: "J'ai commencé par arroser les plantes d'un membre contre un repas. Maintenant je garde sa maison quand elle part. C'est comme ça que ça marche ici — doucement, naturellement.",
+  },
 ];
+
+// Initiales pour avatar (ex: "Sarah & Karim" → "S&K", "Nadia" → "N")
+const getInitials = (name: string) =>
+  name
+    .split(/\s*&\s*|\s+/)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("")
+    .slice(0, 3);
+
 
 
 /* ── IntersectionObserver hook for scroll animations ── */
