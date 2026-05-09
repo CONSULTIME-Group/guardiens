@@ -284,7 +284,7 @@ const Pricing = () => {
 
  <main className="max-w-6xl mx-auto px-4">
  {/* ═══ HERO ═══ */}
-       <section className="py-10 md:py-14 text-center max-w-2xl mx-auto">
+       <section data-testid="pricing-hero" className="py-10 md:py-14 text-center max-w-2xl mx-auto">
  <p className="inline-block bg-primary/10 text-primary text-xs font-body font-semibold uppercase tracking-wider px-3 py-1.5 rounded-full mb-4">
  Sans commission, sans frais cachés
  </p>
