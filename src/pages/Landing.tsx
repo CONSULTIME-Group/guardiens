@@ -719,28 +719,31 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 2bis — CE QUI ARRIVE EN PLUS ═══════════════ */}
-      <section className="py-24 md:py-32 bg-background">
-        <div className="max-w-4xl mx-auto px-6 text-center">
+      <section className="py-28 md:py-36 bg-accent/40 border-y border-accent">
+        <div className="max-w-3xl mx-auto px-6">
           <RevealSection>
-            <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
+            <span className="text-xs tracking-widest uppercase text-primary/70 font-body mb-6 block text-center">
               Ce qu'on n'écrit jamais dans une annonce
             </span>
-            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-6">
-              Bien plus qu'un échange de services.
+            <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.15] text-foreground text-center mb-10">
+              Bien plus qu'un échange<br className="hidden md:inline" /> de services.
             </h2>
-            <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/75 mb-6">
-              Garder une maison, ce n'est pas rendre service à un propriétaire.
-              Confier ses clés, ce n'est pas céder un toit en échange d'une garde.
-            </p>
-            <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/75 mb-6">
-              C'est, surtout, une façon de vivre des expériences qu'on n'aurait jamais cherchées :
-              découvrir une région, une autre manière d'habiter, une histoire de famille,
-              un coin de France qu'on n'aurait jamais visité, des gens qu'on n'aurait jamais croisés.
-            </p>
-            <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/85 font-medium">
-              On apprend, on découvre, on s'attache —
-              sans aller le chercher. Juste en laissant la place à ce qui peut arriver.
-            </p>
+
+            <div className="border-l-4 border-primary pl-6 md:pl-8 max-w-2xl mx-auto">
+              <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/80 mb-5">
+                Garder une maison, ce n'est pas rendre service à un propriétaire.
+                Confier ses clés, ce n'est pas céder un toit en échange d'une garde.
+              </p>
+              <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/80 mb-5">
+                C'est, surtout, une façon de vivre des expériences qu'on n'aurait jamais cherchées :
+                découvrir une région, une autre manière d'habiter, une histoire de famille,
+                un coin de France qu'on n'aurait jamais visité, des gens qu'on n'aurait jamais croisés.
+              </p>
+              <p className="font-heading text-xl md:text-2xl italic text-foreground leading-snug">
+                On apprend, on découvre, on s'attache —
+                sans aller le chercher. Juste en laissant la place à ce qui peut arriver.
+              </p>
+            </div>
           </RevealSection>
         </div>
       </section>
