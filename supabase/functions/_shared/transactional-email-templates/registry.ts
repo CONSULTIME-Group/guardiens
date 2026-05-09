@@ -73,4 +73,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'availability-nudge': availabilityNudge,
   'reactivation-d30': reactivationD30,
   'sitter-encourage-candidature': sitterEncourageCandidature,
+  'discover-mutual-aid-1': discoverMutualAid1,
+  'discover-mutual-aid-2': discoverMutualAid2,
 }
