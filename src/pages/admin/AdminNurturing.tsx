@@ -162,8 +162,9 @@ const StatCard = ({
 };
 
 const AdminNurturing = () => {
-  const [range, setRange] = useState<Range>("30d");
+  const [range, setRange] = useState<Range>("7d");
   const [loading, setLoading] = useState(true);
+  const [triggering, setTriggering] = useState(false);
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [journeys, setJourneys] = useState<JourneyRow[]>([]);
   const [queue, setQueue] = useState<QueueRow[]>([]);
