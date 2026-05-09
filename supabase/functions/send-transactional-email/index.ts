@@ -552,6 +552,8 @@ Deno.serve(async (req) => {
       template_name: templateName,
       recipient_email: effectiveRecipient,
       status: 'sent',
+      resend_id: resendData.id ?? null,
+      metadata: { idempotency_key: idempotencyKey, resend_id: resendData.id ?? null },
     })
 
     console.log('Transactional email sent via Resend', { templateName, effectiveRecipient, resendId: resendData.id })
