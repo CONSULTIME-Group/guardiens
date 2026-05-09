@@ -13,6 +13,7 @@ import PriorityActions from "@/components/admin/seo/PriorityActions";
 import ContentToCreate, { PRIORITY_ARTICLES } from "@/components/admin/seo/ContentToCreate";
 import GSCQueriesTable from "@/components/admin/seo/GSCQueriesTable";
 import TrafficSources from "@/components/admin/seo/TrafficSources";
+import ArticleCtaPerformance from "@/components/admin/seo/ArticleCtaPerformance";
 import { useSeoData } from "@/hooks/useSeoData";
 
 function pctChange(current: number, previous: number): number | undefined {
