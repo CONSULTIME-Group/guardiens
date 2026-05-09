@@ -1070,6 +1070,47 @@ const AdminNurturing = () => {
                 )}
               </CardContent>
             </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Derniers envois</CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">10 emails de nurturing les plus récents (avec engagement).</p>
+              </CardHeader>
+              <CardContent className="overflow-x-auto">
+                {recentSends.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-6 text-center">Aucun envoi sur la période.</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Séquence</TableHead>
+                        <TableHead>Étape</TableHead>
+                        <TableHead>Engagement</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {recentSends.map((l) => {
+                        const ev = l.message_id ? eventsByMid.get(l.message_id) : undefined;
+                        return (
+                          <TableRow key={l.id}>
+                            <TableCell className="text-xs whitespace-nowrap">{format(new Date(l.created_at), "dd MMM HH:mm", { locale: fr })}</TableCell>
+                            <TableCell className="text-sm">{labelSequence(l.user_journeys?.sequence_key ?? "—")}</TableCell>
+                            <TableCell className="text-sm">{labelTemplate(l.template_name)} <span className="text-[10px] text-muted-foreground">· étape {l.step_order}</span></TableCell>
+                            <TableCell>
+                              <div className="flex gap-1">
+                                <Badge variant={ev?.open ? "default" : "outline"} className="text-[10px]">{ev?.open ? "Ouvert" : "Non ouvert"}</Badge>
+                                {ev?.click && <Badge variant="default" className="bg-success text-success-foreground text-[10px]">Cliqué</Badge>}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* =========== ONGLET 3 : DIAGNOSTIC =========== */}
