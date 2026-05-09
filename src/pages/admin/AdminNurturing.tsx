@@ -32,6 +32,7 @@ interface LogRow {
   reason: string | null;
   error_detail: { status?: number; body_excerpt?: string; template?: string; at?: string } | null;
   created_at: string;
+  message_id: string | null;
   user_journeys: { sequence_key: string } | null;
 }
 
@@ -45,6 +46,11 @@ interface JourneyRow {
 interface QueueRow {
   status: string;
   metadata: { source?: string } | null;
+}
+
+interface EngagementRow {
+  message_id: string;
+  event_type: "open" | "click";
 }
 
 interface SequenceRow {
