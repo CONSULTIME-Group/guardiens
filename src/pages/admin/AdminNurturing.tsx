@@ -823,8 +823,110 @@ const AdminNurturing = () => {
             </CardContent>
           </Card>
 
-          <div className="grid gap-4 md:grid-cols-4">
-            <StatCard label="Parcours créés (période)" value={journeyStats.total} />
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Top contenus — quelles étapes créent de l'action ?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {topSteps.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-6 text-center">Aucun envoi sur la période.</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Étape</TableHead>
+                        <TableHead className="text-right">Envoyés</TableHead>
+                        <TableHead className="text-right">Ouv.</TableHead>
+                        <TableHead className="text-right">Clic</TableHead>
+                        <TableHead className="text-right">Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {topSteps.slice(0, 15).map((s) => {
+                        const reliable = s.sent >= 10;
+                        const tone =
+                          !reliable
+                            ? "text-muted-foreground"
+                            : s.actionRate >= 30
+                              ? "text-success font-semibold"
+                              : s.actionRate < 10
+                                ? "text-destructive"
+                                : "text-foreground";
+                        return (
+                          <TableRow key={`${s.sequenceKey}-${s.stepOrder}-${s.templateName}`}>
+                            <TableCell>
+                              <div className="text-sm font-medium">{labelTemplate(s.templateName)}</div>
+                              <div className="text-[11px] text-muted-foreground">
+                                {labelSequence(s.sequenceKey)} · étape {s.stepOrder}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right text-sm">{s.sent}</TableCell>
+                            <TableCell className="text-right text-sm">{s.sent > 0 ? `${s.openRate}%` : "—"}</TableCell>
+                            <TableCell className="text-right text-sm">{s.sent > 0 ? `${s.clickRate}%` : "—"}</TableCell>
+                            <TableCell className={`text-right text-sm ${tone}`}>
+                              {s.sent + s.exited > 0 ? `${s.actionRate}%` : "—"}
+                              {!reliable && s.sent > 0 && (
+                                <span className="text-[9px] text-muted-foreground ml-1">(n&lt;10)</span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
+                <p className="text-[10px] text-muted-foreground mt-2">
+                  Action = clic CTA ou objectif atteint. Surlignage à partir de 10 envois.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Top CTA — quels liens font cliquer ?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {topCtas.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-6 text-center">Aucun clic sur la période.</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>URL cliquée</TableHead>
+                        <TableHead>Templates</TableHead>
+                        <TableHead className="text-right">Clics</TableHead>
+                        <TableHead className="text-right">Uniques</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {topCtas.slice(0, 15).map((c) => (
+                        <TableRow key={c.url}>
+                          <TableCell>
+                            <a
+                              href={c.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-sm text-primary hover:underline break-all"
+                            >
+                              {c.url.replace(/^https?:\/\/[^/]+/, "")}
+                            </a>
+                          </TableCell>
+                          <TableCell className="text-[11px] text-muted-foreground">
+                            {Array.from(c.templates).map(labelTemplate).join(", ") || "—"}
+                          </TableCell>
+                          <TableCell className="text-right text-sm font-semibold">{c.clicks}</TableCell>
+                          <TableCell className="text-right text-sm text-muted-foreground">{c.uniqueSends}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+
             <StatCard label="Actifs" value={journeyStats.active} tone="ok" />
             <StatCard label="Sortis (objectif atteint)" value={journeyStats.exited} />
             <StatCard
