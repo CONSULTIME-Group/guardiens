@@ -170,7 +170,8 @@ const Pricing = () => {
  </script>
  </Helmet>
  <div className="min-h-screen bg-background">
- <PublicHeader />
+  <PublicHeader />
+  <FreePeriodBanner />
  <PageBreadcrumb items={[{ label: "Tarifs" }]} />
 
  <main className="max-w-6xl mx-auto px-4">
