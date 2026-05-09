@@ -570,16 +570,16 @@ const Landing = () => {
             </p>
 
             <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6 animate-hero-fade-up animation-delay-400 max-w-3xl">
-              Garde d'animaux, home sitting <span className="text-white/80">&amp;</span> coups de main entre gens du coin.
+              La garde d'animaux, <span className="text-white/80">et tout ce qui se vit autour.</span>
             </h1>
 
             <p className="font-body text-lg md:text-xl text-white/85 max-w-xl mb-4 leading-relaxed animate-hero-fade-up animation-delay-700">
-              Garder une maison, promener un chien, arroser un potager, donner un coup de main à la mami du coin.
-              Près de chez vous, partout en France — sans argent qui circule.
+              Confier ses clés le temps d'un week-end. Promener un chien.
+              Arroser le potager d'à côté. Échanger un coup de main contre un repas fait maison.
+              Près de chez vous, partout en France.
             </p>
             <p className="font-body text-base md:text-lg text-white/70 max-w-xl mb-10 leading-relaxed italic animate-hero-fade-up animation-delay-700">
-              Et derrière chaque échange, une rencontre, une histoire,
-              une expérience qu'on n'aurait jamais cherchée.
+              Derrière chaque rencontre, une histoire qu'on n'aurait pas cherchée.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 animate-hero-fade-up animation-delay-900">
