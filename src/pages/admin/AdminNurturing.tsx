@@ -416,26 +416,64 @@ const AdminNurturing = () => {
     [logs]
   );
 
-  // Stats agrégées par séquence (logs + journeys de la période)
+  // Index events par message_id
+  const eventsByMid = useMemo(() => {
+    const m = new Map<string, { open: boolean; click: boolean }>();
+    for (const e of engagement) {
+      const r = m.get(e.message_id) ?? { open: false, click: false };
+      if (e.event_type === "open") r.open = true;
+      if (e.event_type === "click") r.click = true;
+      m.set(e.message_id, r);
+    }
+    return m;
+  }, [engagement]);
+
+  // Stats agrégées par séquence (logs + journeys + engagement)
   const sequenceMetrics = useMemo(() => {
-    const m = new Map<string, { sent: number; failed: number; exited: number; activeJourneys: number; totalJourneys: number }>();
+    type M = { sent: number; failed: number; exited: number; activeJourneys: number; totalJourneys: number; opens: number; clicks: number; actions: number };
+    const def = (): M => ({ sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0, opens: 0, clicks: 0, actions: 0 });
+    const m = new Map<string, M>();
     for (const l of logs) {
       const k = l.user_journeys?.sequence_key;
       if (!k) continue;
-      const r = m.get(k) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0 };
-      if (l.sent) r.sent++;
-      else if (l.reason === "exit_condition_met") r.exited++;
-      else r.failed++;
+      const r = m.get(k) ?? def();
+      if (l.sent) {
+        r.sent++;
+        const ev = l.message_id ? eventsByMid.get(l.message_id) : undefined;
+        if (ev?.open) r.opens++;
+        if (ev?.click) r.clicks++;
+        // Action = clic CTA OU sortie via objectif (cf. plan)
+        if (ev?.click) r.actions++;
+      } else if (l.reason === "exit_condition_met") {
+        r.exited++;
+        r.actions++; // exit goal_met compte comme action
+      } else {
+        r.failed++;
+      }
       m.set(k, r);
     }
     for (const j of journeys) {
-      const r = m.get(j.sequence_key) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0 };
+      const r = m.get(j.sequence_key) ?? def();
       r.totalJourneys++;
       if (j.status === "active") r.activeJourneys++;
       m.set(j.sequence_key, r);
     }
     return m;
-  }, [logs, journeys]);
+  }, [logs, journeys, eventsByMid]);
+
+  // Engagement global
+  const engagementStats = useMemo(() => {
+    let sent = 0, opens = 0, clicks = 0, actions = 0;
+    for (const m of sequenceMetrics.values()) {
+      sent += m.sent;
+      opens += m.opens;
+      clicks += m.clicks;
+      actions += m.actions;
+    }
+    const pct = (n: number) => sent > 0 ? Math.round((n / sent) * 1000) / 10 : 0;
+    return { sent, opens, clicks, actions, openRate: pct(opens), clickRate: pct(clicks), actionRate: pct(actions) };
+  }, [sequenceMetrics]);
+
 
   const stepsBySequence = useMemo(() => {
     const m = new Map<string, SequenceStepRow[]>();
