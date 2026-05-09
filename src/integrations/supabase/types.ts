@@ -1686,6 +1686,7 @@ export type Database = {
       journey_step_log: {
         Row: {
           created_at: string
+          error_detail: Json | null
           id: string
           journey_id: string
           reason: string | null
@@ -1695,6 +1696,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          error_detail?: Json | null
           id?: string
           journey_id: string
           reason?: string | null
@@ -1704,6 +1706,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          error_detail?: Json | null
           id?: string
           journey_id?: string
           reason?: string | null
@@ -2276,27 +2279,33 @@ export type Database = {
       nurturing_sequences: {
         Row: {
           active: boolean
+          anchor_field: string
           audience: string
           created_at: string
           description: string | null
+          enrollment_rule: Json
           id: string
           key: string
           updated_at: string
         }
         Insert: {
           active?: boolean
+          anchor_field?: string
           audience: string
           created_at?: string
           description?: string | null
+          enrollment_rule?: Json
           id?: string
           key: string
           updated_at?: string
         }
         Update: {
           active?: boolean
+          anchor_field?: string
           audience?: string
           created_at?: string
           description?: string | null
+          enrollment_rule?: Json
           id?: string
           key?: string
           updated_at?: string
