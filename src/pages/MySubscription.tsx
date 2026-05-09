@@ -427,7 +427,7 @@ const MySubscription = () => {
  <div className="w-full bg-amber-100 rounded-full h-2 overflow-hidden" role="progressbar" aria-valuenow={countdown.progressPct} aria-valuemin={0} aria-valuemax={100} aria-label="Progression vers le lancement">
  <div className="bg-amber-400 h-2 rounded-full transition-all duration-700" ref={(el) => { if (el) el.style.width = `${countdown.progressPct}%`; }} />
  </div>
- <p className="text-xs text-foreground/50 font-body">Lancement officiel le 13 juin 2026</p>
+ <p className="text-xs text-foreground/50 font-body">Lancement officiel le 14 juin 2026</p>
  </div>
 
  {/* Profile nudge */}
