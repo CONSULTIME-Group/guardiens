@@ -299,6 +299,14 @@ Deno.serve(async (req) => {
           .in('status', ['pending', 'sent'])
           .limit(1)
         if (existingDefer && existingDefer.length > 0) {
+          console.warn('[ALERT] Duplicate idempotency hit (already_queued)', { idempotencyKey, templateName, effectiveRecipient, deferReason })
+          void supabase.from('email_idempotency_hits').insert({
+            template_name: templateName,
+            recipient_email: effectiveRecipient,
+            idempotency_key: idempotencyKey,
+            hit_type: 'already_queued',
+            metadata: { defer_reason: deferReason },
+          }).then(({ error }) => { if (error) console.error('Failed to record idempotency hit', error) })
           return new Response(
             JSON.stringify({ success: true, deferred: true, reason: 'already_queued' }),
             { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
