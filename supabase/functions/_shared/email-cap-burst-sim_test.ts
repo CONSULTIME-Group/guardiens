@@ -79,6 +79,7 @@ class FakeSystem {
     const decision = decideDeferral({
       now,
       templateName: template,
+      isUrgent,
       hourSentAt: hourSent,
       daySentAt: daySent,
     })
