@@ -304,6 +304,31 @@ const CreateSit = () => {
   const descriptionValid = specificExpectations.length >= 50;
   const canPublish = profileCompletion >= 60 && property && title && startDate && endDate && !dateError && descriptionValid;
 
+  // Durée réelle en jours (inclusive) entre start_date et end_date
+  const nDays = (startDate && endDate && !dateError)
+    ? Math.max(1, Math.round((new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000) + 1)
+    : 0;
+
+  // Suggestion de titre basée sur les vraies données (animaux + ville + durée)
+  const buildSuggestedTitle = () => {
+    if (!startDate || !endDate || dateError) return "";
+    const speciesCount: Record<string, number> = {};
+    pets.forEach(p => { speciesCount[p.species] = (speciesCount[p.species] || 0) + 1; });
+    const labelMap: Record<string, [string, string]> = {
+      dog: ["chien", "chiens"], cat: ["chat", "chats"], horse: ["cheval", "chevaux"],
+      bird: ["oiseau", "oiseaux"], rodent: ["rongeur", "rongeurs"], fish: ["poisson", "poissons"],
+      reptile: ["reptile", "reptiles"], farm_animal: ["animal de ferme", "animaux de ferme"], nac: ["NAC", "NAC"],
+    };
+    const animalParts = Object.entries(speciesCount).map(([sp, n]) => {
+      const [s, p] = labelMap[sp] || [sp, sp];
+      return n > 1 ? `${n} ${p}` : `1 ${s}`;
+    });
+    const animals = animalParts.length > 0 ? animalParts.join(" et ") : "animaux";
+    const cityPart = ownerCity ? ` à ${ownerCity}` : "";
+    const dayWord = nDays > 1 ? "jours" : "jour";
+    return `Garde de ${animals}${cityPart} — ${nDays} ${dayWord}`;
+  };
+
   // Show urgent option: not confirmed, start < 7 days or flexible
   const showUrgent = flexibleDates || (startDate && new Date(startDate).getTime() - Date.now() < 7 * 86400000);
 
