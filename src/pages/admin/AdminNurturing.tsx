@@ -47,6 +47,77 @@ interface QueueRow {
   metadata: { source?: string } | null;
 }
 
+interface SequenceRow {
+  key: string;
+  audience: string;
+  description: string | null;
+  active: boolean;
+  anchor_field: string;
+  enrollment_rule: { type?: string; days?: number; window_days?: number; min_age_days?: number } | null;
+}
+
+interface SequenceStepRow {
+  sequence_key: string;
+  step_order: number;
+  template_name: string;
+  delay_hours: number;
+  exit_condition: { type?: string; threshold?: number; days?: number } | null;
+}
+
+// Libellés humains pour traduire les clés techniques
+const SEQUENCE_LABELS: Record<string, string> = {
+  "onboarding-owner": "Onboarding Propriétaire",
+  "onboarding-sitter": "Onboarding Gardien",
+  "reactivation-d30": "Réactivation des inactifs (J+30)",
+  "sitter-encourage-candidature": "Gardiens sans candidature (J+14)",
+};
+
+const TEMPLATE_LABELS: Record<string, string> = {
+  "onboarding-j1": "Bienvenue (J+1)",
+  "conseils-publication-annonce": "Conseils pour publier l'annonce",
+  "conseils-annonce-personnalises": "Conseils personnalisés sur l'annonce",
+  "relance-profil-incomplet": "Relance profil incomplet",
+  "availability-nudge": "Rappel disponibilités",
+  "reactivation-d30": "Réactivation après inactivité",
+  "sitter-encourage-candidature": "Encouragement à candidater",
+};
+
+const REASON_LABELS: Record<string, string> = {
+  exit_condition_met: "Objectif atteint (sortie normale)",
+  no_email: "Pas d'adresse email",
+  send_failed_400: "Erreur 400 à l'envoi",
+  send_failed_500: "Erreur 500 à l'envoi",
+  send_failed: "Échec d'envoi",
+  template_not_found: "Template introuvable",
+  user_unsubscribed: "Désinscrit",
+  user_not_found: "Utilisateur introuvable",
+  unknown: "Raison inconnue",
+};
+
+const AUDIENCE_LABELS: Record<string, string> = {
+  owner: "Propriétaires",
+  sitter: "Gardiens",
+  all: "Tous",
+};
+
+const RULE_TYPE_LABELS: Record<string, string> = {
+  signup: "À l'inscription",
+  inactivity: "Inactivité prolongée",
+  sitter_no_application: "Gardien sans candidature",
+  owner_no_sit: "Propriétaire sans annonce",
+};
+
+const formatDelay = (hours: number): string => {
+  if (hours === 0) return "immédiat";
+  if (hours < 24) return `${hours} h`;
+  const days = Math.round(hours / 24);
+  return `J+${days}`;
+};
+
+const labelSequence = (key: string) => SEQUENCE_LABELS[key] ?? key;
+const labelTemplate = (key: string) => TEMPLATE_LABELS[key] ?? key;
+const labelReason = (key: string | null) => REASON_LABELS[key ?? "unknown"] ?? (key ?? "—");
+
 const StatCard = ({
   label,
   value,
