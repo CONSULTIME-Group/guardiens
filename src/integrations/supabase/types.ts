@@ -893,6 +893,36 @@ export type Database = {
         }
         Relationships: []
       }
+      email_engagement_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          ip_prefix: string | null
+          message_id: string
+          target_url: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          ip_prefix?: string | null
+          message_id: string
+          target_url?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          ip_prefix?: string | null
+          message_id?: string
+          target_url?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       email_idempotency_hits: {
         Row: {
           created_at: string
@@ -1689,6 +1719,7 @@ export type Database = {
           error_detail: Json | null
           id: string
           journey_id: string
+          message_id: string | null
           reason: string | null
           sent: boolean
           step_order: number
@@ -1699,6 +1730,7 @@ export type Database = {
           error_detail?: Json | null
           id?: string
           journey_id: string
+          message_id?: string | null
           reason?: string | null
           sent: boolean
           step_order: number
@@ -1709,6 +1741,7 @@ export type Database = {
           error_detail?: Json | null
           id?: string
           journey_id?: string
+          message_id?: string | null
           reason?: string | null
           sent?: boolean
           step_order?: number

@@ -187,6 +187,7 @@ Deno.serve(async (req) => {
       const sendOk = sendRes.ok
       let reason: string | null = null
       let errorDetail: Record<string, unknown> | null = null
+      let messageId: string | null = null
       if (!sendOk) {
         const errBody = await sendRes.text().catch(() => '')
         reason = `send_failed_${sendRes.status}`
@@ -202,11 +203,19 @@ Deno.serve(async (req) => {
           step: nextStep.step_order,
           ...errorDetail,
         })
+      } else {
+        try {
+          const okBody = await sendRes.json()
+          messageId = typeof okBody?.messageId === 'string' ? okBody.messageId : null
+        } catch {
+          messageId = null
+        }
       }
 
       await supabase.from('journey_step_log').insert({
         journey_id: j.id, step_order: nextStep.step_order,
         template_name: nextStep.template_name, sent: sendOk, reason, error_detail: errorDetail,
+        message_id: messageId,
       })
 
       // Always advance the cursor

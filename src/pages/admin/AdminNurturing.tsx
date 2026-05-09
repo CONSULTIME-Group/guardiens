@@ -32,6 +32,7 @@ interface LogRow {
   reason: string | null;
   error_detail: { status?: number; body_excerpt?: string; template?: string; at?: string } | null;
   created_at: string;
+  message_id: string | null;
   user_journeys: { sequence_key: string } | null;
 }
 
@@ -45,6 +46,11 @@ interface JourneyRow {
 interface QueueRow {
   status: string;
   metadata: { source?: string } | null;
+}
+
+interface EngagementRow {
+  message_id: string;
+  event_type: "open" | "click";
 }
 
 interface SequenceRow {
@@ -154,6 +160,7 @@ const AdminNurturing = () => {
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [journeys, setJourneys] = useState<JourneyRow[]>([]);
   const [queue, setQueue] = useState<QueueRow[]>([]);
+  const [engagement, setEngagement] = useState<EngagementRow[]>([]);
   const [logsTruncated, setLogsTruncated] = useState(false);
   const [nurturingTemplates, setNurturingTemplates] = useState<string[]>([]);
   const [lastRunAt, setLastRunAt] = useState<string | null>(null);
@@ -177,7 +184,7 @@ const AdminNurturing = () => {
       supabase
         .from("journey_step_log")
         .select(
-          "id, journey_id, step_order, template_name, sent, reason, error_detail, created_at, user_journeys!inner(sequence_key)",
+          "id, journey_id, step_order, template_name, sent, reason, error_detail, created_at, message_id, user_journeys!inner(sequence_key)",
           { count: "exact" }
         )
         .gte("created_at", since)
@@ -219,6 +226,27 @@ const AdminNurturing = () => {
         if (!latest.has(key)) latest.set(key, { status: r.status, metadata: r.metadata });
       }
       setQueue(Array.from(latest.values()) as QueueRow[]);
+    }
+
+    // Engagement events (opens/clicks) pour les message_ids des logs de la fenêtre
+    const messageIds = Array.from(
+      new Set(((logsRes.data ?? []) as LogRow[]).map((l) => l.message_id).filter(Boolean) as string[])
+    );
+    if (messageIds.length > 0) {
+      // Supabase IN limite ~ 1000, on découpe par lots
+      const chunks: string[][] = [];
+      for (let i = 0; i < messageIds.length; i += 500) chunks.push(messageIds.slice(i, i + 500));
+      const all: EngagementRow[] = [];
+      for (const c of chunks) {
+        const r = await supabase
+          .from("email_engagement_events")
+          .select("message_id, event_type")
+          .in("message_id", c);
+        if (!r.error && r.data) all.push(...(r.data as EngagementRow[]));
+      }
+      setEngagement(all);
+    } else {
+      setEngagement([]);
     }
 
     // Dernier run du cron evaluate-journeys (toutes périodes confondues)
@@ -388,26 +416,64 @@ const AdminNurturing = () => {
     [logs]
   );
 
-  // Stats agrégées par séquence (logs + journeys de la période)
+  // Index events par message_id
+  const eventsByMid = useMemo(() => {
+    const m = new Map<string, { open: boolean; click: boolean }>();
+    for (const e of engagement) {
+      const r = m.get(e.message_id) ?? { open: false, click: false };
+      if (e.event_type === "open") r.open = true;
+      if (e.event_type === "click") r.click = true;
+      m.set(e.message_id, r);
+    }
+    return m;
+  }, [engagement]);
+
+  // Stats agrégées par séquence (logs + journeys + engagement)
   const sequenceMetrics = useMemo(() => {
-    const m = new Map<string, { sent: number; failed: number; exited: number; activeJourneys: number; totalJourneys: number }>();
+    type M = { sent: number; failed: number; exited: number; activeJourneys: number; totalJourneys: number; opens: number; clicks: number; actions: number };
+    const def = (): M => ({ sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0, opens: 0, clicks: 0, actions: 0 });
+    const m = new Map<string, M>();
     for (const l of logs) {
       const k = l.user_journeys?.sequence_key;
       if (!k) continue;
-      const r = m.get(k) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0 };
-      if (l.sent) r.sent++;
-      else if (l.reason === "exit_condition_met") r.exited++;
-      else r.failed++;
+      const r = m.get(k) ?? def();
+      if (l.sent) {
+        r.sent++;
+        const ev = l.message_id ? eventsByMid.get(l.message_id) : undefined;
+        if (ev?.open) r.opens++;
+        if (ev?.click) r.clicks++;
+        // Action = clic CTA OU sortie via objectif (cf. plan)
+        if (ev?.click) r.actions++;
+      } else if (l.reason === "exit_condition_met") {
+        r.exited++;
+        r.actions++; // exit goal_met compte comme action
+      } else {
+        r.failed++;
+      }
       m.set(k, r);
     }
     for (const j of journeys) {
-      const r = m.get(j.sequence_key) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0 };
+      const r = m.get(j.sequence_key) ?? def();
       r.totalJourneys++;
       if (j.status === "active") r.activeJourneys++;
       m.set(j.sequence_key, r);
     }
     return m;
-  }, [logs, journeys]);
+  }, [logs, journeys, eventsByMid]);
+
+  // Engagement global
+  const engagementStats = useMemo(() => {
+    let sent = 0, opens = 0, clicks = 0, actions = 0;
+    for (const m of sequenceMetrics.values()) {
+      sent += m.sent;
+      opens += m.opens;
+      clicks += m.clicks;
+      actions += m.actions;
+    }
+    const pct = (n: number) => sent > 0 ? Math.round((n / sent) * 1000) / 10 : 0;
+    return { sent, opens, clicks, actions, openRate: pct(opens), clickRate: pct(clicks), actionRate: pct(actions) };
+  }, [sequenceMetrics]);
+
 
   const stepsBySequence = useMemo(() => {
     const m = new Map<string, SequenceStepRow[]>();
@@ -494,7 +560,7 @@ const AdminNurturing = () => {
             <p className="text-sm text-muted-foreground py-4 text-center">Aucune séquence configurée.</p>
           ) : (
             sequences.map((s) => {
-              const m = sequenceMetrics.get(s.key) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0 };
+              const m = sequenceMetrics.get(s.key) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0, opens: 0, clicks: 0, actions: 0 };
               const steps = stepsBySequence.get(s.key) ?? [];
               const ruleType = s.enrollment_rule?.type ?? "—";
               const ruleLabel = RULE_TYPE_LABELS[ruleType] ?? ruleType;
@@ -541,7 +607,29 @@ const AdminNurturing = () => {
                     </div>
                   </div>
 
-                  {steps.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div className="bg-primary/5 border border-primary/15 rounded px-2 py-1.5">
+                      <p className="text-muted-foreground">Taux d'ouverture</p>
+                      <p className="font-semibold text-foreground text-base">
+                        {m.sent > 0 ? `${Math.round((m.opens / m.sent) * 100)}%` : "—"}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">{m.opens} / {m.sent}</p>
+                    </div>
+                    <div className="bg-primary/5 border border-primary/15 rounded px-2 py-1.5">
+                      <p className="text-muted-foreground">Taux de clic CTA</p>
+                      <p className="font-semibold text-foreground text-base">
+                        {m.sent > 0 ? `${Math.round((m.clicks / m.sent) * 100)}%` : "—"}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">{m.clicks} / {m.sent}</p>
+                    </div>
+                    <div className="bg-success/10 border border-success/25 rounded px-2 py-1.5">
+                      <p className="text-muted-foreground">Taux d'action</p>
+                      <p className="font-semibold text-success text-base">
+                        {m.sent > 0 ? `${Math.round((m.actions / m.sent) * 100)}%` : "—"}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">clic ou objectif</p>
+                    </div>
+                  </div>
                     <div className="text-xs">
                       <p className="text-muted-foreground mb-1.5">Étapes ({steps.length}) :</p>
                       <div className="flex flex-wrap gap-1.5">
