@@ -246,7 +246,7 @@ const AdminNurturing = () => {
             </CardHeader>
             <CardContent className="overflow-x-auto">
               {recentFailures.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-8 text-center">Aucun échec sur la période. ✨</p>
+                <p className="text-sm text-muted-foreground py-8 text-center">Aucun échec sur la période.</p>
               ) : (
                 <Table>
                   <TableHeader>
