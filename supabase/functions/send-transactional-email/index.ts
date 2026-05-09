@@ -501,13 +501,53 @@ Deno.serve(async (req) => {
   }
 
   // 4. Render React Email template to HTML and plain text
-  const html = await renderAsync(
+  let html = await renderAsync(
     React.createElement(template.component, templateData)
   )
-  const plainText = await renderAsync(
+  let plainText = await renderAsync(
     React.createElement(template.component, templateData),
     { plainText: true }
   )
+
+  // 4b. Append branded footer with preferences + unsubscribe links.
+  // The token is per-recipient (one per email address) and used for one-click and category opt-out.
+  const prefsUrl = `${SITE_URL}/preferences-email`
+  const unsubUrl = `${SITE_URL}/unsubscribe?token=${unsubscribeToken}&category=${category}`
+  const unsubAllUrl = `${SITE_URL}/unsubscribe?token=${unsubscribeToken}`
+
+  // Different copy depending on whether opt-out is offered
+  let footerHtml: string
+  let footerText: string
+  if (category === 'transactional') {
+    footerHtml = `
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;border-top:1px solid #e7e1d8;padding-top:16px;font-family:Arial,sans-serif;">
+        <tr><td style="font-size:11px;color:#999;line-height:1.6;text-align:center;">
+          Cet email essentiel est lié au fonctionnement de votre compte Guardiens.<br/>
+          <a href="${prefsUrl}" style="color:#666;text-decoration:underline;">Gérer mes préférences email</a>
+        </td></tr>
+      </table>`
+    footerText = `\n\n—\nCet email essentiel est lié au fonctionnement de votre compte Guardiens.\nGérer mes préférences : ${prefsUrl}\n`
+  } else {
+    footerHtml = `
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;border-top:1px solid #e7e1d8;padding-top:16px;font-family:Arial,sans-serif;">
+        <tr><td style="font-size:11px;color:#999;line-height:1.6;text-align:center;">
+          <a href="${prefsUrl}" style="color:#666;text-decoration:underline;">Gérer mes préférences</a>
+          &nbsp;·&nbsp;
+          <a href="${unsubUrl}" style="color:#666;text-decoration:underline;">Me désinscrire de cette catégorie</a>
+          &nbsp;·&nbsp;
+          <a href="${unsubAllUrl}" style="color:#666;text-decoration:underline;">Tout désinscrire</a>
+        </td></tr>
+      </table>`
+    footerText = `\n\n—\nGérer mes préférences : ${prefsUrl}\nMe désinscrire de cette catégorie : ${unsubUrl}\nTout désinscrire : ${unsubAllUrl}\n`
+  }
+
+  // Inject footer just before </body> (or append if not found)
+  if (html.includes('</body>')) {
+    html = html.replace('</body>', `${footerHtml}</body>`)
+  } else {
+    html = `${html}${footerHtml}`
+  }
+  plainText = `${plainText}${footerText}`
 
   // Resolve subject — supports static string or dynamic function
   const resolvedSubject =
@@ -515,7 +555,7 @@ Deno.serve(async (req) => {
       ? template.subject(templateData)
       : template.subject
 
-  // 5. Send email directly via Resend (bypasses broken Lovable email queue)
+  // 5. Send email directly via Resend
   const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
   if (!RESEND_API_KEY) {
     console.error('RESEND_API_KEY is not configured')
@@ -538,8 +578,22 @@ Deno.serve(async (req) => {
     template_name: templateName,
     recipient_email: effectiveRecipient,
     status: 'pending',
-    metadata: { idempotency_key: idempotencyKey },
+    metadata: { idempotency_key: idempotencyKey, category },
   })
+
+  // RFC 8058 List-Unsubscribe headers — Gmail/Apple Mail one-click unsubscribe.
+  // Only meaningful for non-transactional emails. The unsubscribe handler accepts
+  // POST with form body for one-click compliance.
+  const headers: Record<string, string> = {}
+  if (category !== 'transactional') {
+    const oneClickUrl = `https://${SENDER_DOMAIN.replace(/^notify\./, '')}`
+    // Use the supabase function URL directly so one-click hits the API without a UI
+    const apiBase = Deno.env.get('SUPABASE_URL') ?? `https://${SENDER_DOMAIN}`
+    const oneClick = `${apiBase}/functions/v1/handle-email-unsubscribe?token=${unsubscribeToken}`
+    headers['List-Unsubscribe'] = `<${oneClick}>, <${unsubAllUrl}>`
+    headers['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click'
+    void oneClickUrl
+  }
 
   const resendPayload: Record<string, unknown> = {
     from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
@@ -547,6 +601,9 @@ Deno.serve(async (req) => {
     subject: resolvedSubject,
     html,
     text: plainText,
+  }
+  if (Object.keys(headers).length > 0) {
+    resendPayload.headers = headers
   }
 
   if (templateName === 'contact-reply') {
