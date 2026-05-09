@@ -23,7 +23,7 @@ interface JourneyRow {
   current_step: number;
   exit_reason: string | null;
   started_at: string;
-  exited_at: string | null;
+  completed_at: string | null;
   profiles: { first_name: string | null; last_name: string | null; email: string | null } | null;
 }
 
@@ -70,7 +70,7 @@ export const SequenceRecipientsDialog = ({ open, onOpenChange, sequenceKey, sequ
       // 1) Parcours de la séquence sur la période
       const jr = await supabase
         .from("user_journeys")
-        .select("id, user_id, status, current_step, exit_reason, started_at, exited_at")
+        .select("id, user_id, status, current_step, exit_reason, started_at, completed_at")
         .eq("sequence_key", sequenceKey)
         .gte("started_at", sinceIso)
         .order("started_at", { ascending: false })
