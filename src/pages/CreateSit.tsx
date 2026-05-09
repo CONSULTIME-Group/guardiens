@@ -123,6 +123,7 @@ const CreateSit = () => {
   const [ownerProfile, setOwnerProfile] = useState<OwnerSummary | null>(null);
   const [ownerPhotos, setOwnerPhotos] = useState<string[]>([]);
   const [profileCompletion, setProfileCompletion] = useState(0);
+  const [ownerCity, setOwnerCity] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [isRepublish, setIsRepublish] = useState(false);
@@ -138,7 +139,7 @@ const CreateSit = () => {
       const [propRes, ownerRes, profileRes, galleryRes] = await Promise.all([
         supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
         supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
-        supabase.from("profiles").select("profile_completion").eq("id", user.id).single(),
+        supabase.from("profiles").select("profile_completion, city").eq("id", user.id).single(),
         supabase.from("owner_gallery").select("photo_url").eq("user_id", user.id).limit(4),
       ]);
 
@@ -149,6 +150,7 @@ const CreateSit = () => {
       }
 
       setProfileCompletion(profileRes.data?.profile_completion || 0);
+      setOwnerCity(profileRes.data?.city || "");
       setOwnerPhotos((galleryRes.data || []).map((g: any) => g.photo_url));
 
       // Pre-fill from previous sit if republishing
@@ -302,6 +304,31 @@ const CreateSit = () => {
   const descriptionValid = specificExpectations.length >= 50;
   const canPublish = profileCompletion >= 60 && property && title && startDate && endDate && !dateError && descriptionValid;
 
+  // Durée réelle en jours (inclusive) entre start_date et end_date
+  const nDays = (startDate && endDate && !dateError)
+    ? Math.max(1, Math.round((new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000) + 1)
+    : 0;
+
+  // Suggestion de titre basée sur les vraies données (animaux + ville + durée)
+  const buildSuggestedTitle = () => {
+    if (!startDate || !endDate || dateError) return "";
+    const speciesCount: Record<string, number> = {};
+    pets.forEach(p => { speciesCount[p.species] = (speciesCount[p.species] || 0) + 1; });
+    const labelMap: Record<string, [string, string]> = {
+      dog: ["chien", "chiens"], cat: ["chat", "chats"], horse: ["cheval", "chevaux"],
+      bird: ["oiseau", "oiseaux"], rodent: ["rongeur", "rongeurs"], fish: ["poisson", "poissons"],
+      reptile: ["reptile", "reptiles"], farm_animal: ["animal de ferme", "animaux de ferme"], nac: ["NAC", "NAC"],
+    };
+    const animalParts = Object.entries(speciesCount).map(([sp, n]) => {
+      const [s, p] = labelMap[sp] || [sp, sp];
+      return n > 1 ? `${n} ${p}` : `1 ${s}`;
+    });
+    const animals = animalParts.length > 0 ? animalParts.join(" et ") : "animaux";
+    const cityPart = ownerCity ? ` à ${ownerCity}` : "";
+    const dayWord = nDays > 1 ? "jours" : "jour";
+    return `Garde de ${animals}${cityPart} — ${nDays} ${dayWord}`;
+  };
+
   // Show urgent option: not confirmed, start < 7 days or flexible
   const showUrgent = flexibleDates || (startDate && new Date(startDate).getTime() - Date.now() < 7 * 86400000);
 
@@ -404,12 +431,22 @@ const CreateSit = () => {
       {/* Form fields */}
       <div className="space-y-6">
         <div>
-          <Label className="text-sm font-medium">Titre de l'annonce *</Label>
+          <div className="flex items-center justify-between mb-1.5">
+            <Label className="text-sm font-medium">Titre de l'annonce *</Label>
+            {nDays > 0 && pets.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setTitle(buildSuggestedTitle())}
+                className="text-xs text-primary hover:underline"
+              >
+                Suggérer un titre
+              </button>
+            )}
+          </div>
           <Input
-            placeholder="Ex : Garde de 2 chats à Écully — 10 jours en août"
+            placeholder={nDays > 0 ? buildSuggestedTitle() : "Ex : Garde de 2 chats à Écully — 10 jours en août"}
             value={title}
             onChange={e => setTitle(e.target.value)}
-            className="mt-1.5"
           />
         </div>
 
@@ -424,11 +461,15 @@ const CreateSit = () => {
             <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} min={startDate || today} className="mt-1.5" />
           </div>
         </div>
-        {dateError && (
+        {dateError ? (
           <p className="text-sm text-destructive flex items-center gap-1.5 -mt-2">
             <AlertCircle className="h-3.5 w-3.5" /> {dateError}
           </p>
-        )}
+        ) : nDays > 0 ? (
+          <p className="text-xs text-muted-foreground -mt-2">
+            Durée : <span className="font-medium text-foreground">{nDays} {nDays > 1 ? "jours" : "jour"}</span>
+          </p>
+        ) : null}
 
         {/* Option dates flexibles */}
         <div className="flex items-start gap-3">
