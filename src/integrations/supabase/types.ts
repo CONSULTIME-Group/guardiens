@@ -893,6 +893,36 @@ export type Database = {
         }
         Relationships: []
       }
+      email_idempotency_hits: {
+        Row: {
+          created_at: string
+          hit_type: string
+          id: string
+          idempotency_key: string
+          metadata: Json | null
+          recipient_email: string
+          template_name: string
+        }
+        Insert: {
+          created_at?: string
+          hit_type: string
+          id?: string
+          idempotency_key: string
+          metadata?: Json | null
+          recipient_email: string
+          template_name: string
+        }
+        Update: {
+          created_at?: string
+          hit_type?: string
+          id?: string
+          idempotency_key?: string
+          metadata?: Json | null
+          recipient_email?: string
+          template_name?: string
+        }
+        Relationships: []
+      }
       email_preferences: {
         Row: {
           alert_emails: boolean
@@ -4292,6 +4322,15 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      email_idempotency_daily_counts: {
+        Row: {
+          day: string | null
+          hit_type: string | null
+          hits: number | null
+          template_name: string | null
+        }
+        Relationships: []
       }
       mass_email_stats: {
         Row: {
