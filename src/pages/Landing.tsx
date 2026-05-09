@@ -974,7 +974,7 @@ const Landing = () => {
                     >
                       <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
                       <span className="text-sm leading-relaxed">
-                        <strong>Lyon</strong> — Des gardiens dans chaque arrondissement, du Vieux Lyon à la Croix-Rousse.
+                        <strong>House-sitting à Lyon</strong> — Des gardiens vérifiés dans chaque arrondissement, du Vieux Lyon à la Croix-Rousse, en passant par la Part-Dieu et Confluence.
                       </span>
                     </Link>
                   </li>
@@ -985,7 +985,7 @@ const Landing = () => {
                     >
                       <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
                       <span className="text-sm leading-relaxed">
-                        <strong>Annecy</strong> — Lac, montagne, résidences secondaires. Des gardiens locaux.
+                        <strong>House-sitting à Annecy</strong> — Lac, montagne, résidences secondaires en Haute-Savoie. Des gardiens locaux qui connaissent le gel, les accès et les vétos.
                       </span>
                     </Link>
                   </li>
@@ -996,7 +996,7 @@ const Landing = () => {
                     >
                       <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
                       <span className="text-sm leading-relaxed">
-                        <strong>Grenoble</strong> — Au pied de trois massifs, des gardiens qui connaissent la cuvette.
+                        <strong>House-sitting à Grenoble</strong> — Au pied du Vercors, de la Chartreuse et de Belledonne. Des gardiens qui connaissent la cuvette et les sentiers de la Bastille.
                       </span>
                     </Link>
                   </li>
@@ -1007,7 +1007,7 @@ const Landing = () => {
                     >
                       <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
                       <span className="text-sm leading-relaxed">
-                        <strong>Partout en France</strong> — Du Pays basque à la Bretagne, le réseau s'étend.
+                        <strong>Partout en France</strong> — Du Pays basque à la Bretagne, en passant par les Alpes, la Provence et le Nord. Le réseau s'étend dans toutes les régions.
                       </span>
                     </Link>
                   </li>
@@ -1020,6 +1020,39 @@ const Landing = () => {
               </div>
             </RevealSection>
           </div>
+
+          {/* FAQ visible — miroir du JSON-LD FAQPage déclaré en haut de page */}
+          <RevealSection delay={0.3} className="mt-16 max-w-3xl mx-auto">
+            <h3 className="font-heading text-2xl md:text-3xl font-semibold text-foreground text-center mb-8">
+              Questions fréquentes
+            </h3>
+            <dl className="space-y-6">
+              <div className="bg-card border border-border rounded-2xl p-6">
+                <dt className="font-heading font-semibold text-foreground mb-2">
+                  Qu'est-ce que le house-sitting ?
+                </dt>
+                <dd className="text-sm text-foreground/70 leading-relaxed">
+                  Le house-sitting est un échange de services : un gardien habite gratuitement dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties.
+                </dd>
+              </div>
+              <div className="bg-card border border-border rounded-2xl p-6">
+                <dt className="font-heading font-semibold text-foreground mb-2">
+                  Faut-il payer pour s'inscrire en tant que propriétaire ?
+                </dt>
+                <dd className="text-sm text-foreground/70 leading-relaxed">
+                  L'inscription, la publication d'annonces et les échanges avec les gardiens sont sans abonnement requis pour les propriétaires. Aucune carte bancaire demandée. Les gardiens bénéficient d'un accès sans abonnement jusqu'au 14 juillet 2026, puis l'abonnement est à 6,99 €/mois. L'entraide entre gens du coin reste sans abonnement pour tous.
+                </dd>
+              </div>
+              <div className="bg-card border border-border rounded-2xl p-6">
+                <dt className="font-heading font-semibold text-foreground mb-2">
+                  Comment trouver un pet sitter près de chez moi ?
+                </dt>
+                <dd className="text-sm text-foreground/70 leading-relaxed">
+                  Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous. Vous choisissez après une rencontre.
+                </dd>
+              </div>
+            </dl>
+          </RevealSection>
         </div>
       </section>
 
