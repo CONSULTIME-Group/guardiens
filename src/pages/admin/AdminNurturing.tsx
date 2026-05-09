@@ -5,6 +5,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { toast } from "sonner";
+import { HelpCircle, Loader2, PlayCircle } from "lucide-react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -23,6 +27,7 @@ import { SequenceRecipientsDialog } from "@/components/admin/SequenceRecipientsD
 
 type Range = "24h" | "7d" | "30d";
 const RANGE_HOURS: Record<Range, number> = { "24h": 24, "7d": 24 * 7, "30d": 24 * 30 };
+
 
 interface LogRow {
   id: string;
@@ -157,8 +162,9 @@ const StatCard = ({
 };
 
 const AdminNurturing = () => {
-  const [range, setRange] = useState<Range>("30d");
+  const [range, setRange] = useState<Range>("7d");
   const [loading, setLoading] = useState(true);
+  const [triggering, setTriggering] = useState(false);
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [journeys, setJourneys] = useState<JourneyRow[]>([]);
   const [queue, setQueue] = useState<QueueRow[]>([]);
@@ -296,6 +302,20 @@ const AdminNurturing = () => {
     }
 
     setLoading(false);
+  };
+
+  const triggerEvaluate = async () => {
+    setTriggering(true);
+    try {
+      const { error } = await supabase.functions.invoke("evaluate-journeys", { body: { manual: true } });
+      if (error) throw error;
+      toast.success("Évaluation lancée — actualisation dans 3 s");
+      setTimeout(() => fetchData(), 3000);
+    } catch (e) {
+      toast.error("Échec du déclenchement", { description: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setTriggering(false);
+    }
   };
 
   useEffect(() => {
@@ -577,26 +597,90 @@ const AdminNurturing = () => {
     return m;
   }, [sequenceSteps]);
 
+  // --- Pour l'onglet Vue d'ensemble : Top 3 winners / losers ---
+  const reliableSteps = topSteps.filter((s) => s.sent + s.exited >= 10);
+  const winners = [...reliableSteps].sort((a, b) => b.actionRate - a.actionRate).slice(0, 3);
+  const losers = [...reliableSteps].filter((s) => s.actionRate < 10).sort((a, b) => a.actionRate - b.actionRate).slice(0, 3);
+
+  // --- Santé du système (3 pastilles) ---
+  const queueHealthy = queueStats.failed === 0 && queueStats.pending < 20;
+  const deliveryRate = stats.successRate;
+  const deliveryTone: "ok" | "warn" | "err" =
+    stats.sendable === 0 ? "ok" : deliveryRate >= 95 ? "ok" : deliveryRate >= 85 ? "warn" : "err";
+  const dotClass = (tone: "ok" | "warn" | "err") =>
+    tone === "ok" ? "bg-success" : tone === "warn" ? "bg-warning" : "bg-destructive";
+
   return (
     <div className="container mx-auto p-6 space-y-6">
+      {/* En-tête */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-heading font-bold">Nurturing — Suivi des envois</h1>
+          <h1 className="text-3xl font-heading font-bold">Pilotage du nurturing</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Volumes, taux d'échec, répartition par séquence et par étape, couverture queue.
+            Quels emails automatiques sont envoyés, à qui, et lesquels créent vraiment de l'action.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {(["24h", "7d", "30d"] as Range[]).map((r) => (
             <Button key={r} size="sm" variant={range === r ? "default" : "outline"} onClick={() => setRange(r)}>
               {r === "24h" ? "24 h" : r === "7d" ? "7 jours" : "30 jours"}
             </Button>
           ))}
-          <Button size="sm" variant="ghost" onClick={fetchData}>
+          <Button size="sm" variant="ghost" onClick={fetchData} disabled={loading}>
             Rafraîchir
           </Button>
+          <Button size="sm" variant="default" onClick={triggerEvaluate} disabled={triggering}>
+            {triggering ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <PlayCircle className="h-4 w-4 mr-1" />}
+            Lancer une évaluation
+          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button size="sm" variant="ghost">
+                <HelpCircle className="h-4 w-4 mr-1" />
+                Comment lire ?
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-96 text-sm space-y-2">
+              <p><strong>Séquence</strong> : campagne d'emails automatiques (ex. « Onboarding Propriétaire »). Chaque séquence cible une audience et déclenche selon une règle.</p>
+              <p><strong>Étape</strong> : un email donné dans une séquence, envoyé après un délai (J+1, J+3…).</p>
+              <p><strong>Parcours</strong> : un utilisateur inscrit dans une séquence. Il avance d'étape en étape, ou « sort » si l'objectif est atteint.</p>
+              <p><strong>Action</strong> : un clic sur le CTA de l'email OU une sortie via objectif atteint dans les 7 jours suivants.</p>
+              <p><strong>Evaluator</strong> : cron qui décide d'envoyer ou non chaque étape (toutes les heures). <strong>Queue</strong> : file d'attente d'envoi des emails.</p>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
+
+      {/* Bandeau de santé */}
+      <Card>
+        <CardContent className="p-4 flex flex-wrap gap-6 items-center">
+          <div className="flex items-center gap-2">
+            <span className={`inline-block h-2.5 w-2.5 rounded-full ${dotClass(cronHealth.tone)}`} />
+            <div>
+              <p className="text-xs text-muted-foreground">Cron evaluate-journeys</p>
+              <p className="text-sm font-medium">{cronHealth.label}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`inline-block h-2.5 w-2.5 rounded-full ${dotClass(queueHealthy ? "ok" : queueStats.failed > 0 ? "err" : "warn")}`} />
+            <div>
+              <p className="text-xs text-muted-foreground">Queue d'envoi</p>
+              <p className="text-sm font-medium">
+                {queueStats.pending} en attente · {queueStats.failed} échec(s)
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`inline-block h-2.5 w-2.5 rounded-full ${dotClass(deliveryTone)}`} />
+            <div>
+              <p className="text-xs text-muted-foreground">Délivrabilité (evaluator)</p>
+              <p className="text-sm font-medium">
+                {stats.sendable === 0 ? "—" : `${stats.successRate}% (${stats.sent}/${stats.sendable})`}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {logsTruncated && (
         <Card className="border-warning bg-warning-soft">
@@ -612,144 +696,10 @@ const AdminNurturing = () => {
             <strong>Bonne nouvelle :</strong> les {failureBurst.count} échecs de la période sont
             tous concentrés sur le {format(new Date(failureBurst.day), "dd MMMM yyyy", { locale: fr })} (il y a {failureBurst.ageDays} j).
             Le dernier passage du cron, {cronHealth.label}, s'est terminé par un envoi réussi —
-            l'incident est résolu, les chiffres restent visibles à titre historique.
+            l'incident est résolu.
           </CardContent>
         </Card>
       )}
-
-      {/* Glossaire — comprendre la page */}
-      <Card className="bg-muted/30">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Comment lire cette page</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground space-y-2">
-          <p>
-            <strong className="text-foreground">Séquence</strong> : campagne d'emails automatiques (ex. « Onboarding Propriétaire »). Chaque séquence cible une audience et déclenche selon une règle (inscription, inactivité…).
-          </p>
-          <p>
-            <strong className="text-foreground">Étape</strong> : un email donné dans une séquence, envoyé après un délai (J+1, J+3…). Une séquence contient plusieurs étapes successives.
-          </p>
-          <p>
-            <strong className="text-foreground">Parcours (journey)</strong> : un utilisateur inscrit dans une séquence. Il avance d'étape en étape, ou « sort » si l'objectif est atteint avant.
-          </p>
-          <p>
-            <strong className="text-foreground">Evaluator</strong> : le cron qui décide d'envoyer ou non chaque étape (toutes les heures). <strong className="text-foreground">Queue</strong> : la file d'attente d'envoi des emails (Lovable Cloud).
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* Séquences actives — vue métier */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Séquences actives</CardTitle>
-          <p className="text-xs text-muted-foreground mt-1">
-            Les campagnes de nurturing en cours. Chiffres calculés sur la fenêtre sélectionnée ({range === "24h" ? "24 h" : range === "7d" ? "7 jours" : "30 jours"}).
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {sequences.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">Aucune séquence configurée.</p>
-          ) : (
-            sequences.map((s) => {
-              const m = sequenceMetrics.get(s.key) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0, opens: 0, clicks: 0, actions: 0 };
-              const steps = stepsBySequence.get(s.key) ?? [];
-              const ruleType = s.enrollment_rule?.type ?? "—";
-              const ruleLabel = RULE_TYPE_LABELS[ruleType] ?? ruleType;
-              const ruleDetail =
-                ruleType === "inactivity" && s.enrollment_rule?.days
-                  ? ` (après ${s.enrollment_rule.days} j d'inactivité)`
-                  : ruleType === "sitter_no_application" && s.enrollment_rule?.min_age_days
-                    ? ` (après ${s.enrollment_rule.min_age_days} j sans candidature)`
-                    : "";
-              return (
-                <div key={s.key} className="border border-border rounded-lg p-4 space-y-3">
-                  <div className="flex items-start justify-between gap-3 flex-wrap">
-                    <div>
-                      <h3 className="font-semibold text-foreground">{labelSequence(s.key)}</h3>
-                      {s.description && <p className="text-xs text-muted-foreground mt-1 max-w-2xl">{s.description}</p>}
-                    </div>
-                    <div className="flex gap-1.5 flex-wrap items-center">
-                      <Badge variant={s.active ? "default" : "outline"}>{s.active ? "Active" : "Inactive"}</Badge>
-                      <Badge variant="secondary">{AUDIENCE_LABELS[s.audience] ?? s.audience}</Badge>
-                      <Badge variant="outline">{ruleLabel}{ruleDetail}</Badge>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-6 text-xs"
-                        onClick={() => setRecipientsDialog({ key: s.key, label: labelSequence(s.key) })}
-                      >
-                        Voir destinataires
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
-                    <div className="bg-muted/40 rounded px-2 py-1.5">
-                      <p className="text-muted-foreground">Parcours actifs</p>
-                      <p className="font-semibold text-foreground text-base">{m.activeJourneys}</p>
-                    </div>
-                    <div className="bg-muted/40 rounded px-2 py-1.5">
-                      <p className="text-muted-foreground">Nouveaux (période)</p>
-                      <p className="font-semibold text-foreground text-base">{m.totalJourneys}</p>
-                    </div>
-                    <div className="bg-muted/40 rounded px-2 py-1.5">
-                      <p className="text-muted-foreground">Emails envoyés</p>
-                      <p className="font-semibold text-success text-base">{m.sent}</p>
-                    </div>
-                    <div className="bg-muted/40 rounded px-2 py-1.5">
-                      <p className="text-muted-foreground">Échecs</p>
-                      <p className={`font-semibold text-base ${m.failed > 0 ? "text-destructive" : "text-foreground"}`}>{m.failed}</p>
-                    </div>
-                    <div className="bg-muted/40 rounded px-2 py-1.5">
-                      <p className="text-muted-foreground">Sorties (objectif)</p>
-                      <p className="font-semibold text-foreground text-base">{m.exited}</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2 text-xs">
-                    <div className="bg-primary/5 border border-primary/15 rounded px-2 py-1.5">
-                      <p className="text-muted-foreground">Taux d'ouverture</p>
-                      <p className="font-semibold text-foreground text-base">
-                        {m.sent > 0 ? `${Math.round((m.opens / m.sent) * 100)}%` : "—"}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">{m.opens} / {m.sent}</p>
-                    </div>
-                    <div className="bg-primary/5 border border-primary/15 rounded px-2 py-1.5">
-                      <p className="text-muted-foreground">Taux de clic CTA</p>
-                      <p className="font-semibold text-foreground text-base">
-                        {m.sent > 0 ? `${Math.round((m.clicks / m.sent) * 100)}%` : "—"}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">{m.clicks} / {m.sent}</p>
-                    </div>
-                    <div className="bg-success/10 border border-success/25 rounded px-2 py-1.5">
-                      <p className="text-muted-foreground">Taux d'action</p>
-                      <p className="font-semibold text-success text-base">
-                        {m.sent > 0 ? `${Math.round((m.actions / m.sent) * 100)}%` : "—"}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">clic ou objectif</p>
-                    </div>
-                  </div>
-                    <div className="text-xs">
-                      <p className="text-muted-foreground mb-1.5">Étapes ({steps.length}) :</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {steps.map((st) => (
-                          <span
-                            key={st.step_order}
-                            className="inline-flex items-center gap-1.5 bg-background border border-border rounded px-2 py-1"
-                            title={`Template : ${st.template_name}`}
-                          >
-                            <span className="font-mono text-muted-foreground">{formatDelay(st.delay_hours)}</span>
-                            <span>{labelTemplate(st.template_name)}</span>
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                </div>
-              );
-            })
-          )}
-        </CardContent>
-      </Card>
 
       {loading ? (
         <div className="grid gap-4 md:grid-cols-4">
@@ -758,125 +708,521 @@ const AdminNurturing = () => {
           ))}
         </div>
       ) : (
-        <>
-          <div className="grid gap-4 md:grid-cols-4">
-            <StatCard
-              label="Étapes évaluées"
-              value={stats.total}
-              hint={`Dont ${stats.exited} sorties (objectif atteint)`}
-            />
-            <StatCard
-              label="Étapes envoyées"
-              value={stats.sent}
-              tone="ok"
-              hint={`${stats.successRate}% de réussite côté evaluator`}
-            />
-            <StatCard
-              label="Échecs evaluator"
-              value={stats.failed}
-              tone={stats.failed > 0 ? "err" : "ok"}
-              hint={`${stats.failureRate}% des tentatives`}
-            />
-            <StatCard
-              label="Couverture (sent vs failed)"
-              value={`${stats.sent}/${stats.sendable}`}
-              tone={stats.failureRate > 5 ? "err" : stats.failureRate > 1 ? "warn" : "ok"}
-              hint={stats.sendable === 0 ? "Aucun envoi sur la période" : `${stats.successRate}% délivrés à la queue`}
-            />
-          </div>
+        <Tabs defaultValue="overview" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
+            <TabsTrigger value="performance">Performance</TabsTrigger>
+            <TabsTrigger value="diagnostic">Diagnostic</TabsTrigger>
+          </TabsList>
 
-          <div className="grid gap-4 md:grid-cols-5">
-            <StatCard
-              label="Queue — total"
-              value={queueStats.total}
-              hint={
-                nurturingTemplates.length > 0
-                  ? `${nurturingTemplates.length} templates suivis (dédup. par message_id)`
-                  : "Aucun template configuré"
-              }
-            />
-            <StatCard label="Queue — sent" value={queueStats.sent} tone="ok" />
-            <StatCard label="Queue — pending" value={queueStats.pending} tone={queueStats.pending > 0 ? "warn" : "ok"} />
-            <StatCard
-              label="Queue — failed/DLQ"
-              value={queueStats.failed}
-              tone={queueStats.failed > 0 ? "err" : "ok"}
-            />
-            <StatCard label="Queue — suppressed" value={queueStats.suppressed} />
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Engagement global — l'email a-t-il déclenché de l'action ?</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-3">
-                <StatCard
-                  label="Taux d'ouverture"
-                  value={engagementStats.sent > 0 ? `${engagementStats.openRate}%` : "—"}
-                  hint={`${engagementStats.opens} / ${engagementStats.sent} envois (sous-estimé : Apple Mail Privacy)`}
-                />
-                <StatCard
-                  label="Taux de clic CTA"
-                  value={engagementStats.sent > 0 ? `${engagementStats.clickRate}%` : "—"}
-                  hint={`${engagementStats.clicks} / ${engagementStats.sent} envois`}
-                />
-                <StatCard
-                  label="Taux d'action"
-                  value={engagementStats.sent > 0 ? `${engagementStats.actionRate}%` : "—"}
-                  tone="ok"
-                  hint={`${engagementStats.actions} / ${engagementStats.sent} — clic CTA ou objectif atteint`}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="grid gap-4 lg:grid-cols-2">
+          {/* =========== ONGLET 1 : VUE D'ENSEMBLE =========== */}
+          <TabsContent value="overview" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Top contenus — quelles étapes créent de l'action ?</CardTitle>
+                <CardTitle>Engagement global — l'email a-t-il déclenché de l'action ?</CardTitle>
               </CardHeader>
               <CardContent>
-                {topSteps.length === 0 ? (
-                  <p className="text-sm text-muted-foreground py-6 text-center">Aucun envoi sur la période.</p>
+                <div className="grid gap-4 md:grid-cols-4">
+                  <StatCard
+                    label="Emails envoyés"
+                    value={engagementStats.sent}
+                    hint={`Sur ${range === "24h" ? "24 h" : range === "7d" ? "7 jours" : "30 jours"}`}
+                  />
+                  <StatCard
+                    label="Taux d'ouverture"
+                    value={engagementStats.sent > 0 ? `${engagementStats.openRate}%` : "—"}
+                    hint={`${engagementStats.opens} ouvertures (sous-estimé : Apple Mail Privacy)`}
+                  />
+                  <StatCard
+                    label="Taux de clic CTA"
+                    value={engagementStats.sent > 0 ? `${engagementStats.clickRate}%` : "—"}
+                    hint={`${engagementStats.clicks} clics`}
+                  />
+                  <StatCard
+                    label="Taux d'action"
+                    value={engagementStats.sent > 0 ? `${engagementStats.actionRate}%` : "—"}
+                    tone="ok"
+                    hint={`${engagementStats.actions} actions — clic CTA ou objectif atteint`}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Ce qui marche le mieux</CardTitle>
+                  <p className="text-xs text-muted-foreground">Top 3 contenus par taux d'action (≥ 10 envois)</p>
+                </CardHeader>
+                <CardContent>
+                  {winners.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">Pas encore assez de données fiables.</p>
+                  ) : (
+                    <ul className="space-y-3">
+                      {winners.map((s) => (
+                        <li key={`${s.sequenceKey}-${s.stepOrder}-${s.templateName}`} className="flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-medium">{labelTemplate(s.templateName)}</p>
+                            <p className="text-[11px] text-muted-foreground">{labelSequence(s.sequenceKey)} · étape {s.stepOrder} · {s.sent} envois</p>
+                          </div>
+                          <Badge variant="default" className="bg-success text-success-foreground">{s.actionRate}%</Badge>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Ce qu'il faudrait retravailler</CardTitle>
+                  <p className="text-xs text-muted-foreground">Taux d'action &lt; 10 % (≥ 10 envois)</p>
+                </CardHeader>
+                <CardContent>
+                  {losers.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">Aucun contenu sous-performant — bravo !</p>
+                  ) : (
+                    <ul className="space-y-3">
+                      {losers.map((s) => (
+                        <li key={`${s.sequenceKey}-${s.stepOrder}-${s.templateName}`} className="flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-medium">{labelTemplate(s.templateName)}</p>
+                            <p className="text-[11px] text-muted-foreground">{labelSequence(s.sequenceKey)} · étape {s.stepOrder} · {s.sent} envois</p>
+                          </div>
+                          <Badge variant="destructive">{s.actionRate}%</Badge>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Séquences actives</CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">Détail complet dans l'onglet Performance.</p>
+              </CardHeader>
+              <CardContent>
+                {sequences.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-4 text-center">Aucune séquence configurée.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {sequences.map((s) => {
+                      const m = sequenceMetrics.get(s.key) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0, opens: 0, clicks: 0, actions: 0 };
+                      return (
+                        <div key={s.key} className="flex items-center justify-between gap-3 border border-border rounded-md px-3 py-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant={s.active ? "default" : "outline"}>{s.active ? "Active" : "Inactive"}</Badge>
+                            <span className="font-medium text-sm">{labelSequence(s.key)}</span>
+                            <span className="text-xs text-muted-foreground">{AUDIENCE_LABELS[s.audience] ?? s.audience}</span>
+                          </div>
+                          <div className="flex items-center gap-4 text-xs">
+                            <span><span className="text-muted-foreground">Actifs : </span><span className="font-semibold">{m.activeJourneys}</span></span>
+                            <span><span className="text-muted-foreground">Envoyés : </span><span className="font-semibold text-success">{m.sent}</span></span>
+                            <span><span className="text-muted-foreground">Action : </span><span className="font-semibold">{m.sent > 0 ? `${Math.round((m.actions / m.sent) * 100)}%` : "—"}</span></span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* =========== ONGLET 2 : PERFORMANCE =========== */}
+          <TabsContent value="performance" className="space-y-6">
+            <div className="grid gap-4 lg:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Top contenus — quelles étapes créent de l'action ?</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {topSteps.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-6 text-center">Aucun envoi sur la période.</p>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Étape</TableHead>
+                          <TableHead className="text-right">Envoyés</TableHead>
+                          <TableHead className="text-right">Ouv.</TableHead>
+                          <TableHead className="text-right">Clic</TableHead>
+                          <TableHead className="text-right">Action</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {topSteps.slice(0, 15).map((s) => {
+                          const reliable = s.sent >= 10;
+                          const tone =
+                            !reliable
+                              ? "text-muted-foreground"
+                              : s.actionRate >= 30
+                                ? "text-success font-semibold"
+                                : s.actionRate < 10
+                                  ? "text-destructive"
+                                  : "text-foreground";
+                          return (
+                            <TableRow key={`${s.sequenceKey}-${s.stepOrder}-${s.templateName}`}>
+                              <TableCell>
+                                <div className="text-sm font-medium">{labelTemplate(s.templateName)}</div>
+                                <div className="text-[11px] text-muted-foreground">
+                                  {labelSequence(s.sequenceKey)} · étape {s.stepOrder}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-right text-sm">{s.sent}</TableCell>
+                              <TableCell className="text-right text-sm">{s.sent > 0 ? `${s.openRate}%` : "—"}</TableCell>
+                              <TableCell className="text-right text-sm">{s.sent > 0 ? `${s.clickRate}%` : "—"}</TableCell>
+                              <TableCell className={`text-right text-sm ${tone}`}>
+                                {s.sent + s.exited > 0 ? `${s.actionRate}%` : "—"}
+                                {!reliable && s.sent > 0 && (
+                                  <span className="text-[9px] text-muted-foreground ml-1">(n&lt;10)</span>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  )}
+                  <p className="text-[10px] text-muted-foreground mt-2">
+                    Action = clic CTA ou objectif atteint. Surlignage à partir de 10 envois.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Top CTA — quels liens font cliquer ?</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {topCtas.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-6 text-center">Aucun clic sur la période.</p>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>URL cliquée</TableHead>
+                          <TableHead>Templates</TableHead>
+                          <TableHead className="text-right">Clics</TableHead>
+                          <TableHead className="text-right">Uniques</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {topCtas.slice(0, 15).map((c) => (
+                          <TableRow key={c.url}>
+                            <TableCell>
+                              <a
+                                href={c.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-sm text-primary hover:underline break-all"
+                              >
+                                {c.url.replace(/^https?:\/\/[^/]+/, "")}
+                              </a>
+                            </TableCell>
+                            <TableCell className="text-[11px] text-muted-foreground">
+                              {Array.from(c.templates).map(labelTemplate).join(", ") || "—"}
+                            </TableCell>
+                            <TableCell className="text-right text-sm font-semibold">{c.clicks}</TableCell>
+                            <TableCell className="text-right text-sm text-muted-foreground">{c.uniqueSends}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Détail par séquence</CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Métriques + étapes configurées + accès aux destinataires.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {sequences.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-4 text-center">Aucune séquence configurée.</p>
+                ) : (
+                  sequences.map((s) => {
+                    const m = sequenceMetrics.get(s.key) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0, opens: 0, clicks: 0, actions: 0 };
+                    const steps = stepsBySequence.get(s.key) ?? [];
+                    const ruleType = s.enrollment_rule?.type ?? "—";
+                    const ruleLabel = RULE_TYPE_LABELS[ruleType] ?? ruleType;
+                    const ruleDetail =
+                      ruleType === "inactivity" && s.enrollment_rule?.days
+                        ? ` (après ${s.enrollment_rule.days} j d'inactivité)`
+                        : ruleType === "sitter_no_application" && s.enrollment_rule?.min_age_days
+                          ? ` (après ${s.enrollment_rule.min_age_days} j sans candidature)`
+                          : "";
+                    return (
+                      <div key={s.key} className="border border-border rounded-lg p-4 space-y-3">
+                        <div className="flex items-start justify-between gap-3 flex-wrap">
+                          <div>
+                            <h3 className="font-semibold text-foreground">{labelSequence(s.key)}</h3>
+                            {s.description && <p className="text-xs text-muted-foreground mt-1 max-w-2xl">{s.description}</p>}
+                          </div>
+                          <div className="flex gap-1.5 flex-wrap items-center">
+                            <Badge variant={s.active ? "default" : "outline"}>{s.active ? "Active" : "Inactive"}</Badge>
+                            <Badge variant="secondary">{AUDIENCE_LABELS[s.audience] ?? s.audience}</Badge>
+                            <Badge variant="outline">{ruleLabel}{ruleDetail}</Badge>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-6 text-xs"
+                              onClick={() => setRecipientsDialog({ key: s.key, label: labelSequence(s.key) })}
+                            >
+                              Voir destinataires
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
+                          <div className="bg-muted/40 rounded px-2 py-1.5">
+                            <p className="text-muted-foreground">Parcours actifs</p>
+                            <p className="font-semibold text-foreground text-base">{m.activeJourneys}</p>
+                          </div>
+                          <div className="bg-muted/40 rounded px-2 py-1.5">
+                            <p className="text-muted-foreground">Nouveaux (période)</p>
+                            <p className="font-semibold text-foreground text-base">{m.totalJourneys}</p>
+                          </div>
+                          <div className="bg-muted/40 rounded px-2 py-1.5">
+                            <p className="text-muted-foreground">Emails envoyés</p>
+                            <p className="font-semibold text-success text-base">{m.sent}</p>
+                          </div>
+                          <div className="bg-muted/40 rounded px-2 py-1.5">
+                            <p className="text-muted-foreground">Échecs</p>
+                            <p className={`font-semibold text-base ${m.failed > 0 ? "text-destructive" : "text-foreground"}`}>{m.failed}</p>
+                          </div>
+                          <div className="bg-muted/40 rounded px-2 py-1.5">
+                            <p className="text-muted-foreground">Sorties (objectif)</p>
+                            <p className="font-semibold text-foreground text-base">{m.exited}</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2 text-xs">
+                          <div className="bg-primary/5 border border-primary/15 rounded px-2 py-1.5">
+                            <p className="text-muted-foreground">Taux d'ouverture</p>
+                            <p className="font-semibold text-foreground text-base">
+                              {m.sent > 0 ? `${Math.round((m.opens / m.sent) * 100)}%` : "—"}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground">{m.opens} / {m.sent}</p>
+                          </div>
+                          <div className="bg-primary/5 border border-primary/15 rounded px-2 py-1.5">
+                            <p className="text-muted-foreground">Taux de clic CTA</p>
+                            <p className="font-semibold text-foreground text-base">
+                              {m.sent > 0 ? `${Math.round((m.clicks / m.sent) * 100)}%` : "—"}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground">{m.clicks} / {m.sent}</p>
+                          </div>
+                          <div className="bg-success/10 border border-success/25 rounded px-2 py-1.5">
+                            <p className="text-muted-foreground">Taux d'action</p>
+                            <p className="font-semibold text-success text-base">
+                              {m.sent > 0 ? `${Math.round((m.actions / m.sent) * 100)}%` : "—"}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground">clic ou objectif</p>
+                          </div>
+                        </div>
+                        <div className="text-xs">
+                          <p className="text-muted-foreground mb-1.5">Étapes ({steps.length}) :</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {steps.map((st) => (
+                              <span
+                                key={st.step_order}
+                                className="inline-flex items-center gap-1.5 bg-background border border-border rounded px-2 py-1"
+                                title={`Template : ${st.template_name}`}
+                              >
+                                <span className="font-mono text-muted-foreground">{formatDelay(st.delay_hours)}</span>
+                                <span>{labelTemplate(st.template_name)}</span>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* =========== ONGLET 3 : DIAGNOSTIC =========== */}
+          <TabsContent value="diagnostic" className="space-y-6">
+            <div className="grid gap-4 md:grid-cols-4">
+              <StatCard
+                label="Étapes évaluées"
+                value={stats.total}
+                hint={`Dont ${stats.exited} sorties (objectif atteint)`}
+              />
+              <StatCard
+                label="Étapes envoyées"
+                value={stats.sent}
+                tone="ok"
+                hint={`${stats.successRate}% de réussite`}
+              />
+              <StatCard
+                label="Échecs evaluator"
+                value={stats.failed}
+                tone={stats.failed > 0 ? "err" : "ok"}
+                hint={`${stats.failureRate}% des tentatives`}
+              />
+              <StatCard
+                label="Parcours créés"
+                value={journeyStats.total}
+                hint={`${journeyStats.active} actifs · ${journeyStats.exited} sortis`}
+              />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-5">
+              <StatCard
+                label="Queue — total"
+                value={queueStats.total}
+                hint={
+                  nurturingTemplates.length > 0
+                    ? `${nurturingTemplates.length} templates suivis`
+                    : "Aucun template configuré"
+                }
+              />
+              <StatCard label="Queue — sent" value={queueStats.sent} tone="ok" />
+              <StatCard label="Queue — pending" value={queueStats.pending} tone={queueStats.pending > 0 ? "warn" : "ok"} />
+              <StatCard
+                label="Queue — failed/DLQ"
+                value={queueStats.failed}
+                tone={queueStats.failed > 0 ? "err" : "ok"}
+              />
+              <StatCard label="Queue — suppressed" value={queueStats.suppressed} />
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Évolution dans le temps</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={260}>
+                  <LineChart data={timeSeries}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="sent" name="Envoyés" stroke="hsl(var(--success))" strokeWidth={2} />
+                    <Line type="monotone" dataKey="failed" name="Échecs" stroke="hsl(var(--destructive))" strokeWidth={2} />
+                    <Line
+                      type="monotone"
+                      dataKey="exited"
+                      name="Sorties"
+                      stroke="hsl(var(--muted-foreground))"
+                      strokeWidth={1.5}
+                      strokeDasharray="4 4"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Raisons d'échec</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {reasonBreakdown.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-8 text-center">Aucun échec sur la période.</p>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Raison</TableHead>
+                          <TableHead className="text-right">Occurrences</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {reasonBreakdown.map((r) => (
+                          <TableRow key={r.reason}>
+                            <TableCell className="text-sm" title={r.reason}>{labelReason(r.reason)}</TableCell>
+                            <TableCell className="text-right">
+                              <Badge
+                                variant={
+                                  r.reason === "exit_condition_met"
+                                    ? "outline"
+                                    : r.reason === "no_email"
+                                      ? "secondary"
+                                      : "destructive"
+                                }
+                              >
+                                {r.count}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Répartition par séquence</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {bySequence.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-8 text-center">Aucune donnée sur la période.</p>
+                  ) : (
+                    <ResponsiveContainer width="100%" height={Math.max(220, bySequence.length * 56)}>
+                      <BarChart data={bySequence} layout="vertical" margin={{ left: 40, right: 16 }}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis type="number" allowDecimals={false} />
+                        <YAxis type="category" dataKey="sequence" width={160} tick={{ fontSize: 12 }} />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey="sent" name="Envoyés" stackId="a" fill="hsl(var(--success))" />
+                        <Bar dataKey="failed" name="Échecs" stackId="a" fill="hsl(var(--destructive))" />
+                        <Bar dataKey="exited" name="Sorties" stackId="a" fill="hsl(var(--muted-foreground))" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Répartition par étape (template)</CardTitle>
+              </CardHeader>
+              <CardContent className="overflow-x-auto">
+                {byStep.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-8 text-center">Aucune donnée sur la période.</p>
                 ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Étape</TableHead>
                         <TableHead className="text-right">Envoyés</TableHead>
-                        <TableHead className="text-right">Ouv.</TableHead>
-                        <TableHead className="text-right">Clic</TableHead>
-                        <TableHead className="text-right">Action</TableHead>
+                        <TableHead className="text-right">Échecs</TableHead>
+                        <TableHead className="text-right">Sorties</TableHead>
+                        <TableHead className="text-right">Taux d'échec</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {topSteps.slice(0, 15).map((s) => {
-                        const reliable = s.sent >= 10;
-                        const tone =
-                          !reliable
-                            ? "text-muted-foreground"
-                            : s.actionRate >= 30
-                              ? "text-success font-semibold"
-                              : s.actionRate < 10
-                                ? "text-destructive"
-                                : "text-foreground";
+                      {byStep.map((s) => {
+                        const sendable = s.sent + s.failed;
+                        const rate = sendable > 0 ? (s.failed / sendable) * 100 : 0;
                         return (
-                          <TableRow key={`${s.sequenceKey}-${s.stepOrder}-${s.templateName}`}>
-                            <TableCell>
-                              <div className="text-sm font-medium">{labelTemplate(s.templateName)}</div>
-                              <div className="text-[11px] text-muted-foreground">
-                                {labelSequence(s.sequenceKey)} · étape {s.stepOrder}
-                              </div>
+                          <TableRow key={s.template}>
+                            <TableCell className="text-sm">{s.template}</TableCell>
+                            <TableCell className="text-right">{s.sent}</TableCell>
+                            <TableCell className="text-right">
+                              {s.failed > 0 ? <span className="text-destructive font-medium">{s.failed}</span> : 0}
                             </TableCell>
-                            <TableCell className="text-right text-sm">{s.sent}</TableCell>
-                            <TableCell className="text-right text-sm">{s.sent > 0 ? `${s.openRate}%` : "—"}</TableCell>
-                            <TableCell className="text-right text-sm">{s.sent > 0 ? `${s.clickRate}%` : "—"}</TableCell>
-                            <TableCell className={`text-right text-sm ${tone}`}>
-                              {s.sent + s.exited > 0 ? `${s.actionRate}%` : "—"}
-                              {!reliable && s.sent > 0 && (
-                                <span className="text-[9px] text-muted-foreground ml-1">(n&lt;10)</span>
-                              )}
+                            <TableCell className="text-right text-muted-foreground">{s.exited}</TableCell>
+                            <TableCell className="text-right">
+                              <Badge variant={rate > 5 ? "destructive" : rate > 0 ? "secondary" : "outline"}>
+                                {rate.toFixed(1)}%
+                              </Badge>
                             </TableCell>
                           </TableRow>
                         );
@@ -884,133 +1230,45 @@ const AdminNurturing = () => {
                     </TableBody>
                   </Table>
                 )}
-                <p className="text-[10px] text-muted-foreground mt-2">
-                  Action = clic CTA ou objectif atteint. Surlignage à partir de 10 envois.
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Échecs récents</CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Le détail HTTP (status + extrait de body) est capturé pour chaque échec.
                 </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Top CTA — quels liens font cliquer ?</CardTitle>
               </CardHeader>
-              <CardContent>
-                {topCtas.length === 0 ? (
-                  <p className="text-sm text-muted-foreground py-6 text-center">Aucun clic sur la période.</p>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>URL cliquée</TableHead>
-                        <TableHead>Templates</TableHead>
-                        <TableHead className="text-right">Clics</TableHead>
-                        <TableHead className="text-right">Uniques</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {topCtas.slice(0, 15).map((c) => (
-                        <TableRow key={c.url}>
-                          <TableCell>
-                            <a
-                              href={c.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-sm text-primary hover:underline break-all"
-                            >
-                              {c.url.replace(/^https?:\/\/[^/]+/, "")}
-                            </a>
-                          </TableCell>
-                          <TableCell className="text-[11px] text-muted-foreground">
-                            {Array.from(c.templates).map(labelTemplate).join(", ") || "—"}
-                          </TableCell>
-                          <TableCell className="text-right text-sm font-semibold">{c.clicks}</TableCell>
-                          <TableCell className="text-right text-sm text-muted-foreground">{c.uniqueSends}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-4">
-            <StatCard label="Parcours créés (période)" value={journeyStats.total} />
-            <StatCard label="Actifs" value={journeyStats.active} tone="ok" />
-            <StatCard label="Sortis (objectif atteint)" value={journeyStats.exited} />
-            <StatCard
-              label="Cron evaluate-journeys"
-              value={cronHealth.label}
-              tone={cronHealth.tone}
-              hint={
-                cronHealth.ageMin === null
-                  ? "Aucun log trouvé"
-                  : lastRunSent
-                    ? "Dernier log = envoi réussi"
-                    : "Dernier log = échec ou sortie"
-              }
-            />
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Évolution dans le temps</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={260}>
-                <LineChart data={timeSeries}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="label" tick={{ fontSize: 12 }} />
-                  <YAxis allowDecimals={false} />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="sent" name="Envoyés" stroke="hsl(var(--success))" strokeWidth={2} />
-                  <Line type="monotone" dataKey="failed" name="Échecs" stroke="hsl(var(--destructive))" strokeWidth={2} />
-                  <Line
-                    type="monotone"
-                    dataKey="exited"
-                    name="Sorties"
-                    stroke="hsl(var(--muted-foreground))"
-                    strokeWidth={1.5}
-                    strokeDasharray="4 4"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Raisons d'échec</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {reasonBreakdown.length === 0 ? (
+              <CardContent className="overflow-x-auto">
+                {recentFailures.length === 0 ? (
                   <p className="text-sm text-muted-foreground py-8 text-center">Aucun échec sur la période.</p>
                 ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Séquence</TableHead>
+                        <TableHead>Step</TableHead>
+                        <TableHead>Template</TableHead>
                         <TableHead>Raison</TableHead>
-                        <TableHead className="text-right">Occurrences</TableHead>
+                        <TableHead>Détail HTTP</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {reasonBreakdown.map((r) => (
-                        <TableRow key={r.reason}>
-                          <TableCell className="text-sm" title={r.reason}>{labelReason(r.reason)}</TableCell>
-                          <TableCell className="text-right">
-                            <Badge
-                              variant={
-                                r.reason === "exit_condition_met"
-                                  ? "outline"
-                                  : r.reason === "no_email"
-                                    ? "secondary"
-                                    : "destructive"
-                              }
-                            >
-                              {r.count}
-                            </Badge>
+                      {recentFailures.map((l) => (
+                        <TableRow key={l.id}>
+                          <TableCell className="text-xs whitespace-nowrap">
+                            {format(new Date(l.created_at), "dd MMM HH:mm", { locale: fr })}
+                          </TableCell>
+                          <TableCell className="text-sm" title={l.user_journeys?.sequence_key ?? ""}>{labelSequence(l.user_journeys?.sequence_key ?? "—")}</TableCell>
+                          <TableCell>{l.step_order}</TableCell>
+                          <TableCell className="text-sm" title={l.template_name}>{labelTemplate(l.template_name)}</TableCell>
+                          <TableCell>
+                            <Badge variant="destructive" title={l.reason ?? ""}>{labelReason(l.reason)}</Badge>
+                          </TableCell>
+                          <TableCell className="font-mono text-[11px] max-w-md truncate" title={l.error_detail?.body_excerpt ?? ""}>
+                            {l.error_detail?.status ? `${l.error_detail.status} · ${l.error_detail.body_excerpt?.slice(0, 80) ?? ""}` : "—"}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -1019,122 +1277,10 @@ const AdminNurturing = () => {
                 )}
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Répartition par séquence</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {bySequence.length === 0 ? (
-                  <p className="text-sm text-muted-foreground py-8 text-center">Aucune donnée sur la période.</p>
-                ) : (
-                  <ResponsiveContainer width="100%" height={Math.max(220, bySequence.length * 56)}>
-                    <BarChart data={bySequence} layout="vertical" margin={{ left: 40, right: 16 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" allowDecimals={false} />
-                      <YAxis type="category" dataKey="sequence" width={160} tick={{ fontSize: 12 }} />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="sent" name="Envoyés" stackId="a" fill="hsl(var(--success))" />
-                      <Bar dataKey="failed" name="Échecs" stackId="a" fill="hsl(var(--destructive))" />
-                      <Bar dataKey="exited" name="Sorties" stackId="a" fill="hsl(var(--muted-foreground))" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Répartition par étape (template)</CardTitle>
-            </CardHeader>
-            <CardContent className="overflow-x-auto">
-              {byStep.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-8 text-center">Aucune donnée sur la période.</p>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Étape</TableHead>
-                      <TableHead className="text-right">Envoyés</TableHead>
-                      <TableHead className="text-right">Échecs</TableHead>
-                      <TableHead className="text-right">Sorties</TableHead>
-                      <TableHead className="text-right">Taux d'échec</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {byStep.map((s) => {
-                      const sendable = s.sent + s.failed;
-                      const rate = sendable > 0 ? (s.failed / sendable) * 100 : 0;
-                      return (
-                        <TableRow key={s.template}>
-                          <TableCell className="text-sm">{s.template}</TableCell>
-                          <TableCell className="text-right">{s.sent}</TableCell>
-                          <TableCell className="text-right">
-                            {s.failed > 0 ? <span className="text-destructive font-medium">{s.failed}</span> : 0}
-                          </TableCell>
-                          <TableCell className="text-right text-muted-foreground">{s.exited}</TableCell>
-                          <TableCell className="text-right">
-                            <Badge variant={rate > 5 ? "destructive" : rate > 0 ? "secondary" : "outline"}>
-                              {rate.toFixed(1)}%
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Échecs récents</CardTitle>
-              <p className="text-xs text-muted-foreground mt-1">
-                Le détail HTTP (status + extrait de body) est désormais capturé pour chaque échec.
-              </p>
-            </CardHeader>
-            <CardContent className="overflow-x-auto">
-              {recentFailures.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-8 text-center">Aucun échec sur la période.</p>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Séquence</TableHead>
-                      <TableHead>Step</TableHead>
-                      <TableHead>Template</TableHead>
-                      <TableHead>Raison</TableHead>
-                      <TableHead>Détail HTTP</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {recentFailures.map((l) => (
-                      <TableRow key={l.id}>
-                        <TableCell className="text-xs whitespace-nowrap">
-                          {format(new Date(l.created_at), "dd MMM HH:mm", { locale: fr })}
-                        </TableCell>
-                        <TableCell className="text-sm" title={l.user_journeys?.sequence_key ?? ""}>{labelSequence(l.user_journeys?.sequence_key ?? "—")}</TableCell>
-                        <TableCell>{l.step_order}</TableCell>
-                        <TableCell className="text-sm" title={l.template_name}>{labelTemplate(l.template_name)}</TableCell>
-                        <TableCell>
-                          <Badge variant="destructive" title={l.reason ?? ""}>{labelReason(l.reason)}</Badge>
-                        </TableCell>
-                        <TableCell className="font-mono text-[11px] max-w-md truncate" title={l.error_detail?.body_excerpt ?? ""}>
-                          {l.error_detail?.status ? `${l.error_detail.status} · ${l.error_detail.body_excerpt?.slice(0, 80) ?? ""}` : "—"}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </>
+          </TabsContent>
+        </Tabs>
       )}
+
       {recipientsDialog && (
         <SequenceRecipientsDialog
           open={!!recipientsDialog}
