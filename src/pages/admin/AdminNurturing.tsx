@@ -926,7 +926,8 @@ const AdminNurturing = () => {
             </Card>
           </div>
 
-
+          <div className="grid gap-4 md:grid-cols-4">
+            <StatCard label="Parcours créés (période)" value={journeyStats.total} />
             <StatCard label="Actifs" value={journeyStats.active} tone="ok" />
             <StatCard label="Sortis (objectif atteint)" value={journeyStats.exited} />
             <StatCard
