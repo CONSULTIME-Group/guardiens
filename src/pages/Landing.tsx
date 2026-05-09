@@ -282,8 +282,8 @@ const Landing = () => {
  return (
  <div className="min-h-screen bg-background text-foreground">
  <PageMeta
-        title="Garde d'animaux à domicile entre particuliers | Guardiens"
-        description="Trouvez un gardien du coin pour votre maison et vos animaux. Home sitting et entraide entre particuliers, vérifiés et notés. Partout en France."
+        title="Garde d'animaux & home sitting entre particuliers | Guardiens"
+        description="Confiez votre maison et vos animaux à un gardien du coin. Home sitting, pet sitting et entraide entre particuliers vérifiés. Partout en France."
  path="/"
  image={HOME_OG_IMAGE}
  />
@@ -643,10 +643,10 @@ const Landing = () => {
               Ce qu'on fait ensemble
             </span>
             <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-3">
-              Home sitting, garde d'animaux et entraide entre gens du coin.
+              Trois manières de s'engager, à votre rythme.
             </h2>
             <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16 italic">
-              Trois façons de s'engager, à votre rythme.
+              Home sitting, garde d'animaux, ou simple coup de main : choisissez votre porte d'entrée.
             </p>
           </RevealSection>
 
@@ -654,9 +654,9 @@ const Landing = () => {
             <RevealSection delay={0.1}>
               <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full">
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Propriétaires</p>
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Vous partez. Votre maison vit.</h3>
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Partir l'esprit léger.</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  Trouvez quelqu'un du coin pour garder votre maison et vos animaux. Vous le rencontrez avant. Vous choisissez.
+                  Quelqu'un du coin veille sur votre maison et vos animaux. Vous le rencontrez avant de partir. Vous choisissez.
                 </p>
                 <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-body font-medium mb-4">
                   Sans abonnement requis
@@ -670,9 +670,9 @@ const Landing = () => {
             <RevealSection delay={0.2}>
               <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full">
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Gardiens</p>
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Vous gardez. Vous découvrez.</h3>
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Garder, et découvrir.</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  Proposez-vous comme gardien. Vivez dans des maisons, avec des animaux, dans des quartiers que vous n'auriez jamais explorés autrement.
+                  Vivez dans des maisons, avec des animaux, dans des coins que vous n'auriez jamais explorés autrement. Une garde, c'est aussi un voyage.
                 </p>
                 <Link to="/inscription?role=sitter" className="text-sm font-body text-primary font-medium hover:underline">
                   Je veux garder →
@@ -686,10 +686,10 @@ const Landing = () => {
                   Sans abonnement
                 </div>
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Entraide</p>
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Un coup de main. Un échange.</h3>
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Un coup de main, un échange.</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  Arroser un potager, promener un chien, partager une compétence. Sans argent.
-                  Et souvent, ce qu'on en retient, ce n'est pas le service rendu — c'est la rencontre.
+                  Arroser un potager, promener un chien, partager une compétence. Pas de tarif, pas de facture.
+                  Ce qu'on en garde, ce n'est pas le service rendu — c'est la rencontre.
                 </p>
                 <Link to="/petites-missions" className="text-sm font-body text-primary font-medium hover:underline">
                   Découvrir l'entraide →
@@ -702,16 +702,16 @@ const Landing = () => {
             <div className="mt-10 bg-accent/40 border border-accent rounded-2xl p-6 md:p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <p className="text-xs tracking-widest uppercase text-foreground/60 font-body mb-1">Imprévu de dernière minute</p>
-                <h3 className="text-lg font-heading font-semibold text-foreground">Besoin d'un gardien en urgence ?</h3>
+                <h3 className="text-lg font-heading font-semibold text-foreground">Un départ précipité ?</h3>
                 <p className="text-sm font-body text-foreground/70 mt-1">
-                  Hospitalisation, déplacement imprévu, urgence familiale : trouvez quelqu'un du coin disponible rapidement.
+                  Hospitalisation, déplacement de dernière minute, urgence familiale : un gardien du coin peut prendre le relais en quelques heures.
                 </p>
               </div>
               <Link
                 to="/gardien-urgence"
                 className="shrink-0 inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-foreground text-background font-body font-medium text-sm hover:bg-foreground/90 transition-colors"
               >
-                Trouver un gardien d'urgence →
+                Trouver un gardien en urgence →
               </Link>
             </div>
           </RevealSection>
@@ -782,9 +782,9 @@ const Landing = () => {
                     1
                   </div>
                 </div>
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Décrivez votre garde</h3>
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Publiez votre annonce</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70">
-                  Vos animaux, vos dates, votre maison. En quelques minutes, votre annonce est en ligne.
+                  Vos dates, vos animaux, votre maison. Quelques minutes suffisent — votre annonce est en ligne.
                 </p>
               </div>
             </RevealSection>
@@ -805,9 +805,9 @@ const Landing = () => {
                     2
                   </div>
                 </div>
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Recevez des candidatures</h3>
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Choisissez après une rencontre</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70">
-                  Des gardiens du coin postulent. Consultez leurs profils, lisez les avis, échangez par messagerie. Rencontrez-vous.
+                  Des gardiens du coin postulent. Vous lisez les profils, les avis, vous échangez. Puis vous vous voyez — un café, une visite — avant de décider.
                 </p>
               </div>
             </RevealSection>
@@ -828,9 +828,9 @@ const Landing = () => {
                     3
                   </div>
                 </div>
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Partez sereinement</h3>
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Partez l'esprit léger</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70">
-                  Signez l'accord de garde. Votre gardien s'installe. Vous recevez des nouvelles. Vous rentrez l'esprit léger.
+                  L'accord de garde signé, votre gardien s'installe. Vous recevez des nouvelles. Vous rentrez chez vous — souvent avec une nouvelle relation.
                 </p>
               </div>
             </RevealSection>
@@ -866,10 +866,10 @@ const Landing = () => {
               Confiance &amp; périmètre
             </p>
             <h2 id="trust-heading" className="font-heading text-4xl md:text-5xl font-semibold text-foreground mt-4 leading-tight">
-              Tout pour choisir en confiance, près de chez vous ou plus loin.
+              Choisir en confiance, à un kilomètre comme à mille.
             </h2>
             <p className="text-base md:text-lg text-muted-foreground mt-5 leading-relaxed">
-              Quatre piliers pour partir l'esprit léger : la gratuité côté propriétaires, la rencontre avant chaque garde, des profils vérifiés, et un périmètre que vous choisissez librement.
+              Quatre repères pour partir tranquille : gratuit côté propriétaires, rencontre avant chaque garde, profils vérifiés, et un périmètre que vous fixez vous-même.
             </p>
           </RevealSection>
 
@@ -898,7 +898,7 @@ const Landing = () => {
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">01</p>
                 <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Gratuit pour les propriétaires</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Publication, candidatures, messagerie : tout est sans frais ni abonnement requis. Aucune carte bancaire demandée.
+                  Annonce, candidatures, messagerie : tout est sans frais, sans abonnement requis. Pas de carte bancaire demandée.
                 </p>
               </article>
 
@@ -906,15 +906,15 @@ const Landing = () => {
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">02</p>
                 <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Rencontre avant chaque garde</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Un café, une visite du logement. Vous choisissez après vous être regardés dans les yeux. La confiance ne se devine pas, elle se construit.
+                  Un café, une visite du logement, un tour des consignes. La confiance ne se devine pas — elle se construit, en se regardant.
                 </p>
               </article>
 
               <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">03</p>
-                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Profils vérifiés &amp; avis croisés</h3>
+                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Profils vérifiés, avis croisés</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Pièce d'identité contrôlée, avis publiés par les propriétaires précédents, historique de gardes réalisées : tout est transparent.
+                  Pièce d'identité contrôlée sous 24 h, avis publiés par les propriétaires précédents, historique des gardes réalisées. Tout est lisible.
                 </p>
               </article>
 
@@ -922,7 +922,7 @@ const Landing = () => {
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">04</p>
                 <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">De votre rue à l'autre bout de la France</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Hyper-local pour un dépannage, élargi pour découvrir une autre région : c'est vous qui décidez jusqu'où vous voulez aller — et chaque garde devient une porte qui s'ouvre.
+                  Hyper-local pour un dépannage, élargi pour changer d'air : vous décidez jusqu'où vous voulez aller. Chaque garde devient une porte qui s'ouvre.
                 </p>
               </article>
             </RevealOnScroll>
@@ -954,14 +954,14 @@ const Landing = () => {
             <RevealSection delay={0.1}>
               <div className="bg-card rounded-2xl p-8 shadow-sm h-full">
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">
-                  « J'ai besoin d'aide »
+                  « J'ai besoin d'un coup de main »
                 </h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  Votre potager pendant les vacances. Vos poules ce weekend. Promener votre chien après une opération.
-                  Ce n'est pas un aveu de faiblesse — c'est un acte de confiance.
+                  Votre potager pendant les vacances. Vos poules ce week-end. Promener votre chien après une opération.
+                  Le demander, ce n'est pas avouer une faiblesse — c'est faire confiance.
                 </p>
                 <p className="text-sm font-body font-medium text-primary">
-                  Pas d'argent. Pas d'abonnement. C'est le pari.
+                  Sans argent, sans abonnement. C'est le pari.
                 </p>
               </div>
             </RevealSection>
@@ -969,14 +969,14 @@ const Landing = () => {
             <RevealSection delay={0.2}>
               <div className="bg-card rounded-2xl p-8 shadow-sm h-full">
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">
-                  « Je propose mon aide »
+                  « Je peux donner un peu de mon temps »
                 </h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  Vous savez tailler des rosiers. Vous adorez les chiens. Vous avez du temps samedi matin.
-                  Proposez — et vivez quelque chose que vous n'auriez jamais vécu sans cette rencontre.
+                  Vous savez tailler les rosiers. Vous adorez les chiens. Vous avez deux heures samedi matin.
+                  Proposez — et vivez ce que vous n'auriez jamais vécu sans cette rencontre.
                 </p>
                 <p className="text-sm font-body font-medium text-primary">
-                  C'est comme ça que le tissu local se recrée.
+                  C'est comme ça qu'un tissu local se retisse.
                 </p>
               </div>
             </RevealSection>
@@ -984,7 +984,7 @@ const Landing = () => {
 
           <RevealSection delay={0.25} className="mt-16">
             <p className="text-center text-xs tracking-widest uppercase text-primary/60 font-body mb-6">
-              Quelques exemples vus sur Guardiens cette semaine
+              Quelques échanges vus sur Guardiens cette semaine
             </p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 max-w-5xl mx-auto">
               {[
@@ -1014,7 +1014,7 @@ const Landing = () => {
           <RevealSection delay={0.3} className="text-center mt-12">
             <div className="border-l-4 border-primary pl-6 max-w-xl mx-auto text-left mb-10">
               <p className="text-xl md:text-2xl font-heading font-semibold italic text-foreground leading-snug">
-                La vie de village n'a pas disparu. Elle attendait juste qu'on ose la première question.
+                La vie de village n'a pas disparu. Elle attendait simplement qu'on ose la première question.
               </p>
             </div>
             <Link
@@ -1032,10 +1032,10 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
             <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug">
-              Ils ont osé. Voici ce qu'ils en disent.
+              Ils ont osé. Voici ce qu'il leur reste.
             </h2>
             <p className="mt-4 font-body text-sm text-foreground/55 max-w-xl mx-auto">
-              Témoignages recueillis auprès des membres du Programme Fondateurs (janvier–mai 2026). Prénoms et villes réels, récits anonymisés à leur demande.
+              Témoignages recueillis auprès des membres du Programme Fondateurs (janvier – mai 2026). Prénoms et villes réels, récits anonymisés à leur demande.
             </p>
           </RevealSection>
 
@@ -1183,10 +1183,10 @@ const Landing = () => {
               Guides &amp; villes
             </span>
             <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug mb-4">
-              House-sitting près de chez vous : guides et villes.
+              House-sitting près de chez vous.
             </h2>
             <p className="text-lg font-body text-foreground/70 max-w-2xl mx-auto">
-              Des guides pratiques pour préparer votre garde d'animaux, et des hubs locaux pour les villes les plus actives — Lyon, Annecy, Grenoble et toute la France.
+              Des guides concrets pour préparer votre garde, et des hubs locaux pour les villes les plus actives — Lyon, Annecy, Grenoble, et partout en France.
             </p>
           </RevealSection>
 
@@ -1404,12 +1404,12 @@ const Landing = () => {
           <div className="inline-flex items-center rounded-full px-4 py-1.5 mb-8 bg-white/15 border border-white/30">
             <span className="font-body text-xs text-white uppercase tracking-widest">Programme Fondateurs</span>
           </div>
-          <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-            Votre histoire commence ici.
+          <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6">
+            Votre prochaine histoire commence ici.
           </h2>
           <p className="font-body text-lg text-white/85 leading-relaxed max-w-lg mx-auto mb-10">
-            Vous partirez l'esprit léger. Vous rentrerez avec une histoire —
-            un coin découvert, une rencontre, des gens que vous n'auriez jamais croisés.
+            Vous partirez l'esprit léger. Vous rentrerez avec autre chose —
+            un coin découvert, une rencontre, quelqu'un que vous n'auriez jamais croisé.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
             <button
@@ -1432,7 +1432,7 @@ const Landing = () => {
             </button>
           </div>
           <p className="text-xs text-white/70 font-body">
-            Sans carte bancaire · Inscription en 2 minutes · Badge Fondateur pour les inscrits avant le 13 juillet 2026.
+            Inscription en 2 minutes, sans carte bancaire. Badge Fondateur pour les inscrits avant le 13 juillet 2026.
           </p>
         </RevealSection>
       </section>
