@@ -433,6 +433,16 @@ async function checkExitCondition(
       if (!data?.last_seen_at) return false
       return Date.now() - new Date(data.last_seen_at).getTime() < days * 86400_000
     }
+    case 'has_mutual_aid_activity': {
+      // User has either posted a small mission OR responded to one
+      const [posted, responded] = await Promise.all([
+        supabase.from('small_missions')
+          .select('id', { count: 'exact', head: true }).eq('user_id', userId),
+        supabase.from('small_mission_responses')
+          .select('id', { count: 'exact', head: true }).eq('responder_id', userId),
+      ])
+      return ((posted.count ?? 0) + (responded.count ?? 0)) > 0
+    }
     default:
       return false
   }
