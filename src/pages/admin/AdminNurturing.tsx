@@ -754,7 +754,7 @@ const AdminNurturing = () => {
                       const rate = sendable > 0 ? (s.failed / sendable) * 100 : 0;
                       return (
                         <TableRow key={s.template}>
-                          <TableCell className="font-mono text-xs">{s.template}</TableCell>
+                          <TableCell className="text-sm">{s.template}</TableCell>
                           <TableCell className="text-right">{s.sent}</TableCell>
                           <TableCell className="text-right">
                             {s.failed > 0 ? <span className="text-destructive font-medium">{s.failed}</span> : 0}
