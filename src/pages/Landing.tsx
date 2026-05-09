@@ -578,7 +578,7 @@ const Landing = () => {
               Ou demander — et rendre — un coup de main près de chez vous, avec ou sans animaux.
             </p>
             <p className="font-body text-base md:text-lg text-white/70 max-w-xl mb-10 leading-relaxed italic animate-hero-fade-up animation-delay-700">
-              Et derrière chaque échange, une rencontre qu'on n'aurait pas cherchée.
+              Et derrière chaque échange, une rencontre que vous n'auriez pas cherchée.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 animate-hero-fade-up animation-delay-900">
@@ -658,7 +658,7 @@ const Landing = () => {
                   Quelqu'un du coin veille sur votre maison et vos animaux. Vous le rencontrez avant de partir. Vous choisissez.
                 </p>
                 <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-body font-medium mb-4">
-                  Sans abonnement requis
+                  Sans abonnement
                 </span>
                 <Link to="/inscription?role=owner" className="block text-sm font-body text-primary font-medium hover:underline">
                   Je cherche un gardien →
@@ -736,9 +736,9 @@ const Landing = () => {
                 un coup de main pour bricoler — et lui proposer un repas fait maison en retour.
               </p>
               <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/80 mb-5">
-                Aucun animal n'a besoin d'apparaître pour qu'une rencontre commence.
-                Demander un coup de main, en proposer un, c'est déjà ouvrir une porte.
-                Garder une maison, c'est en ouvrir une autre — différente, mais animée du même mouvement.
+                Pas besoin d'un animal pour qu'une rencontre commence.
+                Demander un coup de main, en proposer un : c'est déjà ouvrir une porte.
+                Garder une maison, c'est en ouvrir une autre — un même geste, deux échelles.
               </p>
               <p className="font-heading text-xl md:text-2xl italic text-foreground leading-snug">
                 On apprend, on découvre, on s'attache —
@@ -897,7 +897,7 @@ const Landing = () => {
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">01</p>
                 <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Gratuit pour les propriétaires</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Annonce, candidatures, messagerie : tout est sans frais, sans abonnement requis. Pas de carte bancaire demandée.
+                  Annonce, candidatures, messagerie : tout est sans frais, sans abonnement. Pas de carte bancaire demandée.
                 </p>
               </article>
 
@@ -905,7 +905,7 @@ const Landing = () => {
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">02</p>
                 <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Rencontre avant chaque garde</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Un café, une visite du logement, un tour des consignes. La confiance ne se devine pas — elle se construit, en se regardant.
+                  Un café, une visite du logement, un tour des consignes. La confiance ne se devine pas : elle se construit, en se regardant.
                 </p>
               </article>
 
@@ -944,8 +944,7 @@ const Landing = () => {
               qui venait fixer un volet. Quelqu'un à qui on offrait une part de gâteau ou un coup de main en retour.
             </p>
             <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-16 text-lg leading-relaxed">
-              Ce n'est pas du passé. C'est juste qu'on n'ose plus. Guardiens, c'est le prétexte pour recommencer —
-              et au passage, vivre des expériences qu'aucun voyage organisé ne vous offrira.
+              Cette habitude n'a pas disparu — on n'ose simplement plus la première question. Guardiens, c'est le prétexte pour la reposer — et au passage, vivre des expériences qu'aucun voyage organisé ne vous offrira.
             </p>
           </RevealSection>
 
@@ -1034,7 +1033,7 @@ const Landing = () => {
               Ils ont osé. Voici ce qu'il leur reste.
             </h2>
             <p className="mt-4 font-body text-sm text-foreground/55 max-w-xl mx-auto">
-              Témoignages recueillis auprès des membres du Programme Fondateurs (janvier – mai 2026). Prénoms et villes réels, récits anonymisés à leur demande.
+              Témoignages recueillis auprès des membres du programme Fondateur (janvier – mai 2026). Prénoms et villes réels, récits anonymisés à leur demande.
             </p>
           </RevealSection>
 
@@ -1085,7 +1084,7 @@ const Landing = () => {
                             {t.detail}
                           </span>
                           <span className="font-body text-[11px] text-foreground/40 mt-0.5 uppercase tracking-widest">
-                            {t.period} · Programme Fondateurs
+                            {t.period} · Programme Fondateur
                           </span>
                         </span>
                       </figcaption>
@@ -1149,10 +1148,10 @@ const Landing = () => {
                 Guardiens, c'est le prétexte qui manquait. D'un côté, les petites missions d'entraide entre gens du coin : un potager arrosé contre un repas, une compétence contre une autre, un coup de main qui se rend en nature. De l'autre, indépendamment, le home sitting : vos clés confiées à quelqu'un que vous avez regardé dans les yeux.
               </p>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous, on ne s'attendait pas à ce que ça compte autant.
+                Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous ne nous attendions pas à ce que cela compte autant.
               </p>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                C'est pour ça qu'on a construit Guardiens. Pour que vous viviez ça aussi.
+                C'est pour cela que nous avons construit Guardiens — pour que vous viviez cela aussi.
               </p>
               <span className="text-sm font-body italic text-foreground/50 mt-10 block">
                 — Jérémie &amp; Elisa
@@ -1401,7 +1400,7 @@ const Landing = () => {
       <section className="py-24 md:py-32 bg-primary">
         <RevealSection className="max-w-2xl mx-auto px-6 text-center">
           <div className="inline-flex items-center rounded-full px-4 py-1.5 mb-8 bg-white/15 border border-white/30">
-            <span className="font-body text-xs text-white uppercase tracking-widest">Programme Fondateurs</span>
+            <span className="font-body text-xs text-white uppercase tracking-widest">Programme Fondateur</span>
           </div>
           <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6">
             Votre prochaine histoire commence ici.
