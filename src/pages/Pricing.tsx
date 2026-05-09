@@ -47,11 +47,11 @@ const promiseRows: Array<{ label: string; value: string; positive: boolean }> = 
 const faqItems = [
  {
  q: "L'accès est-il vraiment gratuit pour tout le monde jusqu'au 14 juillet 2026 ?",
- a: `Oui. Jusqu'au 14 juillet 2026, **l'accès complet à Guardiens est 100% gratuit pour tout le monde** — gardiens comme propriétaires, sans aucune exception.
+  a: `Oui. Jusqu'au 14 juillet 2026, **l'accès complet à Guardiens est 100 % gratuit pour tout le monde** — gardiens comme propriétaires, sans exception.
 
-Aucune carte bancaire n'est demandée à l'inscription. Vous accédez à toutes les fonctionnalités : publier une annonce, postuler aux gardes, échanger en messagerie, laisser des avis, utiliser l'entraide.
+Aucune carte bancaire n'est demandée à l'inscription. Vous accédez à toutes les fonctionnalités : publier une annonce, postuler aux gardes, échanger par messagerie, laisser des avis, utiliser l'entraide.
 
-Cette gratuité totale ne dépend pas du programme Fondateur. Que vous vous inscriviez le 1er février ou le 12 juin 2026, vous ne payez rien jusqu'au 14 juillet 2026.
+Cette gratuité ne dépend pas du programme Fondateur : que vous vous inscriviez le 1ᵉʳ février ou le 12 juin 2026, vous ne payez rien jusqu'au 14 juillet 2026.
 
 À partir du 15 juillet 2026, l'abonnement gardien à 6,99 €/mois devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit.`,
  },
