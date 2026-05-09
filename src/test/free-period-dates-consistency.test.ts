@@ -89,8 +89,8 @@ describe("Cohérence des dates de gratuité", () => {
 
   describe("présence des dates canoniques", () => {
     const REQUIRED_PRESENCE: Record<string, RegExp[]> = {
-      "src/pages/Pricing.tsx": [/14\s+juillet\s+2026/, /15\s+juillet\s+2026/, /13\s+juin\s+2026/],
-      "src/pages/Cgs.tsx": [/14\s+juillet\s+2026/, /15\s+juillet\s+2026/, /13\s+juin\s+2026/],
+      "src/pages/Pricing.tsx": [/14\s+juillet\s+2026/, /15\s+juillet\s+2026/, /13\s+juillet\s+2026/],
+      "src/pages/Cgs.tsx": [/14\s+juillet\s+2026/, /15\s+juillet\s+2026/, /13\s+juillet\s+2026/],
       "src/pages/Landing.tsx": [/14\s+juillet\s+2026/],
     };
     for (const [file, patterns] of Object.entries(REQUIRED_PRESENCE)) {
