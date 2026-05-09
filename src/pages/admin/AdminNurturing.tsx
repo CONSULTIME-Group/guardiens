@@ -1167,6 +1167,69 @@ const AdminNurturing = () => {
 
           {/* =========== ONGLET 3 : DIAGNOSTIC =========== */}
           <TabsContent value="diagnostic" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span
+                    className={`inline-block h-2.5 w-2.5 rounded-full ${
+                      measurementHealth.tone === "err"
+                        ? "bg-destructive"
+                        : measurementHealth.tone === "warn"
+                          ? "bg-warning"
+                          : "bg-success"
+                    }`}
+                  />
+                  Santé de la mesure d'engagement
+                </CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Un envoi sans <code className="text-[11px]">message_id</code> ne peut pas être
+                  corrélé aux ouvertures et clics : les taux d'engagement sont alors sous-estimés.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-4">
+                  <StatCard label="Envois sur la période" value={measurementHealth.sent} />
+                  <StatCard
+                    label="Sans message_id"
+                    value={measurementHealth.missing}
+                    tone={
+                      measurementHealth.missing === 0
+                        ? "ok"
+                        : measurementHealth.tone === "err"
+                          ? "err"
+                          : "warn"
+                    }
+                  />
+                  <StatCard
+                    label="Part non corrélée"
+                    value={`${measurementHealth.missingRate}%`}
+                    tone={
+                      measurementHealth.missingRate === 0
+                        ? "ok"
+                        : measurementHealth.missingRate >= 20
+                          ? "err"
+                          : "warn"
+                    }
+                    hint="Seuil d'alerte : ≥ 20%"
+                  />
+                  <StatCard
+                    label="État"
+                    value={measurementHealth.label}
+                    tone={measurementHealth.tone}
+                    hint={measurementHealth.hint}
+                  />
+                </div>
+                {measurementHealth.missing > 0 && (
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Vérifier que <code className="text-[11px]">send-transactional-email</code>{" "}
+                    renvoie bien <code className="text-[11px]">messageId</code>, et qu'à défaut le
+                    fallback via <code className="text-[11px]">email_send_log.metadata.idempotency_key</code>{" "}
+                    fonctionne dans <code className="text-[11px]">evaluate-journeys</code>.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
             <div className="grid gap-4 md:grid-cols-4">
               <StatCard
                 label="Étapes évaluées"
