@@ -281,12 +281,12 @@ const Landing = () => {
 
  return (
  <div className="min-h-screen bg-background text-foreground">
- <PageMeta
-        title="Garde d'animaux & home sitting entre particuliers | Guardiens"
-        description="Confiez votre maison et vos animaux à un gardien du coin. Et, à côté, demandez ou rendez de petits services entre gens du coin. Partout en France."
- path="/"
- image={HOME_OG_IMAGE}
- />
+  <PageMeta
+        title="Home sitting et garde d'animaux près de chez vous | Guardiens"
+        description="Confiez votre maison et vos animaux à un gardien vérifié près de chez vous. Rencontre avant chaque garde, sans commission, partout en France."
+  path="/"
+  image={HOME_OG_IMAGE}
+  />
       {/* JSON-LD consolidé : un seul @graph (Organization, WebSite, WebPage,
           BreadcrumbList, Service, FAQPage). Plus lisible pour Google qu'une
           collection de scripts indépendants, et permet de relier WebPage →
@@ -642,10 +642,10 @@ const Landing = () => {
               Ce qu'on fait ensemble
             </span>
             <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-3">
-              Deux usages distincts, une même communauté.
+              Garde d'animaux à domicile et entraide locale.
             </h2>
             <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16 italic">
-              Le home sitting d'un côté. L'entraide entre gens du coin de l'autre. À vous de choisir — l'un, l'autre, ou les deux.
+              Le home sitting d'un côté, l'entraide entre gens du coin de l'autre. À vous de choisir — l'un, l'autre, ou les deux.
             </p>
           </RevealSection>
 
