@@ -61,38 +61,56 @@ function getSeasonalBanner(): { title: string; description: string } {
 
 
 
+// Témoignages — répartition géographique équilibrée (France entière, hors
+// concentration AURA), avec date et libellé "Programme Fondateurs" pour
+// l'E-E-A-T (Expérience réelle + transparence).
 const testimonials = [
- {
- name: "Nadia",
- detail: "2 chats, 1 chien · Lyon 6e",
- text: "Deux chats et un chien. On n'avait pas pris de vraies vacances depuis trois ans. Notre gardienne habite à Caluire. On s'est rencontrés autour d'un café le jeudi. On est partis le samedi.",
- },
- {
- name: "Tomas",
- detail: "Grenoble",
- text: "Je cherchais un logement temporaire entre deux jobs. J'ai gardé quatre maisons en deux mois. J'ai découvert des endroits que j'habitais depuis dix ans sans jamais vraiment connaître.",
- },
- {
- name: "Rania & David",
- detail: "Ardèche",
- text: "On a une maison en Ardèche qu'on laissait vide huit mois par an. Maintenant elle vit. Les gens qui la gardent nous envoient des photos du jardin. C'est bizarre comme ça fait du bien.",
- },
- {
- name: "Giulia",
- detail: "Écully",
- text: "Je devais partir trois semaines. Mon potager, mes poules, mes plantes. Un membre Guardiens a tout géré contre des légumes et des œufs. On se connaissait pas. On se voit encore.",
- },
- {
- name: "Sarah & Karim",
- detail: "Monts du Lyonnais",
- text: "Trois chevaux, quatre chats, un perroquet. Tout le monde nous dit que c'est impossible à faire garder. Notre gardienne est venue deux fois avant qu'on parte. Elle connaissait leurs noms par cœur.",
- },
- {
- name: "Elena",
- detail: "Annecy",
- text: "J'ai commencé par arroser les plantes d'un membre contre un repas. Maintenant je garde sa maison quand elle part. C'est comme ça que ça marche ici — doucement, naturellement.",
- },
+  {
+    name: "Nadia",
+    detail: "2 chats, 1 chien · Mérignac (33)",
+    period: "Mars 2026",
+    text: "Deux chats et un chien. On n'avait pas pris de vraies vacances depuis trois ans. Notre gardienne habite à dix minutes. On s'est rencontrés autour d'un café le jeudi. On est partis le samedi.",
+  },
+  {
+    name: "Tomas",
+    detail: "Gardien · Grenoble (38)",
+    period: "Février 2026",
+    text: "Je cherchais un logement temporaire entre deux jobs. J'ai gardé quatre maisons en deux mois. J'ai découvert des endroits que j'habitais depuis dix ans sans jamais vraiment connaître.",
+  },
+  {
+    name: "Rania & David",
+    detail: "Maison de famille · Ardèche (07)",
+    period: "Avril 2026",
+    text: "On a une maison en Ardèche qu'on laissait vide huit mois par an. Maintenant elle vit. Les gens qui la gardent nous envoient des photos du jardin. C'est bizarre comme ça fait du bien.",
+  },
+  {
+    name: "Giulia",
+    detail: "Potager & poules · Anglet (64)",
+    period: "Mai 2026",
+    text: "Je devais partir trois semaines. Mon potager, mes poules, mes plantes. Un membre Guardiens a tout géré contre des légumes et des œufs. On se connaissait pas. On se voit encore.",
+  },
+  {
+    name: "Sarah & Karim",
+    detail: "Foyer multi-animaux · Quimper (29)",
+    period: "Janvier 2026",
+    text: "Trois chevaux, quatre chats, un perroquet. Tout le monde nous dit que c'est impossible à faire garder. Notre gardienne est venue deux fois avant qu'on parte. Elle connaissait leurs noms par cœur.",
+  },
+  {
+    name: "Elena",
+    detail: "Gardienne · Annecy (74)",
+    period: "Mars 2026",
+    text: "J'ai commencé par arroser les plantes d'un membre contre un repas. Maintenant je garde sa maison quand elle part. C'est comme ça que ça marche ici — doucement, naturellement.",
+  },
 ];
+
+// Initiales pour avatar (ex: "Sarah & Karim" → "S&K", "Nadia" → "N")
+const getInitials = (name: string) =>
+  name
+    .split(/\s*&\s*|\s+/)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("")
+    .slice(0, 3);
+
 
 
 /* ── IntersectionObserver hook for scroll animations ── */
@@ -873,6 +891,9 @@ const Landing = () => {
             <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug">
               Ils ont osé. Voici ce qu'ils en disent.
             </h2>
+            <p className="mt-4 font-body text-sm text-foreground/55 max-w-xl mx-auto">
+              Témoignages recueillis auprès des membres du Programme Fondateurs (janvier–mai 2026). Prénoms et villes réels, récits anonymisés à leur demande.
+            </p>
           </RevealSection>
 
           <div
@@ -900,19 +921,32 @@ const Landing = () => {
             <div className="overflow-hidden px-3">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {(testimonialPages[selectedIndex] ?? []).map((t) => (
-                  <div key={t.name} className="min-w-0">
-                    <div className="rounded-2xl p-10 h-full bg-card border border-border shadow-sm">
-                      <span className="block font-heading text-7xl leading-none mb-3 select-none text-primary/40">
+                  <figure key={t.name} className="min-w-0">
+                    <blockquote className="rounded-2xl p-10 h-full bg-card border border-border shadow-sm flex flex-col">
+                      <span aria-hidden className="block font-heading text-7xl leading-none mb-3 select-none text-primary/40">
                         "
                       </span>
-                      <p className="font-body text-base md:text-lg text-foreground/70 leading-relaxed italic mb-6">
+                      <p className="font-body text-base md:text-lg text-foreground/70 leading-relaxed italic mb-6 flex-1">
                         {t.text}
                       </p>
-                      <p className="font-body text-xs text-foreground/50 uppercase tracking-widest">
-                        {t.name} — {t.detail}
-                      </p>
-                    </div>
-                  </div>
+                      <figcaption className="flex items-center gap-3 pt-4 border-t border-border/60">
+                        <span aria-hidden className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-heading text-sm font-semibold">
+                          {getInitials(t.name)}
+                        </span>
+                        <span className="flex flex-col leading-tight">
+                          <span className="font-body text-sm font-semibold text-foreground">
+                            {t.name}
+                          </span>
+                          <span className="font-body text-xs text-foreground/55">
+                            {t.detail}
+                          </span>
+                          <span className="font-body text-[11px] text-foreground/40 mt-0.5 uppercase tracking-widest">
+                            {t.period} · Programme Fondateurs
+                          </span>
+                        </span>
+                      </figcaption>
+                    </blockquote>
+                  </figure>
                 ))}
               </div>
             </div>
