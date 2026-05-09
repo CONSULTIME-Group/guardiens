@@ -50,7 +50,7 @@ export const template = {
     firstName: 'Marie',
     originalMessage: 'Bonjour, je souhaite en savoir plus sur votre service.',
     replyBody: 'Merci pour votre intérêt ! Nous serions ravis de vous aider.',
-    subject: 'Re : Demande d’information',
+    subject: 'Re : Demande d’information — Guardiens',
   },
 } satisfies TemplateEntry
 
