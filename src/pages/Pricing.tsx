@@ -82,9 +82,9 @@ Pour aller plus loin : [Comment bien choisir son gardien →](/actualites/choisi
  q: "Comment fonctionne l'essai gratuit de 7 jours ?",
  a: `Cet essai s'applique **après le 14 juillet 2026**, lorsque l'abonnement gardien devient payant.
 
-Vous vous inscrivez en tant que gardien, sans carte bancaire. Pendant 7 jours, vous accédez à toutes les fonctionnalités : postuler aux gardes, échanger avec les propriétaires, créer votre profil de confiance.
+Vous vous inscrivez en tant que gardien, sans carte bancaire. Pendant 7 jours, vous accédez à toutes les fonctionnalités : postuler aux gardes, échanger avec les propriétaires, construire votre profil de confiance.
 
-Aucun prélèvement automatique. À la fin de l'essai, vous choisissez si vous souhaitez activer l'abonnement à 6,99 €/mois. Si vous ne faites rien, l'accès s'interrompt sans frais.
+Aucun prélèvement automatique. À la fin de l'essai, vous décidez d'activer ou non l'abonnement à 6,99 €/mois. Sans action de votre part, l'accès s'interrompt — sans frais.
 
 Avant le 14 juillet 2026, cet essai n'a pas lieu d'être : tout est déjà gratuit pour tout le monde.`,
  },
