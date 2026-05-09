@@ -570,7 +570,7 @@ const Landing = () => {
             </p>
 
             <h1 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 animate-hero-fade-up animation-delay-400">
-              Et si on osait, à nouveau, demander un coup de main ?
+              Garde d'animaux, home sitting, coup de main entre gens du coin.
             </h1>
 
             <p className="font-body text-lg md:text-xl text-white/85 max-w-xl mb-4 leading-relaxed animate-hero-fade-up animation-delay-700">
