@@ -44,6 +44,7 @@ interface SendLogRow {
   last_clicked_at: string | null;
   last_clicked_url: string | null;
   created_at: string;
+  metadata: { bypass?: boolean; isUrgent?: boolean } | null;
 }
 
 const statusBadge = (s: string) => {
