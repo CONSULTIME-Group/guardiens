@@ -658,7 +658,7 @@ const Landing = () => {
                   Quelqu'un du coin veille sur votre maison et vos animaux. Vous le rencontrez avant de partir. Vous choisissez.
                 </p>
                 <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-body font-medium mb-4">
-                  Sans abonnement requis
+                  Sans abonnement
                 </span>
                 <Link to="/inscription?role=owner" className="block text-sm font-body text-primary font-medium hover:underline">
                   Je cherche un gardien →
