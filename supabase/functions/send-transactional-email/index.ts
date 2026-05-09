@@ -158,7 +158,14 @@ Deno.serve(async (req) => {
       .limit(1)
 
     if (existingSend && existingSend.length > 0) {
-      console.log('Duplicate send blocked by idempotency', { idempotencyKey, templateName, effectiveRecipient })
+      console.warn('[ALERT] Duplicate idempotency hit (duplicate_send)', { idempotencyKey, templateName, effectiveRecipient })
+      // Métrique : insertion best-effort (n'échoue jamais l'appel)
+      void supabase.from('email_idempotency_hits').insert({
+        template_name: templateName,
+        recipient_email: effectiveRecipient,
+        idempotency_key: idempotencyKey,
+        hit_type: 'duplicate_send',
+      }).then(({ error }) => { if (error) console.error('Failed to record idempotency hit', error) })
       return new Response(
         JSON.stringify({ success: true, skipped: true, reason: 'duplicate_idempotency_key' }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -292,6 +299,14 @@ Deno.serve(async (req) => {
           .in('status', ['pending', 'sent'])
           .limit(1)
         if (existingDefer && existingDefer.length > 0) {
+          console.warn('[ALERT] Duplicate idempotency hit (already_queued)', { idempotencyKey, templateName, effectiveRecipient, deferReason })
+          void supabase.from('email_idempotency_hits').insert({
+            template_name: templateName,
+            recipient_email: effectiveRecipient,
+            idempotency_key: idempotencyKey,
+            hit_type: 'already_queued',
+            metadata: { defer_reason: deferReason },
+          }).then(({ error }) => { if (error) console.error('Failed to record idempotency hit', error) })
           return new Response(
             JSON.stringify({ success: true, deferred: true, reason: 'already_queued' }),
             { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

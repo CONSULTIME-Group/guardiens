@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { RefreshCw, Search, Inbox } from "lucide-react";
+import { RefreshCw, Search, Inbox, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -100,6 +100,41 @@ export function QueueTab() {
   useEffect(() => {
     loadQueue();
   }, [loadQueue]);
+
+  // ── Idempotency hits (alertes doublons) ──
+  type IdemRow = { day: string; template_name: string; hit_type: string; hits: number };
+  const [idemRows, setIdemRows] = useState<IdemRow[]>([]);
+  const [idemDays, setIdemDays] = useState<7 | 14 | 30>(7);
+  const [idemLoading, setIdemLoading] = useState(false);
+
+  const loadIdemHits = useCallback(async () => {
+    setIdemLoading(true);
+    const since = new Date();
+    since.setDate(since.getDate() - idemDays);
+    const sinceIso = since.toISOString().slice(0, 10);
+    const { data, error } = await supabase
+      .from("email_idempotency_daily_counts" as any)
+      .select("*")
+      .gte("day", sinceIso)
+      .order("day", { ascending: false });
+    if (error) toast.error("Impossible de charger les doublons");
+    else setIdemRows(((data ?? []) as any[]) as IdemRow[]);
+    setIdemLoading(false);
+  }, [idemDays]);
+
+  useEffect(() => {
+    loadIdemHits();
+  }, [loadIdemHits]);
+
+  const idemTotals = idemRows.reduce(
+    (acc, r) => {
+      if (r.hit_type === "duplicate_send") acc.dup += Number(r.hits);
+      else if (r.hit_type === "already_queued") acc.queued += Number(r.hits);
+      acc.total += Number(r.hits);
+      return acc;
+    },
+    { dup: 0, queued: 0, total: 0 },
+  );
 
   // ── Lookup par resend_id ──
   const [lookup, setLookup] = useState("");
@@ -210,7 +245,93 @@ export function QueueTab() {
         </CardContent>
       </Card>
 
-      {/* === Lookup par resend_id === */}
+      {/* === Doublons de clé d'idempotence === */}
+      <Card>
+        <CardContent className="pt-6 space-y-4">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <h2 className="font-body text-lg font-semibold flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-warning" /> Doublons de clé d'idempotence
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Comptage par jour et par template des appels où la même <code className="text-xs">idempotencyKey</code> a été détectée comme déjà envoyée ou déjà en file.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Select value={String(idemDays)} onValueChange={(v) => setIdemDays(Number(v) as 7 | 14 | 30)}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">7 jours</SelectItem>
+                  <SelectItem value="14">14 jours</SelectItem>
+                  <SelectItem value="30">30 jours</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline" size="sm" onClick={loadIdemHits} disabled={idemLoading}>
+                <RefreshCw className={`h-4 w-4 ${idemLoading ? "animate-spin" : ""}`} />
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <Card><CardContent className="pt-4 pb-3 text-center">
+              <div className="text-2xl font-bold">{idemTotals.total}</div>
+              <div className="text-xs text-muted-foreground">Total ({idemDays} j)</div>
+            </CardContent></Card>
+            <Card><CardContent className="pt-4 pb-3 text-center">
+              <div className="text-2xl font-bold text-info">{idemTotals.dup}</div>
+              <div className="text-xs text-muted-foreground">duplicate_send</div>
+            </CardContent></Card>
+            <Card><CardContent className="pt-4 pb-3 text-center">
+              <div className="text-2xl font-bold text-warning">{idemTotals.queued}</div>
+              <div className="text-xs text-muted-foreground">already_queued</div>
+            </CardContent></Card>
+          </div>
+
+          <div className="rounded-md border overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Jour</TableHead>
+                  <TableHead>Template</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead className="text-right">Hits</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {idemRows.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center text-sm text-muted-foreground py-8">
+                      {idemLoading ? "Chargement…" : "Aucun doublon sur la période — l'idempotence fait son travail."}
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  idemRows.map((r, i) => (
+                    <TableRow key={`${r.day}-${r.template_name}-${r.hit_type}-${i}`}>
+                      <TableCell className="text-xs whitespace-nowrap">
+                        {format(new Date(r.day), "dd/MM/yyyy", { locale: fr })}
+                      </TableCell>
+                      <TableCell className="text-xs font-mono">{r.template_name}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={
+                          r.hit_type === "duplicate_send"
+                            ? "bg-info/15 text-info border-info/30 text-[10px]"
+                            : "bg-warning/15 text-warning border-warning/30 text-[10px]"
+                        }>
+                          {r.hit_type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right text-sm font-semibold">{r.hits}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardContent className="pt-6 space-y-4">
           <div>
