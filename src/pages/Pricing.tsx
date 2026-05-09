@@ -10,6 +10,7 @@ import { Check, MapPin } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import PublicHeader from "@/components/layout/PublicHeader";
+import FreePeriodBanner from "@/components/marketing/FreePeriodBanner";
 import PublicFooter from "@/components/layout/PublicFooter";
 import FreeAccountSection from "@/components/subscription/FreeAccountSection";
 import SecurityTrustSection from "@/components/subscription/SecurityTrustSection";
@@ -170,7 +171,8 @@ const Pricing = () => {
  </script>
  </Helmet>
  <div className="min-h-screen bg-background">
- <PublicHeader />
+  <PublicHeader />
+  <FreePeriodBanner />
  <PageBreadcrumb items={[{ label: "Tarifs" }]} />
 
  <main className="max-w-6xl mx-auto px-4">

@@ -21,6 +21,7 @@ const spotChien = bust(spotChienSrc);
 const spotBricolage = bust(spotBricolageSrc);
 const spotBienetre = bust(spotBienetreSrc);
 import PublicHeader from "@/components/layout/PublicHeader";
+import FreePeriodBanner from "@/components/marketing/FreePeriodBanner";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -123,7 +124,8 @@ const SmallMissionsPublic = () => {
 
  <div className="min-h-screen bg-background font-body">
  {/* ═══ HEADER ═══ */}
- <PublicHeader />
+  <PublicHeader />
+  <FreePeriodBanner />
  <PageBreadcrumb items={[{ label: "Petites missions" }]} />
 
  {/* ═══ SECTION 1 — HERO ═══ */}

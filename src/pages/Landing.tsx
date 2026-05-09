@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
 import PublicHeader from "@/components/layout/PublicHeader";
+import FreePeriodBanner from "@/components/marketing/FreePeriodBanner";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 import RevealOnScroll from "@/components/ui/RevealOnScroll";
@@ -335,8 +336,9 @@ const Landing = () => {
  }}
  />
 
- {/* ═══════════════ NAVBAR ═══════════════ */}
- <PublicHeader />
+  {/* ═══════════════ NAVBAR ═══════════════ */}
+  <PublicHeader />
+  <FreePeriodBanner />
 
  {/* ═══════════════ SECTION 1 — HERO ═══════════════ */}
  <section className="relative w-full min-h-screen flex items-center overflow-hidden">
