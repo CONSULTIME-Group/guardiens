@@ -101,6 +101,7 @@ const CreateSit = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const fromSitId = searchParams.get("from");
+  const draftIdParam = searchParams.get("draftId");
 
   const [title, setTitle] = useState("");
   const [startDate, setStartDate] = useState("");
