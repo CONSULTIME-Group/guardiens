@@ -597,6 +597,224 @@ const ConfigTab = () => {
   );
 };
 
+// ── Engagement tab ──
+interface TplStats {
+  template: string;
+  sent: number;
+  delivered: number;
+  opened: number;
+  clicked: number;
+  bounced: number;
+  complained: number;
+  unsubscribed: number;
+}
+
+const pct = (num: number, den: number) => (den > 0 ? `${((num / den) * 100).toFixed(1)}%` : "—");
+
+const EngagementTab = () => {
+  const [rows, setRows] = useState<TplStats[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState("30d");
+  const [totals, setTotals] = useState({ sent: 0, delivered: 0, opened: 0, clicked: 0, bounced: 0, unsub: 0 });
+
+  const fetchStats = async () => {
+    setLoading(true);
+    const now = new Date();
+    const start = new Date();
+    if (timeRange === "24h") start.setHours(now.getHours() - 24);
+    else if (timeRange === "7d") start.setDate(now.getDate() - 7);
+    else if (timeRange === "30d") start.setDate(now.getDate() - 30);
+    else if (timeRange === "90d") start.setDate(now.getDate() - 90);
+
+    // 1) Pull sends within window
+    const { data: logs, error: logsErr } = await supabase
+      .from("email_send_log")
+      .select("template_name,recipient_email,status,message_id,created_at,delivered_at,open_count,click_count,bounced_at,complained_at")
+      .gte("created_at", start.toISOString())
+      .order("created_at", { ascending: false })
+      .limit(10000);
+
+    if (logsErr) {
+      toast.error("Erreur lors du chargement");
+      setLoading(false);
+      return;
+    }
+
+    // Dedup latest row per message_id
+    const byMsg = new Map<string, any>();
+    (logs || []).forEach((r) => {
+      const k = r.message_id || `${r.template_name}-${r.recipient_email}-${r.created_at}`;
+      const prev = byMsg.get(k);
+      if (!prev || new Date(r.created_at) > new Date(prev.created_at)) byMsg.set(k, r);
+    });
+    const dedup = Array.from(byMsg.values()).filter((r) => r.status === "sent" || r.delivered_at || r.open_count > 0 || r.click_count > 0);
+
+    // 2) Pull unsubscribes within window
+    const { data: unsubs } = await supabase
+      .from("suppressed_emails")
+      .select("email,created_at")
+      .eq("reason", "unsubscribe")
+      .gte("created_at", start.toISOString());
+
+    // Attribution: pour chaque unsub, trouver le template du dernier email envoyé à cet email AVANT l'unsub (dans la fenêtre)
+    const unsubByTpl = new Map<string, number>();
+    (unsubs || []).forEach((u) => {
+      const candidate = dedup
+        .filter((d) => d.recipient_email?.toLowerCase() === u.email?.toLowerCase() && new Date(d.created_at) <= new Date(u.created_at))
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+      const tpl = candidate?.template_name || "(non attribué)";
+      unsubByTpl.set(tpl, (unsubByTpl.get(tpl) || 0) + 1);
+    });
+
+    // Aggregate per template
+    const byTpl = new Map<string, TplStats>();
+    dedup.forEach((r) => {
+      const t = r.template_name || "(inconnu)";
+      const s = byTpl.get(t) || { template: t, sent: 0, delivered: 0, opened: 0, clicked: 0, bounced: 0, complained: 0, unsubscribed: 0 };
+      s.sent += 1;
+      if (r.delivered_at) s.delivered += 1;
+      if ((r.open_count || 0) > 0) s.opened += 1;
+      if ((r.click_count || 0) > 0) s.clicked += 1;
+      if (r.bounced_at) s.bounced += 1;
+      if (r.complained_at) s.complained += 1;
+      byTpl.set(t, s);
+    });
+    unsubByTpl.forEach((n, tpl) => {
+      const s = byTpl.get(tpl) || { template: tpl, sent: 0, delivered: 0, opened: 0, clicked: 0, bounced: 0, complained: 0, unsubscribed: 0 };
+      s.unsubscribed = n;
+      byTpl.set(tpl, s);
+    });
+
+    const list = Array.from(byTpl.values()).sort((a, b) => b.sent - a.sent);
+    setRows(list);
+
+    setTotals({
+      sent: list.reduce((a, b) => a + b.sent, 0),
+      delivered: list.reduce((a, b) => a + b.delivered, 0),
+      opened: list.reduce((a, b) => a + b.opened, 0),
+      clicked: list.reduce((a, b) => a + b.clicked, 0),
+      bounced: list.reduce((a, b) => a + b.bounced, 0),
+      unsub: (unsubs || []).length,
+    });
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchStats(); }, [timeRange]);
+
+  const exportCsv = () => {
+    const header = "template,sent,delivered,opened,clicked,bounced,complained,unsubscribed,delivery_rate,open_rate,click_rate,unsub_rate,bounce_rate";
+    const lines = rows.map((r) =>
+      [
+        r.template, r.sent, r.delivered, r.opened, r.clicked, r.bounced, r.complained, r.unsubscribed,
+        pct(r.delivered, r.sent), pct(r.opened, r.delivered), pct(r.clicked, r.delivered),
+        pct(r.unsubscribed, r.delivered), pct(r.bounced, r.sent),
+      ].join(",")
+    );
+    const blob = new Blob([header + "\n" + lines.join("\n")], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `engagement-${timeRange}-${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        Open rate, click rate, désabonnements et bounces par template. Déduplication par <code className="text-xs bg-muted px-1 rounded">message_id</code>. Les taux d'ouverture/clic sont basés sur les emails <strong>livrés</strong>.
+      </p>
+
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+        <Card><CardContent className="pt-4 pb-3 text-center">
+          <div className="text-2xl font-bold">{totals.sent}</div>
+          <div className="text-xs text-muted-foreground">Envoyés</div>
+        </CardContent></Card>
+        <Card><CardContent className="pt-4 pb-3 text-center">
+          <div className="text-2xl font-bold">{pct(totals.delivered, totals.sent)}</div>
+          <div className="text-xs text-muted-foreground">Livraison</div>
+        </CardContent></Card>
+        <Card><CardContent className="pt-4 pb-3 text-center">
+          <div className="text-2xl font-bold text-success">{pct(totals.opened, totals.delivered)}</div>
+          <div className="text-xs text-muted-foreground">Ouverture</div>
+        </CardContent></Card>
+        <Card><CardContent className="pt-4 pb-3 text-center">
+          <div className="text-2xl font-bold text-success">{pct(totals.clicked, totals.delivered)}</div>
+          <div className="text-xs text-muted-foreground">Clic</div>
+        </CardContent></Card>
+        <Card><CardContent className="pt-4 pb-3 text-center">
+          <div className="text-2xl font-bold text-warning">{pct(totals.unsub, totals.delivered)}</div>
+          <div className="text-xs text-muted-foreground">Désabos</div>
+        </CardContent></Card>
+        <Card><CardContent className="pt-4 pb-3 text-center">
+          <div className="text-2xl font-bold text-destructive">{pct(totals.bounced, totals.sent)}</div>
+          <div className="text-xs text-muted-foreground">Bounce</div>
+        </CardContent></Card>
+      </div>
+
+      <div className="flex flex-wrap gap-2 items-center">
+        <div className="flex gap-1">
+          {["24h", "7d", "30d", "90d"].map((range) => (
+            <Button key={range} size="sm" variant={timeRange === range ? "default" : "outline"} onClick={() => setTimeRange(range)}>
+              {range === "24h" ? "24h" : range === "7d" ? "7 jours" : range === "30d" ? "30 jours" : "90 jours"}
+            </Button>
+          ))}
+        </div>
+        <Button size="sm" variant="ghost" onClick={fetchStats}><RefreshCw className="h-3.5 w-3.5" /></Button>
+        <div className="flex-1" />
+        <Button size="sm" variant="outline" onClick={exportCsv} disabled={rows.length === 0}>Export CSV</Button>
+      </div>
+
+      <div className="rounded-md border overflow-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-xs">Template</TableHead>
+              <TableHead className="text-xs text-right">Envoyés</TableHead>
+              <TableHead className="text-xs text-right">Livrés</TableHead>
+              <TableHead className="text-xs text-right">Open rate</TableHead>
+              <TableHead className="text-xs text-right">Click rate</TableHead>
+              <TableHead className="text-xs text-right">Unsub rate</TableHead>
+              <TableHead className="text-xs text-right">Bounce</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Chargement...</TableCell></TableRow>
+            ) : rows.length === 0 ? (
+              <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Aucune donnée sur la période</TableCell></TableRow>
+            ) : (
+              rows.map((r) => (
+                <TableRow key={r.template}>
+                  <TableCell className="text-xs font-mono">{r.template}</TableCell>
+                  <TableCell className="text-xs text-right">{r.sent}</TableCell>
+                  <TableCell className="text-xs text-right text-muted-foreground">{r.delivered} <span className="text-[10px]">({pct(r.delivered, r.sent)})</span></TableCell>
+                  <TableCell className="text-xs text-right">
+                    <span className="font-medium">{pct(r.opened, r.delivered)}</span>
+                    <span className="text-muted-foreground text-[10px] ml-1">({r.opened})</span>
+                  </TableCell>
+                  <TableCell className="text-xs text-right">
+                    <span className="font-medium">{pct(r.clicked, r.delivered)}</span>
+                    <span className="text-muted-foreground text-[10px] ml-1">({r.clicked})</span>
+                  </TableCell>
+                  <TableCell className="text-xs text-right">
+                    <span className={r.unsubscribed > 0 ? "font-medium text-warning" : "text-muted-foreground"}>{pct(r.unsubscribed, r.delivered)}</span>
+                    <span className="text-muted-foreground text-[10px] ml-1">({r.unsubscribed})</span>
+                  </TableCell>
+                  <TableCell className="text-xs text-right">
+                    <span className={r.bounced > 0 ? "text-destructive" : "text-muted-foreground"}>{pct(r.bounced, r.sent)}</span>
+                    <span className="text-muted-foreground text-[10px] ml-1">({r.bounced})</span>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+};
+
 // ── Main page ──
 const AdminEmails = () => {
   return (
