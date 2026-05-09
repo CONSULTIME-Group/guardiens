@@ -43,7 +43,7 @@ export default function PublicHeader() {
             Connexion
           </Button>
           <Button size="sm" onClick={() => navigate("/inscription")}>
-            S'inscrire
+            Créer mon compte
           </Button>
         </nav>
 
