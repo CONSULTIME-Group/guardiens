@@ -1653,6 +1653,44 @@ export type Database = {
           },
         ]
       }
+      journey_step_log: {
+        Row: {
+          created_at: string
+          id: string
+          journey_id: string
+          reason: string | null
+          sent: boolean
+          step_order: number
+          template_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          journey_id: string
+          reason?: string | null
+          sent: boolean
+          step_order: number
+          template_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          journey_id?: string
+          reason?: string | null
+          sent?: boolean
+          step_order?: number
+          template_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journey_step_log_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "user_journeys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       location_profiles: {
         Row: {
           activities: string
@@ -2204,6 +2242,77 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      nurturing_sequences: {
+        Row: {
+          active: boolean
+          audience: string
+          created_at: string
+          description: string | null
+          id: string
+          key: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          audience: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          audience?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      nurturing_steps: {
+        Row: {
+          created_at: string
+          delay_hours: number
+          exit_condition: Json | null
+          id: string
+          send_condition: Json | null
+          sequence_id: string
+          step_order: number
+          template_name: string
+        }
+        Insert: {
+          created_at?: string
+          delay_hours: number
+          exit_condition?: Json | null
+          id?: string
+          send_condition?: Json | null
+          sequence_id: string
+          step_order: number
+          template_name: string
+        }
+        Update: {
+          created_at?: string
+          delay_hours?: number
+          exit_condition?: Json | null
+          id?: string
+          send_condition?: Json | null
+          sequence_id?: string
+          step_order?: number
+          template_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nurturing_steps_sequence_id_fkey"
+            columns: ["sequence_id"]
+            isOneToOne: false
+            referencedRelation: "nurturing_sequences"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       owner_gallery: {
         Row: {
@@ -4000,6 +4109,48 @@ export type Database = {
           id?: string
           metadata?: Json | null
           reason?: string
+        }
+        Relationships: []
+      }
+      user_journeys: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          current_step: number
+          exit_reason: string | null
+          id: string
+          last_step_at: string | null
+          sequence_key: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          current_step?: number
+          exit_reason?: string | null
+          id?: string
+          last_step_at?: string | null
+          sequence_key: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          current_step?: number
+          exit_reason?: string | null
+          id?: string
+          last_step_at?: string | null
+          sequence_key?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
