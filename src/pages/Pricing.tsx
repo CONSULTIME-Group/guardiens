@@ -136,7 +136,7 @@ const Pricing = () => {
  return `/inscription${qs ? `?${qs}` : ""}`;
  };
 
- const faqJsonLd = {
+  const faqJsonLd = {
  "@context": "https://schema.org",
  "@type": "FAQPage",
  mainEntity: faqItems.map((item) => ({
@@ -149,6 +149,68 @@ const Pricing = () => {
  })),
  };
 
+ const productJsonLd = {
+ "@context": "https://schema.org",
+ "@type": "Product",
+ name: "Abonnement Gardien Guardiens",
+ description:
+ "Accès gardien à Guardiens : postuler aux gardes d'animaux à domicile, messagerie directe avec les propriétaires, profil de confiance vérifié, alertes locales.",
+ brand: { "@type": "Brand", name: "Guardiens" },
+ url: "https://guardiens.fr/tarifs",
+ offers: [
+ {
+ "@type": "Offer",
+ name: "Espace propriétaire",
+ description: "Publication d'annonces, messagerie et choix d'un gardien — gratuit, sans abonnement.",
+ price: "0",
+ priceCurrency: "EUR",
+ availability: "https://schema.org/InStock",
+ url: "https://guardiens.fr/inscription?role=owner",
+ },
+ {
+ "@type": "Offer",
+ name: "Abonnement Gardien — Mensuel",
+ description: "Accès complet gardien, 7 jours d'essai offerts, résiliable à tout moment.",
+ price: "6.99",
+ priceCurrency: "EUR",
+ priceSpecification: {
+ "@type": "UnitPriceSpecification",
+ price: "6.99",
+ priceCurrency: "EUR",
+ unitText: "MONTH",
+ referenceQuantity: { "@type": "QuantitativeValue", value: "1", unitCode: "MON" },
+ },
+ availability: "https://schema.org/InStock",
+ url: "https://guardiens.fr/inscription?role=sitter&plan=mensuel",
+ },
+ {
+ "@type": "Offer",
+ name: "Accès Gardien — Un mois",
+ description: "Paiement unique pour un mois d'accès, sans renouvellement automatique.",
+ price: "12.00",
+ priceCurrency: "EUR",
+ availability: "https://schema.org/InStock",
+ url: "https://guardiens.fr/inscription?role=sitter&plan=one_shot",
+ },
+ {
+ "@type": "Offer",
+ name: "Formule 2026 — Prorata jusqu'à fin d'année",
+ description: "Paiement unique pour tous les mois restants en 2026, -20% sur le tarif mensuel (5,59 €/mois équivalent).",
+ price: "5.59",
+ priceCurrency: "EUR",
+ priceSpecification: {
+ "@type": "UnitPriceSpecification",
+ price: "5.59",
+ priceCurrency: "EUR",
+ unitText: "MONTH",
+ referenceQuantity: { "@type": "QuantitativeValue", value: "1", unitCode: "MON" },
+ },
+ availability: "https://schema.org/InStock",
+ url: "https://guardiens.fr/inscription?role=sitter&plan=prorata",
+ },
+ ],
+ };
+
  return (
  <>
  <PageMeta
@@ -159,7 +221,7 @@ const Pricing = () => {
  }
  description={
  before
- ? "Accès complet offert jusqu'au 14 juillet 2026 pour tous, gardiens comme propriétaires. Sans carte bancaire, sans commission, sans frais cachés."
+ ? "Accès offert jusqu'au 14 juillet 2026 pour tous, gardiens comme propriétaires. Sans carte bancaire, sans commission."
  : "Gratuit pour les propriétaires. 6,99 €/mois pour les gardiens avec 7 jours d'essai. Sans commission, sans frais cachés."
  }
  path="/tarifs"
@@ -168,6 +230,9 @@ const Pricing = () => {
  <Helmet>
  <script type="application/ld+json">
  {JSON.stringify(faqJsonLd)}
+ </script>
+ <script type="application/ld+json">
+ {JSON.stringify(productJsonLd)}
  </script>
  </Helmet>
  <div className="min-h-screen bg-background">
