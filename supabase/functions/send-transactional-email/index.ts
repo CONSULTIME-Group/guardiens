@@ -521,7 +521,7 @@ Deno.serve(async (req) => {
     template_name: templateName,
     recipient_email: effectiveRecipient,
     status: 'pending',
-    metadata: { idempotency_key: idempotencyKey, category },
+    metadata: { idempotency_key: idempotencyKey, category, bypass, isUrgent },
   })
 
   // RFC 8058 List-Unsubscribe headers — Gmail/Apple Mail one-click unsubscribe.
