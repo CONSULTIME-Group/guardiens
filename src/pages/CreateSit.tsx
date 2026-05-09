@@ -166,6 +166,33 @@ const CreateSit = () => {
         setIsRepublish(true);
       }
 
+      // Load draft (explicit ?draftId or auto-resume most recent draft)
+      if (!sourceSitRes?.data) {
+        let draftRes: { data: any } | null = null;
+        if (draftIdParam) {
+          draftRes = await supabase.from("sits").select("*").eq("id", draftIdParam).eq("user_id", user.id).eq("status", "draft").maybeSingle();
+        } else {
+          draftRes = await supabase.from("sits").select("*").eq("user_id", user.id).eq("status", "draft").order("created_at", { ascending: false }).limit(1).maybeSingle();
+        }
+        if (draftRes?.data) {
+          const d = draftRes.data;
+          setDraftId(d.id);
+          setTitle(d.title || "");
+          setStartDate(d.start_date || "");
+          setEndDate(d.end_date || "");
+          setFlexibleDates(d.flexible_dates || false);
+          setSpecificExpectations(d.specific_expectations || "");
+          setOpenTo(d.open_to || []);
+          setIsUrgent(d.is_urgent || false);
+          setSitEnvironments(d.environments || []);
+          setMinGardienSits(d.min_gardien_sits || 0);
+          setMaxApplications(d.max_applications ?? 10);
+          setOwnerMessage(d.owner_message || "");
+          setDailyRoutine(d.daily_routine || "");
+          setCoverPhotoUrl(d.cover_photo_url || null);
+        }
+      }
+
       if (propRes.data) {
         const p = propRes.data;
         setProperty({
@@ -193,15 +220,76 @@ const CreateSit = () => {
           communication_notes: o.communication_notes,
           environments: (o as any).environments || [],
         });
-        // Only set environments from owner profile if NOT republishing (source sit takes priority)
-        if (!fromSitId) {
-          setSitEnvironments((o as any).environments || []);
+        // Only set environments from owner profile if NOT republishing AND no draft loaded
+        if (!fromSitId && !draftIdParam) {
+          setSitEnvironments(prev => (prev.length > 0 ? prev : ((o as any).environments || [])));
         }
       }
       setLoading(false);
+      // Mark initial load done so autosave only fires for genuine user edits
+      setTimeout(() => { initialLoadedRef.current = true; }, 300);
     };
     load();
-  }, [user, fromSitId]);
+  }, [user, fromSitId, draftIdParam]);
+
+  // Auto-save draft (debounced) — fires after user edits
+  useEffect(() => {
+    if (!user || !property || !initialLoadedRef.current) return;
+    if (!hasUserEditedRef.current) return;
+    const t = setTimeout(async () => {
+      await saveDraft({ silent: true });
+    }, 1500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title, startDate, endDate, flexibleDates, flexibleNotes, specificExpectations, openTo, isUrgent, sitEnvironments, minGardienSits, maxApplications, ownerMessage, dailyRoutine, coverPhotoUrl]);
+
+  const saveDraft = async ({ silent = false }: { silent?: boolean } = {}) => {
+    if (!user || !property) return null;
+    setSavingDraft(true);
+    try {
+      let expectations = specificExpectations;
+      if (flexibleDates && flexibleNotes) {
+        expectations = `${expectations}\n\nDates flexibles : ${flexibleNotes}`.trim();
+      }
+      const payload: any = {
+        user_id: user.id,
+        property_id: property.id,
+        title: title || "",
+        start_date: startDate || null,
+        end_date: endDate || null,
+        flexible_dates: flexibleDates,
+        specific_expectations: expectations,
+        open_to: openTo,
+        is_urgent: isUrgent,
+        environments: sitEnvironments,
+        min_gardien_sits: minGardienSits,
+        max_applications: maxApplications,
+        owner_message: ownerMessage.trim() || null,
+        daily_routine: dailyRoutine.trim() || null,
+        cover_photo_url: coverPhotoUrl ?? (ownerPhotos.length > 0 ? ownerPhotos[0] : null),
+      };
+      if (draftId) {
+        const { error } = await supabase.from("sits").update(payload).eq("id", draftId).eq("status", "draft");
+        if (error) throw error;
+        setLastSavedAt(new Date());
+        return draftId;
+      } else {
+        const { data, error } = await supabase.from("sits").insert({ ...payload, status: "draft" as any }).select("id").single();
+        if (error) throw error;
+        setDraftId(data.id);
+        setLastSavedAt(new Date());
+        return data.id;
+      }
+    } catch (e) {
+      if (!silent) {
+        console.error("[CreateSit] saveDraft failed", e);
+        toast({ variant: "destructive", title: "Sauvegarde du brouillon impossible" });
+      }
+      return null;
+    } finally {
+      setSavingDraft(false);
+    }
+  };
 
   const today = new Date().toISOString().split("T")[0];
   const dateError = startDate && endDate && startDate >= endDate
