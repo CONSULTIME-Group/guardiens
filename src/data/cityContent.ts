@@ -261,7 +261,7 @@ Après avoir accepté une candidature, vous organisez une rencontre directement 
 Guardiens dispose d'un réseau de [gardiens d'urgence à Lyon](/gardien-urgence), mobilisables rapidement. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique (fuite, panne), il suit les consignes laissées par le propriétaire.
 
 **Comment sont vérifiés les gardiens à Lyon ?**
-Chaque gardien fournit une pièce d'identité vérifiée manuellement par l'équipe Guardiens. Les avis croisés après chaque garde et les badges de fiabilité complètent le dispositif de confiance. [En savoir plus dans la FAQ](/faq).
+Chaque gardien fournit une pièce d'identité vérifiée manuellement par l'équipe Guardiens. Les avis croisés après chaque garde et les badges de fiabilité complètent le dispositif de confiance. [En savoir plus dans la FAQ](/faq#confiance-securite).
 
 **Puis-je publier une annonce pour un chien ET un chat ?**
 Absolument. Votre annonce peut inclure tous vos animaux. Les gardiens qui postulent voient la composition exacte de votre foyer et décident en connaissance de cause.
