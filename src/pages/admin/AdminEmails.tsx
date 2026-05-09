@@ -410,6 +410,7 @@ const LogsTab = () => {
           <TableHeader>
             <TableRow>
               <TableHead className="text-xs">Template</TableHead>
+              <TableHead className="text-xs">Type</TableHead>
               <TableHead className="text-xs">Destinataire</TableHead>
               <TableHead className="text-xs">Statut</TableHead>
               <TableHead className="text-xs">Date</TableHead>
@@ -418,13 +419,14 @@ const LogsTab = () => {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Chargement...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Chargement...</TableCell></TableRow>
             ) : logs.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Aucun email trouvé</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Aucun email trouvé</TableCell></TableRow>
             ) : (
               logs.slice(0, 50).map((log) => (
                 <TableRow key={log.id}>
                   <TableCell className="text-xs font-mono">{log.template_name}</TableCell>
+                  <TableCell><UrgencyBadge metadata={log.metadata} /></TableCell>
                   <TableCell className="text-xs">{log.recipient_email}</TableCell>
                   <TableCell><StatusBadge status={log.status} /></TableCell>
                   <TableCell className="text-xs text-muted-foreground">
