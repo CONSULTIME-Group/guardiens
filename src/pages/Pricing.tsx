@@ -149,23 +149,29 @@ const Pricing = () => {
  })),
  };
 
- const productJsonLd = {
+  const productJsonLd = {
  "@context": "https://schema.org",
  "@type": "Product",
  name: "Abonnement Gardien Guardiens",
  description:
  "Accès gardien à Guardiens : postuler aux gardes d'animaux à domicile, messagerie directe avec les propriétaires, profil de confiance vérifié, alertes locales.",
+ image: [
+ "https://guardiens.fr/og/og-sit-1.jpg",
+ "https://guardiens.fr/og/og-sit-2.jpg",
+ ],
  brand: { "@type": "Brand", name: "Guardiens" },
  url: "https://guardiens.fr/tarifs",
  offers: [
  {
  "@type": "Offer",
  name: "Espace propriétaire",
- description: "Publication d'annonces, messagerie et choix d'un gardien — gratuit, sans abonnement.",
+ description: "Publication d'annonces, messagerie et choix d'un gardien, sans abonnement.",
  price: "0",
  priceCurrency: "EUR",
  availability: "https://schema.org/InStock",
  url: "https://guardiens.fr/inscription?role=owner",
+ priceValidUntil: "2027-12-31",
+ seller: { "@type": "Organization", name: "Guardiens" },
  },
  {
  "@type": "Offer",
@@ -182,6 +188,8 @@ const Pricing = () => {
  },
  availability: "https://schema.org/InStock",
  url: "https://guardiens.fr/inscription?role=sitter&plan=mensuel",
+ priceValidUntil: "2026-12-31",
+ seller: { "@type": "Organization", name: "Guardiens" },
  },
  {
  "@type": "Offer",
@@ -191,6 +199,8 @@ const Pricing = () => {
  priceCurrency: "EUR",
  availability: "https://schema.org/InStock",
  url: "https://guardiens.fr/inscription?role=sitter&plan=one_shot",
+ priceValidUntil: "2026-12-31",
+ seller: { "@type": "Organization", name: "Guardiens" },
  },
  {
  "@type": "Offer",
@@ -207,6 +217,8 @@ const Pricing = () => {
  },
  availability: "https://schema.org/InStock",
  url: "https://guardiens.fr/inscription?role=sitter&plan=prorata",
+ priceValidUntil: "2026-12-31",
+ seller: { "@type": "Organization", name: "Guardiens" },
  },
  ],
  };
