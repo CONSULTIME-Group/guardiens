@@ -260,6 +260,95 @@ Deno.serve(async (req) => {
     )
   }
 
+  // 2b. Frequency cap & quiet hours (skipped for bypass templates and when caller marks urgent)
+  const isUrgent = !!(templateData as any)?.__urgent
+  const bypass = BYPASS_TEMPLATES.has(templateName) || isUrgent
+  if (!bypass) {
+    const recipientLower = effectiveRecipient.toLowerCase()
+    const nowMs = Date.now()
+    const oneHourAgo = new Date(nowMs - 3600_000).toISOString()
+    const oneDayAgo = new Date(nowMs - 86400_000).toISOString()
+
+    const [{ data: hourRows }, { data: dayRows }] = await Promise.all([
+      supabase
+        .from('email_send_log')
+        .select('created_at')
+        .ilike('recipient_email', recipientLower)
+        .eq('status', 'sent')
+        .gte('created_at', oneHourAgo)
+        .order('created_at', { ascending: true }),
+      supabase
+        .from('email_send_log')
+        .select('created_at')
+        .ilike('recipient_email', recipientLower)
+        .eq('status', 'sent')
+        .gte('created_at', oneDayAgo)
+        .order('created_at', { ascending: true }),
+    ])
+
+    const hourCount = hourRows?.length ?? 0
+    const dayCount = dayRows?.length ?? 0
+
+    let deferReason: string | null = null
+    let scheduledFor: Date | null = null
+
+    if (isQuietNow()) {
+      deferReason = 'quiet_hours'
+      scheduledFor = nextQuietEnd()
+    } else if (dayCount >= CAP_PER_DAY) {
+      const oldest = dayRows![0].created_at as string
+      deferReason = 'frequency_cap_day'
+      scheduledFor = new Date(new Date(oldest).getTime() + 86400_000 + 30_000)
+    } else if (hourCount >= CAP_PER_HOUR) {
+      const oldest = hourRows![0].created_at as string
+      deferReason = 'frequency_cap_hour'
+      scheduledFor = new Date(new Date(oldest).getTime() + 3600_000 + 30_000)
+    }
+
+    if (deferReason && scheduledFor) {
+      if (idempotencyKey && idempotencyKey !== messageId) {
+        const { data: existingDefer } = await supabase
+          .from('email_deferred_queue')
+          .select('id')
+          .eq('idempotency_key', idempotencyKey)
+          .eq('template_name', templateName)
+          .in('status', ['pending', 'sent'])
+          .limit(1)
+        if (existingDefer && existingDefer.length > 0) {
+          return new Response(
+            JSON.stringify({ success: true, deferred: true, reason: 'already_queued' }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+      }
+
+      const { error: enqErr } = await supabase.from('email_deferred_queue').insert({
+        template_name: templateName,
+        recipient_email: effectiveRecipient,
+        template_data: templateData,
+        idempotency_key: idempotencyKey,
+        defer_reason: deferReason,
+        scheduled_for: scheduledFor.toISOString(),
+      })
+      if (enqErr) {
+        console.error('Failed to enqueue deferred email — falling open and sending', enqErr)
+      } else {
+        await supabase.from('email_send_log').insert({
+          message_id: messageId,
+          template_name: templateName,
+          recipient_email: effectiveRecipient,
+          status: 'deferred',
+          metadata: { idempotency_key: idempotencyKey, defer_reason: deferReason, scheduled_for: scheduledFor.toISOString() },
+        })
+        console.log('Email deferred', { templateName, recipientLower, deferReason, scheduledFor: scheduledFor.toISOString() })
+        return new Response(
+          JSON.stringify({ success: true, deferred: true, reason: deferReason, scheduled_for: scheduledFor.toISOString() }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    }
+  }
+
   // 3. Get or create unsubscribe token (one token per email address)
   const normalizedEmail = effectiveRecipient.toLowerCase()
   let unsubscribeToken: string
