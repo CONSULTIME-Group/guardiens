@@ -5,7 +5,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Legend,
+  LineChart,
+  Line,
+} from "recharts";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -27,11 +38,33 @@ interface JourneyRow {
   status: string;
   sequence_key: string;
   exit_reason: string | null;
+  started_at: string;
 }
 
-const StatCard = ({ label, value, hint, tone }: { label: string; value: string | number; hint?: string; tone?: "ok" | "warn" | "err" }) => {
+interface QueueRow {
+  status: string;
+  metadata: { source?: string } | null;
+}
+
+const StatCard = ({
+  label,
+  value,
+  hint,
+  tone,
+}: {
+  label: string;
+  value: string | number;
+  hint?: string;
+  tone?: "ok" | "warn" | "err";
+}) => {
   const toneClass =
-    tone === "err" ? "text-destructive" : tone === "warn" ? "text-amber-600 dark:text-amber-400" : tone === "ok" ? "text-emerald-600 dark:text-emerald-400" : "text-foreground";
+    tone === "err"
+      ? "text-destructive"
+      : tone === "warn"
+        ? "text-warning"
+        : tone === "ok"
+          ? "text-success"
+          : "text-foreground";
   return (
     <Card>
       <CardContent className="p-4">
@@ -48,21 +81,43 @@ const AdminNurturing = () => {
   const [loading, setLoading] = useState(true);
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [journeys, setJourneys] = useState<JourneyRow[]>([]);
+  const [queue, setQueue] = useState<QueueRow[]>([]);
+  const [logsTruncated, setLogsTruncated] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
     const since = new Date(Date.now() - RANGE_HOURS[range] * 3600_000).toISOString();
-    const [logsRes, journeysRes] = await Promise.all([
+    const LIMIT = 10000;
+
+    const [logsRes, journeysRes, queueRes] = await Promise.all([
       supabase
         .from("journey_step_log")
-        .select("id, journey_id, step_order, template_name, sent, reason, created_at, user_journeys!inner(sequence_key)")
+        .select(
+          "id, journey_id, step_order, template_name, sent, reason, created_at, user_journeys!inner(sequence_key)",
+          { count: "exact" }
+        )
         .gte("created_at", since)
         .order("created_at", { ascending: false })
-        .limit(2000),
-      supabase.from("user_journeys").select("status, sequence_key, exit_reason").limit(5000),
+        .limit(LIMIT),
+      supabase
+        .from("user_journeys")
+        .select("status, sequence_key, exit_reason, started_at")
+        .gte("started_at", since)
+        .limit(LIMIT),
+      supabase
+        .from("email_send_log")
+        .select("status, metadata")
+        .gte("created_at", since)
+        .like("metadata->>source", "journey:%")
+        .limit(LIMIT),
     ]);
-    if (!logsRes.error) setLogs((logsRes.data ?? []) as unknown as LogRow[]);
+
+    if (!logsRes.error) {
+      setLogs((logsRes.data ?? []) as unknown as LogRow[]);
+      setLogsTruncated((logsRes.count ?? 0) > LIMIT);
+    }
     if (!journeysRes.error) setJourneys((journeysRes.data ?? []) as JourneyRow[]);
+    if (!queueRes.error) setQueue((queueRes.data ?? []) as QueueRow[]);
     setLoading(false);
   };
 
@@ -80,6 +135,27 @@ const AdminNurturing = () => {
     const successRate = sendable > 0 ? Math.round((sent / sendable) * 1000) / 10 : 0;
     const failureRate = sendable > 0 ? Math.round((failed / sendable) * 1000) / 10 : 0;
     return { total, sent, failed, exited, successRate, failureRate, sendable };
+  }, [logs]);
+
+  const queueStats = useMemo(() => {
+    const total = queue.length;
+    const sent = queue.filter((q) => q.status === "sent").length;
+    const pending = queue.filter((q) => q.status === "pending").length;
+    const failed = queue.filter((q) => ["failed", "dlq", "bounced"].includes(q.status)).length;
+    const suppressed = queue.filter((q) => q.status === "suppressed").length;
+    return { total, sent, pending, failed, suppressed };
+  }, [queue]);
+
+  const reasonBreakdown = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const l of logs) {
+      if (l.sent) continue;
+      const key = l.reason ?? "unknown";
+      map.set(key, (map.get(key) ?? 0) + 1);
+    }
+    return Array.from(map.entries())
+      .map(([reason, count]) => ({ reason, count }))
+      .sort((a, b) => b.count - a.count);
   }, [logs]);
 
   const bySequence = useMemo(() => {
@@ -108,6 +184,28 @@ const AdminNurturing = () => {
     return Array.from(map.values()).sort((a, b) => b.failed - a.failed || b.sent - a.sent);
   }, [logs]);
 
+  const timeSeries = useMemo(() => {
+    const days = range === "24h" ? 1 : range === "7d" ? 7 : 30;
+    const buckets = new Map<string, { date: string; sent: number; failed: number; exited: number }>();
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 86400_000);
+      const key = format(d, "yyyy-MM-dd");
+      buckets.set(key, { date: key, sent: 0, failed: 0, exited: 0 });
+    }
+    for (const l of logs) {
+      const key = format(new Date(l.created_at), "yyyy-MM-dd");
+      const b = buckets.get(key);
+      if (!b) continue;
+      if (l.sent) b.sent++;
+      else if (l.reason === "exit_condition_met") b.exited++;
+      else b.failed++;
+    }
+    return Array.from(buckets.values()).map((b) => ({
+      ...b,
+      label: format(new Date(b.date), days <= 7 ? "EEE dd" : "dd/MM", { locale: fr }),
+    }));
+  }, [logs, range]);
+
   const journeyStats = useMemo(() => {
     const total = journeys.length;
     const active = journeys.filter((j) => j.status === "active").length;
@@ -117,10 +215,7 @@ const AdminNurturing = () => {
   }, [journeys]);
 
   const recentFailures = useMemo(
-    () =>
-      logs
-        .filter((l) => !l.sent && l.reason !== "exit_condition_met")
-        .slice(0, 30),
+    () => logs.filter((l) => !l.sent && l.reason !== "exit_condition_met").slice(0, 30),
     [logs]
   );
 
@@ -130,7 +225,7 @@ const AdminNurturing = () => {
         <div>
           <h1 className="text-3xl font-heading font-bold">Nurturing — Suivi des envois</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Volumes, taux d'échec, répartition par séquence et par étape.
+            Volumes, taux d'échec, répartition par séquence et par étape, couverture queue.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -145,6 +240,14 @@ const AdminNurturing = () => {
         </div>
       </div>
 
+      {logsTruncated && (
+        <Card className="border-warning bg-warning-soft">
+          <CardContent className="p-4 text-sm text-warning-foreground">
+            Plus de 10 000 entrées sur la période — les chiffres affichés sont tronqués. Réduisez la fenêtre.
+          </CardContent>
+        </Card>
+      )}
+
       {loading ? (
         <div className="grid gap-4 md:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -154,47 +257,142 @@ const AdminNurturing = () => {
       ) : (
         <>
           <div className="grid gap-4 md:grid-cols-4">
-            <StatCard label="Total étapes évaluées" value={stats.total} hint={`Dont ${stats.exited} sorties (objectif atteint)`} />
-            <StatCard label="Emails envoyés" value={stats.sent} tone="ok" hint={`${stats.successRate}% de réussite`} />
-            <StatCard label="Échecs d'envoi" value={stats.failed} tone={stats.failed > 0 ? "err" : "ok"} hint={`${stats.failureRate}% des tentatives`} />
+            <StatCard
+              label="Étapes évaluées"
+              value={stats.total}
+              hint={`Dont ${stats.exited} sorties (objectif atteint)`}
+            />
+            <StatCard
+              label="Étapes envoyées"
+              value={stats.sent}
+              tone="ok"
+              hint={`${stats.successRate}% de réussite côté evaluator`}
+            />
+            <StatCard
+              label="Échecs evaluator"
+              value={stats.failed}
+              tone={stats.failed > 0 ? "err" : "ok"}
+              hint={`${stats.failureRate}% des tentatives`}
+            />
             <StatCard
               label="Couverture (sent vs failed)"
               value={`${stats.sent}/${stats.sendable}`}
               tone={stats.failureRate > 5 ? "err" : stats.failureRate > 1 ? "warn" : "ok"}
-              hint={stats.sendable === 0 ? "Aucun envoi sur la période" : `${stats.successRate}% délivrés`}
+              hint={stats.sendable === 0 ? "Aucun envoi sur la période" : `${stats.successRate}% délivrés à la queue`}
             />
           </div>
 
+          <div className="grid gap-4 md:grid-cols-5">
+            <StatCard label="Queue — total" value={queueStats.total} hint="Source = journey:*" />
+            <StatCard label="Queue — sent" value={queueStats.sent} tone="ok" />
+            <StatCard label="Queue — pending" value={queueStats.pending} tone={queueStats.pending > 0 ? "warn" : "ok"} />
+            <StatCard
+              label="Queue — failed/DLQ"
+              value={queueStats.failed}
+              tone={queueStats.failed > 0 ? "err" : "ok"}
+            />
+            <StatCard label="Queue — suppressed" value={queueStats.suppressed} />
+          </div>
+
           <div className="grid gap-4 md:grid-cols-4">
-            <StatCard label="Parcours actifs" value={journeyStats.active} />
-            <StatCard label="Parcours complétés" value={journeyStats.completed} tone="ok" />
-            <StatCard label="Parcours sortis (objectif)" value={journeyStats.exited} />
-            <StatCard label="Total parcours (toutes périodes)" value={journeyStats.total} />
+            <StatCard label="Parcours créés (période)" value={journeyStats.total} />
+            <StatCard label="Actifs" value={journeyStats.active} />
+            <StatCard label="Complétés" value={journeyStats.completed} tone="ok" />
+            <StatCard label="Sortis (objectif atteint)" value={journeyStats.exited} />
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle>Répartition par séquence</CardTitle>
+              <CardTitle>Évolution dans le temps</CardTitle>
             </CardHeader>
             <CardContent>
-              {bySequence.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-8 text-center">Aucune donnée sur la période.</p>
-              ) : (
-                <ResponsiveContainer width="100%" height={Math.max(220, bySequence.length * 48)}>
-                  <BarChart data={bySequence} layout="vertical" margin={{ left: 40, right: 16 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" allowDecimals={false} />
-                    <YAxis type="category" dataKey="sequence" width={180} tick={{ fontSize: 12 }} />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="sent" name="Envoyés" stackId="a" fill="hsl(var(--primary))" />
-                    <Bar dataKey="failed" name="Échecs" stackId="a" fill="hsl(var(--destructive))" />
-                    <Bar dataKey="exited" name="Sorties" stackId="a" fill="hsl(var(--muted-foreground))" />
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
+              <ResponsiveContainer width="100%" height={260}>
+                <LineChart data={timeSeries}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="sent" name="Envoyés" stroke="hsl(var(--success))" strokeWidth={2} />
+                  <Line type="monotone" dataKey="failed" name="Échecs" stroke="hsl(var(--destructive))" strokeWidth={2} />
+                  <Line
+                    type="monotone"
+                    dataKey="exited"
+                    name="Sorties"
+                    stroke="hsl(var(--muted-foreground))"
+                    strokeWidth={1.5}
+                    strokeDasharray="4 4"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Raisons d'échec</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {reasonBreakdown.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-8 text-center">Aucun échec sur la période.</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Raison</TableHead>
+                        <TableHead className="text-right">Occurrences</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {reasonBreakdown.map((r) => (
+                        <TableRow key={r.reason}>
+                          <TableCell className="font-mono text-xs">{r.reason}</TableCell>
+                          <TableCell className="text-right">
+                            <Badge
+                              variant={
+                                r.reason === "exit_condition_met"
+                                  ? "outline"
+                                  : r.reason === "no_email"
+                                    ? "secondary"
+                                    : "destructive"
+                              }
+                            >
+                              {r.count}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Répartition par séquence</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {bySequence.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-8 text-center">Aucune donnée sur la période.</p>
+                ) : (
+                  <ResponsiveContainer width="100%" height={Math.max(220, bySequence.length * 56)}>
+                    <BarChart data={bySequence} layout="vertical" margin={{ left: 40, right: 16 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" allowDecimals={false} />
+                      <YAxis type="category" dataKey="sequence" width={160} tick={{ fontSize: 12 }} />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="sent" name="Envoyés" stackId="a" fill="hsl(var(--success))" />
+                      <Bar dataKey="failed" name="Échecs" stackId="a" fill="hsl(var(--destructive))" />
+                      <Bar dataKey="exited" name="Sorties" stackId="a" fill="hsl(var(--muted-foreground))" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
           <Card>
             <CardHeader>
