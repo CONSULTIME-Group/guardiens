@@ -366,6 +366,47 @@ const Landing = () => {
                 mainEntity: [
                   { "@id": "https://guardiens.fr/#service" },
                   { "@id": "https://guardiens.fr/#faq" },
+                  { "@id": "https://guardiens.fr/#howto" },
+                ],
+              },
+              {
+                "@type": "HowTo",
+                "@id": "https://guardiens.fr/#howto",
+                name: "Comment trouver un gardien de confiance pour sa maison et ses animaux",
+                description:
+                  "Trois étapes pour confier votre maison et vos animaux à un gardien du coin sur Guardiens, sans abonnement pour les propriétaires.",
+                totalTime: "PT5M",
+                estimatedCost: {
+                  "@type": "MonetaryAmount",
+                  currency: "EUR",
+                  value: "0",
+                },
+                supply: [
+                  { "@type": "HowToSupply", name: "Dates de votre absence" },
+                  { "@type": "HowToSupply", name: "Description de votre maison et de vos animaux" },
+                ],
+                step: [
+                  {
+                    "@type": "HowToStep",
+                    position: 1,
+                    name: "Décrivez votre garde",
+                    text: "Renseignez vos animaux, vos dates et votre maison. En quelques minutes, votre annonce est publiée et visible des gardiens du coin.",
+                    url: "https://guardiens.fr/#how-it-works",
+                  },
+                  {
+                    "@type": "HowToStep",
+                    position: 2,
+                    name: "Recevez des candidatures",
+                    text: "Des gardiens proches de chez vous postulent. Consultez leurs profils vérifiés, lisez les avis, échangez par messagerie et rencontrez celui ou celle qui vous correspond.",
+                    url: "https://guardiens.fr/#how-it-works",
+                  },
+                  {
+                    "@type": "HowToStep",
+                    position: 3,
+                    name: "Partez sereinement",
+                    text: "Signez l'accord de garde, votre gardien s'installe, vous recevez des nouvelles régulières et vous rentrez l'esprit léger.",
+                    url: "https://guardiens.fr/#how-it-works",
+                  },
                 ],
               },
               {
