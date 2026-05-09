@@ -146,6 +146,22 @@ const AdminNurturing = () => {
       }
       setQueue(Array.from(latest.values()) as QueueRow[]);
     }
+
+    // Dernier run du cron evaluate-journeys (toutes périodes confondues)
+    const lastRunRes = await supabase
+      .from("journey_step_log")
+      .select("created_at, sent")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!lastRunRes.error && lastRunRes.data) {
+      setLastRunAt(lastRunRes.data.created_at);
+      setLastRunSent(lastRunRes.data.sent);
+    } else {
+      setLastRunAt(null);
+      setLastRunSent(false);
+    }
+
     setLoading(false);
   };
 
