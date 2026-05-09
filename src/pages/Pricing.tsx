@@ -90,7 +90,7 @@ Avant le 14 juillet 2026, cet essai n'a pas lieu d'être : tout est déjà gratu
  },
  {
  q: "Pourquoi le 14 juillet ?",
- a: `Il fallait une date après trois mois de gratuité — un repère simple, partagé par tout le monde. Le **14 juillet 2026, fête nationale**, s'est imposé naturellement.
+ a: `Il fallait une date après trois mois de gratuité — un repère simple, partagé par toutes et tous. Le **14 juillet 2026, fête nationale**, s'est imposé naturellement.
 
 C'est ce jour-là que la gratuité prend fin pour les gardiens. Le **13 juillet 2026**, dernier jour avant la fête, marque la clôture du **programme Fondateur** : les personnes inscrites avant cette date reçoivent un **badge Fondateur permanent** sur leur profil. Ce badge ne sera plus jamais attribué après.
 
