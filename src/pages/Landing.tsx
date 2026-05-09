@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 import PageMeta from "@/components/PageMeta";
 import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
+import RealMembersStrip from "@/components/landing/RealMembersStrip";
 import PublicHeader from "@/components/layout/PublicHeader";
 import FreePeriodBanner from "@/components/marketing/FreePeriodBanner";
 
@@ -326,6 +327,9 @@ const Landing = () => {
                 founder: [
                   { "@type": "Person", name: "Jérémie Martinot" },
                   { "@type": "Person", name: "Elisa" },
+                ],
+                sameAs: [
+                  "https://maps.app.goo.gl/wBCoMpnyRu8GbrTV7",
                 ],
               },
               {
@@ -895,6 +899,8 @@ const Landing = () => {
               Témoignages recueillis auprès des membres du Programme Fondateurs (janvier–mai 2026). Prénoms et villes réels, récits anonymisés à leur demande.
             </p>
           </RevealSection>
+
+          <RealMembersStrip />
 
           <div
             className="relative"
