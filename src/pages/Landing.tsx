@@ -905,7 +905,7 @@ const Landing = () => {
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">02</p>
                 <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Rencontre avant chaque garde</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Un café, une visite du logement, un tour des consignes. La confiance ne se devine pas — elle se construit, en se regardant.
+                  Un café, une visite du logement, un tour des consignes. La confiance ne se devine pas : elle se construit, en se regardant.
                 </p>
               </article>
 
