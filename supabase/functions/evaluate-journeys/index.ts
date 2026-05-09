@@ -179,6 +179,7 @@ Deno.serve(async (req) => {
         continue
       }
 
+      const idempotencyKey = `journey-${j.sequence_key}-${j.id}-step-${nextStep.step_order}`
       const sendRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
         method: 'POST',
         headers: {
@@ -186,16 +187,33 @@ Deno.serve(async (req) => {
           Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
         },
         body: JSON.stringify({
-          to: profile.email,
-          template: nextStep.template_name,
-          data: { first_name: profile.first_name, journey_id: j.id, step: nextStep.step_order },
-          user_id: j.user_id,
-          source: `journey:${j.sequence_key}:${nextStep.step_order}`,
+          templateName: nextStep.template_name,
+          recipientEmail: profile.email,
+          idempotencyKey,
+          templateData: {
+            firstName: profile.first_name,
+            first_name: profile.first_name,
+            journey_id: j.id,
+            step: nextStep.step_order,
+          },
+          metadata: { source: `journey:${j.sequence_key}:${nextStep.step_order}`, user_id: j.user_id },
         }),
       })
 
       const sendOk = sendRes.ok
-      const reason = sendOk ? null : `send_failed_${sendRes.status}`
+      let reason: string | null = null
+      if (!sendOk) {
+        const errBody = await sendRes.text().catch(() => '')
+        reason = `send_failed_${sendRes.status}`
+        console.error('[ALERT] Journey step send failed', {
+          journey_id: j.id,
+          sequence: j.sequence_key,
+          step: nextStep.step_order,
+          template: nextStep.template_name,
+          status: sendRes.status,
+          body: errBody.slice(0, 500),
+        })
+      }
 
       await supabase.from('journey_step_log').insert({
         journey_id: j.id, step_order: nextStep.step_order,
