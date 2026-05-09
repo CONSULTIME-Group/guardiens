@@ -180,7 +180,6 @@ export const ConfirmationsTab = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHeader as any />
                 <TableHead>Destinataire</TableHead>
                 <TableHead>Envoi</TableHead>
                 <TableHead>Statut</TableHead>
