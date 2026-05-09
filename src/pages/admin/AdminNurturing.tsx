@@ -83,11 +83,19 @@ const AdminNurturing = () => {
   const [journeys, setJourneys] = useState<JourneyRow[]>([]);
   const [queue, setQueue] = useState<QueueRow[]>([]);
   const [logsTruncated, setLogsTruncated] = useState(false);
+  const [nurturingTemplates, setNurturingTemplates] = useState<string[]>([]);
 
   const fetchData = async () => {
     setLoading(true);
     const since = new Date(Date.now() - RANGE_HOURS[range] * 3600_000).toISOString();
     const LIMIT = 10000;
+
+    // 1) Récupère la liste des templates de nurturing pour cibler email_send_log
+    const tplRes = await supabase.from("nurturing_steps").select("template_name");
+    const templates = Array.from(
+      new Set((tplRes.data ?? []).map((r: { template_name: string }) => r.template_name).filter(Boolean))
+    );
+    setNurturingTemplates(templates);
 
     const [logsRes, journeysRes, queueRes] = await Promise.all([
       supabase
@@ -104,12 +112,15 @@ const AdminNurturing = () => {
         .select("status, sequence_key, exit_reason, started_at")
         .gte("started_at", since)
         .limit(LIMIT),
-      supabase
-        .from("email_send_log")
-        .select("status, metadata")
-        .gte("created_at", since)
-        .like("metadata->>source", "journey:%")
-        .limit(LIMIT),
+      templates.length > 0
+        ? supabase
+            .from("email_send_log")
+            .select("message_id, status, created_at, metadata")
+            .gte("created_at", since)
+            .in("template_name", templates)
+            .order("created_at", { ascending: false })
+            .limit(LIMIT)
+        : Promise.resolve({ data: [], error: null } as { data: unknown[]; error: null }),
     ]);
 
     if (!logsRes.error) {
@@ -117,7 +128,22 @@ const AdminNurturing = () => {
       setLogsTruncated((logsRes.count ?? 0) > LIMIT);
     }
     if (!journeysRes.error) setJourneys((journeysRes.data ?? []) as JourneyRow[]);
-    if (!queueRes.error) setQueue((queueRes.data ?? []) as QueueRow[]);
+    if (!queueRes.error) {
+      // Déduplication par message_id (dernier statut connu) — un même email
+      // génère plusieurs lignes (pending puis sent/failed/dlq).
+      const rows = (queueRes.data ?? []) as Array<{
+        message_id: string | null;
+        status: string;
+        created_at: string;
+        metadata: { source?: string } | null;
+      }>;
+      const latest = new Map<string, { status: string; metadata: { source?: string } | null }>();
+      for (const r of rows) {
+        const key = r.message_id ?? `${r.status}-${r.created_at}-${Math.random()}`;
+        if (!latest.has(key)) latest.set(key, { status: r.status, metadata: r.metadata });
+      }
+      setQueue(Array.from(latest.values()) as QueueRow[]);
+    }
     setLoading(false);
   };
 
@@ -283,7 +309,15 @@ const AdminNurturing = () => {
           </div>
 
           <div className="grid gap-4 md:grid-cols-5">
-            <StatCard label="Queue — total" value={queueStats.total} hint="Source = journey:*" />
+            <StatCard
+              label="Queue — total"
+              value={queueStats.total}
+              hint={
+                nurturingTemplates.length > 0
+                  ? `${nurturingTemplates.length} templates suivis (dédup. par message_id)`
+                  : "Aucun template configuré"
+              }
+            />
             <StatCard label="Queue — sent" value={queueStats.sent} tone="ok" />
             <StatCard label="Queue — pending" value={queueStats.pending} tone={queueStats.pending > 0 ? "warn" : "ok"} />
             <StatCard
