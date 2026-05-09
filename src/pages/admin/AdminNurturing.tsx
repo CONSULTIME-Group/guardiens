@@ -320,7 +320,8 @@ const AdminNurturing = () => {
     const map = new Map<string, { template: string; sent: number; failed: number; exited: number }>();
     for (const l of logs) {
       const key = `${l.template_name} · step ${l.step_order}`;
-      const r = map.get(key) ?? { template: key, sent: 0, failed: 0, exited: 0 };
+      const display = `${labelTemplate(l.template_name)} (étape ${l.step_order})`;
+      const r = map.get(key) ?? { template: display, sent: 0, failed: 0, exited: 0 };
       if (l.sent) r.sent++;
       else if (l.reason === "exit_condition_met") r.exited++;
       else r.failed++;
