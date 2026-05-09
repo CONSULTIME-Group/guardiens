@@ -56,14 +56,17 @@ Cette gratuité totale ne dépend pas du programme Fondateur. Que vous vous insc
 À partir du 15 juillet 2026, l'abonnement gardien à 6,99 €/mois devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit.`,
  },
  {
- q: "Quelle est la différence entre la gratuité jusqu'au 14 juillet et le programme Fondateur ?",
- a: `Ce sont deux choses distinctes qui se cumulent.
+ q: "Quelle différence entre le 13 juillet (badge Fondateur) et le 14 juillet (fin de la gratuité) ?",
+ a: `Deux dates, deux choses indépendantes — il est utile de ne pas les confondre.
 
-**La gratuité totale jusqu'au 14 juillet 2026** concerne **tous les inscrits**, sans condition de date. Personne ne paie avant cette date.
+**13 juillet 2026 — clôture du programme Fondateur.** C'est la dernière date pour s'inscrire et recevoir le **badge Fondateur**, un sceau honorifique gravé à vie sur votre profil. Ce badge ne sera plus jamais attribué après. Il ne change rien à votre accès ou à votre tarif : c'est uniquement une distinction symbolique pour les premiers membres.
 
-**Le programme Fondateur** est un statut symbolique réservé aux personnes inscrites **avant le 13 juillet 2026**. Il donne droit à un badge Fondateur affiché sur le profil — ce badge ne sera plus jamais attribué après cette date.
+**14 juillet 2026 — fin de la gratuité totale.** C'est la dernière journée où **tout le monde** accède gratuitement à Guardiens, gardiens comme propriétaires. À partir du **15 juillet 2026**, l'abonnement gardien à 6,99 €/mois devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit.
 
-En clair : tout le monde est gratuit jusqu'au 14 juillet, et seuls les premiers inscrits (avant le 13 juillet) reçoivent en plus le badge Fondateur.`,
+**En résumé :**
+- Inscrit **avant le 13 juillet** → badge Fondateur **+** gratuit jusqu'au 14 juillet.
+- Inscrit **entre le 13 et le 14 juillet** → pas de badge Fondateur, mais gratuit jusqu'au 14 juillet.
+- Inscrit **à partir du 15 juillet** → pas de badge, et abonnement gardien à 6,99 €/mois pour postuler.`,
  },
  {
  q: "Pourquoi c'est gratuit pour les propriétaires ?",
