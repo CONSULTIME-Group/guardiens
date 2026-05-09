@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
-  { label: "Entraide", to: "/petites-missions" },
+  { label: "Coups de main", to: "/petites-missions" },
   { label: "Guides locaux", to: "/guides" },
   { label: "Tarifs", to: "/tarifs" },
   { label: "FAQ", to: "/faq" },
-  { label: "Articles", to: "/actualites" },
+  { label: "Le journal", to: "/actualites" },
 ];
 
 export default function PublicHeader() {
