@@ -413,8 +413,12 @@ const Pricing = () => {
 
  {/* Sitter Card */}
     <Card className="border-2 border-primary/30 relative shadow-xl rounded-2xl h-full flex flex-col bg-primary/5">
- <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-body font-semibold px-3 py-1 rounded-full">
- {before ? `Offert encore ${daysLeft} jour${daysLeft > 1 ? 's' : ''}` : 'Le plus choisi'}
+  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-body font-semibold px-3 py-1 rounded-full whitespace-nowrap max-w-[calc(100%-1.5rem)]">
+ {before
+ ? (daysLeft > 99
+ ? `Offert ${Math.ceil(daysLeft / 30)} mois`
+ : `Offert encore ${daysLeft} jour${daysLeft > 1 ? 's' : ''}`)
+ : 'Le plus choisi'}
  </div>
  <CardHeader className="text-center pb-2 p-8 pt-10">
  <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Gardien</div>
