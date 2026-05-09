@@ -61,7 +61,7 @@ Cette gratuité totale ne dépend pas du programme Fondateur. Que vous vous insc
 
 **La gratuité totale jusqu'au 14 juillet 2026** concerne **tous les inscrits**, sans condition de date. Personne ne paie avant cette date.
 
-**Le programme Fondateur** est un statut symbolique réservé aux personnes inscrites **avant le 13 juillet 2026**. Il donne droit à un badge Fondateur affiché sur le profil sur le profil — ce badge ne sera plus jamais attribué après cette date.
+**Le programme Fondateur** est un statut symbolique réservé aux personnes inscrites **avant le 13 juillet 2026**. Il donne droit à un badge Fondateur affiché sur le profil — ce badge ne sera plus jamais attribué après cette date.
 
 En clair : tout le monde est gratuit jusqu'au 14 juillet, et seuls les premiers inscrits (avant le 13 juillet) reçoivent en plus le badge Fondateur.`,
  },
@@ -69,7 +69,7 @@ En clair : tout le monde est gratuit jusqu'au 14 juillet, et seuls les premiers 
  q: "Pourquoi c'est gratuit pour les propriétaires ?",
  a: `Parce qu'on ne facture pas l'accès à ceux qui ouvrent leur maison.
 
-Publier une annonce, recevoir des candidatures, échanger avec les gardiens, laisser un avis — tout ça reste gratuit,. Ce n'est pas une offre d'appel : c'est une décision de fond sur le modèle économique.
+Publier une annonce, recevoir des candidatures, échanger avec les gardiens, laisser un avis — tout cela reste gratuit. Ce n'est pas une offre d'appel : c'est une décision de fond sur le modèle économique.
 
 Guardiens gagne de l'argent uniquement sur l'abonnement des gardiens. Les propriétaires n'ont aucune raison de payer pour accéder à des gens de confiance qui veulent garder leur maison — c'est l'échange qui a de la valeur, pas l'accès.
 
@@ -177,7 +177,7 @@ const Pricing = () => {
 
  <main className="max-w-6xl mx-auto px-4">
  {/* ═══ HERO ═══ */}
- <section className="py-10 md:py-14 text-center max-w-2xl mx-auto">
+       <section className="py-10 md:py-14 text-center max-w-2xl mx-auto">
  <p className="inline-block bg-primary/10 text-primary text-xs font-body font-semibold uppercase tracking-wider px-3 py-1.5 rounded-full mb-4">
  Sans commission, sans frais cachés
  </p>
@@ -188,11 +188,25 @@ const Pricing = () => {
  <>Un seul prix. <span className="text-primary">Transparent.</span></>
  )}
  </h1>
- <p className="text-base md:text-lg font-body text-foreground/65 leading-relaxed">
+ <p className="text-base md:text-lg font-body text-foreground/65 leading-relaxed mb-7">
  {before
  ? "Jusqu'au 14 juillet 2026, l'accès complet est offert — gardiens comme propriétaires. Aucune carte bancaire demandée."
  : "Gratuit pour les propriétaires. 6,99 €/mois pour les gardiens, avec 7 jours d'essai. C'est tout."}
  </p>
+ <div className="flex flex-col sm:flex-row gap-3 justify-center">
+ <Link
+ to={registerLink("owner")}
+ className="inline-flex items-center justify-center bg-primary text-primary-foreground font-body font-semibold text-sm px-7 py-3.5 rounded-full hover:bg-primary/90 transition-colors min-h-[44px]"
+ >
+ Publier mon annonce — gratuit
+ </Link>
+ <Link
+ to={registerLink("sitter")}
+ className="inline-flex items-center justify-center bg-transparent text-foreground border border-foreground/30 font-body font-medium text-sm px-7 py-3.5 rounded-full hover:bg-foreground/5 transition-colors min-h-[44px]"
+ >
+ Je veux garder
+ </Link>
+ </div>
  </section>
 
  {/* Founder Banner — urgence */}
@@ -256,12 +270,15 @@ const Pricing = () => {
  {/* ═══ Cartes pricing détaillées ═══ */}
  <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto items-stretch mb-12 md:mb-16">
  {/* Owner Card */}
- <Card className="bg-card border border-border/40 rounded-2xl h-full flex flex-col relative">
+  <Card className="bg-card border border-border/40 rounded-2xl h-full flex flex-col relative">
+ <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-foreground/90 text-background text-xs font-body font-medium px-3 py-1 rounded-full">
+ Toujours gratuit
+ </div>
  <CardHeader className="text-center pb-2 p-8 pt-10">
  <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Propriétaire</div>
                 <CardTitle className="font-heading text-5xl font-bold text-foreground">Gratuit</CardTitle>
                 <p className="text-sm font-body text-foreground/60 mt-2">
-                  Sans condition.
+                  Sans abonnement, sans carte bancaire.
                 </p>
  </CardHeader>
  <CardContent className="space-y-5 px-8 pb-8 pt-2 flex-1 flex flex-col">
@@ -288,19 +305,19 @@ const Pricing = () => {
  </Card>
 
  {/* Sitter Card */}
- <Card className="border-2 border-primary/30 relative shadow-xl rounded-2xl h-full flex flex-col bg-primary/5">
- <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-100 text-amber-800 text-xs font-body font-medium px-3 py-1 rounded-full">
- Le plus choisi
+    <Card className="border-2 border-primary/30 relative shadow-xl rounded-2xl h-full flex flex-col bg-primary/5">
+ <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-body font-semibold px-3 py-1 rounded-full">
+ {before ? `Offert encore ${daysLeft} jour${daysLeft > 1 ? 's' : ''}` : 'Le plus choisi'}
  </div>
  <CardHeader className="text-center pb-2 p-8 pt-10">
  <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Gardien</div>
  {before ? (
  <div className="text-center space-y-1.5 py-2">
-                    <p className="font-heading text-5xl font-bold text-primary leading-none">
-                      Gratuit
-                    </p>
- <p className="text-xs text-foreground/55 font-body pt-1">
- Puis <span className="font-semibold text-foreground">6,99 €/mois</span> à partir du 15 juillet 2026
+ <p className="font-heading text-5xl font-bold text-primary leading-none">
+ Gratuit
+ </p>
+ <p className="text-xs text-foreground/55 font-body pt-2">
+ Jusqu'au 14 juillet 2026, puis <span className="font-semibold text-foreground">6,99 €/mois</span>
  </p>
  </div>
  ) : (
