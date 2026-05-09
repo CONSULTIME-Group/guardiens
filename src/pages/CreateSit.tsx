@@ -378,6 +378,16 @@ const CreateSit = () => {
           : "Les informations de votre profil sont pré-remplies. Ajoutez les détails spécifiques à cette garde."}
       </p>
 
+      {(draftId || savingDraft || lastSavedAt) && (
+        <p className="text-xs text-muted-foreground mb-4">
+          {savingDraft
+            ? "Sauvegarde du brouillon…"
+            : lastSavedAt
+              ? `Brouillon enregistré automatiquement à ${lastSavedAt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`
+              : "Brouillon en cours"}
+        </p>
+      )}
+
       {!isRepublish && <FirstAnnonceTip />}
 
       {profileCompletion < 60 && (
