@@ -86,10 +86,10 @@ Aucun prélèvement automatique. À la fin de l'essai, vous choisissez si vous s
 Avant le 14 juillet 2026, cet essai n'a pas lieu d'être : tout est déjà gratuit pour tout le monde.`,
  },
  {
- q: "Pourquoi le 13 juillet ?",
- a: `C'est l'anniversaire de Jérémie, cofondateur de Guardiens.
+ q: "Pourquoi le 14 juillet ?",
+ a: `Il fallait une date après trois mois de gratuité — un repère simple, partagé par tout le monde. Le **14 juillet 2026, fête nationale**, s'est imposé naturellement.
 
-Plutôt que de recevoir des cadeaux, il a décidé de marquer cette date avec le programme Fondateur : les personnes inscrites avant le 13 juillet 2026 reçoivent un **badge Fondateur affiché sur le profil** sur leur profil. Ce badge ne sera plus jamais attribué après cette date.
+C'est ce jour-là que la gratuité prend fin pour les gardiens. Le **13 juillet 2026**, dernier jour avant la fête, marque la clôture du **programme Fondateur** : les personnes inscrites avant cette date reçoivent un **badge Fondateur permanent** sur leur profil. Ce badge ne sera plus jamais attribué après.
 
 À ne pas confondre avec la gratuité : **tout le monde est gratuit jusqu'au 14 juillet 2026**, qu'il s'inscrive avant ou après le 13 juillet. Le 13 juillet concerne uniquement le badge.`,
  },
