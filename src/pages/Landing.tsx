@@ -902,6 +902,9 @@ const Landing = () => {
 
           <RealMembersStrip />
 
+          <div
+            className="relative"
+            onMouseEnter={() => setIsTestimonialsHovered(true)}
             onMouseLeave={() => setIsTestimonialsHovered(false)}
           >
             <button
