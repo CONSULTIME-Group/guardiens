@@ -4,6 +4,7 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
+import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -31,16 +32,10 @@ const ContactReplyEmail = ({ firstName, originalMessage, replyBody }: ContactRep
         {replyBody ? (
           <Text style={text}>{replyBody}</Text>
         ) : null}
-        <Hr style={hr} />
-        <Text style={legal}>
-          Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
-          en réponse à votre demande de contact (art. 6.1.b RGPD — exécution d'une mesure précontractuelle).
-          Pour exercer vos droits (accès, rectification, suppression) : contact@guardiens.fr.
-        </Text>
-        <Text style={footer}>
-          L'équipe {SITE_NAME} —{' '}
-          <Link href="https://guardiens.fr" style={link}>guardiens.fr</Link>
-        </Text>
+        <LegalFooter
+          purpose="de la réponse à votre demande de contact"
+          basis="6.1.b"
+        />
         </Container>
         </Body>
         </Html>

@@ -4,6 +4,7 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
+import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -63,13 +64,10 @@ const RelanceProfilIncompletEmail = ({ firstName }: RelanceProfilIncompletProps)
             Une question ou un blocage ? Répondez simplement à cet email, nous lisons tout.
           </Text>
 
-          <Text style={legal}>
-            Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
-            dans le cadre de l'intérêt légitime lié au bon fonctionnement de votre compte (art. 6.1.f RGPD).
-            Pour exercer vos droits (accès, rectification, suppression) : contact@guardiens.fr.
-          </Text>
-
-          <Text style={footer}>À très vite sur {SITE_NAME}</Text>
+        <LegalFooter
+          purpose="du bon fonctionnement de votre compte"
+          basis="6.1.f"
+        />
         </Container>
         </Body>
         </Html>

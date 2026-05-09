@@ -4,6 +4,7 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
+import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 import {
   buildLeadSentence,
@@ -83,13 +84,10 @@ const NewMessageEmail = ({
             <Button style={button} href={link}>Lire et répondre</Button>
           </Section>
 
-          <Hr style={hr} />
-          <Text style={legal}>
-            Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
-            dans le cadre de l'intérêt légitime lié au bon fonctionnement du service de messagerie (art. 6.1.f RGPD).
-            Pour exercer vos droits : contact@guardiens.fr.
-          </Text>
-          <Text style={footer}>L'équipe {SITE_NAME}</Text>
+        <LegalFooter
+          purpose="du bon fonctionnement du service de messagerie"
+          basis="6.1.f"
+        />
         </Container>
         </Body>
         </Html>

@@ -4,6 +4,7 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
+import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -65,13 +66,13 @@ const ReviewReminderEmail = ({ firstName, sitTitle, revieweeName, sitId, isOwner
 
           <Hr style={hr} />
 
-          <Text style={legalNote}>
-            Conformément au RGPD (art. 6.1.f), cet e-mail est envoyé dans le cadre de l'intérêt légitime
-            lié au bon fonctionnement du service d'avis. Les avis publiés sur {SITE_NAME} sont modérés
-            conformément aux articles L. 111-7-2 du Code de la consommation et au décret n° 2017-1436.
-          </Text>
-
-          <Text style={footer}>L'équipe {SITE_NAME}</Text>
+        <LegalFooter
+          purpose="du bon fonctionnement du service d'avis"
+          basis="6.1.f"
+          extra={
+    "Les avis publiés sur Guardiens sont modérés conformément à l'article L. 111-7-2 du Code de la consommation."
+  }
+/>
         </Container>
         </Body>
         </Html>

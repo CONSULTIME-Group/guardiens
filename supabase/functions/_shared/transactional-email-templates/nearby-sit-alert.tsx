@@ -4,6 +4,7 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
+import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -76,17 +77,10 @@ const NearbySitAlertEmail = ({
             Voir l'annonce
           </Button>
 
-          <Hr style={hr} />
-          <Text style={legal}>
-            Vous recevez cet e-mail car vous êtes inscrit·e comme gardien·ne sur
-            {' '}{SITE_NAME} dans une zone proche de cette annonce. Vous pouvez
-            ajuster vos préférences d'alerte depuis votre espace personnel.
-          </Text>
-          <Text style={legal}>
-            {SITE_NAME} — Jérémie Martinot (SIRET 894 864 040 00015) ·
-            contact@guardiens.fr
-          </Text>
-          <Text style={footer}>À très vite, l'équipe {SITE_NAME}</Text>
+        <LegalFooter
+          purpose="du bon fonctionnement de votre alerte"
+          basis="6.1.f"
+        />
         </Container>
         </Body>
         </Html>

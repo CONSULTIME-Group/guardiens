@@ -4,6 +4,7 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
+import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -31,14 +32,13 @@ const CancellationReviewPublishedEmail = ({ targetFirstName, profileUrl }: Props
         <Button style={button} href={profileUrl || `${SITE_URL}/dashboard`}>
           Voir mon profil
         </Button>
-        <Hr style={hr} />
-        <Text style={legal}>
-          Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
-          dans le cadre de la gestion des avis (art. 6.1.f RGPD — intérêt légitime).
-          Les avis sont modérés conformément aux articles L. 111-7-2 du Code de la consommation.
-          Pour exercer vos droits : contact@guardiens.fr.
-        </Text>
-        <Text style={footer}>L'équipe {SITE_NAME}</Text>
+        <LegalFooter
+          purpose="de la gestion des avis"
+          basis="6.1.f"
+          extra={
+    "Les avis publiés sur Guardiens sont modérés conformément à l'article L. 111-7-2 du Code de la consommation."
+  }
+/>
       </Container>
       </Body>
       </Html>
