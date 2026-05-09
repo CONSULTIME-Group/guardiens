@@ -12,9 +12,12 @@ import { logSeoSnapshot } from "@/lib/seoDebugLog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ArticleRenderer, { resolveImagePath } from "@/components/articles/ArticleRenderer";
+import ArticleAuthorBio from "@/components/articles/ArticleAuthorBio";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { parseFaqFromMarkdown, buildFaqSchema } from "@/lib/parseFaq";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
+import { resolveAuthors } from "@/data/authors";
+import { trackEvent } from "@/lib/analytics";
 
 interface ArticleFull {
  id: string;
@@ -217,6 +220,32 @@ export default function ArticleDetail() {
  fetchAll();
  }, [slug]);
 
+ // CTA tracking — listen for clicks on data-article-cta links inside the rendered article
+ useEffect(() => {
+   if (!article) return;
+   const handler = (e: Event) => {
+     const target = (e.target as HTMLElement | null)?.closest?.(
+       "a[data-article-cta='true']"
+     ) as HTMLAnchorElement | null;
+     if (!target) return;
+     const ctaPosition = target.getAttribute("data-cta-position") || undefined;
+     const ctaRole = target.getAttribute("data-cta-role") || undefined;
+     const articleSlug =
+       target.getAttribute("data-article-slug") || article.slug;
+     trackEvent("cta_click", {
+       source: `article:${articleSlug}`,
+       metadata: {
+         article_slug: articleSlug,
+         cta_position: ctaPosition,
+         cta_role: ctaRole,
+         href: target.getAttribute("href"),
+       },
+     });
+   };
+   document.addEventListener("click", handler, { capture: true });
+   return () => document.removeEventListener("click", handler, { capture: true } as any);
+ }, [article]);
+
  if (loading) {
  return (
  <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
@@ -258,11 +287,19 @@ export default function ArticleDetail() {
  "url": `https://guardiens.fr/actualites/${article.slug}`,
  "datePublished": article.created_at,
  "dateModified": article.updated_at,
-...(article.cover_image_url && { "image": article.cover_image_url }),
- "author": {
- "@type": "Person",
- "name": "Jérémie Martinot"
- },
+ ...(article.cover_image_url && { "image": article.cover_image_url }),
+ "author": (() => {
+   const matched = resolveAuthors(article.author_name);
+   if (matched.length === 0) {
+     return { "@type": "Organization", "name": "Guardiens", "url": "https://guardiens.fr" };
+   }
+   const persons = matched.map((a) => ({
+     "@type": "Person",
+     "name": a.firstName,
+     "url": `https://guardiens.fr/auteurs/${a.slug}`,
+   }));
+   return persons.length === 1 ? persons[0] : persons;
+ })(),
  "publisher": {
  "@type": "Organization",
  "name": "Guardiens",
@@ -424,7 +461,10 @@ export default function ArticleDetail() {
  </div>
  )}
 
- <ArticleRenderer content={article.content} userRole={isAuthenticated ? user?.role : undefined} />
+ <ArticleRenderer content={article.content} userRole={isAuthenticated ? user?.role : undefined} slug={article.slug} />
+
+ {/* Bloc « À propos de l'auteur » — affiché si l'auteur est identifié (Jérémie / Elisa) */}
+ <ArticleAuthorBio authorName={article.author_name} />
 
  {/* CORRECTION 3 — À lire aussi (internal links) */}
  {internalLinks.length > 0 && (

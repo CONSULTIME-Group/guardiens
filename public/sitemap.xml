@@ -85,6 +85,18 @@
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/auteurs/jeremie</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/auteurs/elisa</loc>
+    <lastmod>2026-05-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/house-sitting/annecy</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>weekly</changefreq>

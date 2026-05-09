@@ -256,9 +256,25 @@ metaDescription: "Trouvez un gardien du coin pour votre maison et vos animaux. H
  path: "/mentions-legales",
  title: "Mentions légales — Éditeur et hébergeur | Guardiens",
  metaDescription: "Mentions légales de la plateforme Guardiens : éditeur, hébergeur, directeur de publication, propriété intellectuelle et coordonnées de contact.",
- h1: "Mentions légales",
- sitemapPriority: "0.3",
- changeFreq: "yearly",
+  h1: "Mentions légales",
+  sitemapPriority: "0.3",
+  changeFreq: "yearly",
+ },
+ {
+  path: "/auteurs/jeremie",
+  title: "Jérémie — Auteur Guardiens",
+  metaDescription: "Jérémie, co-fondateur de Guardiens. 5 ans de house-sitting, 37 maisons gardées, 234 animaux accompagnés. Articles écrits depuis le terrain.",
+  h1: "Jérémie",
+  sitemapPriority: "0.5",
+  changeFreq: "monthly",
+ },
+ {
+  path: "/auteurs/elisa",
+  title: "Elisa — Auteure Guardiens",
+  metaDescription: "Elisa, co-fondatrice de Guardiens. 5 ans de house-sitting à deux. Sensibilité particulière à l'expérience humaine et à l'attention portée aux animaux.",
+  h1: "Elisa",
+  sitemapPriority: "0.5",
+  changeFreq: "monthly",
  },
 ];
 

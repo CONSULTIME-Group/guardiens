@@ -13,6 +13,7 @@ import PriorityActions from "@/components/admin/seo/PriorityActions";
 import ContentToCreate, { PRIORITY_ARTICLES } from "@/components/admin/seo/ContentToCreate";
 import GSCQueriesTable from "@/components/admin/seo/GSCQueriesTable";
 import TrafficSources from "@/components/admin/seo/TrafficSources";
+import ArticleCtaPerformance from "@/components/admin/seo/ArticleCtaPerformance";
 import { useSeoData } from "@/hooks/useSeoData";
 
 function pctChange(current: number, previous: number): number | undefined {
@@ -316,6 +317,14 @@ const AdminSEO = () => {
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-foreground border-b pb-2">Contenu à créer</h2>
         <ContentToCreate />
+      </section>
+
+      {/* SECTION — Performance CTAs articles */}
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold text-foreground border-b pb-2">
+          Performance CTAs articles
+        </h2>
+        <ArticleCtaPerformance />
       </section>
 
       {/* Quick links */}

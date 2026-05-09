@@ -75,12 +75,13 @@ function resolveArticleImages(html: string): string {
 }
 
 /** Inject mid-article CTA after the 2nd <h2> */
-function injectCTA(html: string): string {
+function injectCTA(html: string, slug?: string): string {
   let h2Count = 0;
+  const slugAttr = slug ? ` data-article-slug="${slug}"` : "";
   return html.replace(/<h2/g, (match) => {
     h2Count++;
     if (h2Count === 3) {
-      return `<div class="article-cta-block"><div class="article-cta-inner"><p class="article-cta-text">Vous êtes propriétaire d'animaux ou vous aimez les animaux ?</p><div class="article-cta-buttons"><a href="/inscription" class="article-cta-btn article-cta-btn-primary">Rejoindre la communauté</a><a href="/search" class="article-cta-btn article-cta-btn-secondary">Trouver un gardien</a></div></div></div>\n${match}`;
+      return `<div class="article-cta-block"><div class="article-cta-inner"><p class="article-cta-text">Vous êtes propriétaire d'animaux ou vous aimez les animaux ?</p><div class="article-cta-buttons"><a href="/inscription?role=owner" class="article-cta-btn article-cta-btn-primary" data-article-cta="true" data-cta-position="mid" data-cta-role="owner"${slugAttr}>Rejoindre la communauté</a><a href="/inscription?role=sitter" class="article-cta-btn article-cta-btn-secondary" data-article-cta="true" data-cta-position="mid" data-cta-role="sitter"${slugAttr}>Devenir gardien</a></div></div></div>\n${match}`;
     }
     return match;
   });
@@ -141,13 +142,16 @@ function addBandedSections(html: string): string {
 }
 
 /** Add end-of-article CTA */
-function addEndCTA(html: string): string {
-  return html + `<div class="article-cta-block article-cta-end"><div class="article-cta-inner"><p class="article-cta-heading">Prêt à rejoindre la communauté ?</p><p class="article-cta-text">Créez votre profil gratuitement et rejoignez les gardiens de votre quartier.</p><div class="article-cta-buttons"><a href="/inscription" class="article-cta-btn article-cta-btn-primary">Créer mon profil</a></div></div></div>`;
+function addEndCTA(html: string, slug?: string): string {
+  const slugAttr = slug ? ` data-article-slug="${slug}"` : "";
+  return html + `<div class="article-cta-block article-cta-end"><div class="article-cta-inner"><p class="article-cta-heading">Prêt à rejoindre la communauté ?</p><p class="article-cta-text">Créez votre profil gratuitement et rejoignez les gardiens de votre quartier.</p><div class="article-cta-buttons"><a href="/inscription?role=owner" class="article-cta-btn article-cta-btn-primary" data-article-cta="true" data-cta-position="end" data-cta-role="owner"${slugAttr}>Créer mon profil propriétaire</a><a href="/inscription?role=sitter" class="article-cta-btn article-cta-btn-secondary" data-article-cta="true" data-cta-position="end" data-cta-role="sitter"${slugAttr}>Devenir gardien</a></div></div></div>`;
 }
 
 interface ArticleRendererProps {
   content: string;
   userRole?: "owner" | "sitter" | "both";
+  /** Slug de l'article — utilisé pour instrumenter les CTAs (data-article-slug). */
+  slug?: string;
 }
 
 /** Replace inscription CTAs based on user role — preserves existing attributes */
@@ -183,17 +187,17 @@ function stripLeadingH1(md: string): string {
   return md.replace(/^#\s+.+\n+/, "");
 }
 
-export default function ArticleRenderer({ content, userRole }: ArticleRendererProps) {
+export default function ArticleRenderer({ content, userRole, slug }: ArticleRendererProps) {
   const withoutH1 = stripLeadingH1(content);
   const preprocessed = transformFaqBlocks(transformFactBoxes(withoutH1));
   let html = marked.parse(preprocessed, { async: false }) as string;
-  
+
   html = resolveArticleImages(html);
-  html = injectCTA(html);
+  html = injectCTA(html, slug);
   html = addBandedSections(html);
-  html = addEndCTA(html);
+  html = addEndCTA(html, slug);
   html = adaptCTAsForRole(html, userRole);
-  
+
   return (
     <div
       className="article-rich-content"
@@ -201,3 +205,4 @@ export default function ArticleRenderer({ content, userRole }: ArticleRendererPr
     />
   );
 }
+
