@@ -540,9 +540,7 @@ const AdminNurturing = () => {
             <CardHeader>
               <CardTitle>Échecs récents</CardTitle>
               <p className="text-xs text-muted-foreground mt-1">
-                Le détail HTTP (status, body) n'est pas encore stocké en base — il est consultable
-                dans les logs de la fonction <code className="font-mono">evaluate-journeys</code>.
-                Étape 2 du chantier : ajouter une colonne <code className="font-mono">error_detail</code>.
+                Le détail HTTP (status + extrait de body) est désormais capturé pour chaque échec.
               </p>
             </CardHeader>
             <CardContent className="overflow-x-auto">
