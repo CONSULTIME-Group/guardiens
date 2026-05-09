@@ -713,6 +713,33 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* ═══════════════ SECTION 2bis — CE QUI ARRIVE EN PLUS ═══════════════ */}
+      <section className="py-24 md:py-32 bg-background">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <RevealSection>
+            <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
+              Ce qu'on n'écrit jamais dans une annonce
+            </span>
+            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-6">
+              Bien plus qu'un échange de services.
+            </h2>
+            <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/75 mb-6">
+              Garder une maison, ce n'est pas rendre service à un propriétaire.
+              Confier ses clés, ce n'est pas céder un toit en échange d'une garde.
+            </p>
+            <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/75 mb-6">
+              C'est, surtout, une façon de vivre des expériences qu'on n'aurait jamais cherchées :
+              découvrir une région, une autre manière d'habiter, une histoire de famille,
+              un coin de France qu'on n'aurait jamais visité, des gens qu'on n'aurait jamais croisés.
+            </p>
+            <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/85 font-medium">
+              On apprend, on découvre, on s'attache —
+              sans aller le chercher. Juste en laissant la place à ce qui peut arriver.
+            </p>
+          </RevealSection>
+        </div>
+      </section>
+
       {/* ═══════════════ SECTION 3 — COMMENT ÇA MARCHE ═══════════════ */}
       <section id="how-it-works" className="py-24 md:py-32 bg-muted/30">
         <div className="max-w-5xl mx-auto px-6">
