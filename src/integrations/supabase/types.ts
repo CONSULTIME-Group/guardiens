@@ -4209,6 +4209,33 @@ export type Database = {
           sitter_first_name: string
         }[]
       }
+      admin_get_signup_confirmation_stats: {
+        Args: { p_days?: number }
+        Returns: {
+          avg_delay_seconds: number
+          confirmation_rate: number
+          median_delay_seconds: number
+          p90_delay_seconds: number
+          total_confirmed: number
+          total_failed: number
+          total_pending: number
+          total_sent: number
+        }[]
+      }
+      admin_get_signup_confirmations: {
+        Args: { p_days?: number }
+        Returns: {
+          confirmed_at: string
+          delay_seconds: number
+          error_message: string
+          message_id: string
+          recipient_email: string
+          sent_at: string
+          status: string
+          user_created_at: string
+          user_id: string
+        }[]
+      }
       admin_get_sit_applications: {
         Args: { p_sit_id: string }
         Returns: {

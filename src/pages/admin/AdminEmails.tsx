@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Mail, Clock, FileText, Send, ShieldOff, History, Settings2, RefreshCw, AlertCircle, Ban, Eye, SendHorizonal, Pencil, Info } from "lucide-react";
+import { Mail, Clock, FileText, Send, ShieldOff, History, Settings2, RefreshCw, AlertCircle, Ban, Eye, SendHorizonal, Pencil, Info, CheckCircle2 } from "lucide-react";
+import { ConfirmationsTab } from "./_components/ConfirmationsTab";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -603,9 +604,12 @@ const AdminEmails = () => {
       <h1 className="font-body text-2xl font-bold">Emails & Communications</h1>
 
       <Tabs defaultValue="templates" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="templates" className="text-xs gap-1">
             <FileText className="h-3.5 w-3.5" /> Templates
+          </TabsTrigger>
+          <TabsTrigger value="confirmations" className="text-xs gap-1">
+            <CheckCircle2 className="h-3.5 w-3.5" /> Confirmations
           </TabsTrigger>
           <TabsTrigger value="logs" className="text-xs gap-1">
             <History className="h-3.5 w-3.5" /> Logs
@@ -619,6 +623,7 @@ const AdminEmails = () => {
         </TabsList>
 
         <TabsContent value="templates"><TemplatesTab /></TabsContent>
+        <TabsContent value="confirmations"><ConfirmationsTab /></TabsContent>
         <TabsContent value="logs"><LogsTab /></TabsContent>
         <TabsContent value="suppressions"><SuppressionsTab /></TabsContent>
         <TabsContent value="config"><ConfigTab /></TabsContent>
