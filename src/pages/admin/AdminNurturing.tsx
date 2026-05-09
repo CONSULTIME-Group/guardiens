@@ -557,6 +557,7 @@ const AdminNurturing = () => {
                       <TableHead>Step</TableHead>
                       <TableHead>Template</TableHead>
                       <TableHead>Raison</TableHead>
+                      <TableHead>Détail HTTP</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -570,6 +571,9 @@ const AdminNurturing = () => {
                         <TableCell className="font-mono text-xs">{l.template_name}</TableCell>
                         <TableCell>
                           <Badge variant="destructive">{l.reason ?? "unknown"}</Badge>
+                        </TableCell>
+                        <TableCell className="font-mono text-[11px] max-w-md truncate" title={l.error_detail?.body_excerpt ?? ""}>
+                          {l.error_detail?.status ? `${l.error_detail.status} · ${l.error_detail.body_excerpt?.slice(0, 80) ?? ""}` : "—"}
                         </TableCell>
                       </TableRow>
                     ))}
