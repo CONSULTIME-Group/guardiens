@@ -371,9 +371,20 @@ const AdminNurturing = () => {
 
           <div className="grid gap-4 md:grid-cols-4">
             <StatCard label="Parcours créés (période)" value={journeyStats.total} />
-            <StatCard label="Actifs" value={journeyStats.active} />
-            <StatCard label="Complétés" value={journeyStats.completed} tone="ok" />
+            <StatCard label="Actifs" value={journeyStats.active} tone="ok" />
             <StatCard label="Sortis (objectif atteint)" value={journeyStats.exited} />
+            <StatCard
+              label="Cron evaluate-journeys"
+              value={cronHealth.label}
+              tone={cronHealth.tone}
+              hint={
+                cronHealth.ageMin === null
+                  ? "Aucun log trouvé"
+                  : lastRunSent
+                    ? "Dernier log = envoi réussi"
+                    : "Dernier log = échec ou sortie"
+              }
+            />
           </div>
 
           <Card>
