@@ -564,6 +564,7 @@ const AdminNurturing = () => {
         </CardContent>
       </Card>
 
+      {loading ? (
         <div className="grid gap-4 md:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-28" />
