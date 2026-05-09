@@ -27,19 +27,19 @@ const RelancePieceIdentiteEmail = ({ firstName }: RelancePieceIdentiteProps) => 
             Nous avons bien reçu votre selfie pour la vérification d'identité sur <strong>{SITE_NAME}</strong>.
             Merci&nbsp;! Il manque cependant un dernier élément pour que notre équipe puisse traiter votre demande&nbsp;:
             la <strong>pièce d'identité officielle</strong> (carte d'identité, passeport ou titre de séjour).
-          </Text>
+</Text>
 
           <Section style={highlightBox}>
             <Text style={highlightTitle}>Vérification en attente</Text>
             <Text style={highlightText}>
               Tant que les deux fichiers (selfie + pièce d'identité) ne sont pas déposés ensemble,
               votre dossier ne peut pas être soumis à notre équipe et reste invisible côté modération.
-            </Text>
-          </Section>
+</Text>
+</Section>
 
           <Text style={text}>
             <strong>2 minutes suffisent</strong> pour finaliser&nbsp;:
-          </Text>
+</Text>
 
           <Text style={listItem}>1. Rendez-vous dans vos paramètres de compte</Text>
           <Text style={listItem}>2. Section « Vérification d'identité »</Text>
@@ -48,30 +48,30 @@ const RelancePieceIdentiteEmail = ({ firstName }: RelancePieceIdentiteProps) => 
           <Section style={ctaSection}>
             <Button style={button} href={`${SITE_URL}/settings?tab=identity`}>
               Finaliser ma vérification
-            </Button>
-          </Section>
+</Button>
+</Section>
 
           <Text style={subtext}>
             Une fois la pièce déposée, notre équipe valide votre dossier sous 24 à 48&nbsp;h ouvrées
             et vous recevez un email de confirmation.
-          </Text>
+</Text>
 
           <Hr style={hr} />
 
           <Text style={text}>
             Une question ou un blocage ? Répondez simplement à cet email, nous lisons tout.
-          </Text>
+</Text>
 
           <Text style={legal}>
             Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
             dans le cadre de l'intérêt légitime lié au bon fonctionnement de votre compte (art. 6.1.f RGPD).
             Pour exercer vos droits (accès, rectification, suppression) : contact@guardiens.fr.
-          </Text>
+</Text>
 
           <Text style={footer}>À très vite sur {SITE_NAME}</Text>
-        </Container>
-      </Body>
-    </Html>
+</Container>
+</Body>
+</Html>
   )
 }
 

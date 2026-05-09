@@ -25,26 +25,26 @@ const CancellationByOwnerEmail = ({ cancellerFirstName, sitTitle, startDate, rea
         <Text style={text}>
           <strong>{cancellerFirstName || 'Le propriétaire'}</strong> a annulé la garde
           {sitTitle ? ` "${sitTitle}"` : ''}{startDate ? ` prévue le ${startDate}` : ''}.
-        </Text>
+</Text>
         <Text style={text}>
           <strong>Raison :</strong> {reason || 'Non précisée'}
-        </Text>
+</Text>
         <Text style={text}>
           Un avis d'annulation sera soumis à modération puis publié sur son profil. Vous pourrez y répondre dans les 7 jours.
-        </Text>
+</Text>
         <Button style={button} href={`${SITE_URL}/search`}>
           Trouver une autre garde
-        </Button>
+</Button>
         <Hr style={hr} />
         <Text style={legal}>
           Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
           dans le cadre du suivi de votre garde (art. 6.1.b RGPD — exécution du contrat).
           Pour exercer vos droits : contact@guardiens.fr.
-        </Text>
-        <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
-      </Container>
-    </Body>
-  </Html>
+</Text>
+        <Text style={footer}>L'équipe {SITE_NAME}</Text>
+</Container>
+</Body>
+</Html>
 )
 
 export const template = {

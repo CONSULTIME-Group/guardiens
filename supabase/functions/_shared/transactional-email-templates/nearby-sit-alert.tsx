@@ -37,57 +37,57 @@ const NearbySitAlertEmail = ({
       <BrandedHead />
       <Preview>
         Une nouvelle annonce près de chez vous{city ? ` à ${city}` : ''}
-      </Preview>
+</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Heading style={h1}>Une annonce près de chez vous 🐾</Heading>
+          <Heading style={h1}>Une annonce près de chez vous</Heading>
 
           <Text style={text}>
             Bonjour{sitterFirstName ? ` ${sitterFirstName}` : ''},
-          </Text>
+</Text>
 
           <Text style={text}>
             Une nouvelle garde vient d'être publiée dans votre secteur
             {city ? <> à <strong>{city}</strong></> : null}
             {typeof distanceKm === 'number' ? <> (à environ {distanceKm} km de chez vous)</> : null}.
-          </Text>
+</Text>
 
           <Section style={card}>
             {sitTitle ? <Text style={cardTitle}>{sitTitle}</Text> : null}
             {ownerFirstName ? (
-              <Text style={cardLine}>👤 Proposée par {ownerFirstName}</Text>
+              <Text style={cardLine}>Proposée par {ownerFirstName}</Text>
             ) : null}
             {animalsSummary ? (
-              <Text style={cardLine}>🐾 {animalsSummary}</Text>
+              <Text style={cardLine}>{animalsSummary}</Text>
             ) : null}
             {startDate && endDate ? (
-              <Text style={cardLine}>📅 Du {startDate} au {endDate}</Text>
+              <Text style={cardLine}>Du {startDate} au {endDate}</Text>
             ) : null}
-          </Section>
+</Section>
 
           <Text style={text}>
             Le secteur compte encore peu de gardiens disponibles : votre profil
             peut vraiment faire la différence pour cette famille.
-          </Text>
+</Text>
 
           <Button style={button} href={ctaHref}>
             Voir l'annonce
-          </Button>
+</Button>
 
           <Hr style={hr} />
           <Text style={legal}>
             Vous recevez cet e-mail car vous êtes inscrit·e comme gardien·ne sur
             {' '}{SITE_NAME} dans une zone proche de cette annonce. Vous pouvez
             ajuster vos préférences d'alerte depuis votre espace personnel.
-          </Text>
+</Text>
           <Text style={legal}>
             {SITE_NAME} — Jérémie Martinot (SIRET 894 864 040 00015) ·
             contact@guardiens.fr
-          </Text>
-          <Text style={footer}>À très vite, l'équipe {SITE_NAME} 🐾</Text>
-        </Container>
-      </Body>
-    </Html>
+</Text>
+          <Text style={footer}>À très vite, l'équipe {SITE_NAME}</Text>
+</Container>
+</Body>
+</Html>
   )
 }
 

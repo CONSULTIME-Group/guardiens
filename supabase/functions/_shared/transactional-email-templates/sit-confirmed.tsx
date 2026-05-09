@@ -30,60 +30,60 @@ const SitConfirmedEmail = ({
     <Preview>Garde confirmée — votre gardien est sélectionné</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Garde confirmée 🎉</Heading>
+        <Heading style={h1}>Garde confirmée</Heading>
         <Text style={text}>
           Vous avez sélectionné <strong>{sitterFirstName || 'un gardien'}</strong> pour
           {sitTitle ? ` votre garde « ${sitTitle} »` : ' votre garde'}.
           Tout est en place !
-        </Text>
+</Text>
 
         <Section style={card}>
           {petNames && (
             <Text style={cardLine}>
               <strong>Animaux :</strong> {petNames}
-            </Text>
+</Text>
           )}
           {(startDate || endDate) && (
             <Text style={cardLine}>
               <strong>Dates :</strong> {startDate || '—'} → {endDate || '—'}
-            </Text>
+</Text>
           )}
           <Text style={cardLine}>
             <strong>Gardien :</strong> {sitterFirstName || '—'}
-          </Text>
-        </Section>
+</Text>
+</Section>
 
         <Text style={text}>
           <strong>Prochaines étapes :</strong>
-        </Text>
+</Text>
         <Text style={text}>
           • Échangez avec votre gardien dans la messagerie pour préparer la garde.<br />
           • Complétez ou partagez votre <strong>guide de la maison</strong> (accès, codes, contacts utiles).<br />
           • Pensez à signer l'<strong>accord de garde</strong> ensemble pour formaliser les engagements.
-        </Text>
+</Text>
 
         <Button style={button} href={`${SITE_URL}/sits/${sitId || ''}`}>
           Voir la garde
-        </Button>
+</Button>
 
         <Hr style={hr} />
         <Text style={legal}>
           Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
           dans le cadre de la confirmation de votre garde (art. 6.1.b RGPD — exécution du contrat).
           Pour exercer vos droits : contact@guardiens.fr.
-        </Text>
-        <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
-      </Container>
-    </Body>
-  </Html>
+</Text>
+        <Text style={footer}>L'équipe {SITE_NAME}</Text>
+</Container>
+</Body>
+</Html>
 )
 
 export const template = {
   component: SitConfirmedEmail,
   subject: (data: Record<string, any>) =>
     data?.sitterFirstName
-      ? `Garde confirmée avec ${data.sitterFirstName} 🎉`
-      : 'Garde confirmée 🎉',
+      ? `Garde confirmée avec ${data.sitterFirstName}`
+      : 'Garde confirmée',
   displayName: 'Garde confirmée (propriétaire)',
   previewData: {
     sitTitle: 'Garde Mistigri & Pacha',

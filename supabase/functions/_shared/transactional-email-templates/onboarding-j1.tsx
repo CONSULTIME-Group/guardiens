@@ -25,20 +25,20 @@ const OnboardingJ1Email = ({ firstName }: OnboardingJ1Props) => {
 
           <Text style={text}>
             Vous vous êtes inscrit(e) sur {SITE_NAME} hier — bienvenue dans la communauté !
-          </Text>
+</Text>
 
           <Text style={text}>
             Pour accéder aux annonces de garde et aux petites missions près de chez vous
             — ou ailleurs en France si vous élargissez votre rayon —,
             votre profil doit être complété à 60 % minimum. Il vous manque peut-être juste
             une photo et une courte bio.
-          </Text>
+</Text>
 
           <Section style={ctaSection}>
             <Button style={button} href={`${SITE_URL}/profile`}>
               Compléter mon profil
-            </Button>
-          </Section>
+</Button>
+</Section>
 
           <Hr style={hr} />
 
@@ -46,12 +46,12 @@ const OnboardingJ1Email = ({ firstName }: OnboardingJ1Props) => {
             Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
             dans le cadre de l'intérêt légitime lié au bon fonctionnement de votre compte (art. 6.1.f RGPD).
             Pour exercer vos droits (accès, rectification, suppression) : contact@guardiens.fr.
-          </Text>
+</Text>
 
-          <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
-        </Container>
-      </Body>
-    </Html>
+          <Text style={footer}>L'équipe {SITE_NAME}</Text>
+</Container>
+</Body>
+</Html>
   )
 }
 

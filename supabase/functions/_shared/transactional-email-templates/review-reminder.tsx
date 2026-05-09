@@ -32,7 +32,7 @@ const ReviewReminderEmail = ({ firstName, sitTitle, revieweeName, sitId, isOwner
           {/* Stars header */}
           <Section style={starsSection}>
             <Text style={starsText}>⭐⭐⭐⭐⭐</Text>
-          </Section>
+</Section>
 
           <Heading style={h1}>Comment s'est passée la garde ?</Heading>
 
@@ -41,25 +41,25 @@ const ReviewReminderEmail = ({ firstName, sitTitle, revieweeName, sitId, isOwner
           <Text style={text}>
             Votre garde{sitTitle ? ` « ${sitTitle} »` : ''} est terminée !
             Prenez 2 minutes pour partager votre expérience avec {who}.
-          </Text>
+</Text>
 
           <Section style={benefitsBox}>
             <Text style={benefitTitle}>Pourquoi laisser un avis ?</Text>
-            <Text style={benefitItem}>🤝 Aidez la communauté à faire les bons choix</Text>
-            <Text style={benefitItem}>🏆 Valorisez {who} pour son investissement</Text>
-            <Text style={benefitItem}>📈 Améliorez votre propre score de confiance</Text>
-          </Section>
+            <Text style={benefitItem}>Aidez la communauté à faire les bons choix</Text>
+            <Text style={benefitItem}>Valorisez {who} pour son investissement</Text>
+            <Text style={benefitItem}>Améliorez votre propre score de confiance</Text>
+</Section>
 
           <Section style={ctaSection}>
             <Button style={button} href={reviewUrl}>
               Laisser mon avis
-            </Button>
-          </Section>
+</Button>
+</Section>
 
           <Text style={note}>
             Votre avis sera publié une fois que les deux parties auront partagé le leur.
-            C'est plus juste pour tout le monde ! ✌️
-          </Text>
+            C'est plus juste pour tout le monde !
+</Text>
 
           <Hr style={hr} />
 
@@ -67,12 +67,12 @@ const ReviewReminderEmail = ({ firstName, sitTitle, revieweeName, sitId, isOwner
             Conformément au RGPD (art. 6.1.f), cet e-mail est envoyé dans le cadre de l'intérêt légitime
             lié au bon fonctionnement du service d'avis. Les avis publiés sur {SITE_NAME} sont modérés
             conformément aux articles L. 111-7-2 du Code de la consommation et au décret n° 2017-1436.
-          </Text>
+</Text>
 
-          <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
-        </Container>
-      </Body>
-    </Html>
+          <Text style={footer}>L'équipe {SITE_NAME}</Text>
+</Container>
+</Body>
+</Html>
   )
 }
 

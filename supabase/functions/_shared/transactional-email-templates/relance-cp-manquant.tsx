@@ -24,28 +24,28 @@ const RelanceCpManquantEmail = ({ prenom, cta_url }: RelanceCpProps) => {
         <Container style={container}>
           <Heading style={h1}>
             {name ? `Bonjour ${name},` : 'Bonjour,'}
-          </Heading>
+</Heading>
 
           <Text style={text}>
             Bienvenue chez {SITE_NAME}. Pour voir les annonces de garde près de
             chez vous et apparaître dans les recherches des propriétaires, il manque
             une information essentielle : votre code postal.
-          </Text>
+</Text>
 
           <Text style={text}>
             Cela prend 30 secondes.
-          </Text>
+</Text>
 
           <Section style={ctaSection}>
             <Button style={button} href={link}>
               Ajouter mon code postal
-            </Button>
-          </Section>
+</Button>
+</Section>
 
           <Text style={textMuted}>
             Sans cette information, votre profil n'est pas visible et vous
             ne recevrez pas de notifications d'annonces.
-          </Text>
+</Text>
 
           <Hr style={hr} />
 
@@ -53,12 +53,12 @@ const RelanceCpManquantEmail = ({ prenom, cta_url }: RelanceCpProps) => {
             Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
             dans le cadre de l'intérêt légitime lié au bon fonctionnement de votre compte (art. 6.1.f RGPD).
             Pour exercer vos droits : contact@guardiens.fr.
-          </Text>
+</Text>
 
-          <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
-        </Container>
-      </Body>
-    </Html>
+          <Text style={footer}>L'équipe {SITE_NAME}</Text>
+</Container>
+</Body>
+</Html>
   )
 }
 

@@ -19,27 +19,27 @@ const NewApplicationEmail = ({ sitterFirstName, sitTitle }: Props) => (
     <Preview>{sitterFirstName || 'Un gardien'} a postulé pour votre garde</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Nouvelle candidature 🎉</Heading>
+        <Heading style={h1}>Nouvelle candidature</Heading>
         <Text style={text}>
           <strong>{sitterFirstName || 'Un gardien'}</strong> a postulé pour votre garde
           {sitTitle ? ` "${sitTitle}"` : ''}.
-        </Text>
+</Text>
         <Text style={text}>
           Consultez sa candidature et son profil pour décider si c'est le bon match !
-        </Text>
+</Text>
         <Button style={button} href={`${SITE_URL}/dashboard`}>
           Voir la candidature
-        </Button>
+</Button>
         <Hr style={hr} />
         <Text style={legal}>
           Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
           dans le cadre du fonctionnement de votre annonce (art. 6.1.b RGPD — exécution du contrat).
           Pour exercer vos droits : contact@guardiens.fr.
-        </Text>
-        <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
-      </Container>
-    </Body>
-  </Html>
+</Text>
+        <Text style={footer}>L'équipe {SITE_NAME}</Text>
+</Container>
+</Body>
+</Html>
 )
 
 export const template = {

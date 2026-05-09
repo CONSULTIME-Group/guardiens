@@ -22,20 +22,20 @@ const CancellationResponsePublishedEmail = ({ responderFirstName, profileUrl }: 
         <Heading style={h1}>Réponse à votre avis</Heading>
         <Text style={text}>
           <strong>{responderFirstName || 'Un membre'}</strong> a répondu à votre avis d'annulation. La réponse a été validée et est désormais visible sur son profil.
-        </Text>
+</Text>
         <Button style={button} href={profileUrl || `${SITE_URL}/dashboard`}>
           Voir la réponse
-        </Button>
+</Button>
         <Hr style={hr} />
         <Text style={legal}>
           Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
           dans le cadre de la gestion des avis (art. 6.1.f RGPD — intérêt légitime).
           Pour exercer vos droits : contact@guardiens.fr.
-        </Text>
-        <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
-      </Container>
-    </Body>
-  </Html>
+</Text>
+        <Text style={footer}>L'équipe {SITE_NAME}</Text>
+</Container>
+</Body>
+</Html>
 )
 
 export const template = {

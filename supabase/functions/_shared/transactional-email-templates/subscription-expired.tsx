@@ -17,23 +17,23 @@ const SubscriptionExpiredEmail = () => (
         <Heading style={h1}>Abonnement expiré</Heading>
         <Text style={text}>
           Votre abonnement {SITE_NAME} a expiré. Vous n'avez plus accès aux fonctionnalités premium.
-        </Text>
+</Text>
         <Text style={text}>
           Renouvelez votre abonnement pour retrouver l'accès à la messagerie et aux candidatures.
-        </Text>
+</Text>
         <Button style={button} href={`${SITE_URL}/mon-abonnement`}>
           Renouveler mon abonnement
-        </Button>
+</Button>
         <Hr style={hr} />
         <Text style={legal}>
           Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
           dans le cadre de la gestion de votre abonnement (art. 6.1.b RGPD — exécution du contrat).
           Pour exercer vos droits : contact@guardiens.fr.
-        </Text>
-        <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
-      </Container>
-    </Body>
-  </Html>
+</Text>
+        <Text style={footer}>L'équipe {SITE_NAME}</Text>
+</Container>
+</Body>
+</Html>
 )
 
 export const template = {

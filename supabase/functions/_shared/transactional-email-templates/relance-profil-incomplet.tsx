@@ -26,51 +26,51 @@ const RelanceProfilIncompletEmail = ({ firstName }: RelanceProfilIncompletProps)
           <Text style={text}>
             Vous vous êtes inscrit(e) sur <strong>{SITE_NAME}</strong> il y a quelques jours,
             et nous remarquons que votre profil n'a pas encore été complété.
-          </Text>
+</Text>
 
           <Section style={highlightBox}>
-            <Text style={highlightTitle}>⚠️ Votre profil est actuellement invisible</Text>
+            <Text style={highlightTitle}>Votre profil est actuellement invisible</Text>
             <Text style={highlightText}>
               Tant que votre profil n'atteint pas <strong>60 % de complétion</strong>, il n'apparaît
               pas dans les recherches et vous ne pouvez ni candidater à une garde, ni proposer la vôtre.
-            </Text>
-          </Section>
+</Text>
+</Section>
 
           <Text style={text}>
             <strong>3 informations suffisent</strong> pour débloquer votre profil :
-          </Text>
+</Text>
 
-          <Text style={listItem}>✅ Une photo de profil</Text>
-          <Text style={listItem}>✅ Votre code postal</Text>
-          <Text style={listItem}>✅ Une courte présentation (3 lignes)</Text>
+          <Text style={listItem}>Une photo de profil</Text>
+          <Text style={listItem}>Votre code postal</Text>
+          <Text style={listItem}>Une courte présentation (3 lignes)</Text>
 
           <Section style={ctaSection}>
             <Button style={button} href={`${SITE_URL}/profile`}>
               Compléter mon profil maintenant
-            </Button>
-          </Section>
+</Button>
+</Section>
 
           <Text style={subtext}>
             ⏱ Temps estimé : 3 minutes — et votre profil rejoint les centaines de membres
             visibles dans votre région.
-          </Text>
+</Text>
 
           <Hr style={hr} />
 
           <Text style={text}>
             Une question ou un blocage ? Répondez simplement à cet email, nous lisons tout.
-          </Text>
+</Text>
 
           <Text style={legal}>
             Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
             dans le cadre de l'intérêt légitime lié au bon fonctionnement de votre compte (art. 6.1.f RGPD).
             Pour exercer vos droits (accès, rectification, suppression) : contact@guardiens.fr.
-          </Text>
+</Text>
 
-          <Text style={footer}>À très vite sur {SITE_NAME} 🐾</Text>
-        </Container>
-      </Body>
-    </Html>
+          <Text style={footer}>À très vite sur {SITE_NAME}</Text>
+</Container>
+</Body>
+</Html>
   )
 }
 
