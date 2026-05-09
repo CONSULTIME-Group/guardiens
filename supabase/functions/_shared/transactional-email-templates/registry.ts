@@ -41,6 +41,7 @@ import { template as reactivationD30 } from './reactivation-d30.tsx'
 import { template as sitterEncourageCandidature } from './sitter-encourage-candidature.tsx'
 import { template as discoverMutualAid1 } from './discover-mutual-aid-1.tsx'
 import { template as discoverMutualAid2 } from './discover-mutual-aid-2.tsx'
+import { template as discoverMutualAid0 } from './discover-mutual-aid-0.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'nearby-sit-alert': nearbySitAlert,
