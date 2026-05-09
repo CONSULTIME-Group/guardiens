@@ -529,16 +529,16 @@ const Pricing = () => {
  Gratuite pour tous
  </span>
  </div>
- <p className="text-sm md:text-base font-body text-foreground/70 leading-relaxed mb-4">
- Les petites missions n'ont pas besoin d'un animal pour exister. Nadine demande un
- coup de main pour ramasser ses légumes ; Jacques passe une heure dans son jardin
- et repart avec un plat maison. Aucune garde, aucune carte bancaire, aucune
- commission — juste un échange entre gens du coin.
- </p>
- <p className="text-sm font-body text-foreground/55 italic mb-5">
- Cours de cuisine, arrosage de plantes, montage d'un meuble, prêt d'une perceuse,
- trajet partagé jusqu'à la gare : tout passe par l'entraide, sans abonnement requis.
- </p>
+  <p className="text-sm md:text-base font-body text-foreground/70 leading-relaxed mb-4">
+  Les petites missions n'ont pas besoin d'animaux pour exister. Nadine cherche un
+  coup de main pour ramasser ses légumes. Jacques passe une heure dans son jardin
+  et repart avec un plat maison. Aucune garde, aucune carte bancaire, aucune
+  commission — juste un échange entre gens du coin.
+  </p>
+  <p className="text-sm font-body text-foreground/55 italic mb-5">
+  Cours de cuisine, arrosage de plantes, montage de meuble, prêt d'une perceuse,
+  trajet partagé jusqu'à la gare : tout passe par l'entraide, sans abonnement.
+  </p>
  <Link
  to="/petites-missions"
  className="inline-flex items-center gap-2 text-sm font-body font-medium text-primary hover:underline"
