@@ -1201,13 +1201,13 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 9 — GUIDES + VILLES (fusion SEO) ═══════════════ */}
-      <section className="py-24 md:py-32 bg-background">
+      <section id="guides-villes" className="py-24 md:py-32 bg-background scroll-mt-24">
         <div className="max-w-6xl mx-auto px-6">
           <RevealSection className="text-center mb-14">
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
               Guides &amp; villes
             </span>
-            <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug mb-4">
+            <h2 id="house-sitting-pres-de-chez-vous" className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug mb-4 scroll-mt-24">
               House-sitting près de chez vous.
             </h2>
             <p className="text-lg font-body text-foreground/70 max-w-2xl mx-auto">
