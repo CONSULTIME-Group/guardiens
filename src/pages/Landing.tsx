@@ -918,9 +918,9 @@ const Landing = () => {
 
               <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">04</p>
-                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Périmètre libre, de 5 km à toute la France</h3>
+                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">De votre rue à l'autre bout de la France</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Hyper-local pour un dépannage, élargi pour découvrir une autre région : c'est vous qui décidez jusqu'où vous voulez aller.
+                  Hyper-local pour un dépannage, élargi pour découvrir une autre région : c'est vous qui décidez jusqu'où vous voulez aller — et chaque garde devient une porte qui s'ouvre.
                 </p>
               </article>
             </RevealOnScroll>
