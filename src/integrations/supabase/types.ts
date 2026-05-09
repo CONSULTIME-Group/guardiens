@@ -893,6 +893,33 @@ export type Database = {
         }
         Relationships: []
       }
+      email_preferences: {
+        Row: {
+          alert_emails: boolean
+          created_at: string
+          digest_emails: boolean
+          product_emails: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          alert_emails?: boolean
+          created_at?: string
+          digest_emails?: boolean
+          product_emails?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          alert_emails?: boolean
+          created_at?: string
+          digest_emails?: boolean
+          product_emails?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           bounced_at: string | null
@@ -4444,6 +4471,15 @@ export type Database = {
           canonical_user_id: string
         }[]
       }
+      get_email_preferences_by_email: {
+        Args: { p_email: string }
+        Returns: {
+          alert_emails: boolean
+          digest_emails: boolean
+          product_emails: boolean
+          user_id: string
+        }[]
+      }
       get_garde_environments: {
         Args: { p_garde_id: string }
         Returns: string[]
@@ -4583,7 +4619,20 @@ export type Database = {
         }
         Returns: undefined
       }
+      set_email_preferences_by_token: {
+        Args: {
+          p_alert: boolean
+          p_digest: boolean
+          p_product: boolean
+          p_token: string
+        }
+        Returns: boolean
+      }
       slugify_city: { Args: { input: string }; Returns: string }
+      upsert_my_email_preferences: {
+        Args: { p_alert: boolean; p_digest: boolean; p_product: boolean }
+        Returns: undefined
+      }
     }
     Enums: {
       activity_level: "calm" | "moderate" | "sportive"
