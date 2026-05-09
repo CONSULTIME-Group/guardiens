@@ -208,8 +208,12 @@ Deno.serve(async (req) => {
         try {
           const okBody = await sendRes.json()
           messageId = typeof okBody?.messageId === 'string' ? okBody.messageId : null
-          // Distinguish a real send from an idempotent/suppressed/skipped 200 response
-          if (okBody?.skipped === true || okBody?.sent === false) {
+          // Distinguish a real send from an idempotent/suppressed/blocked 200 response
+          const notReallySent =
+            okBody?.skipped === true ||
+            okBody?.sent === false ||
+            okBody?.success === false
+          if (notReallySent) {
             actuallySent = false
             reason = okBody?.reason ? `skipped_${okBody.reason}` : 'skipped'
           }
