@@ -145,6 +145,22 @@ const Register = () => {
  return () => clearInterval(t);
  }, [resendCooldown]);
 
+ // Persist email entre étapes / refresh (préserve le brouillon en cas d'abandon)
+ useEffect(() => {
+  try {
+   if (email) sessionStorage.setItem("guardiens_signup_email", email);
+   else sessionStorage.removeItem("guardiens_signup_email");
+  } catch {}
+ }, [email]);
+
+ // Compteur ETA décroissant à l'étape 2 (rassure : « plus que X secondes »)
+ useEffect(() => {
+  if (step !== 2) return;
+  setEtaSeconds(25);
+  const t = setInterval(() => setEtaSeconds((s) => (s > 0 ? s - 1 : 0)), 1000);
+  return () => clearInterval(t);
+ }, [step]);
+
  // Charge le nombre d'inscrits pour preuve sociale
  useEffect(() => {
  let cancelled = false;
