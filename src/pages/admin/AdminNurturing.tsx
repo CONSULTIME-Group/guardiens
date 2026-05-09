@@ -1135,6 +1135,15 @@ const AdminNurturing = () => {
           </Card>
         </>
       )}
+      {recipientsDialog && (
+        <SequenceRecipientsDialog
+          open={!!recipientsDialog}
+          onOpenChange={(v) => !v && setRecipientsDialog(null)}
+          sequenceKey={recipientsDialog.key}
+          sequenceLabel={recipientsDialog.label}
+          sinceIso={sinceIso}
+        />
+      )}
     </div>
   );
 };
