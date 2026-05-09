@@ -77,7 +77,7 @@ const RelancePieceIdentiteEmail = ({ firstName }: RelancePieceIdentiteProps) => 
 
 export const template = {
   component: RelancePieceIdentiteEmail,
-  subject: 'Finalisez votre vérification d\'identité sur Guardiens',
+  subject: 'Finalisez votre vérification d’identité — Guardiens',
   displayName: 'Relance pièce d\'identité manquante',
   previewData: { firstName: 'Julie' },
 } satisfies TemplateEntry

@@ -42,7 +42,7 @@ const MissionResponseEmail = ({ responderFirstName, missionTitle }: Props) => (
 export const template = {
   component: MissionResponseEmail,
   subject: (data: Record<string, any>) =>
-    `${data.responderFirstName || 'Un membre'} a répondu à votre mission`,
+    `${data.responderFirstName || 'Un membre'} a répondu à votre mission — Guardiens`,
   displayName: 'Petite mission — réponse reçue',
   previewData: { responderFirstName: 'Sophie', missionTitle: 'Promenade chien dimanche' },
 } satisfies TemplateEntry

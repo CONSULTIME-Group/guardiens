@@ -41,7 +41,7 @@ const ApplicationAcceptedEmail = ({ sitTitle, ownerFirstName }: Props) => (
 
 export const template = {
   component: ApplicationAcceptedEmail,
-  subject: 'Bonne nouvelle — votre candidature est acceptée !',
+  subject: 'Votre candidature est acceptée — Guardiens',
   displayName: 'Candidature acceptée',
   previewData: { sitTitle: 'Garde chat Paris 11e', ownerFirstName: 'Julie' },
 } satisfies TemplateEntry

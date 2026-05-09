@@ -57,7 +57,7 @@ const OnboardingJ1Email = ({ firstName }: OnboardingJ1Props) => {
 
 export const template = {
   component: OnboardingJ1Email,
-  subject: 'Votre profil Guardiens vous attend — 5 minutes suffisent',
+  subject: 'Votre profil vous attend — Guardiens',
   displayName: 'Onboarding J+1 — Compléter le profil',
   previewData: { firstName: 'Marie' },
 } satisfies TemplateEntry

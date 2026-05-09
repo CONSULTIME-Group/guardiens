@@ -187,7 +187,7 @@ const ConseilsPublicationEmail = ({
 
 export const template = {
   component: ConseilsPublicationEmail,
-  subject: 'Votre annonce est en ligne — quelques conseils pour la rendre irrésistible',
+  subject: 'Votre annonce est en ligne — conseils pour la rendre irrésistible — Guardiens',
   displayName: 'Conseils publication annonce (J+30min)',
   previewData: {
     firstName: 'Patricia',
