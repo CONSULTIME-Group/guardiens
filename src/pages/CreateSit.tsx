@@ -150,6 +150,7 @@ const CreateSit = () => {
       }
 
       setProfileCompletion(profileRes.data?.profile_completion || 0);
+      setOwnerCity(profileRes.data?.city || "");
       setOwnerPhotos((galleryRes.data || []).map((g: any) => g.photo_url));
 
       // Pre-fill from previous sit if republishing
