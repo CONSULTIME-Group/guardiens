@@ -738,11 +738,26 @@ const CreateSit = () => {
 
       {/* CORRECTION 6 — Publish button */}
       <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-12 px-4 shrink-0"
+            onClick={async () => {
+              const id = await saveDraft();
+              if (id) {
+                toast({ title: "Brouillon enregistré", description: "Vous pourrez le reprendre depuis « Mes gardes »." });
+                navigate("/sits?tab=drafts");
+              }
+            }}
+            disabled={savingDraft || !property}
+          >
+            {savingDraft ? "Sauvegarde…" : "Enregistrer & quitter"}
+          </Button>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div>
+                <div className="flex-1">
                   <Button
                     onClick={handlePublish}
                     disabled={!canPublish || publishing}
