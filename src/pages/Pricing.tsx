@@ -57,7 +57,7 @@ Cette gratuité ne dépend pas du programme Fondateur : que vous vous inscriviez
  },
  {
  q: "Quelle différence entre le 13 juillet (badge Fondateur) et le 14 juillet (fin de la gratuité) ?",
- a: `Deux dates, deux choses indépendantes — il est utile de ne pas les confondre.
+ a: `Deux dates distinctes — mieux vaut ne pas les confondre.
 
 **13 juillet 2026 — clôture du programme Fondateur.** C'est la dernière date pour s'inscrire et recevoir le **badge Fondateur**, un sceau honorifique gravé à vie sur votre profil. Ce badge ne sera plus jamais attribué après. Il ne change rien à votre accès ou à votre tarif : c'est uniquement une distinction symbolique pour les premiers membres.
 
