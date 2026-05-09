@@ -4,6 +4,7 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
+import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -46,14 +47,10 @@ const SubscriptionExpires30dEmail = ({ firstName = '', renewalDate }: Subscripti
         <Button style={button} href={`${SITE_URL}/mon-abonnement`}>
           Gérer mon abonnement
         </Button>
-        <Hr style={hr} />
-        <Text style={legal}>
-          Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
-          dans le cadre de la gestion de votre abonnement (art. 6.1.b RGPD — exécution du contrat).
-          Conformément à l'article L. 215-1 du Code de la consommation, vous êtes informé(e) du renouvellement
-          automatique de votre abonnement. Pour exercer vos droits : contact@guardiens.fr.
-        </Text>
-        <Text style={footer}>L'équipe {SITE_NAME}</Text>
+<LegalFooter
+  purpose="de la gestion de votre abonnement"
+  basis="6.1.b"
+/>
       </Container>
       </Body>
       </Html>

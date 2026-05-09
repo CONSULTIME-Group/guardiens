@@ -4,6 +4,7 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
+import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -173,13 +174,10 @@ const ConseilsAnnoncePersoEmail = ({
             Nous sommes là pour vous accompagner.
           </Text>
 
-          <Text style={legal}>
-            Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
-            dans le cadre de l'intérêt légitime lié au bon fonctionnement de votre annonce
-            (art. 6.1.f RGPD). Pour exercer vos droits : contact@guardiens.fr.
-          </Text>
-
-          <Text style={footer}>L'équipe {SITE_NAME}</Text>
+<LegalFooter
+  purpose="du bon fonctionnement de votre annonce"
+  basis="6.1.f"
+/>
         </Container>
         </Body>
         </Html>
