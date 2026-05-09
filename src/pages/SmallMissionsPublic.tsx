@@ -690,7 +690,7 @@ const SmallMissionsPublic = () => {
  </Button>
  </div>
  <p className="text-xs text-white/50 mt-6">
- Gratuit · Badge Fondateur · Accès jusqu'au 13 juillet
+ Gratuit · Badge Fondateur · Accès jusqu'au 30 juin
  </p>
  </Reveal>
  </div>
