@@ -598,9 +598,21 @@ const AdminNurturing = () => {
   }, [sequenceSteps]);
 
   // --- Pour l'onglet Vue d'ensemble : Top 3 winners / losers ---
+  // Seuil de fiabilité 10 envois ; fallback sur tous les steps quand pas assez de volume.
   const reliableSteps = topSteps.filter((s) => s.sent + s.exited >= 10);
-  const winners = [...reliableSteps].sort((a, b) => b.actionRate - a.actionRate).slice(0, 3);
-  const losers = [...reliableSteps].filter((s) => s.actionRate < 10).sort((a, b) => a.actionRate - b.actionRate).slice(0, 3);
+  const winnersBase = reliableSteps.length >= 1 ? reliableSteps : topSteps.filter((s) => s.sent > 0);
+  const winners = [...winnersBase].sort((a, b) => b.actionRate - a.actionRate || b.sent - a.sent).slice(0, 3);
+  const losersBase = reliableSteps.length >= 1
+    ? reliableSteps.filter((s) => s.actionRate < 10)
+    : topSteps.filter((s) => s.sent > 0 && s.actionRate < 10);
+  const losers = [...losersBase].sort((a, b) => a.actionRate - b.actionRate || b.sent - a.sent).slice(0, 3);
+
+  // --- Activité du jour pour Vue d'ensemble ---
+  const todayKey = format(new Date(), "yyyy-MM-dd");
+  const today = timeSeries.find((b) => b.date === todayKey) ?? { sent: 0, failed: 0, exited: 0 };
+
+  // --- Flux d'envois récents pour Performance (10 derniers) ---
+  const recentSends = logs.filter((l) => l.sent).slice(0, 10);
 
   // --- Santé du système (3 pastilles) ---
   const queueHealthy = queueStats.failed === 0 && queueStats.pending < 20;
