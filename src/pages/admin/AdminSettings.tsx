@@ -148,10 +148,10 @@ const AdminSettings = () => {
  <Separator />
  <div className="flex items-center justify-between">
  <div>
- <p className="text-sm font-medium">Abonnement gardien</p>
- <p className="text-xs text-muted-foreground">9 €/mois pour activer l'espace gardien (hors fondateurs).</p>
+  <p className="text-sm font-medium">Abonnement gardien</p>
+ <p className="text-xs text-muted-foreground">6,99 €/mois pour activer l'espace gardien (hors fondateurs).</p>
  </div>
- <Badge variant="secondary" className="text-xs">9 €/mois</Badge>
+ <Badge variant="secondary" className="text-xs">6,99 €/mois</Badge>
  </div>
  <Separator />
  <div className="flex items-center justify-between">
