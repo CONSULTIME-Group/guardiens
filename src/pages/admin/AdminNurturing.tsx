@@ -485,6 +485,32 @@ const AdminNurturing = () => {
     return m;
   }, [logs, journeys, eventsByMid]);
 
+  // Santé de la mesure d'engagement : un envoi sans message_id ne peut être
+  // corrélé aux ouvertures / clics → les taux d'engagement sont sous-estimés.
+  const measurementHealth = useMemo(() => {
+    const sentLogs = logs.filter((l) => l.sent);
+    const sent = sentLogs.length;
+    const missing = sentLogs.filter((l) => !l.message_id).length;
+    const missingRate = sent > 0 ? Math.round((missing / sent) * 1000) / 10 : 0;
+    let tone: "ok" | "warn" | "err" = "ok";
+    let label = "Mesure fiable";
+    let hint = "Tous les envois sont corrélés aux ouvertures et clics.";
+    if (sent === 0) {
+      tone = "ok";
+      label = "Aucun envoi";
+      hint = "Pas d'envoi sur la période — rien à corréler.";
+    } else if (missingRate >= 20) {
+      tone = "err";
+      label = "Mesure dégradée";
+      hint = `${missing} envoi(s) sans message_id (${missingRate}%) — taux d'ouverture/clic sous-estimés.`;
+    } else if (missing > 0) {
+      tone = "warn";
+      label = "Mesure partielle";
+      hint = `${missing} envoi(s) sans message_id (${missingRate}%) — légère sous-estimation possible.`;
+    }
+    return { sent, missing, missingRate, tone, label, hint };
+  }, [logs]);
+
   // Engagement global
   const engagementStats = useMemo(() => {
     let sent = 0, opens = 0, clicks = 0, actions = 0;
@@ -856,6 +882,32 @@ const AdminNurturing = () => {
 
           {/* =========== ONGLET 2 : PERFORMANCE =========== */}
           <TabsContent value="performance" className="space-y-6">
+            {measurementHealth.tone !== "ok" && (
+              <Card
+                className={
+                  measurementHealth.tone === "err"
+                    ? "border-destructive/50 bg-destructive/5"
+                    : "border-warning/50 bg-warning/5"
+                }
+              >
+                <CardContent className="py-3 flex items-start gap-3 text-sm">
+                  <span
+                    className={`inline-block h-2 w-2 rounded-full mt-1.5 ${
+                      measurementHealth.tone === "err" ? "bg-destructive" : "bg-warning"
+                    }`}
+                  />
+                  <div>
+                    <div className="font-medium">
+                      Santé de la mesure d'engagement : {measurementHealth.label}
+                    </div>
+                    <p className="text-muted-foreground text-xs mt-0.5">
+                      {measurementHealth.hint} Les taux d'ouverture et de clic ci-dessous sont
+                      calculés uniquement sur les envois corrélés à un message_id.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             <div className="grid gap-4 lg:grid-cols-2">
               <Card>
                 <CardHeader>
@@ -1115,6 +1167,69 @@ const AdminNurturing = () => {
 
           {/* =========== ONGLET 3 : DIAGNOSTIC =========== */}
           <TabsContent value="diagnostic" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span
+                    className={`inline-block h-2.5 w-2.5 rounded-full ${
+                      measurementHealth.tone === "err"
+                        ? "bg-destructive"
+                        : measurementHealth.tone === "warn"
+                          ? "bg-warning"
+                          : "bg-success"
+                    }`}
+                  />
+                  Santé de la mesure d'engagement
+                </CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Un envoi sans <code className="text-[11px]">message_id</code> ne peut pas être
+                  corrélé aux ouvertures et clics : les taux d'engagement sont alors sous-estimés.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-4">
+                  <StatCard label="Envois sur la période" value={measurementHealth.sent} />
+                  <StatCard
+                    label="Sans message_id"
+                    value={measurementHealth.missing}
+                    tone={
+                      measurementHealth.missing === 0
+                        ? "ok"
+                        : measurementHealth.tone === "err"
+                          ? "err"
+                          : "warn"
+                    }
+                  />
+                  <StatCard
+                    label="Part non corrélée"
+                    value={`${measurementHealth.missingRate}%`}
+                    tone={
+                      measurementHealth.missingRate === 0
+                        ? "ok"
+                        : measurementHealth.missingRate >= 20
+                          ? "err"
+                          : "warn"
+                    }
+                    hint="Seuil d'alerte : ≥ 20%"
+                  />
+                  <StatCard
+                    label="État"
+                    value={measurementHealth.label}
+                    tone={measurementHealth.tone}
+                    hint={measurementHealth.hint}
+                  />
+                </div>
+                {measurementHealth.missing > 0 && (
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Vérifier que <code className="text-[11px]">send-transactional-email</code>{" "}
+                    renvoie bien <code className="text-[11px]">messageId</code>, et qu'à défaut le
+                    fallback via <code className="text-[11px]">email_send_log.metadata.idempotency_key</code>{" "}
+                    fonctionne dans <code className="text-[11px]">evaluate-journeys</code>.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
             <div className="grid gap-4 md:grid-cols-4">
               <StatCard
                 label="Étapes évaluées"
