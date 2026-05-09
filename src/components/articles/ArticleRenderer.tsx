@@ -215,7 +215,7 @@ export default function ArticleRenderer({ content, userRole, slug }: ArticleRend
   html = injectCTA(html, slug);
   html = addBandedSections(html);
   html = addEndCTA(html, slug);
-  html = adaptCTAsForRole(html, userRole);
+  html = adaptEndCTAsForRole(html, userRole);
 
   return (
     <div
