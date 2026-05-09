@@ -845,34 +845,115 @@ export type Database = {
           },
         ]
       }
+      email_deferred_queue: {
+        Row: {
+          attempts: number
+          created_at: string
+          defer_reason: string
+          id: string
+          idempotency_key: string | null
+          last_attempt_at: string | null
+          last_error: string | null
+          recipient_email: string
+          scheduled_for: string
+          status: string
+          template_data: Json
+          template_name: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          defer_reason: string
+          id?: string
+          idempotency_key?: string | null
+          last_attempt_at?: string | null
+          last_error?: string | null
+          recipient_email: string
+          scheduled_for: string
+          status?: string
+          template_data?: Json
+          template_name: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          defer_reason?: string
+          id?: string
+          idempotency_key?: string | null
+          last_attempt_at?: string | null
+          last_error?: string | null
+          recipient_email?: string
+          scheduled_for?: string
+          status?: string
+          template_data?: Json
+          template_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
+          bounced_at: string | null
+          click_count: number
+          complained_at: string | null
           created_at: string
+          delivered_at: string | null
           error_message: string | null
+          first_clicked_at: string | null
+          first_opened_at: string | null
           id: string
+          last_clicked_at: string | null
+          last_clicked_url: string | null
+          last_opened_at: string | null
           message_id: string | null
           metadata: Json | null
+          open_count: number
           recipient_email: string
+          resend_id: string | null
           status: string
           template_name: string
         }
         Insert: {
+          bounced_at?: string | null
+          click_count?: number
+          complained_at?: string | null
           created_at?: string
+          delivered_at?: string | null
           error_message?: string | null
+          first_clicked_at?: string | null
+          first_opened_at?: string | null
           id?: string
+          last_clicked_at?: string | null
+          last_clicked_url?: string | null
+          last_opened_at?: string | null
           message_id?: string | null
           metadata?: Json | null
+          open_count?: number
           recipient_email: string
+          resend_id?: string | null
           status: string
           template_name: string
         }
         Update: {
+          bounced_at?: string | null
+          click_count?: number
+          complained_at?: string | null
           created_at?: string
+          delivered_at?: string | null
           error_message?: string | null
+          first_clicked_at?: string | null
+          first_opened_at?: string | null
           id?: string
+          last_clicked_at?: string | null
+          last_clicked_url?: string | null
+          last_opened_at?: string | null
           message_id?: string | null
           metadata?: Json | null
+          open_count?: number
           recipient_email?: string
+          resend_id?: string | null
           status?: string
           template_name?: string
         }
