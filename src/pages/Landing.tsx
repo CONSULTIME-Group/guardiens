@@ -178,16 +178,14 @@ const Landing = () => {
 
  useEffect(() => {
  const loadKPIs = async () => {
- const { data } = await supabase
-.from('public_stats')
-.select('*')
-.single();
- if (data) {
- if (typeof data.maisons_gardees === 'number') {
- setKpiMaisons(data.maisons_gardees + FOUNDERS_HOUSES_OFFSET);
- }
- if (typeof data.total_inscrits === 'number') {
- setKpiInscrits(data.total_inscrits);
+      const { data: rows } = await supabase.rpc('get_public_stats');
+      const data = Array.isArray(rows) ? rows[0] : rows;
+      if (data) {
+        if (typeof data.maisons_gardees === 'number') {
+          setKpiMaisons(data.maisons_gardees + FOUNDERS_HOUSES_OFFSET);
+        }
+        if (typeof data.total_inscrits === 'number') {
+          setKpiInscrits(data.total_inscrits);
  }
  if (typeof data.missions_entraide === 'number') {
  setKpiMissions(data.missions_entraide);
