@@ -54,8 +54,8 @@ const RelanceProfilIncompletEmail = ({ firstName }: RelanceProfilIncompletProps)
             </Section>
 
           <Text style={subtext}>
-            ⏱ Temps estimé : 3 minutes — et votre profil rejoint les centaines de membres
-            visibles dans votre région.
+            Temps estimé : 3 minutes — et votre profil rejoint les centaines de membres
+            visibles près de chez vous.
           </Text>
 
           <Hr style={hr} />
