@@ -640,7 +640,7 @@ const SmallMissionsPublic = () => {
   cta: "Voir les tarifs →",
   },
   {
-  href: "/faq",
+  href: "/faq#petites-missions",
   category: "FAQ",
   title: "Questions fréquentes sur l'entraide et la garde",
   desc: "Tout ce qu'il faut savoir avant de publier votre première demande ou de proposer votre aide.",
