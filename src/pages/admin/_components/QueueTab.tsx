@@ -101,6 +101,41 @@ export function QueueTab() {
     loadQueue();
   }, [loadQueue]);
 
+  // ── Idempotency hits (alertes doublons) ──
+  type IdemRow = { day: string; template_name: string; hit_type: string; hits: number };
+  const [idemRows, setIdemRows] = useState<IdemRow[]>([]);
+  const [idemDays, setIdemDays] = useState<7 | 14 | 30>(7);
+  const [idemLoading, setIdemLoading] = useState(false);
+
+  const loadIdemHits = useCallback(async () => {
+    setIdemLoading(true);
+    const since = new Date();
+    since.setDate(since.getDate() - idemDays);
+    const sinceIso = since.toISOString().slice(0, 10);
+    const { data, error } = await supabase
+      .from("email_idempotency_daily_counts" as any)
+      .select("*")
+      .gte("day", sinceIso)
+      .order("day", { ascending: false });
+    if (error) toast.error("Impossible de charger les doublons");
+    else setIdemRows(((data ?? []) as any[]) as IdemRow[]);
+    setIdemLoading(false);
+  }, [idemDays]);
+
+  useEffect(() => {
+    loadIdemHits();
+  }, [loadIdemHits]);
+
+  const idemTotals = idemRows.reduce(
+    (acc, r) => {
+      if (r.hit_type === "duplicate_send") acc.dup += Number(r.hits);
+      else if (r.hit_type === "already_queued") acc.queued += Number(r.hits);
+      acc.total += Number(r.hits);
+      return acc;
+    },
+    { dup: 0, queued: 0, total: 0 },
+  );
+
   // ── Lookup par resend_id ──
   const [lookup, setLookup] = useState("");
   const [logRows, setLogRows] = useState<SendLogRow[] | null>(null);
