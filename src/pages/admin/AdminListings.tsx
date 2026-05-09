@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
+import DraftStatsPanel from "@/components/admin/DraftStatsPanel";
 
 const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
   draft: { label: "Brouillon", variant: "outline" },
@@ -195,6 +196,8 @@ const AdminListings = () => {
   return (
     <div className="space-y-6">
       <h1 className="font-body text-2xl font-bold">Annonces</h1>
+
+      <DraftStatsPanel />
 
       <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px]">
