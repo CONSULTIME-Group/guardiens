@@ -314,7 +314,7 @@ const CreateSit = () => {
         expectations = `${expectations}\n\nDates flexibles : ${flexibleNotes}`.trim();
       }
 
-      const { data: sit, error } = await supabase.from("sits").insert({
+      const payload: any = {
         user_id: user.id,
         property_id: property.id,
         title,
@@ -324,19 +324,28 @@ const CreateSit = () => {
         specific_expectations: expectations,
         open_to: openTo,
         is_urgent: isUrgent,
-        status: "published" as any,
+        status: "published",
         environments: sitEnvironments,
         min_gardien_sits: minGardienSits,
         max_applications: maxApplications,
         owner_message: ownerMessage.trim() || null,
         daily_routine: dailyRoutine.trim() || null,
         cover_photo_url: coverPhotoUrl ?? (ownerPhotos.length > 0 ? ownerPhotos[0] : null),
-      } as any).select("id").single();
+      };
 
-      if (error) throw error;
-      try { await trackFirstAction("sit_created", { sit_id: sit.id, is_urgent: isUrgent }); } catch {}
+      let sitId = draftId;
+      if (draftId) {
+        const { error } = await supabase.from("sits").update(payload).eq("id", draftId);
+        if (error) throw error;
+      } else {
+        const { data: sit, error } = await supabase.from("sits").insert(payload).select("id").single();
+        if (error) throw error;
+        sitId = sit.id;
+      }
+
+      try { await trackFirstAction("sit_created", { sit_id: sitId, is_urgent: isUrgent }); } catch {}
       toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant postuler." });
-      navigate(`/sits/${sit.id}`);
+      navigate(`/sits/${sitId}`);
     } catch (err: any) {
       console.error("[CreateSit] publish failed", err);
       toast({
