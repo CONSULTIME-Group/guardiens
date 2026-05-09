@@ -46,83 +46,83 @@ const promiseRows: Array<{ label: string; value: string; positive: boolean }> = 
 
 const faqItems = [
  {
- q: "L'accès est-il vraiment gratuit pour tout le monde jusqu'au 14 juillet 2026 ?",
-  a: `Oui. Jusqu'au 14 juillet 2026, **l'accès complet à Guardiens est 100 % gratuit pour tout le monde** — gardiens comme propriétaires, sans exception.
+ q: "L'accès est-il vraiment gratuit pour tout le monde jusqu'au 14 juillet 2026 ?",
+  a: `Oui. Jusqu'au 14 juillet 2026, **l'accès complet à Guardiens est 100 % gratuit pour tout le monde** — gardiens comme propriétaires, sans exception.
 
-Aucune carte bancaire n'est demandée à l'inscription. Vous accédez à toutes les fonctionnalités : publier une annonce, postuler aux gardes, échanger par messagerie, laisser des avis, utiliser l'entraide.
+Aucune carte bancaire n'est demandée à l'inscription. Vous accédez à toutes les fonctionnalités : publier une annonce, postuler aux gardes, échanger par messagerie, laisser des avis, utiliser l'entraide.
 
-Cette gratuité ne dépend pas du programme Fondateur : que vous vous inscriviez le 1ᵉʳ février ou le 12 juin 2026, vous ne payez rien jusqu'au 14 juillet 2026.
+Cette gratuité ne dépend pas du programme Fondateur : que vous vous inscriviez le 1ᵉʳ février ou le 12 juin 2026, vous ne payez rien jusqu'au 14 juillet 2026.
 
-À partir du 15 juillet 2026, l'abonnement gardien à 6,99 €/mois devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit.`,
+À partir du 15 juillet 2026, l'abonnement gardien à 6,99 €/mois devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit.`,
  },
  {
- q: "Quelle différence entre le 13 juillet (badge Fondateur) et le 14 juillet (fin de la gratuité) ?",
- a: `Deux dates distinctes — mieux vaut ne pas les confondre.
+ q: "Quelle différence entre le 13 juillet (badge Fondateur) et le 14 juillet (fin de la gratuité) ?",
+ a: `Deux dates distinctes — mieux vaut ne pas les confondre.
 
-**13 juillet 2026 — clôture du programme Fondateur.** C'est la dernière date pour s'inscrire et recevoir le **badge Fondateur**, un sceau honorifique gravé à vie sur votre profil. Ce badge ne sera plus jamais attribué après. Il ne change rien à votre accès ou à votre tarif : c'est uniquement une distinction symbolique pour les premiers membres.
+**13 juillet 2026 — clôture du programme Fondateur.** C'est la dernière date pour s'inscrire et recevoir le **badge Fondateur**, un sceau honorifique gravé à vie sur votre profil. Ce badge ne sera plus jamais attribué après. Il ne change rien à votre accès ou à votre tarif : c'est uniquement une distinction symbolique pour les premiers membres.
 
-**14 juillet 2026 — fin de la gratuité totale.** C'est la dernière journée où **tout le monde** accède gratuitement à Guardiens, gardiens comme propriétaires. À partir du **15 juillet 2026**, l'abonnement gardien à 6,99 €/mois devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit.
+**14 juillet 2026 — fin de la gratuité totale.** C'est la dernière journée où **tout le monde** accède gratuitement à Guardiens, gardiens comme propriétaires. À partir du **15 juillet 2026**, l'abonnement gardien à 6,99 €/mois devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit.
 
-**En résumé :**
+**En résumé :**
 - Inscrit **avant le 13 juillet** → badge Fondateur **+** gratuit jusqu'au 14 juillet.
 - Inscrit **entre le 13 et le 14 juillet** → pas de badge Fondateur, mais gratuit jusqu'au 14 juillet.
-- Inscrit **à partir du 15 juillet** → pas de badge, et abonnement gardien à 6,99 €/mois pour postuler.`,
+- Inscrit **à partir du 15 juillet** → pas de badge, et abonnement gardien à 6,99 €/mois pour postuler.`,
  },
  {
- q: "Pourquoi c'est gratuit pour les propriétaires ?",
+ q: "Pourquoi c'est gratuit pour les propriétaires ?",
   a: `Parce que nous ne facturons pas l'accès à celles et ceux qui ouvrent leur maison.
 
-Publier une annonce, recevoir des candidatures, échanger avec les gardiens, laisser un avis : tout reste gratuit. Ce n'est pas une offre d'appel, c'est un choix de fond sur notre modèle économique.
+Publier une annonce, recevoir des candidatures, échanger avec les gardiens, laisser un avis : tout reste gratuit. Ce n'est pas une offre d'appel, c'est un choix de fond sur notre modèle économique.
 
-Guardiens se rémunère uniquement via l'abonnement des gardiens. Côté propriétaire, payer pour rencontrer des personnes de confiance n'aurait pas de sens : ce qui a de la valeur, c'est l'échange — pas l'accès.
+Guardiens se rémunère uniquement via l'abonnement des gardiens. Côté propriétaire, payer pour rencontrer des personnes de confiance n'aurait pas de sens : ce qui a de la valeur, c'est l'échange — pas l'accès.
 
-Pour aller plus loin : [Comment bien choisir son gardien →](/actualites/choisir-gardien-bons-criteres)`,
+Pour aller plus loin : [Comment bien choisir son gardien →](/actualites/choisir-gardien-bons-criteres)`,
  },
  {
- q: "Comment fonctionne l'essai gratuit de 7 jours ?",
+ q: "Comment fonctionne l'essai gratuit de 7 jours ?",
  a: `Cet essai s'applique **après le 14 juillet 2026**, lorsque l'abonnement gardien devient payant.
 
-Vous vous inscrivez en tant que gardien, sans carte bancaire. Pendant 7 jours, vous accédez à toutes les fonctionnalités : postuler aux gardes, échanger avec les propriétaires, construire votre profil de confiance.
+Vous vous inscrivez en tant que gardien, sans carte bancaire. Pendant 7 jours, vous accédez à toutes les fonctionnalités : postuler aux gardes, échanger avec les propriétaires, construire votre profil de confiance.
 
-Aucun prélèvement automatique. À la fin de l'essai, vous décidez d'activer ou non l'abonnement à 6,99 €/mois. Sans action de votre part, l'accès s'interrompt — sans frais.
+Aucun prélèvement automatique. À la fin de l'essai, vous décidez d'activer ou non l'abonnement à 6,99 €/mois. Sans action de votre part, l'accès s'interrompt — sans frais.
 
-Avant le 14 juillet 2026, cet essai n'a pas lieu d'être : tout est déjà gratuit pour tout le monde.`,
+Avant le 14 juillet 2026, cet essai n'a pas lieu d'être : tout est déjà gratuit pour tout le monde.`,
  },
  {
- q: "Pourquoi le 14 juillet ?",
- a: `Il fallait une date après trois mois de gratuité — un repère simple, partagé par toutes et tous. Le **14 juillet 2026, fête nationale**, s'est imposé naturellement.
+ q: "Pourquoi le 14 juillet ?",
+ a: `Il fallait une date après trois mois de gratuité — un repère simple, partagé par toutes et tous. Le **14 juillet 2026, fête nationale**, s'est imposé naturellement.
 
-C'est ce jour-là que la gratuité prend fin pour les gardiens. Le **13 juillet 2026**, dernier jour avant la fête, marque la clôture du **programme Fondateur** : les personnes inscrites avant cette date reçoivent un **badge Fondateur permanent** sur leur profil. Ce badge ne sera plus jamais attribué après.
+C'est ce jour-là que la gratuité prend fin pour les gardiens. Le **13 juillet 2026**, dernier jour avant la fête, marque la clôture du **programme Fondateur** : les personnes inscrites avant cette date reçoivent un **badge Fondateur permanent** sur leur profil. Ce badge ne sera plus jamais attribué après.
 
-À ne pas confondre avec la gratuité : **tout le monde est gratuit jusqu'au 14 juillet 2026**, qu'il s'inscrive avant ou après le 13 juillet. Le 13 juillet concerne uniquement le badge.`,
+À ne pas confondre avec la gratuité : **tout le monde est gratuit jusqu'au 14 juillet 2026**, qu'il s'inscrive avant ou après le 13 juillet. Le 13 juillet concerne uniquement le badge.`,
  },
  {
- q: "Y a-t-il des frais cachés ?",
- a: `Non. **Jusqu'au 14 juillet 2026 :** rien à payer pour personne, sans carte bancaire.
+ q: "Y a-t-il des frais cachés ?",
+ a: `Non. **Jusqu'au 14 juillet 2026 :** rien à payer pour personne, sans carte bancaire.
 
-**Après le 14 juillet 2026 — ce que paient les gardiens :** 6,99 €/mois, 12 € pour un mois, ou la formule 2026 à -20%. C'est tout.
+**Après le 14 juillet 2026 — ce que paient les gardiens :** 6,99 €/mois, 12 € pour un mois, ou la formule 2026 à −20 %. C'est tout.
 
-**Ce que paient les propriétaires :** Rien, jamais. Publier, recevoir des candidatures, choisir, évaluer — gratuit en permanence.
+**Ce que paient les propriétaires :** Rien, jamais. Publier, recevoir des candidatures, choisir, évaluer — gratuit en permanence.
 
-**Ce qu'on ne prend pas :** Aucune commission sur les gardes. Pas d'assurance obligatoire, pas de booking fee, pas de frais de mise en relation.`,
+**Ce qu'on ne prend pas :** Aucune commission sur les gardes. Pas d'assurance obligatoire, pas de booking fee, pas de frais de mise en relation.`,
  },
  {
- q: "Guardiens, c'est uniquement pour la garde d'animaux ?",
+ q: "Guardiens, c'est uniquement pour la garde d'animaux ?",
   a: `Non. Guardiens héberge **deux usages indépendants**, à parts égales.
 
-**La garde d'animaux à domicile (home sitting)** : un gardien vient chez vous prendre soin de votre maison et de vos animaux pendant votre absence.
+**La garde d'animaux à domicile (home sitting)** : un gardien vient chez vous prendre soin de votre maison et de vos animaux pendant votre absence.
 
-**Les petites missions d'entraide entre gens du coin** : un coup de main ponctuel, sans nuitée, sans animal nécessaire — arroser des plantes, ramasser les légumes du jardin, monter un meuble, prêter une perceuse, partager un trajet.
+**Les petites missions d'entraide entre gens du coin** : un coup de main ponctuel, sans nuitée, sans animal nécessaire — arroser des plantes, ramasser les légumes du jardin, monter un meuble, prêter une perceuse, partager un trajet.
 
-Les deux usages sont indépendants : vous pouvez activer l'un, l'autre, ou les deux. L'entraide reste gratuite pour toutes et tous, sans abonnement.`,
+Les deux usages sont indépendants : vous pouvez activer l'un, l'autre, ou les deux. L'entraide reste gratuite pour toutes et tous, sans abonnement.`,
  },
  {
- q: "Quels types d'échanges sont possibles ?",
-  a: `Les échanges sur Guardiens passent par **du temps, des compétences ou des objets** — jamais par un paiement direct entre membres.
+ q: "Quels types d'échanges sont possibles ?",
+  a: `Les échanges sur Guardiens passent par **du temps, des compétences ou des objets** — jamais par un paiement direct entre membres.
 
-**Côté garde :** vous accueillez un gardien chez vous, il prend soin de votre maison et de vos animaux. Aucun argent ne circule entre vous : l'échange se joue dans le service rendu — un toit contre une présence.
+**Côté garde :** vous accueillez un gardien chez vous, il prend soin de votre maison et de vos animaux. Aucun argent ne circule entre vous : l'échange se joue dans le service rendu — un toit contre une présence.
 
-**Côté entraide :** un service rendu peut être remercié par un autre service, un objet partagé, un repas, un cours ou simplement du temps. Quelques exemples concrets :
+**Côté entraide :** un service rendu peut être remercié par un autre service, un objet partagé, un repas, un cours ou simplement du temps. Quelques exemples concrets :
 - Ramasser des légumes contre un plat maison.
 - Arroser des plantes le temps d'un week-end.
 - Prêter une perceuse, un sécateur, une remorque.
@@ -131,7 +131,7 @@ Les deux usages sont indépendants : vous pouvez activer l'un, l'autre, ou les d
 - Garder un colis, réceptionner une livraison.
 - Aider à porter un meuble, monter une étagère.
 
-Chaque échange est libre, négocié entre les deux personnes et n'engage que vous. Guardiens fournit l'outil et la mise en relation — pas la facture.`,
+Chaque échange est libre, négocié entre les deux personnes et n'engage que vous. Guardiens fournit l'outil et la mise en relation — pas la facture.`,
  },
 ];
 
