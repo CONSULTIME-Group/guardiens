@@ -335,8 +335,9 @@ const Landing = () => {
  }}
  />
 
- {/* ═══════════════ NAVBAR ═══════════════ */}
- <PublicHeader />
+  {/* ═══════════════ NAVBAR ═══════════════ */}
+  <PublicHeader />
+  <FreePeriodBanner />
 
  {/* ═══════════════ SECTION 1 — HERO ═══════════════ */}
  <section className="relative w-full min-h-screen flex items-center overflow-hidden">
