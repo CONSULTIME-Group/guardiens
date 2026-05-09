@@ -108,13 +108,13 @@ C'est ce jour-là que la gratuité prend fin pour les gardiens. Le **13 juillet 
  },
  {
  q: "Guardiens, c'est uniquement pour la garde d'animaux ?",
- a: `Non. Guardiens héberge **deux usages indépendants**, à parts égales.
+  a: `Non. Guardiens héberge **deux usages indépendants**, à parts égales.
 
 **La garde d'animaux à domicile (home sitting)** : un gardien vient chez vous prendre soin de votre maison et de vos animaux pendant votre absence.
 
 **Les petites missions d'entraide entre gens du coin** : un coup de main ponctuel, sans nuitée, sans animal nécessaire — arroser des plantes, ramasser les légumes du jardin, monter un meuble, prêter une perceuse, partager un trajet.
 
-Aucun des deux ne dépend de l'autre. Vous pouvez utiliser uniquement l'entraide, uniquement la garde, ou les deux. L'entraide reste gratuite pour tous, sans abonnement.`,
+Les deux usages sont indépendants : vous pouvez activer l'un, l'autre, ou les deux. L'entraide reste gratuite pour toutes et tous, sans abonnement.`,
  },
  {
  q: "Quels types d'échanges sont possibles ?",
