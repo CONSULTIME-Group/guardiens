@@ -66,7 +66,16 @@ const statusBadge = (s: string) => {
 const fmt = (d: string | null) =>
   d ? format(new Date(d), "dd/MM/yyyy HH:mm", { locale: fr }) : "—";
 
-export function QueueTab() {
+const urgencyBadge = (metadata: SendLogRow["metadata"]) => {
+  if (!metadata) return null;
+  if (metadata.isUrgent) {
+    return <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 text-[10px]">Urgent</Badge>;
+  }
+  if (metadata.bypass) {
+    return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-[10px]">Bypass</Badge>;
+  }
+  return <Badge variant="outline" className="text-muted-foreground text-[10px]">Standard</Badge>;
+};
   // ── Deferred queue ──
   const [rows, setRows] = useState<DeferredRow[]>([]);
   const [loading, setLoading] = useState(false);
