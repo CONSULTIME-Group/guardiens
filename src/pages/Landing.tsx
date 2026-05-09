@@ -891,6 +891,9 @@ const Landing = () => {
             <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug">
               Ils ont osé. Voici ce qu'ils en disent.
             </h2>
+            <p className="mt-4 font-body text-sm text-foreground/55 max-w-xl mx-auto">
+              Témoignages recueillis auprès des membres du Programme Fondateurs (janvier–mai 2026). Prénoms et villes réels, récits anonymisés à leur demande.
+            </p>
           </RevealSection>
 
           <div
