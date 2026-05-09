@@ -935,14 +935,18 @@ const Landing = () => {
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
-              Pour tous · Sans abonnement
+              Pour tous · Sans abonnement · Sans argent
             </span>
             <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-6">
-              Osez demander un coup de main.
+              Osez demander. Osez proposer.
             </h2>
+            <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-4 text-lg leading-relaxed">
+              Avant, il y avait quelqu'un du coin qui passait arroser le jardin, qui gardait le chien,
+              qui venait fixer un volet. Quelqu'un à qui on offrait une part de gâteau ou un coup de main en retour.
+            </p>
             <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-16 text-lg leading-relaxed">
-              Avant, il y avait quelqu'un du coin qui passait arroser le jardin, qui gardait le chien, qui venait fixer un volet.
-              Ce n'est pas du passé. C'est juste qu'on n'ose plus demander. Guardiens est le prétexte pour recommencer.
+              Ce n'est pas du passé. C'est juste qu'on n'ose plus. Guardiens, c'est le prétexte pour recommencer —
+              et au passage, vivre des expériences qu'aucun voyage organisé ne vous offrira.
             </p>
           </RevealSection>
 
