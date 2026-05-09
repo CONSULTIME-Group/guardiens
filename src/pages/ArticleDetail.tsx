@@ -12,9 +12,12 @@ import { logSeoSnapshot } from "@/lib/seoDebugLog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ArticleRenderer, { resolveImagePath } from "@/components/articles/ArticleRenderer";
+import ArticleAuthorBio from "@/components/articles/ArticleAuthorBio";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { parseFaqFromMarkdown, buildFaqSchema } from "@/lib/parseFaq";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
+import { resolveAuthors } from "@/data/authors";
+import { trackEvent } from "@/lib/analytics";
 
 interface ArticleFull {
  id: string;
