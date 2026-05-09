@@ -315,6 +315,17 @@ const AdminNurturing = () => {
         </Card>
       )}
 
+      {failureBurst && failureBurst.lastRunOk && (
+        <Card className="border-success/40 bg-success/5">
+          <CardContent className="p-4 text-sm">
+            <strong>Bonne nouvelle :</strong> les {failureBurst.count} échecs de la période sont
+            tous concentrés sur le {format(new Date(failureBurst.day), "dd MMMM yyyy", { locale: fr })} (il y a {failureBurst.ageDays} j).
+            Le dernier passage du cron, {cronHealth.label}, s'est terminé par un envoi réussi —
+            l'incident est résolu, les chiffres restent visibles à titre historique.
+          </CardContent>
+        </Card>
+      )}
+
       {loading ? (
         <div className="grid gap-4 md:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
