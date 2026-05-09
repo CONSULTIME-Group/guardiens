@@ -90,15 +90,15 @@ const Cgs = () => {
 
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">3.3 Période de lancement</h3>
           <p>
-            Jusqu'au 30 juin 2026, l'accès Gardien est intégralement offert. À compter du 1er juillet 2026, l'abonnement à 6,99&nbsp;€ TTC/mois devient nécessaire pour postuler aux gardes.
+            Jusqu'au 14 juillet 2026, l'accès Gardien est intégralement offert. À compter du 15 juillet 2026, l'abonnement à 6,99&nbsp;€ TTC/mois devient nécessaire pour postuler aux gardes.
           </p>
 
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">3.4 Programme Fondateur</h3>
-          <p>Les utilisateurs inscrits avant le 30 juin 2026 bénéficient du statut de <strong className="text-foreground">Fondateur</strong> et des conditions préférentielles suivantes&nbsp;:</p>
+          <p>Les utilisateurs inscrits avant le 14 juillet 2026 bénéficient du statut de <strong className="text-foreground">Fondateur</strong> et des conditions préférentielles suivantes&nbsp;:</p>
           <ul className="list-disc pl-6 space-y-1">
-            <li>Accès gratuit à l'ensemble des fonctionnalités Gardien jusqu'au 30 juin 2026&nbsp;;</li>
+            <li>Accès gratuit à l'ensemble des fonctionnalités Gardien jusqu'au 14 juillet 2026&nbsp;;</li>
             <li>Badge Fondateur permanent affiché sur leur profil&nbsp;;</li>
-            <li>Reconduction au tarif standard de 6,99&nbsp;€ TTC/mois à compter du 1er juillet 2026, sauf résiliation préalable.</li>
+            <li>Reconduction au tarif standard de 6,99&nbsp;€ TTC/mois à compter du 15 juillet 2026, sauf résiliation préalable.</li>
           </ul>
 
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">3.5 Programme de parrainage</h3>

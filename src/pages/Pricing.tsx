@@ -45,24 +45,24 @@ const promiseRows: Array<{ label: string; value: string; positive: boolean }> = 
 
 const faqItems = [
  {
- q: "L'accès est-il vraiment gratuit pour tout le monde jusqu'au 30 juin 2026 ?",
- a: `Oui. Jusqu'au 30 juin 2026, **l'accès complet à Guardiens est 100% gratuit pour tout le monde** — gardiens comme propriétaires, sans aucune exception.
+ q: "L'accès est-il vraiment gratuit pour tout le monde jusqu'au 14 juillet 2026 ?",
+ a: `Oui. Jusqu'au 14 juillet 2026, **l'accès complet à Guardiens est 100% gratuit pour tout le monde** — gardiens comme propriétaires, sans aucune exception.
 
 Aucune carte bancaire n'est demandée à l'inscription. Vous accédez à toutes les fonctionnalités : publier une annonce, postuler aux gardes, échanger en messagerie, laisser des avis, utiliser l'entraide.
 
-Cette gratuité totale ne dépend pas du programme Fondateur. Que vous vous inscriviez le 1er février ou le 12 juin 2026, vous ne payez rien jusqu'au 30 juin 2026.
+Cette gratuité totale ne dépend pas du programme Fondateur. Que vous vous inscriviez le 1er février ou le 12 juin 2026, vous ne payez rien jusqu'au 14 juillet 2026.
 
-À partir du 1er juillet 2026, l'abonnement gardien à 6,99 €/mois devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit.`,
+À partir du 15 juillet 2026, l'abonnement gardien à 6,99 €/mois devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit.`,
  },
  {
- q: "Quelle est la différence entre la gratuité jusqu'au 30 juin et le programme Fondateur ?",
+ q: "Quelle est la différence entre la gratuité jusqu'au 14 juillet et le programme Fondateur ?",
  a: `Ce sont deux choses distinctes qui se cumulent.
 
-**La gratuité totale jusqu'au 30 juin 2026** concerne **tous les inscrits**, sans condition de date. Personne ne paie avant cette date.
+**La gratuité totale jusqu'au 14 juillet 2026** concerne **tous les inscrits**, sans condition de date. Personne ne paie avant cette date.
 
 **Le programme Fondateur** est un statut symbolique réservé aux personnes inscrites **avant le 13 juin 2026**. Il donne droit à un badge Fondateur affiché sur le profil sur le profil — ce badge ne sera plus jamais attribué après cette date.
 
-En clair : tout le monde est gratuit jusqu'au 30 juin, et seuls les premiers inscrits (avant le 13 juin) reçoivent en plus le badge Fondateur.`,
+En clair : tout le monde est gratuit jusqu'au 14 juillet, et seuls les premiers inscrits (avant le 13 juin) reçoivent en plus le badge Fondateur.`,
  },
  {
  q: "Pourquoi c'est gratuit pour les propriétaires ?",
@@ -76,13 +76,13 @@ Pour comprendre comment fonctionne la mise en relation : [Comment bien choisir s
  },
  {
  q: "Comment fonctionne l'essai gratuit de 7 jours ?",
- a: `Cet essai s'applique **après le 30 juin 2026**, lorsque l'abonnement gardien devient payant.
+ a: `Cet essai s'applique **après le 14 juillet 2026**, lorsque l'abonnement gardien devient payant.
 
 Vous vous inscrivez en tant que gardien, sans carte bancaire. Pendant 7 jours, vous accédez à toutes les fonctionnalités : postuler aux gardes, échanger avec les propriétaires, créer votre profil de confiance.
 
 Aucun prélèvement automatique. À la fin de l'essai, vous choisissez si vous souhaitez activer l'abonnement à 6,99 €/mois. Si vous ne faites rien, l'accès s'interrompt sans frais.
 
-Avant le 30 juin 2026, cet essai n'a pas lieu d'être : tout est déjà gratuit pour tout le monde.`,
+Avant le 14 juillet 2026, cet essai n'a pas lieu d'être : tout est déjà gratuit pour tout le monde.`,
  },
  {
  q: "Pourquoi le 13 juin ?",
@@ -90,13 +90,13 @@ Avant le 30 juin 2026, cet essai n'a pas lieu d'être : tout est déjà gratuit 
 
 Plutôt que de recevoir des cadeaux, il a décidé de marquer cette date avec le programme Fondateur : les personnes inscrites avant le 13 juin 2026 reçoivent un **badge Fondateur affiché sur le profil** sur leur profil. Ce badge ne sera plus jamais attribué après cette date.
 
-À ne pas confondre avec la gratuité : **tout le monde est gratuit jusqu'au 30 juin 2026**, qu'il s'inscrive avant ou après le 13 juin. Le 13 juin concerne uniquement le badge.`,
+À ne pas confondre avec la gratuité : **tout le monde est gratuit jusqu'au 14 juillet 2026**, qu'il s'inscrive avant ou après le 13 juin. Le 13 juin concerne uniquement le badge.`,
  },
  {
  q: "Y a-t-il des frais cachés ?",
- a: `Non. **Jusqu'au 30 juin 2026 :** rien à payer pour personne, sans carte bancaire.
+ a: `Non. **Jusqu'au 14 juillet 2026 :** rien à payer pour personne, sans carte bancaire.
 
-**Après le 30 juin 2026 — ce que paient les gardiens :** 6,99 €/mois, 12 € pour un mois, ou la formule 2026 à -20%. C'est tout.
+**Après le 14 juillet 2026 — ce que paient les gardiens :** 6,99 €/mois, 12 € pour un mois, ou la formule 2026 à -20%. C'est tout.
 
 **Ce que paient les propriétaires :** Rien, jamais. Publier, recevoir des candidatures, choisir, évaluer — gratuit en permanence.
 
@@ -153,12 +153,12 @@ const Pricing = () => {
  <PageMeta
  title={
  before
- ? "Tarifs Guardiens — Offert pour tous jusqu'au 30 juin"
+ ? "Tarifs Guardiens — Offert pour tous jusqu'au 14 juillet"
  : "Tarifs Guardiens — Offert propriétaires · 6,99 €/mois"
  }
  description={
  before
- ? "Accès complet offert jusqu'au 30 juin 2026 pour tous, gardiens comme propriétaires. Sans carte bancaire, sans commission, sans frais cachés."
+ ? "Accès complet offert jusqu'au 14 juillet 2026 pour tous, gardiens comme propriétaires. Sans carte bancaire, sans commission, sans frais cachés."
  : "Gratuit pour les propriétaires. 6,99 €/mois pour les gardiens avec 7 jours d'essai. Sans commission, sans frais cachés."
  }
  path="/tarifs"
@@ -188,7 +188,7 @@ const Pricing = () => {
  </h1>
  <p className="text-base md:text-lg font-body text-foreground/65 leading-relaxed">
  {before
- ? "Jusqu'au 30 juin 2026, l'accès complet est offert — gardiens comme propriétaires. Aucune carte bancaire demandée."
+ ? "Jusqu'au 14 juillet 2026, l'accès complet est offert — gardiens comme propriétaires. Aucune carte bancaire demandée."
  : "Gratuit pour les propriétaires. 6,99 €/mois pour les gardiens, avec 7 jours d'essai. C'est tout."}
  </p>
  </section>
@@ -237,9 +237,9 @@ const Pricing = () => {
 
  {grace && (
  <section className="rounded-2xl p-6 md:p-8 text-center space-y-3 border-2 border-amber-300 bg-amber-50 mb-12 max-w-5xl mx-auto">
- <h2 className="font-heading text-2xl font-bold text-foreground">Les Fondateurs ont jusqu'au 30 juin</h2>
+ <h2 className="font-heading text-2xl font-bold text-foreground">Les Fondateurs ont jusqu'au 14 juillet</h2>
  <p className="text-muted-foreground max-w-2xl mx-auto font-body">
- Les membres inscrits avant le 13 juin conservent leur accès gratuit jusqu'au 30 juin.
+ Les membres inscrits avant le 13 juin conservent leur accès gratuit jusqu'au 14 juillet.
  Après cette date, l'abonnement à 6,99 €/mois sera nécessaire. Le badge Fondateur reste affiché sur votre profil.
  </p>
  </section>
@@ -298,7 +298,7 @@ const Pricing = () => {
                       Gratuit
                     </p>
  <p className="text-xs text-foreground/55 font-body pt-1">
- Puis <span className="font-semibold text-foreground">6,99 €/mois</span> à partir du 1er juillet 2026
+ Puis <span className="font-semibold text-foreground">6,99 €/mois</span> à partir du 15 juillet 2026
  </p>
  </div>
  ) : (
