@@ -900,9 +900,8 @@ const Landing = () => {
             </p>
           </RevealSection>
 
-          <div
-            className="relative"
-            onMouseEnter={() => setIsTestimonialsHovered(true)}
+          <RealMembersStrip />
+
             onMouseLeave={() => setIsTestimonialsHovered(false)}
           >
             <button
