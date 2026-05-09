@@ -731,13 +731,15 @@ const Landing = () => {
 
             <div className="border-l-4 border-primary pl-6 md:pl-8 max-w-2xl mx-auto">
               <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/80 mb-5">
-                Garder une maison, ce n'est pas rendre service à un propriétaire.
-                Confier ses clés, ce n'est pas céder un toit en échange d'une garde.
+                Ce qu'on raconte rarement, c'est ce qui se passe <em>autour</em> :
+                connaître la mami du coin et son histoire parce qu'on l'a aidée à ramasser
+                ses fruits du jardin. Échanger avec Gerardo pendant qu'il vous donne
+                un coup de main pour bricoler — et lui proposer un repas fait maison en retour.
               </p>
               <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/80 mb-5">
-                C'est, surtout, une façon de vivre des expériences qu'on n'aurait jamais cherchées :
-                découvrir une région, une autre manière d'habiter, une histoire de famille,
-                un coin de France qu'on n'aurait jamais visité, des gens qu'on n'aurait jamais croisés.
+                Garder une maison, promener un chien, tailler une haie : ce sont des prétextes.
+                Ce qui compte vraiment, c'est la place qu'on se redonne à vivre des choses
+                inattendues, à recréer un tissu local, à oser demander, à oser proposer.
               </p>
               <p className="font-heading text-xl md:text-2xl italic text-foreground leading-snug">
                 On apprend, on découvre, on s'attache —
