@@ -353,7 +353,7 @@ const MySubscription = () => {
  <span className="text-primary text-lg mt-0.5 flex-shrink-0" aria-hidden="true">{"✓"}</span>
  <div>
  <p className="text-sm font-semibold text-primary font-body">Bienvenue chez Guardiens.</p>
- <p className="text-sm text-foreground/70 font-body mt-0.5">Votre compte est actif. Toutes les fonctionnalités sont disponibles jusqu'au 13 juin.</p>
+ <p className="text-sm text-foreground/70 font-body mt-0.5">Votre compte est actif. Toutes les fonctionnalités sont disponibles jusqu'au 14 juillet 2026.</p>
  </div>
  </div>
  )}
@@ -366,7 +366,7 @@ const MySubscription = () => {
  Pré-lancement {"·"} Bêta
  </span>
  <h1 className="font-heading text-2xl sm:text-3xl font-semibold text-foreground leading-tight">
- Tout est offert jusqu'au 13 juin.
+ Tout est offert jusqu'au 14 juillet 2026.
  </h1>
  <p className="text-base text-foreground/70 font-body max-w-sm leading-relaxed">
  Guardiens est en version bêta. Toutes les fonctionnalités sont ouvertes — sans restriction.
@@ -427,14 +427,14 @@ const MySubscription = () => {
  <div className="w-full bg-amber-100 rounded-full h-2 overflow-hidden" role="progressbar" aria-valuenow={countdown.progressPct} aria-valuemin={0} aria-valuemax={100} aria-label="Progression vers le lancement">
  <div className="bg-amber-400 h-2 rounded-full transition-all duration-700" ref={(el) => { if (el) el.style.width = `${countdown.progressPct}%`; }} />
  </div>
- <p className="text-xs text-foreground/50 font-body">Lancement officiel le 13 juin 2026</p>
+ <p className="text-xs text-foreground/50 font-body">Lancement officiel le 14 juin 2026</p>
  </div>
 
  {/* Profile nudge */}
  {profileCompletion < 60 && (
  <div className="px-6 sm:px-8 py-4 border-b border-border/50 bg-muted/30 flex items-center justify-between gap-4 flex-wrap">
  <div className="space-y-1.5 flex-1 min-w-0">
- <p className="text-sm font-medium text-foreground font-body">Complétez votre profil pour être visible le 13 juin.</p>
+ <p className="text-sm font-medium text-foreground font-body">Complétez votre profil pour être visible dès le lancement.</p>
  <div className="flex items-center gap-2">
  <div className="w-24 bg-border rounded-full h-1.5 overflow-hidden flex-shrink-0">
  <div className="bg-primary h-1.5 rounded-full transition-all" ref={(el) => { if (el) el.style.width = `${profileCompletion}%`; }} />
@@ -483,7 +483,7 @@ const MySubscription = () => {
  <div className="space-y-1">
  <p className="text-sm font-semibold text-amber-800 font-body">Vous devenez Fondateur le 13 juin.</p>
  <p className="text-sm text-amber-700 font-body leading-relaxed">
- Chaque membre inscrit avant le 13 juin bénéficie d'un mois supplémentaire offert jusqu'au 15 juillet, et reçoit le badge Fondateur, visible sur son profil public.
+ Chaque membre inscrit avant le 13 juin 2026 reçoit le badge Fondateur, visible sur son profil public. La gratuité, elle, est étendue à tous les inscrits jusqu'au 14 juillet 2026.
  </p>
  </div>
  </div>
@@ -511,7 +511,7 @@ const MySubscription = () => {
  <SearchIcon className="w-4 h-4" aria-hidden="true" />
  Explorer les annonces
  </Link>
- <p className="text-xs text-foreground/40 font-body text-center">Revenez ici le 13 juin pour choisir votre formule.</p>
+ <p className="text-xs text-foreground/40 font-body text-center">Revenez ici à partir du 15 juillet 2026 pour choisir votre formule.</p>
  </div>
  </div>
 
