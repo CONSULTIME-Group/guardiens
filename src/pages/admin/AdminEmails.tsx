@@ -823,7 +823,7 @@ const AdminEmails = () => {
       <h1 className="font-body text-2xl font-bold">Emails & Communications</h1>
 
       <Tabs defaultValue="templates" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="templates" className="text-xs gap-1">
             <FileText className="h-3.5 w-3.5" /> Templates
           </TabsTrigger>
@@ -832,6 +832,9 @@ const AdminEmails = () => {
           </TabsTrigger>
           <TabsTrigger value="engagement" className="text-xs gap-1">
             <BarChart3 className="h-3.5 w-3.5" /> Engagement
+          </TabsTrigger>
+          <TabsTrigger value="queue" className="text-xs gap-1">
+            <Inbox className="h-3.5 w-3.5" /> File
           </TabsTrigger>
           <TabsTrigger value="logs" className="text-xs gap-1">
             <History className="h-3.5 w-3.5" /> Logs
@@ -847,6 +850,7 @@ const AdminEmails = () => {
         <TabsContent value="templates"><TemplatesTab /></TabsContent>
         <TabsContent value="confirmations"><ConfirmationsTab /></TabsContent>
         <TabsContent value="engagement"><EngagementTab /></TabsContent>
+        <TabsContent value="queue"><QueueTab /></TabsContent>
         <TabsContent value="logs"><LogsTab /></TabsContent>
         <TabsContent value="suppressions"><SuppressionsTab /></TabsContent>
         <TabsContent value="config"><ConfigTab /></TabsContent>
