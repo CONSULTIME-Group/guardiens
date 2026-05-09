@@ -361,7 +361,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  Accord généré par Guardiens — en attente de confirmation des deux parties.
  </p>
  <a
- href="/faq"
+ href="/faq#avant-la-garde"
  target="_blank"
  rel="noopener noreferrer"
  className="text-xs text-primary text-center block mt-1"
