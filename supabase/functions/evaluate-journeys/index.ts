@@ -188,6 +188,7 @@ Deno.serve(async (req) => {
       let reason: string | null = null
       let errorDetail: Record<string, unknown> | null = null
       let messageId: string | null = null
+      let actuallySent = sendOk
       if (!sendOk) {
         const errBody = await sendRes.text().catch(() => '')
         reason = `send_failed_${sendRes.status}`
@@ -207,14 +208,35 @@ Deno.serve(async (req) => {
         try {
           const okBody = await sendRes.json()
           messageId = typeof okBody?.messageId === 'string' ? okBody.messageId : null
+          // Distinguish a real send from an idempotent/suppressed/skipped 200 response
+          if (okBody?.skipped === true || okBody?.sent === false) {
+            actuallySent = false
+            reason = okBody?.reason ? `skipped_${okBody.reason}` : 'skipped'
+          }
         } catch {
           messageId = null
+        }
+
+        // Fallback: if no messageId returned but the email was actually sent,
+        // recover it from email_send_log via the idempotency key so engagement
+        // events (open/click) can be correlated back to this journey step.
+        if (actuallySent && !messageId) {
+          const { data: logRow } = await supabase
+            .from('email_send_log')
+            .select('message_id')
+            .eq('template_name', nextStep.template_name)
+            .eq('recipient_email', profile.email)
+            .filter('metadata->>idempotency_key', 'eq', idempotencyKey)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+          if (logRow?.message_id) messageId = logRow.message_id as string
         }
       }
 
       await supabase.from('journey_step_log').insert({
         journey_id: j.id, step_order: nextStep.step_order,
-        template_name: nextStep.template_name, sent: sendOk, reason, error_detail: errorDetail,
+        template_name: nextStep.template_name, sent: actuallySent, reason, error_detail: errorDetail,
         message_id: messageId,
       })
 
