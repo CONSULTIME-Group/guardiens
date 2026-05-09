@@ -1084,7 +1084,7 @@ const Landing = () => {
                             {t.detail}
                           </span>
                           <span className="font-body text-[11px] text-foreground/40 mt-0.5 uppercase tracking-widest">
-                            {t.period} · Programme Fondateurs
+                            {t.period} · Programme Fondateur
                           </span>
                         </span>
                       </figcaption>
