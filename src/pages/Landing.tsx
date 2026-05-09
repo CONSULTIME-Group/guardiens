@@ -777,13 +777,13 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 3 — COMMENT ÇA MARCHE ═══════════════ */}
-      <section id="how-it-works" className="py-24 md:py-32 bg-muted/30">
+      <section id="comment-ca-marche" className="py-24 md:py-32 bg-muted/30 scroll-mt-24">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
               Simple et transparent
             </span>
-            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-4">
+            <h2 id="how-it-works" className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-4 scroll-mt-24">
               Comment ça marche ?
             </h2>
             <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16">
