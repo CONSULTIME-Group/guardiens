@@ -1138,13 +1138,13 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 8 — NOTRE HISTOIRE ═══════════════ */}
-      <section className="bg-muted/30">
+      <section id="notre-histoire" className="bg-muted/30 scroll-mt-24">
         <div className="max-w-6xl mx-auto px-6 py-24 md:py-32">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
               Notre histoire
             </span>
-            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-12">
+            <h2 id="commence-avec-un-visa" className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-12 scroll-mt-24">
               Tout a commencé avec un visa.
             </h2>
           </RevealSection>
