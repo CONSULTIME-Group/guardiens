@@ -241,7 +241,7 @@ const AdminNurturing = () => {
       for (const c of chunks) {
         const r = await supabase
           .from("email_engagement_events")
-          .select("message_id, event_type")
+          .select("message_id, event_type, target_url")
           .in("message_id", c);
         if (!r.error && r.data) all.push(...(r.data as EngagementRow[]));
       }
