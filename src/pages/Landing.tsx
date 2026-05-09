@@ -1366,7 +1366,7 @@ const Landing = () => {
 
           {/* FAQ visible — miroir du JSON-LD FAQPage déclaré en haut de page */}
           <RevealSection delay={0.3} className="mt-16 max-w-3xl mx-auto">
-            <h3 className="font-heading text-2xl md:text-3xl font-semibold text-foreground text-center mb-8">
+            <h3 id="faq" className="font-heading text-2xl md:text-3xl font-semibold text-foreground text-center mb-8 scroll-mt-24">
               Questions fréquentes
             </h3>
             <dl className="space-y-6">
