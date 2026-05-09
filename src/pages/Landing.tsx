@@ -574,9 +574,8 @@ const Landing = () => {
             </h1>
 
             <p className="font-body text-lg md:text-xl text-white/85 max-w-xl mb-4 leading-relaxed animate-hero-fade-up animation-delay-700">
-              Deux usages, indépendants l'un de l'autre.
-              D'un côté, faire garder votre maison et vos animaux par quelqu'un du coin.
-              De l'autre, demander ou rendre un coup de main près de chez vous — sans qu'aucun animal n'ait besoin d'entrer dans l'histoire.
+              Faire garder votre maison et vos animaux par un gardien du coin pendant vos absences.
+              Ou demander — et rendre — un coup de main près de chez vous, avec ou sans animaux.
             </p>
             <p className="font-body text-base md:text-lg text-white/70 max-w-xl mb-10 leading-relaxed italic animate-hero-fade-up animation-delay-700">
               Et derrière chaque échange, une rencontre qu'on n'aurait pas cherchée.
