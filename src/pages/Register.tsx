@@ -361,9 +361,13 @@ const Register = () => {
  };
 
   const handleGoogleSignUp = async () => {
-    if (!acceptedCgu || !acceptedCgs || !acceptedPrivacy) {
+    if (!acceptedTerms) {
       logOAuthStage("blocked_terms", "/inscription");
-      setFormError("Veuillez accepter les CGU (v5), les CGS (v1) et la politique de confidentialité avant de continuer avec Google.");
+      setFormError("Veuillez accepter les CGU, les CGS et la politique de confidentialité avant de continuer avec Google.");
+      setTermsHighlighted(true);
+      setTimeout(() => {
+        document.getElementById("accept-terms")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 50);
       return;
     }
  setIsGoogleLoading(true);
