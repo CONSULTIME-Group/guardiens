@@ -261,11 +261,19 @@ export default function ArticleDetail() {
  "url": `https://guardiens.fr/actualites/${article.slug}`,
  "datePublished": article.created_at,
  "dateModified": article.updated_at,
-...(article.cover_image_url && { "image": article.cover_image_url }),
- "author": {
- "@type": "Person",
- "name": "Jérémie Martinot"
- },
+ ...(article.cover_image_url && { "image": article.cover_image_url }),
+ "author": (() => {
+   const matched = resolveAuthors(article.author_name);
+   if (matched.length === 0) {
+     return { "@type": "Organization", "name": "Guardiens", "url": "https://guardiens.fr" };
+   }
+   const persons = matched.map((a) => ({
+     "@type": "Person",
+     "name": a.firstName,
+     "url": `https://guardiens.fr/auteurs/${a.slug}`,
+   }));
+   return persons.length === 1 ? persons[0] : persons;
+ })(),
  "publisher": {
  "@type": "Organization",
  "name": "Guardiens",
