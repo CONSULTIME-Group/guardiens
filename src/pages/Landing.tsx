@@ -1148,10 +1148,10 @@ const Landing = () => {
                 Guardiens, c'est le prétexte qui manquait. D'un côté, les petites missions d'entraide entre gens du coin : un potager arrosé contre un repas, une compétence contre une autre, un coup de main qui se rend en nature. De l'autre, indépendamment, le home sitting : vos clés confiées à quelqu'un que vous avez regardé dans les yeux.
               </p>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous, on ne s'attendait pas à ce que ça compte autant.
+                Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous ne nous attendions pas à ce que cela compte autant.
               </p>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                C'est pour ça qu'on a construit Guardiens. Pour que vous viviez ça aussi.
+                C'est pour cela que nous avons construit Guardiens — pour que vous viviez cela aussi.
               </p>
               <span className="text-sm font-body italic text-foreground/50 mt-10 block">
                 — Jérémie &amp; Elisa
