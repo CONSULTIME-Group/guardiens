@@ -44,6 +44,7 @@ interface SendLogRow {
   last_clicked_at: string | null;
   last_clicked_url: string | null;
   created_at: string;
+  metadata: { bypass?: boolean; isUrgent?: boolean } | null;
 }
 
 const statusBadge = (s: string) => {
@@ -64,6 +65,17 @@ const statusBadge = (s: string) => {
 
 const fmt = (d: string | null) =>
   d ? format(new Date(d), "dd/MM/yyyy HH:mm", { locale: fr }) : "—";
+
+const urgencyBadge = (metadata: SendLogRow["metadata"]) => {
+  if (!metadata) return null;
+  if (metadata.isUrgent) {
+    return <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 text-[10px]">Urgent</Badge>;
+  }
+  if (metadata.bypass) {
+    return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-[10px]">Bypass</Badge>;
+  }
+  return <Badge variant="outline" className="text-muted-foreground text-[10px]">Standard</Badge>;
+};
 
 export function QueueTab() {
   // ── Deferred queue ──
@@ -230,6 +242,7 @@ export function QueueTab() {
                   <TableRow>
                     <TableHead>Date</TableHead>
                     <TableHead>Template</TableHead>
+                    <TableHead>Type</TableHead>
                     <TableHead>Destinataire</TableHead>
                     <TableHead>Statut</TableHead>
                     <TableHead>Délivré</TableHead>
@@ -242,7 +255,7 @@ export function QueueTab() {
                 <TableBody>
                   {logRows.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="text-center text-sm text-muted-foreground py-8">
+                      <TableCell colSpan={10} className="text-center text-sm text-muted-foreground py-8">
                         Aucun résultat.
                       </TableCell>
                     </TableRow>
@@ -251,6 +264,7 @@ export function QueueTab() {
                       <TableRow key={r.id}>
                         <TableCell className="text-xs whitespace-nowrap">{fmt(r.created_at)}</TableCell>
                         <TableCell className="text-xs font-mono">{r.template_name}</TableCell>
+                        <TableCell>{urgencyBadge(r.metadata)}</TableCell>
                         <TableCell className="text-sm">{r.recipient_email}</TableCell>
                         <TableCell>{statusBadge(r.status)}</TableCell>
                         <TableCell className="text-xs whitespace-nowrap">{fmt(r.delivered_at)}</TableCell>

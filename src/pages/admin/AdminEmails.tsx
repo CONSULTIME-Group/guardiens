@@ -254,6 +254,17 @@ const StatusBadge = ({ status }: { status: string }) => {
   return <Badge variant={config.variant} className="text-xs">{config.label}</Badge>;
 };
 
+const UrgencyBadge = ({ metadata }: { metadata?: { bypass?: boolean; isUrgent?: boolean } | null }) => {
+  if (!metadata) return <Badge variant="outline" className="text-muted-foreground text-[10px]">Standard</Badge>;
+  if (metadata.isUrgent) {
+    return <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 text-[10px]">Urgent</Badge>;
+  }
+  if (metadata.bypass) {
+    return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-[10px]">Bypass</Badge>;
+  }
+  return <Badge variant="outline" className="text-muted-foreground text-[10px]">Standard</Badge>;
+};
+
 // ── Logs tab ──
 const LogsTab = () => {
   const [logs, setLogs] = useState<any[]>([]);
@@ -399,6 +410,7 @@ const LogsTab = () => {
           <TableHeader>
             <TableRow>
               <TableHead className="text-xs">Template</TableHead>
+              <TableHead className="text-xs">Type</TableHead>
               <TableHead className="text-xs">Destinataire</TableHead>
               <TableHead className="text-xs">Statut</TableHead>
               <TableHead className="text-xs">Date</TableHead>
@@ -407,13 +419,14 @@ const LogsTab = () => {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Chargement...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Chargement...</TableCell></TableRow>
             ) : logs.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Aucun email trouvé</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Aucun email trouvé</TableCell></TableRow>
             ) : (
               logs.slice(0, 50).map((log) => (
                 <TableRow key={log.id}>
                   <TableCell className="text-xs font-mono">{log.template_name}</TableCell>
+                  <TableCell><UrgencyBadge metadata={log.metadata} /></TableCell>
                   <TableCell className="text-xs">{log.recipient_email}</TableCell>
                   <TableCell><StatusBadge status={log.status} /></TableCell>
                   <TableCell className="text-xs text-muted-foreground">
