@@ -461,7 +461,10 @@ export default function ArticleDetail() {
  </div>
  )}
 
- <ArticleRenderer content={article.content} userRole={isAuthenticated ? user?.role : undefined} />
+ <ArticleRenderer content={article.content} userRole={isAuthenticated ? user?.role : undefined} slug={article.slug} />
+
+ {/* Bloc « À propos de l'auteur » — affiché si l'auteur est identifié (Jérémie / Elisa) */}
+ <ArticleAuthorBio authorName={article.author_name} />
 
  {/* CORRECTION 3 — À lire aussi (internal links) */}
  {internalLinks.length > 0 && (
