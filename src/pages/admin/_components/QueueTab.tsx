@@ -76,6 +76,8 @@ const urgencyBadge = (metadata: SendLogRow["metadata"]) => {
   }
   return <Badge variant="outline" className="text-muted-foreground text-[10px]">Standard</Badge>;
 };
+
+export function QueueTab() {
   // ── Deferred queue ──
   const [rows, setRows] = useState<DeferredRow[]>([]);
   const [loading, setLoading] = useState(false);
