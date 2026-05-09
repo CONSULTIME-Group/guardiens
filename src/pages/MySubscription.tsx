@@ -483,7 +483,7 @@ const MySubscription = () => {
  <div className="space-y-1">
  <p className="text-sm font-semibold text-amber-800 font-body">Vous devenez Fondateur le 13 juin.</p>
  <p className="text-sm text-amber-700 font-body leading-relaxed">
- Chaque membre inscrit avant le 13 juin bénéficie d'un mois supplémentaire offert jusqu'au 15 juillet, et reçoit le badge Fondateur, visible sur son profil public.
+ Chaque membre inscrit avant le 13 juin 2026 reçoit le badge Fondateur, visible sur son profil public. La gratuité, elle, est étendue à tous les inscrits jusqu'au 14 juillet 2026.
  </p>
  </div>
  </div>
