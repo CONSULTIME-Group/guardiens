@@ -642,7 +642,7 @@ Deno.serve(async (req) => {
     console.log('Transactional email sent via Resend', { templateName, effectiveRecipient, resendId: resendData.id })
 
     return new Response(
-      JSON.stringify({ success: true, sent: true, resendId: resendData.id }),
+      JSON.stringify({ success: true, sent: true, resendId: resendData.id, messageId }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (sendError) {
