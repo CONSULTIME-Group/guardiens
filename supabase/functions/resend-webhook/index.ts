@@ -97,7 +97,54 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Cherche l'envoi par resend_id
+    // === 1) Update email_send_log (transactional emails tracked by resend_id) ===
+    // We update ALL rows matching this resend_id (typically one with status='sent').
+    // Strategy: read latest sent row, compute incremental update, write back.
+    const { data: logRow } = await supabase
+      .from("email_send_log")
+      .select("id, open_count, click_count, first_opened_at, first_clicked_at")
+      .eq("resend_id", emailId)
+      .eq("status", "sent")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (logRow) {
+      const tNow = event.created_at || new Date().toISOString();
+      const logUpdate: Record<string, unknown> = {};
+      switch (event.type) {
+        case "email.delivered":
+          logUpdate.delivered_at = tNow;
+          break;
+        case "email.opened":
+          logUpdate.last_opened_at = tNow;
+          logUpdate.open_count = (logRow.open_count || 0) + 1;
+          if (!logRow.first_opened_at) logUpdate.first_opened_at = tNow;
+          break;
+        case "email.clicked":
+          logUpdate.last_clicked_at = tNow;
+          logUpdate.click_count = (logRow.click_count || 0) + 1;
+          if (!logRow.first_clicked_at) logUpdate.first_clicked_at = tNow;
+          if (event.data.click?.link) logUpdate.last_clicked_url = event.data.click.link;
+          break;
+        case "email.bounced":
+          logUpdate.bounced_at = tNow;
+          logUpdate.error_message = event.data.bounce?.message || "bounced";
+          break;
+        case "email.complained":
+          logUpdate.complained_at = tNow;
+          break;
+      }
+      if (Object.keys(logUpdate).length > 0) {
+        const { error: logErr } = await supabase
+          .from("email_send_log")
+          .update(logUpdate)
+          .eq("id", logRow.id);
+        if (logErr) console.error("email_send_log update error:", logErr);
+      }
+    }
+
+    // === 2) Update mass_email_sends (legacy mass-email tracking) ===
     const { data: send } = await supabase
       .from("mass_email_sends")
       .select("id, open_count, click_count, first_opened_at, first_clicked_at")
@@ -105,8 +152,8 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (!send) {
-      // Email non tracké (peut être un email transactionnel hors campagne) — OK
-      return new Response(JSON.stringify({ skipped: "not_tracked", email_id: emailId }), {
+      // Email pas dans mass_email_sends — il a peut-être été tracké côté email_send_log au-dessus.
+      return new Response(JSON.stringify({ ok: true, tracked_in: logRow ? "email_send_log" : "none", type: event.type }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
