@@ -115,6 +115,7 @@ class FakeSystem {
       status: 'pending',
       reason: decision.reason,
       attempts: 0,
+      isUrgent,
     })
     this.sendLog.push({
       message_id: this.newId('msg'),
