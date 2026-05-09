@@ -70,13 +70,13 @@ Cette gratuité ne dépend pas du programme Fondateur : que vous vous inscriviez
  },
  {
  q: "Pourquoi c'est gratuit pour les propriétaires ?",
- a: `Parce qu'on ne facture pas l'accès à ceux qui ouvrent leur maison.
+  a: `Parce que nous ne facturons pas l'accès à celles et ceux qui ouvrent leur maison.
 
-Publier une annonce, recevoir des candidatures, échanger avec les gardiens, laisser un avis — tout cela reste gratuit. Ce n'est pas une offre d'appel : c'est une décision de fond sur le modèle économique.
+Publier une annonce, recevoir des candidatures, échanger avec les gardiens, laisser un avis : tout reste gratuit. Ce n'est pas une offre d'appel, c'est un choix de fond sur notre modèle économique.
 
-Guardiens gagne de l'argent uniquement sur l'abonnement des gardiens. Les propriétaires n'ont aucune raison de payer pour accéder à des gens de confiance qui veulent garder leur maison — c'est l'échange qui a de la valeur, pas l'accès.
+Guardiens se rémunère uniquement via l'abonnement des gardiens. Côté propriétaire, payer pour rencontrer des personnes de confiance n'aurait pas de sens : ce qui a de la valeur, c'est l'échange — pas l'accès.
 
-Pour comprendre comment fonctionne la mise en relation : [Comment bien choisir son gardien →](/actualites/choisir-gardien-bons-criteres)`,
+Pour aller plus loin : [Comment bien choisir son gardien →](/actualites/choisir-gardien-bons-criteres)`,
  },
  {
  q: "Comment fonctionne l'essai gratuit de 7 jours ?",
