@@ -366,7 +366,7 @@ const SmallMissionsPublic = () => {
  </Reveal>
  <Reveal delay={0.15}>
  <p>
- Pourquoi ça revient ? Parce que le mouvement de retour à la proximité est partout, et il ne s'arrêtera pas : compostage de quartier, jardins partagés, AMAP, monnaies locales, initiatives municipales, frigos solidaires. Les gens veulent retrouver des liens qui ne passent pas par une facture. Guardiens vous donne le prétexte qui manque pour oser la première demande — et la suivante devient évidente.
+ Pourquoi ça revient ? Parce que le mouvement de retour à la proximité est partout, et il ne s'arrêtera pas : compostage de quartier, jardins partagés, AMAP, monnaies locales, initiatives municipales, boîtes à livres. Les gens veulent retrouver des liens qui ne passent pas par une facture. Guardiens vous donne le prétexte qui manque pour oser la première demande — et la suivante devient évidente.
  </p>
  </Reveal>
  </div>
