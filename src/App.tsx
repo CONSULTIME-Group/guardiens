@@ -69,6 +69,7 @@ const Settings = lazy(() => import("./pages/Settings"));
 const OwnerProfile = lazy(() => import("./pages/OwnerProfile"));
 const News = lazy(() => import("./pages/News"));
 const ArticleDetail = lazy(() => import("./pages/ArticleDetail"));
+const AuthorPage = lazy(() => import("./pages/AuthorPage"));
 const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Terms = lazy(() => import("./pages/Terms"));
@@ -237,6 +238,7 @@ const AppRoutes = () => (
       
       <Route path="/actualites" element={<News />} />
       <Route path="/actualites/:slug" element={<ArticleDetail />} />
+      <Route path="/auteurs/:slug" element={<AuthorPage />} />
       <Route path="/blog" element={<Navigate to="/actualites" replace />} />
       <Route path="/blog/:slug" element={<NavigateBlogSlug />} />
       <Route path="/a-propos" element={<About />} />
