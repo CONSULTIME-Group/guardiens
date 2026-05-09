@@ -578,7 +578,7 @@ const Landing = () => {
               Ou demander — et rendre — un coup de main près de chez vous, avec ou sans animaux.
             </p>
             <p className="font-body text-base md:text-lg text-white/70 max-w-xl mb-10 leading-relaxed italic animate-hero-fade-up animation-delay-700">
-              Et derrière chaque échange, une rencontre qu'on n'aurait pas cherchée.
+              Et derrière chaque échange, une rencontre que vous n'auriez pas cherchée.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 animate-hero-fade-up animation-delay-900">
