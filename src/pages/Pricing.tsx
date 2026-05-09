@@ -634,9 +634,9 @@ const Pricing = () => {
  ))}
  </Accordion>
  <div className="text-center mt-6">
- <Link to="/faq" className="text-sm font-body text-primary hover:underline">
- Voir toutes les questions →
- </Link>
+  <Link to="/faq#tarifs-abonnements" className="text-sm font-body text-primary hover:underline">
+  Voir toutes les questions →
+  </Link>
  </div>
  </section>
 
