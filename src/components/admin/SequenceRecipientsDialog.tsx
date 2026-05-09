@@ -70,12 +70,29 @@ export const SequenceRecipientsDialog = ({ open, onOpenChange, sequenceKey, sequ
       // 1) Parcours de la séquence sur la période
       const jr = await supabase
         .from("user_journeys")
-        .select("id, user_id, status, current_step, exit_reason, started_at, exited_at, profiles!user_journeys_user_id_fkey(first_name, last_name, email)")
+        .select("id, user_id, status, current_step, exit_reason, started_at, exited_at")
         .eq("sequence_key", sequenceKey)
         .gte("started_at", sinceIso)
         .order("started_at", { ascending: false })
         .limit(200);
-      const journeyRows = (jr.data ?? []) as unknown as JourneyRow[];
+      const journeyRowsRaw = (jr.data ?? []) as Array<Omit<JourneyRow, "profiles">>;
+
+      // Fetch profiles séparément
+      const userIds = Array.from(new Set(journeyRowsRaw.map((j) => j.user_id)));
+      let profilesByUser = new Map<string, JourneyRow["profiles"]>();
+      if (userIds.length > 0) {
+        const pr = await supabase
+          .from("profiles")
+          .select("id, first_name, last_name, email")
+          .in("id", userIds);
+        for (const p of (pr.data ?? []) as Array<{ id: string; first_name: string | null; last_name: string | null; email: string | null }>) {
+          profilesByUser.set(p.id, { first_name: p.first_name, last_name: p.last_name, email: p.email });
+        }
+      }
+      const journeyRows: JourneyRow[] = journeyRowsRaw.map((j) => ({
+        ...j,
+        profiles: profilesByUser.get(j.user_id) ?? null,
+      }));
 
       // 2) Logs des étapes pour ces parcours
       const journeyIds = journeyRows.map((j) => j.id);
