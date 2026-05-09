@@ -634,14 +634,41 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* ═══════════════ SOMMAIRE DE PAGE — maillage interne ═══════════════ */}
+      <nav
+        aria-label="Sommaire de la page"
+        className="border-y border-border bg-muted/20"
+      >
+        <div className="max-w-5xl mx-auto px-6 py-4">
+          <h2 className="sr-only">Sommaire</h2>
+          <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-body text-foreground/60">
+            <li><a href="#usages" className="hover:text-primary transition-colors">Garde &amp; entraide</a></li>
+            <li aria-hidden="true" className="text-foreground/20">·</li>
+            <li><a href="#comment-ca-marche" className="hover:text-primary transition-colors">Comment ça marche</a></li>
+            <li aria-hidden="true" className="text-foreground/20">·</li>
+            <li><a href="#confiance" className="hover:text-primary transition-colors">Confiance &amp; périmètre</a></li>
+            <li aria-hidden="true" className="text-foreground/20">·</li>
+            <li><a href="#entraide" className="hover:text-primary transition-colors">Entraide locale</a></li>
+            <li aria-hidden="true" className="text-foreground/20">·</li>
+            <li><a href="#temoignages" className="hover:text-primary transition-colors">Témoignages</a></li>
+            <li aria-hidden="true" className="text-foreground/20">·</li>
+            <li><a href="#notre-histoire" className="hover:text-primary transition-colors">Notre histoire</a></li>
+            <li aria-hidden="true" className="text-foreground/20">·</li>
+            <li><a href="#guides-villes" className="hover:text-primary transition-colors">Guides &amp; villes</a></li>
+            <li aria-hidden="true" className="text-foreground/20">·</li>
+            <li><a href="#faq" className="hover:text-primary transition-colors">FAQ</a></li>
+          </ul>
+        </div>
+      </nav>
+
       {/* ═══════════════ SECTION 2 — CE QU'ON FAIT ENSEMBLE ═══════════════ */}
-      <section className="py-24 md:py-32 bg-background">
+      <section id="usages" className="py-24 md:py-32 bg-background scroll-mt-24">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
               Ce qu'on fait ensemble
             </span>
-            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-3">
+            <h2 id="garde-et-entraide" className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-3 scroll-mt-24">
               Garde d'animaux à domicile et entraide locale.
             </h2>
             <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16 italic">
@@ -718,13 +745,13 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 2bis — CE QUI ARRIVE EN PLUS ═══════════════ */}
-      <section className="py-28 md:py-36 bg-accent/40 border-y border-accent">
+      <section id="rencontre" className="py-28 md:py-36 bg-accent/40 border-y border-accent scroll-mt-24">
         <div className="max-w-3xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/70 font-body mb-6 block text-center">
               Ce qu'on n'écrit jamais dans une annonce
             </span>
-            <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.15] text-foreground text-center mb-10">
+            <h2 id="le-vrai-pretexte" className="font-heading text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.15] text-foreground text-center mb-10 scroll-mt-24">
               Le vrai prétexte,<br className="hidden md:inline" /> c'est la rencontre.
             </h2>
 
@@ -750,13 +777,13 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 3 — COMMENT ÇA MARCHE ═══════════════ */}
-      <section id="how-it-works" className="py-24 md:py-32 bg-muted/30">
+      <section id="comment-ca-marche" className="py-24 md:py-32 bg-muted/30 scroll-mt-24">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
               Simple et transparent
             </span>
-            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-4">
+            <h2 id="how-it-works" className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-4 scroll-mt-24">
               Comment ça marche ?
             </h2>
             <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16">
@@ -858,7 +885,7 @@ const Landing = () => {
       </RevealSection>
 
       {/* ═══════════════ SECTION 5 — CONFIANCE & PÉRIMÈTRE (fusion) ═══════════════ */}
-      <section className="bg-background py-24 md:py-32" aria-labelledby="trust-heading">
+      <section id="confiance" className="bg-background py-24 md:py-32 scroll-mt-24" aria-labelledby="trust-heading">
         <div className="max-w-6xl mx-auto px-5 sm:px-6">
           <RevealSection className="text-center max-w-3xl mx-auto mb-16">
             <p className="text-xs md:text-[13px] tracking-[0.2em] uppercase text-primary font-body font-medium">
@@ -930,13 +957,13 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 6 — OSEZ L'ENTRAIDE ═══════════════ */}
-      <section className="py-24 md:py-32 bg-accent">
+      <section id="entraide" className="py-24 md:py-32 bg-accent scroll-mt-24">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
               Pour tous · Sans abonnement · Sans argent
             </span>
-            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-6">
+            <h2 id="osez-l-entraide" className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-6 scroll-mt-24">
               Osez demander. Osez proposer.
             </h2>
             <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-4 text-lg leading-relaxed">
@@ -1026,10 +1053,10 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 7 — TÉMOIGNAGES ═══════════════ */}
-      <section className="py-24 md:py-32 bg-background">
+      <section id="temoignages" className="py-24 md:py-32 bg-background scroll-mt-24">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
-            <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug">
+            <h2 id="ils-ont-ose" className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug scroll-mt-24">
               Ils ont osé. Voici ce qu'il leur reste.
             </h2>
             <p className="mt-4 font-body text-sm text-foreground/55 max-w-xl mx-auto">
@@ -1111,13 +1138,13 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 8 — NOTRE HISTOIRE ═══════════════ */}
-      <section className="bg-muted/30">
+      <section id="notre-histoire" className="bg-muted/30 scroll-mt-24">
         <div className="max-w-6xl mx-auto px-6 py-24 md:py-32">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
               Notre histoire
             </span>
-            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-12">
+            <h2 id="commence-avec-un-visa" className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-12 scroll-mt-24">
               Tout a commencé avec un visa.
             </h2>
           </RevealSection>
@@ -1174,13 +1201,13 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 9 — GUIDES + VILLES (fusion SEO) ═══════════════ */}
-      <section className="py-24 md:py-32 bg-background">
+      <section id="guides-villes" className="py-24 md:py-32 bg-background scroll-mt-24">
         <div className="max-w-6xl mx-auto px-6">
           <RevealSection className="text-center mb-14">
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
               Guides &amp; villes
             </span>
-            <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug mb-4">
+            <h2 id="house-sitting-pres-de-chez-vous" className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug mb-4 scroll-mt-24">
               House-sitting près de chez vous.
             </h2>
             <p className="text-lg font-body text-foreground/70 max-w-2xl mx-auto">
@@ -1339,7 +1366,7 @@ const Landing = () => {
 
           {/* FAQ visible — miroir du JSON-LD FAQPage déclaré en haut de page */}
           <RevealSection delay={0.3} className="mt-16 max-w-3xl mx-auto">
-            <h3 className="font-heading text-2xl md:text-3xl font-semibold text-foreground text-center mb-8">
+            <h3 id="faq" className="font-heading text-2xl md:text-3xl font-semibold text-foreground text-center mb-8 scroll-mt-24">
               Questions fréquentes
             </h3>
             <dl className="space-y-6">
@@ -1397,7 +1424,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 10 — CTA FINAL (fusion Fondateur + double CTA) ═══════════════ */}
-      <section className="py-24 md:py-32 bg-primary">
+      <section id="commencer" className="py-24 md:py-32 bg-primary scroll-mt-24">
         <RevealSection className="max-w-2xl mx-auto px-6 text-center">
           <div className="inline-flex items-center rounded-full px-4 py-1.5 mb-8 bg-white/15 border border-white/30">
             <span className="font-body text-xs text-white uppercase tracking-widest">Programme Fondateur</span>
