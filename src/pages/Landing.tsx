@@ -736,9 +736,9 @@ const Landing = () => {
                 un coup de main pour bricoler — et lui proposer un repas fait maison en retour.
               </p>
               <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/80 mb-5">
-                Aucun animal n'a besoin d'apparaître pour qu'une rencontre commence.
-                Demander un coup de main, en proposer un, c'est déjà ouvrir une porte.
-                Garder une maison, c'est en ouvrir une autre — différente, mais animée du même mouvement.
+                Pas besoin d'un animal pour qu'une rencontre commence.
+                Demander un coup de main, en proposer un : c'est déjà ouvrir une porte.
+                Garder une maison, c'est en ouvrir une autre — un même geste, deux échelles.
               </p>
               <p className="font-heading text-xl md:text-2xl italic text-foreground leading-snug">
                 On apprend, on découvre, on s'attache —
