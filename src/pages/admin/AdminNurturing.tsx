@@ -304,6 +304,20 @@ const AdminNurturing = () => {
     setLoading(false);
   };
 
+  const triggerEvaluate = async () => {
+    setTriggering(true);
+    try {
+      const { error } = await supabase.functions.invoke("evaluate-journeys", { body: { manual: true } });
+      if (error) throw error;
+      toast.success("Évaluation lancée — actualisation dans 3 s");
+      setTimeout(() => fetchData(), 3000);
+    } catch (e) {
+      toast.error("Échec du déclenchement", { description: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setTriggering(false);
+    }
+  };
+
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
