@@ -123,6 +123,7 @@ const CreateSit = () => {
   const [ownerProfile, setOwnerProfile] = useState<OwnerSummary | null>(null);
   const [ownerPhotos, setOwnerPhotos] = useState<string[]>([]);
   const [profileCompletion, setProfileCompletion] = useState(0);
+  const [ownerCity, setOwnerCity] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [isRepublish, setIsRepublish] = useState(false);
