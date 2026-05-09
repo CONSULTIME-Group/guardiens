@@ -360,10 +360,8 @@ const Landing = () => {
   Home sitting · Entraide locale
   </p>
 
- {/* Badge Gratuit propriétaires */}
- <div className="inline-flex items-center rounded-full px-4 py-1.5 mb-6 bg-white/15 border border-white/30 backdrop-blur-sm animate-hero-fade-up">
- <span className="font-body text-xs text-white tracking-wide">Gratuit pour les propriétaires</span>
- </div>
+  {/* Ticker gratuité — pulse pendant la période, fallback statique sinon */}
+ <FreeTickerChip variant="onDark" className="mb-6 animate-hero-fade-up" />
 
  {/* H1 with staggered animation */}
  <h1 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-2 animate-hero-fade-up animation-delay-400">
