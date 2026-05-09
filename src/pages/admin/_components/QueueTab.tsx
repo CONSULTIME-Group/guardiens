@@ -242,6 +242,7 @@ export function QueueTab() {
                   <TableRow>
                     <TableHead>Date</TableHead>
                     <TableHead>Template</TableHead>
+                    <TableHead>Type</TableHead>
                     <TableHead>Destinataire</TableHead>
                     <TableHead>Statut</TableHead>
                     <TableHead>Délivré</TableHead>
