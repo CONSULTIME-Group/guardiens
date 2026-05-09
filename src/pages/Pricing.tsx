@@ -642,7 +642,7 @@ const Pricing = () => {
 
  {/* ═══ Lien article détaillé ═══ */}
  <section className="rounded-xl border border-border bg-accent/30 p-6 text-center mb-12 max-w-3xl mx-auto">
- <p className="text-sm text-muted-foreground mb-2">Vous voulez tout comprendre en détail ?</p>
+ <p className="text-sm text-muted-foreground mb-2">Vous préférez tout lire en détail ?</p>
  <Link to="/actualites/nouveaux-tarifs-2026" className="text-primary font-medium hover:underline text-sm">
  Découvrir nos tarifs en détail →
  </Link>
