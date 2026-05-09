@@ -73,13 +73,28 @@ const isObviouslyWeak = (pw: string): boolean => {
  return false;
 };
 
+/* ── Random suggestion d'un mot de passe fort, mémorisable et HIBP-safe ── */
+const PW_ADJ = ["Joyeux", "Calme", "Sauvage", "Doux", "Brave", "Curieux", "Vif", "Tendre"];
+const PW_NOUN = ["Chat", "Chien", "Lapin", "Renard", "Loup", "Cheval", "Hibou", "Ours"];
+const PW_VERB = ["adore", "croque", "grimpe", "danse", "veille", "murmure", "explore"];
+const PW_SYM = ["!", "?", "#", "$", "*"];
+const generateSuggestedPassword = (): string => {
+  const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+  const num = String(Math.floor(Math.random() * 90) + 10);
+  return `${pick(PW_ADJ)}${pick(PW_NOUN)}${pick(PW_SYM)}${pick(PW_VERB)}${num}`;
+};
+
 const Register = () => {
  const [searchParams] = useSearchParams();
  const presetRole = searchParams.get("role") as Role | null;
+ const presetEmail = (searchParams.get("email") || "").trim().toLowerCase();
 
  const [step, setStep] = useState<1 | 2 | "confirmation">(presetRole ? 2 : 1);
  const [selectedRole, setSelectedRole] = useState<Role | null>(presetRole);
- const [email, setEmail] = useState("");
+ const [email, setEmail] = useState<string>(() => {
+  if (presetEmail) return presetEmail;
+  try { return sessionStorage.getItem("guardiens_signup_email") || ""; } catch { return ""; }
+ });
  const [password, setPassword] = useState("");
  const [showPassword, setShowPassword] = useState(false);
  const [isLoading, setIsLoading] = useState(false);
@@ -88,10 +103,9 @@ const Register = () => {
  const [resendCount, setResendCount] = useState(0);
  const [formError, setFormError] = useState<string | null>(null);
  const [existingAccountOpen, setExistingAccountOpen] = useState(false);
-  const [acceptedCgu, setAcceptedCgu] = useState(false);
-  const [acceptedCgs, setAcceptedCgs] = useState(false);
-  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
-  const acceptedTerms = acceptedCgu && acceptedCgs && acceptedPrivacy;
+ const [acceptedTerms, setAcceptedTerms] = useState(false);
+ const [termsHighlighted, setTermsHighlighted] = useState(false);
+ const [etaSeconds, setEtaSeconds] = useState<number>(25);
  const [totalInscrits, setTotalInscrits] = useState<number | null>(null);
  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
@@ -130,6 +144,22 @@ const Register = () => {
  const t = setInterval(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
  return () => clearInterval(t);
  }, [resendCooldown]);
+
+ // Persist email entre étapes / refresh (préserve le brouillon en cas d'abandon)
+ useEffect(() => {
+  try {
+   if (email) sessionStorage.setItem("guardiens_signup_email", email);
+   else sessionStorage.removeItem("guardiens_signup_email");
+  } catch {}
+ }, [email]);
+
+ // Compteur ETA décroissant à l'étape 2 (rassure : « plus que X secondes »)
+ useEffect(() => {
+  if (step !== 2) return;
+  setEtaSeconds(25);
+  const t = setInterval(() => setEtaSeconds((s) => (s > 0 ? s - 1 : 0)), 1000);
+  return () => clearInterval(t);
+ }, [step]);
 
  // Charge le nombre d'inscrits pour preuve sociale
  useEffect(() => {
@@ -170,10 +200,20 @@ const Register = () => {
  return;
  }
 
-      if (!acceptedCgu || !acceptedCgs || !acceptedPrivacy) {
-        setFormError("Veuillez accepter les CGU (v5), les CGS (v1) et la politique de confidentialité.");
-        return;
-      }
+  if (!acceptedTerms) {
+    setFormError("Veuillez accepter les CGU, les CGS et la politique de confidentialité pour continuer.");
+    setTermsHighlighted(true);
+    setTimeout(() => {
+      document.getElementById("accept-terms")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 50);
+    try {
+      trackEvent("signup_form_blocked", {
+        source: "/inscription",
+        metadata: { reason: "terms_unchecked", role: selectedRole },
+      });
+    } catch {}
+    return;
+  }
 
  // ── signup_form_submitted (après validation client, avant appel Supabase) ──
  try {
@@ -337,9 +377,13 @@ const Register = () => {
  };
 
   const handleGoogleSignUp = async () => {
-    if (!acceptedCgu || !acceptedCgs || !acceptedPrivacy) {
+    if (!acceptedTerms) {
       logOAuthStage("blocked_terms", "/inscription");
-      setFormError("Veuillez accepter les CGU (v5), les CGS (v1) et la politique de confidentialité avant de continuer avec Google.");
+      setFormError("Veuillez accepter les CGU, les CGS et la politique de confidentialité avant de continuer avec Google.");
+      setTermsHighlighted(true);
+      setTimeout(() => {
+        document.getElementById("accept-terms")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 50);
       return;
     }
  setIsGoogleLoading(true);
@@ -649,46 +693,75 @@ const Register = () => {
  </div>
  </div>
 
+ {/* Bandeau ETA — rassure sur la durée restante */}
+ <div className="flex items-center justify-center gap-2 -mt-1 mb-1 text-xs text-muted-foreground">
+  <span className="inline-flex items-center justify-center min-w-[1.75rem] h-6 px-2 rounded-full bg-primary/10 text-primary font-semibold tabular-nums">
+   {etaSeconds > 0 ? `${etaSeconds}s` : "✓"}
+  </span>
+  <span>{etaSeconds > 0 ? "Plus que quelques secondes" : "C'est presque fini !"}</span>
+ </div>
+
  <div className="space-y-2">
- <Label htmlFor="email">Email</Label>
- <Input
- id="email"
- type="email"
- placeholder="vous@exemple.com"
- value={email}
- onChange={(e) => setEmail(e.target.value)}
- required
- autoComplete="email"
- className="rounded-lg h-12"
- />
+  <Label htmlFor="email">Email</Label>
+  <Input
+   id="email"
+   type="email"
+   placeholder="vous@exemple.com"
+   value={email}
+   onChange={(e) => setEmail(e.target.value)}
+   onFocus={() => { try { trackEvent("signup_form_focused" as any, { source: "/inscription", metadata: { field: "email" } }); } catch {} }}
+   required
+   autoComplete="email"
+   className="rounded-lg h-12"
+  />
+  <p className="text-xs text-muted-foreground">
+   Nous vous enverrons un lien à valider en 1 clic. Pensez à vérifier vos spams (notamment Hotmail / Outlook).
+  </p>
  </div>
  <div className="space-y-2">
- <Label htmlFor="password">Mot de passe</Label>
- <div className="relative">
- <Input
- id="password"
- type={showPassword ? "text" : "password"}
- placeholder="Ex : MonChat!adore2dormir"
- value={password}
- onChange={(e) => { setPassword(e.target.value); setFormError(null); }}
- required
- minLength={8}
- autoComplete="new-password"
- className="rounded-lg h-12 pr-12"
- />
- <button
- type="button"
- onClick={() => setShowPassword(!showPassword)}
- aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
- aria-pressed={showPassword}
- className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
- >
- {showPassword ? <EyeOff className="h-5 w-5" aria-hidden="true" /> : <Eye className="h-5 w-5" aria-hidden="true" />}
- </button>
- </div>
- <p className="text-xs text-muted-foreground">
- 8 caractères min. · mélangez majuscules, chiffres et symboles · évitez les mots de passe courants (ex : « Password1 »)
- </p>
+  <div className="flex items-center justify-between">
+   <Label htmlFor="password">Mot de passe</Label>
+   <button
+    type="button"
+    onClick={() => { const pw = generateSuggestedPassword(); setPassword(pw); setShowPassword(true); setFormError(null); }}
+    className="text-xs text-primary hover:underline"
+   >
+    Suggérer un mot de passe fort
+   </button>
+  </div>
+  <div className="relative">
+   <Input
+    id="password"
+    type={showPassword ? "text" : "password"}
+    placeholder="Au moins 8 caractères"
+    value={password}
+    onChange={(e) => { setPassword(e.target.value); setFormError(null); }}
+    onFocus={() => { try { trackEvent("signup_form_focused" as any, { source: "/inscription", metadata: { field: "password" } }); } catch {} }}
+    required
+    minLength={8}
+    autoComplete="new-password"
+    className="rounded-lg h-12 pr-12"
+   />
+   <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+    aria-pressed={showPassword}
+    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+   >
+    {showPassword ? <EyeOff className="h-5 w-5" aria-hidden="true" /> : <Eye className="h-5 w-5" aria-hidden="true" />}
+   </button>
+  </div>
+  <p className="text-xs text-muted-foreground">
+   8 caractères min. · majuscules, chiffres ou symboles · évitez les mots de passe courants
+  </p>
+
+  {/* Détection live des mots de passe trop courants — évite l'erreur HIBP au submit */}
+  {password.length >= 6 && isObviouslyWeak(password) && (
+   <p className="text-xs text-warning-foreground bg-warning-soft border border-warning-border rounded px-2 py-1.5 animate-in fade-in-0">
+    Ce mot de passe est trop courant. Utilisez « Suggérer un mot de passe fort » ou ajoutez chiffres / symboles.
+   </p>
+  )}
 
  {/* Password strength indicator */}
  {password.length > 0 && (
@@ -714,55 +787,42 @@ const Register = () => {
  </div>
 
 
-          {/* Acceptation légale */}
-          <div className="space-y-2">
-            <div className="flex items-start gap-2">
-              <Checkbox
-                id="accept-cgu"
-                checked={acceptedCgu}
-                onCheckedChange={(v) => setAcceptedCgu(v === true)}
-                className="mt-0.5"
-              />
-              <label htmlFor="accept-cgu" className="text-sm text-muted-foreground leading-snug cursor-pointer">
-                J'accepte les{" "}
-                <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  Conditions Générales d'Utilisation (v5)
-                </Link>.
-              </label>
-            </div>
-            <div className="flex items-start gap-2">
-              <Checkbox
-                id="accept-cgs"
-                checked={acceptedCgs}
-                onCheckedChange={(v) => setAcceptedCgs(v === true)}
-                className="mt-0.5"
-              />
-              <label htmlFor="accept-cgs" className="text-sm text-muted-foreground leading-snug cursor-pointer">
-                J'accepte les{" "}
-                <Link to="/cgs" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  Conditions Générales de Services (v1)
-                </Link>.
-              </label>
-            </div>
-            <div className="flex items-start gap-2">
-              <Checkbox
-                id="accept-privacy"
-                checked={acceptedPrivacy}
-                onCheckedChange={(v) => setAcceptedPrivacy(v === true)}
-                className="mt-0.5"
-              />
-              <label htmlFor="accept-privacy" className="text-sm text-muted-foreground leading-snug cursor-pointer">
-                J'ai lu et j'accepte la{" "}
-                <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  politique de confidentialité
-                </Link>.
-              </label>
-            </div>
+          {/* Acceptation légale — fusionnée en une seule case (équivalent juridique) */}
+          <div
+            className={cn(
+              "flex items-start gap-3 rounded-lg border p-3 transition-colors",
+              termsHighlighted && !acceptedTerms
+                ? "border-destructive bg-destructive/5 animate-in fade-in-0"
+                : "border-border bg-muted/30"
+            )}
+          >
+            <Checkbox
+              id="accept-terms"
+              checked={acceptedTerms}
+              onCheckedChange={(v) => {
+                const checked = v === true;
+                setAcceptedTerms(checked);
+                if (checked) {
+                  setTermsHighlighted(false);
+                  setFormError(null);
+                  try { trackEvent("signup_terms_checked" as any, { source: "/inscription" }); } catch {}
+                }
+              }}
+              className="mt-0.5"
+            />
+            <label htmlFor="accept-terms" className="text-sm text-foreground/80 leading-snug cursor-pointer">
+              J'accepte les{" "}
+              <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">CGU</Link>,
+              les{" "}
+              <Link to="/cgs" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">CGS</Link>{" "}
+              et la{" "}
+              <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">politique de confidentialité</Link>.
+            </label>
           </div>
 
- <Button type="submit" className="w-full" size="lg" disabled={isLoading || !acceptedTerms}>
- {isLoading ? "Création..." : "Créer mon compte"}
- </Button>
+          <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+            {isLoading ? "Création..." : "Créer mon compte"}
+          </Button>
  <p className="text-center text-xs text-muted-foreground">
  Pas de spam · Désinscription en 1 clic · Vos données restent en France
  </p>

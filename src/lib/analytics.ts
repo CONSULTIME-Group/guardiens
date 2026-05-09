@@ -12,6 +12,8 @@ export type EventType =
   | "signup_form_submitted"
   | "signup_completed"
   | "signup_failed"
+  | "signup_form_blocked"         // Submit cliqué mais bloqué côté client (CGU non cochées, etc.)
+  | "signup_form_focused"         // 1er focus sur un champ du formulaire (mesure friction)
   | "signup_email_confirmed"      // Email cliqué + session active
   | "user_activated"
   | "onboarding_started"          // Modale d'onboarding ouverte
