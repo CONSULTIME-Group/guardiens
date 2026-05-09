@@ -158,6 +158,8 @@ const AdminNurturing = () => {
   const [nurturingTemplates, setNurturingTemplates] = useState<string[]>([]);
   const [lastRunAt, setLastRunAt] = useState<string | null>(null);
   const [lastRunSent, setLastRunSent] = useState<boolean>(false);
+  const [sequences, setSequences] = useState<SequenceRow[]>([]);
+  const [sequenceSteps, setSequenceSteps] = useState<SequenceStepRow[]>([]);
 
   const fetchData = async () => {
     setLoading(true);
