@@ -634,14 +634,41 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* ═══════════════ SOMMAIRE DE PAGE — maillage interne ═══════════════ */}
+      <nav
+        aria-label="Sommaire de la page"
+        className="border-y border-border bg-muted/20"
+      >
+        <div className="max-w-5xl mx-auto px-6 py-4">
+          <h2 className="sr-only">Sommaire</h2>
+          <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-body text-foreground/60">
+            <li><a href="#usages" className="hover:text-primary transition-colors">Garde &amp; entraide</a></li>
+            <li aria-hidden="true" className="text-foreground/20">·</li>
+            <li><a href="#comment-ca-marche" className="hover:text-primary transition-colors">Comment ça marche</a></li>
+            <li aria-hidden="true" className="text-foreground/20">·</li>
+            <li><a href="#confiance" className="hover:text-primary transition-colors">Confiance &amp; périmètre</a></li>
+            <li aria-hidden="true" className="text-foreground/20">·</li>
+            <li><a href="#entraide" className="hover:text-primary transition-colors">Entraide locale</a></li>
+            <li aria-hidden="true" className="text-foreground/20">·</li>
+            <li><a href="#temoignages" className="hover:text-primary transition-colors">Témoignages</a></li>
+            <li aria-hidden="true" className="text-foreground/20">·</li>
+            <li><a href="#notre-histoire" className="hover:text-primary transition-colors">Notre histoire</a></li>
+            <li aria-hidden="true" className="text-foreground/20">·</li>
+            <li><a href="#guides-villes" className="hover:text-primary transition-colors">Guides &amp; villes</a></li>
+            <li aria-hidden="true" className="text-foreground/20">·</li>
+            <li><a href="#faq" className="hover:text-primary transition-colors">FAQ</a></li>
+          </ul>
+        </div>
+      </nav>
+
       {/* ═══════════════ SECTION 2 — CE QU'ON FAIT ENSEMBLE ═══════════════ */}
-      <section className="py-24 md:py-32 bg-background">
+      <section id="usages" className="py-24 md:py-32 bg-background scroll-mt-24">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
               Ce qu'on fait ensemble
             </span>
-            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-3">
+            <h2 id="garde-et-entraide" className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-3 scroll-mt-24">
               Garde d'animaux à domicile et entraide locale.
             </h2>
             <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16 italic">
