@@ -106,6 +106,33 @@ C'est ce jour-là que la gratuité prend fin pour les gardiens. Le **13 juillet 
 
 **Ce qu'on ne prend pas :** Aucune commission sur les gardes. Pas d'assurance obligatoire, pas de booking fee, pas de frais de mise en relation.`,
  },
+ {
+ q: "Guardiens, c'est uniquement pour la garde d'animaux ?",
+ a: `Non. Guardiens héberge **deux usages indépendants**, à parts égales.
+
+**La garde d'animaux à domicile (home sitting)** : un gardien vient chez vous prendre soin de votre maison et de vos animaux pendant votre absence.
+
+**Les petites missions d'entraide entre gens du coin** : un coup de main ponctuel, sans nuitée, sans animal nécessaire — arroser des plantes, ramasser les légumes du jardin, monter un meuble, prêter une perceuse, partager un trajet.
+
+Aucun des deux ne dépend de l'autre. Vous pouvez utiliser uniquement l'entraide, uniquement la garde, ou les deux. L'entraide reste gratuite pour tous, sans abonnement.`,
+ },
+ {
+ q: "Quels types d'échanges sont possibles ?",
+ a: `Les échanges sur Guardiens passent par **du temps, des compétences ou des objets** — jamais par une transaction financière directe entre membres.
+
+**Côté garde :** vous accueillez un gardien chez vous, il prend soin de votre maison et de vos animaux. Pas d'argent qui circule entre vous : l'échange se joue dans le service rendu (un toit, une présence).
+
+**Côté entraide :** un service rendu peut être remercié par un autre service, un objet partagé, un repas, un cours, du temps. Quelques exemples concrets :
+- Ramasser des légumes contre un plat maison.
+- Arroser des plantes pendant un week-end.
+- Prêter une perceuse, un sécateur, une remorque.
+- Partager un trajet jusqu'à la gare ou au marché.
+- Donner un cours (pain, couture, jardinage, informatique).
+- Garder un colis, recevoir une livraison.
+- Aider à porter un meuble, monter une étagère.
+
+Chaque échange est libre, négocié entre les deux personnes, et n'engage que vous. Guardiens fournit l'outil et la mise en relation — pas la facture.`,
+ },
 ];
 
 const cityLinks = [
