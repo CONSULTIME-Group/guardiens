@@ -692,6 +692,24 @@ const Landing = () => {
               </div>
             </RevealSection>
           </div>
+
+          <RevealSection delay={0.4}>
+            <div className="mt-10 bg-accent/40 border border-accent rounded-2xl p-6 md:p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <p className="text-xs tracking-widest uppercase text-foreground/60 font-body mb-1">Imprévu de dernière minute</p>
+                <h3 className="text-lg font-heading font-semibold text-foreground">Besoin d'un gardien en urgence ?</h3>
+                <p className="text-sm font-body text-foreground/70 mt-1">
+                  Hospitalisation, déplacement imprévu, urgence familiale : trouvez quelqu'un du coin disponible rapidement.
+                </p>
+              </div>
+              <Link
+                to="/gardien-urgence"
+                className="shrink-0 inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-foreground text-background font-body font-medium text-sm hover:bg-foreground/90 transition-colors"
+              >
+                Trouver un gardien d'urgence →
+              </Link>
+            </div>
+          </RevealSection>
         </div>
       </section>
 
