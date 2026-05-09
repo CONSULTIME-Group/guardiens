@@ -184,10 +184,20 @@ const Register = () => {
  return;
  }
 
-      if (!acceptedCgu || !acceptedCgs || !acceptedPrivacy) {
-        setFormError("Veuillez accepter les CGU (v5), les CGS (v1) et la politique de confidentialité.");
-        return;
-      }
+  if (!acceptedTerms) {
+    setFormError("Veuillez accepter les CGU, les CGS et la politique de confidentialité pour continuer.");
+    setTermsHighlighted(true);
+    setTimeout(() => {
+      document.getElementById("accept-terms")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 50);
+    try {
+      trackEvent("signup_form_blocked", {
+        source: "/inscription",
+        metadata: { reason: "terms_unchecked", role: selectedRole },
+      });
+    } catch {}
+    return;
+  }
 
  // ── signup_form_submitted (après validation client, avant appel Supabase) ──
  try {
