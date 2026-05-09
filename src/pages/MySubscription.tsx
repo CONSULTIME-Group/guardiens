@@ -353,7 +353,7 @@ const MySubscription = () => {
  <span className="text-primary text-lg mt-0.5 flex-shrink-0" aria-hidden="true">{"✓"}</span>
  <div>
  <p className="text-sm font-semibold text-primary font-body">Bienvenue chez Guardiens.</p>
- <p className="text-sm text-foreground/70 font-body mt-0.5">Votre compte est actif. Toutes les fonctionnalités sont disponibles jusqu'au 13 juin.</p>
+ <p className="text-sm text-foreground/70 font-body mt-0.5">Votre compte est actif. Toutes les fonctionnalités sont disponibles jusqu'au 14 juillet 2026.</p>
  </div>
  </div>
  )}
