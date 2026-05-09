@@ -75,12 +75,13 @@ function resolveArticleImages(html: string): string {
 }
 
 /** Inject mid-article CTA after the 2nd <h2> */
-function injectCTA(html: string): string {
+function injectCTA(html: string, slug?: string): string {
   let h2Count = 0;
+  const slugAttr = slug ? ` data-article-slug="${slug}"` : "";
   return html.replace(/<h2/g, (match) => {
     h2Count++;
     if (h2Count === 3) {
-      return `<div class="article-cta-block"><div class="article-cta-inner"><p class="article-cta-text">Vous êtes propriétaire d'animaux ou vous aimez les animaux ?</p><div class="article-cta-buttons"><a href="/inscription" class="article-cta-btn article-cta-btn-primary">Rejoindre la communauté</a><a href="/search" class="article-cta-btn article-cta-btn-secondary">Trouver un gardien</a></div></div></div>\n${match}`;
+      return `<div class="article-cta-block"><div class="article-cta-inner"><p class="article-cta-text">Vous êtes propriétaire d'animaux ou vous aimez les animaux ?</p><div class="article-cta-buttons"><a href="/inscription?role=owner" class="article-cta-btn article-cta-btn-primary" data-article-cta="true" data-cta-position="mid" data-cta-role="owner"${slugAttr}>Rejoindre la communauté</a><a href="/inscription?role=sitter" class="article-cta-btn article-cta-btn-secondary" data-article-cta="true" data-cta-position="mid" data-cta-role="sitter"${slugAttr}>Devenir gardien</a></div></div></div>\n${match}`;
     }
     return match;
   });
