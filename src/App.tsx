@@ -122,6 +122,7 @@ const AdminSEO = lazy(() => import("./pages/admin/AdminSEO"));
 const AdminSkills = lazy(() => import("./pages/admin/AdminSkills"));
 const AdminMassEmails = lazy(() => import("./pages/admin/AdminMassEmails"));
 const AdminRelanceIncomplet = lazy(() => import("./pages/admin/AdminRelanceIncomplet"));
+const AdminNurturing = lazy(() => import("./pages/admin/AdminNurturing"));
 const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
 const AdminErrors = lazy(() => import("./pages/admin/AdminErrors"));
@@ -292,6 +293,7 @@ const AppRoutes = () => (
         <Route path="/admin/skills" element={<AdminSkills />} />
         <Route path="/admin/envois-groupes" element={<AdminMassEmails />} />
         <Route path="/admin/relance-incomplet" element={<AdminRelanceIncomplet />} />
+        <Route path="/admin/nurturing" element={<AdminNurturing />} />
         <Route path="/admin/messages" element={<AdminMessages />} />
         <Route path="/admin/analytics" element={<AdminAnalytics />} />
         <Route path="/admin/errors" element={<AdminErrors />} />

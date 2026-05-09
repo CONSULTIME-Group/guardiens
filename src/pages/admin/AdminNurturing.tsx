@@ -1,0 +1,286 @@
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+
+type Range = "24h" | "7d" | "30d";
+const RANGE_HOURS: Record<Range, number> = { "24h": 24, "7d": 24 * 7, "30d": 24 * 30 };
+
+interface LogRow {
+  id: string;
+  journey_id: string;
+  step_order: number;
+  template_name: string;
+  sent: boolean;
+  reason: string | null;
+  created_at: string;
+  user_journeys: { sequence_key: string } | null;
+}
+
+interface JourneyRow {
+  status: string;
+  sequence_key: string;
+  exit_reason: string | null;
+}
+
+const StatCard = ({ label, value, hint, tone }: { label: string; value: string | number; hint?: string; tone?: "ok" | "warn" | "err" }) => {
+  const toneClass =
+    tone === "err" ? "text-destructive" : tone === "warn" ? "text-amber-600 dark:text-amber-400" : tone === "ok" ? "text-emerald-600 dark:text-emerald-400" : "text-foreground";
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
+        <p className={`mt-1 text-3xl font-heading font-bold ${toneClass}`}>{value}</p>
+        {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
+      </CardContent>
+    </Card>
+  );
+};
+
+const AdminNurturing = () => {
+  const [range, setRange] = useState<Range>("30d");
+  const [loading, setLoading] = useState(true);
+  const [logs, setLogs] = useState<LogRow[]>([]);
+  const [journeys, setJourneys] = useState<JourneyRow[]>([]);
+
+  const fetchData = async () => {
+    setLoading(true);
+    const since = new Date(Date.now() - RANGE_HOURS[range] * 3600_000).toISOString();
+    const [logsRes, journeysRes] = await Promise.all([
+      supabase
+        .from("journey_step_log")
+        .select("id, journey_id, step_order, template_name, sent, reason, created_at, user_journeys!inner(sequence_key)")
+        .gte("created_at", since)
+        .order("created_at", { ascending: false })
+        .limit(2000),
+      supabase.from("user_journeys").select("status, sequence_key, exit_reason").limit(5000),
+    ]);
+    if (!logsRes.error) setLogs((logsRes.data ?? []) as unknown as LogRow[]);
+    if (!journeysRes.error) setJourneys((journeysRes.data ?? []) as JourneyRow[]);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [range]);
+
+  const stats = useMemo(() => {
+    const total = logs.length;
+    const sent = logs.filter((l) => l.sent).length;
+    const exited = logs.filter((l) => !l.sent && l.reason === "exit_condition_met").length;
+    const failed = logs.filter((l) => !l.sent && l.reason !== "exit_condition_met").length;
+    const sendable = sent + failed;
+    const successRate = sendable > 0 ? Math.round((sent / sendable) * 1000) / 10 : 0;
+    const failureRate = sendable > 0 ? Math.round((failed / sendable) * 1000) / 10 : 0;
+    return { total, sent, failed, exited, successRate, failureRate, sendable };
+  }, [logs]);
+
+  const bySequence = useMemo(() => {
+    const map = new Map<string, { sequence: string; sent: number; failed: number; exited: number }>();
+    for (const l of logs) {
+      const key = l.user_journeys?.sequence_key ?? "unknown";
+      const r = map.get(key) ?? { sequence: key, sent: 0, failed: 0, exited: 0 };
+      if (l.sent) r.sent++;
+      else if (l.reason === "exit_condition_met") r.exited++;
+      else r.failed++;
+      map.set(key, r);
+    }
+    return Array.from(map.values()).sort((a, b) => b.sent + b.failed - (a.sent + a.failed));
+  }, [logs]);
+
+  const byStep = useMemo(() => {
+    const map = new Map<string, { template: string; sent: number; failed: number; exited: number }>();
+    for (const l of logs) {
+      const key = `${l.template_name} · step ${l.step_order}`;
+      const r = map.get(key) ?? { template: key, sent: 0, failed: 0, exited: 0 };
+      if (l.sent) r.sent++;
+      else if (l.reason === "exit_condition_met") r.exited++;
+      else r.failed++;
+      map.set(key, r);
+    }
+    return Array.from(map.values()).sort((a, b) => b.failed - a.failed || b.sent - a.sent);
+  }, [logs]);
+
+  const journeyStats = useMemo(() => {
+    const total = journeys.length;
+    const active = journeys.filter((j) => j.status === "active").length;
+    const completed = journeys.filter((j) => j.status === "completed").length;
+    const exited = journeys.filter((j) => j.status === "exited").length;
+    return { total, active, completed, exited };
+  }, [journeys]);
+
+  const recentFailures = useMemo(
+    () =>
+      logs
+        .filter((l) => !l.sent && l.reason !== "exit_condition_met")
+        .slice(0, 30),
+    [logs]
+  );
+
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-3xl font-heading font-bold">Nurturing — Suivi des envois</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Volumes, taux d'échec, répartition par séquence et par étape.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {(["24h", "7d", "30d"] as Range[]).map((r) => (
+            <Button key={r} size="sm" variant={range === r ? "default" : "outline"} onClick={() => setRange(r)}>
+              {r === "24h" ? "24 h" : r === "7d" ? "7 jours" : "30 jours"}
+            </Button>
+          ))}
+          <Button size="sm" variant="ghost" onClick={fetchData}>
+            Rafraîchir
+          </Button>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="grid gap-4 md:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-28" />
+          ))}
+        </div>
+      ) : (
+        <>
+          <div className="grid gap-4 md:grid-cols-4">
+            <StatCard label="Total étapes évaluées" value={stats.total} hint={`Dont ${stats.exited} sorties (objectif atteint)`} />
+            <StatCard label="Emails envoyés" value={stats.sent} tone="ok" hint={`${stats.successRate}% de réussite`} />
+            <StatCard label="Échecs d'envoi" value={stats.failed} tone={stats.failed > 0 ? "err" : "ok"} hint={`${stats.failureRate}% des tentatives`} />
+            <StatCard
+              label="Couverture (sent vs failed)"
+              value={`${stats.sent}/${stats.sendable}`}
+              tone={stats.failureRate > 5 ? "err" : stats.failureRate > 1 ? "warn" : "ok"}
+              hint={stats.sendable === 0 ? "Aucun envoi sur la période" : `${stats.successRate}% délivrés`}
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-4">
+            <StatCard label="Parcours actifs" value={journeyStats.active} />
+            <StatCard label="Parcours complétés" value={journeyStats.completed} tone="ok" />
+            <StatCard label="Parcours sortis (objectif)" value={journeyStats.exited} />
+            <StatCard label="Total parcours (toutes périodes)" value={journeyStats.total} />
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Répartition par séquence</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {bySequence.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-8 text-center">Aucune donnée sur la période.</p>
+              ) : (
+                <ResponsiveContainer width="100%" height={Math.max(220, bySequence.length * 48)}>
+                  <BarChart data={bySequence} layout="vertical" margin={{ left: 40, right: 16 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" allowDecimals={false} />
+                    <YAxis type="category" dataKey="sequence" width={180} tick={{ fontSize: 12 }} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="sent" name="Envoyés" stackId="a" fill="hsl(var(--primary))" />
+                    <Bar dataKey="failed" name="Échecs" stackId="a" fill="hsl(var(--destructive))" />
+                    <Bar dataKey="exited" name="Sorties" stackId="a" fill="hsl(var(--muted-foreground))" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Répartition par étape (template)</CardTitle>
+            </CardHeader>
+            <CardContent className="overflow-x-auto">
+              {byStep.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-8 text-center">Aucune donnée sur la période.</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Étape</TableHead>
+                      <TableHead className="text-right">Envoyés</TableHead>
+                      <TableHead className="text-right">Échecs</TableHead>
+                      <TableHead className="text-right">Sorties</TableHead>
+                      <TableHead className="text-right">Taux d'échec</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {byStep.map((s) => {
+                      const sendable = s.sent + s.failed;
+                      const rate = sendable > 0 ? (s.failed / sendable) * 100 : 0;
+                      return (
+                        <TableRow key={s.template}>
+                          <TableCell className="font-mono text-xs">{s.template}</TableCell>
+                          <TableCell className="text-right">{s.sent}</TableCell>
+                          <TableCell className="text-right">
+                            {s.failed > 0 ? <span className="text-destructive font-medium">{s.failed}</span> : 0}
+                          </TableCell>
+                          <TableCell className="text-right text-muted-foreground">{s.exited}</TableCell>
+                          <TableCell className="text-right">
+                            <Badge variant={rate > 5 ? "destructive" : rate > 0 ? "secondary" : "outline"}>
+                              {rate.toFixed(1)}%
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Échecs récents</CardTitle>
+            </CardHeader>
+            <CardContent className="overflow-x-auto">
+              {recentFailures.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-8 text-center">Aucun échec sur la période.</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Séquence</TableHead>
+                      <TableHead>Step</TableHead>
+                      <TableHead>Template</TableHead>
+                      <TableHead>Raison</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {recentFailures.map((l) => (
+                      <TableRow key={l.id}>
+                        <TableCell className="text-xs whitespace-nowrap">
+                          {format(new Date(l.created_at), "dd MMM HH:mm", { locale: fr })}
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">{l.user_journeys?.sequence_key ?? "—"}</TableCell>
+                        <TableCell>{l.step_order}</TableCell>
+                        <TableCell className="font-mono text-xs">{l.template_name}</TableCell>
+                        <TableCell>
+                          <Badge variant="destructive">{l.reason ?? "unknown"}</Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default AdminNurturing;
