@@ -668,10 +668,18 @@ const AdminNurturing = () => {
                       <h3 className="font-semibold text-foreground">{labelSequence(s.key)}</h3>
                       {s.description && <p className="text-xs text-muted-foreground mt-1 max-w-2xl">{s.description}</p>}
                     </div>
-                    <div className="flex gap-1.5 flex-wrap">
+                    <div className="flex gap-1.5 flex-wrap items-center">
                       <Badge variant={s.active ? "default" : "outline"}>{s.active ? "Active" : "Inactive"}</Badge>
                       <Badge variant="secondary">{AUDIENCE_LABELS[s.audience] ?? s.audience}</Badge>
                       <Badge variant="outline">{ruleLabel}{ruleDetail}</Badge>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-6 text-xs"
+                        onClick={() => setRecipientsDialog({ key: s.key, label: labelSequence(s.key) })}
+                      >
+                        Voir destinataires
+                      </Button>
                     </div>
                   </div>
 
