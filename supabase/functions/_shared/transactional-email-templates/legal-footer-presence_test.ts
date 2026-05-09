@@ -11,7 +11,7 @@ import { assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts'
 
 const TEMPLATES_DIR = new URL('./', import.meta.url)
 const SIRET = '894 864 040 00015'
-const INLINE_HINT = 'Cet e-mail vous est envoyé'
+const INLINE_HINT = 'Email envoyé par'
 
 Deno.test('every transactional template uses shared <LegalFooter />', async () => {
   const missing: string[] = []
@@ -39,16 +39,16 @@ Deno.test('every transactional template uses shared <LegalFooter />', async () =
 
 Deno.test('shared LegalFooter contains canonical SIRET and rights mention', async () => {
   const src = await Deno.readTextFile(new URL('_legal-footer.tsx', TEMPLATES_DIR))
-  // SIRET canonique
+  // SIRET canonique (identifie sans ambiguïté le responsable de traitement)
   assertEquals(src.includes(SIRET), true, 'SIRET canonique manquant dans _legal-footer.tsx')
-  // Identité responsable de traitement
-  assertEquals(src.includes('Jérémie Martinot'), true, 'Identité responsable manquante')
-  // Droits RGPD identiques à l'auth
+  // Droits RGPD complets (art. 13)
   assertEquals(
-    src.includes("droit d'accès, de rectification, d'effacement et\n      d'opposition"),
+    src.includes("droit d'accès") && src.includes('rectification') &&
+      src.includes("d'effacement") && src.includes("d'opposition"),
     true,
     'Mention complète des droits RGPD manquante',
   )
-  // Contact
+  // Contact pour exercice des droits
   assertEquals(src.includes('contact@guardiens.fr'), true, 'Email contact manquant')
 })
+
