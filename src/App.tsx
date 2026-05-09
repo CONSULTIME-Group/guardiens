@@ -96,6 +96,7 @@ const TestEmptyStates = lazy(() => import("./pages/TestEmptyStates"));
 
 const PreviewOngoingSitHero = lazy(() => import("./pages/dev/PreviewOngoingSitHero"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
+const EmailPreferences = lazy(() => import("./pages/EmailPreferences"));
 const CityPage = lazy(() => import("./pages/CityPage"));
 const AdminCityPages = lazy(() => import("./pages/admin/AdminCityPages"));
 const FAQ = lazy(() => import("./pages/FAQ"));
@@ -328,6 +329,7 @@ const AppRoutes = () => (
       
       <Route path="/dev/preview/ongoing-sit-hero" element={<PreviewOngoingSitHero />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />
+      <Route path="/email-preferences" element={<EmailPreferences />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </Suspense>
