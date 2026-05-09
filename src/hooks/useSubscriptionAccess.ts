@@ -64,8 +64,9 @@ export const useSubscriptionAccess = () => {
         } else if (hasActiveSub) {
           setStatus("premium");
           setHasAccess(true);
-        } else if (isFounder && now < GRACE_END_DATE) {
-          setStatus("founder_grace");
+        } else if (now < GRACE_END_DATE) {
+          // Gratuité pour tous jusqu'au 14 juillet 2026, fondateurs ou non
+          setStatus(isFounder ? "founder_grace" : "founder_grace");
           setHasAccess(true);
         } else if (isFounder && !hasActiveSub) {
           setStatus("founder_expired");
