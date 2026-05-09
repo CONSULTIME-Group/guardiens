@@ -395,6 +395,7 @@ const Landing = () => {
                     name: "Décrivez votre garde",
                     text: "Renseignez vos animaux, vos dates et votre maison. En quelques minutes, votre annonce est publiée et visible des gardiens du coin.",
                     url: "https://guardiens.fr/#how-it-works",
+                    image: `https://guardiens.fr${howtoStep1}`,
                   },
                   {
                     "@type": "HowToStep",
@@ -402,6 +403,7 @@ const Landing = () => {
                     name: "Recevez des candidatures",
                     text: "Des gardiens proches de chez vous postulent. Consultez leurs profils vérifiés, lisez les avis, échangez par messagerie et rencontrez celui ou celle qui vous correspond.",
                     url: "https://guardiens.fr/#how-it-works",
+                    image: `https://guardiens.fr${howtoStep2}`,
                   },
                   {
                     "@type": "HowToStep",
@@ -409,6 +411,7 @@ const Landing = () => {
                     name: "Partez sereinement",
                     text: "Signez l'accord de garde, votre gardien s'installe, vous recevez des nouvelles régulières et vous rentrez l'esprit léger.",
                     url: "https://guardiens.fr/#how-it-works",
+                    image: `https://guardiens.fr${howtoStep3}`,
                   },
                 ],
               },
