@@ -21,6 +21,81 @@ const corsHeaders = {
     'authorization, x-client-info, apikey, content-type',
 }
 
+// === Frequency cap & quiet hours config ===
+// Per-recipient caps (rolling windows ending now)
+const CAP_PER_HOUR = 1
+const CAP_PER_DAY = 3
+// Quiet hours in Europe/Paris (inclusive start, exclusive end)
+const QUIET_START_HOUR = 22 // 22:00
+const QUIET_END_HOUR = 8    // 08:00
+
+// Templates that BYPASS cap + quiet hours (auth handled separately via auth-email-hook).
+// Kept tight: identity / disputes / cancellations / sit confirmation are time-critical.
+const BYPASS_TEMPLATES = new Set<string>([
+  'identity-verified',
+  'identity-rejected',
+  'relance-piece-identite',
+  'dispute-resolved',
+  'report-resolved',
+  'cancellation-by-owner',
+  'cancellation-by-sitter',
+  'cancellation-review-published',
+  'cancellation-response-published',
+  'sit-confirmed',
+  'contact-reply', // direct human reply, expected immediately
+])
+
+function getParisParts(d = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Paris',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+  }).formatToParts(d)
+  const get = (t: string) => parts.find((p) => p.type === t)!.value
+  return {
+    year: parseInt(get('year'), 10),
+    month: parseInt(get('month'), 10),
+    day: parseInt(get('day'), 10),
+    hour: parseInt(get('hour'), 10),
+    minute: parseInt(get('minute'), 10),
+  }
+}
+
+function isQuietNow(): boolean {
+  const { hour } = getParisParts()
+  return hour >= QUIET_START_HOUR || hour < QUIET_END_HOUR
+}
+
+// Returns the next Date (UTC) at which Europe/Paris reaches QUIET_END_HOUR.
+function nextQuietEnd(): Date {
+  // Iterate minute by minute is overkill — compute via offset.
+  // Strategy: pick the next Paris calendar day if we're already past 08:00 today
+  // OR if currently in the late-night part (>=22:00 today => need tomorrow 08:00).
+  const now = new Date()
+  const p = getParisParts(now)
+  // If currently before 08:00 Paris, target = today 08:00 Paris
+  // Else target = tomorrow 08:00 Paris
+  let targetY = p.year, targetM = p.month, targetD = p.day
+  if (p.hour >= QUIET_END_HOUR) {
+    // tomorrow
+    const tmp = new Date(Date.UTC(p.year, p.month - 1, p.day) + 24 * 3600_000)
+    targetY = tmp.getUTCFullYear()
+    targetM = tmp.getUTCMonth() + 1
+    targetD = tmp.getUTCDate()
+  }
+  // Construct a UTC date that, when interpreted in Paris, is targetY-targetM-targetD 08:00.
+  // Use binary search on UTC offset: try with +1, then verify with formatter.
+  for (const offsetH of [1, 2]) {
+    const candidate = new Date(Date.UTC(targetY, targetM - 1, targetD, QUIET_END_HOUR - offsetH, 0, 0))
+    const cp = getParisParts(candidate)
+    if (cp.year === targetY && cp.month === targetM && cp.day === targetD && cp.hour === QUIET_END_HOUR && cp.minute === 0) {
+      return candidate
+    }
+  }
+  // Fallback: now + 1h (safety)
+  return new Date(Date.now() + 3600_000)
+}
+
 // Generate a cryptographically random 32-byte hex token
 function generateToken(): string {
   const bytes = new Uint8Array(32)
@@ -183,6 +258,95 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     )
+  }
+
+  // 2b. Frequency cap & quiet hours (skipped for bypass templates and when caller marks urgent)
+  const isUrgent = !!(templateData as any)?.__urgent
+  const bypass = BYPASS_TEMPLATES.has(templateName) || isUrgent
+  if (!bypass) {
+    const recipientLower = effectiveRecipient.toLowerCase()
+    const nowMs = Date.now()
+    const oneHourAgo = new Date(nowMs - 3600_000).toISOString()
+    const oneDayAgo = new Date(nowMs - 86400_000).toISOString()
+
+    const [{ data: hourRows }, { data: dayRows }] = await Promise.all([
+      supabase
+        .from('email_send_log')
+        .select('created_at')
+        .ilike('recipient_email', recipientLower)
+        .eq('status', 'sent')
+        .gte('created_at', oneHourAgo)
+        .order('created_at', { ascending: true }),
+      supabase
+        .from('email_send_log')
+        .select('created_at')
+        .ilike('recipient_email', recipientLower)
+        .eq('status', 'sent')
+        .gte('created_at', oneDayAgo)
+        .order('created_at', { ascending: true }),
+    ])
+
+    const hourCount = hourRows?.length ?? 0
+    const dayCount = dayRows?.length ?? 0
+
+    let deferReason: string | null = null
+    let scheduledFor: Date | null = null
+
+    if (isQuietNow()) {
+      deferReason = 'quiet_hours'
+      scheduledFor = nextQuietEnd()
+    } else if (dayCount >= CAP_PER_DAY) {
+      const oldest = dayRows![0].created_at as string
+      deferReason = 'frequency_cap_day'
+      scheduledFor = new Date(new Date(oldest).getTime() + 86400_000 + 30_000)
+    } else if (hourCount >= CAP_PER_HOUR) {
+      const oldest = hourRows![0].created_at as string
+      deferReason = 'frequency_cap_hour'
+      scheduledFor = new Date(new Date(oldest).getTime() + 3600_000 + 30_000)
+    }
+
+    if (deferReason && scheduledFor) {
+      if (idempotencyKey && idempotencyKey !== messageId) {
+        const { data: existingDefer } = await supabase
+          .from('email_deferred_queue')
+          .select('id')
+          .eq('idempotency_key', idempotencyKey)
+          .eq('template_name', templateName)
+          .in('status', ['pending', 'sent'])
+          .limit(1)
+        if (existingDefer && existingDefer.length > 0) {
+          return new Response(
+            JSON.stringify({ success: true, deferred: true, reason: 'already_queued' }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+      }
+
+      const { error: enqErr } = await supabase.from('email_deferred_queue').insert({
+        template_name: templateName,
+        recipient_email: effectiveRecipient,
+        template_data: templateData,
+        idempotency_key: idempotencyKey,
+        defer_reason: deferReason,
+        scheduled_for: scheduledFor.toISOString(),
+      })
+      if (enqErr) {
+        console.error('Failed to enqueue deferred email — falling open and sending', enqErr)
+      } else {
+        await supabase.from('email_send_log').insert({
+          message_id: messageId,
+          template_name: templateName,
+          recipient_email: effectiveRecipient,
+          status: 'deferred',
+          metadata: { idempotency_key: idempotencyKey, defer_reason: deferReason, scheduled_for: scheduledFor.toISOString() },
+        })
+        console.log('Email deferred', { templateName, recipientLower, deferReason, scheduledFor: scheduledFor.toISOString() })
+        return new Response(
+          JSON.stringify({ success: true, deferred: true, reason: deferReason, scheduled_for: scheduledFor.toISOString() }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    }
   }
 
   // 3. Get or create unsubscribe token (one token per email address)
@@ -388,6 +552,8 @@ Deno.serve(async (req) => {
       template_name: templateName,
       recipient_email: effectiveRecipient,
       status: 'sent',
+      resend_id: resendData.id ?? null,
+      metadata: { idempotency_key: idempotencyKey, resend_id: resendData.id ?? null },
     })
 
     console.log('Transactional email sent via Resend', { templateName, effectiveRecipient, resendId: resendData.id })
