@@ -41,7 +41,7 @@ class FakeSystem {
   }
 
   /** Mirrors send-transactional-email entry point. */
-  send(now: Date, recipient: string, template: string, idempotencyKey: string) {
+  send(now: Date, recipient: string, template: string, idempotencyKey: string, isUrgent = false) {
     const recipientLower = recipient.toLowerCase()
 
     // Idempotence : si une ligne sent existe déjà pour cette clé → no-op (= comportement
