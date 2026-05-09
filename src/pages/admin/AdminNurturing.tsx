@@ -5,6 +5,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { toast } from "sonner";
+import { HelpCircle, Loader2, PlayCircle } from "lucide-react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -23,6 +27,7 @@ import { SequenceRecipientsDialog } from "@/components/admin/SequenceRecipientsD
 
 type Range = "24h" | "7d" | "30d";
 const RANGE_HOURS: Record<Range, number> = { "24h": 24, "7d": 24 * 7, "30d": 24 * 30 };
+
 
 interface LogRow {
   id: string;
