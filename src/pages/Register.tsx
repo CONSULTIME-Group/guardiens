@@ -73,13 +73,28 @@ const isObviouslyWeak = (pw: string): boolean => {
  return false;
 };
 
+/* ── Random suggestion d'un mot de passe fort, mémorisable et HIBP-safe ── */
+const PW_ADJ = ["Joyeux", "Calme", "Sauvage", "Doux", "Brave", "Curieux", "Vif", "Tendre"];
+const PW_NOUN = ["Chat", "Chien", "Lapin", "Renard", "Loup", "Cheval", "Hibou", "Ours"];
+const PW_VERB = ["adore", "croque", "grimpe", "danse", "veille", "murmure", "explore"];
+const PW_SYM = ["!", "?", "#", "$", "*"];
+const generateSuggestedPassword = (): string => {
+  const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+  const num = String(Math.floor(Math.random() * 90) + 10);
+  return `${pick(PW_ADJ)}${pick(PW_NOUN)}${pick(PW_SYM)}${pick(PW_VERB)}${num}`;
+};
+
 const Register = () => {
  const [searchParams] = useSearchParams();
  const presetRole = searchParams.get("role") as Role | null;
+ const presetEmail = (searchParams.get("email") || "").trim().toLowerCase();
 
  const [step, setStep] = useState<1 | 2 | "confirmation">(presetRole ? 2 : 1);
  const [selectedRole, setSelectedRole] = useState<Role | null>(presetRole);
- const [email, setEmail] = useState("");
+ const [email, setEmail] = useState<string>(() => {
+  if (presetEmail) return presetEmail;
+  try { return sessionStorage.getItem("guardiens_signup_email") || ""; } catch { return ""; }
+ });
  const [password, setPassword] = useState("");
  const [showPassword, setShowPassword] = useState(false);
  const [isLoading, setIsLoading] = useState(false);
@@ -88,10 +103,9 @@ const Register = () => {
  const [resendCount, setResendCount] = useState(0);
  const [formError, setFormError] = useState<string | null>(null);
  const [existingAccountOpen, setExistingAccountOpen] = useState(false);
-  const [acceptedCgu, setAcceptedCgu] = useState(false);
-  const [acceptedCgs, setAcceptedCgs] = useState(false);
-  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
-  const acceptedTerms = acceptedCgu && acceptedCgs && acceptedPrivacy;
+ const [acceptedTerms, setAcceptedTerms] = useState(false);
+ const [termsHighlighted, setTermsHighlighted] = useState(false);
+ const [etaSeconds, setEtaSeconds] = useState<number>(25);
  const [totalInscrits, setTotalInscrits] = useState<number | null>(null);
  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
