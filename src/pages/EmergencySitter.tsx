@@ -451,7 +451,7 @@ const EmergencySitter = () => {
           <Link to="/dashboard">
             <Button size="sm" variant="outline">Voir mon éligibilité</Button>
           </Link>
-          <Link to="/faq" className="text-sm text-primary hover:underline">FAQ complète</Link>
+          <Link to="/faq#gardien-d-urgence" className="text-sm text-primary hover:underline">FAQ complète</Link>
         </div>
       </section>
 

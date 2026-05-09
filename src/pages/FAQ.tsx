@@ -1,5 +1,7 @@
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
+import { useLocation, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -11,8 +13,16 @@ import {
  AccordionItem,
  AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Link } from "react-router-dom";
 import { HelpCircle } from "lucide-react";
+
+// Slug stable et déterministe pour les ancres URL
+const slug = (s: string): string =>
+ (s || "")
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, "-")
+  .replace(/^-+|-+$/g, "");
 
 interface FaqEntry {
  id: string;
@@ -35,9 +45,46 @@ const FAQ = () => {
  if (error) throw error;
  return (data || []) as unknown as FaqEntry[];
  },
- });
+  });
 
  const categories = [...new Set(entries.map((e) => e.category))];
+
+ // Map slug -> entry id, pour ouvrir l'accordion ciblé via URL hash
+ const slugToEntryId = useMemo(() => {
+  const m = new Map<string, string>();
+  for (const e of entries) m.set(slug(e.question), e.id);
+  return m;
+ }, [entries]);
+
+ const location = useLocation();
+ const [openItems, setOpenItems] = useState<Record<string, string[]>>({});
+
+ useEffect(() => {
+  if (!entries.length) return;
+  const raw = decodeURIComponent((location.hash || "").replace(/^#/, "")).trim();
+  if (!raw) return;
+
+  // 1) Ancre = slug de question : ouvrir + scroller
+  const targetEntryId = slugToEntryId.get(raw);
+  if (targetEntryId) {
+   const entry = entries.find((e) => e.id === targetEntryId);
+   if (entry) {
+    setOpenItems((prev) => {
+     const cur = new Set(prev[entry.category] ?? []);
+     cur.add(entry.id);
+     return { ...prev, [entry.category]: Array.from(cur) };
+    });
+   }
+  }
+
+  // 2) Scroll vers l'élément (slug question OU slug catégorie)
+  // Léger délai pour laisser le DOM monter l'accordion ouvert
+  const t = window.setTimeout(() => {
+   const el = document.getElementById(raw);
+   if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 80);
+  return () => window.clearTimeout(t);
+ }, [entries, location.hash, slugToEntryId]);
 
  const categoryLabels: Record<string, string> = {
  general: "Questions générales",
@@ -142,20 +189,28 @@ const FAQ = () => {
  </p>
  ) : (
  <div className="space-y-10">
- {categories.map((cat) => {
- const catEntries = entries.filter((e) => e.category === cat);
- return (
- <section key={cat}>
- <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
- {categoryLabels[cat] || cat}
- </h2>
- <Accordion type="multiple" className="space-y-2">
- {catEntries.map((entry) => (
- <AccordionItem
- key={entry.id}
- value={entry.id}
- className="border border-border rounded-lg px-5 data-[state=open]:bg-accent/30"
- >
+  {categories.map((cat) => {
+  const catEntries = entries.filter((e) => e.category === cat);
+  const catLabel = categoryLabels[cat] || cat;
+  const catSlug = slug(catLabel);
+  return (
+  <section key={cat} id={catSlug} className="scroll-mt-24">
+  <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
+  {catLabel}
+  </h2>
+  <Accordion
+  type="multiple"
+  className="space-y-2"
+  value={openItems[cat] ?? []}
+  onValueChange={(v) => setOpenItems((prev) => ({ ...prev, [cat]: v }))}
+  >
+  {catEntries.map((entry) => (
+  <AccordionItem
+  key={entry.id}
+  value={entry.id}
+  id={slug(entry.question)}
+  className="border border-border rounded-lg px-5 scroll-mt-24 data-[state=open]:bg-accent/30"
+  >
  <AccordionTrigger className="text-left font-medium text-foreground hover:no-underline py-4">
  {entry.question}
  </AccordionTrigger>
