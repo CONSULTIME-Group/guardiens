@@ -58,22 +58,11 @@ const ReviewReceivedEmail = ({ firstName, reviewerName, sitTitle, sitId }: Props
             </Button>
             </Section>
 
-          <Hr style={hr} />
-
-          <Section style={legalSection}>
-            <Text style={legalText}>
-              Conformément au RGPD (art. 6.1.f), cet e-mail est envoyé dans le cadre de l'intérêt légitime
-              lié au bon fonctionnement du service d'avis entre membres. Vos données personnelles ne sont
-              utilisées que pour l'envoi de cette notification et ne sont pas transmises à des tiers.
-            </Text>
-            <Text style={legalText}>
-              Les avis publiés sur {SITE_NAME} sont modérés conformément aux articles L. 111-7-2
-              du Code de la consommation et au décret n° 2017-1436. Chaque avis émane d'un membre
-              ayant effectivement participé à la garde concernée.
-            </Text>
-            </Section>
-
-          <Text style={footer}>L'équipe {SITE_NAME}</Text>
+          <LegalFooter
+            purpose="du bon fonctionnement du service d'avis"
+            basis="6.1.f"
+            extra={`Les avis publiés sur ${SITE_NAME} sont modérés conformément à l'article L. 111-7-2 du Code de la consommation et au décret n° 2017-1436. Chaque avis émane d'un membre ayant effectivement participé à la garde concernée.`}
+          />
         </Container>
         </Body>
         </Html>
