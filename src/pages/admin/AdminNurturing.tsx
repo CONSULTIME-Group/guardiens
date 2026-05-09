@@ -236,6 +236,33 @@ const AdminNurturing = () => {
       setLastRunSent(false);
     }
 
+    // Métadonnées des séquences (pour affichage humain)
+    const [seqRes, stepsRes] = await Promise.all([
+      supabase
+        .from("nurturing_sequences")
+        .select("key, audience, description, active, anchor_field, enrollment_rule")
+        .order("key"),
+      supabase
+        .from("nurturing_steps")
+        .select("step_order, template_name, delay_hours, exit_condition, nurturing_sequences!inner(key)")
+        .order("step_order"),
+    ]);
+    if (!seqRes.error) setSequences((seqRes.data ?? []) as unknown as SequenceRow[]);
+    if (!stepsRes.error) {
+      const rows = (stepsRes.data ?? []) as unknown as Array<
+        SequenceStepRow & { nurturing_sequences: { key: string } }
+      >;
+      setSequenceSteps(
+        rows.map((r) => ({
+          sequence_key: r.nurturing_sequences.key,
+          step_order: r.step_order,
+          template_name: r.template_name,
+          delay_hours: r.delay_hours,
+          exit_condition: r.exit_condition,
+        }))
+      );
+    }
+
     setLoading(false);
   };
 
