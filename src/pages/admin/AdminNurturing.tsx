@@ -387,6 +387,38 @@ const AdminNurturing = () => {
     [logs]
   );
 
+  // Stats agrégées par séquence (logs + journeys de la période)
+  const sequenceMetrics = useMemo(() => {
+    const m = new Map<string, { sent: number; failed: number; exited: number; activeJourneys: number; totalJourneys: number }>();
+    for (const l of logs) {
+      const k = l.user_journeys?.sequence_key;
+      if (!k) continue;
+      const r = m.get(k) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0 };
+      if (l.sent) r.sent++;
+      else if (l.reason === "exit_condition_met") r.exited++;
+      else r.failed++;
+      m.set(k, r);
+    }
+    for (const j of journeys) {
+      const r = m.get(j.sequence_key) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0 };
+      r.totalJourneys++;
+      if (j.status === "active") r.activeJourneys++;
+      m.set(j.sequence_key, r);
+    }
+    return m;
+  }, [logs, journeys]);
+
+  const stepsBySequence = useMemo(() => {
+    const m = new Map<string, SequenceStepRow[]>();
+    for (const s of sequenceSteps) {
+      const arr = m.get(s.sequence_key) ?? [];
+      arr.push(s);
+      m.set(s.sequence_key, arr);
+    }
+    for (const arr of m.values()) arr.sort((a, b) => a.step_order - b.step_order);
+    return m;
+  }, [sequenceSteps]);
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
