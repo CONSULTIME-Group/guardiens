@@ -37,6 +37,8 @@ import { template as conseilsAnnoncePersonnalises } from './conseils-annonce-per
 import { template as conseilsPublicationAnnonce } from './conseils-publication-annonce.tsx'
 import { template as relancePieceIdentite } from './relance-piece-identite.tsx'
 import { template as availabilityNudge } from './availability-nudge.tsx'
+import { template as reactivationD30 } from './reactivation-d30.tsx'
+import { template as sitterEncourageCandidature } from './sitter-encourage-candidature.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'nearby-sit-alert': nearbySitAlert,
@@ -67,4 +69,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'conseils-publication-annonce': conseilsPublicationAnnonce,
   'relance-piece-identite': relancePieceIdentite,
   'availability-nudge': availabilityNudge,
+  'reactivation-d30': reactivationD30,
+  'sitter-encourage-candidature': sitterEncourageCandidature,
 }
