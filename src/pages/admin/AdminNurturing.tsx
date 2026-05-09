@@ -645,7 +645,6 @@ const AdminNurturing = () => {
                         ))}
                       </div>
                     </div>
-                  )}
                 </div>
               );
             })
