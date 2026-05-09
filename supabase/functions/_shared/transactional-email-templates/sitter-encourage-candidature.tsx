@@ -1,6 +1,6 @@
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Container, Heading, Html, Preview, Text, Button, Section,
+  Body, Container, Heading, Html, Preview, Text, Button, Section, Hr,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
@@ -16,7 +16,7 @@ interface Props {
 const SitterEncourageCandidatureEmail = ({ firstName }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
-    <Preview>Votre première candidature attend toujours</Preview>
+    <Preview>Lancez-vous, la première candidature est la plus dure</Preview>
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
@@ -27,7 +27,7 @@ const SitterEncourageCandidatureEmail = ({ firstName }: Props) => (
         </Text>
 
         <Text style={text}>
-          Vous êtes inscrit comme gardien depuis quelques semaines, mais vous n'avez pas encore
+          Vous êtes inscrit comme gardien depuis quelques jours, mais vous n'avez pas encore
           envoyé de candidature. C'est souvent l'étape la plus intimidante — pourtant la plupart
           des propriétaires répondent dans les 48&nbsp;heures.
         </Text>
@@ -39,12 +39,15 @@ const SitterEncourageCandidatureEmail = ({ firstName }: Props) => (
           <Text style={cardLine}>· Précisez vos disponibilités exactes</Text>
         </Section>
 
-        <Button style={button} href={`${SITE_URL}/recherche`}>Trouver une garde</Button>
+        <Section style={ctaSection}>
+          <Button style={button} href={`${SITE_URL}/recherche`}>Trouver une garde</Button>
+        </Section>
 
         <Text style={muted}>
-          Une question avant de vous lancer&nbsp;? Notre équipe est joignable depuis la page
-          contact.
+          Une question avant de vous lancer&nbsp;? Notre équipe est joignable depuis la page contact.
         </Text>
+
+        <Hr style={hr} />
 
         <LegalFooter
           purpose="de l'accompagnement de votre activation"
@@ -56,18 +59,26 @@ const SitterEncourageCandidatureEmail = ({ firstName }: Props) => (
   </Html>
 )
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' as const }
-const container = { margin: '0 auto', padding: '24px', maxWidth: '560px' }
-const h1 = { color: '#1a1a1a', fontSize: '22px', fontWeight: 700, marginBottom: '16px' }
-const text = { color: '#1a1a1a', fontSize: '15px', lineHeight: '22px', marginBottom: '12px' }
-const card = { backgroundColor: '#f7f5ee', padding: '16px', borderRadius: '10px', margin: '16px 0' }
-const cardTitle = { color: '#1a1a1a', fontSize: '15px', fontWeight: 600, marginBottom: '8px' }
-const cardLine = { color: '#444', fontSize: '14px', lineHeight: '22px', marginBottom: '4px' }
+const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
+const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
+const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 20px' }
+const text = { fontSize: '14px', color: 'hsl(37, 7%, 30%)', lineHeight: '1.6', margin: '0 0 16px' }
+const card = { backgroundColor: 'hsl(40, 33%, 96%)', padding: '16px', borderRadius: '10px', margin: '16px 0' }
+const cardTitle = { color: 'hsl(153, 42%, 30%)', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }
+const cardLine = { color: 'hsl(37, 7%, 30%)', fontSize: '14px', lineHeight: '22px', marginBottom: '4px' }
+const ctaSection = { textAlign: 'center' as const, margin: '28px 0' }
 const button = {
-  backgroundColor: '#1a1a1a', color: '#ffffff', padding: '12px 22px', borderRadius: '8px',
-  textDecoration: 'none', fontWeight: 600, display: 'inline-block', marginTop: '8px',
+  backgroundColor: 'hsl(153, 42%, 30%)',
+  color: '#ffffff',
+  padding: '12px 28px',
+  borderRadius: '8px',
+  fontSize: '15px',
+  fontWeight: '600' as const,
+  textDecoration: 'none',
+  display: 'inline-block',
 }
-const muted = { color: '#666', fontSize: '13px', lineHeight: '20px', marginTop: '20px' }
+const muted = { color: 'hsl(37, 7%, 50%)', fontSize: '13px', lineHeight: '20px', marginTop: '20px' }
+const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
 
 export const template: TemplateEntry = {
   component: SitterEncourageCandidatureEmail,
