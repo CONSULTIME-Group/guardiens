@@ -284,7 +284,7 @@ const Pricing = () => {
 
  <main className="max-w-6xl mx-auto px-4">
  {/* ═══ HERO ═══ */}
-       <section className="py-10 md:py-14 text-center max-w-2xl mx-auto">
+       <section data-testid="pricing-hero" className="py-10 md:py-14 text-center max-w-2xl mx-auto">
  <p className="inline-block bg-primary/10 text-primary text-xs font-body font-semibold uppercase tracking-wider px-3 py-1.5 rounded-full mb-4">
  Sans commission, sans frais cachés
  </p>
@@ -300,7 +300,7 @@ const Pricing = () => {
  ? "Jusqu'au 14 juillet 2026, l'accès complet est offert — gardiens comme propriétaires. Aucune carte bancaire demandée."
  : "Gratuit pour les propriétaires. 6,99 €/mois pour les gardiens, avec 7 jours d'essai. C'est tout."}
  </p>
- <div className="flex flex-col sm:flex-row gap-3 justify-center">
+ <div data-testid="pricing-hero-cta" className="flex flex-col sm:flex-row gap-3 justify-center">
  <Link
  to={registerLink("owner")}
  className="inline-flex items-center justify-center bg-primary text-primary-foreground font-body font-semibold text-sm px-7 py-3.5 rounded-full hover:bg-primary/90 transition-colors min-h-[44px]"
@@ -375,10 +375,10 @@ const Pricing = () => {
  </div>
 
  {/* ═══ Cartes pricing détaillées ═══ */}
- <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto items-stretch mb-12 md:mb-16">
+	<section data-testid="pricing-cards" className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto items-stretch mb-12 md:mb-16">
  {/* Owner Card */}
-  <Card className="bg-card border border-border/40 rounded-2xl h-full flex flex-col relative">
-  <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center justify-center bg-foreground/90 text-background text-[11px] sm:text-xs font-body font-medium tracking-wide leading-none px-3.5 py-1.5 rounded-full whitespace-nowrap max-w-[calc(100%-1.5rem)] shadow-sm">
+  <Card data-testid="owner-card" className="bg-card border border-border/40 rounded-2xl h-full flex flex-col relative">
+  <div data-testid="badge-owner" className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center justify-center bg-foreground/90 text-background text-[11px] sm:text-xs font-body font-medium tracking-wide leading-none px-3.5 py-1.5 rounded-full whitespace-nowrap max-w-[calc(100%-1.5rem)] shadow-sm">
  Toujours gratuit
  </div>
  <CardHeader className="text-center pb-2 p-8 pt-10">
@@ -412,8 +412,8 @@ const Pricing = () => {
  </Card>
 
  {/* Sitter Card */}
-    <Card className="border-2 border-primary/30 relative shadow-xl rounded-2xl h-full flex flex-col bg-primary/5">
-  <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center justify-center bg-primary text-primary-foreground text-[11px] sm:text-xs font-body font-semibold tracking-wide leading-none px-3.5 py-1.5 rounded-full whitespace-nowrap max-w-[calc(100%-1.5rem)] shadow-sm">
+    <Card data-testid="sitter-card" className="border-2 border-primary/30 relative shadow-xl rounded-2xl h-full flex flex-col bg-primary/5">
+  <div data-testid="badge-sitter" className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center justify-center bg-primary text-primary-foreground text-[11px] sm:text-xs font-body font-semibold tracking-wide leading-none px-3.5 py-1.5 rounded-full whitespace-nowrap max-w-[calc(100%-1.5rem)] shadow-sm">
  {before
  ? (daysLeft > 99
  ? `Offert ${Math.ceil(daysLeft / 30)} mois`
