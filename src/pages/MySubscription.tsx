@@ -511,7 +511,7 @@ const MySubscription = () => {
  <SearchIcon className="w-4 h-4" aria-hidden="true" />
  Explorer les annonces
  </Link>
- <p className="text-xs text-foreground/40 font-body text-center">Revenez ici le 13 juin pour choisir votre formule.</p>
+ <p className="text-xs text-foreground/40 font-body text-center">Revenez ici à partir du 15 juillet 2026 pour choisir votre formule.</p>
  </div>
  </div>
 
