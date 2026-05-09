@@ -4342,10 +4342,10 @@ export type Database = {
       get_public_stats: {
         Args: never
         Returns: {
-          total_missions: number
-          total_pets: number
-          total_properties: number
-          total_users: number
+          animaux_accompagnes: number
+          maisons_gardees: number
+          missions_entraide: number
+          total_inscrits: number
         }[]
       }
       get_sit_application_counts: {
