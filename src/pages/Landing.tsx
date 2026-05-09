@@ -327,6 +327,9 @@ const Landing = () => {
                   { "@type": "Person", name: "Jérémie Martinot" },
                   { "@type": "Person", name: "Elisa" },
                 ],
+                sameAs: [
+                  "https://maps.app.goo.gl/wBCoMpnyRu8GbrTV7",
+                ],
               },
               {
                 "@type": "WebSite",
