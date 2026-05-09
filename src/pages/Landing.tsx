@@ -1191,7 +1191,7 @@ const Landing = () => {
           <div className="w-full mt-16 rounded-2xl overflow-hidden">
             <img
               src={notreHistoirePanorama}
-              alt="Une garde de maison et d'animaux — Guardiens"
+              alt="Photographie panoramique d'une maison de campagne aux volets bleus, illustrant l'esprit du home sitting Guardiens : on confie ses clés, on est invité dans une vie."
               className="w-full h-64 md:h-96 object-cover object-center"
               loading="lazy"
               width={1920}
