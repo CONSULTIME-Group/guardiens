@@ -21,7 +21,7 @@ export interface FaqItem {
 }
 
 const FAQ_BLOCK_RE = /:::faq\s*\n([\s\S]*?):::/g;
-const BOLD_Q_RE = /^\*\*(.+?)\*\*\s*$/;
+const BOLD_Q_RE = /^(?:\*\*(.+?)\*\*|#{2,4}\s+(.+?))\s*$/;
 
 /**
  * Extract all Q/A pairs from :::faq blocks in raw markdown.
@@ -53,7 +53,7 @@ export function parseFaqFromMarkdown(markdown: string): FaqItem[] {
       const qMatch = line.trim().match(BOLD_Q_RE);
       if (qMatch) {
         flush();
-        currentQ = qMatch[1].trim();
+        currentQ = (qMatch[1] ?? qMatch[2]).trim();
       } else if (currentQ) {
         currentALines.push(line);
       }
