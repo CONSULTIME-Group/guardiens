@@ -193,6 +193,12 @@ const EditSit = () => {
   const descValid = trimmedDesc.length === 0 || trimmedDesc.length >= MIN_DESC_LENGTH;
   const isLocked = LOCKED_STATUSES.has(sitStatus);
 
+  // Vocabulaire proscrit (mémoire projet : voisin, AURA, Auvergne-Rhône-Alpes).
+  const FORBIDDEN_REGEX = /\b(voisin(?:e|s|es)?|voisinage|AURA|Auvergne[\s-]Rh[oô]ne[\s-]Alpes)\b/i;
+  const forbiddenInTitle = FORBIDDEN_REGEX.test(title);
+  const forbiddenInDesc = FORBIDDEN_REGEX.test(specificExpectations);
+  const hasForbidden = forbiddenInTitle || forbiddenInDesc;
+
   const canSave = !isLocked && titleValid && hasDatesOrFlexible && !dateError && descValid && !hasForbidden;
 
   const isConfirmed = sitStatus === "confirmed" || sitStatus === "in_progress";
@@ -207,12 +213,6 @@ const EditSit = () => {
   useEffect(() => {
     if (!showUrgent && isUrgent) setIsUrgent(false);
   }, [showUrgent, isUrgent]);
-
-  // Vocabulaire proscrit (mémoire projet : voisin, AURA, Auvergne-Rhône-Alpes).
-  const FORBIDDEN_REGEX = /\b(voisin(?:e|s|es)?|voisinage|AURA|Auvergne[\s-]Rh[oô]ne[\s-]Alpes)\b/i;
-  const forbiddenInTitle = FORBIDDEN_REGEX.test(title);
-  const forbiddenInDesc = FORBIDDEN_REGEX.test(specificExpectations);
-  const hasForbidden = forbiddenInTitle || forbiddenInDesc;
 
   // Tracking "dirty" : compare au snapshot initial.
   const currentSnapshot = useMemo(
