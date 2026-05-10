@@ -12,6 +12,7 @@ import { Calendar, MapPin, Sparkles, AlertCircle, Compass, Plus } from "lucide-r
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
+import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
 
 interface Props {
   contextType: string | null;
@@ -25,6 +26,7 @@ interface Props {
   } | null;
   otherFirstName?: string | null;
   otherCity?: string | null;
+  otherUserId?: string | null;
 }
 
 const fmt = (d?: string | null) => {
