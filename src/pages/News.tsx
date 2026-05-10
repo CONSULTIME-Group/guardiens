@@ -260,16 +260,24 @@ export default function News() {
         </header>
 
         {/* Search bar */}
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
-          <Input
-            type="search"
-            placeholder="Rechercher un article…"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="pl-10"
-            aria-label="Rechercher dans les articles"
-          />
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            <Input
+              type="search"
+              placeholder="Rechercher un article…"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="pl-10"
+              aria-label="Rechercher dans les articles"
+            />
+          </div>
+          {hasActiveFilters && (
+            <Button variant="outline" onClick={resetFilters} className="shrink-0 gap-2">
+              <RotateCcw className="h-4 w-4" aria-hidden="true" />
+              Réinitialiser les filtres
+            </Button>
+          )}
         </div>
 
         {/* Category filter */}
