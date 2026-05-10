@@ -383,7 +383,7 @@ const SmallMissionsPublic = () => {
  Ce que les gens s'échangent
  </p>
  <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground text-center leading-snug mb-12">
- Des échanges qui ont eu lieu.
+ Le genre de coups de main qu'on échange.
  </h2>
  </Reveal>
 
