@@ -83,7 +83,7 @@ export default function AdminMassEmailsStats() {
         clicks: s.clicks,
         uniqueVisitors: s.visitors.size,
         missions: s.missions,
-        conversionRate: s.uniqueVisitors > 0 ? (s.missions / s.visitors.size) * 100 : 0,
+        conversionRate: s.visitors.size > 0 ? (s.missions / s.visitors.size) * 100 : 0,
       }))
       .sort((a, b) => b.clicks - a.clicks);
   }, [rows]);
