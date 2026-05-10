@@ -57,13 +57,39 @@ function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }
  );
 }
 
+/* ── Sticky CTA mobile (QW#6) — visible uniquement <md, après scroll de 600px ── */
+function StickyMobileCta({ onPropose, onAsk }: { onPropose: () => void; onAsk: () => void }) {
+ const [visible, setVisible] = useState(false);
+ useEffect(() => {
+ const onScroll = () => setVisible(window.scrollY > 600);
+ window.addEventListener("scroll", onScroll, { passive: true });
+ onScroll();
+ return () => window.removeEventListener("scroll", onScroll);
+ }, []);
+ return (
+ <div
+ className={`md:hidden fixed bottom-0 inset-x-0 z-40 px-3 pb-3 pt-2 bg-background/95 backdrop-blur border-t border-border/60 transition-transform duration-300 ${visible ? "translate-y-0" : "translate-y-full"}`}
+ style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
+ >
+ <div className="flex gap-2">
+ <Button onClick={onPropose} className="flex-1 bg-primary text-primary-foreground rounded-full h-11 text-sm font-semibold">
+ Je propose mon aide
+ </Button>
+ <Button onClick={onAsk} variant="outline" className="flex-1 border-2 border-primary text-primary rounded-full h-11 text-sm font-semibold">
+ J'ai besoin
+ </Button>
+ </div>
+ </div>
+ );
+}
+
 /* ── data ── */
 const examples = [
- { img: spotVerger, alt: "Panier en osier rempli de fruits frais — illustration gouache", title: "Verger à ramasser", text: "Venir ramasser les fruits avant qu'ils tombent contre un énorme panier de fruits frais à emporter.", badge: "Fruits · Écully" },
+ { img: spotVerger, alt: "Panier en osier rempli de fruits frais — illustration gouache", title: "Verger à ramasser", text: "Venir ramasser les fruits avant qu'ils tombent contre un énorme panier de fruits frais à emporter.", badge: "Fruits · entre gens du coin" },
  { img: spotJardin, alt: "Panier d'herbes aromatiques et sécateur — illustration gouache", title: "Coup de main au jardin", text: "Donner un coup de main pour planter, désherber ou tailler — et venir se servir librement à la récolte.", badge: "Jardinage · entre gens du coin" },
- { img: spotPoules, alt: "Poule rousse devant un nid de paille avec des œufs — illustration gouache", title: "Poules à garder", text: "Nourrir les poules et ramasser les œufs pendant 10 jours contre des œufs frais à volonté au retour.", badge: "Œufs · Caluire" },
+ { img: spotPoules, alt: "Poule rousse devant un nid de paille avec des œufs — illustration gouache", title: "Poules à garder", text: "Nourrir les poules et ramasser les œufs pendant 10 jours contre des œufs frais à volonté au retour.", badge: "Œufs · entre gens du coin" },
  { img: spotChien, alt: "Chien assis avec sa laisse en cuir — illustration gouache", title: "Chien à promener", text: "Deux semaines de balades contre son chien promené la prochaine fois qu'on part.", badge: "Réciprocité · entre gens du coin" },
- { img: spotBricolage, alt: "Boîte à outils en bois ouverte avec marteau, tournevis et clé — illustration gouache", title: "Petit bricolage", text: "Un coup de main pour monter une étagère, fixer un meuble ou changer un robinet, contre un vrai repas fait maison.", badge: "Repas · Annecy" },
+ { img: spotBricolage, alt: "Boîte à outils en bois ouverte avec marteau, tournevis et clé — illustration gouache", title: "Petit bricolage", text: "Un coup de main pour monter une étagère, fixer un meuble ou changer un robinet, contre un vrai repas fait maison.", badge: "Repas · entre gens du coin" },
  { img: spotBienetre, alt: "Tasse en céramique, brin de lavande et galet — illustration gouache", title: "Énergie & bien-être", text: "Une séance de Reiki, un massage ou un moment de méditation partagés, en échange d'un service rendu en retour.", badge: "Échange · entre gens du coin" },
 ];
 
@@ -110,10 +136,11 @@ const SmallMissionsPublic = () => {
  }, []);
 
  /** Auth-aware navigation: redirect to register if not logged in */
- const goToCreate = () =>
+  const goToCreate = () =>
  navigate(isAuthenticated ? "/petites-missions/creer" : "/inscription?redirect=/petites-missions/creer");
+ // QW#2 — corrige la route : on envoie sur la page de PUBLICATION d'une offre, pas sur la liste filtrée
  const goToHelp = () =>
- navigate(isAuthenticated ? "/petites-missions?type=offre" : "/inscription?redirect=/petites-missions?type=offre");
+ navigate(isAuthenticated ? "/petites-missions/creer?type=offre" : "/inscription?redirect=/petites-missions/creer?type=offre");
 
  return (
  <>
@@ -138,27 +165,28 @@ const SmallMissionsPublic = () => {
  </Reveal>
 
  <Reveal delay={0.1}>
- <h1 className="font-heading text-5xl md:text-6xl font-bold text-foreground leading-tight max-w-2xl mx-auto">
- Osez demander.<br />Quelqu'un, près de chez vous, n'attend que ça.
+  <h1 className="font-heading text-5xl md:text-6xl font-bold text-foreground leading-tight max-w-2xl mx-auto">
+ Quelqu'un, près de chez vous,<br />a besoin d'un coup de main.
  </h1>
  <p className="font-heading text-xl md:text-2xl italic text-foreground/70 mt-4 max-w-lg mx-auto">
- Demander un coup de main, ce n'est pas déranger. C'est offrir une occasion de rendre service.
+ Vous avez une heure, un savoir-faire, deux mains disponibles ? C'est déjà tout ce qu'il faut.
  </p>
  </Reveal>
 
  <Reveal delay={0.2}>
  <p className="font-body text-lg text-foreground/70 leading-relaxed text-center max-w-lg mx-auto mt-6">
- Une tonte de pelouse. Un colis à réceptionner. Un meuble à monter. Un chien à sortir une heure. Ce que vous n'osez pas demander à votre famille, vous pouvez l'oser ici — sans gêne, sans facture, sans dette.
+ Une plante à arroser, un colis à réceptionner, un chien à sortir une heure, un meuble à monter. Des micro-services qui changent une journée — et qui ne demandent ni argent, ni engagement.
  </p>
  </Reveal>
 
  <Reveal delay={0.3}>
+ {/* QW#1 — CTA "offrir" en principal (friction sociale ~0), "demander" en secondaire */}
  <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
- <Button onClick={goToCreate} className="bg-primary text-primary-foreground rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary/90 transition-all duration-200">
- J'ose demander
+ <Button onClick={goToHelp} className="bg-primary text-primary-foreground rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary/90 transition-all duration-200">
+ Je propose mon aide
  </Button>
- <Button onClick={goToHelp} variant="outline" className="border-2 border-primary text-primary rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200">
- J'ai du temps à offrir
+ <Button onClick={goToCreate} variant="outline" className="border-2 border-primary text-primary rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200">
+ J'ai besoin d'un coup de main
  </Button>
  </div>
  <p className="text-xs text-foreground/50 mt-4">
@@ -381,7 +409,7 @@ const SmallMissionsPublic = () => {
  Ce que les gens s'échangent
  </p>
  <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground text-center leading-snug mb-12">
- Des échanges qui ont eu lieu.
+ Le genre de coups de main qu'on échange.
  </h2>
  </Reveal>
 
@@ -554,9 +582,9 @@ const SmallMissionsPublic = () => {
  ))}
  </div>
 
- <Reveal delay={0.2}>
+  <Reveal delay={0.2}>
  <p className="text-center font-body text-sm text-foreground/55 italic mt-10 max-w-xl mx-auto">
- Exemples typiques de missions observées sur Guardiens. Les détails sont fictifs, l'esprit est réel.
+ Trois situations typiques de l'entraide entre gens du coin. À vous de les faire exister près de chez vous.
  </p>
  </Reveal>
  </div>
@@ -625,20 +653,20 @@ const SmallMissionsPublic = () => {
   desc: "Un coup de main pour faire les courses, accompagner un rendez-vous médical, ou simplement passer un moment ensemble.",
   cta: "Lire l'article →",
   },
-  {
-  href: "/house-sitting/lyon",
-  category: "Lyon",
-  title: "Trouver un gardien de confiance dans votre quartier",
-  desc: "House-sitting et garde d'animaux à Lyon, par des gens qui habitent près de chez vous.",
-  cta: "Découvrir →",
-  },
-  {
-  href: "/tarifs",
-  category: "Tarifs",
-  title: "Les tarifs Guardiens, en toute transparence",
-  desc: "Gratuit pour les propriétaires. 6,99 €/mois pour les gardiens. L'entraide reste sans frais, pour tous, sans abonnement requis.",
-  cta: "Voir les tarifs →",
-  },
+   {
+   href: "/actualites/petites-missions-entraide-guardiens",
+   category: "Le guide complet",
+   title: "Petites missions d'entraide : pourquoi ça existe, comment s'y mettre",
+   desc: "Le mode d'emploi détaillé : la philosophie, les règles, les premières missions à oser, les pièges à éviter.",
+   cta: "Lire l'article →",
+   },
+   {
+   href: "/actualites/petites-missions-entraide-guide",
+   category: "Premiers pas",
+   title: "Comment publier votre première mission, étape par étape",
+   desc: "Trois minutes pour décrire votre besoin ou votre offre. Voici comment formuler une demande qui obtient des réponses.",
+   cta: "Suivre le guide →",
+   },
   {
   href: "/faq#petites-missions",
   category: "FAQ",
@@ -683,12 +711,12 @@ const SmallMissionsPublic = () => {
  </p>
  </Reveal>
  <Reveal delay={0.2}>
- <div className="flex flex-col sm:flex-row gap-4 justify-center">
- <Button onClick={goToCreate} className="bg-white text-primary rounded-full px-10 py-4 h-auto text-sm font-bold tracking-wide hover:bg-white/90 hover:scale-[1.02] transition-all duration-200">
- J'ose demander
+  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+ <Button onClick={goToHelp} className="bg-white text-primary rounded-full px-10 py-4 h-auto text-sm font-bold tracking-wide hover:bg-white/90 hover:scale-[1.02] transition-all duration-200">
+ Je propose mon aide
  </Button>
- <Button onClick={goToHelp} className="bg-transparent border-2 border-white/70 text-white rounded-full px-10 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-white/15 transition-all duration-200">
- J'ai du temps à offrir
+ <Button onClick={goToCreate} className="bg-transparent border-2 border-white/70 text-white rounded-full px-10 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-white/15 transition-all duration-200">
+ J'ai besoin d'un coup de main
  </Button>
  </div>
  <p className="text-xs text-white/50 mt-6">
@@ -757,8 +785,11 @@ const SmallMissionsPublic = () => {
      acceptedAnswer: { "@type": "Answer", text: faq.a },
     })),
    })}</script>
-  </Helmet>
-  </div>
+   </Helmet>
+
+   {/* QW#6 — Sticky CTA mobile : apparaît après dépassement du hero, masqué en desktop */}
+   <StickyMobileCta onPropose={goToHelp} onAsk={goToCreate} />
+   </div>
   </>
  );
 };
