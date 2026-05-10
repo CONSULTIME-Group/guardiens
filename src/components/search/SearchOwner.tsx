@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import { logger } from "@/lib/logger";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import ReportButton from "@/components/reports/ReportButton";
@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import { ALLOWED_ALERT_RADII, snapToAllowedRadius } from "@/lib/alertRadius";
 import { useAuth } from "@/contexts/AuthContext";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -44,10 +43,12 @@ type SortOption = "closest" | "rating" | "experience";
 type ViewMode = "list" | "map";
 type ZoneMode = "radius" | "dept" | "region" | "france";
 
+const SearchOwnerMapView = lazy(() => import("@/components/search/SearchOwnerMapView"));
+
 const SearchOwner = () => {
   const { user, switchRole } = useAuth();
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
+  
   const { toast: toastUi } = useToast();
   const [searchParams] = useSearchParams();
 
@@ -59,8 +60,7 @@ const SearchOwner = () => {
   const [radius, setRadius] = useState([15]);
   const [zoneMode, setZoneMode] = useState<ZoneMode>("radius");
   const [densityCounts, setDensityCounts] = useState<{ radius: number; dept: number; region: number; france: number }>({ radius: 0, dept: 0, region: 0, france: 0 });
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  // Note: filtre Dates retiré tant que la disponibilité datée n'est pas modélisée côté gardien.
   const [animalTypes, setAnimalTypes] = useState<string[]>([]);
   const [vehicled, setVehicled] = useState(false);
   const [availableOnly, setAvailableOnly] = useState(false);
@@ -72,6 +72,7 @@ const SearchOwner = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("list");
 
   const [results, setResults] = useState<any[]>([]);
+  const [searchCenter, setSearchCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [contactingId, setContactingId] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -141,7 +142,10 @@ const SearchOwner = () => {
       return;
     }
 
-    if (!user) return;
+    if (!user) {
+      setInitialLoaded(true);
+      return;
+    }
     (async () => {
       const { data } = await supabase.from("profiles").select("city, postal_code").eq("id", user.id).single();
       if (data?.city) setCity(data.city);
@@ -283,7 +287,8 @@ const SearchOwner = () => {
 
     const { data: sitters } = await supabase
       .from("sitter_profiles")
-      .select("*, profile:profiles!sitter_profiles_user_id_fkey(first_name, last_name, avatar_url, city, postal_code, profile_completion, identity_verified, completed_sits_count, bio)");
+      .select("*, profile:profiles!sitter_profiles_user_id_fkey(first_name, last_name, avatar_url, city, postal_code, profile_completion, identity_verified, completed_sits_count, bio)")
+      .limit(500);
 
     let items = (sitters || []).filter((s: any) => s.profile?.profile_completion >= 60);
 
@@ -325,53 +330,43 @@ const SearchOwner = () => {
       france: franceTotalSitters ?? items.length,
     });
 
-    // Apply selected zone filter + compute distance
+    // Helper: enrichit un sitter avec ses coords (pour la vue carte) et sa distance
+    const withCoords = (s: any) => {
+      const sitterCity = s.profile?.city;
+      const coords = sitterCity ? cityCoords.get(sitterCity) : null;
+      const dist = coords && searchCoords ? Math.round(haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng)) : null;
+      return { ...s, _dist: dist, _lat: coords?.lat ?? null, _lng: coords?.lng ?? null };
+    };
+
+    // Apply selected zone filter + compute distance + coords
     if (zoneMode === "radius") {
       if (searchCoords) {
-        items = items.map((s: any) => {
-          const sitterCity = s.profile?.city;
-          if (!sitterCity) return { ...s, _dist: Infinity };
-          const coords = cityCoords.get(sitterCity);
-          if (!coords) return { ...s, _dist: Infinity };
-          const dist = haversineDistance(searchCoords!.lat, searchCoords!.lng, coords.lat, coords.lng);
-          return { ...s, _dist: Math.round(dist) };
-        }).filter((s: any) => s._dist <= radius[0]);
+        items = items
+          .map(withCoords)
+          .filter((s: any) => s._dist != null && s._dist <= radius[0]);
       } else if (city) {
         // Fallback: name match
-        items = items.filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase())).map((s: any) => ({ ...s, _dist: null }));
+        items = items
+          .filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase()))
+          .map(withCoords);
       } else {
-        items = items.map((s: any) => ({ ...s, _dist: null }));
+        items = items.map(withCoords);
       }
     } else if (zoneMode === "dept" && refDept) {
       items = items
         .filter((s: any) => {
           const cp = s.profile?.postal_code; return cp ? getDeptCode(cp) === refDept : false;
         })
-        .map((s: any) => {
-          const sitterCity = s.profile?.city;
-          const coords = sitterCity ? cityCoords.get(sitterCity) : null;
-          const dist = coords && searchCoords ? Math.round(haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng)) : null;
-          return { ...s, _dist: dist };
-        });
+        .map(withCoords);
     } else if (zoneMode === "region" && refRegion) {
       items = items
         .filter((s: any) => {
           const cp = s.profile?.postal_code; return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
         })
-        .map((s: any) => {
-          const sitterCity = s.profile?.city;
-          const coords = sitterCity ? cityCoords.get(sitterCity) : null;
-          const dist = coords && searchCoords ? Math.round(haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng)) : null;
-          return { ...s, _dist: dist };
-        });
+        .map(withCoords);
     } else {
       // france
-      items = items.map((s: any) => {
-        const sitterCity = s.profile?.city;
-        const coords = sitterCity ? cityCoords.get(sitterCity) : null;
-        const dist = coords && searchCoords ? Math.round(haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng)) : null;
-        return { ...s, _dist: dist };
-      });
+      items = items.map(withCoords);
     }
 
     // Filter: vehicle
@@ -413,21 +408,31 @@ const SearchOwner = () => {
       m.set(b.badge_id, (m.get(b.badge_id) || 0) + 1);
     });
 
-    const enriched = await Promise.all(
-      items.map(async (s: any) => {
-        const { data: reviews } = await supabase
-          .from("reviews").select("overall_rating")
-          .eq("reviewee_id", s.user_id).eq("published", true);
-        const avgRating = reviews && reviews.length > 0
-          ? (reviews.reduce((sum: number, r: any) => sum + r.overall_rating, 0) / reviews.length)
-          : null;
-        const userBadges = badgeMap.get(s.user_id);
-        const topBadges = userBadges
-          ? Array.from(userBadges.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count).slice(0, 3)
-          : [];
-        return { ...s, avgRating, reviewCount: reviews?.length || 0, topBadges, isEmergency: emergencySet.has(s.user_id) };
-      })
-    );
+    // Batch fetch reviews for all candidates in a single query (avoid N+1)
+    const reviewsAgg = new Map<string, { sum: number; count: number }>();
+    if (userIds.length > 0) {
+      const { data: reviewRows } = await supabase
+        .from("reviews")
+        .select("reviewee_id, overall_rating")
+        .in("reviewee_id", userIds)
+        .eq("published", true);
+      (reviewRows || []).forEach((r: any) => {
+        const cur = reviewsAgg.get(r.reviewee_id) || { sum: 0, count: 0 };
+        cur.sum += r.overall_rating || 0;
+        cur.count += 1;
+        reviewsAgg.set(r.reviewee_id, cur);
+      });
+    }
+
+    const enriched = items.map((s: any) => {
+      const agg = reviewsAgg.get(s.user_id);
+      const avgRating = agg && agg.count > 0 ? agg.sum / agg.count : null;
+      const userBadges = badgeMap.get(s.user_id);
+      const topBadges = userBadges
+        ? Array.from(userBadges.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count).slice(0, 3)
+        : [];
+      return { ...s, avgRating, reviewCount: agg?.count || 0, topBadges, isEmergency: emergencySet.has(s.user_id) };
+    });
 
     // Filter: min rating (post-enrichment)
     let final = enriched;
@@ -455,6 +460,7 @@ const SearchOwner = () => {
     }
 
     setResults(final);
+    setSearchCenter(searchCoords);
     setLoading(false);
   }, [city, cityPostalCode, userPostalCode, radius, zoneMode, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, minSits, minRating, sort, franceTotalSitters]);
 
@@ -554,11 +560,22 @@ const SearchOwner = () => {
                 <Input
                   placeholder="Rechercher une ville..."
                   value={city}
-                  onChange={(e) => { setCity(e.target.value); fetchCitySuggestions(e.target.value); }}
+                  onChange={(e) => {
+                    setCity(e.target.value);
+                    // Reset le code postal si l'utilisateur tape sans choisir de suggestion
+                    setCityPostalCode(null);
+                    fetchCitySuggestions(e.target.value);
+                  }}
                   className="pr-10"
+                  aria-label="Ville ou commune"
                 />
-                <button onClick={handleGeolocate} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary">
-                  <Crosshair className="h-4 w-4" />
+                <button
+                  type="button"
+                  onClick={handleGeolocate}
+                  aria-label="Utiliser ma position actuelle"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
+                >
+                  <Crosshair className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
               {citySuggestions.length > 0 && (
@@ -614,26 +631,7 @@ const SearchOwner = () => {
             </Popover>
           )}
 
-          {/* PILL 3 — Dates */}
-          <Popover open={openPop === "dates"} onOpenChange={(o) => setOpenPop(o ? "dates" : null)}>
-            <PopoverTrigger asChild>
-              <button className={startDate || endDate ? pillActive : pillBase}>
-                <Calendar className="h-3.5 w-3.5 shrink-0" />
-                {startDate && endDate ? `${startDate} → ${endDate}` : "Dates"}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-72 p-3 space-y-3">
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Du</label>
-                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Au</label>
-                <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
-              </div>
-            </PopoverContent>
-          </Popover>
-
+          {/* PILL 3 — Dates : retiré tant que la disponibilité datée gardien n'est pas modélisée */}
           {/* PILL 4 — Animaux */}
           <Popover open={openPop === "animals"} onOpenChange={(o) => setOpenPop(o ? "animals" : null)}>
             <PopoverTrigger asChild>
@@ -768,9 +766,25 @@ const SearchOwner = () => {
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-1 border border-border rounded-lg p-0.5">
-          <button onClick={() => setViewMode("list")} aria-label="Vue grille" className={`p-1.5 rounded ${viewMode === "list" ? "bg-muted" : ""}`}><LayoutGrid className="h-4 w-4" /></button>
-          <button onClick={() => setViewMode("map")} aria-label="Vue carte" className={`p-1.5 rounded ${viewMode === "map" ? "bg-muted" : ""}`}><MapIcon className="h-4 w-4" /></button>
+        <div className="flex items-center gap-1 border border-border rounded-lg p-0.5" role="group" aria-label="Mode d'affichage des résultats">
+          <button
+            type="button"
+            onClick={() => setViewMode("list")}
+            aria-label="Vue grille"
+            aria-pressed={viewMode === "list"}
+            className={`p-1.5 rounded ${viewMode === "list" ? "bg-muted" : ""}`}
+          >
+            <LayoutGrid className="h-4 w-4" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("map")}
+            aria-label="Vue carte"
+            aria-pressed={viewMode === "map"}
+            className={`p-1.5 rounded ${viewMode === "map" ? "bg-muted" : ""}`}
+          >
+            <MapIcon className="h-4 w-4" aria-hidden="true" />
+          </button>
         </div>
       </div>
 
@@ -991,8 +1005,26 @@ const SearchOwner = () => {
               );
             })}
           </div>
-          <div className="w-1/2 flex items-center justify-center bg-muted/30 text-muted-foreground text-sm">
-            Vue carte à venir
+          <div className="w-1/2 relative bg-muted/30">
+            <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">Chargement de la carte…</div>}>
+              <SearchOwnerMapView
+                sitters={results
+                  .filter((s: any) => s._lat != null && s._lng != null)
+                  .map((s: any) => ({
+                    id: s.id,
+                    user_id: s.user_id,
+                    firstName: s.profile?.first_name || "Gardien",
+                    city: s.profile?.city ?? null,
+                    avatar: s.profile?.avatar_url ?? null,
+                    avgRating: s.avgRating ?? null,
+                    dist: s._dist ?? null,
+                    coords: { lat: s._lat, lng: s._lng },
+                  }))}
+                centerCoords={searchCenter}
+                onContact={handleContact}
+                contactingId={contactingId}
+              />
+            </Suspense>
           </div>
         </div>
       )}
