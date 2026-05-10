@@ -437,6 +437,11 @@ const EditSit = () => {
                   Le titre doit contenir au moins 3 caractères.
                 </p>
               )}
+              {forbiddenInTitle && (
+                <p className="text-xs text-destructive mt-1">
+                  Mot non autorisé détecté. Préférez « gardien », « personne de confiance » ou « France entière ».
+                </p>
+              )}
             </div>
 
             <div className="pt-1">
