@@ -232,20 +232,42 @@ export default function News() {
     [articles, featuredIds, activeCategory, urlSearch]
   );
 
-  const categories = [
-    { key: "all", label: "Tous" },
-    { key: "guide_central", label: "Guides essentiels" },
-    { key: "thematique", label: "House-sitting" },
-    { key: "vie_locale", label: "Vie locale & Entraide" },
-    { key: "conseil_gardien", label: "Conseils gardiens" },
-    { key: "conseil_proprio", label: "Conseils propriétaires" },
-    { key: "guide_race", label: "Races" },
-    { key: "ville", label: "Villes" },
-    { key: "guide_ville", label: "Guide ville" },
-    { key: "guide_local", label: "Guides locaux" },
-    { key: "guide_pratique", label: "Guides pratiques" },
-    { key: "saisonnier", label: "Saisonniers" },
+  // Preferred display order (categories not listed here go to the end alphabetically by label)
+  const CATEGORY_ORDER = [
+    "guide_central",
+    "thematique",
+    "vie_locale",
+    "conseil_gardien",
+    "conseil_proprio",
+    "conseil",
+    "guide_race",
+    "guide_local",
+    "guide_pratique",
+    "guide_lieu",
+    "saisonnier",
+    "actualite",
   ];
+
+  const totalArticles = useMemo(
+    () => Object.values(categoryCounts).reduce((sum, n) => sum + n, 0),
+    [categoryCounts]
+  );
+
+  const categories = useMemo(() => {
+    const present = Object.keys(categoryCounts).filter((k) => categoryCounts[k] > 0);
+    const ordered = [
+      ...CATEGORY_ORDER.filter((k) => present.includes(k)),
+      ...present.filter((k) => !CATEGORY_ORDER.includes(k)).sort(),
+    ];
+    return [
+      { key: "all", label: "Tous", count: totalArticles },
+      ...ordered.map((k) => ({
+        key: k,
+        label: CATEGORY_LABELS[k] || k,
+        count: categoryCounts[k],
+      })),
+    ];
+  }, [categoryCounts, totalArticles]);
 
   const metaTitle =
     activeCategory !== "all"
