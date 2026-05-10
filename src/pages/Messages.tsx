@@ -678,8 +678,8 @@ const Messages = () => {
             }}
           />
 
-          {/* Presence + Context card */}
-          {activeConv.other_user?.last_seen_at && (
+          {/* Presence + Context card — RGPD: respect show_last_seen */}
+          {activeConv.other_user?.last_seen_at && activeConv.other_user?.show_last_seen !== false && (
             <div className="px-4 py-1 border-b border-border/50 bg-card/50">
               <PresenceBadge lastSeenAt={activeConv.other_user.last_seen_at} />
             </div>
