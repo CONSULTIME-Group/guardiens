@@ -177,6 +177,7 @@ const SitDetail = () => {
   return (
     <div className="p-6 md:p-10 max-w-4xl mx-auto animate-fade-in pb-44 md:pb-40">
       <Helmet>
+        <title>{sit.title ? `${sit.title} · Mon annonce` : "Mon annonce"}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
