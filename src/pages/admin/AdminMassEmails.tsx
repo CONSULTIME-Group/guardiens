@@ -499,22 +499,28 @@ function buildPreviewHtml(subject: string, body: string, ctaLabel?: string, ctaU
   const escapedSubject = (subject || "Objet de l'email").replace(/</g, "&lt;");
   const escapedBody = (body || "Corps du message…").replace(/</g, "&lt;");
   const ctaBlock = ctaLabel && ctaUrl
-    ? `<tr><td style="padding:24px 0 0"><a href="${ctaUrl}" style="display:inline-block;padding:12px 28px;background-color:#16a34a;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;font-size:16px">${ctaLabel.replace(/</g, "&lt;")}</a></td></tr>`
+    ? `<tr><td align="center" style="padding:32px 0 8px">
+<a href="${ctaUrl}" style="display:inline-block;padding:14px 32px;background-color:#2C6E49;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:600;font-size:16px;box-shadow:0 4px 12px rgba(44,110,73,0.25)">${ctaLabel.replace(/</g, "&lt;")}</a>
+</td></tr>
+<tr><td align="center" style="padding:0 0 8px"><p style="margin:0;font-size:12px;color:#888">3 minutes, c'est tout.</p></td></tr>`
     : "";
 
   return `<div style="background-color:#FAF9F6;padding:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
 <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
-<table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:12px;overflow:hidden">
-<tr><td style="padding:24px 32px 16px;text-align:center;background-color:#FAF9F6">
-<strong style="font-size:18px;color:#1a1a1a">🐾 Guardiens</strong>
+<table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.04)">
+<tr><td style="padding:0;background:linear-gradient(135deg,#2C6E49 0%,#3a8a5d 100%);height:6px;line-height:6px;font-size:0">&nbsp;</td></tr>
+<tr><td style="padding:24px 32px 8px;text-align:center;background-color:#ffffff">
+<img src="https://guardiens.fr/logo-guardiens.png" alt="Guardiens" width="110" style="display:block;margin:0 auto;height:auto"/>
 </td></tr>
-<tr><td style="padding:24px 32px">
-<h1 style="margin:0 0 16px;font-size:20px;color:#1a1a1a">${escapedSubject}</h1>
-<p style="margin:0;font-size:14px;line-height:1.7;color:#333333;white-space:pre-line">${escapedBody}</p>
+<tr><td style="padding:20px 32px 8px">
+<h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#1a1a1a;font-weight:700">${escapedSubject}</h1>
+<div style="margin:0;font-size:14px;line-height:1.75;color:#3a3a3a;white-space:pre-line">${escapedBody}</div>
+</td></tr>
 ${ctaBlock}
-</td></tr>
-<tr><td style="padding:16px 32px;border-top:1px solid #e5e5e5;text-align:center">
-<p style="margin:0;font-size:11px;color:#999999">Guardiens — La communauté d'entraide</p>
+<tr><td style="padding:24px 32px"></td></tr>
+<tr><td style="padding:18px 32px;border-top:1px solid #eee;background-color:#FAF9F6;text-align:center">
+<p style="margin:0 0 4px;font-size:12px;color:#555;font-weight:600">Guardiens</p>
+<p style="margin:0;font-size:11px;color:#888">L'entraide locale entre propriétaires et gardiens d'animaux.</p>
 </td></tr>
 </table>
 </td></tr></table></div>`;
