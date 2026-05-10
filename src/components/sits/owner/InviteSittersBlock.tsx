@@ -263,7 +263,14 @@ const InviteSittersBlock = ({
           >
             {s.first_name || "Gardien"}
           </Link>
-          {s.city && <p className="text-xs text-muted-foreground truncate">{s.city}</p>}
+          {s.city && (
+            <p className="text-xs text-muted-foreground truncate">
+              {s.city}
+              {typeof s.distance_km === "number" && (
+                <span className="ml-1 text-primary font-medium">· {s.distance_km} km</span>
+              )}
+            </p>
+          )}
         </div>
         {status === "applied" ? (
           <span className="text-xs flex items-center gap-1 text-success font-medium">
