@@ -229,7 +229,7 @@ const InviteSittersBlock = ({
     [],
   );
 
-  const hasSearchCriteria = query.trim().length >= 2 || !!deptCode;
+  const hasSearchCriteria = query.trim().length >= 2 || !!deptCode || activeAdvancedFilters > 0;
 
   return (
     <section
