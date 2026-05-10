@@ -48,6 +48,34 @@ export function useSendSitInvitation(sitId: string, ownerId: string) {
         message: message?.trim() || null,
       });
       if (error) throw error;
+
+      // Email transactionnel — best effort, ne bloque pas l'UX
+      try {
+        const [{ data: sitRow }, { data: ownerRow }, { data: sitterRow }] = await Promise.all([
+          supabase.from("sits").select("title, start_date, end_date").eq("id", sitId).single(),
+          supabase.from("profiles").select("first_name, city").eq("id", ownerId).single(),
+          supabase.from("profiles").select("first_name").eq("id", sitterId).single(),
+        ]);
+        const { formatSitPeriod } = await import("@/lib/dateRange");
+        const { sendTransactionalEmail } = await import("@/lib/sendTransactionalEmail");
+        const period = formatSitPeriod(sitRow?.start_date, sitRow?.end_date);
+        await sendTransactionalEmail({
+          templateName: "sit-invitation",
+          recipientUserId: sitterId,
+          idempotencyKey: `sit-invite-${sitId}-${sitterId}`,
+          templateData: {
+            sitterFirstName: (sitterRow as any)?.first_name ?? null,
+            ownerFirstName: (ownerRow as any)?.first_name ?? null,
+            sitTitle: (sitRow as any)?.title ?? null,
+            sitCity: (ownerRow as any)?.city ?? null,
+            sitPeriod: period ? `du ${period}` : null,
+            message: message?.trim() || null,
+            sitId,
+          },
+        });
+      } catch {
+        // silencieux : la notif in-app est déjà envoyée par le trigger DB
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["sit_invitations", sitId] });
