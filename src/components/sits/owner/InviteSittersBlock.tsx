@@ -333,15 +333,160 @@ const InviteSittersBlock = ({
           </div>
 
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <p className="text-xs text-muted-foreground">
-              Combinez prénom/ville et département pour affiner. Besoin de plus de critères (rayon, expérience, animaux…) ?
-            </p>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                  Filtres avancés
+                  {activeAdvancedFilters > 0 && (
+                    <Badge className="ml-1 h-5 min-w-5 px-1.5 text-[10px] bg-primary text-primary-foreground">
+                      {activeAdvancedFilters}
+                    </Badge>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4 space-y-4" align="start">
+                {/* Animaux acceptés */}
+                <div>
+                  <Label className="text-xs font-medium flex items-center gap-1.5 mb-2">
+                    <PawPrint className="h-3.5 w-3.5" /> Animaux acceptés
+                  </Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {ANIMAL_OPTIONS.map((a) => {
+                      const active = animals.includes(a.value);
+                      return (
+                        <button
+                          key={a.value}
+                          type="button"
+                          onClick={() => toggleAnimal(a.value)}
+                          className={
+                            active
+                              ? "bg-primary text-primary-foreground rounded-full px-2.5 py-1 text-xs"
+                              : "border border-border rounded-full px-2.5 py-1 text-xs text-muted-foreground hover:border-primary"
+                          }
+                        >
+                          {a.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Expérience minimum */}
+                <div>
+                  <Label className="text-xs font-medium flex items-center gap-1.5 mb-2">
+                    <GraduationCap className="h-3.5 w-3.5" /> Expérience minimum
+                  </Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {EXPERIENCE_OPTIONS.map((e) => {
+                      const active = minExperience === e.value;
+                      return (
+                        <button
+                          key={e.value}
+                          type="button"
+                          onClick={() => setMinExperience(e.value)}
+                          className={
+                            active
+                              ? "bg-primary text-primary-foreground rounded-full px-2.5 py-1 text-xs"
+                              : "border border-border rounded-full px-2.5 py-1 text-xs text-muted-foreground hover:border-primary"
+                          }
+                        >
+                          {e.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Vérifié */}
+                <div className="flex items-center justify-between gap-3">
+                  <Label htmlFor="invite-verified" className="text-xs font-medium flex items-center gap-1.5 cursor-pointer">
+                    <ShieldCheck className="h-3.5 w-3.5" /> Identité vérifiée seulement
+                  </Label>
+                  <Switch
+                    id="invite-verified"
+                    checked={verifiedOnly}
+                    onCheckedChange={setVerifiedOnly}
+                  />
+                </div>
+
+                {/* Avec photo */}
+                <div className="flex items-center justify-between gap-3">
+                  <Label htmlFor="invite-photo" className="text-xs font-medium flex items-center gap-1.5 cursor-pointer">
+                    <ImageIcon className="h-3.5 w-3.5" /> Avec photo de profil
+                  </Label>
+                  <Switch
+                    id="invite-photo"
+                    checked={withPhotoOnly}
+                    onCheckedChange={setWithPhotoOnly}
+                  />
+                </div>
+
+                {activeAdvancedFilters > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full text-xs text-muted-foreground"
+                    onClick={resetAdvanced}
+                  >
+                    <X className="h-3.5 w-3.5 mr-1" /> Réinitialiser les filtres
+                  </Button>
+                )}
+              </PopoverContent>
+            </Popover>
+
             <Link to="/recherche">
-              <Button variant="ghost" size="sm" className="gap-1.5 text-primary hover:text-primary">
-                Recherche avancée sur la carte <ArrowRight className="h-3.5 w-3.5" />
+              <Button variant="ghost" size="sm" className="gap-1.5 text-xs text-muted-foreground hover:text-primary">
+                Voir aussi sur la carte <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </Link>
           </div>
+
+          {/* Chips de filtres actifs */}
+          {activeAdvancedFilters > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              {animals.map((a) => {
+                const opt = ANIMAL_OPTIONS.find((o) => o.value === a);
+                return (
+                  <Badge key={a} variant="secondary" className="gap-1 pr-1">
+                    {opt?.label}
+                    <button
+                      type="button"
+                      onClick={() => toggleAnimal(a)}
+                      className="hover:text-destructive"
+                      aria-label={`Retirer ${opt?.label}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                );
+              })}
+              {minExperience > 0 && (
+                <Badge variant="secondary" className="gap-1 pr-1">
+                  {EXPERIENCE_OPTIONS.find((e) => e.value === minExperience)?.label}
+                  <button type="button" onClick={() => setMinExperience(0)} className="hover:text-destructive" aria-label="Retirer expérience">
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+              {verifiedOnly && (
+                <Badge variant="secondary" className="gap-1 pr-1">
+                  Vérifié
+                  <button type="button" onClick={() => setVerifiedOnly(false)} className="hover:text-destructive" aria-label="Retirer vérifié">
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+              {withPhotoOnly && (
+                <Badge variant="secondary" className="gap-1 pr-1">
+                  Avec photo
+                  <button type="button" onClick={() => setWithPhotoOnly(false)} className="hover:text-destructive" aria-label="Retirer photo">
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+            </div>
+          )}
 
           {!hasSearchCriteria ? (
             <div className="rounded-xl border border-dashed border-border bg-card p-6 text-center">
