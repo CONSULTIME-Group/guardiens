@@ -57,7 +57,7 @@ const HouseGuideBlock = ({ propertyId }: HouseGuideBlockProps) => {
       </button>
 
       {expanded && (
-        <div className="px-4 pb-4 space-y-4 border-t border-border pt-3">
+        <div id="house-guide-content" className="px-4 pb-4 space-y-4 border-t border-border pt-3">
           {hasAddress && (
             <GuideSection icon={MapPin} title="Adresse & accès">
               {guide.exact_address && <p className="text-sm">{guide.exact_address}</p>}
