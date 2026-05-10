@@ -553,29 +553,32 @@ const Messages = () => {
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); handleArchive(conv); }}
-          className="absolute top-2 right-2 p-1 rounded hover:bg-accent opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute top-2 right-2 p-1 rounded hover:bg-accent opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-opacity"
           title={conv.archived_by.includes(user?.id || "") ? "Désarchiver" : "Archiver"}
-          aria-label={conv.archived_by.includes(user?.id || "") ? "Désarchiver" : "Archiver"}
+          aria-label={conv.archived_by.includes(user?.id || "") ? "Désarchiver cette conversation" : "Archiver cette conversation"}
         >
-          <Archive className="h-3.5 w-3.5 text-muted-foreground" />
+          <Archive className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
         </button>
       </div>
     );
   };
 
   const renderGroup = (key: string, title: string, convs: Conversation[], unreadCount: number, icon: React.ReactNode) => (
-    <div key={key}>
-      <div className="bg-muted/50 px-4 py-2 sticky top-0 z-10 flex items-center gap-2">
-        {icon}
-        <span className="text-xs font-medium text-foreground truncate flex-1">{title}</span>
+    <section key={key} aria-label={title}>
+      <h2 className="bg-muted/50 px-4 py-2 sticky top-0 z-10 flex items-center gap-2 text-xs font-medium text-foreground m-0">
+        <span aria-hidden="true">{icon}</span>
+        <span className="truncate flex-1">{title}</span>
         {unreadCount > 0 && (
-          <span className="bg-primary text-primary-foreground rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold shrink-0">
+          <span
+            className="bg-primary text-primary-foreground rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold shrink-0"
+            aria-label={`${unreadCount} non lu${unreadCount > 1 ? "s" : ""}`}
+          >
             {unreadCount}
           </span>
         )}
-      </div>
+      </h2>
       {convs.map(renderConvItem)}
-    </div>
+    </section>
   );
 
   // Group conversations by sit
@@ -606,12 +609,15 @@ const Messages = () => {
             <h1 className="font-heading text-xl font-bold">Messagerie</h1>
 
             {/* MOD 2 — Single pill row */}
-            <div className="flex gap-2">
+            <div className="flex gap-2" role="tablist" aria-label="Filtrer les conversations">
               {pills.map(p => (
                 <button
                   key={p.value}
+                  type="button"
+                  role="tab"
+                  aria-selected={pill === p.value}
                   onClick={() => setPill(p.value)}
-                  className={`rounded-full px-3 py-1 text-xs transition-colors ${
+                  className={`rounded-full px-3 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                     pill === p.value
                       ? "bg-foreground text-background"
                       : "border border-border text-muted-foreground hover:border-primary"
@@ -632,11 +638,12 @@ const Messages = () => {
               value={searchFilter}
               onChange={e => setSearchFilter(e.target.value)}
               placeholder="Filtrer par annonce ou prénom..."
+              aria-label="Filtrer les conversations par annonce ou prénom"
               className="h-8 text-xs rounded-lg"
             />
           </div>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto" role="region" aria-label="Liste des conversations">
             {displayConversations.length === 0 ? (
               <div className="p-4">
                 {pill === "archived" ? (
@@ -694,7 +701,14 @@ const Messages = () => {
           />
 
           {/* Messages with day separators */}
-          <div className="flex-1 overflow-y-auto space-y-0 pb-20 md:pb-4" style={{ background: "hsl(var(--background))" }}>
+          <div
+            className="flex-1 overflow-y-auto space-y-0 pb-20 md:pb-4"
+            style={{ background: "hsl(var(--background))" }}
+            role="log"
+            aria-live="polite"
+            aria-relevant="additions"
+            aria-label="Historique des messages"
+          >
             {(activeConv.sit?.status === "confirmed" || activeConv.sit?.status === "in_progress") && activeConv.sit?.property_id && (
               <HouseGuideBlock propertyId={activeConv.sit.property_id} />
             )}
@@ -733,19 +747,20 @@ const Messages = () => {
             </div>
           ) : (
             <div className="border-t border-border bg-card p-3 flex items-center gap-2 mb-16 md:mb-0">
-              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoUpload} />
-              <button onClick={() => fileInputRef.current?.click()} className="p-2 rounded-lg hover:bg-accent text-muted-foreground" aria-label="Joindre une photo">
-                <ImageIcon className="h-5 w-5" />
+              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoUpload} aria-hidden="true" tabIndex={-1} />
+              <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2 rounded-lg hover:bg-accent text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Joindre une photo">
+                <ImageIcon className="h-5 w-5" aria-hidden="true" />
               </button>
               <Input
                 value={newMessage}
                 onChange={e => setNewMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Écrire un message..."
+                aria-label="Écrire un message"
                 className="flex-1 rounded-full"
               />
-              <Button size="icon" onClick={handleSend} disabled={sending || !newMessage.trim()} className="rounded-full shrink-0" aria-label="Envoyer">
-                <Send className="h-4 w-4" />
+              <Button size="icon" onClick={handleSend} disabled={sending || !newMessage.trim()} className="rounded-full shrink-0" aria-label="Envoyer le message">
+                <Send className="h-4 w-4" aria-hidden="true" />
               </Button>
             </div>
           )}

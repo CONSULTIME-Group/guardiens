@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Check, CheckCheck, Info } from "lucide-react";
 import { format } from "date-fns";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 interface MessageBubbleProps {
   msg: {
@@ -85,8 +86,13 @@ const MessageBubble = ({ msg, isMe, readerRole = "gardien" }: MessageBubbleProps
           className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${isMe ? "rounded-br-md bg-primary/15" : "rounded-bl-md bg-muted"}`}
         >
           {msg.photo_url && (
-            <button onClick={() => setLightboxOpen(true)} className="block mb-1 focus:outline-none">
-              <img src={msg.photo_url} alt="Photo partagée" loading="lazy" className="max-w-full max-h-48 rounded-lg object-cover hover:opacity-90 transition-opacity cursor-zoom-in" />
+            <button
+              type="button"
+              onClick={() => setLightboxOpen(true)}
+              className="block mb-1 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label="Agrandir la photo partagée"
+            >
+              <img src={msg.photo_url} alt="Photo partagée dans la conversation" loading="lazy" className="max-w-full max-h-48 rounded-lg object-cover hover:opacity-90 transition-opacity cursor-zoom-in" />
             </button>
           )}
           {msg.content && <p className="text-sm whitespace-pre-line break-words text-foreground">{msg.content}</p>}
@@ -104,6 +110,10 @@ const MessageBubble = ({ msg, isMe, readerRole = "gardien" }: MessageBubbleProps
       {msg.photo_url && (
         <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
           <DialogContent className="max-w-3xl p-2 bg-background border-none">
+            <VisuallyHidden>
+              <DialogTitle>Photo partagée</DialogTitle>
+              <DialogDescription>Aperçu agrandi de la photo échangée dans cette conversation</DialogDescription>
+            </VisuallyHidden>
             <img src={msg.photo_url} alt="Photo partagée en grand" className="w-full h-auto max-h-[80vh] object-contain rounded-lg" />
           </DialogContent>
         </Dialog>

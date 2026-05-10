@@ -229,8 +229,8 @@ const ConversationHeader = ({
       <div className="flex items-start justify-between gap-3 p-4">
         <div className="flex items-center gap-3 min-w-0">
           {isMobile && (
-            <button onClick={onBack} className="p-1 hover:bg-accent rounded-lg" aria-label="Retour">
-              <ArrowLeft className="h-5 w-5" />
+            <button type="button" onClick={onBack} className="p-1 hover:bg-accent rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Retour à la liste des conversations">
+              <ArrowLeft className="h-5 w-5" aria-hidden="true" />
             </button>
           )}
           {conv.other_user?.id ? (
@@ -269,8 +269,8 @@ const ConversationHeader = ({
                 </span>
               )}
               {otherUserRating !== undefined && otherUserRating > 0 && (
-                <span className="flex items-center gap-0.5 text-xs text-muted-foreground ml-1">
-                  <Star className="h-3 w-3 text-secondary fill-secondary" /> {otherUserRating.toFixed(1)}
+                <span className="flex items-center gap-0.5 text-xs text-muted-foreground ml-1" aria-label={`Note ${otherUserRating.toFixed(1)} sur 5`}>
+                  <Star className="h-3 w-3 text-secondary fill-secondary" aria-hidden="true" /> <span aria-hidden="true">{otherUserRating.toFixed(1)}</span>
                 </span>
               )}
             </div>
@@ -303,14 +303,14 @@ const ConversationHeader = ({
               </Link>
             </Button>
           )}
-          <button onClick={() => setReportOpen(true)} className="p-2 rounded-lg hover:bg-accent text-muted-foreground" title="Signaler" aria-label="Signaler">
-            <Flag className="h-4 w-4" />
+          <button type="button" onClick={() => setReportOpen(true)} className="p-2 rounded-lg hover:bg-accent text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`Signaler ${sitterName}`}>
+            <Flag className="h-4 w-4" aria-hidden="true" />
           </button>
-          <button onClick={() => setBlockOpen(true)} className="p-2 rounded-lg hover:bg-accent text-destructive" title="Bloquer" aria-label="Bloquer">
-            <Ban className="h-4 w-4" />
+          <button type="button" onClick={() => setBlockOpen(true)} className="p-2 rounded-lg hover:bg-accent text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`Bloquer ${sitterName}`}>
+            <Ban className="h-4 w-4" aria-hidden="true" />
           </button>
-          <button onClick={onArchive} className="p-2 rounded-lg hover:bg-accent text-muted-foreground" title="Archiver" aria-label="Archiver">
-            <Archive className="h-4 w-4" />
+          <button type="button" onClick={onArchive} className="p-2 rounded-lg hover:bg-accent text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Archiver cette conversation">
+            <Archive className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
       </div>
