@@ -759,8 +759,11 @@ const SmallMissionsPublic = () => {
      acceptedAnswer: { "@type": "Answer", text: faq.a },
     })),
    })}</script>
-  </Helmet>
-  </div>
+   </Helmet>
+
+   {/* QW#6 — Sticky CTA mobile : apparaît après dépassement du hero, masqué en desktop */}
+   <StickyMobileCta onPropose={goToHelp} onAsk={goToCreate} />
+   </div>
   </>
  );
 };
