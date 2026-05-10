@@ -53,7 +53,11 @@ interface SitterRow {
   avatar_url: string | null;
   city: string | null;
   bio: string | null;
+  /** Distance en km depuis le propriétaire — défini uniquement en mode rayon. */
+  distance_km?: number | null;
 }
+
+const RADIUS_OPTIONS = [5, 10, 15, 30, 50, 100];
 
 interface InviteSittersBlockProps {
   sitId: string;
