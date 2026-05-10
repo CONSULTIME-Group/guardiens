@@ -275,21 +275,8 @@ const OwnerSitView = ({
         />
       )}
 
-      {/* Share buttons — visible to the owner of a published listing so they can broadcast it */}
-      {sit.status === "published" && (
-        <div className="mb-6">
-          <ShareButtons
-            sitId={sit.id}
-            title={sit.title || `Garde à ${owner?.city || "France"}`}
-            city={owner?.city}
-            startDate={sit.start_date}
-            endDate={sit.end_date}
-            source="owner_sit_detail"
-          />
-        </div>
-      )}
-
-      {/* Header partagé (compact) — actions Modifier / Aperçu gardien + statut */}
+      {/* Header partagé (compact) — actions Partager / Modifier / Aperçu gardien + statut.
+          Le partage est désormais une icône dans le header (plus de gros bloc). */}
       <SitDetailHeader
         sitId={sit.id}
         sitTitle={sit.title}
@@ -309,6 +296,7 @@ const OwnerSitView = ({
         reviewCount={reviews.length}
         avgRating={avgRating}
         compact
+        ownerCity={owner?.city ?? null}
       />
 
       {/* Historique des modifications de dates */}
