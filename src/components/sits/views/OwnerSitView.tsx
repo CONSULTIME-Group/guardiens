@@ -197,10 +197,18 @@ const OwnerSitView = ({
       return;
     }
     setSit({ ...sit, status: "published" });
+    setJustPublished(true);
+    // Scroll vers le bloc d'invitation et l'ouvrir automatiquement
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        const el = document.getElementById("invite-sitters-block");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 250);
+    });
     toast({
       title: "Annonce publiée",
       description:
-        "Les gardiens peuvent maintenant candidater. Pour aller plus vite, proposez votre annonce directement à vos favoris ou aux gardiens que vous avez repérés.",
+        "Place à l'action : proposez votre annonce directement à des gardiens (favoris, recherche, département…).",
       duration: 6000,
     });
   };
