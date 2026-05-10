@@ -29,6 +29,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useSitInvitations } from "@/hooks/useSitInvitations";
 import { DEPT_NAMES } from "@/lib/departments";
+import { Slider } from "@/components/ui/slider";
+import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import InviteSitterDialog from "./InviteSitterDialog";
 import PostPublishRecapDialog from "./PostPublishRecapDialog";
 
