@@ -245,9 +245,24 @@ async function main() {
   // Pages légales (/cgu, /confidentialite, /mentions-legales) déjà incluses
   // dans staticPages via staticRoutes — ne pas les ré-ajouter ici.
 
+  // Déduplication finale : un même <loc> ne doit jamais apparaître 2 fois
+  // (cityLandingPages hardcodées vs seo_city_pages DB notamment).
+  // On garde la PREMIÈRE occurrence (priorité au hardcode + ordre staticPages).
+  const seen = new Set();
+  const dedupedEntries = [];
+  let dupeCount = 0;
+  for (const entry of entries) {
+    const locMatch = entry.match(/<loc>([^<]+)<\/loc>/);
+    const loc = locMatch?.[1];
+    if (loc && seen.has(loc)) { dupeCount++; continue; }
+    if (loc) seen.add(loc);
+    dedupedEntries.push(entry);
+  }
+  if (dupeCount > 0) console.log(`  ⚠️  ${dupeCount} doublon(s) <loc> filtré(s)`);
+
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${entries.join("\n")}
+${dedupedEntries.join("\n")}
 </urlset>`;
 
   const outPath = path.resolve(__dirname, "../public/sitemap.xml");
