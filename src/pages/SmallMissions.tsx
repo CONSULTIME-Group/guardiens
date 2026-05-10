@@ -128,7 +128,7 @@ const SmallMissions = () => {
  const mySkills: string[] = (currentUserProfile as any)?.skill_categories || [];
 
  const [postalCodeInput, setPostalCodeInput] = useState("");
- const [radiusKm, setRadiusKm] = useState(15);
+ const [radiusKm, setRadiusKm] = useState(0); // 0 = "Partout" — défaut volontaire (cold start, base nationale)
  const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>(null);
  const [geocodingOrigin, setGeocodingOrigin] = useState(false);
 
