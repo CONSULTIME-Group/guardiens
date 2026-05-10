@@ -3003,6 +3003,39 @@ export type Database = {
           },
         ]
       }
+      redirects: {
+        Row: {
+          created_at: string
+          hit_count: number
+          last_hit_at: string | null
+          notes: string | null
+          redirect_type: number
+          slug_from: string
+          slug_to: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          hit_count?: number
+          last_hit_at?: string | null
+          notes?: string | null
+          redirect_type?: number
+          slug_from: string
+          slug_to: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          hit_count?: number
+          last_hit_at?: string | null
+          notes?: string | null
+          redirect_type?: number
+          slug_from?: string
+          slug_to?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       referrals: {
         Row: {
           created_at: string | null
@@ -4763,6 +4796,10 @@ export type Database = {
         Returns: boolean
       }
       increment_cp_relance: { Args: { user_ids: string[] }; Returns: undefined }
+      increment_redirect_hit: {
+        Args: { p_slug_from: string }
+        Returns: undefined
+      }
       is_account_empty: { Args: { _user_id: string }; Returns: boolean }
       is_profile_ready_for_action: {
         Args: { p_user_id?: string }
