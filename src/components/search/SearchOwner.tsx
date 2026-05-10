@@ -142,7 +142,10 @@ const SearchOwner = () => {
       return;
     }
 
-    if (!user) return;
+    if (!user) {
+      setInitialLoaded(true);
+      return;
+    }
     (async () => {
       const { data } = await supabase.from("profiles").select("city, postal_code").eq("id", user.id).single();
       if (data?.city) setCity(data.city);
