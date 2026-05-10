@@ -240,8 +240,9 @@ export default function ArticleDetail() {
  if (cp) setCityPageSlug((cp as any).slug);
  }
  };
- fetchAll();
- }, [slug]);
+  fetchAll();
+  return () => { cancelled = true; };
+  }, [slug]);
 
  // CTA tracking — listen for clicks on data-article-cta links inside the rendered article
  useEffect(() => {
