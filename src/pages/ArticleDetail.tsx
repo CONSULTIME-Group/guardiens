@@ -92,43 +92,11 @@ function generateAltText(article: ArticleFull): string {
 }
 
 
-const ARTICLE_REDIRECTS: Record<string, string> = {
- "golden-retriever-lyon-guide-race": "golden-retriever-guide-race-complet",
- "berger-australien-guide": "berger-australien-guide-race",
- "preparer-maison-avant-vacances": "preparer-maison-avant-garde",
- "guide-lieu-meilleurs-parcs-chiens-lyon": "parcs-chiens-lyon-guide-complet",
- "guide-house-sitting-lyon": "house-sitting-lyon",
- "gardiennage-maison-vacances-aura": "house-sitting-aura-guide-complet",
- "house-sitting-auvergne-rhone-alpes": "house-sitting-aura-guide-complet",
- "pet-sitting-grenoble-chartreuse": "house-sitting-grenoble",
- "pet-sitting-grenoble-guide": "house-sitting-grenoble",
- "pet-sitting-annecy-guide": "house-sitting-annecy",
- "pet-sitting-lyon-guide-complet": "house-sitting-lyon",
- "pet-sitting-chambery-savoie": "house-sitting-chambery",
- "garde-chien-lyon-solutions": "house-sitting-lyon",
- "devenir-pet-sitter-guide-debutant": "creer-profil-gardien-attractif",
- "devenir-gardien-guide-complet": "creer-profil-gardien-attractif",
- "conseil-gardien-creer-profil-attractif-lyon": "creer-profil-gardien-attractif",
- "proprietaire-preparer-garde-maison": "preparer-maison-avant-garde",
- "pet-sitting-clermont-ferrand-guide": "pet-sitting-clermont-ferrand",
- "conseils-garder-chien": "reussir-premiere-garde-house-sitting",
- "erreurs-premiere-garde": "reussir-premiere-garde-house-sitting",
- "house-sitting-saint-etienne-guide": "pet-sitting-saint-etienne-loire",
- "jardinage-echange-service-voisin-grenoble": "jardinage-entraide-quartier-grenoble",
- "jardinage-echange-service-voisin-annecy": "jardinage-entraide-quartier-annecy",
- "jardinage-echange-service-voisin-lyon": "jardinage-entraide-quartier-lyon",
- "demenagement-coup-main-voisin-aura": "demenagement-entraide-locale-aura",
- "bricolage-montage-meubles-voisin-grenoble-lyon": "bricolage-montage-meubles-entraide-grenoble-lyon",
- "courses-aide-domicile-voisin-senior-lyon": "courses-aide-domicile-entraide-senior-lyon",
- "reseau-voisinage-quartier-lyon-aura": "reseau-entraide-quartier-lyon-aura",
- // Slugs fantômes crawlés par Google (canonical fausses corrigées)
- "rediger-annonce-garde": "rediger-bonne-annonce-house-sitting",
- "gardien-urgence-presentation": "devenir-gardien-urgence-guardiens",
- "house-sitting-noel": "house-sitting-noel-fetes-fin-annee",
- "10-conseils-garder-chien": "reussir-premiere-garde-house-sitting",
- "devenir-pet-sitter": "creer-profil-gardien-attractif",
- "5-erreurs-premiere-garde": "reussir-premiere-garde-house-sitting",
-};
+// Les redirections d'articles (301) sont désormais gérées en base via la table
+// public.redirects (cf. migration). La résolution se fait au montage du
+// composant via un SELECT direct, ce qui évite tout flash de 404 et garde une
+// source de vérité unique partagée avec l'edge function `redirect-lookup` (qui
+// sert le worker Cloudflare prerender pour émettre un vrai 301 aux crawlers).
 
 /**
  * Tiny child component: re-runs after PageMeta has flushed Helmet so we can
