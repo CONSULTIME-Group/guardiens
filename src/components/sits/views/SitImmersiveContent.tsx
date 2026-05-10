@@ -151,25 +151,22 @@ const SitImmersiveContent = ({
     enabled: !!cityName,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      const { data: cityRows } = await supabase
+      const { count: cityCount } = await supabase
         .from("profiles")
-        .select("id, sitter_profiles!inner(user_id)")
-        .ilike("city", cityName)
-        .limit(50);
-      const cityCount = cityRows?.length ?? 0;
+        .select("id, sitter_profiles!inner(user_id)", { count: "exact", head: true })
+        .ilike("city", cityName);
+      const safeCityCount = cityCount ?? 0;
 
-      if (cityCount >= CITY_THRESHOLD || !deptCode) {
-        return { mode: "city" as const, count: cityCount };
+      if (safeCityCount >= CITY_THRESHOLD || !deptCode) {
+        return { mode: "city" as const, count: safeCityCount };
       }
 
-      const { data: deptRows } = await supabase
+      const { count: deptCount } = await supabase
         .from("profiles")
-        .select("id, postal_code, sitter_profiles!inner(user_id)")
-        .like("postal_code", `${deptCode}%`)
-        .limit(50);
-      const deptCount = deptRows?.length ?? 0;
+        .select("id, postal_code, sitter_profiles!inner(user_id)", { count: "exact", head: true })
+        .like("postal_code", `${deptCode}%`);
 
-      return { mode: "dept" as const, count: deptCount, cityCount };
+      return { mode: "dept" as const, count: deptCount ?? 0, cityCount: safeCityCount };
     },
   });
 
