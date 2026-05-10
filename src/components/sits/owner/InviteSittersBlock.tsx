@@ -301,7 +301,11 @@ const InviteSittersBlock = ({
     [],
   );
 
-  const hasSearchCriteria = query.trim().length >= 2 || !!deptCode || activeAdvancedFilters > 0;
+  const hasSearchCriteria =
+    query.trim().length >= 2 ||
+    (searchMode === "dept" && !!deptCode) ||
+    (searchMode === "radius" && !!ownerCoords) ||
+    activeAdvancedFilters > 0;
 
   // Onglet actif (contrôlé) pour permettre au récap post-publication de
   // rediriger immédiatement l'utilisateur vers le bon onglet.
