@@ -90,6 +90,7 @@ function isNew(publishedAt: string | null): boolean {
 export default function News() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [vieLocaleArticles, setVieLocaleArticles] = useState<Article[]>([]);
+  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState(0);
