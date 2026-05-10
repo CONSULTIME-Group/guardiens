@@ -76,9 +76,12 @@ const SitDetailHeader = ({
   isAuthenticatedNonOwner,
   reviewCount,
   avgRating,
+  ownerCity,
   compact = false,
 }: SitDetailHeaderProps) => {
   const status = getSitStatusConfig(sitStatus);
+  const [shareOpen, setShareOpen] = useState(false);
+  const showShareAction = isOwner && sitStatus === "published";
 
   return (
     <>
