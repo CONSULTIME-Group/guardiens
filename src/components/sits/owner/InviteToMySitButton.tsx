@@ -160,6 +160,8 @@ const InviteToMySitButton = ({
   }, [sits, invitedSitIds, chosenSit]);
 
   if (!isOwnerMode || !sitter || isSelf) return null;
+  if (hideIfNoSits && (publishedCount === null || publishedCount === 0)) return null;
+
 
   return (
     <>
