@@ -139,27 +139,28 @@ const SmallMissionsPublic = () => {
  </Reveal>
 
  <Reveal delay={0.1}>
- <h1 className="font-heading text-5xl md:text-6xl font-bold text-foreground leading-tight max-w-2xl mx-auto">
- Osez demander.<br />Quelqu'un, près de chez vous, n'attend que ça.
+  <h1 className="font-heading text-5xl md:text-6xl font-bold text-foreground leading-tight max-w-2xl mx-auto">
+ Quelqu'un, près de chez vous,<br />a besoin d'un coup de main.
  </h1>
  <p className="font-heading text-xl md:text-2xl italic text-foreground/70 mt-4 max-w-lg mx-auto">
- Demander un coup de main, ce n'est pas déranger. C'est offrir une occasion de rendre service.
+ Vous avez une heure, un savoir-faire, deux mains disponibles ? C'est déjà tout ce qu'il faut.
  </p>
  </Reveal>
 
  <Reveal delay={0.2}>
  <p className="font-body text-lg text-foreground/70 leading-relaxed text-center max-w-lg mx-auto mt-6">
- Une tonte de pelouse. Un colis à réceptionner. Un meuble à monter. Un chien à sortir une heure. Ce que vous n'osez pas demander à votre famille, vous pouvez l'oser ici — sans gêne, sans facture, sans dette.
+ Une plante à arroser, un colis à réceptionner, un chien à sortir une heure, un meuble à monter. Des micro-services qui changent une journée — et qui ne demandent ni argent, ni engagement.
  </p>
  </Reveal>
 
  <Reveal delay={0.3}>
+ {/* QW#1 — CTA "offrir" en principal (friction sociale ~0), "demander" en secondaire */}
  <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
- <Button onClick={goToCreate} className="bg-primary text-primary-foreground rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary/90 transition-all duration-200">
- J'ose demander
+ <Button onClick={goToHelp} className="bg-primary text-primary-foreground rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary/90 transition-all duration-200">
+ Je propose mon aide
  </Button>
- <Button onClick={goToHelp} variant="outline" className="border-2 border-primary text-primary rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200">
- J'ai du temps à offrir
+ <Button onClick={goToCreate} variant="outline" className="border-2 border-primary text-primary rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200">
+ J'ai besoin d'un coup de main
  </Button>
  </div>
  <p className="text-xs text-foreground/50 mt-4">
