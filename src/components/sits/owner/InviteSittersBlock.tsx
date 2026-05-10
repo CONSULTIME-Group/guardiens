@@ -289,7 +289,7 @@ const InviteSittersBlock = ({
         </div>
       </div>
 
-      <Tabs defaultValue={highlight ? "search" : "favorites"} className="w-full">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "favorites" | "search")} className="w-full">
         <TabsList className="bg-background/80">
           <TabsTrigger value="favorites">
             <Heart className="h-4 w-4 mr-1.5" /> Mes favoris ({favSitters.length})
