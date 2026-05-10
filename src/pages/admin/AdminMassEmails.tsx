@@ -346,9 +346,18 @@ const AdminMassEmails = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmer l'envoi</AlertDialogTitle>
-            <AlertDialogDescription>
-              Vous êtes sur le point d'envoyer cet email à {recipientCount ?? 0} inscrits.
-              Cette action est irréversible.
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <p>
+                  Vous êtes sur le point d'envoyer à <strong>{recipientCount ?? 0} destinataires</strong>
+                  {" "}({SEGMENT_LABELS[segment] || segment}). Cette action est irréversible.
+                </p>
+                {ctaEnabled && utmEnabled && ctaUrl.startsWith("https://") && (
+                  <p className="text-xs text-muted-foreground">
+                    Tracking UTM : <code>utm_campaign={effectiveCampaign}</code>, <code>utm_content={utmContent || "cta"}</code>
+                  </p>
+                )}
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
