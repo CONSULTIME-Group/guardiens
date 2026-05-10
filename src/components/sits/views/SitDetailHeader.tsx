@@ -11,7 +11,8 @@
  * Reste 100% présentationnel : aucune logique métier ici, on reçoit tout via props.
  */
 import { Link } from "react-router-dom";
-import { ArrowLeft, Calendar, MapPin, Star, Pencil, ExternalLink, MoreHorizontal } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, Calendar, MapPin, Star, Pencil, ExternalLink, MoreHorizontal, Share2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -21,9 +22,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import ReportButton from "@/components/reports/ReportButton";
 import SitHero from "@/components/sits/shared/SitHero";
+import ShareButtons from "@/components/sits/ShareButtons";
 import { getSitStatusConfig } from "@/components/sits/shared/sitConstants";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 
@@ -40,6 +49,8 @@ interface SitDetailHeaderProps {
   isAuthenticatedNonOwner: boolean;
   reviewCount: number;
   avgRating: string | null;
+  /** Ville à afficher dans le récap de partage (owner uniquement) */
+  ownerCity?: string | null;
   /**
    * Mode compact : masque le hero photos, le titre et la ligne meta
    * (déjà rendus par SitImmersiveContent). Conserve le lien retour, les
@@ -65,9 +76,12 @@ const SitDetailHeader = ({
   isAuthenticatedNonOwner,
   reviewCount,
   avgRating,
+  ownerCity,
   compact = false,
 }: SitDetailHeaderProps) => {
   const status = getSitStatusConfig(sitStatus);
+  const [shareOpen, setShareOpen] = useState(false);
+  const showShareAction = isOwner && sitStatus === "published";
 
   return (
     <>
@@ -94,6 +108,36 @@ const SitDetailHeader = ({
         <div className="flex items-center gap-2 shrink-0">
           {isOwner && (
             <>
+              {/* Partager (icône) — ouvre un dialog avec toutes les options de partage.
+                  Remplace l'ancien gros bloc ShareButtons en haut de la fiche. */}
+              {showShareAction && (
+                <Dialog open={shareOpen} onOpenChange={setShareOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5"
+                      aria-label="Partager cette annonce"
+                    >
+                      <Share2 className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Partager</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Partager votre annonce</DialogTitle>
+                    </DialogHeader>
+                    <ShareButtons
+                      sitId={sitId}
+                      title={sitTitle || `Garde à ${ownerCity || owner?.city || "France"}`}
+                      city={ownerCity ?? owner?.city ?? null}
+                      startDate={startDate}
+                      endDate={endDate}
+                      source="owner_sit_detail"
+                    />
+                  </DialogContent>
+                </Dialog>
+              )}
               {/* Modifier : seulement sur les statuts non terminaux.
                   Les statuts terminaux (completed/cancelled/expired/in_progress)
                   ne doivent plus pouvoir être édités côté propriétaire. */}

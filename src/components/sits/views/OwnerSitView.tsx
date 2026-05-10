@@ -36,7 +36,6 @@ import { useToast } from "@/hooks/use-toast";
 import { formatSitPeriod } from "@/lib/dateRange";
 
 import EmergencyAlertBanner from "@/components/sits/EmergencyAlertBanner";
-import ShareButtons from "@/components/sits/ShareButtons";
 import SitDateHistory from "@/components/sits/SitDateHistory";
 import ApplicationsList from "@/components/sits/ApplicationsList";
 import PostConfirmationChecklist from "@/components/sits/PostConfirmationChecklist";
@@ -105,6 +104,8 @@ const OwnerSitView = ({
   const [logementOverride, setLogementOverride] = useState(initialLogementOverride);
   const [animauxOverride, setAnimauxOverride] = useState(initialAnimauxOverride);
   const [internalAppCount, setInternalAppCount] = useState(appCount);
+  // Marqueur "vient juste de publier" → déclenche scroll + highlight du bloc d'invitation
+  const [justPublished, setJustPublished] = useState(false);
 
   // sync if parent re-fetches
   useEffect(() => setInternalAppCount(appCount), [appCount]);
@@ -196,10 +197,18 @@ const OwnerSitView = ({
       return;
     }
     setSit({ ...sit, status: "published" });
+    setJustPublished(true);
+    // Scroll vers le bloc d'invitation et l'ouvrir automatiquement
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        const el = document.getElementById("invite-sitters-block");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 250);
+    });
     toast({
       title: "Annonce publiée",
       description:
-        "Les gardiens peuvent maintenant candidater. Pour aller plus vite, proposez votre annonce directement à vos favoris ou aux gardiens que vous avez repérés.",
+        "Place à l'action : proposez votre annonce directement à des gardiens (favoris, recherche, département…).",
       duration: 6000,
     });
   };
@@ -275,21 +284,8 @@ const OwnerSitView = ({
         />
       )}
 
-      {/* Share buttons — visible to the owner of a published listing so they can broadcast it */}
-      {sit.status === "published" && (
-        <div className="mb-6">
-          <ShareButtons
-            sitId={sit.id}
-            title={sit.title || `Garde à ${owner?.city || "France"}`}
-            city={owner?.city}
-            startDate={sit.start_date}
-            endDate={sit.end_date}
-            source="owner_sit_detail"
-          />
-        </div>
-      )}
-
-      {/* Header partagé (compact) — actions Modifier / Aperçu gardien + statut */}
+      {/* Header partagé (compact) — actions Partager / Modifier / Aperçu gardien + statut.
+          Le partage est désormais une icône dans le header (plus de gros bloc). */}
       <SitDetailHeader
         sitId={sit.id}
         sitTitle={sit.title}
@@ -309,6 +305,7 @@ const OwnerSitView = ({
         reviewCount={reviews.length}
         avgRating={avgRating}
         compact
+        ownerCity={owner?.city ?? null}
       />
 
       {/* Historique des modifications de dates */}
@@ -359,6 +356,7 @@ const OwnerSitView = ({
           sitCity={owner?.city ?? null}
           startDate={sit.start_date}
           endDate={sit.end_date}
+          highlight={justPublished}
         />
       )}
 
