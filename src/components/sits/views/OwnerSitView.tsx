@@ -356,6 +356,7 @@ const OwnerSitView = ({
           sitCity={owner?.city ?? null}
           startDate={sit.start_date}
           endDate={sit.end_date}
+          highlight={justPublished}
         />
       )}
 
