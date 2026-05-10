@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { MapPin, Calendar, Star, PawPrint, Car, Globe, Briefcase, Home, MessageSquare, ArrowLeft, Eye, ChevronRight, Handshake } from "lucide-react";
+import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
