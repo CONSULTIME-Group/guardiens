@@ -460,6 +460,7 @@ const SearchOwner = () => {
     }
 
     setResults(final);
+    setSearchCenter(searchCoords);
     setLoading(false);
   }, [city, cityPostalCode, userPostalCode, radius, zoneMode, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, minSits, minRating, sort, franceTotalSitters]);
 
