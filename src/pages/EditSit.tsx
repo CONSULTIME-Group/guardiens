@@ -374,3 +374,8 @@ const EditSit = () => {
           </TooltipProvider>
         </div>
       </div>
+    </div>
+  );
+};
+
+export default EditSit;
