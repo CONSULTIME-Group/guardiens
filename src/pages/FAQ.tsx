@@ -57,28 +57,24 @@ const FAQ = () => {
  }, [entries]);
 
  const location = useLocation();
- const [openItems, setOpenItems] = useState<Record<string, string[]>>({});
+ // type="single" : un seul item ouvert à la fois par catégorie
+ const [openItems, setOpenItems] = useState<Record<string, string>>({});
 
  useEffect(() => {
   if (!entries.length) return;
   const raw = decodeURIComponent((location.hash || "").replace(/^#/, "")).trim();
   if (!raw) return;
 
-  // 1) Ancre = slug de question : ouvrir + scroller
+  // 1) Ancre = slug de question : ouvre l'item ciblé (remplace l'éventuel ouvert dans sa catégorie)
   const targetEntryId = slugToEntryId.get(raw);
   if (targetEntryId) {
    const entry = entries.find((e) => e.id === targetEntryId);
    if (entry) {
-    setOpenItems((prev) => {
-     const cur = new Set(prev[entry.category] ?? []);
-     cur.add(entry.id);
-     return { ...prev, [entry.category]: Array.from(cur) };
-    });
+    setOpenItems((prev) => ({ ...prev, [entry.category]: entry.id }));
    }
   }
 
   // 2) Scroll vers l'élément (slug question OU slug catégorie)
-  // Léger délai pour laisser le DOM monter l'accordion ouvert
   const t = window.setTimeout(() => {
    const el = document.getElementById(raw);
    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -199,9 +195,10 @@ const FAQ = () => {
   {catLabel}
   </h2>
   <Accordion
-  type="multiple"
+  type="single"
+  collapsible
   className="space-y-2"
-  value={openItems[cat] ?? []}
+  value={openItems[cat] ?? ""}
   onValueChange={(v) => setOpenItems((prev) => ({ ...prev, [cat]: v }))}
   >
   {catEntries.map((entry) => (
