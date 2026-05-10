@@ -21,11 +21,11 @@ import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { trackFirstAction } from "@/lib/analytics";
 import { Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { appStatusBadge as appStatusLabels } from "@/lib/messageStatus";
 
 interface Conversation {
   id: string;
   sit_id: string | null;
-  long_stay_id?: string | null;
   small_mission_id: string | null;
   owner_id: string;
   sitter_id: string;
@@ -54,14 +54,6 @@ interface Message {
   metadata: { action?: string; actor?: string; actor_id?: string; garde_id?: string; actor_name?: string; dates?: string } | null;
 }
 
-const appStatusLabels: Record<string, { label: string; className: string }> = {
-  pending: { label: "En attente", className: "bg-amber-50 text-amber-700" },
-  viewed: { label: "En attente", className: "bg-amber-50 text-amber-700" },
-  discussing: { label: "En discussion", className: "bg-blue-50 text-blue-700" },
-  accepted: { label: "Acceptée", className: "bg-primary/10 text-primary" },
-  rejected: { label: "Déclinée", className: "bg-muted text-muted-foreground" },
-  cancelled: { label: "Déclinée", className: "bg-muted text-muted-foreground" },
-};
 
 const formatListDate = (d: string) => {
   const date = new Date(d);
@@ -132,7 +124,7 @@ const Messages = () => {
     const missionIds = filteredConvs.map((conv: any) => conv.small_mission_id).filter(Boolean);
 
     const [profilesRes, allLastMsgsRes, allUnreadRes, ratingsRes, emergencyRes, sitsRes, applicationsRes, missionsRes] = await Promise.all([
-      supabase.from("profiles").select("id, first_name, avatar_url, identity_verified, city, is_founder, last_seen_at").in("id", otherIds),
+      supabase.from("profiles").select("id, first_name, avatar_url, identity_verified, city, is_founder, last_seen_at, show_last_seen").in("id", otherIds),
       supabase.from("messages").select("conversation_id, content, created_at, sender_id").in("conversation_id", convIds).order("created_at", { ascending: false }),
       supabase.from("messages").select("conversation_id, id").in("conversation_id", convIds).neq("sender_id", user.id).is("read_at", null),
       supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", otherIds).eq("published", true),
@@ -359,13 +351,15 @@ const Messages = () => {
       }
     }
 
-    // Auto-open most recent unread
-    const unread = conversations.find(c => c.unread_count > 0 && !c.archived_by.includes(user?.id || ""));
-    if (unread) {
-      setActiveConv(unread);
+    // Auto-open most recent unread — only on desktop (mobile keeps the list visible)
+    if (!isMobile) {
+      const unread = conversations.find(c => c.unread_count > 0 && !c.archived_by.includes(user?.id || ""));
+      if (unread) {
+        setActiveConv(unread);
+      }
     }
     setAutoOpened(true);
-  }, [conversations, searchParams, autoOpened, setSearchParams, user, loading]);
+  }, [conversations, searchParams, autoOpened, setSearchParams, user, loading, isMobile]);
 
   const loadMessages = useCallback(async (convId: string) => {
     const { data } = await supabase
@@ -509,54 +503,55 @@ const Messages = () => {
     const roleLabel = isMission ? null : isOwner ? "Votre annonce" : "Vous avez postulé";
 
     return (
-      <div
-        key={conv.id}
-        className={`group relative flex items-start gap-3 p-3.5 pl-6 text-left hover:bg-accent/50 transition-colors border-b border-border/50 cursor-pointer ${activeConv?.id === conv.id ? "bg-accent/50" : ""}`}
-        onClick={() => setActiveConv(conv)}
-      >
-        <div className="relative shrink-0">
-          {conv.other_user?.avatar_url ? (
-            <img src={conv.other_user.avatar_url} alt="" className="w-11 h-11 rounded-full object-cover" />
-          ) : (
-            <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm">
-              {conv.other_user?.first_name?.charAt(0)?.toUpperCase() || "?"}
-            </div>
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className={`text-sm truncate capitalize ${hasUnread ? "font-bold text-foreground" : "font-medium"}`}>
-                {capitalize(conv.other_user?.first_name) || "Utilisateur"}
+      <div key={conv.id} className="group relative border-b border-border/50">
+        <button
+          type="button"
+          onClick={() => setActiveConv(conv)}
+          className={`w-full flex items-start gap-3 p-3.5 pl-6 pr-10 text-left hover:bg-accent/50 transition-colors ${activeConv?.id === conv.id ? "bg-accent/50" : ""}`}
+        >
+          <div className="relative shrink-0">
+            {conv.other_user?.avatar_url ? (
+              <img src={conv.other_user.avatar_url} alt="" className="w-11 h-11 rounded-full object-cover" />
+            ) : (
+              <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm">
+                {conv.other_user?.first_name?.charAt(0)?.toUpperCase() || "?"}
+              </div>
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className={`text-sm truncate capitalize ${hasUnread ? "font-bold text-foreground" : "font-medium"}`}>
+                  {capitalize(conv.other_user?.first_name) || "Utilisateur"}
+                </span>
+                {appInfo && !isMission && (
+                  <span className={`${appInfo.className} rounded-full px-2 py-0.5 text-xs shrink-0`}>
+                    {appInfo.label}
+                  </span>
+                )}
+              </div>
+              <span className="text-[11px] text-muted-foreground shrink-0">
+                {conv.last_message ? formatListDate(conv.last_message.created_at) : ""}
               </span>
-              {/* MOD 3 — Application status badge */}
-              {appInfo && !isMission && (
-                <span className={`${appInfo.className} rounded-full px-2 py-0.5 text-xs shrink-0`}>
-                  {appInfo.label}
+            </div>
+            {roleLabel && (
+              <p className="text-xs text-muted-foreground">{roleLabel}</p>
+            )}
+            <div className="flex items-center justify-between gap-2 mt-0.5">
+              <p className={`text-xs truncate ${hasUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+                {conv.last_message?.sender_id === user?.id ? "Vous : " : ""}
+                {conv.last_message?.content || "Photo"}
+              </p>
+              {hasUnread && (
+                <span className="bg-primary text-primary-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0 font-bold">
+                  {conv.unread_count}
                 </span>
               )}
             </div>
-            <span className="text-[11px] text-muted-foreground shrink-0">
-              {conv.last_message ? formatListDate(conv.last_message.created_at) : ""}
-            </span>
           </div>
-          {/* MOD 9 — Role indicator */}
-          {roleLabel && (
-            <p className="text-xs text-muted-foreground">{roleLabel}</p>
-          )}
-          <div className="flex items-center justify-between gap-2 mt-0.5">
-            <p className={`text-xs truncate ${hasUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-              {conv.last_message?.sender_id === user?.id ? "Vous : " : ""}
-              {conv.last_message?.content || "Photo"}
-            </p>
-            {hasUnread && (
-              <span className="bg-primary text-primary-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0 font-bold">
-                {conv.unread_count}
-              </span>
-            )}
-          </div>
-        </div>
+        </button>
         <button
+          type="button"
           onClick={(e) => { e.stopPropagation(); handleArchive(conv); }}
           className="absolute top-2 right-2 p-1 rounded hover:bg-accent opacity-0 group-hover:opacity-100 transition-opacity"
           title={conv.archived_by.includes(user?.id || "") ? "Désarchiver" : "Archiver"}
@@ -684,8 +679,8 @@ const Messages = () => {
             }}
           />
 
-          {/* Presence + Context card */}
-          {activeConv.other_user?.last_seen_at && (
+          {/* Presence + Context card — RGPD: respect show_last_seen */}
+          {activeConv.other_user?.last_seen_at && activeConv.other_user?.show_last_seen !== false && (
             <div className="px-4 py-1 border-b border-border/50 bg-card/50">
               <PresenceBadge lastSeenAt={activeConv.other_user.last_seen_at} />
             </div>
