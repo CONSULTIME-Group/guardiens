@@ -195,9 +195,10 @@ const FAQ = () => {
   {catLabel}
   </h2>
   <Accordion
-  type="multiple"
+  type="single"
+  collapsible
   className="space-y-2"
-  value={openItems[cat] ?? []}
+  value={openItems[cat] ?? ""}
   onValueChange={(v) => setOpenItems((prev) => ({ ...prev, [cat]: v }))}
   >
   {catEntries.map((entry) => (
