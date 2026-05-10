@@ -352,6 +352,9 @@ export default function News() {
               }`}
             >
               {cat.label}
+              {typeof cat.count === "number" && (
+                <span className="ml-1.5 text-xs opacity-70">({cat.count})</span>
+              )}
             </button>
           ))}
         </div>
