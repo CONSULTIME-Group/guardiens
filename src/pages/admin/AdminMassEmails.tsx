@@ -38,7 +38,7 @@ interface MassEmail {
 const OSER_SUBJECT = "Et si vous osiez demander un coup de main ?";
 const OSER_BODY = `Bonjour,
 
-Sur Guardiens, l'entraide entre voisins propriétaires d'animaux est gratuite, locale et simple.
+Sur Guardiens, l'entraide entre propriétaires d'animaux est gratuite, locale et simple — gens du coin, membres de confiance, près de chez vous.
 
 Vous hésitez à publier une demande ? C'est pourtant la première étape, celle qui débloque tout : nourrir le chat pendant un week-end, sortir le chien pendant un rendez-vous, garder le lapin une après-midi…
 
