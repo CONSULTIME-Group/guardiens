@@ -34,17 +34,31 @@ interface MassEmail {
   status: string;
 }
 
+// Campagne "Oser demander" — pré-remplie pour faciliter l'envoi en 1 clic.
+const OSER_SUBJECT = "Et si vous osiez demander un coup de main ?";
+const OSER_BODY = `Bonjour,
+
+Sur Guardiens, l'entraide entre propriétaires d'animaux est gratuite, locale et simple — gens du coin, membres de confiance, près de chez vous.
+
+Vous hésitez à publier une demande ? C'est pourtant la première étape, celle qui débloque tout : nourrir le chat pendant un week-end, sortir le chien pendant un rendez-vous, garder le lapin une après-midi…
+
+Trois minutes suffisent pour publier votre première mission. Et bien souvent, c'est la première réponse qui change tout.
+
+Alors, et si c'était aujourd'hui ?
+
+À très vite sur Guardiens.`;
+
 const AdminMassEmails = () => {
-  // Form state
+  // Form state — pré-rempli avec la campagne "Oser demander"
   const [segment, setSegment] = useState<Segment>("tous");
   const [filters, setFilters] = useState<MassEmailFilters>({});
-  const [subject, setSubject] = useState("");
-  const [body, setBody] = useState("");
-  const [ctaEnabled, setCtaEnabled] = useState(false);
-  const [ctaLabel, setCtaLabel] = useState("");
-  const [ctaUrl, setCtaUrl] = useState("");
+  const [subject, setSubject] = useState(OSER_SUBJECT);
+  const [body, setBody] = useState(OSER_BODY);
+  const [ctaEnabled, setCtaEnabled] = useState(true);
+  const [ctaLabel, setCtaLabel] = useState("Publier une mission");
+  const [ctaUrl, setCtaUrl] = useState("https://guardiens.fr/entraide/nouvelle");
   const [utmEnabled, setUtmEnabled] = useState(true);
-  const [utmCampaign, setUtmCampaign] = useState("");
+  const [utmCampaign, setUtmCampaign] = useState("oser-2026-05");
   const [utmContent, setUtmContent] = useState("cta");
 
   // UI state
@@ -275,15 +289,27 @@ const AdminMassEmails = () => {
             </CardContent>
           </Card>
 
-          <div className="space-y-3">
+          <div className="rounded-xl border-2 border-primary/30 bg-primary/5 p-5 space-y-3 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="flex-1 space-y-1">
+                <p className="text-sm font-semibold text-foreground">
+                  Prêt à envoyer la campagne « Oser demander »
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Tout est pré-rempli et tracé (campaign : <code className="font-mono">{effectiveCampaign}</code>).
+                  Cliquez ci-dessous pour ouvrir l'aperçu, puis confirmez l'envoi à{" "}
+                  <strong className="text-foreground">{recipientCount ?? "—"}</strong> destinataires.
+                </p>
+              </div>
+            </div>
             <Button
-              className="w-full"
+              className="w-full h-14 text-base font-semibold shadow-md hover:shadow-lg transition-shadow"
               size="lg"
               disabled={!isValid || sending}
               onClick={() => setPreviewOpen(true)}
             >
-              <Eye className="h-4 w-4 mr-2" />
-              Aperçu complet avant envoi
+              <Eye className="h-5 w-5 mr-2" />
+              Aperçu complet & envoi à {recipientCount ?? "…"} destinataires
             </Button>
             {!isValid && (
               <p className="text-xs text-muted-foreground text-center">
@@ -499,22 +525,28 @@ function buildPreviewHtml(subject: string, body: string, ctaLabel?: string, ctaU
   const escapedSubject = (subject || "Objet de l'email").replace(/</g, "&lt;");
   const escapedBody = (body || "Corps du message…").replace(/</g, "&lt;");
   const ctaBlock = ctaLabel && ctaUrl
-    ? `<tr><td style="padding:24px 0 0"><a href="${ctaUrl}" style="display:inline-block;padding:12px 28px;background-color:#16a34a;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;font-size:16px">${ctaLabel.replace(/</g, "&lt;")}</a></td></tr>`
+    ? `<tr><td align="center" style="padding:32px 0 8px">
+<a href="${ctaUrl}" style="display:inline-block;padding:14px 32px;background-color:#2C6E49;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:600;font-size:16px;box-shadow:0 4px 12px rgba(44,110,73,0.25)">${ctaLabel.replace(/</g, "&lt;")}</a>
+</td></tr>
+<tr><td align="center" style="padding:0 0 8px"><p style="margin:0;font-size:12px;color:#888">3 minutes, c'est tout.</p></td></tr>`
     : "";
 
   return `<div style="background-color:#FAF9F6;padding:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
 <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
-<table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:12px;overflow:hidden">
-<tr><td style="padding:24px 32px 16px;text-align:center;background-color:#FAF9F6">
-<strong style="font-size:18px;color:#1a1a1a">🐾 Guardiens</strong>
+<table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.04)">
+<tr><td style="padding:0;background:linear-gradient(135deg,#2C6E49 0%,#3a8a5d 100%);height:6px;line-height:6px;font-size:0">&nbsp;</td></tr>
+<tr><td style="padding:24px 32px 8px;text-align:center;background-color:#ffffff">
+<img src="https://guardiens.fr/logo-guardiens.png" alt="Guardiens" width="110" style="display:block;margin:0 auto;height:auto"/>
 </td></tr>
-<tr><td style="padding:24px 32px">
-<h1 style="margin:0 0 16px;font-size:20px;color:#1a1a1a">${escapedSubject}</h1>
-<p style="margin:0;font-size:14px;line-height:1.7;color:#333333;white-space:pre-line">${escapedBody}</p>
+<tr><td style="padding:20px 32px 8px">
+<h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#1a1a1a;font-weight:700">${escapedSubject}</h1>
+<div style="margin:0;font-size:14px;line-height:1.75;color:#3a3a3a;white-space:pre-line">${escapedBody}</div>
+</td></tr>
 ${ctaBlock}
-</td></tr>
-<tr><td style="padding:16px 32px;border-top:1px solid #e5e5e5;text-align:center">
-<p style="margin:0;font-size:11px;color:#999999">Guardiens — La communauté d'entraide</p>
+<tr><td style="padding:24px 32px"></td></tr>
+<tr><td style="padding:18px 32px;border-top:1px solid #eee;background-color:#FAF9F6;text-align:center">
+<p style="margin:0 0 4px;font-size:12px;color:#555;font-weight:600">Guardiens</p>
+<p style="margin:0;font-size:11px;color:#888">L'entraide locale entre propriétaires et gardiens d'animaux.</p>
 </td></tr>
 </table>
 </td></tr></table></div>`;
