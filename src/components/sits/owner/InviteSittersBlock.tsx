@@ -30,6 +30,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { useSitInvitations } from "@/hooks/useSitInvitations";
 import { DEPT_NAMES } from "@/lib/departments";
 import InviteSitterDialog from "./InviteSitterDialog";
+import PostPublishRecapDialog from "./PostPublishRecapDialog";
 
 const ANIMAL_OPTIONS: { label: string; value: string }[] = [
   { label: "Chiens", value: "dog" },
