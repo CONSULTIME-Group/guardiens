@@ -288,11 +288,9 @@ const SitDetailHeader = ({
                 : "Ce membre n'a pas encore renseigné de présentation."}
             </p>
           </div>
-          <Link to={`/gardiens/${owner.id}`} className="shrink-0">
-            <Button variant="outline" size="sm">
-              Voir le profil
-            </Button>
-          </Link>
+          <Button asChild variant="outline" size="sm" className="shrink-0">
+            <Link to={`/gardiens/${owner.id}`}>Voir le profil</Link>
+          </Button>
         </div>
       )}
     </>
