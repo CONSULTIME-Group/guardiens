@@ -456,6 +456,7 @@ const EditSit = () => {
                         type="date"
                         value={startDate}
                         onChange={(e) => setStartDate(e.target.value)}
+                        min={new Date().toISOString().slice(0, 10)}
                         className="mt-1.5"
                       />
                     </div>
