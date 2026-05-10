@@ -556,9 +556,9 @@ const SmallMissionsPublic = () => {
  ))}
  </div>
 
- <Reveal delay={0.2}>
+  <Reveal delay={0.2}>
  <p className="text-center font-body text-sm text-foreground/55 italic mt-10 max-w-xl mx-auto">
- Exemples typiques de missions observées sur Guardiens. Les détails sont fictifs, l'esprit est réel.
+ Trois situations typiques de l'entraide entre gens du coin. À vous de les faire exister près de chez vous.
  </p>
  </Reveal>
  </div>
