@@ -46,6 +46,9 @@ const PageViewTracker = () => {
         referrer: typeof document !== "undefined" ? document.referrer || undefined : undefined,
       },
     });
+
+    // Attribution mail : capture les UTM si présents (best-effort, jamais bloquant).
+    void captureUtmFromUrl(location.search, location.pathname);
   }, [location.pathname, location.search]);
 
   return null;
