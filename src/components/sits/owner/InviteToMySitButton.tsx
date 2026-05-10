@@ -48,6 +48,10 @@ interface Props {
   /** Texte du bouton (défaut : "Proposer mon annonce") */
   label?: string;
   className?: string;
+  /** Si vrai, ne rend rien tant qu'on n'a pas confirmé qu'au moins une annonce publiée existe. */
+  hideIfNoSits?: boolean;
+  /** Callback déclenché après le préchargement quand hideIfNoSits=true. */
+  onPublishedSitsResolved?: (count: number) => void;
 }
 
 const InviteToMySitButton = ({
@@ -56,6 +60,8 @@ const InviteToMySitButton = ({
   size = "sm",
   label = "Proposer mon annonce",
   className,
+  hideIfNoSits = false,
+  onPublishedSitsResolved,
 }: Props) => {
   const { user, activeRole } = useAuth();
   const ownerId = user?.id ?? null;
@@ -66,6 +72,34 @@ const InviteToMySitButton = ({
   const isSelf = ownerId && sitter?.id === ownerId;
 
   const [open, setOpen] = useState(false);
+  // null = inconnu (préflight en cours), number = compté
+  const [publishedCount, setPublishedCount] = useState<number | null>(
+    hideIfNoSits ? null : 1,
+  );
+
+  // Préflight : compter les annonces publiées si on doit masquer le bouton sinon.
+  useEffect(() => {
+    if (!hideIfNoSits) return;
+    if (!isOwnerMode || !ownerId || isSelf) {
+      setPublishedCount(0);
+      return;
+    }
+    let cancel = false;
+    (async () => {
+      const { count } = await supabase
+        .from("sits")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", ownerId)
+        .eq("status", "published");
+      if (cancel) return;
+      const c = count ?? 0;
+      setPublishedCount(c);
+      onPublishedSitsResolved?.(c);
+    })();
+    return () => {
+      cancel = true;
+    };
+  }, [hideIfNoSits, isOwnerMode, ownerId, isSelf, onPublishedSitsResolved]);
   const [sits, setSits] = useState<PublishedSit[] | null>(null);
   const [invitations, setInvitations] = useState<InvitationLite[]>([]);
   const [chosenSit, setChosenSit] = useState<PublishedSit | null>(null);
@@ -126,6 +160,8 @@ const InviteToMySitButton = ({
   }, [sits, invitedSitIds, chosenSit]);
 
   if (!isOwnerMode || !sitter || isSelf) return null;
+  if (hideIfNoSits && (publishedCount === null || publishedCount === 0)) return null;
+
 
   return (
     <>

@@ -12,6 +12,7 @@ import { Calendar, MapPin, Sparkles, AlertCircle, Compass, Plus } from "lucide-r
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
 
 interface Props {
@@ -35,6 +36,7 @@ const fmt = (d?: string | null) => {
 };
 
 const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCity, otherUserId }: Props) => {
+  const [ownerHasPublishedSit, setOwnerHasPublishedSit] = useState<number | null>(null);
   if (!contextType) return null;
 
   // sit_application → la carte annonce est déjà gérée par ConversationHeader
@@ -63,21 +65,24 @@ const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCit
                     : `${otherFirstName || "Ce propriétaire"} vous sonde avant de publier une annonce.`)}
             </p>
             {isOwner && !isHelper && (
-              otherUserId ? (
-                <div className="mt-2">
+              <div className="mt-2">
+                {otherUserId && ownerHasPublishedSit !== 0 && (
                   <InviteToMySitButton
                     sitter={{ id: otherUserId, first_name: otherFirstName ?? null }}
                     label="Proposer mon annonce"
                     className="border-info-border text-info hover:bg-info-soft"
+                    hideIfNoSits
+                    onPublishedSitsResolved={(c) => setOwnerHasPublishedSit(c)}
                   />
-                </div>
-              ) : (
-                <Button asChild size="sm" variant="outline" className="gap-1.5 h-8 mt-2 border-info-border text-info hover:bg-info-soft">
-                  <Link to="/sits/create">
-                    <Plus className="h-3.5 w-3.5" /> Créer mon annonce
-                  </Link>
-                </Button>
-              )
+                )}
+                {(!otherUserId || ownerHasPublishedSit === 0) && (
+                  <Button asChild size="sm" variant="outline" className="gap-1.5 h-8 border-info-border text-info hover:bg-info-soft">
+                    <Link to="/sits/new">
+                      <Plus className="h-3.5 w-3.5" /> Créer mon annonce
+                    </Link>
+                  </Button>
+                )}
+              </div>
             )}
             {isOwner && isHelper && (
               <Button asChild size="sm" variant="outline" className="gap-1.5 h-8 mt-2 border-info-border text-info hover:bg-info-soft">
