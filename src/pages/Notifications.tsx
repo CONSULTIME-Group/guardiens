@@ -64,6 +64,7 @@ const toneClasses: Record<string, string> = {
 
 const Notifications = () => {
   const { user } = useAuth();
+  const { hasAccess } = useSubscriptionAccess();
   const userId = user?.id;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
