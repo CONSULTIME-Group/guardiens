@@ -395,6 +395,34 @@ const InviteSittersBlock = ({
         </TabsContent>
 
         <TabsContent value="search" className="mt-4 space-y-3">
+          {/* Toggle mode : Département vs Rayon depuis ma ville */}
+          <div className="inline-flex rounded-lg border border-border bg-background/80 p-0.5 text-xs">
+            <button
+              type="button"
+              onClick={() => setSearchMode("dept")}
+              className={`px-3 py-1.5 rounded-md transition flex items-center gap-1.5 ${
+                searchMode === "dept"
+                  ? "bg-primary text-primary-foreground font-medium"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <MapPin className="h-3.5 w-3.5" /> Département
+            </button>
+            <button
+              type="button"
+              onClick={() => setSearchMode("radius")}
+              disabled={!sitCity}
+              title={!sitCity ? "Renseignez votre ville pour activer la recherche par rayon" : undefined}
+              className={`px-3 py-1.5 rounded-md transition flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed ${
+                searchMode === "radius"
+                  ? "bg-primary text-primary-foreground font-medium"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Crosshair className="h-3.5 w-3.5" /> Rayon depuis ma ville
+            </button>
+          </div>
+
           <div className="grid sm:grid-cols-[1fr_220px] gap-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -405,24 +433,82 @@ const InviteSittersBlock = ({
                 className="pl-9 bg-background/80"
               />
             </div>
-            <Select
-              value={deptCode || "all"}
-              onValueChange={(v) => setDeptCode(v === "all" ? "" : v)}
-            >
-              <SelectTrigger className="bg-background/80">
-                <MapPin className="h-4 w-4 mr-1.5 text-muted-foreground" />
-                <SelectValue placeholder="Tous les départements" />
-              </SelectTrigger>
-              <SelectContent className="max-h-72">
-                <SelectItem value="all">Tous les départements</SelectItem>
-                {deptOptions.map(([code, name]) => (
-                  <SelectItem key={code} value={code}>
-                    {code} — {name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {searchMode === "dept" ? (
+              <Select
+                value={deptCode || "all"}
+                onValueChange={(v) => setDeptCode(v === "all" ? "" : v)}
+              >
+                <SelectTrigger className="bg-background/80">
+                  <MapPin className="h-4 w-4 mr-1.5 text-muted-foreground" />
+                  <SelectValue placeholder="Tous les départements" />
+                </SelectTrigger>
+                <SelectContent className="max-h-72">
+                  <SelectItem value="all">Tous les départements</SelectItem>
+                  {deptOptions.map(([code, name]) => (
+                    <SelectItem key={code} value={code}>
+                      {code} — {name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Select
+                value={String(radiusKm)}
+                onValueChange={(v) => setRadiusKm(parseInt(v, 10))}
+              >
+                <SelectTrigger className="bg-background/80">
+                  <Crosshair className="h-4 w-4 mr-1.5 text-muted-foreground" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {RADIUS_OPTIONS.map((r) => (
+                    <SelectItem key={r} value={String(r)}>
+                      {r} km
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
+
+          {searchMode === "radius" && (
+            <div className="rounded-lg border border-border bg-background/60 p-3 space-y-2">
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <Crosshair className="h-3.5 w-3.5" />
+                  {sitCity ? (
+                    <>
+                      Autour de <span className="font-medium text-foreground">{sitCity}</span>
+                      {ownerPostalCode && ` (${ownerPostalCode})`}
+                    </>
+                  ) : (
+                    <span className="text-destructive">Ville du propriétaire manquante</span>
+                  )}
+                </span>
+                <span className="font-medium text-primary tabular-nums">{radiusKm} km</span>
+              </div>
+              {sitCity && (
+                <Slider
+                  value={[radiusKm]}
+                  onValueChange={(v) => setRadiusKm(v[0])}
+                  min={5}
+                  max={100}
+                  step={5}
+                  className="py-1"
+                />
+              )}
+              {ownerCoordsLoading && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <Loader2 className="h-3 w-3 animate-spin" /> Localisation de votre ville…
+                </p>
+              )}
+              {!ownerCoordsLoading && !ownerCoords && sitCity && (
+                <p className="text-xs text-destructive">
+                  Impossible de localiser « {sitCity} ». Réessayez ou utilisez le mode département.
+                </p>
+              )}
+            </div>
+          )}
 
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <Popover>
