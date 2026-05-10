@@ -552,6 +552,26 @@ const InviteSittersBlock = ({
         startDate={startDate}
         endDate={endDate}
       />
+
+      <PostPublishRecapDialog
+        open={recapOpen}
+        onOpenChange={setRecapOpen}
+        ownerId={ownerId}
+        ownerPostalCode={ownerPostalCode}
+        onInviteFavorites={() => {
+          setActiveTab("favorites");
+          requestAnimationFrame(() => {
+            document.getElementById("invite-sitters-block")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+        }}
+        onTargetDepartment={(code) => {
+          setActiveTab("search");
+          setDeptCode(code);
+          requestAnimationFrame(() => {
+            document.getElementById("invite-sitters-block")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+        }}
+      />
     </section>
   );
 };
