@@ -1005,8 +1005,26 @@ const SearchOwner = () => {
               );
             })}
           </div>
-          <div className="w-1/2 flex items-center justify-center bg-muted/30 text-muted-foreground text-sm">
-            Vue carte à venir
+          <div className="w-1/2 relative bg-muted/30">
+            <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">Chargement de la carte…</div>}>
+              <SearchOwnerMapView
+                sitters={results
+                  .filter((s: any) => s._lat != null && s._lng != null)
+                  .map((s: any) => ({
+                    id: s.id,
+                    user_id: s.user_id,
+                    firstName: s.profile?.first_name || "Gardien",
+                    city: s.profile?.city ?? null,
+                    avatar: s.profile?.avatar_url ?? null,
+                    avgRating: s.avgRating ?? null,
+                    dist: s._dist ?? null,
+                    coords: { lat: s._lat, lng: s._lng },
+                  }))}
+                centerCoords={searchCenter}
+                onContact={handleContact}
+                contactingId={contactingId}
+              />
+            </Suspense>
           </div>
         </div>
       )}
