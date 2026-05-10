@@ -36,7 +36,6 @@ import { useToast } from "@/hooks/use-toast";
 import { formatSitPeriod } from "@/lib/dateRange";
 
 import EmergencyAlertBanner from "@/components/sits/EmergencyAlertBanner";
-import ShareButtons from "@/components/sits/ShareButtons";
 import SitDateHistory from "@/components/sits/SitDateHistory";
 import ApplicationsList from "@/components/sits/ApplicationsList";
 import PostConfirmationChecklist from "@/components/sits/PostConfirmationChecklist";
