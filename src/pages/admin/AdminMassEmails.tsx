@@ -146,7 +146,7 @@ const AdminMassEmails = () => {
     }
   };
 
-  const previewHtml = buildPreviewHtml(subject, body, ctaEnabled ? ctaLabel : undefined, ctaEnabled ? ctaUrl : undefined);
+  const previewHtml = buildPreviewHtml(subject, body, ctaEnabled ? ctaLabel : undefined, ctaEnabled ? withUtm(ctaUrl) : undefined);
 
   return (
     <div className="p-6 space-y-6">
