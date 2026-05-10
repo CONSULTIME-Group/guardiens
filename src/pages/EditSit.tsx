@@ -193,15 +193,26 @@ const EditSit = () => {
   const descValid = trimmedDesc.length === 0 || trimmedDesc.length >= MIN_DESC_LENGTH;
   const isLocked = LOCKED_STATUSES.has(sitStatus);
 
-  const canSave = !isLocked && titleValid && hasDatesOrFlexible && !dateError && descValid;
+  // Vocabulaire proscrit (mémoire projet : voisin, AURA, Auvergne-Rhône-Alpes).
+  const FORBIDDEN_REGEX = /\b(voisin(?:e|s|es)?|voisinage|AURA|Auvergne[\s-]Rh[oô]ne[\s-]Alpes)\b/i;
+  const forbiddenInTitle = FORBIDDEN_REGEX.test(title);
+  const forbiddenInDesc = FORBIDDEN_REGEX.test(specificExpectations);
+  const hasForbidden = forbiddenInTitle || forbiddenInDesc;
+
+  const canSave = !isLocked && titleValid && hasDatesOrFlexible && !dateError && descValid && !hasForbidden;
 
   const isConfirmed = sitStatus === "confirmed" || sitStatus === "in_progress";
 
-  // Urgence : annonce non confirmée + dates flexibles ou début dans < 7 jours.
+  // Urgence : annonce non confirmée + dates flexibles ou début dans < 48 h.
   const showUrgent =
     !isConfirmed &&
     (flexibleDates ||
-      (startDate && new Date(startDate).getTime() - Date.now() < 7 * 86400000));
+      (startDate && new Date(startDate).getTime() - Date.now() < 2 * 86400000));
+
+  // Reset isUrgent automatique si la condition ne s'applique plus.
+  useEffect(() => {
+    if (!showUrgent && isUrgent) setIsUrgent(false);
+  }, [showUrgent, isUrgent]);
 
   // Tracking "dirty" : compare au snapshot initial.
   const currentSnapshot = useMemo(
@@ -354,17 +365,27 @@ const EditSit = () => {
       </Helmet>
 
       <div className="flex items-center justify-between gap-3 mb-6">
-        <Link
-          to={`/sits/${id}`}
+        <button
+          type="button"
+          onClick={() => {
+            if (isDirty && !confirm("Vous avez des modifications non sauvegardées. Quitter sans enregistrer ?")) return;
+            navigate(`/sits/${id}`);
+          }}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" /> Retour à l'annonce
-        </Link>
-        <Link to={`/sits/${id}`}>
-          <Button variant="ghost" size="sm" className="gap-1.5 text-xs">
-            <Eye className="h-3.5 w-3.5" /> Aperçu public
-          </Button>
-        </Link>
+        </button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-1.5 text-xs"
+          onClick={() => {
+            if (isDirty && !confirm("Vous avez des modifications non sauvegardées. Quitter sans enregistrer ?")) return;
+            navigate(`/sits/${id}`);
+          }}
+        >
+          <Eye className="h-3.5 w-3.5" /> Aperçu public
+        </Button>
       </div>
 
       <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">Modifier l'annonce</h1>
@@ -426,6 +447,11 @@ const EditSit = () => {
                   Le titre doit contenir au moins 3 caractères.
                 </p>
               )}
+              {forbiddenInTitle && (
+                <p className="text-xs text-destructive mt-1">
+                  Mot non autorisé détecté. Préférez « gardien », « personne de confiance » ou « France entière ».
+                </p>
+              )}
             </div>
 
             <div className="pt-1">
@@ -445,6 +471,7 @@ const EditSit = () => {
                         type="date"
                         value={startDate}
                         onChange={(e) => setStartDate(e.target.value)}
+                        min={new Date().toISOString().slice(0, 10)}
                         className="mt-1.5"
                       />
                     </div>
@@ -541,7 +568,7 @@ const EditSit = () => {
           <SectionCard
             icon={Sparkles}
             title="Description de la garde"
-            description={`Ce qui rend cette garde unique (${MIN_DESC_LENGTH} caractères minimum).`}
+            description="Ce qui rend cette garde unique (champ optionnel)."
           >
             <div>
               <Textarea
@@ -561,8 +588,15 @@ const EditSit = () => {
                     : "text-muted-foreground",
                 )}
               >
-                {trimmedDesc.length}/{MIN_DESC_LENGTH} caractères minimum
+                {trimmedDesc.length === 0
+                  ? `Optionnel — si renseigné, ${MIN_DESC_LENGTH} caractères minimum.`
+                  : `${trimmedDesc.length}/${MIN_DESC_LENGTH} caractères minimum`}
               </p>
+              {forbiddenInDesc && (
+                <p className="text-xs text-destructive mt-1">
+                  Mot non autorisé détecté. Préférez « gardien », « personne de confiance » ou « France entière ».
+                </p>
+              )}
             </div>
           </SectionCard>
 
@@ -574,7 +608,18 @@ const EditSit = () => {
           >
             <div>
               <Label className="text-sm font-medium mb-2 block">Idéale pour</Label>
-              <ChipSelect options={openToOptions} selected={openTo} onChange={setOpenTo} />
+              <ChipSelect
+                options={openToOptions}
+                selected={openTo}
+                onChange={(next) => {
+                  // « Sans préférence » est exclusif des autres choix.
+                  const SP = "Sans préférence";
+                  const justAddedSP = next.includes(SP) && !openTo.includes(SP);
+                  if (justAddedSP) return setOpenTo([SP]);
+                  if (next.length > 1 && next.includes(SP)) return setOpenTo(next.filter((o) => o !== SP));
+                  setOpenTo(next);
+                }}
+              />
             </div>
 
             <div>
@@ -620,15 +665,15 @@ const EditSit = () => {
             )}
           </SectionCard>
 
-          {/* SECTION 4 — Photos (renvoi vers la fiche) */}
+          {/* SECTION 4 — Photos (gérées sur le profil propriétaire) */}
           <SectionCard
             icon={ImageIcon}
             title="Photos & couverture"
-            description="La gestion des photos se fait directement sur la fiche annonce."
+            description="Les photos du logement sont communes à toutes vos annonces et se gèrent sur votre profil propriétaire."
           >
-            <Link to={`/sits/${id}`}>
+            <Link to="/owner-profile">
               <Button variant="outline" size="sm" className="gap-1.5">
-                Gérer les photos sur la fiche <ArrowRight className="h-3.5 w-3.5" />
+                Gérer ma galerie sur le profil <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </Link>
           </SectionCard>
@@ -644,7 +689,13 @@ const EditSit = () => {
             </span>
           )}
           <div className="flex gap-3 flex-1 justify-end">
-            <Button variant="outline" onClick={() => navigate(`/sits/${id}`)}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (isDirty && !confirm("Vous avez des modifications non sauvegardées. Quitter sans enregistrer ?")) return;
+                navigate(`/sits/${id}`);
+              }}
+            >
               Annuler
             </Button>
             <TooltipProvider>
@@ -672,7 +723,9 @@ const EditSit = () => {
                               ? "Renseignez des dates ou un mois flexible"
                               : !descValid
                                 ? `Description : ${MIN_DESC_LENGTH} caractères minimum`
-                                : "Complétez le formulaire pour enregistrer"}
+                                : hasForbidden
+                                  ? "Vocabulaire non autorisé dans le titre ou la description"
+                                  : "Complétez le formulaire pour enregistrer"}
                     </p>
                   </TooltipContent>
                 )}
