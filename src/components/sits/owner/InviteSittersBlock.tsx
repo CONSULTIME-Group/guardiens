@@ -9,12 +9,15 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Send, Check, MailCheck, Heart, Sparkles, ArrowRight, MapPin } from "lucide-react";
+import { Search, Send, Check, MailCheck, Heart, Sparkles, ArrowRight, MapPin, SlidersHorizontal, ShieldCheck, ImageIcon, GraduationCap, PawPrint, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -27,6 +30,21 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { useSitInvitations } from "@/hooks/useSitInvitations";
 import { DEPT_NAMES } from "@/lib/departments";
 import InviteSitterDialog from "./InviteSitterDialog";
+
+const ANIMAL_OPTIONS: { label: string; value: string }[] = [
+  { label: "Chiens", value: "dog" },
+  { label: "Chats", value: "cat" },
+  { label: "Chevaux", value: "horse" },
+  { label: "Ferme", value: "farm_animal" },
+  { label: "NAC", value: "nac" },
+];
+
+const EXPERIENCE_OPTIONS: { label: string; value: number }[] = [
+  { label: "Toutes", value: 0 },
+  { label: "1 garde+", value: 1 },
+  { label: "3 gardes+", value: 3 },
+  { label: "5 gardes+", value: 5 },
+];
 
 interface SitterRow {
   id: string;
@@ -87,23 +105,37 @@ const InviteSittersBlock = ({
   }, [favoriteIds]);
 
   // Recherche : par mots-clés (prénom/ville) et/ou par département (code postal)
+  // + filtres avancés (animaux, expérience min, vérifié, photo)
   const [query, setQuery] = useState("");
   const [deptCode, setDeptCode] = useState<string>(""); // "" = tous départements
+  const [animals, setAnimals] = useState<string[]>([]);
+  const [minExperience, setMinExperience] = useState<number>(0);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [withPhotoOnly, setWithPhotoOnly] = useState(false);
   const [searchResults, setSearchResults] = useState<SitterRow[]>([]);
   const [searching, setSearching] = useState(false);
+
+  const activeAdvancedFilters =
+    animals.length + (minExperience > 0 ? 1 : 0) + (verifiedOnly ? 1 : 0) + (withPhotoOnly ? 1 : 0);
 
   useEffect(() => {
     const q = query.trim();
     // Au moins un critère requis
-    if (q.length < 2 && !deptCode) {
+    if (q.length < 2 && !deptCode && activeAdvancedFilters === 0) {
       setSearchResults([]);
       return;
     }
     setSearching(true);
     const t = setTimeout(async () => {
+      // Si on filtre par animaux → join inner sur sitter_profiles
+      const needsSitterJoin = animals.length > 0;
+      const selectCols = needsSitterJoin
+        ? "id, first_name, avatar_url, city, bio, postal_code, identity_verified, completed_sits_count, sitter_profiles!inner(animal_types)"
+        : "id, first_name, avatar_url, city, bio, postal_code, identity_verified, completed_sits_count";
+
       let req = supabase
         .from("profiles")
-        .select("id, first_name, avatar_url, city, bio, postal_code")
+        .select(selectCols)
         .eq("role", "sitter")
         .neq("id", ownerId);
 
@@ -111,15 +143,36 @@ const InviteSittersBlock = ({
         req = req.or(`first_name.ilike.%${q}%,city.ilike.%${q}%`);
       }
       if (deptCode) {
-        // Postal codes français : préfixe = code département (2 chiffres ou 2A/2B/97x)
         req = req.like("postal_code", `${deptCode}%`);
       }
+      if (verifiedOnly) {
+        req = req.eq("identity_verified", true);
+      }
+      if (withPhotoOnly) {
+        req = req.not("avatar_url", "is", null);
+      }
+      if (minExperience > 0) {
+        req = req.gte("completed_sits_count", minExperience);
+      }
+      if (animals.length > 0) {
+        req = req.overlaps("sitter_profiles.animal_types", animals);
+      }
       const { data } = await req.limit(30);
-      setSearchResults((data as SitterRow[]) || []);
+      setSearchResults(((data as any[]) || []) as SitterRow[]);
       setSearching(false);
     }, 300);
     return () => clearTimeout(t);
-  }, [query, deptCode, ownerId]);
+  }, [query, deptCode, animals, minExperience, verifiedOnly, withPhotoOnly, ownerId, activeAdvancedFilters]);
+
+  const resetAdvanced = () => {
+    setAnimals([]);
+    setMinExperience(0);
+    setVerifiedOnly(false);
+    setWithPhotoOnly(false);
+  };
+
+  const toggleAnimal = (v: string) =>
+    setAnimals((prev) => (prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]));
 
   const [inviteTarget, setInviteTarget] = useState<SitterRow | null>(null);
 
@@ -176,7 +229,7 @@ const InviteSittersBlock = ({
     [],
   );
 
-  const hasSearchCriteria = query.trim().length >= 2 || !!deptCode;
+  const hasSearchCriteria = query.trim().length >= 2 || !!deptCode || activeAdvancedFilters > 0;
 
   return (
     <section
@@ -280,15 +333,160 @@ const InviteSittersBlock = ({
           </div>
 
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <p className="text-xs text-muted-foreground">
-              Combinez prénom/ville et département pour affiner. Besoin de plus de critères (rayon, expérience, animaux…) ?
-            </p>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                  Filtres avancés
+                  {activeAdvancedFilters > 0 && (
+                    <Badge className="ml-1 h-5 min-w-5 px-1.5 text-[10px] bg-primary text-primary-foreground">
+                      {activeAdvancedFilters}
+                    </Badge>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4 space-y-4" align="start">
+                {/* Animaux acceptés */}
+                <div>
+                  <Label className="text-xs font-medium flex items-center gap-1.5 mb-2">
+                    <PawPrint className="h-3.5 w-3.5" /> Animaux acceptés
+                  </Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {ANIMAL_OPTIONS.map((a) => {
+                      const active = animals.includes(a.value);
+                      return (
+                        <button
+                          key={a.value}
+                          type="button"
+                          onClick={() => toggleAnimal(a.value)}
+                          className={
+                            active
+                              ? "bg-primary text-primary-foreground rounded-full px-2.5 py-1 text-xs"
+                              : "border border-border rounded-full px-2.5 py-1 text-xs text-muted-foreground hover:border-primary"
+                          }
+                        >
+                          {a.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Expérience minimum */}
+                <div>
+                  <Label className="text-xs font-medium flex items-center gap-1.5 mb-2">
+                    <GraduationCap className="h-3.5 w-3.5" /> Expérience minimum
+                  </Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {EXPERIENCE_OPTIONS.map((e) => {
+                      const active = minExperience === e.value;
+                      return (
+                        <button
+                          key={e.value}
+                          type="button"
+                          onClick={() => setMinExperience(e.value)}
+                          className={
+                            active
+                              ? "bg-primary text-primary-foreground rounded-full px-2.5 py-1 text-xs"
+                              : "border border-border rounded-full px-2.5 py-1 text-xs text-muted-foreground hover:border-primary"
+                          }
+                        >
+                          {e.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Vérifié */}
+                <div className="flex items-center justify-between gap-3">
+                  <Label htmlFor="invite-verified" className="text-xs font-medium flex items-center gap-1.5 cursor-pointer">
+                    <ShieldCheck className="h-3.5 w-3.5" /> Identité vérifiée seulement
+                  </Label>
+                  <Switch
+                    id="invite-verified"
+                    checked={verifiedOnly}
+                    onCheckedChange={setVerifiedOnly}
+                  />
+                </div>
+
+                {/* Avec photo */}
+                <div className="flex items-center justify-between gap-3">
+                  <Label htmlFor="invite-photo" className="text-xs font-medium flex items-center gap-1.5 cursor-pointer">
+                    <ImageIcon className="h-3.5 w-3.5" /> Avec photo de profil
+                  </Label>
+                  <Switch
+                    id="invite-photo"
+                    checked={withPhotoOnly}
+                    onCheckedChange={setWithPhotoOnly}
+                  />
+                </div>
+
+                {activeAdvancedFilters > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full text-xs text-muted-foreground"
+                    onClick={resetAdvanced}
+                  >
+                    <X className="h-3.5 w-3.5 mr-1" /> Réinitialiser les filtres
+                  </Button>
+                )}
+              </PopoverContent>
+            </Popover>
+
             <Link to="/recherche">
-              <Button variant="ghost" size="sm" className="gap-1.5 text-primary hover:text-primary">
-                Recherche avancée sur la carte <ArrowRight className="h-3.5 w-3.5" />
+              <Button variant="ghost" size="sm" className="gap-1.5 text-xs text-muted-foreground hover:text-primary">
+                Voir aussi sur la carte <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </Link>
           </div>
+
+          {/* Chips de filtres actifs */}
+          {activeAdvancedFilters > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              {animals.map((a) => {
+                const opt = ANIMAL_OPTIONS.find((o) => o.value === a);
+                return (
+                  <Badge key={a} variant="secondary" className="gap-1 pr-1">
+                    {opt?.label}
+                    <button
+                      type="button"
+                      onClick={() => toggleAnimal(a)}
+                      className="hover:text-destructive"
+                      aria-label={`Retirer ${opt?.label}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                );
+              })}
+              {minExperience > 0 && (
+                <Badge variant="secondary" className="gap-1 pr-1">
+                  {EXPERIENCE_OPTIONS.find((e) => e.value === minExperience)?.label}
+                  <button type="button" onClick={() => setMinExperience(0)} className="hover:text-destructive" aria-label="Retirer expérience">
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+              {verifiedOnly && (
+                <Badge variant="secondary" className="gap-1 pr-1">
+                  Vérifié
+                  <button type="button" onClick={() => setVerifiedOnly(false)} className="hover:text-destructive" aria-label="Retirer vérifié">
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+              {withPhotoOnly && (
+                <Badge variant="secondary" className="gap-1 pr-1">
+                  Avec photo
+                  <button type="button" onClick={() => setWithPhotoOnly(false)} className="hover:text-destructive" aria-label="Retirer photo">
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+            </div>
+          )}
 
           {!hasSearchCriteria ? (
             <div className="rounded-xl border border-dashed border-border bg-card p-6 text-center">
