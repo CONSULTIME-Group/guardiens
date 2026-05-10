@@ -606,12 +606,15 @@ const Messages = () => {
             <h1 className="font-heading text-xl font-bold">Messagerie</h1>
 
             {/* MOD 2 — Single pill row */}
-            <div className="flex gap-2">
+            <div className="flex gap-2" role="tablist" aria-label="Filtrer les conversations">
               {pills.map(p => (
                 <button
                   key={p.value}
+                  type="button"
+                  role="tab"
+                  aria-selected={pill === p.value}
                   onClick={() => setPill(p.value)}
-                  className={`rounded-full px-3 py-1 text-xs transition-colors ${
+                  className={`rounded-full px-3 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                     pill === p.value
                       ? "bg-foreground text-background"
                       : "border border-border text-muted-foreground hover:border-primary"
@@ -632,11 +635,12 @@ const Messages = () => {
               value={searchFilter}
               onChange={e => setSearchFilter(e.target.value)}
               placeholder="Filtrer par annonce ou prénom..."
+              aria-label="Filtrer les conversations par annonce ou prénom"
               className="h-8 text-xs rounded-lg"
             />
           </div>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto" role="region" aria-label="Liste des conversations">
             {displayConversations.length === 0 ? (
               <div className="p-4">
                 {pill === "archived" ? (
