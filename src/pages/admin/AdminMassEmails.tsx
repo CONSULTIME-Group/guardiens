@@ -215,19 +215,61 @@ const AdminMassEmails = () => {
               </div>
 
               {ctaEnabled && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="cta-label">Libellé du bouton</Label>
-                    <Input id="cta-label" placeholder="Découvrir" value={ctaLabel} onChange={(e) => setCtaLabel(e.target.value)} />
+                <>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="cta-label">Libellé du bouton</Label>
+                      <Input id="cta-label" placeholder="Découvrir" value={ctaLabel} onChange={(e) => setCtaLabel(e.target.value)} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="cta-url">URL cible</Label>
+                      <Input id="cta-url" placeholder="https://guardiens.fr/..." value={ctaUrl} onChange={(e) => setCtaUrl(e.target.value)} />
+                      {ctaUrl && !ctaUrl.startsWith("https://") && (
+                        <p className="text-xs text-destructive">L'URL doit commencer par https://</p>
+                      )}
+                    </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="cta-url">URL cible</Label>
-                    <Input id="cta-url" placeholder="https://guardiens.fr/..." value={ctaUrl} onChange={(e) => setCtaUrl(e.target.value)} />
-                    {ctaUrl && !ctaUrl.startsWith("https://") && (
-                      <p className="text-xs text-destructive">L'URL doit commencer par https://</p>
+
+                  <div className="pt-3 border-t border-border space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="utm-toggle" className="text-sm">Tracking UTM (liens internes)</Label>
+                        <p className="text-xs text-muted-foreground">Ajouté automatiquement aux URL guardiens.fr</p>
+                      </div>
+                      <Switch id="utm-toggle" checked={utmEnabled} onCheckedChange={setUtmEnabled} />
+                    </div>
+
+                    {utmEnabled && (
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="utm-campaign">utm_campaign</Label>
+                          <Input
+                            id="utm-campaign"
+                            placeholder={autoCampaign}
+                            value={utmCampaign}
+                            onChange={(e) => setUtmCampaign(e.target.value.replace(/[^a-z0-9-]/gi, "-").toLowerCase())}
+                          />
+                          <p className="text-xs text-muted-foreground">Auto depuis l'objet si vide</p>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="utm-content">utm_content</Label>
+                          <Input
+                            id="utm-content"
+                            placeholder="cta"
+                            value={utmContent}
+                            onChange={(e) => setUtmContent(e.target.value.replace(/[^a-z0-9-_]/gi, "-").toLowerCase())}
+                          />
+                          <p className="text-xs text-muted-foreground">Ex : cta, article, footer</p>
+                        </div>
+                        {ctaUrl.startsWith("https://") && (
+                          <div className="col-span-2 text-xs text-muted-foreground break-all bg-muted/40 p-2 rounded">
+                            <span className="font-medium">URL finale :</span> {withUtm(ctaUrl)}
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
-                </div>
+                </>
               )}
             </CardContent>
           </Card>
