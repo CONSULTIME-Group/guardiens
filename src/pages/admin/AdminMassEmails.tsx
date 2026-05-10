@@ -52,6 +52,7 @@ const AdminMassEmails = () => {
   const [countLoading, setCountLoading] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmInput, setConfirmInput] = useState("");
   const [sending, setSending] = useState(false);
 
   // History
