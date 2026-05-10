@@ -44,14 +44,14 @@ const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCit
   if (contextType === "sitter_inquiry" || contextType === "helper_inquiry") {
     const isHelper = contextType === "helper_inquiry";
     return (
-      <div className="px-4 py-3 bg-blue-50 dark:bg-blue-950/30 border-t border-blue-200 dark:border-blue-900/50">
+      <div className="px-4 py-3 bg-info-soft border-t border-info-border">
         <div className="flex items-start gap-2">
-          <Compass className="h-4 w-4 text-blue-700 dark:text-blue-300 shrink-0 mt-0.5" />
+          <Compass className="h-4 w-4 text-info shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+            <p className="text-sm font-medium text-info-foreground">
               {isHelper ? "Demande d'entraide spontanée" : "Demande de disponibilité"}
             </p>
-            <p className="text-xs text-blue-800/80 dark:text-blue-200/80 mt-0.5">
+            <p className="text-xs text-info-foreground/80 mt-0.5">
               {isHelper
                 ? (isOwner
                     ? `Vous sondez ${otherFirstName || "ce membre"} pour un futur coup de main.`
@@ -61,18 +61,18 @@ const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCit
                     : `${otherFirstName || "Ce propriétaire"} vous sonde avant de publier une annonce.`)}
             </p>
             {isOwner && !isHelper && (
-              <Link to="/sits/create" className="inline-block mt-2">
-                <Button size="sm" variant="outline" className="gap-1.5 h-8 border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-200 dark:hover:bg-blue-900/40">
+              <Button asChild size="sm" variant="outline" className="gap-1.5 h-8 mt-2 border-info-border text-info hover:bg-info-soft">
+                <Link to="/sits/create">
                   <Plus className="h-3.5 w-3.5" /> Créer mon annonce
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             )}
             {isOwner && isHelper && (
-              <Link to="/petites-missions/creer" className="inline-block mt-2">
-                <Button size="sm" variant="outline" className="gap-1.5 h-8 border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-200 dark:hover:bg-blue-900/40">
+              <Button asChild size="sm" variant="outline" className="gap-1.5 h-8 mt-2 border-info-border text-info hover:bg-info-soft">
+                <Link to="/petites-missions/creer">
                   <Plus className="h-3.5 w-3.5" /> Créer une mission
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             )}
           </div>
         </div>
@@ -82,14 +82,14 @@ const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCit
 
   if (contextType === "owner_pitch") {
     return (
-      <div className="px-4 py-3 bg-amber-50 dark:bg-amber-950/30 border-t border-amber-200 dark:border-amber-900/50">
+      <div className="px-4 py-3 bg-warning-soft border-t border-warning-border">
         <div className="flex items-start gap-2">
-          <Sparkles className="h-4 w-4 text-amber-700 dark:text-amber-300 shrink-0 mt-0.5" />
+          <Sparkles className="h-4 w-4 text-warning shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
+            <p className="text-sm font-medium text-warning-foreground">
               Contact spontané
             </p>
-            <p className="text-xs text-amber-800/80 dark:text-amber-200/80 mt-0.5">
+            <p className="text-xs text-warning-foreground/80 mt-0.5">
               {isOwner
                 ? `${otherFirstName || "Un gardien"} vous propose ses services. Aucune annonce de votre part n'est en cours.`
                 : `Vous proposez vos services à ${otherFirstName || "ce propriétaire"} sans annonce active. Soyez clair et bref.`}

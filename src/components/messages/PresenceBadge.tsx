@@ -20,8 +20,8 @@ const PresenceBadge = ({ lastSeenAt, className = "" }: Props) => {
 
   if (ageSec < 120) {
     return (
-      <span className={`inline-flex items-center gap-1 text-xs text-emerald-700 dark:text-emerald-400 ${className}`}>
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+      <span className={`inline-flex items-center gap-1 text-xs text-success ${className}`}>
+        <span className="w-1.5 h-1.5 rounded-full bg-success" />
         En ligne
       </span>
     );
