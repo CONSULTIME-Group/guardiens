@@ -52,6 +52,7 @@ const AdminMassEmails = () => {
   const [countLoading, setCountLoading] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmInput, setConfirmInput] = useState("");
   const [sending, setSending] = useState(false);
 
   // History
@@ -275,14 +276,20 @@ const AdminMassEmails = () => {
           </Card>
 
           <div className="space-y-3">
-            <Button variant="outline" className="w-full" onClick={() => setPreviewOpen(true)} disabled={!subject.trim()}>
+            <Button
+              className="w-full"
+              size="lg"
+              disabled={!isValid || sending}
+              onClick={() => setPreviewOpen(true)}
+            >
               <Eye className="h-4 w-4 mr-2" />
-              Prévisualiser l'email
+              Aperçu complet avant envoi
             </Button>
-            <Button className="w-full" disabled={!isValid || sending} onClick={() => setConfirmOpen(true)}>
-              {sending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
-              Envoyer à {recipientCount ?? 0} destinataires
-            </Button>
+            {!isValid && (
+              <p className="text-xs text-muted-foreground text-center">
+                Renseignez l'objet, un corps d'au moins 20 caractères, et au moins 1 destinataire.
+              </p>
+            )}
           </div>
         </div>
 
@@ -330,31 +337,132 @@ const AdminMassEmails = () => {
         </div>
       </div>
 
-      {/* Preview dialog */}
-      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Prévisualisation</DialogTitle>
-            <DialogDescription>Aperçu de l'email tel qu'il sera reçu.</DialogDescription>
+      {/* Écran d'aperçu complet (récap + rendu) avant la confirmation finale */}
+      <Dialog
+        open={previewOpen}
+        onOpenChange={(open) => {
+          setPreviewOpen(open);
+          if (!open) setConfirmInput("");
+        }}
+      >
+        <DialogContent className="max-w-5xl max-h-[92vh] overflow-y-auto p-0">
+          <DialogHeader className="px-6 pt-6 pb-2">
+            <DialogTitle>Aperçu complet de l'envoi</DialogTitle>
+            <DialogDescription>
+              Vérifiez chaque élément. L'envoi est définitif et irréversible une fois confirmé.
+            </DialogDescription>
           </DialogHeader>
-          <div className="border border-border rounded-lg overflow-hidden" dangerouslySetInnerHTML={{ __html: previewHtml }} />
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 px-6 pb-6">
+            {/* Colonne récap */}
+            <div className="space-y-4">
+              <div className="rounded-lg border border-border p-4 space-y-3">
+                <h3 className="text-sm font-semibold">Audience</h3>
+                <div className="text-sm space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Segment</span>
+                    <Badge variant="outline">{SEGMENT_LABELS[segment] || segment}</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Destinataires</span>
+                    <span className="font-semibold text-base">{recipientCount ?? 0}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-border p-4 space-y-3">
+                <h3 className="text-sm font-semibold">Contenu</h3>
+                <div className="text-sm space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Objet</span>
+                    <span className="font-medium text-right max-w-[60%] truncate">{subject || "—"}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Corps</span>
+                    <span>{body.length} car.</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Bouton CTA</span>
+                    <span>{ctaEnabled ? `« ${ctaLabel} »` : "Aucun"}</span>
+                  </div>
+                </div>
+              </div>
+
+              {ctaEnabled && (
+                <div className="rounded-lg border border-border p-4 space-y-2">
+                  <h3 className="text-sm font-semibold">Lien & tracking</h3>
+                  <div className="text-xs text-muted-foreground break-all bg-muted/40 p-2 rounded">
+                    {withUtm(ctaUrl) || "—"}
+                  </div>
+                  {utmEnabled && (
+                    <div className="flex flex-wrap gap-1.5 text-xs">
+                      <Badge variant="secondary">campaign : {effectiveCampaign}</Badge>
+                      <Badge variant="secondary">content : {utmContent || "cta"}</Badge>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="rounded-lg border border-amber-500/40 bg-amber-50/40 dark:bg-amber-950/10 p-4 text-xs text-amber-900 dark:text-amber-200">
+                <strong>Action irréversible.</strong> Une fois confirmé, l'email part immédiatement
+                vers <strong>{recipientCount ?? 0}</strong> destinataires. Aucun rappel possible.
+              </div>
+            </div>
+
+            {/* Colonne rendu HTML */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold">Rendu de l'email</h3>
+              <div
+                className="border border-border rounded-lg overflow-hidden bg-white max-h-[60vh] overflow-y-auto"
+                dangerouslySetInnerHTML={{ __html: previewHtml }}
+              />
+            </div>
+          </div>
+
+          <div className="border-t border-border px-6 py-4 flex flex-col sm:flex-row gap-2 justify-end bg-muted/30">
+            <Button variant="ghost" onClick={() => setPreviewOpen(false)}>
+              Retour à l'édition
+            </Button>
+            <Button
+              onClick={() => {
+                setConfirmInput("");
+                setConfirmOpen(true);
+              }}
+              disabled={!isValid}
+            >
+              Procéder à la confirmation finale
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
-      {/* Confirm dialog */}
-      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      {/* Confirmation finale — saisie obligatoire du nombre de destinataires */}
+      <AlertDialog
+        open={confirmOpen}
+        onOpenChange={(open) => {
+          setConfirmOpen(open);
+          if (!open) setConfirmInput("");
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmer l'envoi</AlertDialogTitle>
+            <AlertDialogTitle>Dernier feu vert</AlertDialogTitle>
             <AlertDialogDescription asChild>
-              <div className="space-y-2 text-sm">
+              <div className="space-y-3 text-sm">
                 <p>
-                  Vous êtes sur le point d'envoyer à <strong>{recipientCount ?? 0} destinataires</strong>
-                  {" "}({SEGMENT_LABELS[segment] || segment}). Cette action est irréversible.
+                  Pour confirmer l'envoi à <strong>{recipientCount ?? 0} destinataires</strong>{" "}
+                  ({SEGMENT_LABELS[segment] || segment}), saisissez le nombre exact ci-dessous.
                 </p>
+                <Input
+                  autoFocus
+                  inputMode="numeric"
+                  placeholder={String(recipientCount ?? 0)}
+                  value={confirmInput}
+                  onChange={(e) => setConfirmInput(e.target.value.replace(/\D/g, ""))}
+                />
                 {ctaEnabled && utmEnabled && ctaUrl.startsWith("https://") && (
                   <p className="text-xs text-muted-foreground">
-                    Tracking UTM : <code>utm_campaign={effectiveCampaign}</code>, <code>utm_content={utmContent || "cta"}</code>
+                    Tracking : <code>{effectiveCampaign}</code> / <code>{utmContent || "cta"}</code>
                   </p>
                 )}
               </div>
@@ -362,7 +470,24 @@ const AdminMassEmails = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleSend}>Confirmer l'envoi</AlertDialogAction>
+            <AlertDialogAction
+              onClick={handleSend}
+              disabled={
+                sending ||
+                recipientCount === null ||
+                Number(confirmInput) !== recipientCount
+              }
+            >
+              {sending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Envoi en cours…
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" /> Envoyer maintenant
+                </>
+              )}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
