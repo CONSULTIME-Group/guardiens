@@ -12,6 +12,7 @@ import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { toast } from "sonner";
 import { format, isPast } from "date-fns";
 import { fr } from "date-fns/locale";
+import { appStatusBadge } from "@/lib/messageStatus";
 
 interface ConversationHeaderProps {
   conv: any;
@@ -27,14 +28,6 @@ interface ConversationHeaderProps {
   isEmergencySitter?: boolean;
 }
 
-const appStatusBadge: Record<string, { label: string; className: string }> = {
-  pending: { label: "En attente", className: "bg-amber-50 text-amber-700" },
-  viewed: { label: "En attente", className: "bg-amber-50 text-amber-700" },
-  discussing: { label: "En discussion", className: "bg-blue-50 text-blue-700" },
-  accepted: { label: "Acceptée", className: "bg-primary/10 text-primary" },
-  rejected: { label: "Déclinée", className: "bg-muted text-muted-foreground" },
-  cancelled: { label: "Déclinée", className: "bg-muted text-muted-foreground" },
-};
 
 const capitalize = (s?: string | null) => {
   if (!s) return "";
@@ -277,7 +270,7 @@ const ConversationHeader = ({
               )}
               {otherUserRating !== undefined && otherUserRating > 0 && (
                 <span className="flex items-center gap-0.5 text-xs text-muted-foreground ml-1">
-                  <Star className="h-3 w-3 text-amber-500" fill="currentColor" /> {otherUserRating.toFixed(1)}
+                  <Star className="h-3 w-3 text-secondary fill-secondary" /> {otherUserRating.toFixed(1)}
                 </span>
               )}
             </div>
@@ -287,11 +280,11 @@ const ConversationHeader = ({
         {/* Right side */}
         <div className="flex items-center gap-2 shrink-0">
           {annonceLinkHref && (
-            <Link to={annonceLinkHref}>
-              <Button size="sm" variant="outline" className="gap-1.5 border-primary text-primary hover:bg-primary/5">
+            <Button asChild size="sm" variant="outline" className="gap-1.5 border-primary text-primary hover:bg-primary/5">
+              <Link to={annonceLinkHref}>
                 Voir l'annonce <ExternalLink className="h-3.5 w-3.5" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           )}
           {isOwner && isPendingApp && (
             <>
@@ -304,11 +297,11 @@ const ConversationHeader = ({
             </>
           )}
           {isConfirmed && conv.sit?.property_id && (
-            <Link to={`/house-guide/${conv.sit.property_id}`}>
-              <Button size="sm" variant="outline" className="gap-1.5">
+            <Button asChild size="sm" variant="outline" className="gap-1.5">
+              <Link to={`/house-guide/${conv.sit.property_id}`}>
                 <Home className="h-3.5 w-3.5" /> Guide
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           )}
           <button onClick={() => setReportOpen(true)} className="p-2 rounded-lg hover:bg-accent text-muted-foreground" title="Signaler" aria-label="Signaler">
             <Flag className="h-4 w-4" />
@@ -382,14 +375,14 @@ const ConversationHeader = ({
         </div>
       )}
       {isSmallMission && missionData && responseData && responseData.status === "accepted" && (
-        <div className="px-4 py-2 bg-green-50 border-t border-green-200 flex items-center gap-2">
-          <CheckCircle className="text-green-600 w-4 h-4 shrink-0" />
-          <span className="text-sm text-green-700 font-medium">Échange accepté</span>
+        <div className="px-4 py-2 bg-success-soft border-t border-success-border flex items-center gap-2">
+          <CheckCircle className="text-success w-4 h-4 shrink-0" />
+          <span className="text-sm text-success-foreground font-medium">Échange accepté</span>
           {missionData.date_needed && isPast(new Date(missionData.date_needed)) && (
             <Button
               size="sm"
               variant="outline"
-              className="ml-auto border-green-300 text-green-700 hover:bg-green-100"
+              className="ml-auto border-success-border text-success-foreground hover:bg-success-soft"
               onClick={handleMarkDone}
             >
               Marquer comme terminé
