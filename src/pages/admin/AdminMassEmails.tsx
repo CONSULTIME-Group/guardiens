@@ -35,18 +35,27 @@ interface MassEmail {
 }
 
 // Campagne "Oser demander" — pré-remplie pour faciliter l'envoi en 1 clic.
-const OSER_SUBJECT = "Et si vous osiez demander un coup de main ?";
+const OSER_SUBJECT = "Et si vous osiez demander, vous aussi ?";
 const OSER_BODY = `Bonjour,
 
-Sur Guardiens, l'entraide entre propriétaires d'animaux est gratuite, locale et simple — gens du coin, membres de confiance, près de chez vous.
+Vous connaissez ce moment : un rendez-vous qui tombe mal, un week-end qui s'annonce, et personne pour passer nourrir le chat ou sortir le chien. On encaisse, on s'organise seul, on n'ose pas déranger.
 
-Vous hésitez à publier une demande ? C'est pourtant la première étape, celle qui débloque tout : nourrir le chat pendant un week-end, sortir le chien pendant un rendez-vous, garder le lapin une après-midi…
+Pourtant, autour de vous, il y a des gens prêts à donner un coup de main — gratuitement, simplement, parce que ça leur fait plaisir.
 
-Trois minutes suffisent pour publier votre première mission. Et bien souvent, c'est la première réponse qui change tout.
+À Hyères, <strong>Annie</strong> vient par exemple de proposer de partager son savoir avec qui en aurait besoin. Elle n'attend rien en retour, juste l'occasion de rendre service.
 
-Alors, et si c'était aujourd'hui ?
+Et c'est ça, l'entraide chez Guardiens : des gens du coin, des animaux à choyer, des petits services qui font une vraie différence. Pas d'argent, pas d'agence, pas de pression.
 
-À très vite sur Guardiens.`;
+La seule chose qui manque encore ? <strong>Votre demande à vous.</strong>
+
+Trois minutes suffisent pour la publier. Et très souvent, c'est la première réponse reçue qui change tout — qui prouve qu'on n'est pas seul, que ça marche, qu'on peut compter sur les autres.
+
+Pour comprendre comment ça fonctionne concrètement, <a href="https://guardiens.fr/articles/petites-missions-entraide-guardiens?utm_source=mass_email&utm_campaign=oser-2026-05&utm_content=article" style="color:#2C6E49;font-weight:600;text-decoration:underline">vous pouvez lire notre article dédié aux petites missions d'entraide</a>.
+
+Et si c'était aujourd'hui ?
+
+À très vite,
+L'équipe Guardiens.`;
 
 const AdminMassEmails = () => {
   // Form state — pré-rempli avec la campagne "Oser demander"
