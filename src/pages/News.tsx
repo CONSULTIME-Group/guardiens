@@ -185,6 +185,30 @@ export default function News() {
     };
   }, [activeCategory, currentPage, urlSearch]);
 
+  // Fetch category counts once (only categories that have at least one article are shown)
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const nowIso = new Date().toISOString();
+      const { data } = await supabase
+        .from("articles")
+        .select("category")
+        .eq("published", true)
+        .lte("published_at", nowIso)
+        .or("noindex.is.null,noindex.eq.false");
+      if (cancelled || !data) return;
+      const counts: Record<string, number> = {};
+      (data as { category: string }[]).forEach((row) => {
+        if (!row.category) return;
+        counts[row.category] = (counts[row.category] || 0) + 1;
+      });
+      setCategoryCounts(counts);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
   const pageList = useMemo(() => buildPageList(currentPage, totalPages), [currentPage, totalPages]);
 
