@@ -707,7 +707,9 @@ const EditSit = () => {
                               ? "Renseignez des dates ou un mois flexible"
                               : !descValid
                                 ? `Description : ${MIN_DESC_LENGTH} caractères minimum`
-                                : "Complétez le formulaire pour enregistrer"}
+                                : hasForbidden
+                                  ? "Vocabulaire non autorisé dans le titre ou la description"
+                                  : "Complétez le formulaire pour enregistrer"}
                     </p>
                   </TooltipContent>
                 )}
