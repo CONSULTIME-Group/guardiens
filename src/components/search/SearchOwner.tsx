@@ -628,26 +628,7 @@ const SearchOwner = () => {
             </Popover>
           )}
 
-          {/* PILL 3 — Dates */}
-          <Popover open={openPop === "dates"} onOpenChange={(o) => setOpenPop(o ? "dates" : null)}>
-            <PopoverTrigger asChild>
-              <button className={startDate || endDate ? pillActive : pillBase}>
-                <Calendar className="h-3.5 w-3.5 shrink-0" />
-                {startDate && endDate ? `${startDate} → ${endDate}` : "Dates"}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-72 p-3 space-y-3">
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Du</label>
-                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Au</label>
-                <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
-              </div>
-            </PopoverContent>
-          </Popover>
-
+          {/* PILL 3 — Dates : retiré tant que la disponibilité datée gardien n'est pas modélisée */}
           {/* PILL 4 — Animaux */}
           <Popover open={openPop === "animals"} onOpenChange={(o) => setOpenPop(o ? "animals" : null)}>
             <PopoverTrigger asChild>
