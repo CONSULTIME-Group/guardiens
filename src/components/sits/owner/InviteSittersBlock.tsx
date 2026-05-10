@@ -115,9 +115,12 @@ const InviteSittersBlock = ({
   }, [favoriteIds]);
 
   // Recherche : par mots-clés (prénom/ville) et/ou par département (code postal)
+  // OU par rayon depuis la ville du propriétaire
   // + filtres avancés (animaux, expérience min, vérifié, photo)
   const [query, setQuery] = useState("");
+  const [searchMode, setSearchMode] = useState<"dept" | "radius">("dept");
   const [deptCode, setDeptCode] = useState<string>(""); // "" = tous départements
+  const [radiusKm, setRadiusKm] = useState<number>(15);
   const [animals, setAnimals] = useState<string[]>([]);
   const [minExperience, setMinExperience] = useState<number>(0);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
@@ -125,19 +128,35 @@ const InviteSittersBlock = ({
   const [searchResults, setSearchResults] = useState<SitterRow[]>([]);
   const [searching, setSearching] = useState(false);
 
+  // Coords du propriétaire (géocodage de sitCity, fait une seule fois).
+  const [ownerCoords, setOwnerCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [ownerCoordsLoading, setOwnerCoordsLoading] = useState(false);
+  useEffect(() => {
+    if (!sitCity || ownerCoords) return;
+    setOwnerCoordsLoading(true);
+    geocodeCity(sitCity).then((r) => {
+      if (r) setOwnerCoords({ lat: r.lat, lng: r.lng });
+      setOwnerCoordsLoading(false);
+    });
+  }, [sitCity, ownerCoords]);
+
+  // Cache mémoire des géocodages de villes candidates pour limiter les
+  // appels à l'edge function `geocode` lors d'une session.
+  const cityGeoCache = useRef<Map<string, { lat: number; lng: number } | null>>(new Map());
+
   const activeAdvancedFilters =
     animals.length + (minExperience > 0 ? 1 : 0) + (verifiedOnly ? 1 : 0) + (withPhotoOnly ? 1 : 0);
 
   useEffect(() => {
     const q = query.trim();
+    const radiusActive = searchMode === "radius" && !!ownerCoords;
     // Au moins un critère requis
-    if (q.length < 2 && !deptCode && activeAdvancedFilters === 0) {
+    if (q.length < 2 && !deptCode && !radiusActive && activeAdvancedFilters === 0) {
       setSearchResults([]);
       return;
     }
     setSearching(true);
     const t = setTimeout(async () => {
-      // Si on filtre par animaux → join inner sur sitter_profiles
       const needsSitterJoin = animals.length > 0;
       const selectCols = needsSitterJoin
         ? "id, first_name, avatar_url, city, bio, postal_code, identity_verified, completed_sits_count, sitter_profiles!inner(animal_types)"
@@ -152,7 +171,10 @@ const InviteSittersBlock = ({
       if (q.length >= 2) {
         req = req.or(`first_name.ilike.%${q}%,city.ilike.%${q}%`);
       }
-      if (deptCode) {
+      // Mode département : filtre côté DB par préfixe code postal.
+      // Mode rayon : pas de filtre DB sur le CP, on filtre côté client par distance
+      // (limité à 200 candidats max pour préserver les perfs de géocodage).
+      if (searchMode === "dept" && deptCode) {
         req = req.like("postal_code", `${deptCode}%`);
       }
       if (verifiedOnly) {
@@ -167,12 +189,45 @@ const InviteSittersBlock = ({
       if (animals.length > 0) {
         req = req.overlaps("sitter_profiles.animal_types", animals);
       }
-      const { data } = await req.limit(30);
-      setSearchResults(((data as any[]) || []) as SitterRow[]);
+
+      const limit = radiusActive ? 200 : 30;
+      const { data } = await req.limit(limit);
+      let rows: SitterRow[] = ((data as any[]) || []) as SitterRow[];
+
+      if (radiusActive && ownerCoords) {
+        // Géocodage parallèle (avec cache) des villes candidates,
+        // puis filtrage par distance et tri croissant.
+        const uniqueCities = Array.from(
+          new Set(rows.map((r) => (r.city || "").trim()).filter((c) => c.length > 0)),
+        );
+        await Promise.all(
+          uniqueCities.map(async (c) => {
+            if (cityGeoCache.current.has(c)) return;
+            const g = await geocodeCity(c);
+            cityGeoCache.current.set(c, g ? { lat: g.lat, lng: g.lng } : null);
+          }),
+        );
+        rows = rows
+          .map((r) => {
+            const g = r.city ? cityGeoCache.current.get(r.city.trim()) : null;
+            if (!g) return { ...r, distance_km: null };
+            const d = haversineDistance(ownerCoords.lat, ownerCoords.lng, g.lat, g.lng);
+            return { ...r, distance_km: Math.round(d) };
+          })
+          .filter((r) => r.distance_km !== null && (r.distance_km as number) <= radiusKm)
+          .sort(
+            (a, b) =>
+              ((a.distance_km ?? Number.POSITIVE_INFINITY) as number) -
+              ((b.distance_km ?? Number.POSITIVE_INFINITY) as number),
+          )
+          .slice(0, 30);
+      }
+
+      setSearchResults(rows);
       setSearching(false);
     }, 300);
     return () => clearTimeout(t);
-  }, [query, deptCode, animals, minExperience, verifiedOnly, withPhotoOnly, ownerId, activeAdvancedFilters]);
+  }, [query, searchMode, deptCode, radiusKm, ownerCoords, animals, minExperience, verifiedOnly, withPhotoOnly, ownerId, activeAdvancedFilters]);
 
   const resetAdvanced = () => {
     setAnimals([]);
