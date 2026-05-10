@@ -384,7 +384,18 @@ const OwnerSitView = ({
         />
       </section>
 
-      {/* Notes spécifiques à cette garde — accordion fermé par défaut. */}
+      {/* Inviter des gardiens — uniquement quand l'annonce est publiée */}
+      {sit.status === "published" && (
+        <InviteSittersBlock
+          sitId={sit.id}
+          ownerId={currentUserId}
+          sitTitle={sit.title}
+          sitCity={owner?.city ?? null}
+          startDate={sit.start_date}
+          endDate={sit.end_date}
+        />
+      )}
+
       <Collapsible className="mt-2 mb-8 rounded-2xl border border-border bg-card">
         <CollapsibleTrigger className="group w-full flex items-center justify-between gap-2 p-5 md:p-6 text-left">
           <div>
