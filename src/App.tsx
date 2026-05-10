@@ -295,6 +295,7 @@ const AppRoutes = () => (
         <Route path="/admin/seo" element={<AdminSEO />} />
         <Route path="/admin/skills" element={<AdminSkills />} />
         <Route path="/admin/envois-groupes" element={<AdminMassEmails />} />
+        <Route path="/admin/envois-groupes/stats" element={<AdminMassEmailsStats />} />
         <Route path="/admin/relance-incomplet" element={<AdminRelanceIncomplet />} />
         <Route path="/admin/nurturing" element={<AdminNurturing />} />
         <Route path="/admin/messages" element={<AdminMessages />} />
