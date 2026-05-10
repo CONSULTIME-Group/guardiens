@@ -59,6 +59,8 @@ interface InviteSittersBlockProps {
   ownerId: string;
   sitTitle: string;
   sitCity: string | null;
+  /** Code postal du propriétaire — utilisé pour pré-cibler le département. */
+  ownerPostalCode?: string | null;
   startDate: string | null;
   endDate: string | null;
   /** Si true → applique un effet visuel d'accent (juste après publication) */
@@ -70,6 +72,7 @@ const InviteSittersBlock = ({
   ownerId,
   sitTitle,
   sitCity,
+  ownerPostalCode = null,
   startDate,
   endDate,
   highlight = false,
