@@ -751,6 +751,22 @@ const InviteSittersBlock = ({
           });
         }}
       />
+
+      {ownerCoords && (
+        <BulkInviteNearestDialog
+          open={bulkOpen}
+          onOpenChange={setBulkOpen}
+          sitId={sitId}
+          ownerId={ownerId}
+          sitTitle={sitTitle}
+          sitCity={sitCity}
+          startDate={startDate}
+          endDate={endDate}
+          ownerCoords={ownerCoords}
+          alreadyInvitedIds={alreadyInvitedIds}
+          remainingQuota={remainingQuota}
+        />
+      )}
     </section>
   );
 };
