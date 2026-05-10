@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
+import { captureUtmFromUrl } from "@/lib/campaignAttribution";
 
 /**
  * Track une vue de page à chaque changement de route.
