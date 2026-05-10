@@ -110,10 +110,11 @@ const SmallMissionsPublic = () => {
  }, []);
 
  /** Auth-aware navigation: redirect to register if not logged in */
- const goToCreate = () =>
+  const goToCreate = () =>
  navigate(isAuthenticated ? "/petites-missions/creer" : "/inscription?redirect=/petites-missions/creer");
+ // QW#2 — corrige la route : on envoie sur la page de PUBLICATION d'une offre, pas sur la liste filtrée
  const goToHelp = () =>
- navigate(isAuthenticated ? "/petites-missions?type=offre" : "/inscription?redirect=/petites-missions?type=offre");
+ navigate(isAuthenticated ? "/petites-missions/creer?type=offre" : "/inscription?redirect=/petites-missions/creer?type=offre");
 
  return (
  <>
