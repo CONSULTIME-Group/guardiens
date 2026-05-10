@@ -86,30 +86,40 @@ const InviteSittersBlock = ({
     };
   }, [favoriteIds]);
 
-  // Recherche
+  // Recherche : par mots-clés (prénom/ville) et/ou par département (code postal)
   const [query, setQuery] = useState("");
+  const [deptCode, setDeptCode] = useState<string>(""); // "" = tous départements
   const [searchResults, setSearchResults] = useState<SitterRow[]>([]);
   const [searching, setSearching] = useState(false);
+
   useEffect(() => {
     const q = query.trim();
-    if (q.length < 2) {
+    // Au moins un critère requis
+    if (q.length < 2 && !deptCode) {
       setSearchResults([]);
       return;
     }
     setSearching(true);
     const t = setTimeout(async () => {
-      const { data } = await supabase
+      let req = supabase
         .from("profiles")
-        .select("id, first_name, avatar_url, city, bio")
+        .select("id, first_name, avatar_url, city, bio, postal_code")
         .eq("role", "sitter")
-        .neq("id", ownerId)
-        .or(`first_name.ilike.%${q}%,city.ilike.%${q}%`)
-        .limit(20);
+        .neq("id", ownerId);
+
+      if (q.length >= 2) {
+        req = req.or(`first_name.ilike.%${q}%,city.ilike.%${q}%`);
+      }
+      if (deptCode) {
+        // Postal codes français : préfixe = code département (2 chiffres ou 2A/2B/97x)
+        req = req.like("postal_code", `${deptCode}%`);
+      }
+      const { data } = await req.limit(30);
       setSearchResults((data as SitterRow[]) || []);
       setSearching(false);
     }, 300);
     return () => clearTimeout(t);
-  }, [query, ownerId]);
+  }, [query, deptCode, ownerId]);
 
   const [inviteTarget, setInviteTarget] = useState<SitterRow | null>(null);
 
