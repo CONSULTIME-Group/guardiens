@@ -7,9 +7,9 @@
  * Les états par sitter (non invité / invité / a candidaté) sont calculés à
  * partir de la table `sit_invitations` (hook useSitInvitations).
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Send, Check, MailCheck, Heart, Sparkles, ArrowRight, MapPin, SlidersHorizontal, ShieldCheck, ImageIcon, GraduationCap, PawPrint, X } from "lucide-react";
+import { Search, Send, Check, MailCheck, Heart, Sparkles, ArrowRight, MapPin, SlidersHorizontal, ShieldCheck, ImageIcon, GraduationCap, PawPrint, X, Crosshair, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -29,6 +29,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useSitInvitations } from "@/hooks/useSitInvitations";
 import { DEPT_NAMES } from "@/lib/departments";
+import { Slider } from "@/components/ui/slider";
+import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import InviteSitterDialog from "./InviteSitterDialog";
 import PostPublishRecapDialog from "./PostPublishRecapDialog";
 
@@ -53,7 +55,11 @@ interface SitterRow {
   avatar_url: string | null;
   city: string | null;
   bio: string | null;
+  /** Distance en km depuis le propriétaire — défini uniquement en mode rayon. */
+  distance_km?: number | null;
 }
+
+const RADIUS_OPTIONS = [5, 10, 15, 30, 50, 100];
 
 interface InviteSittersBlockProps {
   sitId: string;
@@ -109,9 +115,12 @@ const InviteSittersBlock = ({
   }, [favoriteIds]);
 
   // Recherche : par mots-clés (prénom/ville) et/ou par département (code postal)
+  // OU par rayon depuis la ville du propriétaire
   // + filtres avancés (animaux, expérience min, vérifié, photo)
   const [query, setQuery] = useState("");
+  const [searchMode, setSearchMode] = useState<"dept" | "radius">("dept");
   const [deptCode, setDeptCode] = useState<string>(""); // "" = tous départements
+  const [radiusKm, setRadiusKm] = useState<number>(15);
   const [animals, setAnimals] = useState<string[]>([]);
   const [minExperience, setMinExperience] = useState<number>(0);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
@@ -119,19 +128,35 @@ const InviteSittersBlock = ({
   const [searchResults, setSearchResults] = useState<SitterRow[]>([]);
   const [searching, setSearching] = useState(false);
 
+  // Coords du propriétaire (géocodage de sitCity, fait une seule fois).
+  const [ownerCoords, setOwnerCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [ownerCoordsLoading, setOwnerCoordsLoading] = useState(false);
+  useEffect(() => {
+    if (!sitCity || ownerCoords) return;
+    setOwnerCoordsLoading(true);
+    geocodeCity(sitCity).then((r) => {
+      if (r) setOwnerCoords({ lat: r.lat, lng: r.lng });
+      setOwnerCoordsLoading(false);
+    });
+  }, [sitCity, ownerCoords]);
+
+  // Cache mémoire des géocodages de villes candidates pour limiter les
+  // appels à l'edge function `geocode` lors d'une session.
+  const cityGeoCache = useRef<Map<string, { lat: number; lng: number } | null>>(new Map());
+
   const activeAdvancedFilters =
     animals.length + (minExperience > 0 ? 1 : 0) + (verifiedOnly ? 1 : 0) + (withPhotoOnly ? 1 : 0);
 
   useEffect(() => {
     const q = query.trim();
+    const radiusActive = searchMode === "radius" && !!ownerCoords;
     // Au moins un critère requis
-    if (q.length < 2 && !deptCode && activeAdvancedFilters === 0) {
+    if (q.length < 2 && !deptCode && !radiusActive && activeAdvancedFilters === 0) {
       setSearchResults([]);
       return;
     }
     setSearching(true);
     const t = setTimeout(async () => {
-      // Si on filtre par animaux → join inner sur sitter_profiles
       const needsSitterJoin = animals.length > 0;
       const selectCols = needsSitterJoin
         ? "id, first_name, avatar_url, city, bio, postal_code, identity_verified, completed_sits_count, sitter_profiles!inner(animal_types)"
@@ -146,7 +171,10 @@ const InviteSittersBlock = ({
       if (q.length >= 2) {
         req = req.or(`first_name.ilike.%${q}%,city.ilike.%${q}%`);
       }
-      if (deptCode) {
+      // Mode département : filtre côté DB par préfixe code postal.
+      // Mode rayon : pas de filtre DB sur le CP, on filtre côté client par distance
+      // (limité à 200 candidats max pour préserver les perfs de géocodage).
+      if (searchMode === "dept" && deptCode) {
         req = req.like("postal_code", `${deptCode}%`);
       }
       if (verifiedOnly) {
@@ -161,12 +189,45 @@ const InviteSittersBlock = ({
       if (animals.length > 0) {
         req = req.overlaps("sitter_profiles.animal_types", animals);
       }
-      const { data } = await req.limit(30);
-      setSearchResults(((data as any[]) || []) as SitterRow[]);
+
+      const limit = radiusActive ? 200 : 30;
+      const { data } = await req.limit(limit);
+      let rows: SitterRow[] = ((data as any[]) || []) as SitterRow[];
+
+      if (radiusActive && ownerCoords) {
+        // Géocodage parallèle (avec cache) des villes candidates,
+        // puis filtrage par distance et tri croissant.
+        const uniqueCities = Array.from(
+          new Set(rows.map((r) => (r.city || "").trim()).filter((c) => c.length > 0)),
+        );
+        await Promise.all(
+          uniqueCities.map(async (c) => {
+            if (cityGeoCache.current.has(c)) return;
+            const g = await geocodeCity(c);
+            cityGeoCache.current.set(c, g ? { lat: g.lat, lng: g.lng } : null);
+          }),
+        );
+        rows = rows
+          .map((r) => {
+            const g = r.city ? cityGeoCache.current.get(r.city.trim()) : null;
+            if (!g) return { ...r, distance_km: null };
+            const d = haversineDistance(ownerCoords.lat, ownerCoords.lng, g.lat, g.lng);
+            return { ...r, distance_km: Math.round(d) };
+          })
+          .filter((r) => r.distance_km !== null && (r.distance_km as number) <= radiusKm)
+          .sort(
+            (a, b) =>
+              ((a.distance_km ?? Number.POSITIVE_INFINITY) as number) -
+              ((b.distance_km ?? Number.POSITIVE_INFINITY) as number),
+          )
+          .slice(0, 30);
+      }
+
+      setSearchResults(rows);
       setSearching(false);
     }, 300);
     return () => clearTimeout(t);
-  }, [query, deptCode, animals, minExperience, verifiedOnly, withPhotoOnly, ownerId, activeAdvancedFilters]);
+  }, [query, searchMode, deptCode, radiusKm, ownerCoords, animals, minExperience, verifiedOnly, withPhotoOnly, ownerId, activeAdvancedFilters]);
 
   const resetAdvanced = () => {
     setAnimals([]);
@@ -202,7 +263,14 @@ const InviteSittersBlock = ({
           >
             {s.first_name || "Gardien"}
           </Link>
-          {s.city && <p className="text-xs text-muted-foreground truncate">{s.city}</p>}
+          {s.city && (
+            <p className="text-xs text-muted-foreground truncate">
+              {s.city}
+              {typeof s.distance_km === "number" && (
+                <span className="ml-1 text-primary font-medium">· {s.distance_km} km</span>
+              )}
+            </p>
+          )}
         </div>
         {status === "applied" ? (
           <span className="text-xs flex items-center gap-1 text-success font-medium">
@@ -233,7 +301,11 @@ const InviteSittersBlock = ({
     [],
   );
 
-  const hasSearchCriteria = query.trim().length >= 2 || !!deptCode || activeAdvancedFilters > 0;
+  const hasSearchCriteria =
+    query.trim().length >= 2 ||
+    (searchMode === "dept" && !!deptCode) ||
+    (searchMode === "radius" && !!ownerCoords) ||
+    activeAdvancedFilters > 0;
 
   // Onglet actif (contrôlé) pour permettre au récap post-publication de
   // rediriger immédiatement l'utilisateur vers le bon onglet.
@@ -323,6 +395,34 @@ const InviteSittersBlock = ({
         </TabsContent>
 
         <TabsContent value="search" className="mt-4 space-y-3">
+          {/* Toggle mode : Département vs Rayon depuis ma ville */}
+          <div className="inline-flex rounded-lg border border-border bg-background/80 p-0.5 text-xs">
+            <button
+              type="button"
+              onClick={() => setSearchMode("dept")}
+              className={`px-3 py-1.5 rounded-md transition flex items-center gap-1.5 ${
+                searchMode === "dept"
+                  ? "bg-primary text-primary-foreground font-medium"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <MapPin className="h-3.5 w-3.5" /> Département
+            </button>
+            <button
+              type="button"
+              onClick={() => setSearchMode("radius")}
+              disabled={!sitCity}
+              title={!sitCity ? "Renseignez votre ville pour activer la recherche par rayon" : undefined}
+              className={`px-3 py-1.5 rounded-md transition flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed ${
+                searchMode === "radius"
+                  ? "bg-primary text-primary-foreground font-medium"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Crosshair className="h-3.5 w-3.5" /> Rayon depuis ma ville
+            </button>
+          </div>
+
           <div className="grid sm:grid-cols-[1fr_220px] gap-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -333,24 +433,82 @@ const InviteSittersBlock = ({
                 className="pl-9 bg-background/80"
               />
             </div>
-            <Select
-              value={deptCode || "all"}
-              onValueChange={(v) => setDeptCode(v === "all" ? "" : v)}
-            >
-              <SelectTrigger className="bg-background/80">
-                <MapPin className="h-4 w-4 mr-1.5 text-muted-foreground" />
-                <SelectValue placeholder="Tous les départements" />
-              </SelectTrigger>
-              <SelectContent className="max-h-72">
-                <SelectItem value="all">Tous les départements</SelectItem>
-                {deptOptions.map(([code, name]) => (
-                  <SelectItem key={code} value={code}>
-                    {code} — {name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {searchMode === "dept" ? (
+              <Select
+                value={deptCode || "all"}
+                onValueChange={(v) => setDeptCode(v === "all" ? "" : v)}
+              >
+                <SelectTrigger className="bg-background/80">
+                  <MapPin className="h-4 w-4 mr-1.5 text-muted-foreground" />
+                  <SelectValue placeholder="Tous les départements" />
+                </SelectTrigger>
+                <SelectContent className="max-h-72">
+                  <SelectItem value="all">Tous les départements</SelectItem>
+                  {deptOptions.map(([code, name]) => (
+                    <SelectItem key={code} value={code}>
+                      {code} — {name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Select
+                value={String(radiusKm)}
+                onValueChange={(v) => setRadiusKm(parseInt(v, 10))}
+              >
+                <SelectTrigger className="bg-background/80">
+                  <Crosshair className="h-4 w-4 mr-1.5 text-muted-foreground" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {RADIUS_OPTIONS.map((r) => (
+                    <SelectItem key={r} value={String(r)}>
+                      {r} km
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
+
+          {searchMode === "radius" && (
+            <div className="rounded-lg border border-border bg-background/60 p-3 space-y-2">
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <Crosshair className="h-3.5 w-3.5" />
+                  {sitCity ? (
+                    <>
+                      Autour de <span className="font-medium text-foreground">{sitCity}</span>
+                      {ownerPostalCode && ` (${ownerPostalCode})`}
+                    </>
+                  ) : (
+                    <span className="text-destructive">Ville du propriétaire manquante</span>
+                  )}
+                </span>
+                <span className="font-medium text-primary tabular-nums">{radiusKm} km</span>
+              </div>
+              {sitCity && (
+                <Slider
+                  value={[radiusKm]}
+                  onValueChange={(v) => setRadiusKm(v[0])}
+                  min={5}
+                  max={100}
+                  step={5}
+                  className="py-1"
+                />
+              )}
+              {ownerCoordsLoading && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <Loader2 className="h-3 w-3 animate-spin" /> Localisation de votre ville…
+                </p>
+              )}
+              {!ownerCoordsLoading && !ownerCoords && sitCity && (
+                <p className="text-xs text-destructive">
+                  Impossible de localiser « {sitCity} ». Réessayez ou utilisez le mode département.
+                </p>
+              )}
+            </div>
+          )}
 
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <Popover>
@@ -512,7 +670,7 @@ const InviteSittersBlock = ({
             <div className="rounded-xl border border-dashed border-border bg-card p-6 text-center">
               <Search className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
               <p className="text-sm text-muted-foreground">
-                Tapez au moins 2 caractères ou sélectionnez un département.
+                Tapez au moins 2 caractères, sélectionnez un département ou activez le rayon depuis votre ville.
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 Astuce : choisir le département de votre logement permet d'inviter les gardiens du coin.
