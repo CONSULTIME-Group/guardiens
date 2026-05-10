@@ -63,11 +63,21 @@ const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCit
                     : `${otherFirstName || "Ce propriétaire"} vous sonde avant de publier une annonce.`)}
             </p>
             {isOwner && !isHelper && (
-              <Button asChild size="sm" variant="outline" className="gap-1.5 h-8 mt-2 border-info-border text-info hover:bg-info-soft">
-                <Link to="/sits/create">
-                  <Plus className="h-3.5 w-3.5" /> Créer mon annonce
-                </Link>
-              </Button>
+              otherUserId ? (
+                <div className="mt-2">
+                  <InviteToMySitButton
+                    sitter={{ id: otherUserId, first_name: otherFirstName ?? null }}
+                    label="Proposer mon annonce"
+                    className="border-info-border text-info hover:bg-info-soft"
+                  />
+                </div>
+              ) : (
+                <Button asChild size="sm" variant="outline" className="gap-1.5 h-8 mt-2 border-info-border text-info hover:bg-info-soft">
+                  <Link to="/sits/create">
+                    <Plus className="h-3.5 w-3.5" /> Créer mon annonce
+                  </Link>
+                </Button>
+              )
             )}
             {isOwner && isHelper && (
               <Button asChild size="sm" variant="outline" className="gap-1.5 h-8 mt-2 border-info-border text-info hover:bg-info-soft">
