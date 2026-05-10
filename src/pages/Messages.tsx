@@ -711,6 +711,7 @@ const Messages = () => {
             sit={activeConv.sit ? { ...activeConv.sit, id: activeConv.sit_id || undefined } : null}
             otherFirstName={activeConv.other_user?.first_name}
             otherCity={activeConv.other_user?.city}
+            otherUserId={activeConv.other_user?.id ?? null}
           />
 
           {/* Messages with day separators */}
