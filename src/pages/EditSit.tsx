@@ -365,17 +365,29 @@ const EditSit = () => {
       </Helmet>
 
       <div className="flex items-center justify-between gap-3 mb-6">
-        <Link
-          to={`/sits/${id}`}
+        <button
+          type="button"
+          onClick={() => {
+            if (isDirty && !confirm("Vous avez des modifications non sauvegardées. Quitter sans enregistrer ?")) return;
+            navigate(`/sits/${id}`);
+          }}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" /> Retour à l'annonce
-        </Link>
-        <Link to={`/sits/${id}`}>
-          <Button variant="ghost" size="sm" className="gap-1.5 text-xs">
-            <Eye className="h-3.5 w-3.5" /> Aperçu public
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            if (isDirty && !confirm("Vous avez des modifications non sauvegardées. Quitter sans enregistrer ?")) return;
+            navigate(`/sits/${id}`);
+          }}
+        >
+          <Button variant="ghost" size="sm" className="gap-1.5 text-xs" asChild>
+            <span>
+              <Eye className="h-3.5 w-3.5" /> Aperçu public
+            </span>
           </Button>
-        </Link>
+        </button>
       </div>
 
       <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">Modifier l'annonce</h1>
