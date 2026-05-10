@@ -254,6 +254,7 @@ const Messages = () => {
             p_context_type: "sitter_inquiry",
             p_sit_id: null,
             p_small_mission_id: null,
+            p_long_stay_id: null,
           });
           if (rpcErr || !newConvId) return;
 
