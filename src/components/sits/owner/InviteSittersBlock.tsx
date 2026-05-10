@@ -234,6 +234,22 @@ const InviteSittersBlock = ({
 
   const hasSearchCriteria = query.trim().length >= 2 || !!deptCode || activeAdvancedFilters > 0;
 
+  // Onglet actif (contrôlé) pour permettre au récap post-publication de
+  // rediriger immédiatement l'utilisateur vers le bon onglet.
+  const [activeTab, setActiveTab] = useState<"favorites" | "search">(
+    highlight ? "search" : "favorites",
+  );
+
+  // Récap post-publication : s'ouvre une seule fois quand `highlight` passe à true.
+  const [recapOpen, setRecapOpen] = useState(false);
+  const [recapShown, setRecapShown] = useState(false);
+  useEffect(() => {
+    if (highlight && !recapShown) {
+      setRecapOpen(true);
+      setRecapShown(true);
+    }
+  }, [highlight, recapShown]);
+
   return (
     <section
       id="invite-sitters-block"
