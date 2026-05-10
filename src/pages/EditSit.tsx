@@ -166,167 +166,187 @@ const EditSit = () => {
       <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">Modifier l'annonce</h1>
       <p className="text-muted-foreground mb-8 text-sm">Modifiez les informations spécifiques à cette garde. Le logement et les animaux se gèrent depuis votre profil.</p>
 
-      <div className="space-y-6 pb-32">
-        <div>
-          <Label className="text-sm font-medium">Titre de l'annonce</Label>
-          <Input value={title} onChange={e => setTitle(e.target.value)} className="mt-1.5" />
-        </div>
+      <div className="space-y-5 pb-32">
+        {/* SECTION 1 — Essentiel : titre + dates */}
+        <SectionCard
+          icon={FileText}
+          title="L'essentiel"
+          description="Le titre et les dates de votre garde."
+        >
+          <div>
+            <Label className="text-sm font-medium">Titre de l'annonce</Label>
+            <Input value={title} onChange={e => setTitle(e.target.value)} className="mt-1.5" />
+          </div>
 
-        {/* CORRECTION 2 — Dates flexibles enrichies */}
-        {!flexibleDates ? (
-          <>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-sm font-medium">Date de début</Label>
-                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} min={today} className="mt-1.5" />
+          <div className="pt-1">
+            <Label className="text-sm font-medium flex items-center gap-1.5 mb-2">
+              <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
+              Dates de la garde
+            </Label>
+            {!flexibleDates ? (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Date de début</Label>
+                    <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} min={today} className="mt-1.5" />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Date de fin</Label>
+                    <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} min={startDate || today} className="mt-1.5" />
+                  </div>
+                </div>
+                {dateError && (
+                  <p className="text-sm text-destructive flex items-center gap-1.5 mt-2">
+                    <AlertCircle className="h-3.5 w-3.5" /> {dateError}
+                  </p>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setFlexibleDates(true)}
+                  className="text-xs text-primary cursor-pointer mt-2 block hover:underline"
+                >
+                  Mes dates sont flexibles →
+                </button>
+              </>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2">Quel mois ?</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {FLEXIBLE_MONTHS.map(m => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setFlexibleMonths(prev => prev.includes(m) ? prev.filter(x => x !== m) : [...prev, m])}
+                        className={flexibleMonths.includes(m)
+                          ? "bg-primary text-primary-foreground rounded-full px-3 py-1.5 text-xs"
+                          : "border border-border rounded-full px-3 py-1.5 text-xs text-muted-foreground hover:border-primary transition-colors"
+                        }
+                      >
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2">Combien de temps ?</p>
+                  <div className="flex flex-wrap gap-2">
+                    {FLEXIBLE_DURATIONS.map(d => (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => setFlexibleDuration(prev => prev === d ? "" : d)}
+                        className={flexibleDuration === d
+                          ? "bg-primary text-primary-foreground rounded-full px-3 py-1.5 text-xs"
+                          : "border border-border rounded-full px-3 py-1.5 text-xs text-muted-foreground hover:border-primary transition-colors"
+                        }
+                      >
+                        {d}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFlexibleDates(false)}
+                  className="text-xs text-muted-foreground block cursor-pointer hover:text-primary"
+                >
+                  ← Renseigner des dates précises
+                </button>
               </div>
-              <div>
-                <Label className="text-sm font-medium">Date de fin</Label>
-                <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} min={startDate || today} className="mt-1.5" />
-              </div>
-            </div>
-            {dateError && (
-              <p className="text-sm text-destructive flex items-center gap-1.5 -mt-2">
-                <AlertCircle className="h-3.5 w-3.5" /> {dateError}
-              </p>
             )}
-            <button
-              type="button"
-              onClick={() => setFlexibleDates(true)}
-              className="text-xs text-primary cursor-pointer mt-2 block hover:underline"
-            >
-              Mes dates sont flexibles →
-            </button>
-          </>
-        ) : (
-          <div className="space-y-4">
-            <div>
-              <p className="text-xs text-muted-foreground mb-2">Quel mois ?</p>
-              <div className="grid grid-cols-3 gap-2">
-                {FLEXIBLE_MONTHS.map(m => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setFlexibleMonths(prev => prev.includes(m) ? prev.filter(x => x !== m) : [...prev, m])}
-                    className={flexibleMonths.includes(m)
-                      ? "bg-primary text-primary-foreground rounded-full px-3 py-1.5 text-xs"
-                      : "border border-border rounded-full px-3 py-1.5 text-xs text-muted-foreground hover:border-primary transition-colors"
-                    }
-                  >
-                    {m}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground mb-2 mt-4">Combien de temps ?</p>
-              <div className="flex flex-wrap gap-2">
-                {FLEXIBLE_DURATIONS.map(d => (
-                  <button
-                    key={d}
-                    type="button"
-                    onClick={() => setFlexibleDuration(prev => prev === d ? "" : d)}
-                    className={flexibleDuration === d
-                      ? "bg-primary text-primary-foreground rounded-full px-3 py-1.5 text-xs"
-                      : "border border-border rounded-full px-3 py-1.5 text-xs text-muted-foreground hover:border-primary transition-colors"
-                    }
-                  >
-                    {d}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setFlexibleDates(false)}
-              className="text-xs text-muted-foreground mt-3 block cursor-pointer hover:text-primary"
-            >
-              ← Renseigner des dates précises
-            </button>
           </div>
-        )}
+        </SectionCard>
 
-        <div>
-          <Label className="text-sm font-medium">Description de la garde *</Label>
-          <Textarea
-            placeholder="Ce qui est particulier à cette garde (min. 50 caractères)"
-            value={specificExpectations}
-            onChange={e => setSpecificExpectations(e.target.value)}
-            className="mt-1.5"
-            rows={4}
-          />
-          <p className={cn(
-            "text-xs mt-1",
-            specificExpectations.length > 0 && specificExpectations.length < 50
-              ? "text-destructive"
-              : "text-muted-foreground"
-          )}>
-            {specificExpectations.length}/50 caractères minimum
-          </p>
-        </div>
-
-        {/* CORRECTION 1 — "Idéale pour" */}
-        <div>
-          <Label className="text-sm font-medium mb-1 block">Idéale pour (optionnel)</Label>
-          <p className="text-xs text-muted-foreground mb-3">Une indication pour les gardiens — tout le monde peut postuler.</p>
-          <ChipSelect options={openToOptions} selected={openTo} onChange={setOpenTo} />
-        </div>
-
-        {/* CORRECTION 4 — Gardes minimum gardien souhaité */}
-        <div>
-          <Label className="text-sm font-medium text-foreground mb-1 block">Expérience souhaitée du gardien</Label>
-          <p className="text-xs text-muted-foreground mb-3">Une préférence — les gardiens avec moins d'expérience peuvent aussi postuler.</p>
-          <div className="flex flex-wrap gap-2">
-            {MIN_SITS_OPTIONS.map(opt => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setMinGardienSits(opt.value)}
-                className={minGardienSits === opt.value
-                  ? "bg-primary text-primary-foreground rounded-full px-3 py-1.5 text-xs font-medium"
-                  : "border border-border rounded-full px-3 py-1.5 text-xs text-muted-foreground hover:border-primary transition-colors"
-                }
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* CORRECTION 3 — Urgent */}
-        {showUrgent && (
-          <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
-            <Checkbox
-              checked={isUrgent}
-              onCheckedChange={(v) => setIsUrgent(v === true)}
-              className="mt-0.5"
+        {/* SECTION 2 — Description */}
+        <SectionCard
+          icon={Sparkles}
+          title="Description de la garde"
+          description="Ce qui rend cette garde unique (50 caractères minimum)."
+        >
+          <div>
+            <Textarea
+              placeholder="Décrivez ce qui est particulier à cette garde…"
+              value={specificExpectations}
+              onChange={e => setSpecificExpectations(e.target.value)}
+              rows={5}
             />
-            <div>
-              <label className="text-sm font-medium flex items-center gap-1.5 cursor-pointer text-amber-800" onClick={() => setIsUrgent(!isUrgent)}>
-                <Zap className="h-4 w-4" /> Urgent — garde dans moins de 48h
-              </label>
-              <p className="text-xs text-amber-600 mt-0.5">
-                Les gardiens d'urgence seront alertés en priorité
-              </p>
+            <p className={cn(
+              "text-xs mt-1.5",
+              specificExpectations.length > 0 && specificExpectations.length < 50
+                ? "text-destructive"
+                : "text-muted-foreground"
+            )}>
+              {specificExpectations.length}/50 caractères minimum
+            </p>
+          </div>
+        </SectionCard>
+
+        {/* SECTION 3 — Profil de gardien souhaité */}
+        <SectionCard
+          icon={Users}
+          title="Gardien recherché"
+          description="Préférences indicatives — tous les profils peuvent postuler."
+        >
+          <div>
+            <Label className="text-sm font-medium mb-2 block">Idéale pour</Label>
+            <ChipSelect options={openToOptions} selected={openTo} onChange={setOpenTo} />
+          </div>
+
+          <div>
+            <Label className="text-sm font-medium mb-2 block">Expérience souhaitée</Label>
+            <div className="flex flex-wrap gap-2">
+              {MIN_SITS_OPTIONS.map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setMinGardienSits(opt.value)}
+                  className={minGardienSits === opt.value
+                    ? "bg-primary text-primary-foreground rounded-full px-3 py-1.5 text-xs font-medium"
+                    : "border border-border rounded-full px-3 py-1.5 text-xs text-muted-foreground hover:border-primary transition-colors"
+                  }
+                >
+                  {opt.label}
+                </button>
+              ))}
             </div>
           </div>
-        )}
 
-        {/* Photos & couverture : déplacés sur la fiche annonce pour une gestion inline.
-            Lien direct pour rester cohérent. */}
-        <div className="bg-muted/30 rounded-lg border border-dashed border-border p-4 text-sm">
-          <p className="font-medium mb-1">Photos & photo de couverture</p>
-          <p className="text-muted-foreground text-xs mb-2">
-            La gestion des photos et le choix de la couverture se font directement sur la fiche
-            de votre annonce.
-          </p>
-          <Link to={`/sits/${id}`} className="text-primary text-xs hover:underline">
+          {showUrgent && (
+            <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+              <Checkbox
+                checked={isUrgent}
+                onCheckedChange={(v) => setIsUrgent(v === true)}
+                className="mt-0.5"
+              />
+              <div>
+                <label className="text-sm font-medium flex items-center gap-1.5 cursor-pointer text-amber-800" onClick={() => setIsUrgent(!isUrgent)}>
+                  <Zap className="h-4 w-4" /> Urgent — garde dans moins de 48h
+                </label>
+                <p className="text-xs text-amber-600 mt-0.5">
+                  Les gardiens d'urgence seront alertés en priorité
+                </p>
+              </div>
+            </div>
+          )}
+        </SectionCard>
+
+        {/* SECTION 4 — Photos (renvoi vers la fiche) */}
+        <SectionCard
+          icon={ImageIcon}
+          title="Photos & couverture"
+          description="La gestion des photos se fait directement sur la fiche."
+        >
+          <Link
+            to={`/sits/${id}`}
+            className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+          >
             Gérer les photos sur la fiche annonce →
           </Link>
-        </div>
+        </SectionCard>
       </div>
 
-      {/* CORRECTION 6 — Save button */}
+      {/* Save button */}
       <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40">
         <div className="max-w-3xl mx-auto flex gap-3">
           <Button variant="outline" className="flex-1" onClick={() => navigate(`/sits/${id}`)}>
@@ -354,8 +374,3 @@ const EditSit = () => {
           </TooltipProvider>
         </div>
       </div>
-    </div>
-  );
-};
-
-export default EditSit;
