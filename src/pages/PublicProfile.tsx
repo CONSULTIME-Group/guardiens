@@ -525,6 +525,15 @@ const PublicProfile = () => {
                     </Link>
                   </Button>
                 )}
+                {isSitter && (
+                  <InviteToMySitButton
+                    sitter={{ id: profile.id, first_name: profile.first_name }}
+                    variant="outline"
+                    size="default"
+                    label={`Proposer mon annonce`}
+                    className="flex-1 gap-1.5"
+                  />
+                )}
                 <Button
                   className="flex-1 gap-1.5"
                   onClick={handleContact}
