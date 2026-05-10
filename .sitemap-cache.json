@@ -1,8 +1,8 @@
 {
   "sources": {
     "articles": {
-      "head": "2026-05-10T09:59:28.883123+00:00",
-      "fetchedAt": "2026-05-10T09:59:35.554Z"
+      "head": "2026-05-10T10:31:02.386061+00:00",
+      "fetchedAt": "2026-05-10T10:31:22.183Z"
     },
     "public_profiles": {
       "head": null,
@@ -40,16 +40,16 @@
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/jardinage-entraide-locale-grenoble",
-        "lastmod": "2026-04-05",
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
         "loc": "/actualites/gerer-imprevu-pendant-garde",
         "lastmod": "2026-05-10",
         "changefreq": "monthly",
         "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/jardinage-entraide-locale-grenoble",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.7"
       },
       {
         "loc": "/actualites/rediger-bonne-annonce-house-sitting",
@@ -65,33 +65,15 @@
       },
       {
         "loc": "/actualites/jardinage-entraide-quartier-lyon",
-        "lastmod": "2026-03-28",
+        "lastmod": "2026-05-10",
         "changefreq": "monthly",
         "priority": "0.7"
-      },
-      {
-        "loc": "/actualites/devenir-pet-sitter-guide-debutant",
-        "lastmod": "2026-03-26",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/nouveaux-tarifs-2026",
-        "lastmod": "2026-04-29",
-        "changefreq": "monthly",
-        "priority": "0.6"
       },
       {
         "loc": "/actualites/parcs-balades-chiens-grenoble-guide",
         "lastmod": "2026-04-14",
         "changefreq": "monthly",
         "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/conseils-garder-chien",
-        "lastmod": "2026-03-25",
-        "changefreq": "monthly",
-        "priority": "0.6"
       },
       {
         "loc": "/actualites/veterinaire-urgence-lyon-guide",
@@ -106,32 +88,38 @@
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/arroser-plantes-vacances-grenoble",
-        "lastmod": "2026-04-05",
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/actualites/arroser-plantes-vacances-lyon",
-        "lastmod": "2026-04-05",
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
         "loc": "/actualites/que-faire-probleme-pendant-garde",
         "lastmod": "2026-04-14",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
+        "loc": "/actualites/nouveaux-tarifs-2026",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/arroser-plantes-vacances-grenoble",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/actualites/arroser-plantes-vacances-lyon",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.7"
+      },
+      {
         "loc": "/actualites/garde-chat-domicile-house-sitting",
-        "lastmod": "2026-03-26",
+        "lastmod": "2026-05-10",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
         "loc": "/actualites/bengal-guide-race",
-        "lastmod": "2026-04-05",
+        "lastmod": "2026-05-10",
         "changefreq": "monthly",
         "priority": "0.8"
       },
@@ -155,31 +143,25 @@
       },
       {
         "loc": "/actualites/jardinage-entraide-quartier-annecy",
-        "lastmod": "2026-04-15",
+        "lastmod": "2026-05-10",
         "changefreq": "monthly",
         "priority": "0.7"
       },
       {
-        "loc": "/actualites/erreurs-premiere-garde",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
         "loc": "/actualites/garde-animaux-savoie-guide",
-        "lastmod": "2026-04-15",
+        "lastmod": "2026-05-10",
         "changefreq": "monthly",
         "priority": "0.8"
       },
       {
         "loc": "/actualites/persan-guide-race",
-        "lastmod": "2026-04-05",
+        "lastmod": "2026-05-10",
         "changefreq": "monthly",
         "priority": "0.8"
       },
       {
         "loc": "/actualites/garde-animaux-haute-savoie-guide",
-        "lastmod": "2026-04-15",
+        "lastmod": "2026-05-10",
         "changefreq": "monthly",
         "priority": "0.8"
       },
@@ -196,20 +178,20 @@
         "priority": "0.6"
       },
       {
+        "loc": "/actualites/garde-chat-domicile-lyon",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
         "loc": "/actualites/house-sitting-vs-pension-comparatif",
         "lastmod": "2026-04-14",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/garde-chat-domicile-lyon",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
         "loc": "/actualites/garde-chat-presquile-lyon",
-        "lastmod": "2026-04-14",
+        "lastmod": "2026-05-10",
         "changefreq": "monthly",
         "priority": "0.7"
       },
@@ -239,19 +221,19 @@
       },
       {
         "loc": "/actualites/maine-coon-guide-race",
-        "lastmod": "2026-04-05",
+        "lastmod": "2026-05-10",
         "changefreq": "monthly",
         "priority": "0.8"
       },
       {
         "loc": "/actualites/siamois-guide-race",
-        "lastmod": "2026-04-05",
+        "lastmod": "2026-05-10",
         "changefreq": "monthly",
         "priority": "0.8"
       },
       {
         "loc": "/actualites/arroser-plantes-vacances-annecy",
-        "lastmod": "2026-04-15",
+        "lastmod": "2026-05-10",
         "changefreq": "monthly",
         "priority": "0.7"
       },
@@ -269,7 +251,7 @@
       },
       {
         "loc": "/actualites/vacances-longues-garde-animal-2-semaines",
-        "lastmod": "2026-04-14",
+        "lastmod": "2026-05-10",
         "changefreq": "monthly",
         "priority": "0.6"
       },
