@@ -655,15 +655,15 @@ const EditSit = () => {
             )}
           </SectionCard>
 
-          {/* SECTION 4 — Photos (renvoi vers la fiche) */}
+          {/* SECTION 4 — Photos (gérées sur le profil propriétaire) */}
           <SectionCard
             icon={ImageIcon}
             title="Photos & couverture"
-            description="La gestion des photos se fait directement sur la fiche annonce."
+            description="Les photos du logement sont communes à toutes vos annonces et se gèrent sur votre profil propriétaire."
           >
-            <Link to={`/sits/${id}`}>
+            <Link to="/owner-profile">
               <Button variant="outline" size="sm" className="gap-1.5">
-                Gérer les photos sur la fiche <ArrowRight className="h-3.5 w-3.5" />
+                Gérer ma galerie sur le profil <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </Link>
           </SectionCard>
