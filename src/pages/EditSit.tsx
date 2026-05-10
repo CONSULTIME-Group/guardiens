@@ -691,7 +691,13 @@ const EditSit = () => {
             </span>
           )}
           <div className="flex gap-3 flex-1 justify-end">
-            <Button variant="outline" onClick={() => navigate(`/sits/${id}`)}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (isDirty && !confirm("Vous avez des modifications non sauvegardées. Quitter sans enregistrer ?")) return;
+                navigate(`/sits/${id}`);
+              }}
+            >
               Annuler
             </Button>
             <TooltipProvider>
