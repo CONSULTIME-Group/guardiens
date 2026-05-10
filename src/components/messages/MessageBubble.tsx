@@ -69,10 +69,11 @@ const MessageBubble = ({ msg, isMe, readerRole = "gardien" }: MessageBubbleProps
 
   if (msg.is_system) {
     const text = systemMessageText(msg.metadata, readerRole, msg.content);
+    if (!text?.trim()) return null;
     return (
-      <div className="flex justify-center">
+      <div className="flex justify-center" role="status">
         <div className="bg-muted/50 rounded-full px-4 py-1 flex items-center gap-1">
-          <Info className="h-3 w-3 text-muted-foreground shrink-0" />
+          <Info className="h-3 w-3 text-muted-foreground shrink-0" aria-hidden="true" />
           <span className="text-xs text-muted-foreground italic">{text}</span>
         </div>
       </div>
