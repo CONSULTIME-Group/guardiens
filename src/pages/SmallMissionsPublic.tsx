@@ -711,12 +711,12 @@ const SmallMissionsPublic = () => {
  </p>
  </Reveal>
  <Reveal delay={0.2}>
- <div className="flex flex-col sm:flex-row gap-4 justify-center">
- <Button onClick={goToCreate} className="bg-white text-primary rounded-full px-10 py-4 h-auto text-sm font-bold tracking-wide hover:bg-white/90 hover:scale-[1.02] transition-all duration-200">
- J'ose demander
+  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+ <Button onClick={goToHelp} className="bg-white text-primary rounded-full px-10 py-4 h-auto text-sm font-bold tracking-wide hover:bg-white/90 hover:scale-[1.02] transition-all duration-200">
+ Je propose mon aide
  </Button>
- <Button onClick={goToHelp} className="bg-transparent border-2 border-white/70 text-white rounded-full px-10 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-white/15 transition-all duration-200">
- J'ai du temps à offrir
+ <Button onClick={goToCreate} className="bg-transparent border-2 border-white/70 text-white rounded-full px-10 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-white/15 transition-all duration-200">
+ J'ai besoin d'un coup de main
  </Button>
  </div>
  <p className="text-xs text-white/50 mt-6">
