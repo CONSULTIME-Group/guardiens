@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
-import { Calendar, MapPin, ArrowRight, ChevronLeft, ChevronRight, Search, AlertCircle } from "lucide-react";
+import { Calendar, MapPin, ArrowRight, ChevronLeft, ChevronRight, Search, AlertCircle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -231,6 +231,14 @@ export default function News() {
       ? `/actualites?categorie=${activeCategory}${currentPage > 1 ? `&page=${currentPage}` : ""}`
       : `/actualites${currentPage > 1 ? `?page=${currentPage}` : ""}`;
 
+  const hasActiveFilters = urlSearch.trim() !== "" || activeCategory !== "all" || currentPage > 1;
+
+  const resetFilters = () => {
+    setSearchInput("");
+    const next = new URLSearchParams();
+    setSearchParams(next, { replace: true });
+  };
+
   return (
     <>
       <PageMeta
@@ -252,16 +260,24 @@ export default function News() {
         </header>
 
         {/* Search bar */}
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
-          <Input
-            type="search"
-            placeholder="Rechercher un article…"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="pl-10"
-            aria-label="Rechercher dans les articles"
-          />
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            <Input
+              type="search"
+              placeholder="Rechercher un article…"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="pl-10"
+              aria-label="Rechercher dans les articles"
+            />
+          </div>
+          {hasActiveFilters && (
+            <Button variant="outline" onClick={resetFilters} className="shrink-0 gap-2">
+              <RotateCcw className="h-4 w-4" aria-hidden="true" />
+              Réinitialiser les filtres
+            </Button>
+          )}
         </div>
 
         {/* Category filter */}
@@ -355,18 +371,9 @@ export default function News() {
                 ? `Aucun article ne correspond à « ${urlSearch.trim()} ».`
                 : "Aucun article pour le moment. Revenez bientôt !"}
             </p>
-            {(urlSearch.trim() || activeCategory !== "all") && (
-              <Button
-                variant="outline"
-                onClick={() =>
-                  updateParams((p) => {
-                    p.delete("q");
-                    p.delete("categorie");
-                    p.delete("cat");
-                    p.delete("page");
-                  })
-                }
-              >
+            {hasActiveFilters && (
+              <Button variant="outline" onClick={resetFilters} className="gap-2">
+                <RotateCcw className="h-4 w-4" aria-hidden="true" />
                 Réinitialiser les filtres
               </Button>
             )}
