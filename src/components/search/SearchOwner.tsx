@@ -46,7 +46,7 @@ type ZoneMode = "radius" | "dept" | "region" | "france";
 const SearchOwner = () => {
   const { user, switchRole } = useAuth();
   const navigate = useNavigate();
-  const SearchOwnerMapView = useMemo(() => lazy(() => import("@/components/search/SearchOwnerMapView")), []);
+  
   const { toast: toastUi } = useToast();
   const [searchParams] = useSearchParams();
 
