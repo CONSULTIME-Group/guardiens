@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Bell } from "lucide-react";
+import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
+import { Bell, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Popover,
