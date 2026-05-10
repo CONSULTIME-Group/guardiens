@@ -43,6 +43,9 @@ const AdminMassEmails = () => {
   const [ctaEnabled, setCtaEnabled] = useState(false);
   const [ctaLabel, setCtaLabel] = useState("");
   const [ctaUrl, setCtaUrl] = useState("");
+  const [utmEnabled, setUtmEnabled] = useState(true);
+  const [utmCampaign, setUtmCampaign] = useState("");
+  const [utmContent, setUtmContent] = useState("cta");
 
   // UI state
   const [recipientCount, setRecipientCount] = useState<number | null>(null);
