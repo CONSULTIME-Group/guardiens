@@ -197,11 +197,22 @@ const EditSit = () => {
 
   const isConfirmed = sitStatus === "confirmed" || sitStatus === "in_progress";
 
-  // Urgence : annonce non confirmée + dates flexibles ou début dans < 7 jours.
+  // Urgence : annonce non confirmée + dates flexibles ou début dans < 48 h.
   const showUrgent =
     !isConfirmed &&
     (flexibleDates ||
-      (startDate && new Date(startDate).getTime() - Date.now() < 7 * 86400000));
+      (startDate && new Date(startDate).getTime() - Date.now() < 2 * 86400000));
+
+  // Reset isUrgent automatique si la condition ne s'applique plus.
+  useEffect(() => {
+    if (!showUrgent && isUrgent) setIsUrgent(false);
+  }, [showUrgent, isUrgent]);
+
+  // Vocabulaire proscrit (mémoire projet : voisin, AURA, Auvergne-Rhône-Alpes).
+  const FORBIDDEN_REGEX = /\b(voisin(?:e|s|es)?|voisinage|AURA|Auvergne[\s-]Rh[oô]ne[\s-]Alpes)\b/i;
+  const forbiddenInTitle = FORBIDDEN_REGEX.test(title);
+  const forbiddenInDesc = FORBIDDEN_REGEX.test(specificExpectations);
+  const hasForbidden = forbiddenInTitle || forbiddenInDesc;
 
   // Tracking "dirty" : compare au snapshot initial.
   const currentSnapshot = useMemo(
