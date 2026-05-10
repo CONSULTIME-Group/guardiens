@@ -102,12 +102,16 @@ const InviteSittersBlock = ({
 
   const [inviteTarget, setInviteTarget] = useState<SitterRow | null>(null);
 
+  // Compteurs
+  const sentCount = invitations.filter((i) => i.status === "sent" || i.status === "viewed").length;
+  const appliedCount = invitations.filter((i) => i.status === "applied").length;
+
   const renderCard = (s: SitterRow) => {
     const status = invitedById.get(s.id);
     return (
       <div
         key={s.id}
-        className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card hover:border-primary/40 transition"
+        className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:border-primary/40 transition"
       >
         <Avatar className="h-10 w-10 shrink-0">
           <AvatarImage src={s.avatar_url || undefined} alt={s.first_name || "Gardien"} />
@@ -123,7 +127,7 @@ const InviteSittersBlock = ({
           {s.city && <p className="text-xs text-muted-foreground truncate">{s.city}</p>}
         </div>
         {status === "applied" ? (
-          <span className="text-xs flex items-center gap-1 text-success">
+          <span className="text-xs flex items-center gap-1 text-success font-medium">
             <Check className="h-3.5 w-3.5" /> A candidaté
           </span>
         ) : status ? (
@@ -145,20 +149,35 @@ const InviteSittersBlock = ({
   };
 
   return (
-    <section className="mt-6 mb-8 rounded-2xl border border-border bg-card p-5 md:p-6">
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold flex items-center gap-2">
-          <UserPlus className="h-5 w-5 text-primary" />
-          Inviter des gardiens à candidater
-        </h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Vous pouvez proposer cette annonce directement à vos favoris ou à des gardiens trouvés
-          par la recherche. Maximum 20 invitations par 24 h.
-        </p>
+    <section className="mt-8 mb-8 rounded-2xl border-2 border-primary/20 bg-primary/[0.03] p-5 md:p-6">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Proposer votre annonce à des gardiens
+            </h2>
+            <Badge variant="outline" className="text-[11px] font-normal border-primary/30 text-primary">
+              Recommandé
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">
+            Ne laissez pas le hasard faire tout le travail. Envoyez votre annonce directement aux gardiens
+            que vous avez déjà repérés ou que vous découvrez par la recherche. Cela multiplie vos chances
+            de recevoir des candidatures.
+          </p>
+          {(sentCount > 0 || appliedCount > 0) && (
+            <p className="text-xs text-primary/80 mt-2 font-medium">
+              {sentCount} invitation{sentCount > 1 ? "s" : ""} envoyée{sentCount > 1 ? "s" : ""}
+              {appliedCount > 0 && ` · ${appliedCount} candidature${appliedCount > 1 ? "s" : ""} reçue${appliedCount > 1 ? "s" : ""}`}
+              {sentCount >= 20 && " — limite de 20 par 24 h atteinte"}
+            </p>
+          )}
+        </div>
       </div>
 
       <Tabs defaultValue="favorites" className="w-full">
-        <TabsList>
+        <TabsList className="bg-background/80">
           <TabsTrigger value="favorites">
             <Heart className="h-4 w-4 mr-1.5" /> Mes favoris ({favSitters.length})
           </TabsTrigger>
@@ -169,12 +188,21 @@ const InviteSittersBlock = ({
 
         <TabsContent value="favorites" className="mt-4">
           {favSitters.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4">
-              Vous n'avez pas encore de gardiens en favoris.{" "}
-              <Link to="/recherche" className="text-primary hover:underline">
-                Parcourir les gardiens →
+            <div className="rounded-xl border border-dashed border-border bg-card p-6 text-center">
+              <Heart className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">
+                Vous n'avez pas encore de gardiens en favoris.
+              </p>
+              <p className="text-xs text-muted-foreground mt-1 mb-3">
+                En parcourant les profils, cliquez sur le cœur pour sauvegarder les gardiens qui vous plaisent.
+                Vous pourrez ensuite les inviter ici en un clic.
+              </p>
+              <Link to="/recherche">
+                <Button variant="outline" size="sm">
+                  Parcourir les gardiens <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                </Button>
               </Link>
-            </p>
+            </div>
           ) : (
             <div className="grid sm:grid-cols-2 gap-2">{favSitters.map(renderCard)}</div>
           )}
@@ -184,20 +212,39 @@ const InviteSittersBlock = ({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Prénom ou ville…"
+              placeholder="Prénom ou ville du gardien…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="pl-9"
+              className="pl-9 bg-background/80"
             />
           </div>
           {query.trim().length < 2 ? (
-            <p className="text-sm text-muted-foreground py-4">
-              Tapez au moins 2 caractères (prénom ou ville).
-            </p>
+            <div className="rounded-xl border border-dashed border-border bg-card p-6 text-center">
+              <Search className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">
+                Tapez au moins 2 caractères (prénom ou ville).
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Cherchez un gardien par son prénom ou par la ville où il se trouve, puis invitez-le à candidater.
+              </p>
+            </div>
           ) : searching ? (
             <p className="text-sm text-muted-foreground py-4">Recherche en cours…</p>
           ) : searchResults.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4">Aucun gardien trouvé.</p>
+            <div className="rounded-xl border border-dashed border-border bg-card p-6 text-center">
+              <Search className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">
+                Aucun gardien trouvé pour « {query.trim()} ».
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Essayez un autre prénom ou une autre ville, ou parcourez la liste des gardiens depuis la recherche.
+              </p>
+              <Link to="/recherche" className="inline-block mt-3">
+                <Button variant="outline" size="sm">
+                  Recherche avancée <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                </Button>
+              </Link>
+            </div>
           ) : (
             <div className="grid sm:grid-cols-2 gap-2">{searchResults.map(renderCard)}</div>
           )}
