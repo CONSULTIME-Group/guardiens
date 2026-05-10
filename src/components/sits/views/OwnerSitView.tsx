@@ -326,17 +326,6 @@ const OwnerSitView = ({
         </div>
       )}
 
-      {/* Photos & couverture — gestion intégrée à la fiche */}
-      <SitPhotoManager
-        sitId={sit.id}
-        ownerId={currentUserId}
-        initialCoverPhotoUrl={(sit as any).cover_photo_url ?? null}
-        initialGallery={ownerGallery}
-        onCoverChange={(url) => {
-          setSit({ ...sit, cover_photo_url: url } as any);
-        }}
-      />
-
       {/* Aperçu de l'annonce — vue identique à celle des gardiens, EN PREMIER pour
           que le propriétaire visualise immédiatement à quoi ressemble son annonce. */}
       <SitImmersiveContent
@@ -347,7 +336,7 @@ const OwnerSitView = ({
         ownerProfile={ownerProfile}
       />
 
-      {/* Inviter des gardiens — EN PREMIER : action proactive avant d'attendre des candidatures */}
+      {/* Inviter des gardiens — action proactive avant les candidatures */}
       {sit.status === "published" && (
         <InviteSittersBlock
           sitId={sit.id}
@@ -361,7 +350,7 @@ const OwnerSitView = ({
         />
       )}
 
-      {/* Candidatures reçues — APRÈS le bloc d'invitation */}
+      {/* Candidatures reçues — APRÈS l'aperçu et l'invitation */}
       <section className="mt-8 mb-8 rounded-2xl border border-border bg-card p-5 md:p-6">
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <Users className="h-5 w-5 text-primary" />
@@ -395,6 +384,32 @@ const OwnerSitView = ({
           sitStatus={sit.status}
         />
       </section>
+
+      {/* Photos & couverture — déplacé en bas dans un Collapsible (gestion ponctuelle) */}
+      <Collapsible className="mt-2 mb-8 rounded-2xl border border-border bg-card">
+        <CollapsibleTrigger className="group w-full flex items-center justify-between gap-2 p-5 md:p-6 text-left">
+          <div>
+            <h2 className="text-base font-semibold flex items-center gap-2">
+              <Home className="h-5 w-5 text-primary" /> Photos & couverture
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Gérer la galerie et choisir la photo de couverture de cette annonce.
+            </p>
+          </div>
+          <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0 transition-transform group-data-[state=open]:rotate-180" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="px-5 md:px-6 pb-5 md:pb-6">
+          <SitPhotoManager
+            sitId={sit.id}
+            ownerId={currentUserId}
+            initialCoverPhotoUrl={(sit as any).cover_photo_url ?? null}
+            initialGallery={ownerGallery}
+            onCoverChange={(url) => {
+              setSit({ ...sit, cover_photo_url: url } as any);
+            }}
+          />
+        </CollapsibleContent>
+      </Collapsible>
 
       <Collapsible className="mt-2 mb-8 rounded-2xl border border-border bg-card">
         <CollapsibleTrigger className="group w-full flex items-center justify-between gap-2 p-5 md:p-6 text-left">
