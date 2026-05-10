@@ -193,7 +193,7 @@ const EditSit = () => {
   const descValid = trimmedDesc.length === 0 || trimmedDesc.length >= MIN_DESC_LENGTH;
   const isLocked = LOCKED_STATUSES.has(sitStatus);
 
-  const canSave = !isLocked && titleValid && hasDatesOrFlexible && !dateError && descValid;
+  const canSave = !isLocked && titleValid && hasDatesOrFlexible && !dateError && descValid && !hasForbidden;
 
   const isConfirmed = sitStatus === "confirmed" || sitStatus === "in_progress";
 
