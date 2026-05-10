@@ -53,7 +53,7 @@ export function parseFaqFromMarkdown(markdown: string): FaqItem[] {
       const qMatch = line.trim().match(BOLD_Q_RE);
       if (qMatch) {
         flush();
-        currentQ = qMatch[1].trim();
+        currentQ = (qMatch[1] ?? qMatch[2]).trim();
       } else if (currentQ) {
         currentALines.push(line);
       }
