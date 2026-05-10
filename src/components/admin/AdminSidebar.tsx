@@ -73,6 +73,7 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/contact-messages", icon: MessageSquare, label: "Messages contact", badgeKey: "contactMessages" },
       { to: "/admin/messages", icon: MessageSquare, label: "Messagerie", badgeKey: "adminMessageFailed" },
       { to: "/admin/envois-groupes", icon: Mail, label: "Envois groupés" },
+      { to: "/admin/envois-groupes/stats", icon: Mail, label: "Campagnes mail" },
     ],
   },
   {
