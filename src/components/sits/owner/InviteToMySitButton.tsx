@@ -60,6 +60,8 @@ const InviteToMySitButton = ({
   size = "sm",
   label = "Proposer mon annonce",
   className,
+  hideIfNoSits = false,
+  onPublishedSitsResolved,
 }: Props) => {
   const { user, activeRole } = useAuth();
   const ownerId = user?.id ?? null;
@@ -70,6 +72,34 @@ const InviteToMySitButton = ({
   const isSelf = ownerId && sitter?.id === ownerId;
 
   const [open, setOpen] = useState(false);
+  // null = inconnu (préflight en cours), number = compté
+  const [publishedCount, setPublishedCount] = useState<number | null>(
+    hideIfNoSits ? null : 1,
+  );
+
+  // Préflight : compter les annonces publiées si on doit masquer le bouton sinon.
+  useEffect(() => {
+    if (!hideIfNoSits) return;
+    if (!isOwnerMode || !ownerId || isSelf) {
+      setPublishedCount(0);
+      return;
+    }
+    let cancel = false;
+    (async () => {
+      const { count } = await supabase
+        .from("sits")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", ownerId)
+        .eq("status", "published");
+      if (cancel) return;
+      const c = count ?? 0;
+      setPublishedCount(c);
+      onPublishedSitsResolved?.(c);
+    })();
+    return () => {
+      cancel = true;
+    };
+  }, [hideIfNoSits, isOwnerMode, ownerId, isSelf, onPublishedSitsResolved]);
   const [sits, setSits] = useState<PublishedSit[] | null>(null);
   const [invitations, setInvitations] = useState<InvitationLite[]>([]);
   const [chosenSit, setChosenSit] = useState<PublishedSit | null>(null);
