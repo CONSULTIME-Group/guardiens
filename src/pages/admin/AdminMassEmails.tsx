@@ -276,14 +276,20 @@ const AdminMassEmails = () => {
           </Card>
 
           <div className="space-y-3">
-            <Button variant="outline" className="w-full" onClick={() => setPreviewOpen(true)} disabled={!subject.trim()}>
+            <Button
+              className="w-full"
+              size="lg"
+              disabled={!isValid || sending}
+              onClick={() => setPreviewOpen(true)}
+            >
               <Eye className="h-4 w-4 mr-2" />
-              Prévisualiser l'email
+              Aperçu complet avant envoi
             </Button>
-            <Button className="w-full" disabled={!isValid || sending} onClick={() => setConfirmOpen(true)}>
-              {sending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
-              Envoyer à {recipientCount ?? 0} destinataires
-            </Button>
+            {!isValid && (
+              <p className="text-xs text-muted-foreground text-center">
+                Renseignez l'objet, un corps d'au moins 20 caractères, et au moins 1 destinataire.
+              </p>
+            )}
           </div>
         </div>
 
