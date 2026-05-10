@@ -329,53 +329,43 @@ const SearchOwner = () => {
       france: franceTotalSitters ?? items.length,
     });
 
-    // Apply selected zone filter + compute distance
+    // Helper: enrichit un sitter avec ses coords (pour la vue carte) et sa distance
+    const withCoords = (s: any) => {
+      const sitterCity = s.profile?.city;
+      const coords = sitterCity ? cityCoords.get(sitterCity) : null;
+      const dist = coords && searchCoords ? Math.round(haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng)) : null;
+      return { ...s, _dist: dist, _lat: coords?.lat ?? null, _lng: coords?.lng ?? null };
+    };
+
+    // Apply selected zone filter + compute distance + coords
     if (zoneMode === "radius") {
       if (searchCoords) {
-        items = items.map((s: any) => {
-          const sitterCity = s.profile?.city;
-          if (!sitterCity) return { ...s, _dist: Infinity };
-          const coords = cityCoords.get(sitterCity);
-          if (!coords) return { ...s, _dist: Infinity };
-          const dist = haversineDistance(searchCoords!.lat, searchCoords!.lng, coords.lat, coords.lng);
-          return { ...s, _dist: Math.round(dist) };
-        }).filter((s: any) => s._dist <= radius[0]);
+        items = items
+          .map(withCoords)
+          .filter((s: any) => s._dist != null && s._dist <= radius[0]);
       } else if (city) {
         // Fallback: name match
-        items = items.filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase())).map((s: any) => ({ ...s, _dist: null }));
+        items = items
+          .filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase()))
+          .map(withCoords);
       } else {
-        items = items.map((s: any) => ({ ...s, _dist: null }));
+        items = items.map(withCoords);
       }
     } else if (zoneMode === "dept" && refDept) {
       items = items
         .filter((s: any) => {
           const cp = s.profile?.postal_code; return cp ? getDeptCode(cp) === refDept : false;
         })
-        .map((s: any) => {
-          const sitterCity = s.profile?.city;
-          const coords = sitterCity ? cityCoords.get(sitterCity) : null;
-          const dist = coords && searchCoords ? Math.round(haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng)) : null;
-          return { ...s, _dist: dist };
-        });
+        .map(withCoords);
     } else if (zoneMode === "region" && refRegion) {
       items = items
         .filter((s: any) => {
           const cp = s.profile?.postal_code; return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
         })
-        .map((s: any) => {
-          const sitterCity = s.profile?.city;
-          const coords = sitterCity ? cityCoords.get(sitterCity) : null;
-          const dist = coords && searchCoords ? Math.round(haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng)) : null;
-          return { ...s, _dist: dist };
-        });
+        .map(withCoords);
     } else {
       // france
-      items = items.map((s: any) => {
-        const sitterCity = s.profile?.city;
-        const coords = sitterCity ? cityCoords.get(sitterCity) : null;
-        const dist = coords && searchCoords ? Math.round(haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng)) : null;
-        return { ...s, _dist: dist };
-      });
+      items = items.map(withCoords);
     }
 
     // Filter: vehicle
