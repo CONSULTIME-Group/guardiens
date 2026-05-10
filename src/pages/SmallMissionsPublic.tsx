@@ -57,6 +57,32 @@ function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }
  );
 }
 
+/* ── Sticky CTA mobile (QW#6) — visible uniquement <md, après scroll de 600px ── */
+function StickyMobileCta({ onPropose, onAsk }: { onPropose: () => void; onAsk: () => void }) {
+ const [visible, setVisible] = useState(false);
+ useEffect(() => {
+ const onScroll = () => setVisible(window.scrollY > 600);
+ window.addEventListener("scroll", onScroll, { passive: true });
+ onScroll();
+ return () => window.removeEventListener("scroll", onScroll);
+ }, []);
+ return (
+ <div
+ className={`md:hidden fixed bottom-0 inset-x-0 z-40 px-3 pb-3 pt-2 bg-background/95 backdrop-blur border-t border-border/60 transition-transform duration-300 ${visible ? "translate-y-0" : "translate-y-full"}`}
+ style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
+ >
+ <div className="flex gap-2">
+ <Button onClick={onPropose} className="flex-1 bg-primary text-primary-foreground rounded-full h-11 text-sm font-semibold">
+ Je propose mon aide
+ </Button>
+ <Button onClick={onAsk} variant="outline" className="flex-1 border-2 border-primary text-primary rounded-full h-11 text-sm font-semibold">
+ J'ai besoin
+ </Button>
+ </div>
+ </div>
+ );
+}
+
 /* ── data ── */
 const examples = [
  { img: spotVerger, alt: "Panier en osier rempli de fruits frais — illustration gouache", title: "Verger à ramasser", text: "Venir ramasser les fruits avant qu'ils tombent contre un énorme panier de fruits frais à emporter.", badge: "Fruits · entre gens du coin" },
