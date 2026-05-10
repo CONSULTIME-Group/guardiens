@@ -21,7 +21,7 @@ export interface FaqItem {
 }
 
 const FAQ_BLOCK_RE = /:::faq\s*\n([\s\S]*?):::/g;
-const BOLD_Q_RE = /^\*\*(.+?)\*\*\s*$/;
+const BOLD_Q_RE = /^(?:\*\*(.+?)\*\*|#{2,4}\s+(.+?))\s*$/;
 
 /**
  * Extract all Q/A pairs from :::faq blocks in raw markdown.
