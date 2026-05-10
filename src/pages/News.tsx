@@ -231,6 +231,14 @@ export default function News() {
       ? `/actualites?categorie=${activeCategory}${currentPage > 1 ? `&page=${currentPage}` : ""}`
       : `/actualites${currentPage > 1 ? `?page=${currentPage}` : ""}`;
 
+  const hasActiveFilters = urlSearch.trim() !== "" || activeCategory !== "all" || currentPage > 1;
+
+  const resetFilters = () => {
+    setSearchInput("");
+    const next = new URLSearchParams();
+    setSearchParams(next, { replace: true });
+  };
+
   return (
     <>
       <PageMeta
