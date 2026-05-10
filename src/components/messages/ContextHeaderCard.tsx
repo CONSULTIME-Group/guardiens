@@ -36,6 +36,7 @@ const fmt = (d?: string | null) => {
 };
 
 const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCity, otherUserId }: Props) => {
+  const [ownerHasPublishedSit, setOwnerHasPublishedSit] = useState<number | null>(null);
   if (!contextType) return null;
 
   // sit_application → la carte annonce est déjà gérée par ConversationHeader
