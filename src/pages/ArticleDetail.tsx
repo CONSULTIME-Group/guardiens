@@ -137,14 +137,28 @@ export default function ArticleDetail() {
  const [cityGuideSlug, setCityGuideSlug] = useState<string | null>(null);
  const [cityPageSlug, setCityPageSlug] = useState<string | null>(null);
 
- useEffect(() => {
- if (!slug) return;
- const target = ARTICLE_REDIRECTS[slug];
- if (target) {
- navigate(`/actualites/${target}`, { replace: true });
- return;
- }
- const fetchAll = async () => {
+  useEffect(() => {
+  if (!slug) return;
+  let cancelled = false;
+  const fetchAll = async () => {
+    // 1) Vérifier la table redirects (source de vérité unique).
+    //    Boucle de résolution courte (≤ 5 sauts) pour gérer les chaînes.
+    let current = slug;
+    const visited = new Set<string>([current]);
+    for (let i = 0; i < 5; i++) {
+      const { data: red } = await supabase
+        .from("redirects")
+        .select("slug_to")
+        .eq("slug_from", current)
+        .maybeSingle();
+      if (!red?.slug_to || visited.has(red.slug_to)) break;
+      current = red.slug_to;
+      visited.add(current);
+    }
+    if (current !== slug) {
+      if (!cancelled) navigate(`/actualites/${current}`, { replace: true });
+      return;
+    }
  const { data } = await supabase
 .from("articles")
 .select("*")
