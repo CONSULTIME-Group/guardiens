@@ -38,11 +38,14 @@ const HouseGuideBlock = ({ propertyId }: HouseGuideBlockProps) => {
   return (
     <div className="mx-4 my-3 bg-card border border-border rounded-xl overflow-hidden">
       <button
+        type="button"
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-accent/30 transition-colors"
+        aria-expanded={expanded}
+        aria-controls="house-guide-content"
+        className="w-full flex items-center justify-between p-4 hover:bg-accent/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
       >
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center" aria-hidden="true">
             <Home className="h-4 w-4 text-primary" />
           </div>
           <div className="text-left">
@@ -50,7 +53,7 @@ const HouseGuideBlock = ({ propertyId }: HouseGuideBlockProps) => {
             <p className="text-[11px] text-muted-foreground">Infos pratiques pour votre garde</p>
           </div>
         </div>
-        {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+        {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" aria-hidden="true" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
       </button>
 
       {expanded && (
