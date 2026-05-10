@@ -42,15 +42,15 @@ Vous connaissez ce moment : un rendez-vous qui tombe mal, un week-end qui s'anno
 
 Pourtant, autour de vous, il y a des gens prêts à donner un coup de main — gratuitement, simplement, parce que ça leur fait plaisir.
 
-À Hyères, <strong>Annie</strong> vient par exemple de proposer de partager son savoir avec qui en aurait besoin. Elle n'attend rien en retour, juste l'occasion de rendre service.
+À Hyères, <strong>Annie</strong> vient de proposer de partager son savoir avec qui en aurait besoin. Et autour d'elle, on voit aussi passer une <strong>séance de Reiki</strong> à échanger contre un service, des <strong>cours de pain maison</strong>, un <strong>coup de main pour un déménagement</strong>, un <strong>café & écoute</strong> partagé un dimanche, ou encore quelques heures pour <strong>arroser les plantes</strong> ou <strong>réceptionner un colis</strong>.
 
-Et c'est ça, l'entraide chez Guardiens : des gens du coin, des animaux à choyer, des petits services qui font une vraie différence. Pas d'argent, pas d'agence, pas de pression.
+C'est ça, l'entraide chez Guardiens : des gens du coin, des animaux à choyer, des petits services qui font une vraie différence. Pas d'argent, pas d'agence, pas de pression.
 
 La seule chose qui manque encore ? <strong>Votre demande à vous.</strong>
 
 Trois minutes suffisent pour la publier. Et très souvent, c'est la première réponse reçue qui change tout — qui prouve qu'on n'est pas seul, que ça marche, qu'on peut compter sur les autres.
 
-Pour comprendre comment ça fonctionne concrètement, <a href="https://guardiens.fr/articles/petites-missions-entraide-guardiens?utm_source=mass_email&utm_campaign=oser-2026-05&utm_content=article" style="color:#2C6E49;font-weight:600;text-decoration:underline">vous pouvez lire notre article dédié aux petites missions d'entraide</a>.
+Pour comprendre comment ça fonctionne concrètement, <a href="https://guardiens.fr/articles/petites-missions-entraide-guardiens?utm_source=mass_email&utm_campaign=oser-2026-05&utm_content=article" style="color:#2C6E49;font-weight:600;text-decoration:underline">lisez notre article dédié aux petites missions d'entraide</a>.
 
 Et si c'était aujourd'hui ?
 
