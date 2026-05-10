@@ -43,6 +43,9 @@ const AdminMassEmails = () => {
   const [ctaEnabled, setCtaEnabled] = useState(false);
   const [ctaLabel, setCtaLabel] = useState("");
   const [ctaUrl, setCtaUrl] = useState("");
+  const [utmEnabled, setUtmEnabled] = useState(true);
+  const [utmCampaign, setUtmCampaign] = useState("");
+  const [utmContent, setUtmContent] = useState("cta");
 
   // UI state
   const [recipientCount, setRecipientCount] = useState<number | null>(null);
@@ -92,6 +95,31 @@ const AdminMassEmails = () => {
     (recipientCount ?? 0) > 0 &&
     (!ctaEnabled || (ctaLabel.trim().length > 0 && ctaUrl.startsWith("https://")));
 
+  /** Slugifie l'objet pour générer un utm_campaign par défaut. */
+  const autoCampaign = subject
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+    .slice(0, 40) || "campagne";
+
+  const effectiveCampaign = (utmCampaign.trim() || autoCampaign);
+
+  /** Ajoute les UTM à une URL guardiens.fr ; laisse intacte une URL externe. */
+  const withUtm = (rawUrl: string): string => {
+    try {
+      const u = new URL(rawUrl);
+      const isInternal = /(^|\.)guardiens\.fr$|lovable\.app$/.test(u.hostname);
+      if (!isInternal || !utmEnabled) return rawUrl;
+      u.searchParams.set("utm_source", "email");
+      u.searchParams.set("utm_medium", "transac");
+      u.searchParams.set("utm_campaign", effectiveCampaign);
+      u.searchParams.set("utm_content", utmContent.trim() || "cta");
+      return u.toString();
+    } catch {
+      return rawUrl;
+    }
+  };
+
   const handleSend = async () => {
     setConfirmOpen(false);
     setSending(true);
@@ -104,7 +132,7 @@ const AdminMassEmails = () => {
           subject: subject.trim(),
           body: body.trim(),
           cta_label: ctaEnabled ? ctaLabel.trim() : undefined,
-          cta_url: ctaEnabled ? ctaUrl.trim() : undefined,
+          cta_url: ctaEnabled ? withUtm(ctaUrl.trim()) : undefined,
         },
       });
       if (error) throw error;
@@ -118,7 +146,7 @@ const AdminMassEmails = () => {
     }
   };
 
-  const previewHtml = buildPreviewHtml(subject, body, ctaEnabled ? ctaLabel : undefined, ctaEnabled ? ctaUrl : undefined);
+  const previewHtml = buildPreviewHtml(subject, body, ctaEnabled ? ctaLabel : undefined, ctaEnabled ? withUtm(ctaUrl) : undefined);
 
   return (
     <div className="p-6 space-y-6">
@@ -187,19 +215,61 @@ const AdminMassEmails = () => {
               </div>
 
               {ctaEnabled && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="cta-label">Libellé du bouton</Label>
-                    <Input id="cta-label" placeholder="Découvrir" value={ctaLabel} onChange={(e) => setCtaLabel(e.target.value)} />
+                <>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="cta-label">Libellé du bouton</Label>
+                      <Input id="cta-label" placeholder="Découvrir" value={ctaLabel} onChange={(e) => setCtaLabel(e.target.value)} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="cta-url">URL cible</Label>
+                      <Input id="cta-url" placeholder="https://guardiens.fr/..." value={ctaUrl} onChange={(e) => setCtaUrl(e.target.value)} />
+                      {ctaUrl && !ctaUrl.startsWith("https://") && (
+                        <p className="text-xs text-destructive">L'URL doit commencer par https://</p>
+                      )}
+                    </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="cta-url">URL cible</Label>
-                    <Input id="cta-url" placeholder="https://guardiens.fr/..." value={ctaUrl} onChange={(e) => setCtaUrl(e.target.value)} />
-                    {ctaUrl && !ctaUrl.startsWith("https://") && (
-                      <p className="text-xs text-destructive">L'URL doit commencer par https://</p>
+
+                  <div className="pt-3 border-t border-border space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="utm-toggle" className="text-sm">Tracking UTM (liens internes)</Label>
+                        <p className="text-xs text-muted-foreground">Ajouté automatiquement aux URL guardiens.fr</p>
+                      </div>
+                      <Switch id="utm-toggle" checked={utmEnabled} onCheckedChange={setUtmEnabled} />
+                    </div>
+
+                    {utmEnabled && (
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="utm-campaign">utm_campaign</Label>
+                          <Input
+                            id="utm-campaign"
+                            placeholder={autoCampaign}
+                            value={utmCampaign}
+                            onChange={(e) => setUtmCampaign(e.target.value.replace(/[^a-z0-9-]/gi, "-").toLowerCase())}
+                          />
+                          <p className="text-xs text-muted-foreground">Auto depuis l'objet si vide</p>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="utm-content">utm_content</Label>
+                          <Input
+                            id="utm-content"
+                            placeholder="cta"
+                            value={utmContent}
+                            onChange={(e) => setUtmContent(e.target.value.replace(/[^a-z0-9-_]/gi, "-").toLowerCase())}
+                          />
+                          <p className="text-xs text-muted-foreground">Ex : cta, article, footer</p>
+                        </div>
+                        {ctaUrl.startsWith("https://") && (
+                          <div className="col-span-2 text-xs text-muted-foreground break-all bg-muted/40 p-2 rounded">
+                            <span className="font-medium">URL finale :</span> {withUtm(ctaUrl)}
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
-                </div>
+                </>
               )}
             </CardContent>
           </Card>
@@ -276,9 +346,18 @@ const AdminMassEmails = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmer l'envoi</AlertDialogTitle>
-            <AlertDialogDescription>
-              Vous êtes sur le point d'envoyer cet email à {recipientCount ?? 0} inscrits.
-              Cette action est irréversible.
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <p>
+                  Vous êtes sur le point d'envoyer à <strong>{recipientCount ?? 0} destinataires</strong>
+                  {" "}({SEGMENT_LABELS[segment] || segment}). Cette action est irréversible.
+                </p>
+                {ctaEnabled && utmEnabled && ctaUrl.startsWith("https://") && (
+                  <p className="text-xs text-muted-foreground">
+                    Tracking UTM : <code>utm_campaign={effectiveCampaign}</code>, <code>utm_content={utmContent || "cta"}</code>
+                  </p>
+                )}
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
