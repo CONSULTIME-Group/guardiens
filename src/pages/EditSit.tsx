@@ -558,7 +558,7 @@ const EditSit = () => {
           <SectionCard
             icon={Sparkles}
             title="Description de la garde"
-            description={`Ce qui rend cette garde unique (${MIN_DESC_LENGTH} caractères minimum).`}
+            description="Ce qui rend cette garde unique (champ optionnel)."
           >
             <div>
               <Textarea
@@ -578,8 +578,15 @@ const EditSit = () => {
                     : "text-muted-foreground",
                 )}
               >
-                {trimmedDesc.length}/{MIN_DESC_LENGTH} caractères minimum
+                {trimmedDesc.length === 0
+                  ? `Optionnel — si renseigné, ${MIN_DESC_LENGTH} caractères minimum.`
+                  : `${trimmedDesc.length}/${MIN_DESC_LENGTH} caractères minimum`}
               </p>
+              {forbiddenInDesc && (
+                <p className="text-xs text-destructive mt-1">
+                  Mot non autorisé détecté. Préférez « gardien », « personne de confiance » ou « France entière ».
+                </p>
+              )}
             </div>
           </SectionCard>
 
