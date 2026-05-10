@@ -12,6 +12,7 @@ import { Calendar, MapPin, Sparkles, AlertCircle, Compass, Plus } from "lucide-r
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
 
 interface Props {
