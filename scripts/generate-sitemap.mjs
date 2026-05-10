@@ -143,9 +143,9 @@ async function main() {
   const excludedSlugs = new Set([
     "guide-house-sitting-lyon", "guide-lieu-meilleurs-parcs-chiens-lyon",
     "house-sitting-aix-les-bains", "house-sitting-haute-savoie-annecy-megeve",
-    "pet-sitting-chambery-savoie", "pet-sitting-clermont-ferrand",
+    "pet-sitting-chambery-savoie",
     "pet-sitting-grenoble-chartreuse", "pet-sitting-lyon-ouest-lyonnais",
-    "pet-sitting-saint-etienne-loire", "pet-sitting-valence-drome",
+    "pet-sitting-valence-drome",
     "pet-sitting-venissieux", "pet-sitting-villeurbanne",
     "pet-sitting-lyon-guide-complet", "pet-sitting-annecy-guide",
     "pet-sitting-grenoble-guide", "pet-sitting-clermont-ferrand-guide",
