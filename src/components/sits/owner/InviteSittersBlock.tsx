@@ -33,6 +33,7 @@ import { Slider } from "@/components/ui/slider";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import InviteSitterDialog from "./InviteSitterDialog";
 import PostPublishRecapDialog from "./PostPublishRecapDialog";
+import BulkInviteNearestDialog from "./BulkInviteNearestDialog";
 
 const ANIMAL_OPTIONS: { label: string; value: string }[] = [
   { label: "Chiens", value: "dog" },
@@ -323,6 +324,11 @@ const InviteSittersBlock = ({
     }
   }, [highlight, recapShown]);
 
+  // Envoi groupé aux 20 plus proches
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const remainingQuota = Math.max(0, 20 - sentCount);
+  const alreadyInvitedIds = useMemo(() => Array.from(invitedById.keys()), [invitedById]);
+
   return (
     <section
       id="invite-sitters-block"
@@ -358,6 +364,21 @@ const InviteSittersBlock = ({
               {appliedCount > 0 && ` · ${appliedCount} candidature${appliedCount > 1 ? "s" : ""} reçue${appliedCount > 1 ? "s" : ""}`}
               {sentCount >= 20 && " — limite de 20 par 24 h atteinte"}
             </p>
+          )}
+          {ownerCoords && remainingQuota > 0 && (
+            <div className="mt-3">
+              <Button
+                size="sm"
+                onClick={() => setBulkOpen(true)}
+                className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                <Crosshair className="h-3.5 w-3.5" />
+                Inviter les {Math.min(20, remainingQuota)} gardiens disponibles les plus proches
+              </Button>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Envoi groupé en un clic, autour de {sitCity || "votre ville"}.
+              </p>
+            </div>
           )}
         </div>
       </div>
@@ -730,6 +751,22 @@ const InviteSittersBlock = ({
           });
         }}
       />
+
+      {ownerCoords && (
+        <BulkInviteNearestDialog
+          open={bulkOpen}
+          onOpenChange={setBulkOpen}
+          sitId={sitId}
+          ownerId={ownerId}
+          sitTitle={sitTitle}
+          sitCity={sitCity}
+          startDate={startDate}
+          endDate={endDate}
+          ownerCoords={ownerCoords}
+          alreadyInvitedIds={alreadyInvitedIds}
+          remainingQuota={remainingQuota}
+        />
+      )}
     </section>
   );
 };
