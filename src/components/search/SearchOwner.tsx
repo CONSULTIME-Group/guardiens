@@ -43,6 +43,8 @@ type SortOption = "closest" | "rating" | "experience";
 type ViewMode = "list" | "map";
 type ZoneMode = "radius" | "dept" | "region" | "france";
 
+const SearchOwnerMapView = lazy(() => import("@/components/search/SearchOwnerMapView"));
+
 const SearchOwner = () => {
   const { user, switchRole } = useAuth();
   const navigate = useNavigate();
