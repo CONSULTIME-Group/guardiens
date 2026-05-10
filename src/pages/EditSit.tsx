@@ -375,19 +375,17 @@ const EditSit = () => {
         >
           <ArrowLeft className="h-4 w-4" /> Retour à l'annonce
         </button>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-1.5 text-xs"
           onClick={() => {
             if (isDirty && !confirm("Vous avez des modifications non sauvegardées. Quitter sans enregistrer ?")) return;
             navigate(`/sits/${id}`);
           }}
         >
-          <Button variant="ghost" size="sm" className="gap-1.5 text-xs" asChild>
-            <span>
-              <Eye className="h-3.5 w-3.5" /> Aperçu public
-            </span>
-          </Button>
-        </button>
+          <Eye className="h-3.5 w-3.5" /> Aperçu public
+        </Button>
       </div>
 
       <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">Modifier l'annonce</h1>
