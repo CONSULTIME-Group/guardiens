@@ -25,6 +25,7 @@ interface Notification {
 
 const NotificationBell = () => {
   const { user } = useAuth();
+  const { hasAccess } = useSubscriptionAccess();
   const userId = user?.id;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
