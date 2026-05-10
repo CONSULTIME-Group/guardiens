@@ -29,12 +29,14 @@ interface ActiveCampaign {
 function readStored(): ActiveCampaign | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = window.sessionStorage.getItem(STORAGE_KEY);
+    // localStorage : partagé entre onglets de la même origine, survit à la fermeture
+    // d'onglet — robuste aux bascules in-app browser → Safari/Chrome sur mobile.
+    const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as ActiveCampaign;
     if (!parsed?.utm_campaign || typeof parsed.capturedAt !== "number") return null;
     if (Date.now() - parsed.capturedAt > TTL_MS) {
-      window.sessionStorage.removeItem(STORAGE_KEY);
+      window.localStorage.removeItem(STORAGE_KEY);
       return null;
     }
     return parsed;
@@ -46,7 +48,7 @@ function readStored(): ActiveCampaign | null {
 function writeStored(c: ActiveCampaign) {
   if (typeof window === "undefined") return;
   try {
-    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(c));
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(c));
   } catch {
     /* quota / mode privé */
   }
