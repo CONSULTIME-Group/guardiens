@@ -371,18 +371,9 @@ export default function News() {
                 ? `Aucun article ne correspond à « ${urlSearch.trim()} ».`
                 : "Aucun article pour le moment. Revenez bientôt !"}
             </p>
-            {(urlSearch.trim() || activeCategory !== "all") && (
-              <Button
-                variant="outline"
-                onClick={() =>
-                  updateParams((p) => {
-                    p.delete("q");
-                    p.delete("categorie");
-                    p.delete("cat");
-                    p.delete("page");
-                  })
-                }
-              >
+            {hasActiveFilters && (
+              <Button variant="outline" onClick={resetFilters} className="gap-2">
+                <RotateCcw className="h-4 w-4" aria-hidden="true" />
                 Réinitialiser les filtres
               </Button>
             )}
