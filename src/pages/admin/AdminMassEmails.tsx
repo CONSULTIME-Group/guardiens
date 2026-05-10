@@ -550,7 +550,7 @@ function buildPreviewHtml(subject: string, body: string, ctaLabel?: string, ctaU
 </td></tr>
 <tr><td style="padding:20px 32px 8px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#1a1a1a;font-weight:700">${escapedSubject}</h1>
-<div style="margin:0;font-size:14px;line-height:1.75;color:#3a3a3a;white-space:pre-line">${escapedBody}</div>
+<div style="margin:0;font-size:14px;line-height:1.75;color:#3a3a3a;white-space:pre-line">${renderedBody}</div>
 </td></tr>
 ${ctaBlock}
 <tr><td style="padding:24px 32px"></td></tr>
