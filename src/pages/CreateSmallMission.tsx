@@ -151,6 +151,7 @@ const CreateSmallMission = () => {
  }
 
  try { await trackFirstAction("mission_created", { category, mission_type: missionType }); } catch {}
+ if (inserted?.id) { try { await recordMissionCreatedAttribution(inserted.id); } catch {} }
  await queryClient.invalidateQueries({ queryKey: ["small-missions-all"] });
 
  const insertedId = inserted?.id;
