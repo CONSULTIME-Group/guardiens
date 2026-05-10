@@ -117,10 +117,10 @@ function transformFaqBlocks(content: string): string {
       };
 
       for (const line of lines) {
-        const qMatch = line.trim().match(/^\*\*(.+?)\*\*\s*$/);
+        const qMatch = line.trim().match(/^(?:\*\*(.+?)\*\*|#{2,4}\s+(.+?))\s*$/);
         if (qMatch) {
           flush();
-          currentQ = qMatch[1].trim();
+          currentQ = (qMatch[1] ?? qMatch[2]).trim();
         } else if (currentQ) {
           currentA.push(line);
         }
