@@ -90,6 +90,7 @@ function isNew(publishedAt: string | null): boolean {
 export default function News() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [vieLocaleArticles, setVieLocaleArticles] = useState<Article[]>([]);
+  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState(0);
@@ -184,6 +185,30 @@ export default function News() {
     };
   }, [activeCategory, currentPage, urlSearch]);
 
+  // Fetch category counts once (only categories that have at least one article are shown)
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const nowIso = new Date().toISOString();
+      const { data } = await supabase
+        .from("articles")
+        .select("category")
+        .eq("published", true)
+        .lte("published_at", nowIso)
+        .or("noindex.is.null,noindex.eq.false");
+      if (cancelled || !data) return;
+      const counts: Record<string, number> = {};
+      (data as { category: string }[]).forEach((row) => {
+        if (!row.category) return;
+        counts[row.category] = (counts[row.category] || 0) + 1;
+      });
+      setCategoryCounts(counts);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
   const pageList = useMemo(() => buildPageList(currentPage, totalPages), [currentPage, totalPages]);
 
@@ -207,20 +232,42 @@ export default function News() {
     [articles, featuredIds, activeCategory, urlSearch]
   );
 
-  const categories = [
-    { key: "all", label: "Tous" },
-    { key: "guide_central", label: "Guides essentiels" },
-    { key: "thematique", label: "House-sitting" },
-    { key: "vie_locale", label: "Vie locale & Entraide" },
-    { key: "conseil_gardien", label: "Conseils gardiens" },
-    { key: "conseil_proprio", label: "Conseils propriétaires" },
-    { key: "guide_race", label: "Races" },
-    { key: "ville", label: "Villes" },
-    { key: "guide_ville", label: "Guide ville" },
-    { key: "guide_local", label: "Guides locaux" },
-    { key: "guide_pratique", label: "Guides pratiques" },
-    { key: "saisonnier", label: "Saisonniers" },
+  // Preferred display order (categories not listed here go to the end alphabetically by label)
+  const CATEGORY_ORDER = [
+    "guide_central",
+    "thematique",
+    "vie_locale",
+    "conseil_gardien",
+    "conseil_proprio",
+    "conseil",
+    "guide_race",
+    "guide_local",
+    "guide_pratique",
+    "guide_lieu",
+    "saisonnier",
+    "actualite",
   ];
+
+  const totalArticles = useMemo(
+    () => Object.values(categoryCounts).reduce((sum, n) => sum + n, 0),
+    [categoryCounts]
+  );
+
+  const categories = useMemo(() => {
+    const present = Object.keys(categoryCounts).filter((k) => categoryCounts[k] > 0);
+    const ordered = [
+      ...CATEGORY_ORDER.filter((k) => present.includes(k)),
+      ...present.filter((k) => !CATEGORY_ORDER.includes(k)).sort(),
+    ];
+    return [
+      { key: "all", label: "Tous", count: totalArticles },
+      ...ordered.map((k) => ({
+        key: k,
+        label: CATEGORY_LABELS[k] || k,
+        count: categoryCounts[k],
+      })),
+    ];
+  }, [categoryCounts, totalArticles]);
 
   const metaTitle =
     activeCategory !== "all"
@@ -305,6 +352,9 @@ export default function News() {
               }`}
             >
               {cat.label}
+              {typeof cat.count === "number" && (
+                <span className="ml-1.5 text-xs opacity-70">({cat.count})</span>
+              )}
             </button>
           ))}
         </div>
