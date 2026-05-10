@@ -169,11 +169,27 @@ const InviteSittersBlock = ({
     );
   };
 
+  // Liste triée des départements pour le sélecteur
+  const deptOptions = useMemo(
+    () =>
+      Object.entries(DEPT_NAMES).sort(([a], [b]) => a.localeCompare(b)),
+    [],
+  );
+
+  const hasSearchCriteria = query.trim().length >= 2 || !!deptCode;
+
   return (
-    <section className="mt-8 mb-8 rounded-2xl border-2 border-primary/20 bg-primary/[0.03] p-5 md:p-6">
+    <section
+      id="invite-sitters-block"
+      className={`mt-8 mb-8 rounded-2xl border-2 bg-primary/[0.03] p-5 md:p-6 transition-all ${
+        highlight
+          ? "border-primary/60 shadow-[0_0_0_4px_hsl(var(--primary)/0.12)] animate-pulse-once"
+          : "border-primary/20"
+      }`}
+    >
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
               Proposer votre annonce à des gardiens
@@ -181,11 +197,15 @@ const InviteSittersBlock = ({
             <Badge variant="outline" className="text-[11px] font-normal border-primary/30 text-primary">
               Recommandé
             </Badge>
+            {highlight && (
+              <Badge className="text-[11px] font-medium bg-primary text-primary-foreground">
+                Annonce publiée — à vous de jouer
+              </Badge>
+            )}
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            Ne laissez pas le hasard faire tout le travail. Envoyez votre annonce directement aux gardiens
-            que vous avez déjà repérés ou que vous découvrez par la recherche. Cela multiplie vos chances
-            de recevoir des candidatures.
+            Ne laissez pas le hasard faire tout le travail. Envoyez votre annonce directement à des gardiens :
+            vos favoris, par prénom/ville, par département, ou via la recherche avancée.
           </p>
           {(sentCount > 0 || appliedCount > 0) && (
             <p className="text-xs text-primary/80 mt-2 font-medium">
@@ -197,7 +217,7 @@ const InviteSittersBlock = ({
         </div>
       </div>
 
-      <Tabs defaultValue="favorites" className="w-full">
+      <Tabs defaultValue={highlight ? "search" : "favorites"} className="w-full">
         <TabsList className="bg-background/80">
           <TabsTrigger value="favorites">
             <Heart className="h-4 w-4 mr-1.5" /> Mes favoris ({favSitters.length})
@@ -230,23 +250,54 @@ const InviteSittersBlock = ({
         </TabsContent>
 
         <TabsContent value="search" className="mt-4 space-y-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Prénom ou ville du gardien…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="pl-9 bg-background/80"
-            />
+          <div className="grid sm:grid-cols-[1fr_220px] gap-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Prénom ou ville du gardien…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="pl-9 bg-background/80"
+              />
+            </div>
+            <Select
+              value={deptCode || "all"}
+              onValueChange={(v) => setDeptCode(v === "all" ? "" : v)}
+            >
+              <SelectTrigger className="bg-background/80">
+                <MapPin className="h-4 w-4 mr-1.5 text-muted-foreground" />
+                <SelectValue placeholder="Tous les départements" />
+              </SelectTrigger>
+              <SelectContent className="max-h-72">
+                <SelectItem value="all">Tous les départements</SelectItem>
+                {deptOptions.map(([code, name]) => (
+                  <SelectItem key={code} value={code}>
+                    {code} — {name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          {query.trim().length < 2 ? (
+
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <p className="text-xs text-muted-foreground">
+              Combinez prénom/ville et département pour affiner. Besoin de plus de critères (rayon, expérience, animaux…) ?
+            </p>
+            <Link to="/recherche">
+              <Button variant="ghost" size="sm" className="gap-1.5 text-primary hover:text-primary">
+                Recherche avancée sur la carte <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </Link>
+          </div>
+
+          {!hasSearchCriteria ? (
             <div className="rounded-xl border border-dashed border-border bg-card p-6 text-center">
               <Search className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
               <p className="text-sm text-muted-foreground">
-                Tapez au moins 2 caractères (prénom ou ville).
+                Tapez au moins 2 caractères ou sélectionnez un département.
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Cherchez un gardien par son prénom ou par la ville où il se trouve, puis invitez-le à candidater.
+                Astuce : choisir le département de votre logement permet d'inviter les gardiens du coin.
               </p>
             </div>
           ) : searching ? (
@@ -255,10 +306,10 @@ const InviteSittersBlock = ({
             <div className="rounded-xl border border-dashed border-border bg-card p-6 text-center">
               <Search className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
               <p className="text-sm text-muted-foreground">
-                Aucun gardien trouvé pour « {query.trim()} ».
+                Aucun gardien trouvé avec ces critères.
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Essayez un autre prénom ou une autre ville, ou parcourez la liste des gardiens depuis la recherche.
+                Essayez un autre département, élargissez la recherche, ou utilisez la recherche avancée.
               </p>
               <Link to="/recherche" className="inline-block mt-3">
                 <Button variant="outline" size="sm">
