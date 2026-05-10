@@ -144,20 +144,20 @@ const SitDetailHeader = ({
               {(sitStatus === "draft" ||
                 sitStatus === "published" ||
                 sitStatus === "confirmed") && (
-                <Link to={`/sits/${sitId}/edit`}>
-                  <Button variant="outline" size="sm" className="gap-1.5">
+                <Button asChild variant="outline" size="sm" className="gap-1.5">
+                  <Link to={`/sits/${sitId}/edit`}>
                     <Pencil className="h-3.5 w-3.5" /> Modifier
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               )}
-              <Link
-                to={`/annonces/${sitId}`}
+              <a
+                href={`/annonces/${sitId}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm text-primary hover:underline cursor-pointer flex items-center gap-1"
               >
                 Aperçu gardien <ExternalLink className="h-3.5 w-3.5" />
-              </Link>
+              </a>
             </>
           )}
           {/* Signaler : déplacé dans un menu kebab pour ne pas concurrencer
