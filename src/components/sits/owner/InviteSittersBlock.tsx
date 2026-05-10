@@ -9,12 +9,15 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Send, Check, MailCheck, Heart, Sparkles, ArrowRight, MapPin } from "lucide-react";
+import { Search, Send, Check, MailCheck, Heart, Sparkles, ArrowRight, MapPin, SlidersHorizontal, ShieldCheck, ImageIcon, GraduationCap, PawPrint, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -27,6 +30,21 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { useSitInvitations } from "@/hooks/useSitInvitations";
 import { DEPT_NAMES } from "@/lib/departments";
 import InviteSitterDialog from "./InviteSitterDialog";
+
+const ANIMAL_OPTIONS: { label: string; value: string }[] = [
+  { label: "Chiens", value: "dog" },
+  { label: "Chats", value: "cat" },
+  { label: "Chevaux", value: "horse" },
+  { label: "Ferme", value: "farm_animal" },
+  { label: "NAC", value: "nac" },
+];
+
+const EXPERIENCE_OPTIONS: { label: string; value: number }[] = [
+  { label: "Toutes", value: 0 },
+  { label: "1 garde+", value: 1 },
+  { label: "3 gardes+", value: 3 },
+  { label: "5 gardes+", value: 5 },
+];
 
 interface SitterRow {
   id: string;
