@@ -291,6 +291,8 @@ const SitImmersiveContent = ({
                 ownerName={ownerName}
                 expectations={expectations}
                 environments={environments}
+                openTo={sit?.open_to ?? null}
+                minGardienSits={sit?.min_gardien_sits ?? null}
               />
             </TabsContent>
           </Tabs>
