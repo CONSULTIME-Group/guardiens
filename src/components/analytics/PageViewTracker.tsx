@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
+import { captureUtmFromUrl } from "@/lib/campaignAttribution";
 
 /**
  * Track une vue de page à chaque changement de route.
@@ -45,6 +46,9 @@ const PageViewTracker = () => {
         referrer: typeof document !== "undefined" ? document.referrer || undefined : undefined,
       },
     });
+
+    // Attribution mail : capture les UTM si présents (best-effort, jamais bloquant).
+    void captureUtmFromUrl(location.search, location.pathname);
   }, [location.pathname, location.search]);
 
   return null;

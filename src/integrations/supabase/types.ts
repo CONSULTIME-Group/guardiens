@@ -845,6 +845,45 @@ export type Database = {
           },
         ]
       }
+      email_campaign_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          mission_id: string | null
+          path: string | null
+          user_id: string | null
+          utm_campaign: string
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          mission_id?: string | null
+          path?: string | null
+          user_id?: string | null
+          utm_campaign: string
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          mission_id?: string | null
+          path?: string | null
+          user_id?: string | null
+          utm_campaign?: string
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: []
+      }
       email_deferred_queue: {
         Row: {
           attempts: number

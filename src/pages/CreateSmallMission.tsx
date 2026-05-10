@@ -18,6 +18,7 @@ import AccessGateBanner from "@/components/access/AccessGateBanner";
 import MissionPhotoUpload from "@/components/missions/MissionPhotoUpload";
 import { geocodeCity } from "@/lib/geocode";
 import { trackFirstAction } from "@/lib/analytics";
+import { recordMissionCreatedAttribution } from "@/lib/campaignAttribution";
 import { templatesFor, MISSION_TEMPLATES, type MissionTemplate } from "@/data/missionTemplates";
 
 const EURO_REGEX = /\d+\s*[€]|[€]\s*\d+|\d+\s*euro/i;
@@ -150,6 +151,7 @@ const CreateSmallMission = () => {
  }
 
  try { await trackFirstAction("mission_created", { category, mission_type: missionType }); } catch {}
+ if (inserted?.id) { try { await recordMissionCreatedAttribution(inserted.id); } catch {} }
  await queryClient.invalidateQueries({ queryKey: ["small-missions-all"] });
 
  const insertedId = inserted?.id;
