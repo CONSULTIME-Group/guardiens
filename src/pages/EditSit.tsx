@@ -598,7 +598,18 @@ const EditSit = () => {
           >
             <div>
               <Label className="text-sm font-medium mb-2 block">Idéale pour</Label>
-              <ChipSelect options={openToOptions} selected={openTo} onChange={setOpenTo} />
+              <ChipSelect
+                options={openToOptions}
+                selected={openTo}
+                onChange={(next) => {
+                  // « Sans préférence » est exclusif des autres choix.
+                  const SP = "Sans préférence";
+                  const justAddedSP = next.includes(SP) && !openTo.includes(SP);
+                  if (justAddedSP) return setOpenTo([SP]);
+                  if (next.length > 1 && next.includes(SP)) return setOpenTo(next.filter((o) => o !== SP));
+                  setOpenTo(next);
+                }}
+              />
             </div>
 
             <div>
