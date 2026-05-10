@@ -105,23 +105,37 @@ const InviteSittersBlock = ({
   }, [favoriteIds]);
 
   // Recherche : par mots-clés (prénom/ville) et/ou par département (code postal)
+  // + filtres avancés (animaux, expérience min, vérifié, photo)
   const [query, setQuery] = useState("");
   const [deptCode, setDeptCode] = useState<string>(""); // "" = tous départements
+  const [animals, setAnimals] = useState<string[]>([]);
+  const [minExperience, setMinExperience] = useState<number>(0);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [withPhotoOnly, setWithPhotoOnly] = useState(false);
   const [searchResults, setSearchResults] = useState<SitterRow[]>([]);
   const [searching, setSearching] = useState(false);
+
+  const activeAdvancedFilters =
+    animals.length + (minExperience > 0 ? 1 : 0) + (verifiedOnly ? 1 : 0) + (withPhotoOnly ? 1 : 0);
 
   useEffect(() => {
     const q = query.trim();
     // Au moins un critère requis
-    if (q.length < 2 && !deptCode) {
+    if (q.length < 2 && !deptCode && activeAdvancedFilters === 0) {
       setSearchResults([]);
       return;
     }
     setSearching(true);
     const t = setTimeout(async () => {
+      // Si on filtre par animaux → join inner sur sitter_profiles
+      const needsSitterJoin = animals.length > 0;
+      const selectCols = needsSitterJoin
+        ? "id, first_name, avatar_url, city, bio, postal_code, identity_verified, completed_sits_count, sitter_profiles!inner(animal_types)"
+        : "id, first_name, avatar_url, city, bio, postal_code, identity_verified, completed_sits_count";
+
       let req = supabase
         .from("profiles")
-        .select("id, first_name, avatar_url, city, bio, postal_code")
+        .select(selectCols)
         .eq("role", "sitter")
         .neq("id", ownerId);
 
@@ -129,15 +143,36 @@ const InviteSittersBlock = ({
         req = req.or(`first_name.ilike.%${q}%,city.ilike.%${q}%`);
       }
       if (deptCode) {
-        // Postal codes français : préfixe = code département (2 chiffres ou 2A/2B/97x)
         req = req.like("postal_code", `${deptCode}%`);
       }
+      if (verifiedOnly) {
+        req = req.eq("identity_verified", true);
+      }
+      if (withPhotoOnly) {
+        req = req.not("avatar_url", "is", null);
+      }
+      if (minExperience > 0) {
+        req = req.gte("completed_sits_count", minExperience);
+      }
+      if (animals.length > 0) {
+        req = req.overlaps("sitter_profiles.animal_types", animals);
+      }
       const { data } = await req.limit(30);
-      setSearchResults((data as SitterRow[]) || []);
+      setSearchResults(((data as any[]) || []) as SitterRow[]);
       setSearching(false);
     }, 300);
     return () => clearTimeout(t);
-  }, [query, deptCode, ownerId]);
+  }, [query, deptCode, animals, minExperience, verifiedOnly, withPhotoOnly, ownerId, activeAdvancedFilters]);
+
+  const resetAdvanced = () => {
+    setAnimals([]);
+    setMinExperience(0);
+    setVerifiedOnly(false);
+    setWithPhotoOnly(false);
+  };
+
+  const toggleAnimal = (v: string) =>
+    setAnimals((prev) => (prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]));
 
   const [inviteTarget, setInviteTarget] = useState<SitterRow | null>(null);
 
