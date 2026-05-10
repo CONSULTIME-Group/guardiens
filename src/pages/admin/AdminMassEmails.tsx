@@ -95,6 +95,31 @@ const AdminMassEmails = () => {
     (recipientCount ?? 0) > 0 &&
     (!ctaEnabled || (ctaLabel.trim().length > 0 && ctaUrl.startsWith("https://")));
 
+  /** Slugifie l'objet pour générer un utm_campaign par défaut. */
+  const autoCampaign = subject
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+    .slice(0, 40) || "campagne";
+
+  const effectiveCampaign = (utmCampaign.trim() || autoCampaign);
+
+  /** Ajoute les UTM à une URL guardiens.fr ; laisse intacte une URL externe. */
+  const withUtm = (rawUrl: string): string => {
+    try {
+      const u = new URL(rawUrl);
+      const isInternal = /(^|\.)guardiens\.fr$|lovable\.app$/.test(u.hostname);
+      if (!isInternal || !utmEnabled) return rawUrl;
+      u.searchParams.set("utm_source", "email");
+      u.searchParams.set("utm_medium", "transac");
+      u.searchParams.set("utm_campaign", effectiveCampaign);
+      u.searchParams.set("utm_content", utmContent.trim() || "cta");
+      return u.toString();
+    } catch {
+      return rawUrl;
+    }
+  };
+
   const handleSend = async () => {
     setConfirmOpen(false);
     setSending(true);
@@ -107,7 +132,7 @@ const AdminMassEmails = () => {
           subject: subject.trim(),
           body: body.trim(),
           cta_label: ctaEnabled ? ctaLabel.trim() : undefined,
-          cta_url: ctaEnabled ? ctaUrl.trim() : undefined,
+          cta_url: ctaEnabled ? withUtm(ctaUrl.trim()) : undefined,
         },
       });
       if (error) throw error;
