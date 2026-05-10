@@ -15,6 +15,7 @@ import ArticleRenderer, { resolveImagePath } from "@/components/articles/Article
 import ArticleAuthorBio from "@/components/articles/ArticleAuthorBio";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { parseFaqFromMarkdown, buildFaqSchema } from "@/lib/parseFaq";
+import { parseHowToFromMarkdown, buildHowToSchema } from "@/lib/parseHowTo";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { resolveAuthors } from "@/data/authors";
 import { trackEvent } from "@/lib/analytics";
@@ -65,7 +66,8 @@ const CATEGORY_LABELS: Record<string, string> = {
  vie_locale: "Vie locale",
  guide_local: "Guide local",
  guide_pratique: "Guide pratique",
- saisonnier: "Saisonnier",
+  saisonnier: "Saisonnier",
+  guide_central: "Guide central",
 };
 
 /** Generate alt text from article data when hero_image_alt is empty */
@@ -315,32 +317,43 @@ export default function ArticleDetail() {
  },
  };
 
- // FAQ schema — parsed from :::faq blocks
- const faqItems = parseFaqFromMarkdown(article.content);
- const faqSchema = buildFaqSchema(faqItems);
+  // FAQ schema — parsed from :::faq blocks
+  const faqItems = parseFaqFromMarkdown(article.content);
+  const faqSchema = buildFaqSchema(faqItems);
 
- return (
- <>
- <PageMeta
- title={article.meta_title || article.title}
- description={article.meta_description || article.excerpt}
- path={`/actualites/${article.slug}`}
- image={article.cover_image_url || undefined}
- type="article"
- publishedAt={article.published_at || undefined}
- author={article.author_name}
- noindex={article.noindex === true}
- canonical={article.canonical_url || undefined}
- />
- <ArticleSeoLogger article={article} />
+  // HowTo schema — parsed from a "## … étapes …" section (e.g. pilier 01)
+  const howToSteps = parseHowToFromMarkdown(article.content);
+  const howToSchema = buildHowToSchema(howToSteps, {
+    name: article.meta_title || article.title,
+    description: article.meta_description || article.excerpt || undefined,
+  });
 
- {/* CORRECTION 1 — Schema.org Article */}
- <Helmet>
- <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
- {faqSchema && (
- <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
- )}
- </Helmet>
+  return (
+    <>
+    <PageMeta
+    title={article.meta_title || article.title}
+    description={article.meta_description || article.excerpt}
+    path={`/actualites/${article.slug}`}
+    image={article.cover_image_url || undefined}
+    type="article"
+    publishedAt={article.published_at || undefined}
+    author={article.author_name}
+    noindex={article.noindex === true}
+    canonical={article.canonical_url || undefined}
+    />
+    <ArticleSeoLogger article={article} />
+
+    {/* Schema.org — Article + (optionnel) FAQPage + (optionnel) HowTo. */}
+    {/* On émet 3 <script> séparés pour rester lisible côté Search Console. */}
+    <Helmet>
+    <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
+    {faqSchema && (
+    <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
+    )}
+    {howToSchema && (
+    <script type="application/ld+json">{JSON.stringify(howToSchema)}</script>
+    )}
+    </Helmet>
 
  {/* Product/Offer Schema for pricing articles */}
  {article.slug === "nouveaux-tarifs-2026" && (
