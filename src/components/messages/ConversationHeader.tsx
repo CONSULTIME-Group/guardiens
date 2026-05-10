@@ -3,7 +3,7 @@ import FounderBadge from "@/components/badges/FounderBadge";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Archive, ExternalLink, CheckCircle2, Star, Home, Handshake, Calendar, MapPin, Flag, CheckCircle, XCircle, Loader2, Ban } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import HelpButton from "./HelpButton";
 import MissionFeedbackModal from "@/components/missions/MissionFeedbackModal";
@@ -477,16 +477,20 @@ const ConversationHeader = ({
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Signaler ce membre</DialogTitle>
+            <DialogDescription>
+              Décrivez en quelques mots la raison du signalement. Notre équipe l'examine sous 24 h.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
             <Textarea
-              placeholder="Décris le problème en quelques mots"
+              placeholder="Décrivez le problème en quelques mots"
+              aria-label="Motif du signalement"
               value={reportReason}
               onChange={e => setReportReason(e.target.value.slice(0, 300))}
               maxLength={300}
               className="min-h-[100px]"
             />
-            <p className="text-xs text-muted-foreground text-right">{reportReason.length}/300</p>
+            <p className="text-xs text-muted-foreground text-right" aria-live="polite">{reportReason.length}/300</p>
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setReportOpen(false)}>Annuler</Button>
@@ -502,10 +506,10 @@ const ConversationHeader = ({
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Bloquer {capitalize(conv.other_user?.first_name)} ?</DialogTitle>
+            <DialogDescription>
+              Cette personne ne pourra plus vous envoyer de messages et n'apparaîtra plus dans vos conversations.
+            </DialogDescription>
           </DialogHeader>
-          <p className="text-sm text-muted-foreground">
-            Cette personne ne pourra plus vous envoyer de messages et n'apparaîtra plus dans vos conversations.
-          </p>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setBlockOpen(false)}>Annuler</Button>
             <Button
