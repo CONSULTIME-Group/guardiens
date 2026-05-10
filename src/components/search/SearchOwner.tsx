@@ -60,8 +60,7 @@ const SearchOwner = () => {
   const [radius, setRadius] = useState([15]);
   const [zoneMode, setZoneMode] = useState<ZoneMode>("radius");
   const [densityCounts, setDensityCounts] = useState<{ radius: number; dept: number; region: number; france: number }>({ radius: 0, dept: 0, region: 0, france: 0 });
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  // Note: filtre Dates retiré tant que la disponibilité datée n'est pas modélisée côté gardien.
   const [animalTypes, setAnimalTypes] = useState<string[]>([]);
   const [vehicled, setVehicled] = useState(false);
   const [availableOnly, setAvailableOnly] = useState(false);
