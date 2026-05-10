@@ -104,6 +104,8 @@ const OwnerSitView = ({
   const [logementOverride, setLogementOverride] = useState(initialLogementOverride);
   const [animauxOverride, setAnimauxOverride] = useState(initialAnimauxOverride);
   const [internalAppCount, setInternalAppCount] = useState(appCount);
+  // Marqueur "vient juste de publier" → déclenche scroll + highlight du bloc d'invitation
+  const [justPublished, setJustPublished] = useState(false);
 
   // sync if parent re-fetches
   useEffect(() => setInternalAppCount(appCount), [appCount]);
