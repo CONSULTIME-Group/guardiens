@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { Link } from "react-router-dom";
-import { Bell, Check, CheckCheck, Trash2 } from "lucide-react";
+import { Bell, Check, CheckCheck, Trash2, Lock } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
@@ -63,6 +64,7 @@ const toneClasses: Record<string, string> = {
 
 const Notifications = () => {
   const { user } = useAuth();
+  const { hasAccess } = useSubscriptionAccess();
   const userId = user?.id;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -161,6 +163,19 @@ const Notifications = () => {
         <div className="space-y-2">
           {notifications.map((n) => {
             const tone = typeTone[n.type] || "muted";
+            // Gating : un gardien sans accès (post-14/07 sans abonnement) reçoit
+            // l'invitation mais ne peut ni voir l'expéditeur, ni lire le message,
+            // ni accéder à l'annonce. Renvoi vers la page d'abonnement.
+            const isLockedInvite = n.type === "sit_invitation" && !hasAccess;
+            const displayTitle = isLockedInvite
+              ? "Une invitation à garder vous attend"
+              : n.title;
+            const displayBody = isLockedInvite
+              ? "Activez votre espace gardien pour découvrir l'annonce, le propriétaire et candidater."
+              : n.body;
+            const displayLink = isLockedInvite ? "/pricing" : n.link;
+            const displayAvatar = isLockedInvite ? null : n.actor_avatar_url;
+
             const content = (
               <div
                 className={`rounded-lg border border-border p-4 transition-colors hover:shadow-sm ${
@@ -168,8 +183,12 @@ const Notifications = () => {
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  {n.actor_avatar_url ? (
-                    <img src={n.actor_avatar_url} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5" />
+                  {displayAvatar ? (
+                    <img src={displayAvatar} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5" />
+                  ) : isLockedInvite ? (
+                    <span className="mt-1 shrink-0 h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Lock className="h-4 w-4 text-primary" />
+                    </span>
                   ) : (
                     <span
                       aria-hidden
@@ -178,12 +197,17 @@ const Notifications = () => {
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <p className={`text-sm ${!n.read_at ? "font-semibold" : "font-medium"}`}>{n.title}</p>
+                      <p className={`text-sm ${!n.read_at ? "font-semibold" : "font-medium"}`}>{displayTitle}</p>
                       <span className="text-[11px] text-muted-foreground shrink-0">
                         {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: fr })}
                       </span>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-0.5">{n.body}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">{displayBody}</p>
+                    {isLockedInvite && (
+                      <p className="text-xs text-primary mt-1.5 font-medium">
+                        Activer mon espace gardien →
+                      </p>
+                    )}
                   </div>
                   {!n.read_at && (
                     <button
@@ -205,8 +229,8 @@ const Notifications = () => {
               </div>
             );
 
-            return n.link ? (
-              <Link key={n.id} to={n.link} className="block">
+            return displayLink ? (
+              <Link key={n.id} to={displayLink} className="block">
                 {content}
               </Link>
             ) : (

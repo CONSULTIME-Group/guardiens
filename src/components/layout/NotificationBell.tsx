@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Bell } from "lucide-react";
+import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
+import { Bell, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Popover,
@@ -24,6 +25,7 @@ interface Notification {
 
 const NotificationBell = () => {
   const { user } = useAuth();
+  const { hasAccess } = useSubscriptionAccess();
   const userId = user?.id;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -161,6 +163,15 @@ const NotificationBell = () => {
             </div>
           ) : (
             notifications.map((n) => {
+              const isLockedInvite = n.type === "sit_invitation" && !hasAccess;
+              const displayTitle = isLockedInvite
+                ? "Une invitation à garder vous attend"
+                : n.title;
+              const displayBody = isLockedInvite
+                ? "Activez votre espace gardien pour découvrir l'annonce."
+                : n.body;
+              const displayLink = isLockedInvite ? "/pricing" : n.link;
+
               const inner = (
                 <div
                   className={`px-4 py-3 border-b border-border/50 hover:bg-accent/50 transition-colors ${
@@ -168,13 +179,15 @@ const NotificationBell = () => {
                   }`}
                 >
                   <div className="flex items-start gap-2">
-                    {!n.read_at && (
+                    {isLockedInvite ? (
+                      <Lock className="mt-1 h-3.5 w-3.5 text-primary shrink-0" />
+                    ) : !n.read_at ? (
                       <span className="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0" />
-                    )}
+                    ) : null}
                     <div className="min-w-0">
-                      <p className="text-sm font-medium">{n.title}</p>
+                      <p className="text-sm font-medium">{displayTitle}</p>
                       <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                        {n.body}
+                        {displayBody}
                       </p>
                       <p className="text-[10px] text-muted-foreground mt-1">
                         {formatDistanceToNow(new Date(n.created_at), {
@@ -203,10 +216,10 @@ const NotificationBell = () => {
                 setOpen(false);
               };
 
-              return n.link ? (
+              return displayLink ? (
                 <Link
                   key={n.id}
-                  to={n.link}
+                  to={displayLink}
                   onClick={handleClick}
                   className="block"
                 >

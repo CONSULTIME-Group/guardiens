@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { MapPin, Calendar, Star, PawPrint, Car, Globe, Briefcase, Home, MessageSquare, ArrowLeft, Eye, ChevronRight, Handshake } from "lucide-react";
+import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
@@ -524,6 +525,15 @@ const PublicProfile = () => {
                       <Eye className="h-4 w-4" /> Voir l'annonce
                     </Link>
                   </Button>
+                )}
+                {isSitter && (
+                  <InviteToMySitButton
+                    sitter={{ id: profile.id, first_name: profile.first_name }}
+                    variant="outline"
+                    size="default"
+                    label={`Proposer mon annonce`}
+                    className="flex-1 gap-1.5"
+                  />
                 )}
                 <Button
                   className="flex-1 gap-1.5"

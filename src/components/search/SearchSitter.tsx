@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import FounderBadge from "@/components/badges/FounderBadge";
 import ReportButton from "@/components/reports/ReportButton";
+import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
 import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutGrid, Map as MapIcon, Cat, Bird, SlidersHorizontal, ShieldCheck, Crosshair, Bell, BellRing, Loader2 } from "lucide-react";
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
@@ -2201,17 +2202,20 @@ const SearchSitter = () => {
  </p>
  )}
  </div>
- <div className="flex flex-col items-end gap-2 shrink-0">
- <span onClick={(e) => e.stopPropagation()}>
- <FavoriteButton targetType="sitter" targetId={member.id} size="sm" />
- </span>
- <Link
- to={`/gardiens/${member.id}`}
- className="text-sm text-primary font-semibold hover:underline"
- >
- Voir le profil →
- </Link>
- </div>
+  <div className="flex flex-col items-end gap-2 shrink-0">
+  <span onClick={(e) => e.stopPropagation()}>
+  <FavoriteButton targetType="sitter" targetId={member.id} size="sm" />
+  </span>
+  <span onClick={(e) => e.stopPropagation()}>
+  <InviteToMySitButton sitter={{ id: member.id, first_name: member.first_name }} />
+  </span>
+  <Link
+  to={`/gardiens/${member.id}`}
+  className="text-sm text-primary font-semibold hover:underline"
+  >
+  Voir le profil →
+  </Link>
+  </div>
  </div>
  );
  })}
