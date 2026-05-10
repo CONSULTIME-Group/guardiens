@@ -198,7 +198,9 @@ const OwnerSitView = ({
     setSit({ ...sit, status: "published" });
     toast({
       title: "Annonce publiée",
-      description: "Les gardiens peuvent maintenant candidater.",
+      description:
+        "Les gardiens peuvent maintenant candidater. Pour aller plus vite, proposez votre annonce directement à vos favoris ou aux gardiens que vous avez repérés.",
+      duration: 6000,
     });
   };
 
@@ -348,8 +350,19 @@ const OwnerSitView = ({
         ownerProfile={ownerProfile}
       />
 
-      {/* Candidatures reçues — APRÈS l'aperçu : on voit d'abord son annonce,
-          puis qui y a postulé. */}
+      {/* Inviter des gardiens — EN PREMIER : action proactive avant d'attendre des candidatures */}
+      {sit.status === "published" && (
+        <InviteSittersBlock
+          sitId={sit.id}
+          ownerId={currentUserId}
+          sitTitle={sit.title}
+          sitCity={owner?.city ?? null}
+          startDate={sit.start_date}
+          endDate={sit.end_date}
+        />
+      )}
+
+      {/* Candidatures reçues — APRÈS le bloc d'invitation */}
       <section className="mt-8 mb-8 rounded-2xl border border-border bg-card p-5 md:p-6">
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <Users className="h-5 w-5 text-primary" />
@@ -383,18 +396,6 @@ const OwnerSitView = ({
           sitStatus={sit.status}
         />
       </section>
-
-      {/* Inviter des gardiens — uniquement quand l'annonce est publiée */}
-      {sit.status === "published" && (
-        <InviteSittersBlock
-          sitId={sit.id}
-          ownerId={currentUserId}
-          sitTitle={sit.title}
-          sitCity={owner?.city ?? null}
-          startDate={sit.start_date}
-          endDate={sit.end_date}
-        />
-      )}
 
       <Collapsible className="mt-2 mb-8 rounded-2xl border border-border bg-card">
         <CollapsibleTrigger className="group w-full flex items-center justify-between gap-2 p-5 md:p-6 text-left">
