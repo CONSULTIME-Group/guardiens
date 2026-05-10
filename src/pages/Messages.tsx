@@ -706,6 +706,7 @@ const Messages = () => {
             </div>
           )}
           <ContextHeaderCard
+            key={activeConv.id}
             contextType={activeConv.context_type}
             isOwner={activeConv.owner_id === user?.id}
             sit={activeConv.sit ? { ...activeConv.sit, id: activeConv.sit_id || undefined } : null}
