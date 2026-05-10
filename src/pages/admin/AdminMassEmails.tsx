@@ -34,17 +34,31 @@ interface MassEmail {
   status: string;
 }
 
+// Campagne "Oser demander" — pré-remplie pour faciliter l'envoi en 1 clic.
+const OSER_SUBJECT = "Et si vous osiez demander un coup de main ?";
+const OSER_BODY = `Bonjour,
+
+Sur Guardiens, l'entraide entre voisins propriétaires d'animaux est gratuite, locale et simple.
+
+Vous hésitez à publier une demande ? C'est pourtant la première étape, celle qui débloque tout : nourrir le chat pendant un week-end, sortir le chien pendant un rendez-vous, garder le lapin une après-midi…
+
+Trois minutes suffisent pour publier votre première mission. Et bien souvent, c'est la première réponse qui change tout.
+
+Alors, et si c'était aujourd'hui ?
+
+À très vite sur Guardiens.`;
+
 const AdminMassEmails = () => {
-  // Form state
+  // Form state — pré-rempli avec la campagne "Oser demander"
   const [segment, setSegment] = useState<Segment>("tous");
   const [filters, setFilters] = useState<MassEmailFilters>({});
-  const [subject, setSubject] = useState("");
-  const [body, setBody] = useState("");
-  const [ctaEnabled, setCtaEnabled] = useState(false);
-  const [ctaLabel, setCtaLabel] = useState("");
-  const [ctaUrl, setCtaUrl] = useState("");
+  const [subject, setSubject] = useState(OSER_SUBJECT);
+  const [body, setBody] = useState(OSER_BODY);
+  const [ctaEnabled, setCtaEnabled] = useState(true);
+  const [ctaLabel, setCtaLabel] = useState("Publier une mission");
+  const [ctaUrl, setCtaUrl] = useState("https://guardiens.fr/entraide/nouvelle");
   const [utmEnabled, setUtmEnabled] = useState(true);
-  const [utmCampaign, setUtmCampaign] = useState("");
+  const [utmCampaign, setUtmCampaign] = useState("oser-2026-05");
   const [utmContent, setUtmContent] = useState("cta");
 
   // UI state
