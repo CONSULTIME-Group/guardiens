@@ -190,15 +190,54 @@ export default function ArticleDetail() {
 
  if (!art) return;
 
- // Fetch related articles (same category, excluding current)
- const { data: related } = await supabase
-.from("articles")
-.select("slug, title, excerpt, category")
-.eq("published", true)
-.eq("category", art.category)
-.neq("slug", slug)
-.limit(3);
- setRelatedArticles((related as RelatedArticle[]) || []);
+      // Hub & spoke maillage interne :
+      // 1) liens sortants déclarés dans internal_links pointant vers /actualites/*
+      // 2) liens entrants (autres articles dont internal_links pointe vers le slug courant)
+      // 3) fallback : même catégorie
+      const outgoingSlugs = Array.isArray(art.internal_links)
+        ? (art.internal_links as Array<{ url?: string }>)
+            .map((l) => {
+              const m = String(l?.url ?? "").match(/^\/actualites\/([^/?#]+)/);
+              return m ? m[1] : null;
+            })
+            .filter((s): s is string => !!s && s !== slug)
+        : [];
+
+      const [outgoingRes, incomingRes, sameCatRes] = await Promise.all([
+        outgoingSlugs.length > 0
+          ? supabase
+              .from("articles")
+              .select("slug, title, excerpt, category")
+              .eq("published", true)
+              .in("slug", outgoingSlugs)
+          : Promise.resolve({ data: [] as RelatedArticle[] }),
+        supabase
+          .from("articles")
+          .select("slug, title, excerpt, category")
+          .eq("published", true)
+          .neq("slug", slug)
+          .contains("internal_links", [{ url: `/actualites/${slug}` }])
+          .limit(6),
+        supabase
+          .from("articles")
+          .select("slug, title, excerpt, category")
+          .eq("published", true)
+          .eq("category", art.category)
+          .neq("slug", slug)
+          .limit(6),
+      ]);
+
+      const seen = new Set<string>();
+      const merged: RelatedArticle[] = [];
+      for (const list of [outgoingRes.data, incomingRes.data, sameCatRes.data]) {
+        for (const a of (list as RelatedArticle[] | null) ?? []) {
+          if (!seen.has(a.slug)) {
+            seen.add(a.slug);
+            merged.push(a);
+          }
+        }
+      }
+      setRelatedArticles(merged.slice(0, 4));
 
  // Cross-link: city guide
  if (art.city) {
@@ -558,10 +597,10 @@ export default function ArticleDetail() {
  {/* Related articles */}
  {relatedArticles.length > 0 && (
  <div className="mt-10 pt-8 border-t border-border">
- <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
- Articles similaires
- </h2>
- <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
+              Articles liés
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
  {relatedArticles.map((a) => (
  <Link key={a.slug} to={`/actualites/${a.slug}`} className="group">
  <Card className="h-full hover:shadow-md transition-shadow">
