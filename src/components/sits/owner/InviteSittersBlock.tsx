@@ -33,6 +33,7 @@ import { Slider } from "@/components/ui/slider";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import InviteSitterDialog from "./InviteSitterDialog";
 import PostPublishRecapDialog from "./PostPublishRecapDialog";
+import BulkInviteNearestDialog from "./BulkInviteNearestDialog";
 
 const ANIMAL_OPTIONS: { label: string; value: string }[] = [
   { label: "Chiens", value: "dog" },
