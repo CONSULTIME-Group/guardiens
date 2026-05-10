@@ -568,11 +568,22 @@ const SearchOwner = () => {
                 <Input
                   placeholder="Rechercher une ville..."
                   value={city}
-                  onChange={(e) => { setCity(e.target.value); fetchCitySuggestions(e.target.value); }}
+                  onChange={(e) => {
+                    setCity(e.target.value);
+                    // Reset le code postal si l'utilisateur tape sans choisir de suggestion
+                    setCityPostalCode(null);
+                    fetchCitySuggestions(e.target.value);
+                  }}
                   className="pr-10"
+                  aria-label="Ville ou commune"
                 />
-                <button onClick={handleGeolocate} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary">
-                  <Crosshair className="h-4 w-4" />
+                <button
+                  type="button"
+                  onClick={handleGeolocate}
+                  aria-label="Utiliser ma position actuelle"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
+                >
+                  <Crosshair className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
               {citySuggestions.length > 0 && (
