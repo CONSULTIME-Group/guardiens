@@ -34,7 +34,7 @@ const fmt = (d?: string | null) => {
   try { return format(new Date(d), "d MMM", { locale: fr }); } catch { return null; }
 };
 
-const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCity }: Props) => {
+const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCity, otherUserId }: Props) => {
   if (!contextType) return null;
 
   // sit_application → la carte annonce est déjà gérée par ConversationHeader
