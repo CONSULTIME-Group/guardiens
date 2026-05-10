@@ -11,7 +11,8 @@
  * Reste 100% présentationnel : aucune logique métier ici, on reçoit tout via props.
  */
 import { Link } from "react-router-dom";
-import { ArrowLeft, Calendar, MapPin, Star, Pencil, ExternalLink, MoreHorizontal } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, Calendar, MapPin, Star, Pencil, ExternalLink, MoreHorizontal, Share2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -21,9 +22,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import ReportButton from "@/components/reports/ReportButton";
 import SitHero from "@/components/sits/shared/SitHero";
+import ShareButtons from "@/components/sits/ShareButtons";
 import { getSitStatusConfig } from "@/components/sits/shared/sitConstants";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 
@@ -40,6 +49,8 @@ interface SitDetailHeaderProps {
   isAuthenticatedNonOwner: boolean;
   reviewCount: number;
   avgRating: string | null;
+  /** Ville à afficher dans le récap de partage (owner uniquement) */
+  ownerCity?: string | null;
   /**
    * Mode compact : masque le hero photos, le titre et la ligne meta
    * (déjà rendus par SitImmersiveContent). Conserve le lien retour, les
