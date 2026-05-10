@@ -418,21 +418,31 @@ const SearchOwner = () => {
       m.set(b.badge_id, (m.get(b.badge_id) || 0) + 1);
     });
 
-    const enriched = await Promise.all(
-      items.map(async (s: any) => {
-        const { data: reviews } = await supabase
-          .from("reviews").select("overall_rating")
-          .eq("reviewee_id", s.user_id).eq("published", true);
-        const avgRating = reviews && reviews.length > 0
-          ? (reviews.reduce((sum: number, r: any) => sum + r.overall_rating, 0) / reviews.length)
-          : null;
-        const userBadges = badgeMap.get(s.user_id);
-        const topBadges = userBadges
-          ? Array.from(userBadges.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count).slice(0, 3)
-          : [];
-        return { ...s, avgRating, reviewCount: reviews?.length || 0, topBadges, isEmergency: emergencySet.has(s.user_id) };
-      })
-    );
+    // Batch fetch reviews for all candidates in a single query (avoid N+1)
+    const reviewsAgg = new Map<string, { sum: number; count: number }>();
+    if (userIds.length > 0) {
+      const { data: reviewRows } = await supabase
+        .from("reviews")
+        .select("reviewee_id, overall_rating")
+        .in("reviewee_id", userIds)
+        .eq("published", true);
+      (reviewRows || []).forEach((r: any) => {
+        const cur = reviewsAgg.get(r.reviewee_id) || { sum: 0, count: 0 };
+        cur.sum += r.overall_rating || 0;
+        cur.count += 1;
+        reviewsAgg.set(r.reviewee_id, cur);
+      });
+    }
+
+    const enriched = items.map((s: any) => {
+      const agg = reviewsAgg.get(s.user_id);
+      const avgRating = agg && agg.count > 0 ? agg.sum / agg.count : null;
+      const userBadges = badgeMap.get(s.user_id);
+      const topBadges = userBadges
+        ? Array.from(userBadges.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count).slice(0, 3)
+        : [];
+      return { ...s, avgRating, reviewCount: agg?.count || 0, topBadges, isEmergency: emergencySet.has(s.user_id) };
+    });
 
     // Filter: min rating (post-enrichment)
     let final = enriched;
