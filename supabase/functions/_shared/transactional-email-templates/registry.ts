@@ -42,6 +42,7 @@ import { template as sitterEncourageCandidature } from './sitter-encourage-candi
 import { template as discoverMutualAid1 } from './discover-mutual-aid-1.tsx'
 import { template as discoverMutualAid2 } from './discover-mutual-aid-2.tsx'
 import { template as discoverMutualAid0 } from './discover-mutual-aid-0.tsx'
+import { template as sitInvitation } from './sit-invitation.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'nearby-sit-alert': nearbySitAlert,
@@ -77,4 +78,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'discover-mutual-aid-1': discoverMutualAid1,
   'discover-mutual-aid-2': discoverMutualAid2,
   'discover-mutual-aid-0': discoverMutualAid0,
+  'sit-invitation': sitInvitation,
 }

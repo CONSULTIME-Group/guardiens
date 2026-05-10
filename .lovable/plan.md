@@ -1,97 +1,101 @@
+## Objectif
 
-## 1. Pourquoi « plein de msgs envoyés » alors que la page vient d'être mise en ligne
+Une fois l'annonce publiée, le propriétaire peut **inviter** des gardiens à candidater :
+1. Depuis ses **favoris** (en un clic)
+2. Depuis une **recherche de gardiens** (filtres : ville, rayon, expérience, animaux compatibles, dispo si possible)
 
-La page `/admin/nurturing` est **un nouveau tableau de bord**, mais **le moteur de nurturing tourne depuis avril 2026**. Le cron `evaluate-journeys` parcourt les utilisateurs toutes les heures et envoie les bons emails au bon moment, sans dashboard.
-
-Ce que disent les données aujourd'hui (9 mai) :
-
-- **124 emails de nurturing envoyés ce jour** (rien d'anormal — rattrapage de tous les profils éligibles depuis l'activation des nouvelles séquences) :
-  - 45 « Bienvenue J+1 »
-  - 37 « Encouragement à candidater » (gardiens sans candidature)
-  - 24 « Relance profil incomplet »
-  - 18 « Conseils pour publier l'annonce »
-- Les **533 « signup » et 460 « welcome »** visibles dans `email_send_log` ne sont **PAS du nurturing** : ce sont des emails **transactionnels / auth** envoyés par Supabase à chaque inscription. Ils n'apparaissent pas dans cette page.
-
-Concrètement : la page ne « génère » aucun envoi, elle ne fait que **révéler** ce que le système faisait déjà en silence.
+L'invitation = un message + un lien vers l'annonce, qui apparaît côté gardien comme une **invitation à candidater** (notif + entrée messagerie + badge dans dashboard).
 
 ---
 
-## 2. Audit UX de la page actuelle
+## UX
 
-La page fait **1 151 lignes** et empile une dizaine de blocs sans hiérarchie claire. Problèmes :
+### Côté propriétaire — sur `/sits/:id` (vue owner, statut `published`)
 
-| Constat | Impact |
-|---|---|
-| Plage par défaut = **30 jours** | Difficile de voir ce qui se passe « en ce moment » |
-| Titre « Suivi des envois » | Ne dit pas à quoi sert la page |
-| Pas d'indicateur unique de **santé du système** (cron + queue + taux d'envoi) | L'admin doit lire 5 cartes pour savoir si tout va bien |
-| Glossaire + Séquences + Top steps + Top CTA + Erreurs + Queue + Timeline + Reason breakdown sur **une seule page scrollable** | Surcharge cognitive |
-| Pas de bouton « **Lancer evaluate-journeys maintenant** » | Pour tester ou rattraper, il faut attendre l'heure pile |
-| Pas de vue « **prochains envois prévus** » | On voit ce qui est parti, jamais ce qui va partir |
-| Carte « Top contenus » et « Top CTA » noyées en bas | Le levier d'optimisation est invisible |
+Nouveau bloc **« Inviter des gardiens »** placé juste après les Candidatures reçues :
+
+- **Onglet 1 — Mes favoris** : liste des sitters favoris (via `useFavorites('sitter')`), bouton « Inviter » par carte. État : non invité / invité (date) / a candidaté.
+- **Onglet 2 — Trouver des gardiens** : mini-recherche (réutilise la logique de `SearchPage`) filtrée sur ville de l'annonce + rayon (15/30/50 km / partout), filtres expérience & types d'animaux. Bouton « Inviter » par carte.
+- **Modal d'invitation** : message pré-rempli vouvoiement (« Bonjour, je publie une garde du X au Y à <ville>, votre profil m'a tapé dans l'œil. Seriez-vous intéressé(e) ? »), éditable, max 500 car. Bouton « Envoyer l'invitation ».
+- **Garde-fous** : pas d'auto-invitation, pas de doublon (1 invit/sitter/sit), rate-limit (max 20 invits/jour/owner pour éviter le spam).
+
+### Côté gardien
+
+- **Notification** in-app + email transactionnel : « <Prénom> vous invite à candidater à sa garde à <ville> du X au Y ».
+- **Conversation** créée dans la messagerie avec le contexte de l'annonce (réutilise `ContextHeaderCard` + lien vers `/sits/:id`).
+- **Dashboard sitter** : nouveau compteur « Invitations reçues » (lien vers messagerie filtrée).
+- Le gardien candidate normalement via la fiche annonce (flow existant inchangé).
 
 ---
 
-## 3. Refonte proposée
+## Technique
 
-### a. En-tête « Pilotage du nurturing »
+### DB (migration)
 
-Renommer + ajouter un **bandeau de santé** unique avec 3 pastilles :
-- **Cron** (vert si dernier passage < 70 min)
-- **Queue** (vert si pas de pending qui s'accumule)
-- **Délivrabilité** (vert si taux d'envoi ≥ 95 % sur 7 j)
+```sql
+create table public.sit_invitations (
+  id uuid primary key default gen_random_uuid(),
+  sit_id uuid not null references public.sits(id) on delete cascade,
+  owner_id uuid not null,
+  sitter_id uuid not null,
+  message text,
+  status text not null default 'sent', -- sent | viewed | applied | declined
+  created_at timestamptz not null default now(),
+  viewed_at timestamptz,
+  responded_at timestamptz,
+  unique (sit_id, sitter_id)
+);
+create index on public.sit_invitations(sitter_id, status);
+create index on public.sit_invitations(owner_id, created_at desc);
 
-Bouton **« Lancer une évaluation maintenant »** (invoke `evaluate-journeys`).
+alter table public.sit_invitations enable row level security;
 
-### b. Plage par défaut = **7 jours** (au lieu de 30 j)
+-- Owner : voit/crée ses invits sur SES sits publiés
+create policy "owners manage own invitations"
+on public.sit_invitations for all
+using (owner_id = auth.uid())
+with check (owner_id = auth.uid());
 
-### c. Réorganisation en 3 onglets (`Tabs` shadcn)
+-- Sitter : voit les invits qui lui sont adressées, peut update viewed/responded
+create policy "sitters read their invitations"
+on public.sit_invitations for select
+using (sitter_id = auth.uid());
 
-```text
-┌─────────────────────────────────────────────────┐
-│  Vue d'ensemble │ Performance │ Diagnostic     │
-└─────────────────────────────────────────────────┘
+create policy "sitters update their invitations status"
+on public.sit_invitations for update
+using (sitter_id = auth.uid())
+with check (sitter_id = auth.uid());
 ```
 
-**Onglet 1 — Vue d'ensemble** *(ce que je dois savoir en 10 secondes)*
-- KPI globaux : envoyés / ouverts / cliqués / actions
-- Carte « Top 3 contenus qui marchent » (top action rate)
-- Carte « Top 3 contenus à retravailler » (action rate < 10 %, ≥ 10 envois)
-- Bloc « Séquences actives » (compact, sans les étapes — un lien « Détail »)
+Trigger : quand une `applications` est créée par le sitter sur un sit où il a une invit `sent/viewed`, marquer `status = 'applied'`.
 
-**Onglet 2 — Performance** *(comprendre quoi optimiser)*
-- Tableau complet `topSteps` (déjà existant) — triable
-- Tableau complet `topCtas` (déjà existant) — quels liens cliqués
-- Détail par séquence avec étapes + bouton « Voir destinataires »
+Rate-limit : fonction `check_invitation_quota(owner_id)` qui compte les invits des dernières 24 h (max 20).
 
-**Onglet 3 — Diagnostic** *(quand quelque chose cloche)*
-- Time series sent/failed/exited
-- Reason breakdown
-- 30 derniers échecs avec error_detail
-- Queue stats (pending / sent / failed / suppressed)
+### Front
 
-### d. Glossaire → repositionné en `Popover` discret « Comment lire cette page ? » dans l'en-tête, plus en pavé qui prend 200 px de haut.
+Nouveaux fichiers :
+- `src/components/sits/owner/InviteSittersBlock.tsx` — wrapper avec onglets (Favoris / Recherche).
+- `src/components/sits/owner/InviteSitterCard.tsx` — carte sitter + bouton « Inviter » + état.
+- `src/components/sits/owner/InviteSitterDialog.tsx` — modal message + envoi.
+- `src/hooks/useSitInvitations.ts` — list/create/update via React Query.
 
-### e. Petit picto contextuel sur chaque KPI : au survol, le calcul exact (ex. « action = clic CTA OU sortie via objectif atteint dans les 7 j »).
+Intégration : ajout du bloc dans `OwnerSitView.tsx` (statut `published` uniquement), après la section Candidatures.
 
----
+Côté gardien :
+- Notification (table `notifications` existante) + entrée messagerie (réutiliser flow conversation existant lié au sit).
+- Compteur `Invitations reçues` dans `useSitterDashboardData`.
 
-## 4. Détails techniques
+### Email
 
-- Aucune modification de `evaluate-journeys`, des templates, ni des tables — uniquement réorganisation du fichier `src/pages/admin/AdminNurturing.tsx`.
-- Extraire 3 composants : `NurturingHealthBar`, `NurturingOverviewTab`, `NurturingPerformanceTab`, `NurturingDiagnosticTab` sous `src/components/admin/nurturing/` pour ramener le fichier page à ~200 lignes.
-- Réutiliser `SequenceRecipientsDialog` tel quel.
-- Bouton « Lancer évaluation » : `supabase.functions.invoke('evaluate-journeys', { body: { manual: true } })` + toast + refresh.
-- Default `range` passe de `"30d"` à `"7d"`.
+Template transactionnel `sit-invitation` (via `sendTransactionalEmail`) — vouvoiement, pas d'icônes/emojis, mentionne « gardien » jamais « voisin ».
 
 ---
 
-## 5. Hors scope (à valider plus tard si vous le souhaitez)
+## Découpage en lots
 
-- Vue « Prochains envois prévus dans les 24 h » (nécessite un nouveau endpoint dans `evaluate-journeys` en mode dry-run).
-- Édition des séquences/étapes depuis l'admin (actuellement read-only).
-- Export CSV des destinataires.
+- **Lot 1 (DB + back)** : migration `sit_invitations` + RLS + trigger + quota. ~30 min.
+- **Lot 2 (UI Favoris)** : `InviteSittersBlock` onglet Favoris + dialog + hook + intégration `OwnerSitView`. ~1 h.
+- **Lot 3 (UI Recherche)** : onglet Recherche avec filtres ville/rayon/animaux. ~1 h.
+- **Lot 4 (côté gardien)** : notif + entrée messagerie + compteur dashboard + email transactionnel. ~45 min.
 
----
-
-**Validez-vous cette refonte ?** Si oui, je l'applique d'un seul coup. Si vous voulez ajuster (ex. garder la plage 30 j par défaut, ne pas faire les onglets, supprimer un bloc), dites-le et j'adapte avant de coder.
+Total ≈ 3 h. Je peux commencer par le Lot 1 + 2 (le plus à valeur immédiate : inviter ses favoris) et livrer le reste ensuite. OK pour partir comme ça ?

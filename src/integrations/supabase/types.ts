@@ -3594,6 +3594,50 @@ export type Database = {
           },
         ]
       }
+      sit_invitations: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          owner_id: string
+          responded_at: string | null
+          sit_id: string
+          sitter_id: string
+          status: string
+          viewed_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          owner_id: string
+          responded_at?: string | null
+          sit_id: string
+          sitter_id: string
+          status?: string
+          viewed_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          owner_id?: string
+          responded_at?: string | null
+          sit_id?: string
+          sitter_id?: string
+          status?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sit_invitations_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "sits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sits: {
         Row: {
           accepting_applications: boolean
@@ -4707,6 +4751,7 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: number
       }
+      check_invitation_quota: { Args: { _owner_id: string }; Returns: boolean }
       complete_onboarding: {
         Args: {
           p_animal_experience?: string
