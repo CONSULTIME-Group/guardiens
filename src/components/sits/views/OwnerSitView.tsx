@@ -354,6 +354,7 @@ const OwnerSitView = ({
           ownerId={currentUserId}
           sitTitle={sit.title}
           sitCity={owner?.city ?? null}
+          ownerPostalCode={owner?.postal_code ?? null}
           startDate={sit.start_date}
           endDate={sit.end_date}
           highlight={justPublished}

@@ -30,6 +30,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { useSitInvitations } from "@/hooks/useSitInvitations";
 import { DEPT_NAMES } from "@/lib/departments";
 import InviteSitterDialog from "./InviteSitterDialog";
+import PostPublishRecapDialog from "./PostPublishRecapDialog";
 
 const ANIMAL_OPTIONS: { label: string; value: string }[] = [
   { label: "Chiens", value: "dog" },
@@ -59,6 +60,8 @@ interface InviteSittersBlockProps {
   ownerId: string;
   sitTitle: string;
   sitCity: string | null;
+  /** Code postal du propriétaire — utilisé pour pré-cibler le département. */
+  ownerPostalCode?: string | null;
   startDate: string | null;
   endDate: string | null;
   /** Si true → applique un effet visuel d'accent (juste après publication) */
@@ -70,6 +73,7 @@ const InviteSittersBlock = ({
   ownerId,
   sitTitle,
   sitCity,
+  ownerPostalCode = null,
   startDate,
   endDate,
   highlight = false,
@@ -231,6 +235,22 @@ const InviteSittersBlock = ({
 
   const hasSearchCriteria = query.trim().length >= 2 || !!deptCode || activeAdvancedFilters > 0;
 
+  // Onglet actif (contrôlé) pour permettre au récap post-publication de
+  // rediriger immédiatement l'utilisateur vers le bon onglet.
+  const [activeTab, setActiveTab] = useState<"favorites" | "search">(
+    highlight ? "search" : "favorites",
+  );
+
+  // Récap post-publication : s'ouvre une seule fois quand `highlight` passe à true.
+  const [recapOpen, setRecapOpen] = useState(false);
+  const [recapShown, setRecapShown] = useState(false);
+  useEffect(() => {
+    if (highlight && !recapShown) {
+      setRecapOpen(true);
+      setRecapShown(true);
+    }
+  }, [highlight, recapShown]);
+
   return (
     <section
       id="invite-sitters-block"
@@ -270,7 +290,7 @@ const InviteSittersBlock = ({
         </div>
       </div>
 
-      <Tabs defaultValue={highlight ? "search" : "favorites"} className="w-full">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "favorites" | "search")} className="w-full">
         <TabsList className="bg-background/80">
           <TabsTrigger value="favorites">
             <Heart className="h-4 w-4 mr-1.5" /> Mes favoris ({favSitters.length})
@@ -531,6 +551,26 @@ const InviteSittersBlock = ({
         sitCity={sitCity}
         startDate={startDate}
         endDate={endDate}
+      />
+
+      <PostPublishRecapDialog
+        open={recapOpen}
+        onOpenChange={setRecapOpen}
+        ownerId={ownerId}
+        ownerPostalCode={ownerPostalCode}
+        onInviteFavorites={() => {
+          setActiveTab("favorites");
+          requestAnimationFrame(() => {
+            document.getElementById("invite-sitters-block")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+        }}
+        onTargetDepartment={(code) => {
+          setActiveTab("search");
+          setDeptCode(code);
+          requestAnimationFrame(() => {
+            document.getElementById("invite-sitters-block")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+        }}
       />
     </section>
   );
