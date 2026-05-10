@@ -48,6 +48,10 @@ interface Props {
   /** Texte du bouton (défaut : "Proposer mon annonce") */
   label?: string;
   className?: string;
+  /** Si vrai, ne rend rien tant qu'on n'a pas confirmé qu'au moins une annonce publiée existe. */
+  hideIfNoSits?: boolean;
+  /** Callback déclenché après le préchargement quand hideIfNoSits=true. */
+  onPublishedSitsResolved?: (count: number) => void;
 }
 
 const InviteToMySitButton = ({
