@@ -289,15 +289,27 @@ const AdminMassEmails = () => {
             </CardContent>
           </Card>
 
-          <div className="space-y-3">
+          <div className="rounded-xl border-2 border-primary/30 bg-primary/5 p-5 space-y-3 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="flex-1 space-y-1">
+                <p className="text-sm font-semibold text-foreground">
+                  Prêt à envoyer la campagne « Oser demander »
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Tout est pré-rempli et tracé (campaign : <code className="font-mono">{effectiveCampaign}</code>).
+                  Cliquez ci-dessous pour ouvrir l'aperçu, puis confirmez l'envoi à{" "}
+                  <strong className="text-foreground">{recipientCount ?? "—"}</strong> destinataires.
+                </p>
+              </div>
+            </div>
             <Button
-              className="w-full"
+              className="w-full h-14 text-base font-semibold shadow-md hover:shadow-lg transition-shadow"
               size="lg"
               disabled={!isValid || sending}
               onClick={() => setPreviewOpen(true)}
             >
-              <Eye className="h-4 w-4 mr-2" />
-              Aperçu complet avant envoi
+              <Eye className="h-5 w-5 mr-2" />
+              Aperçu complet & envoi à {recipientCount ?? "…"} destinataires
             </Button>
             {!isValid && (
               <p className="text-xs text-muted-foreground text-center">
