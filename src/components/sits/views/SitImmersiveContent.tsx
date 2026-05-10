@@ -151,25 +151,22 @@ const SitImmersiveContent = ({
     enabled: !!cityName,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      const { data: cityRows } = await supabase
+      const { count: cityCount } = await supabase
         .from("profiles")
-        .select("id, sitter_profiles!inner(user_id)")
-        .ilike("city", cityName)
-        .limit(50);
-      const cityCount = cityRows?.length ?? 0;
+        .select("id, sitter_profiles!inner(user_id)", { count: "exact", head: true })
+        .ilike("city", cityName);
+      const safeCityCount = cityCount ?? 0;
 
-      if (cityCount >= CITY_THRESHOLD || !deptCode) {
-        return { mode: "city" as const, count: cityCount };
+      if (safeCityCount >= CITY_THRESHOLD || !deptCode) {
+        return { mode: "city" as const, count: safeCityCount };
       }
 
-      const { data: deptRows } = await supabase
+      const { count: deptCount } = await supabase
         .from("profiles")
-        .select("id, postal_code, sitter_profiles!inner(user_id)")
-        .like("postal_code", `${deptCode}%`)
-        .limit(50);
-      const deptCount = deptRows?.length ?? 0;
+        .select("id, postal_code, sitter_profiles!inner(user_id)", { count: "exact", head: true })
+        .like("postal_code", `${deptCode}%`);
 
-      return { mode: "dept" as const, count: deptCount, cityCount };
+      return { mode: "dept" as const, count: deptCount ?? 0, cityCount: safeCityCount };
     },
   });
 
@@ -217,7 +214,7 @@ const SitImmersiveContent = ({
             onValueChange={(v) => setActiveTab(v as typeof activeTab)}
             className="w-full"
           >
-            <div className="sticky top-0 z-20 -mx-4 md:-mx-6 px-4 md:px-6 py-2 mb-6 bg-background/95 supports-[backdrop-filter]:bg-background/80 backdrop-blur-md border-b border-border/60 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.08)]">
+            <div className="sticky top-16 z-20 -mx-4 md:-mx-6 px-4 md:px-6 py-2 mb-6 bg-background/95 supports-[backdrop-filter]:bg-background/80 backdrop-blur-md border-b border-border/60 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.08)]">
               <TabsList
                 aria-label="Sections de l'annonce"
                 className="w-full grid grid-cols-4 h-auto p-1 bg-muted/60 rounded-xl gap-1"

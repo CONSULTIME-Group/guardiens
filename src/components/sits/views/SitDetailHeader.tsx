@@ -144,20 +144,20 @@ const SitDetailHeader = ({
               {(sitStatus === "draft" ||
                 sitStatus === "published" ||
                 sitStatus === "confirmed") && (
-                <Link to={`/sits/${sitId}/edit`}>
-                  <Button variant="outline" size="sm" className="gap-1.5">
+                <Button asChild variant="outline" size="sm" className="gap-1.5">
+                  <Link to={`/sits/${sitId}/edit`}>
                     <Pencil className="h-3.5 w-3.5" /> Modifier
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               )}
-              <Link
-                to={`/annonces/${sitId}`}
+              <a
+                href={`/annonces/${sitId}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm text-primary hover:underline cursor-pointer flex items-center gap-1"
               >
                 Aperçu gardien <ExternalLink className="h-3.5 w-3.5" />
-              </Link>
+              </a>
             </>
           )}
           {/* Signaler : déplacé dans un menu kebab pour ne pas concurrencer
@@ -195,14 +195,14 @@ const SitDetailHeader = ({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-6">
-        {!compact && owner?.city && (
-          <span className="flex items-center gap-1.5">
-            <MapPin className="h-4 w-4" aria-hidden="true" />
-            {owner.city}
-          </span>
-        )}
-        {!compact && (
+      {!compact ? (
+        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-6">
+          {owner?.city && (
+            <span className="flex items-center gap-1.5">
+              <MapPin className="h-4 w-4" aria-hidden="true" />
+              {owner.city}
+            </span>
+          )}
           <span className="flex items-center gap-1.5">
             <Calendar className="h-4 w-4" aria-hidden="true" />
             <time dateTime={startDate || undefined}>{formatDate(startDate)}</time>
@@ -213,20 +213,29 @@ const SitDetailHeader = ({
               <span className="text-xs bg-accent px-2 py-0.5 rounded-full ml-1">Flexible</span>
             )}
           </span>
-        )}
-        <span
-          className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${status.className}`}
-          aria-label={`Statut de l'annonce : ${status.label}`}
-        >
-          {status.label}
-        </span>
-        {avgRating && (
-          <span className="flex items-center gap-1" aria-label={`Note moyenne ${avgRating} sur 5, ${reviewCount} avis`}>
-            <Star className="h-3.5 w-3.5 text-secondary fill-secondary" aria-hidden="true" />
-            {avgRating} ({reviewCount})
+          <span
+            className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${status.className}`}
+            aria-label={`Statut de l'annonce : ${status.label}`}
+          >
+            {status.label}
           </span>
-        )}
-      </div>
+          {avgRating && (
+            <span className="flex items-center gap-1" aria-label={`Note moyenne ${avgRating} sur 5, ${reviewCount} avis`}>
+              <Star className="h-3.5 w-3.5 text-secondary fill-secondary" aria-hidden="true" />
+              {avgRating} ({reviewCount})
+            </span>
+          )}
+        </div>
+      ) : (
+        <div className="mb-4">
+          <span
+            className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${status.className}`}
+            aria-label={`Statut de l'annonce : ${status.label}`}
+          >
+            {status.label}
+          </span>
+        </div>
+      )}
 
       {/* Owner card — masquée si on est soi-même le propriétaire OU en mode compact (déjà dans la sidebar immersive) */}
       {owner && !isOwner && !compact && (
@@ -279,11 +288,9 @@ const SitDetailHeader = ({
                 : "Ce membre n'a pas encore renseigné de présentation."}
             </p>
           </div>
-          <Link to={`/gardiens/${owner.id}`} className="shrink-0">
-            <Button variant="outline" size="sm">
-              Voir le profil
-            </Button>
-          </Link>
+          <Button asChild variant="outline" size="sm" className="shrink-0">
+            <Link to={`/gardiens/${owner.id}`}>Voir le profil</Link>
+          </Button>
         </div>
       )}
     </>
