@@ -1,32 +1,135 @@
 {
   "sources": {
-    "breed_profiles": {
-      "head": null,
-      "fetchedAt": "2026-05-09T20:10:21.213Z"
+    "seo_city_pages": {
+      "head": "2026-05-04T07:47:07.499343+00:00",
+      "fetchedAt": "2026-05-10T08:08:59.371Z"
     },
     "city_guides": {
       "head": "2026-05-05T10:38:22.999136+00:00",
-      "fetchedAt": "2026-05-09T20:10:21.231Z"
-    },
-    "seo_city_pages": {
-      "head": "2026-05-04T07:47:07.499343+00:00",
-      "fetchedAt": "2026-05-09T20:10:21.247Z"
-    },
-    "seo_department_pages": {
-      "head": "2026-03-26T05:46:21.361179+00:00",
-      "fetchedAt": "2026-05-09T20:10:21.248Z"
-    },
-    "articles": {
-      "head": "2026-04-29T20:53:12.373299+00:00",
-      "fetchedAt": "2026-05-09T20:10:21.249Z"
+      "fetchedAt": "2026-05-10T08:08:59.381Z"
     },
     "public_profiles": {
       "head": null,
-      "fetchedAt": "2026-05-09T20:10:21.273Z"
+      "fetchedAt": "2026-05-10T08:08:59.392Z"
+    },
+    "seo_department_pages": {
+      "head": "2026-03-26T05:46:21.361179+00:00",
+      "fetchedAt": "2026-05-10T08:08:59.394Z"
+    },
+    "articles": {
+      "head": "2026-05-10T08:07:45.187+00:00",
+      "fetchedAt": "2026-05-10T08:08:59.416Z"
+    },
+    "breed_profiles": {
+      "head": null,
+      "fetchedAt": "2026-05-10T08:08:59.435Z"
     }
   },
   "entries": {
-    "breed_profiles": [],
+    "seo_city_pages": [
+      {
+        "loc": "/house-sitting/megeve",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/valence",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/villeurbanne",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/clermont-ferrand",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/annecy",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/ecully",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/chambery",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/beaujolais",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/caluire-et-cuire",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/tassin-la-demi-lune",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/saint-didier-au-mont-d-or",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/saint-etienne",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/monts-du-lyonnais",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/grenoble",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/chamonix",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/bourg-saint-maurice",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/lyon",
+        "lastmod": "2026-05-04",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      }
+    ],
     "city_guides": [
       {
         "loc": "/guides/lyon",
@@ -311,110 +414,7 @@
         "priority": "0.7"
       }
     ],
-    "seo_city_pages": [
-      {
-        "loc": "/house-sitting/megeve",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/valence",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/villeurbanne",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/clermont-ferrand",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/annecy",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/ecully",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/chambery",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/beaujolais",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/caluire-et-cuire",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/tassin-la-demi-lune",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/saint-didier-au-mont-d-or",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/saint-etienne",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/monts-du-lyonnais",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/grenoble",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/chamonix",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/bourg-saint-maurice",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/lyon",
-        "lastmod": "2026-05-04",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      }
-    ],
+    "public_profiles": [],
     "seo_department_pages": [
       {
         "loc": "/departement/puy-de-dome",
@@ -460,6 +460,12 @@
       }
     ],
     "articles": [
+      {
+        "loc": "/actualites/comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.9"
+      },
       {
         "loc": "/actualites/devenir-gardien-urgence-guardiens",
         "lastmod": "2026-04-14",
@@ -791,6 +797,6 @@
         "priority": "0.6"
       }
     ],
-    "public_profiles": []
+    "breed_profiles": []
   }
 }

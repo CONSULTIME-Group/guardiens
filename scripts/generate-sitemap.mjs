@@ -63,6 +63,7 @@ const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIU
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const PRIORITY_MAP = {
+  guide_central: "0.9",
   ville: "0.9",
   guide_race: "0.8",
   guide_local: "0.8",
