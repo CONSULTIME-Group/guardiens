@@ -10,9 +10,37 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Helmet } from "react-helmet-async";
 import ChipSelect from "@/components/profile/ChipSelect";
-import { ArrowLeft, AlertCircle, Zap } from "lucide-react";
+import { ArrowLeft, AlertCircle, Zap, FileText, CalendarDays, Users, Sparkles, ImageIcon } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+
+/** Carte de section pour grouper visuellement les champs d'édition. */
+const SectionCard = ({
+  icon: Icon,
+  title,
+  description,
+  children,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}) => (
+  <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
+    <div className="flex items-start gap-3 mb-4">
+      <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+        <Icon className="h-4 w-4 text-primary" />
+      </div>
+      <div className="min-w-0">
+        <h2 className="font-heading font-semibold text-base">{title}</h2>
+        {description && (
+          <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+        )}
+      </div>
+    </div>
+    <div className="space-y-5">{children}</div>
+  </section>
+);
 
 const openToOptions = ["Familles", "Solo", "Couples", "Retraités", "Sans préférence"];
 const FLEXIBLE_MONTHS = ["Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre"];
