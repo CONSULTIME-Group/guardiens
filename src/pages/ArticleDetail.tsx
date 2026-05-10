@@ -597,10 +597,10 @@ export default function ArticleDetail() {
  {/* Related articles */}
  {relatedArticles.length > 0 && (
  <div className="mt-10 pt-8 border-t border-border">
- <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
- Articles similaires
- </h2>
- <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
+              Articles liés
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
  {relatedArticles.map((a) => (
  <Link key={a.slug} to={`/actualites/${a.slug}`} className="group">
  <Card className="h-full hover:shadow-md transition-shadow">
