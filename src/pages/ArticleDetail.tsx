@@ -459,20 +459,38 @@ export default function ArticleDetail() {
  </div>
  </header>
 
- {/* CORRECTION 2 — Alt text systématique */}
- {article.cover_image_url && (
- <div className="rounded-xl overflow-hidden mb-8">
- <img
- src={getOptimizedImageUrl(resolveImagePath(article.cover_image_url), 800, 75)}
- alt={altText}
- className="w-full h-auto max-h-96 object-cover"
- loading="eager"
- decoding="async"
- width={800}
- height={427}
- />
- </div>
- )}
+  {/* CORRECTION 2 — Alt text systématique. Les couvertures PNG (illustrations
+      à fond transparent / coups de pinceau) sont rendues sans cadre ni crop,
+      pour donner l'impression que l'illustration est peinte directement sur la
+      page. Les couvertures JPG/WebP (photos) gardent le rendu encadré. */}
+  {article.cover_image_url && (() => {
+    const isTransparentArtwork = /\.png(\?|$)/i.test(article.cover_image_url);
+    return isTransparentArtwork ? (
+      <div className="mb-8 -mx-2 sm:-mx-4">
+        <img
+          src={resolveImagePath(article.cover_image_url)}
+          alt={altText}
+          className="block w-full h-auto"
+          loading="eager"
+          decoding="async"
+          width={1600}
+          height={896}
+        />
+      </div>
+    ) : (
+      <div className="rounded-xl overflow-hidden mb-8">
+        <img
+          src={getOptimizedImageUrl(resolveImagePath(article.cover_image_url), 800, 75)}
+          alt={altText}
+          className="w-full h-auto max-h-96 object-cover"
+          loading="eager"
+          decoding="async"
+          width={800}
+          height={427}
+        />
+      </div>
+    );
+  })()}
 
  <ArticleRenderer content={article.content} userRole={isAuthenticated ? user?.role : undefined} slug={article.slug} />
 
