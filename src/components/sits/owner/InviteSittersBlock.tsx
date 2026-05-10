@@ -670,7 +670,7 @@ const InviteSittersBlock = ({
             <div className="rounded-xl border border-dashed border-border bg-card p-6 text-center">
               <Search className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
               <p className="text-sm text-muted-foreground">
-                Tapez au moins 2 caractères ou sélectionnez un département.
+                Tapez au moins 2 caractères, sélectionnez un département ou activez le rayon depuis votre ville.
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 Astuce : choisir le département de votre logement permet d'inviter les gardiens du coin.
