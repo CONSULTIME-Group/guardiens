@@ -9,15 +9,23 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Send, UserPlus, Check, MailCheck, Heart, Sparkles, ArrowRight } from "lucide-react";
+import { Search, Send, Check, MailCheck, Heart, Sparkles, ArrowRight, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useSitInvitations } from "@/hooks/useSitInvitations";
+import { DEPT_NAMES } from "@/lib/departments";
 import InviteSitterDialog from "./InviteSitterDialog";
 
 interface SitterRow {
@@ -35,6 +43,8 @@ interface InviteSittersBlockProps {
   sitCity: string | null;
   startDate: string | null;
   endDate: string | null;
+  /** Si true → applique un effet visuel d'accent (juste après publication) */
+  highlight?: boolean;
 }
 
 const InviteSittersBlock = ({
@@ -44,6 +54,7 @@ const InviteSittersBlock = ({
   sitCity,
   startDate,
   endDate,
+  highlight = false,
 }: InviteSittersBlockProps) => {
   const { data: favorites = [] } = useFavorites("sitter");
   const { data: invitations = [] } = useSitInvitations(sitId);
