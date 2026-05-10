@@ -324,6 +324,11 @@ const InviteSittersBlock = ({
     }
   }, [highlight, recapShown]);
 
+  // Envoi groupé aux 20 plus proches
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const remainingQuota = Math.max(0, 20 - sentCount);
+  const alreadyInvitedIds = useMemo(() => Array.from(invitedById.keys()), [invitedById]);
+
   return (
     <section
       id="invite-sitters-block"
