@@ -108,6 +108,36 @@ const SitDetailHeader = ({
         <div className="flex items-center gap-2 shrink-0">
           {isOwner && (
             <>
+              {/* Partager (icône) — ouvre un dialog avec toutes les options de partage.
+                  Remplace l'ancien gros bloc ShareButtons en haut de la fiche. */}
+              {showShareAction && (
+                <Dialog open={shareOpen} onOpenChange={setShareOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5"
+                      aria-label="Partager cette annonce"
+                    >
+                      <Share2 className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Partager</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Partager votre annonce</DialogTitle>
+                    </DialogHeader>
+                    <ShareButtons
+                      sitId={sitId}
+                      title={sitTitle || `Garde à ${ownerCity || owner?.city || "France"}`}
+                      city={ownerCity ?? owner?.city ?? null}
+                      startDate={startDate}
+                      endDate={endDate}
+                      source="owner_sit_detail"
+                    />
+                  </DialogContent>
+                </Dialog>
+              )}
               {/* Modifier : seulement sur les statuts non terminaux.
                   Les statuts terminaux (completed/cancelled/expired/in_progress)
                   ne doivent plus pouvoir être édités côté propriétaire. */}
