@@ -44,6 +44,24 @@ const SitDetail = () => {
 
   useEffect(() => {
     if (!id) return;
+    // Reset complet à chaque changement d'annonce pour éviter qu'un CTA
+    // (candidater, déjà postulé, déjà reviewé…) ne fuite d'une fiche à l'autre.
+    setLoading(true);
+    setSit(null);
+    setOwner(null);
+    setProperty(null);
+    setPets([]);
+    setOwnerProfile(null);
+    setReviews([]);
+    setSitterProfile(null);
+    setCoords(null);
+    setAppCount(0);
+    setPendingAppCount(0);
+    setHasApplied(false);
+    setHasReviewedThisSit(false);
+    setInitialLogementOverride("");
+    setInitialAnimauxOverride("");
+    setOwnerGallery([]);
     const load = async () => {
       const { data: sitRows } = await supabase.from("sits").select("*").eq("id", id).limit(1);
       const sitData = sitRows?.[0];
