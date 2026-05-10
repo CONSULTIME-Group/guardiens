@@ -40,6 +40,7 @@ function urlEntry(loc: string, lastmod: string, changefreq: string, priority: st
 }
 
 const PRIORITY_MAP: Record<string, string> = {
+  guide_central: "0.9",
   ville: "0.9",
   guide_race: "0.8",
   guide_local: "0.8",
@@ -56,6 +57,7 @@ const PRIORITY_MAP: Record<string, string> = {
 };
 
 const CHANGEFREQ_MAP: Record<string, string> = {
+  guide_central: "monthly",
   ville: "weekly",
   guide_race: "monthly",
   guide_local: "monthly",
