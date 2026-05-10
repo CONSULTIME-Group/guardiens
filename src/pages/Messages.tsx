@@ -201,7 +201,11 @@ const Messages = () => {
         archived_by: conv.archived_by || [],
         sit: conv.sit_id ? (sitsMap.get(conv.sit_id) || null) : null,
         small_mission: conv.small_mission_id ? (missionsMap.get(conv.small_mission_id) || null) : null,
-        other_user: profilesMap.get(otherId) || null,
+        other_user: (() => {
+          const p = profilesMap.get(otherId);
+          if (!p) return null;
+          return { ...p, show_last_seen: showLastSeenMap.get(otherId) ?? true };
+        })(),
         last_message: lastMsgMap.get(conv.id) || null,
         unread_count: unreadMap.get(conv.id) || 0,
         application_status: appStatus || null,
