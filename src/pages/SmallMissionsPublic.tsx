@@ -59,11 +59,11 @@ function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }
 
 /* ── data ── */
 const examples = [
- { img: spotVerger, alt: "Panier en osier rempli de fruits frais — illustration gouache", title: "Verger à ramasser", text: "Venir ramasser les fruits avant qu'ils tombent contre un énorme panier de fruits frais à emporter.", badge: "Fruits · Écully" },
+ { img: spotVerger, alt: "Panier en osier rempli de fruits frais — illustration gouache", title: "Verger à ramasser", text: "Venir ramasser les fruits avant qu'ils tombent contre un énorme panier de fruits frais à emporter.", badge: "Fruits · entre gens du coin" },
  { img: spotJardin, alt: "Panier d'herbes aromatiques et sécateur — illustration gouache", title: "Coup de main au jardin", text: "Donner un coup de main pour planter, désherber ou tailler — et venir se servir librement à la récolte.", badge: "Jardinage · entre gens du coin" },
- { img: spotPoules, alt: "Poule rousse devant un nid de paille avec des œufs — illustration gouache", title: "Poules à garder", text: "Nourrir les poules et ramasser les œufs pendant 10 jours contre des œufs frais à volonté au retour.", badge: "Œufs · Caluire" },
+ { img: spotPoules, alt: "Poule rousse devant un nid de paille avec des œufs — illustration gouache", title: "Poules à garder", text: "Nourrir les poules et ramasser les œufs pendant 10 jours contre des œufs frais à volonté au retour.", badge: "Œufs · entre gens du coin" },
  { img: spotChien, alt: "Chien assis avec sa laisse en cuir — illustration gouache", title: "Chien à promener", text: "Deux semaines de balades contre son chien promené la prochaine fois qu'on part.", badge: "Réciprocité · entre gens du coin" },
- { img: spotBricolage, alt: "Boîte à outils en bois ouverte avec marteau, tournevis et clé — illustration gouache", title: "Petit bricolage", text: "Un coup de main pour monter une étagère, fixer un meuble ou changer un robinet, contre un vrai repas fait maison.", badge: "Repas · Annecy" },
+ { img: spotBricolage, alt: "Boîte à outils en bois ouverte avec marteau, tournevis et clé — illustration gouache", title: "Petit bricolage", text: "Un coup de main pour monter une étagère, fixer un meuble ou changer un robinet, contre un vrai repas fait maison.", badge: "Repas · entre gens du coin" },
  { img: spotBienetre, alt: "Tasse en céramique, brin de lavande et galet — illustration gouache", title: "Énergie & bien-être", text: "Une séance de Reiki, un massage ou un moment de méditation partagés, en échange d'un service rendu en retour.", badge: "Échange · entre gens du coin" },
 ];
 
