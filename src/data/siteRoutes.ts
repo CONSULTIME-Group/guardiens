@@ -128,8 +128,8 @@ metaDescription: "Trouvez un gardien du coin pour votre maison et vos animaux. H
  },
  {
  path: "/tarifs",
- title: "Tarifs — 6,99 €/mois pour les gardiens | Guardiens",
- metaDescription: "6,99 €/mois pour les gardiens, 7 jours d'essai offerts. gratuit pour les propriétaires. Sans commission, sans frais cachés.",
+title: "Tarifs — 6,99\u00A0€/mois pour les gardiens | Guardiens",
+ metaDescription: "6,99\u00A0€/mois pour les gardiens, 7 jours d'essai offerts. Gratuit pour les propriétaires. Sans commission, sans frais cachés.",
  h1: "Nos tarifs",
  sitemapPriority: "0.8",
  changeFreq: "weekly",
