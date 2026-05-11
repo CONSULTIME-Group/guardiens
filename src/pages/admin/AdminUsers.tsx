@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, Crown, ChevronLeft, ChevronRight, MessageSquare, FileText, MailCheck } from "lucide-react";
+import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, Crown, ChevronLeft, ChevronRight, MessageSquare, FileText, MailCheck, UserCog } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { SuspendUserDialog } from "./_components/users/SuspendUserDialog";
 import { NoteUserDialog } from "./_components/users/NoteUserDialog";
@@ -18,6 +18,7 @@ import { SendMessageDialog, type MessageModalState } from "./_components/users/S
 import { MessageHistoryDialog, type HistoryItem } from "./_components/users/MessageHistoryDialog";
 import { LastMessageDialog, type LastMessageState } from "./_components/users/LastMessageDialog";
 import { ErrorDetailDialog, type ErrorDetailState } from "./_components/users/ErrorDetailDialog";
+import ChangeRoleDialog from "./_components/users/ChangeRoleDialog";
 
 const roleLabels: Record<string, string> = {
   owner: "Propriétaire",
