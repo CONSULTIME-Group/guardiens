@@ -453,24 +453,33 @@ const SmallMissions = () => {
                 ))}
               </div>
             ) : missionCount > 0 ? (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredMissions.map((m: any) => (
-                  <MissionCard
-                    key={`m-${m.id}`}
-                    mission={m}
-                    currentUserId={user?.id}
-                    isAuthenticated={isAuthenticated}
-                    canApplyMissions={canApplyMissions}
-                    mode={mode}
-                    onNavigateDetail={() => navigate(isAuthenticated ? `/petites-missions/${m.id}` : "/inscription")}
-                    onPropose={() => {
-                      if (!isAuthenticated) { navigate("/inscription"); return; }
-                      setDialogMission(m);
-                      setDialogTarget({ id: m.user_id, name: (m.profiles as any)?.first_name || "ce membre" });
-                    }}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {visibleMissionsList.map((m: any) => (
+                    <MissionCard
+                      key={`m-${m.id}`}
+                      mission={m}
+                      currentUserId={user?.id}
+                      isAuthenticated={isAuthenticated}
+                      canApplyMissions={canApplyMissions}
+                      mode={mode}
+                      onNavigateDetail={() => navigate(isAuthenticated ? `/petites-missions/${m.id}` : "/inscription")}
+                      onPropose={() => {
+                        if (!isAuthenticated) { navigate("/inscription"); return; }
+                        setDialogMission(m);
+                        setDialogTarget({ id: m.user_id, name: (m.profiles as any)?.first_name || "ce membre" });
+                      }}
+                    />
+                  ))}
+                </div>
+                {missionCount > visibleMissions && (
+                  <div className="flex justify-center pt-4">
+                    <Button variant="outline" onClick={() => setVisibleMissions((n) => n + PAGE_SIZE)}>
+                      Voir plus de demandes ({missionCount - visibleMissions} restantes)
+                    </Button>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-8 text-center space-y-3">
                 <p className="font-heading text-lg font-semibold text-foreground">
