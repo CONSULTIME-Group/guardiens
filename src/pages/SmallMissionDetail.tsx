@@ -859,6 +859,11 @@ const SmallMissionDetail = () => {
               >
                 {submitting ? "Envoi..." : "J'ose proposer mon aide"}
               </Button>
+              {!message.trim() && !submitting && (
+                <p className="text-xs text-muted-foreground text-center">
+                  Écrivez un mot ci-dessus pour activer le bouton.
+                </p>
+              )}
             </div>
           </div>
         )}
@@ -866,8 +871,8 @@ const SmallMissionDetail = () => {
         {/* Not logged in */}
         {!user && (
           <div className="text-center py-8">
-            <p className="text-muted-foreground mb-3">Inscrivez-vous gratuitement pour proposer votre aide.</p>
-            <Link to="/inscription"><Button>S'inscrire gratuitement</Button></Link>
+            <p className="text-muted-foreground mb-3">Inscrivez-vous à 0 € pour proposer votre aide.</p>
+            <Link to="/inscription"><Button>S'inscrire à 0 €</Button></Link>
           </div>
         )}
       </div>
