@@ -516,56 +516,7 @@ const SmallMissionsPublic = () => {
  </div>
  </section>
 
- {/* ═══ SECTION 4.6 — COMMENT ÇA SE PASSE, CONCRÈTEMENT (densification éditoriale) ═══ */}
- <section className="bg-muted/30 border-t border-border/40">
- <div className="max-w-5xl mx-auto px-6 py-20 md:py-24">
- <Reveal>
- <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 text-center mb-4">
- Sur le terrain
- </p>
- <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center leading-snug mb-3">
- Comment ça se passe, concrètement
- </h2>
- <p className="font-body text-base md:text-lg italic text-foreground/60 text-center max-w-xl mx-auto mb-12">
- Trois exemples typiques de missions réalisées sur Guardiens.
- </p>
- </Reveal>
-
- <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
- {[
- {
- title: "Une demande d'arrosage",
- text: "Une habitante de la Croix-Rousse part deux semaines en juillet. Elle propose une corbeille de tomates de son potager, contre l'arrosage trois fois par semaine. Quatre personnes du quartier répondent en moins de vingt-quatre heures.",
- },
- {
- title: "Une offre de promenade",
- text: "Quelqu'un à Caluire propose de promener un chien le matin avant le travail, contre une bière partagée de temps en temps. Trois mois plus tard, il connaît la moitié du quartier et a trouvé un café où on lui garde sa table.",
- },
- {
- title: "Un échange de compétences",
- text: "À Annecy, une demande de cours de cuisine italienne contre un coup de main au montage d'une terrasse en bois. Les deux parties ont gagné un samedi mémorable, un nouveau contact, et l'envie de recommencer.",
- },
- ].map((s, i) => (
- <Reveal key={s.title} delay={0.05 * i}>
- <div className="bg-card border border-border rounded-2xl p-6 md:p-7 h-full flex flex-col">
- <h3 className="font-heading text-lg md:text-xl font-semibold text-foreground mb-3">
- {s.title}
- </h3>
- <p className="font-body text-sm md:text-base text-foreground/75 leading-relaxed flex-1">
- {s.text}
- </p>
- </div>
- </Reveal>
- ))}
- </div>
-
-  <Reveal delay={0.2}>
- <p className="text-center font-body text-sm text-foreground/55 italic mt-10 max-w-xl mx-auto">
- Trois situations typiques de l'entraide entre gens du coin. À vous de les faire exister près de chez vous.
- </p>
- </Reveal>
- </div>
- </section>
+ {/* (ex-section 4.6 « Comment ça se passe » supprimée — doublon avec la section 4 Exemples) */}
 
  {/* ═══ SECTION 5 — RÈGLES ═══ */}
  <section className="bg-accent-foreground text-accent">
