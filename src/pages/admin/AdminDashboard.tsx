@@ -316,7 +316,7 @@ const AdminDashboard = () => {
     {
       title: "Inscrits",
       value: stats.totalUsers,
-      subtitle: `${stats.owners} proprios · ${stats.sitters} gardiens · ${stats.both} mixtes`,
+      subtitle: `${stats.owners} propriétaires · ${stats.sitters} gardiens · ${stats.both} polyvalents`,
       icon: Users,
       link: "/admin/users",
     },
@@ -349,13 +349,16 @@ const AdminDashboard = () => {
       link: "/admin/reviews",
     },
     {
-      title: "Revenus du mois",
-      value: `${stats.monthRevenue}€`,
-      subtitle: "Abonnements",
+      title: "Revenus mensuels estimés",
+      value: stats.monthRevenue.toLocaleString("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }),
+      subtitle: `Abonnements actifs × ${MONTHLY_SUBSCRIPTION_EUR.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}`,
       icon: CreditCard,
       link: "/admin/subscriptions",
     },
   ];
+
+  // Empty state lorsque rien n'est en attente
+  const nothingToDo = actionCards.length === 0 && lateCards.length === 0;
 
   return (
     <div className="space-y-8">
