@@ -464,13 +464,25 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
           {/* ── Slide 0: Welcome + mandatory fields ── */}
           {slide === 0 && (
             <div className="space-y-6">
-              <div>
+              <div className="relative">
                 <h2 className="font-heading text-2xl font-bold text-foreground">
                   Bienvenue sur Guardiens.
                 </h2>
                 <p className="text-base text-foreground/80 leading-relaxed mt-2">
                   En 2 minutes, rendez votre profil attractif. Commençons par faire connaissance — 30 secondes.
                 </p>
+                <p className="text-xs text-muted-foreground italic mt-2">
+                  Vous pourrez tout modifier plus tard depuis votre profil.
+                </p>
+                <img
+                  src={gouacheWelcome}
+                  alt=""
+                  aria-hidden="true"
+                  loading="lazy"
+                  width={120}
+                  height={120}
+                  className="hidden md:block absolute -top-4 -right-2 w-24 h-24 object-contain mix-blend-multiply opacity-90 select-none pointer-events-none"
+                />
               </div>
 
               <div className="space-y-4 bg-muted/50 rounded-xl p-5 border border-border">
