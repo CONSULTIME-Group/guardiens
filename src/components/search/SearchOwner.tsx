@@ -908,34 +908,39 @@ const SearchOwner = () => {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
               {results.map((s: any) => {
                 const profile = s.profile;
                 const sitterAnimalTypes: string[] = s.animal_types || [];
                 const firstName = profile?.first_name || "Gardien";
-                const bio = profile?.bio ? (profile.bio.length > 60 ? profile.bio.slice(0, 60) + "…" : profile.bio) : null;
+                const bio = profile?.bio ? (profile.bio.length > 80 ? profile.bio.slice(0, 80) + "…" : profile.bio) : null;
                 const distLabel = s._dist === 0 ? "Dans votre ville" : (s._dist != null && s._dist !== Infinity ? `${s._dist} km` : null);
 
                 return (
-                  <div key={s.id} className="group relative bg-card rounded-xl overflow-hidden border border-border hover:shadow-md transition-shadow flex flex-col max-w-sm">
+                  <Link
+                    key={s.id}
+                    to={`/gardiens/${s.user_id}`}
+                    aria-label={`Voir le profil de ${firstName}`}
+                    className="group relative bg-card rounded-xl overflow-hidden border border-border hover:shadow-md hover:border-primary/40 transition-all flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
                     {/* Favorite */}
                     <div className="absolute top-2 right-2 z-10">
                       <FavoriteButton targetType="sitter" targetId={s.user_id} />
                     </div>
 
-                    {/* Photo — carré, cadrage centré pour ne pas couper les visages */}
-                    <Link to={`/gardiens/${s.user_id}`} className="block relative" aria-label={`Voir le profil de ${firstName}`}>
+                    {/* Photo — carré, cadrage haut pour ne pas couper les visages */}
+                    <div className="relative">
                       {profile?.avatar_url ? (
-                        <div className="aspect-square w-full overflow-hidden rounded-t-lg bg-muted">
+                        <div className="aspect-square w-full overflow-hidden bg-muted">
                           <img
                             src={profile.avatar_url}
                             alt={firstName}
                             loading="lazy"
-                            className="w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform duration-300"
+                            className="w-full h-full object-cover object-[center_top] group-hover:scale-[1.02] transition-transform duration-300"
                           />
                         </div>
                       ) : (
-                        <div className="aspect-square w-full overflow-hidden rounded-t-lg bg-primary/10 flex items-center justify-center">
+                        <div className="aspect-square w-full overflow-hidden bg-primary/10 flex items-center justify-center">
                           <span className="text-3xl text-primary font-heading font-bold">{firstName.charAt(0)}</span>
                         </div>
                       )}
@@ -944,29 +949,26 @@ const SearchOwner = () => {
                           <Zap className="h-3 w-3 text-amber-500" /> Urgence
                         </span>
                       )}
-                    </Link>
+                    </div>
 
                     {/* Body */}
                     <div className="p-3 flex flex-col flex-1">
-                      {/* Line 1: name + verified pill + city + distance */}
-                      <Link to={`/gardiens/${s.user_id}`} className="hover:underline underline-offset-2">
-                        <p className="text-sm font-semibold truncate">
-                          {firstName}
-                          {profile?.identity_verified && (
-                            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium ml-1.5 inline-block align-middle">Vérifié</span>
-                          )}
-                        </p>
-                        {(profile?.city || distLabel) && (
-                          <p className="text-xs text-muted-foreground truncate">
-                            {profile?.city}
-                            {profile?.city && distLabel && " · "}
-                            {distLabel}
-                          </p>
+                      <p className="text-sm font-semibold truncate">
+                        {firstName}
+                        {profile?.identity_verified && (
+                          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium ml-1.5 inline-block align-middle">Vérifié</span>
                         )}
-                      </Link>
+                      </p>
+                      {(profile?.city || distLabel) && (
+                        <p className="text-xs text-muted-foreground truncate">
+                          {profile?.city}
+                          {profile?.city && distLabel && " · "}
+                          {distLabel}
+                        </p>
+                      )}
 
-                      {/* Line 2: rating + experience */}
-                      <div className="flex items-center gap-2 mt-1">
+                      {/* Rating + experience */}
+                      <div className="flex items-center gap-2 mt-1 min-h-[1rem]">
                         {s.avgRating !== null && (
                           <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
                             <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
@@ -978,34 +980,22 @@ const SearchOwner = () => {
                         )}
                       </div>
 
-                      {/* Line 3: animal pills */}
-                      {sitterAnimalTypes.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-1.5">
-                          {sitterAnimalTypes.slice(0, 3).map((a: string) => (
-                            <span key={a} className="text-[11px] bg-muted rounded-full px-2 py-0.5">{a}</span>
-                          ))}
-                          {sitterAnimalTypes.length > 3 && (
-                            <span className="text-[11px] text-muted-foreground">+{sitterAnimalTypes.length - 3}</span>
-                          )}
-                        </div>
-                      )}
+                      {/* Animal pills — zone réservée pour aligner */}
+                      <div className="flex flex-wrap gap-1 mt-1.5 min-h-[1.5rem]">
+                        {sitterAnimalTypes.slice(0, 3).map((a: string) => (
+                          <span key={a} className="text-[11px] bg-primary/10 text-primary rounded-full px-2 py-0.5 font-medium">{a}</span>
+                        ))}
+                        {sitterAnimalTypes.length > 3 && (
+                          <span className="text-[11px] text-muted-foreground self-center">+{sitterAnimalTypes.length - 3}</span>
+                        )}
+                      </div>
 
-                      {/* Line 4: bio truncated */}
-                      {bio && <p className="text-xs text-muted-foreground mt-1.5 line-clamp-1">{bio}</p>}
-
-                      {/* CTA — secondaire, pour ne pas saturer la grille */}
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => { e.preventDefault(); handleContact(s.user_id); }}
-                        disabled={contactingId === s.user_id}
-                        className="w-full mt-3"
-                      >
-                        <MessageCircle className="h-3.5 w-3.5" />
-                        {contactingId === s.user_id ? "..." : "Contacter"}
-                      </Button>
+                      {/* Bio — zone réservée 2 lignes pour aligner les cartes */}
+                      <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 min-h-[2rem]">
+                        {bio || <span className="opacity-0">.</span>}
+                      </p>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
