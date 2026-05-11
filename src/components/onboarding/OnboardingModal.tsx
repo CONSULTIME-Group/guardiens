@@ -644,8 +644,8 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
               </div>
 
               {usesSitterScoring && (
-                <div className="space-y-2">
-                  <Label>Mon style de vie</Label>
+                <div className="space-y-2 pt-2">
+                  <Label>Et un peu de vous : votre style de vie</Label>
                   <ChipSelect
                     options={LIFESTYLE_OPTIONS}
                     selected={lifestyle}
