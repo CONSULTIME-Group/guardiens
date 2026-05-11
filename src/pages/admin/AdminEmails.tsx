@@ -460,14 +460,16 @@ const SuppressionsTab = () => {
     setLoading(false);
   };
 
-  const handleUnblock = async (id: string, email: string) => {
-    const { error } = await supabase.from("suppressed_emails").delete().eq("id", id);
+  const handleUnblock = async () => {
+    if (!pendingUnblock) return;
+    const { error } = await supabase.from("suppressed_emails").delete().eq("id", pendingUnblock.id);
     if (error) {
       toast.error("Erreur lors du déblocage");
     } else {
-      toast.success(`${email} débloqué`);
-      setSuppressions((prev) => prev.filter((s) => s.id !== id));
+      toast.success(`${pendingUnblock.email} débloqué`);
+      setSuppressions((prev) => prev.filter((s) => s.id !== pendingUnblock.id));
     }
+    setPendingUnblock(null);
   };
 
   useEffect(() => { fetchSuppressions(); }, []);
