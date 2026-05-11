@@ -896,7 +896,7 @@ const PublicSitDetail = () => {
  {/* Note honnêteté : abonnement gardien à venir */}
  {!isAuthenticated && (sit as any).accepting_applications && (
  <p className="text-[11px] text-muted-foreground text-center mt-2 leading-snug">
- Inscription et candidature gratuites aujourd'hui. Un abonnement gardien sera introduit à terme — vous serez prévenu(e) avant tout changement.
+ Inscription et candidature à 0&nbsp;€ aujourd'hui. Un abonnement gardien sera introduit à terme — vous serez prévenu(e) avant tout changement.
  </p>
  )}
         </div>
