@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
-const entraideHeader = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/entraide-header.webp";
+// (image hero stock retirée — hero compact sans photo)
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -511,13 +511,14 @@ const SmallMissions = () => {
  try { localStorage.setItem("guardiens_skill_prompt_dismissed", "true"); } catch {}
  };
 
- const FILTER_PILLS: { key: CategoryFilter; label: string; icon: typeof Dog | null }[] = [
- { key: "all", label: "Tout", icon: null },
- { key: "garden", label: "Jardin", icon: Sprout },
- { key: "animals", label: "Animaux", icon: PawPrint },
- { key: "skills", label: "Compétences", icon: GraduationCap },
- { key: "house", label: "Maison", icon: Handshake },
- { key: "mine", label: "Mes missions", icon: null },
+  // Pills de filtre — sans icônes Lucide (règle mémoire « No Lucide/Emoji in content »)
+ const FILTER_PILLS: { key: CategoryFilter; label: string }[] = [
+ { key: "all", label: "Tout" },
+ { key: "garden", label: "Jardin" },
+ { key: "animals", label: "Animaux" },
+ { key: "skills", label: "Compétences" },
+ { key: "house", label: "Maison" },
+ { key: "mine", label: "Mes missions" },
  ];
 
  return (
@@ -527,61 +528,61 @@ const SmallMissions = () => {
  description="Des coups de main, des échanges, des compétences. Entre gens du coin qui se choisissent."
  />
 
- <div className="min-h-screen bg-background">
- {/* Hero */}
- <section className="relative overflow-hidden rounded-b-2xl">
- <div className="absolute inset-0">
- <img src={entraideHeader} alt="" className="w-full h-full object-cover" />
- <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/75 to-background/60" />
- </div>
- <div className="relative max-w-6xl mx-auto px-4 py-16 md:py-24 text-center space-y-4">
- <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
- Osez. Quelqu'un du coin n'attend que ça.
+  <div className="min-h-screen bg-background">
+ {/* Hero compact — pas d'image stock, ancrage avec le ton (gouache illustrations vivent dans la version SEO) */}
+ <section className="border-b border-border/40 bg-gradient-to-b from-primary/5 to-background">
+ <div className="max-w-6xl mx-auto px-4 py-8 md:py-10 text-center space-y-3">
+ <h1 className="font-heading text-3xl md:text-4xl font-bold text-foreground leading-tight">
+ Petites missions près de chez vous
  </h1>
- <p className="text-muted-foreground max-w-2xl mx-auto">
- Demander un coup de main, ce n'est pas déranger — c'est offrir une occasion de rendre service. Ici, personne ne juge ce qui est petit.
+ <p className="text-sm md:text-base text-muted-foreground max-w-xl mx-auto">
+ Demandez un coup de main ou proposez le vôtre — entre gens du coin, sans argent.
  </p>
  <p className="inline-block text-xs font-medium bg-badge-success text-badge-success-foreground px-3 py-1 rounded-full">
- Les petites missions sont gratuites, pour tout le monde.
+ Gratuit pour tous les membres
  </p>
  </div>
  </section>
 
- <main className="max-w-6xl mx-auto px-4 py-12 space-y-16">
+  <main className="max-w-6xl mx-auto px-4 py-8 md:py-10 space-y-12">
  <section className="space-y-6">
- {/* Mode toggle: need / offer */}
- <div className="flex items-center justify-center gap-1 bg-muted rounded-lg p-1 w-fit mx-auto">
- <button
- onClick={() => setMode("need")}
- className={`px-4 py-2 text-sm rounded-md transition-colors ${mode === "need" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
- >
- J'ose demander
- </button>
- <button
- onClick={() => setMode("offer")}
- className={`px-4 py-2 text-sm rounded-md transition-colors ${mode === "offer" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
- >
- J'ai du temps à offrir
- </button>
- </div>
-
+ {/* Actions de création — 2 CTAs explicites côte à côte (remplace l'ancien tab + bouton qui se dupliquaient) */}
  {isAuthenticated && canApplyMissions && (
- <div className="text-center">
- {mode === "need" ? (
- <Link to="/petites-missions/creer">
- <Button variant="hero" size="lg">
- J'ose demander
+ <div className="flex flex-col sm:flex-row gap-3 justify-center">
+ <Link to="/petites-missions/creer" className="sm:flex-initial">
+ <Button variant="hero" size="lg" className="w-full sm:w-auto">
+ Publier ma demande
  <ArrowRight className="ml-2 h-4 w-4" />
  </Button>
  </Link>
- ) : (
- <Button variant="hero" size="lg" onClick={openOfferDialog}>
- J'ai du temps à offrir
+ <Button variant="outline" size="lg" onClick={openOfferDialog} className="border-2">
+ Proposer mon aide
  <ArrowRight className="ml-2 h-4 w-4" />
  </Button>
- )}
  </div>
  )}
+
+ {/* Toggle de navigation — clarifié : ce que l'on PARCOURT, pas ce que l'on crée */}
+ <div className="flex items-center justify-center">
+ <div className="inline-flex items-center gap-1 bg-muted rounded-lg p-1" role="tablist" aria-label="Filtrer la liste">
+ <button
+ role="tab"
+ aria-selected={mode === "need"}
+ onClick={() => setMode("need")}
+ className={`px-4 py-2 text-sm rounded-md transition-colors ${mode === "need" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
+ >
+ Demandes du coin
+ </button>
+ <button
+ role="tab"
+ aria-selected={mode === "offer"}
+ onClick={() => setMode("offer")}
+ className={`px-4 py-2 text-sm rounded-md transition-colors ${mode === "offer" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
+ >
+ Personnes qui aident
+ </button>
+ </div>
+ </div>
  {isAuthenticated && accessLevel === 1 && (
  <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="mission" />
  )}
@@ -621,7 +622,8 @@ const SmallMissions = () => {
  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
  />
  </div>
- <div className="flex items-center gap-2 flex-1 min-w-0 max-w-[280px]">
+  <div className="flex items-center gap-2 flex-1 min-w-0 max-w-[300px]">
+ <span className="text-xs font-medium text-muted-foreground whitespace-nowrap shrink-0">Rayon</span>
  <input
  type="range"
  min={1}
@@ -632,10 +634,11 @@ const SmallMissions = () => {
  const v = Number(e.target.value);
  setRadiusKm(v >= 100 ? 0 : v);
  }}
+ aria-label="Rayon de recherche en kilomètres"
  className="flex-1 h-2 accent-[hsl(var(--primary))] cursor-pointer"
  />
- <span className="text-xs font-medium text-foreground whitespace-nowrap min-w-[60px] text-right">
- {radiusKm === 0 ? "Partout" : `${radiusKm} km`}
+ <span className="text-xs font-semibold text-foreground whitespace-nowrap min-w-[70px] text-right tabular-nums">
+ {radiusKm === 0 ? "France entière" : `${radiusKm} km`}
  </span>
  </div>
  {geocodingOrigin && (
@@ -664,20 +667,19 @@ const SmallMissions = () => {
  </div>
  </div>
 
- {/* Category filter pills */}
+  {/* Category filter pills (sans icônes décoratives) */}
  <div className="-mx-4 px-4 overflow-x-auto sm:overflow-visible sm:mx-0 sm:px-0">
  <div className="flex sm:flex-wrap items-center gap-2 sm:justify-center w-max sm:w-auto">
- {FILTER_PILLS.map(({ key, label, icon: Icon }) => (
+ {FILTER_PILLS.map(({ key, label }) => (
  <button
  key={key}
  onClick={() => setCategoryFilter(key)}
- className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm whitespace-nowrap transition-colors ${
+ className={`rounded-full border px-4 py-2 text-sm whitespace-nowrap transition-colors ${
  categoryFilter === key
  ? "bg-primary text-primary-foreground border-primary"
  : "bg-muted text-foreground border-border hover:border-primary/40"
  }`}
  >
- {Icon && <Icon className="h-3.5 w-3.5" />}
  {label}
  </button>
  ))}
@@ -688,9 +690,11 @@ const SmallMissions = () => {
  {/* ═══ Section 1 — Missions près de chez vous ═══ */}
  <h2 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
  {mode === "offer" ? "Demandes du coin à aider" : "Demandes près de chez vous"}
+  {missionCount > 0 && (
  <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
  {missionCount} demande{missionCount > 1 ? "s" : ""}
  </span>
+ )}
  </h2>
 
  {missionCount > 0 ? (
