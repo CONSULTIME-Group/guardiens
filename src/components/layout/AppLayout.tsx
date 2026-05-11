@@ -65,7 +65,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
           }}
         />
       )}
-      <DuplicateAccountGuard />
+      {/* DuplicateAccountGuard mont\u00e9 globalement dans App.tsx */}
     </div>
   );
 };
