@@ -767,10 +767,6 @@ const Messages = () => {
           />
         </div>
       ) : null}
-            </Link>
-          )}
-        </div>
-      ) : null}
     </div>
   );
 };
