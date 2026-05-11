@@ -430,15 +430,12 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                slide === 2 ? "Étape 3 sur 3 — Vos savoir-faire" :
                "Découverte de Guardiens"}
             </p>
-            {slide <= 2 && (
-              <p className="text-xs font-semibold text-primary">{liveCompletion}%</p>
-            )}
           </div>
           <Progress value={slide <= 2 ? ((slide + 1) / 3) * 100 : 100} className="h-1.5" />
         </div>
 
-        {/* Role tabs — only for read-only slides */}
-        {slide >= 3 && (
+        {/* Role tabs — only for "both" users on read-only slides */}
+        {slide >= 3 && userRole === "both" && (
           <div className="flex justify-center gap-1 mb-6">
             <button
               onClick={() => setActiveTab("gardien")}
