@@ -901,12 +901,22 @@ const SearchOwner = () => {
                 const distLabel = s._dist === 0 ? "Dans votre ville" : (s._dist != null && s._dist !== Infinity ? `${s._dist} km` : null);
 
                 return (
-                  <div key={s.id} className="bg-card rounded-xl overflow-hidden border border-border hover:shadow-md transition-shadow flex flex-col max-w-sm">
-                    {/* Photo — carré, visage en haut */}
-                    <Link to={`/gardiens/${s.user_id}`} className="block relative">
+                  <div key={s.id} className="group relative bg-card rounded-xl overflow-hidden border border-border hover:shadow-md transition-shadow flex flex-col max-w-sm">
+                    {/* Favorite */}
+                    <div className="absolute top-2 right-2 z-10">
+                      <FavoriteButton targetType="sitter" targetId={s.user_id} />
+                    </div>
+
+                    {/* Photo — carré, cadrage centré pour ne pas couper les visages */}
+                    <Link to={`/gardiens/${s.user_id}`} className="block relative" aria-label={`Voir le profil de ${firstName}`}>
                       {profile?.avatar_url ? (
-                        <div className="aspect-square w-full overflow-hidden rounded-t-lg">
-                          <img src={profile.avatar_url} alt={firstName} className="w-full h-full object-cover object-top" />
+                        <div className="aspect-square w-full overflow-hidden rounded-t-lg bg-muted">
+                          <img
+                            src={profile.avatar_url}
+                            alt={firstName}
+                            loading="lazy"
+                            className="w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform duration-300"
+                          />
                         </div>
                       ) : (
                         <div className="aspect-square w-full overflow-hidden rounded-t-lg bg-primary/10 flex items-center justify-center">
@@ -923,15 +933,20 @@ const SearchOwner = () => {
                     {/* Body */}
                     <div className="p-3 flex flex-col flex-1">
                       {/* Line 1: name + verified pill + city + distance */}
-                      <Link to={`/gardiens/${s.user_id}`}>
+                      <Link to={`/gardiens/${s.user_id}`} className="hover:underline underline-offset-2">
                         <p className="text-sm font-semibold truncate">
                           {firstName}
                           {profile?.identity_verified && (
                             <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium ml-1.5 inline-block align-middle">Vérifié</span>
                           )}
-                          {profile?.city && <span className="text-muted-foreground font-normal"> · {profile.city}</span>}
-                          {distLabel && <span className="text-muted-foreground font-normal"> · {distLabel}</span>}
                         </p>
+                        {(profile?.city || distLabel) && (
+                          <p className="text-xs text-muted-foreground truncate">
+                            {profile?.city}
+                            {profile?.city && distLabel && " · "}
+                            {distLabel}
+                          </p>
+                        )}
                       </Link>
 
                       {/* Line 2: rating + experience */}
@@ -962,15 +977,16 @@ const SearchOwner = () => {
                       {/* Line 4: bio truncated */}
                       {bio && <p className="text-xs text-muted-foreground mt-1.5 line-clamp-1">{bio}</p>}
 
-                      {/* CTA */}
+                      {/* CTA — secondaire, pour ne pas saturer la grille */}
                       <Button
                         size="sm"
+                        variant="outline"
                         onClick={(e) => { e.preventDefault(); handleContact(s.user_id); }}
                         disabled={contactingId === s.user_id}
-                        className="w-full mt-auto pt-2"
+                        className="w-full mt-3"
                       >
                         <MessageCircle className="h-3.5 w-3.5" />
-                        {contactingId === s.user_id ? "..." : `Contacter ${firstName}`}
+                        {contactingId === s.user_id ? "..." : "Contacter"}
                       </Button>
                     </div>
                   </div>
