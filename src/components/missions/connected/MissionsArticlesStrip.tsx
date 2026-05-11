@@ -26,7 +26,7 @@ const MissionsArticlesStrip = () => (
   <section aria-labelledby="missions-articles-heading" className="space-y-3">
     <div className="flex items-baseline justify-between">
       <h2 id="missions-articles-heading" className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        À lire pour bien démarrer
+        Pour aller plus loin
       </h2>
       <Link
         to="/actualites"
