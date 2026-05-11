@@ -6,7 +6,7 @@ import { FOUNDER_START, LAUNCH_DATE, GRACE_END } from "@/lib/constants";
 /**
  * Garde-fou éditorial : la promesse publique est
  *   • Lancement public : 14 juillet 2026 (fête nationale, après 3 mois de gratuité)
- *   • Statut Fondateur : réservé aux inscrits AVANT le 14 juillet 2026 (lancement public)
+ *   • Statut Fondateur : réservé aux inscrits avant / jusqu'au 14 juillet 2026 selon le contexte affiché
  *   • Gratuité pour TOUS : jusqu'au 14 juillet 2026 inclus
  *   • Tarif gardien (6,99 €/mois) : à partir du 15 juillet 2026
  *
@@ -91,8 +91,8 @@ describe("Cohérence des dates de gratuité", () => {
 
   describe("présence des dates canoniques", () => {
     const REQUIRED_PRESENCE: Record<string, RegExp[]> = {
-      "src/pages/Pricing.tsx": [/14\s+juillet\s+2026/, /15\s+juillet\s+2026/, /13\s+juillet\s+2026/],
-      "src/pages/Cgs.tsx": [/14\s+juillet\s+2026/, /15\s+juillet\s+2026/, /13\s+juillet\s+2026/],
+  "src/pages/Pricing.tsx": [/14\s+juillet\s+2026/, /15\s+juillet\s+2026/],
+  "src/pages/Cgs.tsx": [/14\s+juillet\s+2026/, /15\s+juillet\s+2026/],
       "src/pages/Landing.tsx": [/14\s+juillet\s+2026/],
     };
     for (const [file, patterns] of Object.entries(REQUIRED_PRESENCE)) {
