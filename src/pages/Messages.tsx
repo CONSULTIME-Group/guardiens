@@ -448,7 +448,17 @@ const Messages = () => {
   const showList = !activeConv || !isMobile;
   const showThread = !!activeConv;
 
-  if (loading) return <div className="p-6 md:p-10 text-muted-foreground">Chargement...</div>;
+  if (loading) {
+    return (
+      <div className="flex h-screen overflow-hidden">
+        <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+        <div className={`${isMobile ? "w-full" : "w-80 border-r border-border"} flex flex-col bg-card`}>
+          <MessagesListSkeleton />
+        </div>
+        {!isMobile && <div className="flex-1 bg-background" aria-hidden="true" />}
+      </div>
+    );
+  }
 
   const pills: { value: ConvPill; label: string }[] = [
     { value: "all", label: "Tout" },
