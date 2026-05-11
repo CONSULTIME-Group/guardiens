@@ -97,24 +97,44 @@ const ProfileSidebar = ({
       <nav className="flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 -mx-1 px-1">
         {sections.map((s) => {
           const isActive = activeSection === s.id;
+          const isDirty = dirtySection === s.id;
           return (
             <button
               key={s.id}
               type="button"
               onClick={() => onSectionClick(s.id)}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
-                "flex items-center gap-2.5 text-left rounded-lg px-3 py-2 transition-colors whitespace-nowrap lg:whitespace-normal lg:w-full shrink-0",
+                "relative flex items-center gap-2.5 text-left rounded-lg px-3 py-2 transition-colors whitespace-nowrap lg:whitespace-normal lg:w-full shrink-0",
                 isActive && "bg-primary/10 border-l-2 border-primary",
                 !isActive && "hover:bg-muted/50"
               )}
             >
-              {s.complete ? (
-                <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-              ) : (
-                <Circle className="h-4 w-4 text-muted-foreground shrink-0" />
-              )}
+              {/* Numéro de section + statut */}
+              <span className="relative shrink-0">
+                {s.complete ? (
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                ) : (
+                  <span
+                    className={cn(
+                      "inline-flex h-5 w-5 items-center justify-center rounded-full border text-[10px] font-semibold",
+                      isActive
+                        ? "border-primary text-primary"
+                        : "border-muted-foreground/40 text-muted-foreground"
+                    )}
+                  >
+                    {s.num}
+                  </span>
+                )}
+                {isDirty && (
+                  <span
+                    aria-label="Modifications non sauvegardées"
+                    className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-warning ring-2 ring-background"
+                  />
+                )}
+              </span>
               <div className="min-w-0">
-                <p className={cn("text-sm font-medium", isActive ? "text-foreground" : "text-foreground")}>
+                <p className="text-sm font-medium text-foreground">
                   {s.label}
                   {s.optional && <span className="text-xs font-normal text-muted-foreground ml-1">(optionnel)</span>}
                 </p>
