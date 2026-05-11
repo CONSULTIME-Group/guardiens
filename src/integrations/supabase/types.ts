@@ -4757,6 +4757,13 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: number
       }
+      change_user_role: {
+        Args: {
+          p_new_role: Database["public"]["Enums"]["user_role"]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       check_invitation_quota: { Args: { _owner_id: string }; Returns: boolean }
       complete_onboarding: {
         Args: {
