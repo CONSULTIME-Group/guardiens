@@ -908,6 +908,28 @@ const SearchOwner = () => {
               )}
             </div>
           ) : (
+            <>
+              {city && !alertCreated && (
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted/40 px-4 py-2.5">
+                  <p className="text-xs text-muted-foreground flex items-center gap-2">
+                    <Bell className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden="true" />
+                    Soyez prévenu·e dès qu'un nouveau gardien rejoint la zone autour de {city}.
+                  </p>
+                  <button
+                    onClick={handleCreateAlert}
+                    disabled={isCreatingAlert}
+                    className="text-xs font-medium text-primary hover:underline disabled:opacity-60 whitespace-nowrap"
+                  >
+                    {isCreatingAlert ? "Création…" : "Créer une alerte"}
+                  </button>
+                </div>
+              )}
+              {city && alertCreated && (
+                <div className="mb-4 flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-2.5 text-xs text-primary">
+                  <BellRing className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  Alerte créée — vous serez prévenu·e par e-mail.
+                </div>
+              )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
               {results.map((s: any) => {
                 const profile = s.profile;
