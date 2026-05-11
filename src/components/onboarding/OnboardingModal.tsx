@@ -829,7 +829,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
    ═══════════════════════════════════════════════════════ */
 
 const EntraideSlide = () => (
-  <div className="space-y-4">
+  <div className="space-y-5">
     <h2 className="font-heading text-2xl font-bold text-foreground">
       Au-delà des gardes : l'entraide entre gens du coin.
     </h2>
@@ -842,132 +842,74 @@ const EntraideSlide = () => (
       compétences contre un repas, un service rendu, une connexion qui dure.
       Jamais d'argent. Juste du concret.
     </p>
-    {/* Mock */}
-    <div className="pointer-events-none select-none mt-4 rounded-xl overflow-hidden border border-border shadow-sm bg-card">
-      <div className="border-b border-border px-4 py-2.5 flex items-center justify-between">
-        <p className="text-xs font-semibold">Petites missions</p>
-        <div className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">1 mission</div>
-      </div>
-      <div className="p-3 border-b border-border">
-        <div className="flex items-start gap-3">
-          <div className="bg-primary/10 rounded-lg p-2 flex-shrink-0">
-            <Leaf className="w-4 h-4 text-primary" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold mb-0.5">M'aider à ramasser les légumes du potager</p>
-            <p className="text-xs text-muted-foreground mb-1">Poleymieux · Demi-journée</p>
-            <p className="text-xs text-muted-foreground italic">En échange : un gros panier de légumes</p>
-          </div>
-        </div>
-      </div>
-      <div className="p-3 grid grid-cols-2 gap-2">
-        <div className="bg-muted rounded-lg p-2">
-          <div className="flex items-center gap-2 mb-1.5">
-            <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
-              <User className="w-3.5 h-3.5 text-primary/40" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold">Marie</p>
-              <p className="text-xs text-muted-foreground">Lyon</p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-1 mb-1.5">
-            <span className="bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">Animaux</span>
-            <span className="bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">Jardin</span>
-          </div>
-        </div>
-        <div className="bg-muted rounded-lg p-2">
-          <div className="flex items-center gap-2 mb-1.5">
-            <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
-              <User className="w-3.5 h-3.5 text-primary/40" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold">Lilit</p>
-              <p className="text-xs text-muted-foreground">Collonges</p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-1 mb-1.5">
-            <span className="bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">Animaux</span>
-            <span className="bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">Cuisine</span>
-          </div>
-        </div>
-      </div>
+    {/* Gouache posée directement sur la page */}
+    <div className="flex justify-center pt-2">
+      <img
+        src={gouacheEntraide}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        width={220}
+        height={220}
+        className="w-44 h-44 md:w-56 md:h-56 object-contain mix-blend-multiply select-none pointer-events-none"
+      />
     </div>
   </div>
 );
 
 const SitterParcoursSlide = () => {
   const steps = [
-    { icon: Send, title: "Vous postulez", desc: "Un message sincère et direct. C'est votre première impression." },
-    { icon: MessageCircle, title: "Vous échangez", desc: "Une conversation, quelques questions. Souvent une rencontre avant le départ." },
-    { icon: CheckCircle, title: "La garde est confirmée", desc: "Un accord de garde est généré automatiquement. Chacun valide à son rythme." },
-    { icon: Star, title: "Vous vous évaluez mutuellement", desc: "Un avis croisé, des écussons choisis. Une relation qui peut durer." },
+    { title: "Vous postulez", desc: "Un message sincère et direct. C'est votre première impression." },
+    { title: "Vous échangez", desc: "Une conversation, quelques questions. Souvent une rencontre avant le départ." },
+    { title: "La garde est confirmée", desc: "Un accord est généré automatiquement. Chacun valide à son rythme." },
+    { title: "Vous vous évaluez mutuellement", desc: "Un avis croisé, des écussons choisis. Une relation qui peut durer." },
   ];
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <h2 className="font-heading text-2xl font-bold text-foreground">
         Une garde, c'est simple.
       </h2>
-      <div className="flex flex-col gap-4 mt-2">
-        {steps.map((s, i) => {
-          const Icon = s.icon;
-          return (
-            <div key={i} className="flex items-start gap-3">
-              <Icon className="h-6 w-6 text-primary shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-sm text-foreground">{s.title}</p>
-                <p className="text-xs text-muted-foreground">{s.desc}</p>
-              </div>
+      <ol className="flex flex-col gap-4 mt-2">
+        {steps.map((s, i) => (
+          <li key={i} className="flex items-start gap-4">
+            <span
+              aria-hidden="true"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-semibold mt-0.5"
+            >
+              {i + 1}
+            </span>
+            <div>
+              <p className="font-semibold text-sm text-foreground">{s.title}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">{s.desc}</p>
             </div>
-          );
-        })}
-      </div>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 };
 
 const OwnerParcoursSlide = () => (
-  <div className="space-y-4">
+  <div className="space-y-5">
     <h2 className="font-heading text-2xl font-bold text-foreground">
       Notre accord de garde.
-      <br />
-      Un engagement mutuel, généré automatiquement.
     </h2>
     <p className="text-base text-foreground/80 leading-relaxed">
       Quand la garde est confirmée, Guardiens génère automatiquement un document
       qui résume ce que vous avez prévu ensemble. Chacun lit. Chacun valide.
       Vous partez l'esprit léger.
     </p>
-    {/* Mock accord */}
-    <div className="pointer-events-none select-none mt-4 rounded-xl overflow-hidden border border-border shadow-sm bg-card">
-      <div className="px-4 py-3 border-b border-border flex items-center justify-between">
-        <div>
-          <p className="text-sm font-semibold">Notre accord de garde</p>
-          <p className="text-xs text-muted-foreground mt-0.5">Garde du 14 mai au 21 mai 2026</p>
-        </div>
-        <div className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">Généré automatiquement</div>
-      </div>
-      <div className="px-4 py-2.5 border-b border-border">
-        <p className="text-xs font-semibold mb-1.5">Les animaux concernés</p>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5">
-            <PawPrint className="w-3 h-3 text-primary" />
-            <p className="text-xs text-muted-foreground">Rex · Chien · 3 ans</p>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <PawPrint className="w-3 h-3 text-primary" />
-            <p className="text-xs text-muted-foreground">Resa · Chat · 4 ans</p>
-          </div>
-        </div>
-      </div>
-      <div className="px-4 py-3 bg-primary/5">
-        <p className="text-xs text-muted-foreground text-center mb-2">
-          J'ai lu cet accord et je confirme que son contenu correspond à ce que nous avons prévu.
-        </p>
-        <div className="bg-primary text-primary-foreground text-xs font-semibold py-2.5 rounded-lg text-center">
-          C'est bon pour moi →
-        </div>
-      </div>
+    {/* Gouache posée directement sur la page */}
+    <div className="flex justify-center pt-2">
+      <img
+        src={gouacheGarde}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        width={220}
+        height={220}
+        className="w-44 h-44 md:w-56 md:h-56 object-contain mix-blend-multiply select-none pointer-events-none"
+      />
     </div>
   </div>
 );
