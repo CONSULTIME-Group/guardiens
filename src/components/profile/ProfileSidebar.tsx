@@ -54,13 +54,20 @@ const ProfileSidebar = ({
   return (
     <TooltipProvider delayDuration={200}>
     <aside className="w-full lg:w-[280px] lg:sticky lg:top-24 lg:self-start space-y-5 shrink-0">
-      {/* Name + city + founder badge */}
-      <div className="text-center space-y-1">
-        <p className="text-base font-semibold text-foreground">
-          {firstName ? firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase() : "Votre profil"}
-        </p>
-        {city && <p className="text-sm text-muted-foreground">{city}</p>}
-        {/* Badge fondateur — migration en cours */}
+      {/* Avatar + nom + ville */}
+      <div className="flex flex-col items-center text-center space-y-2">
+        <Avatar className="h-16 w-16 border border-border">
+          {avatarUrl && <AvatarImage src={avatarUrl} alt={firstName ?? "Profil"} />}
+          <AvatarFallback className="text-base font-semibold bg-muted">
+            {firstName ? firstName.charAt(0).toUpperCase() : "?"}
+          </AvatarFallback>
+        </Avatar>
+        <div className="space-y-0.5">
+          <p className="text-base font-semibold text-foreground">
+            {firstName ? firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase() : "Votre profil"}
+          </p>
+          {city && <p className="text-sm text-muted-foreground">{city}</p>}
+        </div>
       </div>
 
       {/* Completion */}
