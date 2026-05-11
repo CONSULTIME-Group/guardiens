@@ -77,7 +77,7 @@ const SECTIONS: SectionDef[] = [
 ];
 
 const Settings = () => {
-  const { user, activeRole, logout } = useAuth();
+  const { user, activeRole } = useAuth();
   const profileHref = (user?.role === "both" ? activeRole : user?.role) === "owner" ? "/owner-profile" : "/profile";
   const [prefs, setPrefs] = useState<NotifPrefs>(defaultPrefs);
   const [loading, setLoading] = useState(true);
