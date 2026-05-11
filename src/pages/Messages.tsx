@@ -2,13 +2,13 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Image as ImageIcon, Archive, X, Home, HeartHandshake, MessageSquare, Info, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Archive, Home, HeartHandshake, Lock, Loader2 } from "lucide-react";
 import EmptyState from "@/components/shared/EmptyState";
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import HouseGuideBlock from "@/components/messages/HouseGuideBlock";
 import ConversationHeader from "@/components/messages/ConversationHeader";
@@ -16,12 +16,15 @@ import ContextHeaderCard from "@/components/messages/ContextHeaderCard";
 import PresenceBadge from "@/components/messages/PresenceBadge";
 import DaySeparator from "@/components/messages/DaySeparator";
 import MessageBubble from "@/components/messages/MessageBubble";
+import MessageComposer from "@/components/messages/MessageComposer";
+import MessagesListSkeleton from "@/components/messages/MessagesListSkeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { trackFirstAction } from "@/lib/analytics";
-import { Lock } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { appStatusBadge as appStatusLabels } from "@/lib/messageStatus";
+import { useAutoOpenConversation } from "@/hooks/useAutoOpenConversation";
+
+const MESSAGES_PAGE_SIZE = 50;
 
 interface Conversation {
   id: string;
