@@ -106,6 +106,7 @@ const Settings = () => {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [deleteStatus, setDeleteStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [activeCommitmentsCount, setActiveCommitmentsCount] = useState<number | null>(null);
 
   // Export
