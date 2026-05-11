@@ -1,8 +1,9 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Check, CheckCircle2, Loader2 } from "lucide-react";
+import { ArrowRight, Check, CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import StepIdentity from "@/components/profile/StepIdentity";
 import StepSitterProfile from "@/components/profile/StepSitterProfile";
 import StepExperience from "@/components/profile/StepExperience";
@@ -12,9 +13,11 @@ import StepSkills from "@/components/profile/StepSkills";
 import SitterGallery from "@/components/profile/SitterGallery";
 import ExternalExperiences from "@/components/profile/ExternalExperiences";
 import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
+import ProfileSkeleton from "@/components/profile/ProfileSkeleton";
 import ScoreBreakdown, { type ScoreCriterion } from "@/components/profile/ScoreBreakdown";
 
 import { useSitterProfile, type SitterProfileData } from "@/hooks/useSitterProfile";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
