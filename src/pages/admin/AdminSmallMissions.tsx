@@ -233,6 +233,28 @@ const AdminSmallMissions = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!archiveId} onOpenChange={() => setArchiveId(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Masquer cette mission ?</DialogTitle></DialogHeader>
+          <DialogDescription>La mission sera retirée de la recherche. Vous pourrez la restaurer plus tard.</DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setArchiveId(null)}>Annuler</Button>
+            <Button variant="destructive" onClick={handleArchive}>Masquer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!restoreId} onOpenChange={() => setRestoreId(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Restaurer cette mission ?</DialogTitle></DialogHeader>
+          <DialogDescription>La mission sera remise en ligne et visible dans la recherche.</DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRestoreId(null)}>Annuler</Button>
+            <Button onClick={handleRestore}>Restaurer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
