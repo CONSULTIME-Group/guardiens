@@ -2,17 +2,36 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { X, Camera, CheckCircle, Send, MessageCircle, Star, User, PawPrint, MapPin, Leaf, ShieldCheck, Home, Calendar, Plus, Zap, Activity, Heart, BookOpen, Key, Wifi, Phone, Wrench, ChefHat, Circle } from "lucide-react";
+import { Camera, CheckCircle, User, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
 import ChipSelect from "@/components/profile/ChipSelect";
 import { compressImageFile } from "@/lib/compressImage";
 import { trackEvent } from "@/lib/analytics";
+import gouacheEntraide from "@/assets/onboarding/gouache-entraide.png";
+import gouacheGarde from "@/assets/onboarding/gouache-garde.png";
+import gouacheWelcome from "@/assets/onboarding/gouache-welcome.png";
 
 type ActiveTab = "gardien" | "proprio";
 
