@@ -15,8 +15,10 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   MapPin, Star, SlidersHorizontal, MessageCircle, Zap,
   LayoutGrid, Map as MapIcon, ShieldCheck, Crosshair, CircleDot, Car, Calendar,
-  Bell, BellRing, Loader2, Share2
+  Bell, BellRing, Loader2, Share2, MessageCircle as MsgIcon
 } from "lucide-react";
+import FavoriteButton from "@/components/shared/FavoriteButton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
