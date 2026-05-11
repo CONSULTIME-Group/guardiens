@@ -15,7 +15,7 @@ import PublicFooter from "@/components/layout/PublicFooter";
 import FreeAccountSection from "@/components/subscription/FreeAccountSection";
 import SecurityTrustSection from "@/components/subscription/SecurityTrustSection";
 import { LAUNCH_DATE, isBeforeLaunch, isInGracePeriod } from "@/lib/constants";
-import { SITTER_PRICE, SITTER_PRICE_START } from "@/lib/pricing";
+import { SITTER_PRICE, SITTER_PRICE_START, SITTER_PRICE_NUMERIC, SITTER_PRICE_CURRENCY, SITTER_PRICE_START_ISO } from "@/lib/pricing";
 
 const ownerFeatures = [
  "Publiez une annonce en 5 minutes",
@@ -189,9 +189,10 @@ const Pricing = () => {
    {
     "@type": "Offer",
     name: "Espace propriétaire",
-    description: "Publication d'annonces, messagerie et choix d'un gardien, sans abonnement.",
+    description: "À 0 € pour les propriétaires, sans abonnement requis.",
     price: "0",
-    priceCurrency: "EUR",
+    priceCurrency: SITTER_PRICE_CURRENCY,
+    eligibleCustomerType: "Owner",
     availability: "https://schema.org/InStock",
     url: "https://guardiens.fr/inscription?role=owner",
     priceValidUntil: "2027-12-31",
@@ -200,13 +201,15 @@ const Pricing = () => {
    {
     "@type": "Offer",
     name: "Abonnement Gardien — Mensuel",
-    description: "Accès complet gardien, 7 jours d'essai sans frais, résiliable à tout moment.",
-    price: "6.99",
-    priceCurrency: "EUR",
+    description: `Abonnement gardien à 6,99 €/mois à partir du 14 juillet 2026. 7 jours d'essai sans frais, résiliable à tout moment.`,
+    price: String(SITTER_PRICE_NUMERIC),
+    priceCurrency: SITTER_PRICE_CURRENCY,
+    eligibleCustomerType: "Sitter",
+    availabilityStarts: SITTER_PRICE_START_ISO,
     priceSpecification: {
      "@type": "UnitPriceSpecification",
-     price: "6.99",
-     priceCurrency: "EUR",
+     price: String(SITTER_PRICE_NUMERIC),
+     priceCurrency: SITTER_PRICE_CURRENCY,
      unitText: "MONTH",
      referenceQuantity: { "@type": "QuantitativeValue", value: "1", unitCode: "MON" },
     },
@@ -220,7 +223,9 @@ const Pricing = () => {
     name: "Accès Gardien — Un mois",
     description: "Paiement unique pour un mois d'accès, sans renouvellement automatique.",
     price: "12.00",
-    priceCurrency: "EUR",
+    priceCurrency: SITTER_PRICE_CURRENCY,
+    eligibleCustomerType: "Sitter",
+    availabilityStarts: SITTER_PRICE_START_ISO,
     availability: "https://schema.org/InStock",
     url: "https://guardiens.fr/inscription?role=sitter&plan=one_shot",
     priceValidUntil: "2026-12-31",
@@ -231,11 +236,13 @@ const Pricing = () => {
     name: "Formule 2026 — Prorata jusqu'à fin d'année",
     description: "Paiement unique pour tous les mois restants en 2026, -20% sur le tarif mensuel (5,59 €/mois équivalent).",
     price: "5.59",
-    priceCurrency: "EUR",
+    priceCurrency: SITTER_PRICE_CURRENCY,
+    eligibleCustomerType: "Sitter",
+    availabilityStarts: SITTER_PRICE_START_ISO,
     priceSpecification: {
      "@type": "UnitPriceSpecification",
      price: "5.59",
-     priceCurrency: "EUR",
+     priceCurrency: SITTER_PRICE_CURRENCY,
      unitText: "MONTH",
      referenceQuantity: { "@type": "QuantitativeValue", value: "1", unitCode: "MON" },
     },
@@ -244,7 +251,7 @@ const Pricing = () => {
     priceValidUntil: "2026-12-31",
     seller: { "@type": "Organization", name: "Guardiens" },
    },
-  ],
+   ],
  };
 
  return (

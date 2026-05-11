@@ -87,7 +87,8 @@ const CitySchemaOrg = ({ city }: Props) => {
  "@type": "Offer",
  price: "0",
  priceCurrency: "EUR",
- description: "Sans frais pour les propriétaires",
+ eligibleCustomerType: "Owner",
+ description: "À 0 € pour les propriétaires, sans abonnement requis.",
  },
  },
  {

@@ -18,6 +18,7 @@ import FreePeriodBanner from "@/components/marketing/FreePeriodBanner";
 
 import PublicFooter from "@/components/layout/PublicFooter";
 import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
+import { SITTER_PRICE_NUMERIC, SITTER_PRICE_CURRENCY, SITTER_PRICE_START_ISO } from "@/lib/pricing";
 import RevealOnScroll from "@/components/ui/RevealOnScroll";
 
 const HOME_ROUTE = staticRoutes.find((route) => route.path === "/");
@@ -453,10 +454,15 @@ const Landing = () => {
                   {
                     "@type": "Offer",
                     name: "Espace propriétaire",
+                    price: "0",
+                    priceCurrency: SITTER_PRICE_CURRENCY,
+                    eligibleCustomerType: "Owner",
+                    description:
+                      "À 0 € pour les propriétaires, sans abonnement requis.",
                     priceSpecification: {
                       "@type": "PriceSpecification",
                       price: "0",
-                      priceCurrency: "EUR",
+                      priceCurrency: SITTER_PRICE_CURRENCY,
                       description:
                         "Publication d'annonces et mise en relation sans abonnement pour les propriétaires. Sans carte bancaire.",
                     },
@@ -464,10 +470,16 @@ const Landing = () => {
                   {
                     "@type": "Offer",
                     name: "Abonnement gardien",
+                    price: String(SITTER_PRICE_NUMERIC),
+                    priceCurrency: SITTER_PRICE_CURRENCY,
+                    eligibleCustomerType: "Sitter",
+                    availabilityStarts: SITTER_PRICE_START_ISO,
+                    description:
+                      "Abonnement gardien à 6,99 €/mois à partir du 14 juillet 2026.",
                     priceSpecification: {
-                      "@type": "PriceSpecification",
-                      price: "6.99",
-                      priceCurrency: "EUR",
+                      "@type": "UnitPriceSpecification",
+                      price: String(SITTER_PRICE_NUMERIC),
+                      priceCurrency: SITTER_PRICE_CURRENCY,
                       unitCode: "MON",
                       description:
                         "Abonnement gardien à 6,99 €/mois après le 14 juillet 2026 — accès sans abonnement jusqu'à cette date.",
@@ -476,10 +488,14 @@ const Landing = () => {
                   {
                     "@type": "Offer",
                     name: "Entraide entre gens du coin",
+                    price: "0",
+                    priceCurrency: SITTER_PRICE_CURRENCY,
+                    description:
+                      "Petites missions et entraide sans abonnement pour tous.",
                     priceSpecification: {
                       "@type": "PriceSpecification",
                       price: "0",
-                      priceCurrency: "EUR",
+                      priceCurrency: SITTER_PRICE_CURRENCY,
                       description:
                         "Petites missions et entraide sans abonnement pour tous.",
                     },
