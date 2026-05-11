@@ -47,7 +47,7 @@ interface AppRow {
 }
 
 const statusColor: Record<string, string> = {
-  pending: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
+  pending: "bg-warning-soft text-warning-foreground dark:bg-amber-950 dark:text-amber-300",
   accepted: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
   rejected: "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300",
   withdrawn: "bg-muted text-muted-foreground",
@@ -356,7 +356,7 @@ const StatCard = ({
       <p
         className={`text-2xl font-bold tabular-nums mt-1 ${
           tone === "amber"
-            ? "text-amber-600 dark:text-amber-400"
+            ? "text-warning dark:text-amber-400"
             : tone === "emerald"
             ? "text-emerald-600 dark:text-emerald-400"
             : "text-foreground"

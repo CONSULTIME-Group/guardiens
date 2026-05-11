@@ -31,7 +31,7 @@ const MetricCard = ({ title, icon, value, subtitle, change, invertChange, isNew 
     }
 
     return (
-      <span className={`flex items-center gap-1 text-xs font-medium ${isPositive ? "text-emerald-600" : "text-red-500"}`}>
+      <span className={`flex items-center gap-1 text-xs font-medium ${isPositive ? "text-emerald-600" : "text-destructive"}`}>
         {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
         {formatted}
       </span>

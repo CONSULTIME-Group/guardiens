@@ -112,9 +112,9 @@ const AdminSmallMissions = () => {
 
       {/* Alert for suspect missions */}
       {suspectMissions.length > 0 && (
-        <Card className="border-orange-200 bg-orange-50 dark:bg-orange-900/10 dark:border-orange-800">
+        <Card className="border-warning-border bg-warning-soft dark:bg-orange-900/10 dark:border-orange-800">
           <CardContent className="p-3 flex items-center gap-3">
-            <AlertTriangle className="h-5 w-5 text-orange-500 shrink-0" />
+            <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
             <p className="text-sm flex-1">{suspectMissions.length} mission{suspectMissions.length > 1 ? "s" : ""} avec mention d'argent détectée{suspectMissions.length > 1 ? "s" : ""} — à vérifier</p>
           </CardContent>
         </Card>
@@ -174,9 +174,9 @@ const AdminSmallMissions = () => {
               const status = statusLabels[m.status] || { label: m.status, variant: "outline" as const };
               const isSuspect = moneyPattern.test(m.description || "") || moneyPattern.test(m.exchange_offer || "");
               return (
-                <TableRow key={m.id} className={isSuspect ? "bg-orange-50/50 dark:bg-orange-900/5" : ""}>
+                <TableRow key={m.id} className={isSuspect ? "bg-warning-soft/50 dark:bg-orange-900/5" : ""}>
                   <TableCell className="font-medium max-w-[180px] truncate">
-                    {isSuspect && <AlertTriangle className="h-3 w-3 text-orange-500 inline mr-1" />}
+                    {isSuspect && <AlertTriangle className="h-3 w-3 text-warning inline mr-1" />}
                     {m.title}
                   </TableCell>
                   <TableCell className="text-sm">

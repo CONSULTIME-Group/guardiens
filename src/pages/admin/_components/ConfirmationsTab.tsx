@@ -53,7 +53,7 @@ const StatusBadge = ({ row }: { row: Row }) => {
     return <Badge variant="outline" className="border-green-500 text-green-700 gap-1"><CheckCircle2 className="h-3 w-3" />Confirmé</Badge>;
   }
   if (row.status === "sent") {
-    return <Badge variant="outline" className="border-amber-500 text-amber-700 gap-1"><Hourglass className="h-3 w-3" />En attente</Badge>;
+    return <Badge variant="outline" className="border-amber-500 text-warning gap-1"><Hourglass className="h-3 w-3" />En attente</Badge>;
   }
   if (row.status === "failed" || row.status === "dlq" || row.status === "bounced") {
     return <Badge variant="destructive" className="gap-1"><XCircle className="h-3 w-3" />Échec</Badge>;
@@ -130,7 +130,7 @@ export const ConfirmationsTab = () => {
         </CardContent></Card>
         <Card><CardContent className="p-4">
           <div className="text-xs text-muted-foreground">En attente</div>
-          <div className="text-2xl font-bold text-amber-700">{stats?.total_pending ?? "—"}</div>
+          <div className="text-2xl font-bold text-warning">{stats?.total_pending ?? "—"}</div>
         </CardContent></Card>
         <Card><CardContent className="p-4">
           <div className="text-xs text-muted-foreground">Échecs</div>

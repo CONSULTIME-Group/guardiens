@@ -69,7 +69,7 @@ const fmt = (d: string | null) =>
 const urgencyBadge = (metadata: SendLogRow["metadata"]) => {
   if (!metadata) return null;
   if (metadata.isUrgent) {
-    return <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 text-[10px]">Urgent</Badge>;
+    return <Badge variant="outline" className="bg-warning-soft text-warning border-warning-border text-[10px]">Urgent</Badge>;
   }
   if (metadata.bypass) {
     return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-[10px]">Bypass</Badge>;

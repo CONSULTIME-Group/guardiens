@@ -269,7 +269,7 @@ const AdminContactMessages = () => {
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Clock className="h-4 w-4 text-orange-600 shrink-0" />
+                                <Clock className="h-4 w-4 text-warning shrink-0" />
                               </TooltipTrigger>
                               <TooltipContent><p>Sans réponse depuis plus de 48h</p></TooltipContent>
                             </Tooltip>

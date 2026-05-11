@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const planLabels: Record<string, { label: string; color: string }> = {
-  founder_free: { label: "Fondateur", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400" },
+  founder_free: { label: "Fondateur", color: "bg-warning-soft text-warning-foreground dark:bg-amber-900/30 dark:text-amber-400" },
   annual_sitter: { label: "Premium", color: "bg-primary/10 text-primary" },
   free_launch: { label: "Lancement gratuit", color: "bg-success-soft text-success" },
   owner_free: { label: "Proprio gratuit", color: "bg-muted text-muted-foreground" },
@@ -183,7 +183,7 @@ const AdminSubscriptions = () => {
       {/* Founder reminder buttons */}
       <Card>
         <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <Crown className="h-5 w-5 text-amber-500 shrink-0" />
+          <Crown className="h-5 w-5 text-warning shrink-0" />
           <div className="flex-1">
             <p className="font-medium text-sm">Rappels fondateurs</p>
             <p className="text-xs text-muted-foreground">Envoyer les emails de rappel aux fondateurs sans abonnement actif</p>
@@ -212,7 +212,7 @@ const AdminSubscriptions = () => {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30"><Crown className="h-5 w-5 text-amber-600 dark:text-amber-400" /></div>
+            <div className="p-2 rounded-lg bg-warning-soft dark:bg-amber-900/30"><Crown className="h-5 w-5 text-warning dark:text-amber-400" /></div>
             <div>
               <p className="text-2xl font-bold">{metrics.founders}</p>
               <p className="text-xs text-muted-foreground">Fondateurs actifs</p>
@@ -241,9 +241,9 @@ const AdminSubscriptions = () => {
 
       {/* Expiring alert */}
       {expiringCount > 0 && (
-        <Card className="border-orange-200 bg-orange-50 dark:bg-orange-900/10 dark:border-orange-800">
+        <Card className="border-warning-border bg-warning-soft dark:bg-orange-900/10 dark:border-orange-800">
           <CardContent className="p-3 flex items-center gap-3">
-            <Clock className="h-5 w-5 text-orange-500 shrink-0" />
+            <Clock className="h-5 w-5 text-warning shrink-0" />
             <p className="text-sm flex-1">{expiringCount} abonnement{expiringCount > 1 ? "s" : ""} expire{expiringCount > 1 ? "nt" : ""} dans les 30 prochains jours</p>
             <Button size="sm" variant="outline" onClick={() => setFilterExpiring(true)}>Voir</Button>
           </CardContent>
@@ -294,7 +294,7 @@ const AdminSubscriptions = () => {
               const plan = planLabels[sub.plan] || { label: sub.plan, color: "bg-muted text-muted-foreground" };
               const isExpiringSoon = sub.status === "active" && sub.expires_at && differenceInDays(new Date(sub.expires_at), new Date()) <= 30 && differenceInDays(new Date(sub.expires_at), new Date()) >= 0;
               return (
-                <TableRow key={sub.id} className={isExpiringSoon ? "bg-orange-50/50 dark:bg-orange-900/5" : ""}>
+                <TableRow key={sub.id} className={isExpiringSoon ? "bg-warning-soft/50 dark:bg-orange-900/5" : ""}>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       {sub.profile?.avatar_url && <img src={sub.profile.avatar_url} className="w-6 h-6 rounded-full object-cover" />}
@@ -309,14 +309,14 @@ const AdminSubscriptions = () => {
                   <TableCell className="text-xs text-muted-foreground">{sub.started_at ? format(new Date(sub.started_at), "d MMM yyyy", { locale: fr }) : "—"}</TableCell>
                   <TableCell className="text-xs text-muted-foreground">
                     {sub.expires_at ? format(new Date(sub.expires_at), "d MMM yyyy", { locale: fr }) : "Illimité"}
-                    {isExpiringSoon && <span className="ml-1 text-orange-500 font-medium">⚠</span>}
+                    {isExpiringSoon && <span className="ml-1 text-warning font-medium">⚠</span>}
                   </TableCell>
                   <TableCell>
                     <Badge variant={sub.status === "active" ? "default" : sub.status === "expired" ? "destructive" : "outline"}>
                       {sub.status === "active" ? "Actif" : sub.status === "expired" ? "Expiré" : "Annulé"}
                     </Badge>
                   </TableCell>
-                  <TableCell>{sub.profile?.is_founder ? <Crown className="h-4 w-4 text-amber-500" /> : "—"}</TableCell>
+                  <TableCell>{sub.profile?.is_founder ? <Crown className="h-4 w-4 text-warning" /> : "—"}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
                       <Button variant="ghost" size="icon" title="Voir profil" onClick={() => navigate(`/gardiens/${sub.user_id}`)}>
@@ -334,7 +334,7 @@ const AdminSubscriptions = () => {
                         </Button>
                       ) : (
                         <Button variant="ghost" size="icon" title="Attribuer Fondateur" onClick={() => setActionModal({ open: true, sub, action: "grant_founder", duration: "", motif: "" })}>
-                          <ShieldCheck className="h-4 w-4 text-amber-500" />
+                          <ShieldCheck className="h-4 w-4 text-warning" />
                         </Button>
                       )}
                     </div>

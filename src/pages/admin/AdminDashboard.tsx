@@ -397,7 +397,7 @@ const AdminDashboard = () => {
       {lateCards.length > 0 && (
         <div className="space-y-3">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <Clock className="h-5 w-5 text-orange-600" />
+            <Clock className="h-5 w-5 text-warning" />
             En retard
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -405,14 +405,14 @@ const AdminDashboard = () => {
               <button
                 key={card.link + card.label}
                 onClick={() => navigate(card.link)}
-                className="flex items-center gap-4 rounded-xl border border-orange-200 bg-orange-50 p-4 text-left hover:bg-orange-100 transition-colors"
+                className="flex items-center gap-4 rounded-xl border border-warning-border bg-warning-soft p-4 text-left hover:bg-warning-soft transition-colors"
               >
-                <div className="rounded-lg bg-orange-100 p-2">
-                  <card.icon className="h-5 w-5 text-orange-600" />
+                <div className="rounded-lg bg-warning-soft p-2">
+                  <card.icon className="h-5 w-5 text-warning" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-orange-700">{card.count}</p>
-                  <p className="text-sm text-orange-600">{card.label}</p>
+                  <p className="text-2xl font-bold text-warning">{card.count}</p>
+                  <p className="text-sm text-warning">{card.label}</p>
                 </div>
               </button>
             ))}
@@ -427,12 +427,12 @@ const AdminDashboard = () => {
             <button
               key={alert.link}
               onClick={() => navigate(alert.link)}
-              className="flex items-center gap-3 p-4 rounded-xl bg-orange-50 border border-orange-200 text-left hover:bg-orange-100 transition-colors"
+              className="flex items-center gap-3 p-4 rounded-xl bg-warning-soft border border-warning-border text-left hover:bg-warning-soft transition-colors"
             >
-              <div className="p-2 rounded-lg bg-orange-100">
-                <AlertTriangle className="h-4 w-4 text-orange-600" />
+              <div className="p-2 rounded-lg bg-warning-soft">
+                <AlertTriangle className="h-4 w-4 text-warning" />
               </div>
-              <span className="text-sm font-medium text-orange-800">
+              <span className="text-sm font-medium text-warning-foreground">
                 <strong>{alert.count}</strong> {alert.label}
               </span>
             </button>

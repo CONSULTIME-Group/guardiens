@@ -196,17 +196,17 @@ const AdminSitsManagement = () => {
       {(overdueConfirmed.length > 0 || missingReviews14d.length > 0 || cancelledThisWeek.length > 0) && (
         <div className="space-y-2">
           {overdueConfirmed.length > 0 && (
-            <Card className="border-orange-200 bg-orange-50">
+            <Card className="border-warning-border bg-warning-soft">
               <CardContent className="p-3 flex items-center gap-3">
-                <AlertTriangle className="h-5 w-5 text-orange-500 shrink-0" />
+                <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
                 <p className="text-sm flex-1">{overdueConfirmed.length} garde{overdueConfirmed.length > 1 ? "s" : ""} avec dates passées mais encore "confirmée{overdueConfirmed.length > 1 ? "s" : ""}"</p>
               </CardContent>
             </Card>
           )}
           {missingReviews14d.length > 0 && (
-            <Card className="border-orange-200 bg-orange-50">
+            <Card className="border-warning-border bg-warning-soft">
               <CardContent className="p-3 flex items-center gap-3">
-                <Star className="h-5 w-5 text-orange-500 shrink-0" />
+                <Star className="h-5 w-5 text-warning shrink-0" />
                 <p className="text-sm flex-1">{missingReviews14d.length} garde{missingReviews14d.length > 1 ? "s" : ""} avec avis manquant depuis +14 jours</p>
               </CardContent>
             </Card>
@@ -270,7 +270,7 @@ const AdminSitsManagement = () => {
               return (
                 <TableRow
                   key={sit.id}
-                  className={`transition-colors hover:bg-muted/50 ${isOverdue ? "bg-orange-50/50" : ""}`}
+                  className={`transition-colors hover:bg-muted/50 ${isOverdue ? "bg-warning-soft/50" : ""}`}
                 >
                   <TableCell className="font-medium max-w-[160px] truncate">{sit.title || "Sans titre"}</TableCell>
                   <TableCell className="text-sm">
