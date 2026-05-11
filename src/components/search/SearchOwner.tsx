@@ -1021,6 +1021,7 @@ const SearchOwner = () => {
                 );
               })}
             </div>
+            </>
           )}
         </div>
       ) : (
