@@ -377,23 +377,31 @@ const DisputeCard = ({
         {/* Actions */}
         {dispute.status === "pending" && (
           <div className="flex items-center gap-2 pt-2 border-t border-border">
-            <Button
-              size="sm"
-              onClick={() => onResolve("accepted")}
-              className="gap-1.5"
-            >
-              <CheckCircle2 className="h-4 w-4" />
-              Accepter & retirer l'avis
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onResolve("rejected")}
-              className="gap-1.5"
-            >
-              <XCircle className="h-4 w-4" />
-              Refuser
-            </Button>
+            <ConfirmDialog
+              trigger={
+                <Button size="sm" className="gap-1.5">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Accepter & retirer l'avis
+                </Button>
+              }
+              title="Accepter la contestation et retirer l'avis ?"
+              description="L'avis litigieux sera retiré du profil public et la contestation marquée comme acceptée. Cette action est définitive."
+              confirmLabel="Accepter & retirer"
+              destructive
+              onConfirm={() => onResolve("accepted")}
+            />
+            <ConfirmDialog
+              trigger={
+                <Button size="sm" variant="outline" className="gap-1.5">
+                  <XCircle className="h-4 w-4" />
+                  Refuser
+                </Button>
+              }
+              title="Refuser cette contestation ?"
+              description="L'avis sera maintenu et la contestation marquée comme refusée. L'auteur de la contestation en sera informé."
+              confirmLabel="Refuser la contestation"
+              onConfirm={() => onResolve("rejected")}
+            />
           </div>
         )}
       </div>
