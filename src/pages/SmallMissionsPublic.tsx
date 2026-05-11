@@ -854,6 +854,30 @@ const SmallMissionsPublic = () => {
      acceptedAnswer: { "@type": "Answer", text: faq.a },
     })),
    })}</script>
+   <script type="application/ld+json">{JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "Publier une demande de coup de main près de chez vous",
+    description: "Comment publier une petite mission d'entraide gratuite sur Guardiens, sans abonnement.",
+    totalTime: "PT3M",
+    step: [
+     { "@type": "HowToStep", position: 1, name: "Décrire la mission", text: "Vous décrivez la mission — tonte, bricolage, promener le chien, réceptionner un colis." },
+     { "@type": "HowToStep", position: 2, name: "Proposer une contrepartie", text: "Vous proposez ce que vous donnez en échange — un repas, des légumes, une bouteille." },
+     { "@type": "HowToStep", position: 3, name: "Choisir et rencontrer", text: "Des gens du coin voient votre mission et proposent leur aide. Vous choisissez. Vous vous rencontrez." },
+    ],
+   })}</script>
+   <script type="application/ld+json">{JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "Proposer son aide à des gens du coin",
+    description: "Comment publier une offre d'aide bénévole sur Guardiens et rencontrer des personnes proches qui en ont besoin.",
+    totalTime: "PT3M",
+    step: [
+     { "@type": "HowToStep", position: 1, name: "Décrire votre savoir-faire", text: "Vous décrivez ce que vous savez faire — jardinage, montage de meubles, cuisine, aide aux courses." },
+     { "@type": "HowToStep", position: 2, name: "Préciser la contrepartie", text: "Vous dites ce que vous aimeriez en échange — ou vous laissez la personne proposer." },
+     { "@type": "HowToStep", position: 3, name: "Rencontrer et échanger", text: "Quelqu'un a besoin exactement de ça. Il vous contacte. L'échange commence." },
+    ],
+   })}</script>
    </Helmet>
 
    {/* QW#6 — Sticky CTA mobile : apparaît après dépassement du hero, masqué en desktop */}
