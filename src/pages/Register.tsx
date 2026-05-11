@@ -29,9 +29,9 @@ import {
 type Role = "owner" | "sitter" | "both";
 
 const roles: { value: Role; label: string; description: string }[] = [
- { value: "owner", label: "Propriétaire", description: "Je cherche un gardien pour ma maison et mes animaux" },
- { value: "sitter", label: "Gardien", description: "Je souhaite garder des maisons et m'occuper d'animaux" },
- { value: "both", label: "Les deux", description: "Je veux pouvoir garder et faire garder" },
+ { value: "owner", label: "Propriétaire", description: "J'ai des animaux ou une maison à faire garder. Je publie des annonces et je choisis un gardien." },
+ { value: "sitter", label: "Gardien", description: "Je veux garder des maisons et m'occuper d'animaux. Je consulte les annonces et je propose mes services." },
+ { value: "both", label: "Les deux", description: "Je veux à la fois faire garder et garder. Vous aurez accès aux deux espaces." },
 ];
 
 /* ── Password strength helper ── */
@@ -619,8 +619,12 @@ const Register = () => {
  <div className="font-semibold text-sm lg:text-base mb-0.5 lg:mb-1">{role.label}</div>
  <div className="text-xs lg:text-sm text-muted-foreground leading-snug">{role.description}</div>
  </button>
- ))}
+  ))}
  </div>
+
+ <p className="mt-3 text-center text-[11px] lg:text-xs text-muted-foreground/80">
+  Vous changerez d'avis ? Le rôle reste modifiable à tout moment depuis vos paramètres.
+ </p>
 
  {/* Trust strip — réassurances clés juste avant la décision */}
  <ul className="mt-5 lg:mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-[11px] lg:text-xs text-muted-foreground">
