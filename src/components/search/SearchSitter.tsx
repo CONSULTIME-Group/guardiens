@@ -2249,7 +2249,7 @@ const SearchSitter = () => {
 
  <p className="text-sm text-muted-foreground max-w-md mx-auto">
  {densityCounts.france > 0
- ? "Élargissez la zone, explorez les régions voisines ou créez une alerte pour ne rien rater près de chez vous."
+ ? "Élargissez la zone, explorez les régions limitrophes ou créez une alerte pour ne rien rater près de chez vous."
  : "La communauté grandit chaque jour. Voici comment ne rien rater et tirer profit de votre temps dès maintenant."}
  </p>
  </div>

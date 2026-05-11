@@ -164,8 +164,8 @@ const CityPage = () => {
 
  return (
  <>
- <PageBreadcrumb items={[
- { label: "Nos villes", href: "/house-sitting" },
+          <PageBreadcrumb items={[
+            { label: "Nos villes" },
  { label: cityData.name },
  ]} />
  </>
@@ -449,7 +449,7 @@ const CityPage = () => {
 
  <div className="min-h-screen bg-background">
  <PageBreadcrumb items={[
- { label: "Nos villes", href: "/house-sitting" },
+ { label: "Nos villes" },
  { label: dbPage.city },
  ]} />
 
