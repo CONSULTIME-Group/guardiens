@@ -52,7 +52,7 @@ const OwnerPitchSection = ({ user }: { user: any }) => {
             Recommandé : laissez désactivé. Les gardiens passent ainsi par vos annonces publiées, ce qui garantit un cadre clair (dates, animaux, attentes).
           </p>
           <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-            <strong className="text-foreground">L'entraide entre voisins reste toujours ouverte :</strong> ce réglage ne concerne <em>que</em> les propositions de garde. Les coups de main ponctuels (petites missions) peuvent vous être proposés librement.
+            <strong className="text-foreground">L'entraide reste toujours ouverte :</strong> ce réglage ne concerne <em>que</em> les propositions de garde. Les coups de main ponctuels (petites missions) peuvent vous être proposés librement par les gens du coin.
           </p>
         </div>
         <Switch checked={accept} onCheckedChange={handleToggle} />
