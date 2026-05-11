@@ -98,9 +98,10 @@ const SmallMissions = () => {
  const queryClient = useQueryClient();
  const { hasAccess, status: subStatus } = useSubscriptionAccess();
  const { level: accessLevel, profileCompletion, canApplyMissions } = useAccessLevel();
- const [searchParams] = useSearchParams();
- const initialMode: ModeFilter = searchParams.get("type") === "offre" ? "offer" : "need";
- const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
+  const [searchParams, setSearchParams] = useSearchParams();
+ const initialMode: ModeFilter = (searchParams.get("type") === "offre" || searchParams.get("mode") === "offer") ? "offer" : "need";
+ const initialCat = (searchParams.get("cat") as CategoryFilter) || "all";
+ const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>(initialCat);
  const [mode, setMode] = useState<ModeFilter>(initialMode);
  const [dialogMission, setDialogMission] = useState<any>(null);
  const [dialogTarget, setDialogTarget] = useState<{ id: string; name: string } | null>(null);
@@ -127,13 +128,26 @@ const SmallMissions = () => {
 
  const mySkills: string[] = (currentUserProfile as any)?.skill_categories || [];
 
- const [postalCodeInput, setPostalCodeInput] = useState("");
- const [radiusKm, setRadiusKm] = useState(0); // 0 = "Partout" — défaut volontaire (cold start, base nationale)
+  const [postalCodeInput, setPostalCodeInput] = useState("");
+ const initialRadius = Number(searchParams.get("radius") || "0");
+ const [radiusKm, setRadiusKm] = useState(Number.isFinite(initialRadius) ? initialRadius : 0); // 0 = "Partout" — défaut volontaire (cold start, base nationale)
  const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>(null);
  const [geocodingOrigin, setGeocodingOrigin] = useState(false);
 
  // ── Competence search state ──
- const [competenceSearch, setCompetenceSearch] = useState("");
+ const [competenceSearch, setCompetenceSearch] = useState(searchParams.get("q") || "");
+
+ // ── Sync filters → URL (lien partageable + reload safe) ──
+ useEffect(() => {
+ const next = new URLSearchParams(searchParams);
+ if (categoryFilter !== "all") next.set("cat", categoryFilter); else next.delete("cat");
+ if (mode === "offer") next.set("mode", "offer"); else next.delete("mode");
+ if (radiusKm > 0) next.set("radius", String(radiusKm)); else next.delete("radius");
+ if (competenceSearch.trim()) next.set("q", competenceSearch.trim()); else next.delete("q");
+ next.delete("type"); // ancien paramètre, on migre vers `mode`
+ setSearchParams(next, { replace: true });
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [categoryFilter, mode, radiusKm, competenceSearch]);
 
  // ── "Proposer mon aide" dialog state ──
  const [offerDialogOpen, setOfferDialogOpen] = useState(false);
