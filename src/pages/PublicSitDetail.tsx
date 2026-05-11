@@ -346,7 +346,7 @@ const PublicSitDetail = () => {
  const truncatedDesc = ogDescription.length > 200 ? ogDescription.slice(0, 197) + "…" : ogDescription;
 
  // SEO description (≤160 char) — distincte de og:description
- const seoDescription = `Garde à ${cityForTitle} ${datesShort}. ${petsSummary}. ${owner?.first_name || "Un membre"} cherche un gardien du coin sur Guardiens — inscription gratuit pour les propriétaires.`;
+ const seoDescription = `Garde à ${cityForTitle} ${datesShort}. ${petsSummary}. ${owner?.first_name || "Un membre"} cherche un gardien du coin sur Guardiens — inscription à 0\u00A0€ pour les propriétaires.`;
  const truncatedSeoDesc = seoDescription.length > 160 ? seoDescription.slice(0, 157) + "…" : seoDescription;
 
  const canonicalUrl = typeof window !== "undefined"
@@ -854,7 +854,7 @@ const PublicSitDetail = () => {
  <Button className="w-full h-12 text-base font-semibold">
  {owner?.first_name
  ? `S'inscrire et postuler — aider ${owner.first_name}`
- : "S'inscrire gratuitement et postuler"}
+ : "S'inscrire sans frais et postuler"}
  </Button>
  </Link>
  ) : !hasAccess ? (
@@ -896,7 +896,7 @@ const PublicSitDetail = () => {
  {/* Note honnêteté : abonnement gardien à venir */}
  {!isAuthenticated && (sit as any).accepting_applications && (
  <p className="text-[11px] text-muted-foreground text-center mt-2 leading-snug">
- Inscription et candidature gratuites aujourd'hui. Un abonnement gardien sera introduit à terme — vous serez prévenu(e) avant tout changement.
+ Inscription et candidature à 0&nbsp;€ aujourd'hui. Un abonnement gardien sera introduit à terme — vous serez prévenu(e) avant tout changement.
  </p>
  )}
         </div>
