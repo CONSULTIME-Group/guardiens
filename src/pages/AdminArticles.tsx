@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Plus, Pencil, Trash2, Eye, ArrowLeft, CheckCircle2, AlertTriangle, XCircle, Link2, Loader2 } from "lucide-react";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -117,7 +118,6 @@ const AdminArticles = () => {
   useEffect(() => { fetchArticles(); }, [filterCategory, filterStatus]);
 
   const deleteArticle = async (id: string) => {
-    if (!confirm("Supprimer cet article ?")) return;
     const { error } = await supabase.from("articles").delete().eq("id", id);
     if (error) toast.error("Erreur de suppression");
     else { toast.success("Article supprimé"); fetchArticles(); }
@@ -257,9 +257,18 @@ const AdminArticles = () => {
                       <Button variant="ghost" size="icon" onClick={() => navigate(`/admin/articles/${article.id}`)} title="Modifier">
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => deleteArticle(article.id)} title="Supprimer">
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                      <ConfirmDialog
+                        trigger={
+                          <Button variant="ghost" size="icon" title="Supprimer">
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        }
+                        title="Supprimer cet article ?"
+                        description={<>L'article <strong>« {article.title} »</strong> sera supprimé définitivement. Cette action est irréversible.</>}
+                        confirmLabel="Supprimer définitivement"
+                        destructive
+                        onConfirm={() => deleteArticle(article.id)}
+                      />
                     </div>
                   </TableCell>
                 </TableRow>
