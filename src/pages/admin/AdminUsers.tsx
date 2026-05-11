@@ -75,6 +75,9 @@ const AdminUsers = () => {
   const [lastMessageModal, setLastMessageModal] = useState<LastMessageState>({
     open: false, loading: false, userName: "", userId: "", conversationId: null, content: null, sentAt: null
   });
+  const [roleModal, setRoleModal] = useState<{ open: boolean; userId: string | null; userName: string; currentRole: "owner" | "sitter" | "both" | null }>({
+    open: false, userId: null, userName: "", currentRole: null,
+  });
   const navigate = useNavigate();
 
   const openHistory = async () => {
