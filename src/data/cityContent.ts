@@ -40,7 +40,7 @@ const cityContent: Record<string, CityContentData> = {
 
 Les pensions pour animaux autour d'Annecy coûtent entre 25 et 45 € par jour. Pour deux semaines, ça fait vite 350 à 600 €. Et votre chat qui déteste les cages ? Votre chien qui a besoin de son jardin ?
 
-Le house-sitting (parfois appelé home sitting en français), c'est la solution de bon sens : un gardien vérifié vient chez vous, s'occupe de vos animaux dans leur environnement, arrose le jardin, et veille sur la maison. **Gratuit pour le propriétaire. Logement offert pour le gardien.**
+Le house-sitting (parfois appelé home sitting en français), c'est la solution de bon sens : un gardien vérifié vient chez vous, s'occupe de vos animaux dans leur environnement, arrose le jardin, et veille sur la maison. **À 0 € pour le propriétaire. Logement offert pour le gardien.**
 
 À Annecy, cette logique de proximité est naturelle. Les gens se connaissent entre quartiers, l'entraide est dans l'ADN savoyard. Guardiens digitalise cette confiance de proximité.`,
  },
@@ -63,7 +63,7 @@ En été, c'est l'arrosage du jardin, la gestion des volets contre la chaleur, e
  title: "Le match : pension animale vs Guardiens",
  content: `| | Pension | Guardiens |
 |---|---|---|
-| **Coût** | 25-45 €/jour | Gratuit |
+| **Coût** | 25-45 €/jour | À 0 € |
 | **Environnement** | Cage / box collectif | Chez vous |
 | **Stress animal** | Élevé (changement) | Minimal (habitudes) |
 | **Maison surveillée** | Non | Oui |
@@ -75,7 +75,7 @@ Pour un séjour de 14 jours avec un chien et un chat, **vous économisez 500 à 
  {
  id: "comment",
  title: "Comment ça marche ?",
- content: `**1. Inscrivez-vous** — gratuit en 2 minutes, que vous soyez propriétaire ou gardien.
+ content: `**1. Inscrivez-vous** — à 0 € en 2 minutes, que vous soyez propriétaire ou gardien.
 
 **2. Publiez votre annonce** — décrivez votre maison, vos animaux, les dates, et vos attentes.
 
@@ -249,7 +249,7 @@ Tous passent par le même processus de vérification : identité contrôlée, pr
 
 C'est cette expérience de terrain qui structure aujourd'hui la plateforme : la rencontre physique obligatoire avant chaque garde, le guide de la maison qui centralise toutes les informations pratiques, le réseau de gardiens d'urgence mobilisables en quelques heures, les avis croisés qui construisent la confiance au fil du temps.
 
-Guardiens lance officiellement le 13 juillet 2026 avec les premiers fondateurs — ceux qui rejoignent la plateforme avant le lancement public et qui contribuent à façonner l'outil. Lyon est le point de départ, la France entière le terrain naturel d'expansion.`,
+Guardiens lance officiellement le 14 juillet 2026 avec les premiers fondateurs — ceux qui rejoignent la plateforme avant le lancement public et qui contribuent à façonner l'outil. Lyon est le point de départ, la France entière le terrain naturel d'expansion.`,
  },
  {
  id: "faq",
@@ -339,7 +339,7 @@ Consultez également le [guide complet du gardien à Lyon](/guides/lyon), la pag
  title: "Pourquoi le house-sitting à Grenoble ?",
  content: `Grenoble, ceinturée par trois massifs montagneux — Chartreuse, Vercors, Belledonne — attire des passionnés d'outdoor. Mais quand on part randonner, skier ou voyager, qui garde la maison et les animaux ?
 
-Le house-sitting (parfois appelé home sitting en français) à Grenoble, c'est la réponse locale : un home sitter vérifié s'installe chez vous, s'occupe de vos animaux dans leur environnement, et veille sur votre logement. **Gratuit pour le propriétaire.**
+Le house-sitting (parfois appelé home sitting en français) à Grenoble, c'est la réponse locale : un home sitter vérifié s'installe chez vous, s'occupe de vos animaux dans leur environnement, et veille sur votre logement. **À 0 € pour le propriétaire.**
 
 La cuvette grenobloise crée des contraintes spécifiques : pics de pollution en hiver, chaleur estivale concentrée, et quartiers en pente parfois difficiles d'accès par temps de neige. Un home sitter local connaît ces réalités.`,
  },
@@ -363,7 +363,7 @@ En été, la cuvette concentre la chaleur : un bon gardien maintient les volets 
 
 | | Pension | Guardiens |
 |---|---|---|
-| **Coût** | 25-40 €/jour | Gratuit |
+| **Coût** | 25-40 €/jour | À 0 € |
 | **Environnement** | Cage / box | Chez vous |
 | **Stress animal** | Élevé | Minimal |
 | **Maison surveillée** | Non | Oui |

@@ -495,7 +495,7 @@ const Landing = () => {
                     name: "Qu'est-ce que le house sitting ?",
                     acceptedAnswer: {
                       "@type": "Answer",
-                      text: "Le house sitting est un échange de services : un gardien habite gratuitement dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties.",
+                      text: "Le house sitting est un échange de services : un gardien habite sans frais dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties.",
                     },
                   },
                   {
@@ -897,7 +897,7 @@ const Landing = () => {
               Choisir en confiance, à un kilomètre comme à mille.
             </h2>
             <p className="text-base md:text-lg text-muted-foreground mt-5 leading-relaxed">
-              Quatre repères pour partir tranquille : gratuit côté propriétaires, rencontre avant chaque garde, profils vérifiés, et un périmètre que vous fixez vous-même.
+              Quatre repères pour partir tranquille : à 0 € côté propriétaires, rencontre avant chaque garde, profils vérifiés, et un périmètre que vous fixez vous-même.
             </p>
           </RevealSection>
 
@@ -924,7 +924,7 @@ const Landing = () => {
             <RevealOnScroll from="right" delay={120} className="order-1 lg:order-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">01</p>
-                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Gratuit pour les propriétaires</h3>
+                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">À 0 € pour les propriétaires</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
                   Annonce, candidatures, messagerie : tout est sans frais, sans abonnement. Pas de carte bancaire demandée.
                 </p>
@@ -1377,7 +1377,7 @@ const Landing = () => {
                   Qu'est-ce que le house-sitting ?
                 </dt>
                 <dd className="text-sm text-foreground/70 leading-relaxed">
-                  Le house-sitting est un échange de services : un gardien habite gratuitement dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties.
+                  Le house-sitting est un échange de services : un gardien habite sans frais dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties.
                 </dd>
               </div>
               <div className="bg-card border border-border rounded-2xl p-6">
@@ -1459,7 +1459,7 @@ const Landing = () => {
             </button>
           </div>
           <p className="text-xs text-white/70 font-body">
-            Inscription en 2 minutes, sans carte bancaire. Badge Fondateur pour les inscrits avant le 13 juillet 2026.
+            Inscription en 2 minutes, sans carte bancaire. Badge Fondateur pour les inscrits avant le 14 juillet 2026.
           </p>
         </RevealSection>
       </section>

@@ -17,8 +17,8 @@ const RoleActivationBanner = ({ userRole }: RoleActivationBannerProps) => {
   const targetRole = userRole === "sitter" ? "proprio" : "gardien";
   const text =
     userRole === "sitter"
-      ? "Vous avez aussi des animaux à faire garder ? Activez votre espace propriétaire — c'est gratuit →"
-      : "Envie de garder des maisons ? Essayez gratuitement pendant 30 jours →";
+      ? "Vous avez aussi des animaux à faire garder ? Activez votre espace propriétaire — c'est à 0 € →"
+      : "Envie de garder des maisons ? Essayez sans frais pendant 30 jours →";
 
   return (
     <>

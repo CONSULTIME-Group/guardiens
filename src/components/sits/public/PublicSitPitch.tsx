@@ -63,7 +63,7 @@ export default function PublicSitPitch({
         <p className="mt-3 text-[15px] text-foreground/80 leading-relaxed">
           {subjectLabel} part en voyage et confie {possessive} maison et {possessive === "sa" ? "ses" : "les"} compagnons à un
           gardien Guardiens. <strong className="text-foreground">Vous êtes
-          logé·e gratuitement</strong> en échange de votre présence
+          logé·e sans frais</strong> en échange de votre présence
           bienveillante&nbsp;: une vraie parenthèse, dans un nouveau décor, à
           votre rythme.
         </p>

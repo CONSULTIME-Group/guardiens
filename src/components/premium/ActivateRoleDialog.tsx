@@ -78,7 +78,7 @@ const ActivateRoleDialog = ({ open, onClose, targetRole }: ActivateRoleDialogPro
               Vous avez aussi des animaux à faire garder ?
             </DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground text-center">
-              L'espace propriétaire est gratuit. Activez-le en un clic pour publier des annonces et trouver un gardien près de chez vous.
+              L'espace propriétaire est à 0 €. Activez-le en un clic pour publier des annonces et trouver un gardien près de chez vous.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-2 pt-2">
@@ -103,12 +103,12 @@ const ActivateRoleDialog = ({ open, onClose, targetRole }: ActivateRoleDialogPro
             Envie de garder des maisons aussi ?
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground text-center">
-            L'abonnement gardien est à 6,99&nbsp;€/mois. Vous avez 30 jours gratuits pour tester — sans engagement. Vous pouvez vous désabonner à tout moment depuis vos paramètres.
+            L'abonnement gardien est à 6,99&nbsp;€/mois. Vous avez 30 jours sans frais pour tester — sans engagement. Vous pouvez vous désabonner à tout moment depuis vos paramètres.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2 pt-2">
           <Button onClick={handleActivateGardien} disabled={loading}>
-            {loading ? "Redirection..." : "Essayer gratuitement 30 jours →"}
+            {loading ? "Redirection..." : "essayer sans frais 30 jours →"}
           </Button>
           <Button variant="ghost" onClick={onClose} disabled={loading}>
             Pas maintenant

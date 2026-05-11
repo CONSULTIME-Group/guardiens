@@ -49,8 +49,8 @@ const DEFAULT_FAQ = (cityName: string) => [
  a: `Sur Guardiens, vous publiez une annonce et les gardiens disponibles à ${cityName} et ses environs postulent directement. Chaque gardien est vérifié manuellement avant d'apparaître sur la plateforme.`,
  },
  {
- q: `Est-ce vraiment gratuit pour les propriétaires à ${cityName} ?`,
- a: "Oui. Guardiens est gratuite pour tous les propriétaires. Seuls les gardiens paient un abonnement pour accéder aux annonces et postuler.",
+ q: `Est-ce vraiment à 0 € pour les propriétaires à ${cityName} ?`,
+ a: "Oui. Guardiens est à 0 € pour tous les propriétaires. Seuls les gardiens paient un abonnement pour accéder aux annonces et postuler.",
  },
  {
  q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityName} ?`,
@@ -157,7 +157,7 @@ const CitySchemaOrg = ({ city }: Props) => {
  "@type": "City",
  name: "Lyon",
  },
- priceRange: "Gratuit pour les propriétaires",
+ priceRange: "À 0 € pour les propriétaires",
  });
  }
 
