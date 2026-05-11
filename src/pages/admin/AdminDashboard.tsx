@@ -85,7 +85,7 @@ const MONTHLY_SUBSCRIPTION_EUR = 6.99;
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState<Stats | null>(null);
-  const [alerts, setAlerts] = useState<Alert[]>([]);
+  // Alerts state retiré : duplication avec actionCards (cf. refonte)
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [weeklySignups, setWeeklySignups] = useState<WeeklySignup[]>([]);
   const [deptData, setDeptData] = useState<DeptData[]>([]);
