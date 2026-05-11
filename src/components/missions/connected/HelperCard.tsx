@@ -14,7 +14,7 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile }: Props) => {
   const toShow = comps.length > 0 ? comps : (h.custom_skills as string[] || []);
 
   return (
-    <div className="rounded-2xl border border-primary/20 bg-card p-5 space-y-3">
+    <div className="rounded-lg border border-border bg-card p-5 space-y-3 transition-colors hover:border-primary/30">
       <span className="inline-block text-xs rounded-full bg-primary/10 text-primary px-3 py-1">
         Disponible pour aider
       </span>
@@ -27,7 +27,7 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile }: Props) => {
           </div>
         )}
         <div>
-          <p className="text-base font-heading font-semibold text-foreground">{h.first_name}</p>
+          <p className="text-base font-heading font-semibold text-foreground">{h.first_name || "Membre disponible"}</p>
           {h.city && <p className="text-xs text-muted-foreground">{h.city}</p>}
         </div>
       </div>
@@ -69,7 +69,7 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile }: Props) => {
           onClick={onPropose}
           className="text-sm text-primary font-semibold hover:underline"
         >
-          Proposer un échange →
+          Proposer à {h.first_name || "ce membre"} →
         </button>
         <button
           onClick={onViewProfile}

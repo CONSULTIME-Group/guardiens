@@ -17,6 +17,9 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
   const meta = CATEGORY_META[m.category] || CATEGORY_META.animals;
   const isCompleted = m.status === "completed";
   const isMine = m.user_id === currentUserId;
+  const authorName = (m.profiles as any)?.first_name || "un membre";
+  const authorLabel = isMine ? "vous" : authorName;
+  const authorInitial = authorName.charAt(0).toUpperCase();
 
   return (
     <div
@@ -37,6 +40,23 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
             )}
           </div>
           <p className="font-medium text-sm text-foreground">{m.title}</p>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            {(m.profiles as any)?.avatar_url ? (
+              <img
+                src={(m.profiles as any).avatar_url}
+                alt=""
+                loading="lazy"
+                className="h-6 w-6 rounded-full border border-border object-cover"
+              />
+            ) : (
+              <span className="flex h-6 w-6 items-center justify-center rounded-full border border-border bg-muted text-[11px] font-semibold text-foreground">
+                {authorInitial || "?"}
+              </span>
+            )}
+            <span>
+              Demandé par <span className="font-medium text-foreground">{authorLabel}</span>
+            </span>
+          </div>
           <p className="text-xs text-muted-foreground">
             {formatCity(m.city || "—")} · {formatDuration(m.duration_estimate || "—")}
           </p>
@@ -64,7 +84,7 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
                 className="w-full mt-2"
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); onPropose(); }}
               >
-                {mode === "offer" ? "Je peux aider →" : "Proposer un échange →"}
+                {mode === "offer" ? `Aider ${authorName} →` : `Proposer à ${authorName} →`}
               </Button>
             )
           )}
