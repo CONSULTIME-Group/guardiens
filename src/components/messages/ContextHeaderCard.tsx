@@ -128,8 +128,6 @@ const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCit
     );
   }
 
-    );
-  }
 
   return null;
 };
