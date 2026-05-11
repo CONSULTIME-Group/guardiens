@@ -370,38 +370,13 @@ const SmallMissions = () => {
 
         <main className="max-w-6xl mx-auto px-4 py-8 md:py-10 pb-28 md:pb-10 space-y-12">
           <section className="space-y-6">
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              {isAuthenticated && !canApplyMissions ? (
-                <Button variant="hero" size="lg" disabled className="w-full sm:w-auto gap-1">
+            {isAuthenticated && !canApplyMissions && (
+              <div className="flex justify-center">
+                <Button variant="hero" size="lg" disabled className="gap-1">
                   Complétez votre profil pour publier
                 </Button>
-              ) : (
-                <Button
-                  variant="hero"
-                  size="lg"
-                  className="w-full sm:w-auto"
-                  onClick={() => {
-                    if (!isAuthenticated) { navigate("/inscription?redirect=/petites-missions/creer"); return; }
-                    navigate("/petites-missions/creer");
-                  }}
-                >
-                  Publier ma demande
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-2"
-                onClick={() => {
-                  if (!isAuthenticated) { navigate("/inscription?redirect=/petites-missions"); return; }
-                  openOfferDialog();
-                }}
-              >
-                Me rendre visible comme aidant
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
+              </div>
+            )}
 
             <div className="flex items-center justify-center">
               <div className="inline-flex items-center gap-1 bg-muted rounded-lg p-1" role="tablist" aria-label="Filtrer la liste">
