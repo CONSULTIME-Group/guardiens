@@ -433,7 +433,23 @@ const AdminUsers = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{roleLabels[user.role] || user.role}</Badge>
+                      <div className="flex items-center gap-1">
+                        <Badge variant="outline">{roleLabels[user.role] || user.role}</Badge>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          title="Changer le rôle"
+                          onClick={() => setRoleModal({
+                            open: true,
+                            userId: user.id,
+                            userName: `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "cet utilisateur",
+                            currentRole: user.role,
+                          })}
+                        >
+                          <UserCog className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {user.postal_code || "—"}
