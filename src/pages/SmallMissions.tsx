@@ -543,41 +543,45 @@ const SmallMissions = () => {
  </div>
  </section>
 
- <main className="max-w-6xl mx-auto px-4 py-12 space-y-16">
+  <main className="max-w-6xl mx-auto px-4 py-8 md:py-10 space-y-12">
  <section className="space-y-6">
- {/* Mode toggle: need / offer */}
- <div className="flex items-center justify-center gap-1 bg-muted rounded-lg p-1 w-fit mx-auto">
- <button
- onClick={() => setMode("need")}
- className={`px-4 py-2 text-sm rounded-md transition-colors ${mode === "need" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
- >
- J'ose demander
- </button>
- <button
- onClick={() => setMode("offer")}
- className={`px-4 py-2 text-sm rounded-md transition-colors ${mode === "offer" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
- >
- J'ai du temps à offrir
- </button>
- </div>
-
+ {/* Actions de création — 2 CTAs explicites côte à côte (remplace l'ancien tab + bouton qui se dupliquaient) */}
  {isAuthenticated && canApplyMissions && (
- <div className="text-center">
- {mode === "need" ? (
- <Link to="/petites-missions/creer">
- <Button variant="hero" size="lg">
- J'ose demander
+ <div className="flex flex-col sm:flex-row gap-3 justify-center">
+ <Link to="/petites-missions/creer" className="sm:flex-initial">
+ <Button variant="hero" size="lg" className="w-full sm:w-auto">
+ Publier ma demande
  <ArrowRight className="ml-2 h-4 w-4" />
  </Button>
  </Link>
- ) : (
- <Button variant="hero" size="lg" onClick={openOfferDialog}>
- J'ai du temps à offrir
+ <Button variant="outline" size="lg" onClick={openOfferDialog} className="border-2">
+ Proposer mon aide
  <ArrowRight className="ml-2 h-4 w-4" />
  </Button>
- )}
  </div>
  )}
+
+ {/* Toggle de navigation — clarifié : ce que l'on PARCOURT, pas ce que l'on crée */}
+ <div className="flex items-center justify-center">
+ <div className="inline-flex items-center gap-1 bg-muted rounded-lg p-1" role="tablist" aria-label="Filtrer la liste">
+ <button
+ role="tab"
+ aria-selected={mode === "need"}
+ onClick={() => setMode("need")}
+ className={`px-4 py-2 text-sm rounded-md transition-colors ${mode === "need" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
+ >
+ Demandes du coin
+ </button>
+ <button
+ role="tab"
+ aria-selected={mode === "offer"}
+ onClick={() => setMode("offer")}
+ className={`px-4 py-2 text-sm rounded-md transition-colors ${mode === "offer" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
+ >
+ Personnes qui aident
+ </button>
+ </div>
+ </div>
  {isAuthenticated && accessLevel === 1 && (
  <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="mission" />
  )}
