@@ -189,9 +189,20 @@ const SmallMissionsPublic = () => {
  J'ai besoin d'un coup de main
  </Button>
  </div>
- <p className="text-xs text-foreground/50 mt-4">
+  <p className="text-xs text-foreground/50 mt-4">
  Gratuite pour tous. Aucun engagement, aucun jugement.
  </p>
+ </Reveal>
+
+ {/* Mosaïque hero — ancrage visuel (4 illustrations gouache existantes) */}
+ <Reveal delay={0.35}>
+ <div className="mt-12 grid grid-cols-4 gap-3 md:gap-5 max-w-md mx-auto" aria-hidden="true">
+ {[spotChien, spotJardin, spotPoules, spotBricolage].map((src, i) => (
+ <div key={i} className="aspect-square rounded-2xl bg-card border border-border/60 flex items-center justify-center p-2 hover:-translate-y-0.5 transition-transform">
+ <img src={src} alt="" loading="lazy" width={128} height={128} className="w-full h-full object-contain" />
+ </div>
+ ))}
+ </div>
  </Reveal>
 
  {/* ── Social proof KPIs ── */}
@@ -216,22 +227,17 @@ const SmallMissionsPublic = () => {
  </div>
  </section>
 
- {/* ═══ SECTION 2 — LA CONVICTION ═══ */}
- <section className="bg-background">
- <div className="max-w-xl mx-auto px-6 py-24 md:py-32">
+  {/* ═══ SECTION 2 — LA CONVICTION (fusionnée avec ex-3.5) ═══ */}
+ <section className="bg-background border-t border-border/40">
+ <div className="max-w-2xl mx-auto px-6 py-20 md:py-24">
  <Reveal>
- <p className="text-lg font-heading italic leading-relaxed text-foreground/85 text-center mb-7">
+ <p className="font-heading text-xl md:text-2xl italic leading-relaxed text-foreground/85 text-center mb-8">
  On n'a pas créé les petites missions pour que les gens se rendent des services. On les a créées parce que les échanges les plus vrais ne passent pas par un virement.
  </p>
  </Reveal>
  <Reveal delay={0.1}>
- <p className="text-lg font-heading italic leading-relaxed text-foreground/85 text-center mb-7">
- Vos bras pour planter les légumes ce week-end. Ses tomates cet été. Peut-être son aide pour repeindre la cuisine en septembre. L'échange n'a pas besoin d'être immédiat pour être juste.
- </p>
- </Reveal>
- <Reveal delay={0.2}>
- <p className="text-lg font-heading italic leading-relaxed text-foreground/85 text-center">
- C'est ça qu'on appelle vivre quelque part.
+ <p className="font-heading text-lg italic leading-relaxed text-foreground/75 text-center">
+ Vos bras pour planter les légumes ce week-end. Ses tomates cet été. Peut-être son aide pour repeindre la cuisine en septembre. <span className="text-foreground/90">L'échange n'a pas besoin d'être immédiat pour être juste.</span>
  </p>
  </Reveal>
  </div>
@@ -369,37 +375,7 @@ const SmallMissionsPublic = () => {
   </div>
  </section>
 
- {/* ═══ SECTION 3.5 — POURQUOI L'ENTRAIDE FONCTIONNE (densification éditoriale) ═══ */}
- <section className="bg-muted/30 border-t border-border/40">
- <div className="max-w-3xl mx-auto px-6 py-20 md:py-24">
- <Reveal>
- <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 text-center mb-4">
- Le contexte
- </p>
- <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center leading-snug mb-12">
- Pourquoi l'entraide entre gens du coin fonctionne (et pourquoi on l'a perdue)
- </h2>
- </Reveal>
-
- <div className="space-y-6 font-body text-base md:text-lg text-foreground/80 leading-relaxed">
- <Reveal delay={0.05}>
-  <p>
-  Avant, on demandait à la personne du dessus d'arroser les plantes pendant les vacances. Celle du rez-de-chaussée gardait le chien le weekend. Le retraité d'en face réceptionnait les colis. Personne ne facturait, personne ne tenait les comptes. Ce n'était pas un service — c'était une habitude. Une manière banale, presque invisible, de faire tenir un quartier. Aujourd'hui, pour les mêmes besoins, on appelle un professionnel, on souscrit un abonnement, ou on s'abstient.
-  </p>
- </Reveal>
- <Reveal delay={0.1}>
- <p>
- Pourquoi on l'a perdue ? Parce que les rythmes de vie ont changé. On rentre tard, on déménage souvent, les immeubles ne se croisent plus dans la cour. Et puis il y a ce frein, plus profond : on craint de déranger, ou pire, de paraître profiter de l'autre. Demander un coup de main est devenu un aveu de faiblesse plutôt qu'un acte de confiance. C'est exactement l'inverse de ce que c'était.
- </p>
- </Reveal>
- <Reveal delay={0.15}>
- <p>
- Pourquoi ça revient ? Parce que le mouvement de retour à la proximité est partout, et il ne s'arrêtera pas : compostage de quartier, jardins partagés, AMAP, monnaies locales, initiatives municipales, boîtes à livres. Les gens veulent retrouver des liens qui ne passent pas par une facture. Guardiens vous donne le prétexte qui manque pour oser la première demande — et la suivante devient évidente.
- </p>
- </Reveal>
- </div>
- </div>
- </section>
+ {/* (ex-section 3.5 « Pourquoi l'entraide fonctionne » fusionnée avec la section 2 — supprimée) */}
 
  {/* ═══ SECTION 4 — EXEMPLES ═══ */}
  <section className="bg-background">
@@ -435,13 +411,25 @@ const SmallMissionsPublic = () => {
  ))}
  </div>
 
- <Reveal delay={0.3}>
+  <Reveal delay={0.3}>
  <p className="text-center font-body text-base text-foreground/60 italic mt-12">
  L'échange se décide entre vous. Parfois immédiat. Parfois à la saison prochaine. C'est vous qui décidez — pas la plateforme.
  </p>
  </Reveal>
+
+ {/* CTA intermédiaire — pic d'intention après les exemples */}
+ <Reveal delay={0.35}>
+ <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
+ <Button onClick={goToCreate} className="bg-primary text-primary-foreground rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary/90 transition-all duration-200">
+ Publier ma première mission
+ </Button>
+ <Button onClick={goToHelp} variant="outline" className="border-2 border-primary text-primary rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200">
+ Je propose mon aide
+ </Button>
  </div>
-  </section>
+ </Reveal>
+ </div>
+ </section>
 
  {/* ═══ SECTION 4.5 — CE QU'ON ÉCHANGE / CE QU'ON N'ÉCHANGE PAS (densification éditoriale) ═══ */}
  <section className="bg-background border-t border-border/40">
@@ -539,56 +527,7 @@ const SmallMissionsPublic = () => {
  </div>
  </section>
 
- {/* ═══ SECTION 4.6 — COMMENT ÇA SE PASSE, CONCRÈTEMENT (densification éditoriale) ═══ */}
- <section className="bg-muted/30 border-t border-border/40">
- <div className="max-w-5xl mx-auto px-6 py-20 md:py-24">
- <Reveal>
- <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 text-center mb-4">
- Sur le terrain
- </p>
- <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center leading-snug mb-3">
- Comment ça se passe, concrètement
- </h2>
- <p className="font-body text-base md:text-lg italic text-foreground/60 text-center max-w-xl mx-auto mb-12">
- Trois exemples typiques de missions réalisées sur Guardiens.
- </p>
- </Reveal>
-
- <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
- {[
- {
- title: "Une demande d'arrosage",
- text: "Une habitante de la Croix-Rousse part deux semaines en juillet. Elle propose une corbeille de tomates de son potager, contre l'arrosage trois fois par semaine. Quatre personnes du quartier répondent en moins de vingt-quatre heures.",
- },
- {
- title: "Une offre de promenade",
- text: "Quelqu'un à Caluire propose de promener un chien le matin avant le travail, contre une bière partagée de temps en temps. Trois mois plus tard, il connaît la moitié du quartier et a trouvé un café où on lui garde sa table.",
- },
- {
- title: "Un échange de compétences",
- text: "À Annecy, une demande de cours de cuisine italienne contre un coup de main au montage d'une terrasse en bois. Les deux parties ont gagné un samedi mémorable, un nouveau contact, et l'envie de recommencer.",
- },
- ].map((s, i) => (
- <Reveal key={s.title} delay={0.05 * i}>
- <div className="bg-card border border-border rounded-2xl p-6 md:p-7 h-full flex flex-col">
- <h3 className="font-heading text-lg md:text-xl font-semibold text-foreground mb-3">
- {s.title}
- </h3>
- <p className="font-body text-sm md:text-base text-foreground/75 leading-relaxed flex-1">
- {s.text}
- </p>
- </div>
- </Reveal>
- ))}
- </div>
-
-  <Reveal delay={0.2}>
- <p className="text-center font-body text-sm text-foreground/55 italic mt-10 max-w-xl mx-auto">
- Trois situations typiques de l'entraide entre gens du coin. À vous de les faire exister près de chez vous.
- </p>
- </Reveal>
- </div>
- </section>
+ {/* (ex-section 4.6 « Comment ça se passe » supprimée — doublon avec la section 4 Exemples) */}
 
  {/* ═══ SECTION 5 — RÈGLES ═══ */}
  <section className="bg-accent-foreground text-accent">
@@ -608,10 +547,10 @@ const SmallMissionsPublic = () => {
  text: "Jardin, animaux, maison, quartier. Les missions restent dans l'univers de ce qui nous rassemble.",
  },
  ].map((rule, i) => (
- <Reveal key={rule.title} delay={0.1 * i}>
- <div className={`text-center md:text-left md:px-8 ${i > 0 ? "md:border-l md:border-white/15" : ""}`}>
- <h3 className="font-heading text-xl md:text-2xl font-semibold text-white mb-3">{rule.title}</h3>
- <p className="font-body text-sm md:text-base text-white/70 leading-relaxed">{rule.text}</p>
+  <Reveal key={rule.title} delay={0.1 * i}>
+ <div className={`text-center md:text-left md:px-8 ${i > 0 ? "md:border-l md:border-accent/15" : ""}`}>
+ <h3 className="font-heading text-xl md:text-2xl font-semibold text-accent mb-3">{rule.title}</h3>
+ <p className="font-body text-sm md:text-base text-accent/75 leading-relaxed">{rule.text}</p>
  </div>
  </Reveal>
  ))}
@@ -701,25 +640,25 @@ const SmallMissionsPublic = () => {
  <section className="bg-primary">
  <div className="max-w-2xl mx-auto px-6 py-24 md:py-32 text-center">
  <Reveal>
- <h2 className="font-heading text-4xl md:text-5xl font-bold text-white leading-tight mb-6">
+  <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary-foreground leading-tight mb-6">
  Osez. Vraiment.<br />Personne ne vous jugera.
  </h2>
  </Reveal>
  <Reveal delay={0.1}>
- <p className="font-body text-lg text-white/85 leading-relaxed mb-10">
+ <p className="font-body text-lg text-primary-foreground/85 leading-relaxed mb-10">
  Le pire qui puisse arriver, c'est que personne ne réponde. Le meilleur, c'est de rencontrer quelqu'un qui change votre semaine. Gratuit. Pour tous. Sans abonnement requis.
  </p>
  </Reveal>
  <Reveal delay={0.2}>
   <div className="flex flex-col sm:flex-row gap-4 justify-center">
- <Button onClick={goToHelp} className="bg-white text-primary rounded-full px-10 py-4 h-auto text-sm font-bold tracking-wide hover:bg-white/90 hover:scale-[1.02] transition-all duration-200">
+ <Button onClick={goToHelp} className="bg-primary-foreground text-primary rounded-full px-10 py-4 h-auto text-sm font-bold tracking-wide hover:bg-primary-foreground/90 hover:scale-[1.02] transition-all duration-200">
  Je propose mon aide
  </Button>
- <Button onClick={goToCreate} className="bg-transparent border-2 border-white/70 text-white rounded-full px-10 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-white/15 transition-all duration-200">
+ <Button onClick={goToCreate} className="bg-transparent border-2 border-primary-foreground/70 text-primary-foreground rounded-full px-10 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary-foreground/15 transition-all duration-200">
  J'ai besoin d'un coup de main
  </Button>
  </div>
- <p className="text-xs text-white/50 mt-6">
+ <p className="text-xs text-primary-foreground/70 mt-6">
  Gratuit · Badge Fondateur · Accès jusqu'au 14 juillet
  </p>
  </Reveal>
@@ -727,9 +666,9 @@ const SmallMissionsPublic = () => {
  </section>
 
  {/* ═══ SECTION 7 — FAQ ═══ */}
-  <section className="bg-muted/50 py-16">
+  <section className="bg-muted/50 py-20 md:py-24">
    <div className="max-w-3xl mx-auto px-6">
-    <h2 className="font-heading text-2xl font-bold text-center mb-10">Questions fréquentes</h2>
+    <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center leading-snug mb-10">Questions fréquentes</h2>
     <Accordion type="single" collapsible className="space-y-2">
      {FAQ_ITEMS.map((faq, i) => (
       <AccordionItem key={i} value={`faq-${i}`} className="bg-card border border-border rounded-xl px-4">
