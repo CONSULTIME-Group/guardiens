@@ -245,7 +245,7 @@ const SmallMissions = () => {
   useEffect(() => { setVisibleMissions(PAGE_SIZE); setVisibleHelpers(PAGE_SIZE); }, [categoryFilter, mode, radiusKm, normalizedSearch]);
 
   const missionCoords = useEntityCoords(allMissions as any[], { useDbCoords: true });
-  const helperCoords = useEntityCoords(availableHelpers as any[]);
+  const helperCoords = useEntityCoords(availableHelpers as any[], { useDbCoords: true });
 
   const filteredMissions = useMemo(() => {
     return (allMissions || [])
