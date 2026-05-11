@@ -212,16 +212,23 @@ const AdminErrors = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            onClick={archiveAll}
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            disabled={archiving || loading || filtered.filter((e) => !e.resolved_at).length === 0}
-          >
-            <Archive className="h-4 w-4" />
-            {archiving ? "Archivage…" : "Tout archiver"}
-          </Button>
+          <ConfirmDialog
+            trigger={
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                disabled={archiving || loading || unresolvedCount === 0}
+              >
+                <Archive className="h-4 w-4" />
+                {archiving ? "Archivage…" : "Tout archiver"}
+              </Button>
+            }
+            title={`Archiver ${unresolvedCount} erreur${unresolvedCount > 1 ? "s" : ""} ?`}
+            description="Toutes les erreurs non résolues actuellement filtrées seront marquées comme résolues. Vous pouvez les rouvrir ensuite individuellement."
+            confirmLabel="Tout archiver"
+            onConfirm={archiveAll}
+          />
           <Button onClick={load} variant="outline" size="sm" className="gap-2">
             <RefreshCw className="h-4 w-4" /> Actualiser
           </Button>
