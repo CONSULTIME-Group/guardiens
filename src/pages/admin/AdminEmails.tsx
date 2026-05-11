@@ -523,6 +523,26 @@ const SuppressionsTab = () => {
           </TableBody>
         </Table>
       </div>
+
+      <AlertDialog open={!!pendingUnblock} onOpenChange={(o) => !o && setPendingUnblock(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Débloquer cet email ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingUnblock?.email} sera retiré de la liste des suppressions et pourra à nouveau recevoir des emails.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleUnblock}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Débloquer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
