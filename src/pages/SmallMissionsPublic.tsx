@@ -216,22 +216,17 @@ const SmallMissionsPublic = () => {
  </div>
  </section>
 
- {/* ═══ SECTION 2 — LA CONVICTION ═══ */}
- <section className="bg-background">
- <div className="max-w-xl mx-auto px-6 py-24 md:py-32">
+  {/* ═══ SECTION 2 — LA CONVICTION (fusionnée avec ex-3.5) ═══ */}
+ <section className="bg-background border-t border-border/40">
+ <div className="max-w-2xl mx-auto px-6 py-20 md:py-24">
  <Reveal>
- <p className="text-lg font-heading italic leading-relaxed text-foreground/85 text-center mb-7">
+ <p className="font-heading text-xl md:text-2xl italic leading-relaxed text-foreground/85 text-center mb-8">
  On n'a pas créé les petites missions pour que les gens se rendent des services. On les a créées parce que les échanges les plus vrais ne passent pas par un virement.
  </p>
  </Reveal>
  <Reveal delay={0.1}>
- <p className="text-lg font-heading italic leading-relaxed text-foreground/85 text-center mb-7">
- Vos bras pour planter les légumes ce week-end. Ses tomates cet été. Peut-être son aide pour repeindre la cuisine en septembre. L'échange n'a pas besoin d'être immédiat pour être juste.
- </p>
- </Reveal>
- <Reveal delay={0.2}>
- <p className="text-lg font-heading italic leading-relaxed text-foreground/85 text-center">
- C'est ça qu'on appelle vivre quelque part.
+ <p className="font-heading text-lg italic leading-relaxed text-foreground/75 text-center">
+ Vos bras pour planter les légumes ce week-end. Ses tomates cet été. Peut-être son aide pour repeindre la cuisine en septembre. <span className="text-foreground/90">L'échange n'a pas besoin d'être immédiat pour être juste.</span>
  </p>
  </Reveal>
  </div>
