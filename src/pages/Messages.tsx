@@ -234,159 +234,70 @@ const Messages = () => {
 
   useEffect(() => { loadConversations(); }, [loadConversations]);
 
-  // Auto-open conversation from query param (URL standardisée: ?c=, anciens params supportés)
+  // ── Auto-open : extrait dans un hook dédié (?gardien=, ?c=, fallback unread desktop) ──
+  useAutoOpenConversation<Conversation>({
+    user: user ? { id: user.id } : null,
+    conversations,
+    setConversations,
+    activeConv,
+    setActiveConv,
+    loading,
+    isMobile,
+    enrichConv: (raw, otherProfile) => ({
+      ...(raw as any),
+      archived_by: raw.archived_by || [],
+      sit: null,
+      small_mission: null,
+      other_user: otherProfile || null,
+      last_message: null,
+      unread_count: 0,
+      application_status: null,
+      other_user_rating: 0,
+      other_user_is_emergency: false,
+    }) as Conversation,
+  });
+
+  // ── Realtime sur la liste : tout INSERT sur une conversation de l'utilisateur ──
+  // déclenche un rechargement debouncé de la liste pour rafraîchir badges et tri.
   useEffect(() => {
-    if (autoOpened) return;
-
-    const gardienId = searchParams.get("gardien");
-    const convId =
-      searchParams.get("c") ||
-      searchParams.get("conversation") ||
-      searchParams.get("conv") ||
-      searchParams.get("conversationId");
-
-    // Handle ?gardien= : créer/récupérer conversation via RPC atomique
-    if (gardienId && user && !loading) {
-      const candidates = conversations.filter(c => {
-        const otherId = c.owner_id === user.id ? c.sitter_id : c.owner_id;
-        return otherId === gardienId;
-      });
-      const existing = candidates.sort((a, b) => {
-        if (a.sit_id && !b.sit_id) return -1;
-        if (!a.sit_id && b.sit_id) return 1;
-        return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
-      })[0] || null;
-
-      if (existing) {
-        setActiveConv(existing);
-        searchParams.delete("gardien");
-        setSearchParams(searchParams, { replace: true });
-        setAutoOpened(true);
-        return;
-      }
-
-      // RPC atomique : sondage (sitter_inquiry) — pas de risque de pitch refusé ici
-      (async () => {
-        try {
-          const { data: newConvId, error: rpcErr } = await supabase.rpc("get_or_create_conversation", {
-            p_other_user_id: gardienId,
-            p_context_type: "sitter_inquiry",
-            p_sit_id: null,
-            p_small_mission_id: null,
-            p_long_stay_id: null,
-          });
-          if (rpcErr || !newConvId) return;
-
-          const { data: newConv } = await supabase
-            .from("conversations").select("*").eq("id", newConvId as string).single();
-          if (!newConv) return;
-
-          const { data: profileData } = await supabase
-            .from("profiles")
-            .select("id, first_name, avatar_url, identity_verified, city, is_founder")
-            .eq("id", gardienId)
-            .single();
-
-          const enriched: Conversation = {
-            ...newConv,
-            archived_by: newConv.archived_by || [],
-            other_user: profileData || null,
-            last_message: null,
-            unread_count: 0,
-            application_status: null,
-            other_user_rating: 0,
-            other_user_is_emergency: false,
-          };
-
-          setConversations(prev => [enriched, ...prev]);
-          setActiveConv(enriched);
-          searchParams.delete("gardien");
-          setSearchParams(searchParams, { replace: true });
-          setAutoOpened(true);
-        } catch {
-          // silently fail
-        }
-      })();
-      return;
-    }
-
-    if (conversations.length === 0) return;
-
-    if (convId) {
-      const target = conversations.find(c => c.id === convId);
-      if (target) {
-        setActiveConv(target);
-        // Normaliser l'URL : ?c=<id> uniquement
-        const next = new URLSearchParams(searchParams);
-        next.delete("conversation");
-        next.delete("conv");
-        next.delete("conversationId");
-        next.set("c", convId);
-        setSearchParams(next, { replace: true });
-        setAutoOpened(true);
-        return;
-      }
-      // Conversation not yet in local state — fetch it directly
-      if (!autoOpened) {
-        (async () => {
-          try {
-            const { data: fetchedConv } = await supabase
-              .from("conversations")
-              .select("*")
-              .eq("id", convId)
-              .single();
-            if (!fetchedConv) return;
-            const otherId = fetchedConv.owner_id === user?.id ? fetchedConv.sitter_id : fetchedConv.owner_id;
-            const { data: profileData } = await supabase
-              .from("profiles")
-              .select("id, first_name, avatar_url, identity_verified, city, is_founder")
-              .eq("id", otherId)
-              .single();
-            const enriched: Conversation = {
-              ...fetchedConv,
-              archived_by: fetchedConv.archived_by || [],
-              other_user: profileData || null,
-              last_message: null,
-              unread_count: 0,
-              application_status: null,
-              other_user_rating: 0,
-              other_user_is_emergency: false,
-            };
-            setConversations(prev => {
-              if (prev.some(c => c.id === enriched.id)) return prev;
-              return [enriched, ...prev];
-            });
-            setActiveConv(enriched);
-            searchParams.delete("conversation");
-            searchParams.delete("conv");
-            searchParams.delete("conversationId");
-            setSearchParams(searchParams, { replace: true });
-            setAutoOpened(true);
-          } catch {
-            // silently fail
+    if (!user) return;
+    let timer: number | undefined;
+    const debouncedReload = () => {
+      if (timer) window.clearTimeout(timer);
+      timer = window.setTimeout(() => loadConversations(), 400);
+    };
+    const channel = supabase
+      .channel(`messages-list-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages" },
+        (payload) => {
+          const msg = payload.new as Message;
+          // Ne déclenche que si le message concerne une de nos conversations connues
+          if (conversations.some((c) => c.id === msg.conversation_id)) {
+            debouncedReload();
           }
-        })();
-        return;
-      }
-    }
+        }
+      )
+      .subscribe();
+    return () => {
+      if (timer) window.clearTimeout(timer);
+      supabase.removeChannel(channel);
+    };
+  }, [user, conversations, loadConversations]);
 
-    // Auto-open most recent unread — only on desktop (mobile keeps the list visible)
-    if (!isMobile) {
-      const unread = conversations.find(c => c.unread_count > 0 && !c.archived_by.includes(user?.id || ""));
-      if (unread) {
-        setActiveConv(unread);
-      }
-    }
-    setAutoOpened(true);
-  }, [conversations, searchParams, autoOpened, setSearchParams, user, loading, isMobile]);
-
+  // ── Chargement messages avec pagination (50 derniers d'abord) ──
   const loadMessages = useCallback(async (convId: string) => {
-    const { data } = await supabase
+    isInitialMessagesLoad.current = true;
+    const { data, count } = await supabase
       .from("messages")
-      .select("*")
+      .select("*", { count: "exact" })
       .eq("conversation_id", convId)
-      .order("created_at", { ascending: true });
-    setMessages((data as Message[]) || []);
+      .order("created_at", { ascending: false })
+      .limit(MESSAGES_PAGE_SIZE);
+    const ordered = ((data as Message[]) || []).slice().reverse();
+    setMessages(ordered);
+    setHasMoreMessages((count || 0) > ordered.length);
 
     if (user) {
       await supabase
@@ -397,6 +308,39 @@ const Messages = () => {
         .is("read_at", null);
     }
   }, [user]);
+
+  const loadOlderMessages = useCallback(async () => {
+    if (!activeConv || loadingMoreMessages || messages.length === 0) return;
+    setLoadingMoreMessages(true);
+    const oldest = messages[0];
+    const scrollEl = messagesScrollRef.current;
+    const prevScrollHeight = scrollEl?.scrollHeight ?? 0;
+
+    const { data } = await supabase
+      .from("messages")
+      .select("*")
+      .eq("conversation_id", activeConv.id)
+      .lt("created_at", oldest.created_at)
+      .order("created_at", { ascending: false })
+      .limit(MESSAGES_PAGE_SIZE);
+    const older = ((data as Message[]) || []).slice().reverse();
+    setMessages((prev) => [...older, ...prev]);
+    setHasMoreMessages(older.length === MESSAGES_PAGE_SIZE);
+    setLoadingMoreMessages(false);
+
+    // Préserve la position visuelle après prepend
+    requestAnimationFrame(() => {
+      if (scrollEl) {
+        scrollEl.scrollTop = scrollEl.scrollHeight - prevScrollHeight;
+      }
+    });
+  }, [activeConv, loadingMoreMessages, messages]);
+
+  useEffect(() => {
+    setNewMessage("");
+    if (!activeConv) return;
+    loadMessages(activeConv.id);
+  }, [activeConv?.id, loadMessages]);
 
   useEffect(() => {
     // Toujours vider l'input à chaque changement de conversation —
