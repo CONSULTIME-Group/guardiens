@@ -232,9 +232,11 @@ const OwnerProfilePage = () => {
           <ProfileSidebar
             firstName={mergedData.first_name}
             city={mergedData.city}
+            avatarUrl={mergedData.avatar_url || user?.avatarUrl}
             completion={liveScore}
             sections={sidebarSections}
             activeSection={activeSection}
+            dirtySection={dirty ? activeSection : undefined}
             onSectionClick={(id) => {
               setActiveSection(id);
               requestAnimationFrame(() => {
@@ -264,7 +266,7 @@ const OwnerProfilePage = () => {
 
           {/* Right content */}
           <div className="flex-1 min-w-0 pb-32">
-            <div id="profile-section-content" className="bg-card rounded-xl border border-border p-5 md:p-8 scroll-mt-24">
+            <div id="profile-section-content" className="bg-card rounded-2xl border border-border p-5 md:p-8 scroll-mt-24">
               {activeSection === "identity" && <OwnerStepIdentity data={mergedData} onChange={handleChange} onUploadPhoto={handleUploadPhoto} />}
               {activeSection === "housing" && <OwnerStepHousing data={mergedData} onChange={handleChange} onUploadPhoto={uploadPhoto} />}
               {activeSection === "animals" && <OwnerStepAnimals pets={pets} onAddPet={addPet} onUpdatePet={updatePet} onRemovePet={removePet} />}
@@ -286,33 +288,69 @@ const OwnerProfilePage = () => {
                 />
               )}
               {activeSection === "gallery" && <OwnerGallery />}
+
+              {/* Bouton « Suivant » — auto-sauvegarde puis avance dans la liste. */}
+              {nextSection && (
+                <div className="mt-8 pt-6 border-t border-border flex justify-end">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="gap-2 text-muted-foreground hover:text-foreground"
+                    onClick={async () => {
+                      if (dirty) await handleSave();
+                      setActiveSection(nextSection.id);
+                      requestAnimationFrame(() => {
+                        document.getElementById("profile-section-content")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                      });
+                    }}
+                  >
+                    Suivant : {nextSection.label}
+                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* Sticky save bar */}
-      <div className="fixed bottom-16 md:bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border py-4 px-6 flex items-center justify-between supports-[padding:max(0px)]:pb-[max(env(safe-area-inset-bottom),0.75rem)]">
-        <p className="text-xs text-muted-foreground">
-          {saved && !dirty ? (
-            <span className="text-primary">✓ Profil à jour</span>
-          ) : dirty ? (
-            "Modifications non sauvegardées"
-          ) : null}
-        </p>
-        <Button
-          onClick={handleSave}
-          disabled={saving || !dirty}
-          className="rounded-full px-6 gap-2"
-          size="lg"
-        >
-          {saving ? (
-            <><Loader2 className="h-4 w-4 animate-spin" /> Sauvegarde…</>
-          ) : (
-            <><Check className="h-4 w-4" /> Sauvegarder</>
-          )}
-        </Button>
-      </div>
+      <TooltipProvider delayDuration={200}>
+        <div className="fixed bottom-16 md:bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border py-4 px-6 flex items-center justify-between supports-[padding:max(0px)]:pb-[max(env(safe-area-inset-bottom),0.75rem)]">
+          <p className="text-xs text-muted-foreground" aria-live="polite">
+            {saved && !dirty ? (
+              <span className="inline-flex items-center gap-1 text-primary">
+                <Check className="h-3.5 w-3.5" aria-hidden="true" /> Modifications enregistrées
+              </span>
+            ) : dirty ? (
+              "Modifications non sauvegardées"
+            ) : null}
+          </p>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span tabIndex={0}>
+                <Button
+                  onClick={handleSave}
+                  disabled={saving || !dirty}
+                  className="rounded-full px-6 gap-2"
+                  size="lg"
+                >
+                  {saving ? (
+                    <><Loader2 className="h-4 w-4 animate-spin" /> Sauvegarde…</>
+                  ) : (
+                    <><Check className="h-4 w-4" /> Sauvegarder</>
+                  )}
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {!dirty && !saving && (
+              <TooltipContent side="top">
+                Aucune modification à sauvegarder
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </div>
+      </TooltipProvider>
     </div>
   );
 };
