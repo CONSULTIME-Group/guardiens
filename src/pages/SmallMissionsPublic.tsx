@@ -102,28 +102,45 @@ const SmallMissionsPublic = () => {
  const navigate = useNavigate();
  const { isAuthenticated } = useAuth();
 
- /* KPIs */
- const [kpiMissions, setKpiMissions] = useState<number>(0);
- const [kpiHelpers, setKpiHelpers] = useState<number>(0);
+  /* KPIs */
+  const [kpiMissions, setKpiMissions] = useState<number>(0);
+  const [kpiHelpers, setKpiHelpers] = useState<number>(0);
 
- useEffect(() => {
- const load = async () => {
- // `.single()` rejette quand la vue ne renvoie pas exactement une ligne
- // (PGRST116). On dégrade silencieusement : les KPIs restent à 0 et
- // l'erreur ne pollue pas le moniteur d'`unhandled_rejection`.
- try {
+  /* Missions ouvertes — preuve sociale dynamique */
+  const [openMissions, setOpenMissions] = useState<OpenMissionRow[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
         const { data: rows } = await supabase.rpc("get_public_stats");
         const data = Array.isArray(rows) ? rows[0] : rows;
- if (data) {
- if (typeof data.missions_entraide === "number") setKpiMissions(data.missions_entraide);
- if (typeof data.total_inscrits === "number") setKpiHelpers(data.total_inscrits);
- }
- } catch (err) {
- console.warn("public_stats unavailable:", err);
- }
- };
- void load();
- }, []);
+        if (data) {
+          if (typeof data.missions_entraide === "number") setKpiMissions(data.missions_entraide);
+          if (typeof data.total_inscrits === "number") setKpiHelpers(data.total_inscrits);
+        }
+      } catch (err) {
+        console.warn("public_stats unavailable:", err);
+      }
+    };
+    void load();
+  }, []);
+
+  useEffect(() => {
+    const loadOpen = async () => {
+      try {
+        const { data } = await supabase
+          .from("small_missions")
+          .select("id, title, category, city, created_at")
+          .eq("status", "open")
+          .order("created_at", { ascending: false })
+          .limit(6);
+        if (data) setOpenMissions(data as OpenMissionRow[]);
+      } catch (err) {
+        console.warn("small_missions unavailable:", err);
+      }
+    };
+    void loadOpen();
+  }, []);
 
  /** Auth-aware navigation: redirect to register if not logged in */
   const goToCreate = () =>
