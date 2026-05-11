@@ -527,22 +527,18 @@ const SmallMissions = () => {
  description="Des coups de main, des échanges, des compétences. Entre gens du coin qui se choisissent."
  />
 
- <div className="min-h-screen bg-background">
- {/* Hero */}
- <section className="relative overflow-hidden rounded-b-2xl">
- <div className="absolute inset-0">
- <img src={entraideHeader} alt="" className="w-full h-full object-cover" />
- <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/75 to-background/60" />
- </div>
- <div className="relative max-w-6xl mx-auto px-4 py-16 md:py-24 text-center space-y-4">
- <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
- Osez. Quelqu'un du coin n'attend que ça.
+  <div className="min-h-screen bg-background">
+ {/* Hero compact — pas d'image stock, ancrage avec le ton (gouache illustrations vivent dans la version SEO) */}
+ <section className="border-b border-border/40 bg-gradient-to-b from-primary/5 to-background">
+ <div className="max-w-6xl mx-auto px-4 py-8 md:py-10 text-center space-y-3">
+ <h1 className="font-heading text-3xl md:text-4xl font-bold text-foreground leading-tight">
+ Petites missions près de chez vous
  </h1>
- <p className="text-muted-foreground max-w-2xl mx-auto">
- Demander un coup de main, ce n'est pas déranger — c'est offrir une occasion de rendre service. Ici, personne ne juge ce qui est petit.
+ <p className="text-sm md:text-base text-muted-foreground max-w-xl mx-auto">
+ Demandez un coup de main ou proposez le vôtre — entre gens du coin, sans argent.
  </p>
  <p className="inline-block text-xs font-medium bg-badge-success text-badge-success-foreground px-3 py-1 rounded-full">
- Les petites missions sont gratuites, pour tout le monde.
+ Gratuit pour tous les membres
  </p>
  </div>
  </section>
