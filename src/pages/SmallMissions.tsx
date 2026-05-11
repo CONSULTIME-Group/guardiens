@@ -532,8 +532,8 @@ const SmallMissions = () => {
  {/* Hero compact avec image — hauteur contenue, dégradé fort pour lisibilité */}
  <section className="relative overflow-hidden border-b border-border/40">
  <div className="absolute inset-0">
- <img src={entraideHeader} alt="" loading="eager" className="w-full h-full object-cover" />
- <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/50" />
+  <img src={entraideHeader} alt="" loading="eager" className="w-full h-full object-cover object-[70%_30%] md:object-right" />
+ <div className="absolute inset-0 bg-gradient-to-b from-background/95 via-background/80 to-background/60 md:bg-gradient-to-r md:from-background md:via-background/85 md:to-background/50" />
  </div>
  <div className="relative max-w-6xl mx-auto px-4 py-10 md:py-14 text-center space-y-3">
  <h1 className="font-heading text-3xl md:text-4xl font-bold text-foreground leading-tight">
