@@ -17,6 +17,8 @@ import {
   LayoutGrid, Map as MapIcon, ShieldCheck, Crosshair, CircleDot, Car, Calendar,
   Bell, BellRing, Loader2, Share2
 } from "lucide-react";
+import FavoriteButton from "@/components/shared/FavoriteButton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
@@ -541,7 +543,7 @@ const SearchOwner = () => {
       <div className="px-6 pt-6 pb-2 md:pt-10 space-y-3">
         <h1 className="font-heading text-3xl font-bold mb-1">Trouver un gardien</h1>
         <p className="text-muted-foreground">Recherchez le gardien idéal pour votre maison et vos animaux.</p>
-        <ReachReassuranceBanner variant="inline" inlineText="Du coin par défaut — élargissez le rayon, le département, la région ou toute la France à tout moment." />
+        <ReachReassuranceBanner variant="inline" className="not-italic" inlineText="Du coin par défaut — élargissez le rayon, le département, la région ou toute la France à tout moment." />
       </div>
 
       {/* Sticky search bar */}
@@ -760,6 +762,9 @@ const SearchOwner = () => {
       <div className="flex items-center justify-between px-6 py-2 border-b border-border">
         <div className="flex items-center gap-3">
           <p className="text-sm text-muted-foreground">{results.length} gardien{results.length !== 1 ? "s" : ""} disponible{results.length !== 1 ? "s" : ""}</p>
+          {hasActiveFilters && (
+            <button onClick={resetFilters} className="text-xs text-primary hover:underline whitespace-nowrap">Réinitialiser les filtres</button>
+          )}
           <div className="flex gap-1.5">
             {[{ label: "Plus proches", value: "closest" as SortOption }, { label: "Mieux notés", value: "rating" as SortOption }, { label: "Plus expérimentés", value: "experience" as SortOption }].map(opt => (
               <button key={opt.value} onClick={() => setSort(opt.value)} className={sort === opt.value ? sortPillActive : sortPillBase}>{opt.label}</button>
@@ -792,7 +797,19 @@ const SearchOwner = () => {
       {viewMode === "list" ? (
         <div className="p-6">
           {loading ? (
-            <p className="text-muted-foreground py-10 text-center">Recherche en cours...</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" aria-busy="true" aria-label="Chargement des gardiens">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="bg-card rounded-xl overflow-hidden border border-border">
+                  <Skeleton className="aspect-square w-full rounded-none" />
+                  <div className="p-3 space-y-2">
+                    <Skeleton className="h-4 w-2/3" />
+                    <Skeleton className="h-3 w-1/2" />
+                    <Skeleton className="h-3 w-3/4" />
+                    <Skeleton className="h-8 w-full mt-2" />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : results.length === 0 ? (
             <div className="max-w-2xl mx-auto py-10 space-y-4">
               <div className="text-center">
@@ -896,15 +913,25 @@ const SearchOwner = () => {
                 const sitterAnimalTypes: string[] = s.animal_types || [];
                 const firstName = profile?.first_name || "Gardien";
                 const bio = profile?.bio ? (profile.bio.length > 60 ? profile.bio.slice(0, 60) + "…" : profile.bio) : null;
-                const distLabel = s._dist !== null && s._dist !== undefined && s._dist !== Infinity ? `${s._dist} km` : null;
+                const distLabel = s._dist === 0 ? "Dans votre ville" : (s._dist != null && s._dist !== Infinity ? `${s._dist} km` : null);
 
                 return (
-                  <div key={s.id} className="bg-card rounded-xl overflow-hidden border border-border hover:shadow-md transition-shadow flex flex-col max-w-sm">
-                    {/* Photo — carré, visage en haut */}
-                    <Link to={`/gardiens/${s.user_id}`} className="block relative">
+                  <div key={s.id} className="group relative bg-card rounded-xl overflow-hidden border border-border hover:shadow-md transition-shadow flex flex-col max-w-sm">
+                    {/* Favorite */}
+                    <div className="absolute top-2 right-2 z-10">
+                      <FavoriteButton targetType="sitter" targetId={s.user_id} />
+                    </div>
+
+                    {/* Photo — carré, cadrage centré pour ne pas couper les visages */}
+                    <Link to={`/gardiens/${s.user_id}`} className="block relative" aria-label={`Voir le profil de ${firstName}`}>
                       {profile?.avatar_url ? (
-                        <div className="aspect-square w-full overflow-hidden rounded-t-lg">
-                          <img src={profile.avatar_url} alt={firstName} className="w-full h-full object-cover object-top" />
+                        <div className="aspect-square w-full overflow-hidden rounded-t-lg bg-muted">
+                          <img
+                            src={profile.avatar_url}
+                            alt={firstName}
+                            loading="lazy"
+                            className="w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform duration-300"
+                          />
                         </div>
                       ) : (
                         <div className="aspect-square w-full overflow-hidden rounded-t-lg bg-primary/10 flex items-center justify-center">
@@ -921,15 +948,20 @@ const SearchOwner = () => {
                     {/* Body */}
                     <div className="p-3 flex flex-col flex-1">
                       {/* Line 1: name + verified pill + city + distance */}
-                      <Link to={`/gardiens/${s.user_id}`}>
+                      <Link to={`/gardiens/${s.user_id}`} className="hover:underline underline-offset-2">
                         <p className="text-sm font-semibold truncate">
                           {firstName}
                           {profile?.identity_verified && (
                             <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium ml-1.5 inline-block align-middle">Vérifié</span>
                           )}
-                          {profile?.city && <span className="text-muted-foreground font-normal"> · {profile.city}</span>}
-                          {distLabel && <span className="text-muted-foreground font-normal"> · {distLabel}</span>}
                         </p>
+                        {(profile?.city || distLabel) && (
+                          <p className="text-xs text-muted-foreground truncate">
+                            {profile?.city}
+                            {profile?.city && distLabel && " · "}
+                            {distLabel}
+                          </p>
+                        )}
                       </Link>
 
                       {/* Line 2: rating + experience */}
@@ -960,15 +992,16 @@ const SearchOwner = () => {
                       {/* Line 4: bio truncated */}
                       {bio && <p className="text-xs text-muted-foreground mt-1.5 line-clamp-1">{bio}</p>}
 
-                      {/* CTA */}
+                      {/* CTA — secondaire, pour ne pas saturer la grille */}
                       <Button
                         size="sm"
+                        variant="outline"
                         onClick={(e) => { e.preventDefault(); handleContact(s.user_id); }}
                         disabled={contactingId === s.user_id}
-                        className="w-full mt-auto pt-2"
+                        className="w-full mt-3"
                       >
                         <MessageCircle className="h-3.5 w-3.5" />
-                        {contactingId === s.user_id ? "..." : `Contacter ${firstName}`}
+                        {contactingId === s.user_id ? "..." : "Contacter"}
                       </Button>
                     </div>
                   </div>
@@ -994,7 +1027,7 @@ const SearchOwner = () => {
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm truncate">{firstName}</p>
-                    {s._dist !== null && s._dist !== Infinity && <p className="text-xs text-muted-foreground">{s._dist} km</p>}
+                    {s._dist != null && s._dist !== Infinity && <p className="text-xs text-muted-foreground">{s._dist === 0 ? "Dans votre ville" : `${s._dist} km`}</p>}
                     <div className="flex gap-3 text-xs text-muted-foreground mt-0.5">
                       {s.avgRating !== null && <span className="flex items-center gap-0.5"><Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />{s.avgRating.toFixed(1)}</span>}
                       {(profile?.completed_sits_count || 0) > 0 && <span>{profile.completed_sits_count} garde{profile.completed_sits_count > 1 ? "s" : ""}</span>}
