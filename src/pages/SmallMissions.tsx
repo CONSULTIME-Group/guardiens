@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
-const entraideHeader = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/entraide-header.webp";
+// (image hero stock retirée — hero compact sans photo)
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
