@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
-// (image hero stock retirée — hero compact sans photo)
+const entraideHeader = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/entraide-header.webp";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -529,9 +529,13 @@ const SmallMissions = () => {
  />
 
   <div className="min-h-screen bg-background">
- {/* Hero compact — pas d'image stock, ancrage avec le ton (gouache illustrations vivent dans la version SEO) */}
- <section className="border-b border-border/40 bg-gradient-to-b from-primary/5 to-background">
- <div className="max-w-6xl mx-auto px-4 py-8 md:py-10 text-center space-y-3">
+ {/* Hero compact avec image — hauteur contenue, dégradé fort pour lisibilité */}
+ <section className="relative overflow-hidden border-b border-border/40">
+ <div className="absolute inset-0">
+ <img src={entraideHeader} alt="" loading="eager" className="w-full h-full object-cover" />
+ <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/50" />
+ </div>
+ <div className="relative max-w-6xl mx-auto px-4 py-10 md:py-14 text-center space-y-3">
  <h1 className="font-heading text-3xl md:text-4xl font-bold text-foreground leading-tight">
  Petites missions près de chez vous
  </h1>
