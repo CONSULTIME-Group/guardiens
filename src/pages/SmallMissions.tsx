@@ -247,8 +247,6 @@ const SmallMissions = () => {
   const missionCoords = useEntityCoords(allMissions as any[], { useDbCoords: true });
   const helperCoords = useEntityCoords(availableHelpers as any[]);
 
-  const normalizedSearch = competenceSearch.toLowerCase().trim();
-
   const filteredMissions = useMemo(() => {
     return (allMissions || [])
       .filter((m: any) => {
