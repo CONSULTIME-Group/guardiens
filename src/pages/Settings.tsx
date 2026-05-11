@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import {
   User, Bell, Shield, Trash2, Download, Sun, Moon, Monitor, ArrowRight,
   CreditCard, HelpCircle, Eye, EyeOff, AlertTriangle, LogOut, Layers,
+  Loader2, CheckCircle2,
 } from "lucide-react";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import ActiveRolesSection from "@/components/settings/ActiveRolesSection";
