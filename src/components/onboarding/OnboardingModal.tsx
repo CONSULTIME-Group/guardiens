@@ -566,7 +566,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                     id="onb-bio"
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
-                    placeholder="Qui êtes-vous ? Pourquoi Guardiens ? Ce que vous aimez chez les animaux…"
+                    placeholder="Présentez-vous en quelques mots — ce qui vous fait aimer les animaux suffit."
                     className="rounded-lg min-h-[120px] resize-none"
                     maxLength={2000}
                   />
