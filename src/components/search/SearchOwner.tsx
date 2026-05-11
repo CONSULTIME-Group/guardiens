@@ -898,7 +898,7 @@ const SearchOwner = () => {
                 const sitterAnimalTypes: string[] = s.animal_types || [];
                 const firstName = profile?.first_name || "Gardien";
                 const bio = profile?.bio ? (profile.bio.length > 60 ? profile.bio.slice(0, 60) + "…" : profile.bio) : null;
-                const distLabel = s._dist !== null && s._dist !== undefined && s._dist !== Infinity ? `${s._dist} km` : null;
+                const distLabel = s._dist === 0 ? "Dans votre ville" : (s._dist != null && s._dist !== Infinity ? `${s._dist} km` : null);
 
                 return (
                   <div key={s.id} className="bg-card rounded-xl overflow-hidden border border-border hover:shadow-md transition-shadow flex flex-col max-w-sm">
