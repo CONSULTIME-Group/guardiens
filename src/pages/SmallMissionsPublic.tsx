@@ -75,29 +75,27 @@ function StickyMobileCta({ onPropose, onAsk }: { onPropose: () => void; onAsk: (
  );
 }
 
-/* ── data ── */
-const examples = [
- { img: spotVerger, alt: "Panier en osier rempli de fruits frais — illustration gouache", title: "Verger à ramasser", text: "Venir ramasser les fruits avant qu'ils tombent contre un énorme panier de fruits frais à emporter.", badge: "Fruits · entre gens du coin" },
- { img: spotJardin, alt: "Panier d'herbes aromatiques et sécateur — illustration gouache", title: "Coup de main au jardin", text: "Donner un coup de main pour planter, désherber ou tailler — et venir se servir librement à la récolte.", badge: "Jardinage · entre gens du coin" },
- { img: spotPoules, alt: "Poule rousse devant un nid de paille avec des œufs — illustration gouache", title: "Poules à garder", text: "Nourrir les poules et ramasser les œufs pendant 10 jours contre des œufs frais à volonté au retour.", badge: "Œufs · entre gens du coin" },
- { img: spotChien, alt: "Chien assis avec sa laisse en cuir — illustration gouache", title: "Chien à promener", text: "Deux semaines de balades contre son chien promené la prochaine fois qu'on part.", badge: "Réciprocité · entre gens du coin" },
- { img: spotBricolage, alt: "Boîte à outils en bois ouverte avec marteau, tournevis et clé — illustration gouache", title: "Petit bricolage", text: "Un coup de main pour monter une étagère, fixer un meuble ou changer un robinet, contre un vrai repas fait maison.", badge: "Repas · entre gens du coin" },
- { img: spotBienetre, alt: "Tasse en céramique, brin de lavande et galet — illustration gouache", title: "Énergie & bien-être", text: "Une séance de Reiki, un massage ou un moment de méditation partagés, en échange d'un service rendu en retour.", badge: "Échange · entre gens du coin" },
-];
+/* ── data (centralisée dans @/data/missionsPublicContent) ── */
+const examples = MISSIONS_EXAMPLES;
+const FAQ_ITEMS = MISSIONS_FAQ;
 
-/* ── FAQ items (source unique pour Accordion HTML + Schema FAQPage) ── */
-const FAQ_ITEMS: { q: string; a: string }[] = [
- { q: "C'est quoi les petites missions ?", a: "Des coups de main entre gens du coin — jardinage, animaux, bricolage — échangés sans argent. Vous proposez ce que vous savez faire, ou publiez ce dont vous avez besoin." },
- { q: "C'est vraiment gratuit ?", a: "Oui. L'entraide entre gens du coin est gratuite pour tous. Aucun frais, aucune commission." },
- { q: "Comment fonctionne l'échange ?", a: "Pas d'argent. Vous proposez quelque chose en retour — un repas, des légumes, un coup de main futur. L'échange se décide entre vous." },
- { q: "Faut-il être abonné ?", a: "Non. Les petites missions sont accessibles à tous les membres inscrits, sans abonnement." },
- { q: "Quels types de missions peut-on publier ?", a: "Tout ce qui tourne autour de la maison, du jardin, des animaux et du quartier. Tonte, arrosage, promenade de chien, bricolage, cuisine…" },
- { q: "Comment je sais que la personne est fiable ?", a: "Chaque membre a un profil avec avis, badges et score de confiance. Vous pouvez échanger par messagerie avant de vous engager." },
- { q: "Comment proposer une petite mission près de chez vous ?", a: "Pour proposer une petite mission, vous publiez votre demande ou votre offre depuis votre espace Guardiens. Décrivez clairement ce dont vous avez besoin (ou ce que vous proposez), précisez votre ville et ce que vous donnez en échange. Les gens du coin la voient et répondent s'ils peuvent vous aider. C'est aussi simple que ça." },
- { q: "Quelle différence entre une petite mission et une garde sur Guardiens ?", a: "Une garde, c'est une présence dans la durée : un gardien dort chez vous, prend soin de vos animaux et de votre maison pendant votre absence. Une petite mission, c'est un coup de main ponctuel : arroser les plantes, promener un chien une heure, monter un meuble. La garde nécessite un abonnement gardien (6,99€/mois). Les petites missions sont gratuites pour tous, sans abonnement requis." },
- { q: "L'entraide entre gens du coin est-elle réservée à certaines villes ?", a: "Non. Guardiens est ouvert dans toute la France. Les missions sont visibles uniquement aux personnes situées à proximité de chez vous, pour préserver l'esprit local de l'échange. Plus la communauté grandit dans votre quartier, plus les missions trouvent rapidement preneur." },
- { q: "Que faire si quelqu'un me propose de l'argent pour une petite mission ?", a: "Refusez. C'est non négociable et c'est ce qui rend Guardiens unique. Aucun argent ne doit circuler dans une petite mission. Si quelqu'un insiste, signalez-le à l'équipe Guardiens via le formulaire de contact. Les échanges acceptés sont en nature : produits du jardin, repas, service rendu en retour." },
-];
+interface OpenMissionRow {
+  id: string;
+  title: string;
+  category: string;
+  city: string | null;
+  created_at: string;
+}
+
+const CATEGORY_LABEL: Record<string, string> = {
+  animals: "Animaux",
+  garden: "Jardin",
+  errand: "Courses",
+  tech: "Technique",
+  company: "Compagnie",
+  home: "Maison",
+  other: "Autre",
+};
 
 /* ── page ── */
 const SmallMissionsPublic = () => {
