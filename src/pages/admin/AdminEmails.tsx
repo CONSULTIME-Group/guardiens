@@ -833,7 +833,7 @@ const EngagementTab = () => {
 const AdminEmails = () => {
   return (
     <div className="space-y-6">
-      <h1 className="font-body text-2xl font-bold">Emails & Communications</h1>
+      <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Emails & Communications</h1>
 
       <Tabs defaultValue="templates" className="space-y-4">
         <TabsList className="grid w-full grid-cols-7">

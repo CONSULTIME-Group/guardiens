@@ -190,7 +190,7 @@ const AdminSitsManagement = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-body text-2xl font-bold">Gardes</h1>
+      <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Gardes</h1>
 
       {/* Alerts */}
       {(overdueConfirmed.length > 0 || missingReviews14d.length > 0 || cancelledThisWeek.length > 0) && (

@@ -40,7 +40,7 @@ const AdminSettings = () => {
  return (
  <div className="space-y-6">
  <div>
- <h1 className="font-body text-2xl font-bold">Paramètres du site</h1>
+ <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Paramètres du site</h1>
  <p className="text-sm text-muted-foreground mt-1">
  Configuration générale de la plateforme guardiens.
  </p>
