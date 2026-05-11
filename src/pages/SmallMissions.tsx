@@ -3,7 +3,8 @@ const entraideHeader = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/obje
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dog, Flower2, Handshake, ArrowRight, Lock, X, Sprout, PawPrint, GraduationCap, Star, MapPin, Search as SearchIcon, Check } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowRight, Lock, X, MapPin, Search as SearchIcon, Check } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -19,12 +20,11 @@ import ProposeHelperExchangeDialog from "@/components/missions/ProposeHelperExch
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import CompetenceAutocomplete from "@/components/profile/CompetenceAutocomplete";
 
-const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
- animals: { label: "Animaux", icon: Dog, colorClass: "text-primary" },
- garden: { label: "Jardin", icon: Flower2, colorClass: "text-primary" },
- house: { label: "Maison", icon: Handshake, colorClass: "text-primary" },
- skills: { label: "Compétences", icon: Handshake, colorClass: "text-primary" },
- 
+const CATEGORY_META: Record<string, { label: string }> = {
+ animals: { label: "Animaux" },
+ garden: { label: "Jardin" },
+ house: { label: "Maison" },
+ skills: { label: "Compétences" },
 };
 
 const MISSION_TO_SKILL: Record<string, string> = {
@@ -40,11 +40,11 @@ const SKILL_TO_MISSION: Record<string, string> = {
  coups_de_main: "house",
 };
 
-const SKILL_PILL_META: Record<string, { label: string; icon: typeof Sprout }> = {
- jardin: { label: "Jardin", icon: Sprout },
- animaux: { label: "Animaux", icon: PawPrint },
- competences: { label: "Compétences", icon: GraduationCap },
- house: { label: "Maison", icon: Handshake },
+const SKILL_PILL_META: Record<string, { label: string }> = {
+ jardin: { label: "Jardin" },
+ animaux: { label: "Animaux" },
+ competences: { label: "Compétences" },
+ house: { label: "Maison" },
 };
 
 const DURATION_LABELS: Record<string, string> = {
@@ -98,9 +98,10 @@ const SmallMissions = () => {
  const queryClient = useQueryClient();
  const { hasAccess, status: subStatus } = useSubscriptionAccess();
  const { level: accessLevel, profileCompletion, canApplyMissions } = useAccessLevel();
- const [searchParams] = useSearchParams();
- const initialMode: ModeFilter = searchParams.get("type") === "offre" ? "offer" : "need";
- const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
+  const [searchParams, setSearchParams] = useSearchParams();
+ const initialMode: ModeFilter = (searchParams.get("type") === "offre" || searchParams.get("mode") === "offer") ? "offer" : "need";
+ const initialCat = (searchParams.get("cat") as CategoryFilter) || "all";
+ const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>(initialCat);
  const [mode, setMode] = useState<ModeFilter>(initialMode);
  const [dialogMission, setDialogMission] = useState<any>(null);
  const [dialogTarget, setDialogTarget] = useState<{ id: string; name: string } | null>(null);
@@ -127,13 +128,26 @@ const SmallMissions = () => {
 
  const mySkills: string[] = (currentUserProfile as any)?.skill_categories || [];
 
- const [postalCodeInput, setPostalCodeInput] = useState("");
- const [radiusKm, setRadiusKm] = useState(0); // 0 = "Partout" — défaut volontaire (cold start, base nationale)
+  const [postalCodeInput, setPostalCodeInput] = useState("");
+ const initialRadius = Number(searchParams.get("radius") || "0");
+ const [radiusKm, setRadiusKm] = useState(Number.isFinite(initialRadius) ? initialRadius : 0); // 0 = "Partout" — défaut volontaire (cold start, base nationale)
  const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>(null);
  const [geocodingOrigin, setGeocodingOrigin] = useState(false);
 
  // ── Competence search state ──
- const [competenceSearch, setCompetenceSearch] = useState("");
+ const [competenceSearch, setCompetenceSearch] = useState(searchParams.get("q") || "");
+
+ // ── Sync filters → URL (lien partageable + reload safe) ──
+ useEffect(() => {
+ const next = new URLSearchParams(searchParams);
+ if (categoryFilter !== "all") next.set("cat", categoryFilter); else next.delete("cat");
+ if (mode === "offer") next.set("mode", "offer"); else next.delete("mode");
+ if (radiusKm > 0) next.set("radius", String(radiusKm)); else next.delete("radius");
+ if (competenceSearch.trim()) next.set("q", competenceSearch.trim()); else next.delete("q");
+ next.delete("type"); // ancien paramètre, on migre vers `mode`
+ setSearchParams(next, { replace: true });
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [categoryFilter, mode, radiusKm, competenceSearch]);
 
  // ── "Proposer mon aide" dialog state ──
  const [offerDialogOpen, setOfferDialogOpen] = useState(false);
@@ -287,7 +301,7 @@ const SmallMissions = () => {
  }, [isAuthenticated, user, navigate, switchRole]);
 
 
- const { data: allMissions } = useQuery({
+ const { data: allMissions, isLoading: missionsLoading } = useQuery({
  queryKey: ["small-missions-all"],
  queryFn: async () => {
  const { data: missions } = await supabase
@@ -320,7 +334,7 @@ const SmallMissions = () => {
  },
  });
 
- const { data: availableHelpers } = useQuery({
+ const { data: availableHelpers, isLoading: helpersLoading } = useQuery({
  queryKey: ["available-helpers"],
  queryFn: async () => {
  const { data } = await supabase
@@ -523,16 +537,17 @@ const SmallMissions = () => {
 
  return (
  <>
- <PageMeta
+  <PageMeta
  title="Petites missions — Entre gens du coin | Guardiens"
  description="Des coups de main, des échanges, des compétences. Entre gens du coin qui se choisissent."
+ noindex
  />
 
   <div className="min-h-screen bg-background">
  {/* Hero compact avec image — hauteur contenue, dégradé fort pour lisibilité */}
  <section className="relative overflow-hidden border-b border-border/40">
  <div className="absolute inset-0">
-  <img src={entraideHeader} alt="" loading="eager" className="w-full h-full object-cover object-[70%_30%] md:object-right" />
+  <img src={entraideHeader} alt="" loading="eager" width={1600} height={400} className="w-full h-full object-cover object-[70%_30%] md:object-right" />
  <div className="absolute inset-0 bg-gradient-to-b from-background/95 via-background/80 to-background/60 md:bg-gradient-to-r md:from-background md:via-background/85 md:to-background/50" />
  </div>
  <div className="relative max-w-6xl mx-auto px-4 py-10 md:py-14 text-center space-y-3">
@@ -542,7 +557,7 @@ const SmallMissions = () => {
  <p className="text-sm md:text-base text-muted-foreground max-w-xl mx-auto">
  Demandez un coup de main ou proposez le vôtre — entre gens du coin, sans argent.
  </p>
- <p className="inline-block text-xs font-medium bg-badge-success text-badge-success-foreground px-3 py-1 rounded-full">
+  <p className="inline-block text-xs font-medium bg-primary/10 text-primary px-3 py-1 rounded-full">
  Gratuit pour tous les membres
  </p>
  </div>
@@ -701,11 +716,24 @@ const SmallMissions = () => {
  )}
  </h2>
 
- {missionCount > 0 ? (
+  {missionsLoading ? (
  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
- {filteredMissions.map((m: any) => {
+ {Array.from({ length: 6 }).map((_, i) => (
+ <Card key={`m-skel-${i}`} className="border-border">
+ <CardContent className="p-4 space-y-3">
+ <Skeleton className="h-3 w-20" />
+ <Skeleton className="h-4 w-3/4" />
+ <Skeleton className="h-3 w-1/2" />
+ <Skeleton className="h-3 w-2/3" />
+ <Skeleton className="h-9 w-full mt-2" />
+ </CardContent>
+ </Card>
+ ))}
+ </div>
+ ) : missionCount > 0 ? (
+ <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  {filteredMissions.map((m: any) => {
  const meta = CATEGORY_META[m.category] || CATEGORY_META.animals;
- const Icon = meta.icon;
  const isCompleted = m.status === "completed";
  const isMine = m.user_id === user?.id;
  const goToDetail = () => navigate(isAuthenticated ? `/petites-missions/${m.id}` : "/inscription");
@@ -720,11 +748,8 @@ const SmallMissions = () => {
  >
  <Card className={`border-border transition-colors h-full ${isCompleted ? "opacity-50 grayscale" : "hover:border-primary/30"}`}>
  <CardContent className="p-4 space-y-2">
- <div className="flex items-center justify-between">
- <div className="flex items-center gap-2">
- <Icon className="h-4 w-4 text-primary" />
- <span className="text-xs font-medium text-muted-foreground">{meta.label}</span>
- </div>
+  <div className="flex items-center justify-between">
+ <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{meta.label}</span>
  {m.response_count > 0 && (
  <span className="text-xs text-muted-foreground bg-accent px-2 py-0.5 rounded-full">
  {m.response_count} proposition{m.response_count > 1 ? "s" : ""}
@@ -787,20 +812,27 @@ const SmallMissions = () => {
  ? "Rendez-vous visible : indiquez vos disponibilités juste en dessous. Quand une demande arrivera, vous serez la première personne à qui l'on pense."
  : "Soyez la première personne à publier. Une demande d'aujourd'hui, c'est des gens du coin qui la voient demain — et souvent une rencontre qui change la semaine."}
  </p>
+ <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
  {mode === "need" && (
  <Link to="/petites-missions/creer" className="inline-block">
- <Button variant="hero" size="lg" className="mt-2">
+ <Button variant="hero" size="lg">
  J'ose, je publie ma demande
  <ArrowRight className="ml-2 h-4 w-4" />
  </Button>
  </Link>
  )}
  {mode === "offer" && (
- <Button variant="hero" size="lg" className="mt-2" onClick={openOfferDialog}>
+ <Button variant="hero" size="lg" onClick={openOfferDialog}>
  J'ai du temps à offrir
  <ArrowRight className="ml-2 h-4 w-4" />
  </Button>
  )}
+ {radiusKm > 0 && (
+ <Button variant="outline" size="lg" onClick={() => setRadiusKm(0)}>
+ Élargir à la France entière
+ </Button>
+ )}
+ </div>
  </div>
  )}
 
@@ -864,13 +896,11 @@ const SmallMissions = () => {
  </div>
  </div>
  <div className="flex flex-wrap gap-1.5">
- {displayedSkills.map((key: string) => {
+  {displayedSkills.map((key: string) => {
  const meta = SKILL_PILL_META[key];
  if (!meta) return null;
- const SkIcon = meta.icon;
  return (
- <span key={key} className="flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 text-primary px-2.5 py-0.5 text-xs">
- <SkIcon className="h-3 w-3" />
+ <span key={key} className="rounded-full border border-primary/20 bg-primary/10 text-primary px-2.5 py-0.5 text-xs">
  {meta.label}
  </span>
  );
@@ -879,10 +909,9 @@ const SmallMissions = () => {
  <span className="text-xs text-muted-foreground px-2 py-0.5">+{extraCount}</span>
  )}
  </div>
- {h.sits_count > 0 && (
- <p className="text-xs text-foreground/60 flex items-center gap-1">
- <Star className="h-3 w-3 fill-primary text-primary" />
- {h.review_count > 0 ? `${h.review_avg.toFixed(1)} · ` : ""}{h.sits_count} mission{h.sits_count > 1 ? "s" : ""} accomplie{h.sits_count > 1 ? "s" : ""}
+  {h.sits_count > 0 && (
+ <p className="text-xs text-foreground/60">
+ {h.review_count > 0 ? `Note ${h.review_avg.toFixed(1)} · ` : ""}{h.sits_count} mission{h.sits_count > 1 ? "s" : ""} accomplie{h.sits_count > 1 ? "s" : ""}
  </p>
  )}
  {/* Compétences spécifiques (au-delà des catégories) */}
@@ -926,8 +955,27 @@ const SmallMissions = () => {
  );
  };
 
- return (
+  return (
  <div className="space-y-8">
+ {helpersLoading ? (
+ <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+ {Array.from({ length: 6 }).map((_, i) => (
+ <div key={`h-skel-${i}`} className="rounded-2xl border border-primary/20 bg-card p-5 space-y-3">
+ <Skeleton className="h-5 w-32 rounded-full" />
+ <div className="flex items-center gap-3">
+ <Skeleton className="h-10 w-10 rounded-full" />
+ <div className="space-y-2">
+ <Skeleton className="h-4 w-24" />
+ <Skeleton className="h-3 w-16" />
+ </div>
+ </div>
+ <Skeleton className="h-3 w-3/4" />
+ <Skeleton className="h-8 w-full" />
+ </div>
+ ))}
+ </div>
+ ) : (
+ <>
  {/* Bloc 1 — Compétences spécifiques renseignées (priorité) */}
  {priorityHelpers.length > 0 && (
  <div className="space-y-3">
@@ -968,16 +1016,25 @@ const SmallMissions = () => {
  ? "Activez votre disponibilité ci-dessus : votre présence donne envie aux autres d'oser à leur tour."
  : "Élargissez le rayon, ou publiez votre demande : les personnes du coin reçoivent une alerte et se manifestent souvent dans la journée."}
  </p>
+ <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
  {mode === "need" && (
  <Link to="/petites-missions/creer" className="inline-block">
- <Button variant="hero" size="lg" className="mt-2">
+ <Button variant="hero" size="lg">
  J'ose, je publie ma demande
  <ArrowRight className="ml-2 h-4 w-4" />
  </Button>
  </Link>
  )}
+ {radiusKm > 0 && (
+ <Button variant="outline" size="lg" onClick={() => setRadiusKm(0)}>
+ Élargir à la France entière
+ </Button>
+ )}
+ </div>
  </div>
  )}
+ </>
+  )}
  </div>
  );
  })()}
@@ -985,17 +1042,16 @@ const SmallMissions = () => {
  )}
  </section>
 
- {/* Exemples par catégorie — sans Maison */}
+  {/* Exemples par catégorie — affichés uniquement quand aucun résultat (vrai empty state global) */}
+ {missionCount === 0 && helperCount === 0 && (
  <section className="space-y-8">
  <h2 className="font-heading text-2xl font-bold text-foreground text-center">Quelques exemples d'échanges</h2>
  {(["animals", "garden", "skills"] as const).map((cat) => {
  const meta = CATEGORY_META[cat];
- const Icon = meta.icon;
  const items = EXAMPLES.filter((e) => e.cat === cat);
  return (
  <div key={cat} className="space-y-3">
- <h3 className="font-heading text-lg font-semibold flex items-center gap-2">
- <Icon className="h-5 w-5 text-primary" />
+ <h3 className="font-heading text-lg font-semibold">
  {meta.label}
  </h3>
  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -1012,41 +1068,9 @@ const SmallMissions = () => {
  );
  })}
  </section>
-
- {/* CTA final unifié */}
- <section className="text-center space-y-4 py-8">
- <p className="font-heading text-xl md:text-2xl italic text-foreground/80 max-w-xl mx-auto leading-relaxed">
- Le pire qui puisse arriver, c'est que personne ne réponde.<br />
- Le meilleur, c'est de rencontrer quelqu'un qui change votre semaine.
- </p>
- {isAuthenticated ? (
- <Link to="/petites-missions/creer">
- <Button variant="hero" size="xl">
- J'ose demander
- <ArrowRight className="ml-2 h-5 w-5" />
- </Button>
- </Link>
- ) : (
- <Link to="/inscription">
- <Button variant="hero" size="xl">S'inscrire gratuitement</Button>
- </Link>
  )}
- </section>
 
- {/* Schema.org */}
- <script
- type="application/ld+json"
- dangerouslySetInnerHTML={{
- __html: JSON.stringify({
- "@context": "https://schema.org",
- "@type": "Service",
- name: "Petites missions Guardiens",
- description: "Entraide communautaire entre gens du coin autour des animaux, du jardin et des compétences.",
- areaServed: { "@type": "Country", name: "France" },
- provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
- }),
- }}
- />
+  {/* Schema.org Service intentionnellement omis : déjà servi par /petites-missions public (anti-cannibalisation). */}
  </main>
 
  <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
@@ -1116,7 +1140,7 @@ const SmallMissions = () => {
  <div className="space-y-2">
  <p className="text-sm font-medium text-foreground">Domaines de compétences</p>
  <div className="flex flex-wrap gap-2">
- {Object.entries(SKILL_PILL_META).map(([key, { label, icon: SkIcon }]) => {
+  {Object.entries(SKILL_PILL_META).map(([key, { label }]) => {
  const selected = offerSkills.includes(key);
  return (
  <button
@@ -1129,7 +1153,6 @@ const SmallMissions = () => {
  : "bg-muted text-foreground border-border hover:border-primary/40"
  }`}
  >
- <SkIcon className="h-3.5 w-3.5" />
  {label}
  {selected && <Check className="h-3 w-3" />}
  </button>
