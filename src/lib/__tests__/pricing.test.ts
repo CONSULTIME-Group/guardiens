@@ -29,8 +29,8 @@ describe("pricing constants", () => {
     expect(SITTER_PRICE_CURRENCY).toBe("EUR");
     expect(SITTER_PRICE_START).toBe("14 juillet 2026");
     expect(SITTER_PRICE_START_ISO).toBe("2026-07-14");
-    expect(FOUNDER_DEADLINE).toBe("13 mai 2026");
-    expect(FOUNDER_DEADLINE_ISO).toBe("2026-05-13");
+    expect(FOUNDER_DEADLINE).toBe("14 juillet 2026");
+    expect(FOUNDER_DEADLINE_ISO).toBe("2026-07-14");
     expect(TRIAL_DURATION).toBe("7 jours");
     expect(TRIAL_LABEL).toBe("essai de 7 jours sans frais");
   });
