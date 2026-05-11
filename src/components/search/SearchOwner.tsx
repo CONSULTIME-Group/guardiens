@@ -540,10 +540,9 @@ const SearchOwner = () => {
   return (
     <div className="animate-fade-in">
       {/* Title */}
-      <div className="px-6 pt-6 pb-2 md:pt-10 space-y-3">
-        <h1 className="font-heading text-3xl font-bold mb-1">Trouver un gardien</h1>
-        <p className="text-muted-foreground">Recherchez le gardien idéal pour votre maison et vos animaux.</p>
-        <ReachReassuranceBanner variant="inline" className="not-italic" inlineText="Du coin par défaut — élargissez le rayon, le département, la région ou toute la France à tout moment." />
+      <div className="px-6 pt-6 pb-2 md:pt-8 space-y-1.5">
+        <h1 className="font-heading text-3xl font-bold">Trouver un gardien</h1>
+        <p className="text-sm text-muted-foreground">Le gardien idéal pour votre maison et vos animaux — du coin par défaut, élargissez à toute la France à tout moment.</p>
       </div>
 
       {/* Sticky search bar */}
