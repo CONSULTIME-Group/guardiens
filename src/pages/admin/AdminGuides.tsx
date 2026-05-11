@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -222,9 +223,17 @@ const AdminGuides = () => {
                   <Button size="sm" variant="default" onClick={() => prefillFromRequest(req)} className="gap-1.5">
                     <Plus className="h-3.5 w-3.5" /> Créer le guide
                   </Button>
-                  <Button size="icon" variant="ghost" onClick={() => dismissRequest.mutate(req.id)} title="Écarter">
-                    <X className="h-4 w-4 text-muted-foreground" />
-                  </Button>
+                  <ConfirmDialog
+                    trigger={
+                      <Button size="icon" variant="ghost" title="Écarter cette demande" aria-label="Écarter cette demande de guide">
+                        <X className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    }
+                    title="Écarter cette demande ?"
+                    description={`La demande pour « ${req.city} » disparaîtra de la liste. Vous pourrez toujours créer un guide manuellement plus tard.`}
+                    confirmLabel="Écarter"
+                    onConfirm={() => dismissRequest.mutate(req.id)}
+                  />
                 </div>
               ))}
             </div>

@@ -19,6 +19,7 @@ import { formatDistanceToNow, format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
 import NetworkErrorsSection from "@/components/admin/NetworkErrorsSection";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 
 interface ErrorLog {
   id: string;
@@ -168,7 +169,6 @@ const AdminErrors = () => {
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Supprimer définitivement cette erreur ?")) return;
     const { error } = await supabase.from("error_logs").delete().eq("id", id);
     if (error) toast.error("Échec");
     else { toast.success("Supprimée"); load(); setSelected(null); window.dispatchEvent(new Event("admin-badges-refresh")); }
@@ -181,7 +181,6 @@ const AdminErrors = () => {
       toast.info("Aucune erreur non résolue à archiver");
       return;
     }
-    if (!confirm(`Archiver (marquer comme résolues) ${targets.length} erreur(s) ?`)) return;
     setArchiving(true);
     const { data: { user } } = await supabase.auth.getUser();
     const ids = targets.map((e) => e.id);
@@ -198,6 +197,8 @@ const AdminErrors = () => {
     }
   };
 
+  const unresolvedCount = filtered.filter((e) => !e.resolved_at).length;
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
@@ -211,16 +212,23 @@ const AdminErrors = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            onClick={archiveAll}
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            disabled={archiving || loading || filtered.filter((e) => !e.resolved_at).length === 0}
-          >
-            <Archive className="h-4 w-4" />
-            {archiving ? "Archivage…" : "Tout archiver"}
-          </Button>
+          <ConfirmDialog
+            trigger={
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                disabled={archiving || loading || unresolvedCount === 0}
+              >
+                <Archive className="h-4 w-4" />
+                {archiving ? "Archivage…" : "Tout archiver"}
+              </Button>
+            }
+            title={`Archiver ${unresolvedCount} erreur${unresolvedCount > 1 ? "s" : ""} ?`}
+            description="Toutes les erreurs non résolues actuellement filtrées seront marquées comme résolues. Vous pouvez les rouvrir ensuite individuellement."
+            confirmLabel="Tout archiver"
+            onConfirm={archiveAll}
+          />
           <Button onClick={load} variant="outline" size="sm" className="gap-2">
             <RefreshCw className="h-4 w-4" /> Actualiser
           </Button>
@@ -483,9 +491,18 @@ const AdminErrors = () => {
                       <CheckCircle2 className="h-4 w-4" /> Marquer résolue
                     </Button>
                   )}
-                  <Button onClick={() => remove(selected.id)} variant="destructive" className="gap-2 ml-auto">
-                    <Trash2 className="h-4 w-4" /> Supprimer
-                  </Button>
+                  <ConfirmDialog
+                    trigger={
+                      <Button variant="destructive" className="gap-2 ml-auto">
+                        <Trash2 className="h-4 w-4" /> Supprimer
+                      </Button>
+                    }
+                    title="Supprimer cette erreur ?"
+                    description="L'erreur et son historique d'occurrences seront supprimés définitivement de la base."
+                    confirmLabel="Supprimer"
+                    destructive
+                    onConfirm={() => remove(selected.id)}
+                  />
                 </div>
               </div>
             </>
