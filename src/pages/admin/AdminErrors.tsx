@@ -491,9 +491,18 @@ const AdminErrors = () => {
                       <CheckCircle2 className="h-4 w-4" /> Marquer résolue
                     </Button>
                   )}
-                  <Button onClick={() => remove(selected.id)} variant="destructive" className="gap-2 ml-auto">
-                    <Trash2 className="h-4 w-4" /> Supprimer
-                  </Button>
+                  <ConfirmDialog
+                    trigger={
+                      <Button variant="destructive" className="gap-2 ml-auto">
+                        <Trash2 className="h-4 w-4" /> Supprimer
+                      </Button>
+                    }
+                    title="Supprimer cette erreur ?"
+                    description="L'erreur et son historique d'occurrences seront supprimés définitivement de la base."
+                    confirmLabel="Supprimer"
+                    destructive
+                    onConfirm={() => remove(selected.id)}
+                  />
                 </div>
               </div>
             </>
