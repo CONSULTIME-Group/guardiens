@@ -511,13 +511,14 @@ const SmallMissions = () => {
  try { localStorage.setItem("guardiens_skill_prompt_dismissed", "true"); } catch {}
  };
 
- const FILTER_PILLS: { key: CategoryFilter; label: string; icon: typeof Dog | null }[] = [
- { key: "all", label: "Tout", icon: null },
- { key: "garden", label: "Jardin", icon: Sprout },
- { key: "animals", label: "Animaux", icon: PawPrint },
- { key: "skills", label: "Compétences", icon: GraduationCap },
- { key: "house", label: "Maison", icon: Handshake },
- { key: "mine", label: "Mes missions", icon: null },
+  // Pills de filtre — sans icônes Lucide (règle mémoire « No Lucide/Emoji in content »)
+ const FILTER_PILLS: { key: CategoryFilter; label: string }[] = [
+ { key: "all", label: "Tout" },
+ { key: "garden", label: "Jardin" },
+ { key: "animals", label: "Animaux" },
+ { key: "skills", label: "Compétences" },
+ { key: "house", label: "Maison" },
+ { key: "mine", label: "Mes missions" },
  ];
 
  return (
