@@ -212,12 +212,15 @@ const OwnerProfilePage = () => {
     };
   });
 
+  // Avertit l'utilisateur s'il quitte la page avec des modifications non sauvegardées.
+  useUnsavedChanges(dirty);
+
+  // Section suivante (pour le bouton « Suivant ») — ignore les sections déjà complètes.
+  const currentIndex = SECTIONS_META.findIndex(s => s.id === activeSection);
+  const nextSection = SECTIONS_META[currentIndex + 1];
+
   if (loading) {
-    return (
-      <div className="p-6 md:p-10 max-w-5xl mx-auto animate-fade-in">
-        <div className="text-center text-muted-foreground py-20">Chargement du profil...</div>
-      </div>
-    );
+    return <ProfileSkeleton />;
   }
 
   return (
