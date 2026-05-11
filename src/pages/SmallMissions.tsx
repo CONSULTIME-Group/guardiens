@@ -429,9 +429,9 @@ const SmallMissions = () => {
               setCategoryFilter={setCategoryFilter}
             />
 
-            {/* ═══ Section 1 — Missions près de chez vous ═══ */}
+            {/* ═══ Section 1 — Demandes visibles ═══ */}
             <h2 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
-              {mode === "offer" ? "Demandes du coin à aider" : "Demandes près de chez vous"}
+              {mode === "offer" ? "Demandes à aider" : "Demandes publiées près de chez vous"}
               {missionCount > 0 && (
                 <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
                   {missionCount} demande{missionCount > 1 ? "s" : ""}
@@ -517,7 +517,7 @@ const SmallMissions = () => {
               </div>
             )}
 
-            {/* ═══ Section 2 — Disponibles pour aider ═══ */}
+            {/* ═══ Section 2 — Membres disponibles ═══ */}
             {(helperCount > 0 || isAuthenticated) && (
               <div className="mt-10">
                 {isAuthenticated && mode === "offer" && (
@@ -547,7 +547,7 @@ const SmallMissions = () => {
                   </div>
                 )}
                 <h2 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
-                  {mode === "need" ? "Des gens du coin prêts à aider" : "Autres personnes disponibles"}
+                  {mode === "need" ? "Membres disponibles pour aider" : "Autres membres disponibles"}
                   <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
                     {helperCount} personne{helperCount > 1 ? "s" : ""} du coin
                   </span>
