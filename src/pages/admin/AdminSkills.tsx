@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 
 interface SkillRow {
   id: string;
@@ -446,9 +447,18 @@ const AdminSkills = () => {
                                 <Button size="sm" variant="ghost" className="h-8 px-2" onClick={() => { setEditingId(skill.id); setEditLabel(skill.label); }} title="Modifier + Approuver">
                                   <Pencil className="h-4 w-4" />
                                 </Button>
-                                <Button size="sm" variant="ghost" className="h-8 px-2 text-destructive" onClick={() => handleReject(skill)} title="Refuser">
-                                  <X className="h-4 w-4" />
-                                </Button>
+                                <ConfirmDialog
+                                  trigger={
+                                    <Button size="sm" variant="ghost" className="h-8 px-2 text-destructive" title="Refuser">
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  }
+                                  title="Refuser cette compétence ?"
+                                  description={<>« <strong>{skill.label}</strong> » sera marquée comme refusée et ne sera plus proposée aux gardiens.</>}
+                                  confirmLabel="Refuser"
+                                  destructive
+                                  onConfirm={() => handleReject(skill)}
+                                />
                               </>
                             )}
                           </div>
