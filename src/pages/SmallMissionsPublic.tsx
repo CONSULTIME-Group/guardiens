@@ -400,13 +400,25 @@ const SmallMissionsPublic = () => {
  ))}
  </div>
 
- <Reveal delay={0.3}>
+  <Reveal delay={0.3}>
  <p className="text-center font-body text-base text-foreground/60 italic mt-12">
  L'échange se décide entre vous. Parfois immédiat. Parfois à la saison prochaine. C'est vous qui décidez — pas la plateforme.
  </p>
  </Reveal>
+
+ {/* CTA intermédiaire — pic d'intention après les exemples */}
+ <Reveal delay={0.35}>
+ <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
+ <Button onClick={goToCreate} className="bg-primary text-primary-foreground rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary/90 transition-all duration-200">
+ Publier ma première mission
+ </Button>
+ <Button onClick={goToHelp} variant="outline" className="border-2 border-primary text-primary rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200">
+ Je propose mon aide
+ </Button>
  </div>
-  </section>
+ </Reveal>
+ </div>
+ </section>
 
  {/* ═══ SECTION 4.5 — CE QU'ON ÉCHANGE / CE QU'ON N'ÉCHANGE PAS (densification éditoriale) ═══ */}
  <section className="bg-background border-t border-border/40">
