@@ -489,7 +489,7 @@ const MySubscription = () => {
                     Vous devenez Fondateur le 13 juillet.
                   </p>
                   <p className="text-sm text-founder-foreground/80 font-body leading-relaxed">
-                    Chaque membre inscrit avant le 13 juillet 2026 reçoit le badge Fondateur, visible sur son profil public. La gratuité, elle, est étendue à tous les inscrits jusqu'au 14 juillet 2026.
+                    Chaque membre inscrit avant le 13 juillet 2026 reçoit le badge Fondateur, visible sur son profil public. L'accès offert, lui, est étendu à tous les inscrits jusqu'au 14 juillet 2026.
                   </p>
                 </div>
               </div>
