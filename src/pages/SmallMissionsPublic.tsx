@@ -572,6 +572,122 @@ const SmallMissionsPublic = () => {
  </div>
   </section>
 
+  {/* ═══ SECTION 5.6 — MISSIONS OUVERTES (preuve sociale dynamique) ═══ */}
+  {openMissions.length > 0 && (
+    <section className="bg-muted/40 border-t border-border/40">
+      <div className="max-w-5xl mx-auto px-6 py-20 md:py-24">
+        <Reveal>
+          <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 text-center mb-4">
+            En direct de la communauté
+          </p>
+          <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center leading-snug mb-12">
+            Des missions ouvertes en ce moment
+          </h2>
+        </Reveal>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {openMissions.map((m, i) => (
+            <Reveal key={m.id} delay={0.04 * i}>
+              <Link
+                to={`/petites-missions/${m.id}`}
+                className="block h-full p-5 rounded-2xl border border-border bg-card hover:border-primary/40 hover:-translate-y-0.5 transition-all"
+              >
+                <p className="text-[11px] font-body font-semibold tracking-widest uppercase text-primary/70 mb-3">
+                  {CATEGORY_LABEL[m.category] || "Mission"}
+                </p>
+                <h3 className="font-heading text-base md:text-lg font-semibold text-foreground leading-snug mb-2 line-clamp-2">
+                  {m.title}
+                </h3>
+                <p className="text-xs text-foreground/55">
+                  {m.city || "France"}
+                </p>
+              </Link>
+            </Reveal>
+          ))}
+        </div>
+        <Reveal delay={0.3}>
+          <div className="text-center mt-10">
+            <Button onClick={goToHelp} variant="outline" className="border-2 border-primary text-primary rounded-full px-8 py-3 h-auto text-sm font-semibold">
+              Voir toutes les missions ouvertes
+            </Button>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  )}
+
+  {/* ═══ SECTION 5.7 — TÉMOIGNAGES ═══ */}
+  <section className="bg-background border-t border-border/40">
+    <div className="max-w-5xl mx-auto px-6 py-20 md:py-24">
+      <Reveal>
+        <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 text-center mb-4">
+          Ce qu'en disent les membres
+        </p>
+        <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center leading-snug mb-12">
+          Trois échanges, trois rencontres.
+        </h2>
+      </Reveal>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {MISSIONS_TESTIMONIALS.map((t, i) => (
+          <Reveal key={t.name} delay={0.08 * i}>
+            <figure className="h-full bg-card border border-border rounded-2xl p-8 flex flex-col">
+              <blockquote className="font-heading text-base md:text-lg italic text-foreground/85 leading-relaxed flex-1">
+                « {t.quote} »
+              </blockquote>
+              <figcaption className="mt-6 pt-4 border-t border-border/60">
+                <span className="block font-heading font-semibold text-foreground">{t.name}</span>
+                <span className="text-xs text-foreground/55 tracking-wide">{t.city}</span>
+              </figcaption>
+            </figure>
+          </Reveal>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {/* ═══ SECTION 5.8 — POURQUOI L'ENTRAIDE LOCALE FONCTIONNE (densification YMYL) ═══ */}
+  <section className="bg-muted/30 border-t border-border/40">
+    <div className="max-w-3xl mx-auto px-6 py-20 md:py-24">
+      <Reveal>
+        <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 mb-4">
+          Le fond de l'idée
+        </p>
+        <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground leading-snug mb-8">
+          Pourquoi l'entraide entre gens du coin fonctionne
+        </h2>
+      </Reveal>
+
+      <Reveal delay={0.05}>
+        <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed mb-6">
+          Quand on demande un service à une personne du quartier, il se passe quelque chose qu'aucune plateforme tarifée ne peut reproduire : la relation existe avant la transaction. Vous croisez la personne au marché. Vous savez où elle habite. Vous avez intérêt, l'un comme l'autre, à ce que l'échange se passe bien — parce que vous allez vous revoir.
+        </p>
+      </Reveal>
+
+      <Reveal delay={0.1}>
+        <h3 className="font-heading text-xl md:text-2xl font-semibold text-foreground mt-10 mb-4">
+          Le coût caché des services payants
+        </h3>
+        <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed mb-6">
+          Faire venir un professionnel pour arroser des plantes, déplacer un meuble ou promener un chien revient souvent à 25-40 € par intervention. Sur une saison, le calcul devient déraisonnable pour des gestes qui prennent quinze minutes à une personne du coin. La transaction monétaire transforme un service simple en prestation, avec ce qu'elle implique de cadre, de TVA, et de distance émotionnelle.
+        </p>
+        <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed mb-6">
+          L'entraide gratuite réintroduit la souplesse. Une heure aujourd'hui, un panier de légumes la semaine prochaine. Un coup de main pour un déménagement, un dîner partagé en retour. Personne ne tient les comptes — et c'est précisément ce qui rend l'échange durable.
+        </p>
+      </Reveal>
+
+      <Reveal delay={0.15}>
+        <h3 className="font-heading text-xl md:text-2xl font-semibold text-foreground mt-10 mb-4">
+          Ce que la loi française autorise (et ce qu'elle proscrit)
+        </h3>
+        <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed mb-6">
+          L'entraide non monétaire entre particuliers est parfaitement légale en France, à condition de respecter trois principes simples. D'abord, aucune somme d'argent ne doit circuler — la contrepartie en nature (repas, produits du jardin, service rendu en retour) reste libre, mais l'argent transforme l'échange en travail dissimulé. Ensuite, le service rendu doit rester ponctuel et accessoire : si la même personne vient garder vos enfants tous les mercredis, ce n'est plus de l'entraide, c'est un emploi à déclarer (chèque emploi-service, par exemple). Enfin, certains domaines restent réservés aux professionnels : aide à la personne médicalisée, garde d'enfants régulière, électricité, plomberie sous pression.
+        </p>
+        <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed">
+          Les petites missions Guardiens s'inscrivent strictement dans ce cadre : un coup de main, ponctuel, sans transaction financière, autour de la maison, du jardin, des animaux. C'est volontairement étroit — pour rester sain.
+        </p>
+      </Reveal>
+    </div>
+  </section>
+
   {/* ═══ SECTION 5.5 — POUR ALLER PLUS LOIN (maillage interne) ═══ */}
   <section className="py-20 bg-background">
   <div className="max-w-6xl mx-auto px-6">
