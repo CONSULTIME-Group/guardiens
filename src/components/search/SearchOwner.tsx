@@ -794,7 +794,19 @@ const SearchOwner = () => {
       {viewMode === "list" ? (
         <div className="p-6">
           {loading ? (
-            <p className="text-muted-foreground py-10 text-center">Recherche en cours...</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" aria-busy="true" aria-label="Chargement des gardiens">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="bg-card rounded-xl overflow-hidden border border-border">
+                  <Skeleton className="aspect-square w-full rounded-none" />
+                  <div className="p-3 space-y-2">
+                    <Skeleton className="h-4 w-2/3" />
+                    <Skeleton className="h-3 w-1/2" />
+                    <Skeleton className="h-3 w-3/4" />
+                    <Skeleton className="h-8 w-full mt-2" />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : results.length === 0 ? (
             <div className="max-w-2xl mx-auto py-10 space-y-4">
               <div className="text-center">
