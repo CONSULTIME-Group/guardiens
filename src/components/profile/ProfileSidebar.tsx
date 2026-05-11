@@ -2,6 +2,7 @@ import { CheckCircle2, Circle, Eye, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, type ReactNode, type MouseEvent } from "react";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Tooltip,
   TooltipContent,
@@ -25,9 +26,12 @@ export interface SidebarSection {
 interface ProfileSidebarProps {
   firstName?: string;
   city?: string;
+  avatarUrl?: string;
   completion: number;
   sections: SidebarSection[];
   activeSection: string;
+  /** Id de la section qui contient des modifications non sauvegardées (point orange). */
+  dirtySection?: string;
   onSectionClick: (id: string) => void;
   publicProfileUrl: string;
   role: "sitter" | "owner";
@@ -36,8 +40,8 @@ interface ProfileSidebarProps {
 }
 
 const ProfileSidebar = ({
-  firstName, city, completion, sections,
-  activeSection, onSectionClick, publicProfileUrl, role, isFounder,
+  firstName, city, avatarUrl, completion, sections,
+  activeSection, dirtySection, onSectionClick, publicProfileUrl, role, isFounder,
   scoreBreakdown,
 }: ProfileSidebarProps) => {
   const [expandedMissing, setExpandedMissing] = useState<Record<string, boolean>>({});
