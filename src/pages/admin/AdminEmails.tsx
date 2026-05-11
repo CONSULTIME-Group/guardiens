@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Mail, Clock, FileText, Send, ShieldOff, History, Settings2, RefreshCw, AlertCircle, Ban, Eye, SendHorizonal, Pencil, Info, CheckCircle2, BarChart3, Inbox } from "lucide-react";
 import { ConfirmationsTab } from "./_components/ConfirmationsTab";
 import { QueueTab } from "./_components/QueueTab";
