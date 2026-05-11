@@ -386,30 +386,39 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     navigate("/login", { replace: true });
   };
 
+  const [confirmLogout, setConfirmLogout] = useState(false);
+
   if (!open) return null;
 
-  
+  const handleOpenChange = (next: boolean) => {
+    if (!next && canDismiss) dismiss();
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center backdrop-blur-sm bg-background/80">
-      <div className="max-w-2xl w-full mx-auto mt-8 md:mt-16 bg-card rounded-2xl shadow-xl p-6 md:p-10 relative max-h-[90vh] overflow-y-auto">
-        <div className="absolute right-4 top-4 flex items-center gap-3 z-10">
+    <>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent
+        onEscapeKeyDown={(e) => { if (!canDismiss) e.preventDefault(); }}
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+        className={`max-w-2xl w-[calc(100%-1.5rem)] sm:w-full max-h-[90vh] overflow-y-auto p-6 md:p-10 rounded-2xl ${canDismiss ? "" : "[&>button.absolute]:hidden"}`}
+      >
+        <DialogTitle className="sr-only">Bienvenue sur Guardiens</DialogTitle>
+        <DialogDescription className="sr-only">
+          Quelques étapes pour préparer votre profil et faire connaissance avec la communauté.
+        </DialogDescription>
+        <div className="absolute left-6 top-4 z-10">
           <button
             type="button"
-            onClick={leaveToLogin}
+            onClick={() => setConfirmLogout(true)}
             className="text-xs text-muted-foreground hover:text-foreground underline-offset-4 hover:underline transition-colors"
           >
             Retour à la connexion
           </button>
-          {canDismiss && (
-            <button
-              onClick={dismiss}
-              aria-label="Fermer"
-              className="rounded-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          )}
+        </div>
+        {/* live region pour annoncer les sauvegardes aux lecteurs d'écran */}
+        <div aria-live="polite" className="sr-only">
+          {minimalSaved && slide === 0 ? "Vos informations ont été enregistrées." : ""}
         </div>
 
         {/* Progress indicator */}
