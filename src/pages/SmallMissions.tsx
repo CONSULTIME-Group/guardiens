@@ -955,8 +955,27 @@ const SmallMissions = () => {
  );
  };
 
- return (
+  return (
  <div className="space-y-8">
+ {helpersLoading ? (
+ <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+ {Array.from({ length: 6 }).map((_, i) => (
+ <div key={`h-skel-${i}`} className="rounded-2xl border border-primary/20 bg-card p-5 space-y-3">
+ <Skeleton className="h-5 w-32 rounded-full" />
+ <div className="flex items-center gap-3">
+ <Skeleton className="h-10 w-10 rounded-full" />
+ <div className="space-y-2">
+ <Skeleton className="h-4 w-24" />
+ <Skeleton className="h-3 w-16" />
+ </div>
+ </div>
+ <Skeleton className="h-3 w-3/4" />
+ <Skeleton className="h-8 w-full" />
+ </div>
+ ))}
+ </div>
+ ) : (
+ <>
  {/* Bloc 1 — Compétences spécifiques renseignées (priorité) */}
  {priorityHelpers.length > 0 && (
  <div className="space-y-3">
@@ -997,16 +1016,27 @@ const SmallMissions = () => {
  ? "Activez votre disponibilité ci-dessus : votre présence donne envie aux autres d'oser à leur tour."
  : "Élargissez le rayon, ou publiez votre demande : les personnes du coin reçoivent une alerte et se manifestent souvent dans la journée."}
  </p>
+ <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
  {mode === "need" && (
  <Link to="/petites-missions/creer" className="inline-block">
- <Button variant="hero" size="lg" className="mt-2">
+ <Button variant="hero" size="lg">
  J'ose, je publie ma demande
  <ArrowRight className="ml-2 h-4 w-4" />
  </Button>
  </Link>
  )}
+ {radiusKm > 0 && (
+ <Button variant="outline" size="lg" onClick={() => setRadiusKm(0)}>
+ Élargir à la France entière
+ </Button>
+ )}
+ </div>
  </div>
  )}
+ </>
+ )}
+ </div>
+ );
  </div>
  );
  })()}
