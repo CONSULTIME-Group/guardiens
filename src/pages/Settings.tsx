@@ -743,13 +743,10 @@ const BillingSection = ({ user }: { user: any }) => {
 
         <div className="flex flex-wrap gap-2 pt-2">
           <Button variant="outline" size="sm" asChild className="gap-2">
-            <Link to="/pricing">
+            <Link to="/tarifs">
               Voir les formules
               <ArrowRight className="h-4 w-4" />
             </Link>
-          </Button>
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/parrainage">Programme parrainage</Link>
           </Button>
         </div>
       </div>
