@@ -690,9 +690,11 @@ const SmallMissions = () => {
  {/* ═══ Section 1 — Missions près de chez vous ═══ */}
  <h2 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
  {mode === "offer" ? "Demandes du coin à aider" : "Demandes près de chez vous"}
+  {missionCount > 0 && (
  <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
  {missionCount} demande{missionCount > 1 ? "s" : ""}
  </span>
+ )}
  </h2>
 
  {missionCount > 0 ? (
