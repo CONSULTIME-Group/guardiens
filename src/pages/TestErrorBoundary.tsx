@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -268,6 +269,7 @@ const TestErrorBoundary = () => {
 
   return (
     <main className="min-h-screen bg-background p-6">
+      <Helmet><meta name="robots" content="noindex,nofollow" /></Helmet>
       <div className="max-w-3xl mx-auto space-y-6">
         <header className="space-y-2">
           <h1 className="font-heading text-2xl font-bold text-foreground">

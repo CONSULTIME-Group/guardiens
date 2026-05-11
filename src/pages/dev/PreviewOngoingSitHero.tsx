@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import OngoingSitHero from "@/components/dashboard/owner/OngoingSitHero";
 import type { SitRow, SitterInfo } from "@/components/dashboard/owner/types";
 
@@ -33,6 +34,7 @@ const ongoingSit: SitRow = {
 export default function PreviewOngoingSitHero() {
   return (
     <div className="min-h-screen bg-background p-4">
+      <Helmet><meta name="robots" content="noindex,nofollow" /></Helmet>
       <div className="max-w-5xl mx-auto space-y-4">
         <p className="text-xs text-muted-foreground">
           Preview isolée — OngoingSitHero (J-3, sit en cours)

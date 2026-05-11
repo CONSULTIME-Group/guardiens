@@ -9,8 +9,8 @@
       "fetchedAt": "2026-05-10T12:37:36.240Z"
     },
     "articles": {
-      "head": "2026-05-10T14:28:08.652432+00:00",
-      "fetchedAt": "2026-05-10T20:15:11.705Z"
+      "head": "2026-05-11T14:49:49.647525+00:00",
+      "fetchedAt": "2026-05-11T17:55:57.950Z"
     },
     "seo_department_pages": {
       "head": "2026-03-26T05:46:21.361179+00:00",
@@ -416,16 +416,16 @@
     ],
     "articles": [
       {
-        "loc": "/actualites/devenir-gardien-urgence-guardiens",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
         "loc": "/actualites/jardinage-entraide-quartier-lyon",
         "lastmod": "2026-05-10",
         "changefreq": "monthly",
         "priority": "0.7"
+      },
+      {
+        "loc": "/actualites/preparer-maison-avant-garde",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
         "loc": "/actualites/parcs-balades-chiens-grenoble-guide",
@@ -434,10 +434,16 @@
         "priority": "0.8"
       },
       {
-        "loc": "/actualites/nouveaux-tarifs-2026",
+        "loc": "/actualites/c-est-quoi-le-house-sitting",
         "lastmod": "2026-05-10",
         "changefreq": "monthly",
         "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/nouveaux-tarifs-2026",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.9"
       },
       {
         "loc": "/actualites/arroser-plantes-vacances-grenoble",
@@ -454,6 +460,12 @@
       {
         "loc": "/actualites/garde-chat-domicile-house-sitting",
         "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/devenir-gardien-urgence-guardiens",
+        "lastmod": "2026-04-14",
         "changefreq": "monthly",
         "priority": "0.6"
       },
@@ -512,12 +524,6 @@
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/house-sitting-vs-pension-comparatif",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
         "loc": "/actualites/petites-missions-entraide-guardiens",
         "lastmod": "2026-05-10",
         "changefreq": "monthly",
@@ -528,6 +534,12 @@
         "lastmod": "2026-05-10",
         "changefreq": "monthly",
         "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/house-sitting-vs-pension-comparatif",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
         "loc": "/actualites/garde-chat-presquile-lyon",
@@ -632,13 +644,13 @@
         "priority": "0.8"
       },
       {
-        "loc": "/actualites/house-sitting-hiver-montagne-savoie",
+        "loc": "/actualites/gerer-animaux-difficiles-garde",
         "lastmod": "2026-04-14",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/gerer-animaux-difficiles-garde",
+        "loc": "/actualites/house-sitting-hiver-montagne-savoie",
         "lastmod": "2026-04-14",
         "changefreq": "monthly",
         "priority": "0.6"
@@ -668,28 +680,28 @@
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/garde-animaux-croix-rousse-lyon",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
         "loc": "/actualites/choisir-gardien-bons-criteres",
         "lastmod": "2026-04-14",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/vacances-longues-garde-animal-2-semaines",
+        "loc": "/actualites/garde-animaux-croix-rousse-lyon",
         "lastmod": "2026-05-10",
         "changefreq": "monthly",
-        "priority": "0.6"
+        "priority": "0.7"
       },
       {
         "loc": "/actualites/cavalier-king-charles-guide-race",
         "lastmod": "2026-05-10",
         "changefreq": "monthly",
         "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/vacances-longues-garde-animal-2-semaines",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
         "loc": "/actualites/house-sitting-week-end-court-sejour-aura",
@@ -711,12 +723,6 @@
       },
       {
         "loc": "/actualites/house-sitting-ete-aura-guide",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/c-est-quoi-le-house-sitting",
         "lastmod": "2026-05-10",
         "changefreq": "monthly",
         "priority": "0.6"
@@ -747,12 +753,6 @@
       },
       {
         "loc": "/actualites/checklist-partir-vacances-animaux",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/preparer-maison-avant-garde",
         "lastmod": "2026-04-14",
         "changefreq": "monthly",
         "priority": "0.6"
