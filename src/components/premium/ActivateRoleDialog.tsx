@@ -28,21 +28,18 @@ const ActivateRoleDialog = ({ open, onClose, targetRole }: ActivateRoleDialogPro
     if (!user) return;
     setLoading(true);
     try {
-      await supabase
-        .from("owner_profiles")
-        .upsert({ user_id: user.id } as any, { onConflict: "user_id" });
-
-      await supabase
-        .from("profiles")
-        .update({ role: "both" } as any)
-        .eq("id", user.id);
+      const { error } = await supabase.rpc("change_user_role", {
+        p_user_id: user.id,
+        p_new_role: "both" as any,
+      });
+      if (error) throw error;
 
       onClose();
       toast.success("Votre espace propriétaire est activé !");
       // Reload to refresh auth context
       setTimeout(() => window.location.reload(), 500);
-    } catch {
-      toast.error("Une erreur est survenue. Réessayez.");
+    } catch (e: any) {
+      toast.error(e?.message || "Une erreur est survenue. Réessayez.");
     } finally {
       setLoading(false);
     }
