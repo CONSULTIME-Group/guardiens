@@ -385,22 +385,7 @@ const Messages = () => {
     loadConversations();
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
-  };
-
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user || !activeConv) return;
-    const ext = file.name.split(".").pop();
-    const path = `messages/${activeConv.id}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("property-photos").upload(path, file);
-    if (error) return;
-    const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
-    await supabase.from("messages").insert({ conversation_id: activeConv.id, sender_id: user.id, content: "", photo_url: urlData.publicUrl });
-    await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", activeConv.id);
-    loadConversations();
-  };
+  // (handleKeyDown et handlePhotoUpload sont désormais portés par MessageComposer)
 
   const handleArchive = async (conv: Conversation) => {
     if (!user) return;
