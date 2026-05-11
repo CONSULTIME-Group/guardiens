@@ -222,10 +222,30 @@ const SmallMissions = () => {
   const { data: allMissions, isLoading: missionsLoading } = useAllMissions(user?.id);
   const { data: availableHelpers, isLoading: helpersLoading } = useAvailableHelpers(user?.id, isAuthenticated);
 
-  const missionCoords = useEntityCoords(allMissions as any[], { useDbCoords: true });
-  const helperCoords = useEntityCoords(availableHelpers as any[]);
+  // ── Realtime: refresh missions list on any small_missions change ──
+  useEffect(() => {
+    const channel = supabase
+      .channel("small-missions-list")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "small_missions" },
+        () => { queryClient.invalidateQueries({ queryKey: ["small-missions-all"] }); },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [queryClient]);
 
   const normalizedSearch = competenceSearch.toLowerCase().trim();
+
+  // ── Pagination ──
+  const PAGE_SIZE = 12;
+  const [visibleMissions, setVisibleMissions] = useState(PAGE_SIZE);
+  const [visibleHelpers, setVisibleHelpers] = useState(PAGE_SIZE);
+  // Reset pagination when filters change
+  useEffect(() => { setVisibleMissions(PAGE_SIZE); setVisibleHelpers(PAGE_SIZE); }, [categoryFilter, mode, radiusKm, normalizedSearch]);
+
+  const missionCoords = useEntityCoords(allMissions as any[], { useDbCoords: true });
+  const helperCoords = useEntityCoords(availableHelpers as any[], { useDbCoords: true });
 
   const filteredMissions = useMemo(() => {
     return (allMissions || [])
@@ -307,7 +327,7 @@ const SmallMissions = () => {
     try { localStorage.setItem("guardiens_skill_prompt_dismissed", "true"); } catch {}
   };
 
-  const renderHelperCard = (h: any) => (
+  const renderHelperCard = useCallback((h: any) => (
     <HelperCard
       key={`h-${h.id}`}
       helper={h}
@@ -317,7 +337,15 @@ const SmallMissions = () => {
       }}
       onViewProfile={() => navigate(`/gardiens/${h.id}`)}
     />
-  );
+  ), [isAuthenticated, navigate]);
+
+  // Paginated slices
+  const visibleMissionsList = useMemo(() => filteredMissions.slice(0, visibleMissions), [filteredMissions, visibleMissions]);
+  const visiblePriorityHelpers = useMemo(() => priorityHelpers.slice(0, visibleHelpers), [priorityHelpers, visibleHelpers]);
+  const remainingHelperBudget = Math.max(0, visibleHelpers - visiblePriorityHelpers.length);
+  const visibleComplementaryHelpers = useMemo(() => complementaryHelpers.slice(0, remainingHelperBudget), [complementaryHelpers, remainingHelperBudget]);
+  const totalHelpersShown = visiblePriorityHelpers.length + visibleComplementaryHelpers.length;
+  const totalHelpersAvailable = priorityHelpers.length + complementaryHelpers.length;
 
   return (
     <>
@@ -425,24 +453,33 @@ const SmallMissions = () => {
                 ))}
               </div>
             ) : missionCount > 0 ? (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredMissions.map((m: any) => (
-                  <MissionCard
-                    key={`m-${m.id}`}
-                    mission={m}
-                    currentUserId={user?.id}
-                    isAuthenticated={isAuthenticated}
-                    canApplyMissions={canApplyMissions}
-                    mode={mode}
-                    onNavigateDetail={() => navigate(isAuthenticated ? `/petites-missions/${m.id}` : "/inscription")}
-                    onPropose={() => {
-                      if (!isAuthenticated) { navigate("/inscription"); return; }
-                      setDialogMission(m);
-                      setDialogTarget({ id: m.user_id, name: (m.profiles as any)?.first_name || "ce membre" });
-                    }}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {visibleMissionsList.map((m: any) => (
+                    <MissionCard
+                      key={`m-${m.id}`}
+                      mission={m}
+                      currentUserId={user?.id}
+                      isAuthenticated={isAuthenticated}
+                      canApplyMissions={canApplyMissions}
+                      mode={mode}
+                      onNavigateDetail={() => navigate(isAuthenticated ? `/petites-missions/${m.id}` : "/inscription")}
+                      onPropose={() => {
+                        if (!isAuthenticated) { navigate("/inscription"); return; }
+                        setDialogMission(m);
+                        setDialogTarget({ id: m.user_id, name: (m.profiles as any)?.first_name || "ce membre" });
+                      }}
+                    />
+                  ))}
+                </div>
+                {missionCount > visibleMissions && (
+                  <div className="flex justify-center pt-4">
+                    <Button variant="outline" onClick={() => setVisibleMissions((n) => n + PAGE_SIZE)}>
+                      Voir plus de demandes ({missionCount - visibleMissions} restantes)
+                    </Button>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-8 text-center space-y-3">
                 <p className="font-heading text-lg font-semibold text-foreground">
@@ -534,15 +571,15 @@ const SmallMissions = () => {
                     </div>
                   ) : (
                     <>
-                      {priorityHelpers.length > 0 && (
+                      {visiblePriorityHelpers.length > 0 && (
                         <div className="space-y-3">
                           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {priorityHelpers.map(renderHelperCard)}
+                            {visiblePriorityHelpers.map(renderHelperCard)}
                           </div>
                         </div>
                       )}
 
-                      {complementaryHelpers.length > 0 && (
+                      {visibleComplementaryHelpers.length > 0 && (
                         <div className="space-y-3">
                           <div className="flex items-center gap-3">
                             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
@@ -554,8 +591,16 @@ const SmallMissions = () => {
                             <div className="flex-1 h-px bg-border" />
                           </div>
                           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {complementaryHelpers.map(renderHelperCard)}
+                            {visibleComplementaryHelpers.map(renderHelperCard)}
                           </div>
+                        </div>
+                      )}
+
+                      {totalHelpersAvailable > totalHelpersShown && (
+                        <div className="flex justify-center pt-2">
+                          <Button variant="outline" onClick={() => setVisibleHelpers((n) => n + PAGE_SIZE)}>
+                            Voir plus de personnes ({totalHelpersAvailable - totalHelpersShown} restantes)
+                          </Button>
                         </div>
                       )}
 
