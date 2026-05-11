@@ -201,11 +201,11 @@ const AdminSmallMissions = () => {
                         <Mail className="h-4 w-4" />
                       </Button>
                       {m.status !== "cancelled" ? (
-                        <Button variant="ghost" size="icon" title="Masquer" onClick={() => handleArchive(m.id)}>
+                        <Button variant="ghost" size="icon" title="Masquer" onClick={() => setArchiveId(m.id)}>
                           <Archive className="h-4 w-4" />
                         </Button>
                       ) : (
-                        <Button variant="ghost" size="icon" title="Restaurer" onClick={() => handleRestore(m.id)}>
+                        <Button variant="ghost" size="icon" title="Restaurer" onClick={() => setRestoreId(m.id)}>
                           <RotateCcw className="h-4 w-4" />
                         </Button>
                       )}
