@@ -189,9 +189,20 @@ const SmallMissionsPublic = () => {
  J'ai besoin d'un coup de main
  </Button>
  </div>
- <p className="text-xs text-foreground/50 mt-4">
+  <p className="text-xs text-foreground/50 mt-4">
  Gratuite pour tous. Aucun engagement, aucun jugement.
  </p>
+ </Reveal>
+
+ {/* Mosaïque hero — ancrage visuel (4 illustrations gouache existantes) */}
+ <Reveal delay={0.35}>
+ <div className="mt-12 grid grid-cols-4 gap-3 md:gap-5 max-w-md mx-auto" aria-hidden="true">
+ {[spotChien, spotJardin, spotPoules, spotBricolage].map((src, i) => (
+ <div key={i} className="aspect-square rounded-2xl bg-card border border-border/60 flex items-center justify-center p-2 hover:-translate-y-0.5 transition-transform">
+ <img src={src} alt="" loading="lazy" width={128} height={128} className="w-full h-full object-contain" />
+ </div>
+ ))}
+ </div>
  </Reveal>
 
  {/* ── Social proof KPIs ── */}
