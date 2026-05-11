@@ -540,10 +540,9 @@ const SearchOwner = () => {
   return (
     <div className="animate-fade-in">
       {/* Title */}
-      <div className="px-6 pt-6 pb-2 md:pt-10 space-y-3">
-        <h1 className="font-heading text-3xl font-bold mb-1">Trouver un gardien</h1>
-        <p className="text-muted-foreground">Recherchez le gardien idéal pour votre maison et vos animaux.</p>
-        <ReachReassuranceBanner variant="inline" className="not-italic" inlineText="Du coin par défaut — élargissez le rayon, le département, la région ou toute la France à tout moment." />
+      <div className="px-6 pt-6 pb-2 md:pt-8 space-y-1.5">
+        <h1 className="font-heading text-3xl font-bold">Trouver un gardien</h1>
+        <p className="text-sm text-muted-foreground">Le gardien idéal pour votre maison et vos animaux — du coin par défaut, élargissez à toute la France à tout moment.</p>
       </div>
 
       {/* Sticky search bar */}
@@ -759,9 +758,9 @@ const SearchOwner = () => {
       </div>
 
       {/* Sort bar + view toggle */}
-      <div className="flex items-center justify-between px-6 py-2 border-b border-border">
-        <div className="flex items-center gap-3">
-          <p className="text-sm text-muted-foreground">{results.length} gardien{results.length !== 1 ? "s" : ""} disponible{results.length !== 1 ? "s" : ""}</p>
+      <div className="flex items-center justify-between gap-3 px-6 py-2.5 border-b border-border flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
+          <p className="text-sm font-medium text-foreground">{results.length} gardien{results.length !== 1 ? "s" : ""} disponible{results.length !== 1 ? "s" : ""}</p>
           {hasActiveFilters && (
             <button onClick={resetFilters} className="text-xs text-primary hover:underline whitespace-nowrap">Réinitialiser les filtres</button>
           )}
@@ -777,18 +776,20 @@ const SearchOwner = () => {
             onClick={() => setViewMode("list")}
             aria-label="Vue grille"
             aria-pressed={viewMode === "list"}
-            className={`p-1.5 rounded ${viewMode === "list" ? "bg-muted" : ""}`}
+            className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${viewMode === "list" ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
           >
-            <LayoutGrid className="h-4 w-4" aria-hidden="true" />
+            <LayoutGrid className="h-3.5 w-3.5" aria-hidden="true" />
+            <span className="hidden sm:inline">Grille</span>
           </button>
           <button
             type="button"
             onClick={() => setViewMode("map")}
             aria-label="Vue carte"
             aria-pressed={viewMode === "map"}
-            className={`p-1.5 rounded ${viewMode === "map" ? "bg-muted" : ""}`}
+            className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${viewMode === "map" ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
           >
-            <MapIcon className="h-4 w-4" aria-hidden="true" />
+            <MapIcon className="h-3.5 w-3.5" aria-hidden="true" />
+            <span className="hidden sm:inline">Carte</span>
           </button>
         </div>
       </div>
@@ -907,34 +908,61 @@ const SearchOwner = () => {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <>
+              {city && !alertCreated && (
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted/40 px-4 py-2.5">
+                  <p className="text-xs text-muted-foreground flex items-center gap-2">
+                    <Bell className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden="true" />
+                    Soyez prévenu·e dès qu'un nouveau gardien rejoint la zone autour de {city}.
+                  </p>
+                  <button
+                    onClick={handleCreateAlert}
+                    disabled={isCreatingAlert}
+                    className="text-xs font-medium text-primary hover:underline disabled:opacity-60 whitespace-nowrap"
+                  >
+                    {isCreatingAlert ? "Création…" : "Créer une alerte"}
+                  </button>
+                </div>
+              )}
+              {city && alertCreated && (
+                <div className="mb-4 flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-2.5 text-xs text-primary">
+                  <BellRing className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  Alerte créée — vous serez prévenu·e par e-mail.
+                </div>
+              )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
               {results.map((s: any) => {
                 const profile = s.profile;
                 const sitterAnimalTypes: string[] = s.animal_types || [];
                 const firstName = profile?.first_name || "Gardien";
-                const bio = profile?.bio ? (profile.bio.length > 60 ? profile.bio.slice(0, 60) + "…" : profile.bio) : null;
+                const bio = profile?.bio ? (profile.bio.length > 80 ? profile.bio.slice(0, 80) + "…" : profile.bio) : null;
                 const distLabel = s._dist === 0 ? "Dans votre ville" : (s._dist != null && s._dist !== Infinity ? `${s._dist} km` : null);
 
                 return (
-                  <div key={s.id} className="group relative bg-card rounded-xl overflow-hidden border border-border hover:shadow-md transition-shadow flex flex-col max-w-sm">
+                  <Link
+                    key={s.id}
+                    to={`/gardiens/${s.user_id}`}
+                    aria-label={`Voir le profil de ${firstName}`}
+                    className="group relative bg-card rounded-xl overflow-hidden border border-border hover:shadow-md hover:border-primary/40 transition-all flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
                     {/* Favorite */}
                     <div className="absolute top-2 right-2 z-10">
                       <FavoriteButton targetType="sitter" targetId={s.user_id} />
                     </div>
 
-                    {/* Photo — carré, cadrage centré pour ne pas couper les visages */}
-                    <Link to={`/gardiens/${s.user_id}`} className="block relative" aria-label={`Voir le profil de ${firstName}`}>
+                    {/* Photo — carré, cadrage haut pour ne pas couper les visages */}
+                    <div className="relative">
                       {profile?.avatar_url ? (
-                        <div className="aspect-square w-full overflow-hidden rounded-t-lg bg-muted">
+                        <div className="aspect-square w-full overflow-hidden bg-muted">
                           <img
                             src={profile.avatar_url}
                             alt={firstName}
                             loading="lazy"
-                            className="w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform duration-300"
+                            className="w-full h-full object-cover object-[center_top] group-hover:scale-[1.02] transition-transform duration-300"
                           />
                         </div>
                       ) : (
-                        <div className="aspect-square w-full overflow-hidden rounded-t-lg bg-primary/10 flex items-center justify-center">
+                        <div className="aspect-square w-full overflow-hidden bg-primary/10 flex items-center justify-center">
                           <span className="text-3xl text-primary font-heading font-bold">{firstName.charAt(0)}</span>
                         </div>
                       )}
@@ -943,29 +971,26 @@ const SearchOwner = () => {
                           <Zap className="h-3 w-3 text-amber-500" /> Urgence
                         </span>
                       )}
-                    </Link>
+                    </div>
 
                     {/* Body */}
                     <div className="p-3 flex flex-col flex-1">
-                      {/* Line 1: name + verified pill + city + distance */}
-                      <Link to={`/gardiens/${s.user_id}`} className="hover:underline underline-offset-2">
-                        <p className="text-sm font-semibold truncate">
-                          {firstName}
-                          {profile?.identity_verified && (
-                            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium ml-1.5 inline-block align-middle">Vérifié</span>
-                          )}
-                        </p>
-                        {(profile?.city || distLabel) && (
-                          <p className="text-xs text-muted-foreground truncate">
-                            {profile?.city}
-                            {profile?.city && distLabel && " · "}
-                            {distLabel}
-                          </p>
+                      <p className="text-sm font-semibold truncate">
+                        {firstName}
+                        {profile?.identity_verified && (
+                          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium ml-1.5 inline-block align-middle">Vérifié</span>
                         )}
-                      </Link>
+                      </p>
+                      {(profile?.city || distLabel) && (
+                        <p className="text-xs text-muted-foreground truncate">
+                          {profile?.city}
+                          {profile?.city && distLabel && " · "}
+                          {distLabel}
+                        </p>
+                      )}
 
-                      {/* Line 2: rating + experience */}
-                      <div className="flex items-center gap-2 mt-1">
+                      {/* Rating + experience */}
+                      <div className="flex items-center gap-2 mt-1 min-h-[1rem]">
                         {s.avgRating !== null && (
                           <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
                             <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
@@ -977,37 +1002,26 @@ const SearchOwner = () => {
                         )}
                       </div>
 
-                      {/* Line 3: animal pills */}
-                      {sitterAnimalTypes.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-1.5">
-                          {sitterAnimalTypes.slice(0, 3).map((a: string) => (
-                            <span key={a} className="text-[11px] bg-muted rounded-full px-2 py-0.5">{a}</span>
-                          ))}
-                          {sitterAnimalTypes.length > 3 && (
-                            <span className="text-[11px] text-muted-foreground">+{sitterAnimalTypes.length - 3}</span>
-                          )}
-                        </div>
-                      )}
+                      {/* Animal pills — zone réservée pour aligner */}
+                      <div className="flex flex-wrap gap-1 mt-1.5 min-h-[1.5rem]">
+                        {sitterAnimalTypes.slice(0, 3).map((a: string) => (
+                          <span key={a} className="text-[11px] bg-primary/10 text-primary rounded-full px-2 py-0.5 font-medium">{a}</span>
+                        ))}
+                        {sitterAnimalTypes.length > 3 && (
+                          <span className="text-[11px] text-muted-foreground self-center">+{sitterAnimalTypes.length - 3}</span>
+                        )}
+                      </div>
 
-                      {/* Line 4: bio truncated */}
-                      {bio && <p className="text-xs text-muted-foreground mt-1.5 line-clamp-1">{bio}</p>}
-
-                      {/* CTA — secondaire, pour ne pas saturer la grille */}
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => { e.preventDefault(); handleContact(s.user_id); }}
-                        disabled={contactingId === s.user_id}
-                        className="w-full mt-3"
-                      >
-                        <MessageCircle className="h-3.5 w-3.5" />
-                        {contactingId === s.user_id ? "..." : "Contacter"}
-                      </Button>
+                      {/* Bio — zone réservée 2 lignes pour aligner les cartes */}
+                      <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 min-h-[2rem]">
+                        {bio || <span className="opacity-0">.</span>}
+                      </p>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
+            </>
           )}
         </div>
       ) : (
