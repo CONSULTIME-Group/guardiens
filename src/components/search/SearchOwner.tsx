@@ -762,6 +762,9 @@ const SearchOwner = () => {
       <div className="flex items-center justify-between px-6 py-2 border-b border-border">
         <div className="flex items-center gap-3">
           <p className="text-sm text-muted-foreground">{results.length} gardien{results.length !== 1 ? "s" : ""} disponible{results.length !== 1 ? "s" : ""}</p>
+          {hasActiveFilters && (
+            <button onClick={resetFilters} className="text-xs text-primary hover:underline whitespace-nowrap">Réinitialiser les filtres</button>
+          )}
           <div className="flex gap-1.5">
             {[{ label: "Plus proches", value: "closest" as SortOption }, { label: "Mieux notés", value: "rating" as SortOption }, { label: "Plus expérimentés", value: "experience" as SortOption }].map(opt => (
               <button key={opt.value} onClick={() => setSort(opt.value)} className={sort === opt.value ? sortPillActive : sortPillBase}>{opt.label}</button>
