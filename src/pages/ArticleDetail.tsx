@@ -19,6 +19,7 @@ import { parseHowToFromMarkdown, buildHowToSchema } from "@/lib/parseHowTo";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { resolveAuthors } from "@/data/authors";
 import { trackEvent } from "@/lib/analytics";
+import { SITTER_PRICE_NUMERIC, SITTER_PRICE_CURRENCY, SITTER_PRICE_START_ISO } from "@/lib/pricing";
 
 interface ArticleFull {
  id: string;
@@ -389,8 +390,11 @@ export default function ArticleDetail() {
  "offers": {
  "@type": "Offer",
  "name": "Abonnement gardien mensuel",
- "price": "6.99",
- "priceCurrency": "EUR",
+ "price": String(SITTER_PRICE_NUMERIC),
+ "priceCurrency": SITTER_PRICE_CURRENCY,
+ "eligibleCustomerType": "Sitter",
+ "availabilityStarts": SITTER_PRICE_START_ISO,
+ "description": "Abonnement gardien à 6,99 €/mois à partir du 14 juillet 2026.",
  "priceSpecification": {
  "@type": "UnitPriceSpecification",
  "price": "6.99",
@@ -428,7 +432,7 @@ export default function ArticleDetail() {
 ...(article.region ? { "addressRegion": article.region } : {}),
  "addressCountry": "FR"
  },
- "priceRange": "Gratuit pour les propriétaires",
+ "priceRange": "À 0\u00A0€ pour les propriétaires",
  })}</script>
  </Helmet>
  )}

@@ -24,6 +24,7 @@ const SitSchemaOrg = ({ title, description, city, startDate, endDate, url, image
     category: "House Sitting",
     price: "0",
     priceCurrency: "EUR",
+    eligibleCustomerType: "Owner",
     availability: "https://schema.org/InStock",
     seller: {
       "@type": "Organization",

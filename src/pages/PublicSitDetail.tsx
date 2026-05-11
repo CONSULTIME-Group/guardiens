@@ -373,6 +373,8 @@ const PublicSitDetail = () => {
  "@type": "Offer",
  price: "0",
  priceCurrency: "EUR",
+ eligibleCustomerType: "Owner",
+ description: "À 0 € pour les propriétaires, sans abonnement requis.",
  availability: "https://schema.org/InStock",
  validFrom: sit.start_date,
  validThrough: sit.end_date,

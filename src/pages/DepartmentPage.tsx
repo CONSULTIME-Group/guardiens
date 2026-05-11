@@ -301,7 +301,8 @@ const DepartmentPage = () => {
  "@type": "Offer",
  price: "0",
  priceCurrency: "EUR",
- description: "Inscription et mise en relation à 0 € pour les propriétaires",
+ eligibleCustomerType: "Owner",
+ description: "À 0 € pour les propriétaires, sans abonnement requis.",
  },
  }),
  }}
