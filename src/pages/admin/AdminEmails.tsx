@@ -511,7 +511,7 @@ const SuppressionsTab = () => {
                     {format(new Date(s.created_at), "dd MMM yyyy HH:mm", { locale: fr })}
                   </TableCell>
                   <TableCell>
-                    <Button size="sm" variant="ghost" className="text-xs h-7" onClick={() => handleUnblock(s.id, s.email)}>
+                    <Button size="sm" variant="ghost" className="text-xs h-7" onClick={() => setPendingUnblock({ id: s.id, email: s.email })}>
                       <ShieldOff className="h-3.5 w-3.5 mr-1" /> Débloquer
                     </Button>
                   </TableCell>
