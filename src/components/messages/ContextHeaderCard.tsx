@@ -53,16 +53,18 @@ const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCit
           <Compass className="h-4 w-4 text-info shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-info-foreground">
-              {isHelper ? "Demande d'entraide spontanée" : "Demande de disponibilité"}
+              {isHelper ? "Demande d'entraide" : "Premier contact"}
             </p>
             <p className="text-xs text-info-foreground/80 mt-0.5">
               {isHelper
                 ? (isOwner
-                    ? `Vous sondez ${otherFirstName || "ce membre"} pour un futur coup de main.`
-                    : `${otherFirstName || "Une personne du coin"} vous sonde pour un futur coup de main.`)
+                    ? `Vous avez contacté ${otherFirstName || "ce membre"} pour un futur coup de main.`
+                    : `${otherFirstName || "Une personne du coin"} vous contacte pour un futur coup de main.`)
                 : (isOwner
-                    ? `Vous avez sondé ${otherFirstName || "ce gardien"} avant de publier une annonce.`
-                    : `${otherFirstName || "Ce propriétaire"} vous sonde avant de publier une annonce.`)}
+                    ? (ownerHasPublishedSit && ownerHasPublishedSit > 0
+                        ? `Vous avez une annonce publiée. Proposez-la à ${otherFirstName || "ce gardien"}.`
+                        : `Pour aller plus loin avec ${otherFirstName || "ce gardien"}, publiez votre annonce.`)
+                    : `${otherFirstName || "Ce propriétaire"} vous a contacté·e en amont d'une éventuelle annonce.`)}
             </p>
             {isOwner && !isHelper && (
               <div className="mt-2">
