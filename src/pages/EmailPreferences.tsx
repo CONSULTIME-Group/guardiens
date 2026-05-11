@@ -30,7 +30,7 @@ const EmailPreferences = () => {
     })();
   }, [user]);
 
-  if (!authLoading && !user) return <Navigate to="/auth" replace />;
+  if (!authLoading && !user) return <Navigate to="/login" replace />;
 
   const save = async () => {
     setSaving(true);
