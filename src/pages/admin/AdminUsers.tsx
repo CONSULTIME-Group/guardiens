@@ -689,6 +689,15 @@ const AdminUsers = () => {
         state={errorDetailModal}
         onClose={() => setErrorDetailModal({ open: false, recipient: "", sentAt: "", error: "", content: "" })}
       />
+
+      <ChangeRoleDialog
+        open={roleModal.open}
+        onOpenChange={(open) => setRoleModal((s) => ({ ...s, open }))}
+        userId={roleModal.userId}
+        userName={roleModal.userName}
+        currentRole={roleModal.currentRole}
+        onSuccess={fetchUsers}
+      />
     </div>
   );
 };
