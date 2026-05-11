@@ -9,7 +9,9 @@ import Breadcrumbs from "./Breadcrumbs";
 const NotificationBell = lazy(() => import("./NotificationBell"));
 import { useAuth } from "@/contexts/AuthContext";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
-import DuplicateAccountGuard from "@/components/auth/DuplicateAccountGuard";
+// DuplicateAccountGuard est monté globalement dans App.tsx pour s'exécuter
+// même quand l'utilisateur retombe sur une page publique (Landing, FAQ…)
+// après le retour OAuth Google. Ne pas le re-monter ici.
 import { usePresenceHeartbeat } from "@/hooks/usePresenceHeartbeat";
 
 export const AppLayout = ({ children }: { children?: ReactNode }) => {
