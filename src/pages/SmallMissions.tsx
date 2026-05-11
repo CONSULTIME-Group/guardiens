@@ -301,7 +301,7 @@ const SmallMissions = () => {
  }, [isAuthenticated, user, navigate, switchRole]);
 
 
- const { data: allMissions } = useQuery({
+ const { data: allMissions, isLoading: missionsLoading } = useQuery({
  queryKey: ["small-missions-all"],
  queryFn: async () => {
  const { data: missions } = await supabase
@@ -334,7 +334,7 @@ const SmallMissions = () => {
  },
  });
 
- const { data: availableHelpers } = useQuery({
+ const { data: availableHelpers, isLoading: helpersLoading } = useQuery({
  queryKey: ["available-helpers"],
  queryFn: async () => {
  const { data } = await supabase
