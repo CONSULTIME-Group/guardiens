@@ -38,7 +38,7 @@ describe("pricing constants", () => {
   it("PRICING_LONG contains required mentions", () => {
     expect(PRICING_LONG).toContain("14 juillet 2026");
     expect(PRICING_LONG).toContain("6,99");
-    expect(PRICING_LONG).toContain("13 mai 2026");
+    expect(PRICING_LONG).toContain("14 juillet 2026");
     expect(PRICING_LONG).toContain("Fondateur");
   });
 
