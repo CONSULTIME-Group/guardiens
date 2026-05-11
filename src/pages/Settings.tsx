@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import {
   User, Bell, Shield, Trash2, Download, Sun, Moon, Monitor, ArrowRight,
   CreditCard, HelpCircle, Eye, EyeOff, AlertTriangle, LogOut, Layers,
+  Loader2, CheckCircle2,
 } from "lucide-react";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import ActiveRolesSection from "@/components/settings/ActiveRolesSection";
@@ -105,6 +106,7 @@ const Settings = () => {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [deleteStatus, setDeleteStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [activeCommitmentsCount, setActiveCommitmentsCount] = useState<number | null>(null);
 
   // Export
@@ -293,19 +295,34 @@ const Settings = () => {
   const handleDeleteAccount = async () => {
     if (!user || deleteConfirm !== "SUPPRIMER") return;
     setDeleting(true);
+    setDeleteStatus(null);
     try {
       const { error } = await supabase
         .from("account_deletion_requests")
         .upsert({ user_id: user.id, status: "pending" }, { onConflict: "user_id" });
       if (error) throw error;
-      await supabase.from("profiles").update({ bio: "[Compte en cours de suppression]" }).eq("id", user.id);
-      toast.success("Votre demande de suppression a été enregistrée. Vous avez 30 jours pour l'annuler.");
-      setDeleteOpen(false);
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({ bio: "[Compte en cours de suppression]" })
+        .eq("id", user.id);
+      if (profileError) throw profileError;
+      const successMsg = "Demande enregistrée. Vous avez 30 jours pour l'annuler depuis cette page.";
+      setDeleteStatus({ type: "success", message: successMsg });
+      toast.success(successMsg);
       setDeleteConfirm("");
-    } catch {
-      toast.error("Erreur lors de la demande de suppression.");
+      setTimeout(() => {
+        setDeleteOpen(false);
+        setDeleteStatus(null);
+      }, 2500);
+    } catch (e: any) {
+      const errorMsg = e?.message
+        ? `Échec de la demande : ${e.message}`
+        : "Échec de la demande de suppression. Veuillez réessayer dans un instant.";
+      setDeleteStatus({ type: "error", message: errorMsg });
+      toast.error(errorMsg);
+    } finally {
+      setDeleting(false);
     }
-    setDeleting(false);
   };
 
   if (loading) {
@@ -453,7 +470,14 @@ const Settings = () => {
       </div>
 
       {/* Modal suppression */}
-      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+      <Dialog
+        open={deleteOpen}
+        onOpenChange={(open) => {
+          if (deleting) return;
+          setDeleteOpen(open);
+          if (!open) setDeleteStatus(null);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="text-destructive">Supprimer mon compte</DialogTitle>
@@ -473,16 +497,73 @@ const Settings = () => {
             <Label className="text-sm">
               Tapez <span className="font-bold">SUPPRIMER</span> pour confirmer
             </Label>
-            <Input value={deleteConfirm} onChange={(e) => setDeleteConfirm(e.target.value)} placeholder="SUPPRIMER" />
+            <Input
+              value={deleteConfirm}
+              onChange={(e) => setDeleteConfirm(e.target.value)}
+              placeholder="SUPPRIMER"
+              disabled={deleting || deleteStatus?.type === "success"}
+            />
           </div>
+          {deleting && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-3 text-sm text-foreground/80"
+            >
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              Enregistrement de votre demande en cours…
+            </div>
+          )}
+          {deleteStatus && (
+            <div
+              role={deleteStatus.type === "error" ? "alert" : "status"}
+              aria-live="polite"
+              className={
+                deleteStatus.type === "success"
+                  ? "flex items-start gap-2 rounded-lg border border-success/30 bg-success/10 p-3 text-sm text-foreground"
+                  : "flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-foreground"
+              }
+            >
+              {deleteStatus.type === "success" ? (
+                <CheckCircle2 className="h-4 w-4 mt-0.5 text-success" aria-hidden="true" />
+              ) : (
+                <AlertTriangle className="h-4 w-4 mt-0.5 text-destructive" aria-hidden="true" />
+              )}
+              <span>{deleteStatus.message}</span>
+            </div>
+          )}
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setDeleteOpen(false)}>Revenir</Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setDeleteOpen(false);
+                setDeleteStatus(null);
+              }}
+              disabled={deleting}
+            >
+              {deleteStatus?.type === "success" ? "Fermer" : "Revenir"}
+            </Button>
             <Button
               variant="destructive"
               onClick={handleDeleteAccount}
-              disabled={deleteConfirm !== "SUPPRIMER" || deleting || (activeCommitmentsCount ?? 0) > 0}
+              disabled={
+                deleteConfirm !== "SUPPRIMER" ||
+                deleting ||
+                deleteStatus?.type === "success" ||
+                (activeCommitmentsCount ?? 0) > 0
+              }
+              aria-busy={deleting}
             >
-              {deleting ? "Suppression..." : "Demander la suppression"}
+              {deleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
+                  Suppression…
+                </>
+              ) : deleteStatus?.type === "success" ? (
+                "Demande envoyée"
+              ) : (
+                "Demander la suppression"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
