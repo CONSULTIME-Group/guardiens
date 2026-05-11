@@ -854,7 +854,7 @@ const PublicSitDetail = () => {
  <Button className="w-full h-12 text-base font-semibold">
  {owner?.first_name
  ? `S'inscrire et postuler — aider ${owner.first_name}`
- : "S'inscrire gratuitement et postuler"}
+ : "S'inscrire sans frais et postuler"}
  </Button>
  </Link>
  ) : !hasAccess ? (
