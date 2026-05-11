@@ -164,7 +164,7 @@ const AdminDashboard = () => {
         ? reviewsData!.reduce((sum, r) => sum + r.overall_rating, 0) / totalReviews
         : 0;
 
-      const monthRevenue = (activeSubscriptions || 0) * 49;
+      const monthRevenue = Math.round((activeSubscriptions || 0) * MONTHLY_SUBSCRIPTION_EUR);
 
       setStats({
         totalUsers: totalUsers || 0,
