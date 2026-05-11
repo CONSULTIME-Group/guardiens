@@ -716,7 +716,21 @@ const SmallMissions = () => {
  )}
  </h2>
 
- {missionCount > 0 ? (
+  {missionsLoading ? (
+ <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+ {Array.from({ length: 6 }).map((_, i) => (
+ <Card key={`m-skel-${i}`} className="border-border">
+ <CardContent className="p-4 space-y-3">
+ <Skeleton className="h-3 w-20" />
+ <Skeleton className="h-4 w-3/4" />
+ <Skeleton className="h-3 w-1/2" />
+ <Skeleton className="h-3 w-2/3" />
+ <Skeleton className="h-9 w-full mt-2" />
+ </CardContent>
+ </Card>
+ ))}
+ </div>
+ ) : missionCount > 0 ? (
  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
   {filteredMissions.map((m: any) => {
  const meta = CATEGORY_META[m.category] || CATEGORY_META.animals;
@@ -798,20 +812,27 @@ const SmallMissions = () => {
  ? "Rendez-vous visible : indiquez vos disponibilités juste en dessous. Quand une demande arrivera, vous serez la première personne à qui l'on pense."
  : "Soyez la première personne à publier. Une demande d'aujourd'hui, c'est des gens du coin qui la voient demain — et souvent une rencontre qui change la semaine."}
  </p>
+ <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
  {mode === "need" && (
  <Link to="/petites-missions/creer" className="inline-block">
- <Button variant="hero" size="lg" className="mt-2">
+ <Button variant="hero" size="lg">
  J'ose, je publie ma demande
  <ArrowRight className="ml-2 h-4 w-4" />
  </Button>
  </Link>
  )}
  {mode === "offer" && (
- <Button variant="hero" size="lg" className="mt-2" onClick={openOfferDialog}>
+ <Button variant="hero" size="lg" onClick={openOfferDialog}>
  J'ai du temps à offrir
  <ArrowRight className="ml-2 h-4 w-4" />
  </Button>
  )}
+ {radiusKm > 0 && (
+ <Button variant="outline" size="lg" onClick={() => setRadiusKm(0)}>
+ Élargir à la France entière
+ </Button>
+ )}
+ </div>
  </div>
  )}
 
