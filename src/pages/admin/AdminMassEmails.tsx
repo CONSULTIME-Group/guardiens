@@ -50,7 +50,7 @@ La seule chose qui manque encore ? <strong>Votre demande à vous.</strong>
 
 Trois minutes suffisent pour la publier. Et très souvent, c'est la première réponse reçue qui change tout — qui prouve qu'on n'est pas seul, que ça marche, qu'on peut compter sur les autres.
 
-Pour comprendre comment ça fonctionne concrètement, <a href="https://guardiens.fr/articles/petites-missions-entraide-guardiens?utm_source=mass_email&utm_campaign=oser-2026-05&utm_content=article" style="color:#2C6E49;font-weight:600;text-decoration:underline">lisez notre article dédié aux petites missions d'entraide</a>.
+Pour comprendre comment ça fonctionne concrètement, <a href="https://guardiens.fr/actualites/petites-missions-entraide-guardiens?utm_source=mass_email&utm_campaign=oser-2026-05&utm_content=article" style="color:#2C6E49;font-weight:600;text-decoration:underline">lisez notre article dédié aux petites missions d'entraide</a>.
 
 Et si c'était aujourd'hui ?
 
