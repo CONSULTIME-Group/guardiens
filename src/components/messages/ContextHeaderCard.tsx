@@ -61,9 +61,11 @@ const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCit
                     ? `Vous avez contacté ${otherFirstName || "ce membre"} pour un futur coup de main.`
                     : `${otherFirstName || "Une personne du coin"} vous contacte pour un futur coup de main.`)
                 : (isOwner
-                    ? (ownerHasPublishedSit && ownerHasPublishedSit > 0
-                        ? `Vous avez une annonce publiée. Proposez-la à ${otherFirstName || "ce gardien"}.`
-                        : `Pour aller plus loin avec ${otherFirstName || "ce gardien"}, publiez votre annonce.`)
+                    ? (ownerHasPublishedSit === null
+                        ? `Échangez avec ${otherFirstName || "ce gardien"} avant d'aller plus loin.`
+                        : ownerHasPublishedSit > 0
+                          ? `Vous avez une annonce publiée. Proposez-la à ${otherFirstName || "ce gardien"}.`
+                          : `Pour aller plus loin avec ${otherFirstName || "ce gardien"}, publiez votre annonce.`)
                     : `${otherFirstName || "Ce propriétaire"} vous a contacté·e en amont d'une éventuelle annonce.`)}
             </p>
             {isOwner && !isHelper && (
