@@ -371,7 +371,11 @@ const Messages = () => {
   }, [activeConv, user]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Premier rendu d'une conversation : scroll instantané au bas (pas d'animation longue).
+    // Nouveaux messages ensuite : scroll fluide.
+    const behavior: ScrollBehavior = isInitialMessagesLoad.current ? "auto" : "smooth";
+    messagesEndRef.current?.scrollIntoView({ behavior });
+    if (isInitialMessagesLoad.current) isInitialMessagesLoad.current = false;
   }, [messages]);
 
   const handleSend = async () => {
