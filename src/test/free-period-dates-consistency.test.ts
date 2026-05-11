@@ -6,7 +6,7 @@ import { FOUNDER_START, LAUNCH_DATE, GRACE_END } from "@/lib/constants";
 /**
  * Garde-fou éditorial : la promesse publique est
  *   • Lancement public : 14 juillet 2026 (fête nationale, après 3 mois de gratuité)
- *   • Statut Fondateur : réservé aux inscrits AVANT le 13 juillet 2026
+ *   • Statut Fondateur : réservé aux inscrits AVANT le 14 juillet 2026 (lancement public)
  *   • Gratuité pour TOUS : jusqu'au 14 juillet 2026 inclus
  *   • Tarif gardien (6,99 €/mois) : à partir du 15 juillet 2026
  *
