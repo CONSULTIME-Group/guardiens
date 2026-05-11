@@ -801,10 +801,25 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                   : "Suivant"}
               </Button>
             )}
-          </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
+
+    <AlertDialog open={confirmLogout} onOpenChange={setConfirmLogout}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Quitter et se déconnecter ?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Vos informations déjà enregistrées sont conservées. Vous reprendrez votre profil à votre prochaine connexion.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Continuer mon profil</AlertDialogCancel>
+          <AlertDialogAction onClick={leaveToLogin}>Se déconnecter</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 };
 
