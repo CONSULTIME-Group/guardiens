@@ -124,6 +124,12 @@
     --strength-medium: 25 90% 55%;
     --strength-good: 45 90% 50%;
     --strength-strong: 142 65% 42%;
+
+    /* Founder (badge Fondateur, période fondateur, accents dorés) */
+    --founder: 38 80% 45%;
+    --founder-foreground: 30 60% 18%;
+    --founder-soft: 45 90% 96%;
+    --founder-border: 43 80% 78%;
   }
 
   .dark {
