@@ -416,7 +416,6 @@ const Messages = () => {
   // ─── Reset active conv when role changes ───
   useEffect(() => {
     setActiveConv(null);
-    setAutoOpened(false);
     loadConversations();
   }, [activeRole]); // eslint-disable-line react-hooks/exhaustive-deps
 
