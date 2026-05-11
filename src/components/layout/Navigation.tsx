@@ -274,6 +274,7 @@ export const Sidebar = () => {
           <SidebarItem to="/admin" icon={Shield} label="Espace admin" />
         )}
         <SidebarItem to="/settings" icon={Settings} label="Paramètres" />
+        <SidebarItem to="/contact" icon={LifeBuoy} label="Aide & contact" />
 
         {/* Feedback button */}
         <div className="border-t border-border/50 mt-auto pt-3">
