@@ -1034,9 +1034,7 @@ const SmallMissions = () => {
  </div>
  )}
  </>
- )}
- </div>
- );
+  )}
  </div>
  );
  })()}
