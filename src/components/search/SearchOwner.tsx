@@ -15,7 +15,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   MapPin, Star, SlidersHorizontal, MessageCircle, Zap,
   LayoutGrid, Map as MapIcon, ShieldCheck, Crosshair, CircleDot, Car, Calendar,
-  Bell, BellRing, Loader2, Share2, MessageCircle as MsgIcon
+  Bell, BellRing, Loader2, Share2
 } from "lucide-react";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import { Skeleton } from "@/components/ui/skeleton";
