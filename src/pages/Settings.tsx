@@ -295,19 +295,34 @@ const Settings = () => {
   const handleDeleteAccount = async () => {
     if (!user || deleteConfirm !== "SUPPRIMER") return;
     setDeleting(true);
+    setDeleteStatus(null);
     try {
       const { error } = await supabase
         .from("account_deletion_requests")
         .upsert({ user_id: user.id, status: "pending" }, { onConflict: "user_id" });
       if (error) throw error;
-      await supabase.from("profiles").update({ bio: "[Compte en cours de suppression]" }).eq("id", user.id);
-      toast.success("Votre demande de suppression a été enregistrée. Vous avez 30 jours pour l'annuler.");
-      setDeleteOpen(false);
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({ bio: "[Compte en cours de suppression]" })
+        .eq("id", user.id);
+      if (profileError) throw profileError;
+      const successMsg = "Demande enregistrée. Vous avez 30 jours pour l'annuler depuis cette page.";
+      setDeleteStatus({ type: "success", message: successMsg });
+      toast.success(successMsg);
       setDeleteConfirm("");
-    } catch {
-      toast.error("Erreur lors de la demande de suppression.");
+      setTimeout(() => {
+        setDeleteOpen(false);
+        setDeleteStatus(null);
+      }, 2500);
+    } catch (e: any) {
+      const errorMsg = e?.message
+        ? `Échec de la demande : ${e.message}`
+        : "Échec de la demande de suppression. Veuillez réessayer dans un instant.";
+      setDeleteStatus({ type: "error", message: errorMsg });
+      toast.error(errorMsg);
+    } finally {
+      setDeleting(false);
     }
-    setDeleting(false);
   };
 
   if (loading) {
