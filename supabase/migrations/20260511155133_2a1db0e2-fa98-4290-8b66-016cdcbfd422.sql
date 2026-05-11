@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.change_user_role(uuid, public.user_role) FROM PUBLIC, anon;
