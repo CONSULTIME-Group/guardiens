@@ -676,8 +676,8 @@ const Messages = () => {
 
           {/* Messages with day separators */}
           <div
-            className="flex-1 overflow-y-auto space-y-0 pb-20 md:pb-4"
-            style={{ background: "hsl(var(--background))" }}
+            ref={messagesScrollRef}
+            className="flex-1 overflow-y-auto space-y-0 pb-20 md:pb-4 bg-background"
             role="log"
             aria-live="polite"
             aria-relevant="additions"
@@ -688,6 +688,20 @@ const Messages = () => {
             )}
 
             <div className="p-4 space-y-1">
+              {hasMoreMessages && (
+                <div className="flex justify-center py-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={loadOlderMessages}
+                    disabled={loadingMoreMessages}
+                    className="text-xs text-muted-foreground gap-2"
+                  >
+                    {loadingMoreMessages && <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />}
+                    {loadingMoreMessages ? "Chargement…" : "Voir messages plus anciens"}
+                  </Button>
+                </div>
+              )}
               {messages.map((msg, idx) => {
                 const prevMsg = idx > 0 ? messages[idx - 1] : null;
                 const showDaySep = !prevMsg || !isSameDay(new Date(msg.created_at), new Date(prevMsg.created_at));
@@ -710,7 +724,7 @@ const Messages = () => {
           {effectiveRole === "sitter" && !hasAccess && !activeConv.small_mission_id ? (
             <div className="border-t border-border bg-muted/50 p-4 mb-16 md:mb-0">
               <div className="flex items-center gap-3">
-                <Lock className="h-5 w-5 text-muted-foreground shrink-0" />
+                <Lock className="h-5 w-5 text-muted-foreground shrink-0" aria-hidden="true" />
                 <div className="flex-1">
                   <p className="text-sm text-muted-foreground">
                     Abonnez-vous pour répondre à cette conversation.{" "}
@@ -720,39 +734,39 @@ const Messages = () => {
               </div>
             </div>
           ) : (
-            <div className="border-t border-border bg-card p-3 flex items-center gap-2 mb-16 md:mb-0">
-              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoUpload} aria-hidden="true" tabIndex={-1} />
-              <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2 rounded-lg hover:bg-accent text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Joindre une photo">
-                <ImageIcon className="h-5 w-5" aria-hidden="true" />
-              </button>
-              <Input
-                value={newMessage}
-                onChange={e => setNewMessage(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Écrire un message..."
-                aria-label="Écrire un message"
-                className="flex-1 rounded-full"
-              />
-              <Button size="icon" onClick={handleSend} disabled={sending || !newMessage.trim()} className="rounded-full shrink-0" aria-label="Envoyer le message">
-                <Send className="h-4 w-4" aria-hidden="true" />
-              </Button>
-            </div>
+            <MessageComposer
+              value={newMessage}
+              onChange={setNewMessage}
+              onSend={handleSend}
+              onPickPhoto={async (file) => {
+                if (!user || !activeConv) return;
+                const ext = file.name.split(".").pop();
+                const path = `messages/${activeConv.id}/${Date.now()}.${ext}`;
+                const { error } = await supabase.storage.from("property-photos").upload(path, file);
+                if (error) return;
+                const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
+                await supabase.from("messages").insert({
+                  conversation_id: activeConv.id, sender_id: user.id, content: "", photo_url: urlData.publicUrl,
+                });
+                await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", activeConv.id);
+                loadConversations();
+              }}
+              sending={sending}
+            />
           )}
         </div>
       ) : !isMobile ? (
-        /* MOD 1 — Empty state */
-        <div className="flex-1 flex flex-col items-center justify-center h-full gap-4">
-          <MessageSquare className="h-10 w-10 text-muted-foreground" />
-          <h2 className="text-lg font-semibold text-foreground">Vos échanges</h2>
-          <p className="text-sm text-muted-foreground text-center max-w-xs">
-            Sélectionnez une conversation ou lancez une recherche.
-          </p>
-          {pill !== "archived" && (
-            <Link
-              to={pill === "mission" ? "/petites-missions" : "/search"}
-              className="border border-border rounded-full px-4 py-2 text-sm hover:border-primary transition-colors"
-            >
-              {pill === "mission" ? "Rechercher une mission →" : "Rechercher une annonce →"}
+        /* Empty state desktop — gouache emptyMailbox conforme à la charte */
+        <div className="flex-1 flex flex-col items-center justify-center h-full bg-background">
+          <EmptyState
+            illustration="emptyMailbox"
+            title="Vos échanges"
+            description="Sélectionnez une conversation ou lancez une recherche pour démarrer un échange."
+            actionLabel={pill === "mission" ? "Rechercher une mission" : "Rechercher une annonce"}
+            actionTo={pill === "archived" ? undefined : (pill === "mission" ? "/petites-missions" : "/search")}
+          />
+        </div>
+      ) : null}
             </Link>
           )}
         </div>
