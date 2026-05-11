@@ -1016,7 +1016,7 @@ const SearchOwner = () => {
                       {/* Animal pills — zone réservée pour aligner */}
                       <div className="flex flex-wrap gap-1 mt-1.5 min-h-[1.5rem]">
                         {sitterAnimalTypes.slice(0, 3).map((a: string) => (
-                          <span key={a} className="text-[11px] bg-primary/10 text-primary rounded-full px-2 py-0.5 font-medium">{a}</span>
+                          <span key={a} className="text-[11px] bg-muted text-foreground/80 rounded-full px-2 py-0.5">{a}</span>
                         ))}
                         {sitterAnimalTypes.length > 3 && (
                           <span className="text-[11px] text-muted-foreground self-center">+{sitterAnimalTypes.length - 3}</span>
