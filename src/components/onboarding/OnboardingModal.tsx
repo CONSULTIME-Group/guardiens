@@ -528,14 +528,14 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
             <div className="space-y-5">
               <div>
                 <h2 className="font-heading text-2xl font-bold text-foreground">
-                  {userRole === "both"
-                    ? "Votre photo et votre bio sont la première chose que les autres voient."
-                    : isOwnerOnly
-                      ? "Les gardiens regardent votre photo et votre bio en premier."
-                      : "Les propriétaires regardent votre photo et votre bio en premier."}
+                  La première impression, c'est ici.
                 </h2>
                 <p className="text-base text-foreground/80 leading-relaxed mt-2">
-                  Montrez qui vous êtes. Une photo nette et quelques mots sincères suffisent.
+                  {userRole === "both"
+                    ? "Votre photo et votre bio sont la première chose que les autres voient. Une photo nette et quelques mots sincères suffisent."
+                    : isOwnerOnly
+                      ? "Les gardiens regardent votre photo et votre bio en premier. Une photo nette et quelques mots sincères suffisent."
+                      : "Les propriétaires regardent votre photo et votre bio en premier. Une photo nette et quelques mots sincères suffisent."}
                 </p>
               </div>
 
