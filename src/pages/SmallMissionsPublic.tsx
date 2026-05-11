@@ -3,30 +3,22 @@ import { Button } from "@/components/ui/button";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ArrowLeft, ChevronRight, Home } from "lucide-react";
-import spotVergerSrc from "@/assets/missions/spot-verger.png";
-import spotJardinSrc from "@/assets/missions/spot-jardin.png";
-import spotPoulesSrc from "@/assets/missions/spot-poules.png";
-import spotChienSrc from "@/assets/missions/spot-chien.png";
-import spotBricolageSrc from "@/assets/missions/spot-bricolage.png";
-import spotBienetreSrc from "@/assets/missions/spot-bienetre.png";
-
-/* Cache-buster: force le navigateur à re-télécharger les illustrations (gouache v2) */
-const ILLU_VERSION = "gouache-v2-20260427";
-const bust = (src: string) => `${src}${src.includes("?") ? "&" : "?"}v=${ILLU_VERSION}`;
-const spotVerger = bust(spotVergerSrc);
-const spotJardin = bust(spotJardinSrc);
-const spotPoules = bust(spotPoulesSrc);
-const spotChien = bust(spotChienSrc);
-const spotBricolage = bust(spotBricolageSrc);
-const spotBienetre = bust(spotBienetreSrc);
 import PublicHeader from "@/components/layout/PublicHeader";
 import FreePeriodBanner from "@/components/marketing/FreePeriodBanner";
+import ReachReassuranceBanner from "@/components/marketing/ReachReassuranceBanner";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Helmet } from "react-helmet-async";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  MISSIONS_ILLUSTRATIONS,
+  MISSIONS_EXAMPLES,
+  MISSIONS_FAQ,
+  MISSIONS_TESTIMONIALS,
+} from "@/data/missionsPublicContent";
+
+const { spotChien, spotJardin, spotPoules, spotBricolage } = MISSIONS_ILLUSTRATIONS;
 
 /* ── scroll reveal ── */
 function useScrollReveal(threshold = 0.1) {
@@ -83,57 +75,72 @@ function StickyMobileCta({ onPropose, onAsk }: { onPropose: () => void; onAsk: (
  );
 }
 
-/* ── data ── */
-const examples = [
- { img: spotVerger, alt: "Panier en osier rempli de fruits frais — illustration gouache", title: "Verger à ramasser", text: "Venir ramasser les fruits avant qu'ils tombent contre un énorme panier de fruits frais à emporter.", badge: "Fruits · entre gens du coin" },
- { img: spotJardin, alt: "Panier d'herbes aromatiques et sécateur — illustration gouache", title: "Coup de main au jardin", text: "Donner un coup de main pour planter, désherber ou tailler — et venir se servir librement à la récolte.", badge: "Jardinage · entre gens du coin" },
- { img: spotPoules, alt: "Poule rousse devant un nid de paille avec des œufs — illustration gouache", title: "Poules à garder", text: "Nourrir les poules et ramasser les œufs pendant 10 jours contre des œufs frais à volonté au retour.", badge: "Œufs · entre gens du coin" },
- { img: spotChien, alt: "Chien assis avec sa laisse en cuir — illustration gouache", title: "Chien à promener", text: "Deux semaines de balades contre son chien promené la prochaine fois qu'on part.", badge: "Réciprocité · entre gens du coin" },
- { img: spotBricolage, alt: "Boîte à outils en bois ouverte avec marteau, tournevis et clé — illustration gouache", title: "Petit bricolage", text: "Un coup de main pour monter une étagère, fixer un meuble ou changer un robinet, contre un vrai repas fait maison.", badge: "Repas · entre gens du coin" },
- { img: spotBienetre, alt: "Tasse en céramique, brin de lavande et galet — illustration gouache", title: "Énergie & bien-être", text: "Une séance de Reiki, un massage ou un moment de méditation partagés, en échange d'un service rendu en retour.", badge: "Échange · entre gens du coin" },
-];
+/* ── data (centralisée dans @/data/missionsPublicContent) ── */
+const examples = MISSIONS_EXAMPLES;
+const FAQ_ITEMS = MISSIONS_FAQ;
 
-/* ── FAQ items (source unique pour Accordion HTML + Schema FAQPage) ── */
-const FAQ_ITEMS: { q: string; a: string }[] = [
- { q: "C'est quoi les petites missions ?", a: "Des coups de main entre gens du coin — jardinage, animaux, bricolage — échangés sans argent. Vous proposez ce que vous savez faire, ou publiez ce dont vous avez besoin." },
- { q: "C'est vraiment gratuit ?", a: "Oui. L'entraide entre gens du coin est gratuite pour tous. Aucun frais, aucune commission." },
- { q: "Comment fonctionne l'échange ?", a: "Pas d'argent. Vous proposez quelque chose en retour — un repas, des légumes, un coup de main futur. L'échange se décide entre vous." },
- { q: "Faut-il être abonné ?", a: "Non. Les petites missions sont accessibles à tous les membres inscrits, sans abonnement." },
- { q: "Quels types de missions peut-on publier ?", a: "Tout ce qui tourne autour de la maison, du jardin, des animaux et du quartier. Tonte, arrosage, promenade de chien, bricolage, cuisine…" },
- { q: "Comment je sais que la personne est fiable ?", a: "Chaque membre a un profil avec avis, badges et score de confiance. Vous pouvez échanger par messagerie avant de vous engager." },
- { q: "Comment proposer une petite mission près de chez vous ?", a: "Pour proposer une petite mission, vous publiez votre demande ou votre offre depuis votre espace Guardiens. Décrivez clairement ce dont vous avez besoin (ou ce que vous proposez), précisez votre ville et ce que vous donnez en échange. Les gens du coin la voient et répondent s'ils peuvent vous aider. C'est aussi simple que ça." },
- { q: "Quelle différence entre une petite mission et une garde sur Guardiens ?", a: "Une garde, c'est une présence dans la durée : un gardien dort chez vous, prend soin de vos animaux et de votre maison pendant votre absence. Une petite mission, c'est un coup de main ponctuel : arroser les plantes, promener un chien une heure, monter un meuble. La garde nécessite un abonnement gardien (6,99€/mois). Les petites missions sont gratuites pour tous, sans abonnement requis." },
- { q: "L'entraide entre gens du coin est-elle réservée à certaines villes ?", a: "Non. Guardiens est ouvert dans toute la France. Les missions sont visibles uniquement aux personnes situées à proximité de chez vous, pour préserver l'esprit local de l'échange. Plus la communauté grandit dans votre quartier, plus les missions trouvent rapidement preneur." },
- { q: "Que faire si quelqu'un me propose de l'argent pour une petite mission ?", a: "Refusez. C'est non négociable et c'est ce qui rend Guardiens unique. Aucun argent ne doit circuler dans une petite mission. Si quelqu'un insiste, signalez-le à l'équipe Guardiens via le formulaire de contact. Les échanges acceptés sont en nature : produits du jardin, repas, service rendu en retour." },
-];
+interface OpenMissionRow {
+  id: string;
+  title: string;
+  category: string;
+  city: string | null;
+  created_at: string;
+}
+
+const CATEGORY_LABEL: Record<string, string> = {
+  animals: "Animaux",
+  garden: "Jardin",
+  errand: "Courses",
+  tech: "Technique",
+  company: "Compagnie",
+  home: "Maison",
+  other: "Autre",
+};
 
 /* ── page ── */
 const SmallMissionsPublic = () => {
  const navigate = useNavigate();
  const { isAuthenticated } = useAuth();
 
- /* KPIs */
- const [kpiMissions, setKpiMissions] = useState<number>(0);
- const [kpiHelpers, setKpiHelpers] = useState<number>(0);
+  /* KPIs */
+  const [kpiMissions, setKpiMissions] = useState<number>(0);
+  const [kpiHelpers, setKpiHelpers] = useState<number>(0);
 
- useEffect(() => {
- const load = async () => {
- // `.single()` rejette quand la vue ne renvoie pas exactement une ligne
- // (PGRST116). On dégrade silencieusement : les KPIs restent à 0 et
- // l'erreur ne pollue pas le moniteur d'`unhandled_rejection`.
- try {
+  /* Missions ouvertes — preuve sociale dynamique */
+  const [openMissions, setOpenMissions] = useState<OpenMissionRow[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
         const { data: rows } = await supabase.rpc("get_public_stats");
         const data = Array.isArray(rows) ? rows[0] : rows;
- if (data) {
- if (typeof data.missions_entraide === "number") setKpiMissions(data.missions_entraide);
- if (typeof data.total_inscrits === "number") setKpiHelpers(data.total_inscrits);
- }
- } catch (err) {
- console.warn("public_stats unavailable:", err);
- }
- };
- void load();
- }, []);
+        if (data) {
+          if (typeof data.missions_entraide === "number") setKpiMissions(data.missions_entraide);
+          if (typeof data.total_inscrits === "number") setKpiHelpers(data.total_inscrits);
+        }
+      } catch (err) {
+        console.warn("public_stats unavailable:", err);
+      }
+    };
+    void load();
+  }, []);
+
+  useEffect(() => {
+    const loadOpen = async () => {
+      try {
+        const { data } = await supabase
+          .from("small_missions")
+          .select("id, title, category, city, created_at")
+          .eq("status", "open")
+          .order("created_at", { ascending: false })
+          .limit(6);
+        if (data) setOpenMissions(data as OpenMissionRow[]);
+      } catch (err) {
+        console.warn("small_missions unavailable:", err);
+      }
+    };
+    void loadOpen();
+  }, []);
 
  /** Auth-aware navigation: redirect to register if not logged in */
   const goToCreate = () =>
@@ -224,6 +231,13 @@ const SmallMissionsPublic = () => {
  </div>
  </Reveal>
  )}
+
+ {/* Réassurance périmètre — promesse mondiale, pas régionale */}
+ <Reveal delay={0.45}>
+ <div className="mt-8 max-w-md mx-auto">
+ <ReachReassuranceBanner variant="inline" className="text-center" />
+ </div>
+ </Reveal>
  </div>
  </section>
 
@@ -558,6 +572,122 @@ const SmallMissionsPublic = () => {
  </div>
   </section>
 
+  {/* ═══ SECTION 5.6 — MISSIONS OUVERTES (preuve sociale dynamique) ═══ */}
+  {openMissions.length > 0 && (
+    <section className="bg-muted/40 border-t border-border/40">
+      <div className="max-w-5xl mx-auto px-6 py-20 md:py-24">
+        <Reveal>
+          <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 text-center mb-4">
+            En direct de la communauté
+          </p>
+          <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center leading-snug mb-12">
+            Des missions ouvertes en ce moment
+          </h2>
+        </Reveal>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {openMissions.map((m, i) => (
+            <Reveal key={m.id} delay={0.04 * i}>
+              <Link
+                to={`/petites-missions/${m.id}`}
+                className="block h-full p-5 rounded-2xl border border-border bg-card hover:border-primary/40 hover:-translate-y-0.5 transition-all"
+              >
+                <p className="text-[11px] font-body font-semibold tracking-widest uppercase text-primary/70 mb-3">
+                  {CATEGORY_LABEL[m.category] || "Mission"}
+                </p>
+                <h3 className="font-heading text-base md:text-lg font-semibold text-foreground leading-snug mb-2 line-clamp-2">
+                  {m.title}
+                </h3>
+                <p className="text-xs text-foreground/55">
+                  {m.city || "France"}
+                </p>
+              </Link>
+            </Reveal>
+          ))}
+        </div>
+        <Reveal delay={0.3}>
+          <div className="text-center mt-10">
+            <Button onClick={goToHelp} variant="outline" className="border-2 border-primary text-primary rounded-full px-8 py-3 h-auto text-sm font-semibold">
+              Voir toutes les missions ouvertes
+            </Button>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  )}
+
+  {/* ═══ SECTION 5.7 — TÉMOIGNAGES ═══ */}
+  <section className="bg-background border-t border-border/40">
+    <div className="max-w-5xl mx-auto px-6 py-20 md:py-24">
+      <Reveal>
+        <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 text-center mb-4">
+          Ce qu'en disent les membres
+        </p>
+        <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center leading-snug mb-12">
+          Trois échanges, trois rencontres.
+        </h2>
+      </Reveal>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {MISSIONS_TESTIMONIALS.map((t, i) => (
+          <Reveal key={t.name} delay={0.08 * i}>
+            <figure className="h-full bg-card border border-border rounded-2xl p-8 flex flex-col">
+              <blockquote className="font-heading text-base md:text-lg italic text-foreground/85 leading-relaxed flex-1">
+                « {t.quote} »
+              </blockquote>
+              <figcaption className="mt-6 pt-4 border-t border-border/60">
+                <span className="block font-heading font-semibold text-foreground">{t.name}</span>
+                <span className="text-xs text-foreground/55 tracking-wide">{t.city}</span>
+              </figcaption>
+            </figure>
+          </Reveal>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {/* ═══ SECTION 5.8 — POURQUOI L'ENTRAIDE LOCALE FONCTIONNE (densification YMYL) ═══ */}
+  <section className="bg-muted/30 border-t border-border/40">
+    <div className="max-w-3xl mx-auto px-6 py-20 md:py-24">
+      <Reveal>
+        <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 mb-4">
+          Le fond de l'idée
+        </p>
+        <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground leading-snug mb-8">
+          Pourquoi l'entraide entre gens du coin fonctionne
+        </h2>
+      </Reveal>
+
+      <Reveal delay={0.05}>
+        <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed mb-6">
+          Quand on demande un service à une personne du quartier, il se passe quelque chose qu'aucune plateforme tarifée ne peut reproduire : la relation existe avant la transaction. Vous croisez la personne au marché. Vous savez où elle habite. Vous avez intérêt, l'un comme l'autre, à ce que l'échange se passe bien — parce que vous allez vous revoir.
+        </p>
+      </Reveal>
+
+      <Reveal delay={0.1}>
+        <h3 className="font-heading text-xl md:text-2xl font-semibold text-foreground mt-10 mb-4">
+          Le coût caché des services payants
+        </h3>
+        <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed mb-6">
+          Faire venir un professionnel pour arroser des plantes, déplacer un meuble ou promener un chien revient souvent à 25-40 € par intervention. Sur une saison, le calcul devient déraisonnable pour des gestes qui prennent quinze minutes à une personne du coin. La transaction monétaire transforme un service simple en prestation, avec ce qu'elle implique de cadre, de TVA, et de distance émotionnelle.
+        </p>
+        <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed mb-6">
+          L'entraide gratuite réintroduit la souplesse. Une heure aujourd'hui, un panier de légumes la semaine prochaine. Un coup de main pour un déménagement, un dîner partagé en retour. Personne ne tient les comptes — et c'est précisément ce qui rend l'échange durable.
+        </p>
+      </Reveal>
+
+      <Reveal delay={0.15}>
+        <h3 className="font-heading text-xl md:text-2xl font-semibold text-foreground mt-10 mb-4">
+          Ce que la loi française autorise (et ce qu'elle proscrit)
+        </h3>
+        <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed mb-6">
+          L'entraide non monétaire entre particuliers est parfaitement légale en France, à condition de respecter trois principes simples. D'abord, aucune somme d'argent ne doit circuler — la contrepartie en nature (repas, produits du jardin, service rendu en retour) reste libre, mais l'argent transforme l'échange en travail dissimulé. Ensuite, le service rendu doit rester ponctuel et accessoire : si la même personne vient garder vos enfants tous les mercredis, ce n'est plus de l'entraide, c'est un emploi à déclarer (chèque emploi-service, par exemple). Enfin, certains domaines restent réservés aux professionnels : aide à la personne médicalisée, garde d'enfants régulière, électricité, plomberie sous pression.
+        </p>
+        <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed">
+          Les petites missions Guardiens s'inscrivent strictement dans ce cadre : un coup de main, ponctuel, sans transaction financière, autour de la maison, du jardin, des animaux. C'est volontairement étroit — pour rester sain.
+        </p>
+      </Reveal>
+    </div>
+  </section>
+
   {/* ═══ SECTION 5.5 — POUR ALLER PLUS LOIN (maillage interne) ═══ */}
   <section className="py-20 bg-background">
   <div className="max-w-6xl mx-auto px-6">
@@ -723,6 +853,30 @@ const SmallMissionsPublic = () => {
      name: faq.q,
      acceptedAnswer: { "@type": "Answer", text: faq.a },
     })),
+   })}</script>
+   <script type="application/ld+json">{JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "Publier une demande de coup de main près de chez vous",
+    description: "Comment publier une petite mission d'entraide gratuite sur Guardiens, sans abonnement.",
+    totalTime: "PT3M",
+    step: [
+     { "@type": "HowToStep", position: 1, name: "Décrire la mission", text: "Vous décrivez la mission — tonte, bricolage, promener le chien, réceptionner un colis." },
+     { "@type": "HowToStep", position: 2, name: "Proposer une contrepartie", text: "Vous proposez ce que vous donnez en échange — un repas, des légumes, une bouteille." },
+     { "@type": "HowToStep", position: 3, name: "Choisir et rencontrer", text: "Des gens du coin voient votre mission et proposent leur aide. Vous choisissez. Vous vous rencontrez." },
+    ],
+   })}</script>
+   <script type="application/ld+json">{JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "Proposer son aide à des gens du coin",
+    description: "Comment publier une offre d'aide bénévole sur Guardiens et rencontrer des personnes proches qui en ont besoin.",
+    totalTime: "PT3M",
+    step: [
+     { "@type": "HowToStep", position: 1, name: "Décrire votre savoir-faire", text: "Vous décrivez ce que vous savez faire — jardinage, montage de meubles, cuisine, aide aux courses." },
+     { "@type": "HowToStep", position: 2, name: "Préciser la contrepartie", text: "Vous dites ce que vous aimeriez en échange — ou vous laissez la personne proposer." },
+     { "@type": "HowToStep", position: 3, name: "Rencontrer et échanger", text: "Quelqu'un a besoin exactement de ça. Il vous contacte. L'échange commence." },
+    ],
    })}</script>
    </Helmet>
 
