@@ -45,8 +45,13 @@ const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCit
   // mission_help → géré par les bannières mission existantes
   if (contextType === "mission_help") return null;
 
+  const safeName = (otherFirstName ?? "").trim();
+
   if (contextType === "sitter_inquiry" || contextType === "helper_inquiry") {
     const isHelper = contextType === "helper_inquiry";
+    const sitterName = safeName || "ce gardien";
+    const ownerName = safeName || "ce propriétaire";
+    const memberName = safeName || "ce membre";
     return (
       <div className="px-4 py-3 bg-info-soft border-t border-info-border">
         <div className="flex items-start gap-2">
@@ -58,21 +63,21 @@ const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCit
             <p className="text-xs text-info/80 mt-0.5">
               {isHelper
                 ? (isOwner
-                    ? `Vous avez contacté ${otherFirstName || "ce membre"} pour un futur coup de main.`
-                    : `${otherFirstName || "Une personne du coin"} vous contacte pour un futur coup de main.`)
+                    ? `Vous avez sollicité ${memberName} pour un futur coup de main.`
+                    : `${memberName === "ce membre" ? "Un membre du coin" : memberName} vous sollicite pour un futur coup de main.`)
                 : (isOwner
                     ? (ownerHasPublishedSit === null
-                        ? `Échangez avec ${otherFirstName || "ce gardien"} avant d'aller plus loin.`
+                        ? `Échangez avec ${sitterName} avant d'aller plus loin.`
                         : ownerHasPublishedSit > 0
-                          ? `Vous avez une annonce publiée. Proposez-la à ${otherFirstName || "ce gardien"}.`
-                          : `Pour aller plus loin avec ${otherFirstName || "ce gardien"}, publiez votre annonce.`)
-                    : `${otherFirstName || "Ce propriétaire"} vous a contacté·e en amont d'une éventuelle annonce.`)}
+                          ? `Vous avez une annonce publiée : proposez-la à ${sitterName}.`
+                          : `Pour aller plus loin avec ${sitterName}, publiez votre annonce.`)
+                    : `${ownerName === "ce propriétaire" ? "Ce propriétaire" : ownerName} vous a contacté en amont d'une éventuelle annonce.`)}
             </p>
             {isOwner && !isHelper && (
               <div className="mt-2">
                 {otherUserId && ownerHasPublishedSit !== 0 && (
                   <InviteToMySitButton
-                    sitter={{ id: otherUserId, first_name: otherFirstName ?? null }}
+                    sitter={{ id: otherUserId, first_name: safeName || null }}
                     label="Proposer mon annonce"
                     className="border-info-border text-info hover:bg-info-soft"
                     hideIfNoSits
@@ -102,6 +107,8 @@ const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCit
   }
 
   if (contextType === "owner_pitch") {
+    const sitterName = safeName || "Un gardien";
+    const ownerName = safeName || "ce propriétaire";
     return (
       <div className="px-4 py-3 bg-warning-soft border-t border-warning-border">
         <div className="flex items-start gap-2">
@@ -112,14 +119,15 @@ const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCit
             </p>
             <p className="text-xs text-warning-foreground/80 mt-0.5">
               {isOwner
-                ? `${otherFirstName || "Un gardien"} vous propose ses services. Aucune annonce de votre part n'est en cours.`
-                : `Vous proposez vos services à ${otherFirstName || "ce propriétaire"} sans annonce active. Soyez clair et bref.`}
+                ? `${sitterName} vous propose ses services, sans annonce active de votre part.`
+                : `Vous proposez vos services à ${ownerName} sans annonce active. Allez à l'essentiel.`}
             </p>
           </div>
         </div>
       </div>
     );
   }
+
 
   return null;
 };
