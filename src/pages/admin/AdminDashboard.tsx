@@ -80,8 +80,10 @@ const ACTIVITY_BADGE: Record<ActivityItem["type"], { label: string; variant: "se
   candidature: { label: "Candidature", variant: "outline" },
 };
 
+// Tarif gardien standard mensuel (€) — utilisé pour estimer les revenus du mois.
+const MONTHLY_SUBSCRIPTION_EUR = 6.99;
+
 const AdminDashboard = () => {
-  const navigate = useNavigate();
   const [stats, setStats] = useState<Stats | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
