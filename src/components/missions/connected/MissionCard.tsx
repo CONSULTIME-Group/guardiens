@@ -1,7 +1,14 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Lock } from "lucide-react";
+import { Lock, Sparkles, ChevronRight } from "lucide-react";
 import { CATEGORY_META, formatCity, formatDuration, ModeFilter } from "./constants";
+
+const formatDateNeeded = (d?: string | null) => {
+  if (!d) return null;
+  try {
+    return new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+  } catch { return null; }
+};
 
 interface Props {
   mission: any;
@@ -31,13 +38,17 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
     >
       <Card className={`border-border transition-colors h-full ${isCompleted ? "opacity-50 grayscale" : "hover:border-primary/30"}`}>
         <CardContent className="p-4 space-y-2">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{meta.label}</span>
-            {m.response_count > 0 && (
+            {m.response_count > 0 ? (
               <span className="text-xs text-muted-foreground bg-accent px-2 py-0.5 rounded-full">
                 {m.response_count} proposition{m.response_count > 1 ? "s" : ""}
               </span>
-            )}
+            ) : !isCompleted && !isMine ? (
+              <span className="inline-flex items-center gap-1 text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                <Sparkles className="h-3 w-3" /> Premier à aider
+              </span>
+            ) : null}
           </div>
           <p className="font-medium text-sm text-foreground">{m.title}</p>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -59,6 +70,7 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
           </div>
           <p className="text-xs text-muted-foreground">
             {formatCity(m.city || "—")} · {formatDuration(m.duration_estimate || "—")}
+            {formatDateNeeded(m.date_needed) && <> · pour le {formatDateNeeded(m.date_needed)}</>}
           </p>
           <p className="text-xs text-muted-foreground">En échange : {m.exchange_offer}</p>
           {isCompleted ? (
@@ -80,11 +92,11 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
             ) : (
               <Button
                 size="sm"
-                variant="outline"
                 className="w-full mt-2"
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); onPropose(); }}
               >
-                {mode === "offer" ? `Aider ${authorName} →` : `Proposer à ${authorName} →`}
+                {mode === "offer" ? `Aider ${authorName}` : `Proposer à ${authorName}`}
+                <ChevronRight className="ml-1 h-3.5 w-3.5" />
               </Button>
             )
           )}

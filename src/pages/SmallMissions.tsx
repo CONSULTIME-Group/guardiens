@@ -185,12 +185,14 @@ const SmallMissions = () => {
         const coords = await geocodeCached(p.city || p.postal_code);
         setOriginCoords(coords);
         setGeocodingOrigin(false);
+        if (!searchParams.get("radius")) setRadiusKm(25);
       } else if (p?.city) {
         setPostalCodeInput(p.city);
         setGeocodingOrigin(true);
         const coords = await geocodeCached(p.city);
         setOriginCoords(coords);
         setGeocodingOrigin(false);
+        if (!searchParams.get("radius")) setRadiusKm(25);
       }
     })();
   }, [user]);
@@ -357,24 +359,49 @@ const SmallMissions = () => {
       />
 
       <div className="min-h-screen bg-background">
-        <MissionsHero />
+        <MissionsHero
+          missionCount={(allMissions || []).filter((m: any) => m.status === "open" || m.status === "in_progress").length}
+          helperCount={(availableHelpers || []).length}
+          onPropose={() => {
+            if (!isAuthenticated) { navigate("/inscription?redirect=/petites-missions"); return; }
+            openOfferDialog();
+          }}
+        />
 
-        <main className="max-w-6xl mx-auto px-4 py-8 md:py-10 space-y-12">
+        <main className="max-w-6xl mx-auto px-4 py-8 md:py-10 pb-28 md:pb-10 space-y-12">
           <section className="space-y-6">
-            {isAuthenticated && canApplyMissions && (
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link to="/petites-missions/creer" className="sm:flex-initial">
-                  <Button variant="hero" size="lg" className="w-full sm:w-auto">
-                    Publier ma demande
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-                <Button variant="outline" size="lg" onClick={openOfferDialog} className="border-2">
-                  Proposer mon aide
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              {isAuthenticated && !canApplyMissions ? (
+                <Button variant="hero" size="lg" disabled className="w-full sm:w-auto gap-1">
+                  Complétez votre profil pour publier
+                </Button>
+              ) : (
+                <Button
+                  variant="hero"
+                  size="lg"
+                  className="w-full sm:w-auto"
+                  onClick={() => {
+                    if (!isAuthenticated) { navigate("/inscription?redirect=/petites-missions/creer"); return; }
+                    navigate("/petites-missions/creer");
+                  }}
+                >
+                  Publier ma demande
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-              </div>
-            )}
+              )}
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-2"
+                onClick={() => {
+                  if (!isAuthenticated) { navigate("/inscription?redirect=/petites-missions"); return; }
+                  openOfferDialog();
+                }}
+              >
+                Me rendre visible comme aidant
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
 
             <div className="flex items-center justify-center">
               <div className="inline-flex items-center gap-1 bg-muted rounded-lg p-1" role="tablist" aria-label="Filtrer la liste">
@@ -384,7 +411,7 @@ const SmallMissions = () => {
                   onClick={() => setMode("need")}
                   className={`px-4 py-2 text-sm rounded-md transition-colors ${mode === "need" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
                 >
-                  Demandes du coin
+                  Coups de main demandés
                 </button>
                 <button
                   role="tab"
@@ -392,7 +419,7 @@ const SmallMissions = () => {
                   onClick={() => setMode("offer")}
                   className={`px-4 py-2 text-sm rounded-md transition-colors ${mode === "offer" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
                 >
-                  Personnes qui aident
+                  Aidants disponibles
                 </button>
               </div>
             </div>
@@ -655,6 +682,24 @@ const SmallMissions = () => {
             <Link to="/mentions-legales" className="hover:text-foreground">Mentions légales</Link>
           </div>
         </footer>
+
+        {/* Sticky CTA mobile */}
+        <div className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <Button
+            variant="hero"
+            size="lg"
+            className="w-full"
+            onClick={() => {
+              if (!isAuthenticated) { navigate("/inscription?redirect=/petites-missions/creer"); return; }
+              if (!canApplyMissions) return;
+              navigate("/petites-missions/creer");
+            }}
+            disabled={isAuthenticated && !canApplyMissions}
+          >
+            Publier ma demande
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       {dialogMission && dialogTarget && (

@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { ShieldCheck, ArrowRight } from "lucide-react";
 import { SKILL_PILL_META } from "./constants";
 
 interface Props {
@@ -14,10 +16,18 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile }: Props) => {
   const toShow = comps.length > 0 ? comps : (h.custom_skills as string[] || []);
 
   return (
-    <div className="rounded-lg border border-border bg-card p-5 space-y-3 transition-colors hover:border-primary/30">
-      <span className="inline-block text-xs rounded-full bg-primary/10 text-primary px-3 py-1">
-        Disponible pour aider
-      </span>
+    <div className="rounded-lg border border-border bg-card p-5 space-y-3 transition-colors hover:border-primary/30 flex flex-col">
+      <div className="flex items-center justify-between gap-2">
+        <span className="inline-block text-xs rounded-full bg-primary/10 text-primary px-3 py-1">
+          Disponible pour aider
+        </span>
+        {h.identity_verified && (
+          <span className="inline-flex items-center gap-1 text-xs text-success" title="Identité vérifiée">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            Identité vérifiée
+          </span>
+        )}
+      </div>
       <div className="flex items-center gap-3">
         {h.avatar_url ? (
           <img src={h.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover border border-border" />
@@ -64,16 +74,14 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile }: Props) => {
           )}
         </div>
       )}
-      <div className="flex items-center justify-between gap-2 pt-1">
-        <button
-          onClick={onPropose}
-          className="text-sm text-primary font-semibold hover:underline"
-        >
-          Proposer à {h.first_name || "ce membre"} →
-        </button>
+      <div className="flex flex-col gap-2 pt-2 mt-auto">
+        <Button onClick={onPropose} size="sm" className="w-full">
+          Proposer à {h.first_name || "ce membre"}
+          <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+        </Button>
         <button
           onClick={onViewProfile}
-          className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+          className="text-xs text-muted-foreground hover:text-foreground hover:underline self-center"
         >
           Voir le profil
         </button>
