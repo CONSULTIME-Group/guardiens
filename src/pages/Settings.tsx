@@ -692,14 +692,6 @@ const PrivacySection = ({ prefs, onSave }: any) => (
         <Switch checked={prefs.show_last_seen} onCheckedChange={(v) => onSave({ show_last_seen: v })} />
       </div>
 
-      <div className="pt-3 border-t border-border">
-        <Button variant="link" size="sm" className="px-0 gap-1" asChild>
-          <Link to="/blocked-users">
-            Gérer les personnes bloquées
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        </Button>
-      </div>
     </div>
   </section>
 );
