@@ -385,7 +385,7 @@ const MySubscription = () => {
               <div className="absolute top-3 left-8 right-8 h-px bg-border" aria-hidden="true" />
               {[
                 { label: "Maintenant", sub: "Accès complet", state: "active" as const },
-                { label: "13 juillet", sub: "Badge Fondateur", state: "founder" as const },
+                { label: "14 juillet", sub: "Badge Fondateur", state: "founder" as const },
                 { label: "15 juillet", sub: "Fin de la grâce", state: "future" as const },
                 { label: "Ensuite", sub: "6,99 €/mois · 7 j d'essai", state: "future" as const },
               ].map(({ label, sub: subText, state }) => (
@@ -486,10 +486,10 @@ const MySubscription = () => {
                 <FounderBadge size="lg" />
                 <div className="space-y-1">
                   <p className="text-sm font-semibold text-founder-foreground font-body">
-                    Vous devenez Fondateur le 13 juillet.
+                    Vous devenez Fondateur le 14 juillet.
                   </p>
                   <p className="text-sm text-founder-foreground/80 font-body leading-relaxed">
-                    Chaque membre inscrit avant le 13 juillet 2026 reçoit le badge Fondateur, visible sur son profil public. L'accès offert, lui, est étendu à tous les inscrits jusqu'au 14 juillet 2026.
+                    Chaque membre inscrit avant le 14 juillet 2026 reçoit le badge Fondateur, visible sur son profil public. L'accès offert, lui, est étendu à tous les inscrits jusqu'au 14 juillet 2026.
                   </p>
                 </div>
               </div>

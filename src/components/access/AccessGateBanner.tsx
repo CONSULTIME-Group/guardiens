@@ -35,11 +35,11 @@ const AccessGateBanner = ({ level, profileCompletion, context = "guard", showIde
               Connectez-vous pour continuer
             </p>
             <p className="text-sm text-muted-foreground">
-              Inscrivez-vous gratuitement pour accéder aux annonces et aux missions d'entraide.
+              Inscrivez-vous sans frais pour accéder aux annonces et aux missions d'entraide.
             </p>
             <div className="flex gap-2">
               <Button size="sm" asChild>
-                <Link to="/inscription">S'inscrire gratuitement</Link>
+                <Link to="/inscription">S'inscrire sans frais</Link>
               </Button>
               <Button size="sm" variant="outline" asChild>
                 <Link to="/login">Se connecter</Link>

@@ -153,7 +153,7 @@ const SmallMissionsPublic = () => {
  <>
  <PageMeta
  title="Petites missions d'entraide locale — Guardiens"
- description="Échangez des coups de main entre gens du coin. Jardinage, animaux, bricolage — sans argent. Gratuite pour tous."
+ description="Échangez des coups de main entre gens du coin. Jardinage, animaux, bricolage — sans argent. À 0 € pour tous."
  />
 
  <div className="min-h-screen bg-background font-body">
@@ -197,7 +197,7 @@ const SmallMissionsPublic = () => {
  </Button>
  </div>
   <p className="text-xs text-foreground/50 mt-4">
- Gratuite pour tous. Aucun engagement, aucun jugement.
+ À 0 € pour tous. Aucun engagement, aucun jugement.
  </p>
  </Reveal>
 
@@ -670,7 +670,7 @@ const SmallMissionsPublic = () => {
           Faire venir un professionnel pour arroser des plantes, déplacer un meuble ou promener un chien revient souvent à 25-40 € par intervention. Sur une saison, le calcul devient déraisonnable pour des gestes qui prennent quinze minutes à une personne du coin. La transaction monétaire transforme un service simple en prestation, avec ce qu'elle implique de cadre, de TVA, et de distance émotionnelle.
         </p>
         <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed mb-6">
-          L'entraide gratuite réintroduit la souplesse. Une heure aujourd'hui, un panier de légumes la semaine prochaine. Un coup de main pour un déménagement, un dîner partagé en retour. Personne ne tient les comptes — et c'est précisément ce qui rend l'échange durable.
+          L'entraide à 0 € réintroduit la souplesse. Une heure aujourd'hui, un panier de légumes la semaine prochaine. Un coup de main pour un déménagement, un dîner partagé en retour. Personne ne tient les comptes — et c'est précisément ce qui rend l'échange durable.
         </p>
       </Reveal>
 
@@ -776,7 +776,7 @@ const SmallMissionsPublic = () => {
  </Reveal>
  <Reveal delay={0.1}>
  <p className="font-body text-lg text-primary-foreground/85 leading-relaxed mb-10">
- Le pire qui puisse arriver, c'est que personne ne réponde. Le meilleur, c'est de rencontrer quelqu'un qui change votre semaine. Gratuit. Pour tous. Sans abonnement requis.
+ Le pire qui puisse arriver, c'est que personne ne réponde. Le meilleur, c'est de rencontrer quelqu'un qui change votre semaine. À 0 €. Pour tous. Sans abonnement requis.
  </p>
  </Reveal>
  <Reveal delay={0.2}>
@@ -789,7 +789,7 @@ const SmallMissionsPublic = () => {
  </Button>
  </div>
  <p className="text-xs text-primary-foreground/70 mt-6">
- Gratuit · Badge Fondateur · Accès jusqu'au 14 juillet
+ À 0 € · Badge Fondateur · Accès jusqu'au 14 juillet
  </p>
  </Reveal>
  </div>
@@ -842,7 +842,7 @@ const SmallMissionsPublic = () => {
      "@type": "Offer",
      price: "0",
      priceCurrency: "EUR",
-     description: "Service entièrement gratuit pour tous, sans abonnement requis. Aucune transaction financière entre membres.",
+     description: "Service entièrement à 0 € pour tous, sans abonnement requis. Aucune transaction financière entre membres.",
     },
    })}</script>
    <script type="application/ld+json">{JSON.stringify({
@@ -858,7 +858,7 @@ const SmallMissionsPublic = () => {
     "@context": "https://schema.org",
     "@type": "HowTo",
     name: "Publier une demande de coup de main près de chez vous",
-    description: "Comment publier une petite mission d'entraide gratuite sur Guardiens, sans abonnement.",
+    description: "Comment publier une petite mission d'entraide à 0 € sur Guardiens, sans abonnement.",
     totalTime: "PT3M",
     step: [
      { "@type": "HowToStep", position: 1, name: "Décrire la mission", text: "Vous décrivez la mission — tonte, bricolage, promener le chien, réceptionner un colis." },
