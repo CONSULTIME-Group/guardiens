@@ -621,7 +621,8 @@ const SmallMissions = () => {
  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
  />
  </div>
- <div className="flex items-center gap-2 flex-1 min-w-0 max-w-[280px]">
+  <div className="flex items-center gap-2 flex-1 min-w-0 max-w-[300px]">
+ <span className="text-xs font-medium text-muted-foreground whitespace-nowrap shrink-0">Rayon</span>
  <input
  type="range"
  min={1}
@@ -632,10 +633,11 @@ const SmallMissions = () => {
  const v = Number(e.target.value);
  setRadiusKm(v >= 100 ? 0 : v);
  }}
+ aria-label="Rayon de recherche en kilomètres"
  className="flex-1 h-2 accent-[hsl(var(--primary))] cursor-pointer"
  />
- <span className="text-xs font-medium text-foreground whitespace-nowrap min-w-[60px] text-right">
- {radiusKm === 0 ? "Partout" : `${radiusKm} km`}
+ <span className="text-xs font-semibold text-foreground whitespace-nowrap min-w-[70px] text-right tabular-nums">
+ {radiusKm === 0 ? "France entière" : `${radiusKm} km`}
  </span>
  </div>
  {geocodingOrigin && (
