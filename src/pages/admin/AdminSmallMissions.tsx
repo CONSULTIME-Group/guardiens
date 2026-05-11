@@ -79,14 +79,16 @@ const AdminSmallMissions = () => {
   const moneyPattern = /€|\beuro|payer|remunér|salaire|tarif|\d+\s*€/i;
   const suspectMissions = filtered.filter(m => moneyPattern.test(m.description || "") || moneyPattern.test(m.exchange_offer || ""));
 
-  const handleArchive = async (id: string) => {
-    await supabase.from("small_missions").update({ status: "cancelled" as any }).eq("id", id);
-    toast.success("Mission masquée"); fetchMissions();
+  const handleArchive = async () => {
+    if (!archiveId) return;
+    await supabase.from("small_missions").update({ status: "cancelled" as any }).eq("id", archiveId);
+    toast.success("Mission masquée"); setArchiveId(null); fetchMissions();
   };
 
-  const handleRestore = async (id: string) => {
-    await supabase.from("small_missions").update({ status: "open" as any }).eq("id", id);
-    toast.success("Mission restaurée"); fetchMissions();
+  const handleRestore = async () => {
+    if (!restoreId) return;
+    await supabase.from("small_missions").update({ status: "open" as any }).eq("id", restoreId);
+    toast.success("Mission restaurée"); setRestoreId(null); fetchMissions();
   };
 
   const handleDelete = async () => {
