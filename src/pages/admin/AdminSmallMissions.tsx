@@ -37,6 +37,8 @@ const AdminSmallMissions = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [responseCounts, setResponseCounts] = useState<Record<string, number>>({});
+  const [archiveId, setArchiveId] = useState<string | null>(null);
+  const [restoreId, setRestoreId] = useState<string | null>(null);
 
   const fetchMissions = useCallback(async () => {
     setLoading(true);
