@@ -16,8 +16,8 @@ export const SITTER_PRICE_NUMERIC = 6.99;
 export const SITTER_PRICE_CURRENCY = "EUR";
 export const SITTER_PRICE_START = "14 juillet 2026";
 export const SITTER_PRICE_START_ISO = "2026-07-14";
-export const FOUNDER_DEADLINE = "13 mai 2026";
-export const FOUNDER_DEADLINE_ISO = "2026-05-13";
+export const FOUNDER_DEADLINE = "14 juillet 2026";
+export const FOUNDER_DEADLINE_ISO = "2026-07-14";
 export const TRIAL_DURATION = "7 jours";
 export const TRIAL_LABEL = "essai de 7 jours sans frais";
 
