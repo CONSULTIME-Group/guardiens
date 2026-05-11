@@ -15,6 +15,7 @@ import SkipToContent from "@/components/layout/SkipToContent";
 import OfflineBanner from "@/components/layout/OfflineBanner";
 import NetworkErrorMonitor from "@/components/layout/NetworkErrorMonitor";
 import { PreviewDiagnosticBanner } from "@/components/PreviewDiagnosticBanner";
+import DuplicateAccountGuard from "@/components/auth/DuplicateAccountGuard";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import PageViewTracker from "@/components/analytics/PageViewTracker";
 import FacebookReferralTracker from "@/components/analytics/FacebookReferralTracker";
@@ -357,6 +358,7 @@ const App = () => (
               <OfflineBanner />
               <NetworkErrorMonitor />
               <PreviewDiagnosticBanner />
+              <DuplicateAccountGuard />
               <AppRoutes />
               <FacebookReferralFeedback />
               {/* Bannière cookies retirée : mesure d'audience GA4 exemptée CNIL
