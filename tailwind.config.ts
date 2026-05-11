@@ -77,6 +77,12 @@ export default {
         "strength-medium": "hsl(var(--strength-medium))",
         "strength-good": "hsl(var(--strength-good))",
         "strength-strong": "hsl(var(--strength-strong))",
+        founder: {
+          DEFAULT: "hsl(var(--founder))",
+          foreground: "hsl(var(--founder-foreground))",
+          soft: "hsl(var(--founder-soft))",
+          border: "hsl(var(--founder-border))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
