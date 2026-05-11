@@ -364,37 +364,7 @@ const SmallMissionsPublic = () => {
   </div>
  </section>
 
- {/* ═══ SECTION 3.5 — POURQUOI L'ENTRAIDE FONCTIONNE (densification éditoriale) ═══ */}
- <section className="bg-muted/30 border-t border-border/40">
- <div className="max-w-3xl mx-auto px-6 py-20 md:py-24">
- <Reveal>
- <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 text-center mb-4">
- Le contexte
- </p>
- <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center leading-snug mb-12">
- Pourquoi l'entraide entre gens du coin fonctionne (et pourquoi on l'a perdue)
- </h2>
- </Reveal>
-
- <div className="space-y-6 font-body text-base md:text-lg text-foreground/80 leading-relaxed">
- <Reveal delay={0.05}>
-  <p>
-  Avant, on demandait à la personne du dessus d'arroser les plantes pendant les vacances. Celle du rez-de-chaussée gardait le chien le weekend. Le retraité d'en face réceptionnait les colis. Personne ne facturait, personne ne tenait les comptes. Ce n'était pas un service — c'était une habitude. Une manière banale, presque invisible, de faire tenir un quartier. Aujourd'hui, pour les mêmes besoins, on appelle un professionnel, on souscrit un abonnement, ou on s'abstient.
-  </p>
- </Reveal>
- <Reveal delay={0.1}>
- <p>
- Pourquoi on l'a perdue ? Parce que les rythmes de vie ont changé. On rentre tard, on déménage souvent, les immeubles ne se croisent plus dans la cour. Et puis il y a ce frein, plus profond : on craint de déranger, ou pire, de paraître profiter de l'autre. Demander un coup de main est devenu un aveu de faiblesse plutôt qu'un acte de confiance. C'est exactement l'inverse de ce que c'était.
- </p>
- </Reveal>
- <Reveal delay={0.15}>
- <p>
- Pourquoi ça revient ? Parce que le mouvement de retour à la proximité est partout, et il ne s'arrêtera pas : compostage de quartier, jardins partagés, AMAP, monnaies locales, initiatives municipales, boîtes à livres. Les gens veulent retrouver des liens qui ne passent pas par une facture. Guardiens vous donne le prétexte qui manque pour oser la première demande — et la suivante devient évidente.
- </p>
- </Reveal>
- </div>
- </div>
- </section>
+ {/* (ex-section 3.5 « Pourquoi l'entraide fonctionne » fusionnée avec la section 2 — supprimée) */}
 
  {/* ═══ SECTION 4 — EXEMPLES ═══ */}
  <section className="bg-background">
