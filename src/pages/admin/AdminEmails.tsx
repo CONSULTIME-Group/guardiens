@@ -448,6 +448,7 @@ const LogsTab = () => {
 const SuppressionsTab = () => {
   const [suppressions, setSuppressions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pendingUnblock, setPendingUnblock] = useState<{ id: string; email: string } | null>(null);
 
   const fetchSuppressions = async () => {
     setLoading(true);
