@@ -37,6 +37,8 @@ const AdminSmallMissions = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [responseCounts, setResponseCounts] = useState<Record<string, number>>({});
+  const [archiveId, setArchiveId] = useState<string | null>(null);
+  const [restoreId, setRestoreId] = useState<string | null>(null);
 
   const fetchMissions = useCallback(async () => {
     setLoading(true);
@@ -77,14 +79,16 @@ const AdminSmallMissions = () => {
   const moneyPattern = /€|\beuro|payer|remunér|salaire|tarif|\d+\s*€/i;
   const suspectMissions = filtered.filter(m => moneyPattern.test(m.description || "") || moneyPattern.test(m.exchange_offer || ""));
 
-  const handleArchive = async (id: string) => {
-    await supabase.from("small_missions").update({ status: "cancelled" as any }).eq("id", id);
-    toast.success("Mission masquée"); fetchMissions();
+  const handleArchive = async () => {
+    if (!archiveId) return;
+    await supabase.from("small_missions").update({ status: "cancelled" as any }).eq("id", archiveId);
+    toast.success("Mission masquée"); setArchiveId(null); fetchMissions();
   };
 
-  const handleRestore = async (id: string) => {
-    await supabase.from("small_missions").update({ status: "open" as any }).eq("id", id);
-    toast.success("Mission restaurée"); fetchMissions();
+  const handleRestore = async () => {
+    if (!restoreId) return;
+    await supabase.from("small_missions").update({ status: "open" as any }).eq("id", restoreId);
+    toast.success("Mission restaurée"); setRestoreId(null); fetchMissions();
   };
 
   const handleDelete = async () => {
@@ -199,11 +203,11 @@ const AdminSmallMissions = () => {
                         <Mail className="h-4 w-4" />
                       </Button>
                       {m.status !== "cancelled" ? (
-                        <Button variant="ghost" size="icon" title="Masquer" onClick={() => handleArchive(m.id)}>
+                        <Button variant="ghost" size="icon" title="Masquer" onClick={() => setArchiveId(m.id)}>
                           <Archive className="h-4 w-4" />
                         </Button>
                       ) : (
-                        <Button variant="ghost" size="icon" title="Restaurer" onClick={() => handleRestore(m.id)}>
+                        <Button variant="ghost" size="icon" title="Restaurer" onClick={() => setRestoreId(m.id)}>
                           <RotateCcw className="h-4 w-4" />
                         </Button>
                       )}
@@ -226,6 +230,28 @@ const AdminSmallMissions = () => {
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteId(null)}>Annuler</Button>
             <Button variant="destructive" onClick={handleDelete} disabled={deleting}>{deleting ? "Suppression…" : "Supprimer"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!archiveId} onOpenChange={() => setArchiveId(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Masquer cette mission ?</DialogTitle></DialogHeader>
+          <DialogDescription>La mission sera retirée de la recherche. Vous pourrez la restaurer plus tard.</DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setArchiveId(null)}>Annuler</Button>
+            <Button variant="destructive" onClick={handleArchive}>Masquer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!restoreId} onOpenChange={() => setRestoreId(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Restaurer cette mission ?</DialogTitle></DialogHeader>
+          <DialogDescription>La mission sera remise en ligne et visible dans la recherche.</DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRestoreId(null)}>Annuler</Button>
+            <Button onClick={handleRestore}>Restaurer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

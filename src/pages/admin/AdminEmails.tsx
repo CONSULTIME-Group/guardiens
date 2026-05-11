@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Mail, Clock, FileText, Send, ShieldOff, History, Settings2, RefreshCw, AlertCircle, Ban, Eye, SendHorizonal, Pencil, Info, CheckCircle2, BarChart3, Inbox } from "lucide-react";
 import { ConfirmationsTab } from "./_components/ConfirmationsTab";
 import { QueueTab } from "./_components/QueueTab";
@@ -447,6 +448,7 @@ const LogsTab = () => {
 const SuppressionsTab = () => {
   const [suppressions, setSuppressions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pendingUnblock, setPendingUnblock] = useState<{ id: string; email: string } | null>(null);
 
   const fetchSuppressions = async () => {
     setLoading(true);
@@ -458,14 +460,16 @@ const SuppressionsTab = () => {
     setLoading(false);
   };
 
-  const handleUnblock = async (id: string, email: string) => {
-    const { error } = await supabase.from("suppressed_emails").delete().eq("id", id);
+  const handleUnblock = async () => {
+    if (!pendingUnblock) return;
+    const { error } = await supabase.from("suppressed_emails").delete().eq("id", pendingUnblock.id);
     if (error) {
       toast.error("Erreur lors du déblocage");
     } else {
-      toast.success(`${email} débloqué`);
-      setSuppressions((prev) => prev.filter((s) => s.id !== id));
+      toast.success(`${pendingUnblock.email} débloqué`);
+      setSuppressions((prev) => prev.filter((s) => s.id !== pendingUnblock.id));
     }
+    setPendingUnblock(null);
   };
 
   useEffect(() => { fetchSuppressions(); }, []);
@@ -509,7 +513,7 @@ const SuppressionsTab = () => {
                     {format(new Date(s.created_at), "dd MMM yyyy HH:mm", { locale: fr })}
                   </TableCell>
                   <TableCell>
-                    <Button size="sm" variant="ghost" className="text-xs h-7" onClick={() => handleUnblock(s.id, s.email)}>
+                    <Button size="sm" variant="ghost" className="text-xs h-7" onClick={() => setPendingUnblock({ id: s.id, email: s.email })}>
                       <ShieldOff className="h-3.5 w-3.5 mr-1" /> Débloquer
                     </Button>
                   </TableCell>
@@ -519,6 +523,26 @@ const SuppressionsTab = () => {
           </TableBody>
         </Table>
       </div>
+
+      <AlertDialog open={!!pendingUnblock} onOpenChange={(o) => !o && setPendingUnblock(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Débloquer cet email ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingUnblock?.email} sera retiré de la liste des suppressions et pourra à nouveau recevoir des emails.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleUnblock}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Débloquer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
