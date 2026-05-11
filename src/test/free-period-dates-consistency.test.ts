@@ -26,6 +26,7 @@ const EXPECTED = {
 
 // Fichiers où la copie utilisateur expose les dates de gratuité.
 const COPY_FILES = [
+  "index.html",
   "src/pages/Landing.tsx",
   "src/pages/Pricing.tsx",
   "src/pages/SmallMissionsPublic.tsx",
@@ -40,9 +41,10 @@ const COPY_FILES = [
 // Dates explicitement INTERDITES dans la copie publique : il s'agit de
 // formulations transitoires utilisées lors d'itérations passées.
 const FORBIDDEN_PATTERNS: { pattern: RegExp; reason: string }[] = [
+  { pattern: /13\s+mai\s+2026/gi, reason: "Date '13 mai 2026' obsolète, utiliser 14 juillet 2026 pour le badge Fondateur." },
   { pattern: /30\s+juin\s+2026/gi, reason: "Date '30 juin 2026' obsolète, utiliser 14 juillet 2026." },
   { pattern: /1er\s+juillet\s+2026/gi, reason: "Date '1er juillet 2026' obsolète, utiliser 15 juillet 2026." },
-  { pattern: /\b13\s+juin\s+2026\b/gi, reason: "Date '13 juin 2026' obsolète, le statut Fondateur clôture désormais le 13 juillet 2026." },
+  { pattern: /\b13\s+juin\s+2026\b/gi, reason: "Date '13 juin 2026' obsolète, le statut Fondateur clôture désormais le 14 juillet 2026." },
   { pattern: /2026-06-13/g, reason: "Date '2026-06-13' obsolète, utiliser 2026-07-13." },
   { pattern: /2026-06-30/g, reason: "Date '2026-06-30' obsolète, utiliser 2026-07-14." },
   { pattern: /2026-07-01/g, reason: "Date '2026-07-01' obsolète, utiliser 2026-07-15." },
