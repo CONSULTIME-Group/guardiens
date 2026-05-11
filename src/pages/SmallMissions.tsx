@@ -185,12 +185,14 @@ const SmallMissions = () => {
         const coords = await geocodeCached(p.city || p.postal_code);
         setOriginCoords(coords);
         setGeocodingOrigin(false);
+        if (!searchParams.get("radius")) setRadiusKm(25);
       } else if (p?.city) {
         setPostalCodeInput(p.city);
         setGeocodingOrigin(true);
         const coords = await geocodeCached(p.city);
         setOriginCoords(coords);
         setGeocodingOrigin(false);
+        if (!searchParams.get("radius")) setRadiusKm(25);
       }
     })();
   }, [user]);
