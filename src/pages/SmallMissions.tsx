@@ -327,7 +327,7 @@ const SmallMissions = () => {
     try { localStorage.setItem("guardiens_skill_prompt_dismissed", "true"); } catch {}
   };
 
-  const renderHelperCard = (h: any) => (
+  const renderHelperCard = useCallback((h: any) => (
     <HelperCard
       key={`h-${h.id}`}
       helper={h}
@@ -337,7 +337,15 @@ const SmallMissions = () => {
       }}
       onViewProfile={() => navigate(`/gardiens/${h.id}`)}
     />
-  );
+  ), [isAuthenticated, navigate]);
+
+  // Paginated slices
+  const visibleMissionsList = useMemo(() => filteredMissions.slice(0, visibleMissions), [filteredMissions, visibleMissions]);
+  const visiblePriorityHelpers = useMemo(() => priorityHelpers.slice(0, visibleHelpers), [priorityHelpers, visibleHelpers]);
+  const remainingHelperBudget = Math.max(0, visibleHelpers - visiblePriorityHelpers.length);
+  const visibleComplementaryHelpers = useMemo(() => complementaryHelpers.slice(0, remainingHelperBudget), [complementaryHelpers, remainingHelperBudget]);
+  const totalHelpersShown = visiblePriorityHelpers.length + visibleComplementaryHelpers.length;
+  const totalHelpersAvailable = priorityHelpers.length + complementaryHelpers.length;
 
   return (
     <>
