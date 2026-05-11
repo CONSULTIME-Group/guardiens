@@ -89,8 +89,11 @@ const Messages = () => {
   const [pill, setPill] = useState<ConvPill>("all");
   const [searchFilter, setSearchFilter] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [autoOpened, setAutoOpened] = useState(false);
+  const messagesScrollRef = useRef<HTMLDivElement>(null);
+  // Pagination des messages
+  const [hasMoreMessages, setHasMoreMessages] = useState(false);
+  const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
+  const isInitialMessagesLoad = useRef(true);
 
   const loadConversations = useCallback(async () => {
     if (!user) return;
