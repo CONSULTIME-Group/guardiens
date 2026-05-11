@@ -787,8 +787,7 @@ const HelpSection = () => (
         { to: "/faq", label: "Foire aux questions" },
         { to: "/cgu", label: "Conditions générales d'utilisation" },
         { to: "/mentions-legales", label: "Mentions légales" },
-        { to: "/politique-confidentialite", label: "Politique de confidentialité" },
-        { to: "/cookies", label: "Gestion des cookies" },
+        { to: "/confidentialite", label: "Politique de confidentialité" },
         { to: "/contact", label: "Nous contacter" },
       ].map(({ to, label }) => (
         <li key={to}>
