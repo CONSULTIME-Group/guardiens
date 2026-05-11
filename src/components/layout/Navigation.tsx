@@ -2,7 +2,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, Search, Calendar, MessageSquare, User, LogOut, Settings,
   PawPrint, Newspaper, Shield, Compass, Handshake, Menu, Star,
-  MoreHorizontal, Crown, Plus, Heart,
+  MoreHorizontal, Crown, Plus, Heart, LifeBuoy,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -274,6 +274,7 @@ export const Sidebar = () => {
           <SidebarItem to="/admin" icon={Shield} label="Espace admin" />
         )}
         <SidebarItem to="/settings" icon={Settings} label="Paramètres" />
+        <SidebarItem to="/contact" icon={LifeBuoy} label="Aide & contact" />
 
         {/* Feedback button */}
         <div className="border-t border-border/50 mt-auto pt-3">
@@ -534,6 +535,7 @@ export const BottomNav = () => {
                   { to: "/guides", icon: Compass, label: "Guides locaux", badge: 0 },
                   ...(effectiveRole === "sitter" ? [{ to: "/mon-abonnement", icon: Star, label: "Mon abonnement", badge: 0 }] : []),
                   { to: "/settings", icon: Settings, label: "Paramètres", badge: 0 },
+                  { to: "/contact", icon: LifeBuoy, label: "Aide & contact", badge: 0 },
                   ...(isAdmin ? [{ to: "/admin", icon: Shield, label: "Espace admin", badge: 0 }] : []),
                 ].map((item) => (
                   <NavLink

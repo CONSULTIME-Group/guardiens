@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, Crown, ChevronLeft, ChevronRight, MessageSquare, FileText, MailCheck } from "lucide-react";
+import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, Crown, ChevronLeft, ChevronRight, MessageSquare, FileText, MailCheck, UserCog } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { SuspendUserDialog } from "./_components/users/SuspendUserDialog";
 import { NoteUserDialog } from "./_components/users/NoteUserDialog";
@@ -18,6 +18,7 @@ import { SendMessageDialog, type MessageModalState } from "./_components/users/S
 import { MessageHistoryDialog, type HistoryItem } from "./_components/users/MessageHistoryDialog";
 import { LastMessageDialog, type LastMessageState } from "./_components/users/LastMessageDialog";
 import { ErrorDetailDialog, type ErrorDetailState } from "./_components/users/ErrorDetailDialog";
+import ChangeRoleDialog from "./_components/users/ChangeRoleDialog";
 
 const roleLabels: Record<string, string> = {
   owner: "Propriétaire",
@@ -73,6 +74,9 @@ const AdminUsers = () => {
   });
   const [lastMessageModal, setLastMessageModal] = useState<LastMessageState>({
     open: false, loading: false, userName: "", userId: "", conversationId: null, content: null, sentAt: null
+  });
+  const [roleModal, setRoleModal] = useState<{ open: boolean; userId: string | null; userName: string; currentRole: "owner" | "sitter" | "both" | null }>({
+    open: false, userId: null, userName: "", currentRole: null,
   });
   const navigate = useNavigate();
 
@@ -429,7 +433,23 @@ const AdminUsers = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{roleLabels[user.role] || user.role}</Badge>
+                      <div className="flex items-center gap-1">
+                        <Badge variant="outline">{roleLabels[user.role] || user.role}</Badge>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          title="Changer le rôle"
+                          onClick={() => setRoleModal({
+                            open: true,
+                            userId: user.id,
+                            userName: `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "cet utilisateur",
+                            currentRole: user.role,
+                          })}
+                        >
+                          <UserCog className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {user.postal_code || "—"}
@@ -668,6 +688,15 @@ const AdminUsers = () => {
       <ErrorDetailDialog
         state={errorDetailModal}
         onClose={() => setErrorDetailModal({ open: false, recipient: "", sentAt: "", error: "", content: "" })}
+      />
+
+      <ChangeRoleDialog
+        open={roleModal.open}
+        onOpenChange={(open) => setRoleModal((s) => ({ ...s, open }))}
+        userId={roleModal.userId}
+        userName={roleModal.userName}
+        currentRole={roleModal.currentRole}
+        onSuccess={fetchUsers}
       />
     </div>
   );
