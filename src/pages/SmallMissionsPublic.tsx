@@ -231,6 +231,13 @@ const SmallMissionsPublic = () => {
  </div>
  </Reveal>
  )}
+
+ {/* Réassurance périmètre — promesse mondiale, pas régionale */}
+ <Reveal delay={0.45}>
+ <div className="mt-8 max-w-md mx-auto">
+ <ReachReassuranceBanner variant="inline" className="text-center" />
+ </div>
+ </Reveal>
  </div>
  </section>
 
