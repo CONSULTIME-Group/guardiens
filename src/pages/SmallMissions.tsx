@@ -993,10 +993,11 @@ const SmallMissions = () => {
  )}
  </section>
 
- {/* Exemples par catégorie — sans Maison */}
+  {/* Exemples par catégorie — affichés uniquement quand aucun résultat (vrai empty state global) */}
+ {missionCount === 0 && helperCount === 0 && (
  <section className="space-y-8">
  <h2 className="font-heading text-2xl font-bold text-foreground text-center">Quelques exemples d'échanges</h2>
-  {(["animals", "garden", "skills"] as const).map((cat) => {
+ {(["animals", "garden", "skills"] as const).map((cat) => {
  const meta = CATEGORY_META[cat];
  const items = EXAMPLES.filter((e) => e.cat === cat);
  return (
@@ -1018,26 +1019,7 @@ const SmallMissions = () => {
  );
  })}
  </section>
-
- {/* CTA final unifié */}
- <section className="text-center space-y-4 py-8">
- <p className="font-heading text-xl md:text-2xl italic text-foreground/80 max-w-xl mx-auto leading-relaxed">
- Le pire qui puisse arriver, c'est que personne ne réponde.<br />
- Le meilleur, c'est de rencontrer quelqu'un qui change votre semaine.
- </p>
- {isAuthenticated ? (
- <Link to="/petites-missions/creer">
- <Button variant="hero" size="xl">
- J'ose demander
- <ArrowRight className="ml-2 h-5 w-5" />
- </Button>
- </Link>
- ) : (
- <Link to="/inscription">
- <Button variant="hero" size="xl">S'inscrire gratuitement</Button>
- </Link>
  )}
- </section>
 
   {/* Schema.org Service intentionnellement omis : déjà servi par /petites-missions public (anti-cannibalisation). */}
  </main>
