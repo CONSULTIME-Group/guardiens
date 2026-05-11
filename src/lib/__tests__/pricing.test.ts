@@ -16,7 +16,7 @@ import {
 } from "../pricing";
 
 const NBSP = "\u00A0";
-const FORBIDDEN = ["gratuit", "à vie", "pour toujours", "13 juillet"];
+const FORBIDDEN = ["gratuit", "à vie", "pour toujours", "13 mai"];
 
 describe("pricing constants", () => {
   it("uses non-breaking space before €", () => {
