@@ -13,6 +13,7 @@
  */
 import EmptyState, { ILLUSTRATIONS, type IllustrationKey } from "@/components/shared/EmptyState";
 import { Card } from "@/components/ui/card";
+import { Helmet } from "react-helmet-async";
 
 import { useEffect } from "react";
 
@@ -52,6 +53,7 @@ const TestEmptyStates = () => {
 
   return (
     <main className="min-h-screen bg-background p-4 space-y-8">
+      <Helmet><meta name="robots" content="noindex,nofollow" /></Helmet>
       <h1 className="font-heading text-xl">EmptyState halo regression harness</h1>
 
       {/* 1. PAGE — fond direct = --background */}
