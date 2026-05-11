@@ -801,6 +801,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                   : "Suivant"}
               </Button>
             )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
