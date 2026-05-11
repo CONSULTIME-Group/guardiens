@@ -196,12 +196,7 @@ const AdminDashboard = () => {
       if ((lateReports || 0) > 0) late.push({ label: "Signalements > 72h", count: lateReports || 0, link: "/admin/reports", icon: Flag });
       setLateCards(late);
 
-      // Alerts (kept as-is)
-      const alertList: Alert[] = [];
-      if ((pendingVerifications || 0) > 0) alertList.push({ label: "vérifications ID en attente", count: pendingVerifications || 0, link: "/admin/verifications", icon: ShieldCheck });
-      if ((pendingExperiences || 0) > 0) alertList.push({ label: "expériences à vérifier", count: pendingExperiences || 0, link: "/admin/experiences", icon: Briefcase });
-      if ((pendingReports || 0) > 0) alertList.push({ label: "signalements non traités", count: pendingReports || 0, link: "/admin/reports", icon: Flag });
-      setAlerts(alertList);
+      // (Bloc « Alertes » retiré : doublonnait actionCards)
 
       // Weekly signups (last 12 weeks)
       const weeks: WeeklySignup[] = [];
