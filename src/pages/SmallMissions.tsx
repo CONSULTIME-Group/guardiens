@@ -360,8 +360,6 @@ const SmallMissions = () => {
         <MissionsHero />
 
         <main className="max-w-6xl mx-auto px-4 py-8 md:py-10 space-y-12">
-          <MissionsArticlesStrip />
-
           <section className="space-y-6">
             {isAuthenticated && canApplyMissions && (
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -644,6 +642,8 @@ const SmallMissions = () => {
           </section>
 
           {missionCount === 0 && helperCount === 0 && <ExamplesSection />}
+
+          <MissionsArticlesStrip />
         </main>
 
         <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
