@@ -629,25 +629,25 @@ const SmallMissionsPublic = () => {
  <section className="bg-primary">
  <div className="max-w-2xl mx-auto px-6 py-24 md:py-32 text-center">
  <Reveal>
- <h2 className="font-heading text-4xl md:text-5xl font-bold text-white leading-tight mb-6">
+  <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary-foreground leading-tight mb-6">
  Osez. Vraiment.<br />Personne ne vous jugera.
  </h2>
  </Reveal>
  <Reveal delay={0.1}>
- <p className="font-body text-lg text-white/85 leading-relaxed mb-10">
+ <p className="font-body text-lg text-primary-foreground/85 leading-relaxed mb-10">
  Le pire qui puisse arriver, c'est que personne ne réponde. Le meilleur, c'est de rencontrer quelqu'un qui change votre semaine. Gratuit. Pour tous. Sans abonnement requis.
  </p>
  </Reveal>
  <Reveal delay={0.2}>
   <div className="flex flex-col sm:flex-row gap-4 justify-center">
- <Button onClick={goToHelp} className="bg-white text-primary rounded-full px-10 py-4 h-auto text-sm font-bold tracking-wide hover:bg-white/90 hover:scale-[1.02] transition-all duration-200">
+ <Button onClick={goToHelp} className="bg-primary-foreground text-primary rounded-full px-10 py-4 h-auto text-sm font-bold tracking-wide hover:bg-primary-foreground/90 hover:scale-[1.02] transition-all duration-200">
  Je propose mon aide
  </Button>
- <Button onClick={goToCreate} className="bg-transparent border-2 border-white/70 text-white rounded-full px-10 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-white/15 transition-all duration-200">
+ <Button onClick={goToCreate} className="bg-transparent border-2 border-primary-foreground/70 text-primary-foreground rounded-full px-10 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary-foreground/15 transition-all duration-200">
  J'ai besoin d'un coup de main
  </Button>
  </div>
- <p className="text-xs text-white/50 mt-6">
+ <p className="text-xs text-primary-foreground/70 mt-6">
  Gratuit · Badge Fondateur · Accès jusqu'au 14 juillet
  </p>
  </Reveal>
@@ -655,9 +655,9 @@ const SmallMissionsPublic = () => {
  </section>
 
  {/* ═══ SECTION 7 — FAQ ═══ */}
-  <section className="bg-muted/50 py-16">
+  <section className="bg-muted/50 py-20 md:py-24">
    <div className="max-w-3xl mx-auto px-6">
-    <h2 className="font-heading text-2xl font-bold text-center mb-10">Questions fréquentes</h2>
+    <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center leading-snug mb-10">Questions fréquentes</h2>
     <Accordion type="single" collapsible className="space-y-2">
      {FAQ_ITEMS.map((faq, i) => (
       <AccordionItem key={i} value={`faq-${i}`} className="bg-card border border-border rounded-xl px-4">
