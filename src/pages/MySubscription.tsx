@@ -839,7 +839,7 @@ const MySubscription = () => {
                 {sub?.plan === "monthly"
                   ? "6,99 €/mois"
                   : sub?.plan === "oneshot"
-                    ? "12 € (un mois)"
+                    ? "Accès d'un mois"
                     : sub?.plan === "yearly"
                       ? "Accès 2026 prorata"
                       : "—"}
