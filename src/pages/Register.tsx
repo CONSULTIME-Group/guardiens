@@ -29,9 +29,9 @@ import {
 type Role = "owner" | "sitter" | "both";
 
 const roles: { value: Role; label: string; description: string }[] = [
- { value: "owner", label: "Propriétaire", description: "Je cherche un gardien pour ma maison et mes animaux" },
- { value: "sitter", label: "Gardien", description: "Je souhaite garder des maisons et m'occuper d'animaux" },
- { value: "both", label: "Les deux", description: "Je veux pouvoir garder et faire garder" },
+ { value: "owner", label: "Propriétaire", description: "J'ai des animaux ou une maison à faire garder. Je publie des annonces et je choisis un gardien." },
+ { value: "sitter", label: "Gardien", description: "Je veux garder des maisons et m'occuper d'animaux. Je consulte les annonces et je propose mes services." },
+ { value: "both", label: "Les deux", description: "Je veux à la fois faire garder et garder. Vous aurez accès aux deux espaces." },
 ];
 
 /* ── Password strength helper ── */
