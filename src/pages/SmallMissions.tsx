@@ -20,6 +20,7 @@ import {
   CategoryFilter, ModeFilter, MISSION_TO_SKILL, SKILL_TO_MISSION,
 } from "@/components/missions/connected/constants";
 import MissionsHero from "@/components/missions/connected/MissionsHero";
+import MissionsArticlesStrip from "@/components/missions/connected/MissionsArticlesStrip";
 import MissionsFilterBar from "@/components/missions/connected/MissionsFilterBar";
 import MissionCard from "@/components/missions/connected/MissionCard";
 import HelperCard from "@/components/missions/connected/HelperCard";
@@ -359,6 +360,8 @@ const SmallMissions = () => {
         <MissionsHero />
 
         <main className="max-w-6xl mx-auto px-4 py-8 md:py-10 space-y-12">
+          <MissionsArticlesStrip />
+
           <section className="space-y-6">
             {isAuthenticated && canApplyMissions && (
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
