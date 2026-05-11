@@ -619,8 +619,12 @@ const Register = () => {
  <div className="font-semibold text-sm lg:text-base mb-0.5 lg:mb-1">{role.label}</div>
  <div className="text-xs lg:text-sm text-muted-foreground leading-snug">{role.description}</div>
  </button>
- ))}
+  ))}
  </div>
+
+ <p className="mt-3 text-center text-[11px] lg:text-xs text-muted-foreground/80">
+  Vous changerez d'avis ? Le rôle reste modifiable à tout moment depuis vos paramètres.
+ </p>
 
  {/* Trust strip — réassurances clés juste avant la décision */}
  <ul className="mt-5 lg:mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-[11px] lg:text-xs text-muted-foreground">
