@@ -438,7 +438,7 @@ const AdminMassEmails = () => {
                 </div>
               )}
 
-              <div className="rounded-lg border border-amber-500/40 bg-amber-50/40 dark:bg-amber-950/10 p-4 text-xs text-amber-900 dark:text-amber-200">
+              <div className="rounded-lg border border-amber-500/40 bg-warning-soft/40 dark:bg-amber-950/10 p-4 text-xs text-warning-foreground dark:text-amber-200">
                 <strong>Action irréversible.</strong> Une fois confirmé, l'email part immédiatement
                 vers <strong>{recipientCount ?? 0}</strong> destinataires. Aucun rappel possible.
               </div>

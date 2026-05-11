@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { CheckCircle2 } from "lucide-react";
 import {
   Users, Megaphone, CalendarCheck, Star, UserPlus, Handshake,
-  ExternalLink, AlertTriangle, ShieldCheck, Briefcase, Flag, CreditCard, Mail,
+  ExternalLink, ShieldCheck, Briefcase, Flag, CreditCard, Mail,
   ListChecks, Clock, MessageSquare, BookOpen, ThumbsUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -78,10 +80,12 @@ const ACTIVITY_BADGE: Record<ActivityItem["type"], { label: string; variant: "se
   candidature: { label: "Candidature", variant: "outline" },
 };
 
+// Tarif gardien standard mensuel (€) — utilisé pour estimer les revenus du mois.
+const MONTHLY_SUBSCRIPTION_EUR = 6.99;
+
 const AdminDashboard = () => {
-  const navigate = useNavigate();
   const [stats, setStats] = useState<Stats | null>(null);
-  const [alerts, setAlerts] = useState<Alert[]>([]);
+  // Alerts state retiré : duplication avec actionCards (cf. refonte)
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [weeklySignups, setWeeklySignups] = useState<WeeklySignup[]>([]);
   const [deptData, setDeptData] = useState<DeptData[]>([]);
@@ -160,7 +164,7 @@ const AdminDashboard = () => {
         ? reviewsData!.reduce((sum, r) => sum + r.overall_rating, 0) / totalReviews
         : 0;
 
-      const monthRevenue = (activeSubscriptions || 0) * 49;
+      const monthRevenue = Math.round((activeSubscriptions || 0) * MONTHLY_SUBSCRIPTION_EUR);
 
       setStats({
         totalUsers: totalUsers || 0,
@@ -192,12 +196,7 @@ const AdminDashboard = () => {
       if ((lateReports || 0) > 0) late.push({ label: "Signalements > 72h", count: lateReports || 0, link: "/admin/reports", icon: Flag });
       setLateCards(late);
 
-      // Alerts (kept as-is)
-      const alertList: Alert[] = [];
-      if ((pendingVerifications || 0) > 0) alertList.push({ label: "vérifications ID en attente", count: pendingVerifications || 0, link: "/admin/verifications", icon: ShieldCheck });
-      if ((pendingExperiences || 0) > 0) alertList.push({ label: "expériences à vérifier", count: pendingExperiences || 0, link: "/admin/experiences", icon: Briefcase });
-      if ((pendingReports || 0) > 0) alertList.push({ label: "signalements non traités", count: pendingReports || 0, link: "/admin/reports", icon: Flag });
-      setAlerts(alertList);
+      // (Bloc « Alertes » retiré : doublonnait actionCards)
 
       // Weekly signups (last 12 weeks)
       const weeks: WeeklySignup[] = [];
@@ -312,7 +311,7 @@ const AdminDashboard = () => {
     {
       title: "Inscrits",
       value: stats.totalUsers,
-      subtitle: `${stats.owners} proprios · ${stats.sitters} gardiens · ${stats.both} mixtes`,
+      subtitle: `${stats.owners} propriétaires · ${stats.sitters} gardiens · ${stats.both} polyvalents`,
       icon: Users,
       link: "/admin/users",
     },
@@ -345,105 +344,109 @@ const AdminDashboard = () => {
       link: "/admin/reviews",
     },
     {
-      title: "Revenus du mois",
-      value: `${stats.monthRevenue}€`,
-      subtitle: "Abonnements",
+      title: "Revenus mensuels estimés",
+      value: stats.monthRevenue.toLocaleString("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }),
+      subtitle: `Abonnements actifs × ${MONTHLY_SUBSCRIPTION_EUR.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}`,
       icon: CreditCard,
       link: "/admin/subscriptions",
     },
   ];
 
+  // Empty state lorsque rien n'est en attente
+  const nothingToDo = actionCards.length === 0 && lateCards.length === 0;
+
   return (
     <div className="space-y-8">
-      {/* Header + Google Analytics link */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="font-body text-2xl font-bold">Dashboard</h1>
-        <Button variant="outline" size="sm" asChild>
-          <a href="https://analytics.google.com/analytics/web/#/p/G-9JP4VR1RRP" target="_blank" rel="noopener noreferrer">
-            <ExternalLink className="h-4 w-4 mr-2" />
-            Google Analytics
-          </a>
-        </Button>
-      </div>
+      {/* Header unifié */}
+      <AdminPageHeader
+        title="Vue d'ensemble"
+        description="Actions à mener, signaux d'alerte et indicateurs clés de la plateforme."
+        actions={
+          <Button variant="outline" size="sm" asChild>
+            <a href="https://analytics.google.com/analytics/web/#/p/G-9JP4VR1RRP" target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Google Analytics
+            </a>
+          </Button>
+        }
+      />
 
-      {/* 1. BLOC "À TRAITER MAINTENANT" */}
-      {actionCards.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <ListChecks className="h-5 w-5 text-primary" />
-            À traiter
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {actionCards.map((card) => (
-              <button
-                key={card.link + card.label}
-                onClick={() => navigate(card.link)}
-                className="flex items-center gap-4 rounded-xl border border-border bg-card p-4 text-left hover:shadow-md transition-shadow"
-              >
-                <div className="rounded-lg bg-primary/10 p-2">
-                  <card.icon className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-primary">{card.count}</p>
-                  <p className="text-sm text-muted-foreground">{card.label}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* 1. À traiter — bloc unifié (en cours + en retard, avec empty state) */}
+      <section aria-labelledby="todo-heading" className="space-y-3">
+        <h2 id="todo-heading" className="flex items-center gap-2 text-lg font-semibold font-heading">
+          <ListChecks className="h-5 w-5 text-primary" aria-hidden />
+          À traiter
+        </h2>
 
-      {/* 2. BLOC "EN RETARD" */}
-      {lateCards.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <Clock className="h-5 w-5 text-orange-600" />
-            En retard
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {lateCards.map((card) => (
-              <button
-                key={card.link + card.label}
-                onClick={() => navigate(card.link)}
-                className="flex items-center gap-4 rounded-xl border border-orange-200 bg-orange-50 p-4 text-left hover:bg-orange-100 transition-colors"
-              >
-                <div className="rounded-lg bg-orange-100 p-2">
-                  <card.icon className="h-5 w-5 text-orange-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-orange-700">{card.count}</p>
-                  <p className="text-sm text-orange-600">{card.label}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 3. Alertes orange existantes */}
-      {alerts.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {alerts.map((alert) => (
-            <button
-              key={alert.link}
-              onClick={() => navigate(alert.link)}
-              className="flex items-center gap-3 p-4 rounded-xl bg-orange-50 border border-orange-200 text-left hover:bg-orange-100 transition-colors"
-            >
-              <div className="p-2 rounded-lg bg-orange-100">
-                <AlertTriangle className="h-4 w-4 text-orange-600" />
+        {nothingToDo ? (
+          <Card className="border-success-border bg-success-soft/40">
+            <CardContent className="flex items-center gap-3 py-6">
+              <div className="rounded-full bg-success/15 p-2">
+                <CheckCircle2 className="h-5 w-5 text-success" aria-hidden />
               </div>
-              <span className="text-sm font-medium text-orange-800">
-                <strong>{alert.count}</strong> {alert.label}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
+              <div>
+                <p className="font-semibold text-foreground">Tout est calme.</p>
+                <p className="text-sm text-muted-foreground">
+                  Aucune file en attente, aucun retard à signaler.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            {actionCards.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {actionCards.map((card) => (
+                  <Link
+                    key={`todo-${card.link}-${card.label}`}
+                    to={card.link}
+                    className="flex items-center gap-4 rounded-xl border border-border bg-card p-4 hover:border-primary/40 hover:shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <div className="rounded-lg bg-primary/10 p-2">
+                      <card.icon className="h-5 w-5 text-primary" aria-hidden />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-primary">{card.count}</p>
+                      <p className="text-sm text-muted-foreground">{card.label}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
 
-      {/* 4. Timeline activité récente (enrichie avec badges) */}
+            {lateCards.length > 0 && (
+              <div className="space-y-2 pt-2">
+                <h3 className="flex items-center gap-2 text-sm font-medium text-warning-foreground">
+                  <Clock className="h-4 w-4 text-warning" aria-hidden />
+                  En retard
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {lateCards.map((card) => (
+                    <Link
+                      key={`late-${card.link}-${card.label}`}
+                      to={card.link}
+                      className="flex items-center gap-4 rounded-xl border border-warning-border bg-warning-soft p-4 hover:bg-warning-soft/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <div className="rounded-lg bg-warning/15 p-2">
+                        <card.icon className="h-5 w-5 text-warning" aria-hidden />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-warning-foreground">{card.count}</p>
+                        <p className="text-sm text-warning-foreground/80">{card.label}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </section>
+
+      {/* 2. Activité récente */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Activité récente</CardTitle>
+          <CardTitle className="text-base font-heading">Activité récente</CardTitle>
         </CardHeader>
         <CardContent>
           {activity.length === 0 ? (
@@ -451,10 +454,10 @@ const AdminDashboard = () => {
           ) : (
             <div className="space-y-0">
               {activity.map((item) => (
-                <button
+                <Link
                   key={item.id}
-                  onClick={() => navigate(item.link)}
-                  className="flex items-start gap-3 w-full text-left py-3 px-2 rounded-lg hover:bg-accent/50 transition-colors"
+                  to={item.link}
+                  className="flex items-start gap-3 w-full text-left py-3 px-2 rounded-lg hover:bg-accent/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <div className="mt-1.5 w-2 h-2 rounded-full bg-primary shrink-0" />
                   <div className="flex-1 min-w-0">
@@ -468,34 +471,37 @@ const AdminDashboard = () => {
                       {formatDistanceToNow(new Date(item.time), { addSuffix: true, locale: fr })}
                     </p>
                   </div>
-                </button>
+                </Link>
               ))}
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* 5. KPI cards */}
+      {/* 3. KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {cards.map((card) => (
-          <Card
+          <Link
             key={card.title}
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => navigate(card.link)}
+            to={card.link}
+            className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg"
           >
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {card.title}
-              </CardTitle>
-              <card.icon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{card.value}</div>
-              <p className="text-xs text-muted-foreground mt-1">{card.subtitle}</p>
-            </CardContent>
-          </Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow h-full">
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  {card.title}
+                </CardTitle>
+                <card.icon className="h-4 w-4 text-muted-foreground" aria-hidden />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{card.value}</div>
+                <p className="text-xs text-muted-foreground mt-1">{card.subtitle}</p>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
+
 
       {/* 6. Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

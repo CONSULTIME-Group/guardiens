@@ -89,7 +89,7 @@ const AdminCityPages = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-body text-2xl font-bold text-foreground">Pages SEO Villes</h1>
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Pages SEO Villes</h1>
         <p className="text-muted-foreground">Générez des landing pages par ville pour le référencement.</p>
       </div>
 

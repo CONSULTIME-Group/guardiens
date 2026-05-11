@@ -156,7 +156,7 @@ export default function AdminMessages() {
               hint={`${stats.conversations_with_reply}/${stats.conversations_started_period} conv. répondues`}
             />
             <KpiCard
-              icon={<TrendingUp className="h-4 w-4 text-amber-500" />}
+              icon={<TrendingUp className="h-4 w-4 text-warning" />}
               label="Moy. / jour actif"
               value={stats.avg_per_active_day}
               hint={`${stats.active_days} jour(s) avec activité`}

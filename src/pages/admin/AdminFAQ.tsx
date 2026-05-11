@@ -9,6 +9,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Plus, Trash2, GripVertical, Pencil, X, Check } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const CATEGORIES = [
   { value: "general", label: "Questions générales" },
@@ -178,9 +183,30 @@ const AdminFAQ = () => {
               <Button size="icon" variant="ghost" onClick={() => startEdit(entry)}>
                 <Pencil className="h-4 w-4" />
               </Button>
-              <Button size="icon" variant="ghost" onClick={() => deleteMutation.mutate(entry.id)}>
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button size="icon" variant="ghost" aria-label="Supprimer cette entrée FAQ">
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Supprimer cette entrée FAQ ?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Cette action est définitive. La question et sa réponse seront retirées du site public.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => deleteMutation.mutate(entry.id)}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Supprimer
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           ))}
         </div>

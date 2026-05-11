@@ -159,7 +159,7 @@ const AdminReviews = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-body text-2xl font-bold">Avis</h1>
+      <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Avis</h1>
 
       <Tabs defaultValue="reviews">
         <TabsList>
@@ -177,9 +177,9 @@ const AdminReviews = () => {
         {/* ── Classical reviews tab ── */}
         <TabsContent value="reviews" className="space-y-6 mt-4">
           {lowRatingCount > 0 && filterStatus === "all" && (
-            <Card className="border-orange-200 bg-orange-50">
+            <Card className="border-warning-border bg-warning-soft">
               <CardContent className="p-3 flex items-center gap-3">
-                <AlertTriangle className="h-5 w-5 text-orange-500 shrink-0" />
+                <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
                 <p className="text-sm">{lowRatingCount} avis avec note ≤ 2 étoiles à surveiller</p>
                 <Button size="sm" variant="outline" className="ml-auto" onClick={() => setFilterStatus("low")}>Voir</Button>
               </CardContent>

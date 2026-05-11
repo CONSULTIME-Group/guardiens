@@ -75,7 +75,7 @@ const AdminSEO = () => {
   if (!loading && error === "GOOGLE_SERVICE_ACCOUNT_JSON not configured") {
     return (
       <div className="space-y-8">
-        <h1 className="font-body text-2xl font-bold text-foreground">Dashboard SEO</h1>
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Dashboard SEO</h1>
         <Card className="border-warning">
           <CardContent className="py-6">
             <div className="flex items-start gap-3">

@@ -32,7 +32,7 @@ const AdminLegal = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-body text-2xl font-bold">Pages légales</h1>
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Pages légales</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Vérifiez et consultez les pages légales du site. Toute modification se fait directement dans le code source.
         </p>

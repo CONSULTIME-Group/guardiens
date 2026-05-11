@@ -39,8 +39,8 @@ const PRIORITY_ARTICLES = [
 ];
 
 const PRIORITY_BADGES = {
-  high: { label: "🔴 Haute", className: "bg-red-100 text-red-700" },
-  medium: { label: "🟠 Moyenne", className: "bg-orange-100 text-orange-700" },
+  high: { label: "🔴 Haute", className: "bg-destructive/15 text-destructive" },
+  medium: { label: "🟠 Moyenne", className: "bg-warning-soft text-warning" },
   low: { label: "🟡 Basse", className: "bg-yellow-100 text-yellow-700" },
 };
 
@@ -70,8 +70,8 @@ function humanizeSlug(slug: string): string {
 
 const StatusIcon = ({ status }: { status: "done" | "warn" | "fail" }) => {
   if (status === "done") return <CheckCircle2 className="h-5 w-5 text-emerald-600" />;
-  if (status === "warn") return <AlertTriangle className="h-5 w-5 text-orange-500" />;
-  return <XCircle className="h-5 w-5 text-red-500" />;
+  if (status === "warn") return <AlertTriangle className="h-5 w-5 text-warning" />;
+  return <XCircle className="h-5 w-5 text-destructive" />;
 };
 
 const ContentToCreate = () => {
@@ -146,7 +146,7 @@ const ContentToCreate = () => {
                     <TableCell className="text-right">{current}</TableCell>
                     <TableCell className="text-right text-muted-foreground">{obj.goal}</TableCell>
                     <TableCell className="text-right">
-                      {missing > 0 ? <span className="font-medium text-red-500">{missing}</span> : "—"}
+                      {missing > 0 ? <span className="font-medium text-destructive">{missing}</span> : "—"}
                     </TableCell>
                     <TableCell className="text-center">
                       {status === "done" ? (

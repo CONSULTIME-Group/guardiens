@@ -208,7 +208,7 @@ const AdminContactMessages = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="font-body text-2xl font-bold">Messages contact</h1>
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Messages contact</h1>
         <div className="flex gap-2">
           {(["all", "new", "en_cours", "replied", "closed"] as StatusFilter[]).map(f => (
             <Button key={f} size="sm" variant={filter === f ? "default" : "outline"} onClick={() => { setFilter(f); setPage(0); }}>
@@ -269,7 +269,7 @@ const AdminContactMessages = () => {
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Clock className="h-4 w-4 text-orange-600 shrink-0" />
+                                <Clock className="h-4 w-4 text-warning shrink-0" />
                               </TooltipTrigger>
                               <TooltipContent><p>Sans réponse depuis plus de 48h</p></TooltipContent>
                             </Tooltip>

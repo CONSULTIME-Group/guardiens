@@ -38,7 +38,7 @@ const StatusBar = ({ data, loading, refreshing, onRefresh }: StatusBarProps) => 
 
   const statusIcon = (s: SourceStatus) => {
     if (s === "active") return <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />;
-    if (s === "partial") return <Clock className="h-3.5 w-3.5 text-orange-500" />;
+    if (s === "partial") return <Clock className="h-3.5 w-3.5 text-warning" />;
     if (s === "unavailable") return <AlertCircle className="h-3.5 w-3.5 text-muted-foreground" />;
     return <Clock className="h-3.5 w-3.5 text-muted-foreground animate-pulse" />;
   };
@@ -83,7 +83,7 @@ const StatusBar = ({ data, loading, refreshing, onRefresh }: StatusBarProps) => 
             <span className="text-foreground">{statusLabel("GSC", gscStatus)}</span>
           </div>
           {updatedAtRelative && (
-            <span className={`text-xs ${isStale ? "text-orange-600 font-medium" : "text-muted-foreground"}`}>
+            <span className={`text-xs ${isStale ? "text-warning font-medium" : "text-muted-foreground"}`}>
               Mise à jour {updatedAtRelative}
               {data?.cached && " (cache)"}
               {data?.stale && " · périmé"}
@@ -165,11 +165,11 @@ const StatusBar = ({ data, loading, refreshing, onRefresh }: StatusBarProps) => 
       )}
 
       {gscStatus === "unavailable" && !loading && (
-        <div className="rounded-lg border border-orange-200 bg-orange-50 px-4 py-3 flex items-start gap-3">
-          <AlertCircle className="h-4 w-4 text-orange-500 shrink-0 mt-0.5" />
+        <div className="rounded-lg border border-warning-border bg-warning-soft px-4 py-3 flex items-start gap-3">
+          <AlertCircle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
           <div className="text-sm">
-            <p className="font-medium text-orange-800">Données GSC insuffisantes</p>
-            <p className="text-orange-700 mt-0.5">
+            <p className="font-medium text-warning-foreground">Données GSC insuffisantes</p>
+            <p className="text-warning mt-0.5">
               La synchronisation GSC peut prendre 48-72h après la première connexion.
               Les métriques SEO apparaîtront une fois les premières données collectées.
             </p>
@@ -183,7 +183,7 @@ const StatusBar = ({ data, loading, refreshing, onRefresh }: StatusBarProps) => 
 const ExpertRow = ({ label, value, warn }: { label: string; value: string; warn?: boolean }) => (
   <div className="flex items-baseline justify-between gap-3 border-b border-border/40 pb-1">
     <span className="text-muted-foreground font-sans text-[11px]">{label}</span>
-    <span className={`tabular-nums truncate ${warn ? "text-orange-600 font-semibold" : "text-foreground"}`}>
+    <span className={`tabular-nums truncate ${warn ? "text-warning font-semibold" : "text-foreground"}`}>
       {value}
     </span>
   </div>

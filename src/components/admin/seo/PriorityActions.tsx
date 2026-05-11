@@ -25,8 +25,8 @@ interface PriorityActionsProps {
 }
 
 const TYPE_CONFIG = {
-  urgent: { label: "Position en baisse", badgeClass: "border-red-300 text-red-700 bg-red-50" },
-  optimize: { label: "À optimiser", badgeClass: "border-orange-300 text-orange-700 bg-orange-50" },
+  urgent: { label: "Position en baisse", badgeClass: "border-red-300 text-destructive bg-destructive/10" },
+  optimize: { label: "À optimiser", badgeClass: "border-orange-300 text-warning bg-warning-soft" },
   not_indexed: { label: "Non indexé", badgeClass: "border-yellow-300 text-yellow-700 bg-yellow-50" },
 };
 

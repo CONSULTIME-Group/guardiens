@@ -329,7 +329,7 @@ const AdminUsers = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="font-body text-2xl font-bold">Utilisateurs</h1>
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Utilisateurs</h1>
         <Button variant="outline" size="sm" onClick={openHistory}>
           <MessageSquare className="h-4 w-4 mr-2" />
           Historique de mes envois
