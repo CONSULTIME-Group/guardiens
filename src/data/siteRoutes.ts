@@ -221,7 +221,7 @@ title: "Tarifs — 6,99\u00A0€/mois pour les gardiens | Guardiens",
  {
  path: "/inscription",
  title: "Inscription — Créer un compte gratuit | Guardiens",
- metaDescription: "Rejoignez la communauté Guardiens. Inscription gratuite pour les propriétaires, 6,99 €/mois pour les gardiens avec 7 jours d'essai sans engagement.",
+ metaDescription: "Rejoignez la communauté Guardiens. Inscription gratuite pour les propriétaires, 6,99\u00A0€/mois pour les gardiens avec 7 jours d'essai sans engagement.",
  h1: "Créer un compte",
  sitemapPriority: "0.6",
  changeFreq: "monthly",
