@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { CheckCircle2 } from "lucide-react";
 import {
   Users, Megaphone, CalendarCheck, Star, UserPlus, Handshake,
-  ExternalLink, AlertTriangle, ShieldCheck, Briefcase, Flag, CreditCard, Mail,
+  ExternalLink, ShieldCheck, Briefcase, Flag, CreditCard, Mail,
   ListChecks, Clock, MessageSquare, BookOpen, ThumbsUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
