@@ -1,5 +1,5 @@
 const HintBubble = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-sm italic mt-1.5" style={{ color: "hsl(37, 7%, 60%)" }}>
+  <p className="text-sm italic mt-1.5 text-muted-foreground">
     {children}
   </p>
 );

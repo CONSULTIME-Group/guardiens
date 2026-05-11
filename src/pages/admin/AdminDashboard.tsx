@@ -510,7 +510,7 @@ const AdminDashboard = () => {
                 Gardiens
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "hsl(45, 93%, 47%)" }} />
+                <span className="w-3 h-3 rounded-full bg-warning" />
                 Propriétaires
               </span>
             </div>

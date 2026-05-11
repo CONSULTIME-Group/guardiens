@@ -438,5 +438,5 @@ const mockGarde: AccordDeGardeData = {
 };
 
 export function AccordDeGardePreview() {
- return <AccordDeGarde garde={mockGarde} onClose={() => alert("Fermé")} />;
+ return <AccordDeGarde garde={mockGarde} onClose={() => { if (import.meta.env.DEV) console.log("[AccordDeGardePreview] Fermé"); }} />;
 }
