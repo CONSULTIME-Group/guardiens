@@ -1,8 +1,9 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Check, CheckCircle2, Loader2 } from "lucide-react";
+import { ArrowRight, Check, CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import StepIdentity from "@/components/profile/StepIdentity";
 import StepSitterProfile from "@/components/profile/StepSitterProfile";
 import StepExperience from "@/components/profile/StepExperience";
@@ -12,9 +13,11 @@ import StepSkills from "@/components/profile/StepSkills";
 import SitterGallery from "@/components/profile/SitterGallery";
 import ExternalExperiences from "@/components/profile/ExternalExperiences";
 import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
+import ProfileSkeleton from "@/components/profile/ProfileSkeleton";
 import ScoreBreakdown, { type ScoreCriterion } from "@/components/profile/ScoreBreakdown";
 
 import { useSitterProfile, type SitterProfileData } from "@/hooks/useSitterProfile";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
@@ -275,12 +278,15 @@ const SitterProfile = () => {
     };
   });
 
+  // Avertit l'utilisateur s'il quitte la page avec des modifications non sauvegardées.
+  useUnsavedChanges(dirty);
+
+  // Section suivante (pour le bouton « Suivant »).
+  const currentIndex = SECTIONS_META.findIndex(s => s.id === activeSection);
+  const nextSection = SECTIONS_META[currentIndex + 1];
+
   if (loading) {
-    return (
-      <div className="p-6 md:p-10 max-w-5xl mx-auto animate-fade-in">
-        <div className="text-center text-muted-foreground py-20">Chargement du profil...</div>
-      </div>
-    );
+    return <ProfileSkeleton />;
   }
 
   return (
@@ -293,9 +299,11 @@ const SitterProfile = () => {
           <ProfileSidebar
             firstName={mergedData.first_name}
             city={mergedData.city}
+            avatarUrl={mergedData.avatar_url || user?.avatarUrl}
             completion={liveScore}
             sections={sidebarSections}
             activeSection={activeSection}
+            dirtySection={dirty ? activeSection : undefined}
             onSectionClick={(id) => {
               setActiveSection(id);
               // Scroll vers le contenu correspondant — utile sur mobile et quand
@@ -358,35 +366,74 @@ const SitterProfile = () => {
                   onChange={(partial) => handleChange(partial as any)}
                 />
               )}
+
+              {/* Bouton « Suivant » — auto-sauvegarde puis avance. */}
+              {nextSection && (
+                <div className="mt-8 pt-6 border-t border-border flex justify-end">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="gap-2 text-muted-foreground hover:text-foreground"
+                    disabled={saving || (dirty && !canSave)}
+                    onClick={async () => {
+                      if (dirty && canSave) await handleSave();
+                      setActiveSection(nextSection.id);
+                      requestAnimationFrame(() => {
+                        document.getElementById("profile-section-content")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                      });
+                    }}
+                  >
+                    Suivant : {nextSection.label}
+                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* Sticky save bar */}
-      <div className="fixed bottom-16 md:bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border py-4 px-6 flex items-center justify-between supports-[padding:max(0px)]:pb-[max(env(safe-area-inset-bottom),0.75rem)]">
-        <p className="text-xs text-muted-foreground">
-          {saved && !dirty ? (
-            <span className="inline-flex items-center gap-1 text-primary">
-              <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> Profil à jour
-            </span>
-          ) : dirty ? (
-            "Modifications non sauvegardées"
-          ) : null}
-        </p>
-        <Button
-          onClick={handleSave}
-          disabled={!canSave}
-          className="rounded-full px-6 gap-2"
-          size="lg"
-        >
-          {saving ? (
-            <><Loader2 className="h-4 w-4 animate-spin" /> Sauvegarde…</>
-          ) : (
-            <><Check className="h-4 w-4" /> Sauvegarder</>
-          )}
-        </Button>
-      </div>
+      <TooltipProvider delayDuration={200}>
+        <div className="fixed bottom-16 md:bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border py-4 px-6 flex items-center justify-between supports-[padding:max(0px)]:pb-[max(env(safe-area-inset-bottom),0.75rem)]">
+          <p className="text-xs text-muted-foreground" aria-live="polite">
+            {saved && !dirty ? (
+              <span className="inline-flex items-center gap-1 text-primary">
+                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> Modifications enregistrées
+              </span>
+            ) : dirty ? (
+              "Modifications non sauvegardées"
+            ) : null}
+          </p>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span tabIndex={0}>
+                <Button
+                  onClick={handleSave}
+                  disabled={!canSave}
+                  className="rounded-full px-6 gap-2"
+                  size="lg"
+                >
+                  {saving ? (
+                    <><Loader2 className="h-4 w-4 animate-spin" /> Sauvegarde…</>
+                  ) : (
+                    <><Check className="h-4 w-4" /> Sauvegarder</>
+                  )}
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {!canSave && !saving && (
+              <TooltipContent side="top">
+                {motivationBlocks
+                  ? `Motivation trop courte (${motivationLength}/50 caractères)`
+                  : !dirty
+                    ? "Aucune modification à sauvegarder"
+                    : "Sauvegarde impossible"}
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </div>
+      </TooltipProvider>
     </div>
   );
 };
