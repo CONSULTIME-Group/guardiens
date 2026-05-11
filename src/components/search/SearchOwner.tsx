@@ -758,9 +758,9 @@ const SearchOwner = () => {
       </div>
 
       {/* Sort bar + view toggle */}
-      <div className="flex items-center justify-between px-6 py-2 border-b border-border">
-        <div className="flex items-center gap-3">
-          <p className="text-sm text-muted-foreground">{results.length} gardien{results.length !== 1 ? "s" : ""} disponible{results.length !== 1 ? "s" : ""}</p>
+      <div className="flex items-center justify-between gap-3 px-6 py-2.5 border-b border-border flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
+          <p className="text-sm font-medium text-foreground">{results.length} gardien{results.length !== 1 ? "s" : ""} disponible{results.length !== 1 ? "s" : ""}</p>
           {hasActiveFilters && (
             <button onClick={resetFilters} className="text-xs text-primary hover:underline whitespace-nowrap">Réinitialiser les filtres</button>
           )}
@@ -776,18 +776,20 @@ const SearchOwner = () => {
             onClick={() => setViewMode("list")}
             aria-label="Vue grille"
             aria-pressed={viewMode === "list"}
-            className={`p-1.5 rounded ${viewMode === "list" ? "bg-muted" : ""}`}
+            className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${viewMode === "list" ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
           >
-            <LayoutGrid className="h-4 w-4" aria-hidden="true" />
+            <LayoutGrid className="h-3.5 w-3.5" aria-hidden="true" />
+            <span className="hidden sm:inline">Grille</span>
           </button>
           <button
             type="button"
             onClick={() => setViewMode("map")}
             aria-label="Vue carte"
             aria-pressed={viewMode === "map"}
-            className={`p-1.5 rounded ${viewMode === "map" ? "bg-muted" : ""}`}
+            className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${viewMode === "map" ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
           >
-            <MapIcon className="h-4 w-4" aria-hidden="true" />
+            <MapIcon className="h-3.5 w-3.5" aria-hidden="true" />
+            <span className="hidden sm:inline">Carte</span>
           </button>
         </div>
       </div>
