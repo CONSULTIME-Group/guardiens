@@ -222,6 +222,27 @@ const SmallMissions = () => {
   const { data: allMissions, isLoading: missionsLoading } = useAllMissions(user?.id);
   const { data: availableHelpers, isLoading: helpersLoading } = useAvailableHelpers(user?.id, isAuthenticated);
 
+  // ── Realtime: refresh missions list on any small_missions change ──
+  useEffect(() => {
+    const channel = supabase
+      .channel("small-missions-list")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "small_missions" },
+        () => { queryClient.invalidateQueries({ queryKey: ["small-missions-all"] }); },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [queryClient]);
+
+  // ── Pagination ──
+  const PAGE_SIZE = 12;
+  const [visibleMissions, setVisibleMissions] = useState(PAGE_SIZE);
+  const [visibleHelpers, setVisibleHelpers] = useState(PAGE_SIZE);
+  // Reset pagination when filters change
+  useEffect(() => { setVisibleMissions(PAGE_SIZE); }, [categoryFilter, mode, radiusKm, normalizedSearch]);
+  useEffect(() => { setVisibleHelpers(PAGE_SIZE); }, [categoryFilter, mode, radiusKm, normalizedSearch]);
+
   const missionCoords = useEntityCoords(allMissions as any[], { useDbCoords: true });
   const helperCoords = useEntityCoords(availableHelpers as any[]);
 
