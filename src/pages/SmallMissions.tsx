@@ -523,16 +523,17 @@ const SmallMissions = () => {
 
  return (
  <>
- <PageMeta
+  <PageMeta
  title="Petites missions — Entre gens du coin | Guardiens"
  description="Des coups de main, des échanges, des compétences. Entre gens du coin qui se choisissent."
+ noindex
  />
 
   <div className="min-h-screen bg-background">
  {/* Hero compact avec image — hauteur contenue, dégradé fort pour lisibilité */}
  <section className="relative overflow-hidden border-b border-border/40">
  <div className="absolute inset-0">
-  <img src={entraideHeader} alt="" loading="eager" className="w-full h-full object-cover object-[70%_30%] md:object-right" />
+  <img src={entraideHeader} alt="" loading="eager" width={1600} height={400} className="w-full h-full object-cover object-[70%_30%] md:object-right" />
  <div className="absolute inset-0 bg-gradient-to-b from-background/95 via-background/80 to-background/60 md:bg-gradient-to-r md:from-background md:via-background/85 md:to-background/50" />
  </div>
  <div className="relative max-w-6xl mx-auto px-4 py-10 md:py-14 text-center space-y-3">
@@ -542,7 +543,7 @@ const SmallMissions = () => {
  <p className="text-sm md:text-base text-muted-foreground max-w-xl mx-auto">
  Demandez un coup de main ou proposez le vôtre — entre gens du coin, sans argent.
  </p>
- <p className="inline-block text-xs font-medium bg-badge-success text-badge-success-foreground px-3 py-1 rounded-full">
+  <p className="inline-block text-xs font-medium bg-primary/10 text-primary px-3 py-1 rounded-full">
  Gratuit pour tous les membres
  </p>
  </div>
@@ -703,9 +704,8 @@ const SmallMissions = () => {
 
  {missionCount > 0 ? (
  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
- {filteredMissions.map((m: any) => {
+  {filteredMissions.map((m: any) => {
  const meta = CATEGORY_META[m.category] || CATEGORY_META.animals;
- const Icon = meta.icon;
  const isCompleted = m.status === "completed";
  const isMine = m.user_id === user?.id;
  const goToDetail = () => navigate(isAuthenticated ? `/petites-missions/${m.id}` : "/inscription");
@@ -720,11 +720,8 @@ const SmallMissions = () => {
  >
  <Card className={`border-border transition-colors h-full ${isCompleted ? "opacity-50 grayscale" : "hover:border-primary/30"}`}>
  <CardContent className="p-4 space-y-2">
- <div className="flex items-center justify-between">
- <div className="flex items-center gap-2">
- <Icon className="h-4 w-4 text-primary" />
- <span className="text-xs font-medium text-muted-foreground">{meta.label}</span>
- </div>
+  <div className="flex items-center justify-between">
+ <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{meta.label}</span>
  {m.response_count > 0 && (
  <span className="text-xs text-muted-foreground bg-accent px-2 py-0.5 rounded-full">
  {m.response_count} proposition{m.response_count > 1 ? "s" : ""}
@@ -864,13 +861,11 @@ const SmallMissions = () => {
  </div>
  </div>
  <div className="flex flex-wrap gap-1.5">
- {displayedSkills.map((key: string) => {
+  {displayedSkills.map((key: string) => {
  const meta = SKILL_PILL_META[key];
  if (!meta) return null;
- const SkIcon = meta.icon;
  return (
- <span key={key} className="flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 text-primary px-2.5 py-0.5 text-xs">
- <SkIcon className="h-3 w-3" />
+ <span key={key} className="rounded-full border border-primary/20 bg-primary/10 text-primary px-2.5 py-0.5 text-xs">
  {meta.label}
  </span>
  );
@@ -879,10 +874,9 @@ const SmallMissions = () => {
  <span className="text-xs text-muted-foreground px-2 py-0.5">+{extraCount}</span>
  )}
  </div>
- {h.sits_count > 0 && (
- <p className="text-xs text-foreground/60 flex items-center gap-1">
- <Star className="h-3 w-3 fill-primary text-primary" />
- {h.review_count > 0 ? `${h.review_avg.toFixed(1)} · ` : ""}{h.sits_count} mission{h.sits_count > 1 ? "s" : ""} accomplie{h.sits_count > 1 ? "s" : ""}
+  {h.sits_count > 0 && (
+ <p className="text-xs text-foreground/60">
+ {h.review_count > 0 ? `Note ${h.review_avg.toFixed(1)} · ` : ""}{h.sits_count} mission{h.sits_count > 1 ? "s" : ""} accomplie{h.sits_count > 1 ? "s" : ""}
  </p>
  )}
  {/* Compétences spécifiques (au-delà des catégories) */}
@@ -988,14 +982,12 @@ const SmallMissions = () => {
  {/* Exemples par catégorie — sans Maison */}
  <section className="space-y-8">
  <h2 className="font-heading text-2xl font-bold text-foreground text-center">Quelques exemples d'échanges</h2>
- {(["animals", "garden", "skills"] as const).map((cat) => {
+  {(["animals", "garden", "skills"] as const).map((cat) => {
  const meta = CATEGORY_META[cat];
- const Icon = meta.icon;
  const items = EXAMPLES.filter((e) => e.cat === cat);
  return (
  <div key={cat} className="space-y-3">
- <h3 className="font-heading text-lg font-semibold flex items-center gap-2">
- <Icon className="h-5 w-5 text-primary" />
+ <h3 className="font-heading text-lg font-semibold">
  {meta.label}
  </h3>
  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -1033,20 +1025,7 @@ const SmallMissions = () => {
  )}
  </section>
 
- {/* Schema.org */}
- <script
- type="application/ld+json"
- dangerouslySetInnerHTML={{
- __html: JSON.stringify({
- "@context": "https://schema.org",
- "@type": "Service",
- name: "Petites missions Guardiens",
- description: "Entraide communautaire entre gens du coin autour des animaux, du jardin et des compétences.",
- areaServed: { "@type": "Country", name: "France" },
- provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
- }),
- }}
- />
+  {/* Schema.org Service intentionnellement omis : déjà servi par /petites-missions public (anti-cannibalisation). */}
  </main>
 
  <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
@@ -1116,7 +1095,7 @@ const SmallMissions = () => {
  <div className="space-y-2">
  <p className="text-sm font-medium text-foreground">Domaines de compétences</p>
  <div className="flex flex-wrap gap-2">
- {Object.entries(SKILL_PILL_META).map(([key, { label, icon: SkIcon }]) => {
+  {Object.entries(SKILL_PILL_META).map(([key, { label }]) => {
  const selected = offerSkills.includes(key);
  return (
  <button
@@ -1129,7 +1108,6 @@ const SmallMissions = () => {
  : "bg-muted text-foreground border-border hover:border-primary/40"
  }`}
  >
- <SkIcon className="h-3.5 w-3.5" />
  {label}
  {selected && <Check className="h-3 w-3" />}
  </button>
