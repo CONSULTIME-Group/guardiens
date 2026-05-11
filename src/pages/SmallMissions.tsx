@@ -20,6 +20,7 @@ import {
   CategoryFilter, ModeFilter, MISSION_TO_SKILL, SKILL_TO_MISSION,
 } from "@/components/missions/connected/constants";
 import MissionsHero from "@/components/missions/connected/MissionsHero";
+import MissionsArticlesStrip from "@/components/missions/connected/MissionsArticlesStrip";
 import MissionsFilterBar from "@/components/missions/connected/MissionsFilterBar";
 import MissionCard from "@/components/missions/connected/MissionCard";
 import HelperCard from "@/components/missions/connected/HelperCard";
