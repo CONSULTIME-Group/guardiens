@@ -2848,6 +2848,8 @@ export type Database = {
           last_cp_relance_at: string | null
           last_name: string | null
           last_seen_at: string | null
+          latitude: number | null
+          longitude: number | null
           onboarding_completed: boolean
           onboarding_dismissed_at: string | null
           onboarding_minimal_completed: boolean
@@ -2888,6 +2890,8 @@ export type Database = {
           last_cp_relance_at?: string | null
           last_name?: string | null
           last_seen_at?: string | null
+          latitude?: number | null
+          longitude?: number | null
           onboarding_completed?: boolean
           onboarding_dismissed_at?: string | null
           onboarding_minimal_completed?: boolean
@@ -2928,6 +2932,8 @@ export type Database = {
           last_cp_relance_at?: string | null
           last_name?: string | null
           last_seen_at?: string | null
+          latitude?: number | null
+          longitude?: number | null
           onboarding_completed?: boolean
           onboarding_dismissed_at?: string | null
           onboarding_minimal_completed?: boolean
