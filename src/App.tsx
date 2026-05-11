@@ -358,6 +358,7 @@ const App = () => (
               <OfflineBanner />
               <NetworkErrorMonitor />
               <PreviewDiagnosticBanner />
+              <DuplicateAccountGuard />
               <AppRoutes />
               <FacebookReferralFeedback />
               {/* Bannière cookies retirée : mesure d'audience GA4 exemptée CNIL
