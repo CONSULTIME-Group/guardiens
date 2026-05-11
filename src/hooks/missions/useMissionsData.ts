@@ -42,7 +42,7 @@ export function useAvailableHelpers(currentUserId: string | undefined, enabled: 
     queryFn: async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id, first_name, avatar_url, city, postal_code, skill_categories, available_for_help, custom_skills, latitude, longitude")
+        .select("id, first_name, avatar_url, city, postal_code, skill_categories, available_for_help, custom_skills, latitude, longitude, identity_verified")
         .eq("available_for_help", true)
         .not("skill_categories", "eq", "{}")
         .limit(50);
