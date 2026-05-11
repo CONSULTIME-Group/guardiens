@@ -1,101 +1,76 @@
-## Objectif
 
-Une fois l'annonce publiée, le propriétaire peut **inviter** des gardiens à candidater :
-1. Depuis ses **favoris** (en un clic)
-2. Depuis une **recherche de gardiens** (filtres : ville, rayon, expérience, animaux compatibles, dispo si possible)
+# Audit /petites-missions — État & plan
 
-L'invitation = un message + un lien vers l'annonce, qui apparaît côté gardien comme une **invitation à candidater** (notif + entrée messagerie + badge dans dashboard).
+## Constat (ce qui va, ce qui coince)
 
----
+**Forces**
+- H1 unique, hiérarchie de titres saine, FAQ + Service en JSON-LD, breadcrumb OK.
+- Hero clair, double CTA "Je propose / J'ai besoin", sticky CTA mobile, levée des freins bien rédigée, illustrations gouache cohérentes.
+- KPIs dynamiques (missions réalisées, membres actifs) via `get_public_stats`.
 
-## UX
-
-### Côté propriétaire — sur `/sits/:id` (vue owner, statut `published`)
-
-Nouveau bloc **« Inviter des gardiens »** placé juste après les Candidatures reçues :
-
-- **Onglet 1 — Mes favoris** : liste des sitters favoris (via `useFavorites('sitter')`), bouton « Inviter » par carte. État : non invité / invité (date) / a candidaté.
-- **Onglet 2 — Trouver des gardiens** : mini-recherche (réutilise la logique de `SearchPage`) filtrée sur ville de l'annonce + rayon (15/30/50 km / partout), filtres expérience & types d'animaux. Bouton « Inviter » par carte.
-- **Modal d'invitation** : message pré-rempli vouvoiement (« Bonjour, je publie une garde du X au Y à <ville>, votre profil m'a tapé dans l'œil. Seriez-vous intéressé(e) ? »), éditable, max 500 car. Bouton « Envoyer l'invitation ».
-- **Garde-fous** : pas d'auto-invitation, pas de doublon (1 invit/sitter/sit), rate-limit (max 20 invits/jour/owner pour éviter le spam).
-
-### Côté gardien
-
-- **Notification** in-app + email transactionnel : « <Prénom> vous invite à candidater à sa garde à <ville> du X au Y ».
-- **Conversation** créée dans la messagerie avec le contexte de l'annonce (réutilise `ContextHeaderCard` + lien vers `/sits/:id`).
-- **Dashboard sitter** : nouveau compteur « Invitations reçues » (lien vers messagerie filtrée).
-- Le gardien candidate normalement via la fiche annonce (flow existant inchangé).
+**Faiblesses principales**
+1. **Maillage interne = 0 lien éditorial sortant** (vers `/tarifs`, `/faq`, `/actualites`, hubs villes). Plus gros levier SEO sous-exploité.
+2. **Volume éditorial ~575 mots** — trop court pour un mot-clé concurrentiel "entraide locale / coup de main entre voisins".
+3. **Pas de preuve sociale concrète** : aucun témoignage, aucun extrait de mission réelle, aucune mission ouverte affichée (alors que `MissionsCityPage` le fait déjà pour Lyon).
+4. **Pas de Schema HowTo** alors que les blocs "01/02/03" sont taillés pour ça.
+5. **Pas de section "France entière + près de chez vous"** rassurante (rappel mémoire : promesse mondiale, pas régionale).
+6. **Cache-buster `?v=gouache-v2-...`** sur les 6 illustrations → casse le cache long, à retirer.
+7. **Fichier monolithique 736 lignes** — sections extractibles en composants (`HeroMissions`, `ObjectionsList`, `ExamplesGrid`, `RulesBlock`, `MissionsFaq`).
+8. **Mention "voisins" résiduelle à vérifier** (mémoire : mot proscrit) — audit grep nécessaire.
+9. **Aucune image hero / LCP candidate faible** — texte pur au-dessus de la ligne de flottaison, OK perf mais peu mémorable.
+10. **Pas de bandeau `ReachReassuranceBanner`** (composant existant) pour ancrer la couverture France entière.
 
 ---
 
-## Technique
+## Plan d'amélioration (ordonné par ROI)
 
-### DB (migration)
+### Lot 1 — SEO structurel (impact fort, effort faible)
+- Ajouter un bloc **"Pour aller plus loin"** en bas de page : 6 liens internes contextuels (`/house-sitting/lyon|annecy|grenoble`, `/tarifs`, `/faq`, 2 articles `/actualites/*` connexes).
+- Injecter **2 blocs `HowTo` JSON-LD** dérivés des cards "Besoin" et "Offre".
+- Ajouter le **`ReachReassuranceBanner`** sous le hero (couverture France entière).
+- Audit grep "voisin/voisinage/AURA" sur le fichier + corrections si présent.
+- Retirer le cache-buster `ILLU_VERSION` (les imports Vite gèrent déjà le hash).
 
-```sql
-create table public.sit_invitations (
-  id uuid primary key default gen_random_uuid(),
-  sit_id uuid not null references public.sits(id) on delete cascade,
-  owner_id uuid not null,
-  sitter_id uuid not null,
-  message text,
-  status text not null default 'sent', -- sent | viewed | applied | declined
-  created_at timestamptz not null default now(),
-  viewed_at timestamptz,
-  responded_at timestamptz,
-  unique (sit_id, sitter_id)
-);
-create index on public.sit_invitations(sitter_id, status);
-create index on public.sit_invitations(owner_id, created_at desc);
+### Lot 2 — Densification éditoriale (+700 mots)
+- Section **"Pourquoi l'entraide locale fonctionne"** (cadre social, ancrage local, vouvoiement, ~350 mots).
+- Section **"Échange sans argent : ce que dit la loi"** (rassurance YMYL, ~350 mots).
+- Enrichir 2-3 réponses FAQ courtes existantes (passer de 1 à 3-4 phrases).
 
-alter table public.sit_invitations enable row level security;
+### Lot 3 — Preuve sociale & conversion
+- Bloc **"Missions ouvertes près de chez vous"** : reproduire la logique de `MissionsCityPage` (12 missions max via `small_missions` + `haversineDistance` si géoloc, sinon les 12 plus récentes).
+- Bloc **3 témoignages** (citation + prénom + ville) — hardcodés au début, alimentés par BDD plus tard.
 
--- Owner : voit/crée ses invits sur SES sits publiés
-create policy "owners manage own invitations"
-on public.sit_invitations for all
-using (owner_id = auth.uid())
-with check (owner_id = auth.uid());
+### Lot 4 — Refacto & maintenabilité (zéro impact visuel)
+- Extraire le fichier 736 lignes en composants dans `src/components/missions/public/` :
+  `HeroMissions`, `ConvictionBlock`, `ObjectionsList`, `TwoModesCards`, `ExamplesGrid`, `RulesBlock`, `FinalCta`, `MissionsFaq`, `MoreLinksFooter`.
+- Centraliser `FAQ_ITEMS` et `examples` dans `src/data/missionsPublicContent.ts`.
 
--- Sitter : voit les invits qui lui sont adressées, peut update viewed/responded
-create policy "sitters read their invitations"
-on public.sit_invitations for select
-using (sitter_id = auth.uid());
-
-create policy "sitters update their invitations status"
-on public.sit_invitations for update
-using (sitter_id = auth.uid())
-with check (sitter_id = auth.uid());
-```
-
-Trigger : quand une `applications` est créée par le sitter sur un sit où il a une invit `sent/viewed`, marquer `status = 'applied'`.
-
-Rate-limit : fonction `check_invitation_quota(owner_id)` qui compte les invits des dernières 24 h (max 20).
-
-### Front
-
-Nouveaux fichiers :
-- `src/components/sits/owner/InviteSittersBlock.tsx` — wrapper avec onglets (Favoris / Recherche).
-- `src/components/sits/owner/InviteSitterCard.tsx` — carte sitter + bouton « Inviter » + état.
-- `src/components/sits/owner/InviteSitterDialog.tsx` — modal message + envoi.
-- `src/hooks/useSitInvitations.ts` — list/create/update via React Query.
-
-Intégration : ajout du bloc dans `OwnerSitView.tsx` (statut `published` uniquement), après la section Candidatures.
-
-Côté gardien :
-- Notification (table `notifications` existante) + entrée messagerie (réutiliser flow conversation existant lié au sit).
-- Compteur `Invitations reçues` dans `useSitterDashboardData`.
-
-### Email
-
-Template transactionnel `sit-invitation` (via `sendTransactionalEmail`) — vouvoiement, pas d'icônes/emojis, mentionne « gardien » jamais « voisin ».
+### Lot 5 — Polish UX
+- Ajouter un **lien retour discret** sous le breadcrumb (déjà dans Header, à confirmer).
+- Vérifier la couleur des CTA secondaires sur mobile (contraste `border-2 border-primary text-primary`).
+- Pré-charger la 1ère illustration de la mosaïque hero (`fetchpriority="high"`).
 
 ---
 
-## Découpage en lots
+## Détails techniques
 
-- **Lot 1 (DB + back)** : migration `sit_invitations` + RLS + trigger + quota. ~30 min.
-- **Lot 2 (UI Favoris)** : `InviteSittersBlock` onglet Favoris + dialog + hook + intégration `OwnerSitView`. ~1 h.
-- **Lot 3 (UI Recherche)** : onglet Recherche avec filtres ville/rayon/animaux. ~1 h.
-- **Lot 4 (côté gardien)** : notif + entrée messagerie + compteur dashboard + email transactionnel. ~45 min.
+| Lot | Fichiers touchés | Risque |
+|---|---|---|
+| 1 | `SmallMissionsPublic.tsx` (ajout bloc + JSON-LD), `data/missionsPublicContent.ts` (nouveau) | Faible |
+| 2 | `SmallMissionsPublic.tsx` (2 sections JSX), `FAQ_ITEMS` étendu | Faible |
+| 3 | Nouveau hook `useNearbyOpenMissions` (réutilise pattern `MissionsCityPage`) | Moyen (perf si non-géolocalisé → fallback "12 plus récentes") |
+| 4 | Splits purs, aucun changement de rendu | Faible si tests visuels |
+| 5 | CSS / `<link rel="preload">` dans `<Helmet>` | Faible |
 
-Total ≈ 3 h. Je peux commencer par le Lot 1 + 2 (le plus à valeur immédiate : inviter ses favoris) et livrer le reste ensuite. OK pour partir comme ça ?
+**Pas de migration DB requise.** Tout reste en frontend + JSON-LD.
+
+---
+
+## Ordre d'exécution recommandé
+
+1. Lot 1 (1 PR) — gain SEO immédiat, ~30 min de travail.
+2. Lot 4 (1 PR) — refacto avant d'ajouter du contenu.
+3. Lot 2 + Lot 3 (1 PR) — densification + preuve sociale.
+4. Lot 5 (1 PR finale) — polish.
+
+Validez-moi le périmètre (tous les lots, ou priorité Lot 1 + Lot 3 par exemple) et je passe à l'implémentation.
