@@ -2,17 +2,36 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { X, Camera, CheckCircle, Send, MessageCircle, Star, User, PawPrint, MapPin, Leaf, ShieldCheck, Home, Calendar, Plus, Zap, Activity, Heart, BookOpen, Key, Wifi, Phone, Wrench, ChefHat, Circle } from "lucide-react";
+import { Camera, CheckCircle, User, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
 import ChipSelect from "@/components/profile/ChipSelect";
 import { compressImageFile } from "@/lib/compressImage";
 import { trackEvent } from "@/lib/analytics";
+import gouacheEntraide from "@/assets/onboarding/gouache-entraide.png";
+import gouacheGarde from "@/assets/onboarding/gouache-garde.png";
+import gouacheWelcome from "@/assets/onboarding/gouache-welcome.png";
 
 type ActiveTab = "gardien" | "proprio";
 
@@ -367,30 +386,39 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     navigate("/login", { replace: true });
   };
 
+  const [confirmLogout, setConfirmLogout] = useState(false);
+
   if (!open) return null;
 
-  
+  const handleOpenChange = (next: boolean) => {
+    if (!next && canDismiss) dismiss();
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center backdrop-blur-sm bg-background/80">
-      <div className="max-w-2xl w-full mx-auto mt-8 md:mt-16 bg-card rounded-2xl shadow-xl p-6 md:p-10 relative max-h-[90vh] overflow-y-auto">
-        <div className="absolute right-4 top-4 flex items-center gap-3 z-10">
+    <>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent
+        onEscapeKeyDown={(e) => { if (!canDismiss) e.preventDefault(); }}
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+        className={`max-w-2xl w-[calc(100%-1.5rem)] sm:w-full max-h-[90vh] overflow-y-auto p-6 md:p-10 rounded-2xl ${canDismiss ? "" : "[&>button.absolute]:hidden"}`}
+      >
+        <DialogTitle className="sr-only">Bienvenue sur Guardiens</DialogTitle>
+        <DialogDescription className="sr-only">
+          Quelques étapes pour préparer votre profil et faire connaissance avec la communauté.
+        </DialogDescription>
+        <div className="absolute left-6 top-4 z-10">
           <button
             type="button"
-            onClick={leaveToLogin}
+            onClick={() => setConfirmLogout(true)}
             className="text-xs text-muted-foreground hover:text-foreground underline-offset-4 hover:underline transition-colors"
           >
             Retour à la connexion
           </button>
-          {canDismiss && (
-            <button
-              onClick={dismiss}
-              aria-label="Fermer"
-              className="rounded-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          )}
+        </div>
+        {/* live region pour annoncer les sauvegardes aux lecteurs d'écran */}
+        <div aria-live="polite" className="sr-only">
+          {minimalSaved && slide === 0 ? "Vos informations ont été enregistrées." : ""}
         </div>
 
         {/* Progress indicator */}
@@ -402,15 +430,12 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                slide === 2 ? "Étape 3 sur 3 — Vos savoir-faire" :
                "Découverte de Guardiens"}
             </p>
-            {slide <= 2 && (
-              <p className="text-xs font-semibold text-primary">{liveCompletion}%</p>
-            )}
           </div>
           <Progress value={slide <= 2 ? ((slide + 1) / 3) * 100 : 100} className="h-1.5" />
         </div>
 
-        {/* Role tabs — only for read-only slides */}
-        {slide >= 3 && (
+        {/* Role tabs — only for "both" users on read-only slides */}
+        {slide >= 3 && userRole === "both" && (
           <div className="flex justify-center gap-1 mb-6">
             <button
               onClick={() => setActiveTab("gardien")}
@@ -439,13 +464,25 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
           {/* ── Slide 0: Welcome + mandatory fields ── */}
           {slide === 0 && (
             <div className="space-y-6">
-              <div>
+              <div className="relative">
                 <h2 className="font-heading text-2xl font-bold text-foreground">
                   Bienvenue sur Guardiens.
                 </h2>
                 <p className="text-base text-foreground/80 leading-relaxed mt-2">
                   En 2 minutes, rendez votre profil attractif. Commençons par faire connaissance — 30 secondes.
                 </p>
+                <p className="text-xs text-muted-foreground italic mt-2">
+                  Vous pourrez tout modifier plus tard depuis votre profil.
+                </p>
+                <img
+                  src={gouacheWelcome}
+                  alt=""
+                  aria-hidden="true"
+                  loading="lazy"
+                  width={120}
+                  height={120}
+                  className="hidden md:block absolute -top-4 -right-2 w-24 h-24 object-contain mix-blend-multiply opacity-90 select-none pointer-events-none"
+                />
               </div>
 
               <div className="space-y-4 bg-muted/50 rounded-xl p-5 border border-border">
@@ -491,14 +528,14 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
             <div className="space-y-5">
               <div>
                 <h2 className="font-heading text-2xl font-bold text-foreground">
-                  {userRole === "both"
-                    ? "Votre photo et votre bio sont la première chose que les autres voient."
-                    : isOwnerOnly
-                      ? "Les gardiens regardent votre photo et votre bio en premier."
-                      : "Les propriétaires regardent votre photo et votre bio en premier."}
+                  La première impression, c'est ici.
                 </h2>
                 <p className="text-base text-foreground/80 leading-relaxed mt-2">
-                  Montrez qui vous êtes. Une photo nette et quelques mots sincères suffisent.
+                  {userRole === "both"
+                    ? "Votre photo et votre bio sont la première chose que les autres voient. Une photo nette et quelques mots sincères suffisent."
+                    : isOwnerOnly
+                      ? "Les gardiens regardent votre photo et votre bio en premier. Une photo nette et quelques mots sincères suffisent."
+                      : "Les propriétaires regardent votre photo et votre bio en premier. Une photo nette et quelques mots sincères suffisent."}
                 </p>
               </div>
 
@@ -529,7 +566,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                     id="onb-bio"
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
-                    placeholder="Qui êtes-vous ? Pourquoi Guardiens ? Ce que vous aimez chez les animaux…"
+                    placeholder="Présentez-vous en quelques mots — ce qui vous fait aimer les animaux suffit."
                     className="rounded-lg min-h-[120px] resize-none"
                     maxLength={2000}
                   />
@@ -607,8 +644,8 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
               </div>
 
               {usesSitterScoring && (
-                <div className="space-y-2">
-                  <Label>Mon style de vie</Label>
+                <div className="space-y-2 pt-2">
+                  <Label>Et un peu de vous : votre style de vie</Label>
                   <ChipSelect
                     options={LIFESTYLE_OPTIONS}
                     selected={lifestyle}
@@ -775,8 +812,24 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
             )}
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
+
+    <AlertDialog open={confirmLogout} onOpenChange={setConfirmLogout}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Quitter et se déconnecter ?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Vos informations déjà enregistrées sont conservées. Vous reprendrez votre profil à votre prochaine connexion.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Continuer mon profil</AlertDialogCancel>
+          <AlertDialogAction onClick={leaveToLogin}>Se déconnecter</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 };
 
@@ -785,7 +838,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
    ═══════════════════════════════════════════════════════ */
 
 const EntraideSlide = () => (
-  <div className="space-y-4">
+  <div className="space-y-5">
     <h2 className="font-heading text-2xl font-bold text-foreground">
       Au-delà des gardes : l'entraide entre gens du coin.
     </h2>
@@ -798,132 +851,74 @@ const EntraideSlide = () => (
       compétences contre un repas, un service rendu, une connexion qui dure.
       Jamais d'argent. Juste du concret.
     </p>
-    {/* Mock */}
-    <div className="pointer-events-none select-none mt-4 rounded-xl overflow-hidden border border-border shadow-sm bg-card">
-      <div className="border-b border-border px-4 py-2.5 flex items-center justify-between">
-        <p className="text-xs font-semibold">Petites missions</p>
-        <div className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">1 mission</div>
-      </div>
-      <div className="p-3 border-b border-border">
-        <div className="flex items-start gap-3">
-          <div className="bg-primary/10 rounded-lg p-2 flex-shrink-0">
-            <Leaf className="w-4 h-4 text-primary" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold mb-0.5">M'aider à ramasser les légumes du potager</p>
-            <p className="text-xs text-muted-foreground mb-1">Poleymieux · Demi-journée</p>
-            <p className="text-xs text-muted-foreground italic">En échange : un gros panier de légumes</p>
-          </div>
-        </div>
-      </div>
-      <div className="p-3 grid grid-cols-2 gap-2">
-        <div className="bg-muted rounded-lg p-2">
-          <div className="flex items-center gap-2 mb-1.5">
-            <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
-              <User className="w-3.5 h-3.5 text-primary/40" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold">Marie</p>
-              <p className="text-xs text-muted-foreground">Lyon</p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-1 mb-1.5">
-            <span className="bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">Animaux</span>
-            <span className="bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">Jardin</span>
-          </div>
-        </div>
-        <div className="bg-muted rounded-lg p-2">
-          <div className="flex items-center gap-2 mb-1.5">
-            <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
-              <User className="w-3.5 h-3.5 text-primary/40" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold">Lilit</p>
-              <p className="text-xs text-muted-foreground">Collonges</p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-1 mb-1.5">
-            <span className="bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">Animaux</span>
-            <span className="bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">Cuisine</span>
-          </div>
-        </div>
-      </div>
+    {/* Gouache posée directement sur la page */}
+    <div className="flex justify-center pt-2">
+      <img
+        src={gouacheEntraide}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        width={220}
+        height={220}
+        className="w-44 h-44 md:w-56 md:h-56 object-contain mix-blend-multiply select-none pointer-events-none"
+      />
     </div>
   </div>
 );
 
 const SitterParcoursSlide = () => {
   const steps = [
-    { icon: Send, title: "Vous postulez", desc: "Un message sincère et direct. C'est votre première impression." },
-    { icon: MessageCircle, title: "Vous échangez", desc: "Une conversation, quelques questions. Souvent une rencontre avant le départ." },
-    { icon: CheckCircle, title: "La garde est confirmée", desc: "Un accord de garde est généré automatiquement. Chacun valide à son rythme." },
-    { icon: Star, title: "Vous vous évaluez mutuellement", desc: "Un avis croisé, des écussons choisis. Une relation qui peut durer." },
+    { title: "Vous postulez", desc: "Un message sincère et direct. C'est votre première impression." },
+    { title: "Vous échangez", desc: "Une conversation, quelques questions. Souvent une rencontre avant le départ." },
+    { title: "La garde est confirmée", desc: "Un accord est généré automatiquement. Chacun valide à son rythme." },
+    { title: "Vous vous évaluez mutuellement", desc: "Un avis croisé, des écussons choisis. Une relation qui peut durer." },
   ];
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <h2 className="font-heading text-2xl font-bold text-foreground">
         Une garde, c'est simple.
       </h2>
-      <div className="flex flex-col gap-4 mt-2">
-        {steps.map((s, i) => {
-          const Icon = s.icon;
-          return (
-            <div key={i} className="flex items-start gap-3">
-              <Icon className="h-6 w-6 text-primary shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-sm text-foreground">{s.title}</p>
-                <p className="text-xs text-muted-foreground">{s.desc}</p>
-              </div>
+      <ol className="flex flex-col gap-4 mt-2">
+        {steps.map((s, i) => (
+          <li key={i} className="flex items-start gap-4">
+            <span
+              aria-hidden="true"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-semibold mt-0.5"
+            >
+              {i + 1}
+            </span>
+            <div>
+              <p className="font-semibold text-sm text-foreground">{s.title}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">{s.desc}</p>
             </div>
-          );
-        })}
-      </div>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 };
 
 const OwnerParcoursSlide = () => (
-  <div className="space-y-4">
+  <div className="space-y-5">
     <h2 className="font-heading text-2xl font-bold text-foreground">
       Notre accord de garde.
-      <br />
-      Un engagement mutuel, généré automatiquement.
     </h2>
     <p className="text-base text-foreground/80 leading-relaxed">
       Quand la garde est confirmée, Guardiens génère automatiquement un document
       qui résume ce que vous avez prévu ensemble. Chacun lit. Chacun valide.
       Vous partez l'esprit léger.
     </p>
-    {/* Mock accord */}
-    <div className="pointer-events-none select-none mt-4 rounded-xl overflow-hidden border border-border shadow-sm bg-card">
-      <div className="px-4 py-3 border-b border-border flex items-center justify-between">
-        <div>
-          <p className="text-sm font-semibold">Notre accord de garde</p>
-          <p className="text-xs text-muted-foreground mt-0.5">Garde du 14 mai au 21 mai 2026</p>
-        </div>
-        <div className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">Généré automatiquement</div>
-      </div>
-      <div className="px-4 py-2.5 border-b border-border">
-        <p className="text-xs font-semibold mb-1.5">Les animaux concernés</p>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5">
-            <PawPrint className="w-3 h-3 text-primary" />
-            <p className="text-xs text-muted-foreground">Rex · Chien · 3 ans</p>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <PawPrint className="w-3 h-3 text-primary" />
-            <p className="text-xs text-muted-foreground">Resa · Chat · 4 ans</p>
-          </div>
-        </div>
-      </div>
-      <div className="px-4 py-3 bg-primary/5">
-        <p className="text-xs text-muted-foreground text-center mb-2">
-          J'ai lu cet accord et je confirme que son contenu correspond à ce que nous avons prévu.
-        </p>
-        <div className="bg-primary text-primary-foreground text-xs font-semibold py-2.5 rounded-lg text-center">
-          C'est bon pour moi →
-        </div>
-      </div>
+    {/* Gouache posée directement sur la page */}
+    <div className="flex justify-center pt-2">
+      <img
+        src={gouacheGarde}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        width={220}
+        height={220}
+        className="w-44 h-44 md:w-56 md:h-56 object-contain mix-blend-multiply select-none pointer-events-none"
+      />
     </div>
   </div>
 );

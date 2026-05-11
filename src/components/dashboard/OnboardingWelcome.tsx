@@ -50,7 +50,7 @@ const OnboardingWelcome = ({ role, checks, onDismiss }: OnboardingWelcomeProps) 
       key: "avatar",
       icon: Camera,
       title: "Ajoutez une photo de profil",
-      description: "Un profil avec photo reçoit 3× plus de réponses. Montrez votre plus beau sourire !",
+      description: "Une photo aide les propriétaires à mettre un visage sur votre profil.",
       link: "/profile",
       cta: "Ajouter ma photo",
       done: checks.hasAvatar,
@@ -98,7 +98,7 @@ const OnboardingWelcome = ({ role, checks, onDismiss }: OnboardingWelcomeProps) 
       key: "avatar",
       icon: Camera,
       title: "Ajoutez une photo de profil",
-      description: "Les gardiens font plus confiance aux profils avec photo. C'est rapide !",
+      description: "Les gardiens font plus confiance aux profils avec photo. C'est rapide.",
       link: "/owner-profile",
       cta: "Ajouter ma photo",
       done: checks.hasAvatar,
@@ -176,7 +176,9 @@ const OnboardingWelcome = ({ role, checks, onDismiss }: OnboardingWelcomeProps) 
           />
         </div>
         <p className="text-xs text-muted-foreground text-right">
-          À 60%, vous pourrez publier votre première annonce
+          {role === "owner"
+            ? "À 60 %, vous pourrez publier votre première annonce."
+            : "À 60 %, vous pourrez postuler aux annonces."}
         </p>
       </div>
 
@@ -205,7 +207,7 @@ const OnboardingWelcome = ({ role, checks, onDismiss }: OnboardingWelcomeProps) 
                   {step.done ? (
                     <CheckCircle2 className="h-5 w-5" />
                   ) : (
-                    <Icon className="h-4.5 w-4.5 text-muted-foreground" />
+                    <Icon className="h-4 w-4 text-muted-foreground" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
