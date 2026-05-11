@@ -536,10 +536,10 @@ const SmallMissionsPublic = () => {
  text: "Jardin, animaux, maison, quartier. Les missions restent dans l'univers de ce qui nous rassemble.",
  },
  ].map((rule, i) => (
- <Reveal key={rule.title} delay={0.1 * i}>
- <div className={`text-center md:text-left md:px-8 ${i > 0 ? "md:border-l md:border-white/15" : ""}`}>
- <h3 className="font-heading text-xl md:text-2xl font-semibold text-white mb-3">{rule.title}</h3>
- <p className="font-body text-sm md:text-base text-white/70 leading-relaxed">{rule.text}</p>
+  <Reveal key={rule.title} delay={0.1 * i}>
+ <div className={`text-center md:text-left md:px-8 ${i > 0 ? "md:border-l md:border-accent/15" : ""}`}>
+ <h3 className="font-heading text-xl md:text-2xl font-semibold text-accent mb-3">{rule.title}</h3>
+ <p className="font-body text-sm md:text-base text-accent/75 leading-relaxed">{rule.text}</p>
  </div>
  </Reveal>
  ))}
