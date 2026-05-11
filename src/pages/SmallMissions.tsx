@@ -571,15 +571,15 @@ const SmallMissions = () => {
                     </div>
                   ) : (
                     <>
-                      {priorityHelpers.length > 0 && (
+                      {visiblePriorityHelpers.length > 0 && (
                         <div className="space-y-3">
                           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {priorityHelpers.map(renderHelperCard)}
+                            {visiblePriorityHelpers.map(renderHelperCard)}
                           </div>
                         </div>
                       )}
 
-                      {complementaryHelpers.length > 0 && (
+                      {visibleComplementaryHelpers.length > 0 && (
                         <div className="space-y-3">
                           <div className="flex items-center gap-3">
                             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
@@ -591,8 +591,16 @@ const SmallMissions = () => {
                             <div className="flex-1 h-px bg-border" />
                           </div>
                           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {complementaryHelpers.map(renderHelperCard)}
+                            {visibleComplementaryHelpers.map(renderHelperCard)}
                           </div>
+                        </div>
+                      )}
+
+                      {totalHelpersAvailable > totalHelpersShown && (
+                        <div className="flex justify-center pt-2">
+                          <Button variant="outline" onClick={() => setVisibleHelpers((n) => n + PAGE_SIZE)}>
+                            Voir plus de personnes ({totalHelpersAvailable - totalHelpersShown} restantes)
+                          </Button>
                         </div>
                       )}
 
