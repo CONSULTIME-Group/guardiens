@@ -2,13 +2,13 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Image as ImageIcon, Archive, X, Home, HeartHandshake, MessageSquare, Info, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Archive, Home, HeartHandshake, Lock, Loader2 } from "lucide-react";
 import EmptyState from "@/components/shared/EmptyState";
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import HouseGuideBlock from "@/components/messages/HouseGuideBlock";
 import ConversationHeader from "@/components/messages/ConversationHeader";
@@ -16,12 +16,15 @@ import ContextHeaderCard from "@/components/messages/ContextHeaderCard";
 import PresenceBadge from "@/components/messages/PresenceBadge";
 import DaySeparator from "@/components/messages/DaySeparator";
 import MessageBubble from "@/components/messages/MessageBubble";
+import MessageComposer from "@/components/messages/MessageComposer";
+import MessagesListSkeleton from "@/components/messages/MessagesListSkeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { trackFirstAction } from "@/lib/analytics";
-import { Lock } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { appStatusBadge as appStatusLabels } from "@/lib/messageStatus";
+import { useAutoOpenConversation } from "@/hooks/useAutoOpenConversation";
+
+const MESSAGES_PAGE_SIZE = 50;
 
 interface Conversation {
   id: string;
@@ -86,8 +89,11 @@ const Messages = () => {
   const [pill, setPill] = useState<ConvPill>("all");
   const [searchFilter, setSearchFilter] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [autoOpened, setAutoOpened] = useState(false);
+  const messagesScrollRef = useRef<HTMLDivElement>(null);
+  // Pagination des messages
+  const [hasMoreMessages, setHasMoreMessages] = useState(false);
+  const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
+  const isInitialMessagesLoad = useRef(true);
 
   const loadConversations = useCallback(async () => {
     if (!user) return;
@@ -228,159 +234,70 @@ const Messages = () => {
 
   useEffect(() => { loadConversations(); }, [loadConversations]);
 
-  // Auto-open conversation from query param (URL standardisée: ?c=, anciens params supportés)
+  // ── Auto-open : extrait dans un hook dédié (?gardien=, ?c=, fallback unread desktop) ──
+  useAutoOpenConversation<Conversation>({
+    user: user ? { id: user.id } : null,
+    conversations,
+    setConversations,
+    activeConv,
+    setActiveConv,
+    loading,
+    isMobile,
+    enrichConv: (raw, otherProfile) => ({
+      ...(raw as any),
+      archived_by: raw.archived_by || [],
+      sit: null,
+      small_mission: null,
+      other_user: otherProfile || null,
+      last_message: null,
+      unread_count: 0,
+      application_status: null,
+      other_user_rating: 0,
+      other_user_is_emergency: false,
+    }) as Conversation,
+  });
+
+  // ── Realtime sur la liste : tout INSERT sur une conversation de l'utilisateur ──
+  // déclenche un rechargement debouncé de la liste pour rafraîchir badges et tri.
   useEffect(() => {
-    if (autoOpened) return;
-
-    const gardienId = searchParams.get("gardien");
-    const convId =
-      searchParams.get("c") ||
-      searchParams.get("conversation") ||
-      searchParams.get("conv") ||
-      searchParams.get("conversationId");
-
-    // Handle ?gardien= : créer/récupérer conversation via RPC atomique
-    if (gardienId && user && !loading) {
-      const candidates = conversations.filter(c => {
-        const otherId = c.owner_id === user.id ? c.sitter_id : c.owner_id;
-        return otherId === gardienId;
-      });
-      const existing = candidates.sort((a, b) => {
-        if (a.sit_id && !b.sit_id) return -1;
-        if (!a.sit_id && b.sit_id) return 1;
-        return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
-      })[0] || null;
-
-      if (existing) {
-        setActiveConv(existing);
-        searchParams.delete("gardien");
-        setSearchParams(searchParams, { replace: true });
-        setAutoOpened(true);
-        return;
-      }
-
-      // RPC atomique : sondage (sitter_inquiry) — pas de risque de pitch refusé ici
-      (async () => {
-        try {
-          const { data: newConvId, error: rpcErr } = await supabase.rpc("get_or_create_conversation", {
-            p_other_user_id: gardienId,
-            p_context_type: "sitter_inquiry",
-            p_sit_id: null,
-            p_small_mission_id: null,
-            p_long_stay_id: null,
-          });
-          if (rpcErr || !newConvId) return;
-
-          const { data: newConv } = await supabase
-            .from("conversations").select("*").eq("id", newConvId as string).single();
-          if (!newConv) return;
-
-          const { data: profileData } = await supabase
-            .from("profiles")
-            .select("id, first_name, avatar_url, identity_verified, city, is_founder")
-            .eq("id", gardienId)
-            .single();
-
-          const enriched: Conversation = {
-            ...newConv,
-            archived_by: newConv.archived_by || [],
-            other_user: profileData || null,
-            last_message: null,
-            unread_count: 0,
-            application_status: null,
-            other_user_rating: 0,
-            other_user_is_emergency: false,
-          };
-
-          setConversations(prev => [enriched, ...prev]);
-          setActiveConv(enriched);
-          searchParams.delete("gardien");
-          setSearchParams(searchParams, { replace: true });
-          setAutoOpened(true);
-        } catch {
-          // silently fail
-        }
-      })();
-      return;
-    }
-
-    if (conversations.length === 0) return;
-
-    if (convId) {
-      const target = conversations.find(c => c.id === convId);
-      if (target) {
-        setActiveConv(target);
-        // Normaliser l'URL : ?c=<id> uniquement
-        const next = new URLSearchParams(searchParams);
-        next.delete("conversation");
-        next.delete("conv");
-        next.delete("conversationId");
-        next.set("c", convId);
-        setSearchParams(next, { replace: true });
-        setAutoOpened(true);
-        return;
-      }
-      // Conversation not yet in local state — fetch it directly
-      if (!autoOpened) {
-        (async () => {
-          try {
-            const { data: fetchedConv } = await supabase
-              .from("conversations")
-              .select("*")
-              .eq("id", convId)
-              .single();
-            if (!fetchedConv) return;
-            const otherId = fetchedConv.owner_id === user?.id ? fetchedConv.sitter_id : fetchedConv.owner_id;
-            const { data: profileData } = await supabase
-              .from("profiles")
-              .select("id, first_name, avatar_url, identity_verified, city, is_founder")
-              .eq("id", otherId)
-              .single();
-            const enriched: Conversation = {
-              ...fetchedConv,
-              archived_by: fetchedConv.archived_by || [],
-              other_user: profileData || null,
-              last_message: null,
-              unread_count: 0,
-              application_status: null,
-              other_user_rating: 0,
-              other_user_is_emergency: false,
-            };
-            setConversations(prev => {
-              if (prev.some(c => c.id === enriched.id)) return prev;
-              return [enriched, ...prev];
-            });
-            setActiveConv(enriched);
-            searchParams.delete("conversation");
-            searchParams.delete("conv");
-            searchParams.delete("conversationId");
-            setSearchParams(searchParams, { replace: true });
-            setAutoOpened(true);
-          } catch {
-            // silently fail
+    if (!user) return;
+    let timer: number | undefined;
+    const debouncedReload = () => {
+      if (timer) window.clearTimeout(timer);
+      timer = window.setTimeout(() => loadConversations(), 400);
+    };
+    const channel = supabase
+      .channel(`messages-list-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages" },
+        (payload) => {
+          const msg = payload.new as Message;
+          // Ne déclenche que si le message concerne une de nos conversations connues
+          if (conversations.some((c) => c.id === msg.conversation_id)) {
+            debouncedReload();
           }
-        })();
-        return;
-      }
-    }
+        }
+      )
+      .subscribe();
+    return () => {
+      if (timer) window.clearTimeout(timer);
+      supabase.removeChannel(channel);
+    };
+  }, [user, conversations, loadConversations]);
 
-    // Auto-open most recent unread — only on desktop (mobile keeps the list visible)
-    if (!isMobile) {
-      const unread = conversations.find(c => c.unread_count > 0 && !c.archived_by.includes(user?.id || ""));
-      if (unread) {
-        setActiveConv(unread);
-      }
-    }
-    setAutoOpened(true);
-  }, [conversations, searchParams, autoOpened, setSearchParams, user, loading, isMobile]);
-
+  // ── Chargement messages avec pagination (50 derniers d'abord) ──
   const loadMessages = useCallback(async (convId: string) => {
-    const { data } = await supabase
+    isInitialMessagesLoad.current = true;
+    const { data, count } = await supabase
       .from("messages")
-      .select("*")
+      .select("*", { count: "exact" })
       .eq("conversation_id", convId)
-      .order("created_at", { ascending: true });
-    setMessages((data as Message[]) || []);
+      .order("created_at", { ascending: false })
+      .limit(MESSAGES_PAGE_SIZE);
+    const ordered = ((data as Message[]) || []).slice().reverse();
+    setMessages(ordered);
+    setHasMoreMessages((count || 0) > ordered.length);
 
     if (user) {
       await supabase
@@ -391,6 +308,39 @@ const Messages = () => {
         .is("read_at", null);
     }
   }, [user]);
+
+  const loadOlderMessages = useCallback(async () => {
+    if (!activeConv || loadingMoreMessages || messages.length === 0) return;
+    setLoadingMoreMessages(true);
+    const oldest = messages[0];
+    const scrollEl = messagesScrollRef.current;
+    const prevScrollHeight = scrollEl?.scrollHeight ?? 0;
+
+    const { data } = await supabase
+      .from("messages")
+      .select("*")
+      .eq("conversation_id", activeConv.id)
+      .lt("created_at", oldest.created_at)
+      .order("created_at", { ascending: false })
+      .limit(MESSAGES_PAGE_SIZE);
+    const older = ((data as Message[]) || []).slice().reverse();
+    setMessages((prev) => [...older, ...prev]);
+    setHasMoreMessages(older.length === MESSAGES_PAGE_SIZE);
+    setLoadingMoreMessages(false);
+
+    // Préserve la position visuelle après prepend
+    requestAnimationFrame(() => {
+      if (scrollEl) {
+        scrollEl.scrollTop = scrollEl.scrollHeight - prevScrollHeight;
+      }
+    });
+  }, [activeConv, loadingMoreMessages, messages]);
+
+  useEffect(() => {
+    setNewMessage("");
+    if (!activeConv) return;
+    loadMessages(activeConv.id);
+  }, [activeConv?.id, loadMessages]);
 
   useEffect(() => {
     // Toujours vider l'input à chaque changement de conversation —
@@ -421,7 +371,11 @@ const Messages = () => {
   }, [activeConv, user]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Premier rendu d'une conversation : scroll instantané au bas (pas d'animation longue).
+    // Nouveaux messages ensuite : scroll fluide.
+    const behavior: ScrollBehavior = isInitialMessagesLoad.current ? "auto" : "smooth";
+    messagesEndRef.current?.scrollIntoView({ behavior });
+    if (isInitialMessagesLoad.current) isInitialMessagesLoad.current = false;
   }, [messages]);
 
   const handleSend = async () => {
@@ -435,22 +389,7 @@ const Messages = () => {
     loadConversations();
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
-  };
-
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user || !activeConv) return;
-    const ext = file.name.split(".").pop();
-    const path = `messages/${activeConv.id}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("property-photos").upload(path, file);
-    if (error) return;
-    const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
-    await supabase.from("messages").insert({ conversation_id: activeConv.id, sender_id: user.id, content: "", photo_url: urlData.publicUrl });
-    await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", activeConv.id);
-    loadConversations();
-  };
+  // (handleKeyDown et handlePhotoUpload sont désormais portés par MessageComposer)
 
   const handleArchive = async (conv: Conversation) => {
     if (!user) return;
@@ -466,7 +405,6 @@ const Messages = () => {
   // ─── Reset active conv when role changes ───
   useEffect(() => {
     setActiveConv(null);
-    setAutoOpened(false);
     loadConversations();
   }, [activeRole]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -499,7 +437,17 @@ const Messages = () => {
   const showList = !activeConv || !isMobile;
   const showThread = !!activeConv;
 
-  if (loading) return <div className="p-6 md:p-10 text-muted-foreground">Chargement...</div>;
+  if (loading) {
+    return (
+      <div className="flex h-screen overflow-hidden">
+        <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+        <div className={`${isMobile ? "w-full" : "w-80 border-r border-border"} flex flex-col bg-card`}>
+          <MessagesListSkeleton />
+        </div>
+        {!isMobile && <div className="flex-1 bg-background" aria-hidden="true" />}
+      </div>
+    );
+  }
 
   const pills: { value: ConvPill; label: string }[] = [
     { value: "all", label: "Tout" },
@@ -717,8 +665,8 @@ const Messages = () => {
 
           {/* Messages with day separators */}
           <div
-            className="flex-1 overflow-y-auto space-y-0 pb-20 md:pb-4"
-            style={{ background: "hsl(var(--background))" }}
+            ref={messagesScrollRef}
+            className="flex-1 overflow-y-auto space-y-0 pb-20 md:pb-4 bg-background"
             role="log"
             aria-live="polite"
             aria-relevant="additions"
@@ -729,6 +677,20 @@ const Messages = () => {
             )}
 
             <div className="p-4 space-y-1">
+              {hasMoreMessages && (
+                <div className="flex justify-center py-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={loadOlderMessages}
+                    disabled={loadingMoreMessages}
+                    className="text-xs text-muted-foreground gap-2"
+                  >
+                    {loadingMoreMessages && <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />}
+                    {loadingMoreMessages ? "Chargement…" : "Voir messages plus anciens"}
+                  </Button>
+                </div>
+              )}
               {messages.map((msg, idx) => {
                 const prevMsg = idx > 0 ? messages[idx - 1] : null;
                 const showDaySep = !prevMsg || !isSameDay(new Date(msg.created_at), new Date(prevMsg.created_at));
@@ -751,7 +713,7 @@ const Messages = () => {
           {effectiveRole === "sitter" && !hasAccess && !activeConv.small_mission_id ? (
             <div className="border-t border-border bg-muted/50 p-4 mb-16 md:mb-0">
               <div className="flex items-center gap-3">
-                <Lock className="h-5 w-5 text-muted-foreground shrink-0" />
+                <Lock className="h-5 w-5 text-muted-foreground shrink-0" aria-hidden="true" />
                 <div className="flex-1">
                   <p className="text-sm text-muted-foreground">
                     Abonnez-vous pour répondre à cette conversation.{" "}
@@ -761,41 +723,37 @@ const Messages = () => {
               </div>
             </div>
           ) : (
-            <div className="border-t border-border bg-card p-3 flex items-center gap-2 mb-16 md:mb-0">
-              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoUpload} aria-hidden="true" tabIndex={-1} />
-              <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2 rounded-lg hover:bg-accent text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Joindre une photo">
-                <ImageIcon className="h-5 w-5" aria-hidden="true" />
-              </button>
-              <Input
-                value={newMessage}
-                onChange={e => setNewMessage(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Écrire un message..."
-                aria-label="Écrire un message"
-                className="flex-1 rounded-full"
-              />
-              <Button size="icon" onClick={handleSend} disabled={sending || !newMessage.trim()} className="rounded-full shrink-0" aria-label="Envoyer le message">
-                <Send className="h-4 w-4" aria-hidden="true" />
-              </Button>
-            </div>
+            <MessageComposer
+              value={newMessage}
+              onChange={setNewMessage}
+              onSend={handleSend}
+              onPickPhoto={async (file) => {
+                if (!user || !activeConv) return;
+                const ext = file.name.split(".").pop();
+                const path = `messages/${activeConv.id}/${Date.now()}.${ext}`;
+                const { error } = await supabase.storage.from("property-photos").upload(path, file);
+                if (error) return;
+                const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
+                await supabase.from("messages").insert({
+                  conversation_id: activeConv.id, sender_id: user.id, content: "", photo_url: urlData.publicUrl,
+                });
+                await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", activeConv.id);
+                loadConversations();
+              }}
+              sending={sending}
+            />
           )}
         </div>
       ) : !isMobile ? (
-        /* MOD 1 — Empty state */
-        <div className="flex-1 flex flex-col items-center justify-center h-full gap-4">
-          <MessageSquare className="h-10 w-10 text-muted-foreground" />
-          <h2 className="text-lg font-semibold text-foreground">Vos échanges</h2>
-          <p className="text-sm text-muted-foreground text-center max-w-xs">
-            Sélectionnez une conversation ou lancez une recherche.
-          </p>
-          {pill !== "archived" && (
-            <Link
-              to={pill === "mission" ? "/petites-missions" : "/search"}
-              className="border border-border rounded-full px-4 py-2 text-sm hover:border-primary transition-colors"
-            >
-              {pill === "mission" ? "Rechercher une mission →" : "Rechercher une annonce →"}
-            </Link>
-          )}
+        /* Empty state desktop — gouache emptyMailbox conforme à la charte */
+        <div className="flex-1 flex flex-col items-center justify-center h-full bg-background">
+          <EmptyState
+            illustration="emptyMailbox"
+            title="Vos échanges"
+            description="Sélectionnez une conversation ou lancez une recherche pour démarrer un échange."
+            actionLabel={pill === "mission" ? "Rechercher une mission" : "Rechercher une annonce"}
+            actionTo={pill === "archived" ? undefined : (pill === "mission" ? "/petites-missions" : "/search")}
+          />
         </div>
       ) : null}
     </div>
