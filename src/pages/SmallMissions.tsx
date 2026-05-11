@@ -3,7 +3,8 @@ const entraideHeader = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/obje
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dog, Flower2, Handshake, ArrowRight, Lock, X, Sprout, PawPrint, GraduationCap, Star, MapPin, Search as SearchIcon, Check } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowRight, Lock, X, MapPin, Search as SearchIcon, Check } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -19,12 +20,11 @@ import ProposeHelperExchangeDialog from "@/components/missions/ProposeHelperExch
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import CompetenceAutocomplete from "@/components/profile/CompetenceAutocomplete";
 
-const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
- animals: { label: "Animaux", icon: Dog, colorClass: "text-primary" },
- garden: { label: "Jardin", icon: Flower2, colorClass: "text-primary" },
- house: { label: "Maison", icon: Handshake, colorClass: "text-primary" },
- skills: { label: "Compétences", icon: Handshake, colorClass: "text-primary" },
- 
+const CATEGORY_META: Record<string, { label: string }> = {
+ animals: { label: "Animaux" },
+ garden: { label: "Jardin" },
+ house: { label: "Maison" },
+ skills: { label: "Compétences" },
 };
 
 const MISSION_TO_SKILL: Record<string, string> = {
@@ -40,11 +40,11 @@ const SKILL_TO_MISSION: Record<string, string> = {
  coups_de_main: "house",
 };
 
-const SKILL_PILL_META: Record<string, { label: string; icon: typeof Sprout }> = {
- jardin: { label: "Jardin", icon: Sprout },
- animaux: { label: "Animaux", icon: PawPrint },
- competences: { label: "Compétences", icon: GraduationCap },
- house: { label: "Maison", icon: Handshake },
+const SKILL_PILL_META: Record<string, { label: string }> = {
+ jardin: { label: "Jardin" },
+ animaux: { label: "Animaux" },
+ competences: { label: "Compétences" },
+ house: { label: "Maison" },
 };
 
 const DURATION_LABELS: Record<string, string> = {
