@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
-import { Check, Loader2 } from "lucide-react";
+import { ArrowRight, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import OwnerStepIdentity from "@/components/owner-profile/OwnerStepIdentity";
 import OwnerStepHousing from "@/components/owner-profile/OwnerStepHousing";
 import OwnerStepAnimals from "@/components/owner-profile/OwnerStepAnimals";
@@ -12,8 +13,10 @@ import OwnerGallery from "@/components/owner-profile/OwnerGallery";
 import OwnerHouseGuideForm from "@/components/owner-profile/OwnerHouseGuideForm";
 import OwnerStepSkills from "@/components/owner-profile/OwnerStepSkills";
 import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
+import ProfileSkeleton from "@/components/profile/ProfileSkeleton";
 import ScoreBreakdown, { type ScoreCriterion } from "@/components/profile/ScoreBreakdown";
 import { useOwnerProfile, type OwnerProfileData } from "@/hooks/useOwnerProfile";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
