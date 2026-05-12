@@ -443,11 +443,11 @@ const Pricing = () => {
       {/* Owner Card */}
       <Card data-testid="owner-card" className="bg-card border border-border/40 rounded-2xl h-full flex flex-col relative">
        <div data-testid="badge-owner" className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center justify-center bg-foreground/90 text-background text-[11px] sm:text-xs font-body font-medium tracking-wide leading-none px-3.5 py-1.5 rounded-full whitespace-nowrap max-w-[calc(100%-1.5rem)] shadow-sm">
-        Toujours à 0&nbsp;€
+        Toujours gratuit
        </div>
        <CardHeader className="text-center pb-2 p-8 pt-10">
         <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Propriétaire</div>
-        <CardTitle className="font-heading text-5xl font-bold text-foreground">0&nbsp;€</CardTitle>
+        <CardTitle className="font-heading text-5xl font-bold text-foreground">Gratuit</CardTitle>
         <p className="text-sm font-body text-foreground/60 mt-2">
          Sans abonnement, sans carte bancaire.
         </p>
@@ -456,7 +456,7 @@ const Pricing = () => {
         <ul className="space-y-3 flex-1">
          {ownerFeatures.map((f) => (
           <li key={f} className="flex items-start gap-2.5 text-sm">
-           <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+           <span aria-hidden className="text-primary font-body mt-0.5 shrink-0 select-none">—</span>
            <span className="font-body text-foreground/70">{f}</span>
           </li>
          ))}
