@@ -10,12 +10,10 @@ const corsHeaders = {
 const JULY_14_2026_UTC = new Date("2026-07-14T00:00:00Z");
 
 const PRICE_IDS = {
-  monthly:  "price_1TPPawIR9gPuLbxmH9vC614f", // 6,99€/mois récurrent (prod_UOByEwqFtArM7W)
-  one_shot: "price_1TJKw9EbGS9RIjqFjRSGwnsQ",
-  prorata:  "price_1TJKwgEbGS9RIjqFBUfno6Lr",
+  monthly:  "price_1TPPawIR9gPuLbxmH9vC614f", // 6,99 €/mois récurrent  (prod_UOByEwqFtArM7W)
+  one_shot: "price_1TWDJpIR9gPuLbxmG5i5fZHR", // 10 € paiement unique   (prod_UVDlR3KnhFvfYP)
+  annuel:   "price_1TWDLeIR9gPuLbxm0iCJDa58", // 65 €/an récurrent      (prod_UVDnMM7d5bbZ6o)
 };
-
-const PRORATA_PRODUCT_ID = "prod_UHumwgYhIdF6BV";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
