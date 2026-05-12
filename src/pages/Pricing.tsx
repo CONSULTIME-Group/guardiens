@@ -278,7 +278,7 @@ const Pricing = () => {
     },
     availability: "https://schema.org/InStock",
     url: "https://guardiens.fr/inscription?role=sitter&plan=mensuel",
-    priceValidUntil: "2026-12-31",
+     priceValidUntil: "2027-12-31",
     seller: { "@type": "Organization", name: "Guardiens" },
    },
    {
