@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-import { Check, MapPin, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import PublicHeader from "@/components/layout/PublicHeader";
@@ -18,7 +18,24 @@ import SecurityTrustSection from "@/components/subscription/SecurityTrustSection
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { LAUNCH_DATE, isBeforeLaunch, isInGracePeriod } from "@/lib/constants";
-import { SITTER_PRICE, SITTER_PRICE_START, SITTER_PRICE_NUMERIC, SITTER_PRICE_CURRENCY, SITTER_PRICE_START_ISO } from "@/lib/pricing";
+import {
+  SITTER_PRICE,
+  SITTER_PRICE_START,
+  SITTER_PRICE_NUMERIC,
+  SITTER_PRICE_CURRENCY,
+  SITTER_PRICE_START_ISO,
+  SITTER_PRICE_ANNUAL_NUMERIC,
+  SITTER_PRICE_ANNUAL_DISCOUNT_PCT,
+  SITTER_PRICE_ONESHOT_NUMERIC,
+} from "@/lib/pricing";
+
+// Économie annuelle réelle, calculée pour rester cohérente avec les constantes prix.
+const ANNUAL_SAVINGS_EUR = (
+  SITTER_PRICE_NUMERIC * 12 - SITTER_PRICE_ANNUAL_NUMERIC
+).toFixed(2).replace(".", ",");
+const ANNUAL_MONTHLY_EQUIV = (
+  SITTER_PRICE_ANNUAL_NUMERIC / 12
+).toFixed(2).replace(".", ",");
 
 const ownerFeatures = [
  "Publiez une annonce en 5 minutes",
@@ -42,7 +59,7 @@ const sitterFeatures = [
 const promiseRows: Array<{ label: string; value: string; positive: boolean }> = [
  { label: "Commission sur la garde", value: "0 %", positive: true },
  { label: "Vérification d'identité", value: "Incluse", positive: true },
- { label: "Entraide & petites missions", value: `À 0\u00A0€`, positive: true },
+ { label: "Entraide & petites missions", value: `Gratuit`, positive: true },
  { label: "Carte bancaire à l'inscription", value: "Jamais", positive: true },
  { label: "Frais de mise en relation", value: "Aucun", positive: true },
  { label: "Engagement de durée", value: "Aucun", positive: true },
@@ -50,14 +67,14 @@ const promiseRows: Array<{ label: string; value: string; positive: boolean }> = 
 
 const faqItems = [
  {
-  q: `L'accès est-il vraiment à 0\u00A0€ pour tout le monde jusqu'au ${SITTER_PRICE_START} ?`,
-  a: `Oui. Jusqu'au ${SITTER_PRICE_START}, **l'accès complet à Guardiens est à 0\u00A0€ pour tout le monde** — gardiens comme propriétaires, sans exception.
+  q: `L'accès est-il vraiment gratuit pour tout le monde jusqu'au ${SITTER_PRICE_START} ?`,
+  a: `Oui. Jusqu'au ${SITTER_PRICE_START}, **l'accès complet à Guardiens est gratuit pour tout le monde** — gardiens comme propriétaires, sans exception.
 
 Aucune carte bancaire n'est demandée à l'inscription. Vous accédez à toutes les fonctionnalités : publier une annonce, postuler aux gardes, échanger par messagerie, laisser des avis, utiliser l'entraide.
 
-Cet accès à 0\u00A0€ ne dépend pas du programme Fondateur : que vous vous inscriviez le 1ᵉʳ février ou le 12 juin 2026, vous ne payez rien jusqu'au ${SITTER_PRICE_START}.
+Cet accès gratuit ne dépend pas du programme Fondateur : que vous vous inscriviez le 1ᵉʳ février ou le 12 juin 2026, vous ne payez rien jusqu'au ${SITTER_PRICE_START}.
 
-À partir du 15 juillet 2026, l'abonnement gardien à ${SITTER_PRICE} devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste à 0\u00A0€.`,
+À partir du 15 juillet 2026, l'abonnement gardien à ${SITTER_PRICE} devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit.`,
  },
  {
   q: `Qu'est-ce que le programme Fondateur ?`,
@@ -65,13 +82,13 @@ Cet accès à 0\u00A0€ ne dépend pas du programme Fondateur : que vous vous i
 
 Le badge ne change rien à votre accès ni à votre tarif : c'est uniquement une distinction symbolique pour celles et ceux qui ont rejoint l'aventure dès le départ.
 
-À ne pas confondre avec l'accès à 0\u00A0€ : **tout le monde accède à Guardiens à 0\u00A0€ jusqu'au ${SITTER_PRICE_START}**, Fondateur ou non.`,
+À ne pas confondre avec l'accès gratuit : **tout le monde accède à Guardiens gratuit jusqu'au ${SITTER_PRICE_START}**, Fondateur ou non.`,
  },
  {
-  q: `Pourquoi c'est à 0\u00A0€ pour les propriétaires ?`,
+  q: `Pourquoi c'est gratuit pour les propriétaires ?`,
   a: `Parce que nous ne facturons pas l'accès à celles et ceux qui ouvrent leur maison.
 
-Publier une annonce, recevoir des candidatures, échanger avec les gardiens, laisser un avis : tout reste à 0\u00A0€. Ce n'est pas une offre d'appel, c'est un choix de fond sur notre modèle économique.
+Publier une annonce, recevoir des candidatures, échanger avec les gardiens, laisser un avis : tout reste gratuit. Ce n'est pas une offre d'appel, c'est un choix de fond sur notre modèle économique.
 
 Guardiens se rémunère uniquement via l'abonnement des gardiens. Côté propriétaire, payer pour rencontrer des personnes de confiance n'aurait pas de sens : ce qui a de la valeur, c'est l'échange — pas l'accès.
 
@@ -85,13 +102,13 @@ Vous vous inscrivez en tant que gardien, sans carte bancaire. Pendant 7 jours, v
 
 Aucun prélèvement automatique. À la fin de l'essai, vous décidez d'activer ou non l'abonnement à ${SITTER_PRICE}. Sans action de votre part, l'accès s'interrompt — sans frais.
 
-Avant le ${SITTER_PRICE_START}, cet essai n'a pas lieu d'être : tout est déjà à 0\u00A0€ pour tout le monde.`,
+Avant le ${SITTER_PRICE_START}, cet essai n'a pas lieu d'être : tout est déjà gratuit pour tout le monde.`,
  },
  {
   q: `Pourquoi le 14 juillet ?`,
-  a: `Il fallait une date après plusieurs semaines d'accès à 0\u00A0€ — un repère simple, partagé par toutes et tous. Le **${SITTER_PRICE_START}, fête nationale**, s'est imposé naturellement.
+  a: `Il fallait une date après plusieurs semaines d'accès gratuit — un repère simple, partagé par toutes et tous. Le **${SITTER_PRICE_START}, fête nationale**, s'est imposé naturellement.
 
-C'est ce jour-là que l'accès à 0\u00A0€ prend fin pour les gardiens. À partir du **15 juillet 2026**, l'abonnement gardien à ${SITTER_PRICE} devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste à 0\u00A0€ en permanence.`,
+C'est ce jour-là que l'accès gratuit prend fin pour les gardiens. À partir du **15 juillet 2026**, l'abonnement gardien à ${SITTER_PRICE} devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit en permanence.`,
  },
  {
   q: "Y a-t-il des frais cachés ?",
@@ -99,7 +116,7 @@ C'est ce jour-là que l'accès à 0\u00A0€ prend fin pour les gardiens. À par
 
 **Après le ${SITTER_PRICE_START} — ce que paient les gardiens :** ${SITTER_PRICE}, 10\u00A0€ pour un mois, ou 65\u00A0€/an (−22\u00A0%). C'est tout.
 
-**Ce que paient les propriétaires :** Rien, jamais. Publier, recevoir des candidatures, choisir, évaluer — accès à 0\u00A0€ en permanence.
+**Ce que paient les propriétaires :** Rien, jamais. Publier, recevoir des candidatures, choisir, évaluer — accès gratuit en permanence.
 
 **Ce qu'on ne prend pas :** Aucune commission sur les gardes. Pas d'assurance obligatoire, pas de booking fee, pas de frais de mise en relation.`,
  },
@@ -111,7 +128,7 @@ C'est ce jour-là que l'accès à 0\u00A0€ prend fin pour les gardiens. À par
 
 **Les petites missions d'entraide entre gens du coin** : un coup de main ponctuel, sans nuitée, sans animal nécessaire — arroser des plantes, ramasser les légumes du jardin, monter un meuble, prêter une perceuse, partager un trajet.
 
-Les deux usages sont indépendants : vous pouvez activer l'un, l'autre, ou les deux. L'entraide reste à 0\u00A0€ pour toutes et tous, sans abonnement.`,
+Les deux usages sont indépendants : vous pouvez activer l'un, l'autre, ou les deux. L'entraide reste gratuit pour toutes et tous, sans abonnement.`,
  },
  {
   q: "Quels types d'échanges sont possibles ?",
@@ -144,9 +161,20 @@ const cityLinks = [
 const Pricing = () => {
  const before = isBeforeLaunch();
  const grace = isInGracePeriod();
- const [formule, setFormule] = useState<'one_shot' | 'mensuel' | 'annuel'>('mensuel');
+ const [searchParams] = useSearchParams();
+ const initialPlan = ((): 'one_shot' | 'mensuel' | 'annuel' => {
+  const p = searchParams.get('plan');
+  return p === 'one_shot' || p === 'annuel' || p === 'mensuel' ? p : 'mensuel';
+ })();
+ const [formule, setFormule] = useState<'one_shot' | 'mensuel' | 'annuel'>(initialPlan);
  const [checkoutLoading, setCheckoutLoading] = useState(false);
  const { user } = useAuth();
+
+ // Synchronise le state si le paramètre `?plan=` change après mount (deep-link).
+ useEffect(() => {
+  const p = searchParams.get('plan');
+  if (p === 'one_shot' || p === 'annuel' || p === 'mensuel') setFormule(p);
+ }, [searchParams]);
 
  const msLeft = Math.max(0, LAUNCH_DATE.getTime() - new Date().getTime());
  const daysLeft = Math.ceil(msLeft / 86400000);
@@ -165,6 +193,14 @@ const Pricing = () => {
   return `/inscription${qs ? `?${qs}` : ""}`;
  };
 
+ // Mapping formule UI (FR) → contrat backend (`create-checkout-session`).
+ // CRITIQUE : sans ce mapping, `mensuel` produisait une 400 « formula_type invalide ».
+ const FORMULA_TO_BACKEND: Record<typeof formule, 'monthly' | 'one_shot' | 'annuel'> = {
+  mensuel: 'monthly',
+  one_shot: 'one_shot',
+  annuel: 'annuel',
+ };
+
  // Lance le checkout Stripe correspondant à la formule sélectionnée.
  // Pré-condition : utilisateur connecté ET hors période gratuite (`before === false`).
  const startCheckout = async () => {
@@ -172,7 +208,7 @@ const Pricing = () => {
   setCheckoutLoading(true);
   try {
    const { data, error } = await supabase.functions.invoke("create-checkout-session", {
-    body: { formula_type: formule },
+    body: { formula_type: FORMULA_TO_BACKEND[formule] },
    });
    if (error) throw error;
    const url = (data as { url?: string } | null)?.url;
@@ -242,7 +278,7 @@ const Pricing = () => {
     },
     availability: "https://schema.org/InStock",
     url: "https://guardiens.fr/inscription?role=sitter&plan=mensuel",
-    priceValidUntil: "2026-12-31",
+     priceValidUntil: "2027-12-31",
     seller: { "@type": "Organization", name: "Guardiens" },
    },
    {
@@ -292,7 +328,7 @@ const Pricing = () => {
     description={
      before
       ? `Accès offert jusqu'au ${SITTER_PRICE_START} pour tous, gardiens comme propriétaires. Sans carte bancaire, sans commission.`
-      : `À 0\u00A0€ pour les propriétaires. ${SITTER_PRICE} pour les gardiens avec 7 jours d'essai sans frais. Sans commission, sans frais cachés.`
+      : `Gratuit pour les propriétaires. ${SITTER_PRICE} pour les gardiens avec 7 jours d'essai sans frais. Sans commission, sans frais cachés.`
     }
     path="/tarifs"
    />
@@ -326,14 +362,14 @@ const Pricing = () => {
       <p className="text-base md:text-lg font-body text-foreground/65 leading-relaxed mb-7">
        {before
         ? `Jusqu'au ${SITTER_PRICE_START}, l'accès complet est offert — gardiens comme propriétaires. Aucune carte bancaire demandée.`
-        : `À 0\u00A0€ pour les propriétaires. ${SITTER_PRICE} pour les gardiens, avec 7 jours d'essai sans frais. C'est tout.`}
+        : `Gratuit pour les propriétaires. ${SITTER_PRICE} pour les gardiens, avec 7 jours d'essai sans frais. C'est tout.`}
       </p>
       <div data-testid="pricing-hero-cta" className="flex flex-col sm:flex-row gap-3 justify-center">
        <Link
         to={registerLink("owner")}
         className="inline-flex items-center justify-center bg-primary text-primary-foreground font-body font-semibold text-sm px-7 py-3.5 rounded-full hover:bg-primary/90 transition-colors min-h-[44px]"
        >
-        Publier mon annonce — à 0&nbsp;€
+        Publier mon annonce — gratuitement
        </Link>
        <Link
         to={registerLink("sitter")}
@@ -390,7 +426,7 @@ const Pricing = () => {
       <section className="rounded-2xl p-6 md:p-8 text-center space-y-3 border-2 border-amber-300 bg-amber-50 mb-12 max-w-5xl mx-auto">
        <h2 className="font-heading text-2xl font-bold text-foreground">Les Fondateurs ont jusqu'au {SITTER_PRICE_START}</h2>
        <p className="text-muted-foreground max-w-2xl mx-auto font-body">
-        Les premiers membres conservent leur accès à 0&nbsp;€ jusqu'au {SITTER_PRICE_START}.
+        Les premiers membres conservent leur accès gratuit jusqu'au {SITTER_PRICE_START}.
         Après cette date, l'abonnement à {SITTER_PRICE} sera nécessaire pour les gardiens. Le badge Fondateur reste affiché sur votre profil.
        </p>
       </section>
@@ -407,11 +443,11 @@ const Pricing = () => {
       {/* Owner Card */}
       <Card data-testid="owner-card" className="bg-card border border-border/40 rounded-2xl h-full flex flex-col relative">
        <div data-testid="badge-owner" className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center justify-center bg-foreground/90 text-background text-[11px] sm:text-xs font-body font-medium tracking-wide leading-none px-3.5 py-1.5 rounded-full whitespace-nowrap max-w-[calc(100%-1.5rem)] shadow-sm">
-        Toujours à 0&nbsp;€
+        Toujours gratuit
        </div>
        <CardHeader className="text-center pb-2 p-8 pt-10">
         <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Propriétaire</div>
-        <CardTitle className="font-heading text-5xl font-bold text-foreground">0&nbsp;€</CardTitle>
+        <CardTitle className="font-heading text-5xl font-bold text-foreground">Gratuit</CardTitle>
         <p className="text-sm font-body text-foreground/60 mt-2">
          Sans abonnement, sans carte bancaire.
         </p>
@@ -420,7 +456,7 @@ const Pricing = () => {
         <ul className="space-y-3 flex-1">
          {ownerFeatures.map((f) => (
           <li key={f} className="flex items-start gap-2.5 text-sm">
-           <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+           <span aria-hidden className="text-primary font-body mt-0.5 shrink-0 select-none">—</span>
            <span className="font-body text-foreground/70">{f}</span>
           </li>
          ))}
@@ -453,7 +489,7 @@ const Pricing = () => {
         {before ? (
          <div className="text-center space-y-1.5 py-2">
           <p className="font-heading text-5xl font-bold text-primary leading-none">
-           0&nbsp;€
+           Gratuit
           </p>
           <p className="text-xs text-foreground/55 font-body pt-2">
            Jusqu'au {SITTER_PRICE_START}, puis <span className="font-semibold text-foreground">{SITTER_PRICE}</span>
@@ -461,13 +497,29 @@ const Pricing = () => {
          </div>
         ) : (
          <div className="text-center space-y-1.5 py-2">
-          <p className="font-heading text-5xl font-bold text-foreground">
-           <span className="text-lg font-body font-normal text-foreground/60 mr-1">à partir de</span>
-           6,99&nbsp;€
-           <span className="text-lg font-body font-normal text-foreground/60 ml-1">/mois</span>
-          </p>
+          {formule === 'annuel' ? (
+           <p className="font-heading text-5xl font-bold text-foreground">
+            {SITTER_PRICE_ANNUAL_NUMERIC}&nbsp;€
+            <span className="text-lg font-body font-normal text-foreground/60 ml-1">/an</span>
+           </p>
+          ) : formule === 'one_shot' ? (
+           <p className="font-heading text-5xl font-bold text-foreground">
+            {SITTER_PRICE_ONESHOT_NUMERIC}&nbsp;€
+            <span className="text-lg font-body font-normal text-foreground/60 ml-1">le mois</span>
+           </p>
+          ) : (
+           <p className="font-heading text-5xl font-bold text-foreground">
+            <span className="text-lg font-body font-normal text-foreground/60 mr-1">à partir de</span>
+            6,99&nbsp;€
+            <span className="text-lg font-body font-normal text-foreground/60 ml-1">/mois</span>
+           </p>
+          )}
           <p className="text-xs text-foreground/50 font-body">
-           7 jours d'essai sans frais · Sans CB · Résiliable à tout moment
+           {formule === 'mensuel'
+            ? "7 jours d'essai sans frais · Sans CB · Résiliable à tout moment"
+            : formule === 'annuel'
+             ? `Soit ${ANNUAL_MONTHLY_EQUIV}\u00A0€/mois équivalent · Résiliable à tout moment`
+             : "Paiement unique · Sans renouvellement"}
           </p>
          </div>
         )}
@@ -476,31 +528,40 @@ const Pricing = () => {
         <ul className="space-y-3">
          {sitterFeatures.map((f) => (
           <li key={f} className="flex items-start gap-2.5 text-sm">
-           <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+           <span aria-hidden className="text-primary font-body mt-0.5 shrink-0 select-none">—</span>
            <span className="text-foreground/70 font-body">{f}</span>
           </li>
          ))}
         </ul>
 
-        {/* Bloc formules — masqué pendant la période à 0 € totale */}
+        {/* Bloc formules — masqué pendant la période gratuite totale.
+            Pattern radiogroup accessible (rôle + arrow keys via tabIndex et aria-checked). */}
         {!before && (
-         <div className="bg-background border border-border/50 rounded-xl p-4 space-y-3 text-left">
+         <div role="radiogroup" aria-label="Choix de la formule gardien" className="bg-background border border-border/50 rounded-xl p-4 space-y-3 text-left">
           <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
            Trois formules
           </p>
           <div
+           role="radio"
+           aria-checked={formule === 'one_shot'}
+           tabIndex={0}
            onClick={() => setFormule('one_shot')}
-           className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'one_shot' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
+           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFormule('one_shot'); } }}
+           className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${formule === 'one_shot' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
           >
            <div className="min-w-0">
             <p className="text-sm font-medium text-foreground font-body">Accès un mois</p>
             <p className="text-xs text-foreground/50 font-body">Paiement immédiat · Sans renouvellement</p>
            </div>
-           <span className="text-sm font-semibold text-foreground font-body flex-shrink-0">10&nbsp;€</span>
+           <span className="text-sm font-semibold text-foreground font-body flex-shrink-0">{SITTER_PRICE_ONESHOT_NUMERIC}&nbsp;€</span>
           </div>
           <div
+           role="radio"
+           aria-checked={formule === 'mensuel'}
+           tabIndex={0}
            onClick={() => setFormule('mensuel')}
-           className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'mensuel' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
+           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFormule('mensuel'); } }}
+           className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${formule === 'mensuel' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
           >
            <div className="min-w-0">
             <div className="flex items-center gap-2">
@@ -512,18 +573,22 @@ const Pricing = () => {
            <span className="text-sm font-semibold text-primary font-body flex-shrink-0">{SITTER_PRICE}</span>
           </div>
           <div
+           role="radio"
+           aria-checked={formule === 'annuel'}
+           tabIndex={0}
            onClick={() => setFormule('annuel')}
-           className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'annuel' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
+           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFormule('annuel'); } }}
+           className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${formule === 'annuel' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
           >
            <div className="min-w-0">
             <div className="flex items-center gap-2">
              <p className="text-sm font-medium text-foreground font-body">Annuel</p>
-             <span className="text-[10px] font-body font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full leading-none">-22%</span>
+             <span className="text-[10px] font-body font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full leading-none">-{SITTER_PRICE_ANNUAL_DISCOUNT_PCT}%</span>
             </div>
             <p className="text-xs text-foreground/50 font-body">Un paiement par an · Renouvellement annuel · Résiliable à tout moment</p>
-            <p className="text-xs text-foreground/40 italic font-body">Soit ~5,42&nbsp;€/mois équivalent · Économie de 18,88&nbsp;€/an</p>
+            <p className="text-xs text-foreground/40 italic font-body">Soit ~{ANNUAL_MONTHLY_EQUIV}&nbsp;€/mois équivalent · Économie de {ANNUAL_SAVINGS_EUR}&nbsp;€/an</p>
            </div>
-           <span className="text-sm font-semibold text-primary font-body flex-shrink-0">65&nbsp;€/an</span>
+           <span className="text-sm font-semibold text-primary font-body flex-shrink-0">{SITTER_PRICE_ANNUAL_NUMERIC}&nbsp;€/an</span>
           </div>
          </div>
         )}
@@ -563,7 +628,7 @@ const Pricing = () => {
              ? "7 jours d'essai sans frais. Résiliable à tout moment."
              : formule === "annuel"
               ? "Renouvellement annuel automatique. Résiliable à tout moment."
-              : "Paiement unique, 30 jours d'accès, sans renouvellement."}
+              : "Paiement unique pour un mois d'accès, sans renouvellement."}
          </p>
         </div>
        </CardContent>
@@ -578,7 +643,7 @@ const Pricing = () => {
          L'entraide, indépendante de la garde
         </h2>
         <span className="text-xs uppercase tracking-wider font-body text-primary">
-         À 0&nbsp;€ pour tous
+         Gratuit pour tous
         </span>
        </div>
        <p className="text-sm md:text-base font-body text-foreground/70 leading-relaxed mb-4">
@@ -621,7 +686,6 @@ const Pricing = () => {
         >
          <span className="text-sm font-body text-foreground/75">{row.label}</span>
          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary font-body whitespace-nowrap">
-          <Check className="h-4 w-4" />
           {row.value}
          </span>
         </li>
@@ -647,7 +711,7 @@ const Pricing = () => {
          to={city.to}
          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm font-body text-foreground hover:border-primary/40 hover:text-primary transition-colors"
         >
-         <MapPin className="h-3.5 w-3.5" /> {city.label}
+         {city.label}
         </Link>
        ))}
       </div>
