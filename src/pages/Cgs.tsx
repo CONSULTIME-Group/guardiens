@@ -7,7 +7,7 @@ const Cgs = () => {
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
         title="Conditions générales de services | Guardiens"
-        description="Conditions générales de services Guardiens : tarifs, paiement, période d'essai, résiliation simplifiée et droit de rétractation."
+        description="Conditions générales de services Guardiens : tarifs, paiement, résiliation simplifiée et droit de rétractation."
         path="/cgs"
       />
       <PublicHeader />
@@ -83,9 +83,9 @@ const Cgs = () => {
             Les prix sont exprimés en euros toutes taxes comprises. La TVA n'est pas applicable conformément à l'article 293 B du CGI.
           </p>
 
-          <h3 className="font-heading text-lg font-semibold text-foreground pt-2">3.2 Période d'essai</h3>
+          <h3 className="font-heading text-lg font-semibold text-foreground pt-2">3.2 Absence de période d'essai</h3>
           <p>
-            Un essai sans frais de 7 jours est proposé lors de la première souscription Gardien. À l'issue de la période d'essai, l'abonnement n'est pas reconduit automatiquement&nbsp;: l'utilisateur choisit explicitement de poursuivre par une action positive depuis son espace personnel. À défaut, l'accès aux fonctionnalités payantes est suspendu sans prélèvement.
+            La souscription Gardien ne comporte pas de période d'essai gratuite. La rassurance équivalente est apportée par&nbsp;: (i)&nbsp;l'accès intégralement offert jusqu'au 14&nbsp;juillet&nbsp;2026 (cf. 3.3), (ii)&nbsp;l'absence d'engagement de durée et la résiliation en un clic (cf. 5), (iii)&nbsp;la formule «&nbsp;accès un mois&nbsp;» à 10&nbsp;€ en paiement unique sans renouvellement automatique.
           </p>
 
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">3.3 Période de lancement</h3>
@@ -118,7 +118,7 @@ const Cgs = () => {
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">4.2 Moyens de paiement acceptés</h3>
           <p>Les paiements sont acceptés par carte bancaire (Visa, Mastercard, American Express), conformément aux moyens de paiement supportés par Stripe.</p>
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">4.3 Fréquence de prélèvement</h3>
-          <p>L'abonnement Gardien est prélevé mensuellement, à la date anniversaire de la souscription. Le premier prélèvement intervient à l'issue de la période d'essai de 7 jours, sauf renonciation de l'utilisateur.</p>
+          <p>L'abonnement Gardien est prélevé mensuellement, à la date anniversaire de la souscription. Le premier prélèvement intervient immédiatement à la souscription, sauf en période de lancement (cf. 3.3) ou en cas d'avoir actif (parrainage, programme Fondateur).</p>
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">4.4 Échec de paiement</h3>
           <p>En cas d'échec de paiement (carte expirée, fonds insuffisants, refus banque), Stripe procède à plusieurs tentatives de relance automatique sur une période de 7 jours. À défaut de régularisation, l'accès aux fonctionnalités payantes est suspendu jusqu'à mise à jour du moyen de paiement.</p>
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">4.5 Facturation</h3>

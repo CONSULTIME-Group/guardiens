@@ -385,7 +385,7 @@ export default function ArticleDetail() {
  "@context": "https://schema.org",
  "@type": "Product",
  "name": "Abonnement Gardien Guardiens",
- "description": "Abonnement unique pour devenir gardien de maison et d'animaux sur Guardiens. 7 jours d'essai offerts, sans engagement.",
+ "description": "Abonnement pour devenir gardien de maison et d'animaux sur Guardiens. Sans engagement, résiliable à tout moment.",
  "brand": { "@type": "Brand", "name": "Guardiens" },
  "offers": {
  "@type": "Offer",
@@ -405,13 +405,7 @@ export default function ArticleDetail() {
  "unitCode": "MON"
  }
  },
- "availability": "https://schema.org/InStock",
- "eligibleDuration": {
- "@type": "QuantitativeValue",
- "value": "7",
- "unitCode": "DAY",
- "description": "7 jours d'essai offerts avant tout prélèvement"
- }
+ "availability": "https://schema.org/InStock"
  }
  })}</script>
  </Helmet>
