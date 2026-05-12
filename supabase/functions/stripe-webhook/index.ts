@@ -128,34 +128,26 @@ Deno.serve(async (req) => {
         const formulaType = session.metadata?.formula_type;
         const freeMonthsCredit = parseInt(session.metadata?.free_months_credit ?? "0");
 
-        // Monthly subscriptions are handled by customer.subscription.created
-        if (!userId || formulaType === "monthly") break;
+        // Les abonnements récurrents (monthly, annuel) sont gérés via
+        // customer.subscription.created / .updated. Ici on ne traite que les
+        // paiements uniques (one_shot — 10 €, 30 jours d'accès).
+        if (!userId || formulaType !== "one_shot") break;
 
         console.log(`[stripe-webhook] checkout.session.completed: userId=${userId}, formula=${formulaType}`);
 
         const now = new Date();
         const startDate = now.toISOString();
-        let endDate: string;
-
-        if (formulaType === "one_shot") {
-          const end = new Date(now);
-          end.setDate(end.getDate() + 30);
-          if (freeMonthsCredit > 0) end.setMonth(end.getMonth() + freeMonthsCredit);
-          endDate = end.toISOString();
-        } else if (formulaType === "prorata") {
-          const end = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
-          if (freeMonthsCredit > 0) end.setMonth(end.getMonth() + freeMonthsCredit);
-          endDate = end.toISOString();
-        } else {
-          break;
-        }
+        const end = new Date(now);
+        end.setDate(end.getDate() + 30);
+        if (freeMonthsCredit > 0) end.setMonth(end.getMonth() + freeMonthsCredit);
+        const endDate = end.toISOString();
 
         // Upsert subscription
         await supabase.from("subscriptions").upsert({
           user_id: userId,
-          subscription_type: formulaType,
+          subscription_type: "one_shot",
           status: "active",
-          plan: formulaType === "one_shot" ? "one_shot" : "prorata",
+          plan: "one_shot",
           stripe_customer_id: session.customer as string,
           stripe_subscription_id: null,
           trial_end: null,

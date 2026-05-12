@@ -5077,6 +5077,7 @@ export type Database = {
         | "monthly"
         | "one_shot"
         | "prorata"
+        | "annuel"
       subscription_status:
         | "active"
         | "expired"
@@ -5297,6 +5298,7 @@ export const Constants = {
         "monthly",
         "one_shot",
         "prorata",
+        "annuel",
       ],
       subscription_status: [
         "active",
