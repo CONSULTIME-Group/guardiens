@@ -59,7 +59,7 @@ const sitterFeatures = [
 const promiseRows: Array<{ label: string; value: string; positive: boolean }> = [
  { label: "Commission sur la garde", value: "0 %", positive: true },
  { label: "Vérification d'identité", value: "Incluse", positive: true },
- { label: "Entraide & petites missions", value: `À 0\u00A0€`, positive: true },
+ { label: "Entraide & petites missions", value: `Gratuit`, positive: true },
  { label: "Carte bancaire à l'inscription", value: "Jamais", positive: true },
  { label: "Frais de mise en relation", value: "Aucun", positive: true },
  { label: "Engagement de durée", value: "Aucun", positive: true },
