@@ -78,9 +78,9 @@ export function useDashboardData(): DashboardData {
         supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "confirmed"),
         supabase.from("reviews").select("overall_rating"),
         supabase.from("profiles").select("created_at, city, role, first_name, id, postal_code"),
-        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "pending"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).or("identity_verification_status.eq.pending,and(identity_verification_status.eq.not_submitted,identity_document_url.not.is.null),and(identity_verification_status.eq.not_submitted,identity_selfie_url.not.is.null)"),
         supabase.from("external_experiences").select("id", { count: "exact", head: true }).eq("verification_status", "pending"),
-        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new"),
         supabase.from("profiles").select("id, first_name, role, created_at").order("created_at", { ascending: false }).limit(5),
         supabase.from("sits").select("id, title, created_at, status, property_id, properties!inner(user_id, ...profiles!inner(first_name, city))").order("created_at", { ascending: false }).limit(5),
         supabase.from("reviews").select("id, overall_rating, created_at, reviewer_id, reviewee_id, sit_id, reviewer:profiles!reviews_reviewer_id_fkey(first_name), reviewee:profiles!reviews_reviewee_id_fkey(first_name)").order("created_at", { ascending: false }).limit(5),
@@ -89,9 +89,9 @@ export function useDashboardData(): DashboardData {
         supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new"),
         supabase.from("skills_library").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("reviews").select("id", { count: "exact", head: true }).eq("moderation_status", "pending"),
-        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "pending").lt("created_at", ago24h),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).or("identity_verification_status.eq.pending,and(identity_verification_status.eq.not_submitted,identity_document_url.not.is.null),and(identity_verification_status.eq.not_submitted,identity_selfie_url.not.is.null)").lt("created_at", ago24h),
         supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new").lt("created_at", ago48h),
-        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "pending").lt("created_at", ago72h),
+        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").lt("created_at", ago72h),
       ]);
 
       const totalReviews = reviewsData?.length || 0;
