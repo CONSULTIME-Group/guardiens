@@ -18,7 +18,7 @@ export const isInGracePeriod = () => {
 
 // ── Tarifs (en euros) ──
 export const PRICE_MONTHLY = 6.99;
-export const PRICE_ONESHOT = 12;
+export const PRICE_ONESHOT = 10;
 export const PRORATA_DISCOUNT = 0.8; // 20 % de réduction
 
 // ── Seuils ──

@@ -94,7 +94,7 @@ C'est ce jour-là que l'accès à 0\u00A0€ prend fin pour les gardiens. À par
   q: "Y a-t-il des frais cachés ?",
   a: `Non. **Jusqu'au ${SITTER_PRICE_START} :** rien à payer pour personne, sans carte bancaire.
 
-**Après le ${SITTER_PRICE_START} — ce que paient les gardiens :** ${SITTER_PRICE}, 12\u00A0€ pour un mois, ou la formule 2026 à −20\u00A0%. C'est tout.
+**Après le ${SITTER_PRICE_START} — ce que paient les gardiens :** ${SITTER_PRICE}, 10\u00A0€ pour un mois, ou 65\u00A0€/an (−22\u00A0%). C'est tout.
 
 **Ce que paient les propriétaires :** Rien, jamais. Publier, recevoir des candidatures, choisir, évaluer — accès à 0\u00A0€ en permanence.
 
