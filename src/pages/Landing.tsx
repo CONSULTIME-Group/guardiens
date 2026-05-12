@@ -1402,11 +1402,16 @@ const Landing = () => {
             </RevealSection>
           </div>
 
-          {/* FAQ visible — miroir du JSON-LD FAQPage déclaré en haut de page */}
-          <RevealSection delay={0.3} className="mt-16 max-w-3xl mx-auto">
-            <h3 id="faq" className="font-heading text-2xl md:text-3xl font-semibold text-foreground text-center mb-8 scroll-mt-24">
+        </div>
+      </section>
+
+      {/* ═══════════════ SECTION 9bis — FAQ (section dédiée, miroir du JSON-LD FAQPage) ═══════════════ */}
+      <section id="faq" className="py-20 md:py-24 bg-background scroll-mt-24" aria-labelledby="faq-heading">
+        <div className="max-w-3xl mx-auto px-[5%] md:px-[8%]">
+          <RevealSection>
+            <h2 id="faq-heading" className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center mb-10 scroll-mt-24">
               Questions fréquentes
-            </h3>
+            </h2>
             <dl className="space-y-6">
               <div className="bg-card border border-border rounded-2xl p-6">
                 <dt className="font-heading font-semibold text-foreground mb-2">
