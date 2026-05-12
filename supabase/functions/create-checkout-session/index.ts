@@ -102,9 +102,10 @@ Deno.serve(async (req) => {
 
     // ─── Validate that the price required for this formula exists in the current Stripe env ───
     const priceIdToCheck =
-      formulaType === "monthly" ? PRICE_IDS.monthly :
+      formulaType === "monthly"  ? PRICE_IDS.monthly  :
       formulaType === "one_shot" ? PRICE_IDS.one_shot :
-      null; // prorata uses price_data with product, validated separately
+      formulaType === "annuel"   ? PRICE_IDS.annuel   :
+      null;
 
     if (priceIdToCheck) {
       try {
@@ -114,28 +115,9 @@ Deno.serve(async (req) => {
         console.error(`[create-checkout-session] Price ${priceIdToCheck} introuvable en mode ${stripeMode}:`, msg);
         return new Response(
           JSON.stringify({
-            error: `Configuration Stripe invalide : le prix « ${priceIdToCheck } » n'existe pas dans l'environnement ${stripeMode === "live" ? "production (live)" : "test"}. Vérifiez que la clé STRIPE_SECRET_KEY correspond bien à l'environnement où ce prix a été créé.`,
+            error: `Configuration Stripe invalide : le prix « ${priceIdToCheck} » n'existe pas dans l'environnement ${stripeMode === "live" ? "production (live)" : "test"}. Vérifiez que la clé STRIPE_SECRET_KEY correspond bien à l'environnement où ce prix a été créé.`,
             stripe_mode: stripeMode,
             missing_price_id: priceIdToCheck,
-          }),
-          {
-            status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      }
-    } else if (formulaType === "prorata") {
-      // Validate prorata product exists
-      try {
-        await stripe.products.retrieve(PRORATA_PRODUCT_ID);
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        console.error(`[create-checkout-session] Product ${PRORATA_PRODUCT_ID} introuvable en mode ${stripeMode}:`, msg);
-        return new Response(
-          JSON.stringify({
-            error: `Configuration Stripe invalide : le produit prorata « ${PRORATA_PRODUCT_ID} » n'existe pas dans l'environnement ${stripeMode === "live" ? "production (live)" : "test"}.`,
-            stripe_mode: stripeMode,
-            missing_product_id: PRORATA_PRODUCT_ID,
           }),
           {
             status: 500,
