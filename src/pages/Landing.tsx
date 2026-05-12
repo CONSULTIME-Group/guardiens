@@ -914,7 +914,7 @@ const Landing = () => {
               Choisir en confiance, à un kilomètre comme à mille.
             </h2>
             <p className="text-base md:text-lg text-muted-foreground mt-5 leading-relaxed">
-              Quatre repères pour partir tranquille : à 0 € côté propriétaires, rencontre avant chaque garde, profils vérifiés, et un périmètre que vous fixez vous-même.
+              Quatre repères pour partir tranquille : gratuit côté propriétaires, rencontre avant chaque garde, profils vérifiés, et un périmètre que vous fixez vous-même.
             </p>
           </RevealSection>
 
