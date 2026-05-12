@@ -94,6 +94,27 @@ export function useDashboardData(): DashboardData {
         supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").lt("created_at", ago72h),
       ]);
 
+      // Compétences saisies dans les profils mais pas encore validées
+      // (source #2 affichée dans /admin/skills, non comptée par status='pending')
+      let pendingProfileSkills = 0;
+      try {
+        const [{ data: validatedComps }, { data: sitterComps }, { data: ownerComps }] = await Promise.all([
+          supabase.from("competences_validees").select("label"),
+          supabase.from("sitter_profiles").select("competences").not("competences", "is", null),
+          supabase.from("owner_profiles").select("competences").not("competences", "is", null),
+        ]);
+        const validatedSet = new Set((validatedComps || []).map((c: any) => c.label));
+        const seen = new Set<string>();
+        [...(sitterComps || []), ...(ownerComps || [])].forEach((row: any) => {
+          (row.competences || []).forEach((c: string) => {
+            if (c && !validatedSet.has(c)) seen.add(c);
+          });
+        });
+        pendingProfileSkills = seen.size;
+      } catch {
+        pendingProfileSkills = 0;
+      }
+
       const totalReviews = reviewsData?.length || 0;
       const avgRating = totalReviews > 0
         ? reviewsData!.reduce((sum, r) => sum + r.overall_rating, 0) / totalReviews
@@ -120,7 +141,8 @@ export function useDashboardData(): DashboardData {
       if ((pendingExperiences || 0) > 0) actions.push({ label: "Expériences", count: pendingExperiences || 0, link: "/admin/experiences", icon: Briefcase });
       if ((pendingReports || 0) > 0) actions.push({ label: "Signalements", count: pendingReports || 0, link: "/admin/reports", icon: Flag });
       if ((pendingContactMessages || 0) > 0) actions.push({ label: "Messages contact", count: pendingContactMessages || 0, link: "/admin/contact-messages", icon: MessageSquare });
-      if ((pendingSkills || 0) > 0) actions.push({ label: "Compétences", count: pendingSkills || 0, link: "/admin/skills", icon: BookOpen });
+      const totalSkills = (pendingSkills || 0) + pendingProfileSkills;
+      if (totalSkills > 0) actions.push({ label: "Compétences", count: totalSkills, link: "/admin/skills", icon: BookOpen });
       if ((pendingReviewModeration || 0) > 0) actions.push({ label: "Avis en attente", count: pendingReviewModeration || 0, link: "/admin/reviews", icon: ThumbsUp });
       setActionCards(actions);
 
