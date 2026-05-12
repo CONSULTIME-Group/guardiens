@@ -459,7 +459,7 @@ const Landing = () => {
                     priceCurrency: SITTER_PRICE_CURRENCY,
                     eligibleCustomerType: "Owner",
                     description:
-                      "À 0 € pour les propriétaires, sans abonnement requis.",
+                      "Gratuit pour les propriétaires, sans abonnement requis.",
                     priceSpecification: {
                       "@type": "PriceSpecification",
                       price: "0",
@@ -570,7 +570,7 @@ const Landing = () => {
       <section className="relative w-full min-h-screen flex items-center overflow-hidden">
         <img
           src="/hero-landing.webp"
-          alt="Un golden retriever souriant dans un jardin ensoleillé — l'esprit Guardiens"
+          alt="Golden retriever assis dans l'herbe d'un jardin ensoleillé, gueule ouverte."
           className="absolute inset-0 w-full h-full object-cover"
           loading="eager"
           fetchPriority="high"
@@ -653,6 +653,16 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* ═══════════════ MICRO-PROOF SOCIAL — sous le hero ═══════════════ */}
+      <aside aria-label="Témoignage" className="bg-muted/30 border-b border-border">
+        <div className="max-w-4xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 text-center sm:text-left">
+          <p className="font-body text-sm md:text-[15px] text-foreground/80 italic leading-snug">
+            « Notre gardienne habite à dix minutes. On s'est rencontrés autour d'un café le jeudi. On est partis le samedi. »
+          </p>
+          <span className="font-body text-xs text-foreground/55 whitespace-nowrap">— Nadia, Mérignac (33)</span>
+        </div>
+      </aside>
+
       {/* ═══════════════ SOMMAIRE DE PAGE — maillage interne ═══════════════ */}
       <nav
         aria-label="Sommaire de la page"
@@ -728,7 +738,7 @@ const Landing = () => {
             <RevealSection delay={0.3}>
               <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full border-2 border-primary/20 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-body font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
-                  Sans abonnement
+                  Gratuit
                 </div>
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Entraide locale — indépendante de la garde</p>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Un coup de main, un échange.</h3>
@@ -914,7 +924,7 @@ const Landing = () => {
               Choisir en confiance, à un kilomètre comme à mille.
             </h2>
             <p className="text-base md:text-lg text-muted-foreground mt-5 leading-relaxed">
-              Quatre repères pour partir tranquille : à 0 € côté propriétaires, rencontre avant chaque garde, profils vérifiés, et un périmètre que vous fixez vous-même.
+              Quatre repères pour partir tranquille : gratuit côté propriétaires, rencontre avant chaque garde, profils vérifiés, et un périmètre que vous fixez vous-même.
             </p>
           </RevealSection>
 
@@ -941,9 +951,9 @@ const Landing = () => {
             <RevealOnScroll from="right" delay={120} className="order-1 lg:order-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">01</p>
-                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">À 0 € pour les propriétaires</h3>
+                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Gratuit pour les propriétaires</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Annonce, candidatures, messagerie : tout est sans frais, sans abonnement. Pas de carte bancaire demandée.
+                  Annonce, candidatures, messagerie : tout est gratuit. Pas de carte bancaire demandée.
                 </p>
               </article>
 
@@ -1445,8 +1455,10 @@ const Landing = () => {
       {/* ═══════════════ SECTION 10 — CTA FINAL (fusion Fondateur + double CTA) ═══════════════ */}
       <section id="commencer" className="py-24 md:py-32 bg-primary scroll-mt-24">
         <RevealSection className="max-w-2xl mx-auto px-6 text-center">
-          <div className="inline-flex items-center rounded-full px-4 py-1.5 mb-8 bg-white/15 border border-white/30">
+          <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-6 bg-white/15 border border-white/30">
             <span className="font-body text-xs text-white uppercase tracking-widest">Programme Fondateur</span>
+            <span aria-hidden="true" className="text-white/40">·</span>
+            <span className="font-body text-xs text-white/90">Badge offert avant le 14 juillet 2026</span>
           </div>
           <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6">
             Votre prochaine histoire commence ici.
@@ -1476,7 +1488,7 @@ const Landing = () => {
             </button>
           </div>
           <p className="text-xs text-white/70 font-body">
-            Inscription en 2 minutes, sans carte bancaire. Badge Fondateur pour les inscrits avant le 14 juillet 2026.
+            Inscription en 2 minutes, sans carte bancaire.
           </p>
         </RevealSection>
       </section>
