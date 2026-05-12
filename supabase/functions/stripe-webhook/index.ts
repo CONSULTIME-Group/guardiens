@@ -67,11 +67,28 @@ Deno.serve(async (req) => {
           default: statut = "expired"; break;
         }
 
-        // Normalise vers les valeurs de l'enum public.subscription_plan.
-        // Legacy `yearly_prorata` (Stripe metadata) -> `prorata` (DB).
+        // Détermination du plan : priorité au price.id (source de vérité Stripe),
+        // fallback metadata.formula_type, puis "monthly".
+        // Mapping miroir de PRICE_IDS dans create-checkout-session.
+        const PRICE_TO_PLAN: Record<string, string> = {
+          "price_1TPPawIR9gPuLbxmH9vC614f": "monthly", // 6,99 €/mois
+          "price_1TWDLeIR9gPuLbxm0iCJDa58": "annuel",  // 65 €/an
+        };
+
+        const priceId = sub.items?.data?.[0]?.price?.id;
+        const planFromPrice = priceId ? PRICE_TO_PLAN[priceId] : undefined;
+
         const rawFormula = sub.metadata?.formula_type || sub.metadata?.plan || "monthly";
-        const normalizedPlan =
+        const planFromMetadata =
           rawFormula === "yearly_prorata" ? "prorata" : rawFormula;
+
+        const normalizedPlan = planFromPrice ?? planFromMetadata;
+
+        if (priceId && !planFromPrice) {
+          console.warn(
+            `[stripe-webhook] price.id ${priceId} non mappé dans PRICE_TO_PLAN, fallback metadata=${planFromMetadata}`
+          );
+        }
 
         await supabase.from("subscriptions").upsert({
           user_id,
