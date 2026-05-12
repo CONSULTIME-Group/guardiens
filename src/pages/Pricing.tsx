@@ -643,7 +643,7 @@ const Pricing = () => {
          L'entraide, indépendante de la garde
         </h2>
         <span className="text-xs uppercase tracking-wider font-body text-primary">
-         À 0&nbsp;€ pour tous
+         Gratuit pour tous
         </span>
        </div>
        <p className="text-sm md:text-base font-body text-foreground/70 leading-relaxed mb-4">
