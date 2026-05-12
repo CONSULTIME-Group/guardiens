@@ -1445,8 +1445,10 @@ const Landing = () => {
       {/* ═══════════════ SECTION 10 — CTA FINAL (fusion Fondateur + double CTA) ═══════════════ */}
       <section id="commencer" className="py-24 md:py-32 bg-primary scroll-mt-24">
         <RevealSection className="max-w-2xl mx-auto px-6 text-center">
-          <div className="inline-flex items-center rounded-full px-4 py-1.5 mb-8 bg-white/15 border border-white/30">
+          <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-6 bg-white/15 border border-white/30">
             <span className="font-body text-xs text-white uppercase tracking-widest">Programme Fondateur</span>
+            <span aria-hidden="true" className="text-white/40">·</span>
+            <span className="font-body text-xs text-white/90">Badge offert avant le 14 juillet 2026</span>
           </div>
           <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6">
             Votre prochaine histoire commence ici.
@@ -1476,7 +1478,7 @@ const Landing = () => {
             </button>
           </div>
           <p className="text-xs text-white/70 font-body">
-            Inscription en 2 minutes, sans carte bancaire. Badge Fondateur pour les inscrits avant le 14 juillet 2026.
+            Inscription en 2 minutes, sans carte bancaire.
           </p>
         </RevealSection>
       </section>
