@@ -161,9 +161,20 @@ const cityLinks = [
 const Pricing = () => {
  const before = isBeforeLaunch();
  const grace = isInGracePeriod();
- const [formule, setFormule] = useState<'one_shot' | 'mensuel' | 'annuel'>('mensuel');
+ const [searchParams] = useSearchParams();
+ const initialPlan = ((): 'one_shot' | 'mensuel' | 'annuel' => {
+  const p = searchParams.get('plan');
+  return p === 'one_shot' || p === 'annuel' || p === 'mensuel' ? p : 'mensuel';
+ })();
+ const [formule, setFormule] = useState<'one_shot' | 'mensuel' | 'annuel'>(initialPlan);
  const [checkoutLoading, setCheckoutLoading] = useState(false);
  const { user } = useAuth();
+
+ // Synchronise le state si le paramètre `?plan=` change après mount (deep-link).
+ useEffect(() => {
+  const p = searchParams.get('plan');
+  if (p === 'one_shot' || p === 'annuel' || p === 'mensuel') setFormule(p);
+ }, [searchParams]);
 
  const msLeft = Math.max(0, LAUNCH_DATE.getTime() - new Date().getTime());
  const daysLeft = Math.ceil(msLeft / 86400000);
@@ -182,6 +193,14 @@ const Pricing = () => {
   return `/inscription${qs ? `?${qs}` : ""}`;
  };
 
+ // Mapping formule UI (FR) → contrat backend (`create-checkout-session`).
+ // CRITIQUE : sans ce mapping, `mensuel` produisait une 400 « formula_type invalide ».
+ const FORMULA_TO_BACKEND: Record<typeof formule, 'monthly' | 'one_shot' | 'annuel'> = {
+  mensuel: 'monthly',
+  one_shot: 'one_shot',
+  annuel: 'annuel',
+ };
+
  // Lance le checkout Stripe correspondant à la formule sélectionnée.
  // Pré-condition : utilisateur connecté ET hors période gratuite (`before === false`).
  const startCheckout = async () => {
@@ -189,7 +208,7 @@ const Pricing = () => {
   setCheckoutLoading(true);
   try {
    const { data, error } = await supabase.functions.invoke("create-checkout-session", {
-    body: { formula_type: formule },
+    body: { formula_type: FORMULA_TO_BACKEND[formule] },
    });
    if (error) throw error;
    const url = (data as { url?: string } | null)?.url;
