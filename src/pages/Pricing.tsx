@@ -141,7 +141,7 @@ const cityLinks = [
 const Pricing = () => {
  const before = isBeforeLaunch();
  const grace = isInGracePeriod();
- const [formule, setFormule] = useState<'one_shot' | 'mensuel' | 'prorata'>('mensuel');
+ const [formule, setFormule] = useState<'one_shot' | 'mensuel' | 'annuel'>('mensuel');
 
  const msLeft = Math.max(0, LAUNCH_DATE.getTime() - new Date().getTime());
  const daysLeft = Math.ceil(msLeft / 86400000);
@@ -149,7 +149,7 @@ const Pricing = () => {
  const ctaLabels: Record<typeof formule, string> = {
   one_shot: "Accéder un mois — 12\u00A0€",
   mensuel: "Commencer — 7 jours offerts",
-  prorata: "Choisir le prorata 2026",
+  annuel: "Choisir l'annuel — 65\u00A0€/an",
  };
 
  const registerLink = (role?: string) => {
@@ -233,22 +233,22 @@ const Pricing = () => {
    },
    {
     "@type": "Offer",
-    name: "Formule 2026 — Prorata jusqu'à fin d'année",
-    description: "Paiement unique pour tous les mois restants en 2026, -20% sur le tarif mensuel (5,59 €/mois équivalent).",
-    price: "5.59",
+    name: "Abonnement Gardien — Annuel",
+    description: "Abonnement gardien annuel à 65 €/an, soit 5,42 €/mois équivalent (-22 % vs mensuel). Renouvellement annuel automatique, résiliable à tout moment.",
+    price: "65.00",
     priceCurrency: SITTER_PRICE_CURRENCY,
     eligibleCustomerType: "Sitter",
     availabilityStarts: SITTER_PRICE_START_ISO,
     priceSpecification: {
      "@type": "UnitPriceSpecification",
-     price: "5.59",
+     price: "65.00",
      priceCurrency: SITTER_PRICE_CURRENCY,
-     unitText: "MONTH",
-     referenceQuantity: { "@type": "QuantitativeValue", value: "1", unitCode: "MON" },
+     unitText: "YEAR",
+     referenceQuantity: { "@type": "QuantitativeValue", value: "12", unitCode: "MON" },
     },
     availability: "https://schema.org/InStock",
-    url: "https://guardiens.fr/inscription?role=sitter&plan=prorata",
-    priceValidUntil: "2026-12-31",
+    url: "https://guardiens.fr/inscription?role=sitter&plan=annuel",
+    priceValidUntil: "2027-12-31",
     seller: { "@type": "Organization", name: "Guardiens" },
    },
    ],
@@ -485,18 +485,18 @@ const Pricing = () => {
            <span className="text-sm font-semibold text-primary font-body flex-shrink-0">{SITTER_PRICE}</span>
           </div>
           <div
-           onClick={() => setFormule('prorata')}
-           className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'prorata' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
+           onClick={() => setFormule('annuel')}
+           className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'annuel' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
           >
            <div className="min-w-0">
             <div className="flex items-center gap-2">
-             <p className="text-sm font-medium text-foreground font-body">Jusqu'à fin 2026</p>
-             <span className="text-[10px] font-body font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full leading-none">-20%</span>
+             <p className="text-sm font-medium text-foreground font-body">Annuel</p>
+             <span className="text-[10px] font-body font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full leading-none">-22%</span>
             </div>
-            <p className="text-xs text-foreground/50 font-body">Un seul paiement pour tous les mois restants en 2026</p>
-            <p className="text-xs text-foreground/40 italic font-body">Ex. aujourd'hui : ~8 mois → environ 45&nbsp;€ au lieu de 56&nbsp;€</p>
+            <p className="text-xs text-foreground/50 font-body">Un paiement par an · Renouvellement annuel · Résiliable à tout moment</p>
+            <p className="text-xs text-foreground/40 italic font-body">Soit ~5,42&nbsp;€/mois équivalent · Économie de 18,88&nbsp;€/an</p>
            </div>
-           <span className="text-sm font-semibold text-primary font-body flex-shrink-0">5,59&nbsp;€/mois</span>
+           <span className="text-sm font-semibold text-primary font-body flex-shrink-0">65&nbsp;€/an</span>
           </div>
          </div>
         )}
