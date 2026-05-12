@@ -426,7 +426,7 @@ const Pricing = () => {
       <section className="rounded-2xl p-6 md:p-8 text-center space-y-3 border-2 border-amber-300 bg-amber-50 mb-12 max-w-5xl mx-auto">
        <h2 className="font-heading text-2xl font-bold text-foreground">Les Fondateurs ont jusqu'au {SITTER_PRICE_START}</h2>
        <p className="text-muted-foreground max-w-2xl mx-auto font-body">
-        Les premiers membres conservent leur accès à 0&nbsp;€ jusqu'au {SITTER_PRICE_START}.
+        Les premiers membres conservent leur accès gratuit jusqu'au {SITTER_PRICE_START}.
         Après cette date, l'abonnement à {SITTER_PRICE} sera nécessaire pour les gardiens. Le badge Fondateur reste affiché sur votre profil.
        </p>
       </section>
