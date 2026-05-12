@@ -38,7 +38,7 @@ const NBSP = "\u00A0";
 
 // ── Extracteurs ──────────────────────────────────────────────────────────────
 
-function extractCtaLabel(src: string, key: Formula): string | null {
+function extractCtaLabel(src: string, key: Formula | BackendKey): string | null {
   const re = new RegExp(`${key}\\s*:\\s*["']([^"']+)["']`);
   return src.match(re)?.[1] ?? null;
 }
@@ -50,12 +50,12 @@ function extractOfferPrice(src: string, offerName: string): string | null {
   return src.match(re)?.[1] ?? null;
 }
 
-function extractBackendPriceId(src: string, key: Formula): string | null {
+function extractBackendPriceId(src: string, key: Formula | BackendKey): string | null {
   const re = new RegExp(`${key}["']?\\s*:\\s*["'](price_[A-Za-z0-9]+)["']`);
   return src.match(re)?.[1] ?? null;
 }
 
-function extractBackendMode(src: string, key: Formula): string | null {
+function extractBackendMode(src: string, key: Formula | BackendKey): string | null {
   const re = new RegExp(`${key}[\\s\\S]{0,400}?mode:\\s*["'](payment|subscription)["']`);
   return src.match(re)?.[1] ?? null;
 }
