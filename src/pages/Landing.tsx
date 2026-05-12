@@ -1396,7 +1396,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 9bis — FAQ (section dédiée, miroir du JSON-LD FAQPage) ═══════════════ */}
-      <section id="faq" className="py-20 md:py-24 bg-background scroll-mt-24" aria-labelledby="faq-heading">
+      <section id="faq" className="py-24 md:py-32 bg-background scroll-mt-24" aria-labelledby="faq-heading">
         <div className="max-w-3xl mx-auto px-[5%] md:px-[8%]">
           <RevealSection>
             <h2 id="faq-heading" className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center mb-10 scroll-mt-24">
