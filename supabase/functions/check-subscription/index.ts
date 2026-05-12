@@ -74,45 +74,55 @@ serve(async (req) => {
 
     if (subscriptions.data.length > 0) {
       const sub = subscriptions.data[0];
-      const plan = sub.metadata?.plan || "monthly";
+      // Source de vérité : metadata.formula_type (écrit par create-checkout-session)
+      // Fallback `plan` (legacy) puis "monthly".
+      const plan = sub.metadata?.formula_type || sub.metadata?.plan || "monthly";
       logStep("Active subscription found", { id: sub.id, plan });
 
       return new Response(
         JSON.stringify({
           subscribed: true,
-          plan,
+          plan, // "monthly" | "annuel"
           subscription_end: new Date(sub.current_period_end * 1000).toISOString(),
-          has_yearly_access: false,
+          has_yearly_access: plan === "annuel",
           cancel_at_period_end: sub.cancel_at_period_end,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Check for completed one-time payments (yearly prorata)
+    // Vérifie un paiement ponctuel one_shot (10 €) ou ancien yearly_prorata (legacy)
     const checkoutSessions = await stripe.checkout.sessions.list({
       customer: customerId,
-      limit: 10,
+      limit: 20,
     });
 
-    const yearlyPayment = checkoutSessions.data.find(
+    const paidSession = checkoutSessions.data.find(
       (s) =>
         s.payment_status === "paid" &&
-        s.metadata?.plan === "yearly_prorata" &&
-        s.metadata?.user_id === user.id
+        s.mode === "payment" &&
+        s.metadata?.user_id === user.id &&
+        (s.metadata?.formula_type === "one_shot" ||
+          s.metadata?.plan === "yearly_prorata"),
     );
 
-    if (yearlyPayment) {
-      const endOf2026 = new Date(2026, 11, 31).toISOString();
+    if (paidSession) {
+      const created = new Date((paidSession.created ?? 0) * 1000);
+      const isLegacyYearly = paidSession.metadata?.plan === "yearly_prorata";
+      // one_shot = 30 jours d'accès. yearly_prorata legacy = jusqu'au 31/12/2026.
+      const end = isLegacyYearly
+        ? new Date(2026, 11, 31, 23, 59, 59)
+        : new Date(created.getTime() + 30 * 86400000);
       const now = new Date();
-      if (now < new Date(2026, 11, 31)) {
-        logStep("Yearly prorata access active", { sessionId: yearlyPayment.id });
+      if (now < end) {
+        const plan = isLegacyYearly ? "yearly_prorata" : "one_shot";
+        logStep("One-time payment access active", { sessionId: paidSession.id, plan });
         return new Response(
           JSON.stringify({
             subscribed: true,
-            plan: "yearly_prorata",
-            subscription_end: endOf2026,
-            has_yearly_access: true,
+            plan,
+            subscription_end: end.toISOString(),
+            has_yearly_access: isLegacyYearly,
             cancel_at_period_end: false,
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
