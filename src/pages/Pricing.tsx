@@ -628,7 +628,7 @@ const Pricing = () => {
              ? "7 jours d'essai sans frais. Résiliable à tout moment."
              : formule === "annuel"
               ? "Renouvellement annuel automatique. Résiliable à tout moment."
-              : "Paiement unique, 30 jours d'accès, sans renouvellement."}
+              : "Paiement unique pour un mois d'accès, sans renouvellement."}
          </p>
         </div>
        </CardContent>
