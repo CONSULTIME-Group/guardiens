@@ -117,7 +117,7 @@ export const AdminSidebar = () => {
   useEffect(() => {
     const fetchBadges = async () => {
       const results = await Promise.all([
-        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "pending"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).or("identity_verification_status.eq.pending,and(identity_verification_status.eq.not_submitted,identity_document_url.not.is.null),and(identity_verification_status.eq.not_submitted,identity_selfie_url.not.is.null)"),
         supabase.from("external_experiences").select("id", { count: "exact", head: true }).eq("verification_status", "pending"),
         supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new"),
         supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new"),
@@ -130,12 +130,33 @@ export const AdminSidebar = () => {
         supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").eq("target_type", "sit"),
         supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").eq("target_type", "small_mission"),
       ]);
+
+      // Compétences saisies dans les profils mais pas encore validées
+      let pendingProfileSkills = 0;
+      try {
+        const [{ data: validatedComps }, { data: sitterComps }, { data: ownerComps }] = await Promise.all([
+          supabase.from("competences_validees").select("label"),
+          supabase.from("sitter_profiles").select("competences").not("competences", "is", null),
+          supabase.from("owner_profiles").select("competences").not("competences", "is", null),
+        ]);
+        const validatedSet = new Set((validatedComps || []).map((c: any) => c.label));
+        const seen = new Set<string>();
+        [...(sitterComps || []), ...(ownerComps || [])].forEach((row: any) => {
+          (row.competences || []).forEach((c: string) => {
+            if (c && !validatedSet.has(c)) seen.add(c);
+          });
+        });
+        pendingProfileSkills = seen.size;
+      } catch {
+        pendingProfileSkills = 0;
+      }
+
       setBadges({
         verifications: results[0].count || 0,
         experiences: results[1].count || 0,
         reports: results[2].count || 0,
         contactMessages: results[3].count || 0,
-        skills: results[4].count || 0,
+        skills: (results[4].count || 0) + pendingProfileSkills,
         reviewDisputes: results[5].count || 0,
         errors: results[6].count || 0,
         guideRequests: results[7].count || 0,
