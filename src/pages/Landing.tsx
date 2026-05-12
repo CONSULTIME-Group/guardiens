@@ -570,7 +570,7 @@ const Landing = () => {
       <section className="relative w-full min-h-screen flex items-center overflow-hidden">
         <img
           src="/hero-landing.webp"
-          alt="Un golden retriever souriant dans un jardin ensoleillé — l'esprit Guardiens"
+          alt="Golden retriever assis dans l'herbe d'un jardin ensoleillé, gueule ouverte."
           className="absolute inset-0 w-full h-full object-cover"
           loading="eager"
           fetchPriority="high"
