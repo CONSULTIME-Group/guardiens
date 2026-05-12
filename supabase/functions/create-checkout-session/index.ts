@@ -53,14 +53,19 @@ Deno.serve(async (req) => {
       } else if (body?.lookup_key) {
         const lookupKey = body.lookup_key;
         if (lookupKey === "gardien_oneshot") formulaType = "one_shot";
-        else if (lookupKey === "gardien_annuel_2026" || lookupKey === "gardien_prorata_2026") formulaType = "prorata";
+        else if (
+          lookupKey === "gardien_annuel" ||
+          lookupKey === "gardien_annuel_2026" ||
+          lookupKey === "gardien_annuel_65" ||
+          lookupKey === "gardien_prorata_2026"
+        ) formulaType = "annuel";
         else formulaType = "monthly";
       }
     } catch {
       // No body — default monthly
     }
 
-    if (!["monthly", "one_shot", "prorata"].includes(formulaType)) {
+    if (!["monthly", "one_shot", "annuel"].includes(formulaType)) {
       return new Response(JSON.stringify({ error: "formula_type invalide" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
