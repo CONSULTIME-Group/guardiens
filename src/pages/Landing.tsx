@@ -333,6 +333,7 @@ const Landing = () => {
                   { "@type": "Person", name: "Elisa" },
                 ],
                 sameAs: [
+                  "https://www.linkedin.com/in/jeremiemartinot",
                   "https://maps.app.goo.gl/wBCoMpnyRu8GbrTV7",
                 ],
               },
