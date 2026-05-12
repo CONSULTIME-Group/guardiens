@@ -8,8 +8,6 @@ import {
   SITTER_PRICE_START_ISO,
   FOUNDER_DEADLINE,
   FOUNDER_DEADLINE_ISO,
-  TRIAL_DURATION,
-  TRIAL_LABEL,
   PRICING_LONG,
   PRICING_SHORT,
   PRICING_VERY_SHORT,
@@ -31,8 +29,6 @@ describe("pricing constants", () => {
     expect(SITTER_PRICE_START_ISO).toBe("2026-07-14");
     expect(FOUNDER_DEADLINE).toBe("14 juillet 2026");
     expect(FOUNDER_DEADLINE_ISO).toBe("2026-07-14");
-    expect(TRIAL_DURATION).toBe("7 jours");
-    expect(TRIAL_LABEL).toBe("essai de 7 jours sans frais");
   });
 
   it("PRICING_LONG contains required mentions", () => {

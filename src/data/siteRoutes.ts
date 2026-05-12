@@ -239,7 +239,7 @@ title: "Tarifs — 6,99\u00A0€/mois pour les gardiens | Guardiens",
  {
  path: "/cgs",
  title: "Conditions générales de services | Guardiens",
- metaDescription: "Conditions générales de services Guardiens : tarifs, paiement, période d'essai, résiliation simplifiée et droit de rétractation.",
+ metaDescription: "Conditions générales de services Guardiens : tarifs, paiement, résiliation simplifiée et droit de rétractation.",
  h1: "Conditions générales de services",
  sitemapPriority: "0.3",
  changeFreq: "yearly",
