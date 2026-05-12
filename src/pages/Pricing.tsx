@@ -181,7 +181,7 @@ const Pricing = () => {
 
  const ctaLabels: Record<typeof formule, string> = {
   one_shot: "Accéder un mois — 10\u00A0€",
-  mensuel: "Commencer — 7 jours offerts",
+  mensuel: "S'abonner — 6,99\u00A0€/mois",
   annuel: "Choisir l'annuel — 65\u00A0€/an",
  };
 
