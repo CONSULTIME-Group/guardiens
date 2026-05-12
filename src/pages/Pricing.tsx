@@ -711,7 +711,7 @@ const Pricing = () => {
          to={city.to}
          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm font-body text-foreground hover:border-primary/40 hover:text-primary transition-colors"
         >
-         <MapPin className="h-3.5 w-3.5" /> {city.label}
+         {city.label}
         </Link>
        ))}
       </div>
