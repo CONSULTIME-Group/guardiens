@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import ReactMarkdown from "react-markdown";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-import { Check, MapPin } from "lucide-react";
+import { Check, MapPin, Loader2 } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import PublicHeader from "@/components/layout/PublicHeader";
@@ -14,6 +15,8 @@ import FreePeriodBanner from "@/components/marketing/FreePeriodBanner";
 import PublicFooter from "@/components/layout/PublicFooter";
 import FreeAccountSection from "@/components/subscription/FreeAccountSection";
 import SecurityTrustSection from "@/components/subscription/SecurityTrustSection";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { LAUNCH_DATE, isBeforeLaunch, isInGracePeriod } from "@/lib/constants";
 import { SITTER_PRICE, SITTER_PRICE_START, SITTER_PRICE_NUMERIC, SITTER_PRICE_CURRENCY, SITTER_PRICE_START_ISO } from "@/lib/pricing";
 
@@ -142,6 +145,8 @@ const Pricing = () => {
  const before = isBeforeLaunch();
  const grace = isInGracePeriod();
  const [formule, setFormule] = useState<'one_shot' | 'mensuel' | 'annuel'>('mensuel');
+ const [checkoutLoading, setCheckoutLoading] = useState(false);
+ const { user } = useAuth();
 
  const msLeft = Math.max(0, LAUNCH_DATE.getTime() - new Date().getTime());
  const daysLeft = Math.ceil(msLeft / 86400000);
@@ -158,6 +163,28 @@ const Pricing = () => {
   if (formule) params.set("plan", formule);
   const qs = params.toString();
   return `/inscription${qs ? `?${qs}` : ""}`;
+ };
+
+ // Lance le checkout Stripe correspondant à la formule sélectionnée.
+ // Pré-condition : utilisateur connecté ET hors période gratuite (`before === false`).
+ const startCheckout = async () => {
+  if (!user) return;
+  setCheckoutLoading(true);
+  try {
+   const { data, error } = await supabase.functions.invoke("create-checkout-session", {
+    body: { formula_type: formule },
+   });
+   if (error) throw error;
+   const url = (data as { url?: string } | null)?.url;
+   if (!url) throw new Error("URL de paiement introuvable.");
+   // Ouvre Stripe Checkout dans un nouvel onglet (pattern recommandé Lovable + évite la perte de contexte).
+   window.open(url, "_blank", "noopener,noreferrer");
+  } catch (err) {
+   const msg = err instanceof Error ? err.message : "Impossible d'ouvrir le paiement.";
+   toast.error(msg);
+  } finally {
+   setCheckoutLoading(false);
+  }
  };
 
  const faqJsonLd = {
@@ -501,18 +528,42 @@ const Pricing = () => {
          </div>
         )}
 
-        {/* CTA */}
+        {/* CTA — bascule entre /inscription (visiteur ou période gratuite) et Stripe Checkout (utilisateur connecté, post-launch) */}
         <div className="space-y-1 pt-2 mt-auto">
-         <Link
-          to={registerLink("sitter")}
-          className="w-full inline-flex items-center justify-center bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
-         >
-          {before ? "Devenir gardien" : ctaLabels[formule]}
-         </Link>
+         {before || !user ? (
+          <Link
+           to={registerLink("sitter")}
+           className="w-full inline-flex items-center justify-center bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
+          >
+           {before ? "Devenir gardien" : ctaLabels[formule]}
+          </Link>
+         ) : (
+          <Button
+           type="button"
+           onClick={startCheckout}
+           disabled={checkoutLoading}
+           className="w-full bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3.5 rounded-xl hover:bg-primary/90 min-h-[44px]"
+          >
+           {checkoutLoading ? (
+            <>
+             <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+             Ouverture du paiement…
+            </>
+           ) : (
+            ctaLabels[formule]
+           )}
+          </Button>
+         )}
          <p className="text-xs font-body text-foreground/50 text-center mt-2">
           {before
            ? "Aucune carte bancaire demandée."
-           : "Inscription sans carte bancaire. L'abonnement mensuel inclut 7 jours d'essai sans frais."}
+           : !user
+            ? "Inscription sans carte bancaire. L'abonnement mensuel inclut 7 jours d'essai sans frais."
+            : formule === "mensuel"
+             ? "7 jours d'essai sans frais. Résiliable à tout moment."
+             : formule === "annuel"
+              ? "Renouvellement annuel automatique. Résiliable à tout moment."
+              : "Paiement unique, 30 jours d'accès, sans renouvellement."}
          </p>
         </div>
        </CardContent>
