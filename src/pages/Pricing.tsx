@@ -686,7 +686,6 @@ const Pricing = () => {
         >
          <span className="text-sm font-body text-foreground/75">{row.label}</span>
          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary font-body whitespace-nowrap">
-          <Check className="h-4 w-4" />
           {row.value}
          </span>
         </li>
