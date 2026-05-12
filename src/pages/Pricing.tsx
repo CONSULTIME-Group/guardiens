@@ -528,18 +528,42 @@ const Pricing = () => {
          </div>
         )}
 
-        {/* CTA */}
+        {/* CTA — bascule entre /inscription (visiteur ou période gratuite) et Stripe Checkout (utilisateur connecté, post-launch) */}
         <div className="space-y-1 pt-2 mt-auto">
-         <Link
-          to={registerLink("sitter")}
-          className="w-full inline-flex items-center justify-center bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
-         >
-          {before ? "Devenir gardien" : ctaLabels[formule]}
-         </Link>
+         {before || !user ? (
+          <Link
+           to={registerLink("sitter")}
+           className="w-full inline-flex items-center justify-center bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
+          >
+           {before ? "Devenir gardien" : ctaLabels[formule]}
+          </Link>
+         ) : (
+          <Button
+           type="button"
+           onClick={startCheckout}
+           disabled={checkoutLoading}
+           className="w-full bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3.5 rounded-xl hover:bg-primary/90 min-h-[44px]"
+          >
+           {checkoutLoading ? (
+            <>
+             <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+             Ouverture du paiement…
+            </>
+           ) : (
+            ctaLabels[formule]
+           )}
+          </Button>
+         )}
          <p className="text-xs font-body text-foreground/50 text-center mt-2">
           {before
            ? "Aucune carte bancaire demandée."
-           : "Inscription sans carte bancaire. L'abonnement mensuel inclut 7 jours d'essai sans frais."}
+           : !user
+            ? "Inscription sans carte bancaire. L'abonnement mensuel inclut 7 jours d'essai sans frais."
+            : formule === "mensuel"
+             ? "7 jours d'essai sans frais. Résiliable à tout moment."
+             : formule === "annuel"
+              ? "Renouvellement annuel automatique. Résiliable à tout moment."
+              : "Paiement unique, 30 jours d'accès, sans renouvellement."}
          </p>
         </div>
        </CardContent>
