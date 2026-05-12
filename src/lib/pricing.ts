@@ -28,8 +28,6 @@ export const SITTER_PRICE_START = "14 juillet 2026";
 export const SITTER_PRICE_START_ISO = "2026-07-14";
 export const FOUNDER_DEADLINE = "14 juillet 2026";
 export const FOUNDER_DEADLINE_ISO = "2026-07-14";
-export const TRIAL_DURATION = "7 jours";
-export const TRIAL_LABEL = "essai de 7 jours sans frais";
 
 // ── Versions composées prêtes à l'emploi ─────────────────────────────────────
 export const PRICING_LONG = `À ${OWNER_PRICE} pour les propriétaires, sans abonnement requis. Abonnement gardien à ${SITTER_PRICE} à partir du ${SITTER_PRICE_START} (accès à ${OWNER_PRICE} jusqu'à cette date). Inscrivez-vous avant le ${FOUNDER_DEADLINE} pour le badge Fondateur.`;

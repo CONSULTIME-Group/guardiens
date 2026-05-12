@@ -152,7 +152,7 @@ Deno.serve(async (req) => {
     // ─── MONTHLY ───
     if (formulaType === "monthly") {
       const now = new Date();
-      // Pas de période d'essai 7j : suppression produit/légale.
+      // Pas de phase d'essai 7j (politique no-trial — cf. mem://features/no-trial-policy).
       // Le seul "trial Stripe" encore utilisé = accès gratuit Fondateur jusqu'au 14/07/2026
       // ou crédit de mois offerts (parrainage).
       let trialEnd: number | undefined = undefined;
