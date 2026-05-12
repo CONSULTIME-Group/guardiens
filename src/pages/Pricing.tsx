@@ -328,7 +328,7 @@ const Pricing = () => {
     description={
      before
       ? `Accès offert jusqu'au ${SITTER_PRICE_START} pour tous, gardiens comme propriétaires. Sans carte bancaire, sans commission.`
-      : `À 0\u00A0€ pour les propriétaires. ${SITTER_PRICE} pour les gardiens avec 7 jours d'essai sans frais. Sans commission, sans frais cachés.`
+      : `Gratuit pour les propriétaires. ${SITTER_PRICE} pour les gardiens avec 7 jours d'essai sans frais. Sans commission, sans frais cachés.`
     }
     path="/tarifs"
    />
