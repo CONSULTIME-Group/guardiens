@@ -459,7 +459,7 @@ const Landing = () => {
                     priceCurrency: SITTER_PRICE_CURRENCY,
                     eligibleCustomerType: "Owner",
                     description:
-                      "À 0 € pour les propriétaires, sans abonnement requis.",
+                      "Gratuit pour les propriétaires, sans abonnement requis.",
                     priceSpecification: {
                       "@type": "PriceSpecification",
                       price: "0",
@@ -728,7 +728,7 @@ const Landing = () => {
             <RevealSection delay={0.3}>
               <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full border-2 border-primary/20 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-body font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
-                  Sans abonnement
+                  Gratuit
                 </div>
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Entraide locale — indépendante de la garde</p>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Un coup de main, un échange.</h3>
