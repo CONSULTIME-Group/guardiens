@@ -118,7 +118,7 @@ serve(async (req) => {
         : new Date(created.getTime() + 30 * 86400000);
       const now = new Date();
       if (now < end) {
-        const plan = isLegacyYearly ? "yearly_prorata" : "one_shot";
+        const plan = isLegacyYearly ? "prorata" : "one_shot";
         logStep("One-time payment access active", { sessionId: paidSession.id, plan });
         return new Response(
           JSON.stringify({
