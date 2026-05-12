@@ -675,9 +675,9 @@ const Landing = () => {
             <li aria-hidden="true" className="text-foreground/20">·</li>
             <li><a href="#comment-ca-marche" className="hover:text-primary transition-colors">Comment ça marche</a></li>
             <li aria-hidden="true" className="text-foreground/20">·</li>
-            <li><a href="#confiance" className="hover:text-primary transition-colors">Confiance &amp; périmètre</a></li>
-            <li aria-hidden="true" className="text-foreground/20">·</li>
             <li><a href="#entraide" className="hover:text-primary transition-colors">Entraide locale</a></li>
+            <li aria-hidden="true" className="text-foreground/20">·</li>
+            <li><a href="#confiance" className="hover:text-primary transition-colors">Confiance &amp; périmètre</a></li>
             <li aria-hidden="true" className="text-foreground/20">·</li>
             <li><a href="#temoignages" className="hover:text-primary transition-colors">Témoignages</a></li>
             <li aria-hidden="true" className="text-foreground/20">·</li>
@@ -746,9 +746,9 @@ const Landing = () => {
                   Arroser un potager, monter une étagère, partager une compétence, rendre une visite à une personne isolée.
                   Aucune garde, aucun animal nécessaire — juste des gens du coin qui s'entraident.
                 </p>
-                <Link to="/petites-missions" className="text-sm font-body text-primary font-medium hover:underline">
+                <a href="#entraide" className="text-sm font-body text-primary font-medium hover:underline">
                   Découvrir l'entraide →
-                </Link>
+                </a>
               </div>
             </RevealSection>
           </div>
@@ -892,15 +892,23 @@ const Landing = () => {
           </div>
 
           <RevealSection delay={0.4} className="text-center mt-14">
-            <button
-              onClick={() => {
-                trackEvent("cta_proprio_clicked", { metadata: { location: "how_it_works" } });
-                navigate("/inscription?role=owner");
-              }}
-              className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
-            >
-              Publier mon annonce
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+              <button
+                onClick={() => {
+                  trackEvent("cta_proprio_clicked", { metadata: { location: "how_it_works" } });
+                  navigate("/inscription?role=owner");
+                }}
+                className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
+              >
+                Publier mon annonce
+              </button>
+              <a
+                href="#entraide"
+                className="font-body text-sm font-medium tracking-wide rounded-full px-8 py-3.5 bg-transparent text-foreground border border-border hover:border-primary/40 hover:text-primary transition-all duration-200"
+              >
+                Ou commencer par un coup de main →
+              </a>
+            </div>
             <p className="mt-3 text-xs text-muted-foreground font-body">
               Inscription en 2 minutes · Sans carte bancaire
             </p>
@@ -908,7 +916,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 6 — OSEZ L'ENTRAIDE ═══════════════ */}
+      {/* ═══════════════ SECTION 4 — OSEZ L'ENTRAIDE ═══════════════ */}
       <section id="entraide" className="py-24 md:py-32 bg-accent scroll-mt-24">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
@@ -1004,12 +1012,13 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 4 — VITRINE DÉMO ═══════════════ */}
+      {/* ═══════════════ SECTION 5 — VITRINE DÉMO (transition entraide → garde) ═══════════════ */}
       <RevealSection>
+        <p className="sr-only">Et côté garde, voici à quoi ressemble une annonce.</p>
         <DemoListingShowcase />
       </RevealSection>
 
-      {/* ═══════════════ SECTION 5 — CONFIANCE & PÉRIMÈTRE (fusion) ═══════════════ */}
+      {/* ═══════════════ SECTION 6 — CONFIANCE & PÉRIMÈTRE ═══════════════ */}
       <section id="confiance" className="bg-background py-24 md:py-32 scroll-mt-24" aria-labelledby="trust-heading">
         <div className="max-w-6xl mx-auto px-5 sm:px-6">
           <RevealSection className="text-center max-w-3xl mx-auto mb-16">
