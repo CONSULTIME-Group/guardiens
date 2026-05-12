@@ -653,16 +653,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ MICRO-PROOF SOCIAL — sous le hero ═══════════════ */}
-      <aside aria-label="Témoignage" className="bg-muted/30 border-b border-border">
-        <div className="max-w-4xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 text-center sm:text-left">
-          <p className="font-body text-sm md:text-[15px] text-foreground/80 italic leading-snug">
-            « Notre gardienne habite à dix minutes. On s'est rencontrés autour d'un café le jeudi. On est partis le samedi. »
-          </p>
-          <span className="font-body text-xs text-foreground/55 whitespace-nowrap">— Nadia, Mérignac (33)</span>
-        </div>
-      </aside>
-
       {/* ═══════════════ SOMMAIRE DE PAGE — maillage interne ═══════════════ */}
       <nav
         aria-label="Sommaire de la page"
@@ -774,7 +764,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 2bis — CE QUI ARRIVE EN PLUS ═══════════════ */}
-      <section id="rencontre" className="py-28 md:py-36 bg-accent/40 border-y border-accent scroll-mt-24">
+      <section id="rencontre" className="py-24 md:py-32 bg-accent/40 border-y border-accent scroll-mt-24">
         <div className="max-w-3xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/70 font-body mb-6 block text-center">
@@ -1406,7 +1396,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 9bis — FAQ (section dédiée, miroir du JSON-LD FAQPage) ═══════════════ */}
-      <section id="faq" className="py-20 md:py-24 bg-background scroll-mt-24" aria-labelledby="faq-heading">
+      <section id="faq" className="py-24 md:py-32 bg-background scroll-mt-24" aria-labelledby="faq-heading">
         <div className="max-w-3xl mx-auto px-[5%] md:px-[8%]">
           <RevealSection>
             <h2 id="faq-heading" className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center mb-10 scroll-mt-24">
