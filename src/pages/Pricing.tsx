@@ -489,7 +489,7 @@ const Pricing = () => {
         {before ? (
          <div className="text-center space-y-1.5 py-2">
           <p className="font-heading text-5xl font-bold text-primary leading-none">
-           0&nbsp;€
+           Gratuit
           </p>
           <p className="text-xs text-foreground/55 font-body pt-2">
            Jusqu'au {SITTER_PRICE_START}, puis <span className="font-semibold text-foreground">{SITTER_PRICE}</span>
@@ -497,13 +497,29 @@ const Pricing = () => {
          </div>
         ) : (
          <div className="text-center space-y-1.5 py-2">
-          <p className="font-heading text-5xl font-bold text-foreground">
-           <span className="text-lg font-body font-normal text-foreground/60 mr-1">à partir de</span>
-           6,99&nbsp;€
-           <span className="text-lg font-body font-normal text-foreground/60 ml-1">/mois</span>
-          </p>
+          {formule === 'annuel' ? (
+           <p className="font-heading text-5xl font-bold text-foreground">
+            {SITTER_PRICE_ANNUAL_NUMERIC}&nbsp;€
+            <span className="text-lg font-body font-normal text-foreground/60 ml-1">/an</span>
+           </p>
+          ) : formule === 'one_shot' ? (
+           <p className="font-heading text-5xl font-bold text-foreground">
+            {SITTER_PRICE_ONESHOT_NUMERIC}&nbsp;€
+            <span className="text-lg font-body font-normal text-foreground/60 ml-1">le mois</span>
+           </p>
+          ) : (
+           <p className="font-heading text-5xl font-bold text-foreground">
+            <span className="text-lg font-body font-normal text-foreground/60 mr-1">à partir de</span>
+            6,99&nbsp;€
+            <span className="text-lg font-body font-normal text-foreground/60 ml-1">/mois</span>
+           </p>
+          )}
           <p className="text-xs text-foreground/50 font-body">
-           7 jours d'essai sans frais · Sans CB · Résiliable à tout moment
+           {formule === 'mensuel'
+            ? "7 jours d'essai sans frais · Sans CB · Résiliable à tout moment"
+            : formule === 'annuel'
+             ? `Soit ${ANNUAL_MONTHLY_EQUIV}\u00A0€/mois équivalent · Résiliable à tout moment`
+             : "Paiement unique · Sans renouvellement"}
           </p>
          </div>
         )}
@@ -512,7 +528,7 @@ const Pricing = () => {
         <ul className="space-y-3">
          {sitterFeatures.map((f) => (
           <li key={f} className="flex items-start gap-2.5 text-sm">
-           <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+           <span aria-hidden className="text-primary font-body mt-0.5 shrink-0 select-none">—</span>
            <span className="text-foreground/70 font-body">{f}</span>
           </li>
          ))}
