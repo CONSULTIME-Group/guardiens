@@ -58,7 +58,8 @@ describe("Prix ponctuel — cohérence UI / state / pricing.ts / Schema.org", ()
     const offerBlock = offerMatch![0];
 
     expect(offerBlock).toMatch(/price:\s*["']10\.00["']/);
-    expect(offerBlock).toContain("EUR");
+    expect(offerBlock).toContain("SITTER_PRICE_CURRENCY");
+    expect(SITTER_PRICE_CURRENCY).toBe("EUR");
     expect(offerBlock).toContain("eligibleCustomerType");
     expect(offerBlock).toContain("plan=one_shot");
     expect(offerBlock).toContain("schema.org/InStock");
