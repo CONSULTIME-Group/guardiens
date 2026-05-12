@@ -362,14 +362,14 @@ const Pricing = () => {
       <p className="text-base md:text-lg font-body text-foreground/65 leading-relaxed mb-7">
        {before
         ? `Jusqu'au ${SITTER_PRICE_START}, l'accès complet est offert — gardiens comme propriétaires. Aucune carte bancaire demandée.`
-        : `À 0\u00A0€ pour les propriétaires. ${SITTER_PRICE} pour les gardiens, avec 7 jours d'essai sans frais. C'est tout.`}
+        : `Gratuit pour les propriétaires. ${SITTER_PRICE} pour les gardiens, avec 7 jours d'essai sans frais. C'est tout.`}
       </p>
       <div data-testid="pricing-hero-cta" className="flex flex-col sm:flex-row gap-3 justify-center">
        <Link
         to={registerLink("owner")}
         className="inline-flex items-center justify-center bg-primary text-primary-foreground font-body font-semibold text-sm px-7 py-3.5 rounded-full hover:bg-primary/90 transition-colors min-h-[44px]"
        >
-        Publier mon annonce — à 0&nbsp;€
+        Publier mon annonce — gratuitement
        </Link>
        <Link
         to={registerLink("sitter")}
