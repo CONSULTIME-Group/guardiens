@@ -941,9 +941,9 @@ const Landing = () => {
             <RevealOnScroll from="right" delay={120} className="order-1 lg:order-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">01</p>
-                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">À 0 € pour les propriétaires</h3>
+                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Gratuit pour les propriétaires</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Annonce, candidatures, messagerie : tout est sans frais, sans abonnement. Pas de carte bancaire demandée.
+                  Annonce, candidatures, messagerie : tout est gratuit. Pas de carte bancaire demandée.
                 </p>
               </article>
 
