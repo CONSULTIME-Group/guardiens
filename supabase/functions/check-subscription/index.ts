@@ -76,15 +76,18 @@ serve(async (req) => {
       const sub = subscriptions.data[0];
       // Source de vérité : metadata.formula_type (écrit par create-checkout-session)
       // Fallback `plan` (legacy) puis "monthly".
-      const plan = sub.metadata?.formula_type || sub.metadata?.plan || "monthly";
+      // Legacy `yearly_prorata` est normalisé vers `prorata` (valeur enum DB).
+      const rawPlan = sub.metadata?.formula_type || sub.metadata?.plan || "monthly";
+      const plan = rawPlan === "yearly_prorata" ? "prorata" : rawPlan;
+      const hasYearlyAccess = plan === "annuel" || plan === "prorata";
       logStep("Active subscription found", { id: sub.id, plan });
 
       return new Response(
         JSON.stringify({
           subscribed: true,
-          plan, // "monthly" | "annuel"
+          plan, // "monthly" | "annuel" | "prorata" (legacy)
           subscription_end: new Date(sub.current_period_end * 1000).toISOString(),
-          has_yearly_access: plan === "annuel",
+          has_yearly_access: hasYearlyAccess,
           cancel_at_period_end: sub.cancel_at_period_end,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -115,7 +118,7 @@ serve(async (req) => {
         : new Date(created.getTime() + 30 * 86400000);
       const now = new Date();
       if (now < end) {
-        const plan = isLegacyYearly ? "yearly_prorata" : "one_shot";
+        const plan = isLegacyYearly ? "prorata" : "one_shot";
         logStep("One-time payment access active", { sessionId: paidSession.id, plan });
         return new Response(
           JSON.stringify({
