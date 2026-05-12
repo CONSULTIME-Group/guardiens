@@ -653,6 +653,16 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* ═══════════════ MICRO-PROOF SOCIAL — sous le hero ═══════════════ */}
+      <aside aria-label="Témoignage" className="bg-muted/30 border-b border-border">
+        <div className="max-w-4xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 text-center sm:text-left">
+          <p className="font-body text-sm md:text-[15px] text-foreground/80 italic leading-snug">
+            « Notre gardienne habite à dix minutes. On s'est rencontrés autour d'un café le jeudi. On est partis le samedi. »
+          </p>
+          <span className="font-body text-xs text-foreground/55 whitespace-nowrap">— Nadia, Mérignac (33)</span>
+        </div>
+      </aside>
+
       {/* ═══════════════ SOMMAIRE DE PAGE — maillage interne ═══════════════ */}
       <nav
         aria-label="Sommaire de la page"
