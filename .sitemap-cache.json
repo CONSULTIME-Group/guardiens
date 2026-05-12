@@ -9,8 +9,8 @@
       "fetchedAt": "2026-05-10T12:37:36.240Z"
     },
     "articles": {
-      "head": "2026-05-11T14:49:49.647525+00:00",
-      "fetchedAt": "2026-05-11T17:55:57.950Z"
+      "head": "2026-05-12T06:53:51.419448+00:00",
+      "fetchedAt": "2026-05-12T06:54:05.758Z"
     },
     "seo_department_pages": {
       "head": "2026-03-26T05:46:21.361179+00:00",
@@ -438,12 +438,6 @@
         "lastmod": "2026-05-10",
         "changefreq": "monthly",
         "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/nouveaux-tarifs-2026",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.9"
       },
       {
         "loc": "/actualites/arroser-plantes-vacances-grenoble",
