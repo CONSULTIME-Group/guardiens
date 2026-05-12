@@ -147,7 +147,7 @@ const Pricing = () => {
  const daysLeft = Math.ceil(msLeft / 86400000);
 
  const ctaLabels: Record<typeof formule, string> = {
-  one_shot: "Accéder un mois — 12\u00A0€",
+  one_shot: "Accéder un mois — 10\u00A0€",
   mensuel: "Commencer — 7 jours offerts",
   annuel: "Choisir l'annuel — 65\u00A0€/an",
  };
@@ -222,7 +222,7 @@ const Pricing = () => {
     "@type": "Offer",
     name: "Accès Gardien — Un mois",
     description: "Paiement unique pour un mois d'accès, sans renouvellement automatique.",
-    price: "12.00",
+    price: "10.00",
     priceCurrency: SITTER_PRICE_CURRENCY,
     eligibleCustomerType: "Sitter",
     availabilityStarts: SITTER_PRICE_START_ISO,
@@ -469,7 +469,7 @@ const Pricing = () => {
             <p className="text-sm font-medium text-foreground font-body">Accès un mois</p>
             <p className="text-xs text-foreground/50 font-body">Paiement immédiat · Sans renouvellement</p>
            </div>
-           <span className="text-sm font-semibold text-foreground font-body flex-shrink-0">12&nbsp;€</span>
+           <span className="text-sm font-semibold text-foreground font-body flex-shrink-0">10&nbsp;€</span>
           </div>
           <div
            onClick={() => setFormule('mensuel')}

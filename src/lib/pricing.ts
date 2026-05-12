@@ -16,8 +16,8 @@ export const SITTER_PRICE_NUMERIC = 6.99;
 export const SITTER_PRICE_CURRENCY = "EUR";
 
 // Formule ponctuelle — paiement unique pour un mois d'accès, sans renouvellement.
-export const SITTER_PRICE_ONESHOT = `12${NBSP}€`;
-export const SITTER_PRICE_ONESHOT_NUMERIC = 12;
+export const SITTER_PRICE_ONESHOT = `10${NBSP}€`;
+export const SITTER_PRICE_ONESHOT_NUMERIC = 10;
 
 // Formule annuelle — paiement récurrent annuel, équivalent ~5,42 €/mois (-22 % vs mensuel).
 export const SITTER_PRICE_ANNUAL = `65${NBSP}€/an`;
