@@ -125,7 +125,7 @@ const FOUNDER_FAQ = [
   },
   {
     q: "Que se passe-t-il après le 15 juillet ?",
-    a: "Une seule formule : 6,99 €/mois sans engagement, avec 7 jours d'essai. Vous décidez librement au moment voulu.",
+    a: "Une seule formule récurrente : 6,99 €/mois sans engagement, résiliable en un clic. Une formule « accès un mois » à 10 € en paiement unique reste également disponible.",
   },
   {
     q: "Qu'est-ce que le badge Fondateur ?",
@@ -278,7 +278,7 @@ const MySubscription = () => {
     if (searchParams.get("success") === "true") {
       const formula = searchParams.get("formula");
       const messages: Record<string, string> = {
-        monthly: "Votre essai de 7 jours démarre — bienvenue chez Guardiens.",
+        monthly: "Votre abonnement gardien est activé — bienvenue chez Guardiens.",
         one_shot: "Votre accès d'un mois est actif. Bonne garde !",
         prorata: "Votre accès 2026 est activé. Merci pour votre soutien.",
       };
@@ -387,7 +387,7 @@ const MySubscription = () => {
                 { label: "Maintenant", sub: "Accès complet", state: "active" as const },
                 { label: "14 juillet", sub: "Badge Fondateur", state: "founder" as const },
                 { label: "15 juillet", sub: "Fin de la grâce", state: "future" as const },
-                { label: "Ensuite", sub: "6,99 €/mois · 7 j d'essai", state: "future" as const },
+                { label: "Ensuite", sub: "6,99 €/mois · sans engagement", state: "future" as const },
               ].map(({ label, sub: subText, state }) => (
                 <li key={label} className="flex flex-col items-center gap-1.5 z-10 flex-1">
                   <div className={[
@@ -531,7 +531,7 @@ const MySubscription = () => {
             <p className="font-heading text-3xl font-bold text-primary">
               6,99 €<span className="text-sm font-normal text-muted-foreground">/mois</span>
             </p>
-            <p className="text-xs text-muted-foreground font-body">Sans engagement · 7 jours d'essai</p>
+            <p className="text-xs text-muted-foreground font-body">Sans engagement · Résiliable à tout moment</p>
           </div>
           <p className="text-xs text-muted-foreground font-body text-center">Aucun prélèvement automatique avant votre choix.</p>
         </div>
@@ -759,8 +759,8 @@ const MySubscription = () => {
         <div className="bg-primary/5 border border-primary/20 rounded-xl px-5 py-4 flex items-center gap-3">
           <Star className="h-5 w-5 text-primary flex-shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-foreground font-body">7 jours d'essai offerts sur le mensuel</p>
-            <p className="text-xs text-muted-foreground font-body">Testez tout sans engagement. Annulable en un clic.</p>
+            <p className="text-sm font-semibold text-foreground font-body">Sans engagement · Résiliable en un clic</p>
+            <p className="text-xs text-muted-foreground font-body">Aucune commission, aucun frais caché. Une formule « accès un mois » à 10 € est aussi disponible si vous préférez un paiement unique.</p>
           </div>
         </div>
 
