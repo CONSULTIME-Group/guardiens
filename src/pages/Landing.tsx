@@ -764,7 +764,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 2bis — CE QUI ARRIVE EN PLUS ═══════════════ */}
-      <section id="rencontre" className="py-28 md:py-36 bg-accent/40 border-y border-accent scroll-mt-24">
+      <section id="rencontre" className="py-24 md:py-32 bg-accent/40 border-y border-accent scroll-mt-24">
         <div className="max-w-3xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/70 font-body mb-6 block text-center">
