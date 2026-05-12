@@ -145,6 +145,8 @@ const Pricing = () => {
  const before = isBeforeLaunch();
  const grace = isInGracePeriod();
  const [formule, setFormule] = useState<'one_shot' | 'mensuel' | 'annuel'>('mensuel');
+ const [checkoutLoading, setCheckoutLoading] = useState(false);
+ const { user } = useAuth();
 
  const msLeft = Math.max(0, LAUNCH_DATE.getTime() - new Date().getTime());
  const daysLeft = Math.ceil(msLeft / 86400000);
@@ -161,6 +163,28 @@ const Pricing = () => {
   if (formule) params.set("plan", formule);
   const qs = params.toString();
   return `/inscription${qs ? `?${qs}` : ""}`;
+ };
+
+ // Lance le checkout Stripe correspondant à la formule sélectionnée.
+ // Pré-condition : utilisateur connecté ET hors période gratuite (`before === false`).
+ const startCheckout = async () => {
+  if (!user) return;
+  setCheckoutLoading(true);
+  try {
+   const { data, error } = await supabase.functions.invoke("create-checkout-session", {
+    body: { formula_type: formule },
+   });
+   if (error) throw error;
+   const url = (data as { url?: string } | null)?.url;
+   if (!url) throw new Error("URL de paiement introuvable.");
+   // Ouvre Stripe Checkout dans un nouvel onglet (pattern recommandé Lovable + évite la perte de contexte).
+   window.open(url, "_blank", "noopener,noreferrer");
+  } catch (err) {
+   const msg = err instanceof Error ? err.message : "Impossible d'ouvrir le paiement.";
+   toast.error(msg);
+  } finally {
+   setCheckoutLoading(false);
+  }
  };
 
  const faqJsonLd = {
