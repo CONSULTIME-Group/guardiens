@@ -10,12 +10,10 @@ const corsHeaders = {
 const JULY_14_2026_UTC = new Date("2026-07-14T00:00:00Z");
 
 const PRICE_IDS = {
-  monthly:  "price_1TPPawIR9gPuLbxmH9vC614f", // 6,99€/mois récurrent (prod_UOByEwqFtArM7W)
-  one_shot: "price_1TJKw9EbGS9RIjqFjRSGwnsQ",
-  prorata:  "price_1TJKwgEbGS9RIjqFBUfno6Lr",
+  monthly:  "price_1TPPawIR9gPuLbxmH9vC614f", // 6,99 €/mois récurrent  (prod_UOByEwqFtArM7W)
+  one_shot: "price_1TWDJpIR9gPuLbxmG5i5fZHR", // 10 € paiement unique   (prod_UVDlR3KnhFvfYP)
+  annuel:   "price_1TWDLeIR9gPuLbxm0iCJDa58", // 65 €/an récurrent      (prod_UVDnMM7d5bbZ6o)
 };
-
-const PRORATA_PRODUCT_ID = "prod_UHumwgYhIdF6BV";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -55,14 +53,19 @@ Deno.serve(async (req) => {
       } else if (body?.lookup_key) {
         const lookupKey = body.lookup_key;
         if (lookupKey === "gardien_oneshot") formulaType = "one_shot";
-        else if (lookupKey === "gardien_annuel_2026" || lookupKey === "gardien_prorata_2026") formulaType = "prorata";
+        else if (
+          lookupKey === "gardien_annuel" ||
+          lookupKey === "gardien_annuel_2026" ||
+          lookupKey === "gardien_annuel_65" ||
+          lookupKey === "gardien_prorata_2026"
+        ) formulaType = "annuel";
         else formulaType = "monthly";
       }
     } catch {
       // No body — default monthly
     }
 
-    if (!["monthly", "one_shot", "prorata"].includes(formulaType)) {
+    if (!["monthly", "one_shot", "annuel"].includes(formulaType)) {
       return new Response(JSON.stringify({ error: "formula_type invalide" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -99,9 +102,10 @@ Deno.serve(async (req) => {
 
     // ─── Validate that the price required for this formula exists in the current Stripe env ───
     const priceIdToCheck =
-      formulaType === "monthly" ? PRICE_IDS.monthly :
+      formulaType === "monthly"  ? PRICE_IDS.monthly  :
       formulaType === "one_shot" ? PRICE_IDS.one_shot :
-      null; // prorata uses price_data with product, validated separately
+      formulaType === "annuel"   ? PRICE_IDS.annuel   :
+      null;
 
     if (priceIdToCheck) {
       try {
@@ -111,28 +115,9 @@ Deno.serve(async (req) => {
         console.error(`[create-checkout-session] Price ${priceIdToCheck} introuvable en mode ${stripeMode}:`, msg);
         return new Response(
           JSON.stringify({
-            error: `Configuration Stripe invalide : le prix « ${priceIdToCheck } » n'existe pas dans l'environnement ${stripeMode === "live" ? "production (live)" : "test"}. Vérifiez que la clé STRIPE_SECRET_KEY correspond bien à l'environnement où ce prix a été créé.`,
+            error: `Configuration Stripe invalide : le prix « ${priceIdToCheck} » n'existe pas dans l'environnement ${stripeMode === "live" ? "production (live)" : "test"}. Vérifiez que la clé STRIPE_SECRET_KEY correspond bien à l'environnement où ce prix a été créé.`,
             stripe_mode: stripeMode,
             missing_price_id: priceIdToCheck,
-          }),
-          {
-            status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      }
-    } else if (formulaType === "prorata") {
-      // Validate prorata product exists
-      try {
-        await stripe.products.retrieve(PRORATA_PRODUCT_ID);
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        console.error(`[create-checkout-session] Product ${PRORATA_PRODUCT_ID} introuvable en mode ${stripeMode}:`, msg);
-        return new Response(
-          JSON.stringify({
-            error: `Configuration Stripe invalide : le produit prorata « ${PRORATA_PRODUCT_ID} » n'existe pas dans l'environnement ${stripeMode === "live" ? "production (live)" : "test"}.`,
-            stripe_mode: stripeMode,
-            missing_product_id: PRORATA_PRODUCT_ID,
           }),
           {
             status: 500,
@@ -227,41 +212,22 @@ Deno.serve(async (req) => {
       });
     }
 
-    // ─── PRORATA ───
-    if (formulaType === "prorata") {
-      const now = new Date();
-      const currentMonth = now.getMonth();
-      const moisRestants = 11 - currentMonth;
-
-      if (moisRestants <= 0) {
-        return new Response(JSON.stringify({ error: "Formule 2026 non disponible en décembre" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      const montantEuros = Math.round(moisRestants * 6.99 * 0.8 * 100) / 100;
-      const montantCents = Math.round(montantEuros * 100);
-
+    // ─── ANNUEL (65 €/an récurrent) ───
+    if (formulaType === "annuel") {
       const session = await stripe.checkout.sessions.create({
-        mode: "payment",
+        mode: "subscription",
         customer: customerId,
-        line_items: [{
-          price_data: {
-            currency: "eur",
-            product: PRORATA_PRODUCT_ID,
-            unit_amount: montantCents,
-          },
-          quantity: 1,
-        }],
+        line_items: [{ price: PRICE_IDS.annuel, quantity: 1 }],
+        subscription_data: {
+          metadata: { user_id: user.id, formula_type: "annuel" },
+        },
+        payment_method_collection: "always",
         locale: "fr",
-        success_url: `${origin}/mon-abonnement?success=true&formula=prorata`,
+        success_url: `${origin}/mon-abonnement?success=true&formula=annuel`,
         cancel_url: `${origin}/mon-abonnement?cancelled=true`,
         metadata: {
           user_id: user.id,
-          formula_type: "prorata",
-          mois_restants: moisRestants.toString(),
-          montant_euros: montantEuros.toFixed(2),
+          formula_type: "annuel",
           free_months_credit: freeMonths.toString(),
         },
       });
