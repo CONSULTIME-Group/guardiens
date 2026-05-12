@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-import { Check, MapPin, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import PublicHeader from "@/components/layout/PublicHeader";
@@ -18,7 +18,24 @@ import SecurityTrustSection from "@/components/subscription/SecurityTrustSection
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { LAUNCH_DATE, isBeforeLaunch, isInGracePeriod } from "@/lib/constants";
-import { SITTER_PRICE, SITTER_PRICE_START, SITTER_PRICE_NUMERIC, SITTER_PRICE_CURRENCY, SITTER_PRICE_START_ISO } from "@/lib/pricing";
+import {
+  SITTER_PRICE,
+  SITTER_PRICE_START,
+  SITTER_PRICE_NUMERIC,
+  SITTER_PRICE_CURRENCY,
+  SITTER_PRICE_START_ISO,
+  SITTER_PRICE_ANNUAL_NUMERIC,
+  SITTER_PRICE_ANNUAL_DISCOUNT_PCT,
+  SITTER_PRICE_ONESHOT_NUMERIC,
+} from "@/lib/pricing";
+
+// Économie annuelle réelle, calculée pour rester cohérente avec les constantes prix.
+const ANNUAL_SAVINGS_EUR = (
+  SITTER_PRICE_NUMERIC * 12 - SITTER_PRICE_ANNUAL_NUMERIC
+).toFixed(2).replace(".", ",");
+const ANNUAL_MONTHLY_EQUIV = (
+  SITTER_PRICE_ANNUAL_NUMERIC / 12
+).toFixed(2).replace(".", ",");
 
 const ownerFeatures = [
  "Publiez une annonce en 5 minutes",
