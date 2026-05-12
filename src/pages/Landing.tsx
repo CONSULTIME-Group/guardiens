@@ -908,83 +908,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 4 — VITRINE DÉMO ═══════════════ */}
-      <RevealSection>
-        <DemoListingShowcase />
-      </RevealSection>
-
-      {/* ═══════════════ SECTION 5 — CONFIANCE & PÉRIMÈTRE (fusion) ═══════════════ */}
-      <section id="confiance" className="bg-background py-24 md:py-32 scroll-mt-24" aria-labelledby="trust-heading">
-        <div className="max-w-6xl mx-auto px-5 sm:px-6">
-          <RevealSection className="text-center max-w-3xl mx-auto mb-16">
-            <p className="text-xs md:text-[13px] tracking-[0.2em] uppercase text-primary font-body font-medium">
-              Confiance &amp; périmètre
-            </p>
-            <h2 id="trust-heading" className="font-heading text-4xl md:text-5xl font-semibold text-foreground mt-4 leading-tight">
-              Choisir en confiance, à un kilomètre comme à mille.
-            </h2>
-            <p className="text-base md:text-lg text-muted-foreground mt-5 leading-relaxed">
-              Quatre repères pour partir tranquille : gratuit côté propriétaires, rencontre avant chaque garde, profils vérifiés, et un périmètre que vous fixez vous-même.
-            </p>
-          </RevealSection>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Illustration France */}
-            <RevealOnScroll from="left" className="relative order-2 lg:order-1 mx-auto w-full max-w-md lg:max-w-none group/illu">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 rounded-3xl blur-2xl transition-opacity duration-500 group-hover/illu:opacity-80 opacity-60" aria-hidden="true" />
-              <div className="relative bg-card/50 border border-border rounded-3xl p-4 sm:p-5 md:p-7 shadow-sm transition-all duration-500 group-hover/illu:shadow-lg group-hover/illu:-translate-y-0.5">
-                <img
-                  src={franceLocalNational}
-                  alt="Illustration gouache d'une carte de France parsemée de points reliés, symbolisant le réseau de gardiens partout dans le pays."
-                  width={960}
-                  height={960}
-                  loading="lazy"
-                  decoding="async"
-                  sizes="(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 480px"
-                  className="block w-full h-auto max-w-[420px] sm:max-w-[460px] lg:max-w-none mx-auto rounded-2xl transition-transform duration-700 ease-out group-hover/illu:scale-[1.02] motion-reduce:transition-none motion-reduce:transform-none"
-                  style={{ imageRendering: 'auto' }}
-                />
-              </div>
-            </RevealOnScroll>
-
-            {/* 4 piliers */}
-            <RevealOnScroll from="right" delay={120} className="order-1 lg:order-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
-                <p className="text-xs tracking-widest uppercase text-primary/70 font-body">01</p>
-                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Gratuit pour les propriétaires</h3>
-                <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Annonce, candidatures, messagerie : tout est gratuit. Pas de carte bancaire demandée.
-                </p>
-              </article>
-
-              <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
-                <p className="text-xs tracking-widest uppercase text-primary/70 font-body">02</p>
-                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Rencontre avant chaque garde</h3>
-                <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Un café, une visite du logement, un tour des consignes. La confiance ne se devine pas : elle se construit, en se regardant.
-                </p>
-              </article>
-
-              <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
-                <p className="text-xs tracking-widest uppercase text-primary/70 font-body">03</p>
-                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Profils vérifiés, avis croisés</h3>
-                <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Pièce d'identité contrôlée sous 24 h, avis publiés par les propriétaires précédents, historique des gardes réalisées. Tout est lisible.
-                </p>
-              </article>
-
-              <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
-                <p className="text-xs tracking-widest uppercase text-primary/70 font-body">04</p>
-                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">De votre rue à l'autre bout de la France</h3>
-                <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Hyper-local pour un dépannage, élargi pour changer d'air : vous décidez jusqu'où vous voulez aller. Chaque garde devient une porte qui s'ouvre.
-                </p>
-              </article>
-            </RevealOnScroll>
-          </div>
-        </div>
-      </section>
-
       {/* ═══════════════ SECTION 6 — OSEZ L'ENTRAIDE ═══════════════ */}
       <section id="entraide" className="py-24 md:py-32 bg-accent scroll-mt-24">
         <div className="max-w-5xl mx-auto px-6">
@@ -1078,6 +1001,83 @@ const Landing = () => {
               Découvrir les petites missions <ArrowRight className="h-4 w-4" />
             </Link>
           </RevealSection>
+        </div>
+      </section>
+
+      {/* ═══════════════ SECTION 4 — VITRINE DÉMO ═══════════════ */}
+      <RevealSection>
+        <DemoListingShowcase />
+      </RevealSection>
+
+      {/* ═══════════════ SECTION 5 — CONFIANCE & PÉRIMÈTRE (fusion) ═══════════════ */}
+      <section id="confiance" className="bg-background py-24 md:py-32 scroll-mt-24" aria-labelledby="trust-heading">
+        <div className="max-w-6xl mx-auto px-5 sm:px-6">
+          <RevealSection className="text-center max-w-3xl mx-auto mb-16">
+            <p className="text-xs md:text-[13px] tracking-[0.2em] uppercase text-primary font-body font-medium">
+              Confiance &amp; périmètre
+            </p>
+            <h2 id="trust-heading" className="font-heading text-4xl md:text-5xl font-semibold text-foreground mt-4 leading-tight">
+              Choisir en confiance, à un kilomètre comme à mille.
+            </h2>
+            <p className="text-base md:text-lg text-muted-foreground mt-5 leading-relaxed">
+              Quatre repères pour partir tranquille : gratuit côté propriétaires, rencontre avant chaque garde, profils vérifiés, et un périmètre que vous fixez vous-même.
+            </p>
+          </RevealSection>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Illustration France */}
+            <RevealOnScroll from="left" className="relative order-2 lg:order-1 mx-auto w-full max-w-md lg:max-w-none group/illu">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 rounded-3xl blur-2xl transition-opacity duration-500 group-hover/illu:opacity-80 opacity-60" aria-hidden="true" />
+              <div className="relative bg-card/50 border border-border rounded-3xl p-4 sm:p-5 md:p-7 shadow-sm transition-all duration-500 group-hover/illu:shadow-lg group-hover/illu:-translate-y-0.5">
+                <img
+                  src={franceLocalNational}
+                  alt="Illustration gouache d'une carte de France parsemée de points reliés, symbolisant le réseau de gardiens partout dans le pays."
+                  width={960}
+                  height={960}
+                  loading="lazy"
+                  decoding="async"
+                  sizes="(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 480px"
+                  className="block w-full h-auto max-w-[420px] sm:max-w-[460px] lg:max-w-none mx-auto rounded-2xl transition-transform duration-700 ease-out group-hover/illu:scale-[1.02] motion-reduce:transition-none motion-reduce:transform-none"
+                  style={{ imageRendering: 'auto' }}
+                />
+              </div>
+            </RevealOnScroll>
+
+            {/* 4 piliers */}
+            <RevealOnScroll from="right" delay={120} className="order-1 lg:order-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body">01</p>
+                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Gratuit pour les propriétaires</h3>
+                <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
+                  Annonce, candidatures, messagerie : tout est gratuit. Pas de carte bancaire demandée.
+                </p>
+              </article>
+
+              <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body">02</p>
+                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Rencontre avant chaque garde</h3>
+                <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
+                  Un café, une visite du logement, un tour des consignes. La confiance ne se devine pas : elle se construit, en se regardant.
+                </p>
+              </article>
+
+              <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body">03</p>
+                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Profils vérifiés, avis croisés</h3>
+                <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
+                  Pièce d'identité contrôlée sous 24 h, avis publiés par les propriétaires précédents, historique des gardes réalisées. Tout est lisible.
+                </p>
+              </article>
+
+              <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body">04</p>
+                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">De votre rue à l'autre bout de la France</h3>
+                <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
+                  Hyper-local pour un dépannage, élargi pour changer d'air : vous décidez jusqu'où vous voulez aller. Chaque garde devient une porte qui s'ouvre.
+                </p>
+              </article>
+            </RevealOnScroll>
+          </div>
         </div>
       </section>
 
