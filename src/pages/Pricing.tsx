@@ -67,14 +67,14 @@ const promiseRows: Array<{ label: string; value: string; positive: boolean }> = 
 
 const faqItems = [
  {
-  q: `L'accès est-il vraiment à 0\u00A0€ pour tout le monde jusqu'au ${SITTER_PRICE_START} ?`,
-  a: `Oui. Jusqu'au ${SITTER_PRICE_START}, **l'accès complet à Guardiens est à 0\u00A0€ pour tout le monde** — gardiens comme propriétaires, sans exception.
+  q: `L'accès est-il vraiment gratuit pour tout le monde jusqu'au ${SITTER_PRICE_START} ?`,
+  a: `Oui. Jusqu'au ${SITTER_PRICE_START}, **l'accès complet à Guardiens est gratuit pour tout le monde** — gardiens comme propriétaires, sans exception.
 
 Aucune carte bancaire n'est demandée à l'inscription. Vous accédez à toutes les fonctionnalités : publier une annonce, postuler aux gardes, échanger par messagerie, laisser des avis, utiliser l'entraide.
 
-Cet accès à 0\u00A0€ ne dépend pas du programme Fondateur : que vous vous inscriviez le 1ᵉʳ février ou le 12 juin 2026, vous ne payez rien jusqu'au ${SITTER_PRICE_START}.
+Cet accès gratuit ne dépend pas du programme Fondateur : que vous vous inscriviez le 1ᵉʳ février ou le 12 juin 2026, vous ne payez rien jusqu'au ${SITTER_PRICE_START}.
 
-À partir du 15 juillet 2026, l'abonnement gardien à ${SITTER_PRICE} devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste à 0\u00A0€.`,
+À partir du 15 juillet 2026, l'abonnement gardien à ${SITTER_PRICE} devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit.`,
  },
  {
   q: `Qu'est-ce que le programme Fondateur ?`,
@@ -82,13 +82,13 @@ Cet accès à 0\u00A0€ ne dépend pas du programme Fondateur : que vous vous i
 
 Le badge ne change rien à votre accès ni à votre tarif : c'est uniquement une distinction symbolique pour celles et ceux qui ont rejoint l'aventure dès le départ.
 
-À ne pas confondre avec l'accès à 0\u00A0€ : **tout le monde accède à Guardiens à 0\u00A0€ jusqu'au ${SITTER_PRICE_START}**, Fondateur ou non.`,
+À ne pas confondre avec l'accès gratuit : **tout le monde accède à Guardiens gratuit jusqu'au ${SITTER_PRICE_START}**, Fondateur ou non.`,
  },
  {
-  q: `Pourquoi c'est à 0\u00A0€ pour les propriétaires ?`,
+  q: `Pourquoi c'est gratuit pour les propriétaires ?`,
   a: `Parce que nous ne facturons pas l'accès à celles et ceux qui ouvrent leur maison.
 
-Publier une annonce, recevoir des candidatures, échanger avec les gardiens, laisser un avis : tout reste à 0\u00A0€. Ce n'est pas une offre d'appel, c'est un choix de fond sur notre modèle économique.
+Publier une annonce, recevoir des candidatures, échanger avec les gardiens, laisser un avis : tout reste gratuit. Ce n'est pas une offre d'appel, c'est un choix de fond sur notre modèle économique.
 
 Guardiens se rémunère uniquement via l'abonnement des gardiens. Côté propriétaire, payer pour rencontrer des personnes de confiance n'aurait pas de sens : ce qui a de la valeur, c'est l'échange — pas l'accès.
 
@@ -102,13 +102,13 @@ Vous vous inscrivez en tant que gardien, sans carte bancaire. Pendant 7 jours, v
 
 Aucun prélèvement automatique. À la fin de l'essai, vous décidez d'activer ou non l'abonnement à ${SITTER_PRICE}. Sans action de votre part, l'accès s'interrompt — sans frais.
 
-Avant le ${SITTER_PRICE_START}, cet essai n'a pas lieu d'être : tout est déjà à 0\u00A0€ pour tout le monde.`,
+Avant le ${SITTER_PRICE_START}, cet essai n'a pas lieu d'être : tout est déjà gratuit pour tout le monde.`,
  },
  {
   q: `Pourquoi le 14 juillet ?`,
-  a: `Il fallait une date après plusieurs semaines d'accès à 0\u00A0€ — un repère simple, partagé par toutes et tous. Le **${SITTER_PRICE_START}, fête nationale**, s'est imposé naturellement.
+  a: `Il fallait une date après plusieurs semaines d'accès gratuit — un repère simple, partagé par toutes et tous. Le **${SITTER_PRICE_START}, fête nationale**, s'est imposé naturellement.
 
-C'est ce jour-là que l'accès à 0\u00A0€ prend fin pour les gardiens. À partir du **15 juillet 2026**, l'abonnement gardien à ${SITTER_PRICE} devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste à 0\u00A0€ en permanence.`,
+C'est ce jour-là que l'accès gratuit prend fin pour les gardiens. À partir du **15 juillet 2026**, l'abonnement gardien à ${SITTER_PRICE} devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit en permanence.`,
  },
  {
   q: "Y a-t-il des frais cachés ?",
@@ -116,7 +116,7 @@ C'est ce jour-là que l'accès à 0\u00A0€ prend fin pour les gardiens. À par
 
 **Après le ${SITTER_PRICE_START} — ce que paient les gardiens :** ${SITTER_PRICE}, 10\u00A0€ pour un mois, ou 65\u00A0€/an (−22\u00A0%). C'est tout.
 
-**Ce que paient les propriétaires :** Rien, jamais. Publier, recevoir des candidatures, choisir, évaluer — accès à 0\u00A0€ en permanence.
+**Ce que paient les propriétaires :** Rien, jamais. Publier, recevoir des candidatures, choisir, évaluer — accès gratuit en permanence.
 
 **Ce qu'on ne prend pas :** Aucune commission sur les gardes. Pas d'assurance obligatoire, pas de booking fee, pas de frais de mise en relation.`,
  },
@@ -128,7 +128,7 @@ C'est ce jour-là que l'accès à 0\u00A0€ prend fin pour les gardiens. À par
 
 **Les petites missions d'entraide entre gens du coin** : un coup de main ponctuel, sans nuitée, sans animal nécessaire — arroser des plantes, ramasser les légumes du jardin, monter un meuble, prêter une perceuse, partager un trajet.
 
-Les deux usages sont indépendants : vous pouvez activer l'un, l'autre, ou les deux. L'entraide reste à 0\u00A0€ pour toutes et tous, sans abonnement.`,
+Les deux usages sont indépendants : vous pouvez activer l'un, l'autre, ou les deux. L'entraide reste gratuit pour toutes et tous, sans abonnement.`,
  },
  {
   q: "Quels types d'échanges sont possibles ?",
