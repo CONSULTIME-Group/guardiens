@@ -534,25 +534,34 @@ const Pricing = () => {
          ))}
         </ul>
 
-        {/* Bloc formules — masqué pendant la période à 0 € totale */}
+        {/* Bloc formules — masqué pendant la période gratuite totale.
+            Pattern radiogroup accessible (rôle + arrow keys via tabIndex et aria-checked). */}
         {!before && (
-         <div className="bg-background border border-border/50 rounded-xl p-4 space-y-3 text-left">
+         <div role="radiogroup" aria-label="Choix de la formule gardien" className="bg-background border border-border/50 rounded-xl p-4 space-y-3 text-left">
           <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
            Trois formules
           </p>
           <div
+           role="radio"
+           aria-checked={formule === 'one_shot'}
+           tabIndex={0}
            onClick={() => setFormule('one_shot')}
-           className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'one_shot' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
+           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFormule('one_shot'); } }}
+           className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${formule === 'one_shot' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
           >
            <div className="min-w-0">
             <p className="text-sm font-medium text-foreground font-body">Accès un mois</p>
             <p className="text-xs text-foreground/50 font-body">Paiement immédiat · Sans renouvellement</p>
            </div>
-           <span className="text-sm font-semibold text-foreground font-body flex-shrink-0">10&nbsp;€</span>
+           <span className="text-sm font-semibold text-foreground font-body flex-shrink-0">{SITTER_PRICE_ONESHOT_NUMERIC}&nbsp;€</span>
           </div>
           <div
+           role="radio"
+           aria-checked={formule === 'mensuel'}
+           tabIndex={0}
            onClick={() => setFormule('mensuel')}
-           className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'mensuel' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
+           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFormule('mensuel'); } }}
+           className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${formule === 'mensuel' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
           >
            <div className="min-w-0">
             <div className="flex items-center gap-2">
@@ -564,18 +573,22 @@ const Pricing = () => {
            <span className="text-sm font-semibold text-primary font-body flex-shrink-0">{SITTER_PRICE}</span>
           </div>
           <div
+           role="radio"
+           aria-checked={formule === 'annuel'}
+           tabIndex={0}
            onClick={() => setFormule('annuel')}
-           className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'annuel' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
+           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFormule('annuel'); } }}
+           className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${formule === 'annuel' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
           >
            <div className="min-w-0">
             <div className="flex items-center gap-2">
              <p className="text-sm font-medium text-foreground font-body">Annuel</p>
-             <span className="text-[10px] font-body font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full leading-none">-22%</span>
+             <span className="text-[10px] font-body font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full leading-none">-{SITTER_PRICE_ANNUAL_DISCOUNT_PCT}%</span>
             </div>
             <p className="text-xs text-foreground/50 font-body">Un paiement par an · Renouvellement annuel · Résiliable à tout moment</p>
-            <p className="text-xs text-foreground/40 italic font-body">Soit ~5,42&nbsp;€/mois équivalent · Économie de 18,88&nbsp;€/an</p>
+            <p className="text-xs text-foreground/40 italic font-body">Soit ~{ANNUAL_MONTHLY_EQUIV}&nbsp;€/mois équivalent · Économie de {ANNUAL_SAVINGS_EUR}&nbsp;€/an</p>
            </div>
-           <span className="text-sm font-semibold text-primary font-body flex-shrink-0">65&nbsp;€/an</span>
+           <span className="text-sm font-semibold text-primary font-body flex-shrink-0">{SITTER_PRICE_ANNUAL_NUMERIC}&nbsp;€/an</span>
           </div>
          </div>
         )}
