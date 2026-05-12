@@ -212,41 +212,22 @@ Deno.serve(async (req) => {
       });
     }
 
-    // ─── PRORATA ───
-    if (formulaType === "prorata") {
-      const now = new Date();
-      const currentMonth = now.getMonth();
-      const moisRestants = 11 - currentMonth;
-
-      if (moisRestants <= 0) {
-        return new Response(JSON.stringify({ error: "Formule 2026 non disponible en décembre" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      const montantEuros = Math.round(moisRestants * 6.99 * 0.8 * 100) / 100;
-      const montantCents = Math.round(montantEuros * 100);
-
+    // ─── ANNUEL (65 €/an récurrent) ───
+    if (formulaType === "annuel") {
       const session = await stripe.checkout.sessions.create({
-        mode: "payment",
+        mode: "subscription",
         customer: customerId,
-        line_items: [{
-          price_data: {
-            currency: "eur",
-            product: PRORATA_PRODUCT_ID,
-            unit_amount: montantCents,
-          },
-          quantity: 1,
-        }],
+        line_items: [{ price: PRICE_IDS.annuel, quantity: 1 }],
+        subscription_data: {
+          metadata: { user_id: user.id, formula_type: "annuel" },
+        },
+        payment_method_collection: "always",
         locale: "fr",
-        success_url: `${origin}/mon-abonnement?success=true&formula=prorata`,
+        success_url: `${origin}/mon-abonnement?success=true&formula=annuel`,
         cancel_url: `${origin}/mon-abonnement?cancelled=true`,
         metadata: {
           user_id: user.id,
-          formula_type: "prorata",
-          mois_restants: moisRestants.toString(),
-          montant_euros: montantEuros.toFixed(2),
+          formula_type: "annuel",
           free_months_credit: freeMonths.toString(),
         },
       });
