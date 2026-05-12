@@ -152,16 +152,18 @@ Deno.serve(async (req) => {
     // ─── MONTHLY ───
     if (formulaType === "monthly") {
       const now = new Date();
-      let trialEnd: number;
+      // Pas de période d'essai 7j : suppression produit/légale.
+      // Le seul "trial Stripe" encore utilisé = accès gratuit Fondateur jusqu'au 14/07/2026
+      // ou crédit de mois offerts (parrainage).
+      let trialEnd: number | undefined = undefined;
 
       if (isFounder && now < JULY_14_2026_UTC) {
         const endDate = new Date(JULY_14_2026_UTC);
         if (freeMonths > 0) endDate.setMonth(endDate.getMonth() + freeMonths);
         trialEnd = Math.floor(endDate.getTime() / 1000);
-      } else {
+      } else if (freeMonths > 0) {
         const endDate = new Date(now);
-        endDate.setDate(endDate.getDate() + 7);
-        if (freeMonths > 0) endDate.setMonth(endDate.getMonth() + freeMonths);
+        endDate.setMonth(endDate.getMonth() + freeMonths);
         trialEnd = Math.floor(endDate.getTime() / 1000);
       }
 
@@ -170,7 +172,7 @@ Deno.serve(async (req) => {
         customer: customerId,
         line_items: [{ price: PRICE_IDS.monthly, quantity: 1 }],
         subscription_data: {
-          trial_end: trialEnd,
+          ...(trialEnd ? { trial_end: trialEnd } : {}),
           metadata: { user_id: user.id, formula_type: "monthly" },
         },
         payment_method_collection: "always",

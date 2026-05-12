@@ -95,14 +95,14 @@ Guardiens se rémunère uniquement via l'abonnement des gardiens. Côté propri�
 Pour aller plus loin : [Comment bien choisir son gardien →](/actualites/choisir-gardien-bons-criteres)`,
  },
  {
-  q: `Comment fonctionne l'essai de 7 jours sans frais ?`,
-  a: `Cet essai s'applique **après le ${SITTER_PRICE_START}**, lorsque l'abonnement gardien devient payant.
+  q: `Puis-je annuler à tout moment ?`,
+  a: `Oui. L'abonnement gardien est **résiliable en un clic depuis votre espace abonnement**, sans frais ni justification.
 
-Vous vous inscrivez en tant que gardien, sans carte bancaire. Pendant 7 jours, vous accédez à toutes les fonctionnalités : postuler aux gardes, échanger avec les propriétaires, construire votre profil de confiance.
+Aucun engagement de durée. Si vous résiliez en cours de mois, l'accès reste actif jusqu'à la prochaine date d'échéance, puis s'interrompt sans nouveau prélèvement.
 
-Aucun prélèvement automatique. À la fin de l'essai, vous décidez d'activer ou non l'abonnement à ${SITTER_PRICE}. Sans action de votre part, l'accès s'interrompt — sans frais.
+La formule **accès un mois (10 €)** est un paiement unique sans renouvellement : rien à résilier, l'accès s'interrompt seul à la fin du mois.
 
-Avant le ${SITTER_PRICE_START}, cet essai n'a pas lieu d'être : tout est déjà gratuit pour tout le monde.`,
+La formule **annuelle (65 €/an)** est résiliable à tout moment ; le renouvellement annuel n'a lieu qu'à la date anniversaire.`,
  },
  {
   q: `Pourquoi le 14 juillet ?`,
@@ -264,7 +264,7 @@ const Pricing = () => {
    {
     "@type": "Offer",
     name: "Abonnement Gardien — Mensuel",
-    description: `Abonnement gardien à 6,99 €/mois à partir du 14 juillet 2026. 7 jours d'essai sans frais, résiliable à tout moment.`,
+    description: `Abonnement gardien à 6,99 €/mois à partir du 14 juillet 2026. Sans engagement, résiliable à tout moment.`,
     price: String(SITTER_PRICE_NUMERIC),
     priceCurrency: SITTER_PRICE_CURRENCY,
     eligibleCustomerType: "Sitter",
@@ -328,7 +328,7 @@ const Pricing = () => {
     description={
      before
       ? `Accès offert jusqu'au ${SITTER_PRICE_START} pour tous, gardiens comme propriétaires. Sans carte bancaire, sans commission.`
-      : `Gratuit pour les propriétaires. ${SITTER_PRICE} pour les gardiens avec 7 jours d'essai sans frais. Sans commission, sans frais cachés.`
+      : `Gratuit pour les propriétaires. ${SITTER_PRICE} pour les gardiens, sans engagement. Sans commission, sans frais cachés.`
     }
     path="/tarifs"
    />
@@ -362,7 +362,7 @@ const Pricing = () => {
       <p className="text-base md:text-lg font-body text-foreground/65 leading-relaxed mb-7">
        {before
         ? `Jusqu'au ${SITTER_PRICE_START}, l'accès complet est offert — gardiens comme propriétaires. Aucune carte bancaire demandée.`
-        : `Gratuit pour les propriétaires. ${SITTER_PRICE} pour les gardiens, avec 7 jours d'essai sans frais. C'est tout.`}
+        : `Gratuit pour les propriétaires. ${SITTER_PRICE} pour les gardiens, sans engagement. C'est tout.`}
       </p>
       <div data-testid="pricing-hero-cta" className="flex flex-col sm:flex-row gap-3 justify-center">
        <Link
@@ -516,7 +516,7 @@ const Pricing = () => {
           )}
           <p className="text-xs text-foreground/50 font-body">
            {formule === 'mensuel'
-            ? "7 jours d'essai sans frais · Sans CB · Résiliable à tout moment"
+            ? "Sans engagement · Résiliable à tout moment"
             : formule === 'annuel'
              ? `Soit ${ANNUAL_MONTHLY_EQUIV}\u00A0€/mois équivalent · Résiliable à tout moment`
              : "Paiement unique · Sans renouvellement"}
@@ -568,7 +568,7 @@ const Pricing = () => {
              <p className="text-sm font-medium text-foreground font-body">Mensuel</p>
              <span className="text-xs font-body text-primary/70">Le plus choisi</span>
             </div>
-            <p className="text-xs text-foreground/50 font-body">7 jours d'essai sans frais · Annulable à tout moment</p>
+            <p className="text-xs text-foreground/50 font-body">Sans engagement · Résiliable à tout moment</p>
            </div>
            <span className="text-sm font-semibold text-primary font-body flex-shrink-0">{SITTER_PRICE}</span>
           </div>
@@ -620,12 +620,12 @@ const Pricing = () => {
           </Button>
          )}
          <p className="text-xs font-body text-foreground/50 text-center mt-2">
-          {before
+           {before
            ? "Aucune carte bancaire demandée."
            : !user
-            ? "Inscription sans carte bancaire. L'abonnement mensuel inclut 7 jours d'essai sans frais."
+            ? "Inscription gratuite. Aucune carte bancaire avant la souscription d'une formule."
             : formule === "mensuel"
-             ? "7 jours d'essai sans frais. Résiliable à tout moment."
+             ? "Sans engagement. Résiliable à tout moment."
              : formule === "annuel"
               ? "Renouvellement annuel automatique. Résiliable à tout moment."
               : "Paiement unique pour un mois d'accès, sans renouvellement."}

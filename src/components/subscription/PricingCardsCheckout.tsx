@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Check, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import FreeAccountSection from "./FreeAccountSection";
 
@@ -39,24 +39,28 @@ export default function PricingCardsCheckout() {
               <span className="text-sm text-muted-foreground font-body">/mois</span>
             </p>
             <p className="text-xs text-muted-foreground font-body mb-4">
-              7 jours d'essai. Sans engagement, annulable à tout moment.
+              Sans engagement, résiliable à tout moment.
             </p>
             <ul className="text-sm font-body space-y-2 mb-6 flex-1">
-              <li className="flex items-center gap-2">
-                <Check className="h-3.5 w-3.5 text-primary shrink-0" /> 7 jours d'essai offerts
+              <li className="flex items-start gap-2">
+                <span aria-hidden className="text-primary mt-0.5 shrink-0 select-none">—</span>
+                <span>Sans engagement</span>
               </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-3.5 w-3.5 text-primary shrink-0" /> Sans engagement
+              <li className="flex items-start gap-2">
+                <span aria-hidden className="text-primary mt-0.5 shrink-0 select-none">—</span>
+                <span>Résiliable en un clic</span>
               </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-3.5 w-3.5 text-primary shrink-0" /> Annulable en un clic
+              <li className="flex items-start gap-2">
+                <span aria-hidden className="text-primary mt-0.5 shrink-0 select-none">—</span>
+                <span>Accès complet à toutes les fonctionnalités</span>
               </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-3.5 w-3.5 text-primary shrink-0" /> Accès complet à toutes les fonctionnalités
+              <li className="flex items-start gap-2">
+                <span aria-hidden className="text-primary mt-0.5 shrink-0 select-none">—</span>
+                <span>Aucune commission sur les gardes</span>
               </li>
             </ul>
             <Button className="w-full font-body" onClick={handleCheckout} disabled={loading !== null}>
-              {loading === "monthly" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Démarrer mon essai de 7 jours"}
+              {loading === "monthly" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Activer mon abonnement"}
             </Button>
           </div>
         </div>
