@@ -19,12 +19,11 @@ import {
 
 // Imports `?raw` : récupère le code source brut. Vite supporte nativement.
 // Le composant étant lazy + dev-only, le coût bundle reste contenu.
-// @ts-expect-error vite raw import
 import pricingPageSrc from "@/pages/Pricing.tsx?raw";
-// @ts-expect-error vite raw import
 import checkoutFnSrc from "../../supabase/functions/create-checkout-session/index.ts?raw";
 
 type Formula = "owner" | "mensuel" | "one_shot" | "annuel";
+type BackendKey = "monthly" | "one_shot" | "annuel";
 
 interface Row {
   formula: Formula;
