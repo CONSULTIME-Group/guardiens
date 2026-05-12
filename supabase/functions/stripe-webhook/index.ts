@@ -67,13 +67,19 @@ Deno.serve(async (req) => {
           default: statut = "expired"; break;
         }
 
+        // Normalise vers les valeurs de l'enum public.subscription_plan.
+        // Legacy `yearly_prorata` (Stripe metadata) -> `prorata` (DB).
+        const rawFormula = sub.metadata?.formula_type || sub.metadata?.plan || "monthly";
+        const normalizedPlan =
+          rawFormula === "yearly_prorata" ? "prorata" : rawFormula;
+
         await supabase.from("subscriptions").upsert({
           user_id,
           stripe_subscription_id: sub.id,
           stripe_customer_id: sub.customer as string,
           status: statut,
-          plan: sub.metadata?.formula_type || "monthly",
-          subscription_type: sub.metadata?.formula_type || "monthly",
+          plan: normalizedPlan,
+          subscription_type: normalizedPlan,
           trial_end: sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null,
           current_period_start: new Date(sub.current_period_start * 1000).toISOString(),
           expires_at: new Date(sub.current_period_end * 1000).toISOString(),
