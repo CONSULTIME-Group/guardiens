@@ -12,6 +12,7 @@ Guardiens est gratuit pour les propriétaires. Les gardiens accèdent au service
 - [FAQ](/faq): Réponses aux questions fréquentes — fonctionnement, sécurité, abonnement, missions.
 - [Actualités](/actualites): Articles de fond sur la garde d'animaux, le house-sitting et la vie de la plateforme.
 - [Petites missions](/petites-missions): Coups de main entre membres (promenade, visite, dépannage), gratuits, sans nuitée.
+- [Petites missions à Lyon](/petites-missions/lyon): Hub local des coups de main entre membres à Lyon.
 - [Gardien d'urgence](/gardien-urgence): Trouver un gardien rapidement en cas d'imprévu.
 - [Guides de villes](/guides): Guides locaux indépendants des annonces de garde.
 - [Contact](/contact): Nous écrire.
