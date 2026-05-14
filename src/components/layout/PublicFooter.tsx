@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
   return (
-    <footer ref={ref} className="bg-[hsl(40_12%_10%)] border-t border-white/10">
+    <footer ref={ref} className="bg-footer border-t border-white/10">
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-16">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10 mb-12">
           <div>
@@ -66,21 +66,21 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
             <h3 className="font-heading text-lg font-semibold text-white/90">
               <span className="text-primary">g</span>uardiens
             </h3>
-            <p className="font-body text-sm text-white/40">
+            <p className="font-body text-sm text-white/70">
               House-sitting de proximité
             </p>
           </div>
-          <div className="flex flex-wrap gap-4 text-sm text-white/40 font-body">
-            <span className="text-xs text-white/40 font-body">Guardiens · Version bêta · 2026</span>
-            <span className="text-white/20">·</span>
+          <div className="flex flex-wrap gap-4 text-sm text-white/75 font-body">
+            <span className="text-xs text-white/60 font-body">Guardiens · Version bêta · 2026</span>
+            <span aria-hidden="true" className="text-white/40">·</span>
             <Link to="/cgu" className="hover:text-white transition-colors">CGU</Link>
-            <span className="text-white/20">·</span>
+            <span aria-hidden="true" className="text-white/40">·</span>
             <Link to="/cgs" className="hover:text-white transition-colors">CGS</Link>
-            <span className="text-white/20">·</span>
+            <span aria-hidden="true" className="text-white/40">·</span>
             <Link to="/confidentialite" className="hover:text-white transition-colors">Politique de confidentialité</Link>
-            <span className="text-white/20">·</span>
+            <span aria-hidden="true" className="text-white/40">·</span>
             <Link to="/mentions-legales" className="hover:text-white transition-colors">Mentions légales</Link>
-            <span className="text-white/20">·</span>
+            <span aria-hidden="true" className="text-white/40">·</span>
             <Link to="/contact" className="hover:text-white transition-colors">Contact</Link>
           </div>
         </div>

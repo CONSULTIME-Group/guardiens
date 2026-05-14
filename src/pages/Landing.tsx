@@ -626,25 +626,25 @@ const Landing = () => {
                 {kpiMaisons > 0 && (
                   <div className="border-r border-white/20 pr-12 last:border-r-0 last:pr-0">
                     <span className="block text-3xl font-heading font-bold text-white">{kpiMaisons}</span>
-                    <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">maisons gardées</span>
+                    <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">maisons gardées</span>
                   </div>
                 )}
                 {kpiAnimaux > 0 && (
                   <div className="border-r border-white/20 pr-12 last:border-r-0 last:pr-0">
                     <span className="block text-3xl font-heading font-bold text-white">{kpiAnimaux}</span>
-                    <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">animaux accompagnés</span>
+                    <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">animaux accompagnés</span>
                   </div>
                 )}
                 {kpiInscrits > 0 && (
                   <div className="border-r border-white/20 pr-12 last:border-r-0 last:pr-0">
                     <span className="block text-3xl font-heading font-bold text-white">{kpiInscrits}</span>
-                    <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">inscrits</span>
+                    <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">inscrits</span>
                   </div>
                 )}
                 {kpiMissions > 0 && (
                   <div>
                     <span className="block text-3xl font-heading font-bold text-white">{kpiMissions}</span>
-                    <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">missions d'entraide</span>
+                    <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">missions d'entraide</span>
                   </div>
                 )}
               </div>

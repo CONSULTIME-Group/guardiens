@@ -89,6 +89,10 @@
     --sidebar-border: 37 22% 89%;
     --sidebar-ring: 153 42% 30%;
 
+    /* Footer : fond sombre absolu, identique en light/dark, immunisé contre l'inversion de --foreground */
+    --footer: 40 12% 10%;
+    --footer-foreground: 40 33% 97%;
+
     --font-heading: 'Playfair Display', serif;
     --font-body: 'Outfit', sans-serif;
 
@@ -173,6 +177,9 @@
     --sidebar-accent-foreground: 40 15% 90%;
     --sidebar-border: 160 8% 20%;
     --sidebar-ring: 153 42% 40%;
+
+    --footer: 40 12% 10%;
+    --footer-foreground: 40 33% 97%;
 
     --hint: 37 10% 45%;
     --message-sent: 153 30% 20%;
