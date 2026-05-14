@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
   return (
-    <footer ref={ref} className="bg-[hsl(40_12%_10%)] border-t border-white/10">
+    <footer ref={ref} className="bg-footer border-t border-white/10">
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-16">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10 mb-12">
           <div>
