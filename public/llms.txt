@@ -1,0 +1,33 @@
+# Guardiens
+
+> Plateforme de garde d'animaux à domicile en France. Mise en relation entre propriétaires d'animaux et gardiens de confiance habitant près de chez vous, sans frais cachés et sans transaction financière entre membres.
+
+Guardiens est gratuit pour les propriétaires. Les gardiens accèdent au service via un abonnement à 6,99 €/mois (ou 12 € en one-shot), sans engagement. L'entraide entre membres (petites missions du quotidien : promenade, visite, dépannage) est gratuite et n'inclut jamais de nuitée.
+
+## Pages principales
+
+- [Accueil](/): Découvrir Guardiens — propriétaires et gardiens, garde à domicile, entraide locale.
+- [Tarifs](/tarifs): Détail des offres propriétaire (gratuit) et gardien (6,99 €/mois, 12 € one-shot, sans engagement).
+- [À propos](/a-propos): Notre mission, nos valeurs, l'équipe derrière Guardiens.
+- [FAQ](/faq): Réponses aux questions fréquentes — fonctionnement, sécurité, abonnement, missions.
+- [Actualités](/actualites): Articles de fond sur la garde d'animaux, le house-sitting et la vie de la plateforme.
+- [Petites missions](/petites-missions): Coups de main entre membres (promenade, visite, dépannage), gratuits, sans nuitée.
+- [Gardien d'urgence](/gardien-urgence): Trouver un gardien rapidement en cas d'imprévu.
+- [Guides de villes](/guides): Guides locaux indépendants des annonces de garde.
+- [Contact](/contact): Nous écrire.
+
+## Légal
+
+- [CGU](/cgu): Conditions générales d'utilisation.
+- [CGS](/cgs): Conditions générales de service.
+- [Confidentialité](/confidentialite): Politique RGPD et gestion des données personnelles.
+- [Mentions légales](/mentions-legales): Éditeur, hébergeur, SIRET.
+
+## Auteurs
+
+- [Jérémie Martinot](/auteurs/jeremie): Fondateur de Guardiens.
+- [Elisa](/auteurs/elisa): Rédactrice spécialisée bien-être animal.
+
+## Optional
+
+- [Recherche de gardiens](/recherche): Outil de recherche (nécessite un compte).
