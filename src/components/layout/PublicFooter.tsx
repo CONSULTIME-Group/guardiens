@@ -7,7 +7,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-16">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10 mb-12">
           <div>
-            <h3 className="font-body text-xs uppercase tracking-widest text-white/30 mb-4">House-sitting par ville</h3>
+            <h3 className="font-body text-xs uppercase tracking-widest text-white/60 mb-4">House-sitting par ville</h3>
             <ul className="space-y-2">
               <li><Link to="/house-sitting/lyon" className="font-body text-sm text-white/50 hover:text-white transition-colors">House-sitting Lyon</Link></li>
               <li><Link to="/house-sitting/annecy" className="font-body text-sm text-white/50 hover:text-white transition-colors">House-sitting Annecy</Link></li>
@@ -17,7 +17,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
             </ul>
           </div>
           <div>
-            <h3 className="font-body text-xs uppercase tracking-widest text-white/30 mb-4">Par département</h3>
+            <h3 className="font-body text-xs uppercase tracking-widest text-white/60 mb-4">Par département</h3>
             <ul className="space-y-2">
               <li><Link to="/departement/rhone" className="font-body text-sm text-white/50 hover:text-white transition-colors">Rhône (69)</Link></li>
               <li><Link to="/departement/haute-savoie" className="font-body text-sm text-white/50 hover:text-white transition-colors">Haute-Savoie (74)</Link></li>
@@ -29,7 +29,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
             </ul>
           </div>
           <div>
-            <h3 className="font-body text-xs uppercase tracking-widest text-white/30 mb-4">Guides locaux</h3>
+            <h3 className="font-body text-xs uppercase tracking-widest text-white/60 mb-4">Guides locaux</h3>
             <ul className="space-y-2">
               <li><Link to="/guides" className="font-body text-sm text-white/50 hover:text-white transition-colors">Tous les guides</Link></li>
               <li><Link to="/guides/lyon" className="font-body text-sm text-white/50 hover:text-white transition-colors">Guide Lyon</Link></li>
@@ -40,7 +40,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
             </ul>
           </div>
           <div>
-            <h3 className="font-body text-xs uppercase tracking-widest text-white/30 mb-4">Ressources</h3>
+            <h3 className="font-body text-xs uppercase tracking-widest text-white/60 mb-4">Ressources</h3>
             <ul className="space-y-2">
               <li><Link to="/actualites" className="font-body text-sm text-white/50 hover:text-white transition-colors">Articles</Link></li>
               <li><Link to="/actualites/house-sitting-aura-guide-complet" className="font-body text-sm text-white/50 hover:text-white transition-colors">Guide du house-sitting</Link></li>
@@ -50,7 +50,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
             </ul>
           </div>
           <div>
-            <h3 className="font-body text-xs uppercase tracking-widest text-white/30 mb-4">Guardiens</h3>
+            <h3 className="font-body text-xs uppercase tracking-widest text-white/60 mb-4">Guardiens</h3>
             <ul className="space-y-2">
               <li><Link to="/a-propos" className="font-body text-sm text-white/50 hover:text-white transition-colors">À propos</Link></li>
               <li><Link to="/contact" className="font-body text-sm text-white/50 hover:text-white transition-colors">Contact</Link></li>
