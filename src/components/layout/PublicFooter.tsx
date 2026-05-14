@@ -66,21 +66,21 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
             <h3 className="font-heading text-lg font-semibold text-white/90">
               <span className="text-primary">g</span>uardiens
             </h3>
-            <p className="font-body text-sm text-white/40">
+            <p className="font-body text-sm text-white/70">
               House-sitting de proximité
             </p>
           </div>
-          <div className="flex flex-wrap gap-4 text-sm text-white/40 font-body">
-            <span className="text-xs text-white/40 font-body">Guardiens · Version bêta · 2026</span>
-            <span className="text-white/20">·</span>
+          <div className="flex flex-wrap gap-4 text-sm text-white/75 font-body">
+            <span className="text-xs text-white/60 font-body">Guardiens · Version bêta · 2026</span>
+            <span aria-hidden="true" className="text-white/40">·</span>
             <Link to="/cgu" className="hover:text-white transition-colors">CGU</Link>
-            <span className="text-white/20">·</span>
+            <span aria-hidden="true" className="text-white/40">·</span>
             <Link to="/cgs" className="hover:text-white transition-colors">CGS</Link>
-            <span className="text-white/20">·</span>
+            <span aria-hidden="true" className="text-white/40">·</span>
             <Link to="/confidentialite" className="hover:text-white transition-colors">Politique de confidentialité</Link>
-            <span className="text-white/20">·</span>
+            <span aria-hidden="true" className="text-white/40">·</span>
             <Link to="/mentions-legales" className="hover:text-white transition-colors">Mentions légales</Link>
-            <span className="text-white/20">·</span>
+            <span aria-hidden="true" className="text-white/40">·</span>
             <Link to="/contact" className="hover:text-white transition-colors">Contact</Link>
           </div>
         </div>
