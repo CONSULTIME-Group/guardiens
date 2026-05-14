@@ -567,7 +567,7 @@ const Landing = () => {
       <FreePeriodBanner />
 
       {/* ═══════════════ SECTION 1 — HERO (épuré, 5 blocs) ═══════════════ */}
-      <section className="relative w-full min-h-screen flex items-center overflow-hidden">
+      <section id="main-content" role="main" className="relative w-full min-h-screen flex items-center overflow-hidden">
         <img
           src="/hero-landing.webp"
           alt="Golden retriever assis dans l'herbe d'un jardin ensoleillé, gueule ouverte."
@@ -660,7 +660,7 @@ const Landing = () => {
       >
         <div className="max-w-5xl mx-auto px-6 py-4">
           <h2 className="sr-only">Sommaire</h2>
-          <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-body text-foreground/60">
+          <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm font-body text-foreground/70">
             <li><a href="#usages" className="hover:text-primary transition-colors">Garde &amp; entraide</a></li>
             <li aria-hidden="true" className="text-foreground/20">·</li>
             <li><a href="#comment-ca-marche" className="hover:text-primary transition-colors">Comment ça marche</a></li>
@@ -1154,11 +1154,15 @@ const Landing = () => {
                 <button
                   key={i}
                   onClick={() => goToTestimonialPage(i)}
-                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    i === selectedIndex ? "bg-primary" : "bg-foreground/20"
-                  }`}
+                  className="inline-flex items-center justify-center min-w-11 min-h-11 group"
                   aria-label={`Aller à la page de témoignages ${i + 1}`}
-                />
+                >
+                  <span
+                    className={`block w-2.5 h-2.5 rounded-full transition-colors ${
+                      i === selectedIndex ? "bg-primary" : "bg-foreground/20 group-hover:bg-foreground/40"
+                    }`}
+                  />
+                </button>
               ))}
             </div>
           </div>
