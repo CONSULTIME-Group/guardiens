@@ -99,7 +99,7 @@ export default function PricingCards() {
           <p className="text-sm font-body text-white/70 mb-1">
             / an — soit {SITTER_PRICE_ANNUAL_MONTHLY_EQUIV} équivalent
           </p>
-          <p className="text-xs font-body text-white/50 mb-4">
+          <p className="text-xs font-body text-white/75 mb-4">
             Renouvellement annuel automatique. Résiliable à tout moment.
           </p>
           <ul className="text-sm font-body text-white/80 space-y-2 mb-6 flex-1">
