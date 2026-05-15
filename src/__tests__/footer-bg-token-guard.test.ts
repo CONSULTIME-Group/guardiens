@@ -29,7 +29,7 @@ function walk(dir: string, acc: string[] = []): string[] {
     if (st.isDirectory()) {
       if (entry === 'node_modules' || entry.startsWith('.')) continue;
       walk(full, acc);
-    } else if (FOOTER_FILE_PATTERN.test(entry)) {
+    } else if (FOOTER_FILE_PATTERN.test(entry) && !full.includes('__tests__')) {
       acc.push(full);
     }
   }
