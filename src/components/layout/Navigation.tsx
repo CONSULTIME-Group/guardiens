@@ -11,7 +11,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 // Lazy : NotificationBell tire date-fns. On évite vendor-date dans l'entry.
 const NotificationBell = lazy(() => import("./NotificationBell"));
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import FeedbackDialog from "@/components/feedback/FeedbackDialog";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
@@ -475,6 +475,8 @@ export const BottomNav = () => {
               </button>
             </SheetTrigger>
             <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh] overflow-y-auto">
+              <SheetTitle className="sr-only">Menu</SheetTitle>
+              <SheetDescription className="sr-only">Accès rapide aux profils, raccourcis et paramètres.</SheetDescription>
               {/* Role switcher */}
               <div className="mb-4">
                 <p className="text-xs text-muted-foreground mb-2 font-medium">Profil actif</p>
