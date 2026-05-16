@@ -5,7 +5,7 @@ import BadgeSceau from '@/components/badges/BadgeSceau'
 import { BadgeSceauLarge } from '@/components/badges/BadgeSceauLarge'
 import { BADGE_DEFINITIONS } from '@/components/badges/badge-definitions'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Camera, Loader2, Download, Maximize2 } from 'lucide-react'
 import { toast } from 'sonner'
 
