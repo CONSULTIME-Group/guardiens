@@ -184,10 +184,34 @@ const OwnerSitView = ({
       });
       return;
     }
+
+    // Cleanup : annule toutes les candidatures encore actives (non finalisées).
+    // Statuts finaux conservés : accepted, rejected, cancelled, withdrawn.
+    const { data: cancelled, error: appsError } = await supabase
+      .from("applications")
+      .update({ status: "cancelled" })
+      .eq("sit_id", sit.id)
+      .in("status", ["pending", "viewed", "discussing"])
+      .select("id");
+
+    if (appsError) {
+      // L'annonce est dépubliée mais le nettoyage a échoué — on prévient sans bloquer.
+      toast({
+        variant: "destructive",
+        title: "Candidatures non nettoyées",
+        description:
+          "L'annonce est en brouillon, mais certaines candidatures n'ont pas pu être clôturées. Réessayez ou contactez le support.",
+      });
+    }
+
     setSit({ ...sit, status: "draft" });
+    const count = cancelled?.length ?? 0;
     toast({
       title: "Annonce dépubliée",
-      description: "Elle est remise en brouillon. Vous pouvez la republier quand vous voulez.",
+      description:
+        count > 0
+          ? `Remise en brouillon. ${count} candidature${count > 1 ? "s" : ""} en cours ${count > 1 ? "ont" : "a"} été clôturée${count > 1 ? "s" : ""}.`
+          : "Elle est remise en brouillon. Vous pouvez la republier quand vous voulez.",
     });
   };
 
