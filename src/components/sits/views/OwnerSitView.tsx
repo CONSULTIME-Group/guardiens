@@ -156,11 +156,16 @@ const OwnerSitView = ({
 
   const isDraft = sit.status === "draft";
   // canCancel — propriétaire :
-  // - published : annule l'annonce avant qu'elle parte
-  // - confirmed : annule la garde avant son démarrage (notifie le gardien)
-  // - in_progress : possible mais on force le contact direct ; non géré ici (cf. message d'aide modal)
-  // - draft / completed / cancelled / expired : pas d'annulation pertinente
-  const canCancel = sit.status === "published" || sit.status === "confirmed";
+  // - confirmed uniquement : la modale d'annulation génère un avis envers
+  //   le gardien accepté ; sans gardien (published) ce flux n'a pas de sens
+  //   (utiliser Archiver / Supprimer à la place).
+  // - bloqué dès que la date de fin est passée : on n'annule pas une garde
+  //   déjà terminée — le lifecycle l'auto-archive ou l'auto-complète.
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const endDate = sit.end_date ? new Date(sit.end_date) : null;
+  const isPast = endDate ? endDate < today : false;
+  const canCancel = !isPast && sit.status === "confirmed";
 
   // Critères de complétude pour la checklist de publication.
   const description = (sit.specific_expectations || "").trim();

@@ -391,8 +391,14 @@ const SitterSitView = ({
           - La garde n'est ni terminée, ni annulée, ni en brouillon
           Le modal CancelSitModal détecte automatiquement le rôle via user.id ≠ sitOwnerId. */}
       {(() => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const endDate = sit.end_date ? new Date(sit.end_date) : null;
+        const isPast = endDate ? endDate < today : false;
         const canSitterCancel =
-          hasApplied && (sit.status === "confirmed" || sit.status === "in_progress");
+          !isPast &&
+          hasApplied &&
+          (sit.status === "confirmed" || sit.status === "in_progress");
         if (!canSitterCancel) return null;
         return (
           <section
