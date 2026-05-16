@@ -347,6 +347,49 @@ const OwnerSitView = ({
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Confirmation dépublication — précise l'impact (candidatures clôturées). */}
+      <AlertDialog open={unpublishConfirmOpen} onOpenChange={(o) => !unpublishing && setUnpublishConfirmOpen(o)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Dépublier cette annonce ?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 pt-2">
+                <p>
+                  L'annonce repassera en <strong>brouillon</strong> et ne sera plus
+                  visible des gardiens. Vous pourrez la republier à tout moment.
+                </p>
+                {pendingAppsToCancel > 0 && (
+                  <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm">
+                    <p className="text-foreground">
+                      <strong>
+                        {pendingAppsToCancel} candidature{pendingAppsToCancel > 1 ? "s" : ""} en cours
+                      </strong>{" "}
+                      {pendingAppsToCancel > 1 ? "seront clôturées" : "sera clôturée"}.
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Les gardiens concernés ne pourront plus échanger sur cette annonce.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={unpublishing}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void handleUnpublish();
+              }}
+              disabled={unpublishing}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {unpublishing ? "Dépublication…" : "Dépublier"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Emergency sitter alert — owner only, published sit starting within 15 days */}
       {sit.status === "published" && owner?.city && (
         <EmergencyAlertBanner
