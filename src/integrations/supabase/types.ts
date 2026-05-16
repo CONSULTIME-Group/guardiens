@@ -4995,6 +4995,7 @@ export type Database = {
         Returns: boolean
       }
       slugify_city: { Args: { input: string }; Returns: string }
+      unpublish_sit: { Args: { p_sit_id: string }; Returns: number }
       upsert_my_email_preferences: {
         Args: { p_alert: boolean; p_digest: boolean; p_product: boolean }
         Returns: undefined

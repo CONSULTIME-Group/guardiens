@@ -185,47 +185,57 @@ const OwnerSitView = ({
     setUnpublishConfirmOpen(true);
   };
 
-  // Étape 2 : exécute la dépublication après confirmation explicite.
+  // Étape 2 : exécute la dépublication via le RPC sécurisé.
+  // Le RPC valide : auth, ownership, status=published, end_date >= today.
+  // Côté client on ne fait QUE le mapping des erreurs typées → message FR.
   const handleUnpublish = async () => {
     if (unpublishing) return;
     setUnpublishing(true);
-    const { error } = await supabase
-      .from("sits")
-      .update({ status: "draft" as any })
-      .eq("id", sit.id)
-      .eq("user_id", currentUserId);
+
+    const { data, error } = await supabase.rpc("unpublish_sit", {
+      p_sit_id: sit.id,
+    });
+
     if (error) {
-      setUnpublishing(false);
-      toast({
-        variant: "destructive",
+      const raw = error.message || "";
+      const code = raw.includes(":") ? raw.split(":")[0] : raw;
+      const friendly: Record<string, { title: string; description: string }> = {
+        NOT_AUTHENTICATED: {
+          title: "Connexion requise",
+          description: "Reconnectez-vous pour dépublier cette annonce.",
+        },
+        SIT_NOT_FOUND: {
+          title: "Annonce introuvable",
+          description: "Cette annonce n'existe plus ou a déjà été supprimée.",
+        },
+        FORBIDDEN: {
+          title: "Action non autorisée",
+          description: "Seul le propriétaire de l'annonce peut la dépublier.",
+        },
+        INVALID_STATUS: {
+          title: "Dépublication impossible",
+          description:
+            "Cette annonce n'est pas dans un état permettant la dépublication (déjà confirmée, annulée ou en brouillon).",
+        },
+        SIT_ENDED: {
+          title: "Dates passées",
+          description:
+            "Cette annonce est terminée : utilisez Archiver ou Supprimer plutôt que Dépublier.",
+        },
+      };
+      const mapped = friendly[code] ?? {
         title: "Dépublication impossible",
-        description: "L'annonce n'a pas pu être remise en brouillon.",
-      });
+        description: "Une erreur est survenue. Réessayez ou contactez le support.",
+      };
+      setUnpublishing(false);
+      toast({ variant: "destructive", ...mapped });
       return;
     }
 
-    // Cleanup : annule toutes les candidatures encore actives (non finalisées).
-    // Statuts finaux conservés : accepted, rejected, cancelled, withdrawn.
-    const { data: cancelled, error: appsError } = await supabase
-      .from("applications")
-      .update({ status: "cancelled" })
-      .eq("sit_id", sit.id)
-      .in("status", ["pending", "viewed", "discussing"])
-      .select("id");
-
-    if (appsError) {
-      toast({
-        variant: "destructive",
-        title: "Candidatures non nettoyées",
-        description:
-          "L'annonce est en brouillon, mais certaines candidatures n'ont pas pu être clôturées. Réessayez ou contactez le support.",
-      });
-    }
-
+    const count = (data as number | null) ?? 0;
     setSit({ ...sit, status: "draft" });
     setUnpublishConfirmOpen(false);
     setUnpublishing(false);
-    const count = cancelled?.length ?? 0;
     toast({
       title: "Annonce dépubliée",
       description:
