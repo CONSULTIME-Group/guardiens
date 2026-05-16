@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import {
   MapPin, Star, SlidersHorizontal, MessageCircle, Zap,
   LayoutGrid, Map as MapIcon, ShieldCheck, Crosshair, CircleDot, Car, Calendar,
@@ -655,6 +655,8 @@ const SearchOwner = () => {
               </button>
             </SheetTrigger>
             <SheetContent side="right" className="w-80 overflow-y-auto">
+              <SheetTitle className="sr-only">Filtres de recherche</SheetTitle>
+              <SheetDescription className="sr-only">Affinez votre recherche avec les filtres ci-dessous.</SheetDescription>
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-heading font-semibold text-lg">Filtres</h3>
                 <button onClick={resetFilters} className="text-sm text-primary hover:underline">Réinitialiser</button>

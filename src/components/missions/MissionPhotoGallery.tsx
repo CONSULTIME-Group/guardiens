@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface MissionPhotoGalleryProps {
@@ -32,6 +32,8 @@ const MissionPhotoGallery = ({ photos }: MissionPhotoGalleryProps) => {
 
       <Dialog open={lightboxIndex !== null} onOpenChange={closeLightbox}>
         <DialogContent className="max-w-3xl p-0 bg-black/95 border-none overflow-hidden">
+          <DialogTitle className="sr-only">Photo de la mission</DialogTitle>
+          <DialogDescription className="sr-only">Aperçu agrandi des photos de la mission.</DialogDescription>
           {lightboxIndex !== null && (
             <div className="relative flex items-center justify-center min-h-[50vh]">
               <img

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Camera, X, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
@@ -259,6 +259,8 @@ const SitterGallery = () => {
       {lightboxPhoto && (
         <Dialog open={!!lightboxPhoto} onOpenChange={() => setLightboxPhoto(null)}>
           <DialogContent className="max-w-2xl p-0 overflow-hidden">
+            <DialogTitle className="sr-only">{lightboxPhoto.caption || "Photo"}</DialogTitle>
+            <DialogDescription className="sr-only">Aperçu agrandi de la photo de la galerie.</DialogDescription>
             <div className="relative">
               <img src={lightboxPhoto.photo_url} alt={lightboxPhoto.caption} className="w-full max-h-[70vh] object-contain bg-black" />
               <button onClick={() => setLightboxPhoto(null)} className="absolute top-3 right-3 p-2 rounded-full bg-black/60 text-white hover:bg-black/80">

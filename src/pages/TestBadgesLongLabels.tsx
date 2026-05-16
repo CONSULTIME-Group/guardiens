@@ -5,7 +5,7 @@ import BadgeSceau from '@/components/badges/BadgeSceau'
 import { BadgeSceauLarge } from '@/components/badges/BadgeSceauLarge'
 import { BADGE_DEFINITIONS } from '@/components/badges/badge-definitions'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Camera, Loader2, Download, Maximize2 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -745,6 +745,8 @@ export default function TestBadgesLongLabels() {
             className="max-w-sm p-6 sm:p-8"
             data-staged-badge={stagedCase.id}
           >
+            <DialogTitle className="sr-only">{stagedDef.label}</DialogTitle>
+            <DialogDescription className="sr-only">Aperçu du badge {stagedDef.label}.</DialogDescription>
             <div className="flex flex-col items-center text-center">
               <div className="flex justify-center pt-4 pb-5 shrink-0">
                 <BadgeSceauLarge id={stagedCase.id} size={96} />

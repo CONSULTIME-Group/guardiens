@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface FounderBadgeProps {
  size?: 'sm' | 'md' | 'lg';
@@ -31,8 +31,10 @@ export default function FounderBadge({ size = 'md', className = '' }: FounderBad
  </div>
 
  <Dialog open={open} onOpenChange={setOpen}>
- <DialogContent className="max-w-sm text-center p-6 space-y-4">
- <img
+          <DialogContent className="max-w-sm text-center p-6 space-y-4">
+            <DialogTitle className="sr-only">Membre Fondateur</DialogTitle>
+            <DialogDescription className="sr-only">Détails du badge Membre Fondateur.</DialogDescription>
+            <img
  src={BADGE_URL}
  alt="Badge Fondateur"
  className="h-28 w-auto object-contain mx-auto"

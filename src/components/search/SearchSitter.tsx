@@ -22,7 +22,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, MapPin, Calendar, Star, Lock, Zap, Sparkles } from "lucide-react";
 import { format, differenceInDays, differenceInHours } from "date-fns";
@@ -1520,8 +1520,10 @@ const SearchSitter = () => {
  )}
  </button>
  </SheetTrigger>
- <SheetContent side="right" className="w-80 overflow-y-auto">
- <div className="flex items-center justify-between mb-6 mt-2">
+            <SheetContent side="right" className="w-80 overflow-y-auto">
+              <SheetTitle className="sr-only">Filtres de recherche</SheetTitle>
+              <SheetDescription className="sr-only">Affinez votre recherche avec les filtres ci-dessous.</SheetDescription>
+              <div className="flex items-center justify-between mb-6 mt-2">
  <h3 className="font-heading font-semibold text-lg text-foreground">Filtres</h3>
  <button onClick={resetFilters} className="text-sm text-primary hover:underline">Réinitialiser</button>
  </div>

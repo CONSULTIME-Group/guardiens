@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { CheckCircle2, X, Camera } from "lucide-react";
 
 interface GalleryPhoto {
@@ -56,6 +56,8 @@ const PublicGallery = ({ photos, firstName }: PublicGalleryProps) => {
       {lightbox && (
         <Dialog open={!!lightbox} onOpenChange={() => setLightbox(null)}>
           <DialogContent className="max-w-2xl p-0 overflow-hidden">
+            <DialogTitle className="sr-only">{lightbox.caption || "Photo"}</DialogTitle>
+            <DialogDescription className="sr-only">Aperçu agrandi de la photo de la galerie.</DialogDescription>
             <div className="relative">
               <img src={lightbox.photo_url} alt={lightbox.caption} className="w-full max-h-[70vh] object-contain bg-black" />
               <button onClick={() => setLightbox(null)} className="absolute top-3 right-3 p-2 rounded-full bg-black/60 text-white hover:bg-black/80">
