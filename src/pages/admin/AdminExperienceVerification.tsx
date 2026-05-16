@@ -271,6 +271,8 @@ const AdminExperienceVerification = () => {
       {/* Zoomed image modal */}
       <Dialog open={!!zoomedImg} onOpenChange={(o) => !o && setZoomedImg(null)}>
         <DialogContent className="max-w-3xl">
+          <DialogTitle className="sr-only">Capture d'écran agrandie</DialogTitle>
+          <DialogDescription className="sr-only">Aperçu agrandi de la capture d'écran soumise.</DialogDescription>
           {zoomedImg && <img src={zoomedImg} alt="Screenshot" className="w-full rounded-lg" />}
         </DialogContent>
       </Dialog>

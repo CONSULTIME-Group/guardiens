@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, Camera, X } from "lucide-react";
 import HintBubble from "../profile/HintBubble";
 import BreedProfileCard from "../breeds/BreedProfileCard";
@@ -312,6 +312,8 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
       {/* Lightbox */}
       <Dialog open={!!lightboxUrl} onOpenChange={() => setLightboxUrl(null)}>
         <DialogContent className="max-w-2xl p-2 bg-background/95 backdrop-blur">
+          <DialogTitle className="sr-only">Photo de l'animal en plein écran</DialogTitle>
+          <DialogDescription className="sr-only">Aperçu agrandi de la photo de l'animal.</DialogDescription>
           {lightboxUrl && (
             <img src={lightboxUrl} alt="Photo animal" className="w-full h-auto max-h-[80vh] object-contain rounded-lg" />
           )}

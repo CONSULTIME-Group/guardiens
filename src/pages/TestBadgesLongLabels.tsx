@@ -745,6 +745,8 @@ export default function TestBadgesLongLabels() {
             className="max-w-sm p-6 sm:p-8"
             data-staged-badge={stagedCase.id}
           >
+            <DialogTitle className="sr-only">{stagedDef.label}</DialogTitle>
+            <DialogDescription className="sr-only">Aperçu du badge {stagedDef.label}.</DialogDescription>
             <div className="flex flex-col items-center text-center">
               <div className="flex justify-center pt-4 pb-5 shrink-0">
                 <BadgeSceauLarge id={stagedCase.id} size={96} />
