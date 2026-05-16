@@ -29,6 +29,8 @@ const OwnerSitManagement = ({
   canCancel,
   onCancelClick,
   onShareClick,
+  canUnpublish,
+  onUnpublishClick,
 }: OwnerSitManagementProps) => {
   return (
     <section
@@ -82,6 +84,18 @@ const OwnerSitManagement = ({
           </Button>
         )}
 
+        {canUnpublish && onUnpublishClick && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onUnpublishClick}
+            className="justify-start gap-2 text-destructive-text hover:text-destructive-text hover:bg-destructive/10 border-destructive/30 hover:border-destructive/50"
+          >
+            <XCircle className="h-3.5 w-3.5" />
+            Dépublier l'annonce
+          </Button>
+        )}
+
         {canCancel && (
           <Button
             variant="outline"
@@ -97,9 +111,14 @@ const OwnerSitManagement = ({
 
       {canCancel && (
         <p className="text-xs text-muted-foreground mt-3">
-          L'annulation est définitive. {status === "confirmed"
-            ? "Le gardien sera notifié immédiatement."
-            : "Vous pourrez ensuite republier une nouvelle annonce si besoin."}
+          L'annulation est définitive. Le gardien sera notifié immédiatement.
+        </p>
+      )}
+
+      {canUnpublish && !canCancel && (
+        <p className="text-xs text-muted-foreground mt-3">
+          Dépublier remet l'annonce en brouillon : elle ne sera plus visible des gardiens
+          mais vous pourrez la republier à tout moment.
         </p>
       )}
     </section>
