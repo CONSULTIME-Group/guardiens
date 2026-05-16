@@ -492,6 +492,8 @@ const OwnerSitView = ({
         status={sit.status}
         canCancel={canCancel}
         onCancelClick={() => setCancelOpen(true)}
+        canUnpublish={canUnpublish}
+        onUnpublishClick={handleUnpublish}
       />
 
       <SitFooterReassurance />
