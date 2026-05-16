@@ -101,6 +101,9 @@ const OwnerSitView = ({
   const [publishing, setPublishing] = useState(false);
   const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [unpublishConfirmOpen, setUnpublishConfirmOpen] = useState(false);
+  const [unpublishing, setUnpublishing] = useState(false);
+  const [pendingAppsToCancel, setPendingAppsToCancel] = useState<number>(0);
   const [logementOverride, setLogementOverride] = useState(initialLogementOverride);
   const [animauxOverride, setAnimauxOverride] = useState(initialAnimauxOverride);
   const [internalAppCount, setInternalAppCount] = useState(appCount);
@@ -170,13 +173,29 @@ const OwnerSitView = ({
   // on remet simplement en brouillon (pas d'avis, pas de notification gardien).
   const canUnpublish = !isPast && sit.status === "published";
 
+  // Étape 1 : ouvre la modale de confirmation en pré-comptant les candidatures
+  // actives qui seront clôturées — l'owner doit voir l'impact avant de cliquer.
+  const requestUnpublish = async () => {
+    const { count } = await supabase
+      .from("applications")
+      .select("id", { count: "exact", head: true })
+      .eq("sit_id", sit.id)
+      .in("status", ["pending", "viewed", "discussing"]);
+    setPendingAppsToCancel(count ?? 0);
+    setUnpublishConfirmOpen(true);
+  };
+
+  // Étape 2 : exécute la dépublication après confirmation explicite.
   const handleUnpublish = async () => {
+    if (unpublishing) return;
+    setUnpublishing(true);
     const { error } = await supabase
       .from("sits")
       .update({ status: "draft" as any })
       .eq("id", sit.id)
       .eq("user_id", currentUserId);
     if (error) {
+      setUnpublishing(false);
       toast({
         variant: "destructive",
         title: "Dépublication impossible",
@@ -195,7 +214,6 @@ const OwnerSitView = ({
       .select("id");
 
     if (appsError) {
-      // L'annonce est dépubliée mais le nettoyage a échoué — on prévient sans bloquer.
       toast({
         variant: "destructive",
         title: "Candidatures non nettoyées",
@@ -205,6 +223,8 @@ const OwnerSitView = ({
     }
 
     setSit({ ...sit, status: "draft" });
+    setUnpublishConfirmOpen(false);
+    setUnpublishing(false);
     const count = cancelled?.length ?? 0;
     toast({
       title: "Annonce dépubliée",
@@ -214,7 +234,6 @@ const OwnerSitView = ({
           : "Elle est remise en brouillon. Vous pouvez la republier quand vous voulez.",
     });
   };
-
   // Critères de complétude pour la checklist de publication.
   const description = (sit.specific_expectations || "").trim();
   const checklist = {
@@ -323,6 +342,49 @@ const OwnerSitView = ({
               }}
             >
               Publier
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirmation dépublication — précise l'impact (candidatures clôturées). */}
+      <AlertDialog open={unpublishConfirmOpen} onOpenChange={(o) => !unpublishing && setUnpublishConfirmOpen(o)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Dépublier cette annonce ?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 pt-2">
+                <p>
+                  L'annonce repassera en <strong>brouillon</strong> et ne sera plus
+                  visible des gardiens. Vous pourrez la republier à tout moment.
+                </p>
+                {pendingAppsToCancel > 0 && (
+                  <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm">
+                    <p className="text-foreground">
+                      <strong>
+                        {pendingAppsToCancel} candidature{pendingAppsToCancel > 1 ? "s" : ""} en cours
+                      </strong>{" "}
+                      {pendingAppsToCancel > 1 ? "seront clôturées" : "sera clôturée"}.
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Les gardiens concernés ne pourront plus échanger sur cette annonce.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={unpublishing}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void handleUnpublish();
+              }}
+              disabled={unpublishing}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {unpublishing ? "Dépublication…" : "Dépublier"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -517,7 +579,7 @@ const OwnerSitView = ({
         canCancel={canCancel}
         onCancelClick={() => setCancelOpen(true)}
         canUnpublish={canUnpublish}
-        onUnpublishClick={handleUnpublish}
+        onUnpublishClick={requestUnpublish}
       />
 
       <SitFooterReassurance />
