@@ -173,13 +173,29 @@ const OwnerSitView = ({
   // on remet simplement en brouillon (pas d'avis, pas de notification gardien).
   const canUnpublish = !isPast && sit.status === "published";
 
+  // Étape 1 : ouvre la modale de confirmation en pré-comptant les candidatures
+  // actives qui seront clôturées — l'owner doit voir l'impact avant de cliquer.
+  const requestUnpublish = async () => {
+    const { count } = await supabase
+      .from("applications")
+      .select("id", { count: "exact", head: true })
+      .eq("sit_id", sit.id)
+      .in("status", ["pending", "viewed", "discussing"]);
+    setPendingAppsToCancel(count ?? 0);
+    setUnpublishConfirmOpen(true);
+  };
+
+  // Étape 2 : exécute la dépublication après confirmation explicite.
   const handleUnpublish = async () => {
+    if (unpublishing) return;
+    setUnpublishing(true);
     const { error } = await supabase
       .from("sits")
       .update({ status: "draft" as any })
       .eq("id", sit.id)
       .eq("user_id", currentUserId);
     if (error) {
+      setUnpublishing(false);
       toast({
         variant: "destructive",
         title: "Dépublication impossible",
@@ -198,7 +214,6 @@ const OwnerSitView = ({
       .select("id");
 
     if (appsError) {
-      // L'annonce est dépubliée mais le nettoyage a échoué — on prévient sans bloquer.
       toast({
         variant: "destructive",
         title: "Candidatures non nettoyées",
@@ -208,6 +223,8 @@ const OwnerSitView = ({
     }
 
     setSit({ ...sit, status: "draft" });
+    setUnpublishConfirmOpen(false);
+    setUnpublishing(false);
     const count = cancelled?.length ?? 0;
     toast({
       title: "Annonce dépubliée",
@@ -217,7 +234,6 @@ const OwnerSitView = ({
           : "Elle est remise en brouillon. Vous pouvez la republier quand vous voulez.",
     });
   };
-
   // Critères de complétude pour la checklist de publication.
   const description = (sit.specific_expectations || "").trim();
   const checklist = {
