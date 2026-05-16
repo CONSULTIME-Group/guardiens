@@ -166,6 +166,30 @@ const OwnerSitView = ({
   const endDate = sit.end_date ? new Date(sit.end_date) : null;
   const isPast = endDate ? endDate < today : false;
   const canCancel = !isPast && sit.status === "confirmed";
+  // canUnpublish — propriétaire d'une annonce publiée sans gardien accepté :
+  // on remet simplement en brouillon (pas d'avis, pas de notification gardien).
+  const canUnpublish = !isPast && sit.status === "published";
+
+  const handleUnpublish = async () => {
+    const { error } = await supabase
+      .from("sits")
+      .update({ status: "draft" as any })
+      .eq("id", sit.id)
+      .eq("user_id", currentUserId);
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Dépublication impossible",
+        description: "L'annonce n'a pas pu être remise en brouillon.",
+      });
+      return;
+    }
+    setSit({ ...sit, status: "draft" });
+    toast({
+      title: "Annonce dépubliée",
+      description: "Elle est remise en brouillon. Vous pouvez la republier quand vous voulez.",
+    });
+  };
 
   // Critères de complétude pour la checklist de publication.
   const description = (sit.specific_expectations || "").trim();
@@ -468,6 +492,8 @@ const OwnerSitView = ({
         status={sit.status}
         canCancel={canCancel}
         onCancelClick={() => setCancelOpen(true)}
+        canUnpublish={canUnpublish}
+        onUnpublishClick={handleUnpublish}
       />
 
       <SitFooterReassurance />
