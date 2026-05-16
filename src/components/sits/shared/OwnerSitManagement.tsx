@@ -13,10 +13,13 @@ interface OwnerSitManagementProps {
   sitId: string;
   propertyId: string;
   status: string;
-  /** Indique si la garde peut encore être annulée (published, confirmed). */
+  /** Indique si la garde peut encore être annulée (confirmed uniquement). */
   canCancel: boolean;
   onCancelClick: () => void;
   onShareClick?: () => void;
+  /** Indique si l'annonce publiée peut être dépubliée (remise en brouillon). */
+  canUnpublish?: boolean;
+  onUnpublishClick?: () => void;
 }
 
 const OwnerSitManagement = ({
