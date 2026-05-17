@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import { Link } from "react-router-dom";
-import { MapPin, PawPrint, Cat, Bird } from "lucide-react";
+import { MapPin, PawPrint, Cat, Bird, X } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 
 const speciesIcon: Record<string, typeof PawPrint> = {
