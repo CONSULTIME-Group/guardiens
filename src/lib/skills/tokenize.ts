@@ -53,6 +53,26 @@ const isValid = (s: string): boolean => {
 };
 
 /**
+ * Clé canonique pour comparer deux pastilles « savoir-faire » :
+ *  - trim
+ *  - collapse espaces internes
+ *  - bascule en minuscules
+ *  - retrait des diacritiques (é→e, ç→c, etc.)
+ *
+ * Permet de dédupliquer « Couture », « couture », « COUTURE  »,
+ * « Cuisiné » vs « cuisine », etc.
+ */
+export const normalizeSkillKey = (s: string | null | undefined): string => {
+  if (!s) return "";
+  return s
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLocaleLowerCase("fr")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+};
+
+/**
  * @param raw Liste brute (peut contenir des phrases entières).
  * @returns Liste de pastilles courtes, dédupliquées, capitalisées.
  */
@@ -66,13 +86,31 @@ export const tokenizeSkillPhrases = (raw: (string | null | undefined)[] | null |
     const stripped = stripStopPrefix(entry.trim());
     const parts = stripped.split(SEPARATORS);
     for (const part of parts) {
-      const cleaned = cleanToken(part);
+      const cleaned = cleanToken(part).replace(/\s+/g, " ");
       if (!isValid(cleaned)) continue;
-      const key = cleaned.toLowerCase();
-      if (seen.has(key)) continue;
+      const key = normalizeSkillKey(cleaned);
+      if (!key || seen.has(key)) continue;
       seen.add(key);
       out.push(capitalize(cleaned));
     }
   }
   return out;
 };
+
+/**
+ * Déduplique une liste d'objets « chip » par label normalisé.
+ * Garde la 1ʳᵉ occurrence — passez les chips prioritaires en premier
+ * (ex. custom avant category).
+ */
+export const dedupeChipsByLabel = <T extends { label: string }>(chips: T[]): T[] => {
+  const seen = new Set<string>();
+  const out: T[] = [];
+  for (const chip of chips) {
+    const key = normalizeSkillKey(chip.label);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push(chip);
+  }
+  return out;
+};
+

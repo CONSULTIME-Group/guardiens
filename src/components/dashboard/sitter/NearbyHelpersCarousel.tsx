@@ -10,7 +10,7 @@ import { startConversation } from "@/lib/conversation";
 import { toast } from "sonner";
 import { capitalize } from "@/components/dashboard/owner/helpers";
 import EmptyIllustration from "@/components/dashboard/shared/EmptyIllustration";
-import { tokenizeSkillPhrases } from "@/lib/skills/tokenize";
+import { tokenizeSkillPhrases, dedupeChipsByLabel } from "@/lib/skills/tokenize";
 
 /**
  * Compteur dual « local · national » de personnes prêtes à donner un coup de main.
@@ -191,7 +191,9 @@ const HelperMiniCard = ({
   const customSkills = tokenizeSkillPhrases(helper.custom_skills);
 
   type Chip = { key: string; label: string; tone: "custom" | "category" };
-  const chips: Chip[] = [
+  // Custom en premier — prioritaire en cas de doublon vs label de catégorie.
+  // Dédup case + diacritique-insensible (« Couture » == « couture » == « COUTURE »).
+  const chips: Chip[] = dedupeChipsByLabel([
     ...customSkills.map((c): Chip => ({ key: `c-${c}`, label: c, tone: "custom" })),
     ...helper.skill_categories
       .filter((cat) => SKILL_CHIPS.find((c) => c.key === cat))
@@ -200,7 +202,7 @@ const HelperMiniCard = ({
         label: SKILL_CHIPS.find((c) => c.key === cat)!.label,
         tone: "category",
       })),
-  ];
+  ]);
   const MAX_CHIPS = 4;
   const visibleChips = chips.slice(0, MAX_CHIPS);
   const remaining = chips.length - visibleChips.length;
