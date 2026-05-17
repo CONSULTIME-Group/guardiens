@@ -37,7 +37,7 @@ const HelperMiniCard = ({
   onWrite: () => void;
 }) => {
   const firstName = capitalize(helper.first_name || "Membre");
-  const customSkill = helper.custom_skills[0]?.trim();
+  const customSkill = helper.custom_skills?.[0]?.trim();
   // Fallback : début de bio si pas de compétence libre renseignée
   const teaser = customSkill || helper.bio?.trim() || null;
   const teaserLabel = customSkill ? "Peut aider pour" : "À propos";
