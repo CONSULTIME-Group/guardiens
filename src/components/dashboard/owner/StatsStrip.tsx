@@ -56,8 +56,25 @@ const StatsStrip = memo(({ items }: StatsStripProps) => {
             ) : (
               <p className="text-sm text-muted-foreground leading-none mt-1">{item.fallback}</p>
             )}
-            <p className={`text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 ${clickable ? "group-hover:text-foreground/80" : ""}`}>
-              {item.label}
+            <p className={`text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 inline-flex items-center gap-1 justify-center md:justify-start ${clickable ? "group-hover:text-foreground/80" : ""}`}>
+              <span>{item.label}</span>
+              {item.tooltip && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                      className="inline-flex items-center justify-center rounded-full text-muted-foreground/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      aria-label={`En savoir plus sur ${item.label}`}
+                    >
+                      <Info className="h-3 w-3" aria-hidden="true" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed normal-case tracking-normal">
+                    {item.tooltip}
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </p>
           </div>
         );
