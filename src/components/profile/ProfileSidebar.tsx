@@ -94,7 +94,8 @@ const ProfileSidebar = ({
       {scoreBreakdown}
 
       {/* Section nav — vertical on desktop, horizontal scroll on mobile */}
-      <nav className="flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 -mx-1 px-1">
+      <div className="relative lg:static -mr-4 lg:mr-0">
+      <nav className="flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-x-visible no-scrollbar pb-2 lg:pb-0 pr-8 lg:pr-0 -mx-1 px-1">
         {sections.map((s) => {
           const isActive = activeSection === s.id;
           const isDirty = dirtySection === s.id;
@@ -197,6 +198,8 @@ const ProfileSidebar = ({
           );
         })}
       </nav>
+      <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-background to-transparent lg:hidden" />
+      </div>
 
       {/* Mobile-only : panneau détaillé pour la section active.
           Sur mobile la nav est en scroll horizontal et n'a pas la place
