@@ -8,14 +8,7 @@ import { usePreloadImages } from "@/hooks/usePreloadImages";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 
 import emptyAnnoncesUrl from "@/assets/illustrations/empty-annonces.webp";
-import emptyHelpersUrl from "@/assets/illustrations/empty-helpers.webp";
 import emptyConseilsUrl from "@/assets/illustrations/empty-conseils.webp";
-
-const CRITICAL_EMPTY_ILLUSTRATIONS = [
-  emptyAnnoncesUrl,
-  emptyHelpersUrl,
-  emptyConseilsUrl,
-] as const;
 
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
@@ -47,10 +40,6 @@ const SitterDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { hasAccess: hasSubscription } = useSubscriptionAccess();
 
-  // Préchargement des gouaches d'empty-states : évite le pop-in quand
-  // une section bascule de loading → empty après résolution des queries.
-  usePreloadImages(CRITICAL_EMPTY_ILLUSTRATIONS);
-
   const {
     loading, profileCompletion, identityVerified, identityStatus,
     completedSits, avgRating, reviewsCount, badgeCount, totalApps,
@@ -62,6 +51,17 @@ const SitterDashboard = () => {
     toggleAvailability,
     reputation, groupedBadges,
   } = useSitterDashboardData(user?.id);
+
+  // Préchargement conditionnel : on injecte un <link rel=preload> uniquement
+  // pour les sections qui vont basculer en empty-state, après résolution des
+  // queries. Évite le coût réseau systématique quand les sections sont remplies.
+  // Helpers est géré séparément (état interne à NearbyHelpersCarousel).
+  const illustrationsToPreload: string[] = [];
+  if (!loading) {
+    if (!nearbyError && nearbyListings.length === 0) illustrationsToPreload.push(emptyAnnoncesUrl);
+    if (articles.length === 0) illustrationsToPreload.push(emptyConseilsUrl);
+  }
+  usePreloadImages(illustrationsToPreload);
 
   if (loading) return (
     <div className="p-8 flex items-center justify-center">
