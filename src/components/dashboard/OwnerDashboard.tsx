@@ -8,6 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import OnboardingWelcome from "./OnboardingWelcome";
 import NearbyPeopleTabs from "./owner/NearbyPeopleTabs";
+import NearbyHelpersCarousel from "./sitter/NearbyHelpersCarousel";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
 import { Plus, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -368,6 +369,11 @@ const OwnerDashboard = () => {
                 : []),
             ]}
           />
+          {/* Mobile/tablet : remontée explicite des helpers proches (≤ lg).
+              Sur ≥ lg ils restent accessibles via NearbyPeopleTabs (onglet « Coup de main »). */}
+          <div className="lg:hidden">
+            <NearbyHelpersCarousel />
+          </div>
           <NearbyPeopleTabs />
           <MissionsTabsCard myMissions={myMissions} nearbyMissions={smallMissions} />
         </aside>
