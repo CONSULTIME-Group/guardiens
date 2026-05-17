@@ -163,13 +163,13 @@ const SearchMapView = ({
         </MapContainer>
 
         {/* Sélecteur : toutes les annonces vs annonces actives uniquement */}
-        <div className="absolute top-3 left-3 z-[400] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-sm p-1 flex text-xs">
+        <div className="absolute top-3 left-3 right-3 md:right-auto z-[400] bg-card border-2 border-border rounded-xl shadow-lg p-1 flex text-sm md:text-xs max-w-[calc(100vw-1.5rem)] md:max-w-none">
           <button
             type="button"
             onClick={() => setShowAll(false)}
             aria-pressed={!showAll}
-            className={`px-2.5 py-1.5 rounded-md font-medium transition-colors ${
-              !showAll ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            className={`flex-1 md:flex-none min-h-11 md:min-h-0 px-3 py-2 md:py-1.5 rounded-lg font-semibold transition-colors ${
+              !showAll ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"
             }`}
           >
             Annonces actives
@@ -178,8 +178,8 @@ const SearchMapView = ({
             type="button"
             onClick={() => setShowAll(true)}
             aria-pressed={showAll}
-            className={`px-2.5 py-1.5 rounded-md font-medium transition-colors ${
-              showAll ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            className={`flex-1 md:flex-none min-h-11 md:min-h-0 px-3 py-2 md:py-1.5 rounded-lg font-semibold transition-colors ${
+              showAll ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"
             }`}
           >
             Toutes les annonces
@@ -187,7 +187,7 @@ const SearchMapView = ({
         </div>
 
         {/* Légende */}
-        <div className="absolute bottom-20 md:bottom-3 left-3 z-[400] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-sm px-3 py-2 text-xs text-foreground pointer-events-none space-y-1">
+        <div className="absolute bottom-20 md:bottom-3 left-3 z-[400] bg-card border border-border rounded-lg shadow-md px-3 py-2 text-sm md:text-xs font-medium text-foreground pointer-events-none space-y-1">
           <div className="flex items-center gap-2">
             <span className="inline-block w-3 h-3 rounded-full" style={{ background: pinColors.active.bg, border: `2px solid ${pinColors.active.ring}` }} />
             Annonce active
