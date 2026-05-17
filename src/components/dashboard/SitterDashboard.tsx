@@ -292,58 +292,71 @@ const SitterDashboard = () => {
         onToggleAvailability={toggleAvailability}
       />
 
-      {/* FreePeriodBanner sur empty state (pas de garde prévue) */}
-      {!nextGuard && (
-        <div className="mb-4">
-          <FreePeriodBanner />
-        </div>
-      )}
+      {/* État empty = pas de prochaine garde ET pas d'annonce à proximité.
+          Dans ce cas, la priorité absolue est l'activation : on remonte la
+          checklist juste après le Hero et on masque NextGuardEmpty (la
+          checklist le remplace fonctionnellement). */}
+      {(() => {
+        const isEmpty = !nextGuard && !nextGuardError && nearbyListings.length === 0 && !nearbyError;
+        return (
+          <>
+            {/* Checklist mobile EN PREMIER sur empty state */}
+            {isEmpty && <div className="xl:hidden">{ChecklistBlock}</div>}
 
-      {/* Hero contextuel */}
-      {nextGuard ? (
-        <SitterNextGuard nextGuard={nextGuard} />
-      ) : nextGuardError ? (
-        <DashboardSectionState
-          variant="error"
-          eyebrow="Prochaine garde"
-          description={nextGuardError}
-          onRetry={() => window.location.reload()}
-        />
-      ) : nearbyListings.length > 0 ? (
-        <NearestListingHero listing={nearbyListings[0]} />
-      ) : nearbyError ? (
-        <DashboardSectionState
-          variant="error"
-          eyebrow="Annonce la plus proche"
-          description={nearbyError}
-          onRetry={() => window.location.reload()}
-        />
-      ) : (
-        <SitterNextGuardEmpty />
-      )}
+            {/* FreePeriodBanner sur empty state (pas de garde prévue) */}
+            {!nextGuard && (
+              <div className="mb-4">
+                <FreePeriodBanner />
+              </div>
+            )}
 
-      <div className="px-4 sm:px-5 md:px-8 mt-4">
-        <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
-      </div>
+            {/* Hero contextuel (masqué en empty state — la checklist a pris sa place) */}
+            {nextGuard ? (
+              <SitterNextGuard nextGuard={nextGuard} />
+            ) : nextGuardError ? (
+              <DashboardSectionState
+                variant="error"
+                eyebrow="Prochaine garde"
+                description={nextGuardError}
+                onRetry={() => window.location.reload()}
+              />
+            ) : nearbyListings.length > 0 ? (
+              <NearestListingHero listing={nearbyListings[0]} />
+            ) : nearbyError ? (
+              <DashboardSectionState
+                variant="error"
+                eyebrow="Annonce la plus proche"
+                description={nearbyError}
+                onRetry={() => window.location.reload()}
+              />
+            ) : null /* empty : checklist déjà rendue */}
 
-      {/* ═══ 2-COLUMN LAYOUT ≥ xl ═══ */}
+            <div className="px-4 sm:px-5 md:px-8 mt-4">
+              <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+            </div>
 
-      {/* Version pleine largeur — visible < xl */}
-      <div className="xl:hidden mt-4">
-        {ChecklistBlock}
+            {/* ═══ 2-COLUMN LAYOUT ≥ xl ═══ */}
 
-        <div className="px-4 sm:px-5 md:px-8 mb-6 space-y-4">
-          {buildStatusBlock(false)}
-          {buildBadgesBlock(false)}
-          {buildEmergencyBlock(false)}
-        </div>
+            {/* Version pleine largeur — visible < xl */}
+            <div className="xl:hidden mt-4">
+              {/* Checklist ici UNIQUEMENT si pas déjà rendue plus haut */}
+              {!isEmpty && ChecklistBlock}
 
-        <div className="px-4 sm:px-5 md:px-8 mb-6">
-          <DashSection eyebrow="Près de chez vous" title="À découvrir" description="Annonces, échanges et conseils sélectionnés pour vous.">
-            {DiscoveryTabs}
-          </DashSection>
-        </div>
-      </div>
+              <div className="px-4 sm:px-5 md:px-8 mb-6 space-y-4">
+                {buildStatusBlock(false)}
+                {buildBadgesBlock(false)}
+                {buildEmergencyBlock(false)}
+              </div>
+
+              <div className="px-4 sm:px-5 md:px-8 mb-6">
+                <DashSection eyebrow="Près de chez vous" title="À découvrir" description="Annonces, échanges et conseils sélectionnés pour vous.">
+                  {DiscoveryTabs}
+                </DashSection>
+              </div>
+            </div>
+          </>
+        );
+      })()}
 
       {/* Version 2 colonnes — visible ≥ xl */}
       <div className="hidden xl:grid xl:grid-cols-12 xl:gap-6 xl:px-8 min-w-0 mt-4">
