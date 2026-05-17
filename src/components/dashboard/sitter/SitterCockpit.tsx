@@ -4,6 +4,7 @@ import FounderBadge from "@/components/badges/FounderBadge";
 import PriorityActionCard from "@/components/dashboard/shared/PriorityActionCard";
 import LiveSignalStrip from "@/components/dashboard/shared/LiveSignalStrip";
 import { useSitterPriorityAction } from "@/hooks/useSitterPriorityAction";
+import heroMorning from "@/assets/illustrations/sitter-hero-morning.jpg";
 
 /**
  * Cockpit gardien — bloc unifié au-dessus du pli.
