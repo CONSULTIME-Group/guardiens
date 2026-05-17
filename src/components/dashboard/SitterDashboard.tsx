@@ -370,7 +370,8 @@ const SitterDashboard = () => {
         {/* ── ZONE 3 : DÉCOUVERTE (annonces + missions + articles) ── */}
         <div className="px-4 sm:px-5 md:px-8 mb-6">
           <DashSection eyebrow="Près de chez vous" title="À découvrir" description="Annonces, échanges et conseils sélectionnés pour vous.">
-            <div className="space-y-4">
+            <div className="space-y-6">
+              <NearbyHelpersCarousel />
               <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} myMissions={myMissions} postalCode={postalCode} nearbyError={nearbyError} nearbyMissionsError={nearbyMissionsError} myMissionsError={myMissionsError} isAvailable={isAvailable} />
               {articles.length > 0 && (
                 <div>
