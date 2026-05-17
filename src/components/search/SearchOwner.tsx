@@ -747,7 +747,7 @@ const SearchOwner = () => {
                     trackEvent("search_empty_action", { source: "owner", metadata: { action: "change_zone", zone_mode: z.key } });
                   }}
                   disabled={z.disabled}
-                  className={`shrink-0 rounded-full px-3 py-1 text-xs border transition-colors ${
+                  className={`snap-start shrink-0 rounded-full px-3 py-1 min-h-9 inline-flex items-center text-xs border transition-colors whitespace-nowrap ${
                     active
                       ? "bg-primary text-primary-foreground border-primary"
                       : z.disabled
