@@ -179,13 +179,21 @@ const HelperMiniCard = ({
   pending?: boolean;
 }) => {
   const firstName = capitalize(helper.first_name || "Membre");
+
+  // Pastilles synthétiques uniquement.
+  // En base, `custom_skills` peut contenir une phrase entière ("Je peux promener
+  // un chien, rendre visite à un chat, monter un meuble Ikea…"). On ne veut PAS
+  // ça en pastille : on filtre les tokens > 22 caractères ou contenant une
+  // ponctuation de phrase (. , ; :). Reste : mots-clés courts type "Couture",
+  // "Informatique", "Yoga".
+  const SHORT_TOKEN_MAX = 22;
+  const isSyntheticToken = (s: string) =>
+    s.length <= SHORT_TOKEN_MAX && !/[.,;:!?]/.test(s);
   const customSkills = (helper.custom_skills || [])
     .map((s) => s?.trim())
-    .filter((s): s is string => !!s);
+    .filter((s): s is string => !!s)
+    .filter(isSyntheticToken);
 
-  // Fusion pastilles : custom_skills d'abord (vrai savoir-faire déclaré),
-  // puis catégories génériques en complément. Plafond 4 chips pour rester
-  // sur 1-2 lignes max. Pas de phrase, pas de bio italique : pastilles only.
   type Chip = { key: string; label: string; tone: "custom" | "category" };
   const chips: Chip[] = [
     ...customSkills.map((c): Chip => ({ key: `c-${c}`, label: c, tone: "custom" })),
