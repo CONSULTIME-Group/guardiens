@@ -6,30 +6,40 @@ interface PostalCodeState {
   error: string | null;
 }
 
+type CityCentreMap = Record<string, { latitude: number; longitude: number }>;
+
 /**
  * Returns a handler that auto-fills city from a French postal code
  * using the geo.api.gouv.fr API.
- * If multiple cities match, exposes them so the UI can show a select.
+ *
+ * Importance : on récupère AUSSI `centre` (GeoJSON Point [lng, lat]) pour
+ * propager latitude/longitude en même temps que la ville. Sans ça, le profil
+ * n'a pas de coords GPS et le tri par distance ne fonctionne plus
+ * (carrousel helpers, alertes, search radius).
  */
 export function usePostalCodeCity(
-  onChange: (partial: { city?: string; postal_code?: string }) => void,
+  onChange: (partial: {
+    city?: string;
+    postal_code?: string;
+    latitude?: number | null;
+    longitude?: number | null;
+  }) => void,
 ) {
   const [postalState, setPostalState] = useState<PostalCodeState>({
     cities: [],
     loading: false,
     error: null,
   });
+  const [centreMap, setCentreMap] = useState<CityCentreMap>({});
 
   const handlePostalCodeChange = useCallback(
     async (value: string) => {
       onChange({ postal_code: value });
-      // Always reset cached cities when CP changes (avoids stale dropdown)
       setPostalState({ cities: [], loading: false, error: null });
+      setCentreMap({});
 
-      // French postal codes are 5 digits
       if (!/^\d{5}$/.test(value)) {
-        // Clear city if CP becomes invalid (less than 5 digits)
-        if (value.length === 0) onChange({ city: "" });
+        if (value.length === 0) onChange({ city: "", latitude: null, longitude: null });
         return;
       }
 
@@ -37,25 +47,39 @@ export function usePostalCodeCity(
 
       try {
         const res = await fetch(
-          `https://geo.api.gouv.fr/communes?codePostal=${value}&fields=nom&limit=20`,
+          `https://geo.api.gouv.fr/communes?codePostal=${value}&fields=nom,centre&limit=20`,
         );
         if (!res.ok) throw new Error("API error");
 
-        const data: { nom: string }[] = await res.json();
+        const data: { nom: string; centre?: { coordinates: [number, number] } }[] =
+          await res.json();
 
         if (!data || data.length === 0) {
           setPostalState({ cities: [], loading: false, error: "Code postal non reconnu" });
           return;
         }
 
+        const map: CityCentreMap = {};
+        data.forEach((d) => {
+          if (d.centre?.coordinates) {
+            const [lng, lat] = d.centre.coordinates;
+            map[d.nom] = { latitude: lat, longitude: lng };
+          }
+        });
+        setCentreMap(map);
+
         const names = data.map((d) => d.nom);
 
         if (names.length === 1) {
-          // Single match → auto-fill
-          onChange({ city: names[0], postal_code: value });
+          const coords = map[names[0]];
+          onChange({
+            city: names[0],
+            postal_code: value,
+            latitude: coords?.latitude ?? null,
+            longitude: coords?.longitude ?? null,
+          });
           setPostalState({ cities: [], loading: false, error: null });
         } else {
-          // Multiple matches → let user choose
           setPostalState({ cities: names, loading: false, error: null });
         }
       } catch {
@@ -67,10 +91,15 @@ export function usePostalCodeCity(
 
   const selectCity = useCallback(
     (city: string) => {
-      onChange({ city });
+      const coords = centreMap[city];
+      onChange({
+        city,
+        latitude: coords?.latitude ?? null,
+        longitude: coords?.longitude ?? null,
+      });
       setPostalState((s) => ({ ...s, cities: [] }));
     },
-    [onChange],
+    [onChange, centreMap],
   );
 
   return { handlePostalCodeChange, selectCity, ...postalState };

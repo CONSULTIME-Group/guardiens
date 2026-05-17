@@ -33,6 +33,8 @@ export interface SitterProfileData {
   last_name: string;
   city: string;
   postal_code: string;
+  latitude?: number | null;
+  longitude?: number | null;
   bio: string;
   avatar_url: string;
   // Step 1 - from sitter_profiles
@@ -125,6 +127,8 @@ export function useSitterProfile() {
       last_name: p?.last_name || "",
       city: p?.city || "",
       postal_code: p?.postal_code || "",
+      latitude: (p as any)?.latitude ?? null,
+      longitude: (p as any)?.longitude ?? null,
       bio: p?.bio || "",
       avatar_url: p?.avatar_url || "",
       motivation: s?.motivation || "",
@@ -194,6 +198,48 @@ export function useSitterProfile() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  // Backfill géoloc silencieux : si l'utilisateur a code postal + ville mais
+  // pas de lat/lng (cas legacy d'avant l'ajout du `centre` dans usePostalCodeCity),
+  // on les récupère via geo.api.gouv.fr et on met à jour. Sinon le tri par
+  // distance reste cassé sans que l'utilisateur comprenne pourquoi.
+  useEffect(() => {
+    const needsBackfill =
+      !!user &&
+      !!data.postal_code &&
+      /^\d{5}$/.test(data.postal_code) &&
+      !!data.city &&
+      (data.latitude == null || data.longitude == null);
+    if (!needsBackfill) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(
+          `https://geo.api.gouv.fr/communes?codePostal=${data.postal_code}&fields=nom,centre&limit=20`,
+        );
+        if (!res.ok) return;
+        const arr: { nom: string; centre?: { coordinates: [number, number] } }[] = await res.json();
+        const match =
+          arr.find((c) => c.nom.toLowerCase() === data.city.toLowerCase()) ||
+          arr[0];
+        if (!match?.centre?.coordinates || cancelled) return;
+        const [lng, lat] = match.centre.coordinates;
+        const { error } = await supabase
+          .from("profiles")
+          .update({ latitude: lat, longitude: lng })
+          .eq("id", user.id);
+        if (!error && !cancelled) {
+          setData((prev) => ({ ...prev, latitude: lat, longitude: lng }));
+        }
+      } catch {
+        // silencieux — on retentera au prochain chargement
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, data.postal_code, data.city, data.latitude, data.longitude]);
+
   // Canonical score: read from profiles.profile_completion (computed server-side
   // by the calculate_profile_completion RPC). Local computeCompletion was removed
   // because it diverged from the SQL barème (showed 66% in profile vs 40% in dashboard).
@@ -224,7 +270,7 @@ export function useSitterProfile() {
 
     try {
       // Save profile fields
-      const profileFields = ["first_name", "last_name", "city", "postal_code", "bio", "avatar_url", "skill_categories", "available_for_help"] as const;
+      const profileFields = ["first_name", "last_name", "city", "postal_code", "latitude", "longitude", "bio", "avatar_url", "skill_categories", "available_for_help"] as const;
       const profileUpdate: any = {};
       profileFields.forEach(f => { if (f in stepData) profileUpdate[f] = (stepData as any)[f]; });
 
