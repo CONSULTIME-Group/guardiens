@@ -62,7 +62,7 @@ const Login = () => {
       return;
     }
     logOAuthStage("tokens_received", "/login");
-    navigate("/dashboard", { replace: true });
+    navigate(postAuthTarget, { replace: true });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
