@@ -83,8 +83,9 @@ const QuickActionsCard = ({
       )}
     </Link>
 
-    {/* CTA principal */}
-    <Button asChild className="w-full mt-4" size="sm">
+    {/* CTA secondaire — le CTA primaire de la page est porté par le Cockpit (PriorityActionCard).
+        On reste en ghost pour ne pas concurrencer. */}
+    <Button asChild variant="ghost" className="w-full mt-4 text-foreground/80 hover:text-primary" size="sm">
       <Link to="/search" className="gap-2">
         <Search className="h-4 w-4" aria-hidden="true" />
         Découvrir les gardes

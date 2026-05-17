@@ -99,10 +99,10 @@ const EmptyHelpersState = ({ hideHeader, userId }: { hideHeader: boolean; userId
               Personne n'est encore disponible pour un coup de main près de chez vous. Invitez un proche&nbsp;: vous gagnez un mois offert, lui aussi.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button asChild size="sm" className="rounded-xl">
+              <Button asChild size="sm" variant="outline" className="rounded-xl">
                 <Link to="/mon-abonnement#parrainage">Inviter un proche</Link>
               </Button>
-              <Button asChild size="sm" variant="ghost" className="rounded-xl">
+              <Button asChild size="sm" variant="ghost" className="rounded-xl text-foreground/80 hover:text-primary">
                 <Link to="/email-preferences">Activer une alerte</Link>
               </Button>
             </div>
