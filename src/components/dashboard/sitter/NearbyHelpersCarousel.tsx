@@ -117,7 +117,7 @@ const HelperMiniCard = ({
   );
 };
 
-const NearbyHelpersCarousel = memo(() => {
+const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boolean } = {}) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { data, isLoading } = useNearbyHelpers(user?.id);
