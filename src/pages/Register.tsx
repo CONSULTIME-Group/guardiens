@@ -842,16 +842,16 @@ const Register = () => {
 
   {step !== "confirmation" && (
   <div className="mt-6 space-y-2 text-center text-sm text-muted-foreground">
-  <p>
-  Déjà un compte ?{" "}
-  <Link to="/login" className="text-primary font-medium hover:underline">Se connecter</Link>
-  </p>
-  {step === 2 && (
-  <button
-  type="button"
-  onClick={() => navigate("/login")}
-  className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-  >
+   <p>
+   Déjà un compte ?{" "}
+   <Link to={`/login${buildRedirectQuery(redirectTarget)}`} className="text-primary font-medium hover:underline">Se connecter</Link>
+   </p>
+   {step === 2 && (
+   <button
+   type="button"
+   onClick={() => navigate(`/login${buildRedirectQuery(redirectTarget)}`)}
+   className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+   >
   Quitter l'inscription et revenir à la connexion
   </button>
   )}
