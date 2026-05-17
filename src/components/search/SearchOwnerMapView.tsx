@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import { Link } from "react-router-dom";
-import { Star, MapPin } from "lucide-react";
+import { Star, MapPin, X } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 
 interface SitterPin {
