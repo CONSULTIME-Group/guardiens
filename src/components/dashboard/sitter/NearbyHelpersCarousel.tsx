@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ShieldCheck, ArrowRight, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNearbyHelpers, type NearbyHelper } from "@/hooks/useNearbyHelpers";
+import { useNearbyHelpers, nextRadiusStep, type NearbyHelper } from "@/hooks/useNearbyHelpers";
 import { useHelpersProximityCount } from "@/hooks/useHelpersProximityCount";
 import { useCtaCooldown } from "@/hooks/useCtaCooldown";
 import { startConversation } from "@/lib/conversation";
@@ -316,15 +316,24 @@ const HelperMiniCard = ({
 const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boolean } = {}) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { data, isLoading } = useNearbyHelpers(user?.id);
   const [activeSkill, setActiveSkill] = useState<string | null>(null);
   const [pending, setPending] = useState<string | null>(null);
+  // Override rayon — bumped via le lien « Élargir le rayon » dans l'empty-state
+  // du filtre. Reset à null quand l'utilisateur change/retire le filtre, pour
+  // ne pas garder un rayon de 100 km collant.
+  const [forcedRadius, setForcedRadius] = useState<number | null>(null);
+  const { data, isLoading } = useNearbyHelpers(user?.id, { forcedRadius });
 
   const helpers = data?.helpers || [];
   const filtered = useMemo(() => {
     if (!activeSkill) return helpers;
     return helpers.filter((h) => h.skill_categories.includes(activeSkill));
   }, [helpers, activeSkill]);
+
+  const handleSkillToggle = (key: string | null) => {
+    setForcedRadius(null);
+    setActiveSkill(key);
+  };
 
   if (isLoading) {
     return (
