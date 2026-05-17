@@ -4558,6 +4558,8 @@ export type Database = {
           id: string | null
           identity_verified: boolean | null
           is_founder: boolean | null
+          latitude_approx: number | null
+          longitude_approx: number | null
           postal_code: string | null
         }
         Insert: {
@@ -4569,6 +4571,8 @@ export type Database = {
           id?: string | null
           identity_verified?: boolean | null
           is_founder?: boolean | null
+          latitude_approx?: never
+          longitude_approx?: never
           postal_code?: string | null
         }
         Update: {
@@ -4580,6 +4584,8 @@ export type Database = {
           id?: string | null
           identity_verified?: boolean | null
           is_founder?: boolean | null
+          latitude_approx?: never
+          longitude_approx?: never
           postal_code?: string | null
         }
         Relationships: []
