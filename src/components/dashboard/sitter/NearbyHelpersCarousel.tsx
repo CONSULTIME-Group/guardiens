@@ -10,7 +10,7 @@ import { startConversation } from "@/lib/conversation";
 import { toast } from "sonner";
 import { capitalize } from "@/components/dashboard/owner/helpers";
 import EmptyIllustration from "@/components/dashboard/shared/EmptyIllustration";
-import { tokenizeSkillPhrases } from "@/lib/skills/tokenize";
+import { tokenizeSkillPhrases, dedupeChipsByLabel } from "@/lib/skills/tokenize";
 
 /**
  * Compteur dual « local · national » de personnes prêtes à donner un coup de main.
