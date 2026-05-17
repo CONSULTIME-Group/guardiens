@@ -218,9 +218,21 @@
     @apply border-border;
   }
 
+  /* Hotfix défensif overflow horizontal mobile.
+     Cause root : certaines pages publiques (Landing, Pricing, CityPage…)
+     ne passent pas par AppLayout (qui a déjà `overflow-x-hidden` sur main).
+     Sans cette garde, un élément absolu/négatif provoque une barre de scroll
+     horizontale visible en 375px → bug critique mobile.
+     `overflow-x: clip` sur html évite la barre tout en préservant
+     `position: sticky` (un overflow-x: hidden sur l'ancêtre casse sticky). */
+  html {
+    overflow-x: clip;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
+    overflow-x: clip;
   }
 
   h1, h2, h3, h4, h5, h6 {
