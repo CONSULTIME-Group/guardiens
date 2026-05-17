@@ -224,8 +224,8 @@ const SearchMapView = ({
           return (
             <div
               ref={popoverRef}
-              className={`absolute z-[1000] bg-card rounded-xl shadow-lg overflow-hidden ${isDemo ? "border-2 border-dashed border-amber-400" : "border border-border"}`}
-              style={{ width: 240, top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
+              className={`absolute z-[1000] bg-card rounded-xl shadow-lg overflow-hidden w-[min(260px,calc(100vw-2rem))] ${isDemo ? "border-2 border-dashed border-amber-400" : "border border-border"}`}
+              style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
             >
               {isDemo && (
                 <div className="bg-amber-400 text-amber-950 text-[11px] font-semibold uppercase tracking-wide px-3 py-1 text-center">
