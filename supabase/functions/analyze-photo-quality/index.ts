@@ -53,7 +53,7 @@ Utilisez le vouvoiement, soyez concret, court, bienveillant.`;
             content: [
               {
                 type: "text",
-                text: "Évaluez cette photo de logement destinée à attirer un gardien. Notez la qualité globale, listez les défauts visibles, et proposez 1 à 3 corrections concrètes.",
+                text: "Évaluez cette photo en tant que candidate à la couverture d'une annonce de garde de maison/animaux. Privilégiez fortement la présence d'un animal et/ou d'un intérieur accueillant plutôt que la seule qualité technique. Notez de 0 à 100, listez les défauts visibles, et proposez 1 à 3 corrections concrètes en vouvoiement.",
               },
               { type: "image_url", image_url: { url: imageUrl } },
             ],
