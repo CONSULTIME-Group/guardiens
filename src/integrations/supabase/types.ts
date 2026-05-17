@@ -162,6 +162,27 @@ export type Database = {
           },
         ]
       }
+      ai_photo_analysis_quota: {
+        Row: {
+          count: number
+          day: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          day?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          day?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       alert_preferences: {
         Row: {
           active: boolean
@@ -4893,6 +4914,10 @@ export type Database = {
         Returns: boolean
       }
       increment_cp_relance: { Args: { user_ids: string[] }; Returns: undefined }
+      increment_photo_analysis_quota: {
+        Args: { _user_id: string }
+        Returns: number
+      }
       increment_redirect_hit: {
         Args: { p_slug_from: string }
         Returns: undefined
