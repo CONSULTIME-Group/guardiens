@@ -978,7 +978,7 @@ const SearchSitter = () => {
  : `${resultCount} annonce${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""} près de vous`;
 
  // ─── Pill style ───
- const pillClass = "flex items-center gap-2 px-4 py-2 min-h-11 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap shrink-0";
+ const pillClass = "snap-start flex items-center gap-2 px-4 py-2 min-h-11 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap shrink-0";
 
  // ─── Card renderer ───
  const renderCard = (item: any, listIndex?: number) => {
@@ -1266,7 +1266,7 @@ const SearchSitter = () => {
     id="search-filter-pills"
     className={`relative -mr-6 sm:mr-0 ${isMobile && viewMode === "map" && !mobileFiltersOpen ? "hidden" : ""}`}
    >
-   <div className="flex flex-row items-center gap-2 px-6 py-3 overflow-x-auto no-scrollbar pr-10 sm:pr-6">
+   <div className="flex flex-row items-center gap-2 px-6 py-3 overflow-x-auto no-scrollbar pr-10 sm:pr-6 snap-x snap-mandatory scroll-px-6 overscroll-x-contain">
  {/* Location pill */}
  <Popover open={editingCity} onOpenChange={setEditingCity}>
  <PopoverTrigger asChild>
@@ -1651,18 +1651,17 @@ const SearchSitter = () => {
  </div>
  </SheetContent>
  </Sheet>
-  </div>
-  <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:hidden" />
-  </div>
-  </div>
+   </div>
+   <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:hidden" />
+   </div>
 
- {/* ─── Sort bar + view toggle ─── */}
- <div className="flex justify-between items-center px-6 py-2 border-b border-border bg-background">
- <div className="flex items-center gap-3 flex-wrap">
- <span className="text-sm text-muted-foreground">{loading ? "Recherche…" : countLabel}</span>
+ {/* ─── Sort bar + view toggle (sticky avec les pills pour cohérence visuelle) ─── */}
+ <div className="flex justify-between items-center gap-2 px-4 sm:px-6 py-2 border-t border-border/60 bg-background flex-nowrap">
+ <div className="flex items-center gap-2 min-w-0 flex-1">
+ <span className="text-xs sm:text-sm text-muted-foreground truncate">{loading ? "Recherche…" : countLabel}</span>
  <Select value={sort} onValueChange={(v) => handleSortChange(v as SortOption)}>
- <SelectTrigger className="h-8 w-auto gap-1.5 rounded-full border-border bg-card px-3 text-xs">
- <span className="text-muted-foreground">Trier&nbsp;:</span>
+ <SelectTrigger className="h-8 w-auto gap-1.5 rounded-full border-border bg-card px-3 text-xs shrink-0">
+ <span className="text-muted-foreground hidden sm:inline">Trier&nbsp;:</span>
  <SelectValue />
  </SelectTrigger>
  <SelectContent align="start">
@@ -1736,6 +1735,7 @@ const SearchSitter = () => {
  >
  <MapIcon className="h-4 w-4" />
  </button>
+ </div>
  </div>
  </div>
 

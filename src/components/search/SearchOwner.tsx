@@ -523,11 +523,11 @@ const SearchOwner = () => {
     });
   };
 
-  const pillBase = "flex items-center gap-2 px-4 py-2 min-h-11 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap shrink-0";
-  const pillActive = "flex items-center gap-2 px-4 py-2 rounded-full border border-primary bg-primary/10 text-primary cursor-pointer transition-colors text-sm font-medium whitespace-nowrap";
+  const pillBase = "snap-start flex items-center gap-2 px-4 py-2 min-h-11 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap shrink-0";
+  const pillActive = "snap-start flex items-center gap-2 px-4 py-2 min-h-11 rounded-full border border-primary bg-primary/10 text-primary cursor-pointer transition-colors text-sm font-medium whitespace-nowrap shrink-0";
 
-  const sortPillBase = "rounded-full px-3 py-1 text-xs border border-border text-muted-foreground cursor-pointer hover:border-primary transition-colors";
-  const sortPillActive = "rounded-full px-3 py-1 text-xs bg-foreground text-background cursor-pointer";
+  const sortPillBase = "snap-start shrink-0 rounded-full px-3 py-1 min-h-9 inline-flex items-center text-xs border border-border text-muted-foreground cursor-pointer hover:border-primary transition-colors whitespace-nowrap";
+  const sortPillActive = "snap-start shrink-0 rounded-full px-3 py-1 min-h-9 inline-flex items-center text-xs bg-foreground text-background cursor-pointer whitespace-nowrap";
 
   // Zone mode chips — l'option "région" est volontairement absente : la
   // promesse produit est « France entière », pas régionale (mémoire "No AURA").
@@ -548,7 +548,7 @@ const SearchOwner = () => {
       {/* Sticky search bar */}
       <div className="sticky top-0 z-10 bg-background border-b border-border px-6 py-3 space-y-3">
         <div className="relative -mr-6 sm:mr-0">
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pr-10 sm:pr-0">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pr-10 sm:pr-0 snap-x snap-mandatory scroll-px-6 overscroll-x-contain">
           {/* PILL 1 — Localisation */}
           <Popover open={openPop === "loc"} onOpenChange={(o) => setOpenPop(o ? "loc" : null)}>
             <PopoverTrigger asChild>
@@ -734,7 +734,7 @@ const SearchOwner = () => {
 
         {/* Zone mode selector with density counters */}
         <div className="relative -mr-6 sm:mr-0">
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pr-10 sm:pr-0">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pr-10 sm:pr-0 snap-x snap-mandatory scroll-px-6 overscroll-x-contain">
             <span className="text-xs text-muted-foreground shrink-0 mr-1">Zone&nbsp;:</span>
             {zoneChips.map((z) => {
               const active = zoneMode === z.key;
@@ -747,7 +747,7 @@ const SearchOwner = () => {
                     trackEvent("search_empty_action", { source: "owner", metadata: { action: "change_zone", zone_mode: z.key } });
                   }}
                   disabled={z.disabled}
-                  className={`shrink-0 rounded-full px-3 py-1 text-xs border transition-colors ${
+                  className={`snap-start shrink-0 rounded-full px-3 py-1 min-h-9 inline-flex items-center text-xs border transition-colors whitespace-nowrap ${
                     active
                       ? "bg-primary text-primary-foreground border-primary"
                       : z.disabled
@@ -763,42 +763,56 @@ const SearchOwner = () => {
           </div>
           <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:hidden" />
         </div>
-      </div>
 
-      {/* Sort bar + view toggle */}
-      <div className="flex items-center justify-between gap-3 px-6 py-2.5 border-b border-border flex-wrap">
-        <div className="flex items-center gap-3 flex-wrap">
-          <p className="text-sm font-medium text-foreground">{results.length} gardien{results.length !== 1 ? "s" : ""} disponible{results.length !== 1 ? "s" : ""}</p>
-          {hasActiveFilters && (
-            <button onClick={resetFilters} className="text-xs text-primary hover:underline whitespace-nowrap">Réinitialiser les filtres</button>
-          )}
-          <div className="flex gap-1.5">
-            {[{ label: "Plus proches", value: "closest" as SortOption }, { label: "Mieux notés", value: "rating" as SortOption }, { label: "Plus expérimentés", value: "experience" as SortOption }].map(opt => (
-              <button key={opt.value} onClick={() => setSort(opt.value)} className={sort === opt.value ? sortPillActive : sortPillBase}>{opt.label}</button>
-            ))}
+        {/* Sort bar + view toggle (sticky avec les pills pour cohérence visuelle) */}
+        <div className="flex items-center justify-between gap-2 -mx-6 px-6 pt-2.5 border-t border-border/60 flex-nowrap">
+          <div className="flex items-center gap-2 min-w-0 flex-1 overflow-x-auto no-scrollbar snap-x snap-mandatory">
+            <p className="text-xs sm:text-sm font-medium text-foreground shrink-0">{results.length} gardien{results.length !== 1 ? "s" : ""}<span className="hidden sm:inline"> disponible{results.length !== 1 ? "s" : ""}</span></p>
+            {hasActiveFilters && (
+              <button onClick={resetFilters} className="text-xs text-primary hover:underline whitespace-nowrap shrink-0">Réinit.</button>
+            )}
+            <div className="flex gap-1.5 shrink-0">
+              {[{ label: "Plus proches", value: "closest" as SortOption }, { label: "Mieux notés", value: "rating" as SortOption }, { label: "Plus expérimentés", value: "experience" as SortOption }].map(opt => (
+                <button key={opt.value} onClick={() => setSort(opt.value)} className={sort === opt.value ? sortPillActive : sortPillBase}>{opt.label}</button>
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-1 border border-border rounded-lg p-0.5" role="group" aria-label="Mode d'affichage des résultats">
-          <button
-            type="button"
-            onClick={() => setViewMode("list")}
-            aria-label="Vue grille"
-            aria-pressed={viewMode === "list"}
-            className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${viewMode === "list" ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
-          >
-            <LayoutGrid className="h-3.5 w-3.5" aria-hidden="true" />
-            <span className="hidden sm:inline">Grille</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode("map")}
-            aria-label="Vue carte"
-            aria-pressed={viewMode === "map"}
-            className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${viewMode === "map" ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
-          >
-            <MapIcon className="h-3.5 w-3.5" aria-hidden="true" />
-            <span className="hidden sm:inline">Carte</span>
-          </button>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {city && (
+              <button
+                type="button"
+                onClick={alertCreated ? undefined : handleCreateAlert}
+                disabled={!city || isCreatingAlert}
+                aria-label={alertCreated ? "Alerte créée" : "Créer une alerte pour cette recherche"}
+                title={alertCreated ? "Alerte créée" : "Créer une alerte"}
+                className={`inline-flex items-center justify-center h-9 w-9 rounded-lg border transition-colors ${alertCreated ? "border-primary/40 bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary hover:text-primary"}`}
+              >
+                {isCreatingAlert ? <Loader2 className="h-4 w-4 animate-spin" /> : alertCreated ? <BellRing className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
+              </button>
+            )}
+            <div className="flex items-center gap-1 border border-border rounded-lg p-0.5" role="group" aria-label="Mode d'affichage des résultats">
+              <button
+                type="button"
+                onClick={() => setViewMode("list")}
+                aria-label="Vue grille"
+                aria-pressed={viewMode === "list"}
+                className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${viewMode === "list" ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
+              >
+                <LayoutGrid className="h-3.5 w-3.5" aria-hidden="true" />
+                <span className="hidden sm:inline">Grille</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("map")}
+                aria-label="Vue carte"
+                aria-pressed={viewMode === "map"}
+                className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${viewMode === "map" ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
+              >
+                <MapIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                <span className="hidden sm:inline">Carte</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
