@@ -21,15 +21,14 @@ const MissionsTabsCard = memo(({ myMissions, nearbyMissions }: MissionsTabsCardP
     myMissions.length > 0 ? "mine" : "nearby"
   );
 
-  const sortedMine = useMemo(
-    () =>
-      [...myMissions].sort((a, b) => {
-        const aDone = a.status === "completed" ? 1 : 0;
-        const bDone = b.status === "completed" ? 1 : 0;
-        return aDone - bDone;
-      }),
-    [myMissions]
-  );
+  const { activeMine, archivedMine } = useMemo(() => {
+    const active: SmallMission[] = [];
+    const archived: SmallMission[] = [];
+    for (const m of myMissions) {
+      (m.status === "completed" ? archived : active).push(m);
+    }
+    return { activeMine: active, archivedMine: archived };
+  }, [myMissions]);
 
   const tabBtn = (key: "mine" | "nearby", label: string, count: number) => {
     const active = tab === key;
@@ -71,7 +70,7 @@ const MissionsTabsCard = memo(({ myMissions, nearbyMissions }: MissionsTabsCardP
 
       {/* Contenu : Mes missions */}
       {tab === "mine" && (
-        sortedMine.length === 0 ? (
+        activeMine.length === 0 && archivedMine.length === 0 ? (
           <div className="py-1">
             <p className="text-xs text-muted-foreground font-sans mb-3">
               <span className="font-semibold text-foreground">Osez !</span> Demandez un coup de main, ou proposez quelque chose en échange — un café, une histoire, un service…
@@ -96,25 +95,52 @@ const MissionsTabsCard = memo(({ myMissions, nearbyMissions }: MissionsTabsCardP
           </div>
         ) : (
           <div>
-            {sortedMine.map(m => {
-              const responseCount = m.small_mission_responses?.length || 0;
-              const isCompleted = m.status === "completed";
-              return (
-                <Link
-                  key={m.id}
-                  to={`/petites-missions/${m.id}`}
-                  className="group flex items-center gap-3 py-2.5 border-b border-border last:border-0 hover:bg-muted/40 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:translate-x-0.5"
-                >
-                  <div className={`w-2 h-2 rounded-full shrink-0 transition-transform duration-200 group-hover:scale-125 ${isCompleted ? "bg-muted-foreground/30" : "bg-primary"}`} />
-                  <p className={`text-xs font-sans flex-1 truncate transition-colors ${isCompleted ? "text-muted-foreground line-through" : "text-foreground group-hover:text-primary"}`}>
-                    {m.title}
-                  </p>
-                  <p className="text-xs text-muted-foreground font-sans shrink-0">
-                    {isCompleted ? "Terminée" : `${responseCount} réponse${responseCount > 1 ? "s" : ""}`}
-                  </p>
-                </Link>
-              );
-            })}
+            {activeMine.length > 0 ? (
+              activeMine.map(m => {
+                const responseCount = m.small_mission_responses?.length || 0;
+                return (
+                  <Link
+                    key={m.id}
+                    to={`/petites-missions/${m.id}`}
+                    className="group flex items-center gap-3 py-2.5 border-b border-border last:border-0 hover:bg-muted/40 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:translate-x-0.5"
+                  >
+                    <div className="w-2 h-2 rounded-full shrink-0 bg-primary transition-transform duration-200 group-hover:scale-125" />
+                    <p className="text-xs font-sans flex-1 truncate text-foreground group-hover:text-primary transition-colors">
+                      {m.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground font-sans shrink-0">
+                      {`${responseCount} réponse${responseCount > 1 ? "s" : ""}`}
+                    </p>
+                  </Link>
+                );
+              })
+            ) : (
+              <p className="text-xs text-muted-foreground italic py-1">Aucune mission active.</p>
+            )}
+
+            {archivedMine.length > 0 && (
+              <details className="group mt-2">
+                <summary className="cursor-pointer list-none text-xs text-muted-foreground hover:text-foreground transition-colors py-2 flex items-center justify-between">
+                  <span>Archivées ({archivedMine.length})</span>
+                  <span className="group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
+                </summary>
+                <div className="pt-1">
+                  {archivedMine.map(m => (
+                    <Link
+                      key={m.id}
+                      to={`/petites-missions/${m.id}`}
+                      className="flex items-center gap-3 py-2.5 border-b border-border last:border-0 -mx-2 px-2 rounded-lg"
+                    >
+                      <div className="w-2 h-2 rounded-full shrink-0 bg-muted-foreground/30" />
+                      <p className="text-xs font-sans flex-1 truncate text-muted-foreground line-through">
+                        {m.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground font-sans shrink-0">Terminée</p>
+                    </Link>
+                  ))}
+                </div>
+              </details>
+            )}
           </div>
         )
       )}

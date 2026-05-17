@@ -192,21 +192,27 @@ const OwnerDashboard = () => {
             </p>
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl md:text-3xl font-heading font-bold text-foreground leading-tight">
-                Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} !
+                Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""}{"\u202F"}!
               </h1>
               {user?.isFounder && <FounderBadge size="sm" />}
             </div>
             <p className="text-sm text-muted-foreground font-sans mt-1">{subtitle}</p>
             {user?.id && (
-              <Link
-                to={`/gardiens/${user.id}?tab=proprio`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] mt-2 text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
-                aria-label="Voir mon profil public (nouvel onglet)"
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="mt-3 rounded-xl"
               >
-                <Eye className="w-3 h-3" aria-hidden="true" /> Mon profil public
-              </Link>
+                <Link
+                  to={`/gardiens/${user.id}?tab=proprio`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Voir mon profil public (nouvel onglet)"
+                >
+                  <Eye className="w-4 h-4 mr-1.5" aria-hidden="true" /> Mon profil public
+                </Link>
+              </Button>
             )}
           </div>
           <Button
@@ -328,7 +334,6 @@ const OwnerDashboard = () => {
               {
                 value: completedSits.length,
                 label: "Gardes",
-                emptyHint: "Aucune garde",
               },
               {
                 value: avgRating > 0 ? `${avgRating} ★` : null,
@@ -341,12 +346,10 @@ const OwnerDashboard = () => {
                 value: activeSits.length,
                 label: "Annonces",
                 to: "/sits",
-                emptyHint: "Aucune",
               },
               {
                 value: trustedSitterCount,
-                label: "Confiance",
-                emptyHint: "—",
+                label: "De confiance",
               },
             ]}
           />
