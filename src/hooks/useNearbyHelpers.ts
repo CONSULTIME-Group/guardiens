@@ -134,9 +134,19 @@ export function useNearbyHelpers(
         return { helpers: prioritize(enriched).slice(0, MAX_RESULTS), radiusUsed: 0, hasGeo: false };
       }
 
-      // 4. Fallback progressif du rayon
+      // 4. Rayon forcé par l'UI (« Élargir le rayon ») — court-circuit fallback
       const withDistance = enriched.filter((h) => h.distance_km !== null);
 
+      if (forcedRadius && forcedRadius > 0) {
+        const inRange = withDistance.filter((h) => h.distance_km! <= forcedRadius);
+        return {
+          helpers: prioritize(inRange).slice(0, MAX_RESULTS),
+          radiusUsed: forcedRadius,
+          hasGeo: true,
+        };
+      }
+
+      // 5. Fallback progressif du rayon
       for (const radius of RADIUS_STEPS) {
         const inRange = withDistance.filter((h) => h.distance_km! <= radius);
         if (inRange.length >= 3) {
