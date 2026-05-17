@@ -14,10 +14,16 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile }: Props) => {
   const extraCount = skillCats.length - 2;
   const customSkills: string[] = (h.custom_skills as string[]) || [];
   const comps: string[] = h.competences || [];
-  // Compétences "spéciales" = saisies en libre par la personne (savoir-faire
-  // unique : injection, dressage clicker, soins NAC…). On les distingue
-  // visuellement des catégories génériques (Animaux/Jardin/Bricolage).
-  const specialSkills = customSkills.length > 0 ? customSkills : comps;
+  // Compétences "spéciales" = saisies en libre (savoir-faire unique).
+  // On affiche d'abord les custom (signature de la personne), puis les comps
+  // générales en complément, dédupliquées (insensible à la casse).
+  const seen = new Set<string>();
+  const specialSkills = [...customSkills, ...comps].filter((s) => {
+    const k = s?.trim().toLowerCase();
+    if (!k || seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
   const bioTeaser = h.bio?.trim() || null;
 
   return (
