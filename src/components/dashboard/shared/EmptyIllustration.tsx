@@ -51,6 +51,9 @@ const EmptyIllustration = ({ kind, size = "md", className = "" }: EmptyIllustrat
       src={src}
       alt={alt}
       loading="lazy"
+      decoding="async"
+      // @ts-expect-error -- fetchpriority est valide HTML mais pas encore typé dans React 18
+      fetchpriority="low"
       width={896}
       height={672}
       className={`mx-auto w-auto ${SIZE_CLASS[size]} object-contain select-none pointer-events-none ${className}`}
