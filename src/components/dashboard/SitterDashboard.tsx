@@ -27,7 +27,6 @@ import QuickActionsCard from "./sitter/QuickActionsCard";
 import DashSection from "./owner/DashSection";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CheckCircle, Circle, ChevronRight, Newspaper, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
