@@ -32,6 +32,7 @@ import EmptyCard from "./owner/EmptyCard";
 import StatsStrip from "./owner/StatsStrip";
 import PendingReviewsCard from "./owner/PendingReviewsCard";
 import MobileStickyCTA from "./owner/MobileStickyCTA";
+import LiveSignalStrip from "./shared/LiveSignalStrip";
 import TodoCard, { type TodoItem } from "./owner/TodoCard";
 
 import {
@@ -232,8 +233,9 @@ const OwnerDashboard = () => {
         </div>
       </header>
 
-      <div className="px-5 md:px-8">
+      <div className="px-5 md:px-8 space-y-3">
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+        <LiveSignalStrip />
       </div>
 
       {/* ═══ Bloc unifié "À faire maintenant" ═══ */}
