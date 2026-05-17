@@ -192,7 +192,7 @@ const OwnerDashboard = () => {
             </p>
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl md:text-3xl font-heading font-bold text-foreground leading-tight">
-                Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} !
+                Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""}{"\u202F"}!
               </h1>
               {user?.isFounder && <FounderBadge size="sm" />}
             </div>
