@@ -57,7 +57,7 @@ const SitterCockpit = ({
   return (
     <section
       aria-label="Espace gardien — synthèse"
-      className="px-4 sm:px-5 md:px-8 pt-5 sm:pt-6 md:pt-8 pb-2 space-y-4"
+      className="px-4 sm:px-5 md:px-8 pt-3 sm:pt-4 md:pt-5 pb-1 space-y-2.5"
     >
       {/* ─── Ligne 1 : Greeting + dispo en 1 strip ─── */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
