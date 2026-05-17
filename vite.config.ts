@@ -9,6 +9,22 @@ import { componentTagger } from "lovable-tagger";
  * every page whose canonical_url / noindex / meta_* changed since the
  * last publish. Non-blocking and best-effort — never fails the build.
  */
+/**
+ * Liste blanche d'URLs SEO STATIQUES (issues de pages .tsx, pas de la DB)
+ * à purger systématiquement à chaque build prod. Toute modification de
+ * JSON-LD / meta sur ces pages doit être ajoutée ici, sinon Prerender
+ * continue de servir l'ancien HTML jusqu'à expiration TTL (~24h).
+ */
+const STATIC_SEO_URLS = [
+  "https://guardiens.fr/",
+  "https://guardiens.fr/tarifs",
+  "https://guardiens.fr/actualites/nouveaux-tarifs-2026",
+  "https://guardiens.fr/actualites",
+  "https://guardiens.fr/faq",
+  "https://guardiens.fr/about",
+  "https://guardiens.fr/contact",
+];
+
 const prerenderFlushPlugin = (): Plugin => ({
   name: "prerender-flush-after-publish",
   apply: "build",
@@ -19,21 +35,33 @@ const prerenderFlushPlugin = (): Plugin => ({
       console.log("[prerender-flush] skipped (missing VITE_SUPABASE_* env)");
       return;
     }
-    const url = `https://${projectId}.supabase.co/functions/v1/prerender-recache-pending`;
+    const base = `https://${projectId}.supabase.co/functions/v1/prerender-recache-pending`;
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${anon}`,
+      apikey: anon,
+    };
+
+    // 1. Flush DB-dirty rows (articles/seo_city_pages/city_guides).
     try {
-      const r = await fetch(url, {
+      const r = await fetch(base, { method: "POST", headers, body: "{}" });
+      const txt = await r.text();
+      console.log(`[prerender-flush] dirty ${r.status} ${txt.slice(0, 160)}`);
+    } catch (e) {
+      console.warn(`[prerender-flush] dirty failure: ${e instanceof Error ? e.message : String(e)}`);
+    }
+
+    // 2. Flush whitelist d'URLs SEO statiques (Pricing, Article fixe, FAQ…).
+    try {
+      const r = await fetch(base, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${anon}`,
-          apikey: anon,
-        },
-        body: "{}",
+        headers,
+        body: JSON.stringify({ urls: STATIC_SEO_URLS }),
       });
       const txt = await r.text();
-      console.log(`[prerender-flush] ${r.status} ${txt.slice(0, 200)}`);
+      console.log(`[prerender-flush] static ${r.status} ${txt.slice(0, 160)}`);
     } catch (e) {
-      console.warn(`[prerender-flush] non-blocking failure: ${e instanceof Error ? e.message : String(e)}`);
+      console.warn(`[prerender-flush] static failure: ${e instanceof Error ? e.message : String(e)}`);
     }
   },
 });
