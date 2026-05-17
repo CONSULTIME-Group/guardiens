@@ -734,7 +734,7 @@ const SearchOwner = () => {
 
         {/* Zone mode selector with density counters */}
         <div className="relative -mr-6 sm:mr-0">
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pr-10 sm:pr-0">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pr-10 sm:pr-0 snap-x snap-mandatory scroll-px-6 overscroll-x-contain">
             <span className="text-xs text-muted-foreground shrink-0 mr-1">Zone&nbsp;:</span>
             {zoneChips.map((z) => {
               const active = zoneMode === z.key;
