@@ -458,7 +458,7 @@ const OwnerDashboard = () => {
           badge={pendingAppCount}
         />
       ) : activeSits.length > 0 ? (
-        <MobileStickyCTA label="Publier une annonce" to="/sits/create" />
+        <MobileStickyCTA label="Voir mon annonce" to="/sits" />
       ) : null}
     </div>
   );
