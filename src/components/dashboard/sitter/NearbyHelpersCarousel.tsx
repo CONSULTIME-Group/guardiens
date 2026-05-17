@@ -218,10 +218,10 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Button asChild size="sm" className="rounded-xl">
-              <Link to="/parrainage">Inviter un proche</Link>
+              <Link to="/mon-abonnement#parrainage">Inviter un proche</Link>
             </Button>
             <Button asChild size="sm" variant="ghost" className="rounded-xl">
-              <Link to="/preferences-alertes">Activer une alerte</Link>
+              <Link to="/email-preferences">Activer une alerte</Link>
             </Button>
           </div>
         </div>
