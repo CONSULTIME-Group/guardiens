@@ -95,16 +95,20 @@ export function useNearbyHelpers(currentUserId: string | undefined) {
         };
       });
 
-      // Tri prioritaire : 1) custom_skills renseignés, 2) identité vérifiée, 3) distance
+      // Tri : 1) distance croissante (priorité absolue quand géoloc), puis
+      // 2) custom_skills renseignés, 3) identité vérifiée. La distance prime
+      // — l'utilisateur cherche d'abord quelqu'un de proche, pas le plus diplômé.
       const prioritize = (list: NearbyHelper[]) =>
         [...list].sort((a, b) => {
+          const da = a.distance_km ?? Infinity;
+          const db = b.distance_km ?? Infinity;
+          if (da !== db) return da - db;
           const aHasSkills = a.custom_skills.length > 0 ? 1 : 0;
           const bHasSkills = b.custom_skills.length > 0 ? 1 : 0;
           if (aHasSkills !== bHasSkills) return bHasSkills - aHasSkills;
           const aVer = a.identity_verified ? 1 : 0;
           const bVer = b.identity_verified ? 1 : 0;
-          if (aVer !== bVer) return bVer - aVer;
-          return (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity);
+          return bVer - aVer;
         });
 
       // Pas de géoloc → on retourne 8 profils (priorité custom_skills puis identité vérifiée)
