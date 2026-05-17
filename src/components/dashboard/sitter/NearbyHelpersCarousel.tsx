@@ -342,7 +342,7 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
   // Empty-state premium : pas de helpers dans le rayon max (100 km).
   // On transforme le vide en levier d'acquisition (parrainage) plutôt qu'en trou UX.
   if (!helpers.length) {
-    return <EmptyHelpersState hideHeader={hideHeader} />;
+    return <EmptyHelpersState hideHeader={hideHeader} userId={user?.id} />;
   }
 
   const radiusLabel = data?.hasGeo
@@ -381,11 +381,14 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
               Qui peut vous donner un coup de main&nbsp;?
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Personnes du coin disponibles {radiusLabel}.
+              Triés par proximité, {radiusLabel}.
             </p>
           </div>
         </div>
       )}
+
+      {/* Compteur dual local · national — preuve sociale localisée */}
+      <HelpersProximityTicker userId={user?.id} />
 
       {/* Chips compétences */}
       <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
