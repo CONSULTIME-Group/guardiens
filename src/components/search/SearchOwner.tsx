@@ -528,11 +528,11 @@ const SearchOwner = () => {
   const sortPillBase = "rounded-full px-3 py-1 text-xs border border-border text-muted-foreground cursor-pointer hover:border-primary transition-colors";
   const sortPillActive = "rounded-full px-3 py-1 text-xs bg-foreground text-background cursor-pointer";
 
-  // Zone mode chips
+  // Zone mode chips — l'option "région" est volontairement absente : la
+  // promesse produit est « France entière », pas régionale (mémoire "No AURA").
   const zoneChips: Array<{ key: ZoneMode; label: string; count: number; disabled?: boolean }> = [
     { key: "radius", label: `${radius[0]} km`, count: densityCounts.radius, disabled: !city },
     { key: "dept", label: refDept ? `Dép. ${refDept}` : "Département", count: densityCounts.dept, disabled: !refDept },
-    { key: "region", label: refRegion ? (getRegionName(refDept) ?? "Région") : "Région", count: densityCounts.region, disabled: !refRegion },
     { key: "france", label: "France", count: densityCounts.france },
   ];
 
