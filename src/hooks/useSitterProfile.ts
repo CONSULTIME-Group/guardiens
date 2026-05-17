@@ -198,6 +198,48 @@ export function useSitterProfile() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  // Backfill géoloc silencieux : si l'utilisateur a code postal + ville mais
+  // pas de lat/lng (cas legacy d'avant l'ajout du `centre` dans usePostalCodeCity),
+  // on les récupère via geo.api.gouv.fr et on met à jour. Sinon le tri par
+  // distance reste cassé sans que l'utilisateur comprenne pourquoi.
+  useEffect(() => {
+    const needsBackfill =
+      !!user &&
+      !!data.postal_code &&
+      /^\d{5}$/.test(data.postal_code) &&
+      !!data.city &&
+      (data.latitude == null || data.longitude == null);
+    if (!needsBackfill) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(
+          `https://geo.api.gouv.fr/communes?codePostal=${data.postal_code}&fields=nom,centre&limit=20`,
+        );
+        if (!res.ok) return;
+        const arr: { nom: string; centre?: { coordinates: [number, number] } }[] = await res.json();
+        const match =
+          arr.find((c) => c.nom.toLowerCase() === data.city.toLowerCase()) ||
+          arr[0];
+        if (!match?.centre?.coordinates || cancelled) return;
+        const [lng, lat] = match.centre.coordinates;
+        const { error } = await supabase
+          .from("profiles")
+          .update({ latitude: lat, longitude: lng })
+          .eq("id", user.id);
+        if (!error && !cancelled) {
+          setData((prev) => ({ ...prev, latitude: lat, longitude: lng }));
+        }
+      } catch {
+        // silencieux — on retentera au prochain chargement
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, data.postal_code, data.city, data.latitude, data.longitude]);
+
   // Canonical score: read from profiles.profile_completion (computed server-side
   // by the calculate_profile_completion RPC). Local computeCompletion was removed
   // because it diverged from the SQL barème (showed 66% in profile vs 40% in dashboard).
