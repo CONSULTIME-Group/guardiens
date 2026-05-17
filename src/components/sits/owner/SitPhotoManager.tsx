@@ -53,26 +53,95 @@ const SitPhotoManager = ({
 
   const effectiveCover = coverUrl || gallery[0]?.photo_url || null;
 
+  // Debounce & cache pour éviter la sur-consommation Gemini :
+  // - Session (window) : scores par URL, gardés tant que l'onglet vit.
+  // - localStorage : meilleur résultat par sit, TTL 24h, invalidé si la galerie change.
+  const SESSION_SCORES_KEY = `__sitPhotoScores_${sitId}`;
+  const PERSIST_KEY = `sitPhotoSuggest:${sitId}`;
+  const TTL_MS = 24 * 60 * 60 * 1000;
+
+  type Scored = { url: string; score: number; summary: string };
+
+  const getGalleryFingerprint = () =>
+    gallery.map((p) => p.photo_url).sort().join("|");
+
+  const readPersisted = (): { fingerprint: string; at: number; best: Scored } | null => {
+    try {
+      const raw = localStorage.getItem(PERSIST_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed?.at || Date.now() - parsed.at > TTL_MS) return null;
+      return parsed;
+    } catch {
+      return null;
+    }
+  };
+
+  const writePersisted = (best: Scored) => {
+    try {
+      localStorage.setItem(
+        PERSIST_KEY,
+        JSON.stringify({ fingerprint: getGalleryFingerprint(), at: Date.now(), best }),
+      );
+    } catch {
+      // quota / private mode : silencieux
+    }
+  };
+
+  const getSessionScores = (): Map<string, Scored> => {
+    const w = window as any;
+    if (!w[SESSION_SCORES_KEY]) w[SESSION_SCORES_KEY] = new Map<string, Scored>();
+    return w[SESSION_SCORES_KEY];
+  };
+
   const handleSuggestBest = async () => {
     if (suggesting || gallery.length === 0) return;
+
+    const fingerprint = getGalleryFingerprint();
+
+    // 1) Cache persistant 24h, valable si la galerie n'a pas changé
+    const persisted = readPersisted();
+    if (persisted && persisted.fingerprint === fingerprint) {
+      if (persisted.best.url === effectiveCover) {
+        toast({
+          title: "Votre couverture est déjà la meilleure",
+          description: `Score : ${persisted.best.score}/100 (analyse récente).`,
+        });
+        return;
+      }
+      setSuggestion(persisted.best);
+      return;
+    }
+
     setSuggesting(true);
     setSuggestion(null);
     try {
       const sample = gallery.slice(0, 10);
+      const sessionScores = getSessionScores();
+
       const results = await Promise.all(
-        sample.map(async (p) => {
+        sample.map(async (p): Promise<Scored | null> => {
+          // 2) Cache session : ne ré-analyse pas une URL déjà notée
+          const cached = sessionScores.get(p.photo_url);
+          if (cached) return cached;
           try {
             const { data, error } = await supabase.functions.invoke("analyze-photo-quality", {
               body: { imageUrl: p.photo_url },
             });
             if (error || !data || typeof data.score !== "number") return null;
-            return { url: p.photo_url, score: data.score as number, summary: data.summary as string };
+            const scored: Scored = {
+              url: p.photo_url,
+              score: data.score as number,
+              summary: data.summary as string,
+            };
+            sessionScores.set(p.photo_url, scored);
+            return scored;
           } catch {
             return null;
           }
-        })
+        }),
       );
-      const scored = results.filter((r): r is { url: string; score: number; summary: string } => !!r);
+      const scored = results.filter((r): r is Scored => !!r);
       if (scored.length === 0) {
         toast({
           variant: "destructive",
@@ -83,6 +152,7 @@ const SitPhotoManager = ({
       }
       scored.sort((a, b) => b.score - a.score);
       const best = scored[0];
+      writePersisted(best);
       if (best.url === effectiveCover) {
         toast({
           title: "Votre couverture est déjà la meilleure",
