@@ -21,10 +21,22 @@ Deno.serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY manquant");
 
-    const systemPrompt = `Vous êtes un expert en photographie immobilière qui évalue des photos d'annonces de garde de maison.
-Analysez l'image fournie et identifiez les défauts qui réduiraient l'attrait pour un futur gardien.
-Vous tutoyez jamais : utilisez le vouvoiement dans toutes les suggestions.
-Soyez concret, court, bienveillant.`;
+    const systemPrompt = `Vous évaluez des photos de couverture d'annonces de garde de maison/animaux.
+
+Objectif : choisir LA photo qui donne le plus envie à un gardien de candidater. La pertinence éditoriale compte BIEN PLUS que la qualité technique pure.
+
+Hiérarchie de scoring (sur 100) :
+- 85-100 : animal de compagnie visible (chien, chat, NAC) dans un cadre chaleureux, OU intérieur de vie accueillant (salon, cuisine, terrasse habitée, jardin verdoyant), OU extérieur charmant de la maison.
+- 60-84 : pièce correcte mais peu chaleureuse, jardin neutre, façade soignée.
+- 30-59 : photo hors-sujet bien cadrée (objet, paysage lointain, véhicule, détail technique).
+- 0-29 : photo manifestement inappropriée (selfie/portrait humain frontal, scène privée, rue grise, photo floue/sombre, capture d'écran, document).
+
+Pénalisez fortement (max 40) : visages humains en gros plan, photos de personnes posant, véhicules, rues/parkings, photos administratives.
+Bonus implicite : présence d'animal, lumière naturelle, atmosphère « comme à la maison ».
+
+La qualité technique (netteté, exposition) ne départage qu'à pertinence éditoriale égale.
+
+Utilisez le vouvoiement, soyez concret, court, bienveillant.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -41,7 +53,7 @@ Soyez concret, court, bienveillant.`;
             content: [
               {
                 type: "text",
-                text: "Évaluez cette photo de logement destinée à attirer un gardien. Notez la qualité globale, listez les défauts visibles, et proposez 1 à 3 corrections concrètes.",
+                text: "Évaluez cette photo en tant que candidate à la couverture d'une annonce de garde de maison/animaux. Privilégiez fortement la présence d'un animal et/ou d'un intérieur accueillant plutôt que la seule qualité technique. Notez de 0 à 100, listez les défauts visibles, et proposez 1 à 3 corrections concrètes en vouvoiement.",
               },
               { type: "image_url", image_url: { url: imageUrl } },
             ],
