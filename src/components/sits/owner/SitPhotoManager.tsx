@@ -14,7 +14,7 @@
  */
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Image as ImageIcon, Plus, Loader2, Star, Check } from "lucide-react";
+import { Image as ImageIcon, Plus, Loader2, Star, Check, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { compressImageFile } from "@/lib/compressImage";
