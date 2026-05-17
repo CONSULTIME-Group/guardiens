@@ -72,19 +72,20 @@ const NearbyEmergencySitters = ({ hideHeader = false }: { hideHeader?: boolean }
       className="rounded-2xl border border-border bg-card overflow-hidden animate-fade-in"
       aria-label="Gardiens d'urgence à proximité"
     >
-      {/* Header compact avec accent urgence */}
-      <header className="px-4 py-3 bg-gradient-to-r from-destructive/8 via-destructive/5 to-transparent border-b border-border">
-        <div className="flex items-center justify-between gap-2">
-          <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-[2px] text-destructive font-sans font-semibold">
-              Urgence
-            </p>
-            <h2 className="font-heading text-sm font-bold text-foreground leading-tight mt-0.5">
-              Gardiens disponibles rapidement
-            </h2>
+      {!hideHeader && (
+        <header className="px-4 py-3 bg-gradient-to-r from-destructive/8 via-destructive/5 to-transparent border-b border-border">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-[10px] uppercase tracking-[2px] text-destructive font-sans font-semibold">
+                Urgence
+              </p>
+              <h2 className="font-heading text-sm font-bold text-foreground leading-tight mt-0.5">
+                Gardiens disponibles rapidement
+              </h2>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       {/* Liste dense */}
       <ul className="divide-y divide-border">
