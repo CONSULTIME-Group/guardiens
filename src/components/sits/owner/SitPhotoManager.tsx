@@ -48,8 +48,59 @@ const SitPhotoManager = ({
   const [coverUrl, setCoverUrl] = useState<string | null>(initialCoverPhotoUrl);
   const [savingCover, setSavingCover] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggestion, setSuggestion] = useState<{ url: string; score: number; summary: string } | null>(null);
 
   const effectiveCover = coverUrl || gallery[0]?.photo_url || null;
+
+  const handleSuggestBest = async () => {
+    if (suggesting || gallery.length === 0) return;
+    setSuggesting(true);
+    setSuggestion(null);
+    try {
+      const sample = gallery.slice(0, 10);
+      const results = await Promise.all(
+        sample.map(async (p) => {
+          try {
+            const { data, error } = await supabase.functions.invoke("analyze-photo-quality", {
+              body: { imageUrl: p.photo_url },
+            });
+            if (error || !data || typeof data.score !== "number") return null;
+            return { url: p.photo_url, score: data.score as number, summary: data.summary as string };
+          } catch {
+            return null;
+          }
+        })
+      );
+      const scored = results.filter((r): r is { url: string; score: number; summary: string } => !!r);
+      if (scored.length === 0) {
+        toast({
+          variant: "destructive",
+          title: "Analyse indisponible",
+          description: "Impossible d'analyser vos photos pour le moment.",
+        });
+        return;
+      }
+      scored.sort((a, b) => b.score - a.score);
+      const best = scored[0];
+      if (best.url === effectiveCover) {
+        toast({
+          title: "Votre couverture est déjà la meilleure",
+          description: `Score qualité : ${best.score}/100.`,
+        });
+        return;
+      }
+      setSuggestion(best);
+    } finally {
+      setSuggesting(false);
+    }
+  };
+
+  const applySuggestion = async () => {
+    if (!suggestion) return;
+    await handleSetCover(suggestion.url);
+    setSuggestion(null);
+  };
 
   const handleSetCover = async (url: string) => {
     if (savingCover) return;
