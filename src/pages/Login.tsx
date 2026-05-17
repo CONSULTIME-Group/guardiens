@@ -277,7 +277,7 @@ const Login = () => {
 
           <p className="text-center text-sm text-muted-foreground mt-6">
             Pas encore de compte ?{" "}
-            <Link to="/inscription" className="text-primary font-medium hover:underline">Créer un compte</Link>
+            <Link to={`/inscription${buildRedirectQuery(redirectTarget)}`} className="text-primary font-medium hover:underline">Créer un compte</Link>
           </p>
         </div>
       </div>
