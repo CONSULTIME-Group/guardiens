@@ -20,6 +20,7 @@ import SitterMobileStickyCTA from "./sitter/SitterMobileStickyCTA";
 import SitterStatusBar from "./sitter/SitterStatusBar";
 import SitterBadgesSection from "./sitter/SitterBadgesSection";
 import SitterBottomColumns from "./sitter/SitterBottomColumns";
+import NearbyHelpersCarousel from "./sitter/NearbyHelpersCarousel";
 import SitterEmergencyCard from "./sitter/SitterEmergencyCard";
 import DashSection from "./owner/DashSection";
 
