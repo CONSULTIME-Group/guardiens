@@ -1643,8 +1643,8 @@ const SearchSitter = () => {
 
  {/* Apply button */}
  <Button className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-medium" onClick={() => {
- // Close the sheet by triggering search
  doSearch();
+ setFilterSheetOpen(false);
  }}>
  Appliquer les filtres
  </Button>
