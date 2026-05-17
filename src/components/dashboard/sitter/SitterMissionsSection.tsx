@@ -238,6 +238,7 @@ const SitterMissionsSection = memo(({
             <div className="flex gap-2 mt-3">
               <Button
                 size="sm"
+                variant="outline"
                 onClick={() => navigate("/petites-missions/creer")}
                 className="flex-1 rounded-xl text-xs gap-1.5"
               >
@@ -246,9 +247,9 @@ const SitterMissionsSection = memo(({
               </Button>
               <Button
                 size="sm"
-                variant="outline"
+                variant="ghost"
                 onClick={() => navigate("/petites-missions")}
-                className="flex-1 rounded-xl text-xs"
+                className="flex-1 rounded-xl text-xs text-foreground/80 hover:text-primary"
               >
                 Voir tout
               </Button>
