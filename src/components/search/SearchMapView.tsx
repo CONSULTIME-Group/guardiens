@@ -187,7 +187,7 @@ const SearchMapView = ({
         </div>
 
         {/* Légende */}
-        <div className="absolute bottom-3 left-3 z-[400] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-sm px-3 py-2 text-xs text-foreground pointer-events-none space-y-1">
+        <div className="absolute bottom-20 md:bottom-3 left-3 z-[400] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-sm px-3 py-2 text-xs text-foreground pointer-events-none space-y-1">
           <div className="flex items-center gap-2">
             <span className="inline-block w-3 h-3 rounded-full" style={{ background: pinColors.active.bg, border: `2px solid ${pinColors.active.ring}` }} />
             Annonce active
