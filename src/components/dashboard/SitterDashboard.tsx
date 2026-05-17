@@ -366,56 +366,54 @@ const SitterDashboard = () => {
         <RoleActivationBanner userRole={user?.role || "sitter"} />
       </div>
 
-      {/* ═══ HERO ═══ */}
-      <SitterHero
+      {/* ═══ COCKPIT ═══ (greeting + action prioritaire + signal vivant) */}
+      <SitterCockpit
         userId={user?.id}
         firstName={user?.firstName}
         avatarUrl={avatarUrl}
         isFounder={user?.isFounder}
-        subtitle={subtitle}
         isAvailable={isAvailable}
         onToggleAvailability={toggleAvailability}
+        nextGuard={nextGuard}
+        profileCompletion={profileCompletion}
+        postalCode={postalCode}
+        nearbyListings={nearbyListings}
       />
 
-      {/* État empty = pas de prochaine garde ET pas d'annonce à proximité.
-          Dans ce cas, la priorité absolue est l'activation : on remonte la
-          checklist juste après le Hero et on masque NextGuardEmpty (la
-          checklist le remplace fonctionnellement). */}
+      {/* Erreurs de fetch — affichées discrètement sous le cockpit pour ne pas
+          polluer le pli, mais restent visibles pour debug utilisateur. */}
+      {(nextGuardError || nearbyError) && (
+        <div className="px-4 sm:px-5 md:px-8 mt-2 space-y-2">
+          {nextGuardError && (
+            <DashboardSectionState
+              variant="error"
+              eyebrow="Prochaine garde"
+              description={nextGuardError}
+              onRetry={() => window.location.reload()}
+            />
+          )}
+          {nearbyError && (
+            <DashboardSectionState
+              variant="error"
+              eyebrow="Annonces à proximité"
+              description={nearbyError}
+              onRetry={() => window.location.reload()}
+            />
+          )}
+        </div>
+      )}
+
+      {/* FreePeriodBanner — 1 ligne sous le cockpit, pas un bloc en hero */}
+      {!nextGuard && (
+        <div className="px-4 sm:px-5 md:px-8 mt-3">
+          <FreePeriodBanner />
+        </div>
+      )}
+
       {(() => {
         const isEmpty = !nextGuard && !nextGuardError && nearbyListings.length === 0 && !nearbyError;
         return (
           <>
-            {/* Checklist mobile EN PREMIER sur empty state */}
-            {isEmpty && <div className="xl:hidden">{ChecklistBlock}</div>}
-
-            {/* FreePeriodBanner sur empty state (pas de garde prévue) */}
-            {!nextGuard && (
-              <div className="mb-4">
-                <FreePeriodBanner />
-              </div>
-            )}
-
-            {/* Hero contextuel (masqué en empty state — la checklist a pris sa place) */}
-            {nextGuard ? (
-              <SitterNextGuard nextGuard={nextGuard} />
-            ) : nextGuardError ? (
-              <DashboardSectionState
-                variant="error"
-                eyebrow="Prochaine garde"
-                description={nextGuardError}
-                onRetry={() => window.location.reload()}
-              />
-            ) : nearbyListings.length > 0 ? (
-              <NearestListingHero listing={nearbyListings[0]} />
-            ) : nearbyError ? (
-              <DashboardSectionState
-                variant="error"
-                eyebrow="Annonce la plus proche"
-                description={nearbyError}
-                onRetry={() => window.location.reload()}
-              />
-            ) : null /* empty : checklist déjà rendue */}
-
             <div className="px-4 sm:px-5 md:px-8 mt-4">
               <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
             </div>
@@ -424,17 +422,18 @@ const SitterDashboard = () => {
 
             {/* Version pleine largeur — visible < xl */}
             <div className="xl:hidden mt-4">
-              {/* Checklist ici UNIQUEMENT si pas déjà rendue plus haut */}
-              {!isEmpty && ChecklistBlock}
+              {/* Checklist — toujours rendue sous le cockpit en mobile (l'empty-state
+                  est déjà géré par la PriorityActionCard du cockpit). */}
+              {ChecklistBlock}
+
+              <div className="px-4 sm:px-5 md:px-8 mb-6">
+                {DiscoverySections}
+              </div>
 
               <div className="px-4 sm:px-5 md:px-8 mb-6 space-y-4">
                 {buildStatusBlock(false)}
                 {buildBadgesBlock(false)}
                 {buildEmergencyBlock(false)}
-              </div>
-
-              <div className="px-4 sm:px-5 md:px-8 mb-6">
-                {DiscoverySections}
               </div>
             </div>
           </>
