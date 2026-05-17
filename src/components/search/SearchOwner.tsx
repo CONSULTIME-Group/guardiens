@@ -523,7 +523,7 @@ const SearchOwner = () => {
     });
   };
 
-  const pillBase = "flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap";
+  const pillBase = "flex items-center gap-2 px-4 py-2 min-h-11 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap shrink-0";
   const pillActive = "flex items-center gap-2 px-4 py-2 rounded-full border border-primary bg-primary/10 text-primary cursor-pointer transition-colors text-sm font-medium whitespace-nowrap";
 
   const sortPillBase = "rounded-full px-3 py-1 text-xs border border-border text-muted-foreground cursor-pointer hover:border-primary transition-colors";
@@ -655,7 +655,7 @@ const SearchOwner = () => {
                 {hasActiveFilters && <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-primary" />}
               </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-80 overflow-y-auto">
+            <SheetContent side="right" className="w-[88vw] sm:w-80 max-w-sm overflow-y-auto">
               <SheetTitle className="sr-only">Filtres de recherche</SheetTitle>
               <SheetDescription className="sr-only">Affinez votre recherche avec les filtres ci-dessous.</SheetDescription>
               <div className="flex items-center justify-between mb-6">
@@ -1045,8 +1045,8 @@ const SearchOwner = () => {
           )}
         </div>
       ) : (
-        <div className="flex h-[calc(100vh-220px)]">
-          <div className="w-1/2 overflow-y-auto border-r border-border p-4 space-y-3">
+        <div className="flex h-[calc(100dvh-220px)]">
+          <div className="hidden md:block md:w-1/2 overflow-y-auto border-r border-border p-4 space-y-3">
             {results.map((s: any) => {
               const profile = s.profile;
               const firstName = profile?.first_name || "Gardien";
@@ -1072,7 +1072,7 @@ const SearchOwner = () => {
               );
             })}
           </div>
-          <div className="w-1/2 relative bg-muted/30">
+          <div className="w-full md:w-1/2 relative bg-muted/30">
             <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">Chargement de la carte…</div>}>
               <SearchOwnerMapView
                 sitters={results

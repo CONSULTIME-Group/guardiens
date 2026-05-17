@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import { Link } from "react-router-dom";
-import { Star, MapPin } from "lucide-react";
+import { Star, MapPin, X } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 
 interface SitterPin {
@@ -95,9 +95,18 @@ const SearchOwnerMapView = ({ sitters, centerCoords, onContact, contactingId }: 
       {active && (
         <div
           ref={popRef}
-          className="absolute z-[1000] bg-card rounded-xl shadow-lg overflow-hidden border border-border"
-          style={{ width: 240, top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
+          role="dialog"
+          aria-label="Aperçu du gardien"
+          className="absolute z-[1000] bg-card rounded-xl shadow-lg overflow-hidden border border-border w-[min(280px,calc(100vw-1.5rem))] left-3 right-3 mx-auto md:left-1/2 md:right-auto md:mx-0 bottom-24 md:bottom-auto md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2"
         >
+          <button
+            type="button"
+            onClick={() => setActiveId(null)}
+            aria-label="Fermer l'aperçu"
+            className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-background/90 backdrop-blur-sm border border-border flex items-center justify-center text-foreground hover:bg-muted shadow-sm"
+          >
+            <X className="h-4 w-4" />
+          </button>
           <Link to={`/gardiens/${active.user_id}`} className="block">
             {active.avatar ? (
               <img src={active.avatar} alt={active.firstName} className="w-full h-[120px] object-cover object-top" />
