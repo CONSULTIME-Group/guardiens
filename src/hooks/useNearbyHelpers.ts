@@ -20,6 +20,8 @@ export type NearbyHelper = {
   avatar_url: string | null;
   city: string | null;
   skill_categories: string[];
+  custom_skills: string[];
+  bio: string | null;
   identity_verified: boolean;
   completed_sits_count: number;
   distance_km: number | null;
@@ -53,7 +55,7 @@ export function useNearbyHelpers(currentUserId: string | undefined) {
       //    on garde large pour avoir matière même en zone rurale)
       const { data: pool } = await supabase
         .from("profiles")
-        .select("id, first_name, avatar_url, city, skill_categories, identity_verified, completed_sits_count, latitude, longitude")
+        .select("id, first_name, avatar_url, city, skill_categories, custom_skills, bio, identity_verified, completed_sits_count, latitude, longitude")
         .eq("available_for_help", true)
         .not("skill_categories", "eq", "{}")
         .neq("id", currentUserId!)
@@ -63,8 +65,15 @@ export function useNearbyHelpers(currentUserId: string | undefined) {
         return { helpers: [], radiusUsed: RADIUS_STEPS[0], hasGeo };
       }
 
+      const normalizeCustom = (raw: any): string[] => {
+        if (!raw) return [];
+        if (Array.isArray(raw)) return raw.filter((s) => typeof s === "string" && s.trim().length > 0);
+        if (typeof raw === "string" && raw.trim().length > 0) return [raw];
+        return [];
+      };
+
       // 3. Tri par distance si géoloc connue, sinon ordre arbitraire
-      const enriched = pool.map((p: any) => {
+      const enriched: NearbyHelper[] = pool.map((p: any) => {
         const distance_km =
           hasGeo && p.latitude && p.longitude
             ? haversineDistance(
@@ -78,35 +87,44 @@ export function useNearbyHelpers(currentUserId: string | undefined) {
           avatar_url: p.avatar_url,
           city: p.city,
           skill_categories: p.skill_categories || [],
+          custom_skills: normalizeCustom(p.custom_skills),
+          bio: p.bio || null,
           identity_verified: !!p.identity_verified,
           completed_sits_count: p.completed_sits_count || 0,
           distance_km,
-        } satisfies NearbyHelper;
+        };
       });
 
-      // Pas de géoloc → on retourne 8 profils au hasard (priorité identité vérifiée)
+      // Tri prioritaire : 1) custom_skills renseignés, 2) identité vérifiée, 3) distance
+      const prioritize = (list: NearbyHelper[]) =>
+        [...list].sort((a, b) => {
+          const aHasSkills = a.custom_skills.length > 0 ? 1 : 0;
+          const bHasSkills = b.custom_skills.length > 0 ? 1 : 0;
+          if (aHasSkills !== bHasSkills) return bHasSkills - aHasSkills;
+          const aVer = a.identity_verified ? 1 : 0;
+          const bVer = b.identity_verified ? 1 : 0;
+          if (aVer !== bVer) return bVer - aVer;
+          return (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity);
+        });
+
+      // Pas de géoloc → on retourne 8 profils (priorité custom_skills puis identité vérifiée)
       if (!hasGeo) {
-        const sorted = enriched.sort(
-          (a, b) => Number(b.identity_verified) - Number(a.identity_verified),
-        );
-        return { helpers: sorted.slice(0, MAX_RESULTS), radiusUsed: 0, hasGeo: false };
+        return { helpers: prioritize(enriched).slice(0, MAX_RESULTS), radiusUsed: 0, hasGeo: false };
       }
 
       // 4. Fallback progressif du rayon
-      const withDistance = enriched
-        .filter((h) => h.distance_km !== null)
-        .sort((a, b) => (a.distance_km! - b.distance_km!));
+      const withDistance = enriched.filter((h) => h.distance_km !== null);
 
       for (const radius of RADIUS_STEPS) {
         const inRange = withDistance.filter((h) => h.distance_km! <= radius);
         if (inRange.length >= 3) {
-          return { helpers: inRange.slice(0, MAX_RESULTS), radiusUsed: radius, hasGeo: true };
+          return { helpers: prioritize(inRange).slice(0, MAX_RESULTS), radiusUsed: radius, hasGeo: true };
         }
       }
 
       // Aucun fallback n'a donné 3+ résultats → on retourne ce qu'on a
       return {
-        helpers: withDistance.slice(0, MAX_RESULTS),
+        helpers: prioritize(withDistance).slice(0, MAX_RESULTS),
         radiusUsed: RADIUS_STEPS[RADIUS_STEPS.length - 1],
         hasGeo: true,
       };
