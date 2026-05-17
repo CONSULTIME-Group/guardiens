@@ -224,7 +224,8 @@ export default {
     console.log('[Prerender] Bot — UA: "' + ua + '" — URL: ' + url);
 
     try {
-      const prerenderResponse = await fetchPrerender(url);
+      const token = (env && env.PRERENDER_TOKEN) || PRERENDER_TOKEN_FALLBACK;
+      const prerenderResponse = await fetchPrerender(url, token);
 
       if (prerenderResponse.ok) {
         return withDiagHeaders(prerenderResponse, {
