@@ -412,8 +412,9 @@ const SitterDashboard = () => {
           {/* Reset child padding (parent gère via xl:px-8) en surchargeant via wrappers */}
           <div className="[&>*]:!px-0 [&>*]:!mx-0">
             {ChecklistBlock}
-            <section aria-labelledby="nearby-heading-xl">
+            <section aria-labelledby="nearby-heading-xl" className="space-y-6">
               <h2 id="nearby-heading-xl" className="sr-only">Près de chez vous</h2>
+              <NearbyHelpersCarousel />
               <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} myMissions={myMissions} postalCode={postalCode} nearbyError={nearbyError} nearbyMissionsError={nearbyMissionsError} myMissionsError={myMissionsError} isAvailable={isAvailable} />
             </section>
             {articles.length > 0 && (
