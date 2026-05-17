@@ -13,7 +13,7 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile }: Props) => {
   const skillCats: string[] = h.skill_categories || [];
   const displayedSkills = skillCats.slice(0, 2);
   const extraCount = skillCats.length - 2;
-  const customSkills: string[] = tokenizeSkillPhrases(h.custom_keywords ? null : (h.custom_skills as string[]) || []);
+  const customSkills: string[] = tokenizeSkillPhrases((h.custom_skills as string[]) || []);
   const comps: string[] = tokenizeSkillPhrases((h.competences as string[]) || []);
   // Compétences "spéciales" = saisies en libre (savoir-faire unique).
   // On affiche d'abord les custom (signature de la personne), puis les comps
