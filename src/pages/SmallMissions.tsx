@@ -536,7 +536,7 @@ const SmallMissions = () => {
                         const hasBio = Boolean(((m.profiles as any)?.bio || "").trim());
                         void trackEvent("exp_mission_bio_click", {
                           source: "small_missions",
-                          metadata: { variant: bioVariant, has_bio: hasBio, position: idx, mission_id: m.id },
+                          metadata: { release: BIO_RELEASE_TAG, has_bio: hasBio, position: idx, mission_id: m.id },
                         });
                         navigate(isAuthenticated ? `/petites-missions/${m.id}` : "/inscription");
                       }}
