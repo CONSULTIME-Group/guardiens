@@ -449,7 +449,7 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
               className="rounded-2xl border border-dashed border-border bg-muted/30 px-5 py-6 text-center"
             >
               <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold mb-1.5">
-                Filtre actif{activeChip ? ` · ${activeChip.label}` : ""}
+                0 résultat · Filtre actif{activeChip ? ` · ${activeChip.label}` : ""}
               </p>
               <p className="text-sm font-heading font-semibold text-foreground leading-snug mb-1">
                 Aucune personne disponible sur cette compétence
@@ -457,8 +457,8 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
               </p>
               <p className="text-xs text-muted-foreground font-sans mb-4 max-w-prose mx-auto">
                 {nextRadius
-                  ? `Élargissez le rayon pour garder ${activeChip?.label ?? "ce filtre"} actif, ou essayez une autre catégorie.`
-                  : "Essayez une autre catégorie, ou retirez le filtre pour voir toutes les personnes du coin."}
+                  ? `Élargissez le rayon pour garder ${activeChip?.label ?? "ce filtre"} actif, relancez la recherche, ou essayez une autre catégorie.`
+                  : "Relancez la recherche pour vérifier les derniers inscrits, essayez une autre catégorie, ou retirez le filtre."}
               </p>
               <div className="flex flex-wrap items-center justify-center gap-2">
                 {nextRadius && (
@@ -473,6 +473,16 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
                 <Button
                   size="sm"
                   variant="outline"
+                  className="rounded-xl"
+                  onClick={() => refetch()}
+                  disabled={isFetching}
+                  aria-label="Relancer la recherche pour vérifier les derniers inscrits"
+                >
+                  {isFetching ? "Recherche…" : "Réessayer"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
                   className="rounded-xl"
                   onClick={() => handleSkillToggle(null)}
                 >
