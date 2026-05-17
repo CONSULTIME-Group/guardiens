@@ -198,15 +198,21 @@ const OwnerDashboard = () => {
             </div>
             <p className="text-sm text-muted-foreground font-sans mt-1">{subtitle}</p>
             {user?.id && (
-              <Link
-                to={`/gardiens/${user.id}?tab=proprio`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] mt-2 text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
-                aria-label="Voir mon profil public (nouvel onglet)"
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="mt-3 rounded-xl"
               >
-                <Eye className="w-3 h-3" aria-hidden="true" /> Mon profil public
-              </Link>
+                <Link
+                  to={`/gardiens/${user.id}?tab=proprio`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Voir mon profil public (nouvel onglet)"
+                >
+                  <Eye className="w-4 h-4 mr-1.5" aria-hidden="true" /> Mon profil public
+                </Link>
+              </Button>
             )}
           </div>
           <Button
