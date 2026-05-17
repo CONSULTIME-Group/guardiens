@@ -220,6 +220,7 @@ const OwnerDashboard = () => {
               </Button>
             )}
           </div>
+          {/* Desktop : CTA inline dans le hero. Mobile : porté par MobileStickyCTA. */}
           <Button
             size="lg"
             onClick={() => navigate("/sits/create")}
