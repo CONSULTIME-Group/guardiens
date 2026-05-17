@@ -398,7 +398,7 @@ const SitterDashboard = () => {
             {ChecklistBlock}
             <section aria-labelledby="nearby-heading-xl">
               <h2 id="nearby-heading-xl" className="sr-only">Près de chez vous</h2>
-              {DiscoveryTabs}
+              {DiscoverySections}
             </section>
           </div>
         </div>
