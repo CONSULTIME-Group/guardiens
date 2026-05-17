@@ -294,7 +294,7 @@ const Register = () => {
  metadata: { role: selectedRole, user_id: newUserId, auto_confirmed: true },
  });
  } catch {}
- navigate("/dashboard");
+ navigate(postAuthTarget);
  return;
  }
 
