@@ -1651,18 +1651,17 @@ const SearchSitter = () => {
  </div>
  </SheetContent>
  </Sheet>
-  </div>
-  <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:hidden" />
-  </div>
-  </div>
+   </div>
+   <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:hidden" />
+   </div>
 
- {/* ─── Sort bar + view toggle ─── */}
- <div className="flex justify-between items-center px-6 py-2 border-b border-border bg-background">
- <div className="flex items-center gap-3 flex-wrap">
- <span className="text-sm text-muted-foreground">{loading ? "Recherche…" : countLabel}</span>
+ {/* ─── Sort bar + view toggle (sticky avec les pills pour cohérence visuelle) ─── */}
+ <div className="flex justify-between items-center gap-2 px-4 sm:px-6 py-2 border-t border-border/60 bg-background flex-nowrap">
+ <div className="flex items-center gap-2 min-w-0 flex-1">
+ <span className="text-xs sm:text-sm text-muted-foreground truncate">{loading ? "Recherche…" : countLabel}</span>
  <Select value={sort} onValueChange={(v) => handleSortChange(v as SortOption)}>
- <SelectTrigger className="h-8 w-auto gap-1.5 rounded-full border-border bg-card px-3 text-xs">
- <span className="text-muted-foreground">Trier&nbsp;:</span>
+ <SelectTrigger className="h-8 w-auto gap-1.5 rounded-full border-border bg-card px-3 text-xs shrink-0">
+ <span className="text-muted-foreground hidden sm:inline">Trier&nbsp;:</span>
  <SelectValue />
  </SelectTrigger>
  <SelectContent align="start">
