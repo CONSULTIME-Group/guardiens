@@ -1368,7 +1368,7 @@ const SearchSitter = () => {
  const d = getDeptCode(userPostalCode);
  return d ? `Dépt ${d}` : "Mon département";
  })()}
- {zoneMode === "region" && (getRegionName(getDeptCode(userPostalCode)) || "Ma région")}
+ {zoneMode === "region" && "Ma région"}
  {zoneMode === "france" && "Toute la France"}
  </span>
  </button>
