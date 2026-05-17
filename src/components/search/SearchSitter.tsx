@@ -1266,7 +1266,7 @@ const SearchSitter = () => {
     id="search-filter-pills"
     className={`relative -mr-6 sm:mr-0 ${isMobile && viewMode === "map" && !mobileFiltersOpen ? "hidden" : ""}`}
    >
-   <div className="flex flex-row items-center gap-2 px-6 py-3 overflow-x-auto no-scrollbar pr-10 sm:pr-6">
+   <div className="flex flex-row items-center gap-2 px-6 py-3 overflow-x-auto no-scrollbar pr-10 sm:pr-6 snap-x snap-mandatory scroll-px-6 overscroll-x-contain">
  {/* Location pill */}
  <Popover open={editingCity} onOpenChange={setEditingCity}>
  <PopoverTrigger asChild>
