@@ -28,6 +28,9 @@ import ExamplesSection from "@/components/missions/connected/ExamplesSection";
 import OfferDialog from "@/components/missions/connected/OfferDialog";
 import { geocodeCached, useEntityCoords } from "@/hooks/missions/useGeocodedCoords";
 import { useAllMissions, useAvailableHelpers } from "@/hooks/missions/useMissionsData";
+import { getVariant } from "@/lib/abTest";
+import { trackEvent } from "@/lib/analytics";
+import { useScrollDepthTracker } from "@/hooks/useScrollDepthTracker";
 
 const SmallMissions = () => {
   const { isAuthenticated, user, switchRole } = useAuth();
