@@ -95,7 +95,7 @@ function ReferralSection({ referralCode, userId }: { referralCode: string | null
   if (!code) return null;
 
   return (
-    <div className="bg-muted rounded-xl px-6 py-5">
+    <div id="parrainage" className="bg-muted rounded-xl px-6 py-5 scroll-mt-24">
       <h3 className="font-heading text-lg font-semibold mb-1">Parrainez un proche.</h3>
       <p className="text-sm text-muted-foreground font-body mb-4">
         Si quelqu'un s'inscrit avec votre lien et active son compte,
