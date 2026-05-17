@@ -445,15 +445,16 @@ const OwnerDashboard = () => {
       </div>
 
       {/* ═══ CTA sticky mobile ═══ */}
+      {/* Masqué sur empty state (0 annonce active) : le Hero porte déjà le CTA "Nouvelle annonce". */}
       {pendingAppCount > 0 ? (
         <MobileStickyCTA
           label="Voir les candidatures"
           to="/sits"
           badge={pendingAppCount}
         />
-      ) : (
+      ) : activeSits.length > 0 ? (
         <MobileStickyCTA label="Publier une annonce" to="/sits/create" />
-      )}
+      ) : null}
     </div>
   );
 };
