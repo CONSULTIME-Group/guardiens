@@ -1,5 +1,12 @@
+import { Info } from "lucide-react";
 import { useActiveSittersCount } from "@/hooks/useActiveSittersCount";
 import { useActiveOwnersCount } from "@/hooks/useActiveOwnersCount";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 /**
  * Bandeau signal vivant — preuve sociale temps réel.
