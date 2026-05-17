@@ -33,12 +33,30 @@ export type NearbyHelpersResult = {
   hasGeo: boolean;
 };
 
-const RADIUS_STEPS = [30, 50, 100];
+export const RADIUS_STEPS = [30, 50, 100];
 const MAX_RESULTS = 8;
 
-export function useNearbyHelpers(currentUserId: string | undefined) {
+/**
+ * Renvoie le prochain palier de rayon strictement plus grand, ou null s'il
+ * n'y en a plus. Utilisé par l'UI pour proposer « Élargir le rayon » sans
+ * réinitialiser le filtre compétence.
+ */
+export function nextRadiusStep(current: number): number | null {
+  return RADIUS_STEPS.find((r) => r > current) ?? null;
+}
+
+export type NearbyHelpersOptions = {
+  /** Force un rayon spécifique (sinon fallback automatique 30→50→100). */
+  forcedRadius?: number | null;
+};
+
+export function useNearbyHelpers(
+  currentUserId: string | undefined,
+  options: NearbyHelpersOptions = {},
+) {
+  const { forcedRadius = null } = options;
   return useQuery<NearbyHelpersResult>({
-    queryKey: ["nearby-helpers", currentUserId],
+    queryKey: ["nearby-helpers", currentUserId, forcedRadius],
     enabled: !!currentUserId,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
