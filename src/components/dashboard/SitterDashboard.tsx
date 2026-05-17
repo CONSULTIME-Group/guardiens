@@ -291,7 +291,8 @@ const SitterDashboard = () => {
   );
 
   return (
-    <div className="space-y-0 overflow-hidden pb-40 md:pb-8">
+    <div className="space-y-0 overflow-hidden pb-24 md:pb-8">
+{/* pb-24 mobile = BottomNav (h-16) + sticky CTA (~32px). h-20 spacer supprimé (doublon). */}
       {/* Role activation */}
       <div className="px-4 sm:px-5 md:px-8 mb-4">
         <RoleActivationBanner userRole={user?.role || "sitter"} />
@@ -348,14 +349,10 @@ const SitterDashboard = () => {
       <div className="xl:hidden mt-4">
         {ChecklistBlock}
 
-        <div className="px-4 sm:px-5 md:px-8 mb-6">
-          <DashSection eyebrow="Votre profil" title="Statut & réputation" description="Votre vitrine auprès des propriétaires.">
-            <div className="space-y-4">
-              {buildStatusBlock(false)}
-              {buildBadgesBlock(false)}
-              {buildEmergencyBlock(false)}
-            </div>
-          </DashSection>
+        <div className="px-4 sm:px-5 md:px-8 mb-6 space-y-4">
+          {buildStatusBlock(false)}
+          {buildBadgesBlock(false)}
+          {buildEmergencyBlock(false)}
         </div>
 
         <div className="px-4 sm:px-5 md:px-8 mb-6">
@@ -401,8 +398,6 @@ const SitterDashboard = () => {
 
       {/* CTA sticky mobile */}
       <SitterMobileStickyCTA pendingAppsCount={pendingAppsCount} unreadCount={unreadCount} />
-
-      <div className="md:hidden h-20" aria-hidden="true" />
     </div>
   );
 };

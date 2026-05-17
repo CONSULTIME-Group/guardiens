@@ -220,6 +220,7 @@ const OwnerDashboard = () => {
               </Button>
             )}
           </div>
+          {/* Desktop : CTA inline dans le hero. Mobile : porté par MobileStickyCTA. */}
           <Button
             size="lg"
             onClick={() => navigate("/sits/create")}
@@ -449,7 +450,7 @@ const OwnerDashboard = () => {
       </div>
 
       {/* ═══ CTA sticky mobile ═══ */}
-      {/* Masqué sur empty state (0 annonce active) : le Hero porte déjà le CTA "Nouvelle annonce". */}
+      {/* Empty state mobile : le hero CTA est hidden md:inline-flex → on relaie ici. */}
       {pendingAppCount > 0 ? (
         <MobileStickyCTA
           label="Voir les candidatures"
@@ -458,7 +459,9 @@ const OwnerDashboard = () => {
         />
       ) : activeSits.length > 0 ? (
         <MobileStickyCTA label="Voir mon annonce" to="/sits" />
-      ) : null}
+      ) : (
+        <MobileStickyCTA label="Publier une annonce" to="/sits/create" />
+      )}
     </div>
   );
 };
