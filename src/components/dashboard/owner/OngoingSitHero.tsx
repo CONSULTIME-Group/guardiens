@@ -51,7 +51,7 @@ const OngoingSitHero = memo(({ sit, sitterProfiles, coverPhoto }: OngoingSitHero
 
   return (
     <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
-      <div className="group block bg-card border border-border rounded-2xl overflow-hidden transition-all duration-300 ease-out hover:shadow-lg hover:border-primary/30">
+      <div className="group block bg-primary/5 border-2 border-primary/30 rounded-2xl overflow-hidden transition-all duration-300 ease-out hover:shadow-lg hover:border-primary/50">
         <div className="flex flex-col sm:flex-row">
           {/* Image de couverture */}
           <div className="relative sm:w-48 md:w-56 h-36 sm:h-auto sm:min-h-[180px] overflow-hidden bg-muted shrink-0">

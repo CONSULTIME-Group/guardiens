@@ -199,6 +199,9 @@ const OwnerDashboard = () => {
               {user?.isFounder && <FounderBadge size="sm" />}
             </div>
             <p className="text-sm text-muted-foreground font-sans mt-1">{subtitle}</p>
+            <p className="text-xs text-primary/80 font-sans mt-1">
+              Votre espace propriétaire reste gratuit.
+            </p>
             {user?.id && (
               <Button
                 asChild
@@ -455,7 +458,7 @@ const OwnerDashboard = () => {
           badge={pendingAppCount}
         />
       ) : activeSits.length > 0 ? (
-        <MobileStickyCTA label="Publier une annonce" to="/sits/create" />
+        <MobileStickyCTA label="Voir mon annonce" to="/sits" />
       ) : null}
     </div>
   );
