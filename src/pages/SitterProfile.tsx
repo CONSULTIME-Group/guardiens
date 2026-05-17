@@ -336,7 +336,7 @@ const SitterProfile = () => {
           />
 
           {/* Right content */}
-          <div className="flex-1 min-w-0 pb-32">
+          <div className="flex-1 min-w-0 pb-40 md:pb-32">
             <div id="profile-section-content" className="bg-card rounded-2xl border border-border p-5 md:p-8 scroll-mt-24">
               {activeSection === "identity" && (
                 <StepIdentity data={mergedData} onChange={handleChange} onUploadAvatar={handleUploadAvatar} />
