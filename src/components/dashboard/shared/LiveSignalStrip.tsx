@@ -1,4 +1,5 @@
 import { useActiveSittersCount } from "@/hooks/useActiveSittersCount";
+import { useActiveOwnersCount } from "@/hooks/useActiveOwnersCount";
 
 /**
  * Bandeau signal vivant — preuve sociale temps réel.
@@ -20,8 +21,11 @@ interface LiveSignalStripProps {
 }
 
 const LiveSignalStrip = ({ secondarySignal }: LiveSignalStripProps) => {
-  const { data: count } = useActiveSittersCount();
-  if (!count || count < 10) return null;
+  const { data: sittersCount } = useActiveSittersCount();
+  const { data: ownersCount } = useActiveOwnersCount();
+  const hasSitters = !!sittersCount && sittersCount >= 10;
+  const hasOwners = !!ownersCount && ownersCount >= 10;
+  if (!hasSitters && !hasOwners) return null;
 
   return (
     <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-muted/30 ring-1 ring-border/40 text-xs sm:text-sm">
@@ -30,10 +34,26 @@ const LiveSignalStrip = ({ secondarySignal }: LiveSignalStripProps) => {
         <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
       </span>
       <p className="text-foreground/80 font-sans">
-        <span className="font-semibold text-foreground tabular-nums">
-          {count.toLocaleString("fr-FR")}
-        </span>{" "}
-        gardiens actifs en France
+        {hasSitters && (
+          <>
+            <span className="font-semibold text-foreground tabular-nums">
+              {sittersCount!.toLocaleString("fr-FR")}
+            </span>{" "}
+            gardiens
+          </>
+        )}
+        {hasSitters && hasOwners && (
+          <span className="mx-1.5 text-muted-foreground/60">·</span>
+        )}
+        {hasOwners && (
+          <>
+            <span className="font-semibold text-foreground tabular-nums">
+              {ownersCount!.toLocaleString("fr-FR")}
+            </span>{" "}
+            propriétaires
+          </>
+        )}
+        <span className="text-foreground/60"> actifs en France</span>
         {secondarySignal && (
           <>
             <span className="mx-1.5 text-muted-foreground/60">·</span>
