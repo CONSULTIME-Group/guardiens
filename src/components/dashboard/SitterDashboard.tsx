@@ -21,6 +21,7 @@ import SitterMissionsSection from "./sitter/SitterMissionsSection";
 import NearbyAnnoncesCard from "./sitter/NearbyAnnoncesCard";
 import QuickActionsCard from "./sitter/QuickActionsCard";
 import EmptyIllustration from "./shared/EmptyIllustration";
+import SectionEyebrow from "./shared/SectionEyebrow";
 import DashSection from "./owner/DashSection";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
