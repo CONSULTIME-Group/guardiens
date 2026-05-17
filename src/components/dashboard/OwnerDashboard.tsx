@@ -367,8 +367,7 @@ const OwnerDashboard = () => {
                 : []),
             ]}
           />
-          <NearbyEmergencySitters />
-          <NearbyHelpersCarousel />
+          <NearbyPeopleTabs />
           <MissionsTabsCard myMissions={myMissions} nearbyMissions={smallMissions} />
         </aside>
       </div>
