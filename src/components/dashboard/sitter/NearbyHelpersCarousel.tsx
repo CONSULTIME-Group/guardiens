@@ -1,33 +1,48 @@
 import { memo, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShieldCheck, ArrowRight } from "lucide-react";
+import { ShieldCheck, ArrowRight, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNearbyHelpers, type NearbyHelper } from "@/hooks/useNearbyHelpers";
-import { useActiveSittersCount } from "@/hooks/useActiveSittersCount";
+import { useHelpersProximityCount } from "@/hooks/useHelpersProximityCount";
 import { useCtaCooldown } from "@/hooks/useCtaCooldown";
 import { startConversation } from "@/lib/conversation";
 import { toast } from "sonner";
 import { capitalize } from "@/components/dashboard/owner/helpers";
 
 /**
- * Mini-compteur de preuve sociale globale.
- * Affiché uniquement quand on a une valeur ; silencieux si la requête échoue
- * (pas de "0 gardien actif" anxiogène). Pulse vert = signal de fraîcheur.
+ * Compteur dual « local · national » de personnes prêtes à donner un coup de main.
+ *
+ * Pourquoi : un « 412 actifs en France » est trop abstrait sur un dashboard
+ * utilisateur. On veut d'abord le SIGNAL LOCAL (« il y a du monde près de
+ * vous »), puis le NATIONAL en filet (« sinon la communauté est vivante »).
+ * Affiché en pastille horizontale dense, pulse vert pour la fraîcheur.
  */
-const ActiveSittersTicker = () => {
-  const { data: count } = useActiveSittersCount();
-  if (!count || count < 10) return null;
+const HelpersProximityTicker = ({ userId }: { userId?: string }) => {
+  const { data } = useHelpersProximityCount(userId);
+  if (!data) return null;
+  const { localCount, nationalCount, radiusKm, hasGeo } = data;
+  if (nationalCount < 5) return null;
+
   return (
-    <p className="mt-4 inline-flex items-center gap-2 text-[11px] text-muted-foreground font-sans">
-      <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
+    <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] sm:text-xs text-foreground/75 font-sans">
+      <span className="relative flex h-1.5 w-1.5 shrink-0" aria-hidden="true">
         <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-60 animate-ping" />
         <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
       </span>
+      {hasGeo && localCount > 0 && (
+        <span className="inline-flex items-center gap-1">
+          <MapPin className="h-3 w-3 text-primary/70" aria-hidden="true" />
+          <strong className="font-semibold text-foreground tabular-nums">{localCount}</strong>
+          <span className="text-foreground/70">prêt·es à aider à moins de {radiusKm}&nbsp;km</span>
+        </span>
+      )}
+      {hasGeo && localCount > 0 && <span className="text-muted-foreground/50">·</span>}
       <span>
-        <strong className="font-semibold text-foreground tabular-nums">{count.toLocaleString("fr-FR")}</strong> gardiens actifs partout en France
+        <strong className="font-semibold text-foreground tabular-nums">{nationalCount.toLocaleString("fr-FR")}</strong>{" "}
+        <span className="text-foreground/70">{hasGeo && localCount > 0 ? "en France" : "personnes prêtes à aider en France"}</span>
       </span>
-    </p>
+    </div>
   );
 };
 
