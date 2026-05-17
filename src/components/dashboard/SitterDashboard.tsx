@@ -22,6 +22,7 @@ import SitterStatusBar from "./sitter/SitterStatusBar";
 import SitterBadgesSection from "./sitter/SitterBadgesSection";
 import NearbyHelpersCarousel from "./sitter/NearbyHelpersCarousel";
 import SitterEmergencyCard from "./sitter/SitterEmergencyCard";
+import SitterEmergencyCardCompact from "./sitter/SitterEmergencyCardCompact";
 import SitterMissionsSection from "./sitter/SitterMissionsSection";
 import NearbyAnnoncesCard from "./sitter/NearbyAnnoncesCard";
 import QuickActionsCard from "./sitter/QuickActionsCard";
