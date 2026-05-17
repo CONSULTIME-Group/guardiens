@@ -481,7 +481,7 @@ const SearchOwner = () => {
   const refDept = getDeptCode(getZoneRefPostalCode());
   const refRegion = getRegionCode(refDept);
   const deptLabel = refDept ? `${refDept} ${DEPT_NAMES[refDept] || ""}`.trim() : "Département";
-  const regionLabel = refRegion ? getRegionName(refDept) : "Région";
+  // regionLabel volontairement supprimé (mémoire "No AURA").
 
   // Suggest expanding when current zone is empty and a wider zone has results.
   // L'étape "région" est volontairement omise : la promesse produit est « France
