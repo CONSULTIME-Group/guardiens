@@ -57,7 +57,7 @@ const HelpersProximityTicker = ({ userId }: { userId?: string }) => {
  * Le ticker "X gardiens actifs" reste affiché dans tous les cas — c'est de la
  * preuve sociale, pas un CTA, donc pas concerné par le cooldown.
  */
-const EmptyHelpersState = ({ hideHeader }: { hideHeader: boolean }) => {
+const EmptyHelpersState = ({ hideHeader, userId }: { hideHeader: boolean; userId?: string }) => {
   const { variant, snooze } = useCtaCooldown("helpers_empty_referral", {
     softThreshold: 3,
     windowDays: 7,
@@ -141,7 +141,7 @@ const EmptyHelpersState = ({ hideHeader }: { hideHeader: boolean }) => {
           </p>
         )}
 
-        <ActiveSittersTicker />
+        <HelpersProximityTicker userId={userId} />
       </div>
     </section>
   );
