@@ -1,8 +1,6 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { StatutGardienBadge } from "@/components/profile/StatutGardienBadge";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import type { ReputationData } from "@/hooks/useSitterDashboardData";
 
 interface SitterStatusBarProps {
@@ -11,57 +9,19 @@ interface SitterStatusBarProps {
   avgRating: number;
   reviewsCount: number;
   badgeCount: number;
-  totalApps: number;
+  /** Conservé pour compat — non affiché (KPI sans valeur côté gardien). */
+  totalApps?: number;
   reputation: ReputationData | null;
   /** Si true: stack vertical (1 colonne) — pour usage en sidebar étroite. */
   compact?: boolean;
 }
 
-type AppView = "sent" | "received";
-
 const SitterStatusBar = ({
-  profileCompletion, completedSits, avgRating, reviewsCount, badgeCount, totalApps, reputation,
+  profileCompletion, completedSits, avgRating, reviewsCount, badgeCount, reputation,
   compact = false,
 }: SitterStatusBarProps) => {
   const { user, activeRole } = useAuth();
   const profilePath = (user?.role === "both" ? activeRole : user?.role) === "owner" ? "/owner-profile" : "/profile";
-
-  // Sélecteur Mes candidatures (envoyées) ↔ Candidatures reçues (sur mes annonces)
-  const [appView, setAppView] = useState<AppView>("sent");
-  const [receivedCount, setReceivedCount] = useState<number | null>(null);
-  const [loadingReceived, setLoadingReceived] = useState(false);
-
-  useEffect(() => {
-    if (appView !== "received" || receivedCount !== null || !user?.id) return;
-    let cancelled = false;
-    setLoadingReceived(true);
-    (async () => {
-      // 1) Récupère les ids de mes annonces (en tant que propriétaire)
-      const { data: sits, error: sitsErr } = await supabase
-        .from("sits")
-        .select("id")
-        .eq("user_id", user.id);
-      if (cancelled) return;
-      if (sitsErr || !sits || sits.length === 0) {
-        setReceivedCount(0);
-        setLoadingReceived(false);
-        return;
-      }
-      // 2) Compte les candidatures reçues sur ces annonces
-      const sitIds = sits.map((s) => s.id);
-      const { count, error: appsErr } = await supabase
-        .from("applications")
-        .select("id", { count: "exact", head: true })
-        .in("sit_id", sitIds);
-      if (cancelled) return;
-      setReceivedCount(appsErr ? 0 : count || 0);
-      setLoadingReceived(false);
-    })();
-    return () => { cancelled = true; };
-  }, [appView, receivedCount, user?.id]);
-
-  const displayedCount = appView === "sent" ? totalApps : (receivedCount ?? 0);
-  const displayedLabel = appView === "sent" ? "Mes candidatures" : "Candidatures reçues";
 
   const gridCls = compact
     ? "grid-cols-1"
