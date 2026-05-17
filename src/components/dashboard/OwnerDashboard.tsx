@@ -369,6 +369,11 @@ const OwnerDashboard = () => {
                 : []),
             ]}
           />
+          {/* Mobile/tablet : remontée explicite des helpers proches (≤ lg).
+              Sur ≥ lg ils restent accessibles via NearbyPeopleTabs (onglet « Coup de main »). */}
+          <div className="lg:hidden">
+            <NearbyHelpersCarousel />
+          </div>
           <NearbyPeopleTabs />
           <MissionsTabsCard myMissions={myMissions} nearbyMissions={smallMissions} />
         </aside>
