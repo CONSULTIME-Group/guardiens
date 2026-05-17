@@ -322,7 +322,7 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
   // du filtre. Reset à null quand l'utilisateur change/retire le filtre, pour
   // ne pas garder un rayon de 100 km collant.
   const [forcedRadius, setForcedRadius] = useState<number | null>(null);
-  const { data, isLoading } = useNearbyHelpers(user?.id, { forcedRadius });
+  const { data, isLoading, isFetching, refetch } = useNearbyHelpers(user?.id, { forcedRadius });
 
   const helpers = data?.helpers || [];
   const filtered = useMemo(() => {
