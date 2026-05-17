@@ -125,12 +125,12 @@ const SearchMapView = ({
   const activeItem = results.find((r) => r.id === activePin);
 
   return (
-    <div className="flex h-[calc(100vh-200px)]">
-      <div className="w-1/2 overflow-y-auto p-4 space-y-3 border-r border-border">
+    <div className="flex flex-col md:flex-row h-[calc(100vh-180px)] md:h-[calc(100vh-200px)]">
+      <div className="hidden md:block md:w-1/2 overflow-y-auto p-4 space-y-3 border-r border-border">
         {results.map(renderCard)}
       </div>
 
-      <div className="w-1/2 relative">
+      <div className="w-full md:w-1/2 relative flex-1 min-h-0">
         <MapContainer
           center={center}
           zoom={userCoords ? 11 : 6}
