@@ -32,11 +32,11 @@ const SKILL_CHIPS: { key: string; label: string; intent: string }[] = [
 const HelperMiniCard = ({
   helper,
   onWrite,
-  compact = false,
+  pending,
 }: {
   helper: NearbyHelper;
   onWrite: () => void;
-  compact?: boolean;
+  pending?: boolean;
 }) => {
   const firstName = capitalize(helper.first_name || "Membre");
   const customSkills = (helper.custom_skills || [])
@@ -44,96 +44,114 @@ const HelperMiniCard = ({
     .filter((s): s is string => !!s);
   const bioTeaser = helper.bio?.trim() || null;
   return (
-    <article className={`${compact ? "w-full" : "flex-shrink-0 w-[82vw] sm:w-72 snap-start"} rounded-2xl border border-border bg-card overflow-hidden flex flex-col`}>
-      <div className="p-4 flex items-center gap-3">
+    <article
+      className="
+        group/card flex-shrink-0 w-[78vw] sm:w-[19rem] snap-start
+        rounded-2xl bg-card
+        ring-1 ring-border/60 hover:ring-primary/30
+        shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.12)]
+        transition-all duration-300 ease-out
+        flex flex-col overflow-hidden
+      "
+    >
+      {/* En-tête : avatar + nom + ville/distance + vérif */}
+      <div className="px-4 pt-4 pb-3 flex items-center gap-3">
         {helper.avatar_url ? (
           <img
             src={helper.avatar_url}
             alt={`Portrait de ${firstName}`}
             loading="lazy"
-            className="w-12 h-12 rounded-full object-cover border border-border shrink-0"
+            className="w-12 h-12 rounded-full object-cover ring-1 ring-border shrink-0"
           />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-accent text-accent-foreground font-heading font-semibold flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent to-muted text-accent-foreground font-heading font-semibold flex items-center justify-center shrink-0 ring-1 ring-border">
             {firstName.charAt(0)}
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <Link
-            to={`/gardiens/${helper.id}`}
-            className="block text-sm font-heading font-semibold text-foreground truncate hover:underline"
-          >
-            {firstName}
-          </Link>
-          <p className="text-xs text-muted-foreground truncate">
+          <div className="flex items-center gap-1.5">
+            <Link
+              to={`/gardiens/${helper.id}`}
+              className="block text-sm font-heading font-semibold text-foreground truncate hover:text-primary transition-colors"
+            >
+              {firstName}
+            </Link>
+            {helper.identity_verified && (
+              <span
+                className="inline-flex items-center text-primary shrink-0"
+                title="Identité vérifiée"
+                aria-label="Identité vérifiée"
+              >
+                <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+              </span>
+            )}
+          </div>
+          <p className="text-[11px] text-muted-foreground truncate mt-0.5">
             {helper.city ? capitalize(helper.city) : "Près de chez vous"}
             {helper.distance_km !== null && helper.distance_km !== undefined
               ? ` · ${Math.round(helper.distance_km)} km`
               : ""}
           </p>
         </div>
-        {helper.identity_verified && (
-          <span
-            className="inline-flex items-center text-success shrink-0"
-            title="Identité vérifiée"
-            aria-label="Identité vérifiée"
-          >
-            <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-          </span>
-        )}
       </div>
 
-      {/* Catégories générales */}
-      <div className="px-4 pb-1 flex flex-wrap gap-1.5">
-        {helper.skill_categories.slice(0, 3).map((cat) => {
-          const meta = SKILL_CHIPS.find((c) => c.key === cat);
-          if (!meta) return null;
-          return (
-            <span
-              key={cat}
-              className="text-[11px] rounded-full bg-primary/10 text-primary px-2 py-0.5"
-            >
-              {meta.label}
-            </span>
-          );
-        })}
-      </div>
-
-      {/* Savoir-faire spécifique (custom skills saisis librement) */}
-      {customSkills.length > 0 && (
-        <div className="px-4 pb-1 pt-2">
-          <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium mb-1">
-            Savoir-faire
+      {/* Bio teaser — typo serif italique, ton éditorial léger */}
+      {bioTeaser ? (
+        <p className="px-4 pb-3 text-[13px] text-foreground/75 leading-relaxed italic line-clamp-2 font-heading">
+          « {bioTeaser} »
+        </p>
+      ) : (
+        <div className="px-4 pb-3">
+          <p className="text-[12px] text-muted-foreground/70 leading-snug italic">
+            Disponible pour un coup de main près de chez vous.
           </p>
-          <div className="flex flex-wrap gap-1">
-            {customSkills.slice(0, 3).map((c) => (
-              <span
-                key={c}
-                className="text-[11px] rounded-full bg-muted text-foreground/80 px-2 py-0.5 border border-border"
-              >
-                {c}
-              </span>
-            ))}
-            {customSkills.length > 3 && (
-              <span className="text-[11px] text-muted-foreground px-1">
-                +{customSkills.length - 3}
-              </span>
-            )}
-          </div>
         </div>
       )}
 
-      {/* Mini bio */}
-      {bioTeaser && (
-        <p className="px-4 pb-2 pt-2 text-xs text-foreground/75 leading-snug line-clamp-2 italic">
-          « {bioTeaser} »
-        </p>
+      {/* Savoir-faire : 1 ligne, chips fines, débordement masqué */}
+      {(customSkills.length > 0 || helper.skill_categories.length > 0) && (
+        <div className="px-4 pb-4 flex flex-wrap gap-1.5">
+          {customSkills.slice(0, 2).map((c) => (
+            <span
+              key={c}
+              className="text-[11px] rounded-full bg-muted/60 text-foreground/80 px-2.5 py-0.5 ring-1 ring-border/40"
+            >
+              {c}
+            </span>
+          ))}
+          {helper.skill_categories
+            .filter((cat) => SKILL_CHIPS.find((c) => c.key === cat))
+            .slice(0, customSkills.length > 0 ? 1 : 3)
+            .map((cat) => {
+              const meta = SKILL_CHIPS.find((c) => c.key === cat)!;
+              return (
+                <span
+                  key={cat}
+                  className="text-[11px] rounded-full bg-primary/8 text-primary px-2.5 py-0.5"
+                >
+                  {meta.label}
+                </span>
+              );
+            })}
+          {customSkills.length + helper.skill_categories.length > 3 && (
+            <span className="text-[11px] text-muted-foreground self-center">
+              +{customSkills.length + helper.skill_categories.length - 3}
+            </span>
+          )}
+        </div>
       )}
 
-      <div className="px-4 pb-4 mt-auto pt-2">
-        <Button size="sm" className="w-full rounded-xl" onClick={onWrite}>
-          Lui écrire
-          <ArrowRight className="ml-1.5 h-3.5 w-3.5" aria-hidden="true" />
+      {/* CTA — discret, bord supérieur très léger, plein largeur */}
+      <div className="mt-auto border-t border-border/40 bg-muted/20 group-hover/card:bg-muted/40 transition-colors">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full rounded-none h-10 text-xs font-medium text-foreground hover:bg-transparent hover:text-primary justify-center"
+          onClick={onWrite}
+          disabled={pending}
+        >
+          {pending ? "Ouverture…" : "Lui écrire"}
+          <ArrowRight className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover/card:translate-x-0.5" aria-hidden="true" />
         </Button>
       </div>
     </article>
@@ -248,31 +266,26 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
         })}
       </div>
 
-      {/* Liste : carrousel horizontal en mode standard, stack vertical en mode compact (aside étroit) */}
+      {/* Carrousel horizontal premium — partout (hideHeader contrôle seulement le titre). */}
       {filtered.length === 0 ? (
         <p className="text-xs text-muted-foreground italic py-4">
           Personne sur cette compétence pour l'instant — essayez une autre catégorie.
         </p>
-      ) : hideHeader ? (
-        <div className="flex flex-col gap-2">
-          {filtered.slice(0, 3).map((helper) => (
-            <HelperMiniCard
-              key={helper.id}
-              helper={helper}
-              onWrite={() => handleWrite(helper)}
-              compact
-            />
-          ))}
-        </div>
       ) : (
-        <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory scrollbar-hide">
-          {filtered.map((helper) => (
-            <HelperMiniCard
-              key={helper.id}
-              helper={helper}
-              onWrite={() => handleWrite(helper)}
-            />
-          ))}
+        <div className="relative -mx-1">
+          <div className="flex gap-3 overflow-x-auto pb-3 px-1 snap-x snap-mandatory scrollbar-hide scroll-smooth">
+            {filtered.map((helper) => (
+              <HelperMiniCard
+                key={helper.id}
+                helper={helper}
+                onWrite={() => handleWrite(helper)}
+                pending={pending === helper.id}
+              />
+            ))}
+          </div>
+          {/* Fondus latéraux : indication subtile de scroll horizontal */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-4 bg-gradient-to-r from-background to-transparent" aria-hidden="true" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-4 bg-gradient-to-l from-background to-transparent" aria-hidden="true" />
         </div>
       )}
     </section>
