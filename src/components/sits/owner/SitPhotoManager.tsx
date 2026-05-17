@@ -117,32 +117,51 @@ const SitPhotoManager = ({
     setSuggesting(true);
     setSuggestion(null);
     try {
-      const sample = gallery.slice(0, 10);
+      // Cap client : on ne soumet que les URLs non encore en cache session.
+      // Le backend re-cappe à MAX_PER_CALL (6) de toute façon.
+      const CLIENT_CAP = 6;
       const sessionScores = getSessionScores();
+      const sample = gallery.slice(0, CLIENT_CAP);
+      const toAnalyze = sample.filter((p) => !sessionScores.get(p.photo_url));
 
-      const results = await Promise.all(
-        sample.map(async (p): Promise<Scored | null> => {
-          // 2) Cache session : ne ré-analyse pas une URL déjà notée
-          const cached = sessionScores.get(p.photo_url);
-          if (cached) return cached;
-          try {
-            const { data, error } = await supabase.functions.invoke("analyze-photo-quality", {
-              body: { imageUrl: p.photo_url },
+      let fresh: Scored[] = [];
+      if (toAnalyze.length > 0) {
+        const { data, error } = await supabase.functions.invoke("analyze-photo-quality", {
+          body: { imageUrls: toAnalyze.map((p) => p.photo_url) },
+        });
+        if (error) {
+          const ctx: any = (error as any).context;
+          const code = ctx?.code ?? (data as any)?.code;
+          if (code === "DAILY_QUOTA_REACHED") {
+            toast({
+              variant: "destructive",
+              title: "Quota d'analyses atteint",
+              description:
+                "Vous avez atteint le nombre d'analyses IA autorisées aujourd'hui. Revenez demain.",
             });
-            if (error || !data || typeof data.score !== "number") return null;
-            const scored: Scored = {
-              url: p.photo_url,
-              score: data.score as number,
-              summary: data.summary as string,
-            };
-            sessionScores.set(p.photo_url, scored);
-            return scored;
-          } catch {
-            return null;
+            return;
           }
-        }),
-      );
-      const scored = results.filter((r): r is Scored => !!r);
+          if (code === "AI_RATE_LIMITED") {
+            toast({
+              variant: "destructive",
+              title: "Service IA saturé",
+              description: "Réessayez dans quelques instants.",
+            });
+            return;
+          }
+          throw error;
+        }
+        const arr = Array.isArray((data as any)?.results) ? (data as any).results : [];
+        fresh = arr
+          .filter((r: any) => r && typeof r.score === "number")
+          .map((r: any) => ({ url: r.url, score: r.score, summary: r.summary }));
+        for (const r of fresh) sessionScores.set(r.url, r);
+      }
+
+      const scored: Scored[] = sample
+        .map((p) => sessionScores.get(p.photo_url))
+        .filter((r): r is Scored => !!r);
+
       if (scored.length === 0) {
         toast({
           variant: "destructive",
