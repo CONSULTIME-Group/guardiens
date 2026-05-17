@@ -26,10 +26,26 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
   const navigate = useNavigate();
   const now = new Date();
 
-  // Find relevant sit: active > last completed > null
-  const activeSit = sits.find(s => ["published", "confirmed", "in_progress"].includes(s.status));
-  const lastCompleted = sits.find(s => s.status === "completed");
-  const currentSit = activeSit || lastCompleted;
+  // Priorité : 1) garde en cours, 2) prochaine confirmée, 3) prochaine publiée,
+  // 4) annonce publiée sans date, 5) dernière terminée (fallback).
+  const nowTs = now.getTime();
+  const startTs = (s: typeof sits[number]) =>
+    s.start_date ? new Date(s.start_date).getTime() : Number.POSITIVE_INFINITY;
+
+  const inProgress = sits.find(s => s.status === "in_progress");
+  const upcomingConfirmed = sits
+    .filter(s => s.status === "confirmed" && s.start_date && new Date(s.start_date).getTime() >= nowTs)
+    .sort((a, b) => startTs(a) - startTs(b))[0];
+  const upcomingPublished = sits
+    .filter(s => s.status === "published" && s.start_date && new Date(s.start_date).getTime() >= nowTs)
+    .sort((a, b) => startTs(a) - startTs(b))[0];
+  const anyPublished = sits.find(s => s.status === "published");
+  const lastCompleted = sits
+    .filter(s => s.status === "completed")
+    .sort((a, b) => (new Date(b.end_date || 0).getTime()) - (new Date(a.end_date || 0).getTime()))[0];
+
+  const currentSit =
+    inProgress || upcomingConfirmed || upcomingPublished || anyPublished || lastCompleted;
 
   // No sit ever + no profile data → empty state
   if (!currentSit && pets.length === 0 && !propertyType) {
