@@ -217,8 +217,16 @@ const SitterDashboard = () => {
 
   // ── Zone Découverte — sections indépendantes (plus d'onglets).
   // Ordre validé : Annonces → Coup de main → Conseils (replié).
-  // Pourquoi : les onglets masquaient 2/3 du contenu, le gardien tape rarement
-  // au-delà du premier. Hiérarchie par intention business plutôt que par type.
+  // Logique d'emptiness : on évite d'afficher 2 cartes vides côte à côte.
+  // - Annonces : si rien dans 100 km, on remplace la carte par 1 message clair.
+  // - Coup de main : si pas de missions (mienne ni du coin), on masque
+  //   SitterMissionsSection — la carte helpers (qui a son propre empty-state
+  //   premium avec CTA parrainage) reste seule visible et porte le message.
+  const annoncesEmpty = !nearbyError && nearbyListings.length === 0;
+  const missionsEmpty =
+    !myMissionsError && !nearbyMissionsError &&
+    myMissions.length === 0 && nearbyMissions.length === 0;
+
   const DiscoverySections = (
     <div className="space-y-8">
       {/* 1. Annonces — priorité business (garde rémunérée) */}
@@ -231,11 +239,30 @@ const SitterDashboard = () => {
             Près de chez vous
           </h3>
         </header>
-        <NearbyAnnoncesCard
-          nearbyListings={nearbyListings}
-          nearbyError={nearbyError}
-          isAvailable={isAvailable}
-        />
+        {annoncesEmpty ? (
+          <div className="rounded-2xl border border-border bg-card px-5 py-6 text-center">
+            <p className="text-sm text-foreground font-medium mb-1">
+              Aucune annonce dans un rayon de 100 km.
+            </p>
+            <p className="text-xs text-muted-foreground font-sans mb-4">
+              {isAvailable
+                ? "Vous êtes visible — de nouvelles annonces apparaissent chaque jour."
+                : "Activez le mode disponible pour être contacté directement par les propriétaires."}
+            </p>
+            <Link
+              to="/search"
+              className="inline-flex items-center gap-1 text-xs text-primary font-semibold hover:underline"
+            >
+              Élargir la recherche →
+            </Link>
+          </div>
+        ) : (
+          <NearbyAnnoncesCard
+            nearbyListings={nearbyListings}
+            nearbyError={nearbyError}
+            isAvailable={isAvailable}
+          />
+        )}
       </section>
 
       {/* 2. Coup de main — entraide (helpers + missions ouvertes fusionnés) */}
@@ -250,13 +277,15 @@ const SitterDashboard = () => {
         </header>
         <div className="space-y-4">
           <NearbyHelpersCarousel hideHeader />
-          <SitterMissionsSection
-            myMissions={myMissions}
-            nearbyMissions={nearbyMissions}
-            postalCode={postalCode}
-            myMissionsError={myMissionsError}
-            nearbyMissionsError={nearbyMissionsError}
-          />
+          {!missionsEmpty && (
+            <SitterMissionsSection
+              myMissions={myMissions}
+              nearbyMissions={nearbyMissions}
+              postalCode={postalCode}
+              myMissionsError={myMissionsError}
+              nearbyMissionsError={nearbyMissionsError}
+            />
+          )}
         </div>
       </section>
 
