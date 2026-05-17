@@ -1,5 +1,15 @@
 import { useState } from "react";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
+import { usePreloadImages } from "@/hooks/usePreloadImages";
+import emptyAnnoncesUrl from "@/assets/illustrations/empty-annonces.webp";
+import emptyHelpersUrl from "@/assets/illustrations/empty-helpers.webp";
+import emptyConseilsUrl from "@/assets/illustrations/empty-conseils.webp";
+
+const CRITICAL_EMPTY_ILLUSTRATIONS = [
+  emptyAnnoncesUrl,
+  emptyHelpersUrl,
+  emptyConseilsUrl,
+] as const;
 import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
