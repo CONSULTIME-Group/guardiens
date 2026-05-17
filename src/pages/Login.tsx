@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { getSignupRedirectUrl } from "@/lib/authRedirect";
+import { sanitizeRedirect, buildRedirectQuery } from "@/lib/safeRedirect";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { getAuthFieldAttrs } from "@/lib/inAppBrowser";
 import { mapAuthError } from "@/lib/authErrorMessages";
