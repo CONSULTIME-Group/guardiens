@@ -68,6 +68,13 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
               Demandé par <span className="font-medium text-foreground">{authorLabel}</span>
             </span>
           </div>
+          {/* Mini bio de l'auteur — donne du contexte humain (« qui est cette personne ? »)
+              avant que l'utilisateur clique pour ouvrir le détail. Caché si auteur = vous. */}
+          {!isMine && (m.profiles as any)?.bio?.trim() && (
+            <p className="text-xs italic text-foreground/70 leading-snug line-clamp-2">
+              « {(m.profiles as any).bio.trim()} »
+            </p>
+          )}
           <p className="text-xs text-muted-foreground">
             {formatCity(m.city || "—")} · {formatDuration(m.duration_estimate || "—")}
             {formatDateNeeded(m.date_needed) && <> · pour le {formatDateNeeded(m.date_needed)}</>}
