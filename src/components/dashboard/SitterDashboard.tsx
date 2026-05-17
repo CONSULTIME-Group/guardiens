@@ -88,10 +88,12 @@ const SitterDashboard = () => {
     identityVerified: identityStatus === "verified" || identityVerified,
     availableMode: isAvailable,
   };
+  // Checklist d'ACTIVATION strictement liée au profil (pas d'action commerciale type
+  // « postuler » — celle-ci est portée par le CTA sticky « Découvrir les gardes »
+  // et la card Prochaine garde, et n'a rien à faire dans « Finalisez votre profil »).
   const allItems = [
     { done: onboardingChecks.profileComplete, label: `Compléter mon profil (${profileCompletion}%)`, to: "/profile" },
     { done: onboardingChecks.identityVerified, label: "Vérifier mon identité (recommandé)", to: "/settings#verification" },
-    { done: totalApps > 0, label: "Postuler à une première garde", to: "/search" },
     { done: onboardingChecks.availableMode, label: "Activer le mode disponible", to: "", isToggle: true },
   ];
   const completedItems = allItems.filter(c => c.done);
@@ -220,16 +222,10 @@ const SitterDashboard = () => {
     </div>
   );
 
-  const CtaBlock = (
-    <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
-      <button
-        onClick={() => navigate("/search")}
-        className="group w-full bg-primary text-primary-foreground rounded-2xl py-3 sm:py-4 text-sm sm:text-base font-sans font-semibold hover:bg-primary/90 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ease-out"
-      >
-        Découvrez les gardes disponibles <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">→</span>
-      </button>
-    </div>
-  );
+  // CtaBlock supprimé : triple redondance avec le sticky bottom (mobile)
+  // et le bouton « Explorer » de la card Prochaine garde. Le sticky CTA reste
+  // l'action primaire ; les CTA contextuels (card prochaine garde, empty states)
+  // suffisent. Cette suppression dégage ~80 px de scroll mobile sans perte de conversion.
 
   const buildEmergencyBlock = (sidebar: boolean) => (
     <section
@@ -273,6 +269,7 @@ const SitterDashboard = () => {
       <SitterHero
         userId={user?.id}
         firstName={user?.firstName}
+        avatarUrl={avatarUrl}
         isFounder={user?.isFounder}
         subtitle={subtitle}
         isAvailable={isAvailable}
@@ -354,9 +351,8 @@ const SitterDashboard = () => {
 
       {/* Version pleine largeur — visible < xl — 3 zones */}
       <div className="xl:hidden">
-        {/* ── ZONE 1 : ACTIVATION (checklist + CTA principal) ── */}
+        {/* ── ZONE 1 : ACTIVATION (checklist seule, plus de CTA dupliqué) ── */}
         {ChecklistBlock}
-        {CtaBlock}
 
         {/* ── ZONE 2 : STATUT & RÉPUTATION (status + urgence + badges) ── */}
         <div className="px-4 sm:px-5 md:px-8 mb-6">
@@ -373,7 +369,7 @@ const SitterDashboard = () => {
         <div className="px-4 sm:px-5 md:px-8 mb-6">
           <DashSection eyebrow="Près de chez vous" title="À découvrir" description="Annonces, échanges et conseils sélectionnés pour vous.">
             <div className="space-y-4">
-              <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} myMissions={myMissions} postalCode={postalCode} nearbyError={nearbyError} nearbyMissionsError={nearbyMissionsError} myMissionsError={myMissionsError} />
+              <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} myMissions={myMissions} postalCode={postalCode} nearbyError={nearbyError} nearbyMissionsError={nearbyMissionsError} myMissionsError={myMissionsError} isAvailable={isAvailable} />
               {articles.length > 0 && (
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -413,10 +409,9 @@ const SitterDashboard = () => {
           {/* Reset child padding (parent gère via xl:px-8) en surchargeant via wrappers */}
           <div className="[&>*]:!px-0 [&>*]:!mx-0">
             {ChecklistBlock}
-            {CtaBlock}
             <section aria-labelledby="nearby-heading-xl">
               <h2 id="nearby-heading-xl" className="sr-only">Près de chez vous</h2>
-              <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} myMissions={myMissions} postalCode={postalCode} nearbyError={nearbyError} nearbyMissionsError={nearbyMissionsError} myMissionsError={myMissionsError} />
+              <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} myMissions={myMissions} postalCode={postalCode} nearbyError={nearbyError} nearbyMissionsError={nearbyMissionsError} myMissionsError={myMissionsError} isAvailable={isAvailable} />
             </section>
             {articles.length > 0 && (
               <section aria-labelledby="articles-heading-xl" className="mb-6">

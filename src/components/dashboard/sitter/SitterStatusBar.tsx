@@ -96,33 +96,34 @@ const SitterStatusBar = ({
     {/* Zone 2 — MES STATS */}
     <div className={`p-4 md:p-5 ${dividerZone2}`}>
       <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">Mes stats</p>
+      {/* Masquer les KPI à 0 (sauf la Note quand des avis existent et le sélecteur
+          de candidatures qui reste utile pour basculer Gardien↔Propriétaire).
+          Cohérence avec OwnerDashboard où les zéros démotivants sont masqués. */}
+      {(completedSits > 0 || reviewsCount > 0 || badgeCount > 0 || displayedCount > 0) ? (
       <div className="grid grid-cols-2 gap-3">
+        {completedSits > 0 && (
         <div className="text-center">
           <p className="text-2xl font-heading font-bold text-foreground">{completedSits}</p>
           <p className="text-xs text-muted-foreground font-sans">Gardes</p>
         </div>
+        )}
+        {reviewsCount > 0 && (
         <div className="text-center">
-          {reviewsCount > 0 ? (
-            <>
-              <p className="text-2xl font-heading font-bold text-foreground">
-                {avgRating.toFixed(1)}
-                <span className="text-sm font-sans font-normal text-muted-foreground">/5</span>
-              </p>
-              <p className="text-xs text-muted-foreground font-sans">
-                Note ({reviewsCount} avis)
-              </p>
-            </>
-          ) : (
-            <>
-              <p className="text-sm text-muted-foreground font-sans mt-1">–</p>
-              <p className="text-xs text-muted-foreground font-sans">Note</p>
-            </>
-          )}
+          <p className="text-2xl font-heading font-bold text-foreground">
+            {avgRating.toFixed(1)}
+            <span className="text-sm font-sans font-normal text-muted-foreground">/5</span>
+          </p>
+          <p className="text-xs text-muted-foreground font-sans">
+            Note ({reviewsCount} avis)
+          </p>
         </div>
+        )}
+        {badgeCount > 0 && (
         <div className="text-center">
           <p className="text-2xl font-heading font-bold text-foreground">{badgeCount}</p>
           <p className="text-xs text-muted-foreground font-sans">Badges</p>
         </div>
+        )}
         <div className="text-center">
           <p className="text-2xl font-heading font-bold text-foreground" aria-live="polite">
             {appView === "received" && loadingReceived ? "…" : displayedCount}
@@ -174,9 +175,9 @@ const SitterStatusBar = ({
           </div>
         </div>
       </div>
-      {completedSits === 0 && (
-        <p className="text-xs text-muted-foreground font-sans italic mt-3 leading-snug">
-          Vos statistiques apparaîtront après votre première garde.
+      ) : (
+        <p className="text-sm text-muted-foreground font-sans italic leading-snug">
+          Vos stats apparaîtront après votre première garde.
         </p>
       )}
     </div>

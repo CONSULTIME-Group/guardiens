@@ -119,22 +119,28 @@ const SitterEmergencyCard = ({ hasEmergencyProfile }: SitterEmergencyCardProps) 
     initialPreview as any
   );
 
-  const PreviewToggle = isDev ? (
+  // Toggle visible uniquement si on entre en mode aperçu via l'URL
+  // (?previewEmergency=locked|eligible|active). Évite la fuite UI en preview/prod.
+  const PreviewToggle = isDev && initialPreview !== null ? (
     <div className="flex items-center gap-1 rounded-full border border-dashed border-amber-400/60 bg-background/80 backdrop-blur px-2 py-1 mb-2 text-[11px] w-fit">
       <Eye className="h-3 w-3 text-amber-600" />
       <span className="text-muted-foreground mr-1">Aperçu :</span>
-      {(["locked", "eligible", "active"] as const).map(m => (
+      {([
+        { key: "locked", label: "Verrouillé" },
+        { key: "eligible", label: "Éligible" },
+        { key: "active", label: "Actif" },
+      ] as const).map(({ key, label }) => (
         <button
-          key={m}
+          key={key}
           type="button"
-          onClick={() => setPreviewMode(m)}
+          onClick={() => setPreviewMode(key)}
           className={`px-1.5 py-0.5 rounded-full transition ${
-            previewMode === m
+            previewMode === key
               ? "bg-amber-500 text-white font-medium"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          {m}
+          {label}
         </button>
       ))}
       {previewMode !== null && (
