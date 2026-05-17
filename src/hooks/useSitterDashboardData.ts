@@ -199,7 +199,7 @@ export function useSitterDashboardData(userId: string | undefined) {
           if (candidateOwnerIds.length > 0) {
             const { data: owners, error: ownersErr } = await supabase
               .from("public_profiles")
-              .select("id, postal_code, latitude, longitude")
+              .select("id, postal_code, latitude_approx, longitude_approx")
               .in("id", candidateOwnerIds);
             if (ownersErr) {
               nearbyError = "Impossible de charger les annonces près de chez vous.";
@@ -214,10 +214,10 @@ export function useSitterDashboardData(userId: string | undefined) {
                 .filter((s: any) => deptOwnerIds.has(s.user_id))
                 .map((s: any) => {
                   const owner = ownerById.get(s.user_id);
-                  const distance_km = hasMyCoords && owner?.latitude && owner?.longitude
+                  const distance_km = hasMyCoords && owner?.latitude_approx && owner?.longitude_approx
                     ? haversineDistance(
                         { lat: meLat as number, lng: meLng as number },
-                        { lat: owner.latitude, lng: owner.longitude },
+                        { lat: owner.latitude_approx, lng: owner.longitude_approx },
                       )
                     : null;
                   return { ...s, distance_km };
