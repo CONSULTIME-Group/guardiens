@@ -88,10 +88,12 @@ const SitterDashboard = () => {
     identityVerified: identityStatus === "verified" || identityVerified,
     availableMode: isAvailable,
   };
+  // Checklist d'ACTIVATION strictement liée au profil (pas d'action commerciale type
+  // « postuler » — celle-ci est portée par le CTA sticky « Découvrir les gardes »
+  // et la card Prochaine garde, et n'a rien à faire dans « Finalisez votre profil »).
   const allItems = [
     { done: onboardingChecks.profileComplete, label: `Compléter mon profil (${profileCompletion}%)`, to: "/profile" },
     { done: onboardingChecks.identityVerified, label: "Vérifier mon identité (recommandé)", to: "/settings#verification" },
-    { done: totalApps > 0, label: "Postuler à une première garde", to: "/search" },
     { done: onboardingChecks.availableMode, label: "Activer le mode disponible", to: "", isToggle: true },
   ];
   const completedItems = allItems.filter(c => c.done);
@@ -220,16 +222,10 @@ const SitterDashboard = () => {
     </div>
   );
 
-  const CtaBlock = (
-    <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
-      <button
-        onClick={() => navigate("/search")}
-        className="group w-full bg-primary text-primary-foreground rounded-2xl py-3 sm:py-4 text-sm sm:text-base font-sans font-semibold hover:bg-primary/90 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ease-out"
-      >
-        Découvrez les gardes disponibles <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">→</span>
-      </button>
-    </div>
-  );
+  // CtaBlock supprimé : triple redondance avec le sticky bottom (mobile)
+  // et le bouton « Explorer » de la card Prochaine garde. Le sticky CTA reste
+  // l'action primaire ; les CTA contextuels (card prochaine garde, empty states)
+  // suffisent. Cette suppression dégage ~80 px de scroll mobile sans perte de conversion.
 
   const buildEmergencyBlock = (sidebar: boolean) => (
     <section
