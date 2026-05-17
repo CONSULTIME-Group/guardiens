@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Lock, Sparkles, ChevronRight } from "lucide-react";
+import { Lock, Sparkles, ChevronRight, UserPen } from "lucide-react";
+import { Link } from "react-router-dom";
 import { CATEGORY_META, formatCity, formatDuration, ModeFilter } from "./constants";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 
@@ -76,9 +77,34 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
           </div>
           {/* Mini bio de l'auteur — donne du contexte humain (« qui est cette personne ? »)
               avant que l'utilisateur clique pour ouvrir le détail. Caché si auteur = vous. */}
-          {!isMine && (() => {
+          {(() => {
             const safeBio = sanitizeBioForCard((m.profiles as any)?.bio);
-            if (!safeBio) return null;
+
+            // Bio absente — l'auteur voit un CTA discret l'invitant à se présenter ;
+            // les autres voient un placeholder neutre (« Sans présentation ») pour ne
+            // pas stigmatiser la personne et garder la hauteur de carte stable.
+            if (!safeBio) {
+              if (isMine) {
+                return (
+                  <Link
+                    to="/profile?focus=bio"
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                  >
+                    <UserPen className="h-3 w-3" />
+                    Ajoutez une mini-bio pour rassurer les gardiens
+                  </Link>
+                );
+              }
+              return (
+                <p className="text-xs italic text-muted-foreground/70 leading-snug">
+                  Sans présentation pour l'instant
+                </p>
+              );
+            }
+
+            if (isMine) return null;
+
             // Mode compact : tronque à 80 car. + clamp 1 ligne (gain ~16px/carte,
             // utile sur grilles 3 colonnes ou liste mobile très longue).
             const displayBio = compactBio && safeBio.length > 80
