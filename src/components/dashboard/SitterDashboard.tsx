@@ -269,6 +269,7 @@ const SitterDashboard = () => {
       <SitterHero
         userId={user?.id}
         firstName={user?.firstName}
+        avatarUrl={avatarUrl}
         isFounder={user?.isFounder}
         subtitle={subtitle}
         isAvailable={isAvailable}
@@ -350,9 +351,8 @@ const SitterDashboard = () => {
 
       {/* Version pleine largeur — visible < xl — 3 zones */}
       <div className="xl:hidden">
-        {/* ── ZONE 1 : ACTIVATION (checklist + CTA principal) ── */}
+        {/* ── ZONE 1 : ACTIVATION (checklist seule, plus de CTA dupliqué) ── */}
         {ChecklistBlock}
-        {CtaBlock}
 
         {/* ── ZONE 2 : STATUT & RÉPUTATION (status + urgence + badges) ── */}
         <div className="px-4 sm:px-5 md:px-8 mb-6">
@@ -369,7 +369,7 @@ const SitterDashboard = () => {
         <div className="px-4 sm:px-5 md:px-8 mb-6">
           <DashSection eyebrow="Près de chez vous" title="À découvrir" description="Annonces, échanges et conseils sélectionnés pour vous.">
             <div className="space-y-4">
-              <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} myMissions={myMissions} postalCode={postalCode} nearbyError={nearbyError} nearbyMissionsError={nearbyMissionsError} myMissionsError={myMissionsError} />
+              <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} myMissions={myMissions} postalCode={postalCode} nearbyError={nearbyError} nearbyMissionsError={nearbyMissionsError} myMissionsError={myMissionsError} isAvailable={isAvailable} />
               {articles.length > 0 && (
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -409,10 +409,9 @@ const SitterDashboard = () => {
           {/* Reset child padding (parent gère via xl:px-8) en surchargeant via wrappers */}
           <div className="[&>*]:!px-0 [&>*]:!mx-0">
             {ChecklistBlock}
-            {CtaBlock}
             <section aria-labelledby="nearby-heading-xl">
               <h2 id="nearby-heading-xl" className="sr-only">Près de chez vous</h2>
-              <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} myMissions={myMissions} postalCode={postalCode} nearbyError={nearbyError} nearbyMissionsError={nearbyMissionsError} myMissionsError={myMissionsError} />
+              <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} myMissions={myMissions} postalCode={postalCode} nearbyError={nearbyError} nearbyMissionsError={nearbyMissionsError} myMissionsError={myMissionsError} isAvailable={isAvailable} />
             </section>
             {articles.length > 0 && (
               <section aria-labelledby="articles-heading-xl" className="mb-6">
