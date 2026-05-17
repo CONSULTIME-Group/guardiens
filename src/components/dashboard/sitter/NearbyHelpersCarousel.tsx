@@ -184,17 +184,10 @@ const HelperMiniCard = ({
 
   // Pastilles synthétiques uniquement.
   // En base, `custom_skills` peut contenir une phrase entière ("Je peux promener
-  // un chien, rendre visite à un chat, monter un meuble Ikea…"). On ne veut PAS
-  // ça en pastille : on filtre les tokens > 22 caractères ou contenant une
-  // ponctuation de phrase (. , ; :). Reste : mots-clés courts type "Couture",
-  // "Informatique", "Yoga".
-  const SHORT_TOKEN_MAX = 22;
-  const isSyntheticToken = (s: string) =>
-    s.length <= SHORT_TOKEN_MAX && !/[.,;:!?]/.test(s);
-  const customSkills = (helper.custom_skills || [])
-    .map((s) => s?.trim())
-    .filter((s): s is string => !!s)
-    .filter(isSyntheticToken);
+  // un chien, rendre visite à un chat, monter un meuble Ikea…") ou une liste
+  // séparée par virgules/slashs. On tokenise sur les séparateurs courants puis
+  // on filtre : longueur 2–22, sans ponctuation de phrase, dédupliqué.
+  const customSkills = tokenizeSkillPhrases(helper.custom_skills);
 
   type Chip = { key: string; label: string; tone: "custom" | "category" };
   const chips: Chip[] = [
