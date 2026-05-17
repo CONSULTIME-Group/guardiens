@@ -179,13 +179,21 @@ const HelperMiniCard = ({
   pending?: boolean;
 }) => {
   const firstName = capitalize(helper.first_name || "Membre");
+
+  // Pastilles synthétiques uniquement.
+  // En base, `custom_skills` peut contenir une phrase entière ("Je peux promener
+  // un chien, rendre visite à un chat, monter un meuble Ikea…"). On ne veut PAS
+  // ça en pastille : on filtre les tokens > 22 caractères ou contenant une
+  // ponctuation de phrase (. , ; :). Reste : mots-clés courts type "Couture",
+  // "Informatique", "Yoga".
+  const SHORT_TOKEN_MAX = 22;
+  const isSyntheticToken = (s: string) =>
+    s.length <= SHORT_TOKEN_MAX && !/[.,;:!?]/.test(s);
   const customSkills = (helper.custom_skills || [])
     .map((s) => s?.trim())
-    .filter((s): s is string => !!s);
+    .filter((s): s is string => !!s)
+    .filter(isSyntheticToken);
 
-  // Fusion pastilles : custom_skills d'abord (vrai savoir-faire déclaré),
-  // puis catégories génériques en complément. Plafond 4 chips pour rester
-  // sur 1-2 lignes max. Pas de phrase, pas de bio italique : pastilles only.
   type Chip = { key: string; label: string; tone: "custom" | "category" };
   const chips: Chip[] = [
     ...customSkills.map((c): Chip => ({ key: `c-${c}`, label: c, tone: "custom" })),
@@ -398,6 +406,20 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
 
       {/* Compteur dual local · national — preuve sociale localisée */}
       <HelpersProximityTicker userId={user?.id} />
+
+      {/* Pas de géoloc → impossible de trier par distance. On le dit franchement
+          plutôt que de faire passer 8 profils nationaux pour des « voisins ». */}
+      {data && !data.hasGeo && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-warning/10 ring-1 ring-warning/30 px-3 py-2 text-xs">
+          <span className="text-foreground/80 font-sans">
+            <MapPin className="inline h-3.5 w-3.5 mr-1 text-warning" aria-hidden="true" />
+            Sans votre adresse, impossible de trier par proximité — résultats au hasard.
+          </span>
+          <Button asChild size="sm" variant="outline" className="h-7 rounded-lg text-xs">
+            <Link to="/profile">Ajouter mon adresse</Link>
+          </Button>
+        </div>
+      )}
 
       {/* Chips compétences */}
       <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
