@@ -30,10 +30,11 @@ interface StatsStripProps {
  */
 const StatsStrip = memo(({ items }: StatsStripProps) => {
   return (
-    <section
-      aria-label="Vos statistiques propriétaire"
-      className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-border rounded-2xl border border-border bg-card overflow-hidden transition-shadow duration-300 hover:shadow-sm"
-    >
+    <TooltipProvider delayDuration={150}>
+      <section
+        aria-label="Vos statistiques propriétaire"
+        className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-border rounded-2xl border border-border bg-card overflow-hidden transition-shadow duration-300 hover:shadow-sm"
+      >
       {items.map((item, idx) => {
         const isZero = item.value === 0 || item.value === "0";
         const showEmptyHint = isZero && !!item.emptyHint;
