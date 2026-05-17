@@ -31,6 +31,8 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const redirectTarget = sanitizeRedirect(searchParams.get("redirect"));
+  const postAuthTarget = redirectTarget ?? "/dashboard";
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
