@@ -19,8 +19,16 @@
 
 const SEPARATORS = /\s*(?:,|;|\/|\||·|•|\n|\r|\bet\b|&|—|–| - )\s*/gi;
 
-const MIN_LEN = 2;
-const MAX_LEN = 22;
+/**
+ * Bornes par défaut de longueur d'une pastille « savoir-faire ».
+ *  - `SKILL_TOKEN_MIN_LEN` : 2 caractères (évite les fragments « a », « j' »).
+ *  - `SKILL_TOKEN_MAX_LEN` : 22 caractères (au-delà = phrase, pas un mot-clé).
+ *
+ * Override possible via le paramètre `maxLen` de `tokenizeSkillPhrases`
+ * pour ajuster localement (ex. carte profil 28, vignette compacte 18).
+ */
+export const SKILL_TOKEN_MIN_LEN = 2;
+export const SKILL_TOKEN_MAX_LEN = 22;
 
 const STOP_PREFIXES = [
   "je peux ", "je sais ", "je propose ", "je fais ",
