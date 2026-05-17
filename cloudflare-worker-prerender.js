@@ -49,12 +49,12 @@ function detectBot(request) {
   return { shouldPrerender: reasons.length === 0 && isBot, isBot, ua, reasons };
 }
 
-async function fetchPrerender(url) {
+async function fetchPrerender(url, token) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), PRERENDER_TIMEOUT_MS);
   try {
     const response = await fetch(PRERENDER_SERVICE + encodeURIComponent(url), {
-      headers: { 'X-Prerender-Token': PRERENDER_TOKEN },
+      headers: { 'X-Prerender-Token': token },
       signal: controller.signal,
       redirect: 'manual',
     });
