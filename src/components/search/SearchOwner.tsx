@@ -763,6 +763,7 @@ const SearchOwner = () => {
           </div>
           <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:hidden" />
         </div>
+      </div>
 
       {/* Sort bar + view toggle */}
       <div className="flex items-center justify-between gap-3 px-6 py-2.5 border-b border-border flex-wrap">
