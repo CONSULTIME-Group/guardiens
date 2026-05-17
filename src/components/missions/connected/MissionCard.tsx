@@ -83,7 +83,7 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
           </div>
           {/* Mini bio de l'auteur — donne du contexte humain (« qui est cette personne ? »)
               avant que l'utilisateur clique pour ouvrir le détail. Caché si auteur = vous. */}
-          {(() => {
+          {showBio && (() => {
             const safeBio = sanitizeBioForCard((m.profiles as any)?.bio);
 
             // Bio absente — l'auteur voit un CTA discret l'invitant à se présenter ;
