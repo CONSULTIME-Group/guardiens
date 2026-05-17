@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ShieldCheck, ArrowRight, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNearbyHelpers, type NearbyHelper } from "@/hooks/useNearbyHelpers";
+import { useNearbyHelpers, nextRadiusStep, type NearbyHelper } from "@/hooks/useNearbyHelpers";
 import { useHelpersProximityCount } from "@/hooks/useHelpersProximityCount";
 import { useCtaCooldown } from "@/hooks/useCtaCooldown";
 import { startConversation } from "@/lib/conversation";
@@ -316,15 +316,24 @@ const HelperMiniCard = ({
 const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boolean } = {}) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { data, isLoading } = useNearbyHelpers(user?.id);
   const [activeSkill, setActiveSkill] = useState<string | null>(null);
   const [pending, setPending] = useState<string | null>(null);
+  // Override rayon — bumped via le lien « Élargir le rayon » dans l'empty-state
+  // du filtre. Reset à null quand l'utilisateur change/retire le filtre, pour
+  // ne pas garder un rayon de 100 km collant.
+  const [forcedRadius, setForcedRadius] = useState<number | null>(null);
+  const { data, isLoading } = useNearbyHelpers(user?.id, { forcedRadius });
 
   const helpers = data?.helpers || [];
   const filtered = useMemo(() => {
     if (!activeSkill) return helpers;
     return helpers.filter((h) => h.skill_categories.includes(activeSkill));
   }, [helpers, activeSkill]);
+
+  const handleSkillToggle = (key: string | null) => {
+    setForcedRadius(null);
+    setActiveSkill(key);
+  };
 
   if (isLoading) {
     return (
@@ -394,7 +403,7 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
       <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
         <button
           type="button"
-          onClick={() => setActiveSkill(null)}
+          onClick={() => handleSkillToggle(null)}
           className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
             activeSkill === null
               ? "bg-foreground text-background border-foreground"
@@ -411,7 +420,7 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
             <button
               key={chip.key}
               type="button"
-              onClick={() => setActiveSkill(active ? null : chip.key)}
+              onClick={() => handleSkillToggle(active ? null : chip.key)}
               className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
                 active
                   ? "bg-foreground text-background border-foreground"
@@ -432,6 +441,8 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
       {filtered.length === 0 ? (
         (() => {
           const activeChip = SKILL_CHIPS.find((c) => c.key === activeSkill);
+          const currentRadius = data?.radiusUsed ?? 0;
+          const nextRadius = data?.hasGeo ? nextRadiusStep(currentRadius) : null;
           return (
             <div
               role="status"
@@ -441,19 +452,33 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
                 Filtre actif{activeChip ? ` · ${activeChip.label}` : ""}
               </p>
               <p className="text-sm font-heading font-semibold text-foreground leading-snug mb-1">
-                Aucune personne disponible sur cette compétence près de chez vous.
+                Aucune personne disponible sur cette compétence
+                {data?.hasGeo ? ` dans un rayon de ${currentRadius} km.` : " près de chez vous."}
               </p>
               <p className="text-xs text-muted-foreground font-sans mb-4 max-w-prose mx-auto">
-                Essayez une autre catégorie, ou retirez le filtre pour voir toutes les personnes du coin.
+                {nextRadius
+                  ? `Élargissez le rayon pour garder ${activeChip?.label ?? "ce filtre"} actif, ou essayez une autre catégorie.`
+                  : "Essayez une autre catégorie, ou retirez le filtre pour voir toutes les personnes du coin."}
               </p>
-              <Button
-                size="sm"
-                variant="outline"
-                className="rounded-xl"
-                onClick={() => setActiveSkill(null)}
-              >
-                Voir tout le monde
-              </Button>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {nextRadius && (
+                  <Button
+                    size="sm"
+                    className="rounded-xl"
+                    onClick={() => setForcedRadius(nextRadius)}
+                  >
+                    Élargir à {nextRadius}&nbsp;km
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-xl"
+                  onClick={() => handleSkillToggle(null)}
+                >
+                  Voir tout le monde
+                </Button>
+              </div>
             </div>
           );
         })()
