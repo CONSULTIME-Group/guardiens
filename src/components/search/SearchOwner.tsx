@@ -548,7 +548,7 @@ const SearchOwner = () => {
       {/* Sticky search bar */}
       <div className="sticky top-0 z-10 bg-background border-b border-border px-6 py-3 space-y-3">
         <div className="relative -mr-6 sm:mr-0">
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pr-10 sm:pr-0">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pr-10 sm:pr-0 snap-x snap-mandatory scroll-px-6 overscroll-x-contain">
           {/* PILL 1 — Localisation */}
           <Popover open={openPop === "loc"} onOpenChange={(o) => setOpenPop(o ? "loc" : null)}>
             <PopoverTrigger asChild>
