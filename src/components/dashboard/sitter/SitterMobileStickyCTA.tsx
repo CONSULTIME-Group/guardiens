@@ -35,7 +35,9 @@ const SitterMobileStickyCTA = memo(({ pendingAppsCount = 0, unreadCount = 0 }: S
 
   return (
     <div
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-4px_12px_-4px_hsl(var(--foreground)/0.08)]"
+      // Posé EXACTEMENT au-dessus de la BottomNav (h-16 = 64px) pour éviter
+      // la superposition sticky CTA / nav mobile.
+      className="md:hidden fixed bottom-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border px-4 py-3 shadow-[0_-4px_12px_-4px_hsl(var(--foreground)/0.08)]"
       role="region"
       aria-label="Action principale gardien"
     >

@@ -240,7 +240,8 @@ const SitterDashboard = () => {
   );
 
   return (
-    <div className="space-y-0 overflow-hidden">
+    <div className="space-y-0 overflow-hidden pb-40 md:pb-8">
+{/* pb-40 mobile = BottomNav (h-16=64px) + Sticky CTA (~72px) + marge. */}
 
       {/* Postal code missing banner */}
       {!postalCode && !cpBannerDismissed && (

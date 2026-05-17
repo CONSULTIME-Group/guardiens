@@ -26,8 +26,11 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
   const navigate = useNavigate();
   const now = new Date();
 
-  // Priorité : 1) garde en cours, 2) prochaine confirmée, 3) prochaine publiée,
-  // 4) annonce publiée sans date, 5) dernière terminée (fallback).
+  // Priorité hero : 1) garde en cours, 2) prochaine confirmée, 3) prochaine
+  // publiée, 4) annonce publiée sans date.
+  // /!\ On NE FALLBACK PLUS sur la dernière garde terminée : afficher un sit
+  // passé comme « hero » est démotivant et trompeur (badge « Terminée » +
+  // dates passées). On bascule sur un état dédié « Relancer / republier ».
   const nowTs = now.getTime();
   const startTs = (s: typeof sits[number]) =>
     s.start_date ? new Date(s.start_date).getTime() : Number.POSITIVE_INFINITY;
@@ -40,15 +43,16 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
     .filter(s => s.status === "published" && s.start_date && new Date(s.start_date).getTime() >= nowTs)
     .sort((a, b) => startTs(a) - startTs(b))[0];
   const anyPublished = sits.find(s => s.status === "published");
+  // Conservé uniquement pour le CTA « Republier » (pas pour le hero principal).
   const lastCompleted = sits
     .filter(s => s.status === "completed")
     .sort((a, b) => (new Date(b.end_date || 0).getTime()) - (new Date(a.end_date || 0).getTime()))[0];
 
   const currentSit =
-    inProgress || upcomingConfirmed || upcomingPublished || anyPublished || lastCompleted;
+    inProgress || upcomingConfirmed || upcomingPublished || anyPublished;
 
   // No sit ever + no profile data → empty state
-  if (!currentSit && pets.length === 0 && !propertyType) {
+  if (!currentSit && !lastCompleted && pets.length === 0 && !propertyType) {
     return (
       <div className="bg-card border border-border rounded-2xl p-6 text-center space-y-3">
         <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
@@ -63,6 +67,36 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
         <Button size="sm" onClick={() => navigate("/owner-profile")}>
           Compléter mon profil
         </Button>
+      </div>
+    );
+  }
+
+  // Pas de garde active/à venir, mais une garde terminée existe → état « Relancer ».
+  // On ne ressuscite PAS le passé en hero : on propose explicitement de republier.
+  if (!currentSit && lastCompleted) {
+    const lastDate = lastCompleted.end_date
+      ? format(new Date(lastCompleted.end_date), "MMMM yyyy", { locale: fr })
+      : null;
+    return (
+      <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold text-foreground">Prochaine garde</h3>
+          <span className="text-xs bg-muted text-muted-foreground rounded-full px-2 py-0.5">Aucune planifiée</span>
+        </div>
+        <p className="text-sm text-foreground/80">
+          {lastDate
+            ? `Votre dernière garde s'est terminée en ${lastDate}.`
+            : "Votre dernière garde est terminée."}{" "}
+          Republiez votre annonce ou créez-en une nouvelle pour préparer la suivante.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="outline" onClick={() => navigate(`/sits/${lastCompleted.id}#republier`)}>
+            <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Republier la précédente
+          </Button>
+          <Button size="sm" onClick={() => navigate("/sits/create")}>
+            <Plus className="h-3.5 w-3.5 mr-1.5" /> Nouvelle annonce
+          </Button>
+        </div>
       </div>
     );
   }

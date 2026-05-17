@@ -22,7 +22,9 @@ const MobileStickyCTA = memo(({ label = "Publier une annonce", to = "/sits/creat
 
   return (
     <div
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-4px_12px_-4px_hsl(var(--foreground)/0.08)]"
+      // Posé EXACTEMENT au-dessus de la BottomNav (h-16 = 64px). Sans ce
+      // décalage, le CTA et la nav se superposent en bas de viewport.
+      className="md:hidden fixed bottom-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border px-4 py-3 shadow-[0_-4px_12px_-4px_hsl(var(--foreground)/0.08)]"
       role="region"
       aria-label="Action principale"
     >
