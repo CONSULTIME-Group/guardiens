@@ -17,7 +17,7 @@ interface SitterRow {
  * Design optimisé pour colonne droite : header coloré urgence, lignes denses,
  * pas d'icônes décoratives dans le contenu (uniquement Star fonctionnelle pour la note).
  */
-const NearbyEmergencySitters = () => {
+const NearbyEmergencySitters = ({ hideHeader = false }: { hideHeader?: boolean } = {}) => {
   const { user } = useAuth();
   const [sitters, setSitters] = useState<SitterRow[]>([]);
   const [loading, setLoading] = useState(true);
