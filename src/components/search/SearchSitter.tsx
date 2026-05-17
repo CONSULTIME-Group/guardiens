@@ -1249,13 +1249,15 @@ const SearchSitter = () => {
      <span className="flex items-center gap-2 text-sm font-medium text-foreground min-w-0">
       <MapPin className="h-4 w-4 text-primary shrink-0" />
       <span className="truncate">{city || "Lieu"} · {datesLabel}</span>
+      {hasActiveFilters && !mobileFiltersOpen && (
+       <span className="ml-1 inline-flex items-center rounded-full bg-accent text-accent-foreground px-2 py-0.5 text-[11px] font-semibold shrink-0">
+        {activeFiltersCount} filtre{activeFiltersCount > 1 ? "s" : ""} actif{activeFiltersCount > 1 ? "s" : ""}
+       </span>
+      )}
      </span>
-     <span className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-3 py-1.5 text-xs font-semibold shrink-0 relative">
+     <span className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-3 py-1.5 text-xs font-semibold shrink-0">
       <SlidersHorizontal className="h-3.5 w-3.5" />
       {mobileFiltersOpen ? "Fermer" : "Filtres"}
-      {hasActiveFilters && !mobileFiltersOpen && (
-       <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-accent border border-background" />
-      )}
      </span>
     </button>
    )}
