@@ -10,18 +10,12 @@ import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import { FreePeriodBanner } from "@/components/marketing/FreePeriodBanner";
 
-import SitterHero from "./sitter/SitterHero";
 import SitterCockpit from "./sitter/SitterCockpit";
-import SitterNextGuard from "./sitter/SitterNextGuard";
-// SitterNextGuardEmpty supprimé : la Checklist d'activation joue désormais
-// ce rôle en empty state (action > décoration).
-import NearestListingHero from "./sitter/NearestListingHero";
 import DashboardSectionState from "./sitter/DashboardSectionState";
 import SitterMobileStickyCTA from "./sitter/SitterMobileStickyCTA";
 import SitterStatusBar from "./sitter/SitterStatusBar";
 import SitterBadgesSection from "./sitter/SitterBadgesSection";
 import NearbyHelpersCarousel from "./sitter/NearbyHelpersCarousel";
-import SitterEmergencyCard from "./sitter/SitterEmergencyCard";
 import SitterEmergencyCardCompact from "./sitter/SitterEmergencyCardCompact";
 import SitterMissionsSection from "./sitter/SitterMissionsSection";
 import NearbyAnnoncesCard from "./sitter/NearbyAnnoncesCard";
