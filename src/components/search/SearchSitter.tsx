@@ -1392,17 +1392,8 @@ const SearchSitter = () => {
  </span>
  )}
  </button>
- <button
- onClick={() => setZoneMode("region")}
- disabled={!getRegionCode(getDeptCode(userPostalCode))}
- className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${zoneMode === "region" ? "bg-primary/10 text-primary font-medium" : "hover:bg-accent text-foreground"}`}
- >
- Ma région {getRegionName(getDeptCode(userPostalCode)) && (
- <span className="text-xs text-muted-foreground">
- ({getRegionName(getDeptCode(userPostalCode))} · {densityCounts.region})
- </span>
- )}
- </button>
+  {/* L'option "Ma région" est volontairement masquée : la promesse produit
+      est « France entière », pas régionale (mémoire core "No AURA"). */}
  <button
  onClick={() => setZoneMode("france")}
  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${zoneMode === "france" ? "bg-primary/10 text-primary font-medium" : "hover:bg-accent text-foreground"}`}
