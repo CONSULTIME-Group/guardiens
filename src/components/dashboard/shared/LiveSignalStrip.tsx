@@ -61,6 +61,29 @@ const LiveSignalStrip = ({ secondarySignal }: LiveSignalStripProps) => {
           </>
         )}
         <span className="text-foreground/60"> actifs en France</span>
+        <TooltipProvider delayDuration={150}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                aria-label="Que signifie « actifs » ?"
+                className="ml-1 inline-flex items-center align-middle text-muted-foreground/70 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full"
+              >
+                <Info className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-xs text-xs leading-relaxed">
+              <p className="font-semibold mb-1">Que veut dire « actifs » ?</p>
+              <p className="text-muted-foreground">
+                Nombre total de membres ayant activé leur espace sur Guardiens :
+                gardiens (rôle gardien ou les deux) et propriétaires (rôle
+                propriétaire ou les deux). Calculé à partir des inscriptions
+                réelles à la plateforme, mis à jour en continu (rafraîchi toutes
+                les 5 min).
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         {secondarySignal && (
           <>
             <span className="mx-1.5 text-muted-foreground/60">·</span>
