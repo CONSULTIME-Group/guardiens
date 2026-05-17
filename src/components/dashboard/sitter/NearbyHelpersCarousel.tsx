@@ -184,7 +184,50 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
     );
   }
 
-  if (!helpers.length) return null;
+  // Empty-state premium : pas de helpers dans le rayon max (100 km).
+  // On transforme le vide en levier d'acquisition (parrainage) plutôt qu'en trou UX.
+  if (!helpers.length) {
+    return (
+      <section aria-labelledby="nearby-helpers-empty-heading" className="space-y-3">
+        {!hideHeader && (
+          <div className="min-w-0">
+            <h3
+              id="nearby-helpers-empty-heading"
+              className="font-heading text-base font-semibold text-foreground leading-tight"
+            >
+              Qui peut vous donner un coup de main&nbsp;?
+            </h3>
+          </div>
+        )}
+        <div
+          className="
+            relative overflow-hidden rounded-2xl
+            bg-gradient-to-br from-card via-card to-muted/30
+            ring-1 ring-border/60
+            p-5 sm:p-6
+          "
+        >
+          <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold mb-2">
+            Votre coin est encore calme
+          </p>
+          <h4 className="font-heading text-lg sm:text-xl font-bold text-foreground leading-snug">
+            Soyez la première personne de confiance de votre coin.
+          </h4>
+          <p className="text-sm text-foreground/70 leading-relaxed mt-2 max-w-prose">
+            Personne n'est encore disponible pour un coup de main près de chez vous. Invitez un proche&nbsp;: vous gagnez un mois offert, lui aussi.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button asChild size="sm" className="rounded-xl">
+              <Link to="/mon-abonnement#parrainage">Inviter un proche</Link>
+            </Button>
+            <Button asChild size="sm" variant="ghost" className="rounded-xl">
+              <Link to="/email-preferences">Activer une alerte</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   const radiusLabel = data?.hasGeo
     ? `dans un rayon de ${data.radiusUsed} km`
