@@ -266,31 +266,26 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
         })}
       </div>
 
-      {/* Liste : carrousel horizontal en mode standard, stack vertical en mode compact (aside étroit) */}
+      {/* Carrousel horizontal premium — partout (hideHeader contrôle seulement le titre). */}
       {filtered.length === 0 ? (
         <p className="text-xs text-muted-foreground italic py-4">
           Personne sur cette compétence pour l'instant — essayez une autre catégorie.
         </p>
-      ) : hideHeader ? (
-        <div className="flex flex-col gap-2">
-          {filtered.slice(0, 3).map((helper) => (
-            <HelperMiniCard
-              key={helper.id}
-              helper={helper}
-              onWrite={() => handleWrite(helper)}
-              compact
-            />
-          ))}
-        </div>
       ) : (
-        <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory scrollbar-hide">
-          {filtered.map((helper) => (
-            <HelperMiniCard
-              key={helper.id}
-              helper={helper}
-              onWrite={() => handleWrite(helper)}
-            />
-          ))}
+        <div className="relative -mx-1">
+          <div className="flex gap-3 overflow-x-auto pb-3 px-1 snap-x snap-mandatory scrollbar-hide scroll-smooth">
+            {filtered.map((helper) => (
+              <HelperMiniCard
+                key={helper.id}
+                helper={helper}
+                onWrite={() => handleWrite(helper)}
+                pending={pending === helper.id}
+              />
+            ))}
+          </div>
+          {/* Fondus latéraux : indication subtile de scroll horizontal */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-4 bg-gradient-to-r from-background to-transparent" aria-hidden="true" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-4 bg-gradient-to-l from-background to-transparent" aria-hidden="true" />
         </div>
       )}
     </section>
