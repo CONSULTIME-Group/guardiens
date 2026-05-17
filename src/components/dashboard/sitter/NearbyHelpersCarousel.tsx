@@ -32,9 +32,11 @@ const SKILL_CHIPS: { key: string; label: string; intent: string }[] = [
 const HelperMiniCard = ({
   helper,
   onWrite,
+  compact = false,
 }: {
   helper: NearbyHelper;
   onWrite: () => void;
+  compact?: boolean;
 }) => {
   const firstName = capitalize(helper.first_name || "Membre");
   const customSkill = helper.custom_skills?.[0]?.trim();
@@ -42,7 +44,7 @@ const HelperMiniCard = ({
   const teaser = customSkill || helper.bio?.trim() || null;
   const teaserLabel = customSkill ? "Peut aider pour" : "À propos";
   return (
-    <article className="flex-shrink-0 w-[82vw] sm:w-72 snap-start rounded-2xl border border-border bg-card overflow-hidden flex flex-col">
+    <article className={`${compact ? "w-full" : "flex-shrink-0 w-[82vw] sm:w-72 snap-start"} rounded-2xl border border-border bg-card overflow-hidden flex flex-col`}>
       <div className="p-4 flex items-center gap-3">
         {helper.avatar_url ? (
           <img
@@ -225,11 +227,22 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
         })}
       </div>
 
-      {/* Carrousel */}
+      {/* Liste : carrousel horizontal en mode standard, stack vertical en mode compact (aside étroit) */}
       {filtered.length === 0 ? (
         <p className="text-xs text-muted-foreground italic py-4">
           Personne sur cette compétence pour l'instant — essayez une autre catégorie.
         </p>
+      ) : hideHeader ? (
+        <div className="flex flex-col gap-2">
+          {filtered.slice(0, 3).map((helper) => (
+            <HelperMiniCard
+              key={helper.id}
+              helper={helper}
+              onWrite={() => handleWrite(helper)}
+              compact
+            />
+          ))}
+        </div>
       ) : (
         <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory scrollbar-hide">
           {filtered.map((helper) => (
