@@ -566,42 +566,43 @@ const Messages = () => {
       {/* ═══ CONVERSATION LIST ═══ */}
       {showList && (
         <div className={`${isMobile && activeConv ? "hidden" : ""} ${isMobile ? "w-full" : "w-80 border-r border-border"} flex flex-col bg-card`}>
-          <div className="p-4 border-b border-border space-y-3">
-            <h1 className="font-heading text-xl font-bold">Messagerie</h1>
-
-            {/* MOD 2 — Single pill row */}
-            <div className="flex gap-2" role="tablist" aria-label="Filtrer les conversations">
-              {pills.map(p => (
-                <button
-                  key={p.value}
-                  type="button"
-                  role="tab"
-                  aria-selected={pill === p.value}
-                  onClick={() => setPill(p.value)}
-                  className={`rounded-full px-3 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                    pill === p.value
-                      ? "bg-foreground text-background"
-                      : "border border-border text-muted-foreground hover:border-primary"
-                  }`}
-                >
-                  {p.label}
-                </button>
-              ))}
+          <div className="sticky top-0 z-10 bg-card border-b border-border px-3 pt-3 pb-2 space-y-2">
+            {/* Row 1 — title + search filter inline */}
+            <div className="flex items-center gap-2">
+              <h1 className="font-heading text-base font-bold shrink-0">Messagerie</h1>
+              <Input
+                value={searchFilter}
+                onChange={e => setSearchFilter(e.target.value)}
+                placeholder="Filtrer…"
+                aria-label="Filtrer les conversations par annonce ou prénom"
+                className="h-7 text-xs rounded-lg flex-1 min-w-0"
+              />
             </div>
-            <p className="text-xs text-muted-foreground">
-              Conversations en tant que {effectiveRole === "owner" ? "Propriétaire" : "Gardien"}
-            </p>
-          </div>
 
-          {/* Search filter */}
-          <div className="px-3 py-2 border-b border-border">
-            <Input
-              value={searchFilter}
-              onChange={e => setSearchFilter(e.target.value)}
-              placeholder="Filtrer par annonce ou prénom..."
-              aria-label="Filtrer les conversations par annonce ou prénom"
-              className="h-8 text-xs rounded-lg"
-            />
+            {/* Row 2 — compact pills + role context inline */}
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+              <div className="flex gap-1 shrink-0" role="tablist" aria-label="Filtrer les conversations">
+                {pills.map(p => (
+                  <button
+                    key={p.value}
+                    type="button"
+                    role="tab"
+                    aria-selected={pill === p.value}
+                    onClick={() => setPill(p.value)}
+                    className={`rounded-full px-2.5 py-0.5 text-[11px] leading-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                      pill === p.value
+                        ? "bg-foreground text-background"
+                        : "border border-border text-muted-foreground hover:border-primary"
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+              <span className="text-[10px] text-muted-foreground truncate ml-auto shrink-0">
+                {effectiveRole === "owner" ? "Propriétaire" : "Gardien"}
+              </span>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto" role="region" aria-label="Liste des conversations">
