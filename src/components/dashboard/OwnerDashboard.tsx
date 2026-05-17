@@ -7,7 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 
 import OnboardingWelcome from "./OnboardingWelcome";
-import NearbyEmergencySitters from "./NearbyEmergencySitters";
+import NearbyPeopleTabs from "./owner/NearbyPeopleTabs";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
 import { Plus, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
