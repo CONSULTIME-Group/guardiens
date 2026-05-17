@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, ArrowRight } from "lucide-react";
 import { SKILL_PILL_META } from "./constants";
-import { tokenizeSkillPhrases } from "@/lib/skills/tokenize";
+import { tokenizeSkillPhrases, normalizeSkillKey } from "@/lib/skills/tokenize";
 
 interface Props {
   helper: any;
