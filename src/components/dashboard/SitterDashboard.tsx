@@ -383,13 +383,7 @@ const SitterDashboard = () => {
               </div>
 
               <div className="px-4 sm:px-5 md:px-8 mb-6">
-                <NearbyHelpersCarousel />
-              </div>
-
-              <div className="px-4 sm:px-5 md:px-8 mb-6">
-                <DashSection eyebrow="Près de chez vous" title="À découvrir" description="Annonces, échanges et conseils sélectionnés pour vous.">
-                  {DiscoveryTabs}
-                </DashSection>
+                {DiscoverySections}
               </div>
             </div>
           </>
