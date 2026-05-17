@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, ArrowRight } from "lucide-react";
 import { SKILL_PILL_META } from "./constants";
+import { tokenizeSkillPhrases } from "@/lib/skills/tokenize";
 
 interface Props {
   helper: any;
@@ -12,8 +13,8 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile }: Props) => {
   const skillCats: string[] = h.skill_categories || [];
   const displayedSkills = skillCats.slice(0, 2);
   const extraCount = skillCats.length - 2;
-  const customSkills: string[] = (h.custom_skills as string[]) || [];
-  const comps: string[] = h.competences || [];
+  const customSkills: string[] = tokenizeSkillPhrases((h.custom_skills as string[]) || []);
+  const comps: string[] = tokenizeSkillPhrases((h.competences as string[]) || []);
   // Compétences "spéciales" = saisies en libre (savoir-faire unique).
   // On affiche d'abord les custom (signature de la personne), puis les comps
   // générales en complément, dédupliquées (insensible à la casse).
