@@ -1229,7 +1229,7 @@ const SearchSitter = () => {
  </div>
 
  {/* ─── Sticky search bar ─── */}
- <div className="sticky top-0 z-10 bg-background border-b border-border">
+ <div className="sticky top-0 z-[1100] bg-background border-b-2 border-border shadow-sm">
   <div className="relative -mr-6 sm:mr-0">
   <div className="flex flex-row items-center gap-2 px-6 py-3 overflow-x-auto no-scrollbar pr-10 sm:pr-6">
  {/* Location pill */}
