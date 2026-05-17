@@ -348,14 +348,10 @@ const SitterDashboard = () => {
       <div className="xl:hidden mt-4">
         {ChecklistBlock}
 
-        <div className="px-4 sm:px-5 md:px-8 mb-6">
-          <DashSection eyebrow="Votre profil" title="Statut & réputation" description="Votre vitrine auprès des propriétaires.">
-            <div className="space-y-4">
-              {buildStatusBlock(false)}
-              {buildBadgesBlock(false)}
-              {buildEmergencyBlock(false)}
-            </div>
-          </DashSection>
+        <div className="px-4 sm:px-5 md:px-8 mb-6 space-y-4">
+          {buildStatusBlock(false)}
+          {buildBadgesBlock(false)}
+          {buildEmergencyBlock(false)}
         </div>
 
         <div className="px-4 sm:px-5 md:px-8 mb-6">
