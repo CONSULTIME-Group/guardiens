@@ -224,6 +224,7 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
               <Link to="/email-preferences">Activer une alerte</Link>
             </Button>
           </div>
+          <ActiveSittersTicker />
         </div>
       </section>
     );
