@@ -8,7 +8,10 @@
  * so you can curl and see exactly what the Worker decided.
  */
 
-const PRERENDER_TOKEN = 'P7riC8MFdBNYlNYGa8oz';
+// PRERENDER_TOKEN est lu depuis env.PRERENDER_TOKEN (variable chiffrée Cloudflare)
+// Fallback hardcodé conservé temporairement au cas où la variable ne serait pas encore
+// déployée — À SUPPRIMER une fois la variable confirmée active en prod.
+const PRERENDER_TOKEN_FALLBACK = 'P7riC8MFdBNYlNYGa8oz';
 const PRERENDER_SERVICE = 'https://service.prerender.io/';
 const PRERENDER_TIMEOUT_MS = 10000;
 
@@ -46,12 +49,12 @@ function detectBot(request) {
   return { shouldPrerender: reasons.length === 0 && isBot, isBot, ua, reasons };
 }
 
-async function fetchPrerender(url) {
+async function fetchPrerender(url, token) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), PRERENDER_TIMEOUT_MS);
   try {
     const response = await fetch(PRERENDER_SERVICE + encodeURIComponent(url), {
-      headers: { 'X-Prerender-Token': PRERENDER_TOKEN },
+      headers: { 'X-Prerender-Token': token },
       signal: controller.signal,
       redirect: 'manual',
     });
@@ -177,7 +180,7 @@ export default {
         headers: {
           'location': target,
           'cache-control': 'public, max-age=3600',
-          'x-prerender-worker': 'guardiens-prerender-v3',
+          'x-prerender-worker': 'guardiens-prerender-v5',
           'x-prerender-status': 'www-to-apex-301',
         },
       });
@@ -190,7 +193,7 @@ export default {
         headers: {
           'content-type': 'text/plain; charset=utf-8',
           'cache-control': 'public, max-age=3600',
-          'x-prerender-worker': 'guardiens-prerender-v3',
+          'x-prerender-worker': 'guardiens-prerender-v5',
           'x-prerender-status': 'worker-served',
         },
       });
@@ -200,7 +203,7 @@ export default {
     const url = request.url;
 
     const baseDiag = {
-      'X-Prerender-Worker': 'guardiens-prerender-v3',
+      'X-Prerender-Worker': 'guardiens-prerender-v5',
       'X-Prerender-Bot-Detected': String(isBot),
       'X-Prerender-UA': ua || '(empty)',
       'X-Prerender-Skip-Reasons': reasons.join(',') || 'none',
@@ -221,7 +224,8 @@ export default {
     console.log('[Prerender] Bot — UA: "' + ua + '" — URL: ' + url);
 
     try {
-      const prerenderResponse = await fetchPrerender(url);
+      const token = (env && env.PRERENDER_TOKEN) || PRERENDER_TOKEN_FALLBACK;
+      const prerenderResponse = await fetchPrerender(url, token);
 
       if (prerenderResponse.ok) {
         return withDiagHeaders(prerenderResponse, {
