@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import { Link } from "react-router-dom";
-import { MapPin, PawPrint, Cat, Bird } from "lucide-react";
+import { MapPin, PawPrint, Cat, Bird, X } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 
 const speciesIcon: Record<string, typeof PawPrint> = {
@@ -125,7 +125,7 @@ const SearchMapView = ({
   const activeItem = results.find((r) => r.id === activePin);
 
   return (
-    <div className="flex flex-col md:flex-row h-[calc(100vh-180px)] md:h-[calc(100vh-200px)]">
+    <div className="flex flex-col md:flex-row h-[calc(100dvh-180px)] md:h-[calc(100dvh-200px)]">
       <div className="hidden md:block md:w-1/2 overflow-y-auto p-4 space-y-3 border-r border-border">
         {results.map(renderCard)}
       </div>
@@ -224,9 +224,18 @@ const SearchMapView = ({
           return (
             <div
               ref={popoverRef}
-              className={`absolute z-[1000] bg-card rounded-xl shadow-lg overflow-hidden w-[min(260px,calc(100vw-2rem))] ${isDemo ? "border-2 border-dashed border-amber-400" : "border border-border"}`}
-              style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
+              role="dialog"
+              aria-label="Aperçu de l'annonce"
+              className={`absolute z-[1000] bg-card rounded-xl shadow-lg overflow-hidden w-[min(280px,calc(100vw-1.5rem))] left-3 right-3 mx-auto md:left-1/2 md:right-auto md:mx-0 bottom-24 md:bottom-auto md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 ${isDemo ? "border-2 border-dashed border-amber-400" : "border border-border"}`}
             >
+              <button
+                type="button"
+                onClick={() => setActivePin(null)}
+                aria-label="Fermer l'aperçu"
+                className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-background/90 backdrop-blur-sm border border-border flex items-center justify-center text-foreground hover:bg-muted shadow-sm"
+              >
+                <X className="h-4 w-4" />
+              </button>
               {isDemo && (
                 <div className="bg-amber-400 text-amber-950 text-[11px] font-semibold uppercase tracking-wide px-3 py-1 text-center">
                   Annonce d'exemple
@@ -276,7 +285,7 @@ const SearchMapView = ({
                   </Link>
                 )}
               </div>
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-card border-b border-r border-border rotate-45" />
+              <div className="hidden md:block absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-card border-b border-r border-border rotate-45" />
             </div>
           );
         })()}

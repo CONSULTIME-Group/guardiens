@@ -134,7 +134,8 @@ const SearchSitter = () => {
  const [cityInput, setCityInput] = useState("");
  const [citySuggestions, setCitySuggestions] = useState<{ nom: string; codesPostaux?: string[] }[]>([]);
   const [showMoreAnimals, setShowMoreAnimals] = useState(false);
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+ const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+ const [filterSheetOpen, setFilterSheetOpen] = useState(false);
 
  // Environment (visual only for now)
  const [environments, setEnvironments] = useState<string[]>([]);
@@ -977,7 +978,7 @@ const SearchSitter = () => {
  : `${resultCount} annonce${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""} près de vous`;
 
  // ─── Pill style ───
- const pillClass = "flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap shrink-0";
+ const pillClass = "flex items-center gap-2 px-4 py-2 min-h-11 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap shrink-0";
 
  // ─── Card renderer ───
  const renderCard = (item: any, listIndex?: number) => {
@@ -1537,7 +1538,7 @@ const SearchSitter = () => {
  </button>
 
  {/* Advanced filters pill */}
- <Sheet>
+ <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
  <SheetTrigger asChild>
  <button className={`${pillClass} relative`}>
  <SlidersHorizontal className="h-4 w-4" />
@@ -1547,7 +1548,7 @@ const SearchSitter = () => {
  )}
  </button>
  </SheetTrigger>
-            <SheetContent side="right" className="w-80 overflow-y-auto">
+            <SheetContent side="right" className="w-[88vw] sm:w-80 max-w-sm overflow-y-auto">
               <SheetTitle className="sr-only">Filtres de recherche</SheetTitle>
               <SheetDescription className="sr-only">Affinez votre recherche avec les filtres ci-dessous.</SheetDescription>
               <div className="flex items-center justify-between mb-6 mt-2">
@@ -1642,8 +1643,8 @@ const SearchSitter = () => {
 
  {/* Apply button */}
  <Button className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-medium" onClick={() => {
- // Close the sheet by triggering search
  doSearch();
+ setFilterSheetOpen(false);
  }}>
  Appliquer les filtres
  </Button>
