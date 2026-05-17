@@ -350,7 +350,7 @@ const OwnerDashboard = () => {
               {
                 value: trustedSitterCount,
                 label: "De confiance",
-                tooltip: "Nombre de gardiens avec qui vous avez déjà réalisé au moins une garde confirmée ou terminée. Ce sont vos contacts privilégiés à recontacter en priorité.",
+                tooltip: "Nombre de gardiens ayant déjà réalisé au moins 2 gardes chez vous. Ce sont vos contacts privilégiés à recontacter en priorité.",
               },
             ]}
           />
