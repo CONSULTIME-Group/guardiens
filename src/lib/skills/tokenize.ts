@@ -54,8 +54,8 @@ const cleanToken = (raw: string): string => {
 const capitalize = (s: string): string =>
   s.length === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1);
 
-const isValid = (s: string): boolean => {
-  if (s.length < MIN_LEN || s.length > MAX_LEN) return false;
+const isValid = (s: string, minLen: number, maxLen: number): boolean => {
+  if (s.length < minLen || s.length > maxLen) return false;
   if (/[.!?]/.test(s)) return false;
   return true;
 };
