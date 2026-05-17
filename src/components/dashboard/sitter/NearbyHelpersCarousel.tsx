@@ -335,9 +335,33 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
 
       {/* Carrousel horizontal premium — partout (hideHeader contrôle seulement le titre). */}
       {filtered.length === 0 ? (
-        <p className="text-xs text-muted-foreground italic py-4">
-          Personne sur cette compétence pour l'instant — essayez une autre catégorie.
-        </p>
+        (() => {
+          const activeChip = SKILL_CHIPS.find((c) => c.key === activeSkill);
+          return (
+            <div
+              role="status"
+              className="rounded-2xl border border-dashed border-border bg-muted/30 px-5 py-6 text-center"
+            >
+              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold mb-1.5">
+                Filtre actif{activeChip ? ` · ${activeChip.label}` : ""}
+              </p>
+              <p className="text-sm font-heading font-semibold text-foreground leading-snug mb-1">
+                Aucune personne disponible sur cette compétence près de chez vous.
+              </p>
+              <p className="text-xs text-muted-foreground font-sans mb-4 max-w-prose mx-auto">
+                Essayez une autre catégorie, ou retirez le filtre pour voir toutes les personnes du coin.
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-xl"
+                onClick={() => setActiveSkill(null)}
+              >
+                Voir tout le monde
+              </Button>
+            </div>
+          );
+        })()
       ) : (
         <div className="relative -mx-1">
           <div className="flex gap-3 overflow-x-auto pb-3 px-1 snap-x snap-mandatory scrollbar-hide scroll-smooth">
