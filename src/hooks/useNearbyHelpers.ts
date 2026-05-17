@@ -72,7 +72,7 @@ export function useNearbyHelpers(
       //    on garde large pour avoir matière même en zone rurale)
       const { data: pool } = await supabase
         .from("profiles")
-        .select("id, first_name, avatar_url, city, skill_categories, custom_skills, bio, identity_verified, completed_sits_count, latitude, longitude")
+        .select("id, first_name, avatar_url, city, skill_categories, custom_skills, identity_verified, completed_sits_count, latitude, longitude")
         .eq("available_for_help", true)
         .not("skill_categories", "eq", "{}")
         .neq("id", currentUserId!)
