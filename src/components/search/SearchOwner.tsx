@@ -1046,7 +1046,7 @@ const SearchOwner = () => {
         </div>
       ) : (
         <div className="flex h-[calc(100dvh-220px)]">
-          <div className="w-1/2 overflow-y-auto border-r border-border p-4 space-y-3">
+          <div className="hidden md:block md:w-1/2 overflow-y-auto border-r border-border p-4 space-y-3">
             {results.map((s: any) => {
               const profile = s.profile;
               const firstName = profile?.first_name || "Gardien";
@@ -1072,7 +1072,7 @@ const SearchOwner = () => {
               );
             })}
           </div>
-          <div className="w-1/2 relative bg-muted/30">
+          <div className="w-full md:w-1/2 relative bg-muted/30">
             <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">Chargement de la carte…</div>}>
               <SearchOwnerMapView
                 sitters={results
