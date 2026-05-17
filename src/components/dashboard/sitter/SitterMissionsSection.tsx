@@ -116,6 +116,7 @@ const SitterMissionsSection = memo(({
             </p>
             <div className="flex flex-col gap-2">
               <Button
+                variant="outline"
                 onClick={() => navigate("/petites-missions/creer")}
                 className="w-full rounded-xl text-xs font-medium gap-1.5"
                 size="sm"
@@ -124,9 +125,9 @@ const SitterMissionsSection = memo(({
                 Publier un besoin
               </Button>
               <Button
-                variant="outline"
+                variant="ghost"
                 onClick={() => navigate("/petites-missions")}
-                className="w-full rounded-xl text-xs font-medium gap-1.5"
+                className="w-full rounded-xl text-xs font-medium gap-1.5 text-foreground/80 hover:text-primary"
                 size="sm"
               >
                 Proposer mon aide
