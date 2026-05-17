@@ -401,7 +401,7 @@ const Register = () => {
  metadata: { role: selectedRole, method: "google" },
  });
  } catch {}
-  const googleRedirectUrl = `${window.location.origin}/dashboard`;
+  const googleRedirectUrl = `${window.location.origin}${postAuthTarget}`;
   logOAuthStage("sdk_called", "/inscription", {
  role: selectedRole,
  redirect_uri: googleRedirectUrl,
