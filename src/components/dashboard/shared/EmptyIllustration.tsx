@@ -1,5 +1,5 @@
-import emptyAnnonces from "@/assets/illustrations/empty-annonces.jpg";
-import emptyHelpers from "@/assets/illustrations/empty-helpers.jpg";
+import emptyAnnonces from "@/assets/illustrations/empty-annonces.webp";
+import emptyHelpers from "@/assets/illustrations/empty-helpers.webp";
 import emptyConseils from "@/assets/illustrations/empty-conseils.jpg";
 
 /**
