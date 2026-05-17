@@ -165,9 +165,18 @@ const queryClient = new QueryClient({
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, user, loading } = useAuth();
+  const location = useLocation();
   if (loading) return <FallbackSpinner />;
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
-  
+  if (!isAuthenticated) {
+    // Preserve the originally requested URL so the user is returned
+    // to it after a successful login/signup.
+    const target = `${location.pathname}${location.search}${location.hash}`;
+    const safe = target.startsWith("/") && !target.startsWith("//") ? target : "/dashboard";
+    const redirectQuery = safe && safe !== "/dashboard"
+      ? `?redirect=${encodeURIComponent(safe)}`
+      : "";
+    return <Navigate to={`/login${redirectQuery}`} replace />;
+  }
   return <>{children}</>;
 };
 
