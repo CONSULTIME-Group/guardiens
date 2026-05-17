@@ -21,6 +21,7 @@ import SitterMissionsSection from "./sitter/SitterMissionsSection";
 import NearbyAnnoncesCard from "./sitter/NearbyAnnoncesCard";
 import QuickActionsCard from "./sitter/QuickActionsCard";
 import EmptyIllustration from "./shared/EmptyIllustration";
+import SectionEyebrow from "./shared/SectionEyebrow";
 import DashSection from "./owner/DashSection";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -302,14 +303,12 @@ const SitterDashboard = () => {
     <div className="space-y-8">
       {/* 1. Annonces — priorité business (garde rémunérée) */}
       <section aria-labelledby="discovery-annonces-heading">
-        <header className="mb-3">
-          <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
-            Annonces
-          </p>
-          <h3 id="discovery-annonces-heading" className="font-heading text-lg font-bold text-foreground leading-tight">
-            Près de chez vous
-          </h3>
-        </header>
+        <SectionEyebrow
+          eyebrow="Annonces"
+          title="Près de chez vous"
+          accent="primary"
+          id="discovery-annonces-heading"
+        />
         {annoncesEmpty ? (
           <div className="rounded-2xl border border-border bg-card px-5 pt-5 pb-6 text-center">
             <EmptyIllustration kind="annonces" size="md" className="mb-3" />
@@ -339,14 +338,12 @@ const SitterDashboard = () => {
 
       {/* 2. Coup de main — entraide (helpers + missions ouvertes fusionnés) */}
       <section aria-labelledby="discovery-missions-heading">
-        <header className="mb-3">
-          <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
-            Coup de main
-          </p>
-          <h3 id="discovery-missions-heading" className="font-heading text-lg font-bold text-foreground leading-tight">
-            Entraide près de chez vous
-          </h3>
-        </header>
+        <SectionEyebrow
+          eyebrow="Coup de main"
+          title="Entraide près de chez vous"
+          accent="secondary"
+          id="discovery-missions-heading"
+        />
         <div className="space-y-4">
           <NearbyHelpersCarousel hideHeader />
           {!missionsEmpty && (

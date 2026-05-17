@@ -4,6 +4,7 @@ import FounderBadge from "@/components/badges/FounderBadge";
 import PriorityActionCard from "@/components/dashboard/shared/PriorityActionCard";
 import LiveSignalStrip from "@/components/dashboard/shared/LiveSignalStrip";
 import { useSitterPriorityAction } from "@/hooks/useSitterPriorityAction";
+import heroMorning from "@/assets/illustrations/sitter-hero-morning.jpg";
 
 /**
  * Cockpit gardien — bloc unifié au-dessus du pli.
@@ -57,80 +58,109 @@ const SitterCockpit = ({
   return (
     <section
       aria-label="Espace gardien — synthèse"
-      className="px-4 sm:px-5 md:px-8 pt-3 sm:pt-4 md:pt-5 pb-1 space-y-2.5"
+      className="px-4 sm:px-5 md:px-8 pt-3 sm:pt-4 md:pt-5 pb-1"
     >
-      {/* ─── Ligne 1 : Greeting + dispo en 1 strip ─── */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="shrink-0 w-11 h-11 rounded-full overflow-hidden ring-1 ring-border bg-muted flex items-center justify-center">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt="Votre photo de profil" className="w-full h-full object-cover" loading="lazy" />
-            ) : (
-              <span className="font-heading font-bold text-base text-foreground/70">{initial}</span>
-            )}
-          </div>
-          <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold leading-tight">
-              Espace gardien
-            </p>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-base sm:text-lg font-heading font-bold text-foreground leading-tight truncate">
-                Bonjour{firstName ? `, ${capitalize(firstName)}` : ""}
-              </h1>
-              {isFounder && <FounderBadge size="sm" />}
-            </div>
-          </div>
+      {/* ─── Tuile héro éditoriale ─── */}
+      <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-accent/60 via-card to-accent/30 shadow-sm">
+        {/* Illustration décorative — masquée mobile, demi-largeur dès md */}
+        <div
+          aria-hidden="true"
+          className="hidden md:block absolute inset-y-0 right-0 w-1/2 lg:w-[55%] pointer-events-none"
+        >
+          <img
+            src={heroMorning}
+            alt=""
+            className="h-full w-full object-cover object-left opacity-90"
+            width={1536}
+            height={768}
+          />
+          {/* Fondu pour lisibilité du texte */}
+          <div className="absolute inset-0 bg-gradient-to-r from-card via-card/70 to-transparent" />
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          {userId && (
-            <Link
-              to={`/gardiens/${userId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Voir votre profil public (nouvel onglet)"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground text-xs font-sans font-medium px-2.5 py-1.5 transition-colors"
-            >
-              <Eye className="w-3.5 h-3.5" aria-hidden="true" />
-              <span className="hidden sm:inline">Profil public</span>
-            </Link>
-          )}
-          <button
-            id="sitter-availability-toggle"
-            role="switch"
-            aria-checked={isAvailable}
-            aria-label={isAvailable ? "Vous êtes disponible — désactiver" : "Vous êtes indisponible — activer"}
-            onClick={onToggleAvailability}
-            className={`group inline-flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
-              isAvailable
-                ? "border-success/40 bg-success/10 text-success"
-                : "border-border bg-card text-muted-foreground hover:bg-muted"
-            }`}
-          >
-            <span className={`relative flex h-2 w-2 ${isAvailable ? "" : "opacity-40"}`} aria-hidden="true">
-              {isAvailable && (
-                <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-60 animate-ping" />
-              )}
-              <span className={`relative inline-flex h-2 w-2 rounded-full ${isAvailable ? "bg-success" : "bg-muted-foreground"}`} />
-            </span>
-            {isAvailable ? "Disponible" : "Indisponible"}
-          </button>
+        <div className="relative grid md:grid-cols-2 gap-0">
+          {/* Colonne gauche — contenu */}
+          <div className="p-5 sm:p-6 md:p-7 space-y-4">
+            {/* Ligne 1 : eyebrow + avatar + nom + dispo */}
+            <div className="flex items-start justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="shrink-0 w-12 h-12 rounded-full overflow-hidden ring-2 ring-card shadow-sm bg-muted flex items-center justify-center">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="Votre photo de profil" className="w-full h-full object-cover" loading="lazy" />
+                  ) : (
+                    <span className="font-heading font-bold text-lg text-foreground/70">{initial}</span>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] uppercase tracking-[2px] text-primary font-sans font-semibold leading-tight">
+                    Espace gardien
+                  </p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h1 className="text-xl sm:text-2xl font-heading font-bold text-foreground leading-tight truncate">
+                      Bonjour{firstName ? `, ${capitalize(firstName)}` : ""}
+                    </h1>
+                    {isFounder && <FounderBadge size="sm" />}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                {userId && (
+                  <Link
+                    to={`/gardiens/${userId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Voir votre profil public (nouvel onglet)"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card/80 backdrop-blur-sm hover:bg-card text-foreground text-xs font-sans font-medium px-2.5 py-1.5 transition-colors"
+                  >
+                    <Eye className="w-3.5 h-3.5" aria-hidden="true" />
+                    <span className="hidden sm:inline">Profil public</span>
+                  </Link>
+                )}
+                <button
+                  id="sitter-availability-toggle"
+                  role="switch"
+                  aria-checked={isAvailable}
+                  aria-label={isAvailable ? "Vous êtes disponible — désactiver" : "Vous êtes indisponible — activer"}
+                  onClick={onToggleAvailability}
+                  className={`group inline-flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+                    isAvailable
+                      ? "border-success/40 bg-success/10 text-success"
+                      : "border-border bg-card/80 backdrop-blur-sm text-muted-foreground hover:bg-card"
+                  }`}
+                >
+                  <span className={`relative flex h-2 w-2 ${isAvailable ? "" : "opacity-40"}`} aria-hidden="true">
+                    {isAvailable && (
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-60 animate-ping" />
+                    )}
+                    <span className={`relative inline-flex h-2 w-2 rounded-full ${isAvailable ? "bg-success" : "bg-muted-foreground"}`} />
+                  </span>
+                  {isAvailable ? "Disponible" : "Indisponible"}
+                </button>
+              </div>
+            </div>
+
+            {/* Action prioritaire — un seul CTA dominant */}
+            <PriorityActionCard
+              eyebrow={priority.eyebrow}
+              title={priority.title}
+              description={priority.description}
+              ctaLabel={priority.ctaLabel}
+              ctaTo={priority.ctaTo}
+              urgency={priority.urgency}
+              onCtaClick={handlePriorityCta}
+            />
+          </div>
+
+          {/* Colonne droite — espace illustration (visible md+ via background absolu) */}
+          <div className="hidden md:block" aria-hidden="true" />
+        </div>
+
+        {/* Signal vivant en pied de tuile, fond légèrement teinté */}
+        <div className="relative border-t border-border/60 bg-card/70 backdrop-blur-sm px-5 sm:px-6 md:px-7 py-2.5">
+          <LiveSignalStrip />
         </div>
       </div>
-
-      {/* ─── Ligne 2 : Action prioritaire (UN seul CTA dominant) ─── */}
-      <PriorityActionCard
-        eyebrow={priority.eyebrow}
-        title={priority.title}
-        description={priority.description}
-        ctaLabel={priority.ctaLabel}
-        ctaTo={priority.ctaTo}
-        urgency={priority.urgency}
-        onCtaClick={handlePriorityCta}
-      />
-
-      {/* ─── Ligne 3 : Signal vivant (preuve sociale) ─── */}
-      <LiveSignalStrip />
     </section>
   );
 };
