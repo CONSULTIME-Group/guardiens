@@ -486,6 +486,7 @@ const SmallMissions = () => {
                       isAuthenticated={isAuthenticated}
                       canApplyMissions={canApplyMissions}
                       mode={mode}
+                      compactBio={compactBio}
                       onNavigateDetail={() => navigate(isAuthenticated ? `/petites-missions/${m.id}` : "/inscription")}
                       onPropose={() => {
                         if (!isAuthenticated) { navigate("/inscription"); return; }
