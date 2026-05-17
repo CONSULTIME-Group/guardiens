@@ -39,10 +39,10 @@ const HelperMiniCard = ({
   compact?: boolean;
 }) => {
   const firstName = capitalize(helper.first_name || "Membre");
-  const customSkill = helper.custom_skills?.[0]?.trim();
-  // Fallback : début de bio si pas de compétence libre renseignée
-  const teaser = customSkill || helper.bio?.trim() || null;
-  const teaserLabel = customSkill ? "Peut aider pour" : "À propos";
+  const customSkills = (helper.custom_skills || [])
+    .map((s) => s?.trim())
+    .filter((s): s is string => !!s);
+  const bioTeaser = helper.bio?.trim() || null;
   return (
     <article className={`${compact ? "w-full" : "flex-shrink-0 w-[82vw] sm:w-72 snap-start"} rounded-2xl border border-border bg-card overflow-hidden flex flex-col`}>
       <div className="p-4 flex items-center gap-3">
@@ -83,18 +83,8 @@ const HelperMiniCard = ({
         )}
       </div>
 
-      {teaser && (
-        <div className="px-4 pb-2">
-          <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-medium mb-0.5">
-            {teaserLabel}
-          </p>
-          <p className="text-xs text-foreground/85 leading-snug line-clamp-3">
-            {teaser}
-          </p>
-        </div>
-      )}
-
-      <div className="px-4 pb-2 pt-2 flex flex-wrap gap-1.5">
+      {/* Catégories générales */}
+      <div className="px-4 pb-1 flex flex-wrap gap-1.5">
         {helper.skill_categories.slice(0, 3).map((cat) => {
           const meta = SKILL_CHIPS.find((c) => c.key === cat);
           if (!meta) return null;
@@ -108,6 +98,37 @@ const HelperMiniCard = ({
           );
         })}
       </div>
+
+      {/* Savoir-faire spécifique (custom skills saisis librement) */}
+      {customSkills.length > 0 && (
+        <div className="px-4 pb-1 pt-2">
+          <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium mb-1">
+            Savoir-faire
+          </p>
+          <div className="flex flex-wrap gap-1">
+            {customSkills.slice(0, 3).map((c) => (
+              <span
+                key={c}
+                className="text-[11px] rounded-full bg-muted text-foreground/80 px-2 py-0.5 border border-border"
+              >
+                {c}
+              </span>
+            ))}
+            {customSkills.length > 3 && (
+              <span className="text-[11px] text-muted-foreground px-1">
+                +{customSkills.length - 3}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Mini bio */}
+      {bioTeaser && (
+        <p className="px-4 pb-2 pt-2 text-xs text-foreground/75 leading-snug line-clamp-2 italic">
+          « {bioTeaser} »
+        </p>
+      )}
 
       <div className="px-4 pb-4 mt-auto pt-2">
         <Button size="sm" className="w-full rounded-xl" onClick={onWrite}>
