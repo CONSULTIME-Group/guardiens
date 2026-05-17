@@ -31,6 +31,7 @@ import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import { ALLOWED_ALERT_RADII, snapToAllowedRadius } from "@/lib/alertRadius";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import FavoriteButton from "@/components/shared/FavoriteButton";
+import { ILLUSTRATIONS } from "@/components/shared/EmptyState";
 import { getDeptCode, DEPT_NAMES } from "@/lib/departments";
 import { getRegionCode, getRegionName, getDeptsInRegion, REGION_NAMES, DEPT_TO_REGION } from "@/lib/regions";
 import { trackEvent } from "@/lib/analytics";
@@ -2218,9 +2219,7 @@ const SearchSitter = () => {
  <div className="max-w-2xl mx-auto py-12 px-4 space-y-6">
  {/* Hero empty state */}
  <div className="text-center space-y-3">
- <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/10">
- <Search className="h-8 w-8 text-primary/60" />
- </div>
+                                {(() => { const Illu = tab === "sits" ? ILLUSTRATIONS.emptyCalendar : ILLUSTRATIONS.walkingDog; return <Illu />; })()}
  <h3 className="font-heading font-semibold text-xl text-foreground">
  {tab === "sits" ? "Pas encore d'annonce de garde dans votre zone" : "Pas encore de mission dans votre zone"}
  </h3>

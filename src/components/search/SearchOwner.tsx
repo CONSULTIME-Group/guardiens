@@ -18,6 +18,7 @@ import {
   Bell, BellRing, Loader2, Share2
 } from "lucide-react";
 import FavoriteButton from "@/components/shared/FavoriteButton";
+import { ILLUSTRATIONS } from "@/components/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { useToast } from "@/hooks/use-toast";
@@ -814,13 +815,14 @@ const SearchOwner = () => {
             </div>
           ) : results.length === 0 ? (
             <div className="max-w-2xl mx-auto py-10 space-y-4">
-              <div className="text-center">
-                <h2 className="font-heading text-xl font-semibold mb-2">
+              <div className="text-center space-y-3">
+                {(() => { const Illu = ILLUSTRATIONS.walkingDog; return <Illu />; })()}
+                <h2 className="font-heading text-xl font-semibold">
                   {isLaunchMode
                     ? "Soyez parmi les premiers propriétaires"
                     : "Aucun gardien dans cette zone pour l'instant"}
                 </h2>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
                   {isLaunchMode
                     ? "La communauté de gardiens se construit. Créez une alerte pour être prévenu·e dès qu'un gardien rejoint votre zone."
                     : "Voici comment trouver le bon gardien quand même."}
