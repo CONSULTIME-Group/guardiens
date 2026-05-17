@@ -8,14 +8,7 @@ import { usePreloadImages } from "@/hooks/usePreloadImages";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 
 import emptyAnnoncesUrl from "@/assets/illustrations/empty-annonces.webp";
-import emptyHelpersUrl from "@/assets/illustrations/empty-helpers.webp";
 import emptyConseilsUrl from "@/assets/illustrations/empty-conseils.webp";
-
-const CRITICAL_EMPTY_ILLUSTRATIONS = [
-  emptyAnnoncesUrl,
-  emptyHelpersUrl,
-  emptyConseilsUrl,
-] as const;
 
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
