@@ -1,5 +1,12 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
+import { Info } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface StatItem {
   value: number | string | null;
@@ -9,6 +16,8 @@ interface StatItem {
   to?: string;
   /** Si défini et value === 0, affiche un placeholder neutre (« — ») au lieu d'un « 0 » grisé. */
   emptyHint?: string;
+  /** Texte explicatif affiché au survol/tap d'une petite icône info à côté du label. */
+  tooltip?: string;
 }
 
 interface StatsStripProps {
