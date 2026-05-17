@@ -356,49 +356,7 @@ const SitterDashboard = () => {
         </div>
       </section>
 
-      {/* 3. Conseils — éditorial, replié par défaut (priorité business basse) */}
-      <section aria-labelledby="discovery-conseils-heading">
-        <details className="group rounded-2xl bg-card border border-border overflow-hidden">
-          <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
-            <div>
-              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
-                Conseils
-              </p>
-              <h3 id="discovery-conseils-heading" className="font-heading text-base font-bold text-foreground leading-tight">
-                Lire les conseils de la communauté
-              </h3>
-            </div>
-            <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
-          </summary>
-          <div className="px-4 pb-4">
-            {articles.length > 0 ? (
-              <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-                {articles.map((a: any) => (
-                  <Link key={a.id} to={`/actualites/${a.slug}`} className="group/card flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 ease-out cursor-pointer">
-                    {a.cover_image_url ? (
-                      <div className="w-full h-28 overflow-hidden">
-                        <img src={getOptimizedImageUrl(a.cover_image_url, 300, 75)} alt={a.title || "Article"} className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover/card:scale-105" width={300} height={112} loading="lazy" />
-                      </div>
-                    ) : (
-                      <div className="w-full h-28 bg-accent flex items-center justify-center">
-                        <Newspaper className="h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
-                      </div>
-                    )}
-                    <div className="p-3">
-                      <h4 className="text-sm font-semibold line-clamp-2 transition-colors group-hover/card:text-primary">{a.title}</h4>
-                      <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{a.excerpt}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground italic text-center py-6">
-                De nouveaux conseils arrivent prochainement.
-              </p>
-            )}
-          </div>
-        </details>
-      </section>
+      {/* Conseils déplacé dans l'accordéon unique secondaire (Conseils + Réputation + Badges) en bas de page. */}
     </div>
   );
 
