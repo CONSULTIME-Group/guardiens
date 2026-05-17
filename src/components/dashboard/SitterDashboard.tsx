@@ -372,18 +372,23 @@ const SitterDashboard = () => {
           </div>
         </div>
 
-        {/* SIDE COLUMN — 4/12 — enrichie avec QuickActions en tête */}
-        <aside aria-label="Actions, statut, badges et urgence" className="xl:col-span-4 min-w-0">
+        {/* SIDE COLUMN — 4/12 — ACTIONS UNIQUEMENT (audit #3 : pas de décoration en aside) */}
+        <aside aria-label="Actions rapides" className="xl:col-span-4 min-w-0">
           <QuickActionsCard
             pendingAppsCount={pendingAppsCount}
             unreadCount={unreadCount}
             isAvailable={isAvailable}
             onToggleAvailability={toggleAvailability}
           />
-          {buildStatusBlock(true)}
-          {buildEmergencyBlock(true)}
-          {buildBadgesBlock(true)}
         </aside>
+      </div>
+
+      {/* Statut / badges / urgence — pleine largeur sous le layout 2 colonnes en xl.
+          Sur < xl, déjà rendus dans la version pleine largeur ci-dessus. */}
+      <div className="hidden xl:block xl:px-8 mt-6 space-y-4">
+        {buildStatusBlock(false)}
+        {buildBadgesBlock(false)}
+        {buildEmergencyBlock(false)}
       </div>
 
       {/* Lien discret "Revoir la présentation" — relégué en pied */}
