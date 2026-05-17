@@ -347,11 +347,14 @@ const OwnerDashboard = () => {
                 label: "Annonces",
                 to: "/sits",
               },
-              {
-                value: trustedSitterCount,
-                label: "Récurrents",
-                tooltip: "Nombre de gardiens ayant déjà réalisé au moins 2 gardes chez vous. Ce sont vos contacts privilégiés à recontacter en priorité.",
-              },
+              // « Récurrents » : masqué tant qu'aucun gardien n'a réalisé 2 gardes ou plus.
+              ...(trustedSitterCount > 0
+                ? [{
+                    value: trustedSitterCount,
+                    label: "Récurrents",
+                    tooltip: "Nombre de gardiens ayant déjà réalisé au moins 2 gardes chez vous. Ce sont vos contacts privilégiés à recontacter en priorité.",
+                  }]
+                : []),
             ]}
           />
           <NearbyEmergencySitters />
