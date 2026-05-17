@@ -168,6 +168,21 @@ export default {
     const urlObj = new URL(request.url);
     const pathname = urlObj.pathname;
 
+    // === 301 www → apex (canonical hostname) ===
+    // Évite le duplicate content SEO : guardiens.fr est la seule version canonique.
+    if (urlObj.hostname === 'www.guardiens.fr') {
+      const target = `https://guardiens.fr${pathname}${urlObj.search}`;
+      return new Response(null, {
+        status: 301,
+        headers: {
+          'location': target,
+          'cache-control': 'public, max-age=3600',
+          'x-prerender-worker': 'guardiens-prerender-v3',
+          'x-prerender-status': 'www-to-apex-301',
+        },
+      });
+    }
+
     // === Routes spéciales servies par le Worker ===
     if (pathname === '/robots.txt') {
       return new Response(ROBOTS_TXT, {
