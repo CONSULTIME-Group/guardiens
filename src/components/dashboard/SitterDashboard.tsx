@@ -432,9 +432,8 @@ const SitterDashboard = () => {
                 {DiscoverySections}
               </div>
 
-              <div className="px-4 sm:px-5 md:px-8 mb-6 space-y-4">
-                {buildStatusBlock(false)}
-                {buildBadgesBlock(false)}
+              <div className="px-4 sm:px-5 md:px-8 mb-6 space-y-3">
+                {SecondaryAccordion}
                 {buildEmergencyBlock(false)}
               </div>
             </div>
