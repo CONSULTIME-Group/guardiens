@@ -4,9 +4,32 @@ import { ShieldCheck, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNearbyHelpers, type NearbyHelper } from "@/hooks/useNearbyHelpers";
+import { useActiveSittersCount } from "@/hooks/useActiveSittersCount";
 import { startConversation } from "@/lib/conversation";
 import { toast } from "sonner";
 import { capitalize } from "@/components/dashboard/owner/helpers";
+
+/**
+ * Mini-compteur de preuve sociale globale.
+ * Affiché uniquement quand on a une valeur ; silencieux si la requête échoue
+ * (pas de "0 gardien actif" anxiogène). Pulse vert = signal de fraîcheur.
+ */
+const ActiveSittersTicker = () => {
+  const { data: count } = useActiveSittersCount();
+  if (!count || count < 10) return null;
+  return (
+    <p className="mt-4 inline-flex items-center gap-2 text-[11px] text-muted-foreground font-sans">
+      <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
+        <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-60 animate-ping" />
+        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
+      </span>
+      <span>
+        <strong className="font-semibold text-foreground tabular-nums">{count.toLocaleString("fr-FR")}</strong> gardiens actifs partout en France
+      </span>
+    </p>
+  );
+};
+
 
 /**
  * « Près de chez vous — qui peut donner un coup de main ? »
