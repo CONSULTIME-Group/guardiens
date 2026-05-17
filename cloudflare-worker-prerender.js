@@ -180,7 +180,7 @@ export default {
         headers: {
           'location': target,
           'cache-control': 'public, max-age=3600',
-          'x-prerender-worker': 'guardiens-prerender-v3',
+          'x-prerender-worker': 'guardiens-prerender-v5',
           'x-prerender-status': 'www-to-apex-301',
         },
       });
@@ -193,7 +193,7 @@ export default {
         headers: {
           'content-type': 'text/plain; charset=utf-8',
           'cache-control': 'public, max-age=3600',
-          'x-prerender-worker': 'guardiens-prerender-v3',
+          'x-prerender-worker': 'guardiens-prerender-v5',
           'x-prerender-status': 'worker-served',
         },
       });
@@ -203,7 +203,7 @@ export default {
     const url = request.url;
 
     const baseDiag = {
-      'X-Prerender-Worker': 'guardiens-prerender-v3',
+      'X-Prerender-Worker': 'guardiens-prerender-v5',
       'X-Prerender-Bot-Detected': String(isBot),
       'X-Prerender-UA': ua || '(empty)',
       'X-Prerender-Skip-Reasons': reasons.join(',') || 'none',
