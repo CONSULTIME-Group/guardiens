@@ -655,7 +655,7 @@ const SearchOwner = () => {
                 {hasActiveFilters && <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-primary" />}
               </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-80 overflow-y-auto">
+            <SheetContent side="right" className="w-[88vw] sm:w-80 max-w-sm overflow-y-auto">
               <SheetTitle className="sr-only">Filtres de recherche</SheetTitle>
               <SheetDescription className="sr-only">Affinez votre recherche avec les filtres ci-dessous.</SheetDescription>
               <div className="flex items-center justify-between mb-6">
