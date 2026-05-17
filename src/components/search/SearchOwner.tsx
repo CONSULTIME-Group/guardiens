@@ -483,14 +483,13 @@ const SearchOwner = () => {
   const deptLabel = refDept ? `${refDept} ${DEPT_NAMES[refDept] || ""}`.trim() : "Département";
   const regionLabel = refRegion ? getRegionName(refDept) : "Région";
 
-  // Suggest expanding when current zone is empty and a wider zone has results
+  // Suggest expanding when current zone is empty and a wider zone has results.
+  // L'étape "région" est volontairement omise : la promesse produit est « France
+  // entière », pas régionale (voir mémoire core "No AURA").
   const suggestExpansion = (): { target: ZoneMode; count: number; label: string } | null => {
     if (results.length > 0) return null;
     if (zoneMode === "radius" && densityCounts.dept > 0) {
       return { target: "dept", count: densityCounts.dept, label: deptLabel };
-    }
-    if ((zoneMode === "radius" || zoneMode === "dept") && densityCounts.region > 0) {
-      return { target: "region", count: densityCounts.region, label: regionLabel || "votre région" };
     }
     if (zoneMode !== "france" && densityCounts.france > 0) {
       return { target: "france", count: densityCounts.france, label: "France entière" };
