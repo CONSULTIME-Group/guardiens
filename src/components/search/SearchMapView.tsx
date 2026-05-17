@@ -224,9 +224,18 @@ const SearchMapView = ({
           return (
             <div
               ref={popoverRef}
-              className={`absolute z-[1000] bg-card rounded-xl shadow-lg overflow-hidden w-[min(260px,calc(100vw-2rem))] ${isDemo ? "border-2 border-dashed border-amber-400" : "border border-border"}`}
-              style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
+              role="dialog"
+              aria-label="Aperçu de l'annonce"
+              className={`absolute z-[1000] bg-card rounded-xl shadow-lg overflow-hidden w-[min(280px,calc(100vw-1.5rem))] left-3 right-3 mx-auto md:left-1/2 md:right-auto md:mx-0 bottom-24 md:bottom-auto md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 ${isDemo ? "border-2 border-dashed border-amber-400" : "border border-border"}`}
             >
+              <button
+                type="button"
+                onClick={() => setActivePin(null)}
+                aria-label="Fermer l'aperçu"
+                className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-background/90 backdrop-blur-sm border border-border flex items-center justify-center text-foreground hover:bg-muted shadow-sm"
+              >
+                <X className="h-4 w-4" />
+              </button>
               {isDemo && (
                 <div className="bg-amber-400 text-amber-950 text-[11px] font-semibold uppercase tracking-wide px-3 py-1 text-center">
                   Annonce d'exemple
