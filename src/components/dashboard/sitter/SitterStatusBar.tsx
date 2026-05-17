@@ -1,8 +1,6 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { StatutGardienBadge } from "@/components/profile/StatutGardienBadge";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import type { ReputationData } from "@/hooks/useSitterDashboardData";
 
 interface SitterStatusBarProps {
@@ -11,57 +9,19 @@ interface SitterStatusBarProps {
   avgRating: number;
   reviewsCount: number;
   badgeCount: number;
-  totalApps: number;
+  /** Conservé pour compat — non affiché (KPI sans valeur côté gardien). */
+  totalApps?: number;
   reputation: ReputationData | null;
   /** Si true: stack vertical (1 colonne) — pour usage en sidebar étroite. */
   compact?: boolean;
 }
 
-type AppView = "sent" | "received";
-
 const SitterStatusBar = ({
-  profileCompletion, completedSits, avgRating, reviewsCount, badgeCount, totalApps, reputation,
+  profileCompletion, completedSits, avgRating, reviewsCount, badgeCount, reputation,
   compact = false,
 }: SitterStatusBarProps) => {
   const { user, activeRole } = useAuth();
   const profilePath = (user?.role === "both" ? activeRole : user?.role) === "owner" ? "/owner-profile" : "/profile";
-
-  // Sélecteur Mes candidatures (envoyées) ↔ Candidatures reçues (sur mes annonces)
-  const [appView, setAppView] = useState<AppView>("sent");
-  const [receivedCount, setReceivedCount] = useState<number | null>(null);
-  const [loadingReceived, setLoadingReceived] = useState(false);
-
-  useEffect(() => {
-    if (appView !== "received" || receivedCount !== null || !user?.id) return;
-    let cancelled = false;
-    setLoadingReceived(true);
-    (async () => {
-      // 1) Récupère les ids de mes annonces (en tant que propriétaire)
-      const { data: sits, error: sitsErr } = await supabase
-        .from("sits")
-        .select("id")
-        .eq("user_id", user.id);
-      if (cancelled) return;
-      if (sitsErr || !sits || sits.length === 0) {
-        setReceivedCount(0);
-        setLoadingReceived(false);
-        return;
-      }
-      // 2) Compte les candidatures reçues sur ces annonces
-      const sitIds = sits.map((s) => s.id);
-      const { count, error: appsErr } = await supabase
-        .from("applications")
-        .select("id", { count: "exact", head: true })
-        .in("sit_id", sitIds);
-      if (cancelled) return;
-      setReceivedCount(appsErr ? 0 : count || 0);
-      setLoadingReceived(false);
-    })();
-    return () => { cancelled = true; };
-  }, [appView, receivedCount, user?.id]);
-
-  const displayedCount = appView === "sent" ? totalApps : (receivedCount ?? 0);
-  const displayedLabel = appView === "sent" ? "Mes candidatures" : "Candidatures reçues";
 
   const gridCls = compact
     ? "grid-cols-1"
@@ -96,10 +56,11 @@ const SitterStatusBar = ({
     {/* Zone 2 — MES STATS */}
     <div className={`p-4 md:p-5 ${dividerZone2}`}>
       <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">Mes stats</p>
-      {/* Masquer les KPI à 0 (sauf la Note quand des avis existent et le sélecteur
-          de candidatures qui reste utile pour basculer Gardien↔Propriétaire).
-          Cohérence avec OwnerDashboard où les zéros démotivants sont masqués. */}
-      {(completedSits > 0 || reviewsCount > 0 || badgeCount > 0 || displayedCount > 0) ? (
+      {/* Masquer les KPI à 0 — cohérence avec OwnerDashboard. La tuile
+          « Mes candidatures » a été retirée : un compteur brut d'envois ne
+          dit rien (ni statut, ni issue) et démotive en cas de no-reply.
+          La bascule Gardien↔Propriétaire reste accessible via la sidebar. */}
+      {(completedSits > 0 || reviewsCount > 0 || badgeCount > 0) ? (
       <div className="grid grid-cols-2 gap-3">
         {completedSits > 0 && (
         <div className="text-center">
@@ -124,56 +85,6 @@ const SitterStatusBar = ({
           <p className="text-xs text-muted-foreground font-sans">Badges</p>
         </div>
         )}
-        <div className="text-center">
-          <p className="text-2xl font-heading font-bold text-foreground" aria-live="polite">
-            {appView === "received" && loadingReceived ? "…" : displayedCount}
-          </p>
-          <p className="text-xs text-muted-foreground font-sans mb-1.5">{displayedLabel}</p>
-          {/* Sélecteur de contexte : envoyées (gardien) ↔ reçues (propriétaire) */}
-          <div
-            role="tablist"
-            aria-label="Contexte des candidatures"
-            aria-busy={loadingReceived || undefined}
-            className={`inline-flex items-center rounded-full border border-border bg-muted/40 p-0.5 text-[10px] font-sans ${
-              loadingReceived ? "opacity-60 cursor-not-allowed" : ""
-            }`}
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={appView === "sent"}
-              disabled={loadingReceived}
-              onClick={() => {
-                if (loadingReceived || appView === "sent") return;
-                setAppView("sent");
-              }}
-              className={`px-2 py-0.5 rounded-full transition-colors disabled:cursor-not-allowed ${
-                appView === "sent"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Gardien
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={appView === "received"}
-              disabled={loadingReceived}
-              onClick={() => {
-                if (loadingReceived || appView === "received") return;
-                setAppView("received");
-              }}
-              className={`px-2 py-0.5 rounded-full transition-colors disabled:cursor-not-allowed ${
-                appView === "received"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Propriétaire
-            </button>
-          </div>
-        </div>
       </div>
       ) : (
         <p className="text-sm text-muted-foreground font-sans italic leading-snug">
