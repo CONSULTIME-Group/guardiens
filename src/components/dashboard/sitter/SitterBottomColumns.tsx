@@ -12,6 +12,8 @@ interface SitterBottomColumnsProps {
   nearbyError?: string | null;
   nearbyMissionsError?: string | null;
   myMissionsError?: string | null;
+  /** Mode disponible : conditionne le copy de l'empty state. */
+  isAvailable?: boolean;
 }
 
 const SitterBottomColumns = ({
@@ -22,6 +24,7 @@ const SitterBottomColumns = ({
   nearbyError = null,
   nearbyMissionsError = null,
   myMissionsError = null,
+  isAvailable = false,
 }: SitterBottomColumnsProps) => {
 
   const ErrorState = ({ message }: { message: string }) => (
@@ -53,7 +56,15 @@ const SitterBottomColumns = ({
         ) : nearbyListings.length === 0 ? (
           <div className="text-center py-4">
             <p className="text-sm text-muted-foreground font-sans italic mb-3">Pas encore d'annonce dans votre zone.</p>
-            <p className="text-xs text-muted-foreground font-sans">Activez le mode disponible pour être contacté directement par les propriétaires.</p>
+            {isAvailable ? (
+              <p className="text-xs text-muted-foreground font-sans">
+                Vous êtes visible : élargissez votre rayon ou repassez bientôt, de nouvelles annonces apparaissent chaque jour.
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground font-sans">
+                Activez le mode disponible (en haut de page) pour être contacté directement par les propriétaires.
+              </p>
+            )}
           </div>
         ) : (
           nearbyListings.slice(0, 3).map((sit: any) => {
