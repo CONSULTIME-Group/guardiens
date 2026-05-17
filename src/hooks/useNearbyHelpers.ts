@@ -20,6 +20,8 @@ export type NearbyHelper = {
   avatar_url: string | null;
   city: string | null;
   skill_categories: string[];
+  custom_skills: string[];
+  bio: string | null;
   identity_verified: boolean;
   completed_sits_count: number;
   distance_km: number | null;
