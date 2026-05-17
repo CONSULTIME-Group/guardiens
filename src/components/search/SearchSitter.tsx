@@ -31,6 +31,7 @@ import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import { ALLOWED_ALERT_RADII, snapToAllowedRadius } from "@/lib/alertRadius";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import FavoriteButton from "@/components/shared/FavoriteButton";
+import { ILLUSTRATIONS } from "@/components/shared/EmptyState";
 import { getDeptCode, DEPT_NAMES } from "@/lib/departments";
 import { getRegionCode, getRegionName, getDeptsInRegion, REGION_NAMES, DEPT_TO_REGION } from "@/lib/regions";
 import { trackEvent } from "@/lib/analytics";
