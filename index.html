@@ -3,6 +3,31 @@
   <head>
     <meta name="google-site-verification" content="cJRwkNCqEB75-Xv50L0Vuw8wqjpIv-hLapCDuVcCjaw" />
     <meta charset="UTF-8" />
+    <script>
+      // Empêche l'indexation du domaine de preview Lovable. Domaine canonique = guardiens.fr.
+      (function () {
+        try {
+          var h = window.location.hostname;
+          if (h === 'guardiens.lovable.app' || h.endsWith('.lovable.app')) {
+            var m = document.createElement('meta');
+            m.name = 'robots';
+            m.content = 'noindex, nofollow';
+            document.head.appendChild(m);
+            var g = document.createElement('meta');
+            g.name = 'googlebot';
+            g.content = 'noindex, nofollow';
+            document.head.appendChild(g);
+            // Canonical forcé vers le domaine prod
+            var existing = document.querySelector('link[rel="canonical"]');
+            if (existing) existing.remove();
+            var c = document.createElement('link');
+            c.rel = 'canonical';
+            c.href = 'https://guardiens.fr' + window.location.pathname + window.location.search;
+            document.head.appendChild(c);
+          }
+        } catch (e) {}
+      })();
+    </script>
     <!-- build: 2026-05-05T08:00 force-redeploy -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Garde d'animaux à domicile entre particuliers | Guardiens</title>
