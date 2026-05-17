@@ -117,7 +117,7 @@ const HelperMiniCard = ({
   );
 };
 
-const NearbyHelpersCarousel = memo(() => {
+const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boolean } = {}) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { data, isLoading } = useNearbyHelpers(user?.id);
@@ -171,19 +171,21 @@ const NearbyHelpersCarousel = memo(() => {
 
   return (
     <section aria-labelledby="nearby-helpers-heading" className="space-y-3">
-      <div className="flex items-end justify-between gap-2">
-        <div className="min-w-0">
-          <h3
-            id="nearby-helpers-heading"
-            className="font-heading text-base font-semibold text-foreground leading-tight"
-          >
-            Qui peut vous donner un coup de main&nbsp;?
-          </h3>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Personnes du coin disponibles {radiusLabel}.
-          </p>
+      {!hideHeader && (
+        <div className="flex items-end justify-between gap-2">
+          <div className="min-w-0">
+            <h3
+              id="nearby-helpers-heading"
+              className="font-heading text-base font-semibold text-foreground leading-tight"
+            >
+              Qui peut vous donner un coup de main&nbsp;?
+            </h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Personnes du coin disponibles {radiusLabel}.
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Chips compétences */}
       <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
