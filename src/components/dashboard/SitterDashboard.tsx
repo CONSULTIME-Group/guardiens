@@ -218,9 +218,12 @@ const SitterDashboard = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground italic text-center py-4">
-                De nouveaux conseils arrivent prochainement.
-              </p>
+              <div className="text-center py-2">
+                <EmptyIllustration kind="conseils" size="sm" className="mb-2" />
+                <p className="text-sm text-muted-foreground italic">
+                  De nouveaux conseils arrivent prochainement.
+                </p>
+              </div>
             )}
           </AccordionContent>
         </AccordionItem>
