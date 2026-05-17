@@ -18,6 +18,7 @@ import {
   Bell, BellRing, Loader2, Share2
 } from "lucide-react";
 import FavoriteButton from "@/components/shared/FavoriteButton";
+import { ILLUSTRATIONS } from "@/components/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { useToast } from "@/hooks/use-toast";
