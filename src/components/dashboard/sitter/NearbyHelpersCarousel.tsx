@@ -9,6 +9,7 @@ import { useCtaCooldown } from "@/hooks/useCtaCooldown";
 import { startConversation } from "@/lib/conversation";
 import { toast } from "sonner";
 import { capitalize } from "@/components/dashboard/owner/helpers";
+import EmptyIllustration from "@/components/dashboard/shared/EmptyIllustration";
 
 /**
  * Compteur dual « local · national » de personnes prêtes à donner un coup de main.
@@ -84,10 +85,11 @@ const EmptyHelpersState = ({ hideHeader, userId }: { hideHeader: boolean; userId
           p-5 sm:p-6
         "
       >
-        <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold mb-2">
+        <EmptyIllustration kind="helpers" size="md" className="mb-3" />
+        <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold mb-2 text-center sm:text-left">
           Votre coin est encore calme
         </p>
-        <h4 className="font-heading text-lg sm:text-xl font-bold text-foreground leading-snug">
+        <h4 className="font-heading text-lg sm:text-xl font-bold text-foreground leading-snug text-center sm:text-left">
           {variant === "hidden"
             ? "Personne disponible près de chez vous pour l'instant."
             : "Soyez la première personne de confiance de votre coin."}

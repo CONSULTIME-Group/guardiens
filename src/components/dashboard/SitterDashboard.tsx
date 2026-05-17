@@ -20,6 +20,7 @@ import SitterEmergencyCardCompact from "./sitter/SitterEmergencyCardCompact";
 import SitterMissionsSection from "./sitter/SitterMissionsSection";
 import NearbyAnnoncesCard from "./sitter/NearbyAnnoncesCard";
 import QuickActionsCard from "./sitter/QuickActionsCard";
+import EmptyIllustration from "./shared/EmptyIllustration";
 import DashSection from "./owner/DashSection";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -217,9 +218,12 @@ const SitterDashboard = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground italic text-center py-4">
-                De nouveaux conseils arrivent prochainement.
-              </p>
+              <div className="text-center py-2">
+                <EmptyIllustration kind="conseils" size="sm" className="mb-2" />
+                <p className="text-sm text-muted-foreground italic">
+                  De nouveaux conseils arrivent prochainement.
+                </p>
+              </div>
             )}
           </AccordionContent>
         </AccordionItem>
@@ -307,7 +311,8 @@ const SitterDashboard = () => {
           </h3>
         </header>
         {annoncesEmpty ? (
-          <div className="rounded-2xl border border-border bg-card px-5 py-6 text-center">
+          <div className="rounded-2xl border border-border bg-card px-5 pt-5 pb-6 text-center">
+            <EmptyIllustration kind="annonces" size="md" className="mb-3" />
             <p className="text-sm text-foreground font-medium mb-1">
               Aucune annonce dans un rayon de 100 km.
             </p>
