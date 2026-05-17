@@ -40,10 +40,11 @@ export type EventType =
   | "fb_referral_landing"      // Visiteur arrivé depuis Facebook (referrer ou utm_source=facebook)
   | "fb_referral_feedback"     // Réaction au prompt de feedback (metadata.reaction)
   | "fb_referral_dismissed"    // Prompt fermé sans feedback
-  // A/B test : impact de la mini-bio sur les MissionCard ---------------------
-  | "exp_mission_bio_exposure" // 1ère impression de la liste missions (variant: A|B)
-  | "exp_mission_bio_click"    // Clic sur une MissionCard (variant, hasBio)
-  | "exp_mission_bio_scroll";  // Scroll max atteint sur la liste (variant, maxPct, isMobile)
+  // Mesure before/after : impact de la mini-bio sur MissionCard --------------
+  // Tag de cohorte dans metadata.release (ex: "mission_card_bio_v1_2026_05_17").
+  | "exp_mission_bio_exposure" // 1ère impression de la liste missions (release, mission_count)
+  | "exp_mission_bio_click"    // Clic sur une MissionCard (release, has_bio, position)
+  | "exp_mission_bio_scroll";  // Scroll max atteint sur la liste (release, max_scroll_pct, is_mobile)
 
 interface TrackOptions {
   source?: string;
