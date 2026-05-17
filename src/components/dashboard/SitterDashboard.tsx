@@ -46,6 +46,10 @@ const SitterDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { hasAccess: hasSubscription } = useSubscriptionAccess();
 
+  // Préchargement des gouaches d'empty-states : évite le pop-in quand
+  // une section bascule de loading → empty après résolution des queries.
+  usePreloadImages(CRITICAL_EMPTY_ILLUSTRATIONS);
+
   const {
     loading, profileCompletion, identityVerified, identityStatus,
     completedSits, avgRating, reviewsCount, badgeCount, totalApps,
