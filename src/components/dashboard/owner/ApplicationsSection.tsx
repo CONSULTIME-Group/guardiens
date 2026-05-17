@@ -128,10 +128,10 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, lo
 
   // Si aucune candidature non lue mais des consultées : on n'affiche pas le doublon
   // d'empty state (déjà couvert par MonAnnonceCard) et on titre directement
-  // « Candidatures reçues déjà consultées ».
+  // « Candidatures déjà consultées ».
   const onlyRead = !loading && unread.length === 0 && read.length > 0;
   const sectionTitle = onlyRead
-    ? "Candidatures reçues déjà consultées"
+    ? "Candidatures déjà consultées"
     : "Candidatures reçues non lues";
 
   return (
@@ -160,7 +160,7 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, lo
               className="px-4 py-3 text-sm text-muted-foreground hover:no-underline opacity-60 cursor-not-allowed pointer-events-none [&>svg]:opacity-40"
             >
               <span className="flex items-center gap-2">
-                Candidatures reçues déjà consultées
+                Candidatures déjà consultées
                 <Skeleton className="inline-block h-3 w-8 align-middle" />
               </span>
             </AccordionTrigger>
@@ -179,7 +179,7 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, lo
             <AccordionTrigger className="px-4 py-3 text-sm text-muted-foreground hover:no-underline">
               {onlyRead
                 ? `Voir les ${read.length} candidature${read.length > 1 ? "s" : ""} consultée${read.length > 1 ? "s" : ""}`
-                : `Candidatures reçues déjà consultées (${read.length})`}
+                : `Candidatures déjà consultées (${read.length})`}
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4">
               <div className="space-y-3">
