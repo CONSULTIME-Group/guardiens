@@ -481,16 +481,15 @@ const SearchOwner = () => {
   const refDept = getDeptCode(getZoneRefPostalCode());
   const refRegion = getRegionCode(refDept);
   const deptLabel = refDept ? `${refDept} ${DEPT_NAMES[refDept] || ""}`.trim() : "Département";
-  const regionLabel = refRegion ? getRegionName(refDept) : "Région";
+  // regionLabel volontairement supprimé (mémoire "No AURA").
 
-  // Suggest expanding when current zone is empty and a wider zone has results
+  // Suggest expanding when current zone is empty and a wider zone has results.
+  // L'étape "région" est volontairement omise : la promesse produit est « France
+  // entière », pas régionale (voir mémoire core "No AURA").
   const suggestExpansion = (): { target: ZoneMode; count: number; label: string } | null => {
     if (results.length > 0) return null;
     if (zoneMode === "radius" && densityCounts.dept > 0) {
       return { target: "dept", count: densityCounts.dept, label: deptLabel };
-    }
-    if ((zoneMode === "radius" || zoneMode === "dept") && densityCounts.region > 0) {
-      return { target: "region", count: densityCounts.region, label: regionLabel || "votre région" };
     }
     if (zoneMode !== "france" && densityCounts.france > 0) {
       return { target: "france", count: densityCounts.france, label: "France entière" };
@@ -529,11 +528,11 @@ const SearchOwner = () => {
   const sortPillBase = "rounded-full px-3 py-1 text-xs border border-border text-muted-foreground cursor-pointer hover:border-primary transition-colors";
   const sortPillActive = "rounded-full px-3 py-1 text-xs bg-foreground text-background cursor-pointer";
 
-  // Zone mode chips
+  // Zone mode chips — l'option "région" est volontairement absente : la
+  // promesse produit est « France entière », pas régionale (mémoire "No AURA").
   const zoneChips: Array<{ key: ZoneMode; label: string; count: number; disabled?: boolean }> = [
     { key: "radius", label: `${radius[0]} km`, count: densityCounts.radius, disabled: !city },
     { key: "dept", label: refDept ? `Dép. ${refDept}` : "Département", count: densityCounts.dept, disabled: !refDept },
-    { key: "region", label: refRegion ? (getRegionName(refDept) ?? "Région") : "Région", count: densityCounts.region, disabled: !refRegion },
     { key: "france", label: "France", count: densityCounts.france },
   ];
 
