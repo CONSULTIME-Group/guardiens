@@ -181,21 +181,40 @@ const SitterDashboard = () => {
     </section>
   );
 
+  // Réputation détaillée — déplacée dans un Accordion fermé par défaut.
+  // Pourquoi : 5 KPIs en strip horizontal au-dessus du pli = 5 zéros pour
+  // un débutant. On garde la donnée accessible, mais on la sort du chemin critique.
   const buildStatusBlock = (compact: boolean) => (
     <section aria-labelledby={compact ? "status-heading-side" : "status-heading"}>
       <h2 id={compact ? "status-heading-side" : "status-heading"} className="sr-only">
-        Mon statut
+        Ma réputation détaillée
       </h2>
-      <SitterStatusBar
-        profileCompletion={profileCompletion}
-        completedSits={completedSits}
-        avgRating={avgRating}
-        reviewsCount={reviewsCount}
-        badgeCount={badgeCount}
-        totalApps={totalApps}
-        reputation={reputation}
-        compact={compact}
-      />
+      <Accordion type="single" collapsible>
+        <AccordionItem value="reputation" className="border border-border rounded-2xl bg-card overflow-hidden">
+          <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
+            <div className="flex flex-col items-start text-left">
+              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
+                Ma réputation
+              </p>
+              <p className="text-sm font-medium text-foreground">
+                {completedSits} garde{completedSits > 1 ? "s" : ""} · {reviewsCount > 0 ? `note ${avgRating.toFixed(1)}/5` : "aucun avis"} · {badgeCount} badge{badgeCount > 1 ? "s" : ""}
+              </p>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4 pt-1">
+            <SitterStatusBar
+              profileCompletion={profileCompletion}
+              completedSits={completedSits}
+              avgRating={avgRating}
+              reviewsCount={reviewsCount}
+              badgeCount={badgeCount}
+              totalApps={totalApps}
+              reputation={reputation}
+              compact={compact}
+            />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </section>
   );
 
@@ -205,15 +224,17 @@ const SitterDashboard = () => {
     </div>
   );
 
+  // Emergency en version compacte (1 ligne) — l'ancienne carte ~200px était
+  // disproportionnée pour une fonction conditionnelle.
   const buildEmergencyBlock = (sidebar: boolean) => (
     <section
       aria-labelledby={sidebar ? "emergency-heading-side" : "emergency-heading"}
-      className={sidebar ? "mb-6" : "px-4 sm:px-5 md:px-8 mb-6 md:mb-8"}
+      className={sidebar ? "" : "px-4 sm:px-5 md:px-8"}
     >
       <h2 id={sidebar ? "emergency-heading-side" : "emergency-heading"} className="sr-only">
         Gardien d'urgence
       </h2>
-      <SitterEmergencyCard hasEmergencyProfile={hasEmergencyProfile} />
+      <SitterEmergencyCardCompact hasEmergencyProfile={hasEmergencyProfile} />
     </section>
   );
 
