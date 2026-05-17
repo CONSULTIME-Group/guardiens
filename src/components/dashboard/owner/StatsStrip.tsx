@@ -94,7 +94,8 @@ const StatsStrip = memo(({ items }: StatsStripProps) => {
         }
         return <div key={idx}>{inner(false)}</div>;
       })}
-    </section>
+      </section>
+    </TooltipProvider>
   );
 });
 
