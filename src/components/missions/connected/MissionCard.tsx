@@ -25,9 +25,15 @@ interface Props {
    * Utile quand la grille rend beaucoup de cartes (densité visuelle / scroll).
    */
   compactBio?: boolean;
+  /**
+   * A/B test `mission_card_bio_v1` : si false, on ne rend pas du tout la bio
+   * (ni texte, ni placeholder, ni CTA auteur). Permet de comparer A (sans bio)
+   * vs B (avec bio) sur taux de clic + scroll dans `SmallMissions`.
+   */
+  showBio?: boolean;
 }
 
-const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissions, mode, onNavigateDetail, onPropose, compactBio = false }: Props) => {
+const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissions, mode, onNavigateDetail, onPropose, compactBio = false, showBio = true }: Props) => {
   const meta = CATEGORY_META[m.category] || CATEGORY_META.animals;
   const isCompleted = m.status === "completed";
   const isMine = m.user_id === currentUserId;
@@ -77,7 +83,7 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
           </div>
           {/* Mini bio de l'auteur — donne du contexte humain (« qui est cette personne ? »)
               avant que l'utilisateur clique pour ouvrir le détail. Caché si auteur = vous. */}
-          {(() => {
+          {showBio && (() => {
             const safeBio = sanitizeBioForCard((m.profiles as any)?.bio);
 
             // Bio absente — l'auteur voit un CTA discret l'invitant à se présenter ;

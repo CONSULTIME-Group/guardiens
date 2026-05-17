@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,6 +28,9 @@ import ExamplesSection from "@/components/missions/connected/ExamplesSection";
 import OfferDialog from "@/components/missions/connected/OfferDialog";
 import { geocodeCached, useEntityCoords } from "@/hooks/missions/useGeocodedCoords";
 import { useAllMissions, useAvailableHelpers } from "@/hooks/missions/useMissionsData";
+import { getVariant } from "@/lib/abTest";
+import { trackEvent } from "@/lib/analytics";
+import { useScrollDepthTracker } from "@/hooks/useScrollDepthTracker";
 
 const SmallMissions = () => {
   const { isAuthenticated, user, switchRole } = useAuth();
@@ -322,6 +325,44 @@ const SmallMissions = () => {
     try { window.localStorage.setItem("missions:compactBio", compactBio ? "1" : "0"); } catch { /* quota */ }
   }, [compactBio]);
 
+  // ---------------------------------------------------------------------------
+  // A/B test : MissionCard avec mini-bio (B) vs sans (A).
+  // Hypothèse : afficher la bio augmente le taux de clic vers le détail
+  //             ET maintient/améliore le scroll engagement sur mobile.
+  // Assignation : sticky par userId (ou anonId) → expérience stable.
+  // Mesures :
+  //   - exp_mission_bio_exposure : 1 fois par session/page (variant)
+  //   - exp_mission_bio_click    : à chaque clic carte (variant, position, hasBio)
+  //   - exp_mission_bio_scroll   : scroll max % à la sortie de page
+  // ---------------------------------------------------------------------------
+  const bioVariant = useMemo(
+    () => getVariant("mission_card_bio_v1", user?.id),
+    [user?.id]
+  );
+  const showBio = bioVariant === "B";
+
+  const exposureFiredRef = useRef(false);
+  useEffect(() => {
+    if (exposureFiredRef.current) return;
+    if (missionCount === 0) return;
+    exposureFiredRef.current = true;
+    void trackEvent("exp_mission_bio_exposure", {
+      source: "small_missions",
+      metadata: { variant: bioVariant, mission_count: missionCount },
+    });
+  }, [missionCount, bioVariant]);
+
+  const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches;
+  useScrollDepthTracker(
+    (maxPct) => {
+      void trackEvent("exp_mission_bio_scroll", {
+        source: "small_missions",
+        metadata: { variant: bioVariant, max_scroll_pct: maxPct, is_mobile: isMobile },
+      });
+    },
+    missionCount > 0
+  );
+
   const { priorityHelpers, complementaryHelpers } = useMemo(() => {
     const priority: any[] = [];
     const complementary: any[] = [];
@@ -478,7 +519,7 @@ const SmallMissions = () => {
             ) : missionCount > 0 ? (
               <>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {visibleMissionsList.map((m: any) => (
+                  {visibleMissionsList.map((m: any, idx: number) => (
                     <MissionCard
                       key={`m-${m.id}`}
                       mission={m}
@@ -487,7 +528,15 @@ const SmallMissions = () => {
                       canApplyMissions={canApplyMissions}
                       mode={mode}
                       compactBio={compactBio}
-                      onNavigateDetail={() => navigate(isAuthenticated ? `/petites-missions/${m.id}` : "/inscription")}
+                      showBio={showBio}
+                      onNavigateDetail={() => {
+                        const hasBio = Boolean(((m.profiles as any)?.bio || "").trim());
+                        void trackEvent("exp_mission_bio_click", {
+                          source: "small_missions",
+                          metadata: { variant: bioVariant, has_bio: hasBio, position: idx, mission_id: m.id },
+                        });
+                        navigate(isAuthenticated ? `/petites-missions/${m.id}` : "/inscription");
+                      }}
                       onPropose={() => {
                         if (!isAuthenticated) { navigate("/inscription"); return; }
                         setDialogMission(m);
