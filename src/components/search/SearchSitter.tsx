@@ -1737,6 +1737,7 @@ const SearchSitter = () => {
  </button>
  </div>
  </div>
+ </div>
 
  {/* Densité supprimée — déjà visible dans le sélecteur de Zone et le bandeau hors-zone */}
 
