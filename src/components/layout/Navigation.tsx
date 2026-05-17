@@ -379,6 +379,9 @@ export const BottomNav = () => {
   
 
   // Adapt tabs to active role
+  // NB : "Profil" retiré du bottom nav mobile au profit de "Coup de main"
+  // (entraide gratuite, pilier de la promesse). Profil reste accessible
+  // en 1 tap via le hamburger / sidebar mobile (cf. ligne 238).
   const isOwnerView = effectiveRole === "owner";
   const tabs = [
     { to: "/dashboard", icon: Home, label: "Accueil", badge: pendingAppsCount },
@@ -388,11 +391,7 @@ export const BottomNav = () => {
       label: isOwnerView ? "Gardiens" : "Recherche",
     },
     { to: "/messages", icon: MessageSquare, label: "Messages", badge: unreadCount },
-    {
-      to: isOwnerView ? "/owner-profile" : "/profile",
-      icon: User,
-      label: "Profil",
-    },
+    { to: "/petites-missions", icon: Handshake, label: "Coup de main", badge: missionBadgeCount },
   ];
 
   return (
