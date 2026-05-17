@@ -376,7 +376,11 @@ const Register = () => {
  };
 
  const goToLoginWithEmail = () => {
- navigate(`/login?email=${encodeURIComponent(email)}`);
+  const params = new URLSearchParams();
+  if (email) params.set("email", email);
+  if (redirectTarget) params.set("redirect", redirectTarget);
+  const qs = params.toString();
+  navigate(`/login${qs ? `?${qs}` : ""}`);
  };
 
   const handleGoogleSignUp = async () => {
