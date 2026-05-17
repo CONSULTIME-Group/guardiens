@@ -1,10 +1,21 @@
 import { useState } from "react";
-import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
+import { usePreloadImages } from "@/hooks/usePreloadImages";
+import { getOptimizedImageUrl } from "@/lib/imageOptim";
+
+import emptyAnnoncesUrl from "@/assets/illustrations/empty-annonces.webp";
+import emptyHelpersUrl from "@/assets/illustrations/empty-helpers.webp";
+import emptyConseilsUrl from "@/assets/illustrations/empty-conseils.webp";
+
+const CRITICAL_EMPTY_ILLUSTRATIONS = [
+  emptyAnnoncesUrl,
+  emptyHelpersUrl,
+  emptyConseilsUrl,
+] as const;
 
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
@@ -35,6 +46,10 @@ const SitterDashboard = () => {
   const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
   const [searchParams, setSearchParams] = useSearchParams();
   const { hasAccess: hasSubscription } = useSubscriptionAccess();
+
+  // Préchargement des gouaches d'empty-states : évite le pop-in quand
+  // une section bascule de loading → empty après résolution des queries.
+  usePreloadImages(CRITICAL_EMPTY_ILLUSTRATIONS);
 
   const {
     loading, profileCompletion, identityVerified, identityStatus,
