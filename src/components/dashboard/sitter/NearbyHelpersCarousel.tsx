@@ -80,13 +80,13 @@ const EmptyHelpersState = ({ hideHeader, userId }: { hideHeader: boolean; userId
       <div
         className="
           relative overflow-hidden rounded-2xl
-          bg-gradient-to-br from-card via-card to-muted/30
-          ring-1 ring-border/60
+          bg-gradient-to-br from-primary/5 via-card to-warning/10
+          ring-1 ring-primary/20
           p-5 sm:p-6
         "
       >
         <EmptyIllustration kind="helpers" size="md" className="mb-3" />
-        <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold mb-2 text-center sm:text-left">
+        <p className="text-[10px] uppercase tracking-[2px] text-primary font-sans font-semibold mb-2 text-center sm:text-left">
           Votre coin est encore calme
         </p>
         <h4 className="font-heading text-lg sm:text-xl font-bold text-foreground leading-snug text-center sm:text-left">
