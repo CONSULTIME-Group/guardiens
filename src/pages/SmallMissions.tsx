@@ -312,6 +312,16 @@ const SmallMissions = () => {
   const missionCount = filteredMissions.length;
   const helperCount = filteredHelpers.length;
 
+  // Préférence d'affichage : mini-bio compacte (1 ligne, ~80 car.) vs étendue (2 lignes).
+  // Persistée localement pour respecter le choix de l'utilisateur entre sessions.
+  const [compactBio, setCompactBio] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem("missions:compactBio") === "1";
+  });
+  useEffect(() => {
+    try { window.localStorage.setItem("missions:compactBio", compactBio ? "1" : "0"); } catch { /* quota */ }
+  }, [compactBio]);
+
   const { priorityHelpers, complementaryHelpers } = useMemo(() => {
     const priority: any[] = [];
     const complementary: any[] = [];
@@ -432,7 +442,7 @@ const SmallMissions = () => {
             />
 
             {/* ═══ Section 1 — Demandes visibles ═══ */}
-            <h2 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
+            <h2 className="text-base font-semibold text-foreground mb-2 flex items-center gap-2">
               {mode === "offer" ? "Demandes à aider" : "Demandes publiées près de chez vous"}
               {missionCount > 0 && (
                 <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
@@ -440,6 +450,16 @@ const SmallMissions = () => {
                 </span>
               )}
             </h2>
+            {missionCount > 0 && (
+              <label className="flex items-center gap-2 mb-4 text-xs text-muted-foreground cursor-pointer select-none">
+                <Switch
+                  checked={compactBio}
+                  onCheckedChange={setCompactBio}
+                  aria-label="Afficher les bios en version compacte"
+                />
+                <span>Bios compactes (1 ligne)</span>
+              </label>
+            )}
 
             {missionsLoading ? (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -466,6 +486,7 @@ const SmallMissions = () => {
                       isAuthenticated={isAuthenticated}
                       canApplyMissions={canApplyMissions}
                       mode={mode}
+                      compactBio={compactBio}
                       onNavigateDetail={() => navigate(isAuthenticated ? `/petites-missions/${m.id}` : "/inscription")}
                       onPropose={() => {
                         if (!isAuthenticated) { navigate("/inscription"); return; }
