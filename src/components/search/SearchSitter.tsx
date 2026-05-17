@@ -1538,7 +1538,7 @@ const SearchSitter = () => {
  </button>
 
  {/* Advanced filters pill */}
- <Sheet>
+ <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
  <SheetTrigger asChild>
  <button className={`${pillClass} relative`}>
  <SlidersHorizontal className="h-4 w-4" />
@@ -1548,7 +1548,7 @@ const SearchSitter = () => {
  )}
  </button>
  </SheetTrigger>
-            <SheetContent side="right" className="w-80 overflow-y-auto">
+            <SheetContent side="right" className="w-[88vw] sm:w-80 max-w-sm overflow-y-auto">
               <SheetTitle className="sr-only">Filtres de recherche</SheetTitle>
               <SheetDescription className="sr-only">Affinez votre recherche avec les filtres ci-dessous.</SheetDescription>
               <div className="flex items-center justify-between mb-6 mt-2">
