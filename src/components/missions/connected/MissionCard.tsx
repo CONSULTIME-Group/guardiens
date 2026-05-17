@@ -19,9 +19,14 @@ interface Props {
   mode: ModeFilter;
   onNavigateDetail: () => void;
   onPropose: () => void;
+  /**
+   * Mode compact pour la mini-bio : tronque à ~80 caractères et clamp 1 ligne.
+   * Utile quand la grille rend beaucoup de cartes (densité visuelle / scroll).
+   */
+  compactBio?: boolean;
 }
 
-const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissions, mode, onNavigateDetail, onPropose }: Props) => {
+const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissions, mode, onNavigateDetail, onPropose, compactBio = false }: Props) => {
   const meta = CATEGORY_META[m.category] || CATEGORY_META.animals;
   const isCompleted = m.status === "completed";
   const isMine = m.user_id === currentUserId;
