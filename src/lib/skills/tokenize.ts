@@ -19,8 +19,16 @@
 
 const SEPARATORS = /\s*(?:,|;|\/|\||·|•|\n|\r|\bet\b|&|—|–| - )\s*/gi;
 
-const MIN_LEN = 2;
-const MAX_LEN = 22;
+/**
+ * Bornes par défaut de longueur d'une pastille « savoir-faire ».
+ *  - `SKILL_TOKEN_MIN_LEN` : 2 caractères (évite les fragments « a », « j' »).
+ *  - `SKILL_TOKEN_MAX_LEN` : 22 caractères (au-delà = phrase, pas un mot-clé).
+ *
+ * Override possible via le paramètre `maxLen` de `tokenizeSkillPhrases`
+ * pour ajuster localement (ex. carte profil 28, vignette compacte 18).
+ */
+export const SKILL_TOKEN_MIN_LEN = 2;
+export const SKILL_TOKEN_MAX_LEN = 22;
 
 const STOP_PREFIXES = [
   "je peux ", "je sais ", "je propose ", "je fais ",
@@ -46,8 +54,8 @@ const cleanToken = (raw: string): string => {
 const capitalize = (s: string): string =>
   s.length === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1);
 
-const isValid = (s: string): boolean => {
-  if (s.length < MIN_LEN || s.length > MAX_LEN) return false;
+const isValid = (s: string, minLen: number, maxLen: number): boolean => {
+  if (s.length < minLen || s.length > maxLen) return false;
   if (/[.!?]/.test(s)) return false;
   return true;
 };
@@ -72,12 +80,25 @@ export const normalizeSkillKey = (s: string | null | undefined): string => {
     .replace(/[\u0300-\u036f]/g, "");
 };
 
+export interface TokenizeOptions {
+  /** Longueur min (incluse). Défaut : `SKILL_TOKEN_MIN_LEN` (2). */
+  minLen?: number;
+  /** Longueur max (incluse). Défaut : `SKILL_TOKEN_MAX_LEN` (22). */
+  maxLen?: number;
+}
+
 /**
  * @param raw Liste brute (peut contenir des phrases entières).
+ * @param options Bornes de longueur configurables.
  * @returns Liste de pastilles courtes, dédupliquées, capitalisées.
  */
-export const tokenizeSkillPhrases = (raw: (string | null | undefined)[] | null | undefined): string[] => {
+export const tokenizeSkillPhrases = (
+  raw: (string | null | undefined)[] | null | undefined,
+  options: TokenizeOptions = {},
+): string[] => {
   if (!raw || raw.length === 0) return [];
+  const minLen = options.minLen ?? SKILL_TOKEN_MIN_LEN;
+  const maxLen = options.maxLen ?? SKILL_TOKEN_MAX_LEN;
   const seen = new Set<string>();
   const out: string[] = [];
 
@@ -87,7 +108,7 @@ export const tokenizeSkillPhrases = (raw: (string | null | undefined)[] | null |
     const parts = stripped.split(SEPARATORS);
     for (const part of parts) {
       const cleaned = cleanToken(part).replace(/\s+/g, " ");
-      if (!isValid(cleaned)) continue;
+      if (!isValid(cleaned, minLen, maxLen)) continue;
       const key = normalizeSkillKey(cleaned);
       if (!key || seen.has(key)) continue;
       seen.add(key);
