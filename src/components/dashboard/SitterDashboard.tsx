@@ -142,33 +142,15 @@ const SitterDashboard = () => {
           </div>
 
           <div role="list" className="bg-card border border-border rounded-2xl overflow-hidden">
-            {incompleteItems.map((item: any, i: number) =>
-              item.isToggle ? (
-                <div key="toggle" role="listitem" className="flex items-center justify-between py-3 border-b border-border last:border-0 px-4">
-                  <div className="flex items-center">
-                    <Circle className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                    <span className="text-sm text-foreground ml-3">Activer le mode disponible</span>
-                  </div>
-                  <button
-                    role="switch"
-                    aria-checked={isAvailable}
-                    aria-label="Basculer la disponibilité"
-                    onClick={toggleAvailability}
-                    className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${isAvailable ? "bg-toggle-active" : "bg-muted"}`}
-                  >
-                    <span className={`absolute top-0.5 w-5 h-5 bg-background rounded-full shadow transition-all duration-200 ${isAvailable ? "left-5" : "left-0.5"}`} />
-                  </button>
+            {incompleteItems.map((item: any, i: number) => (
+              <Link key={i} to={item.to} role="listitem" className="group flex items-center justify-between py-3 px-4 border-b border-border last:border-0 cursor-pointer hover:bg-muted/40 transition-all duration-200 ease-out hover:translate-x-0.5">
+                <div className="flex items-center">
+                  <Circle className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
+                  <span className="text-sm text-foreground ml-3">{item.label}</span>
                 </div>
-              ) : (
-                <Link key={i} to={item.to} role="listitem" className="group flex items-center justify-between py-3 px-4 border-b border-border last:border-0 cursor-pointer hover:bg-muted/40 transition-all duration-200 ease-out hover:translate-x-0.5">
-                  <div className="flex items-center">
-                    <Circle className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
-                    <span className="text-sm text-foreground ml-3">{item.label}</span>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
-                </Link>
-              )
-            )}
+                <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
+              </Link>
+            ))}
           </div>
           {completedItems.length > 0 && (
             <Accordion type="single" collapsible className="mt-3">
