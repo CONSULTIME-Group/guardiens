@@ -547,7 +547,8 @@ const SearchOwner = () => {
 
       {/* Sticky search bar */}
       <div className="sticky top-0 z-10 bg-background border-b border-border px-6 py-3 space-y-3">
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+        <div className="relative -mr-6 sm:mr-0">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pr-10 sm:pr-0">
           {/* PILL 1 — Localisation */}
           <Popover open={openPop === "loc"} onOpenChange={(o) => setOpenPop(o ? "loc" : null)}>
             <PopoverTrigger asChild>
@@ -727,35 +728,40 @@ const SearchOwner = () => {
               </div>
             </SheetContent>
           </Sheet>
+          </div>
+          <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:hidden" />
         </div>
 
         {/* Zone mode selector with density counters */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-          <span className="text-xs text-muted-foreground shrink-0 mr-1">Zone&nbsp;:</span>
-          {zoneChips.map((z) => {
-            const active = zoneMode === z.key;
-            return (
-              <button
-                key={z.key}
-                onClick={() => {
-                  if (z.disabled) return;
-                  setZoneMode(z.key);
-                  trackEvent("search_empty_action", { source: "owner", metadata: { action: "change_zone", zone_mode: z.key } });
-                }}
-                disabled={z.disabled}
-                className={`shrink-0 rounded-full px-3 py-1 text-xs border transition-colors ${
-                  active
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : z.disabled
-                      ? "border-border text-muted-foreground/50 cursor-not-allowed"
-                      : "border-border text-muted-foreground hover:border-primary"
-                }`}
-                title={z.disabled ? "Renseignez une ville" : undefined}
-              >
-                {z.label} <span className="opacity-70">({z.count})</span>
-              </button>
-            );
-          })}
+        <div className="relative -mr-6 sm:mr-0">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pr-10 sm:pr-0">
+            <span className="text-xs text-muted-foreground shrink-0 mr-1">Zone&nbsp;:</span>
+            {zoneChips.map((z) => {
+              const active = zoneMode === z.key;
+              return (
+                <button
+                  key={z.key}
+                  onClick={() => {
+                    if (z.disabled) return;
+                    setZoneMode(z.key);
+                    trackEvent("search_empty_action", { source: "owner", metadata: { action: "change_zone", zone_mode: z.key } });
+                  }}
+                  disabled={z.disabled}
+                  className={`shrink-0 rounded-full px-3 py-1 text-xs border transition-colors ${
+                    active
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : z.disabled
+                        ? "border-border text-muted-foreground/50 cursor-not-allowed"
+                        : "border-border text-muted-foreground hover:border-primary"
+                  }`}
+                  title={z.disabled ? "Renseignez une ville" : undefined}
+                >
+                  {z.label} <span className="opacity-70">({z.count})</span>
+                </button>
+              );
+            })}
+          </div>
+          <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:hidden" />
         </div>
       </div>
 

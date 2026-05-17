@@ -1230,7 +1230,8 @@ const SearchSitter = () => {
 
  {/* ─── Sticky search bar ─── */}
  <div className="sticky top-0 z-10 bg-background border-b border-border">
- <div className="flex flex-row items-center gap-2 px-6 py-3 overflow-x-auto">
+  <div className="relative -mr-6 sm:mr-0">
+  <div className="flex flex-row items-center gap-2 px-6 py-3 overflow-x-auto no-scrollbar pr-10 sm:pr-6">
  {/* Location pill */}
  <Popover open={editingCity} onOpenChange={setEditingCity}>
  <PopoverTrigger asChild>
@@ -1615,8 +1616,10 @@ const SearchSitter = () => {
  </div>
  </SheetContent>
  </Sheet>
- </div>
- </div>
+  </div>
+  <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:hidden" />
+  </div>
+  </div>
 
  {/* ─── Sort bar + view toggle ─── */}
  <div className="flex justify-between items-center px-6 py-2 border-b border-border bg-background">
