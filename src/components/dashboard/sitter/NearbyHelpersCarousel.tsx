@@ -37,8 +37,12 @@ const HelperMiniCard = ({
   onWrite: () => void;
 }) => {
   const firstName = capitalize(helper.first_name || "Membre");
+  const customSkill = helper.custom_skills[0]?.trim();
+  // Fallback : début de bio si pas de compétence libre renseignée
+  const teaser = customSkill || helper.bio?.trim() || null;
+  const teaserLabel = customSkill ? "Peut aider pour" : "À propos";
   return (
-    <article className="flex-shrink-0 w-[78vw] sm:w-64 snap-start rounded-2xl border border-border bg-card overflow-hidden flex flex-col">
+    <article className="flex-shrink-0 w-[82vw] sm:w-72 snap-start rounded-2xl border border-border bg-card overflow-hidden flex flex-col">
       <div className="p-4 flex items-center gap-3">
         {helper.avatar_url ? (
           <img
@@ -77,7 +81,18 @@ const HelperMiniCard = ({
         )}
       </div>
 
-      <div className="px-4 pb-2 flex flex-wrap gap-1.5 min-h-[28px]">
+      {teaser && (
+        <div className="px-4 pb-2">
+          <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-medium mb-0.5">
+            {teaserLabel}
+          </p>
+          <p className="text-xs text-foreground/85 leading-snug line-clamp-3">
+            {teaser}
+          </p>
+        </div>
+      )}
+
+      <div className="px-4 pb-2 pt-2 flex flex-wrap gap-1.5">
         {helper.skill_categories.slice(0, 3).map((cat) => {
           const meta = SKILL_CHIPS.find((c) => c.key === cat);
           if (!meta) return null;
@@ -92,7 +107,7 @@ const HelperMiniCard = ({
         })}
       </div>
 
-      <div className="px-4 pb-4 mt-auto">
+      <div className="px-4 pb-4 mt-auto pt-2">
         <Button size="sm" className="w-full rounded-xl" onClick={onWrite}>
           Lui écrire
           <ArrowRight className="ml-1.5 h-3.5 w-3.5" aria-hidden="true" />
