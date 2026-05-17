@@ -16,11 +16,11 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile }: Props) => {
   const customSkills: string[] = tokenizeSkillPhrases((h.custom_skills as string[]) || []);
   const comps: string[] = tokenizeSkillPhrases((h.competences as string[]) || []);
   // Compétences "spéciales" = saisies en libre (savoir-faire unique).
-  // On affiche d'abord les custom (signature de la personne), puis les comps
-  // générales en complément, dédupliquées (insensible à la casse).
+  // Custom prioritaire, dédup insensible à la casse ET aux diacritiques
+  // (« Cuisine » == « cuisiné » == « CUISINE  »).
   const seen = new Set<string>();
   const specialSkills = [...customSkills, ...comps].filter((s) => {
-    const k = s?.trim().toLowerCase();
+    const k = normalizeSkillKey(s);
     if (!k || seen.has(k)) return false;
     seen.add(k);
     return true;
