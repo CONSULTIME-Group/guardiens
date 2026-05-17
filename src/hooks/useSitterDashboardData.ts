@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { differenceInDays, differenceInHours } from "date-fns";
+import { haversineDistance } from "@/utils/geo";
 
 export interface GroupedBadge {
   badge_id: string;
@@ -125,7 +126,7 @@ export function useSitterDashboardData(userId: string | undefined) {
           .select("is_available, experience_years, animal_types")
           .eq("user_id", userId).single(),
         supabase.from("profiles")
-          .select("identity_verification_status, profile_completion, identity_verified, cancellation_count, is_founder, postal_code, avatar_url, bio, onboarding_completed, onboarding_dismissed_at, onboarding_minimal_completed")
+          .select("identity_verification_status, profile_completion, identity_verified, cancellation_count, is_founder, postal_code, avatar_url, bio, onboarding_completed, onboarding_dismissed_at, onboarding_minimal_completed, latitude, longitude")
           .eq("id", userId).single(),
         supabase.from("reviews")
           .select("overall_rating").eq("reviewee_id", userId).eq("published", true),
@@ -173,8 +174,14 @@ export function useSitterDashboardData(userId: string | undefined) {
       // Reputation (replaces useProfileReputation)
       const reputation: ReputationData | null = reputationRes.data ?? null;
 
-      // Nearby listings — filtered by owner's department (first 2 chars of postal code)
+      // Nearby listings — filtre dept (CP[0:2]) puis tri par distance quand
+      // les coords du propriétaire ET du gardien sont connues. Sans coords,
+      // on garde l'ordre chronologique (filet de sécurité).
       const userDept = profile?.postal_code?.slice(0, 2);
+      const meLat = (profile as any)?.latitude as number | null | undefined;
+      const meLng = (profile as any)?.longitude as number | null | undefined;
+      const hasMyCoords = typeof meLat === "number" && typeof meLng === "number";
+
       let nearbyListings: any[] = [];
       let nearbyError: string | null = null;
       if (userDept) {
@@ -192,25 +199,42 @@ export function useSitterDashboardData(userId: string | undefined) {
           if (candidateOwnerIds.length > 0) {
             const { data: owners, error: ownersErr } = await supabase
               .from("public_profiles")
-              .select("id, postal_code")
+              .select("id, postal_code, latitude_approx, longitude_approx")
               .in("id", candidateOwnerIds);
             if (ownersErr) {
               nearbyError = "Impossible de charger les annonces près de chez vous.";
             } else {
+              const ownerById = new Map<string, any>((owners || []).map((o: any) => [o.id, o]));
               const deptOwnerIds = new Set(
                 (owners || [])
                   .filter((o: any) => o.postal_code?.startsWith(userDept))
                   .map((o: any) => o.id)
               );
-              nearbyListings = (deptListings || [])
+              const enriched = (deptListings || [])
                 .filter((s: any) => deptOwnerIds.has(s.user_id))
-                .slice(0, 4);
+                .map((s: any) => {
+                  const owner = ownerById.get(s.user_id);
+                  const distance_km = hasMyCoords && owner?.latitude_approx && owner?.longitude_approx
+                    ? haversineDistance(
+                        { lat: meLat as number, lng: meLng as number },
+                        { lat: owner.latitude_approx, lng: owner.longitude_approx },
+                      )
+                    : null;
+                  return { ...s, distance_km };
+                });
+              // Tri : distance croissante si dispo, sinon ordre chronologique
+              // d'origine (déjà DESC created_at en sortie SQL).
+              if (hasMyCoords) {
+                enriched.sort((a, b) => (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity));
+              }
+              nearbyListings = enriched.slice(0, 4);
             }
           }
         }
       }
 
-      // Nearby missions — filtered by department
+      // Nearby missions — même logique : filtre dept + tri distance via les
+      // coords de l'auteur de la mission (fetch léger sur public_profiles).
       let nearbyMissions: any[] = [];
       let nearbyMissionsError: string | null = null;
       if (userDept) {
@@ -223,9 +247,33 @@ export function useSitterDashboardData(userId: string | undefined) {
         if (missionsErr) {
           nearbyMissionsError = "Impossible de charger les échanges autour de vous.";
         } else {
-          nearbyMissions = (missions || [])
-            .filter((m: any) => m.user_id !== userId && m.postal_code?.startsWith(userDept))
-            .slice(0, 4);
+          const deptMissions = (missions || [])
+            .filter((m: any) => m.user_id !== userId && m.postal_code?.startsWith(userDept));
+          // Enrichissement coords auteur — un seul appel batch.
+          const authorIds = Array.from(new Set(deptMissions.map((m: any) => m.user_id)));
+          let authorCoords = new Map<string, { lat: number; lng: number }>();
+          if (authorIds.length > 0 && hasMyCoords) {
+            const { data: authors } = await supabase
+              .from("public_profiles")
+              .select("id, latitude_approx, longitude_approx")
+              .in("id", authorIds);
+            (authors || []).forEach((a: any) => {
+              if (typeof a.latitude_approx === "number" && typeof a.longitude_approx === "number") {
+                authorCoords.set(a.id, { lat: a.latitude_approx, lng: a.longitude_approx });
+              }
+            });
+          }
+          const enriched = deptMissions.map((m: any) => {
+            const c = authorCoords.get(m.user_id);
+            const distance_km = c && hasMyCoords
+              ? haversineDistance({ lat: meLat as number, lng: meLng as number }, c)
+              : null;
+            return { ...m, distance_km };
+          });
+          if (hasMyCoords) {
+            enriched.sort((a, b) => (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity));
+          }
+          nearbyMissions = enriched.slice(0, 4);
         }
       }
 

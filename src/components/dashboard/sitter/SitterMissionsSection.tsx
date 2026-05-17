@@ -211,7 +211,9 @@ const SitterMissionsSection = memo(({
               Découvrez les besoins des gens du coin et proposez votre aide.
             </p>
             <div>
-              {nearbyMissions.map((m: any) => (
+              {nearbyMissions.map((m: any) => {
+                const distance = typeof m.distance_km === "number" ? Math.round(m.distance_km) : null;
+                return (
                 <Link
                   key={m.id}
                   to={`/petites-missions/${m.id}`}
@@ -232,8 +234,18 @@ const SitterMissionsSection = memo(({
                         : ""}
                     </p>
                   </div>
+                  {distance !== null && (
+                    <span
+                      className="shrink-0 inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-semibold font-sans px-2 py-0.5 tabular-nums"
+                      aria-label={`À environ ${distance} kilomètres`}
+                      title="Distance approximative (~1 km de précision)"
+                    >
+                      {distance}&nbsp;km
+                    </span>
+                  )}
                 </Link>
-              ))}
+                );
+              })}
             </div>
             <div className="flex gap-2 mt-3">
               <Button

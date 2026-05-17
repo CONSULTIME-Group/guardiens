@@ -45,6 +45,8 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, isAvailable = 
     ) : (
       nearbyListings.slice(0, 5).map((sit: any) => {
         const isNew = differenceInHours(new Date(), new Date(sit.created_at)) < 48;
+        const distance =
+          typeof sit.distance_km === "number" ? Math.round(sit.distance_km) : null;
         return (
           <Link
             key={sit.id}
@@ -52,7 +54,7 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, isAvailable = 
             className="group flex items-start gap-3 py-2.5 border-b border-border last:border-0 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:bg-muted/40 hover:translate-x-0.5"
           >
             <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-1.5 transition-transform duration-200 group-hover:scale-125" />
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <p className="text-xs text-foreground/80 font-sans leading-snug transition-colors group-hover:text-foreground">
                 {sit.title}
                 {isNew && <span className="ml-2 text-xs bg-primary text-primary-foreground rounded px-1.5 py-0.5">Nouveau</span>}
@@ -63,6 +65,15 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, isAvailable = 
                   : "Dates flexibles"}
               </p>
             </div>
+            {distance !== null && (
+              <span
+                className="shrink-0 inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-semibold font-sans px-2 py-0.5 tabular-nums"
+                aria-label={`À environ ${distance} kilomètres de chez vous`}
+                title="Distance approximative (~1 km de précision)"
+              >
+                {distance}&nbsp;km
+              </span>
+            )}
           </Link>
         );
       })
