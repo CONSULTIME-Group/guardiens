@@ -310,9 +310,12 @@ const SitterDashboard = () => {
           id="discovery-annonces-heading"
         />
         {annoncesEmpty ? (
-          <div className="rounded-2xl border border-border bg-card px-5 pt-5 pb-6 text-center">
+          <div className="relative overflow-hidden rounded-2xl border border-warning/30 bg-gradient-to-br from-warning/10 via-card to-primary/5 px-5 pt-5 pb-6 text-center">
             <EmptyIllustration kind="annonces" size="md" className="mb-3" />
-            <p className="text-sm text-foreground font-medium mb-1">
+            <p className="text-[10px] uppercase tracking-[2px] text-warning font-sans font-semibold mb-1">
+              Calme plat
+            </p>
+            <p className="font-heading text-base font-bold text-foreground mb-1">
               Aucune annonce dans un rayon de 100 km.
             </p>
             <p className="text-xs text-muted-foreground font-sans mb-4">
