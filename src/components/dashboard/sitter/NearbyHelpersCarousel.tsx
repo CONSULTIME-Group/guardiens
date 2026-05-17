@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNearbyHelpers, type NearbyHelper } from "@/hooks/useNearbyHelpers";
 import { useActiveSittersCount } from "@/hooks/useActiveSittersCount";
+import { useCtaCooldown } from "@/hooks/useCtaCooldown";
 import { startConversation } from "@/lib/conversation";
 import { toast } from "sonner";
 import { capitalize } from "@/components/dashboard/owner/helpers";
@@ -27,6 +28,107 @@ const ActiveSittersTicker = () => {
         <strong className="font-semibold text-foreground tabular-nums">{count.toLocaleString("fr-FR")}</strong> gardiens actifs partout en France
       </span>
     </p>
+  );
+};
+
+/**
+ * Empty-state du carousel helpers — avec cooldown pour éviter la fatigue.
+ *
+ * 3 variantes selon l'historique d'exposition (localStorage, 7j glissants) :
+ * - `primary` : carte complète + CTA bouton plein "Inviter un proche"
+ * - `soft` : copy raccourcie + lien texte discret (après 3 vues en 7j)
+ * - `hidden` : message minimal sans CTA promotionnel (si user a cliqué "Ne plus me proposer")
+ *
+ * Le ticker "X gardiens actifs" reste affiché dans tous les cas — c'est de la
+ * preuve sociale, pas un CTA, donc pas concerné par le cooldown.
+ */
+const EmptyHelpersState = ({ hideHeader }: { hideHeader: boolean }) => {
+  const { variant, snooze } = useCtaCooldown("helpers_empty_referral", {
+    softThreshold: 3,
+    windowDays: 7,
+    snoozeDays: 30,
+  });
+
+  return (
+    <section aria-labelledby="nearby-helpers-empty-heading" className="space-y-3">
+      {!hideHeader && (
+        <div className="min-w-0">
+          <h3
+            id="nearby-helpers-empty-heading"
+            className="font-heading text-base font-semibold text-foreground leading-tight"
+          >
+            Qui peut vous donner un coup de main&nbsp;?
+          </h3>
+        </div>
+      )}
+      <div
+        className="
+          relative overflow-hidden rounded-2xl
+          bg-gradient-to-br from-card via-card to-muted/30
+          ring-1 ring-border/60
+          p-5 sm:p-6
+        "
+      >
+        <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold mb-2">
+          Votre coin est encore calme
+        </p>
+        <h4 className="font-heading text-lg sm:text-xl font-bold text-foreground leading-snug">
+          {variant === "hidden"
+            ? "Personne disponible près de chez vous pour l'instant."
+            : "Soyez la première personne de confiance de votre coin."}
+        </h4>
+
+        {variant === "primary" && (
+          <>
+            <p className="text-sm text-foreground/70 leading-relaxed mt-2 max-w-prose">
+              Personne n'est encore disponible pour un coup de main près de chez vous. Invitez un proche&nbsp;: vous gagnez un mois offert, lui aussi.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button asChild size="sm" className="rounded-xl">
+                <Link to="/mon-abonnement#parrainage">Inviter un proche</Link>
+              </Button>
+              <Button asChild size="sm" variant="ghost" className="rounded-xl">
+                <Link to="/email-preferences">Activer une alerte</Link>
+              </Button>
+            </div>
+            <button
+              type="button"
+              onClick={snooze}
+              className="mt-3 text-[11px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+            >
+              Ne plus me proposer pendant 30 jours
+            </button>
+          </>
+        )}
+
+        {variant === "soft" && (
+          <>
+            <p className="text-sm text-foreground/70 leading-relaxed mt-2 max-w-prose">
+              De nouvelles personnes arrivent régulièrement. Activez une alerte pour être prévenu en priorité.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+              <Button asChild size="sm" variant="outline" className="rounded-xl">
+                <Link to="/email-preferences">Activer une alerte</Link>
+              </Button>
+              <Link
+                to="/mon-abonnement#parrainage"
+                className="text-xs text-muted-foreground hover:text-primary underline-offset-2 hover:underline"
+              >
+                Ou inviter un proche
+              </Link>
+            </div>
+          </>
+        )}
+
+        {variant === "hidden" && (
+          <p className="text-sm text-foreground/70 leading-relaxed mt-2 max-w-prose">
+            Repassez bientôt — la communauté s'agrandit chaque semaine près de chez vous.
+          </p>
+        )}
+
+        <ActiveSittersTicker />
+      </div>
+    </section>
   );
 };
 
@@ -210,47 +312,7 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
   // Empty-state premium : pas de helpers dans le rayon max (100 km).
   // On transforme le vide en levier d'acquisition (parrainage) plutôt qu'en trou UX.
   if (!helpers.length) {
-    return (
-      <section aria-labelledby="nearby-helpers-empty-heading" className="space-y-3">
-        {!hideHeader && (
-          <div className="min-w-0">
-            <h3
-              id="nearby-helpers-empty-heading"
-              className="font-heading text-base font-semibold text-foreground leading-tight"
-            >
-              Qui peut vous donner un coup de main&nbsp;?
-            </h3>
-          </div>
-        )}
-        <div
-          className="
-            relative overflow-hidden rounded-2xl
-            bg-gradient-to-br from-card via-card to-muted/30
-            ring-1 ring-border/60
-            p-5 sm:p-6
-          "
-        >
-          <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold mb-2">
-            Votre coin est encore calme
-          </p>
-          <h4 className="font-heading text-lg sm:text-xl font-bold text-foreground leading-snug">
-            Soyez la première personne de confiance de votre coin.
-          </h4>
-          <p className="text-sm text-foreground/70 leading-relaxed mt-2 max-w-prose">
-            Personne n'est encore disponible pour un coup de main près de chez vous. Invitez un proche&nbsp;: vous gagnez un mois offert, lui aussi.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Button asChild size="sm" className="rounded-xl">
-              <Link to="/mon-abonnement#parrainage">Inviter un proche</Link>
-            </Button>
-            <Button asChild size="sm" variant="ghost" className="rounded-xl">
-              <Link to="/email-preferences">Activer une alerte</Link>
-            </Button>
-          </div>
-          <ActiveSittersTicker />
-        </div>
-      </section>
-    );
+    return <EmptyHelpersState hideHeader={hideHeader} />;
   }
 
   const radiusLabel = data?.hasGeo
