@@ -14,7 +14,7 @@
  */
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Image as ImageIcon, Plus, Loader2, Star, Check } from "lucide-react";
+import { Image as ImageIcon, Plus, Loader2, Star, Check, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { compressImageFile } from "@/lib/compressImage";
@@ -48,8 +48,59 @@ const SitPhotoManager = ({
   const [coverUrl, setCoverUrl] = useState<string | null>(initialCoverPhotoUrl);
   const [savingCover, setSavingCover] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggestion, setSuggestion] = useState<{ url: string; score: number; summary: string } | null>(null);
 
   const effectiveCover = coverUrl || gallery[0]?.photo_url || null;
+
+  const handleSuggestBest = async () => {
+    if (suggesting || gallery.length === 0) return;
+    setSuggesting(true);
+    setSuggestion(null);
+    try {
+      const sample = gallery.slice(0, 10);
+      const results = await Promise.all(
+        sample.map(async (p) => {
+          try {
+            const { data, error } = await supabase.functions.invoke("analyze-photo-quality", {
+              body: { imageUrl: p.photo_url },
+            });
+            if (error || !data || typeof data.score !== "number") return null;
+            return { url: p.photo_url, score: data.score as number, summary: data.summary as string };
+          } catch {
+            return null;
+          }
+        })
+      );
+      const scored = results.filter((r): r is { url: string; score: number; summary: string } => !!r);
+      if (scored.length === 0) {
+        toast({
+          variant: "destructive",
+          title: "Analyse indisponible",
+          description: "Impossible d'analyser vos photos pour le moment.",
+        });
+        return;
+      }
+      scored.sort((a, b) => b.score - a.score);
+      const best = scored[0];
+      if (best.url === effectiveCover) {
+        toast({
+          title: "Votre couverture est déjà la meilleure",
+          description: `Score qualité : ${best.score}/100.`,
+        });
+        return;
+      }
+      setSuggestion(best);
+    } finally {
+      setSuggesting(false);
+    }
+  };
+
+  const applySuggestion = async () => {
+    if (!suggestion) return;
+    await handleSetCover(suggestion.url);
+    setSuggestion(null);
+  };
 
   const handleSetCover = async (url: string) => {
     if (savingCover) return;
@@ -150,6 +201,27 @@ const SitPhotoManager = ({
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {gallery.length >= 2 && (
+            <button
+              type="button"
+              onClick={handleSuggestBest}
+              disabled={suggesting}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-md border border-primary/30 bg-primary/5 text-primary px-3 py-1.5 text-sm font-medium hover:bg-primary/10 transition-colors",
+                suggesting && "opacity-60 pointer-events-none"
+              )}
+            >
+              {suggesting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Analyse…
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" /> Suggérer la meilleure
+                </>
+              )}
+            </button>
+          )}
           <label className="inline-flex">
             <input
               type="file"
@@ -181,6 +253,30 @@ const SitPhotoManager = ({
           </label>
         </div>
       </div>
+
+      {suggestion && (
+        <div className="mb-4 rounded-xl border border-primary/30 bg-primary/5 p-3 flex flex-wrap items-center gap-3">
+          <img
+            src={suggestion.url}
+            alt=""
+            className="h-16 w-20 rounded-md object-cover border border-border"
+          />
+          <div className="flex-1 min-w-[200px]">
+            <p className="text-sm font-medium text-foreground">
+              Couverture suggérée — score qualité {suggestion.score}/100
+            </p>
+            <p className="text-xs text-muted-foreground">{suggestion.summary}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={() => setSuggestion(null)}>
+              Ignorer
+            </Button>
+            <Button size="sm" onClick={applySuggestion} disabled={!!savingCover}>
+              Appliquer
+            </Button>
+          </div>
+        </div>
+      )}
 
       {gallery.length === 0 ? (
         <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/30 p-6 text-center">
