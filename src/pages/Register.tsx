@@ -112,6 +112,8 @@ const Register = () => {
  const { register } = useAuth();
  const navigate = useNavigate();
  const { toast } = useToast();
+ const redirectTarget = sanitizeRedirect(searchParams.get("redirect"));
+ const postAuthTarget = redirectTarget ?? "/dashboard";
 
  const pwStrength = useMemo(() => getPasswordStrength(password), [password]);
 
