@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Lock, Sparkles, ChevronRight } from "lucide-react";
 import { CATEGORY_META, formatCity, formatDuration, ModeFilter } from "./constants";
+import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 
 const formatDateNeeded = (d?: string | null) => {
   if (!d) return null;
@@ -70,11 +71,14 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
           </div>
           {/* Mini bio de l'auteur — donne du contexte humain (« qui est cette personne ? »)
               avant que l'utilisateur clique pour ouvrir le détail. Caché si auteur = vous. */}
-          {!isMine && (m.profiles as any)?.bio?.trim() && (
-            <p className="text-xs italic text-foreground/70 leading-snug line-clamp-2">
-              « {(m.profiles as any).bio.trim()} »
-            </p>
-          )}
+          {!isMine && (() => {
+            const safeBio = sanitizeBioForCard((m.profiles as any)?.bio);
+            return safeBio ? (
+              <p className="text-xs italic text-foreground/70 leading-snug line-clamp-2">
+                « {safeBio} »
+              </p>
+            ) : null;
+          })()}
           <p className="text-xs text-muted-foreground">
             {formatCity(m.city || "—")} · {formatDuration(m.duration_estimate || "—")}
             {formatDateNeeded(m.date_needed) && <> · pour le {formatDateNeeded(m.date_needed)}</>}
