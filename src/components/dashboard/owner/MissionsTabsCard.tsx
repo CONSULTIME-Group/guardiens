@@ -21,15 +21,14 @@ const MissionsTabsCard = memo(({ myMissions, nearbyMissions }: MissionsTabsCardP
     myMissions.length > 0 ? "mine" : "nearby"
   );
 
-  const sortedMine = useMemo(
-    () =>
-      [...myMissions].sort((a, b) => {
-        const aDone = a.status === "completed" ? 1 : 0;
-        const bDone = b.status === "completed" ? 1 : 0;
-        return aDone - bDone;
-      }),
-    [myMissions]
-  );
+  const { activeMine, archivedMine } = useMemo(() => {
+    const active: SmallMission[] = [];
+    const archived: SmallMission[] = [];
+    for (const m of myMissions) {
+      (m.status === "completed" ? archived : active).push(m);
+    }
+    return { activeMine: active, archivedMine: archived };
+  }, [myMissions]);
 
   const tabBtn = (key: "mine" | "nearby", label: string, count: number) => {
     const active = tab === key;
