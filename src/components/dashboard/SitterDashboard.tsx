@@ -11,6 +11,7 @@ import AccessGateBanner from "@/components/access/AccessGateBanner";
 import { FreePeriodBanner } from "@/components/marketing/FreePeriodBanner";
 
 import SitterHero from "./sitter/SitterHero";
+import SitterCockpit from "./sitter/SitterCockpit";
 import SitterNextGuard from "./sitter/SitterNextGuard";
 // SitterNextGuardEmpty supprimé : la Checklist d'activation joue désormais
 // ce rôle en empty state (action > décoration).
