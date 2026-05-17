@@ -20,6 +20,7 @@ import SitterMobileStickyCTA from "./sitter/SitterMobileStickyCTA";
 import SitterStatusBar from "./sitter/SitterStatusBar";
 import SitterBadgesSection from "./sitter/SitterBadgesSection";
 import SitterBottomColumns from "./sitter/SitterBottomColumns";
+import NearbyHelpersCarousel from "./sitter/NearbyHelpersCarousel";
 import SitterEmergencyCard from "./sitter/SitterEmergencyCard";
 import DashSection from "./owner/DashSection";
 
@@ -369,7 +370,8 @@ const SitterDashboard = () => {
         {/* ── ZONE 3 : DÉCOUVERTE (annonces + missions + articles) ── */}
         <div className="px-4 sm:px-5 md:px-8 mb-6">
           <DashSection eyebrow="Près de chez vous" title="À découvrir" description="Annonces, échanges et conseils sélectionnés pour vous.">
-            <div className="space-y-4">
+            <div className="space-y-6">
+              <NearbyHelpersCarousel />
               <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} myMissions={myMissions} postalCode={postalCode} nearbyError={nearbyError} nearbyMissionsError={nearbyMissionsError} myMissionsError={myMissionsError} isAvailable={isAvailable} />
               {articles.length > 0 && (
                 <div>
@@ -410,8 +412,9 @@ const SitterDashboard = () => {
           {/* Reset child padding (parent gère via xl:px-8) en surchargeant via wrappers */}
           <div className="[&>*]:!px-0 [&>*]:!mx-0">
             {ChecklistBlock}
-            <section aria-labelledby="nearby-heading-xl">
+            <section aria-labelledby="nearby-heading-xl" className="space-y-6">
               <h2 id="nearby-heading-xl" className="sr-only">Près de chez vous</h2>
+              <NearbyHelpersCarousel />
               <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} myMissions={myMissions} postalCode={postalCode} nearbyError={nearbyError} nearbyMissionsError={nearbyMissionsError} myMissionsError={myMissionsError} isAvailable={isAvailable} />
             </section>
             {articles.length > 0 && (

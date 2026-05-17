@@ -1,0 +1,115 @@
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { haversineDistance } from "@/utils/geo";
+
+/**
+ * Helpers du coin (gens disponibles « pour un coup de main »).
+ *
+ * Pourquoi un hook dédié plutôt que de réutiliser `useAvailableHelpers` :
+ * - on a besoin de la distance par rapport à l'utilisateur courant pour trier
+ *   et appliquer un rayon (fallback 30 → 50 → 100 km).
+ * - on limite le payload (8 profils max) — c'est un carrousel, pas une liste.
+ *
+ * Aucune réponse vide : si le rayon de 30 km est sec, on élargit silencieusement.
+ * Le composant affiche le rayon réellement utilisé pour rester transparent.
+ */
+
+export type NearbyHelper = {
+  id: string;
+  first_name: string | null;
+  avatar_url: string | null;
+  city: string | null;
+  skill_categories: string[];
+  identity_verified: boolean;
+  completed_sits_count: number;
+  distance_km: number | null;
+};
+
+export type NearbyHelpersResult = {
+  helpers: NearbyHelper[];
+  radiusUsed: number; // km
+  hasGeo: boolean;
+};
+
+const RADIUS_STEPS = [30, 50, 100];
+const MAX_RESULTS = 8;
+
+export function useNearbyHelpers(currentUserId: string | undefined) {
+  return useQuery<NearbyHelpersResult>({
+    queryKey: ["nearby-helpers", currentUserId],
+    enabled: !!currentUserId,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      // 1. Coords de l'utilisateur courant
+      const { data: me } = await supabase
+        .from("profiles")
+        .select("latitude, longitude")
+        .eq("id", currentUserId!)
+        .maybeSingle();
+
+      const hasGeo = !!(me?.latitude && me?.longitude);
+
+      // 2. Pool de helpers (limité — filtre distance fait côté client,
+      //    on garde large pour avoir matière même en zone rurale)
+      const { data: pool } = await supabase
+        .from("profiles")
+        .select("id, first_name, avatar_url, city, skill_categories, identity_verified, completed_sits_count, latitude, longitude")
+        .eq("available_for_help", true)
+        .not("skill_categories", "eq", "{}")
+        .neq("id", currentUserId!)
+        .limit(200);
+
+      if (!pool || pool.length === 0) {
+        return { helpers: [], radiusUsed: RADIUS_STEPS[0], hasGeo };
+      }
+
+      // 3. Tri par distance si géoloc connue, sinon ordre arbitraire
+      const enriched = pool.map((p: any) => {
+        const distance_km =
+          hasGeo && p.latitude && p.longitude
+            ? haversineDistance(
+                { lat: me!.latitude as number, lng: me!.longitude as number },
+                { lat: p.latitude, lng: p.longitude },
+              )
+            : null;
+        return {
+          id: p.id,
+          first_name: p.first_name,
+          avatar_url: p.avatar_url,
+          city: p.city,
+          skill_categories: p.skill_categories || [],
+          identity_verified: !!p.identity_verified,
+          completed_sits_count: p.completed_sits_count || 0,
+          distance_km,
+        } satisfies NearbyHelper;
+      });
+
+      // Pas de géoloc → on retourne 8 profils au hasard (priorité identité vérifiée)
+      if (!hasGeo) {
+        const sorted = enriched.sort(
+          (a, b) => Number(b.identity_verified) - Number(a.identity_verified),
+        );
+        return { helpers: sorted.slice(0, MAX_RESULTS), radiusUsed: 0, hasGeo: false };
+      }
+
+      // 4. Fallback progressif du rayon
+      const withDistance = enriched
+        .filter((h) => h.distance_km !== null)
+        .sort((a, b) => (a.distance_km! - b.distance_km!));
+
+      for (const radius of RADIUS_STEPS) {
+        const inRange = withDistance.filter((h) => h.distance_km! <= radius);
+        if (inRange.length >= 3) {
+          return { helpers: inRange.slice(0, MAX_RESULTS), radiusUsed: radius, hasGeo: true };
+        }
+      }
+
+      // Aucun fallback n'a donné 3+ résultats → on retourne ce qu'on a
+      return {
+        helpers: withDistance.slice(0, MAX_RESULTS),
+        radiusUsed: RADIUS_STEPS[RADIUS_STEPS.length - 1],
+        hasGeo: true,
+      };
+    },
+  });
+}
