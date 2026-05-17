@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { getSignupRedirectUrl } from "@/lib/authRedirect";
+import { sanitizeRedirect, buildRedirectQuery } from "@/lib/safeRedirect";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { getAuthFieldAttrs } from "@/lib/inAppBrowser";
 import { mapAuthError } from "@/lib/authErrorMessages";
@@ -30,6 +31,8 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const redirectTarget = sanitizeRedirect(searchParams.get("redirect"));
+  const postAuthTarget = redirectTarget ?? "/dashboard";
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
@@ -37,7 +40,7 @@ const Login = () => {
     try {
       trackEvent("login_completed", { source: "/login", metadata: { method: "google", stage: "started" } });
     } catch {}
-    const googleRedirectUrl = `${window.location.origin}/dashboard`;
+    const googleRedirectUrl = `${window.location.origin}${postAuthTarget}`;
     logOAuthStage("sdk_called", "/login", { redirect_uri: googleRedirectUrl });
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: googleRedirectUrl,
@@ -59,7 +62,7 @@ const Login = () => {
       return;
     }
     logOAuthStage("tokens_received", "/login");
-    navigate("/dashboard", { replace: true });
+    navigate(postAuthTarget, { replace: true });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,7 +77,7 @@ const Login = () => {
       try {
         trackEvent("login_completed", { source: "/login", metadata: { method: "email", stage: "success" } });
       } catch {}
-      navigate("/dashboard", { replace: true });
+      navigate(postAuthTarget, { replace: true });
     } catch (error: any) {
       const info = mapAuthError(error);
       try {
@@ -246,7 +249,13 @@ const Login = () => {
                       Mot de passe oublié ?
                     </Link>
                     {failedAttempts >= 2 && (
-                      <Link to={`/inscription${email ? `?email=${encodeURIComponent(email)}` : ""}`} className="text-primary hover:underline">
+                      <Link to={`/inscription${(() => {
+                        const params = new URLSearchParams();
+                        if (email) params.set("email", email);
+                        if (redirectTarget) params.set("redirect", redirectTarget);
+                        const qs = params.toString();
+                        return qs ? `?${qs}` : "";
+                      })()}`} className="text-primary hover:underline">
                         Pas encore de compte ? Inscrivez-vous
                       </Link>
                     )}
@@ -268,7 +277,7 @@ const Login = () => {
 
           <p className="text-center text-sm text-muted-foreground mt-6">
             Pas encore de compte ?{" "}
-            <Link to="/inscription" className="text-primary font-medium hover:underline">Créer un compte</Link>
+            <Link to={`/inscription${buildRedirectQuery(redirectTarget)}`} className="text-primary font-medium hover:underline">Créer un compte</Link>
           </p>
         </div>
       </div>

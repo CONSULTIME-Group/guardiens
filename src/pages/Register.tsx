@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { getSignupRedirectUrl } from "@/lib/authRedirect";
+import { sanitizeRedirect, buildRedirectQuery } from "@/lib/safeRedirect";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent, trackEventWithUserId, mapSignupError } from "@/lib/analytics";
 import { mapAuthError } from "@/lib/authErrorMessages";
@@ -112,6 +113,8 @@ const Register = () => {
  const { register } = useAuth();
  const navigate = useNavigate();
  const { toast } = useToast();
+ const redirectTarget = sanitizeRedirect(searchParams.get("redirect"));
+ const postAuthTarget = redirectTarget ?? "/dashboard";
 
  const pwStrength = useMemo(() => getPasswordStrength(password), [password]);
 
@@ -291,7 +294,7 @@ const Register = () => {
  metadata: { role: selectedRole, user_id: newUserId, auto_confirmed: true },
  });
  } catch {}
- navigate("/dashboard");
+ navigate(postAuthTarget);
  return;
  }
 
@@ -373,7 +376,11 @@ const Register = () => {
  };
 
  const goToLoginWithEmail = () => {
- navigate(`/login?email=${encodeURIComponent(email)}`);
+  const params = new URLSearchParams();
+  if (email) params.set("email", email);
+  if (redirectTarget) params.set("redirect", redirectTarget);
+  const qs = params.toString();
+  navigate(`/login${qs ? `?${qs}` : ""}`);
  };
 
   const handleGoogleSignUp = async () => {
@@ -394,7 +401,7 @@ const Register = () => {
  metadata: { role: selectedRole, method: "google" },
  });
  } catch {}
-  const googleRedirectUrl = `${window.location.origin}/dashboard`;
+  const googleRedirectUrl = `${window.location.origin}${postAuthTarget}`;
   logOAuthStage("sdk_called", "/inscription", {
  role: selectedRole,
  redirect_uri: googleRedirectUrl,
@@ -419,7 +426,7 @@ const Register = () => {
  return;
  }
  logOAuthStage("tokens_received", "/inscription");
- navigate("/dashboard", { replace: true });
+ navigate(postAuthTarget, { replace: true });
  };
 
  return (
@@ -835,16 +842,16 @@ const Register = () => {
 
   {step !== "confirmation" && (
   <div className="mt-6 space-y-2 text-center text-sm text-muted-foreground">
-  <p>
-  Déjà un compte ?{" "}
-  <Link to="/login" className="text-primary font-medium hover:underline">Se connecter</Link>
-  </p>
-  {step === 2 && (
-  <button
-  type="button"
-  onClick={() => navigate("/login")}
-  className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-  >
+   <p>
+   Déjà un compte ?{" "}
+   <Link to={`/login${buildRedirectQuery(redirectTarget)}`} className="text-primary font-medium hover:underline">Se connecter</Link>
+   </p>
+   {step === 2 && (
+   <button
+   type="button"
+   onClick={() => navigate(`/login${buildRedirectQuery(redirectTarget)}`)}
+   className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+   >
   Quitter l'inscription et revenir à la connexion
   </button>
   )}
