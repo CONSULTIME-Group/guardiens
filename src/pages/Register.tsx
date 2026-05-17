@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { getSignupRedirectUrl } from "@/lib/authRedirect";
+import { sanitizeRedirect, buildRedirectQuery } from "@/lib/safeRedirect";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent, trackEventWithUserId, mapSignupError } from "@/lib/analytics";
 import { mapAuthError } from "@/lib/authErrorMessages";
