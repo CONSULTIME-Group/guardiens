@@ -227,11 +227,22 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
         })}
       </div>
 
-      {/* Carrousel */}
+      {/* Liste : carrousel horizontal en mode standard, stack vertical en mode compact (aside étroit) */}
       {filtered.length === 0 ? (
         <p className="text-xs text-muted-foreground italic py-4">
           Personne sur cette compétence pour l'instant — essayez une autre catégorie.
         </p>
+      ) : hideHeader ? (
+        <div className="flex flex-col gap-2">
+          {filtered.slice(0, 3).map((helper) => (
+            <HelperMiniCard
+              key={helper.id}
+              helper={helper}
+              onWrite={() => handleWrite(helper)}
+              compact
+            />
+          ))}
+        </div>
       ) : (
         <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory scrollbar-hide">
           {filtered.map((helper) => (
