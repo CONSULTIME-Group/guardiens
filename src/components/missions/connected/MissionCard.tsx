@@ -78,11 +78,17 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
               avant que l'utilisateur clique pour ouvrir le détail. Caché si auteur = vous. */}
           {!isMine && (() => {
             const safeBio = sanitizeBioForCard((m.profiles as any)?.bio);
-            return safeBio ? (
-              <p className="text-xs italic text-foreground/70 leading-snug line-clamp-2">
-                « {safeBio} »
+            if (!safeBio) return null;
+            // Mode compact : tronque à 80 car. + clamp 1 ligne (gain ~16px/carte,
+            // utile sur grilles 3 colonnes ou liste mobile très longue).
+            const displayBio = compactBio && safeBio.length > 80
+              ? `${safeBio.slice(0, 80).trimEnd()}…`
+              : safeBio;
+            return (
+              <p className={`text-xs italic text-foreground/70 leading-snug ${compactBio ? "line-clamp-1" : "line-clamp-2"}`}>
+                « {displayBio} »
               </p>
-            ) : null;
+            );
           })()}
           <p className="text-xs text-muted-foreground">
             {formatCity(m.city || "—")} · {formatDuration(m.duration_estimate || "—")}
