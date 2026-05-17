@@ -307,7 +307,8 @@ const SitterDashboard = () => {
           </h3>
         </header>
         {annoncesEmpty ? (
-          <div className="rounded-2xl border border-border bg-card px-5 py-6 text-center">
+          <div className="rounded-2xl border border-border bg-card px-5 pt-5 pb-6 text-center">
+            <EmptyIllustration kind="annonces" size="md" className="mb-3" />
             <p className="text-sm text-foreground font-medium mb-1">
               Aucune annonce dans un rayon de 100 km.
             </p>
