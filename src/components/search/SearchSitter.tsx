@@ -150,7 +150,13 @@ const SearchSitter = () => {
  // Derive housingType for existing filter logic (backward compat)
  const housingType = housingTypes.length === 1 ? housingTypes[0] : "all";
 
- const hasActiveFilters = housingTypes.length > 0 || verifiedOnly || withPhotosOnly || minExperience !== "all" || environments.length > 0;
+ const activeFiltersCount =
+  housingTypes.length +
+  environments.length +
+  (verifiedOnly ? 1 : 0) +
+  (withPhotosOnly ? 1 : 0) +
+  (minExperience !== "all" ? 1 : 0);
+ const hasActiveFilters = activeFiltersCount > 0;
 
  // ─── City autocomplete via geo.api.gouv.fr ───
  // Comportement unifié : on normalise (sans accents/casse) côté client puis
