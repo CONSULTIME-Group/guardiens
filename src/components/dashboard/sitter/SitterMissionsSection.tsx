@@ -176,6 +176,7 @@ const SitterMissionsSection = memo(({
             </div>
             <Button
               size="sm"
+              variant="outline"
               onClick={() => navigate("/petites-missions/creer")}
               className="w-full rounded-xl text-xs mt-3 gap-1.5"
             >
