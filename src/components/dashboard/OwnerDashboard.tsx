@@ -32,6 +32,7 @@ import StatsStrip from "./owner/StatsStrip";
 import PendingReviewsCard from "./owner/PendingReviewsCard";
 import MobileStickyCTA from "./owner/MobileStickyCTA";
 import TodoCard, { type TodoItem } from "./owner/TodoCard";
+import NearbyHelpersCarousel from "./sitter/NearbyHelpersCarousel";
 import {
   SPECIES_LABEL, PROPRIO_SPECIAL_IDS,
   capitalize, capitalizeWords,
@@ -364,6 +365,7 @@ const OwnerDashboard = () => {
             ]}
           />
           <NearbyEmergencySitters />
+          <NearbyHelpersCarousel />
           <MissionsTabsCard myMissions={myMissions} nearbyMissions={smallMissions} />
         </aside>
       </div>
