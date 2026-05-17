@@ -80,12 +80,25 @@ export const normalizeSkillKey = (s: string | null | undefined): string => {
     .replace(/[\u0300-\u036f]/g, "");
 };
 
+export interface TokenizeOptions {
+  /** Longueur min (incluse). Défaut : `SKILL_TOKEN_MIN_LEN` (2). */
+  minLen?: number;
+  /** Longueur max (incluse). Défaut : `SKILL_TOKEN_MAX_LEN` (22). */
+  maxLen?: number;
+}
+
 /**
  * @param raw Liste brute (peut contenir des phrases entières).
+ * @param options Bornes de longueur configurables.
  * @returns Liste de pastilles courtes, dédupliquées, capitalisées.
  */
-export const tokenizeSkillPhrases = (raw: (string | null | undefined)[] | null | undefined): string[] => {
+export const tokenizeSkillPhrases = (
+  raw: (string | null | undefined)[] | null | undefined,
+  options: TokenizeOptions = {},
+): string[] => {
   if (!raw || raw.length === 0) return [];
+  const minLen = options.minLen ?? SKILL_TOKEN_MIN_LEN;
+  const maxLen = options.maxLen ?? SKILL_TOKEN_MAX_LEN;
   const seen = new Set<string>();
   const out: string[] = [];
 
@@ -95,7 +108,7 @@ export const tokenizeSkillPhrases = (raw: (string | null | undefined)[] | null |
     const parts = stripped.split(SEPARATORS);
     for (const part of parts) {
       const cleaned = cleanToken(part).replace(/\s+/g, " ");
-      if (!isValid(cleaned)) continue;
+      if (!isValid(cleaned, minLen, maxLen)) continue;
       const key = normalizeSkillKey(cleaned);
       if (!key || seen.has(key)) continue;
       seen.add(key);
