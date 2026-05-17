@@ -1229,10 +1229,35 @@ const SearchSitter = () => {
  />
  </div>
 
- {/* ─── Sticky search bar ─── */}
- <div className="sticky top-0 z-[1100] bg-background border-b-2 border-border shadow-sm">
-  <div className="relative -mr-6 sm:mr-0">
-  <div className="flex flex-row items-center gap-2 px-6 py-3 overflow-x-auto no-scrollbar pr-10 sm:pr-6">
+  {/* ─── Sticky search bar ─── */}
+  <div className="sticky top-0 z-[1100] bg-background border-b-2 border-border shadow-sm">
+   {/* Mobile compact bar (carte uniquement) : un résumé + bouton qui replie/déplie les filtres */}
+   {isMobile && viewMode === "map" && (
+    <button
+     type="button"
+     onClick={() => setMobileFiltersOpen(o => !o)}
+     aria-expanded={mobileFiltersOpen}
+     aria-controls="search-filter-pills"
+     className="w-full flex items-center justify-between gap-2 px-4 py-2.5 text-left border-b border-border/60"
+    >
+     <span className="flex items-center gap-2 text-sm font-medium text-foreground min-w-0">
+      <MapPin className="h-4 w-4 text-primary shrink-0" />
+      <span className="truncate">{city || "Lieu"} · {datesLabel}</span>
+     </span>
+     <span className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-3 py-1.5 text-xs font-semibold shrink-0 relative">
+      <SlidersHorizontal className="h-3.5 w-3.5" />
+      {mobileFiltersOpen ? "Fermer" : "Filtres"}
+      {hasActiveFilters && !mobileFiltersOpen && (
+       <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-accent border border-background" />
+      )}
+     </span>
+    </button>
+   )}
+   <div
+    id="search-filter-pills"
+    className={`relative -mr-6 sm:mr-0 ${isMobile && viewMode === "map" && !mobileFiltersOpen ? "hidden" : ""}`}
+   >
+   <div className="flex flex-row items-center gap-2 px-6 py-3 overflow-x-auto no-scrollbar pr-10 sm:pr-6">
  {/* Location pill */}
  <Popover open={editingCity} onOpenChange={setEditingCity}>
  <PopoverTrigger asChild>
