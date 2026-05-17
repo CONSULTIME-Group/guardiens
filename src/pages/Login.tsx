@@ -77,7 +77,7 @@ const Login = () => {
       try {
         trackEvent("login_completed", { source: "/login", metadata: { method: "email", stage: "success" } });
       } catch {}
-      navigate("/dashboard", { replace: true });
+      navigate(postAuthTarget, { replace: true });
     } catch (error: any) {
       const info = mapAuthError(error);
       try {
