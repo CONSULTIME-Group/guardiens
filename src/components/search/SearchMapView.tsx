@@ -125,7 +125,7 @@ const SearchMapView = ({
   const activeItem = results.find((r) => r.id === activePin);
 
   return (
-    <div className="flex flex-col md:flex-row h-[calc(100vh-180px)] md:h-[calc(100vh-200px)]">
+    <div className="flex flex-col md:flex-row h-[calc(100dvh-180px)] md:h-[calc(100dvh-200px)]">
       <div className="hidden md:block md:w-1/2 overflow-y-auto p-4 space-y-3 border-r border-border">
         {results.map(renderCard)}
       </div>
