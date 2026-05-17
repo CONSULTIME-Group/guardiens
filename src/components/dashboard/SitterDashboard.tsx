@@ -175,17 +175,57 @@ const SitterDashboard = () => {
     </section>
   );
 
-  // Réputation détaillée — déplacée dans un Accordion fermé par défaut.
-  // Pourquoi : 5 KPIs en strip horizontal au-dessus du pli = 5 zéros pour
-  // un débutant. On garde la donnée accessible, mais on la sort du chemin critique.
-  const buildStatusBlock = (compact: boolean) => (
-    <section aria-labelledby={compact ? "status-heading-side" : "status-heading"}>
-      <h2 id={compact ? "status-heading-side" : "status-heading"} className="sr-only">
-        Ma réputation détaillée
-      </h2>
+  // ── Accordéon unique : Conseils + Réputation + Badges ──
+  // 3 strates secondaires regroupées dans UN seul Accordion pour densifier
+  // le bas de dashboard et clarifier la hiérarchie (1 zone "à explorer"
+  // au lieu de 3 cartes empilées). Toutes fermées par défaut.
+  const SecondaryAccordion = (
+    <section aria-label="Mon espace gardien — détails" className="rounded-2xl border border-border bg-card overflow-hidden">
       <Accordion type="single" collapsible>
-        <AccordionItem value="reputation" className="border border-border rounded-2xl bg-card overflow-hidden">
-          <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
+        <AccordionItem value="conseils" className="border-b border-border last:border-0">
+          <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
+            <div className="flex flex-col items-start text-left">
+              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
+                Conseils
+              </p>
+              <p className="text-sm font-medium text-foreground">
+                {articles.length > 0
+                  ? `${articles.length} article${articles.length > 1 ? "s" : ""} de la communauté`
+                  : "Bientôt de nouveaux conseils"}
+              </p>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4 pt-1">
+            {articles.length > 0 ? (
+              <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+                {articles.map((a: any) => (
+                  <Link key={a.id} to={`/actualites/${a.slug}`} className="group/card flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 ease-out cursor-pointer">
+                    {a.cover_image_url ? (
+                      <div className="w-full h-28 overflow-hidden">
+                        <img src={getOptimizedImageUrl(a.cover_image_url, 300, 75)} alt={a.title || "Article"} className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover/card:scale-105" width={300} height={112} loading="lazy" />
+                      </div>
+                    ) : (
+                      <div className="w-full h-28 bg-accent flex items-center justify-center">
+                        <Newspaper className="h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
+                      </div>
+                    )}
+                    <div className="p-3">
+                      <h4 className="text-sm font-semibold line-clamp-2 transition-colors group-hover/card:text-primary">{a.title}</h4>
+                      <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{a.excerpt}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground italic text-center py-4">
+                De nouveaux conseils arrivent prochainement.
+              </p>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="reputation" className="border-b border-border last:border-0">
+          <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
             <div className="flex flex-col items-start text-left">
               <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
                 Ma réputation
@@ -204,18 +244,28 @@ const SitterDashboard = () => {
               badgeCount={badgeCount}
               totalApps={totalApps}
               reputation={reputation}
-              compact={compact}
+              compact={false}
             />
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="badges" className="border-b border-border last:border-0">
+          <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
+            <div className="flex flex-col items-start text-left">
+              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
+                Badges
+              </p>
+              <p className="text-sm font-medium text-foreground">
+                {badgeCount} badge{badgeCount > 1 ? "s" : ""} obtenu{badgeCount > 1 ? "s" : ""}
+              </p>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4 pt-1">
+            <SitterBadgesSection groupedBadges={groupedBadges} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
     </section>
-  );
-
-  const buildBadgesBlock = (sidebar: boolean) => (
-    <div className={sidebar ? "mb-6" : "px-4 sm:px-5 md:px-8 mb-6 md:mb-8"}>
-      <SitterBadgesSection groupedBadges={groupedBadges} condensed />
-    </div>
   );
 
   // Emergency en version compacte (1 ligne) — l'ancienne carte ~200px était
