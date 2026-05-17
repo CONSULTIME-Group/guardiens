@@ -201,6 +201,27 @@ const SitPhotoManager = ({
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {gallery.length >= 2 && (
+            <button
+              type="button"
+              onClick={handleSuggestBest}
+              disabled={suggesting}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-md border border-primary/30 bg-primary/5 text-primary px-3 py-1.5 text-sm font-medium hover:bg-primary/10 transition-colors",
+                suggesting && "opacity-60 pointer-events-none"
+              )}
+            >
+              {suggesting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Analyse…
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" /> Suggérer la meilleure
+                </>
+              )}
+            </button>
+          )}
           <label className="inline-flex">
             <input
               type="file"
@@ -232,6 +253,30 @@ const SitPhotoManager = ({
           </label>
         </div>
       </div>
+
+      {suggestion && (
+        <div className="mb-4 rounded-xl border border-primary/30 bg-primary/5 p-3 flex flex-wrap items-center gap-3">
+          <img
+            src={suggestion.url}
+            alt=""
+            className="h-16 w-20 rounded-md object-cover border border-border"
+          />
+          <div className="flex-1 min-w-[200px]">
+            <p className="text-sm font-medium text-foreground">
+              Couverture suggérée — score qualité {suggestion.score}/100
+            </p>
+            <p className="text-xs text-muted-foreground">{suggestion.summary}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={() => setSuggestion(null)}>
+              Ignorer
+            </Button>
+            <Button size="sm" onClick={applySuggestion} disabled={!!savingCover}>
+              Appliquer
+            </Button>
+          </div>
+        </div>
+      )}
 
       {gallery.length === 0 ? (
         <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/30 p-6 text-center">
