@@ -174,8 +174,14 @@ export function useSitterDashboardData(userId: string | undefined) {
       // Reputation (replaces useProfileReputation)
       const reputation: ReputationData | null = reputationRes.data ?? null;
 
-      // Nearby listings — filtered by owner's department (first 2 chars of postal code)
+      // Nearby listings — filtre dept (CP[0:2]) puis tri par distance quand
+      // les coords du propriétaire ET du gardien sont connues. Sans coords,
+      // on garde l'ordre chronologique (filet de sécurité).
       const userDept = profile?.postal_code?.slice(0, 2);
+      const meLat = (profile as any)?.latitude as number | null | undefined;
+      const meLng = (profile as any)?.longitude as number | null | undefined;
+      const hasMyCoords = typeof meLat === "number" && typeof meLng === "number";
+
       let nearbyListings: any[] = [];
       let nearbyError: string | null = null;
       if (userDept) {
@@ -193,25 +199,42 @@ export function useSitterDashboardData(userId: string | undefined) {
           if (candidateOwnerIds.length > 0) {
             const { data: owners, error: ownersErr } = await supabase
               .from("public_profiles")
-              .select("id, postal_code")
+              .select("id, postal_code, latitude, longitude")
               .in("id", candidateOwnerIds);
             if (ownersErr) {
               nearbyError = "Impossible de charger les annonces près de chez vous.";
             } else {
+              const ownerById = new Map<string, any>((owners || []).map((o: any) => [o.id, o]));
               const deptOwnerIds = new Set(
                 (owners || [])
                   .filter((o: any) => o.postal_code?.startsWith(userDept))
                   .map((o: any) => o.id)
               );
-              nearbyListings = (deptListings || [])
+              const enriched = (deptListings || [])
                 .filter((s: any) => deptOwnerIds.has(s.user_id))
-                .slice(0, 4);
+                .map((s: any) => {
+                  const owner = ownerById.get(s.user_id);
+                  const distance_km = hasMyCoords && owner?.latitude && owner?.longitude
+                    ? haversineDistance(
+                        { lat: meLat as number, lng: meLng as number },
+                        { lat: owner.latitude, lng: owner.longitude },
+                      )
+                    : null;
+                  return { ...s, distance_km };
+                });
+              // Tri : distance croissante si dispo, sinon ordre chronologique
+              // d'origine (déjà DESC created_at en sortie SQL).
+              if (hasMyCoords) {
+                enriched.sort((a, b) => (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity));
+              }
+              nearbyListings = enriched.slice(0, 4);
             }
           }
         }
       }
 
-      // Nearby missions — filtered by department
+      // Nearby missions — même logique : filtre dept + tri distance via les
+      // coords de l'auteur de la mission (fetch léger sur public_profiles).
       let nearbyMissions: any[] = [];
       let nearbyMissionsError: string | null = null;
       if (userDept) {
@@ -224,9 +247,33 @@ export function useSitterDashboardData(userId: string | undefined) {
         if (missionsErr) {
           nearbyMissionsError = "Impossible de charger les échanges autour de vous.";
         } else {
-          nearbyMissions = (missions || [])
-            .filter((m: any) => m.user_id !== userId && m.postal_code?.startsWith(userDept))
-            .slice(0, 4);
+          const deptMissions = (missions || [])
+            .filter((m: any) => m.user_id !== userId && m.postal_code?.startsWith(userDept));
+          // Enrichissement coords auteur — un seul appel batch.
+          const authorIds = Array.from(new Set(deptMissions.map((m: any) => m.user_id)));
+          let authorCoords = new Map<string, { lat: number; lng: number }>();
+          if (authorIds.length > 0 && hasMyCoords) {
+            const { data: authors } = await supabase
+              .from("public_profiles")
+              .select("id, latitude, longitude")
+              .in("id", authorIds);
+            (authors || []).forEach((a: any) => {
+              if (typeof a.latitude === "number" && typeof a.longitude === "number") {
+                authorCoords.set(a.id, { lat: a.latitude, lng: a.longitude });
+              }
+            });
+          }
+          const enriched = deptMissions.map((m: any) => {
+            const c = authorCoords.get(m.user_id);
+            const distance_km = c && hasMyCoords
+              ? haversineDistance({ lat: meLat as number, lng: meLng as number }, c)
+              : null;
+            return { ...m, distance_km };
+          });
+          if (hasMyCoords) {
+            enriched.sort((a, b) => (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity));
+          }
+          nearbyMissions = enriched.slice(0, 4);
         }
       }
 
