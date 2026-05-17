@@ -134,7 +134,8 @@ const SearchSitter = () => {
  const [cityInput, setCityInput] = useState("");
  const [citySuggestions, setCitySuggestions] = useState<{ nom: string; codesPostaux?: string[] }[]>([]);
   const [showMoreAnimals, setShowMoreAnimals] = useState(false);
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+ const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+ const [filterSheetOpen, setFilterSheetOpen] = useState(false);
 
  // Environment (visual only for now)
  const [environments, setEnvironments] = useState<string[]>([]);
