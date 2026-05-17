@@ -249,7 +249,13 @@ const Login = () => {
                       Mot de passe oublié ?
                     </Link>
                     {failedAttempts >= 2 && (
-                      <Link to={`/inscription${email ? `?email=${encodeURIComponent(email)}` : ""}`} className="text-primary hover:underline">
+                      <Link to={`/inscription${(() => {
+                        const params = new URLSearchParams();
+                        if (email) params.set("email", email);
+                        if (redirectTarget) params.set("redirect", redirectTarget);
+                        const qs = params.toString();
+                        return qs ? `?${qs}` : "";
+                      })()}`} className="text-primary hover:underline">
                         Pas encore de compte ? Inscrivez-vous
                       </Link>
                     )}
