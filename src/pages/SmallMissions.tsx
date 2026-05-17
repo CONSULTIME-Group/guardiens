@@ -333,20 +333,16 @@ const SmallMissions = () => {
   }, [compactBio]);
 
   // ---------------------------------------------------------------------------
-  // A/B test : MissionCard avec mini-bio (B) vs sans (A).
-  // Hypothèse : afficher la bio augmente le taux de clic vers le détail
-  //             ET maintient/améliore le scroll engagement sur mobile.
-  // Assignation : sticky par userId (ou anonId) → expérience stable.
-  // Mesures :
-  //   - exp_mission_bio_exposure : 1 fois par session/page (variant)
-  //   - exp_mission_bio_click    : à chaque clic carte (variant, position, hasBio)
-  //   - exp_mission_bio_scroll   : scroll max % à la sortie de page
+  // Mesure before/after : impact de la mini-bio sur MissionCard.
+  // Plus de bucketing A/B (trafic trop faible pour atteindre la significativité).
+  // Tous les utilisateurs voient la bio (showBio = true). On compare les KPI
+  // pré-release vs post-release via le tag de cohorte `BIO_RELEASE_TAG`.
+  // Événements :
+  //   - exp_mission_bio_exposure : 1 fois par session/page (release)
+  //   - exp_mission_bio_click    : à chaque clic carte (release, position, hasBio)
+  //   - exp_mission_bio_scroll   : scroll max % à la sortie de page (release, isMobile)
   // ---------------------------------------------------------------------------
-  const bioVariant = useMemo(
-    () => getVariant("mission_card_bio_v1", user?.id),
-    [user?.id]
-  );
-  const showBio = bioVariant === "B";
+  const showBio = true;
 
   const exposureFiredRef = useRef(false);
   useEffect(() => {
@@ -355,16 +351,16 @@ const SmallMissions = () => {
     exposureFiredRef.current = true;
     void trackEvent("exp_mission_bio_exposure", {
       source: "small_missions",
-      metadata: { variant: bioVariant, mission_count: missionCount },
+      metadata: { release: BIO_RELEASE_TAG, mission_count: missionCount },
     });
-  }, [missionCount, bioVariant]);
+  }, [missionCount]);
 
   const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches;
   useScrollDepthTracker(
     (maxPct) => {
       void trackEvent("exp_mission_bio_scroll", {
         source: "small_missions",
-        metadata: { variant: bioVariant, max_scroll_pct: maxPct, is_mobile: isMobile },
+        metadata: { release: BIO_RELEASE_TAG, max_scroll_pct: maxPct, is_mobile: isMobile },
       });
     },
     missionCount > 0
