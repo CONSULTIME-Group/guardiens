@@ -382,11 +382,13 @@ export default function ArticleDetail() {
  {article.slug === "nouveaux-tarifs-2026" && (
  <Helmet>
  <script type="application/ld+json">{JSON.stringify({
- "@context": "https://schema.org",
- "@type": "Product",
- "name": "Abonnement Gardien Guardiens",
- "description": "Abonnement pour devenir gardien de maison et d'animaux sur Guardiens. Sans engagement, résiliable à tout moment.",
- "brand": { "@type": "Brand", "name": "Guardiens" },
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "serviceType": "Abonnement plateforme de gardiennage entre particuliers",
+  "name": "Abonnement Gardien Guardiens",
+  "description": "Abonnement pour devenir gardien de maison et d'animaux sur Guardiens. Sans engagement, résiliable à tout moment.",
+  "provider": { "@type": "Organization", "name": "Guardiens", "url": "https://guardiens.fr" },
+  "areaServed": { "@type": "Country", "name": "France" },
  "offers": {
  "@type": "Offer",
  "name": "Abonnement gardien mensuel",

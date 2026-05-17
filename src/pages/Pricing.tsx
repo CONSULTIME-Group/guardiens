@@ -236,18 +236,20 @@ const Pricing = () => {
   })),
  };
 
- const productJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Product",
-  name: "Abonnement Gardien Guardiens",
-  description:
-   "Accès gardien à Guardiens : postuler aux gardes d'animaux à domicile, messagerie directe avec les propriétaires, profil de confiance vérifié, alertes locales.",
-  image: [
-   "https://guardiens.fr/og/og-sit-1.jpg",
-   "https://guardiens.fr/og/og-sit-2.jpg",
-  ],
-  brand: { "@type": "Brand", name: "Guardiens" },
-  url: "https://guardiens.fr/tarifs",
+  const productJsonLd = {
+   "@context": "https://schema.org",
+   "@type": "Service",
+   serviceType: "Abonnement plateforme de gardiennage entre particuliers",
+   name: "Abonnement Gardien Guardiens",
+   description:
+    "Accès gardien à Guardiens : postuler aux gardes d'animaux à domicile, messagerie directe avec les propriétaires, profil de confiance vérifié, alertes locales.",
+   image: [
+    "https://guardiens.fr/og/og-sit-1.jpg",
+    "https://guardiens.fr/og/og-sit-2.jpg",
+   ],
+   provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
+   areaServed: { "@type": "Country", name: "France" },
+   url: "https://guardiens.fr/tarifs",
   offers: [
    {
     "@type": "Offer",
