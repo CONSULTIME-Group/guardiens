@@ -125,12 +125,12 @@ const SearchMapView = ({
   const activeItem = results.find((r) => r.id === activePin);
 
   return (
-    <div className="flex h-[calc(100vh-200px)]">
-      <div className="w-1/2 overflow-y-auto p-4 space-y-3 border-r border-border">
+    <div className="flex flex-col md:flex-row h-[calc(100vh-180px)] md:h-[calc(100vh-200px)]">
+      <div className="hidden md:block md:w-1/2 overflow-y-auto p-4 space-y-3 border-r border-border">
         {results.map(renderCard)}
       </div>
 
-      <div className="w-1/2 relative">
+      <div className="w-full md:w-1/2 relative flex-1 min-h-0">
         <MapContainer
           center={center}
           zoom={userCoords ? 11 : 6}
@@ -187,7 +187,7 @@ const SearchMapView = ({
         </div>
 
         {/* Légende */}
-        <div className="absolute bottom-3 left-3 z-[400] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-sm px-3 py-2 text-xs text-foreground pointer-events-none space-y-1">
+        <div className="absolute bottom-20 md:bottom-3 left-3 z-[400] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-sm px-3 py-2 text-xs text-foreground pointer-events-none space-y-1">
           <div className="flex items-center gap-2">
             <span className="inline-block w-3 h-3 rounded-full" style={{ background: pinColors.active.bg, border: `2px solid ${pinColors.active.ring}` }} />
             Annonce active
@@ -224,8 +224,8 @@ const SearchMapView = ({
           return (
             <div
               ref={popoverRef}
-              className={`absolute z-[1000] bg-card rounded-xl shadow-lg overflow-hidden ${isDemo ? "border-2 border-dashed border-amber-400" : "border border-border"}`}
-              style={{ width: 240, top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
+              className={`absolute z-[1000] bg-card rounded-xl shadow-lg overflow-hidden w-[min(260px,calc(100vw-2rem))] ${isDemo ? "border-2 border-dashed border-amber-400" : "border border-border"}`}
+              style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
             >
               {isDemo && (
                 <div className="bg-amber-400 text-amber-950 text-[11px] font-semibold uppercase tracking-wide px-3 py-1 text-center">
