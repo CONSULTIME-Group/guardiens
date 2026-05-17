@@ -25,23 +25,26 @@ const QuickActionsCard = ({
       Actions rapides
     </p>
 
-    {/* Toggle dispo */}
+    {/* Indicateur de statut (lecture seule). Le toggle réel reste dans le Hero
+        — source de vérité unique pour éviter les états divergents. */}
     <div className="flex items-center justify-between py-2 border-b border-border">
       <div>
         <p className="text-sm font-medium text-foreground">Mode disponible</p>
         <p className="text-xs text-muted-foreground">
-          {isAvailable ? "Visible auprès des proprios" : "Vous n'apparaissez pas"}
+          {isAvailable ? "Visible auprès des propriétaires" : "Vous n'apparaissez pas dans les résultats"}
         </p>
       </div>
-      <button
-        role="switch"
-        aria-checked={isAvailable}
-        aria-label="Basculer la disponibilité"
-        onClick={onToggleAvailability}
-        className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${isAvailable ? "bg-toggle-active" : "bg-muted"}`}
+      <span
+        className={`inline-flex items-center gap-1.5 text-xs font-medium rounded-full px-2.5 py-1 ${
+          isAvailable
+            ? "bg-success/15 text-success border border-success/30"
+            : "bg-muted text-muted-foreground border border-border"
+        }`}
+        aria-live="polite"
       >
-        <span className={`absolute top-0.5 w-5 h-5 bg-background rounded-full shadow transition-all duration-200 ${isAvailable ? "left-5" : "left-0.5"}`} />
-      </button>
+        <span className={`w-1.5 h-1.5 rounded-full ${isAvailable ? "bg-success" : "bg-muted-foreground/50"}`} />
+        {isAvailable ? "Actif" : "Inactif"}
+      </span>
     </div>
 
     {/* Candidatures */}

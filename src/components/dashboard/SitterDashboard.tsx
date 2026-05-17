@@ -12,7 +12,8 @@ import { FreePeriodBanner } from "@/components/marketing/FreePeriodBanner";
 
 import SitterHero from "./sitter/SitterHero";
 import SitterNextGuard from "./sitter/SitterNextGuard";
-import SitterNextGuardEmpty from "./sitter/SitterNextGuardEmpty";
+// SitterNextGuardEmpty supprimé : la Checklist d'activation joue désormais
+// ce rôle en empty state (action > décoration).
 import NearestListingHero from "./sitter/NearestListingHero";
 import DashboardSectionState from "./sitter/DashboardSectionState";
 import SitterMobileStickyCTA from "./sitter/SitterMobileStickyCTA";
@@ -73,13 +74,14 @@ const SitterDashboard = () => {
 
   // ── Checklist UNIFIÉE — fusion onboarding + profile completion ──
   // Items atomiques actionnables (pas l'agrégat profile_completion).
+  // NB : le toggle "mode disponible" est porté UNIQUEMENT par SitterHero
+  // (source de vérité unique). On ne le duplique plus ici.
   const allItems = [
     { done: !!postalCode, label: "Indiquer mon code postal", to: "/profile?focus=postal_code" },
     { done: !!avatarUrl, label: "Ajouter une photo de profil", to: "/profile?section=identite" },
     { done: !!(bio && bio.length >= 50), label: "Écrire ma bio (motivation, expérience)", to: "/profile?section=profil" },
     { done: hasAnimalExperience, label: "Ajouter une expérience animale", to: "/profile?section=experience" },
     { done: identityStatus === "verified" || identityVerified, label: "Vérifier mon identité (recommandé)", to: "/settings#verification" },
-    { done: isAvailable, label: "Activer le mode disponible", to: "", isToggle: true },
   ];
   const completedItems = allItems.filter(c => c.done);
   const incompleteItems = allItems.filter(c => !c.done);
@@ -141,33 +143,15 @@ const SitterDashboard = () => {
           </div>
 
           <div role="list" className="bg-card border border-border rounded-2xl overflow-hidden">
-            {incompleteItems.map((item: any, i: number) =>
-              item.isToggle ? (
-                <div key="toggle" role="listitem" className="flex items-center justify-between py-3 border-b border-border last:border-0 px-4">
-                  <div className="flex items-center">
-                    <Circle className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                    <span className="text-sm text-foreground ml-3">Activer le mode disponible</span>
-                  </div>
-                  <button
-                    role="switch"
-                    aria-checked={isAvailable}
-                    aria-label="Basculer la disponibilité"
-                    onClick={toggleAvailability}
-                    className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${isAvailable ? "bg-toggle-active" : "bg-muted"}`}
-                  >
-                    <span className={`absolute top-0.5 w-5 h-5 bg-background rounded-full shadow transition-all duration-200 ${isAvailable ? "left-5" : "left-0.5"}`} />
-                  </button>
+            {incompleteItems.map((item: any, i: number) => (
+              <Link key={i} to={item.to} role="listitem" className="group flex items-center justify-between py-3 px-4 border-b border-border last:border-0 cursor-pointer hover:bg-muted/40 transition-all duration-200 ease-out hover:translate-x-0.5">
+                <div className="flex items-center">
+                  <Circle className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
+                  <span className="text-sm text-foreground ml-3">{item.label}</span>
                 </div>
-              ) : (
-                <Link key={i} to={item.to} role="listitem" className="group flex items-center justify-between py-3 px-4 border-b border-border last:border-0 cursor-pointer hover:bg-muted/40 transition-all duration-200 ease-out hover:translate-x-0.5">
-                  <div className="flex items-center">
-                    <Circle className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
-                    <span className="text-sm text-foreground ml-3">{item.label}</span>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
-                </Link>
-              )
-            )}
+                <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
+              </Link>
+            ))}
           </div>
           {completedItems.length > 0 && (
             <Accordion type="single" collapsible className="mt-3">
@@ -309,58 +293,71 @@ const SitterDashboard = () => {
         onToggleAvailability={toggleAvailability}
       />
 
-      {/* FreePeriodBanner sur empty state (pas de garde prévue) */}
-      {!nextGuard && (
-        <div className="mb-4">
-          <FreePeriodBanner />
-        </div>
-      )}
+      {/* État empty = pas de prochaine garde ET pas d'annonce à proximité.
+          Dans ce cas, la priorité absolue est l'activation : on remonte la
+          checklist juste après le Hero et on masque NextGuardEmpty (la
+          checklist le remplace fonctionnellement). */}
+      {(() => {
+        const isEmpty = !nextGuard && !nextGuardError && nearbyListings.length === 0 && !nearbyError;
+        return (
+          <>
+            {/* Checklist mobile EN PREMIER sur empty state */}
+            {isEmpty && <div className="xl:hidden">{ChecklistBlock}</div>}
 
-      {/* Hero contextuel */}
-      {nextGuard ? (
-        <SitterNextGuard nextGuard={nextGuard} />
-      ) : nextGuardError ? (
-        <DashboardSectionState
-          variant="error"
-          eyebrow="Prochaine garde"
-          description={nextGuardError}
-          onRetry={() => window.location.reload()}
-        />
-      ) : nearbyListings.length > 0 ? (
-        <NearestListingHero listing={nearbyListings[0]} />
-      ) : nearbyError ? (
-        <DashboardSectionState
-          variant="error"
-          eyebrow="Annonce la plus proche"
-          description={nearbyError}
-          onRetry={() => window.location.reload()}
-        />
-      ) : (
-        <SitterNextGuardEmpty />
-      )}
+            {/* FreePeriodBanner sur empty state (pas de garde prévue) */}
+            {!nextGuard && (
+              <div className="mb-4">
+                <FreePeriodBanner />
+              </div>
+            )}
 
-      <div className="px-4 sm:px-5 md:px-8 mt-4">
-        <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
-      </div>
+            {/* Hero contextuel (masqué en empty state — la checklist a pris sa place) */}
+            {nextGuard ? (
+              <SitterNextGuard nextGuard={nextGuard} />
+            ) : nextGuardError ? (
+              <DashboardSectionState
+                variant="error"
+                eyebrow="Prochaine garde"
+                description={nextGuardError}
+                onRetry={() => window.location.reload()}
+              />
+            ) : nearbyListings.length > 0 ? (
+              <NearestListingHero listing={nearbyListings[0]} />
+            ) : nearbyError ? (
+              <DashboardSectionState
+                variant="error"
+                eyebrow="Annonce la plus proche"
+                description={nearbyError}
+                onRetry={() => window.location.reload()}
+              />
+            ) : null /* empty : checklist déjà rendue */}
 
-      {/* ═══ 2-COLUMN LAYOUT ≥ xl ═══ */}
+            <div className="px-4 sm:px-5 md:px-8 mt-4">
+              <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+            </div>
 
-      {/* Version pleine largeur — visible < xl */}
-      <div className="xl:hidden mt-4">
-        {ChecklistBlock}
+            {/* ═══ 2-COLUMN LAYOUT ≥ xl ═══ */}
 
-        <div className="px-4 sm:px-5 md:px-8 mb-6 space-y-4">
-          {buildStatusBlock(false)}
-          {buildBadgesBlock(false)}
-          {buildEmergencyBlock(false)}
-        </div>
+            {/* Version pleine largeur — visible < xl */}
+            <div className="xl:hidden mt-4">
+              {/* Checklist ici UNIQUEMENT si pas déjà rendue plus haut */}
+              {!isEmpty && ChecklistBlock}
 
-        <div className="px-4 sm:px-5 md:px-8 mb-6">
-          <DashSection eyebrow="Près de chez vous" title="À découvrir" description="Annonces, échanges et conseils sélectionnés pour vous.">
-            {DiscoveryTabs}
-          </DashSection>
-        </div>
-      </div>
+              <div className="px-4 sm:px-5 md:px-8 mb-6 space-y-4">
+                {buildStatusBlock(false)}
+                {buildBadgesBlock(false)}
+                {buildEmergencyBlock(false)}
+              </div>
+
+              <div className="px-4 sm:px-5 md:px-8 mb-6">
+                <DashSection eyebrow="Près de chez vous" title="À découvrir" description="Annonces, échanges et conseils sélectionnés pour vous.">
+                  {DiscoveryTabs}
+                </DashSection>
+              </div>
+            </div>
+          </>
+        );
+      })()}
 
       {/* Version 2 colonnes — visible ≥ xl */}
       <div className="hidden xl:grid xl:grid-cols-12 xl:gap-6 xl:px-8 min-w-0 mt-4">
@@ -375,18 +372,23 @@ const SitterDashboard = () => {
           </div>
         </div>
 
-        {/* SIDE COLUMN — 4/12 — enrichie avec QuickActions en tête */}
-        <aside aria-label="Actions, statut, badges et urgence" className="xl:col-span-4 min-w-0">
+        {/* SIDE COLUMN — 4/12 — ACTIONS UNIQUEMENT (audit #3 : pas de décoration en aside) */}
+        <aside aria-label="Actions rapides" className="xl:col-span-4 min-w-0">
           <QuickActionsCard
             pendingAppsCount={pendingAppsCount}
             unreadCount={unreadCount}
             isAvailable={isAvailable}
             onToggleAvailability={toggleAvailability}
           />
-          {buildStatusBlock(true)}
-          {buildEmergencyBlock(true)}
-          {buildBadgesBlock(true)}
         </aside>
+      </div>
+
+      {/* Statut / badges / urgence — pleine largeur sous le layout 2 colonnes en xl.
+          Sur < xl, déjà rendus dans la version pleine largeur ci-dessus. */}
+      <div className="hidden xl:block xl:px-8 mt-6 space-y-4">
+        {buildStatusBlock(false)}
+        {buildBadgesBlock(false)}
+        {buildEmergencyBlock(false)}
       </div>
 
       {/* Lien discret "Revoir la présentation" — relégué en pied */}
