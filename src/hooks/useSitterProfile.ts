@@ -33,6 +33,8 @@ export interface SitterProfileData {
   last_name: string;
   city: string;
   postal_code: string;
+  latitude?: number | null;
+  longitude?: number | null;
   bio: string;
   avatar_url: string;
   // Step 1 - from sitter_profiles
