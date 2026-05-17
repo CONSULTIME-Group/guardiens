@@ -1,33 +1,48 @@
 import { memo, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShieldCheck, ArrowRight } from "lucide-react";
+import { ShieldCheck, ArrowRight, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNearbyHelpers, type NearbyHelper } from "@/hooks/useNearbyHelpers";
-import { useActiveSittersCount } from "@/hooks/useActiveSittersCount";
+import { useHelpersProximityCount } from "@/hooks/useHelpersProximityCount";
 import { useCtaCooldown } from "@/hooks/useCtaCooldown";
 import { startConversation } from "@/lib/conversation";
 import { toast } from "sonner";
 import { capitalize } from "@/components/dashboard/owner/helpers";
 
 /**
- * Mini-compteur de preuve sociale globale.
- * Affiché uniquement quand on a une valeur ; silencieux si la requête échoue
- * (pas de "0 gardien actif" anxiogène). Pulse vert = signal de fraîcheur.
+ * Compteur dual « local · national » de personnes prêtes à donner un coup de main.
+ *
+ * Pourquoi : un « 412 actifs en France » est trop abstrait sur un dashboard
+ * utilisateur. On veut d'abord le SIGNAL LOCAL (« il y a du monde près de
+ * vous »), puis le NATIONAL en filet (« sinon la communauté est vivante »).
+ * Affiché en pastille horizontale dense, pulse vert pour la fraîcheur.
  */
-const ActiveSittersTicker = () => {
-  const { data: count } = useActiveSittersCount();
-  if (!count || count < 10) return null;
+const HelpersProximityTicker = ({ userId }: { userId?: string }) => {
+  const { data } = useHelpersProximityCount(userId);
+  if (!data) return null;
+  const { localCount, nationalCount, radiusKm, hasGeo } = data;
+  if (nationalCount < 5) return null;
+
   return (
-    <p className="mt-4 inline-flex items-center gap-2 text-[11px] text-muted-foreground font-sans">
-      <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
+    <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] sm:text-xs text-foreground/75 font-sans">
+      <span className="relative flex h-1.5 w-1.5 shrink-0" aria-hidden="true">
         <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-60 animate-ping" />
         <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
       </span>
+      {hasGeo && localCount > 0 && (
+        <span className="inline-flex items-center gap-1">
+          <MapPin className="h-3 w-3 text-primary/70" aria-hidden="true" />
+          <strong className="font-semibold text-foreground tabular-nums">{localCount}</strong>
+          <span className="text-foreground/70">prêt·es à aider à moins de {radiusKm}&nbsp;km</span>
+        </span>
+      )}
+      {hasGeo && localCount > 0 && <span className="text-muted-foreground/50">·</span>}
       <span>
-        <strong className="font-semibold text-foreground tabular-nums">{count.toLocaleString("fr-FR")}</strong> gardiens actifs partout en France
+        <strong className="font-semibold text-foreground tabular-nums">{nationalCount.toLocaleString("fr-FR")}</strong>{" "}
+        <span className="text-foreground/70">{hasGeo && localCount > 0 ? "en France" : "personnes prêtes à aider en France"}</span>
       </span>
-    </p>
+    </div>
   );
 };
 
@@ -42,7 +57,7 @@ const ActiveSittersTicker = () => {
  * Le ticker "X gardiens actifs" reste affiché dans tous les cas — c'est de la
  * preuve sociale, pas un CTA, donc pas concerné par le cooldown.
  */
-const EmptyHelpersState = ({ hideHeader }: { hideHeader: boolean }) => {
+const EmptyHelpersState = ({ hideHeader, userId }: { hideHeader: boolean; userId?: string }) => {
   const { variant, snooze } = useCtaCooldown("helpers_empty_referral", {
     softThreshold: 3,
     windowDays: 7,
@@ -126,7 +141,7 @@ const EmptyHelpersState = ({ hideHeader }: { hideHeader: boolean }) => {
           </p>
         )}
 
-        <ActiveSittersTicker />
+        <HelpersProximityTicker userId={userId} />
       </div>
     </section>
   );
@@ -167,20 +182,43 @@ const HelperMiniCard = ({
   const customSkills = (helper.custom_skills || [])
     .map((s) => s?.trim())
     .filter((s): s is string => !!s);
-  const bioTeaser = helper.bio?.trim() || null;
+
+  // Fusion pastilles : custom_skills d'abord (vrai savoir-faire déclaré),
+  // puis catégories génériques en complément. Plafond 4 chips pour rester
+  // sur 1-2 lignes max. Pas de phrase, pas de bio italique : pastilles only.
+  type Chip = { key: string; label: string; tone: "custom" | "category" };
+  const chips: Chip[] = [
+    ...customSkills.map((c): Chip => ({ key: `c-${c}`, label: c, tone: "custom" })),
+    ...helper.skill_categories
+      .filter((cat) => SKILL_CHIPS.find((c) => c.key === cat))
+      .map((cat): Chip => ({
+        key: `k-${cat}`,
+        label: SKILL_CHIPS.find((c) => c.key === cat)!.label,
+        tone: "category",
+      })),
+  ];
+  const MAX_CHIPS = 4;
+  const visibleChips = chips.slice(0, MAX_CHIPS);
+  const remaining = chips.length - visibleChips.length;
+
+  const distance =
+    helper.distance_km !== null && helper.distance_km !== undefined
+      ? Math.round(helper.distance_km)
+      : null;
+
   return (
     <article
       className="
         group/card flex-shrink-0 w-[78vw] sm:w-[19rem] snap-start
         rounded-2xl bg-card
-        ring-1 ring-border/60 hover:ring-primary/30
-        shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.12)]
-        transition-all duration-300 ease-out
+        ring-1 ring-border/60 hover:ring-primary/40
+        shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_32px_-16px_rgba(0,0,0,0.18)]
+        transition-all duration-300 ease-out hover:-translate-y-0.5
         flex flex-col overflow-hidden
       "
     >
-      {/* En-tête : avatar + nom + ville/distance + vérif */}
-      <div className="px-4 pt-4 pb-3 flex items-center gap-3">
+      {/* En-tête : avatar + nom + ville + distance proéminente */}
+      <div className="px-4 pt-4 pb-3 flex items-start gap-3">
         {helper.avatar_url ? (
           <img
             src={helper.avatar_url}
@@ -213,61 +251,53 @@ const HelperMiniCard = ({
           </div>
           <p className="text-[11px] text-muted-foreground truncate mt-0.5">
             {helper.city ? capitalize(helper.city) : "Près de chez vous"}
-            {helper.distance_km !== null && helper.distance_km !== undefined
-              ? ` · ${Math.round(helper.distance_km)} km`
-              : ""}
           </p>
         </div>
+        {distance !== null && (
+          <span
+            className="shrink-0 inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-[11px] font-semibold font-sans px-2 py-0.5 tabular-nums"
+            aria-label={`À ${distance} kilomètres de chez vous`}
+          >
+            <MapPin className="h-3 w-3" aria-hidden="true" />
+            {distance}&nbsp;km
+          </span>
+        )}
       </div>
 
-      {/* Bio teaser — typo serif italique, ton éditorial léger */}
-      {bioTeaser ? (
-        <p className="px-4 pb-3 text-[13px] text-foreground/75 leading-relaxed italic line-clamp-2 font-heading">
-          « {bioTeaser} »
-        </p>
-      ) : (
-        <div className="px-4 pb-3">
-          <p className="text-[12px] text-muted-foreground/70 leading-snug italic">
-            Disponible pour un coup de main près de chez vous.
-          </p>
-        </div>
-      )}
-
-      {/* Savoir-faire : 1 ligne, chips fines, débordement masqué */}
-      {(customSkills.length > 0 || helper.skill_categories.length > 0) && (
-        <div className="px-4 pb-4 flex flex-wrap gap-1.5">
-          {customSkills.slice(0, 2).map((c) => (
-            <span
-              key={c}
-              className="text-[11px] rounded-full bg-muted/60 text-foreground/80 px-2.5 py-0.5 ring-1 ring-border/40"
-            >
-              {c}
-            </span>
-          ))}
-          {helper.skill_categories
-            .filter((cat) => SKILL_CHIPS.find((c) => c.key === cat))
-            .slice(0, customSkills.length > 0 ? 1 : 3)
-            .map((cat) => {
-              const meta = SKILL_CHIPS.find((c) => c.key === cat)!;
-              return (
-                <span
-                  key={cat}
-                  className="text-[11px] rounded-full bg-primary/8 text-primary px-2.5 py-0.5"
-                >
-                  {meta.label}
-                </span>
-              );
-            })}
-          {customSkills.length + helper.skill_categories.length > 3 && (
-            <span className="text-[11px] text-muted-foreground self-center">
-              +{customSkills.length + helper.skill_categories.length - 3}
-            </span>
+      {/* Savoir-faire : pastilles only (pas de bio, pas de phrase) */}
+      {chips.length > 0 ? (
+        <div className="px-4 pb-4 flex flex-wrap gap-1.5 min-h-[2rem]">
+          {visibleChips.map((chip) =>
+            chip.tone === "custom" ? (
+              <span
+                key={chip.key}
+                className="text-[11px] rounded-full bg-foreground/[0.06] text-foreground/85 px-2.5 py-0.5 ring-1 ring-border/40"
+              >
+                {chip.label}
+              </span>
+            ) : (
+              <span
+                key={chip.key}
+                className="text-[11px] rounded-full bg-primary/8 text-primary px-2.5 py-0.5"
+              >
+                {chip.label}
+              </span>
+            )
           )}
+          {remaining > 0 && (
+            <span className="text-[11px] text-muted-foreground self-center">+{remaining}</span>
+          )}
+        </div>
+      ) : (
+        <div className="px-4 pb-4">
+          <span className="text-[11px] rounded-full bg-muted/40 text-muted-foreground px-2.5 py-0.5">
+            Disponible
+          </span>
         </div>
       )}
 
       {/* CTA — discret, bord supérieur très léger, plein largeur */}
-      <div className="mt-auto border-t border-border/40 bg-muted/20 group-hover/card:bg-muted/40 transition-colors">
+      <div className="mt-auto border-t border-border/40 bg-muted/20 group-hover/card:bg-primary/5 transition-colors">
         <Button
           variant="ghost"
           size="sm"
@@ -312,7 +342,7 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
   // Empty-state premium : pas de helpers dans le rayon max (100 km).
   // On transforme le vide en levier d'acquisition (parrainage) plutôt qu'en trou UX.
   if (!helpers.length) {
-    return <EmptyHelpersState hideHeader={hideHeader} />;
+    return <EmptyHelpersState hideHeader={hideHeader} userId={user?.id} />;
   }
 
   const radiusLabel = data?.hasGeo
@@ -351,11 +381,14 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
               Qui peut vous donner un coup de main&nbsp;?
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Personnes du coin disponibles {radiusLabel}.
+              Triés par proximité, {radiusLabel}.
             </p>
           </div>
         </div>
       )}
+
+      {/* Compteur dual local · national — preuve sociale localisée */}
+      <HelpersProximityTicker userId={user?.id} />
 
       {/* Chips compétences */}
       <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
