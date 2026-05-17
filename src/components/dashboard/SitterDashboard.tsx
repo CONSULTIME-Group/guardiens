@@ -10,17 +10,13 @@ import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import { FreePeriodBanner } from "@/components/marketing/FreePeriodBanner";
 
-import SitterHero from "./sitter/SitterHero";
-import SitterNextGuard from "./sitter/SitterNextGuard";
-// SitterNextGuardEmpty supprimé : la Checklist d'activation joue désormais
-// ce rôle en empty state (action > décoration).
-import NearestListingHero from "./sitter/NearestListingHero";
+import SitterCockpit from "./sitter/SitterCockpit";
 import DashboardSectionState from "./sitter/DashboardSectionState";
 import SitterMobileStickyCTA from "./sitter/SitterMobileStickyCTA";
 import SitterStatusBar from "./sitter/SitterStatusBar";
 import SitterBadgesSection from "./sitter/SitterBadgesSection";
 import NearbyHelpersCarousel from "./sitter/NearbyHelpersCarousel";
-import SitterEmergencyCard from "./sitter/SitterEmergencyCard";
+import SitterEmergencyCardCompact from "./sitter/SitterEmergencyCardCompact";
 import SitterMissionsSection from "./sitter/SitterMissionsSection";
 import NearbyAnnoncesCard from "./sitter/NearbyAnnoncesCard";
 import QuickActionsCard from "./sitter/QuickActionsCard";
@@ -179,21 +175,40 @@ const SitterDashboard = () => {
     </section>
   );
 
+  // Réputation détaillée — déplacée dans un Accordion fermé par défaut.
+  // Pourquoi : 5 KPIs en strip horizontal au-dessus du pli = 5 zéros pour
+  // un débutant. On garde la donnée accessible, mais on la sort du chemin critique.
   const buildStatusBlock = (compact: boolean) => (
     <section aria-labelledby={compact ? "status-heading-side" : "status-heading"}>
       <h2 id={compact ? "status-heading-side" : "status-heading"} className="sr-only">
-        Mon statut
+        Ma réputation détaillée
       </h2>
-      <SitterStatusBar
-        profileCompletion={profileCompletion}
-        completedSits={completedSits}
-        avgRating={avgRating}
-        reviewsCount={reviewsCount}
-        badgeCount={badgeCount}
-        totalApps={totalApps}
-        reputation={reputation}
-        compact={compact}
-      />
+      <Accordion type="single" collapsible>
+        <AccordionItem value="reputation" className="border border-border rounded-2xl bg-card overflow-hidden">
+          <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
+            <div className="flex flex-col items-start text-left">
+              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
+                Ma réputation
+              </p>
+              <p className="text-sm font-medium text-foreground">
+                {completedSits} garde{completedSits > 1 ? "s" : ""} · {reviewsCount > 0 ? `note ${avgRating.toFixed(1)}/5` : "aucun avis"} · {badgeCount} badge{badgeCount > 1 ? "s" : ""}
+              </p>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4 pt-1">
+            <SitterStatusBar
+              profileCompletion={profileCompletion}
+              completedSits={completedSits}
+              avgRating={avgRating}
+              reviewsCount={reviewsCount}
+              badgeCount={badgeCount}
+              totalApps={totalApps}
+              reputation={reputation}
+              compact={compact}
+            />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </section>
   );
 
@@ -203,15 +218,17 @@ const SitterDashboard = () => {
     </div>
   );
 
+  // Emergency en version compacte (1 ligne) — l'ancienne carte ~200px était
+  // disproportionnée pour une fonction conditionnelle.
   const buildEmergencyBlock = (sidebar: boolean) => (
     <section
       aria-labelledby={sidebar ? "emergency-heading-side" : "emergency-heading"}
-      className={sidebar ? "mb-6" : "px-4 sm:px-5 md:px-8 mb-6 md:mb-8"}
+      className={sidebar ? "" : "px-4 sm:px-5 md:px-8"}
     >
       <h2 id={sidebar ? "emergency-heading-side" : "emergency-heading"} className="sr-only">
         Gardien d'urgence
       </h2>
-      <SitterEmergencyCard hasEmergencyProfile={hasEmergencyProfile} />
+      <SitterEmergencyCardCompact hasEmergencyProfile={hasEmergencyProfile} />
     </section>
   );
 
@@ -343,56 +360,54 @@ const SitterDashboard = () => {
         <RoleActivationBanner userRole={user?.role || "sitter"} />
       </div>
 
-      {/* ═══ HERO ═══ */}
-      <SitterHero
+      {/* ═══ COCKPIT ═══ (greeting + action prioritaire + signal vivant) */}
+      <SitterCockpit
         userId={user?.id}
         firstName={user?.firstName}
         avatarUrl={avatarUrl}
         isFounder={user?.isFounder}
-        subtitle={subtitle}
         isAvailable={isAvailable}
         onToggleAvailability={toggleAvailability}
+        nextGuard={nextGuard}
+        profileCompletion={profileCompletion}
+        postalCode={postalCode}
+        nearbyListings={nearbyListings}
       />
 
-      {/* État empty = pas de prochaine garde ET pas d'annonce à proximité.
-          Dans ce cas, la priorité absolue est l'activation : on remonte la
-          checklist juste après le Hero et on masque NextGuardEmpty (la
-          checklist le remplace fonctionnellement). */}
+      {/* Erreurs de fetch — affichées discrètement sous le cockpit pour ne pas
+          polluer le pli, mais restent visibles pour debug utilisateur. */}
+      {(nextGuardError || nearbyError) && (
+        <div className="px-4 sm:px-5 md:px-8 mt-2 space-y-2">
+          {nextGuardError && (
+            <DashboardSectionState
+              variant="error"
+              eyebrow="Prochaine garde"
+              description={nextGuardError}
+              onRetry={() => window.location.reload()}
+            />
+          )}
+          {nearbyError && (
+            <DashboardSectionState
+              variant="error"
+              eyebrow="Annonces à proximité"
+              description={nearbyError}
+              onRetry={() => window.location.reload()}
+            />
+          )}
+        </div>
+      )}
+
+      {/* FreePeriodBanner — 1 ligne sous le cockpit, pas un bloc en hero */}
+      {!nextGuard && (
+        <div className="px-4 sm:px-5 md:px-8 mt-3">
+          <FreePeriodBanner />
+        </div>
+      )}
+
       {(() => {
         const isEmpty = !nextGuard && !nextGuardError && nearbyListings.length === 0 && !nearbyError;
         return (
           <>
-            {/* Checklist mobile EN PREMIER sur empty state */}
-            {isEmpty && <div className="xl:hidden">{ChecklistBlock}</div>}
-
-            {/* FreePeriodBanner sur empty state (pas de garde prévue) */}
-            {!nextGuard && (
-              <div className="mb-4">
-                <FreePeriodBanner />
-              </div>
-            )}
-
-            {/* Hero contextuel (masqué en empty state — la checklist a pris sa place) */}
-            {nextGuard ? (
-              <SitterNextGuard nextGuard={nextGuard} />
-            ) : nextGuardError ? (
-              <DashboardSectionState
-                variant="error"
-                eyebrow="Prochaine garde"
-                description={nextGuardError}
-                onRetry={() => window.location.reload()}
-              />
-            ) : nearbyListings.length > 0 ? (
-              <NearestListingHero listing={nearbyListings[0]} />
-            ) : nearbyError ? (
-              <DashboardSectionState
-                variant="error"
-                eyebrow="Annonce la plus proche"
-                description={nearbyError}
-                onRetry={() => window.location.reload()}
-              />
-            ) : null /* empty : checklist déjà rendue */}
-
             <div className="px-4 sm:px-5 md:px-8 mt-4">
               <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
             </div>
@@ -401,17 +416,18 @@ const SitterDashboard = () => {
 
             {/* Version pleine largeur — visible < xl */}
             <div className="xl:hidden mt-4">
-              {/* Checklist ici UNIQUEMENT si pas déjà rendue plus haut */}
-              {!isEmpty && ChecklistBlock}
+              {/* Checklist — toujours rendue sous le cockpit en mobile (l'empty-state
+                  est déjà géré par la PriorityActionCard du cockpit). */}
+              {ChecklistBlock}
+
+              <div className="px-4 sm:px-5 md:px-8 mb-6">
+                {DiscoverySections}
+              </div>
 
               <div className="px-4 sm:px-5 md:px-8 mb-6 space-y-4">
                 {buildStatusBlock(false)}
                 {buildBadgesBlock(false)}
                 {buildEmergencyBlock(false)}
-              </div>
-
-              <div className="px-4 sm:px-5 md:px-8 mb-6">
-                {DiscoverySections}
               </div>
             </div>
           </>
