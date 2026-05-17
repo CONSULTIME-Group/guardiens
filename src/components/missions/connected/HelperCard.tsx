@@ -12,8 +12,13 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile }: Props) => {
   const skillCats: string[] = h.skill_categories || [];
   const displayedSkills = skillCats.slice(0, 2);
   const extraCount = skillCats.length - 2;
+  const customSkills: string[] = (h.custom_skills as string[]) || [];
   const comps: string[] = h.competences || [];
-  const toShow = comps.length > 0 ? comps : (h.custom_skills as string[] || []);
+  // Compétences "spéciales" = saisies en libre par la personne (savoir-faire
+  // unique : injection, dressage clicker, soins NAC…). On les distingue
+  // visuellement des catégories génériques (Animaux/Jardin/Bricolage).
+  const specialSkills = customSkills.length > 0 ? customSkills : comps;
+  const bioTeaser = h.bio?.trim() || null;
 
   return (
     <div className="rounded-lg border border-border bg-card p-5 space-y-3 transition-colors hover:border-primary/30 flex flex-col">
@@ -41,6 +46,8 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile }: Props) => {
           {h.city && <p className="text-xs text-muted-foreground">{h.city}</p>}
         </div>
       </div>
+
+      {/* Catégories génériques */}
       <div className="flex flex-wrap gap-1.5">
         {displayedSkills.map((key: string) => {
           const meta = SKILL_PILL_META[key];
@@ -55,25 +62,41 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile }: Props) => {
           <span className="text-xs text-muted-foreground px-2 py-0.5">+{extraCount}</span>
         )}
       </div>
+
+      {/* Compétences spéciales (savoir-faire unique) */}
+      {specialSkills.length > 0 && (
+        <div>
+          <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium mb-1">
+            Savoir-faire
+          </p>
+          <div className="flex flex-wrap gap-1">
+            {specialSkills.slice(0, 3).map((c: string) => (
+              <span key={c} className="text-xs bg-muted text-foreground/80 px-2 py-0.5 rounded-full border border-border">
+                {c}
+              </span>
+            ))}
+            {specialSkills.length > 3 && (
+              <span className="text-xs bg-muted text-foreground/60 px-2 py-0.5 rounded-full border border-border">
+                +{specialSkills.length - 3}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Mini bio */}
+      {bioTeaser && (
+        <p className="text-xs text-foreground/75 leading-snug line-clamp-2 italic">
+          « {bioTeaser} »
+        </p>
+      )}
+
       {h.sits_count > 0 && (
         <p className="text-xs text-foreground/60">
           {h.review_count > 0 ? `Note ${h.review_avg.toFixed(1)} · ` : ""}{h.sits_count} mission{h.sits_count > 1 ? "s" : ""} accomplie{h.sits_count > 1 ? "s" : ""}
         </p>
       )}
-      {toShow.length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {toShow.slice(0, 3).map((c: string) => (
-            <span key={c} className="text-xs bg-muted text-foreground/70 px-2 py-0.5 rounded-full border border-border">
-              {c}
-            </span>
-          ))}
-          {toShow.length > 3 && (
-            <span className="text-xs bg-muted text-foreground/70 px-2 py-0.5 rounded-full border border-border">
-              +{toShow.length - 3}
-            </span>
-          )}
-        </div>
-      )}
+
       <div className="flex flex-col gap-2 pt-2 mt-auto">
         <Button onClick={onPropose} size="sm" className="w-full">
           Proposer à {h.first_name || "ce membre"}
