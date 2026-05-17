@@ -14,7 +14,8 @@
  */
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Image as ImageIcon, Plus, Loader2, Star, Check, Sparkles } from "lucide-react";
+import { Image as ImageIcon, Plus, Loader2, Star, Check, Sparkles, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { compressImageFile } from "@/lib/compressImage";
@@ -272,25 +273,50 @@ const SitPhotoManager = ({
         </div>
         <div className="flex items-center gap-2">
           {gallery.length >= 2 && (
-            <button
-              type="button"
-              onClick={handleSuggestBest}
-              disabled={suggesting}
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-md border border-primary/30 bg-primary/5 text-primary px-3 py-1.5 text-sm font-medium hover:bg-primary/10 transition-colors",
-                suggesting && "opacity-60 pointer-events-none"
-              )}
-            >
-              {suggesting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" /> Analyse…
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4" /> Suggérer la meilleure
-                </>
-              )}
-            </button>
+            <div className="inline-flex items-center gap-1">
+              <button
+                type="button"
+                onClick={handleSuggestBest}
+                disabled={suggesting}
+                aria-describedby="suggest-best-rgpd"
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-md border border-primary/30 bg-primary/5 text-primary px-3 py-1.5 text-sm font-medium hover:bg-primary/10 transition-colors",
+                  suggesting && "opacity-60 pointer-events-none"
+                )}
+              >
+                {suggesting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" /> Analyse…
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4" /> Suggérer la meilleure
+                  </>
+                )}
+              </button>
+              <TooltipProvider delayDuration={150}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label="Informations sur l'analyse IA des photos"
+                      className="inline-flex items-center justify-center h-7 w-7 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    >
+                      <Info className="h-3.5 w-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-xs text-xs leading-relaxed">
+                    <p id="suggest-best-rgpd">
+                      En cliquant sur « Suggérer la meilleure », vos photos sont envoyées à un
+                      modèle d'IA partenaire (Google Gemini, via la passerelle Lovable AI) pour
+                      analyser leur pertinence comme couverture d'annonce. Aucune photo n'est
+                      conservée par le modèle. Vous restez seul décisionnaire de la photo
+                      retenue.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           )}
           <label className="inline-flex">
             <input
