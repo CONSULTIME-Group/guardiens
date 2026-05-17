@@ -1,5 +1,12 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
+import { Info } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface StatItem {
   value: number | string | null;
@@ -9,6 +16,8 @@ interface StatItem {
   to?: string;
   /** Si défini et value === 0, affiche un placeholder neutre (« — ») au lieu d'un « 0 » grisé. */
   emptyHint?: string;
+  /** Texte explicatif affiché au survol/tap d'une petite icône info à côté du label. */
+  tooltip?: string;
 }
 
 interface StatsStripProps {
@@ -21,10 +30,11 @@ interface StatsStripProps {
  */
 const StatsStrip = memo(({ items }: StatsStripProps) => {
   return (
-    <section
-      aria-label="Vos statistiques propriétaire"
-      className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-border rounded-2xl border border-border bg-card overflow-hidden transition-shadow duration-300 hover:shadow-sm"
-    >
+    <TooltipProvider delayDuration={150}>
+      <section
+        aria-label="Vos statistiques propriétaire"
+        className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-border rounded-2xl border border-border bg-card overflow-hidden transition-shadow duration-300 hover:shadow-sm"
+      >
       {items.map((item, idx) => {
         const isZero = item.value === 0 || item.value === "0";
         const showEmptyHint = isZero && !!item.emptyHint;
@@ -47,8 +57,25 @@ const StatsStrip = memo(({ items }: StatsStripProps) => {
             ) : (
               <p className="text-sm text-muted-foreground leading-none mt-1">{item.fallback}</p>
             )}
-            <p className={`text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 ${clickable ? "group-hover:text-foreground/80" : ""}`}>
-              {item.label}
+            <p className={`text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 inline-flex items-center gap-1 justify-center md:justify-start ${clickable ? "group-hover:text-foreground/80" : ""}`}>
+              <span>{item.label}</span>
+              {item.tooltip && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                      className="inline-flex items-center justify-center rounded-full text-muted-foreground/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      aria-label={`En savoir plus sur ${item.label}`}
+                    >
+                      <Info className="h-3 w-3" aria-hidden="true" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed normal-case tracking-normal">
+                    {item.tooltip}
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </p>
           </div>
         );
@@ -67,7 +94,8 @@ const StatsStrip = memo(({ items }: StatsStripProps) => {
         }
         return <div key={idx}>{inner(false)}</div>;
       })}
-    </section>
+      </section>
+    </TooltipProvider>
   );
 });
 
