@@ -255,11 +255,11 @@ export function useSitterDashboardData(userId: string | undefined) {
           if (authorIds.length > 0 && hasMyCoords) {
             const { data: authors } = await supabase
               .from("public_profiles")
-              .select("id, latitude, longitude")
+              .select("id, latitude_approx, longitude_approx")
               .in("id", authorIds);
             (authors || []).forEach((a: any) => {
-              if (typeof a.latitude === "number" && typeof a.longitude === "number") {
-                authorCoords.set(a.id, { lat: a.latitude, lng: a.longitude });
+              if (typeof a.latitude_approx === "number" && typeof a.longitude_approx === "number") {
+                authorCoords.set(a.id, { lat: a.latitude_approx, lng: a.longitude_approx });
               }
             });
           }
