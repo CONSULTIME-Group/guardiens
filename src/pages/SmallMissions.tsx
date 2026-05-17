@@ -325,6 +325,44 @@ const SmallMissions = () => {
     try { window.localStorage.setItem("missions:compactBio", compactBio ? "1" : "0"); } catch { /* quota */ }
   }, [compactBio]);
 
+  // ---------------------------------------------------------------------------
+  // A/B test : MissionCard avec mini-bio (B) vs sans (A).
+  // Hypothèse : afficher la bio augmente le taux de clic vers le détail
+  //             ET maintient/améliore le scroll engagement sur mobile.
+  // Assignation : sticky par userId (ou anonId) → expérience stable.
+  // Mesures :
+  //   - exp_mission_bio_exposure : 1 fois par session/page (variant)
+  //   - exp_mission_bio_click    : à chaque clic carte (variant, position, hasBio)
+  //   - exp_mission_bio_scroll   : scroll max % à la sortie de page
+  // ---------------------------------------------------------------------------
+  const bioVariant = useMemo(
+    () => getVariant("mission_card_bio_v1", user?.id),
+    [user?.id]
+  );
+  const showBio = bioVariant === "B";
+
+  const exposureFiredRef = useRef(false);
+  useEffect(() => {
+    if (exposureFiredRef.current) return;
+    if (missionCount === 0) return;
+    exposureFiredRef.current = true;
+    void trackEvent("exp_mission_bio_exposure", {
+      source: "small_missions",
+      metadata: { variant: bioVariant, mission_count: missionCount },
+    });
+  }, [missionCount, bioVariant]);
+
+  const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches;
+  useScrollDepthTracker(
+    (maxPct) => {
+      void trackEvent("exp_mission_bio_scroll", {
+        source: "small_missions",
+        metadata: { variant: bioVariant, max_scroll_pct: maxPct, is_mobile: isMobile },
+      });
+    },
+    missionCount > 0
+  );
+
   const { priorityHelpers, complementaryHelpers } = useMemo(() => {
     const priority: any[] = [];
     const complementary: any[] = [];
