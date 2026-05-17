@@ -334,7 +334,6 @@ const OwnerDashboard = () => {
               {
                 value: completedSits.length,
                 label: "Gardes",
-                emptyHint: "Aucune garde",
               },
               {
                 value: avgRating > 0 ? `${avgRating} ★` : null,
@@ -347,12 +346,10 @@ const OwnerDashboard = () => {
                 value: activeSits.length,
                 label: "Annonces",
                 to: "/sits",
-                emptyHint: "Aucune",
               },
               {
                 value: trustedSitterCount,
-                label: "Confiance",
-                emptyHint: "—",
+                label: "De confiance",
               },
             ]}
           />
