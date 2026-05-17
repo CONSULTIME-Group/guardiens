@@ -73,13 +73,14 @@ const SitterDashboard = () => {
 
   // ── Checklist UNIFIÉE — fusion onboarding + profile completion ──
   // Items atomiques actionnables (pas l'agrégat profile_completion).
+  // NB : le toggle "mode disponible" est porté UNIQUEMENT par SitterHero
+  // (source de vérité unique). On ne le duplique plus ici.
   const allItems = [
     { done: !!postalCode, label: "Indiquer mon code postal", to: "/profile?focus=postal_code" },
     { done: !!avatarUrl, label: "Ajouter une photo de profil", to: "/profile?section=identite" },
     { done: !!(bio && bio.length >= 50), label: "Écrire ma bio (motivation, expérience)", to: "/profile?section=profil" },
     { done: hasAnimalExperience, label: "Ajouter une expérience animale", to: "/profile?section=experience" },
     { done: identityStatus === "verified" || identityVerified, label: "Vérifier mon identité (recommandé)", to: "/settings#verification" },
-    { done: isAvailable, label: "Activer le mode disponible", to: "", isToggle: true },
   ];
   const completedItems = allItems.filter(c => c.done);
   const incompleteItems = allItems.filter(c => !c.done);
