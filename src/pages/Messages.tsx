@@ -257,6 +257,22 @@ const Messages = () => {
     }) as Conversation,
   });
 
+  // ── Pré-remplissage du brouillon via `?draft=` ──
+  // Permet à un appelant externe (ex: carrousel « Coup de main » du dashboard
+  // gardien) d'amorcer le 1er message avec un contexte précis. Appliqué UNE
+  // SEULE FOIS, quand la conversation cible est ouverte, et seulement si
+  // l'utilisateur n'a pas déjà commencé à taper. Param retiré de l'URL ensuite.
+  useEffect(() => {
+    const draft = searchParams.get("draft");
+    if (!draft || !activeConv) return;
+    if (newMessage.trim().length > 0) return;
+    setNewMessage(draft);
+    const next = new URLSearchParams(searchParams);
+    next.delete("draft");
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeConv?.id, searchParams]);
+
   // ── Realtime sur la liste : tout INSERT sur une conversation de l'utilisateur ──
   // déclenche un rechargement debouncé de la liste pour rafraîchir badges et tri.
   useEffect(() => {
