@@ -426,7 +426,7 @@ const Register = () => {
  return;
  }
  logOAuthStage("tokens_received", "/inscription");
- navigate("/dashboard", { replace: true });
+ navigate(postAuthTarget, { replace: true });
  };
 
  return (
