@@ -343,11 +343,16 @@ const OwnerDashboard = () => {
                 highlight: avgRating > 0,
                 to: user?.id ? `/gardiens/${user.id}?tab=proprio#avis` : undefined,
               },
-              {
-                value: activeSits.length,
-                label: "Annonces",
-                to: "/sits",
-              },
+              // « Annonces » masqué quand aucune n'est active : afficher « 0 »
+              // alors que le hero peut montrer une garde passée crée une
+              // contradiction visuelle démotivante (cf. fix Récurrents).
+              ...(activeSits.length > 0
+                ? [{
+                    value: activeSits.length,
+                    label: "Annonces",
+                    to: "/sits",
+                  }]
+                : []),
               // « Récurrents » : masqué tant qu'aucun gardien n'a réalisé 2 gardes ou plus.
               ...(trustedSitterCount > 0
                 ? [{
