@@ -1,6 +1,12 @@
 import { useState } from "react";
-import { getOptimizedImageUrl } from "@/lib/imageOptim";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
+import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
+import { useAccessLevel } from "@/hooks/useAccessLevel";
+import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
 import { usePreloadImages } from "@/hooks/usePreloadImages";
+import { getOptimizedImageUrl } from "@/lib/imageOptim";
+
 import emptyAnnoncesUrl from "@/assets/illustrations/empty-annonces.webp";
 import emptyHelpersUrl from "@/assets/illustrations/empty-helpers.webp";
 import emptyConseilsUrl from "@/assets/illustrations/empty-conseils.webp";
@@ -10,11 +16,6 @@ const CRITICAL_EMPTY_ILLUSTRATIONS = [
   emptyHelpersUrl,
   emptyConseilsUrl,
 ] as const;
-import { useAuth } from "@/contexts/AuthContext";
-import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
-import { useAccessLevel } from "@/hooks/useAccessLevel";
-import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
 
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
