@@ -27,7 +27,6 @@ import QuickActionsCard from "./sitter/QuickActionsCard";
 import DashSection from "./owner/DashSection";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CheckCircle, Circle, ChevronRight, Newspaper, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -216,62 +215,95 @@ const SitterDashboard = () => {
     </section>
   );
 
-  // ── Zone Découverte — 3 onglets ──
-  const DiscoveryTabs = (
-    <Tabs defaultValue="annonces" className="w-full">
-      <TabsList className="w-full grid grid-cols-3 h-auto p-1">
-        <TabsTrigger value="annonces" className="text-xs sm:text-sm py-2">Annonces</TabsTrigger>
-        <TabsTrigger value="missions" className="text-xs sm:text-sm py-2">Coup de main</TabsTrigger>
-        <TabsTrigger value="conseils" className="text-xs sm:text-sm py-2">Conseils</TabsTrigger>
-      </TabsList>
-
-      <TabsContent value="annonces" className="mt-4">
+  // ── Zone Découverte — sections indépendantes (plus d'onglets).
+  // Ordre validé : Annonces → Coup de main → Conseils (replié).
+  // Pourquoi : les onglets masquaient 2/3 du contenu, le gardien tape rarement
+  // au-delà du premier. Hiérarchie par intention business plutôt que par type.
+  const DiscoverySections = (
+    <div className="space-y-8">
+      {/* 1. Annonces — priorité business (garde rémunérée) */}
+      <section aria-labelledby="discovery-annonces-heading">
+        <header className="mb-3">
+          <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
+            Annonces
+          </p>
+          <h3 id="discovery-annonces-heading" className="font-heading text-lg font-bold text-foreground leading-tight">
+            Près de chez vous
+          </h3>
+        </header>
         <NearbyAnnoncesCard
           nearbyListings={nearbyListings}
           nearbyError={nearbyError}
           isAvailable={isAvailable}
         />
-      </TabsContent>
+      </section>
 
-      <TabsContent value="missions" className="mt-4 space-y-4">
-        <NearbyHelpersCarousel hideHeader />
-        <SitterMissionsSection
-          myMissions={myMissions}
-          nearbyMissions={nearbyMissions}
-          postalCode={postalCode}
-          myMissionsError={myMissionsError}
-          nearbyMissionsError={nearbyMissionsError}
-        />
-      </TabsContent>
-
-      <TabsContent value="conseils" className="mt-4">
-        {articles.length > 0 ? (
-          <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-            {articles.map((a: any) => (
-              <Link key={a.id} to={`/actualites/${a.slug}`} className="group flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 ease-out cursor-pointer">
-                {a.cover_image_url ? (
-                  <div className="w-full h-28 overflow-hidden">
-                    <img src={getOptimizedImageUrl(a.cover_image_url, 300, 75)} alt={a.title || "Article"} className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105" width={300} height={112} loading="lazy" />
-                  </div>
-                ) : (
-                  <div className="w-full h-28 bg-accent flex items-center justify-center">
-                    <Newspaper className="h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
-                  </div>
-                )}
-                <div className="p-3">
-                  <h4 className="text-sm font-semibold line-clamp-2 transition-colors group-hover:text-primary">{a.title}</h4>
-                  <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{a.excerpt}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground italic text-center py-6">
-            De nouveaux conseils arrivent prochainement.
+      {/* 2. Coup de main — entraide (helpers + missions ouvertes fusionnés) */}
+      <section aria-labelledby="discovery-missions-heading">
+        <header className="mb-3">
+          <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
+            Coup de main
           </p>
-        )}
-      </TabsContent>
-    </Tabs>
+          <h3 id="discovery-missions-heading" className="font-heading text-lg font-bold text-foreground leading-tight">
+            Entraide près de chez vous
+          </h3>
+        </header>
+        <div className="space-y-4">
+          <NearbyHelpersCarousel hideHeader />
+          <SitterMissionsSection
+            myMissions={myMissions}
+            nearbyMissions={nearbyMissions}
+            postalCode={postalCode}
+            myMissionsError={myMissionsError}
+            nearbyMissionsError={nearbyMissionsError}
+          />
+        </div>
+      </section>
+
+      {/* 3. Conseils — éditorial, replié par défaut (priorité business basse) */}
+      <section aria-labelledby="discovery-conseils-heading">
+        <details className="group rounded-2xl bg-card border border-border overflow-hidden">
+          <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
+            <div>
+              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
+                Conseils
+              </p>
+              <h3 id="discovery-conseils-heading" className="font-heading text-base font-bold text-foreground leading-tight">
+                Lire les conseils de la communauté
+              </h3>
+            </div>
+            <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
+          </summary>
+          <div className="px-4 pb-4">
+            {articles.length > 0 ? (
+              <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+                {articles.map((a: any) => (
+                  <Link key={a.id} to={`/actualites/${a.slug}`} className="group/card flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 ease-out cursor-pointer">
+                    {a.cover_image_url ? (
+                      <div className="w-full h-28 overflow-hidden">
+                        <img src={getOptimizedImageUrl(a.cover_image_url, 300, 75)} alt={a.title || "Article"} className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover/card:scale-105" width={300} height={112} loading="lazy" />
+                      </div>
+                    ) : (
+                      <div className="w-full h-28 bg-accent flex items-center justify-center">
+                        <Newspaper className="h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
+                      </div>
+                    )}
+                    <div className="p-3">
+                      <h4 className="text-sm font-semibold line-clamp-2 transition-colors group-hover/card:text-primary">{a.title}</h4>
+                      <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{a.excerpt}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground italic text-center py-6">
+                De nouveaux conseils arrivent prochainement.
+              </p>
+            )}
+          </div>
+        </details>
+      </section>
+    </div>
   );
 
   return (
@@ -350,13 +382,7 @@ const SitterDashboard = () => {
               </div>
 
               <div className="px-4 sm:px-5 md:px-8 mb-6">
-                <NearbyHelpersCarousel />
-              </div>
-
-              <div className="px-4 sm:px-5 md:px-8 mb-6">
-                <DashSection eyebrow="Près de chez vous" title="À découvrir" description="Annonces, échanges et conseils sélectionnés pour vous.">
-                  {DiscoveryTabs}
-                </DashSection>
+                {DiscoverySections}
               </div>
             </div>
           </>
@@ -371,7 +397,7 @@ const SitterDashboard = () => {
             {ChecklistBlock}
             <section aria-labelledby="nearby-heading-xl">
               <h2 id="nearby-heading-xl" className="sr-only">Près de chez vous</h2>
-              {DiscoveryTabs}
+              {DiscoverySections}
             </section>
           </div>
         </div>
