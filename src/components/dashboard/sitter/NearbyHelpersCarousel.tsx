@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNearbyHelpers, type NearbyHelper } from "@/hooks/useNearbyHelpers";
 import { useActiveSittersCount } from "@/hooks/useActiveSittersCount";
+import { useCtaCooldown } from "@/hooks/useCtaCooldown";
 import { startConversation } from "@/lib/conversation";
 import { toast } from "sonner";
 import { capitalize } from "@/components/dashboard/owner/helpers";
