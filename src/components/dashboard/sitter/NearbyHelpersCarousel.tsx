@@ -327,17 +327,18 @@ const HelperMiniCard = ({
         )}
       </div>
 
-      {/* CTA — discret, bord supérieur très léger, plein largeur */}
+      {/* CTA — redirige vers la création d'une petite mission (pas de DM direct). */}
       <div className="mt-auto border-t border-border/40 bg-muted/20 group-hover/card:bg-primary/5 transition-colors">
         <Button
+          asChild
           variant="ghost"
           size="sm"
           className="w-full rounded-none h-10 text-xs font-medium text-foreground hover:bg-transparent hover:text-primary justify-center"
-          onClick={onWrite}
-          disabled={pending}
         >
-          {pending ? "Ouverture…" : "Lui écrire"}
-          <ArrowRight className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover/card:translate-x-0.5" aria-hidden="true" />
+          <Link to={ctaHref}>
+            Publier un coup de main
+            <ArrowRight className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover/card:translate-x-0.5" aria-hidden="true" />
+          </Link>
         </Button>
       </div>
     </article>
