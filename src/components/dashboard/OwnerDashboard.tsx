@@ -220,7 +220,11 @@ const OwnerDashboard = () => {
         <RoleActivationBanner userRole={user?.role || "owner"} />
       </div>
 
-      {/* ═══ Hero header (épuré) ═══ */}
+      {/* ═══ Hero header (compact — eyebrow + titre + sous-titre contextuel) ═══
+          La ligne défensive « gratuit » est retirée : redondante une fois
+          loggé (gratuité déjà actée), elle parasitait la hiérarchie. Le
+          rappel de gratuité reste porté par RoleActivationBanner et la
+          carte parrainage. */}
       <header className="px-5 md:px-8 pt-2 animate-fade-in">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div className="min-w-0">
@@ -234,9 +238,6 @@ const OwnerDashboard = () => {
               {user?.isFounder && <FounderBadge size="sm" />}
             </div>
             <p className="text-sm text-muted-foreground font-sans mt-1">{subtitle}</p>
-            <p className="text-xs text-primary/80 font-sans mt-1">
-              Votre espace propriétaire reste gratuit.
-            </p>
             {user?.id && (
               <Button
                 asChild
