@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { format, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { AlertCircle, RefreshCw, Share2, Compass } from "lucide-react";
-import { REFERRAL_REWARD_LABEL, SITTER_PRICE_START } from "@/lib/pricing";
+import { SITTER_PRICE_START } from "@/lib/pricing";
 
 interface Props {
   nearbyListings: any[];
