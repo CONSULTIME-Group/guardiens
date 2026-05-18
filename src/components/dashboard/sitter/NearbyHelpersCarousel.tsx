@@ -392,25 +392,16 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
       : `dans un rayon de ${data.radiusUsed} km`
     : "dans la communauté";
 
-  const handleWrite = async (helper: NearbyHelper) => {
-    if (!user?.id || pending) return;
-    setPending(helper.id);
-    const result = await startConversation({
-      otherUserId: helper.id,
-      context: "helper_inquiry",
-    });
-    setPending(null);
-    if (result.conversationId) {
-      const intent = activeSkill
-        ? SKILL_CHIPS.find((c) => c.key === activeSkill)?.intent
-        : null;
-      const params = new URLSearchParams({ c: result.conversationId });
-      if (intent) params.set("draft", `Bonjour, je cherche ${intent} près de chez moi. Seriez-vous disponible ?`);
-      navigate(`/messages?${params.toString()}`);
-    } else {
-      toast.error(result.error || "Impossible d'ouvrir la conversation");
-    }
-  };
+  // Construit le lien vers la création d'une petite mission, pré-cadré par la
+  // compétence active si l'utilisateur a filtré.
+  const ctaHref = (() => {
+    const intent = activeSkill
+      ? SKILL_CHIPS.find((c) => c.key === activeSkill)?.intent
+      : null;
+    if (!intent) return "/petites-missions/creer";
+    const params = new URLSearchParams({ intent });
+    return `/petites-missions/creer?${params.toString()}`;
+  })();
 
   return (
     <section aria-labelledby="nearby-helpers-heading" className="space-y-3">
