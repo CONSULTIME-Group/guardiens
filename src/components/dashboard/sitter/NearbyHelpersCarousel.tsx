@@ -420,15 +420,18 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
   return (
     <section aria-labelledby="nearby-helpers-heading" className="space-y-3">
       {!hideHeader && (
-        <div className="flex items-end justify-between gap-2">
+        <div className="flex items-end justify-between gap-3">
           <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent mb-1.5">
+              Coup de main
+            </p>
             <h3
               id="nearby-helpers-heading"
-              className="font-heading text-base font-semibold text-foreground leading-tight"
+              className="font-heading text-2xl sm:text-3xl font-semibold text-foreground leading-tight"
             >
-              Qui peut vous donner un coup de main&nbsp;?
+              Entraide près de chez vous
             </h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p className="text-xs text-muted-foreground mt-2 max-w-prose">
               Savoir-faire particuliers affichés en priorité, puis proximité — {radiusLabel}.
             </p>
           </div>
