@@ -272,14 +272,17 @@ const HelperMiniCard = ({
             )}
           </div>
           {distance !== null ? (
-            <p
-              className={`mt-1 text-[10px] font-bold uppercase tracking-[0.18em] tabular-nums ${
-                isVeryClose ? "text-accent" : "text-muted-foreground"
+            <span
+              className={`mt-1.5 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold tabular-nums ring-1 ${
+                isVeryClose
+                  ? "bg-accent/15 text-accent ring-accent/30"
+                  : "bg-primary/10 text-primary ring-primary/20"
               }`}
-              aria-label={`À ${distance} kilomètres de chez vous`}
+              aria-label={`À environ ${distance} kilomètres de chez vous`}
             >
+              <MapPin className="h-3 w-3" aria-hidden="true" />
               {distance}&nbsp;km
-            </p>
+            </span>
           ) : (
             <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground truncate">
               {helper.city ? capitalize(helper.city) : "Près de chez vous"}
@@ -289,25 +292,8 @@ const HelperMiniCard = ({
       </div>
 
       <div className="px-6 pb-5 space-y-3">
-        {/* Catégories génériques */}
-        {visibleCats.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {visibleCats.map((chip) => (
-              <span
-                key={chip.key}
-                className="px-2.5 py-1 bg-muted/40 border border-border text-foreground text-[10px] font-bold uppercase tracking-wider rounded-lg"
-              >
-                {chip.label}
-              </span>
-            ))}
-            {remainingCats > 0 && (
-              <span className="text-[11px] text-muted-foreground self-center">+{remainingCats}</span>
-            )}
-          </div>
-        )}
-
-        {/* Savoir-faire (custom) — section labellisée */}
-        {visibleSF.length > 0 && (
+        {/* Savoir-faire (custom) — affiché EN PREMIER car c'est le différenciant. */}
+        {visibleSF.length > 0 ? (
           <div className="space-y-1.5">
             <p className="text-[9px] uppercase tracking-[0.2em] text-accent font-bold">
               Savoir-faire
@@ -326,6 +312,27 @@ const HelperMiniCard = ({
               )}
             </div>
           </div>
+        ) : visibleCats.length === 0 ? (
+          <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+            Aucun savoir-faire renseigné
+          </p>
+        ) : null}
+
+        {/* Catégories génériques — secondaires */}
+        {visibleCats.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {visibleCats.map((chip) => (
+              <span
+                key={chip.key}
+                className="px-2.5 py-1 bg-muted/40 border border-border text-foreground text-[10px] font-bold uppercase tracking-wider rounded-lg"
+              >
+                {chip.label}
+              </span>
+            ))}
+            {remainingCats > 0 && (
+              <span className="text-[11px] text-muted-foreground self-center">+{remainingCats}</span>
+            )}
+          </div>
         )}
 
         {/* Mini bio */}
@@ -342,18 +349,17 @@ const HelperMiniCard = ({
         )}
       </div>
 
-      {/* CTA — redirige vers la création d'une petite mission (pas de DM direct). */}
+      {/* Lien profil discret — pas de CTA invasif sur la carte. Les actions
+          (voir missions / demander un coup de main) sont déportées au niveau
+          de la section, comme demandé. */}
       <div className="mt-auto px-6 pb-6">
-        <Button
-          asChild
-          variant="outline"
-          className="w-full rounded-2xl h-11 text-[11px] font-bold uppercase tracking-[0.18em] border-border bg-background/60 text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all"
+        <Link
+          to={`/gardiens/${helper.id}`}
+          className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground hover:text-primary transition-colors"
         >
-          <Link to={ctaHref}>
-            Publier un coup de main
-            <ArrowRight className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover/card:translate-x-0.5" aria-hidden="true" />
-          </Link>
-        </Button>
+          Voir le profil
+          <ArrowRight className="h-3 w-3 transition-transform group-hover/card:translate-x-0.5" aria-hidden="true" />
+        </Link>
       </div>
     </article>
   );
@@ -566,6 +572,26 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
           <div className="pointer-events-none absolute inset-y-0 right-0 w-4 bg-gradient-to-l from-background to-transparent" aria-hidden="true" />
         </div>
       )}
+
+      {/* CTA déportés au niveau de la section — volontairement discrets
+          (texte + liens), pas de gros boutons pleins pour ne pas écraser
+          le carrousel ni pousser à la création compulsive d'une mission. */}
+      <div className="flex flex-wrap items-center justify-end gap-x-5 gap-y-2 pt-1 text-xs">
+        <Link
+          to="/petites-missions"
+          className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary font-semibold transition-colors"
+        >
+          Voir les petites missions
+          <ArrowRight className="h-3 w-3" aria-hidden="true" />
+        </Link>
+        <Link
+          to={ctaHref}
+          className="inline-flex items-center gap-1 text-primary hover:underline font-semibold"
+        >
+          Demander un coup de main
+          <ArrowRight className="h-3 w-3" aria-hidden="true" />
+        </Link>
+      </div>
     </section>
   );
 });
