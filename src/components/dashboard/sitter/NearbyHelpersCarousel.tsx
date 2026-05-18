@@ -347,9 +347,7 @@ const HelperMiniCard = ({
 
 const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boolean } = {}) => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [activeSkill, setActiveSkill] = useState<string | null>(null);
-  const [pending, setPending] = useState<string | null>(null);
   // Override rayon — bumped via le lien « Élargir le rayon » dans l'empty-state
   // du filtre. Reset à null quand l'utilisateur change/retire le filtre, pour
   // ne pas garder un rayon de 100 km collant.
