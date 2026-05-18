@@ -298,51 +298,55 @@ const SitterDashboard = () => {
     myMissions.length === 0 && nearbyMissions.length === 0;
 
   const DiscoverySections = (
-    <div className="space-y-6">
+    <div className="space-y-6 min-w-0">
       {/* 1. Annonces — zone PRIMARY (vert sapin) : garde rémunérée */}
       <section
         aria-labelledby="discovery-annonces-heading"
-        className="relative rounded-2xl bg-primary/[0.04] ring-1 ring-primary/15 p-4 sm:p-5"
+        className="relative rounded-2xl bg-primary/[0.04] ring-1 ring-primary/15 p-3 sm:p-5 min-w-0 overflow-hidden"
       >
         <span aria-hidden className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-primary" />
-        <SectionEyebrow
-          eyebrow="Annonces · Garde"
-          title="Près de chez vous"
-          accent="primary"
-          id="discovery-annonces-heading"
-        />
-        <NearbyAnnoncesCard
-          nearbyListings={nearbyListings}
-          nearbyListingsRadius={nearbyListingsRadius}
-          nearbyError={nearbyError}
-          isAvailable={isAvailable}
-          hideHeader
-        />
+        <div className="pl-2 sm:pl-3 min-w-0">
+          <SectionEyebrow
+            eyebrow="Annonces · Garde"
+            title="Près de chez vous"
+            accent="primary"
+            id="discovery-annonces-heading"
+          />
+          <NearbyAnnoncesCard
+            nearbyListings={nearbyListings}
+            nearbyListingsRadius={nearbyListingsRadius}
+            nearbyError={nearbyError}
+            isAvailable={isAvailable}
+            hideHeader
+          />
+        </div>
       </section>
 
       {/* 2. Coup de main — zone WARNING (ambre) : entraide */}
       <section
         aria-labelledby="discovery-missions-heading"
-        className="relative rounded-2xl bg-warning/[0.06] ring-1 ring-warning/20 p-4 sm:p-5"
+        className="relative rounded-2xl bg-warning/[0.06] ring-1 ring-warning/20 p-3 sm:p-5 min-w-0 overflow-hidden"
       >
         <span aria-hidden className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-warning" />
-        <SectionEyebrow
-          eyebrow="Coup de main · Entraide"
-          title="Près de chez vous"
-          accent="warning"
-          id="discovery-missions-heading"
-        />
-        <div className="space-y-4">
-          <NearbyHelpersCarousel hideHeader />
-          {!missionsEmpty && (
-            <SitterMissionsSection
-              myMissions={myMissions}
-              nearbyMissions={nearbyMissions}
-              postalCode={postalCode}
-              myMissionsError={myMissionsError}
-              nearbyMissionsError={nearbyMissionsError}
-            />
-          )}
+        <div className="pl-2 sm:pl-3 min-w-0">
+          <SectionEyebrow
+            eyebrow="Coup de main · Entraide"
+            title="Près de chez vous"
+            accent="warning"
+            id="discovery-missions-heading"
+          />
+          <div className="space-y-4 min-w-0">
+            <NearbyHelpersCarousel hideHeader />
+            {!missionsEmpty && (
+              <SitterMissionsSection
+                myMissions={myMissions}
+                nearbyMissions={nearbyMissions}
+                postalCode={postalCode}
+                myMissionsError={myMissionsError}
+                nearbyMissionsError={nearbyMissionsError}
+              />
+            )}
+          </div>
         </div>
       </section>
 

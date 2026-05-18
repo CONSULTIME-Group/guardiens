@@ -55,10 +55,10 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
         </button>
       </div>
     ) : nearbyListings.length === 0 || hasBeyond ? (
-      <div className="bg-card border border-border rounded-[2rem] p-8 sm:p-10 flex flex-col items-center text-center shadow-sm">
-        <div className="max-w-lg space-y-6">
-          <div className="space-y-3">
-            <h4 className="font-heading text-xl sm:text-2xl font-semibold text-foreground leading-snug">
+      <div className="bg-card border border-border rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-10 flex flex-col items-center text-center shadow-sm min-w-0 overflow-hidden">
+        <div className="max-w-lg space-y-6 min-w-0 w-full">
+          <div className="space-y-3 min-w-0">
+            <h4 className="font-heading text-lg sm:text-2xl font-semibold text-foreground leading-snug break-words">
               {hasBeyond ? "Aucune annonce dans un rayon de 100 km" : "Calme plat sur votre secteur"}
             </h4>
             <p className="text-sm text-muted-foreground leading-relaxed">
