@@ -335,46 +335,6 @@ const HelperMiniCard = ({
           </div>
         )}
 
-      <div className="px-6 pb-5 space-y-3">
-        {/* Catégories génériques */}
-        {visibleCats.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {visibleCats.map((chip) => (
-              <span
-                key={chip.key}
-                className="px-2.5 py-1 bg-muted/40 border border-border text-foreground text-[10px] font-bold uppercase tracking-wider rounded-lg"
-              >
-                {chip.label}
-              </span>
-            ))}
-            {remainingCats > 0 && (
-              <span className="text-[11px] text-muted-foreground self-center">+{remainingCats}</span>
-            )}
-          </div>
-        )}
-
-        {/* Savoir-faire (custom) — section labellisée */}
-        {visibleSF.length > 0 && (
-          <div className="space-y-1.5">
-            <p className="text-[9px] uppercase tracking-[0.2em] text-accent font-bold">
-              Savoir-faire
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {visibleSF.map((chip) => (
-                <span
-                  key={chip.key}
-                  className="px-2.5 py-1 bg-accent/10 border border-accent/25 text-foreground text-[10px] font-semibold uppercase tracking-wider rounded-lg"
-                >
-                  {chip.label}
-                </span>
-              ))}
-              {remainingSF > 0 && (
-                <span className="text-[11px] text-muted-foreground self-center">+{remainingSF}</span>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Mini bio */}
         {bioTeaser && (
           <p className="text-[13px] text-foreground/70 leading-relaxed line-clamp-3 italic">
@@ -389,18 +349,17 @@ const HelperMiniCard = ({
         )}
       </div>
 
-      {/* CTA — redirige vers la création d'une petite mission (pas de DM direct). */}
+      {/* Lien profil discret — pas de CTA invasif sur la carte. Les actions
+          (voir missions / demander un coup de main) sont déportées au niveau
+          de la section, comme demandé. */}
       <div className="mt-auto px-6 pb-6">
-        <Button
-          asChild
-          variant="outline"
-          className="w-full rounded-2xl h-11 text-[11px] font-bold uppercase tracking-[0.18em] border-border bg-background/60 text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all"
+        <Link
+          to={`/gardiens/${helper.id}`}
+          className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground hover:text-primary transition-colors"
         >
-          <Link to={ctaHref}>
-            Publier un coup de main
-            <ArrowRight className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover/card:translate-x-0.5" aria-hidden="true" />
-          </Link>
-        </Button>
+          Voir le profil
+          <ArrowRight className="h-3 w-3 transition-transform group-hover/card:translate-x-0.5" aria-hidden="true" />
+        </Link>
       </div>
     </article>
   );
