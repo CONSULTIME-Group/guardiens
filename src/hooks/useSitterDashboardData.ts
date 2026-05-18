@@ -174,60 +174,76 @@ export function useSitterDashboardData(userId: string | undefined) {
       // Reputation (replaces useProfileReputation)
       const reputation: ReputationData | null = reputationRes.data ?? null;
 
-      // Nearby listings — filtre dept (CP[0:2]) puis tri par distance quand
-      // les coords du propriétaire ET du gardien sont connues. Sans coords,
-      // on garde l'ordre chronologique (filet de sécurité).
-      const userDept = profile?.postal_code?.slice(0, 2);
+      // Nearby listings — tri purement géodésique (haversine) sur la position
+      // approximative du propriétaire. Plus de filtre département : la promesse
+      // « près de chez vous » s'aligne sur la distance réelle, pas sur un
+      // découpage administratif. Fallback de rayon 30 → 50 → 100 km (mêmes
+      // paliers que useNearbyHelpers pour la cohérence UX). Sans géoloc côté
+      // gardien, on retombe sur l'ordre chronologique récent (filet).
       const meLat = (profile as any)?.latitude as number | null | undefined;
       const meLng = (profile as any)?.longitude as number | null | undefined;
       const hasMyCoords = typeof meLat === "number" && typeof meLng === "number";
+      const NEARBY_LISTINGS_RADIUS_STEPS = [30, 50, 100];
+      const NEARBY_LISTINGS_LIMIT = 4;
 
       let nearbyListings: any[] = [];
       let nearbyError: string | null = null;
-      if (userDept) {
-        const { data: deptListings, error: listErr } = await supabase
+      {
+        const { data: allListings, error: listErr } = await supabase
           .from("sits")
           .select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, properties:property_id(photos, type, environment)")
           .eq("status", "published")
           .neq("user_id", userId)
           .order("created_at", { ascending: false })
-          .limit(50);
+          .limit(500);
         if (listErr) {
           nearbyError = "Impossible de charger les annonces près de chez vous.";
         } else {
-          const candidateOwnerIds = Array.from(new Set((deptListings || []).map((s: any) => s.user_id)));
+          const candidateOwnerIds = Array.from(new Set((allListings || []).map((s: any) => s.user_id)));
           if (candidateOwnerIds.length > 0) {
             const { data: owners, error: ownersErr } = await supabase
               .from("public_profiles")
-              .select("id, postal_code, latitude_approx, longitude_approx")
+              .select("id, latitude_approx, longitude_approx")
               .in("id", candidateOwnerIds);
             if (ownersErr) {
               nearbyError = "Impossible de charger les annonces près de chez vous.";
             } else {
               const ownerById = new Map<string, any>((owners || []).map((o: any) => [o.id, o]));
-              const deptOwnerIds = new Set(
-                (owners || [])
-                  .filter((o: any) => o.postal_code?.startsWith(userDept))
-                  .map((o: any) => o.id)
-              );
-              const enriched = (deptListings || [])
-                .filter((s: any) => deptOwnerIds.has(s.user_id))
-                .map((s: any) => {
-                  const owner = ownerById.get(s.user_id);
-                  const distance_km = hasMyCoords && owner?.latitude_approx && owner?.longitude_approx
-                    ? haversineDistance(
-                        { lat: meLat as number, lng: meLng as number },
-                        { lat: owner.latitude_approx, lng: owner.longitude_approx },
-                      )
-                    : null;
-                  return { ...s, distance_km };
-                });
-              // Tri : distance croissante si dispo, sinon ordre chronologique
-              // d'origine (déjà DESC created_at en sortie SQL).
+              const enriched = (allListings || []).map((s: any) => {
+                const owner = ownerById.get(s.user_id);
+                const distance_km = hasMyCoords && owner?.latitude_approx && owner?.longitude_approx
+                  ? haversineDistance(
+                      { lat: meLat as number, lng: meLng as number },
+                      { lat: owner.latitude_approx, lng: owner.longitude_approx },
+                    )
+                  : null;
+                return { ...s, distance_km };
+              });
+
               if (hasMyCoords) {
-                enriched.sort((a, b) => (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity));
+                // Fallback progressif : on cherche un palier qui rend >= 3
+                // résultats, sinon on prend tout ce qui rentre dans 100 km.
+                const withDistance = enriched.filter((s) => s.distance_km !== null);
+                let selected: any[] = [];
+                for (const radius of NEARBY_LISTINGS_RADIUS_STEPS) {
+                  const inRange = withDistance.filter((s) => s.distance_km! <= radius);
+                  if (inRange.length >= 3) {
+                    selected = inRange;
+                    break;
+                  }
+                }
+                if (selected.length === 0) {
+                  selected = withDistance.filter(
+                    (s) => s.distance_km! <= NEARBY_LISTINGS_RADIUS_STEPS[NEARBY_LISTINGS_RADIUS_STEPS.length - 1],
+                  );
+                }
+                selected.sort((a, b) => (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity));
+                nearbyListings = selected.slice(0, NEARBY_LISTINGS_LIMIT);
+              } else {
+                // Pas de géoloc côté gardien : on ne peut pas trier par
+                // distance, on retombe sur l'ordre chronologique récent.
+                nearbyListings = enriched.slice(0, NEARBY_LISTINGS_LIMIT);
               }
-              nearbyListings = enriched.slice(0, 4);
             }
           }
         }
