@@ -30,6 +30,7 @@ import { toast } from "sonner";
 import { useSearchParams, Link } from "react-router-dom";
 
 import { LAUNCH_DATE, LAUNCH_START, GRACE_END, FOUNDER_START } from "@/lib/constants";
+import { SITTER_PRICE_START } from "@/lib/pricing";
 
 function calcCountdown() {
   const now = new Date();
