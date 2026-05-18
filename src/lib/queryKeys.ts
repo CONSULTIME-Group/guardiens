@@ -21,7 +21,7 @@
  */
 
 export const QK_VERSIONS = {
-  nearbyHelpers: "v4",
+  nearbyHelpers: "v5",
   helpersProximityCount: "v1",
 } as const;
 

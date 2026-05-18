@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { format, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw, Share2 } from "lucide-react";
 
 interface Props {
   nearbyListings: any[];
@@ -30,15 +30,33 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, isAvailable = 
         </button>
       </div>
     ) : nearbyListings.length === 0 ? (
-      <div className="text-center py-4">
-        <p className="text-sm text-muted-foreground font-sans italic mb-3">Pas encore d'annonce dans votre zone.</p>
-        {isAvailable ? (
-          <p className="text-xs text-muted-foreground font-sans">
-            Vous êtes visible : élargissez votre rayon ou repassez bientôt, de nouvelles annonces apparaissent chaque jour.
+      <div className="py-2 space-y-3">
+        <p className="text-sm text-foreground/80 font-sans leading-snug">
+          Pas encore d'annonce dans votre zone. Nous travaillons chaque jour à faire
+          connaître la plateforme aux propriétaires — et vous pouvez nous y aider.
+        </p>
+        <div className="rounded-xl border border-primary/20 bg-primary/[0.05] p-3">
+          <p className="text-xs font-semibold text-foreground mb-1">
+            Partagez votre lien de parrainage
           </p>
-        ) : (
+          <p className="text-xs text-muted-foreground font-sans leading-relaxed mb-2">
+            Invitez un propriétaire à rejoindre Guardiens. Quand l'abonnement gardien
+            deviendra payant (à partir du 14 juillet 2026), vous recevrez{" "}
+            <strong className="text-foreground font-semibold">1 mois offert</strong>{" "}
+            par filleul activé.
+          </p>
+          <Link
+            to="/my-subscription#parrainage"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+          >
+            <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
+            Obtenir mon lien
+          </Link>
+        </div>
+        {!isAvailable && (
           <p className="text-xs text-muted-foreground font-sans">
-            Activez le mode disponible (en haut de page) pour être contacté directement par les propriétaires.
+            Pensez à activer le mode disponible (en haut de page) pour être contacté
+            dès qu'une annonce arrive.
           </p>
         )}
       </div>
