@@ -76,9 +76,8 @@ export function useNearbyHelpers(
         .from("profiles")
         .select("id, first_name, avatar_url, city, skill_categories, custom_skills, bio, identity_verified, completed_sits_count, latitude, longitude")
         .eq("available_for_help", true)
-        .not("skill_categories", "eq", "{}")
         .neq("id", currentUserId!)
-        .limit(200);
+        .limit(500);
 
       if (!pool || pool.length === 0) {
         return { helpers: [], radiusUsed: RADIUS_STEPS[0], hasGeo };
@@ -86,7 +85,19 @@ export function useNearbyHelpers(
 
       const normalizeCustom = (raw: any): string[] => {
         if (!raw) return [];
-        if (Array.isArray(raw)) return raw.filter((s) => typeof s === "string" && s.trim().length > 0);
+        if (Array.isArray(raw)) {
+          return raw
+            .map((item) => {
+              if (typeof item === "string") return item.trim();
+              if (item && typeof item === "object") {
+                const status = typeof item.status === "string" ? item.status : "approved";
+                const label = typeof item.label === "string" ? item.label : "";
+                return status === "approved" ? label.trim() : "";
+              }
+              return "";
+            })
+            .filter((s) => s.length > 0);
+        }
         if (typeof raw === "string" && raw.trim().length > 0) return [raw];
         return [];
       };
@@ -112,7 +123,7 @@ export function useNearbyHelpers(
           completed_sits_count: p.completed_sits_count || 0,
           distance_km,
         };
-      });
+      }).filter((h) => h.skill_categories.length > 0 || h.custom_skills.length > 0);
 
       // Tri : 1) savoir-faire perso renseigné (signal fort de profil engagé
       // et différenciant), 2) distance croissante, 3) identité vérifiée.

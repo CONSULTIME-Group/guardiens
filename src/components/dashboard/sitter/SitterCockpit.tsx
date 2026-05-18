@@ -4,7 +4,6 @@ import FounderBadge from "@/components/badges/FounderBadge";
 import PriorityActionCard from "@/components/dashboard/shared/PriorityActionCard";
 import LiveSignalStrip from "@/components/dashboard/shared/LiveSignalStrip";
 import { useSitterPriorityAction } from "@/hooks/useSitterPriorityAction";
-import heroMorning from "@/assets/illustrations/sitter-hero-morning.webp";
 
 /**
  * Cockpit gardien — bloc unifié au-dessus du pli.
@@ -62,23 +61,7 @@ const SitterCockpit = ({
     >
       {/* ─── Tuile héro éditoriale ─── */}
       <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-accent/60 via-card to-accent/30 shadow-sm">
-        {/* Illustration décorative — masquée mobile, demi-largeur dès md */}
-        <div
-          aria-hidden="true"
-          className="hidden md:block absolute inset-y-0 right-0 w-1/2 lg:w-[55%] pointer-events-none"
-        >
-          <img
-            src={heroMorning}
-            alt=""
-            className="h-full w-full object-cover object-left opacity-90"
-            width={1536}
-            height={768}
-          />
-          {/* Fondu pour lisibilité du texte */}
-          <div className="absolute inset-0 bg-gradient-to-r from-card via-card/70 to-transparent" />
-        </div>
-
-        <div className="relative grid md:grid-cols-2 gap-0">
+        <div className="relative grid gap-0">
           {/* Colonne gauche — contenu */}
           <div className="p-5 sm:p-6 md:p-7 space-y-4">
             {/* Ligne 1 : eyebrow + avatar + nom + dispo */}
@@ -151,9 +134,6 @@ const SitterCockpit = ({
               onCtaClick={handlePriorityCta}
             />
           </div>
-
-          {/* Colonne droite — espace illustration (visible md+ via background absolu) */}
-          <div className="hidden md:block" aria-hidden="true" />
         </div>
 
         {/* Signal vivant en pied de tuile, fond légèrement teinté */}

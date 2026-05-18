@@ -15,11 +15,12 @@
  * par ce fichier pour garder la traçabilité des bumps en un seul endroit.
  *
  * Historique des bumps :
+ *  - nearbyHelpers v3 (2026-05-18) : affichage des profils avec `custom_skills` même sans catégorie générique.
  *  - nearbyHelpers v2 (2026-05-18) : ajout du champ `bio`.
  */
 
 export const QK_VERSIONS = {
-  nearbyHelpers: "v2",
+  nearbyHelpers: "v3",
   helpersProximityCount: "v1",
 } as const;
 
