@@ -272,14 +272,17 @@ const HelperMiniCard = ({
             )}
           </div>
           {distance !== null ? (
-            <p
-              className={`mt-1 text-[10px] font-bold uppercase tracking-[0.18em] tabular-nums ${
-                isVeryClose ? "text-accent" : "text-muted-foreground"
+            <span
+              className={`mt-1.5 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold tabular-nums ring-1 ${
+                isVeryClose
+                  ? "bg-accent/15 text-accent ring-accent/30"
+                  : "bg-primary/10 text-primary ring-primary/20"
               }`}
-              aria-label={`À ${distance} kilomètres de chez vous`}
+              aria-label={`À environ ${distance} kilomètres de chez vous`}
             >
+              <MapPin className="h-3 w-3" aria-hidden="true" />
               {distance}&nbsp;km
-            </p>
+            </span>
           ) : (
             <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground truncate">
               {helper.city ? capitalize(helper.city) : "Près de chez vous"}
@@ -287,6 +290,50 @@ const HelperMiniCard = ({
           )}
         </div>
       </div>
+
+      <div className="px-6 pb-5 space-y-3">
+        {/* Savoir-faire (custom) — affiché EN PREMIER car c'est le différenciant. */}
+        {visibleSF.length > 0 ? (
+          <div className="space-y-1.5">
+            <p className="text-[9px] uppercase tracking-[0.2em] text-accent font-bold">
+              Savoir-faire
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {visibleSF.map((chip) => (
+                <span
+                  key={chip.key}
+                  className="px-2.5 py-1 bg-accent/10 border border-accent/25 text-foreground text-[10px] font-semibold uppercase tracking-wider rounded-lg"
+                >
+                  {chip.label}
+                </span>
+              ))}
+              {remainingSF > 0 && (
+                <span className="text-[11px] text-muted-foreground self-center">+{remainingSF}</span>
+              )}
+            </div>
+          </div>
+        ) : visibleCats.length === 0 ? (
+          <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+            Aucun savoir-faire renseigné
+          </p>
+        ) : null}
+
+        {/* Catégories génériques — secondaires */}
+        {visibleCats.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {visibleCats.map((chip) => (
+              <span
+                key={chip.key}
+                className="px-2.5 py-1 bg-muted/40 border border-border text-foreground text-[10px] font-bold uppercase tracking-wider rounded-lg"
+              >
+                {chip.label}
+              </span>
+            ))}
+            {remainingCats > 0 && (
+              <span className="text-[11px] text-muted-foreground self-center">+{remainingCats}</span>
+            )}
+          </div>
+        )}
 
       <div className="px-6 pb-5 space-y-3">
         {/* Catégories génériques */}
