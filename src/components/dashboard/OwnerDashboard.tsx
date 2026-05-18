@@ -425,6 +425,12 @@ const OwnerDashboard = () => {
           {/* Zone WARNING — Petites missions (entraide) */}
           <MissionsTabsCard myMissions={myMissions} nearbyMissions={smallMissions} />
 
+          {/* Savoir-faire à proximité — pendant « offres » de l'entraide :
+              missions = besoins exprimés ; helpers = compétences offertes.
+              Indispensable pour un propriétaire qui peut aussi avoir besoin
+              d'un coup de main (jardin, bricolage, animaux ponctuels). */}
+          <NearbyHelpersCarousel />
+
           {/* Parrainage — levier d'acquisition gratuit, rendu visible
               directement depuis le dashboard (au lieu d'être enterré dans
               /mon-abonnement). Tonalité informative, pas commerciale. */}
