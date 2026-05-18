@@ -4,11 +4,7 @@ import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
-import { usePreloadImages } from "@/hooks/usePreloadImages";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
-
-import emptyAnnoncesUrl from "@/assets/illustrations/empty-annonces.webp";
-import emptyConseilsUrl from "@/assets/illustrations/empty-conseils.webp";
 
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
@@ -24,7 +20,6 @@ import SitterEmergencyCardCompact from "./sitter/SitterEmergencyCardCompact";
 import SitterMissionsSection from "./sitter/SitterMissionsSection";
 import NearbyAnnoncesCard from "./sitter/NearbyAnnoncesCard";
 import QuickActionsCard from "./sitter/QuickActionsCard";
-import EmptyIllustration from "./shared/EmptyIllustration";
 import SectionEyebrow from "./shared/SectionEyebrow";
 import DashSection from "./owner/DashSection";
 
@@ -51,17 +46,6 @@ const SitterDashboard = () => {
     toggleAvailability,
     reputation, groupedBadges,
   } = useSitterDashboardData(user?.id);
-
-  // Préchargement conditionnel : on injecte un <link rel=preload> uniquement
-  // pour les sections qui vont basculer en empty-state, après résolution des
-  // queries. Évite le coût réseau systématique quand les sections sont remplies.
-  // Helpers est géré séparément (état interne à NearbyHelpersCarousel).
-  const illustrationsToPreload: string[] = [];
-  if (!loading) {
-    if (!nearbyError && nearbyListings.length === 0) illustrationsToPreload.push(emptyAnnoncesUrl);
-    if (articles.length === 0) illustrationsToPreload.push(emptyConseilsUrl);
-  }
-  usePreloadImages(illustrationsToPreload);
 
   if (loading) return (
     <div className="p-8 flex items-center justify-center">
@@ -235,7 +219,6 @@ const SitterDashboard = () => {
               </div>
             ) : (
               <div className="text-center py-2">
-                <EmptyIllustration kind="conseils" size="sm" className="mb-2" />
                 <p className="text-sm text-muted-foreground italic">
                   De nouveaux conseils arrivent prochainement.
                 </p>
@@ -326,7 +309,6 @@ const SitterDashboard = () => {
         />
         {annoncesEmpty ? (
           <div className="relative overflow-hidden rounded-2xl border border-warning/30 bg-gradient-to-br from-warning/10 via-card to-primary/5 px-5 pt-5 pb-6 text-center">
-            <EmptyIllustration kind="annonces" size="md" className="mb-3" />
             <p className="text-[10px] uppercase tracking-[2px] text-warning font-sans font-semibold mb-1">
               Calme plat
             </p>
