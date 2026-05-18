@@ -84,6 +84,7 @@ const INITIAL_STATE: SitterDashboardData = {
   nextGuard: null,
   nextGuardError: null,
   nearbyListings: [],
+  nearbyListingsRadius: null,
   nearbyError: null,
   articles: [],
   badges: [],
