@@ -101,14 +101,31 @@ export function useNearbyHelpers(
     enabled: !!currentUserId,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      // 1. Coords de l'utilisateur courant
-      const { data: me } = await supabase
+      // 1. Coords de l'utilisateur courant — fallback sur public_profiles
+      //    (latitude_approx/longitude_approx) si profiles.latitude est null,
+      //    sinon aucune distance ne s'affiche pour les utilisateurs qui n'ont
+      //    pas encore d'adresse précise mais ont un code postal géocodé.
+      const { data: meRaw } = await supabase
         .from("profiles")
         .select("latitude, longitude")
         .eq("id", currentUserId!)
         .maybeSingle();
 
-      const hasGeo = !!(me?.latitude && me?.longitude);
+      let meLat: number | null = (meRaw?.latitude as number | null) ?? null;
+      let meLng: number | null = (meRaw?.longitude as number | null) ?? null;
+      if (meLat === null || meLng === null) {
+        const { data: meApprox } = await supabase
+          .from("public_profiles")
+          .select("latitude_approx, longitude_approx")
+          .eq("id", currentUserId!)
+          .maybeSingle();
+        if (meApprox?.latitude_approx && meApprox?.longitude_approx) {
+          meLat = meApprox.latitude_approx as number;
+          meLng = meApprox.longitude_approx as number;
+        }
+      }
+      const me = meLat !== null && meLng !== null ? { latitude: meLat, longitude: meLng } : null;
+      const hasGeo = !!me;
 
       // 2. Pool de helpers (limité — filtre distance fait côté client,
       //    on garde large pour avoir matière même en zone rurale)
