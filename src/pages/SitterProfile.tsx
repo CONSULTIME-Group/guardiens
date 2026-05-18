@@ -21,6 +21,7 @@ import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
+import FillSavoirFaireBanner from "@/components/profile/FillSavoirFaireBanner";
 
 // Sections affichées dans la sidebar. `optional: true` = pas de calcul de complétion (purement décoratif).
 const SECTIONS_META = [
@@ -337,6 +338,7 @@ const SitterProfile = () => {
 
           {/* Right content */}
           <div className="flex-1 min-w-0 pb-40 md:pb-32">
+            <FillSavoirFaireBanner />
             <div id="profile-section-content" className="bg-card rounded-2xl border border-border p-5 md:p-8 scroll-mt-24">
               {activeSection === "identity" && (
                 <StepIdentity data={mergedData} onChange={handleChange} onUploadAvatar={handleUploadAvatar} />
