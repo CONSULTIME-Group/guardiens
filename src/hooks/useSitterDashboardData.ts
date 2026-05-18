@@ -43,6 +43,7 @@ export interface SitterDashboardData {
   nextGuard: any | null;
   nextGuardError: string | null;
   nearbyListings: any[];
+  nearbyListingsRadius: number | null;
   nearbyError: string | null;
   articles: any[];
   badges: any[];
