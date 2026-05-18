@@ -91,6 +91,14 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
             </Link>
           </div>
 
+          <Link
+            to="/search"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+          >
+            <Compass className="h-3.5 w-3.5" aria-hidden="true" />
+            Explorer toutes les annonces
+          </Link>
+
           {!isAvailable && (
             <p className="text-xs text-muted-foreground">
               Pensez à activer le mode disponible (en haut de page) pour être contacté
