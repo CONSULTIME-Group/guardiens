@@ -47,6 +47,8 @@ export function sanitizeBioForCard(input: string | null | undefined): string {
   out = out.replace(PHONE_RE, (match) => {
     const digits = match.replace(/\D/g, "");
     return digits.length >= 8 ? "[contact masqué]" : match;
+  });
+
   // Emojis : règle Core « No emoji in content ». On retire toute la classe
   // Unicode des pictogrammes (incl. drapeaux, symboles, ZWJ et sélecteurs de
   // variation), pour ne pas laisser passer 👋 / ❤️ / 🐶 dans les cartes.
