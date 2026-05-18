@@ -1,13 +1,11 @@
 import { memo, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ShieldCheck, ArrowRight, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNearbyHelpers, nextRadiusStep, type NearbyHelper } from "@/hooks/useNearbyHelpers";
 import { useHelpersProximityCount } from "@/hooks/useHelpersProximityCount";
 import { useCtaCooldown } from "@/hooks/useCtaCooldown";
-import { startConversation } from "@/lib/conversation";
-import { toast } from "sonner";
 import { capitalize } from "@/components/dashboard/owner/helpers";
 import { tokenizeSkillPhrases, dedupeChipsByLabel } from "@/lib/skills/tokenize";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
