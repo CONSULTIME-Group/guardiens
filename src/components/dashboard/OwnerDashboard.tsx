@@ -284,7 +284,7 @@ const OwnerDashboard = () => {
           n'occupe pas déjà l'espace (max 2 bandeaux contextuels actifs). */}
       <div className="px-5 md:px-8 space-y-3">
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
-        {level === "full" && <LiveSignalStrip secondarySignal={localSignal} />}
+        {(level === 4 || level === "3B") && <LiveSignalStrip secondarySignal={localSignal} />}
       </div>
 
       {/* ═══ Bloc unifié "À faire maintenant" ═══ */}
