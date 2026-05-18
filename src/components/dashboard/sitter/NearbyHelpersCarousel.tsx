@@ -171,12 +171,10 @@ const SKILL_CHIPS: { key: string; label: string; intent: string }[] = [
 
 const HelperMiniCard = ({
   helper,
-  onWrite,
-  pending,
+  ctaHref,
 }: {
   helper: NearbyHelper;
-  onWrite: () => void;
-  pending?: boolean;
+  ctaHref: string;
 }) => {
   const firstName = capitalize(helper.first_name || "Membre");
 
