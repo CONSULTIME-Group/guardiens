@@ -289,8 +289,39 @@ export default function PublicSitterProfile() {
 
   const handleTabChange = (tab: ProfileTab) => {
     setActiveTab(tab);
-    setSearchParams({ tab }, { replace: true });
+    // push (pas replace) → la back nav restitue l'onglet précédent.
+    setSearchParams({ tab });
   };
+
+  // Sync activeTab quand ?tab= change via back/forward ou ouverture en nouvel
+  // onglet, après le premier chargement.
+  useEffect(() => {
+    if (loading) return;
+    const requested = tabParam as ProfileTab | null;
+    if (!requested) return;
+    if (requested === activeTab) return;
+    const availability: Record<ProfileTab, boolean> = {
+      gardien: sitterProfile !== null,
+      proprio: ownerProfile !== null,
+      entraide: missionCount > 0,
+    };
+    if (availability[requested]) setActiveTab(requested);
+  }, [tabParam, loading, sitterProfile, ownerProfile, missionCount]);
+
+  // Scroll vers l'ancre (#confiance, #verification, …) une fois les données
+  // chargées : en SPA, le hash natif ne déclenche pas le scroll car l'élément
+  // n'existe pas encore au moment de la navigation.
+  useEffect(() => {
+    if (loading) return;
+    const hash = typeof window !== "undefined" ? window.location.hash.slice(1) : "";
+    if (!hash) return;
+    // Léger délai pour laisser le DOM des Tabs/sections se monter.
+    const t = setTimeout(() => {
+      const el = document.getElementById(hash);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 250);
+    return () => clearTimeout(t);
+  }, [loading, activeTab]);
 
   useEffect(() => {
     if (!id || id === "undefined" || id === "null") { setLoading(false); return; }
