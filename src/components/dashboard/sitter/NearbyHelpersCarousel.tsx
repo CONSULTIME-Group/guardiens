@@ -302,7 +302,7 @@ const HelperMiniCard = ({
               {visibleSF.map((chip) => (
                 <span
                   key={chip.key}
-                  className="px-2.5 py-1 bg-accent/10 border border-accent/25 text-foreground text-[10px] font-semibold uppercase tracking-wider rounded-lg"
+                  className="px-2.5 py-1 bg-accent/15 border border-accent/40 text-accent-foreground text-[10px] font-semibold uppercase tracking-wider rounded-lg"
                 >
                   {chip.label}
                 </span>
@@ -318,20 +318,25 @@ const HelperMiniCard = ({
           </p>
         ) : null}
 
-        {/* Catégories génériques — secondaires */}
+        {/* Catégories — labellisées explicitement pour ne pas laisser de chips orphelines */}
         {visibleCats.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {visibleCats.map((chip) => (
-              <span
-                key={chip.key}
-                className="px-2.5 py-1 bg-muted/40 border border-border text-foreground text-[10px] font-bold uppercase tracking-wider rounded-lg"
-              >
-                {chip.label}
-              </span>
-            ))}
-            {remainingCats > 0 && (
-              <span className="text-[11px] text-muted-foreground self-center">+{remainingCats}</span>
-            )}
+          <div className="space-y-1.5">
+            <p className="text-[9px] uppercase tracking-[0.2em] text-primary font-bold">
+              {visibleSF.length > 0 ? "Domaines" : "Peut aider sur"}
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {visibleCats.map((chip) => (
+                <span
+                  key={chip.key}
+                  className="px-2.5 py-1 bg-primary/10 border border-primary/30 text-primary text-[10px] font-bold uppercase tracking-wider rounded-lg"
+                >
+                  {chip.label}
+                </span>
+              ))}
+              {remainingCats > 0 && (
+                <span className="text-[11px] text-muted-foreground self-center">+{remainingCats}</span>
+              )}
+            </div>
           </div>
         )}
 
