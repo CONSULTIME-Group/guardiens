@@ -166,7 +166,14 @@ const Dashboard = () => {
         key={displayedRole}
         className={transitioning ? "animate-fade-out" : "animate-fade-in"}
       >
-        {displayedRole === "owner" ? <OwnerDashboard /> : <SitterDashboard />}
+        <DashboardErrorBoundary
+          section={displayedRole === "owner" ? "OwnerDashboard" : "SitterDashboard"}
+          label={
+            displayedRole === "owner" ? "Le dashboard propriétaire" : "Le dashboard gardien"
+          }
+        >
+          {displayedRole === "owner" ? <OwnerDashboard /> : <SitterDashboard />}
+        </DashboardErrorBoundary>
       </div>
     </div>
   );
