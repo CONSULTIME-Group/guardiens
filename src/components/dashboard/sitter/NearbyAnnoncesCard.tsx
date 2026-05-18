@@ -134,3 +134,5 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, isAvailable = 
     )}
   </section>
 );
+
+export default NearbyAnnoncesCard;
