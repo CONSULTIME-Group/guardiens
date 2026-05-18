@@ -395,7 +395,7 @@ const HelperMiniCard = ({
       {/* Lien profil discret — pas de CTA invasif sur la carte. Les actions
           (voir missions / demander un coup de main) sont déportées au niveau
           de la section, comme demandé. */}
-      <div className="mt-auto px-6 pb-6">
+      <div className="mt-auto px-4 sm:px-6 pb-4 sm:pb-6">
         <Link
           to={`/gardiens/${helper.id}`}
           className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground hover:text-primary transition-colors"
