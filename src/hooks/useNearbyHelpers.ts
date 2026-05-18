@@ -126,30 +126,7 @@ export function useNearbyHelpers(
         };
       }).filter((h) => h.skill_categories.length > 0 || h.custom_skills.length > 0);
 
-      // Tri : distance croissante en PRIORITÉ ABSOLUE.
-      // C'est « près de chez vous » : un profil avec savoir-faire à 50 km
-      // ne doit JAMAIS passer devant un voisin à 5 km.
-      // Bonus : à l'intérieur d'un rayon ultra-proche (≤ NEAR_RADIUS_KM),
-      // on remonte les profils qui ont renseigné des custom_skills (signal
-      // d'engagement) au-dessus de ceux qui n'en ont pas, à distance ~égale.
-      const NEAR_RADIUS_KM = 5;
-      const prioritize = (list: NearbyHelper[]) =>
-        [...list].sort((a, b) => {
-          const da = a.distance_km ?? Infinity;
-          const db = b.distance_km ?? Infinity;
-          const aNear = da <= NEAR_RADIUS_KM;
-          const bNear = db <= NEAR_RADIUS_KM;
-          // Bonus skills uniquement dans la zone ultra-proche
-          if (aNear && bNear) {
-            const aHasSkills = a.custom_skills.length > 0 ? 1 : 0;
-            const bHasSkills = b.custom_skills.length > 0 ? 1 : 0;
-            if (aHasSkills !== bHasSkills) return bHasSkills - aHasSkills;
-          }
-          if (da !== db) return da - db;
-          const aVer = a.identity_verified ? 1 : 0;
-          const bVer = b.identity_verified ? 1 : 0;
-          return bVer - aVer;
-        });
+      const prioritize = (list: NearbyHelper[]) => prioritizeHelpers(list);
 
       // Pas de géoloc → on retourne 8 profils par identité vérifiée + skills
       if (!hasGeo) {
