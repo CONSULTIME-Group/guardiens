@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { haversineDistance } from "@/utils/geo";
+import { qk } from "@/lib/queryKeys";
 
 /**
  * Helpers du coin (gens disponibles « pour un coup de main »).
@@ -56,7 +57,7 @@ export function useNearbyHelpers(
 ) {
   const { forcedRadius = null } = options;
   return useQuery<NearbyHelpersResult>({
-    queryKey: ["nearby-helpers", "v2-bio", currentUserId, forcedRadius],
+    queryKey: qk.nearbyHelpers(currentUserId, forcedRadius),
     enabled: !!currentUserId,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
