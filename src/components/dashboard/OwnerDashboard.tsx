@@ -39,6 +39,7 @@ import {
 } from "./owner/helpers";
 import type { Pet } from "./owner/types";
 import { useOwnerDashboardData } from "@/hooks/useOwnerDashboardData";
+import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
 
 /* ═══════════════════════════════════════════════════════
    Main component
