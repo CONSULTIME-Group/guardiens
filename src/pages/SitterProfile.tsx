@@ -81,16 +81,20 @@ const SitterProfile = () => {
   const [saved, setSaved] = useState(false);
   const draftKey = user ? `guardiens_sitter_profile_draft_${user.id}` : null;
   const draftHydratedRef = useRef(false);
-  const focusAppliedRef = useRef(false);
+  const lastAppliedFocusRef = useRef<string | null>(null);
+  const lastAppliedSectionRef = useRef<string | null>(null);
 
-  // Handle focus=postal_code and section= query params
+  // Handle focus=postal_code and section= query params.
+  // Réagit aussi aux changements d'URL (back/forward, ouverture en nouvel
+  // onglet avec un section= différent) via comparaison de valeur, et non un
+  // simple verrou booléen.
   useEffect(() => {
-    if (loading || focusAppliedRef.current) return;
+    if (loading) return;
     const focus = searchParams.get("focus");
     const section = searchParams.get("section");
 
-    if (focus === "postal_code") {
-      focusAppliedRef.current = true;
+    if (focus === "postal_code" && lastAppliedFocusRef.current !== focus) {
+      lastAppliedFocusRef.current = focus;
       setActiveSection("identity");
       setTimeout(() => {
         const el = document.querySelector<HTMLInputElement>('[name="postal_code"], [data-field="postal_code"]');
@@ -101,8 +105,8 @@ const SitterProfile = () => {
           setTimeout(() => el.classList.remove("ring-2", "ring-primary"), 3000);
         }
       }, 500);
-    } else if (section && SECTION_PARAM_MAP[section]) {
-      focusAppliedRef.current = true;
+    } else if (section && SECTION_PARAM_MAP[section] && lastAppliedSectionRef.current !== section) {
+      lastAppliedSectionRef.current = section;
       const mapped = SECTION_PARAM_MAP[section];
       setActiveSection(mapped);
       setTimeout(() => {
@@ -110,6 +114,10 @@ const SitterProfile = () => {
         contentEl?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 300);
     }
+
+    // Reset des refs si le param disparaît, pour réautoriser une future application.
+    if (!focus) lastAppliedFocusRef.current = null;
+    if (!section) lastAppliedSectionRef.current = null;
   }, [loading, searchParams]);
 
   useEffect(() => {
