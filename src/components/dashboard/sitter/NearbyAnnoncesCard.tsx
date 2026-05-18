@@ -142,6 +142,7 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
       </div>
     )}
   </section>
-);
+  );
+};
 
 export default NearbyAnnoncesCard;
