@@ -108,7 +108,15 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
         </div>
       </div>
     ) : (
-      <div className="bg-card border border-border rounded-[2rem] p-4 sm:p-5 divide-y divide-border/60">
+      <div className="bg-card border border-border rounded-[2rem] p-4 sm:p-5">
+        {(nearbyListingsRadius || hasBeyond) && (
+          <p className="text-[11px] text-muted-foreground mb-2 px-1">
+            {hasBeyond
+              ? "Aucune annonce dans un rayon de 100 km — voici la/les plus proche(s) disponible(s)."
+              : `Annonces dans un rayon de ${nearbyListingsRadius} km.`}
+          </p>
+        )}
+        <div className="divide-y divide-border/60">
         {nearbyListings.slice(0, 5).map((sit: any) => {
           const isNew = differenceInHours(new Date(), new Date(sit.created_at)) < 48;
           const distance =
