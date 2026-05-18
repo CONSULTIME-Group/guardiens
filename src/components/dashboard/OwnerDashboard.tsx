@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import FounderBadge from "@/components/badges/FounderBadge";
+import { BadgeRow } from "@/components/badges/BadgeRow";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,7 +10,7 @@ import { Link, useNavigate } from "react-router-dom";
 import OnboardingWelcome from "./OnboardingWelcome";
 import NearbyOwnerSittersCard from "./owner/NearbyOwnerSittersCard";
 import NearbyEmergencySitters from "./NearbyEmergencySitters";
-import NearbyHelpersCarousel from "./sitter/NearbyHelpersCarousel";
+import NearbyHelpersCarousel from "./shared/NearbyHelpersCarousel";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
 import { Plus, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -231,16 +232,7 @@ const OwnerDashboard = () => {
     <div className="space-y-6 md:space-y-8 pb-40 md:pb-8">
 {/* pb-40 mobile = BottomNav (h-16=64px) + Sticky CTA (~72px) + marge respiration. */}
 
-      {/* Role activation banner */}
-      <div className="px-5 md:px-8 pt-2">
-        <RoleActivationBanner userRole={user?.role || "owner"} />
-      </div>
-
-      {/* ═══ Hero header (compact — eyebrow + titre + sous-titre contextuel) ═══
-          La ligne défensive « gratuit » est retirée : redondante une fois
-          loggé (gratuité déjà actée), elle parasitait la hiérarchie. Le
-          rappel de gratuité reste porté par RoleActivationBanner et la
-          carte parrainage. */}
+      {/* ═══ Hero header (compact — eyebrow + titre + sous-titre contextuel) ═══ */}
       <header className="px-5 md:px-8 pt-2 animate-fade-in">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div className="min-w-0">
@@ -283,9 +275,17 @@ const OwnerDashboard = () => {
         </div>
       </header>
 
+      {/* Bannière dual-role : déplacée APRÈS le hero (l'utilisateur lit
+          d'abord son nom, ensuite l'incitation à activer l'espace gardien). */}
+      <div className="px-5 md:px-8">
+        <RoleActivationBanner userRole={user?.role || "owner"} />
+      </div>
+
+      {/* Règle de priorité : on n'affiche LiveSignalStrip que si AccessGateBanner
+          n'occupe pas déjà l'espace (max 2 bandeaux contextuels actifs). */}
       <div className="px-5 md:px-8 space-y-3">
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
-        <LiveSignalStrip secondarySignal={localSignal} />
+        {(level === 4 || level === "3B") && <LiveSignalStrip secondarySignal={localSignal} />}
       </div>
 
       {/* ═══ Bloc unifié "À faire maintenant" ═══ */}
@@ -396,8 +396,8 @@ const OwnerDashboard = () => {
               <span aria-hidden className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-warning" />
               <div className="pl-2 sm:pl-3 min-w-0">
                 <SectionEyebrow
-                  eyebrow="Coup de main · Entraide"
-                  title="Près de chez vous"
+                  eyebrow="Entraide locale"
+                  title="Coup de main près de chez vous"
                   accent="warning"
                   id="owner-discovery-missions-heading"
                 />
@@ -416,6 +416,9 @@ const OwnerDashboard = () => {
         <aside className="space-y-6">
           {showEmergencyHelp && <NearbyEmergencySitters />}
           <NearbyOwnerSittersCard />
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary px-3 py-1 text-[11px] font-semibold">
+            Espace propriétaire — gratuit
+          </div>
           <StatsStrip
             items={[
               {
@@ -503,45 +506,49 @@ const OwnerDashboard = () => {
         </section>
       )}
 
-      {/* ═══ Footer dashboard — accès secondaires compacts ═══ */}
-      <div className="px-5 md:px-8 pt-2 border-t border-border/40">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {user?.id && (
-            <Link
-              to={`/gardiens/${user.id}?tab=proprio#badges`}
-              className="flex items-center justify-between gap-3 rounded-2xl bg-card border border-border px-4 py-3 hover:bg-muted/30 transition-colors group"
-            >
+      {/* ═══ Footer dashboard — badges inline + ressources ═══ */}
+      <div className="px-5 md:px-8 pt-2 border-t border-border/40 space-y-3">
+        {user?.id && userBadges && userBadges.length > 0 && (
+          <div className="rounded-2xl bg-card border border-border px-4 py-3">
+            <div className="flex items-center justify-between gap-3 mb-3">
               <div>
                 <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
                   Reconnaissance
                 </p>
                 <p className="text-sm font-semibold text-foreground">
-                  {userBadges?.length ?? 0} badge{(userBadges?.length ?? 0) > 1 ? "s" : ""} débloqué{(userBadges?.length ?? 0) > 1 ? "s" : ""}
+                  {userBadges.length} badge{userBadges.length > 1 ? "s" : ""} débloqué{userBadges.length > 1 ? "s" : ""}
                 </p>
               </div>
-              <span className="text-xs text-primary font-semibold group-hover:translate-x-0.5 transition-transform" aria-hidden="true">
-                Voir →
-              </span>
-            </Link>
-          )}
-
-          <details className="group rounded-2xl bg-card border border-border overflow-hidden">
-            <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
-              <div>
-                <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
-                  Ressources
-                </p>
-                <p className="text-sm font-semibold text-foreground">
-                  Conseils & guides pour propriétaires
-                </p>
-              </div>
-              <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
-            </summary>
-            <div className="px-4 pb-4">
-              <ContextualResources annoncesCount={sits.length} gardesCount={completedSits.length} loading={loading} />
+              <Link
+                to={`/gardiens/${user.id}?tab=proprio#badges`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-primary font-semibold hover:underline shrink-0"
+                aria-label="Voir tous les badges sur mon profil public (nouvel onglet)"
+              >
+                Voir tout →
+              </Link>
             </div>
-          </details>
-        </div>
+            <BadgeRow badges={userBadges} size="compact" maxVisible={8} />
+          </div>
+        )}
+
+        <details className="group rounded-2xl bg-card border border-border overflow-hidden">
+          <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
+            <div>
+              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
+                Ressources
+              </p>
+              <p className="text-sm font-semibold text-foreground">
+                Conseils & guides pour propriétaires
+              </p>
+            </div>
+            <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
+          </summary>
+          <div className="px-4 pb-4">
+            <ContextualResources annoncesCount={sits.length} gardesCount={completedSits.length} loading={loading} />
+          </div>
+        </details>
       </div>
 
       {/* ═══ CTA sticky mobile ═══ */}

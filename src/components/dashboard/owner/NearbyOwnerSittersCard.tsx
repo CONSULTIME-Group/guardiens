@@ -29,14 +29,14 @@ const NearbyOwnerSittersCard = ({ hideHeader = false }: Props) => {
       {!hideHeader && (
         <div className="flex flex-col">
           <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary mb-1.5">
-            Gardiens
+            Garde
           </p>
           <div className="flex items-end justify-between gap-3">
             <h3
               id="nearby-sitters-heading"
               className="font-heading text-2xl sm:text-3xl font-semibold text-foreground leading-tight"
             >
-              Près de chez vous
+              Gardiens près de chez vous
             </h3>
             {sitters.length > 0 && (
               <Link
