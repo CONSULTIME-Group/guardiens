@@ -114,17 +114,19 @@ export function useNearbyHelpers(
         };
       });
 
-      // Tri : 1) distance croissante (priorité absolue quand géoloc), puis
-      // 2) custom_skills renseignés, 3) identité vérifiée. La distance prime
-      // — l'utilisateur cherche d'abord quelqu'un de proche, pas le plus diplômé.
+      // Tri : 1) savoir-faire perso renseigné (signal fort de profil engagé
+      // et différenciant), 2) distance croissante, 3) identité vérifiée.
+      // Choix produit : on remonte d'abord les profils qui ont pris le temps
+      // de décrire leurs compétences — ils convertissent mieux que de purs
+      // « proches mais vides ». La distance reste le second critère.
       const prioritize = (list: NearbyHelper[]) =>
         [...list].sort((a, b) => {
-          const da = a.distance_km ?? Infinity;
-          const db = b.distance_km ?? Infinity;
-          if (da !== db) return da - db;
           const aHasSkills = a.custom_skills.length > 0 ? 1 : 0;
           const bHasSkills = b.custom_skills.length > 0 ? 1 : 0;
           if (aHasSkills !== bHasSkills) return bHasSkills - aHasSkills;
+          const da = a.distance_km ?? Infinity;
+          const db = b.distance_km ?? Infinity;
+          if (da !== db) return da - db;
           const aVer = a.identity_verified ? 1 : 0;
           const bVer = b.identity_verified ? 1 : 0;
           return bVer - aVer;
