@@ -15,7 +15,7 @@ import DashboardSectionState from "./sitter/DashboardSectionState";
 import SitterMobileStickyCTA from "./sitter/SitterMobileStickyCTA";
 import SitterStatusBar from "./sitter/SitterStatusBar";
 import SitterBadgesSection from "./sitter/SitterBadgesSection";
-import NearbyHelpersCarousel from "./sitter/NearbyHelpersCarousel";
+import NearbyHelpersCarousel from "./shared/NearbyHelpersCarousel";
 import SitterEmergencyCardCompact from "./sitter/SitterEmergencyCardCompact";
 import SitterMissionsSection from "./sitter/SitterMissionsSection";
 import NearbyAnnoncesCard from "./sitter/NearbyAnnoncesCard";

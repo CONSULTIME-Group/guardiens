@@ -9,7 +9,7 @@ import { Link, useNavigate } from "react-router-dom";
 import OnboardingWelcome from "./OnboardingWelcome";
 import NearbyOwnerSittersCard from "./owner/NearbyOwnerSittersCard";
 import NearbyEmergencySitters from "./NearbyEmergencySitters";
-import NearbyHelpersCarousel from "./sitter/NearbyHelpersCarousel";
+import NearbyHelpersCarousel from "./shared/NearbyHelpersCarousel";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
 import { Plus, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
