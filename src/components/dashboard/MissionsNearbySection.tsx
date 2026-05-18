@@ -161,7 +161,7 @@ const MissionsNearbySection = () => {
              <p className="text-sm text-foreground font-medium">
                Déclarez vos compétences pour voir en priorité les échanges qui vous correspondent.
              </p>
-            <Link to="/profile#competences" className="text-sm text-primary font-semibold mt-1 inline-block">
+            <Link to="/profile?section=competences" className="text-sm text-primary font-semibold mt-1 inline-block">
               Ajouter mes compétences →
             </Link>
           </div>
