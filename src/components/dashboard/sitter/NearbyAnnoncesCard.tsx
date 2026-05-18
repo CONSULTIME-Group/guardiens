@@ -54,17 +54,17 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
           <RefreshCw className="h-3 w-3" aria-hidden="true" /> Réessayer
         </button>
       </div>
-    ) : nearbyListings.length === 0 ? (
+    ) : nearbyListings.length === 0 || hasBeyond ? (
       <div className="bg-card border border-border rounded-[2rem] p-8 sm:p-10 flex flex-col items-center text-center shadow-sm">
         <div className="max-w-lg space-y-6">
           <div className="space-y-3">
             <h4 className="font-heading text-xl sm:text-2xl font-semibold text-foreground leading-snug">
-              Calme plat sur votre secteur
+              {hasBeyond ? "Aucune annonce dans un rayon de 100 km" : "Calme plat sur votre secteur"}
             </h4>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Aucune annonce de garde n'a été publiée près de chez vous pour le moment.
-              Votre profil reste visible auprès de la communauté et de nouvelles
-              opportunités peuvent apparaître chaque jour.
+              {hasBeyond
+                ? "Aucune garde n'est publiée à moins de 100 km de chez vous pour le moment. Votre profil reste visible et de nouvelles opportunités peuvent apparaître chaque jour."
+                : "Aucune annonce de garde n'a été publiée près de chez vous pour le moment. Votre profil reste visible auprès de la communauté et de nouvelles opportunités peuvent apparaître chaque jour."}
             </p>
           </div>
 
@@ -74,12 +74,12 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
                 {REFERRAL_REWARD_LABEL}
               </span>
               <p className="font-heading text-base font-semibold text-foreground mb-1">
-                Parrainez vos proches
+                Faites venir un propriétaire près de chez vous
               </p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Aidez la communauté à grandir. Quand l'abonnement gardien deviendra
-                payant (à partir du {SITTER_PRICE_START}), chaque filleul activé vous
-                offre {REFERRAL_REWARD_LABEL}.
+                Plus la communauté grandit autour de vous, plus les annonces arrivent.
+                Quand l'abonnement gardien deviendra payant (à partir du {SITTER_PRICE_START}),
+                chaque filleul activé vous offre {REFERRAL_REWARD_LABEL}.
               </p>
             </div>
             <Link
@@ -90,6 +90,47 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
               Partager mon lien
             </Link>
           </div>
+
+          {hasBeyond && nearbyListings.length > 0 && (
+            <div className="text-left pt-2 border-t border-border/60">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground font-semibold mb-3">
+                Les plus proches disponibles (hors rayon)
+              </p>
+              <div className="divide-y divide-border/60">
+                {nearbyListings.slice(0, 3).map((sit: any) => {
+                  const distance =
+                    typeof sit.distance_km === "number" ? Math.round(sit.distance_km) : null;
+                  return (
+                    <Link
+                      key={sit.id}
+                      to={`/sits/${sit.id}`}
+                      className="group flex items-start gap-3 py-3 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:bg-muted/40"
+                    >
+                      <div className="w-2 h-2 rounded-full bg-muted-foreground/50 shrink-0 mt-1.5" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-foreground leading-snug font-medium transition-colors group-hover:text-primary truncate">
+                          {sit.title}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {sit.start_date && sit.end_date
+                            ? `${format(new Date(sit.start_date), "d MMM", { locale: fr })} → ${format(new Date(sit.end_date), "d MMM", { locale: fr })}`
+                            : "Dates flexibles"}
+                        </p>
+                      </div>
+                      {distance !== null && (
+                        <span
+                          className="shrink-0 inline-flex items-center rounded-full text-[11px] font-bold tabular-nums px-2.5 py-0.5 bg-muted text-muted-foreground ring-1 ring-border"
+                          aria-label={`À environ ${distance} kilomètres de chez vous`}
+                        >
+                          Plus loin · {distance}&nbsp;km
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <Link
             to="/search"
@@ -107,6 +148,7 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
           )}
         </div>
       </div>
+
     ) : (
       <div className="bg-card border border-border rounded-[2rem] p-4 sm:p-5">
         {(nearbyListingsRadius || hasBeyond) && (
