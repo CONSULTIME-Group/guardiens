@@ -329,7 +329,7 @@ const HelperMiniCard = ({
         </div>
       </div>
 
-      <div className="px-6 pb-5 space-y-3">
+      <div className="px-4 sm:px-6 pb-4 sm:pb-5 space-y-3">
         {/* Savoir-faire (custom) — affiché EN PREMIER car c'est le différenciant. */}
         {visibleSF.length > 0 ? (
           <div className="space-y-1.5">
