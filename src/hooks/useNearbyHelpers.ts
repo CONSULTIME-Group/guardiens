@@ -39,6 +39,45 @@ export const RADIUS_STEPS = [30, 50, 100];
 const MAX_RESULTS = 8;
 
 /**
+ * Rayon « ultra-proche ». À l'intérieur de cette zone, on autorise un
+ * bonus de tri pour les profils renseignant un savoir-faire (custom_skills) —
+ * et UNIQUEMENT à l'intérieur. Au-delà, la distance reprend la main absolue.
+ */
+export const NEAR_RADIUS_KM = 5;
+
+/**
+ * Tri canonique des helpers pour le carrousel « près de chez vous ».
+ *
+ * Règles, dans cet ordre :
+ *  1. Distance croissante = priorité ABSOLUE (un profil à 50 km ne passe
+ *     JAMAIS devant un profil à 5 km, même avec savoir-faire).
+ *  2. Bonus custom_skills UNIQUEMENT si les deux profils comparés sont
+ *     dans la zone ≤ NEAR_RADIUS_KM (et à distance ~égale, le bonus
+ *     est appliqué avant le tie-break distance).
+ *  3. Tie-break : identité vérifiée d'abord.
+ *
+ * Exporté pour pouvoir être testé sans monter le hook complet.
+ */
+export function prioritizeHelpers(list: NearbyHelper[]): NearbyHelper[] {
+  return [...list].sort((a, b) => {
+    const da = a.distance_km ?? Infinity;
+    const db = b.distance_km ?? Infinity;
+    const aNear = da <= NEAR_RADIUS_KM;
+    const bNear = db <= NEAR_RADIUS_KM;
+    // Bonus skills strictement réservé à la zone ultra-proche.
+    if (aNear && bNear) {
+      const aHasSkills = a.custom_skills.length > 0 ? 1 : 0;
+      const bHasSkills = b.custom_skills.length > 0 ? 1 : 0;
+      if (aHasSkills !== bHasSkills) return bHasSkills - aHasSkills;
+    }
+    if (da !== db) return da - db;
+    const aVer = a.identity_verified ? 1 : 0;
+    const bVer = b.identity_verified ? 1 : 0;
+    return bVer - aVer;
+  });
+}
+
+/**
  * Renvoie le prochain palier de rayon strictement plus grand, ou null s'il
  * n'y en a plus. Utilisé par l'UI pour proposer « Élargir le rayon » sans
  * réinitialiser le filtre compétence.
@@ -126,30 +165,7 @@ export function useNearbyHelpers(
         };
       }).filter((h) => h.skill_categories.length > 0 || h.custom_skills.length > 0);
 
-      // Tri : distance croissante en PRIORITÉ ABSOLUE.
-      // C'est « près de chez vous » : un profil avec savoir-faire à 50 km
-      // ne doit JAMAIS passer devant un voisin à 5 km.
-      // Bonus : à l'intérieur d'un rayon ultra-proche (≤ NEAR_RADIUS_KM),
-      // on remonte les profils qui ont renseigné des custom_skills (signal
-      // d'engagement) au-dessus de ceux qui n'en ont pas, à distance ~égale.
-      const NEAR_RADIUS_KM = 5;
-      const prioritize = (list: NearbyHelper[]) =>
-        [...list].sort((a, b) => {
-          const da = a.distance_km ?? Infinity;
-          const db = b.distance_km ?? Infinity;
-          const aNear = da <= NEAR_RADIUS_KM;
-          const bNear = db <= NEAR_RADIUS_KM;
-          // Bonus skills uniquement dans la zone ultra-proche
-          if (aNear && bNear) {
-            const aHasSkills = a.custom_skills.length > 0 ? 1 : 0;
-            const bHasSkills = b.custom_skills.length > 0 ? 1 : 0;
-            if (aHasSkills !== bHasSkills) return bHasSkills - aHasSkills;
-          }
-          if (da !== db) return da - db;
-          const aVer = a.identity_verified ? 1 : 0;
-          const bVer = b.identity_verified ? 1 : 0;
-          return bVer - aVer;
-        });
+      const prioritize = (list: NearbyHelper[]) => prioritizeHelpers(list);
 
       // Pas de géoloc → on retourne 8 profils par identité vérifiée + skills
       if (!hasGeo) {
