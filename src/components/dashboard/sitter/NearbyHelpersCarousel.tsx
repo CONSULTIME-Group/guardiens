@@ -540,8 +540,7 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
               <HelperMiniCard
                 key={helper.id}
                 helper={helper}
-                onWrite={() => handleWrite(helper)}
-                pending={pending === helper.id}
+                ctaHref={ctaHref}
               />
             ))}
           </div>
