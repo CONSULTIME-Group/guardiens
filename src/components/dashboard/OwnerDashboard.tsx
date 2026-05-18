@@ -505,45 +505,49 @@ const OwnerDashboard = () => {
         </section>
       )}
 
-      {/* ═══ Footer dashboard — accès secondaires compacts ═══ */}
-      <div className="px-5 md:px-8 pt-2 border-t border-border/40">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {user?.id && (
-            <Link
-              to={`/gardiens/${user.id}?tab=proprio#badges`}
-              className="flex items-center justify-between gap-3 rounded-2xl bg-card border border-border px-4 py-3 hover:bg-muted/30 transition-colors group"
-            >
+      {/* ═══ Footer dashboard — badges inline + ressources ═══ */}
+      <div className="px-5 md:px-8 pt-2 border-t border-border/40 space-y-3">
+        {user?.id && userBadges && userBadges.length > 0 && (
+          <div className="rounded-2xl bg-card border border-border px-4 py-3">
+            <div className="flex items-center justify-between gap-3 mb-3">
               <div>
                 <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
                   Reconnaissance
                 </p>
                 <p className="text-sm font-semibold text-foreground">
-                  {userBadges?.length ?? 0} badge{(userBadges?.length ?? 0) > 1 ? "s" : ""} débloqué{(userBadges?.length ?? 0) > 1 ? "s" : ""}
+                  {userBadges.length} badge{userBadges.length > 1 ? "s" : ""} débloqué{userBadges.length > 1 ? "s" : ""}
                 </p>
               </div>
-              <span className="text-xs text-primary font-semibold group-hover:translate-x-0.5 transition-transform" aria-hidden="true">
-                Voir →
-              </span>
-            </Link>
-          )}
-
-          <details className="group rounded-2xl bg-card border border-border overflow-hidden">
-            <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
-              <div>
-                <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
-                  Ressources
-                </p>
-                <p className="text-sm font-semibold text-foreground">
-                  Conseils & guides pour propriétaires
-                </p>
-              </div>
-              <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
-            </summary>
-            <div className="px-4 pb-4">
-              <ContextualResources annoncesCount={sits.length} gardesCount={completedSits.length} loading={loading} />
+              <Link
+                to={`/gardiens/${user.id}?tab=proprio#badges`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-primary font-semibold hover:underline shrink-0"
+                aria-label="Voir tous les badges sur mon profil public (nouvel onglet)"
+              >
+                Voir tout →
+              </Link>
             </div>
-          </details>
-        </div>
+            <BadgeRow badges={userBadges} size="compact" maxVisible={8} />
+          </div>
+        )}
+
+        <details className="group rounded-2xl bg-card border border-border overflow-hidden">
+          <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
+            <div>
+              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
+                Ressources
+              </p>
+              <p className="text-sm font-semibold text-foreground">
+                Conseils & guides pour propriétaires
+              </p>
+            </div>
+            <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
+          </summary>
+          <div className="px-4 pb-4">
+            <ContextualResources annoncesCount={sits.length} gardesCount={completedSits.length} loading={loading} />
+          </div>
+        </details>
       </div>
 
       {/* ═══ CTA sticky mobile ═══ */}
