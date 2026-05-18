@@ -9,6 +9,7 @@ import { Link, useNavigate } from "react-router-dom";
 import OnboardingWelcome from "./OnboardingWelcome";
 import NearbyOwnerSittersCard from "./owner/NearbyOwnerSittersCard";
 import NearbyEmergencySitters from "./NearbyEmergencySitters";
+import NearbyHelpersCarousel from "./sitter/NearbyHelpersCarousel";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
 import { Plus, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -424,6 +425,12 @@ const OwnerDashboard = () => {
 
           {/* Zone WARNING — Petites missions (entraide) */}
           <MissionsTabsCard myMissions={myMissions} nearbyMissions={smallMissions} />
+
+          {/* Savoir-faire à proximité — pendant « offres » de l'entraide :
+              missions = besoins exprimés ; helpers = compétences offertes.
+              Indispensable pour un propriétaire qui peut aussi avoir besoin
+              d'un coup de main (jardin, bricolage, animaux ponctuels). */}
+          <NearbyHelpersCarousel />
 
           {/* Parrainage — levier d'acquisition gratuit, rendu visible
               directement depuis le dashboard (au lieu d'être enterré dans
