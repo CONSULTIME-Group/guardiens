@@ -395,8 +395,8 @@ const OwnerDashboard = () => {
               <span aria-hidden className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-warning" />
               <div className="pl-2 sm:pl-3 min-w-0">
                 <SectionEyebrow
-                  eyebrow="Coup de main · Entraide"
-                  title="Près de chez vous"
+                  eyebrow="Entraide locale"
+                  title="Coup de main près de chez vous"
                   accent="warning"
                   id="owner-discovery-missions-heading"
                 />
