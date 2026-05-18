@@ -145,11 +145,15 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
               </div>
               {distance !== null && (
                 <span
-                  className="shrink-0 inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-bold tabular-nums px-2.5 py-0.5"
+                  className={`shrink-0 inline-flex items-center rounded-full text-[11px] font-bold tabular-nums px-2.5 py-0.5 ${
+                    sit.is_beyond
+                      ? "bg-muted text-muted-foreground ring-1 ring-border"
+                      : "bg-primary/10 text-primary"
+                  }`}
                   aria-label={`À environ ${distance} kilomètres de chez vous`}
-                  title="Distance approximative (~1 km de précision)"
+                  title={sit.is_beyond ? "Annonce hors rayon habituel" : "Distance approximative (~1 km de précision)"}
                 >
-                  {distance}&nbsp;km
+                  {sit.is_beyond ? "Plus loin · " : ""}{distance}&nbsp;km
                 </span>
               )}
             </Link>
