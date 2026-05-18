@@ -263,13 +263,24 @@ const HelperMiniCard = ({
           </p>
         </div>
         {distance !== null && (
-          <span
-            className="shrink-0 inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-[11px] font-semibold font-sans px-2 py-0.5 tabular-nums"
-            aria-label={`À ${distance} kilomètres de chez vous`}
-          >
-            <MapPin className="h-3 w-3" aria-hidden="true" />
-            {distance}&nbsp;km
-          </span>
+          <div className="shrink-0 flex flex-col items-end gap-1">
+            <span
+              className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-[11px] font-semibold font-sans px-2 py-0.5 tabular-nums"
+              aria-label={`À ${distance} kilomètres de chez vous`}
+            >
+              <MapPin className="h-3 w-3" aria-hidden="true" />
+              {distance}&nbsp;km
+            </span>
+            {distance <= 5 && savoirFaireChips.length > 0 && (
+              <span
+                className="inline-flex items-center rounded-full bg-success/15 text-success text-[10px] font-semibold font-sans px-2 py-0.5 ring-1 ring-success/25"
+                title="Personne avec savoir-faire à moins de 5 km — priorisée pour vous"
+                aria-label="Tout près, à moins de 5 kilomètres, avec savoir-faire"
+              >
+                Tout près · ≤ 5&nbsp;km
+              </span>
+            )}
+          </div>
         )}
       </div>
 
