@@ -1,12 +1,15 @@
 import { Link } from "react-router-dom";
 import { format, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
-import { AlertCircle, RefreshCw, Share2 } from "lucide-react";
+import { AlertCircle, RefreshCw, Share2, Compass } from "lucide-react";
 import { REFERRAL_REWARD_LABEL, SITTER_PRICE_START } from "@/lib/pricing";
 
 interface Props {
   nearbyListings: any[];
   nearbyError?: string | null;
+  /** Rayon (km) effectivement appliqué pour le filtrage (30/50/100), ou null
+   *  si on a dû élargir au-delà (annonces flaggées is_beyond). */
+  nearbyListingsRadius?: number | null;
   isAvailable?: boolean;
   /** Quand un parent (ex: SitterDashboard) a déjà rendu un SectionEyebrow. */
   hideHeader?: boolean;
