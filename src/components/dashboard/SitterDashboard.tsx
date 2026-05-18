@@ -307,33 +307,12 @@ const SitterDashboard = () => {
           accent="primary"
           id="discovery-annonces-heading"
         />
-        {annoncesEmpty ? (
-          <div className="relative overflow-hidden rounded-2xl border border-warning/30 bg-gradient-to-br from-warning/10 via-card to-primary/5 px-5 pt-5 pb-6 text-center">
-            <p className="text-[10px] uppercase tracking-[2px] text-warning font-sans font-semibold mb-1">
-              Calme plat
-            </p>
-            <p className="font-heading text-base font-bold text-foreground mb-1">
-              Aucune annonce dans un rayon de 100 km.
-            </p>
-            <p className="text-xs text-muted-foreground font-sans mb-4">
-              {isAvailable
-                ? "Vous êtes visible — de nouvelles annonces apparaissent chaque jour."
-                : "Activez le mode disponible pour être contacté directement par les propriétaires."}
-            </p>
-            <Link
-              to="/search"
-              className="inline-flex items-center gap-1 text-xs text-primary font-semibold hover:underline"
-            >
-              Élargir la recherche →
-            </Link>
-          </div>
-        ) : (
-          <NearbyAnnoncesCard
-            nearbyListings={nearbyListings}
-            nearbyError={nearbyError}
-            isAvailable={isAvailable}
-          />
-        )}
+        <NearbyAnnoncesCard
+          nearbyListings={nearbyListings}
+          nearbyError={nearbyError}
+          isAvailable={isAvailable}
+          hideHeader
+        />
       </section>
 
       {/* 2. Coup de main — entraide (helpers + missions ouvertes fusionnés) */}
