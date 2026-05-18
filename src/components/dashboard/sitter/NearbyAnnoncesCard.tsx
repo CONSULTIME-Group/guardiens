@@ -8,32 +8,36 @@ interface Props {
   nearbyListings: any[];
   nearbyError?: string | null;
   isAvailable?: boolean;
+  /** Quand un parent (ex: SitterDashboard) a déjà rendu un SectionEyebrow. */
+  hideHeader?: boolean;
 }
 
 /**
  * Carte "Annonces près de chez vous" — extraite de SitterBottomColumns
  * pour pouvoir être utilisée seule dans un onglet de la zone Découverte.
  */
-const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, isAvailable = false }: Props) => (
-  <section aria-labelledby="nearby-annonces-heading" className="space-y-5">
-    <div className="flex flex-col">
-      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent mb-1.5">
-        Annonces
-      </p>
-      <div className="flex items-end justify-between gap-3">
-        <h3
-          id="nearby-annonces-heading"
-          className="font-heading text-2xl sm:text-3xl font-semibold text-foreground leading-tight"
-        >
-          Près de chez vous
-        </h3>
-        {nearbyListings.length > 0 && (
-          <Link to="/search" className="text-xs text-primary font-semibold hover:underline shrink-0">
-            Voir tout →
-          </Link>
-        )}
+const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, isAvailable = false, hideHeader = false }: Props) => (
+  <section aria-labelledby={hideHeader ? undefined : "nearby-annonces-heading"} className="space-y-5">
+    {!hideHeader && (
+      <div className="flex flex-col">
+        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent mb-1.5">
+          Annonces
+        </p>
+        <div className="flex items-end justify-between gap-3">
+          <h3
+            id="nearby-annonces-heading"
+            className="font-heading text-2xl sm:text-3xl font-semibold text-foreground leading-tight"
+          >
+            Près de chez vous
+          </h3>
+          {nearbyListings.length > 0 && (
+            <Link to="/search" className="text-xs text-primary font-semibold hover:underline shrink-0">
+              Voir tout →
+            </Link>
+          )}
+        </div>
       </div>
-    </div>
+    )}
 
     {nearbyError ? (
       <div role="alert" className="rounded-[2rem] border border-destructive/30 bg-destructive/5 p-6 text-center">
