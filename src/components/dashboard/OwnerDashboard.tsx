@@ -30,7 +30,7 @@ import MissionsTabsCard from "./owner/MissionsTabsCard";
 import DashSection from "./owner/DashSection";
 import EmptyCard from "./owner/EmptyCard";
 import StatsStrip from "./owner/StatsStrip";
-import PendingReviewsCard from "./owner/PendingReviewsCard";
+
 import MobileStickyCTA from "./owner/MobileStickyCTA";
 import LiveSignalStrip from "./shared/LiveSignalStrip";
 import TodoCard, { type TodoItem } from "./owner/TodoCard";
@@ -345,9 +345,8 @@ const OwnerDashboard = () => {
             )}
           </DashSection>
 
-          {pendingReviews.length > 0 && (
-            <PendingReviewsCard pendingReviews={pendingReviews} />
-          )}
+          {/* Avis en attente : remontés dans TodoCard pour éviter le doublon
+              de surface. Un seul point d'entrée « action en attente ». */}
 
           {showApplicationsSection && (
             <ApplicationsSection
