@@ -208,7 +208,13 @@ const HelperMiniCard = ({
   const visibleSF = savoirFaireChips.slice(0, MAX_SF);
   const remainingSF = savoirFaireChips.length - visibleSF.length;
 
-  const bioTeaser = sanitizeBioForCard(helper.bio);
+  // Fallback : si la bio brute existe mais que la sanitization l'a vidée
+  // (bio contenant uniquement email/tél/URL), on affiche un texte neutre
+  // plutôt que rien — pour ne pas laisser la carte « muette ».
+  const rawBio = (helper.bio || "").trim();
+  const sanitized = sanitizeBioForCard(helper.bio);
+  const bioTeaser =
+    sanitized || (rawBio.length > 0 ? "Disponible pour un coup de main près de chez vous." : "");
 
   const distance =
     helper.distance_km !== null && helper.distance_km !== undefined
