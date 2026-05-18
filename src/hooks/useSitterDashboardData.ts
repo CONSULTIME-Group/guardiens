@@ -386,6 +386,7 @@ export function useSitterDashboardData(userId: string | undefined) {
         nextGuard,
         nextGuardError,
         nearbyListings,
+        nearbyListingsRadius,
         nearbyError,
         articles: articlesRes.data || [],
         badges: allBadges,
