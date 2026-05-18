@@ -237,11 +237,11 @@ const AdminDiagnostics = () => {
           )}
           {geoResult && (
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-              <StatCard label="Profils traités" value={geoResult.processed} />
-              <StatCard label="Mis à jour" value={geoResult.updated} tone="emerald" />
-              <StatCard label="Ignorés" value={geoResult.skipped} />
-              <StatCard label="Erreurs" value={geoResult.errors} tone="amber" />
-              <StatCard label="Codes postaux" value={geoResult.unique_postal_codes} />
+              <InlineMetric label="Profils traités" value={geoResult.processed} />
+              <InlineMetric label="Mis à jour" value={geoResult.updated} tone="emerald" />
+              <InlineMetric label="Ignorés" value={geoResult.skipped} />
+              <InlineMetric label="Erreurs" value={geoResult.errors} tone="amber" />
+              <InlineMetric label="Codes postaux" value={geoResult.unique_postal_codes} />
             </div>
           )}
         </CardContent>
@@ -435,6 +435,31 @@ const StatCard = ({
       </p>
     </CardContent>
   </Card>
+);
+
+const InlineMetric = ({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone?: "amber" | "emerald";
+}) => (
+  <div className="rounded-md border bg-muted/30 px-3 py-2">
+    <p className="text-xs text-muted-foreground">{label}</p>
+    <p
+      className={`text-xl font-bold tabular-nums mt-1 ${
+        tone === "amber"
+          ? "text-warning dark:text-amber-400"
+          : tone === "emerald"
+          ? "text-emerald-600 dark:text-emerald-400"
+          : "text-foreground"
+      }`}
+    >
+      {value}
+    </p>
+  </div>
 );
 
 export default AdminDiagnostics;
