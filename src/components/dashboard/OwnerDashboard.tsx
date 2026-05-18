@@ -32,6 +32,7 @@ import StatsStrip from "./owner/StatsStrip";
 
 import MobileStickyCTA from "./owner/MobileStickyCTA";
 import LiveSignalStrip from "./shared/LiveSignalStrip";
+import SectionEyebrow from "./shared/SectionEyebrow";
 import TodoCard, { type TodoItem } from "./owner/TodoCard";
 
 import {
