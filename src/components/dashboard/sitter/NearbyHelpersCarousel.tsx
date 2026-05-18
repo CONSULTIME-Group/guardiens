@@ -141,7 +141,45 @@ const EmptyHelpersState = ({ hideHeader, userId }: { hideHeader: boolean; userId
           </p>
         )}
 
+        {/* Savoir-faire disponibles — pédagogie : on montre les catégories
+            de coup de main même quand personne n'est listé, pour que
+            l'utilisateur comprenne le périmètre. */}
+        <div className="mt-4 pt-4 border-t border-border/40">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold mb-2">
+            Savoir-faire couverts
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {SKILL_CHIPS.map((chip) => (
+              <span
+                key={chip.key}
+                className="px-2.5 py-1 bg-card border border-border text-foreground/80 text-[10px] font-semibold uppercase tracking-wider rounded-lg"
+              >
+                {chip.label}
+              </span>
+            ))}
+          </div>
+        </div>
+
         <HelpersProximityTicker userId={userId} />
+
+        {/* CTA navigation — toujours visible, même en empty-state, pour
+            permettre de rejoindre la page des petites missions. */}
+        <div className="mt-4 pt-3 border-t border-border/40 flex flex-wrap items-center justify-end gap-x-5 gap-y-2 text-xs">
+          <Link
+            to="/petites-missions"
+            className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary font-semibold transition-colors"
+          >
+            Voir les petites missions
+            <ArrowRight className="h-3 w-3" aria-hidden="true" />
+          </Link>
+          <Link
+            to="/petites-missions/creer"
+            className="inline-flex items-center gap-1 text-primary hover:underline font-semibold"
+          >
+            Demander un coup de main
+            <ArrowRight className="h-3 w-3" aria-hidden="true" />
+          </Link>
+        </div>
       </div>
     </section>
   );
