@@ -249,8 +249,9 @@ export function useSitterDashboardData(userId: string | undefined) {
         }
       }
 
-      // Nearby missions — même logique : filtre dept + tri distance via les
-      // coords de l'auteur de la mission (fetch léger sur public_profiles).
+      // Nearby missions — conserve la logique département (entraide locale,
+      // pas de trajets longs). À migrer séparément si besoin.
+      const userDept = profile?.postal_code?.slice(0, 2);
       let nearbyMissions: any[] = [];
       let nearbyMissionsError: string | null = null;
       if (userDept) {
