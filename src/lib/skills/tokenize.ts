@@ -107,7 +107,7 @@ export const tokenizeSkillPhrases = (
     const stripped = stripStopPrefix(entry.trim());
     const parts = stripped.split(SEPARATORS);
     for (const part of parts) {
-      const cleaned = cleanToken(part).replace(/\s+/g, " ");
+      const cleaned = cleanToken(stripStopPrefix(part).replace(/\s+/g, " "));
       if (!isValid(cleaned, minLen, maxLen)) continue;
       const key = normalizeSkillKey(cleaned);
       if (!key || seen.has(key)) continue;
