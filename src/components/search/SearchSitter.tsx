@@ -73,6 +73,10 @@ const SearchSitter = () => {
  const [radius, setRadius] = useState([15]);
  const [zoneMode, setZoneMode] = useState<ZoneMode>(() => {
  if (typeof window === "undefined") return "radius";
+ // Param URL ?zone=france — utilisé depuis le dashboard pour ouvrir la
+ // recherche directement en mode élargi (« annonces plus loin »).
+ const urlZone = searchParams.get("zone");
+ if (urlZone === "radius" || urlZone === "dept" || urlZone === "region" || urlZone === "france") return urlZone;
  const saved = localStorage.getItem("search.zoneMode");
  return saved === "radius" || saved === "dept" || saved === "region" || saved === "france" ? saved : "radius";
  });
