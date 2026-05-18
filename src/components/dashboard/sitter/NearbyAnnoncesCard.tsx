@@ -55,61 +55,81 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
         </button>
       </div>
     ) : nearbyListings.length === 0 || hasBeyond ? (
-      <div className="bg-card border border-border rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-10 flex flex-col items-center text-center shadow-sm min-w-0 overflow-hidden">
-        <div className="max-w-lg space-y-6 min-w-0 w-full">
-          <div className="space-y-3 min-w-0">
-            <h4 className="font-heading text-lg sm:text-2xl font-semibold text-foreground leading-snug break-words">
-              {hasBeyond ? "Aucune annonce dans un rayon de 100 km" : "Calme plat sur votre secteur"}
-            </h4>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {hasBeyond
-                ? "Aucune garde n'est publiée à moins de 100 km de chez vous pour le moment. Votre profil reste visible et de nouvelles opportunités peuvent apparaître chaque jour."
-                : "Aucune annonce de garde n'a été publiée près de chez vous pour le moment. Votre profil reste visible auprès de la communauté et de nouvelles opportunités peuvent apparaître chaque jour."}
-            </p>
-          </div>
-
-          <div className="bg-background/60 border border-accent/25 rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row items-center gap-5 text-left">
-            <div className="flex-1 min-w-0">
-              <span className="inline-block px-2 py-1 bg-accent text-accent-foreground text-[10px] font-bold uppercase tracking-widest rounded-md mb-3">
-                {REFERRAL_REWARD_LABEL}
-              </span>
-              <p className="font-heading text-base font-semibold text-foreground mb-1">
-                Faites venir un propriétaire près de chez vous
-              </p>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Votre filleul rejoint Guardiens <strong className="text-foreground">gratuitement</strong> jusqu'au {SITTER_PRICE_START}.
-                Plus la communauté grandit autour de vous, plus les annonces arrivent. Et quand
-                l'abonnement gardien deviendra payant, chaque filleul activé vous offre {REFERRAL_REWARD_LABEL}.
-              </p>
+      (() => {
+        const hasFallback = hasBeyond && nearbyListings.length > 0;
+        // Cas "vraiment vide" : bloc compact (pas de pavé). Le parrainage
+        // reste accessible mais sur 1 ligne, pas en hero.
+        // Cas "hors rayon mais on a des suggestions" : on inverse la hiérarchie
+        // — les annonces plus loin deviennent le contenu principal, l'empty
+        // state se réduit à une mention discrète en tête.
+        if (!hasFallback) {
+          return (
+            <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 flex flex-col gap-3 shadow-sm min-w-0">
+              <div className="flex items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-heading font-semibold text-foreground leading-snug">
+                    Calme plat sur votre secteur
+                  </p>
+                  <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+                    Aucune annonce de garde n'a été publiée près de chez vous pour le moment. Votre profil reste visible.
+                  </p>
+                </div>
+                <Link
+                  to="/search?zone=france"
+                  className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-full border border-border bg-background text-[11px] font-semibold text-foreground hover:bg-muted/60 hover:border-foreground/30 transition-colors"
+                >
+                  <Compass className="h-3.5 w-3.5" aria-hidden="true" />
+                  Voir plus loin
+                </Link>
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-border/60">
+                <p className="text-xs text-muted-foreground">
+                  Faites venir un propriétaire&nbsp;: votre filleul rejoint gratuitement jusqu'au {SITTER_PRICE_START}.
+                </p>
+                <Link
+                  to="/mon-abonnement#parrainage"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+                >
+                  <Share2 className="h-3 w-3" aria-hidden="true" />
+                  Partager mon lien
+                </Link>
+              </div>
+              {!isAvailable && (
+                <p className="text-[11px] text-muted-foreground italic">
+                  Pensez à activer le mode disponible pour être contacté dès qu'une annonce arrive.
+                </p>
+              )}
             </div>
-            <Link
-              to="/mon-abonnement#parrainage"
-              className="shrink-0 inline-flex items-center gap-1.5 whitespace-nowrap px-6 py-3 bg-primary text-primary-foreground text-xs font-bold uppercase tracking-wider rounded-full hover:bg-primary/90 transition-colors"
-            >
-              <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
-              Partager mon lien
-            </Link>
-          </div>
+          );
+        }
 
-          {hasBeyond && nearbyListings.length > 0 && (
-            <div className="text-left pt-2 border-t border-border/60">
+        // hasFallback === true : on met en avant les annonces hors rayon.
+        return (
+          <div className="space-y-3 min-w-0">
+            <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 min-w-0">
               <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground font-semibold mb-3">
-                Les plus proches disponibles (hors rayon)
+                Aucune garde à moins de 100 km — voici les plus proches disponibles
               </p>
               <div className="divide-y divide-border/60">
-                {nearbyListings.slice(0, 3).map((sit: any) => {
+                {nearbyListings.slice(0, 5).map((sit: any) => {
                   const distance =
                     typeof sit.distance_km === "number" ? Math.round(sit.distance_km) : null;
+                  const isNew = differenceInHours(new Date(), new Date(sit.created_at)) < 48;
                   return (
                     <Link
                       key={sit.id}
                       to={`/sits/${sit.id}`}
-                      className="group flex items-start gap-3 py-3 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:bg-muted/40"
+                      className="group flex items-start gap-3 py-3 first:pt-1 last:pb-1 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:bg-muted/40 hover:translate-x-0.5"
                     >
-                      <div className="w-2 h-2 rounded-full bg-muted-foreground/50 shrink-0 mt-1.5" />
+                      <div className="w-2 h-2 rounded-full bg-primary/70 shrink-0 mt-1.5 transition-transform duration-200 group-hover:scale-125" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-foreground leading-snug font-medium transition-colors group-hover:text-primary truncate">
+                        <p className="text-sm sm:text-base text-foreground leading-snug font-medium transition-colors group-hover:text-primary">
                           {sit.title}
+                          {isNew && (
+                            <span className="ml-2 text-[10px] uppercase tracking-wider font-bold bg-accent text-accent-foreground rounded px-1.5 py-0.5 align-middle">
+                              Nouveau
+                            </span>
+                          )}
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {sit.start_date && sit.end_date
@@ -122,32 +142,33 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
                           className="shrink-0 inline-flex items-center rounded-full text-[11px] font-bold tabular-nums px-2.5 py-0.5 bg-muted text-muted-foreground ring-1 ring-border"
                           aria-label={`À environ ${distance} kilomètres de chez vous`}
                         >
-                          Plus loin · {distance}&nbsp;km
+                          {distance}&nbsp;km
                         </span>
                       )}
                     </Link>
                   );
                 })}
               </div>
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-3 mt-2 border-t border-border/60">
+                <Link
+                  to="/search?zone=france"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+                >
+                  <Compass className="h-3.5 w-3.5" aria-hidden="true" />
+                  Voir toutes les annonces plus loin
+                </Link>
+                <Link
+                  to="/mon-abonnement#parrainage"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-primary"
+                >
+                  <Share2 className="h-3 w-3" aria-hidden="true" />
+                  Inviter un proche
+                </Link>
+              </div>
             </div>
-          )}
-
-          <Link
-            to="/search?zone=france"
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border border-border bg-background text-xs font-semibold text-foreground hover:bg-muted/60 hover:border-foreground/30 transition-colors"
-          >
-            <Compass className="h-3.5 w-3.5" aria-hidden="true" />
-            Voir les annonces plus loin
-          </Link>
-
-          {!isAvailable && (
-            <p className="text-xs text-muted-foreground">
-              Pensez à activer le mode disponible (en haut de page) pour être contacté
-              dès qu'une annonce arrive.
-            </p>
-          )}
-        </div>
-      </div>
+          </div>
+        );
+      })()
 
     ) : (
       <div className="bg-card border border-border rounded-[2rem] p-4 sm:p-5">
