@@ -258,8 +258,8 @@ const HelperMiniCard = ({
   return (
     <article
       className="
-        group/card flex-shrink-0 w-[80vw] sm:w-[20rem] snap-start
-        rounded-[2rem] bg-card
+        group/card flex-shrink-0 w-[78vw] max-w-[20rem] sm:w-[20rem] snap-start
+        rounded-[1.75rem] sm:rounded-[2rem] bg-card
         ring-1 ring-border/60 hover:ring-accent/50
         shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-[0_18px_40px_-20px_rgba(0,0,0,0.22)]
         transition-all duration-500 ease-out hover:-translate-y-1
@@ -267,7 +267,7 @@ const HelperMiniCard = ({
       "
     >
       {/* En-tête : avatar rotaté façon gouache + nom + distance éditoriale */}
-      <div className="px-6 pt-6 pb-4 flex items-start justify-between gap-3">
+      <div className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 flex items-start justify-between gap-3">
         <div className="relative shrink-0">
           {helper.avatar_url ? (
             <img
@@ -329,7 +329,7 @@ const HelperMiniCard = ({
         </div>
       </div>
 
-      <div className="px-6 pb-5 space-y-3">
+      <div className="px-4 sm:px-6 pb-4 sm:pb-5 space-y-3">
         {/* Savoir-faire (custom) — affiché EN PREMIER car c'est le différenciant. */}
         {visibleSF.length > 0 ? (
           <div className="space-y-1.5">
@@ -395,7 +395,7 @@ const HelperMiniCard = ({
       {/* Lien profil discret — pas de CTA invasif sur la carte. Les actions
           (voir missions / demander un coup de main) sont déportées au niveau
           de la section, comme demandé. */}
-      <div className="mt-auto px-6 pb-6">
+      <div className="mt-auto px-4 sm:px-6 pb-4 sm:pb-6">
         <Link
           to={`/gardiens/${helper.id}`}
           className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground hover:text-primary transition-colors"
@@ -504,44 +504,48 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
         </div>
       )}
 
-      {/* Chips compétences */}
-      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-        <button
-          type="button"
-          onClick={() => handleSkillToggle(null)}
-          className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
-            activeSkill === null
-              ? "bg-foreground text-background border-foreground"
-              : "bg-card text-foreground border-border hover:bg-muted"
-          }`}
-        >
-          Tout
-        </button>
-        {SKILL_CHIPS.map((chip) => {
-          const count = helpers.filter((h) =>
-            h.skill_categories.includes(chip.key) || (chip.key === "competences" && h.custom_skills.length > 0),
-          ).length;
-          if (count === 0) return null;
-          const active = activeSkill === chip.key;
-          return (
-            <button
-              key={chip.key}
-              type="button"
-              onClick={() => handleSkillToggle(active ? null : chip.key)}
-              className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
-                active
-                  ? "bg-foreground text-background border-foreground"
-                  : "bg-card text-foreground border-border hover:bg-muted"
-              }`}
-              aria-pressed={active}
-            >
-              {chip.label}
-              <span className={`ml-1.5 text-[10px] ${active ? "text-background/70" : "text-muted-foreground"}`}>
-                {count}
-              </span>
-            </button>
-          );
-        })}
+      {/* Chips compétences — scroll horizontal sur mobile avec fondu droit
+          pour signaler qu'il existe d'autres filtres au-delà du bord. */}
+      <div className="relative -mx-1">
+        <div className="flex gap-2 overflow-x-auto pb-1 px-1 scrollbar-hide">
+          <button
+            type="button"
+            onClick={() => handleSkillToggle(null)}
+            className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+              activeSkill === null
+                ? "bg-foreground text-background border-foreground"
+                : "bg-card text-foreground border-border hover:bg-muted"
+            }`}
+          >
+            Tout
+          </button>
+          {SKILL_CHIPS.map((chip) => {
+            const count = helpers.filter((h) =>
+              h.skill_categories.includes(chip.key) || (chip.key === "competences" && h.custom_skills.length > 0),
+            ).length;
+            if (count === 0) return null;
+            const active = activeSkill === chip.key;
+            return (
+              <button
+                key={chip.key}
+                type="button"
+                onClick={() => handleSkillToggle(active ? null : chip.key)}
+                className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+                  active
+                    ? "bg-foreground text-background border-foreground"
+                    : "bg-card text-foreground border-border hover:bg-muted"
+                }`}
+                aria-pressed={active}
+              >
+                {chip.label}
+                <span className={`ml-1.5 text-[10px] ${active ? "text-background/70" : "text-muted-foreground"}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-background to-transparent sm:hidden" aria-hidden="true" />
       </div>
 
       {/* Carrousel horizontal premium — partout (hideHeader contrôle seulement le titre). */}

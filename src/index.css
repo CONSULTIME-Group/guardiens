@@ -728,3 +728,17 @@
   }
 }
 
+
+@layer utilities {
+  /* Masque la scrollbar des carrousels horizontaux sans casser le scroll natif.
+     Tailwind n'inclut pas cette utilitaire par défaut — on l'ajoute ici pour
+     éviter d'avoir une barre grise sous les carousels « Coup de main » /
+     « Annonces » sur mobile. */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
