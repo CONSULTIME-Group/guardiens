@@ -309,6 +309,7 @@ const SitterDashboard = () => {
         />
         <NearbyAnnoncesCard
           nearbyListings={nearbyListings}
+          nearbyListingsRadius={nearbyListingsRadius}
           nearbyError={nearbyError}
           isAvailable={isAvailable}
           hideHeader
