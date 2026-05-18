@@ -19,7 +19,9 @@ interface Props {
  * Carte "Annonces près de chez vous" — extraite de SitterBottomColumns
  * pour pouvoir être utilisée seule dans un onglet de la zone Découverte.
  */
-const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, isAvailable = false, hideHeader = false }: Props) => (
+const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListingsRadius = null, isAvailable = false, hideHeader = false }: Props) => {
+  const hasBeyond = nearbyListings.some((s: any) => s?.is_beyond);
+  return (
   <section aria-labelledby={hideHeader ? undefined : "nearby-annonces-heading"} className="space-y-5">
     {!hideHeader && (
       <div className="flex flex-col">
