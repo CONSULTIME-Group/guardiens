@@ -148,6 +148,19 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
     ? differenceInDays(new Date(currentSit.start_date), now)
     : null;
 
+  // Diagnostic auto : annonce publiée depuis plus de 3 jours sans aucune
+  // candidature → on bascule du compteur passif vers un bloc de leviers
+  // actionnables. Ne s'affiche pas si la garde commence dans plus de 30 j
+  // (normal qu'aucune candidature n'arrive sur une garde lointaine).
+  const daysSincePublished = currentSit.created_at
+    ? differenceInDays(now, new Date(currentSit.created_at))
+    : 0;
+  const showStallDiagnostic =
+    currentSit.status === "published" &&
+    appCount === 0 &&
+    daysSincePublished >= 3 &&
+    (daysUntilStart === null || daysUntilStart <= 30);
+
   return (
     <div className="group/card bg-card border border-border rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-md hover:border-border/80">
       {coverPhoto ? (
@@ -227,6 +240,55 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
             </span>
             <ArrowRight className="h-4 w-4 text-primary shrink-0" aria-hidden="true" />
           </button>
+        ) : showStallDiagnostic ? (
+          <div
+            className="w-full rounded-xl border border-warning/40 bg-warning/5 px-3 py-3 space-y-2"
+            role="status"
+            aria-label="Aucune candidature reçue, diagnostic"
+          >
+            <div className="flex items-start gap-2.5">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-warning/15 text-warning shrink-0 mt-0.5">
+                <Inbox className="h-4 w-4" />
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground">
+                  Aucune candidature après {daysSincePublished} jours
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Trois leviers pour relancer votre annonce&nbsp;:
+                </p>
+              </div>
+            </div>
+            <ul className="text-xs text-foreground/90 pl-10 space-y-1.5">
+              <li className="flex items-start gap-2">
+                <span className="text-warning" aria-hidden="true">·</span>
+                <Link
+                  to={`/sits/${currentSit.id}/edit#photos`}
+                  className="hover:underline"
+                >
+                  Ajoutez 2–3 photos lumineuses (maison + animaux)
+                </Link>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-warning" aria-hidden="true">·</span>
+                <Link
+                  to={`/sits/${currentSit.id}/edit#description`}
+                  className="hover:underline"
+                >
+                  Étoffez la description (routine, lieu, attentes)
+                </Link>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-warning" aria-hidden="true">·</span>
+                <Link
+                  to={`/sits/${currentSit.id}/edit#dates`}
+                  className="hover:underline"
+                >
+                  Élargissez les dates ou proposez un week-end test
+                </Link>
+              </li>
+            </ul>
+          </div>
         ) : (
           <div
             className="w-full flex items-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 px-3 py-2.5"
