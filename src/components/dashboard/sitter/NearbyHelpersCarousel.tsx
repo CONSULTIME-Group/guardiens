@@ -187,7 +187,7 @@ const HelperMiniCard = ({
   // un chien, rendre visite à un chat, monter un meuble Ikea…") ou une liste
   // séparée par virgules/slashs. On tokenise sur les séparateurs courants puis
   // on filtre : longueur 2–22, sans ponctuation de phrase, dédupliqué.
-  const customSkills = tokenizeSkillPhrases(helper.custom_skills);
+  const customSkills = tokenizeSkillPhrases(helper.custom_skills, { maxLen: 42 });
 
   type Chip = { key: string; label: string };
   const categoryChips: Chip[] = helper.skill_categories
