@@ -1,6 +1,6 @@
 import emptyAnnonces from "@/assets/illustrations/empty-annonces.webp";
 import emptyHelpers from "@/assets/illustrations/empty-helpers.webp";
-import emptyConseils from "@/assets/illustrations/empty-conseils.jpg";
+import emptyConseils from "@/assets/illustrations/empty-conseils.webp";
 
 /**
  * Gouaches éditoriales pour les empty-states du dashboard.
