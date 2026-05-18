@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { format, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw, Share2 } from "lucide-react";
 
 interface Props {
   nearbyListings: any[];
