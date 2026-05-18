@@ -402,80 +402,80 @@ const OwnerDashboard = () => {
         </aside>
       </div>
 
-      {/* ═══ Sections éditoriales (repliées par défaut) ═══ */}
-      <div className="px-5 md:px-8 pt-2 space-y-3 border-t border-border/40">
-        {highlights.length > 0 && (
-          <details className="group rounded-2xl bg-card border border-border overflow-hidden">
-            <summary className="cursor-pointer list-none px-4 md:px-5 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
+      {/* ═══ Preuve sociale — Highlights remontés et déployés par défaut ═══ */}
+      {highlights.length > 0 && (
+        <section
+          className="px-5 md:px-8 pt-2 border-t border-border/40"
+          aria-label="Ce que les gardiens disent de votre maison"
+        >
+          <div className="mb-3">
+            <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
+              Preuve sociale
+            </p>
+            <h2 className="font-heading text-base md:text-lg font-bold text-foreground leading-tight">
+              Ce que les gardiens disent de votre maison
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {highlights.slice(0, 3).map(h => (
+              <div key={h.id} className="flex items-start gap-3 p-3 rounded-2xl bg-card border border-border">
+                {h.sitter?.avatar_url ? (
+                  <img src={h.sitter.avatar_url} alt={`Photo de ${h.sitter.first_name || 'gardien'}`} loading="lazy" className="w-10 h-10 rounded-full object-cover shrink-0" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold shrink-0">
+                    {h.sitter?.first_name?.charAt(0) || "?"}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium">{capitalize(h.sitter?.first_name)}</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">{h.text}</p>
+                </div>
+                {h.photo_url && <img src={h.photo_url} alt="Photo de garde" loading="lazy" className="w-16 h-12 rounded-xl object-cover shrink-0" />}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ═══ Footer dashboard — accès secondaires compacts ═══ */}
+      <div className="px-5 md:px-8 pt-2 border-t border-border/40">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {user?.id && (
+            <Link
+              to={`/gardiens/${user.id}?tab=proprio#badges`}
+              className="flex items-center justify-between gap-3 rounded-2xl bg-card border border-border px-4 py-3 hover:bg-muted/30 transition-colors group"
+            >
               <div>
                 <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
-                  Social proof
+                  Reconnaissance
                 </p>
-                <h2 className="font-heading text-base font-bold text-foreground leading-tight">
-                  Ce que les gardiens disent de votre maison
-                </h2>
+                <p className="text-sm font-semibold text-foreground">
+                  {userBadges?.length ?? 0} badge{(userBadges?.length ?? 0) > 1 ? "s" : ""} débloqué{(userBadges?.length ?? 0) > 1 ? "s" : ""}
+                </p>
+              </div>
+              <span className="text-xs text-primary font-semibold group-hover:translate-x-0.5 transition-transform" aria-hidden="true">
+                Voir →
+              </span>
+            </Link>
+          )}
+
+          <details className="group rounded-2xl bg-card border border-border overflow-hidden">
+            <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
+              <div>
+                <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
+                  Ressources
+                </p>
+                <p className="text-sm font-semibold text-foreground">
+                  Conseils & guides pour propriétaires
+                </p>
               </div>
               <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
             </summary>
-            <div className="px-4 md:px-5 pb-4 space-y-2">
-              {highlights.slice(0, 3).map(h => (
-                <div key={h.id} className="flex items-start gap-3 p-3 rounded-2xl bg-muted/30">
-                  {h.sitter?.avatar_url ? (
-                    <img src={h.sitter.avatar_url} alt={`Photo de ${h.sitter.first_name || 'gardien'}`} loading="lazy" className="w-10 h-10 rounded-full object-cover shrink-0" />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold shrink-0">
-                      {h.sitter?.first_name?.charAt(0) || "?"}
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium">{capitalize(h.sitter?.first_name)}</p>
-                    <p className="text-sm text-muted-foreground mt-0.5">{h.text}</p>
-                  </div>
-                  {h.photo_url && <img src={h.photo_url} alt="Photo de garde" loading="lazy" className="w-16 h-12 rounded-xl object-cover shrink-0" />}
-                </div>
-              ))}
+            <div className="px-4 pb-4">
+              <ContextualResources annoncesCount={sits.length} gardesCount={completedSits.length} loading={loading} />
             </div>
           </details>
-        )}
-
-        <details className="group rounded-2xl bg-card border border-border overflow-hidden">
-          <summary className="cursor-pointer list-none px-4 md:px-5 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
-            <div>
-              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
-                Ressources
-              </p>
-              <h2 className="font-heading text-base font-bold text-foreground leading-tight">
-                Conseils & guides pour propriétaires
-              </h2>
-            </div>
-            <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
-          </summary>
-          <div className="px-4 md:px-5 pb-4">
-            <ContextualResources annoncesCount={sits.length} gardesCount={completedSits.length} loading={loading} />
-          </div>
-        </details>
-
-        <details className="group rounded-2xl bg-card border border-border overflow-hidden">
-          <summary className="cursor-pointer list-none px-4 md:px-5 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
-            <div>
-              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
-                Reconnaissance
-              </p>
-              <h2 className="font-heading text-base font-bold text-foreground leading-tight">
-                Vos badges
-              </h2>
-            </div>
-            <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
-          </summary>
-          <div className="px-4 md:px-5 pb-4">
-            <BadgeGridSection
-              title=""
-              badgeIds={PROPRIO_BADGE_IDS}
-              userBadges={userBadges}
-              specialBadgeIds={PROPRIO_SPECIAL_IDS}
-            />
-          </div>
-        </details>
+        </div>
       </div>
 
       {/* ═══ CTA sticky mobile ═══ */}
