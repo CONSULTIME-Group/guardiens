@@ -59,6 +59,16 @@ const OwnerDashboard = () => {
     pendingReviews,
   } = data;
 
+  /* ── Signal local : nombre de gardiens proches (utilisé pour enrichir
+       LiveSignalStrip avec une preuve sociale ancrée près de chez vous). ── */
+  const { data: nearbyOwnerSittersData } = useNearbyOwnerSitters(user?.id);
+  const localSignal = useMemo(() => {
+    if (!nearbyOwnerSittersData) return null;
+    const { sitters, radiusUsed } = nearbyOwnerSittersData;
+    if (sitters.length === 0 || !radiusUsed) return null;
+    return `${sitters.length} dans un rayon de ${radiusUsed} km`;
+  }, [nearbyOwnerSittersData]);
+
   /* ── UI state ── */
   const [showOnboarding, setShowOnboarding] = useState(false);
 
@@ -256,7 +266,7 @@ const OwnerDashboard = () => {
 
       <div className="px-5 md:px-8 space-y-3">
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
-        <LiveSignalStrip />
+        <LiveSignalStrip secondarySignal={localSignal} />
       </div>
 
       {/* ═══ Bloc unifié "À faire maintenant" ═══ */}
