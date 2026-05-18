@@ -46,6 +46,16 @@ interface AppRow {
   } | null;
 }
 
+interface BackfillResult {
+  processed: number;
+  updated: number;
+  skipped: number;
+  errors: number;
+  unique_postal_codes: number;
+  dry_run: boolean;
+  duration_ms: number;
+}
+
 const statusColor: Record<string, string> = {
   pending: "bg-warning-soft text-warning-foreground dark:bg-amber-950 dark:text-amber-300",
   accepted: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
@@ -61,6 +71,9 @@ const AdminDiagnostics = () => {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [geoError, setGeoError] = useState<string | null>(null);
+  const [geoResult, setGeoResult] = useState<BackfillResult | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -94,6 +107,29 @@ const AdminDiagnostics = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const runCoordinateBackfill = async () => {
+    setGeoLoading(true);
+    setGeoError(null);
+    setGeoResult(null);
+    try {
+      if (!isAdmin) throw new Error("Accès réservé aux admins.");
+
+      const { data, error: invokeError } = await supabase.functions.invoke(
+        "backfill-profile-coordinates",
+        { body: {} },
+      );
+
+      if (invokeError) throw invokeError;
+      if (data?.error) throw new Error(data.error);
+
+      setGeoResult(data as BackfillResult);
+    } catch (e: any) {
+      setGeoError(e?.message || "Erreur inconnue");
+    } finally {
+      setGeoLoading(false);
+    }
+  };
 
   const filtered = useMemo(() => {
     if (!filter.trim()) return rows;
@@ -173,6 +209,39 @@ const AdminDiagnostics = () => {
             <div className="flex gap-2 text-xs text-muted-foreground pt-1">
               <span className="w-32">dernière requête</span>
               <span>{format(lastFetched, "PPpp", { locale: fr })}</span>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Coordonnées des profils</CardTitle>
+          <CardDescription>
+            Rattrape les profils qui ont un code postal mais pas encore de latitude/longitude,
+            afin que le rayon d'entraide fonctionne sur une vraie distance.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <Button onClick={runCoordinateBackfill} disabled={geoLoading || !isAdmin} size="sm">
+              <RefreshCw className={`h-4 w-4 mr-1.5 ${geoLoading ? "animate-spin" : ""}`} />
+              Rattraper les coordonnées
+            </Button>
+            {!isAdmin && <span className="text-sm text-muted-foreground">Admin requis.</span>}
+          </div>
+          {geoError && (
+            <div className="rounded-md border border-destructive/50 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+              {geoError}
+            </div>
+          )}
+          {geoResult && (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <StatCard label="Profils traités" value={geoResult.processed} />
+              <StatCard label="Mis à jour" value={geoResult.updated} tone="emerald" />
+              <StatCard label="Ignorés" value={geoResult.skipped} />
+              <StatCard label="Erreurs" value={geoResult.errors} tone="amber" />
+              <StatCard label="Codes postaux" value={geoResult.unique_postal_codes} />
             </div>
           )}
         </CardContent>
