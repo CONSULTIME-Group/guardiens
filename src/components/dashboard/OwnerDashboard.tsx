@@ -40,6 +40,7 @@ import {
 import type { Pet } from "./owner/types";
 import { useOwnerDashboardData } from "@/hooks/useOwnerDashboardData";
 import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
+import { SITTER_PRICE_START, REFERRAL_REWARD_LABEL } from "@/lib/pricing";
 
 /* ═══════════════════════════════════════════════════════
    Main component
@@ -408,6 +409,28 @@ const OwnerDashboard = () => {
 
           {/* Zone WARNING — Petites missions (entraide) */}
           <MissionsTabsCard myMissions={myMissions} nearbyMissions={smallMissions} />
+
+          {/* Parrainage — levier d'acquisition gratuit, rendu visible
+              directement depuis le dashboard (au lieu d'être enterré dans
+              /mon-abonnement). Tonalité informative, pas commerciale. */}
+          <Link
+            to="/mon-abonnement#parrainage"
+            className="block rounded-2xl border border-border bg-gradient-to-br from-accent/10 to-background p-4 hover:border-primary/40 transition-colors group"
+          >
+            <p className="text-[10px] uppercase tracking-[2px] text-accent font-sans font-semibold mb-1">
+              Parrainage
+            </p>
+            <p className="text-sm font-heading font-semibold text-foreground leading-snug">
+              Invitez un proche
+            </p>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              Son inscription reste gratuite jusqu'au {SITTER_PRICE_START}.
+              Vous gagnez {REFERRAL_REWARD_LABEL.toLowerCase()} dès qu'il publie sa première annonce ou candidature.
+            </p>
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary mt-2 group-hover:translate-x-0.5 transition-transform">
+              Partager mon lien →
+            </span>
+          </Link>
         </aside>
       </div>
 
