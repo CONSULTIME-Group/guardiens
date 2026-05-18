@@ -42,8 +42,8 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, isAvailable = 
           </p>
           <p className="text-xs text-muted-foreground font-sans leading-relaxed mb-2">
             Invitez un propriétaire à rejoindre Guardiens. Quand l'abonnement gardien
-            deviendra payant (à partir du 14 juillet 2026), vous recevrez{" "}
-            <strong className="text-foreground font-semibold">1 mois offert</strong>{" "}
+            deviendra payant (à partir du {SITTER_PRICE_START}), vous recevrez{" "}
+            <strong className="text-foreground font-semibold">{REFERRAL_REWARD_LABEL}</strong>{" "}
             par filleul activé.
           </p>
           <Link
