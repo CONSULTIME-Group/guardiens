@@ -231,16 +231,7 @@ const OwnerDashboard = () => {
     <div className="space-y-6 md:space-y-8 pb-40 md:pb-8">
 {/* pb-40 mobile = BottomNav (h-16=64px) + Sticky CTA (~72px) + marge respiration. */}
 
-      {/* Role activation banner */}
-      <div className="px-5 md:px-8 pt-2">
-        <RoleActivationBanner userRole={user?.role || "owner"} />
-      </div>
-
-      {/* ═══ Hero header (compact — eyebrow + titre + sous-titre contextuel) ═══
-          La ligne défensive « gratuit » est retirée : redondante une fois
-          loggé (gratuité déjà actée), elle parasitait la hiérarchie. Le
-          rappel de gratuité reste porté par RoleActivationBanner et la
-          carte parrainage. */}
+      {/* ═══ Hero header (compact — eyebrow + titre + sous-titre contextuel) ═══ */}
       <header className="px-5 md:px-8 pt-2 animate-fade-in">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div className="min-w-0">
@@ -283,9 +274,17 @@ const OwnerDashboard = () => {
         </div>
       </header>
 
+      {/* Bannière dual-role : déplacée APRÈS le hero (l'utilisateur lit
+          d'abord son nom, ensuite l'incitation à activer l'espace gardien). */}
+      <div className="px-5 md:px-8">
+        <RoleActivationBanner userRole={user?.role || "owner"} />
+      </div>
+
+      {/* Règle de priorité : on n'affiche LiveSignalStrip que si AccessGateBanner
+          n'occupe pas déjà l'espace (max 2 bandeaux contextuels actifs). */}
       <div className="px-5 md:px-8 space-y-3">
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
-        <LiveSignalStrip secondarySignal={localSignal} />
+        {level === "full" && <LiveSignalStrip secondarySignal={localSignal} />}
       </div>
 
       {/* ═══ Bloc unifié "À faire maintenant" ═══ */}
