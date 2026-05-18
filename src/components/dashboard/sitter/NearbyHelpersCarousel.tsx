@@ -258,8 +258,8 @@ const HelperMiniCard = ({
   return (
     <article
       className="
-        group/card flex-shrink-0 w-[80vw] sm:w-[20rem] snap-start
-        rounded-[2rem] bg-card
+        group/card flex-shrink-0 w-[78vw] max-w-[20rem] sm:w-[20rem] snap-start
+        rounded-[1.75rem] sm:rounded-[2rem] bg-card
         ring-1 ring-border/60 hover:ring-accent/50
         shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-[0_18px_40px_-20px_rgba(0,0,0,0.22)]
         transition-all duration-500 ease-out hover:-translate-y-1
@@ -267,7 +267,7 @@ const HelperMiniCard = ({
       "
     >
       {/* En-tête : avatar rotaté façon gouache + nom + distance éditoriale */}
-      <div className="px-6 pt-6 pb-4 flex items-start justify-between gap-3">
+      <div className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 flex items-start justify-between gap-3">
         <div className="relative shrink-0">
           {helper.avatar_url ? (
             <img
