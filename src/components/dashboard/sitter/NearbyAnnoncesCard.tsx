@@ -133,11 +133,11 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
           )}
 
           <Link
-            to="/search"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+            to="/search?zone=france"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border border-border bg-background text-xs font-semibold text-foreground hover:bg-muted/60 hover:border-foreground/30 transition-colors"
           >
             <Compass className="h-3.5 w-3.5" aria-hidden="true" />
-            Explorer toutes les annonces
+            Voir les annonces plus loin
           </Link>
 
           {!isAvailable && (
