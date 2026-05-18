@@ -383,9 +383,59 @@ const OwnerDashboard = () => {
               loading={loading}
             />
           )}
+
+          {/* ═══ DÉCOUVERTE — alignée sur le dashboard gardien ═══
+              Deux zones bandées (PRIMARY = gardiens, WARNING = entraide)
+              dans la colonne principale, pour donner la même lisibilité
+              et le même poids à l'entraide que côté gardien. */}
+          <div className="space-y-6 min-w-0">
+            {/* 1. Gardiens — zone PRIMARY (vert sapin) */}
+            <section
+              aria-labelledby="owner-discovery-sitters-heading"
+              className="relative rounded-2xl bg-primary/[0.04] ring-1 ring-primary/15 p-3 sm:p-5 min-w-0 overflow-hidden"
+            >
+              <span aria-hidden className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-primary" />
+              <div className="pl-2 sm:pl-3 min-w-0">
+                <SectionEyebrow
+                  eyebrow="Gardiens · Garde"
+                  title="Près de chez vous"
+                  accent="primary"
+                  id="owner-discovery-sitters-heading"
+                />
+                {showEmergencyHelp && (
+                  <div className="mb-4">
+                    <NearbyEmergencySitters />
+                  </div>
+                )}
+                <NearbyOwnerSittersCard hideHeader />
+              </div>
+            </section>
+
+            {/* 2. Coup de main — zone WARNING (ambre) : entraide bidirectionnelle */}
+            <section
+              aria-labelledby="owner-discovery-missions-heading"
+              className="relative rounded-2xl bg-warning/[0.06] ring-1 ring-warning/20 p-3 sm:p-5 min-w-0 overflow-hidden"
+            >
+              <span aria-hidden className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-warning" />
+              <div className="pl-2 sm:pl-3 min-w-0">
+                <SectionEyebrow
+                  eyebrow="Coup de main · Entraide"
+                  title="Près de chez vous"
+                  accent="warning"
+                  id="owner-discovery-missions-heading"
+                />
+                <div className="space-y-4 min-w-0">
+                  <NearbyHelpersCarousel hideHeader />
+                  <MissionsTabsCard myMissions={myMissions} nearbyMissions={smallMissions} />
+                </div>
+              </div>
+            </section>
+          </div>
         </div>
 
-        {/* Colonne contexte : stats compactes + urgence + missions */}
+        {/* Colonne contexte : stats compactes + parrainage uniquement.
+            Les blocs « gardiens » et « entraide » remontent dans la colonne
+            principale pour matcher le dashboard gardien. */}
         <aside className="space-y-6">
           <StatsStrip
             items={[
@@ -400,9 +450,6 @@ const OwnerDashboard = () => {
                 highlight: avgRating > 0,
                 to: user?.id ? `/gardiens/${user.id}?tab=proprio#avis` : undefined,
               },
-              // « Annonces » masqué quand aucune n'est active : afficher « 0 »
-              // alors que le hero peut montrer une garde passée crée une
-              // contradiction visuelle démotivante (cf. fix Récurrents).
               ...(activeSits.length > 0
                 ? [{
                     value: activeSits.length,
@@ -410,7 +457,6 @@ const OwnerDashboard = () => {
                     to: "/sits",
                   }]
                 : []),
-              // « Récurrents » : masqué tant qu'aucun gardien n'a réalisé 2 gardes ou plus.
               ...(trustedSitterCount > 0
                 ? [{
                     value: trustedSitterCount,
@@ -420,22 +466,8 @@ const OwnerDashboard = () => {
                 : []),
             ]}
           />
-          {/* Zone PRIMARY — Gardiens disponibles près de chez vous */}
-          {showEmergencyHelp && <NearbyEmergencySitters />}
-          <NearbyOwnerSittersCard />
 
-          {/* Zone WARNING — Petites missions (entraide) */}
-          <MissionsTabsCard myMissions={myMissions} nearbyMissions={smallMissions} />
-
-          {/* Savoir-faire à proximité — pendant « offres » de l'entraide :
-              missions = besoins exprimés ; helpers = compétences offertes.
-              Indispensable pour un propriétaire qui peut aussi avoir besoin
-              d'un coup de main (jardin, bricolage, animaux ponctuels). */}
-          <NearbyHelpersCarousel />
-
-          {/* Parrainage — levier d'acquisition gratuit, rendu visible
-              directement depuis le dashboard (au lieu d'être enterré dans
-              /mon-abonnement). Tonalité informative, pas commerciale. */}
+          {/* Parrainage — levier d'acquisition gratuit */}
           <Link
             to="/mon-abonnement#parrainage"
             className="block rounded-2xl border border-border bg-gradient-to-br from-accent/10 to-background p-4 hover:border-primary/40 transition-colors group"
