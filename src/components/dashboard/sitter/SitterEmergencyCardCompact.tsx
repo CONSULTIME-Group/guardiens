@@ -36,7 +36,7 @@ const SitterEmergencyCardCompact = ({ hasEmergencyProfile }: Props) => {
 
   return (
     <Link
-      to="/settings#emergency"
+      to="/gardien-urgence"
       className="group flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-muted/40 ring-1 ring-dashed ring-border hover:ring-primary/30 transition-all"
     >
       <div className="min-w-0">
