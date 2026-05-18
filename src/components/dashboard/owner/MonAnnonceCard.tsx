@@ -148,6 +148,19 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
     ? differenceInDays(new Date(currentSit.start_date), now)
     : null;
 
+  // Diagnostic auto : annonce publiée depuis plus de 3 jours sans aucune
+  // candidature → on bascule du compteur passif vers un bloc de leviers
+  // actionnables. Ne s'affiche pas si la garde commence dans plus de 30 j
+  // (normal qu'aucune candidature n'arrive sur une garde lointaine).
+  const daysSincePublished = currentSit.created_at
+    ? differenceInDays(now, new Date(currentSit.created_at))
+    : 0;
+  const showStallDiagnostic =
+    currentSit.status === "published" &&
+    appCount === 0 &&
+    daysSincePublished >= 3 &&
+    (daysUntilStart === null || daysUntilStart <= 30);
+
   return (
     <div className="group/card bg-card border border-border rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-md hover:border-border/80">
       {coverPhoto ? (
