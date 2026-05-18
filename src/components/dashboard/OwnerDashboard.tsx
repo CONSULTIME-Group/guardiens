@@ -414,6 +414,8 @@ const OwnerDashboard = () => {
             Les blocs « gardiens » et « entraide » remontent dans la colonne
             principale pour matcher le dashboard gardien. */}
         <aside className="space-y-6">
+          {showEmergencyHelp && <NearbyEmergencySitters />}
+          <NearbyOwnerSittersCard />
           <StatsStrip
             items={[
               {
