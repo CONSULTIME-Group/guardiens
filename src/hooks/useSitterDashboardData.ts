@@ -265,7 +265,6 @@ export function useSitterDashboardData(userId: string | undefined) {
           }
         }
       }
-      }
 
       // Nearby missions — conserve la logique département (entraide locale,
       // pas de trajets longs). À migrer séparément si besoin.
