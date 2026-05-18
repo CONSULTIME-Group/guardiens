@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { capitalize } from "@/components/dashboard/owner/helpers";
 import EmptyIllustration from "@/components/dashboard/shared/EmptyIllustration";
 import { tokenizeSkillPhrases, dedupeChipsByLabel } from "@/lib/skills/tokenize";
+import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 
 /**
  * Compteur dual « local · national » de personnes prêtes à donner un coup de main.
