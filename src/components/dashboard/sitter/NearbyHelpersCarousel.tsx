@@ -191,22 +191,24 @@ const HelperMiniCard = ({
   // on filtre : longueur 2–22, sans ponctuation de phrase, dédupliqué.
   const customSkills = tokenizeSkillPhrases(helper.custom_skills);
 
-  type Chip = { key: string; label: string; tone: "custom" | "category" };
-  // Custom en premier — prioritaire en cas de doublon vs label de catégorie.
-  // Dédup case + diacritique-insensible (« Couture » == « couture » == « COUTURE »).
-  const chips: Chip[] = dedupeChipsByLabel([
-    ...customSkills.map((c): Chip => ({ key: `c-${c}`, label: c, tone: "custom" })),
-    ...helper.skill_categories
-      .filter((cat) => SKILL_CHIPS.find((c) => c.key === cat))
-      .map((cat): Chip => ({
-        key: `k-${cat}`,
-        label: SKILL_CHIPS.find((c) => c.key === cat)!.label,
-        tone: "category",
-      })),
-  ]);
-  const MAX_CHIPS = 4;
-  const visibleChips = chips.slice(0, MAX_CHIPS);
-  const remaining = chips.length - visibleChips.length;
+  type Chip = { key: string; label: string };
+  const categoryChips: Chip[] = helper.skill_categories
+    .map((cat) => {
+      const meta = SKILL_CHIPS.find((c) => c.key === cat);
+      return meta ? { key: `k-${cat}`, label: meta.label } : null;
+    })
+    .filter(Boolean) as Chip[];
+  const savoirFaireChips: Chip[] = dedupeChipsByLabel(
+    customSkills.map((c) => ({ key: `c-${c}`, label: c })),
+  );
+  const MAX_CAT = 3;
+  const MAX_SF = 3;
+  const visibleCats = categoryChips.slice(0, MAX_CAT);
+  const remainingCats = categoryChips.length - visibleCats.length;
+  const visibleSF = savoirFaireChips.slice(0, MAX_SF);
+  const remainingSF = savoirFaireChips.length - visibleSF.length;
+
+  const bioTeaser = sanitizeBioForCard(helper.bio);
 
   const distance =
     helper.distance_km !== null && helper.distance_km !== undefined
@@ -271,37 +273,59 @@ const HelperMiniCard = ({
         )}
       </div>
 
-      {/* Savoir-faire : pastilles only (pas de bio, pas de phrase) */}
-      {chips.length > 0 ? (
-        <div className="px-4 pb-4 flex flex-wrap gap-1.5 min-h-[2rem]">
-          {visibleChips.map((chip) =>
-            chip.tone === "custom" ? (
+      <div className="px-4 pb-4 space-y-2.5">
+        {/* Catégories génériques */}
+        {visibleCats.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {visibleCats.map((chip) => (
               <span
                 key={chip.key}
-                className="text-[11px] rounded-full bg-foreground/[0.06] text-foreground/85 px-2.5 py-0.5 ring-1 ring-border/40"
+                className="text-[11px] rounded-full bg-primary/10 text-primary px-2.5 py-0.5 ring-1 ring-primary/15"
               >
                 {chip.label}
               </span>
-            ) : (
-              <span
-                key={chip.key}
-                className="text-[11px] rounded-full bg-primary/8 text-primary px-2.5 py-0.5"
-              >
-                {chip.label}
-              </span>
-            )
-          )}
-          {remaining > 0 && (
-            <span className="text-[11px] text-muted-foreground self-center">+{remaining}</span>
-          )}
-        </div>
-      ) : (
-        <div className="px-4 pb-4">
-          <span className="text-[11px] rounded-full bg-muted/40 text-muted-foreground px-2.5 py-0.5">
+            ))}
+            {remainingCats > 0 && (
+              <span className="text-[11px] text-muted-foreground self-center">+{remainingCats}</span>
+            )}
+          </div>
+        )}
+
+        {/* Savoir-faire (custom) — section labellisée */}
+        {visibleSF.length > 0 && (
+          <div>
+            <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium mb-1">
+              Savoir-faire
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {visibleSF.map((chip) => (
+                <span
+                  key={chip.key}
+                  className="text-[11px] rounded-full bg-foreground/[0.06] text-foreground/85 px-2.5 py-0.5 ring-1 ring-border/40"
+                >
+                  {chip.label}
+                </span>
+              ))}
+              {remainingSF > 0 && (
+                <span className="text-[11px] text-muted-foreground self-center">+{remainingSF}</span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Mini bio */}
+        {bioTeaser && (
+          <p className="text-[12px] text-foreground/75 leading-snug line-clamp-2 italic">
+            « {bioTeaser} »
+          </p>
+        )}
+
+        {categoryChips.length === 0 && savoirFaireChips.length === 0 && !bioTeaser && (
+          <span className="inline-block text-[11px] rounded-full bg-muted/40 text-muted-foreground px-2.5 py-0.5">
             Disponible
           </span>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* CTA — discret, bord supérieur très léger, plein largeur */}
       <div className="mt-auto border-t border-border/40 bg-muted/20 group-hover/card:bg-primary/5 transition-colors">
