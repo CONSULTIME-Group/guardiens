@@ -126,72 +126,66 @@ export function useNearbyHelpers(
         };
       }).filter((h) => h.skill_categories.length > 0 || h.custom_skills.length > 0);
 
-      // Tri : 1) savoir-faire perso renseigné (signal fort de profil engagé
-      // et différenciant), 2) distance croissante, 3) identité vérifiée.
-      // Choix produit : on remonte d'abord les profils qui ont pris le temps
-      // de décrire leurs compétences — ils convertissent mieux que de purs
-      // « proches mais vides ». La distance reste le second critère.
+      // Tri : distance croissante en PRIORITÉ ABSOLUE.
+      // C'est « près de chez vous » : un profil avec savoir-faire à 50 km
+      // ne doit JAMAIS passer devant un voisin à 5 km.
+      // Bonus : à l'intérieur d'un rayon ultra-proche (≤ NEAR_RADIUS_KM),
+      // on remonte les profils qui ont renseigné des custom_skills (signal
+      // d'engagement) au-dessus de ceux qui n'en ont pas, à distance ~égale.
+      const NEAR_RADIUS_KM = 5;
       const prioritize = (list: NearbyHelper[]) =>
         [...list].sort((a, b) => {
-          const aHasSkills = a.custom_skills.length > 0 ? 1 : 0;
-          const bHasSkills = b.custom_skills.length > 0 ? 1 : 0;
-          if (aHasSkills !== bHasSkills) return bHasSkills - aHasSkills;
           const da = a.distance_km ?? Infinity;
           const db = b.distance_km ?? Infinity;
+          const aNear = da <= NEAR_RADIUS_KM;
+          const bNear = db <= NEAR_RADIUS_KM;
+          // Bonus skills uniquement dans la zone ultra-proche
+          if (aNear && bNear) {
+            const aHasSkills = a.custom_skills.length > 0 ? 1 : 0;
+            const bHasSkills = b.custom_skills.length > 0 ? 1 : 0;
+            if (aHasSkills !== bHasSkills) return bHasSkills - aHasSkills;
+          }
           if (da !== db) return da - db;
           const aVer = a.identity_verified ? 1 : 0;
           const bVer = b.identity_verified ? 1 : 0;
           return bVer - aVer;
         });
 
-      const withSkillProfiles = (list: NearbyHelper[]) => {
-        const prioritized = prioritize(list);
-        const existingIds = new Set(prioritized.map((h) => h.id));
-        const missingSkillProfiles = prioritize(enriched)
-          .filter((h) => h.custom_skills.length > 0 && !existingIds.has(h.id))
-          .slice(0, Math.max(0, 2 - prioritized.filter((h) => h.custom_skills.length > 0).length));
-
-        return {
-          helpers: prioritize([...missingSkillProfiles, ...prioritized]).slice(0, MAX_RESULTS),
-          includesExtendedSkillProfiles: missingSkillProfiles.length > 0,
-        };
-      };
-
-      // Pas de géoloc → on retourne 8 profils (priorité custom_skills puis identité vérifiée)
+      // Pas de géoloc → on retourne 8 profils par identité vérifiée + skills
       if (!hasGeo) {
         return { helpers: prioritize(enriched).slice(0, MAX_RESULTS), radiusUsed: 0, hasGeo: false, includesExtendedSkillProfiles: false };
       }
 
-      // 4. Rayon forcé par l'UI (« Élargir le rayon ») — court-circuit fallback
       const withDistance = enriched.filter((h) => h.distance_km !== null);
 
       if (forcedRadius && forcedRadius > 0) {
         const inRange = withDistance.filter((h) => h.distance_km! <= forcedRadius);
-        const mixed = withSkillProfiles(inRange);
         return {
-          helpers: mixed.helpers,
+          helpers: prioritize(inRange).slice(0, MAX_RESULTS),
           radiusUsed: forcedRadius,
           hasGeo: true,
-          includesExtendedSkillProfiles: mixed.includesExtendedSkillProfiles,
+          includesExtendedSkillProfiles: false,
         };
       }
 
-      // 5. Fallback progressif du rayon
+      // Fallback progressif du rayon
       for (const radius of RADIUS_STEPS) {
         const inRange = withDistance.filter((h) => h.distance_km! <= radius);
         if (inRange.length >= 3) {
-          const mixed = withSkillProfiles(inRange);
-          return { helpers: mixed.helpers, radiusUsed: radius, hasGeo: true, includesExtendedSkillProfiles: mixed.includesExtendedSkillProfiles };
+          return {
+            helpers: prioritize(inRange).slice(0, MAX_RESULTS),
+            radiusUsed: radius,
+            hasGeo: true,
+            includesExtendedSkillProfiles: false,
+          };
         }
       }
 
-      // Aucun fallback n'a donné 3+ résultats → on retourne ce qu'on a
-      const mixed = withSkillProfiles(withDistance);
       return {
-        helpers: mixed.helpers,
+        helpers: prioritize(withDistance).slice(0, MAX_RESULTS),
         radiusUsed: RADIUS_STEPS[RADIUS_STEPS.length - 1],
         hasGeo: true,
-        includesExtendedSkillProfiles: mixed.includesExtendedSkillProfiles,
+        includesExtendedSkillProfiles: false,
       };
     },
   });
