@@ -138,8 +138,22 @@ const OwnerDashboard = () => {
       const daysUntil = differenceInDays(new Date(nextConfirmed.start_date!), now);
       return `Votre prochaine garde commence dans ${daysUntil} jour${daysUntil > 1 ? "s" : ""}.`;
     }
-    if (pendingAppCount > 0) return "Vous avez une nouvelle candidature à examiner.";
-    return "Trouvez le gardien idéal pour vos animaux.";
+    if (pendingAppCount > 0) {
+      return `${pendingAppCount} candidature${pendingAppCount > 1 ? "s" : ""} à examiner.`;
+    }
+    // Annonce publiée stagnante : on rend le subtitle diagnostic plutôt que générique.
+    const stalledPublished = sits.find(s =>
+      s.status === "published" &&
+      (s.applications || []).length === 0 &&
+      s.created_at &&
+      differenceInDays(now, new Date(s.created_at)) >= 3
+    );
+    if (stalledPublished) {
+      return "Votre annonce n'a pas encore reçu de candidature — voici 3 leviers pour la relancer.";
+    }
+    const anyPublished = sits.some(s => s.status === "published");
+    if (anyPublished) return "Votre annonce est en ligne — les candidatures arrivent.";
+    return "Publiez votre première annonce pour trouver un gardien.";
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ongoingSit, sits, pendingAppCount]);
 
