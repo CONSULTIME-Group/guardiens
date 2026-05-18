@@ -273,15 +273,15 @@ const HelperMiniCard = ({
           </div>
           {distance !== null ? (
             <span
-              className={`mt-1.5 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold tabular-nums ring-1 ${
+              className={`mt-1.5 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-bold tabular-nums ring-1 shadow-sm ${
                 isVeryClose
-                  ? "bg-accent/15 text-accent ring-accent/30"
-                  : "bg-primary/10 text-primary ring-primary/20"
+                  ? "bg-accent text-accent-foreground ring-accent/60"
+                  : "bg-primary text-primary-foreground ring-primary/60"
               }`}
               aria-label={`À environ ${distance} kilomètres de chez vous`}
             >
               <MapPin className="h-3 w-3" aria-hidden="true" />
-              {distance}&nbsp;km
+              {distance === 0 ? "< 1" : distance}&nbsp;km
             </span>
           ) : (
             <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground truncate">
