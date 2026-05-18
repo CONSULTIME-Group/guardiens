@@ -520,7 +520,7 @@ const OwnerDashboard = () => {
                 </p>
               </div>
               <Link
-                to={`/gardiens/${user.id}?tab=proprio#badges`}
+                to={`/gardiens/${user.id}#confiance`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs text-primary font-semibold hover:underline shrink-0"
