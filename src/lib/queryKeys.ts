@@ -15,12 +15,13 @@
  * par ce fichier pour garder la traçabilité des bumps en un seul endroit.
  *
  * Historique des bumps :
+ *  - nearbyHelpers v4 (2026-05-18) : panachage proximité + profils à savoir-faire hors rayon.
  *  - nearbyHelpers v3 (2026-05-18) : affichage des profils avec `custom_skills` même sans catégorie générique.
  *  - nearbyHelpers v2 (2026-05-18) : ajout du champ `bio`.
  */
 
 export const QK_VERSIONS = {
-  nearbyHelpers: "v3",
+  nearbyHelpers: "v4",
   helpersProximityCount: "v1",
 } as const;
 
