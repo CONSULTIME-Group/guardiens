@@ -384,32 +384,9 @@ const OwnerDashboard = () => {
             />
           )}
 
-          {/* ═══ DÉCOUVERTE — alignée sur le dashboard gardien ═══
-              Deux zones bandées (PRIMARY = gardiens, WARNING = entraide)
-              dans la colonne principale, pour donner la même lisibilité
-              et le même poids à l'entraide que côté gardien. */}
+          {/* ═══ DÉCOUVERTE — Coup de main dans la colonne principale ═══
+              Les gardiens « près de chez vous » sont remontés dans l'aside à droite. */}
           <div className="space-y-6 min-w-0">
-            {/* 1. Gardiens — zone PRIMARY (vert sapin) */}
-            <section
-              aria-labelledby="owner-discovery-sitters-heading"
-              className="relative rounded-2xl bg-primary/[0.04] ring-1 ring-primary/15 p-3 sm:p-5 min-w-0 overflow-hidden"
-            >
-              <span aria-hidden className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-primary" />
-              <div className="pl-2 sm:pl-3 min-w-0">
-                <SectionEyebrow
-                  eyebrow="Gardiens · Garde"
-                  title="Près de chez vous"
-                  accent="primary"
-                  id="owner-discovery-sitters-heading"
-                />
-                {showEmergencyHelp && (
-                  <div className="mb-4">
-                    <NearbyEmergencySitters />
-                  </div>
-                )}
-                <NearbyOwnerSittersCard hideHeader />
-              </div>
-            </section>
 
             {/* 2. Coup de main — zone WARNING (ambre) : entraide bidirectionnelle */}
             <section
