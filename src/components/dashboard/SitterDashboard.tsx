@@ -298,11 +298,15 @@ const SitterDashboard = () => {
     myMissions.length === 0 && nearbyMissions.length === 0;
 
   const DiscoverySections = (
-    <div className="space-y-8">
-      {/* 1. Annonces — priorité business (garde rémunérée) */}
-      <section aria-labelledby="discovery-annonces-heading">
+    <div className="space-y-6">
+      {/* 1. Annonces — zone PRIMARY (vert sapin) : garde rémunérée */}
+      <section
+        aria-labelledby="discovery-annonces-heading"
+        className="relative rounded-2xl bg-primary/[0.04] ring-1 ring-primary/15 p-4 sm:p-5"
+      >
+        <span aria-hidden className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-primary" />
         <SectionEyebrow
-          eyebrow="Annonces"
+          eyebrow="Annonces · Garde"
           title="Près de chez vous"
           accent="primary"
           id="discovery-annonces-heading"
@@ -316,12 +320,16 @@ const SitterDashboard = () => {
         />
       </section>
 
-      {/* 2. Coup de main — entraide (helpers + missions ouvertes fusionnés) */}
-      <section aria-labelledby="discovery-missions-heading">
+      {/* 2. Coup de main — zone WARNING (ambre) : entraide */}
+      <section
+        aria-labelledby="discovery-missions-heading"
+        className="relative rounded-2xl bg-warning/[0.06] ring-1 ring-warning/20 p-4 sm:p-5"
+      >
+        <span aria-hidden className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-warning" />
         <SectionEyebrow
-          eyebrow="Coup de main"
-          title="Entraide près de chez vous"
-          accent="secondary"
+          eyebrow="Coup de main · Entraide"
+          title="Près de chez vous"
+          accent="warning"
           id="discovery-missions-heading"
         />
         <div className="space-y-4">
@@ -338,7 +346,7 @@ const SitterDashboard = () => {
         </div>
       </section>
 
-      {/* Conseils déplacé dans l'accordéon unique secondaire (Conseils + Réputation + Badges) en bas de page. */}
+      {/* Conseils reste neutre dans l'accordéon secondaire en bas. */}
     </div>
   );
 
