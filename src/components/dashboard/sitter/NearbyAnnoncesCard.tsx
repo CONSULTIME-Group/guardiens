@@ -155,6 +155,7 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
             </Link>
           );
         })}
+        </div>
       </div>
     )}
   </section>
