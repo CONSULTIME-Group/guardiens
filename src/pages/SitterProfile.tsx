@@ -60,6 +60,9 @@ const SECTION_PARAM_MAP: Record<string, string> = {
   identite: "identity",
   profil: "sitter",
   experience: "experience",
+  competences: "skills",
+  mobilite: "mobility",
+  galerie: "gallery",
 };
 
 const SitterProfile = () => {
