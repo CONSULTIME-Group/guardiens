@@ -84,6 +84,29 @@ const OwnerDashboard = () => {
     [sits]
   );
 
+  /**
+   * Affichage urgence : strictement conditionnel pour éviter de générer
+   * de l'anxiété par défaut. On ne montre les gardiens d'urgence QUE si :
+   *  - une garde confirmée commence dans moins de 7 jours, OU
+   *  - une annonce publiée est ouverte SANS aucune candidature (le proprio
+   *    risque de se retrouver sans solution).
+   */
+  const showEmergencyHelp = useMemo(() => {
+    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+    const imminent = sits.some(s =>
+      s.status === "confirmed" &&
+      s.start_date &&
+      new Date(s.start_date).getTime() - now.getTime() < sevenDaysMs &&
+      new Date(s.start_date).getTime() > now.getTime()
+    );
+    const orphanPublished = sits.some(s =>
+      s.status === "published" &&
+      (s.applications || []).length === 0
+    );
+    return imminent || orphanPublished;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sits]);
+
   /* ── Onboarding visibility (driven by hook data + user state) ── */
   useEffect(() => {
     if (loading || !user || !data.profile) return;
@@ -373,11 +396,10 @@ const OwnerDashboard = () => {
             ]}
           />
           {/* Zone PRIMARY — Gardiens disponibles près de chez vous */}
-          <NearbyEmergencySitters />
+          {showEmergencyHelp && <NearbyEmergencySitters />}
           <NearbyOwnerSittersCard />
 
-          {/* Zone WARNING — Entraide & coups de main */}
-          <NearbyHelpersCarousel />
+          {/* Zone WARNING — Petites missions (entraide) */}
           <MissionsTabsCard myMissions={myMissions} nearbyMissions={smallMissions} />
         </aside>
       </div>
