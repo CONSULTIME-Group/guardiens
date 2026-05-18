@@ -32,6 +32,7 @@ export type NearbyHelpersResult = {
   helpers: NearbyHelper[];
   radiusUsed: number; // km
   hasGeo: boolean;
+  includesExtendedSkillProfiles: boolean;
 };
 
 export const RADIUS_STEPS = [30, 50, 100];
@@ -80,7 +81,7 @@ export function useNearbyHelpers(
         .limit(500);
 
       if (!pool || pool.length === 0) {
-        return { helpers: [], radiusUsed: RADIUS_STEPS[0], hasGeo };
+        return { helpers: [], radiusUsed: RADIUS_STEPS[0], hasGeo, includesExtendedSkillProfiles: false };
       }
 
       const normalizeCustom = (raw: any): string[] => {
@@ -143,9 +144,22 @@ export function useNearbyHelpers(
           return bVer - aVer;
         });
 
+      const withSkillProfiles = (list: NearbyHelper[]) => {
+        const prioritized = prioritize(list);
+        const existingIds = new Set(prioritized.map((h) => h.id));
+        const missingSkillProfiles = prioritize(enriched)
+          .filter((h) => h.custom_skills.length > 0 && !existingIds.has(h.id))
+          .slice(0, Math.max(0, 2 - prioritized.filter((h) => h.custom_skills.length > 0).length));
+
+        return {
+          helpers: prioritize([...missingSkillProfiles, ...prioritized]).slice(0, MAX_RESULTS),
+          includesExtendedSkillProfiles: missingSkillProfiles.length > 0,
+        };
+      };
+
       // Pas de géoloc → on retourne 8 profils (priorité custom_skills puis identité vérifiée)
       if (!hasGeo) {
-        return { helpers: prioritize(enriched).slice(0, MAX_RESULTS), radiusUsed: 0, hasGeo: false };
+        return { helpers: prioritize(enriched).slice(0, MAX_RESULTS), radiusUsed: 0, hasGeo: false, includesExtendedSkillProfiles: false };
       }
 
       // 4. Rayon forcé par l'UI (« Élargir le rayon ») — court-circuit fallback
@@ -153,10 +167,12 @@ export function useNearbyHelpers(
 
       if (forcedRadius && forcedRadius > 0) {
         const inRange = withDistance.filter((h) => h.distance_km! <= forcedRadius);
+        const mixed = withSkillProfiles(inRange);
         return {
-          helpers: prioritize(inRange).slice(0, MAX_RESULTS),
+          helpers: mixed.helpers,
           radiusUsed: forcedRadius,
           hasGeo: true,
+          includesExtendedSkillProfiles: mixed.includesExtendedSkillProfiles,
         };
       }
 
@@ -164,15 +180,18 @@ export function useNearbyHelpers(
       for (const radius of RADIUS_STEPS) {
         const inRange = withDistance.filter((h) => h.distance_km! <= radius);
         if (inRange.length >= 3) {
-          return { helpers: prioritize(inRange).slice(0, MAX_RESULTS), radiusUsed: radius, hasGeo: true };
+          const mixed = withSkillProfiles(inRange);
+          return { helpers: mixed.helpers, radiusUsed: radius, hasGeo: true, includesExtendedSkillProfiles: mixed.includesExtendedSkillProfiles };
         }
       }
 
       // Aucun fallback n'a donné 3+ résultats → on retourne ce qu'on a
+      const mixed = withSkillProfiles(withDistance);
       return {
-        helpers: prioritize(withDistance).slice(0, MAX_RESULTS),
+        helpers: mixed.helpers,
         radiusUsed: RADIUS_STEPS[RADIUS_STEPS.length - 1],
         hasGeo: true,
+        includesExtendedSkillProfiles: mixed.includesExtendedSkillProfiles,
       };
     },
   });
