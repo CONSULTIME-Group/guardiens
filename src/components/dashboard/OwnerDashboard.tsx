@@ -415,6 +415,9 @@ const OwnerDashboard = () => {
         <aside className="space-y-6">
           {showEmergencyHelp && <NearbyEmergencySitters />}
           <NearbyOwnerSittersCard />
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary px-3 py-1 text-[11px] font-semibold">
+            Espace propriétaire — gratuit
+          </div>
           <StatsStrip
             items={[
               {
