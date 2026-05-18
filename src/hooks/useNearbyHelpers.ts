@@ -21,6 +21,7 @@ export type NearbyHelper = {
   city: string | null;
   skill_categories: string[];
   custom_skills: string[];
+  bio: string | null;
   identity_verified: boolean;
   completed_sits_count: number;
   distance_km: number | null;
@@ -72,7 +73,7 @@ export function useNearbyHelpers(
       //    on garde large pour avoir matière même en zone rurale)
       const { data: pool } = await supabase
         .from("profiles")
-        .select("id, first_name, avatar_url, city, skill_categories, custom_skills, identity_verified, completed_sits_count, latitude, longitude")
+        .select("id, first_name, avatar_url, city, skill_categories, custom_skills, bio, identity_verified, completed_sits_count, latitude, longitude")
         .eq("available_for_help", true)
         .not("skill_categories", "eq", "{}")
         .neq("id", currentUserId!)
@@ -105,6 +106,7 @@ export function useNearbyHelpers(
           city: p.city,
           skill_categories: p.skill_categories || [],
           custom_skills: normalizeCustom(p.custom_skills),
+          bio: typeof p.bio === "string" && p.bio.trim().length > 0 ? p.bio : null,
           identity_verified: !!p.identity_verified,
           completed_sits_count: p.completed_sits_count || 0,
           distance_km,
