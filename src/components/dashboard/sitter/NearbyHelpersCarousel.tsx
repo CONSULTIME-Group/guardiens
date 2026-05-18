@@ -215,36 +215,49 @@ const HelperMiniCard = ({
       ? Math.round(helper.distance_km)
       : null;
 
+  const isVeryClose = distance !== null && distance <= 5;
+
   return (
     <article
       className="
-        group/card flex-shrink-0 w-[78vw] sm:w-[19rem] snap-start
-        rounded-2xl bg-card
-        ring-1 ring-border/60 hover:ring-primary/40
-        shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_32px_-16px_rgba(0,0,0,0.18)]
-        transition-all duration-300 ease-out hover:-translate-y-0.5
+        group/card flex-shrink-0 w-[80vw] sm:w-[20rem] snap-start
+        rounded-[2rem] bg-card
+        ring-1 ring-border/60 hover:ring-accent/50
+        shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-[0_18px_40px_-20px_rgba(0,0,0,0.22)]
+        transition-all duration-500 ease-out hover:-translate-y-1
         flex flex-col overflow-hidden
       "
     >
-      {/* En-tête : avatar + nom + ville + distance proéminente */}
-      <div className="px-4 pt-4 pb-3 flex items-start gap-3">
-        {helper.avatar_url ? (
-          <img
-            src={helper.avatar_url}
-            alt={`Portrait de ${firstName}`}
-            loading="lazy"
-            className="w-12 h-12 rounded-full object-cover ring-1 ring-border shrink-0"
-          />
-        ) : (
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent to-muted text-accent-foreground font-heading font-semibold flex items-center justify-center shrink-0 ring-1 ring-border">
-            {firstName.charAt(0)}
-          </div>
-        )}
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
+      {/* En-tête : avatar rotaté façon gouache + nom + distance éditoriale */}
+      <div className="px-6 pt-6 pb-4 flex items-start justify-between gap-3">
+        <div className="relative shrink-0">
+          {helper.avatar_url ? (
+            <img
+              src={helper.avatar_url}
+              alt={`Portrait de ${firstName}`}
+              loading="lazy"
+              className="w-16 h-16 rounded-[1.25rem] object-cover ring-1 ring-border rotate-2 group-hover/card:rotate-0 transition-transform duration-500"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-[1.25rem] bg-gradient-to-br from-accent/40 to-muted text-accent-foreground font-heading text-xl font-semibold flex items-center justify-center ring-1 ring-border rotate-2 group-hover/card:rotate-0 transition-transform duration-500">
+              {firstName.charAt(0)}
+            </div>
+          )}
+          {isVeryClose && savoirFaireChips.length > 0 && (
+            <span
+              className="absolute -bottom-2 -right-2 px-2 py-0.5 bg-primary text-primary-foreground text-[9px] font-bold uppercase tracking-widest rounded-md shadow-md"
+              title="Savoir-faire à moins de 5 km — priorisé pour vous"
+              aria-label="Tout près, à moins de 5 kilomètres"
+            >
+              Tout près
+            </span>
+          )}
+        </div>
+        <div className="min-w-0 flex-1 text-right">
+          <div className="flex items-center gap-1.5 justify-end">
             <Link
               to={`/gardiens/${helper.id}`}
-              className="block text-sm font-heading font-semibold text-foreground truncate hover:text-primary transition-colors"
+              className="block text-base font-heading font-semibold text-foreground truncate hover:text-primary transition-colors"
             >
               {firstName}
             </Link>
@@ -258,40 +271,31 @@ const HelperMiniCard = ({
               </span>
             )}
           </div>
-          <p className="text-[11px] text-muted-foreground truncate mt-0.5">
-            {helper.city ? capitalize(helper.city) : "Près de chez vous"}
-          </p>
-        </div>
-        {distance !== null && (
-          <div className="shrink-0 flex flex-col items-end gap-1">
-            <span
-              className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-[11px] font-semibold font-sans px-2 py-0.5 tabular-nums"
+          {distance !== null ? (
+            <p
+              className={`mt-1 text-[10px] font-bold uppercase tracking-[0.18em] tabular-nums ${
+                isVeryClose ? "text-accent" : "text-muted-foreground"
+              }`}
               aria-label={`À ${distance} kilomètres de chez vous`}
             >
-              <MapPin className="h-3 w-3" aria-hidden="true" />
               {distance}&nbsp;km
-            </span>
-            {distance <= 5 && savoirFaireChips.length > 0 && (
-              <span
-                className="inline-flex items-center rounded-full bg-success/15 text-success text-[10px] font-semibold font-sans px-2 py-0.5 ring-1 ring-success/25"
-                title="Personne avec savoir-faire à moins de 5 km — priorisée pour vous"
-                aria-label="Tout près, à moins de 5 kilomètres, avec savoir-faire"
-              >
-                Tout près · ≤ 5&nbsp;km
-              </span>
-            )}
-          </div>
-        )}
+            </p>
+          ) : (
+            <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground truncate">
+              {helper.city ? capitalize(helper.city) : "Près de chez vous"}
+            </p>
+          )}
+        </div>
       </div>
 
-      <div className="px-4 pb-4 space-y-2.5">
+      <div className="px-6 pb-5 space-y-3">
         {/* Catégories génériques */}
         {visibleCats.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {visibleCats.map((chip) => (
               <span
                 key={chip.key}
-                className="text-[11px] rounded-full bg-primary/10 text-primary px-2.5 py-0.5 ring-1 ring-primary/15"
+                className="px-2.5 py-1 bg-muted/40 border border-border text-foreground text-[10px] font-bold uppercase tracking-wider rounded-lg"
               >
                 {chip.label}
               </span>
@@ -304,15 +308,15 @@ const HelperMiniCard = ({
 
         {/* Savoir-faire (custom) — section labellisée */}
         {visibleSF.length > 0 && (
-          <div>
-            <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium mb-1">
+          <div className="space-y-1.5">
+            <p className="text-[9px] uppercase tracking-[0.2em] text-accent font-bold">
               Savoir-faire
             </p>
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1.5">
               {visibleSF.map((chip) => (
                 <span
                   key={chip.key}
-                  className="text-[11px] rounded-full bg-foreground/[0.06] text-foreground/85 px-2.5 py-0.5 ring-1 ring-border/40"
+                  className="px-2.5 py-1 bg-accent/10 border border-accent/25 text-foreground text-[10px] font-semibold uppercase tracking-wider rounded-lg"
                 >
                   {chip.label}
                 </span>
@@ -326,7 +330,7 @@ const HelperMiniCard = ({
 
         {/* Mini bio */}
         {bioTeaser && (
-          <p className="text-[12px] text-foreground/75 leading-snug line-clamp-2 italic">
+          <p className="text-[13px] text-foreground/70 leading-relaxed line-clamp-3 italic">
             « {bioTeaser} »
           </p>
         )}
@@ -339,12 +343,11 @@ const HelperMiniCard = ({
       </div>
 
       {/* CTA — redirige vers la création d'une petite mission (pas de DM direct). */}
-      <div className="mt-auto border-t border-border/40 bg-muted/20 group-hover/card:bg-primary/5 transition-colors">
+      <div className="mt-auto px-6 pb-6">
         <Button
           asChild
-          variant="ghost"
-          size="sm"
-          className="w-full rounded-none h-10 text-xs font-medium text-foreground hover:bg-transparent hover:text-primary justify-center"
+          variant="outline"
+          className="w-full rounded-2xl h-11 text-[11px] font-bold uppercase tracking-[0.18em] border-border bg-background/60 text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all"
         >
           <Link to={ctaHref}>
             Publier un coup de main
@@ -417,15 +420,18 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
   return (
     <section aria-labelledby="nearby-helpers-heading" className="space-y-3">
       {!hideHeader && (
-        <div className="flex items-end justify-between gap-2">
+        <div className="flex items-end justify-between gap-3">
           <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent mb-1.5">
+              Coup de main
+            </p>
             <h3
               id="nearby-helpers-heading"
-              className="font-heading text-base font-semibold text-foreground leading-tight"
+              className="font-heading text-2xl sm:text-3xl font-semibold text-foreground leading-tight"
             >
-              Qui peut vous donner un coup de main&nbsp;?
+              Entraide près de chez vous
             </h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p className="text-xs text-muted-foreground mt-2 max-w-prose">
               Savoir-faire particuliers affichés en priorité, puis proximité — {radiusLabel}.
             </p>
           </div>
