@@ -77,9 +77,9 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
                 Faites venir un propriétaire près de chez vous
               </p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Plus la communauté grandit autour de vous, plus les annonces arrivent.
-                Quand l'abonnement gardien deviendra payant (à partir du {SITTER_PRICE_START}),
-                chaque filleul activé vous offre {REFERRAL_REWARD_LABEL}.
+                Votre filleul rejoint Guardiens <strong className="text-foreground">gratuitement</strong> jusqu'au {SITTER_PRICE_START}.
+                Plus la communauté grandit autour de vous, plus les annonces arrivent. Et quand
+                l'abonnement gardien deviendra payant, chaque filleul activé vous offre {REFERRAL_REWARD_LABEL}.
               </p>
             </div>
             <Link

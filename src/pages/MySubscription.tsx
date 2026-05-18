@@ -30,6 +30,7 @@ import { toast } from "sonner";
 import { useSearchParams, Link } from "react-router-dom";
 
 import { LAUNCH_DATE, LAUNCH_START, GRACE_END, FOUNDER_START } from "@/lib/constants";
+import { SITTER_PRICE_START } from "@/lib/pricing";
 
 function calcCountdown() {
   const now = new Date();
@@ -98,8 +99,9 @@ function ReferralSection({ referralCode, userId }: { referralCode: string | null
     <div id="parrainage" className="bg-muted rounded-xl px-6 py-5 scroll-mt-24">
       <h3 className="font-heading text-lg font-semibold mb-1">Parrainez un proche.</h3>
       <p className="text-sm text-muted-foreground font-body mb-4">
-        Si quelqu'un s'inscrit avec votre lien et active son compte,
-        vous recevez tous les deux un mois d'accès offert.
+        Votre filleul rejoint Guardiens <strong className="text-foreground">gratuitement</strong> jusqu'au {SITTER_PRICE_START}.
+        Quand l'abonnement gardien deviendra payant, vous recevez tous les deux
+        un mois d'accès offert dès son activation.
       </p>
       <div className="flex gap-2">
         <input
