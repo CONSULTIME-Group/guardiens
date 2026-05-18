@@ -362,7 +362,9 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
   const helpers = data?.helpers || [];
   const filtered = useMemo(() => {
     if (!activeSkill) return helpers;
-    return helpers.filter((h) => h.skill_categories.includes(activeSkill) || h.custom_skills.length > 0);
+    return helpers.filter((h) =>
+      h.skill_categories.includes(activeSkill) || (activeSkill === "competences" && h.custom_skills.length > 0),
+    );
   }, [helpers, activeSkill]);
 
   const handleSkillToggle = (key: string | null) => {
@@ -462,7 +464,9 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
           Tout
         </button>
         {SKILL_CHIPS.map((chip) => {
-          const count = helpers.filter((h) => h.skill_categories.includes(chip.key)).length;
+          const count = helpers.filter((h) =>
+            h.skill_categories.includes(chip.key) || (chip.key === "competences" && h.custom_skills.length > 0),
+          ).length;
           if (count === 0) return null;
           const active = activeSkill === chip.key;
           return (
