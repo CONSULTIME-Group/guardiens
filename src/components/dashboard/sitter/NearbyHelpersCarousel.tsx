@@ -504,44 +504,48 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
         </div>
       )}
 
-      {/* Chips compétences */}
-      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-        <button
-          type="button"
-          onClick={() => handleSkillToggle(null)}
-          className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
-            activeSkill === null
-              ? "bg-foreground text-background border-foreground"
-              : "bg-card text-foreground border-border hover:bg-muted"
-          }`}
-        >
-          Tout
-        </button>
-        {SKILL_CHIPS.map((chip) => {
-          const count = helpers.filter((h) =>
-            h.skill_categories.includes(chip.key) || (chip.key === "competences" && h.custom_skills.length > 0),
-          ).length;
-          if (count === 0) return null;
-          const active = activeSkill === chip.key;
-          return (
-            <button
-              key={chip.key}
-              type="button"
-              onClick={() => handleSkillToggle(active ? null : chip.key)}
-              className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
-                active
-                  ? "bg-foreground text-background border-foreground"
-                  : "bg-card text-foreground border-border hover:bg-muted"
-              }`}
-              aria-pressed={active}
-            >
-              {chip.label}
-              <span className={`ml-1.5 text-[10px] ${active ? "text-background/70" : "text-muted-foreground"}`}>
-                {count}
-              </span>
-            </button>
-          );
-        })}
+      {/* Chips compétences — scroll horizontal sur mobile avec fondu droit
+          pour signaler qu'il existe d'autres filtres au-delà du bord. */}
+      <div className="relative -mx-1">
+        <div className="flex gap-2 overflow-x-auto pb-1 px-1 scrollbar-hide">
+          <button
+            type="button"
+            onClick={() => handleSkillToggle(null)}
+            className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+              activeSkill === null
+                ? "bg-foreground text-background border-foreground"
+                : "bg-card text-foreground border-border hover:bg-muted"
+            }`}
+          >
+            Tout
+          </button>
+          {SKILL_CHIPS.map((chip) => {
+            const count = helpers.filter((h) =>
+              h.skill_categories.includes(chip.key) || (chip.key === "competences" && h.custom_skills.length > 0),
+            ).length;
+            if (count === 0) return null;
+            const active = activeSkill === chip.key;
+            return (
+              <button
+                key={chip.key}
+                type="button"
+                onClick={() => handleSkillToggle(active ? null : chip.key)}
+                className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+                  active
+                    ? "bg-foreground text-background border-foreground"
+                    : "bg-card text-foreground border-border hover:bg-muted"
+                }`}
+                aria-pressed={active}
+              >
+                {chip.label}
+                <span className={`ml-1.5 text-[10px] ${active ? "text-background/70" : "text-muted-foreground"}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-background to-transparent sm:hidden" aria-hidden="true" />
       </div>
 
       {/* Carrousel horizontal premium — partout (hideHeader contrôle seulement le titre). */}
