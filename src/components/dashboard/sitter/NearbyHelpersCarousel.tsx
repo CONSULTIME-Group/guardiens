@@ -1,13 +1,11 @@
 import { memo, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ShieldCheck, ArrowRight, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNearbyHelpers, nextRadiusStep, type NearbyHelper } from "@/hooks/useNearbyHelpers";
 import { useHelpersProximityCount } from "@/hooks/useHelpersProximityCount";
 import { useCtaCooldown } from "@/hooks/useCtaCooldown";
-import { startConversation } from "@/lib/conversation";
-import { toast } from "sonner";
 import { capitalize } from "@/components/dashboard/owner/helpers";
 import { tokenizeSkillPhrases, dedupeChipsByLabel } from "@/lib/skills/tokenize";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
@@ -173,12 +171,10 @@ const SKILL_CHIPS: { key: string; label: string; intent: string }[] = [
 
 const HelperMiniCard = ({
   helper,
-  onWrite,
-  pending,
+  ctaHref,
 }: {
   helper: NearbyHelper;
-  onWrite: () => void;
-  pending?: boolean;
+  ctaHref: string;
 }) => {
   const firstName = capitalize(helper.first_name || "Membre");
 
@@ -331,17 +327,18 @@ const HelperMiniCard = ({
         )}
       </div>
 
-      {/* CTA — discret, bord supérieur très léger, plein largeur */}
+      {/* CTA — redirige vers la création d'une petite mission (pas de DM direct). */}
       <div className="mt-auto border-t border-border/40 bg-muted/20 group-hover/card:bg-primary/5 transition-colors">
         <Button
+          asChild
           variant="ghost"
           size="sm"
           className="w-full rounded-none h-10 text-xs font-medium text-foreground hover:bg-transparent hover:text-primary justify-center"
-          onClick={onWrite}
-          disabled={pending}
         >
-          {pending ? "Ouverture…" : "Lui écrire"}
-          <ArrowRight className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover/card:translate-x-0.5" aria-hidden="true" />
+          <Link to={ctaHref}>
+            Publier un coup de main
+            <ArrowRight className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover/card:translate-x-0.5" aria-hidden="true" />
+          </Link>
         </Button>
       </div>
     </article>
@@ -350,9 +347,7 @@ const HelperMiniCard = ({
 
 const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boolean } = {}) => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [activeSkill, setActiveSkill] = useState<string | null>(null);
-  const [pending, setPending] = useState<string | null>(null);
   // Override rayon — bumped via le lien « Élargir le rayon » dans l'empty-state
   // du filtre. Reset à null quand l'utilisateur change/retire le filtre, pour
   // ne pas garder un rayon de 100 km collant.
@@ -397,25 +392,16 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
       : `dans un rayon de ${data.radiusUsed} km`
     : "dans la communauté";
 
-  const handleWrite = async (helper: NearbyHelper) => {
-    if (!user?.id || pending) return;
-    setPending(helper.id);
-    const result = await startConversation({
-      otherUserId: helper.id,
-      context: "helper_inquiry",
-    });
-    setPending(null);
-    if (result.conversationId) {
-      const intent = activeSkill
-        ? SKILL_CHIPS.find((c) => c.key === activeSkill)?.intent
-        : null;
-      const params = new URLSearchParams({ c: result.conversationId });
-      if (intent) params.set("draft", `Bonjour, je cherche ${intent} près de chez moi. Seriez-vous disponible ?`);
-      navigate(`/messages?${params.toString()}`);
-    } else {
-      toast.error(result.error || "Impossible d'ouvrir la conversation");
-    }
-  };
+  // Construit le lien vers la création d'une petite mission, pré-cadré par la
+  // compétence active si l'utilisateur a filtré.
+  const ctaHref = (() => {
+    const intent = activeSkill
+      ? SKILL_CHIPS.find((c) => c.key === activeSkill)?.intent
+      : null;
+    if (!intent) return "/petites-missions/creer";
+    const params = new URLSearchParams({ intent });
+    return `/petites-missions/creer?${params.toString()}`;
+  })();
 
   return (
     <section aria-labelledby="nearby-helpers-heading" className="space-y-3">
@@ -554,8 +540,7 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
               <HelperMiniCard
                 key={helper.id}
                 helper={helper}
-                onWrite={() => handleWrite(helper)}
-                pending={pending === helper.id}
+                ctaHref={ctaHref}
               />
             ))}
           </div>
