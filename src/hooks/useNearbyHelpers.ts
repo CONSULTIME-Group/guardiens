@@ -106,6 +106,7 @@ export function useNearbyHelpers(
           city: p.city,
           skill_categories: p.skill_categories || [],
           custom_skills: normalizeCustom(p.custom_skills),
+          bio: typeof p.bio === "string" && p.bio.trim().length > 0 ? p.bio : null,
           identity_verified: !!p.identity_verified,
           completed_sits_count: p.completed_sits_count || 0,
           distance_km,
