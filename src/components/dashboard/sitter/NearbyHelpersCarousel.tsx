@@ -572,6 +572,26 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
           <div className="pointer-events-none absolute inset-y-0 right-0 w-4 bg-gradient-to-l from-background to-transparent" aria-hidden="true" />
         </div>
       )}
+
+      {/* CTA déportés au niveau de la section — volontairement discrets
+          (texte + liens), pas de gros boutons pleins pour ne pas écraser
+          le carrousel ni pousser à la création compulsive d'une mission. */}
+      <div className="flex flex-wrap items-center justify-end gap-x-5 gap-y-2 pt-1 text-xs">
+        <Link
+          to="/petites-missions"
+          className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary font-semibold transition-colors"
+        >
+          Voir les petites missions
+          <ArrowRight className="h-3 w-3" aria-hidden="true" />
+        </Link>
+        <Link
+          to={ctaHref}
+          className="inline-flex items-center gap-1 text-primary hover:underline font-semibold"
+        >
+          Demander un coup de main
+          <ArrowRight className="h-3 w-3" aria-hidden="true" />
+        </Link>
+      </div>
     </section>
   );
 });
