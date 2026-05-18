@@ -5,6 +5,7 @@ import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
 import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import SitterDashboard from "@/components/dashboard/SitterDashboard";
+import { DashboardErrorBoundary } from "@/components/dashboard/DashboardErrorBoundary";
 import { trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -166,7 +167,14 @@ const Dashboard = () => {
         key={displayedRole}
         className={transitioning ? "animate-fade-out" : "animate-fade-in"}
       >
-        {displayedRole === "owner" ? <OwnerDashboard /> : <SitterDashboard />}
+        <DashboardErrorBoundary
+          section={displayedRole === "owner" ? "OwnerDashboard" : "SitterDashboard"}
+          label={
+            displayedRole === "owner" ? "Le dashboard propriétaire" : "Le dashboard gardien"
+          }
+        >
+          {displayedRole === "owner" ? <OwnerDashboard /> : <SitterDashboard />}
+        </DashboardErrorBoundary>
       </div>
     </div>
   );
