@@ -9,7 +9,6 @@ import { useCtaCooldown } from "@/hooks/useCtaCooldown";
 import { startConversation } from "@/lib/conversation";
 import { toast } from "sonner";
 import { capitalize } from "@/components/dashboard/owner/helpers";
-import EmptyIllustration from "@/components/dashboard/shared/EmptyIllustration";
 import { tokenizeSkillPhrases, dedupeChipsByLabel } from "@/lib/skills/tokenize";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 
@@ -87,7 +86,6 @@ const EmptyHelpersState = ({ hideHeader, userId }: { hideHeader: boolean; userId
           p-5 sm:p-6
         "
       >
-        <EmptyIllustration kind="helpers" size="md" className="mb-3" />
         <p className="text-[10px] uppercase tracking-[2px] text-primary font-sans font-semibold mb-2 text-center sm:text-left">
           Votre coin est encore calme
         </p>
@@ -364,7 +362,7 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
   const helpers = data?.helpers || [];
   const filtered = useMemo(() => {
     if (!activeSkill) return helpers;
-    return helpers.filter((h) => h.skill_categories.includes(activeSkill));
+    return helpers.filter((h) => h.skill_categories.includes(activeSkill) || h.custom_skills.length > 0);
   }, [helpers, activeSkill]);
 
   const handleSkillToggle = (key: string | null) => {
@@ -427,7 +425,7 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
               Qui peut vous donner un coup de main&nbsp;?
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Triés par proximité, {radiusLabel}.
+              Savoir-faire particuliers affichés en priorité, puis proximité — {radiusLabel}.
             </p>
           </div>
         </div>
