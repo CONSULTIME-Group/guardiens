@@ -61,7 +61,7 @@ const SitterCockpit = ({
     >
       {/* ─── Tuile héro éditoriale ─── */}
       <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-accent/60 via-card to-accent/30 shadow-sm">
-        <div className="relative grid md:grid-cols-2 gap-0">
+        <div className="relative grid gap-0">
           {/* Colonne gauche — contenu */}
           <div className="p-5 sm:p-6 md:p-7 space-y-4">
             {/* Ligne 1 : eyebrow + avatar + nom + dispo */}
@@ -134,8 +134,6 @@ const SitterCockpit = ({
               onCtaClick={handlePriorityCta}
             />
           </div>
-
-          <div className="hidden md:block" aria-hidden="true" />
         </div>
 
         {/* Signal vivant en pied de tuile, fond légèrement teinté */}
