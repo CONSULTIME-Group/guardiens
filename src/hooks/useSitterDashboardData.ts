@@ -43,6 +43,7 @@ export interface SitterDashboardData {
   nextGuard: any | null;
   nextGuardError: string | null;
   nearbyListings: any[];
+  nearbyListingsRadius: number | null;
   nearbyError: string | null;
   articles: any[];
   badges: any[];
@@ -83,6 +84,7 @@ const INITIAL_STATE: SitterDashboardData = {
   nextGuard: null,
   nextGuardError: null,
   nearbyListings: [],
+  nearbyListingsRadius: null,
   nearbyError: null,
   articles: [],
   badges: [],
@@ -187,6 +189,7 @@ export function useSitterDashboardData(userId: string | undefined) {
       const NEARBY_LISTINGS_LIMIT = 4;
 
       let nearbyListings: any[] = [];
+      let nearbyListingsRadius: number | null = null;
       let nearbyError: string | null = null;
       {
         const { data: allListings, error: listErr } = await supabase
@@ -229,6 +232,7 @@ export function useSitterDashboardData(userId: string | undefined) {
                   const inRange = withDistance.filter((s) => s.distance_km! <= radius);
                   if (inRange.length >= 3) {
                     selected = inRange;
+                    nearbyListingsRadius = radius;
                     break;
                   }
                 }
@@ -236,6 +240,19 @@ export function useSitterDashboardData(userId: string | undefined) {
                   selected = withDistance.filter(
                     (s) => s.distance_km! <= NEARBY_LISTINGS_RADIUS_STEPS[NEARBY_LISTINGS_RADIUS_STEPS.length - 1],
                   );
+                  if (selected.length > 0) {
+                    nearbyListingsRadius = NEARBY_LISTINGS_RADIUS_STEPS[NEARBY_LISTINGS_RADIUS_STEPS.length - 1];
+                  }
+                }
+                // Filet ultime : aucune annonce dans 100 km → on met en avant
+                // la/les plus proche(s) disponible(s), flaggée(s) is_beyond
+                // pour que l'UI affiche un libellé « Plus loin ».
+                if (selected.length === 0 && withDistance.length > 0) {
+                  const sortedAll = [...withDistance].sort(
+                    (a, b) => (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity),
+                  );
+                  selected = sortedAll.slice(0, 2).map((s) => ({ ...s, is_beyond: true }));
+                  nearbyListingsRadius = null; // signale « hors rayon standard »
                 }
                 selected.sort((a, b) => (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity));
                 nearbyListings = selected.slice(0, NEARBY_LISTINGS_LIMIT);
@@ -369,6 +386,7 @@ export function useSitterDashboardData(userId: string | undefined) {
         nextGuard,
         nextGuardError,
         nearbyListings,
+        nearbyListingsRadius,
         nearbyError,
         articles: articlesRes.data || [],
         badges: allBadges,

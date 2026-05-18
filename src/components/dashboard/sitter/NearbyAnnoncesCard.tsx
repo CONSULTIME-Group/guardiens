@@ -1,12 +1,15 @@
 import { Link } from "react-router-dom";
 import { format, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
-import { AlertCircle, RefreshCw, Share2 } from "lucide-react";
+import { AlertCircle, RefreshCw, Share2, Compass } from "lucide-react";
 import { REFERRAL_REWARD_LABEL, SITTER_PRICE_START } from "@/lib/pricing";
 
 interface Props {
   nearbyListings: any[];
   nearbyError?: string | null;
+  /** Rayon (km) effectivement appliqué pour le filtrage (30/50/100), ou null
+   *  si on a dû élargir au-delà (annonces flaggées is_beyond). */
+  nearbyListingsRadius?: number | null;
   isAvailable?: boolean;
   /** Quand un parent (ex: SitterDashboard) a déjà rendu un SectionEyebrow. */
   hideHeader?: boolean;
@@ -16,7 +19,9 @@ interface Props {
  * Carte "Annonces près de chez vous" — extraite de SitterBottomColumns
  * pour pouvoir être utilisée seule dans un onglet de la zone Découverte.
  */
-const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, isAvailable = false, hideHeader = false }: Props) => (
+const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListingsRadius = null, isAvailable = false, hideHeader = false }: Props) => {
+  const hasBeyond = nearbyListings.some((s: any) => s?.is_beyond);
+  return (
   <section aria-labelledby={hideHeader ? undefined : "nearby-annonces-heading"} className="space-y-5">
     {!hideHeader && (
       <div className="flex flex-col">
@@ -86,6 +91,14 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, isAvailable = 
             </Link>
           </div>
 
+          <Link
+            to="/search"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+          >
+            <Compass className="h-3.5 w-3.5" aria-hidden="true" />
+            Explorer toutes les annonces
+          </Link>
+
           {!isAvailable && (
             <p className="text-xs text-muted-foreground">
               Pensez à activer le mode disponible (en haut de page) pour être contacté
@@ -95,7 +108,15 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, isAvailable = 
         </div>
       </div>
     ) : (
-      <div className="bg-card border border-border rounded-[2rem] p-4 sm:p-5 divide-y divide-border/60">
+      <div className="bg-card border border-border rounded-[2rem] p-4 sm:p-5">
+        {(nearbyListingsRadius || hasBeyond) && (
+          <p className="text-[11px] text-muted-foreground mb-2 px-1">
+            {hasBeyond
+              ? "Aucune annonce dans un rayon de 100 km — voici la/les plus proche(s) disponible(s)."
+              : `Annonces dans un rayon de ${nearbyListingsRadius} km.`}
+          </p>
+        )}
+        <div className="divide-y divide-border/60">
         {nearbyListings.slice(0, 5).map((sit: any) => {
           const isNew = differenceInHours(new Date(), new Date(sit.created_at)) < 48;
           const distance =
@@ -124,19 +145,25 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, isAvailable = 
               </div>
               {distance !== null && (
                 <span
-                  className="shrink-0 inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-bold tabular-nums px-2.5 py-0.5"
+                  className={`shrink-0 inline-flex items-center rounded-full text-[11px] font-bold tabular-nums px-2.5 py-0.5 ${
+                    sit.is_beyond
+                      ? "bg-muted text-muted-foreground ring-1 ring-border"
+                      : "bg-primary/10 text-primary"
+                  }`}
                   aria-label={`À environ ${distance} kilomètres de chez vous`}
-                  title="Distance approximative (~1 km de précision)"
+                  title={sit.is_beyond ? "Annonce hors rayon habituel" : "Distance approximative (~1 km de précision)"}
                 >
-                  {distance}&nbsp;km
+                  {sit.is_beyond ? "Plus loin · " : ""}{distance}&nbsp;km
                 </span>
               )}
             </Link>
           );
         })}
+        </div>
       </div>
     )}
   </section>
-);
+  );
+};
 
 export default NearbyAnnoncesCard;

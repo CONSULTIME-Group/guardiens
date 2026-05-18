@@ -41,7 +41,7 @@ const SitterDashboard = () => {
     pendingAppsCount, unreadCount, isAvailable,
     postalCode, avatarUrl, bio, hasAnimalExperience,
     hasEmergencyProfile, hasAcceptedRecent, nextGuard, nextGuardError,
-    nearbyListings, nearbyError, articles, nearbyMissions, nearbyMissionsError,
+    nearbyListings, nearbyListingsRadius, nearbyError, articles, nearbyMissions, nearbyMissionsError,
     myMissions, myMissionsError,
     toggleAvailability,
     reputation, groupedBadges,
@@ -309,6 +309,7 @@ const SitterDashboard = () => {
         />
         <NearbyAnnoncesCard
           nearbyListings={nearbyListings}
+          nearbyListingsRadius={nearbyListingsRadius}
           nearbyError={nearbyError}
           isAvailable={isAvailable}
           hideHeader
