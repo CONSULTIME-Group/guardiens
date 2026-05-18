@@ -17,9 +17,7 @@ import { differenceInDays } from "date-fns";
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
-import BadgeGridSection from "@/components/badges/BadgeGridSection";
 import { useUserBadges } from "@/hooks/useProfileReputation";
-import { PROPRIO_BADGE_IDS } from "@/components/badges/badge-definitions";
 
 /* ── Extracted sub-components ── */
 import MonAnnonceCard from "./owner/MonAnnonceCard";
@@ -36,7 +34,7 @@ import LiveSignalStrip from "./shared/LiveSignalStrip";
 import TodoCard, { type TodoItem } from "./owner/TodoCard";
 
 import {
-  SPECIES_LABEL, PROPRIO_SPECIAL_IDS,
+  SPECIES_LABEL,
   capitalize, capitalizeWords,
 } from "./owner/helpers";
 import type { Pet } from "./owner/types";
