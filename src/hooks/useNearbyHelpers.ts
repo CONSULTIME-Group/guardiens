@@ -56,7 +56,7 @@ export function useNearbyHelpers(
 ) {
   const { forcedRadius = null } = options;
   return useQuery<NearbyHelpersResult>({
-    queryKey: ["nearby-helpers", currentUserId, forcedRadius],
+    queryKey: ["nearby-helpers", "v2-bio", currentUserId, forcedRadius],
     enabled: !!currentUserId,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
