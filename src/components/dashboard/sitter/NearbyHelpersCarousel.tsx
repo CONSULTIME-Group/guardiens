@@ -392,7 +392,9 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
   }
 
   const radiusLabel = data?.hasGeo
-    ? `dans un rayon de ${data.radiusUsed} km`
+    ? data.includesExtendedSkillProfiles
+      ? `dans un rayon de ${data.radiusUsed} km, avec des savoir-faire élargis France entière`
+      : `dans un rayon de ${data.radiusUsed} km`
     : "dans la communauté";
 
   const handleWrite = async (helper: NearbyHelper) => {
