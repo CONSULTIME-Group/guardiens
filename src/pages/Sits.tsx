@@ -818,6 +818,11 @@ const Sits = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Sticky CTA mobile owner — visible dès qu'il y a au moins une annonce */}
+      {isOwnerView && sits.length > 0 && (
+        <MobileStickyCTA label="Publier une annonce" to="/sits/create" />
+      )}
     </div>
   );
 };
