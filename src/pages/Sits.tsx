@@ -35,6 +35,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Helmet } from "react-helmet-async";
+import MobileStickyCTA from "@/components/dashboard/owner/MobileStickyCTA";
 
 /* ── Status configs ── */
 const statusConfig: Record<string, { label: string; className: string }> = {
