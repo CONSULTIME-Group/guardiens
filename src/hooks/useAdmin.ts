@@ -14,16 +14,18 @@ export const useAdmin = () => {
       return;
     }
 
-    const checkAdmin = async () => {
+    let cancelled = false;
+    setLoading(true);
+    (async () => {
       const { data, error } = await supabase.rpc("has_role", {
         _user_id: user.id,
         _role: "admin",
       });
+      if (cancelled) return;
       setIsAdmin(!error && data === true);
       setLoading(false);
-    };
-
-    checkAdmin();
+    })();
+    return () => { cancelled = true; };
   }, [user]);
 
   return { isAdmin, loading };
