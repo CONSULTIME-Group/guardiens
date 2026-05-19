@@ -49,6 +49,20 @@ export function useAutoOpenConversation<C extends ConvLike>({
   useEffect(() => {
     const gardienId = searchParams.get("gardien");
     if (!gardienId || !user || loading) return;
+    // Garde : ne jamais déclencher la RPC sur soi-même (sinon 400 côté serveur).
+    if (gardienId === user.id) {
+      const next = new URLSearchParams(searchParams);
+      next.delete("gardien");
+      setSearchParams(next, { replace: true });
+      return;
+    }
+    // Garde : ignorer un id qui n'est pas un UUID valide.
+    if (!/^[0-9a-f-]{36}$/i.test(gardienId)) {
+      const next = new URLSearchParams(searchParams);
+      next.delete("gardien");
+      setSearchParams(next, { replace: true });
+      return;
+    }
 
     const candidates = conversations.filter((c) => {
       const otherId = c.owner_id === user.id ? c.sitter_id : c.owner_id;
