@@ -796,9 +796,14 @@ const SearchSitter = () => {
  });
  }
  final = sortResults(final, sort);
- // Démos toujours visibles : intercalées tous les 3 résultats pour montrer
- // l'étendue de l'expérience Guardiens (badge "exemple" sur chacune).
- final = interleaveDemos(final, DEMO_SITS, 3);
+ // Démos toujours visibles, mais densité adaptée à l'offre réelle :
+ //  • 0 vraie annonce         → on garde la cadence 1/3 (page sinon vide)
+ //  • 1-3 vraies annonces     → 1 démo après la dernière, max 2 démos
+ //  • 4+ vraies annonces      → 1 démo tous les 6 résultats
+ const realCount = final.length;
+ const demoCadence = realCount === 0 ? 3 : realCount <= 3 ? 99 : 6;
+ const demoLimit = realCount === 0 ? DEMO_SITS.length : realCount <= 3 ? 2 : DEMO_SITS.length;
+ final = interleaveDemos(final, DEMO_SITS.slice(0, demoLimit), demoCadence);
  const coordsMap = new Map<string, { lat: number; lng: number }>();
  final.forEach((item: any) => {
  if (!item) return;
