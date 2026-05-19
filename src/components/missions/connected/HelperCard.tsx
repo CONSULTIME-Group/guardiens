@@ -104,17 +104,24 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile }: Props) => {
         </p>
       )}
 
-      <div className="flex flex-col gap-2 pt-2 mt-auto">
-        <Button onClick={onPropose} size="sm" className="w-full">
-          Proposer à {h.first_name || "ce membre"}
-          <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-        </Button>
-        <button
-          onClick={onViewProfile}
-          className="text-xs text-muted-foreground hover:text-foreground hover:underline self-center"
-        >
+      {/* Item 9 — éviter le mur de CTAs verts répétés.
+          Action primaire = découvrir le profil (chemin naturel) ;
+          contact en secondaire/outline pour qui sait déjà. */}
+      <div className="flex items-center gap-2 pt-2 mt-auto">
+        <Button onClick={onViewProfile} size="sm" variant="outline" className="flex-1">
           Voir le profil
-        </button>
+        </Button>
+        <Button
+          onClick={onPropose}
+          size="sm"
+          variant="ghost"
+          className="shrink-0 text-primary hover:text-primary hover:bg-primary/10"
+          aria-label={`Contacter ${h.first_name || "ce membre"}`}
+          title={`Contacter ${h.first_name || "ce membre"}`}
+        >
+          Contacter
+          <ArrowRight className="ml-1 h-3.5 w-3.5" />
+        </Button>
       </div>
     </div>
   );

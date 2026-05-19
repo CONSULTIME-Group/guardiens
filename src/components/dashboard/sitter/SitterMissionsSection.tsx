@@ -30,8 +30,14 @@ const SitterMissionsSection = memo(({
   nearbyMissionsError = null,
 }: SitterMissionsSectionProps) => {
   const navigate = useNavigate();
+  const openCount = useMemo(
+    () => myMissions.filter(m => m.status !== "completed").length,
+    [myMissions]
+  );
+  // Item 12 — ne pas atterrir sur "Les miennes" si seules des missions terminées
+  // (cartes barrées en grisé = mauvais signal). On préfère "Autour de vous".
   const [tab, setTab] = useState<"mine" | "nearby">(
-    myMissions.length > 0 ? "mine" : "nearby"
+    openCount > 0 ? "mine" : "nearby"
   );
 
   // Tri : ouvertes d'abord, terminées en dessous (cohérent avec côté propriétaire).
@@ -42,11 +48,6 @@ const SitterMissionsSection = memo(({
         const bDone = b.status === "completed" ? 1 : 0;
         return aDone - bDone;
       }),
-    [myMissions]
-  );
-
-  const openCount = useMemo(
-    () => myMissions.filter(m => m.status !== "completed").length,
     [myMissions]
   );
 

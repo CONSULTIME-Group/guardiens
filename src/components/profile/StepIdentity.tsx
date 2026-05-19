@@ -51,7 +51,11 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
         </button>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
         <span className="text-sm text-muted-foreground">
-          {uploading ? "Envoi en cours..." : "Ajouter une photo de profil"}
+          {uploading
+            ? "Envoi en cours..."
+            : data.avatar_url
+              ? "Modifier votre photo de profil"
+              : "Ajouter une photo de profil"}
         </span>
         <HintBubble>C'est la première chose que les propriétaires regardent.</HintBubble>
       </div>

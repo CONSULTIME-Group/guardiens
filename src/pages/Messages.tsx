@@ -583,19 +583,26 @@ const Messages = () => {
       {showList && (
         <div className={`${isMobile && activeConv ? "hidden" : ""} ${isMobile ? "w-full" : "w-80 border-r border-border"} flex flex-col bg-card`}>
           <div className="sticky top-0 z-10 bg-card border-b border-border px-3 pt-3 pb-2 space-y-2">
-            {/* Row 1 — title + search filter inline */}
-            <div className="flex items-center gap-2">
-              <h1 className="font-heading text-base font-bold shrink-0">Messagerie</h1>
+            {/* Row 1 — title alone (lisible mobile) + role à droite */}
+            <div className="flex items-center justify-between gap-2">
+              <h1 className="font-heading text-base font-bold truncate">Messagerie</h1>
+              <span className="text-[10px] text-muted-foreground truncate shrink-0">
+                {effectiveRole === "owner" ? "Propriétaire" : "Gardien"}
+              </span>
+            </div>
+
+            {/* Row 2 — search filter (uniquement si >=5 conversations) */}
+            {conversations.length >= 5 && (
               <Input
                 value={searchFilter}
                 onChange={e => setSearchFilter(e.target.value)}
-                placeholder="Filtrer…"
+                placeholder="Filtrer par annonce ou prénom…"
                 aria-label="Filtrer les conversations par annonce ou prénom"
-                className="h-7 text-xs rounded-lg flex-1 min-w-0"
+                className="h-8 text-xs rounded-lg w-full"
               />
-            </div>
+            )}
 
-            {/* Row 2 — compact pills + role context inline */}
+            {/* Row 3 — pills compactes */}
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
               <div className="flex gap-1 shrink-0" role="tablist" aria-label="Filtrer les conversations">
                 {pills.map(p => (
@@ -615,9 +622,6 @@ const Messages = () => {
                   </button>
                 ))}
               </div>
-              <span className="text-[10px] text-muted-foreground truncate ml-auto shrink-0">
-                {effectiveRole === "owner" ? "Propriétaire" : "Gardien"}
-              </span>
             </div>
           </div>
 
