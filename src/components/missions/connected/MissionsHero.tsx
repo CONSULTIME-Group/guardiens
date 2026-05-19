@@ -39,7 +39,9 @@ const MissionsHero = ({ missionCount = 0, helperCount = 0, onPropose }: Props) =
             )}
           </p>
         )}
-        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-1">
+        {/* Item 8 — un seul CTA primaire dans le hero, le second devient un lien tertiaire
+            pour limiter le mur de boutons verts (4 → 2 sur mobile). */}
+        <div className="flex flex-col sm:flex-row items-center gap-3 justify-center pt-1">
           <Link to="/petites-missions/creer">
             <Button variant="hero" size="lg" className="w-full sm:w-auto">
               J'ose, je publie ma demande
@@ -47,9 +49,13 @@ const MissionsHero = ({ missionCount = 0, helperCount = 0, onPropose }: Props) =
             </Button>
           </Link>
           {onPropose && (
-            <Button variant="outline" size="lg" onClick={onPropose} className="border-2">
-              Me rendre visible comme aidant
-            </Button>
+            <button
+              type="button"
+              onClick={onPropose}
+              className="text-sm text-primary font-semibold hover:underline"
+            >
+              ou me rendre visible comme aidant →
+            </button>
           )}
         </div>
       </div>

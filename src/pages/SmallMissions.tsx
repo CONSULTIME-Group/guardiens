@@ -731,23 +731,26 @@ const SmallMissions = () => {
           </div>
         </footer>
 
-        {/* Sticky CTA mobile */}
-        <div className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-          <Button
-            variant="hero"
-            size="lg"
-            className="w-full"
-            onClick={() => {
-              if (!isAuthenticated) { navigate("/inscription?redirect=/petites-missions/creer"); return; }
-              if (!canApplyMissions) return;
-              navigate("/petites-missions/creer");
-            }}
-            disabled={isAuthenticated && !canApplyMissions}
-          >
-            Publier ma demande
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
+        {/* Sticky CTA mobile — masqué quand l'empty-state expose déjà sa CTA
+            (item 8 : éviter 4 boutons verts empilés sur mobile). */}
+        {(missionCount > 0 || helperCount > 0) && (
+          <div className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            <Button
+              variant="hero"
+              size="lg"
+              className="w-full"
+              onClick={() => {
+                if (!isAuthenticated) { navigate("/inscription?redirect=/petites-missions/creer"); return; }
+                if (!canApplyMissions) return;
+                navigate("/petites-missions/creer");
+              }}
+              disabled={isAuthenticated && !canApplyMissions}
+            >
+              {mode === "offer" ? "Proposer mon aide" : "Publier ma demande"}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </div>
 
       {dialogMission && dialogTarget && (
