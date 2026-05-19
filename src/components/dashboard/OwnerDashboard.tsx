@@ -229,8 +229,8 @@ const OwnerDashboard = () => {
   }
 
   return (
-    <div className="space-y-6 md:space-y-8 pb-40 md:pb-8">
-{/* pb-40 mobile = BottomNav (h-16=64px) + Sticky CTA (~72px) + marge respiration. */}
+    <div className="space-y-6 md:space-y-8 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-8">
+{/* pb mobile = BottomNav (h-16=64px) + Sticky CTA (~72px) + safe-area iPhone notch. */}
 
       {/* ═══ Hero header (compact — eyebrow + titre + sous-titre contextuel) ═══ */}
       <header className="px-5 md:px-8 pt-2 animate-fade-in">
