@@ -255,9 +255,12 @@ const OwnerDashboard = () => {
               >
                 <Link
                   to={`/gardiens/${user.id}?tab=proprio`}
-                  target="_blank"
+                  // Sur mobile : navigation in-app (les WebView intégrées
+                  // Instagram/Gmail/FB cassent target="_blank"). Sur desktop :
+                  // nouvel onglet pour ne pas perdre le contexte dashboard.
+                  target={typeof window !== "undefined" && window.innerWidth >= 768 ? "_blank" : undefined}
                   rel="noopener noreferrer"
-                  aria-label="Voir mon profil public (nouvel onglet)"
+                  aria-label="Voir mon profil public"
                 >
                   <Eye className="w-4 h-4 mr-1.5" aria-hidden="true" /> Mon profil public
                 </Link>
