@@ -462,24 +462,24 @@ const Sits = () => {
     <div className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in pb-24 md:pb-8">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 mb-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <h1 className="font-heading text-2xl md:text-3xl font-bold mb-1">
             {activeRole === "owner" ? "Mes annonces" : "Mes gardes"}
           </h1>
-          <p className="text-muted-foreground text-sm truncate">
+          <p className="text-muted-foreground text-sm">
             {headerSubtitle}
           </p>
         </div>
         {activeRole === "owner" ? (
-          <Link to="/sits/create" className="shrink-0">
-            <Button className="gap-2">
+          <Link to="/sits/create" className="shrink-0 self-start sm:self-auto">
+            <Button className="gap-2 w-full sm:w-auto">
               <Plus className="h-4 w-4" /> Publier
             </Button>
           </Link>
         ) : (
-          <Link to="/search" className="shrink-0">
-            <Button variant="outline" className="gap-2">
+          <Link to="/search" className="shrink-0 self-start sm:self-auto">
+            <Button variant="outline" className="gap-2 w-full sm:w-auto">
               <Eye className="h-4 w-4" /> Voir les annonces
             </Button>
           </Link>

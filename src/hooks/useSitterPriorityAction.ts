@@ -82,9 +82,13 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
     }
 
     // 4. Annonce à proximité — opportunité fraîche
-    if (nearbyListings.length > 0) {
-      const first = nearbyListings[0];
-      const count = nearbyListings.length;
+    //    On EXCLUT les annonces flaggées `is_beyond` : sinon le cockpit
+    //    annonce « 2 annonces près de chez vous » alors que la carte
+    //    plus bas affiche « Aucune garde à moins de 100 km ».
+    const trulyNearby = nearbyListings.filter((s: any) => !s?.is_beyond);
+    if (trulyNearby.length > 0) {
+      const first = trulyNearby[0];
+      const count = trulyNearby.length;
       return {
         variant: "nearby",
         eyebrow: `${count} annonce${count > 1 ? "s" : ""} près de chez vous`,
@@ -93,6 +97,20 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
         ctaLabel: count === 1 ? "Voir l'annonce" : "Voir les annonces",
         ctaTo: count === 1 ? `/sits/${first.id}` : "/search",
         urgency: "medium",
+      };
+    }
+
+    // 4b. Annonces hors rayon — opportunité élargie, ton honnête
+    if (nearbyListings.length > 0) {
+      const count = nearbyListings.length;
+      return {
+        variant: "explore",
+        eyebrow: "Annonces plus loin",
+        title: `${count} annonce${count > 1 ? "s" : ""} disponible${count > 1 ? "s" : ""} hors de votre rayon habituel.`,
+        description: "Rien à proximité immédiate — élargissez à la France entière pour découvrir ces gardes.",
+        ctaLabel: "Voir toute la France",
+        ctaTo: "/search?zone=france",
+        urgency: "low",
       };
     }
 

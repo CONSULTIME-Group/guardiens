@@ -234,7 +234,16 @@ const SitterDashboard = () => {
                 Ma réputation
               </p>
               <p className="text-sm font-medium text-foreground">
-                {completedSits} garde{completedSits > 1 ? "s" : ""} · {reviewsCount > 0 ? `note ${avgRating.toFixed(1)}/5` : "aucun avis"} · {badgeCount} badge{badgeCount > 1 ? "s" : ""}
+                {completedSits} garde{completedSits > 1 ? "s" : ""}
+                {" · "}
+                {/* On affiche la note UNIQUEMENT si elle s'appuie sur des gardes réelles.
+                    Avec 0 garde, une note (ex. 5,0 issue d'une expérience externe vérifiée)
+                    crée un faux signal de réputation. */}
+                {completedSits > 0 && reviewsCount > 0
+                  ? `note ${avgRating.toFixed(1).replace(".", ",")}/5`
+                  : "pas encore noté"}
+                {" · "}
+                {badgeCount} badge{badgeCount > 1 ? "s" : ""}
               </p>
             </div>
           </AccordionTrigger>

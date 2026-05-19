@@ -685,16 +685,15 @@ const SearchSitter = () => {
  };
 
  const searchSits = async (searchCoords: { lat: number; lng: number } | null) => {
- // Show published + assigned (confirmed/in_progress) + completed so members see history
- // and the page feels lived-in. Completed/assigned cards are rendered greyed-out and
- // non-clickable so they only add volume without polluting actionable results.
- // `profiles` table has restrictive RLS (owner-only) so its embedded join returns null
- // for other owners' sits. We join `properties` (RLS now allows authenticated read for
- // active sits) and fetch owner data separately from the safe `public_profiles` view.
+ // On exclut « completed » : ces annonces ne sont pas actionnables et,
+ // quand le rayon est vide, elles remontent en première position (carte
+ // greyscale « Garde terminée ») et donnent l'impression que la plateforme
+ // est inactive. Les annonces attribuées (confirmed/in_progress) sont
+ // conservées car elles montrent une dynamique actuelle.
  let query = supabase
 .from("sits")
 .select("*, property:properties!sits_property_id_fkey(type, environment, photos, cover_photo_url)")
-.in("status", ["published", "confirmed", "in_progress", "completed"])
+.in("status", ["published", "confirmed", "in_progress"])
 .order("created_at", { ascending: false });
  if (startDate) query = query.gte("end_date", startDate);
  if (endDate) query = query.lte("start_date", endDate);
@@ -797,9 +796,14 @@ const SearchSitter = () => {
  });
  }
  final = sortResults(final, sort);
- // Démos toujours visibles : intercalées tous les 3 résultats pour montrer
- // l'étendue de l'expérience Guardiens (badge "exemple" sur chacune).
- final = interleaveDemos(final, DEMO_SITS, 3);
+ // Démos toujours visibles, mais densité adaptée à l'offre réelle :
+ //  • 0 vraie annonce         → on garde la cadence 1/3 (page sinon vide)
+ //  • 1-3 vraies annonces     → 1 démo après la dernière, max 2 démos
+ //  • 4+ vraies annonces      → 1 démo tous les 6 résultats
+ const realCount = final.length;
+ const demoCadence = realCount === 0 ? 3 : realCount <= 3 ? 99 : 6;
+ const demoLimit = realCount === 0 ? DEMO_SITS.length : realCount <= 3 ? 2 : DEMO_SITS.length;
+ final = interleaveDemos(final, DEMO_SITS.slice(0, demoLimit), demoCadence);
  const coordsMap = new Map<string, { lat: number; lng: number }>();
  final.forEach((item: any) => {
  if (!item) return;
