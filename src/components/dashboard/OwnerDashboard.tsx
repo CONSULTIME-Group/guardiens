@@ -229,8 +229,8 @@ const OwnerDashboard = () => {
   }
 
   return (
-    <div className="space-y-6 md:space-y-8 pb-40 md:pb-8">
-{/* pb-40 mobile = BottomNav (h-16=64px) + Sticky CTA (~72px) + marge respiration. */}
+    <div className="space-y-6 md:space-y-8 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-8">
+{/* pb mobile = BottomNav (h-16=64px) + Sticky CTA (~72px) + safe-area iPhone notch. */}
 
       {/* ═══ Hero header (compact — eyebrow + titre + sous-titre contextuel) ═══ */}
       <header className="px-5 md:px-8 pt-2 animate-fade-in">
@@ -255,9 +255,12 @@ const OwnerDashboard = () => {
               >
                 <Link
                   to={`/gardiens/${user.id}?tab=proprio`}
-                  target="_blank"
+                  // Sur mobile : navigation in-app (les WebView intégrées
+                  // Instagram/Gmail/FB cassent target="_blank"). Sur desktop :
+                  // nouvel onglet pour ne pas perdre le contexte dashboard.
+                  target={typeof window !== "undefined" && window.innerWidth >= 768 ? "_blank" : undefined}
                   rel="noopener noreferrer"
-                  aria-label="Voir mon profil public (nouvel onglet)"
+                  aria-label="Voir mon profil public"
                 >
                   <Eye className="w-4 h-4 mr-1.5" aria-hidden="true" /> Mon profil public
                 </Link>
