@@ -486,8 +486,14 @@ const Sits = () => {
         )}
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
+      {/* Tabs — mask-fade à droite pour signaler le scroll horizontal sur mobile */}
+      <div
+        className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide"
+        style={{
+          WebkitMaskImage: "linear-gradient(to right, black calc(100% - 24px), transparent 100%)",
+          maskImage: "linear-gradient(to right, black calc(100% - 24px), transparent 100%)",
+        }}
+      >
         {isOwnerView ? (
           ownerTabs.map((tab) => (
             <button
