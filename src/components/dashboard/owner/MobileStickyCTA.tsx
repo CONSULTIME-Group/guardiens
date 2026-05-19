@@ -22,8 +22,9 @@ const MobileStickyCTA = memo(({ label = "Publier une annonce", to = "/sits/creat
 
   return (
     <div
-      // Posé EXACTEMENT au-dessus de la BottomNav (h-16 = 64px). Sans ce
-      // décalage, le CTA et la nav se superposent en bas de viewport.
+      // Posé EXACTEMENT au-dessus de la BottomNav (h-16 = 64px). La BottomNav
+      // n'a pas de safe-area-inset → on garde bottom-16 pour rester collé
+      // visuellement à son bord supérieur sur tous les iPhones (SE → 15 Pro Max).
       className="md:hidden fixed bottom-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border px-4 py-3 shadow-[0_-4px_12px_-4px_hsl(var(--foreground)/0.08)]"
       role="region"
       aria-label="Action principale"
