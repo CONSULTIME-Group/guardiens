@@ -35,6 +35,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Helmet } from "react-helmet-async";
+import MobileStickyCTA from "@/components/dashboard/owner/MobileStickyCTA";
 
 /* ── Status configs ── */
 const statusConfig: Record<string, { label: string; className: string }> = {
@@ -459,7 +460,7 @@ const Sits = () => {
   }, [tabCounts, ownerTabCounts, activeSits, isOwnerView]);
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in pb-24 md:pb-8">
+    <div className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in pb-[calc(9rem+env(safe-area-inset-bottom))] md:pb-8">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       {/* Header */}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -486,8 +487,14 @@ const Sits = () => {
         )}
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
+      {/* Tabs — mask-fade à droite pour signaler le scroll horizontal sur mobile */}
+      <div
+        className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide"
+        style={{
+          WebkitMaskImage: "linear-gradient(to right, black calc(100% - 24px), transparent 100%)",
+          maskImage: "linear-gradient(to right, black calc(100% - 24px), transparent 100%)",
+        }}
+      >
         {isOwnerView ? (
           ownerTabs.map((tab) => (
             <button
@@ -811,6 +818,11 @@ const Sits = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Sticky CTA mobile owner — visible dès qu'il y a au moins une annonce */}
+      {isOwnerView && sits.length > 0 && (
+        <MobileStickyCTA label="Publier une annonce" to="/sits/create" />
+      )}
     </div>
   );
 };

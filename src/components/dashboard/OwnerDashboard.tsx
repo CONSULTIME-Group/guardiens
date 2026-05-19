@@ -247,24 +247,17 @@ const OwnerDashboard = () => {
             </div>
             <p className="text-sm text-muted-foreground font-sans mt-1">{subtitle}</p>
             {user?.id && (
-              <Button
-                asChild
-                variant="outline"
-                size="sm"
-                className="mt-3 rounded-xl"
+              <Link
+                to={`/gardiens/${user.id}?tab=proprio`}
+                // Mobile : in-app (les WebView Instagram/Gmail/FB cassent target="_blank").
+                // Desktop : nouvel onglet pour préserver le contexte dashboard.
+                target={typeof window !== "undefined" && window.innerWidth >= 768 ? "_blank" : undefined}
+                rel="noopener noreferrer"
+                aria-label="Voir mon profil public"
+                className="inline-flex items-center gap-1.5 mt-2 text-xs font-sans text-muted-foreground hover:text-primary transition-colors"
               >
-                <Link
-                  to={`/gardiens/${user.id}?tab=proprio`}
-                  // Sur mobile : navigation in-app (les WebView intégrées
-                  // Instagram/Gmail/FB cassent target="_blank"). Sur desktop :
-                  // nouvel onglet pour ne pas perdre le contexte dashboard.
-                  target={typeof window !== "undefined" && window.innerWidth >= 768 ? "_blank" : undefined}
-                  rel="noopener noreferrer"
-                  aria-label="Voir mon profil public"
-                >
-                  <Eye className="w-4 h-4 mr-1.5" aria-hidden="true" /> Mon profil public
-                </Link>
-              </Button>
+                <Eye className="w-3.5 h-3.5" aria-hidden="true" /> Mon profil public
+              </Link>
             )}
           </div>
           {/* Desktop : CTA inline dans le hero. Mobile : porté par MobileStickyCTA. */}
