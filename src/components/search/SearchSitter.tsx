@@ -1559,18 +1559,26 @@ const SearchSitter = () => {
  )}
  </div>
   <div className="flex flex-col items-end gap-2 shrink-0">
-  <span onClick={(e) => e.stopPropagation()}>
-  <FavoriteButton targetType="sitter" targetId={member.id} size="sm" />
-  </span>
-  <span onClick={(e) => e.stopPropagation()}>
-  <InviteToMySitButton sitter={{ id: member.id, first_name: member.first_name }} />
-  </span>
-  <Link
-  to={`/gardiens/${member.id}`}
-  className="text-sm text-primary font-semibold hover:underline"
-  >
-  Voir le profil →
-  </Link>
+  {member.is_demo ? (
+    <span className="text-[10px] font-semibold uppercase tracking-wider bg-amber-100 text-amber-800 rounded-full px-2 py-1">
+      Exemple
+    </span>
+  ) : (
+    <>
+      <span onClick={(e) => e.stopPropagation()}>
+        <FavoriteButton targetType="sitter" targetId={member.id} size="sm" />
+      </span>
+      <span onClick={(e) => e.stopPropagation()}>
+        <InviteToMySitButton sitter={{ id: member.id, first_name: member.first_name }} />
+      </span>
+      <Link
+        to={`/gardiens/${member.id}`}
+        className="text-sm text-primary font-semibold hover:underline"
+      >
+        Voir le profil →
+      </Link>
+    </>
+  )}
   </div>
  </div>
  );
