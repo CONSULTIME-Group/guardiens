@@ -4873,6 +4873,17 @@ export type Database = {
         Args: { p_garde_id: string }
         Returns: string[]
       }
+      get_mission_author_public: {
+        Args: { _mission_id: string }
+        Returns: {
+          avatar_url: string
+          city: string
+          first_name: string
+          identity_verified: boolean
+          member_since: string
+          postal_code: string
+        }[]
+      }
       get_or_create_conversation: {
         Args: {
           p_context_type: Database["public"]["Enums"]["conversation_context"]
