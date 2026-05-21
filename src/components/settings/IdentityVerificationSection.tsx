@@ -87,16 +87,20 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
     setUploading(true);
     setUploadProgress(10);
     try {
-      const compressed = await compressImageFile(file, 5, 2048);
-      setUploadProgress(20);
-      const ext = compressed.name.split(".").pop();
-      const path = `${user.id}/identity-document.${ext}`;
+      // HEIC/HEIF (photos iPhone) ne sont pas décodables par <canvas> hors Safari iOS
+      // → on uploade le fichier brut au lieu de tenter une compression qui échouerait
+      // avec un message trompeur "vérifiez le format".
+      const ext = (file.name.split(".").pop() || "").toLowerCase();
+      const isHeic = ext === "heic" || ext === "heif" || file.type === "image/heic" || file.type === "image/heif";
+      const toUpload = isHeic ? file : await compressImageFile(file, 5, 2048);
       setUploadProgress(30);
-      await supabase.storage.from("identity-documents").remove([path]);
+      const finalExt = toUpload.name.split(".").pop();
+      const path = `${user.id}/identity-document.${finalExt}`;
       setUploadProgress(50);
+      await supabase.storage.from("identity-documents").remove([path]);
       const { error: uploadError } = await supabase.storage
         .from("identity-documents")
-        .upload(path, compressed, { upsert: true });
+        .upload(path, toUpload, { upsert: true, contentType: toUpload.type || undefined });
       if (uploadError) throw uploadError;
       setUploadProgress(80);
       await supabase.from("profiles").update({
@@ -123,8 +127,11 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
       }
       setUploadProgress(100);
     } catch (err) {
-      logger.error("Settings upload error", { err: String(err) });
-      toast.error("Votre fichier n'a pas pu être envoyé. Vérifiez le format (JPG, PNG, PDF, HEIC) et la taille (max 10 Mo).");
+      const msg = err instanceof Error ? err.message : String(err);
+      logger.error("Settings upload error", { err: msg });
+      // Vrai message d'erreur (au lieu du générique trompeur qui faisait croire
+      // à Sophie & co que leur fichier était dans un mauvais format).
+      toast.error(`Envoi impossible : ${msg.slice(0, 160)}`);
       setPreviewUrl(null);
     }
     setTimeout(() => setUploadProgress(0), 1000);
