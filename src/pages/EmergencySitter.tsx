@@ -356,12 +356,10 @@ const EmergencySitter = () => {
         </div>
 
         <div className="text-center mt-8">
-          <Link to="/dashboard">
-            <Button variant="outline" size="lg" className="gap-2">
-              <Zap className="h-4 w-4" />
-              Voir si je suis éligible
-            </Button>
-          </Link>
+          <Button variant="outline" size="lg" className="gap-2" disabled>
+            <Zap className="h-4 w-4" />
+            Éligibilité (à venir)
+          </Button>
         </div>
       </section>
 
