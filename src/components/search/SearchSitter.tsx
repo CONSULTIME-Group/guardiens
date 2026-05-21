@@ -810,15 +810,14 @@ const SearchSitter = () => {
  else if (sort === "rating") items.sort((a: any, b: any) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
  // Tri prio : savoir-faire particuliers (competences) AVEC photo > competences sans photo > autres avec photo > autres sans photo.
  // Ce tri prime sur les autres pour mettre en avant la valeur ajoutée (reiki, éducation canine, ostéo…).
- const skillRank = (m: any) => {
-    const hasCompetences =
+  const skillRank = (m: any) => {
+    const hasSpecificSkills =
       tokenizeSkillPhrases(m.custom_skills || []).length > 0 ||
       tokenizeSkillPhrases(m.competences || []).length > 0 ||
-      !!m.specialty_label ||
-      (Array.isArray(m.skill_categories) && m.skill_categories.includes("competences"));
+      !!m.specialty_label;
    const hasAvatar = !!m.avatar_url;
-   if (hasCompetences && hasAvatar) return 0;
-   if (hasCompetences) return 1;
+    if (hasSpecificSkills && hasAvatar) return 0;
+    if (hasSpecificSkills) return 1;
    if (hasAvatar) return 2;
    return 3;
  };
