@@ -1002,24 +1002,25 @@ const SearchSitter = () => {
  });
  const isMission = tab === "missions";
  const isDemo = !!item.is_demo;
- const isAssigned = !isMission && !!item.isAssigned;
- const isCompleted = !isMission && !!item.isCompleted;
- const isInactive = isAssigned || isCompleted;
- // Annonce hors du rayon de recherche : on l'affiche seulement quand
- // l'utilisateur a élargi la zone (région/France) ET que la distance dépasse son rayon.
- const isOutOfZone =
- !isMission &&
- !isDemo &&
- typeof item.distance === "number" &&
- item.distance > radius[0];
- const linkTo = isMission
- ? `/petites-missions/${item.id}`
- : isDemo
- ? `/annonces/demo/${item.slug || item.id}`
- : `/sits/${item.id}`;
+  const isAssigned = !isMission && !!item.isAssigned;
+  const isCompleted = !isMission && !!item.isCompleted;
+  const isPast = !isMission && !!item.isPast;
+  const isInactive = isAssigned || isCompleted || isPast;
+  // Annonce hors du rayon de recherche : on l'affiche seulement quand
+  // l'utilisateur a élargi la zone (région/France) ET que la distance dépasse son rayon.
+  const isOutOfZone =
+  !isMission &&
+  !isDemo &&
+  typeof item.distance === "number" &&
+  item.distance > radius[0];
+  const linkTo = isMission
+  ? `/petites-missions/${item.id}`
+  : isDemo
+  ? `/annonces/demo/${item.slug || item.id}`
+  : `/sits/${item.id}`;
 
- const showCTA = !hasAccess && !isInactive && !isDemo;
- const isClickable = (isDemo || hasAccess) && !isInactive;
+  const showCTA = !hasAccess && !isInactive && !isDemo;
+  const isClickable = (isDemo || hasAccess) && !isInactive;
 
  const cardContent = (
  <div
