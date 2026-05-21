@@ -46,6 +46,7 @@ import DatesPickerPopover from "@/components/search/header/DatesPickerPopover";
 import AnimalsPickerPopover from "@/components/search/header/AnimalsPickerPopover";
 import { useEmptyStateBreakdown } from "@/hooks/search/useEmptyStateBreakdown";
 import { useSearchAlert } from "@/hooks/search/useSearchAlert";
+import { useSearchUserProfile } from "@/hooks/search/useSearchUserProfile";
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Animaux de ferme", "NAC"];
 const animalChipToSpecies: Record<string, string> = {
@@ -332,35 +333,18 @@ const SearchSitter = () => {
  };
 
  // Load user profile & eligibility
- useEffect(() => {
- if (!user) return;
- const load = async () => {
- const [profileRes, spRes, eligRes, reviewsRes, myProfileRes] = await Promise.all([
- supabase.from("profiles").select("city, postal_code").eq("id", user.id).single(),
- supabase.from("sitter_profiles").select("*").eq("user_id", user.id).maybeSingle(),
- supabase.from("applications").select("id, sit:sits!inner(status)").eq("sitter_id", user.id).eq("status", "accepted"),
- supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
- supabase.from("profiles").select("identity_verified").eq("id", user.id).single(),
- ]);
- const uc = profileRes.data?.city || "";
- setUserCity(uc);
- setUserPostalCode(profileRes.data?.postal_code || null);
- setSitterProfile(spRes.data);
- if (uc) {
- setCity(uc);
- setCityInput(uc);
- const coords = await geocodeCity(uc);
- if (coords) setUserCoords(coords);
- }
- const completedSits = (eligRes.data || []).filter((a: any) => a.sit?.status === "completed").length;
- setUserCompletedSits(completedSits);
- const reviews = reviewsRes.data || [];
- const avgRating = reviews.length > 0 ? reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length : 0;
- const verified = myProfileRes.data?.identity_verified || false;
- setSitterEligible(completedSits >= 3 && avgRating >= 4.7 && verified);
- };
- load();
- }, [user]);
+ useSearchUserProfile({
+  userId: user?.id,
+  setUserCity,
+  setUserPostalCode,
+  setSitterProfile,
+  setUserCoords,
+  setUserCompletedSits,
+  setSitterEligible,
+  setCity,
+  setCityInput,
+ });
+
 
  // Auto-search when filters change (debounced)
  const doSearch = useCallback(async () => {
