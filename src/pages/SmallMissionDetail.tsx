@@ -213,10 +213,10 @@ const SmallMissionDetail = () => {
     if (!m) { setLoading(false); return; }
     setMission(m);
 
-    const { data: profile } = await supabase.from("profiles")
-      .select("first_name, last_name, avatar_url, city, postal_code, identity_verified, created_at")
-      .eq("id", m.user_id).single();
-    setAuthor(profile);
+    // RPC publique: renvoie les champs auteur sûrs même pour les non-connectés
+    const { data: authorRows } = await supabase.rpc("get_mission_author_public", { _mission_id: m.id });
+    const authorRow: any = Array.isArray(authorRows) ? authorRows[0] : authorRows;
+    setAuthor(authorRow ? { ...authorRow, created_at: authorRow.member_since } : null);
 
     // Related missions — même catégorie ou même ville, statut ouvert, 3 max
     const { data: related } = await supabase.from("small_missions")
