@@ -10,6 +10,9 @@ import L from "leaflet";
 interface Props {
   city?: string | null;
   postalCode?: string | null;
+  /** Coordonnées exactes si dispo (prioritaires sur le géocodage). */
+  lat?: number | null;
+  lng?: number | null;
   /** Rayon du cercle d'approximation, en mètres. Default 1500. */
   radius?: number;
   className?: string;
