@@ -54,7 +54,10 @@ export const privateDisallowPaths: string[] = [
  "/mon-abonnement",
  "/notifications",
   "/sits",
-  "/annonces/",
+  // NB : `/annonces/` NE doit PAS être bloqué. Les annonces individuelles
+  // (`/annonces/:id`) sont publiques et indexables conditionnellement
+  // (filtre qualité dans PublicSitDetail via <meta robots>). Bloquer le
+  // préfixe ici empêcherait Google de crawler une page pourtant publique.
   "/recherche-gardiens",
  "/review/",
  "/house-guide/",
