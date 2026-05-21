@@ -812,6 +812,7 @@ const SearchSitter = () => {
  // Ce tri prime sur les autres pour mettre en avant la valeur ajoutée (reiki, éducation canine, ostéo…).
  const skillRank = (m: any) => {
     const hasCompetences =
+      tokenizeSkillPhrases(m.custom_skills || []).length > 0 ||
       tokenizeSkillPhrases(m.competences || []).length > 0 ||
       !!m.specialty_label ||
       (Array.isArray(m.skill_categories) && m.skill_categories.includes("competences"));
