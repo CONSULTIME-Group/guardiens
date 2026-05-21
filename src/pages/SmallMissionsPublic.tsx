@@ -153,13 +153,13 @@ const SmallMissionsPublic = () => {
   useEffect(() => {
     const loadOpen = async () => {
       try {
-        const { data } = await supabase
-          .from("small_missions")
-          .select("id, title, category, city, created_at")
-          .eq("status", "open")
-          .order("created_at", { ascending: false })
-          .limit(6);
-        if (data) setOpenMissions(data as OpenMissionRow[]);
+         const { data } = await supabase
+           .from("small_missions")
+           .select("id, title, description, category, city, created_at, date_needed, duration_estimate, exchange_offer")
+           .eq("status", "open")
+           .order("created_at", { ascending: false })
+           .limit(6);
+         if (data) setOpenMissions(data as OpenMissionRow[]);
       } catch (err) {
         console.warn("small_missions unavailable:", err);
       }
