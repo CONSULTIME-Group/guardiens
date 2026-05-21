@@ -360,31 +360,57 @@ const PublicSitView = ({
                 </div>
               </div>
 
-              <Link to={`/inscription?role=sitter&redirect=${encodeURIComponent(redirect)}`} className="block">
-                <Button className="w-full py-6 rounded-full font-bold text-base shadow-lg shadow-primary/20">
-                  Postuler à cette garde
+              {!accepting ? (
+                <Button className="w-full py-6 rounded-full font-bold text-base" disabled>
+                  Candidatures en cours d'analyse
                 </Button>
-              </Link>
-
-              <p className="mt-5 text-xs text-center text-muted-foreground px-2 leading-relaxed">
-                Inscription gratuite, 2 minutes. Sans engagement.
-              </p>
-
-              <div className="mt-6 pt-6 border-t border-border space-y-2">
-                <p className="text-xs text-center text-muted-foreground">Déjà membre&nbsp;?</p>
-                <Link to={`/login?redirect=${encodeURIComponent(redirect)}`} className="block">
-                  <Button variant="outline" className="w-full rounded-full">
-                    Se connecter
+              ) : !isAuthenticated ? (
+                <>
+                  <Link to={`/inscription?role=sitter&redirect=${encodeURIComponent(redirect)}`} className="block">
+                    <Button className="w-full py-6 rounded-full font-bold text-base shadow-lg shadow-primary/20">
+                      Postuler à cette garde
+                    </Button>
+                  </Link>
+                  <p className="mt-5 text-xs text-center text-muted-foreground px-2 leading-relaxed">
+                    Inscription gratuite, 2 minutes. Sans engagement.
+                  </p>
+                  <div className="mt-6 pt-6 border-t border-border space-y-2">
+                    <p className="text-xs text-center text-muted-foreground">Déjà membre&nbsp;?</p>
+                    <Link to={`/login?redirect=${encodeURIComponent(redirect)}`} className="block">
+                      <Button variant="outline" className="w-full rounded-full">
+                        Se connecter
+                      </Button>
+                    </Link>
+                  </div>
+                </>
+              ) : hasApplied ? (
+                <Button className="w-full py-6 rounded-full font-bold text-base" disabled>
+                  <CheckCircle2 className="h-5 w-5 mr-2" /> Candidature envoyée
+                </Button>
+              ) : !hasAccess ? (
+                <Link to="/mon-abonnement" className="block">
+                  <Button className="w-full py-6 rounded-full font-bold text-base shadow-lg shadow-primary/20">
+                    S'abonner pour postuler
                   </Button>
                 </Link>
-              </div>
+              ) : (
+                <Button
+                  onClick={onApply}
+                  className="w-full py-6 rounded-full font-bold text-base shadow-lg shadow-primary/20"
+                >
+                  Postuler à cette garde
+                </Button>
+              )}
             </div>
 
             {/* Localisation approximative */}
             <div className="bg-card rounded-[2rem] overflow-hidden shadow-sm border border-border">
               <ApproximateLocationMap
                 city={owner?.city}
-                className="h-48"
+                postalCode={owner?.postal_code}
+                lat={sit.latitude}
+                lng={sit.longitude}
+                className="h-64"
               />
               <div className="p-5">
                 <p className="font-semibold text-sm text-foreground mb-1">Localisation approximative</p>
