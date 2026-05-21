@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Share2, CheckCircle2 } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
+import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import { Helmet } from "react-helmet-async";
 
 const entraideHeader =
