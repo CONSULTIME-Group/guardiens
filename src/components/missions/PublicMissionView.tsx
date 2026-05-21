@@ -270,7 +270,9 @@ const PublicMissionView = ({
               <ApproximateLocationMap
                 city={mission.city}
                 postalCode={mission.postal_code}
-                className="h-48"
+                lat={mission.latitude}
+                lng={mission.longitude}
+                className="h-64"
               />
               <div className="p-5">
                 <p className="font-semibold text-sm text-foreground mb-1">Localisation approximative</p>
