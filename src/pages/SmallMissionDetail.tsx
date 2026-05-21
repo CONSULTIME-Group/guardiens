@@ -501,9 +501,20 @@ const SmallMissionDetail = () => {
         </div>
         <div className="relative max-w-3xl mx-auto px-6 py-10">
           <PageMeta title={`${mission.title} — Coup de main près de chez vous | Guardiens`} description={mission.description?.slice(0, 155)} />
-          <Link to="/petites-missions" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
-            <ArrowLeft className="h-4 w-4" /> Retour aux missions
-          </Link>
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <Link to="/petites-missions" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+              <ArrowLeft className="h-4 w-4" /> Retour aux missions
+            </Link>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSharePublishedLink}
+              className="gap-1.5 rounded-full"
+              aria-label="Partager cette mission"
+            >
+              <Share2 className="h-4 w-4" /> Partager
+            </Button>
+          </div>
           <h1 className="font-heading text-2xl md:text-3xl font-bold">{mission.title}</h1>
         </div>
       </div>
