@@ -82,9 +82,34 @@ const FAQ_ITEMS = MISSIONS_FAQ;
 interface OpenMissionRow {
   id: string;
   title: string;
+  description: string | null;
   category: string;
   city: string | null;
   created_at: string;
+  date_needed: string | null;
+  duration_estimate: string | null;
+  exchange_offer: string | null;
+}
+
+/* Date relative en français, court */
+function timeAgoFr(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "à l'instant";
+  if (m < 60) return `il y a ${m} min`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `il y a ${h} h`;
+  const d = Math.floor(h / 24);
+  if (d < 7) return `il y a ${d} j`;
+  const w = Math.floor(d / 7);
+  if (w < 5) return `il y a ${w} sem`;
+  return new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+}
+
+function formatDateNeeded(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return d.toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "long" });
 }
 
 const CATEGORY_LABEL: Record<string, string> = {
