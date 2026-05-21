@@ -685,55 +685,61 @@ const SearchSitter = () => {
  return { items: filtered, cityCoords };
  };
 
- const searchSits = async (searchCoords: { lat: number; lng: number } | null) => {
- // On exclut « completed » : ces annonces ne sont pas actionnables et,
- // quand le rayon est vide, elles remontent en première position (carte
- // greyscale « Garde terminée ») et donnent l'impression que la plateforme
- // est inactive. Les annonces attribuées (confirmed/in_progress) sont
- // conservées car elles montrent une dynamique actuelle.
- let query = supabase
+  const searchSits = async (searchCoords: { lat: number; lng: number } | null) => {
+  // On inclut les statuts passés (expired / completed / cancelled) pour la
+  // transparence et le SEO visiteur : ils sont affichés grisés avec le label
+  // « Annonce passée » et ne sont pas actionnables.
+  let query = supabase
 .from("sits")
 .select("*, property:properties!sits_property_id_fkey(type, environment, photos, cover_photo_url)")
-.in("status", ["published", "confirmed", "in_progress"])
+.in("status", ["published", "confirmed", "in_progress", "completed", "cancelled"])
 .order("created_at", { ascending: false });
- if (startDate) query = query.gte("end_date", startDate);
- if (endDate) query = query.lte("start_date", endDate);
- const { data } = await query;
- let items = data || [];
+  if (startDate) query = query.gte("end_date", startDate);
+  if (endDate) query = query.lte("start_date", endDate);
+  const { data } = await query;
+  let items = data || [];
 
- // Hydrate owner data from public_profiles (safe public view) in a single batched call
- const ownerIds = Array.from(new Set(items.map((s: any) => s.user_id).filter(Boolean)));
- if (ownerIds.length > 0) {
- const [{ data: owners }, { data: galleryRows }] = await Promise.all([
-   supabase
+  // Hydrate owner data from public_profiles (safe public view) in a single batched call
+  const ownerIds = Array.from(new Set(items.map((s: any) => s.user_id).filter(Boolean)));
+  if (ownerIds.length > 0) {
+  const [{ data: owners }, { data: galleryRows }] = await Promise.all([
+    supabase
 .from("public_profiles")
 .select("id, first_name, avatar_url, city, postal_code, identity_verified, is_founder")
 .in("id", ownerIds),
-   supabase
+    supabase
 .from("owner_gallery")
 .select("user_id, photo_url, position")
 .in("user_id", ownerIds)
 .order("position", { ascending: true }),
- ]);
- const ownerMap = new Map((owners || []).map((o: any) => [o.id, o]));
- const galleryFirstMap = new Map<string, string>();
- (galleryRows || []).forEach((g: any) => {
-   if (g?.user_id && g?.photo_url && !galleryFirstMap.has(g.user_id)) {
-     galleryFirstMap.set(g.user_id, g.photo_url);
-   }
- });
- items = items.map((s: any) => ({
-   ...s,
-   owner: ownerMap.get(s.user_id) || null,
-   ownerGalleryFirstPhoto: galleryFirstMap.get(s.user_id) || null,
- }));
- }
- // Mark assigned/completed sits (will be rendered greyed-out, non-clickable)
- items = items.map((s: any) => ({
-...s,
- isAssigned: s.status === "confirmed" || s.status === "in_progress",
- isCompleted: s.status === "completed",
- }));
+  ]);
+  const ownerMap = new Map((owners || []).map((o: any) => [o.id, o]));
+  const galleryFirstMap = new Map<string, string>();
+  (galleryRows || []).forEach((g: any) => {
+    if (g?.user_id && g?.photo_url && !galleryFirstMap.has(g.user_id)) {
+      galleryFirstMap.set(g.user_id, g.photo_url);
+    }
+  });
+  items = items.map((s: any) => ({
+    ...s,
+    owner: ownerMap.get(s.user_id) || null,
+    ownerGalleryFirstPhoto: galleryFirstMap.get(s.user_id) || null,
+  }));
+  }
+  // Mark assigned/past sits (will be rendered greyed-out, non-clickable).
+  // « expired » est calculé côté client : statut « published » avec end_date passée.
+  const todayIso = new Date().toISOString().slice(0, 10);
+  items = items.map((s: any) => {
+    const isCompleted = s.status === "completed";
+    const isCancelled = s.status === "cancelled";
+    const isExpired = s.status === "published" && s.end_date && s.end_date < todayIso;
+    return {
+      ...s,
+      isAssigned: s.status === "confirmed" || s.status === "in_progress",
+      isCompleted,
+      isPast: isExpired || isCancelled,
+    };
+  });
  if (housingType !== "all") items = items.filter((s: any) => s.property?.type === housingType);
  if (withPhotosOnly) items = items.filter((s: any) => s.property?.photos?.length > 0);
  if (duration !== "all") {
@@ -920,9 +926,10 @@ const SearchSitter = () => {
  if (sortBy === "closest") sorted.sort((a, b) => (a.distance ?? 9999) - (b.distance ?? 9999));
  else if (sortBy === "recent") sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
  else if (sortBy === "rating") sorted.sort((a, b) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
- // Always push assigned (greyed-out) sits to the bottom, then completed (history) at the very end
- sorted.sort((a, b) => Number(!!a.isAssigned || !!a.isCompleted) - Number(!!b.isAssigned || !!b.isCompleted));
- sorted.sort((a, b) => Number(!!a.isCompleted) - Number(!!b.isCompleted));
+  // Tri secondaire : on pousse en bas les annonces inactives (attribuées),
+  // puis tout en bas les annonces passées (expirées, complétées, annulées).
+  sorted.sort((a, b) => Number(!!a.isAssigned || !!a.isCompleted || !!a.isPast) - Number(!!b.isAssigned || !!b.isCompleted || !!b.isPast));
+  sorted.sort((a, b) => Number(!!a.isCompleted || !!a.isPast) - Number(!!b.isCompleted || !!b.isPast));
  return sorted;
  };
 
@@ -972,7 +979,7 @@ const SearchSitter = () => {
 
  // Compteur "annonces disponibles" : on EXCLUT les démos, les attribuées et les terminées
  // pour ne pas surévaluer l'offre réelle.
- const availableSitsCount = results.filter((r: any) => !r.isAssigned && !r.isCompleted && !r.is_demo).length;
+ const availableSitsCount = results.filter((r: any) => !r.isAssigned && !r.isCompleted && !r.isPast && !r.is_demo).length;
  const demoCount = results.filter((r: any) => r.is_demo).length;
  const resultCount = tab === "missions" && missionSubTab === "members" ? availableMembers.length : availableSitsCount;
  const countLabel = tab === "missions" && missionSubTab === "members"
@@ -995,24 +1002,25 @@ const SearchSitter = () => {
  });
  const isMission = tab === "missions";
  const isDemo = !!item.is_demo;
- const isAssigned = !isMission && !!item.isAssigned;
- const isCompleted = !isMission && !!item.isCompleted;
- const isInactive = isAssigned || isCompleted;
- // Annonce hors du rayon de recherche : on l'affiche seulement quand
- // l'utilisateur a élargi la zone (région/France) ET que la distance dépasse son rayon.
- const isOutOfZone =
- !isMission &&
- !isDemo &&
- typeof item.distance === "number" &&
- item.distance > radius[0];
- const linkTo = isMission
- ? `/petites-missions/${item.id}`
- : isDemo
- ? `/annonces/demo/${item.slug || item.id}`
- : `/sits/${item.id}`;
+  const isAssigned = !isMission && !!item.isAssigned;
+  const isCompleted = !isMission && !!item.isCompleted;
+  const isPast = !isMission && !!item.isPast;
+  const isInactive = isAssigned || isCompleted || isPast;
+  // Annonce hors du rayon de recherche : on l'affiche seulement quand
+  // l'utilisateur a élargi la zone (région/France) ET que la distance dépasse son rayon.
+  const isOutOfZone =
+  !isMission &&
+  !isDemo &&
+  typeof item.distance === "number" &&
+  item.distance > radius[0];
+  const linkTo = isMission
+  ? `/petites-missions/${item.id}`
+  : isDemo
+  ? `/annonces/demo/${item.slug || item.id}`
+  : `/sits/${item.id}`;
 
- const showCTA = !hasAccess && !isInactive && !isDemo;
- const isClickable = (isDemo || hasAccess) && !isInactive;
+  const showCTA = !hasAccess && !isInactive && !isDemo;
+  const isClickable = (isDemo || hasAccess) && !isInactive;
 
  const cardContent = (
  <div
@@ -1042,13 +1050,13 @@ const SearchSitter = () => {
  <Sparkles className="h-3 w-3" /> Annonce d'exemple — pour illustrer la plateforme
  </span>
  )}
- {(isAssigned || isCompleted) && (
- <span className="absolute inset-0 flex items-center justify-center">
- <span className="bg-foreground/85 text-background rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wide shadow-md">
- {isCompleted ? "Garde terminée" : "Gardiennage attribué"}
- </span>
- </span>
- )}
+  {(isAssigned || isCompleted || isPast) && (
+  <span className="absolute inset-0 flex items-center justify-center">
+  <span className="bg-foreground/85 text-background rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wide shadow-md">
+  {isPast || isCompleted ? "Annonce passée" : "Gardiennage attribué"}
+  </span>
+  </span>
+  )}
  {!isInactive && !isDemo && item.owner?.identity_verified && (
  <span className="absolute top-3 left-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 text-xs text-primary font-medium">
  <ShieldCheck className="h-3 w-3" /> Vérifié
@@ -1122,11 +1130,16 @@ const SearchSitter = () => {
  Cette garde a déjà trouvé son gardien.
  </p>
  )}
- {isCompleted && (
- <p className="text-xs text-muted-foreground italic mt-3">
- Garde déjà réalisée — pour donner un aperçu de l'activité.
- </p>
- )}
+  {isCompleted && (
+  <p className="text-xs text-muted-foreground italic mt-3">
+  Garde déjà réalisée — pour donner un aperçu de l'activité.
+  </p>
+  )}
+  {isPast && !isCompleted && (
+  <p className="text-xs text-muted-foreground italic mt-3">
+  Annonce passée — consultable à titre d'historique.
+  </p>
+  )}
  {isDemo && (
  <p className="text-xs text-amber-700 italic mt-3 flex items-center gap-1">
  <Sparkles className="h-3 w-3" /> Exemple — cliquez pour découvrir l'expérience complète

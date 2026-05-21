@@ -34,7 +34,7 @@ const createPinIcon = (kind: PinKind, isActive: boolean) => {
 
 const getPinKind = (item: any): PinKind => {
   if (item?.is_demo) return "demo";
-  if (item?.isAssigned || item?.isCompleted) return "inactive";
+  if (item?.isAssigned || item?.isCompleted || item?.isPast) return "inactive";
   return "active";
 };
 
@@ -106,7 +106,7 @@ const SearchMapView = ({
     : [46.6, 2.5];
 
   const visibleResults = results.filter(
-    (item) => showAll || (!item?.is_demo && !item?.isAssigned && !item?.isCompleted)
+    (item) => showAll || (!item?.is_demo && !item?.isAssigned && !item?.isCompleted && !item?.isPast)
   );
   const visibleCoords = visibleResults
     .map((item) => getCoords(item))
@@ -145,7 +145,7 @@ const SearchMapView = ({
             maxZoom={19}
           />
           {results
-            .filter((item) => showAll || (!item?.is_demo && !item?.isAssigned && !item?.isCompleted))
+            .filter((item) => showAll || (!item?.is_demo && !item?.isAssigned && !item?.isCompleted && !item?.isPast))
             .map((item) => {
               const coords = getCoords(item);
               if (!coords) return null;
