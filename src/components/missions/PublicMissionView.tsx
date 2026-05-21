@@ -19,6 +19,8 @@ interface MissionLike {
   description?: string | null;
   city?: string | null;
   postal_code?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   category: string;
   status: string;
   created_at: string;
