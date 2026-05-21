@@ -6,6 +6,7 @@ import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { Button } from "@/components/ui/button";
 import SearchSeoIntro from "@/components/search/SearchSeoIntro";
 import SearchSeoFooter, { SEARCH_FAQ } from "@/components/search/SearchSeoFooter";
+import SearchHowItWorksAnon from "@/components/search/SearchHowItWorksAnon";
 
 const SearchSitter = lazyWithRetry(
   () => import("@/components/search/SearchSitter"),
