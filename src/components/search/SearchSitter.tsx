@@ -46,6 +46,7 @@ import DatesPickerPopover from "@/components/search/header/DatesPickerPopover";
 import AnimalsPickerPopover from "@/components/search/header/AnimalsPickerPopover";
 import { useEmptyStateBreakdown } from "@/hooks/search/useEmptyStateBreakdown";
 import { useSearchAlert } from "@/hooks/search/useSearchAlert";
+import { useSearchUserProfile } from "@/hooks/search/useSearchUserProfile";
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Animaux de ferme", "NAC"];
 const animalChipToSpecies: Record<string, string> = {
