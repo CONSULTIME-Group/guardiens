@@ -453,15 +453,15 @@ const EmergencySitter = () => {
         </div>
       </section>
 
-      {/* Footer CTA — integrated into PublicFooter area */}
+      {/* Footer CTA */}
       <section className="py-8 text-center border-t border-border">
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <Link to="/inscription?role=owner">
-            <Button size="sm">Trouver un gardien d'urgence</Button>
+            <Button size="sm">S'inscrire — lancement prochain</Button>
           </Link>
-          <Link to="/dashboard">
-            <Button size="sm" variant="outline">Voir mon éligibilité</Button>
-          </Link>
+          <Button size="sm" variant="outline" disabled>
+            Voir mon éligibilité (à venir)
+          </Button>
           <Link to="/faq#gardien-d-urgence" className="text-sm text-primary hover:underline">FAQ complète</Link>
         </div>
       </section>
