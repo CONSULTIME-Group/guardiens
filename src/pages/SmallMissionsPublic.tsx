@@ -82,9 +82,34 @@ const FAQ_ITEMS = MISSIONS_FAQ;
 interface OpenMissionRow {
   id: string;
   title: string;
+  description: string | null;
   category: string;
   city: string | null;
   created_at: string;
+  date_needed: string | null;
+  duration_estimate: string | null;
+  exchange_offer: string | null;
+}
+
+/* Date relative en français, court */
+function timeAgoFr(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "à l'instant";
+  if (m < 60) return `il y a ${m} min`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `il y a ${h} h`;
+  const d = Math.floor(h / 24);
+  if (d < 7) return `il y a ${d} j`;
+  const w = Math.floor(d / 7);
+  if (w < 5) return `il y a ${w} sem`;
+  return new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+}
+
+function formatDateNeeded(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return d.toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "long" });
 }
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -128,13 +153,13 @@ const SmallMissionsPublic = () => {
   useEffect(() => {
     const loadOpen = async () => {
       try {
-        const { data } = await supabase
-          .from("small_missions")
-          .select("id, title, category, city, created_at")
-          .eq("status", "open")
-          .order("created_at", { ascending: false })
-          .limit(6);
-        if (data) setOpenMissions(data as OpenMissionRow[]);
+         const { data } = await supabase
+           .from("small_missions")
+           .select("id, title, description, category, city, created_at, date_needed, duration_estimate, exchange_offer")
+           .eq("status", "open")
+           .order("created_at", { ascending: false })
+           .limit(6);
+         if (data) setOpenMissions(data as OpenMissionRow[]);
       } catch (err) {
         console.warn("small_missions unavailable:", err);
       }
@@ -153,7 +178,7 @@ const SmallMissionsPublic = () => {
  <>
  <PageMeta
  title="Petites missions d'entraide locale — Guardiens"
- description="Échangez des coups de main entre gens du coin. Jardinage, animaux, bricolage — sans argent. À 0 € pour tous."
+ description="Échangez des coups de main entre gens du coin. Jardinage, animaux, bricolage — sans argent. Gratuit pour tous."
  />
 
  <div className="min-h-screen bg-background font-body">
@@ -197,7 +222,7 @@ const SmallMissionsPublic = () => {
  </Button>
  </div>
   <p className="text-xs text-foreground/50 mt-4">
- À 0 € pour tous. Aucun engagement, aucun jugement.
+ Gratuit pour tous. Aucun engagement, aucun jugement.
  </p>
  </Reveal>
 
@@ -584,26 +609,76 @@ const SmallMissionsPublic = () => {
             Des missions ouvertes en ce moment
           </h2>
         </Reveal>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {openMissions.map((m, i) => (
-            <Reveal key={m.id} delay={0.04 * i}>
-              <Link
-                to={`/petites-missions/${m.id}`}
-                className="block h-full p-5 rounded-2xl border border-border bg-card hover:border-primary/40 hover:-translate-y-0.5 transition-all"
-              >
-                <p className="text-[11px] font-body font-semibold tracking-widest uppercase text-primary/70 mb-3">
-                  {CATEGORY_LABEL[m.category] || "Mission"}
-                </p>
-                <h3 className="font-heading text-base md:text-lg font-semibold text-foreground leading-snug mb-2 line-clamp-2">
-                  {m.title}
-                </h3>
-                <p className="text-xs text-foreground/55">
-                  {m.city || "France"}
-                </p>
-              </Link>
-            </Reveal>
-          ))}
-        </div>
+        {(() => {
+          const count = openMissions.length;
+          const gridCls =
+            count === 1
+              ? "grid grid-cols-1 md:grid-cols-2 gap-5 max-w-3xl mx-auto"
+              : count === 2
+              ? "grid grid-cols-1 md:grid-cols-2 gap-5 max-w-4xl mx-auto"
+              : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5";
+          return (
+            <div className={gridCls}>
+              {openMissions.map((m, i) => {
+                const dateNeeded = formatDateNeeded(m.date_needed);
+                const isFeatured = count === 1;
+                return (
+                  <Reveal key={m.id} delay={0.04 * i}>
+                    <Link
+                      to={`/petites-missions/${m.id}`}
+                      className="group relative flex h-full flex-col p-6 md:p-7 rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5 transition-all"
+                    >
+                      <div className="flex items-center justify-between gap-3 mb-3">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-body font-semibold tracking-wide">
+                          {CATEGORY_LABEL[m.category] || "Mission"}
+                        </span>
+                        <span className="text-[11px] text-foreground/50">{timeAgoFr(m.created_at)}</span>
+                      </div>
+                      <h3 className={`font-heading font-semibold text-foreground leading-snug mb-2 line-clamp-2 ${isFeatured ? "text-xl md:text-2xl" : "text-base md:text-lg"}`}>
+                        {m.title}
+                      </h3>
+                      {m.description && (
+                        <p className={`font-body text-sm text-foreground/70 leading-relaxed mb-4 ${isFeatured ? "line-clamp-3" : "line-clamp-2"}`}>
+                          {m.description}
+                        </p>
+                      )}
+                      <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-foreground/60">
+                        <span className="font-medium text-foreground/75">{m.city || "France"}</span>
+                        {dateNeeded && <span aria-hidden>·</span>}
+                        {dateNeeded && <span>{dateNeeded}</span>}
+                        {m.duration_estimate && <span aria-hidden>·</span>}
+                        {m.duration_estimate && <span>{m.duration_estimate}</span>}
+                      </div>
+                      <span className="mt-4 inline-flex items-center text-xs font-semibold text-primary group-hover:underline">
+                        Voir la mission →
+                      </span>
+                    </Link>
+                  </Reveal>
+                );
+              })}
+
+              {count < 3 && (
+                <Reveal delay={0.04 * count}>
+                  <button
+                    type="button"
+                    onClick={goToCreate}
+                    className="group flex h-full w-full flex-col items-center justify-center text-center p-6 md:p-7 rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 hover:border-primary/60 transition-colors"
+                  >
+                    <span className="font-heading text-lg md:text-xl font-semibold text-foreground mb-2">
+                      Votre demande pourrait être ici.
+                    </span>
+                    <span className="font-body text-sm text-foreground/70 mb-4 max-w-xs">
+                      Publiez un coup de main en deux minutes — gratuit, sans engagement.
+                    </span>
+                    <span className="inline-flex items-center text-sm font-semibold text-primary group-hover:underline">
+                      Publier une mission →
+                    </span>
+                  </button>
+                </Reveal>
+              )}
+            </div>
+          );
+        })()}
         <Reveal delay={0.3}>
           <div className="text-center mt-10">
             <Button onClick={goToHelp} variant="outline" className="border-2 border-primary text-primary rounded-full px-8 py-3 h-auto text-sm font-semibold">
@@ -670,7 +745,7 @@ const SmallMissionsPublic = () => {
           Faire venir un professionnel pour arroser des plantes, déplacer un meuble ou promener un chien revient souvent à 25-40 € par intervention. Sur une saison, le calcul devient déraisonnable pour des gestes qui prennent quinze minutes à une personne du coin. La transaction monétaire transforme un service simple en prestation, avec ce qu'elle implique de cadre, de TVA, et de distance émotionnelle.
         </p>
         <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed mb-6">
-          L'entraide à 0 € réintroduit la souplesse. Une heure aujourd'hui, un panier de légumes la semaine prochaine. Un coup de main pour un déménagement, un dîner partagé en retour. Personne ne tient les comptes — et c'est précisément ce qui rend l'échange durable.
+          L'entraide gratuite réintroduit la souplesse. Une heure aujourd'hui, un panier de légumes la semaine prochaine. Un coup de main pour un déménagement, un dîner partagé en retour. Personne ne tient les comptes — et c'est précisément ce qui rend l'échange durable.
         </p>
       </Reveal>
 
@@ -776,7 +851,7 @@ const SmallMissionsPublic = () => {
  </Reveal>
  <Reveal delay={0.1}>
  <p className="font-body text-lg text-primary-foreground/85 leading-relaxed mb-10">
- Le pire qui puisse arriver, c'est que personne ne réponde. Le meilleur, c'est de rencontrer quelqu'un qui change votre semaine. À 0 €. Pour tous. Sans abonnement requis.
+ Le pire qui puisse arriver, c'est que personne ne réponde. Le meilleur, c'est de rencontrer quelqu'un qui change votre semaine. Gratuit. Pour tous. Sans abonnement requis.
  </p>
  </Reveal>
  <Reveal delay={0.2}>
@@ -789,7 +864,7 @@ const SmallMissionsPublic = () => {
  </Button>
  </div>
  <p className="text-xs text-primary-foreground/70 mt-6">
- À 0 € · Badge Fondateur · Accès jusqu'au 14 juillet
+ Gratuit · Badge Fondateur · Accès jusqu'au 14 juillet
  </p>
  </Reveal>
  </div>
@@ -842,7 +917,7 @@ const SmallMissionsPublic = () => {
      "@type": "Offer",
      price: "0",
      priceCurrency: "EUR",
-     description: "Service entièrement à 0 € pour tous, sans abonnement requis. Aucune transaction financière entre membres.",
+     description: "Service entièrement gratuit pour tous, sans abonnement requis. Aucune transaction financière entre membres.",
     },
    })}</script>
    <script type="application/ld+json">{JSON.stringify({
@@ -858,7 +933,7 @@ const SmallMissionsPublic = () => {
     "@context": "https://schema.org",
     "@type": "HowTo",
     name: "Publier une demande de coup de main près de chez vous",
-    description: "Comment publier une petite mission d'entraide à 0 € sur Guardiens, sans abonnement.",
+    description: "Comment publier une petite mission d'entraide gratuite sur Guardiens, sans abonnement.",
     totalTime: "PT3M",
     step: [
      { "@type": "HowToStep", position: 1, name: "Décrire la mission", text: "Vous décrivez la mission — tonte, bricolage, promener le chien, réceptionner un colis." },
