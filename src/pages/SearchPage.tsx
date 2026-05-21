@@ -81,18 +81,24 @@ const SearchPage = () => {
       {/* H1 + intro éditoriale (rendus pour tous, garantit le H1 unique au crawler) */}
       <SearchSeoIntro />
 
-      {/* Bandeau visiteur — discret, non sticky pour ne pas manger le viewport mobile */}
+      {/* Bandeau visiteur — discret, non sticky pour préserver le viewport mobile.
+          Hiérarchie : libellé "Consultation libre" + bénéfice clair + CTA primaire. */}
       {!user && (
         <div className="bg-primary/5 border-b border-primary/20">
-          <div className="container max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-sm">
-            <p className="text-foreground">
-              Consultation libre. Inscrivez-vous pour postuler, contacter les propriétaires et sauvegarder vos favoris.
-            </p>
-            <div className="flex gap-2">
-              <Button asChild size="sm">
+          <div className="container max-w-6xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-sm">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="inline-flex items-center rounded-full bg-primary/15 text-primary px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide shrink-0">
+                Consultation libre
+              </span>
+              <p className="text-foreground/90 truncate">
+                Inscrivez-vous pour postuler, échanger et sauvegarder vos favoris.
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Button asChild size="sm" className="h-8">
                 <Link to="/inscription">Inscription gratuite</Link>
               </Button>
-              <Button asChild size="sm" variant="ghost">
+              <Button asChild size="sm" variant="ghost" className="h-8">
                 <Link to="/login">Se connecter</Link>
               </Button>
             </div>
