@@ -501,15 +501,18 @@ const SmallMissions = () => {
               setCategoryFilter={setCategoryFilter}
             />
 
-            {/* ═══ Section 1 — Demandes visibles ═══ */}
-            <h2 className="text-base font-semibold text-foreground mb-2 flex items-center gap-2">
-              {mode === "offer" ? "Demandes à aider" : "Demandes publiées près de chez vous"}
+            {/* ═══ Section 1 — Demandes visibles (HERO) ═══ */}
+            <div className="flex items-center gap-3 mb-2">
+              <span className="h-8 w-1.5 rounded-full bg-primary" aria-hidden />
+              <h2 className="text-xl md:text-2xl font-heading font-bold text-foreground leading-tight">
+                {mode === "offer" ? "Demandes à aider" : "Demandes publiées près de chez vous"}
+              </h2>
               {missionCount > 0 && (
-                <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                <span className="text-xs font-semibold bg-primary/10 text-primary px-2.5 py-1 rounded-full">
                   {missionCount} demande{missionCount > 1 ? "s" : ""}
                 </span>
               )}
-            </h2>
+            </div>
             {missionCount > 0 && (
               <label className="flex items-center gap-2 mb-4 text-xs text-muted-foreground cursor-pointer select-none">
                 <Switch
