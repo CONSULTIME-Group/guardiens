@@ -1539,6 +1539,17 @@ const SearchSitter = () => {
  const skills: string[] = member.skill_categories || [];
  const visibleSkills = skills.slice(0, 2);
  const extraCount = skills.length - 2;
+  const seenSpecialSkills = new Set<string>();
+  const specialSkills = [
+    ...(member.specialty_label ? [member.specialty_label] : []),
+    ...tokenizeSkillPhrases(member.custom_skills || []),
+    ...tokenizeSkillPhrases(member.competences || []),
+  ].filter((label: string) => {
+    const key = normalizeSkillKey(label);
+    if (!key || seenSpecialSkills.has(key)) return false;
+    seenSpecialSkills.add(key);
+    return true;
+  });
  return (
  <div key={member.id} className={`bg-card rounded-2xl border p-4 flex items-center gap-4 ${member.is_demo ? "border-amber-300/70 border-dashed" : "border-border"}`}>
  {member.avatar_url ? (
@@ -1576,6 +1587,16 @@ const SearchSitter = () => {
  })}
  {extraCount > 0 && <span className="text-xs text-muted-foreground self-center">+{extraCount}</span>}
  </div>
+  {specialSkills.length > 0 && (
+  <div className="flex flex-wrap gap-1.5 mt-1.5">
+  {specialSkills.slice(0, 3).map((skill: string) => (
+  <span key={skill} className="rounded-full border border-accent bg-accent/50 text-accent-foreground text-xs px-2.5 py-0.5">
+  {skill}
+  </span>
+  ))}
+  {specialSkills.length > 3 && <span className="text-xs text-muted-foreground self-center">+{specialSkills.length - 3}</span>}
+  </div>
+  )}
  {(member.avgRating || member.sitsCount > 0) && (
  <p className="text-xs text-muted-foreground mt-1">
  {member.avgRating && <>★ {member.avgRating}</>}
