@@ -17,7 +17,7 @@ const SearchOwner = lazyWithRetry(
   "SearchOwner",
 );
 
-const CANONICAL = "https://guardiens.fr/recherche";
+const CANONICAL = "https://guardiens.fr/annonces";
 const TITLE = "Annonces de garde d'animaux à domicile en France · Guardiens";
 const DESCRIPTION =
   "Découvrez toutes les annonces de garde de chats, chiens et NAC à domicile, partout en France. Consultation libre, inscription gratuite pour postuler.";
