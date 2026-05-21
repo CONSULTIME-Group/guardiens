@@ -13,6 +13,7 @@ const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
 import SearchListingCard from "@/components/search/listing/SearchListingCard";
 import { DEMO_SITS, DEMO_MISSIONS, DEMO_MEMBERS, interleaveDemos, auditInterleave } from "@/data/demoListings";
 import { normalize } from "@/lib/normalize";
+import { normalizeSkillKey, tokenizeSkillPhrases } from "@/lib/skills/tokenize";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -47,8 +48,6 @@ import AnimalsPickerPopover from "@/components/search/header/AnimalsPickerPopove
 import { useEmptyStateBreakdown } from "@/hooks/search/useEmptyStateBreakdown";
 import { useSearchAlert } from "@/hooks/search/useSearchAlert";
 import { useSearchUserProfile } from "@/hooks/search/useSearchUserProfile";
-import { normalizeSkillKey, tokenizeSkillPhrases } from "@/lib/skills/tokenize";
-
 const animalChips = ["Chiens", "Chats", "Chevaux", "Animaux de ferme", "NAC"];
 const animalChipToSpecies: Record<string, string> = {
  Chiens: "dog", Chats: "cat", Chevaux: "horse",
@@ -756,7 +755,7 @@ const SearchSitter = () => {
  const searchAvailableMembers = async (searchCoords: { lat: number; lng: number } | null) => {
  const { data } = await supabase
 .from("public_profiles")
-.select("id, first_name, avatar_url, city, bio, skill_categories, available_for_help, is_founder")
+.select("id, first_name, avatar_url, city, bio, skill_categories, custom_skills, available_for_help, is_founder")
 .eq("available_for_help", true)
 .not("skill_categories", "eq", "{}");
  let items = (data || []).filter((m: any) => m.id !== user?.id);
