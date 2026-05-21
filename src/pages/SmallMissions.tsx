@@ -260,19 +260,12 @@ const SmallMissions = () => {
   const missionCoords = useEntityCoords(allMissions as any[], { useDbCoords: true });
   const helperCoords = useEntityCoords(availableHelpers as any[], { useDbCoords: true });
 
-  const filteredMissions = useMemo(() => {
+  const filteredMissionsWithZone = useMemo(() => {
     return (allMissions || [])
       .filter((m: any) => {
         if (categoryFilter === "mine") return m.user_id === user?.id;
         if (m.status === "completed" || m.status === "cancelled") return false;
         if (categoryFilter !== "all" && m.category !== categoryFilter) return false;
-        if (originCoords && radiusKm > 0) {
-          const mc = missionCoords.get(m.id);
-          if (mc) {
-            const dist = haversineDistance(originCoords.lat, originCoords.lng, mc.lat, mc.lng);
-            if (dist > radiusKm) return false;
-          }
-        }
         if (normalizedSearch) {
           const titleMatch = m.title?.toLowerCase().includes(normalizedSearch);
           const descMatch = m.description?.toLowerCase().includes(normalizedSearch);
@@ -280,6 +273,18 @@ const SmallMissions = () => {
           if (!titleMatch && !descMatch && !exchangeMatch) return false;
         }
         return true;
+      })
+      .map((m: any) => {
+        let distance: number | null = null;
+        let outOfZone = false;
+        if (originCoords) {
+          const mc = missionCoords.get(m.id);
+          if (mc) {
+            distance = haversineDistance(originCoords.lat, originCoords.lng, mc.lat, mc.lng);
+            if (radiusKm > 0 && distance > radiusKm) outOfZone = true;
+          }
+        }
+        return { ...m, _distance: distance, _outOfZone: outOfZone };
       })
       .sort((a: any, b: any) => {
         const order: Record<string, number> = { open: 0, in_progress: 1, completed: 2 };
@@ -294,6 +299,17 @@ const SmallMissions = () => {
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       });
   }, [allMissions, categoryFilter, user?.id, originCoords, radiusKm, missionCoords, mySkills, normalizedSearch]);
+
+  const filteredMissions = useMemo(
+    () => filteredMissionsWithZone.filter((m: any) => !m._outOfZone),
+    [filteredMissionsWithZone],
+  );
+  const outOfZoneMissions = useMemo(
+    () => filteredMissionsWithZone
+      .filter((m: any) => m._outOfZone)
+      .sort((a: any, b: any) => (a._distance ?? 9999) - (b._distance ?? 9999)),
+    [filteredMissionsWithZone],
+  );
 
   const filteredHelpers = useMemo(() => {
     return (availableHelpers || []).filter((h: any) => {
