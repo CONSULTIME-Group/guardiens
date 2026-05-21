@@ -198,6 +198,7 @@ const SmallMissionDetail = () => {
   const [feedbackSent, setFeedbackSent] = useState<Record<string, boolean>>({});
   // Received feedbacks
   const [receivedFeedbacks, setReceivedFeedbacks] = useState<any[]>([]);
+  const [relatedMissions, setRelatedMissions] = useState<any[]>([]);
 
   // Current user's response
   const myResponse = responses.find(r => r.responder_id === user?.id);
