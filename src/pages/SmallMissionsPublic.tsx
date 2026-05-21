@@ -307,6 +307,16 @@ const SmallMissionsPublic = () => {
                   ? DURATION_LABEL[m.duration_estimate] || null
                   : null;
                 const isFeatured = count === 1;
+                const shareMission = async (e: React.MouseEvent) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const url = `${window.location.origin}/petites-missions/${m.id}`;
+                  const shareData = { title: `Coup de main : ${m.title}`, text: m.description?.slice(0, 140) || "", url };
+                  if (typeof navigator !== "undefined" && (navigator as any).share) {
+                    try { await (navigator as any).share(shareData); return; } catch { /* fallback */ }
+                  }
+                  try { await navigator.clipboard.writeText(url); } catch { /* noop */ }
+                };
                 return (
                   <Reveal key={m.id} delay={0.04 * i}>
                     <Link
@@ -317,7 +327,18 @@ const SmallMissionsPublic = () => {
                         <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-body font-semibold tracking-wide">
                           {CATEGORY_LABEL[m.category] || "Mission"}
                         </span>
-                        <span className="text-[11px] text-foreground/50">{timeAgoFr(m.created_at)}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] text-foreground/50">{timeAgoFr(m.created_at)}</span>
+                          <button
+                            type="button"
+                            onClick={shareMission}
+                            aria-label="Partager cette mission"
+                            title="Partager"
+                            className="inline-flex h-7 w-7 items-center justify-center rounded-full text-foreground/50 hover:text-primary hover:bg-primary/10 transition-colors"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                          </button>
+                        </div>
                       </div>
                       <h3 className={`font-heading font-semibold text-foreground leading-snug mb-2 line-clamp-2 ${isFeatured ? "text-xl md:text-2xl" : "text-base md:text-lg"}`}>
                         {m.title}
