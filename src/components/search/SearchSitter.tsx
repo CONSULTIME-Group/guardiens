@@ -726,13 +726,20 @@ const SearchSitter = () => {
     ownerGalleryFirstPhoto: galleryFirstMap.get(s.user_id) || null,
   }));
   }
-  // Mark assigned/past sits (will be rendered greyed-out, non-clickable)
-  items = items.map((s: any) => ({
-...s,
-  isAssigned: s.status === "confirmed" || s.status === "in_progress",
-  isCompleted: s.status === "completed",
-  isPast: s.status === "expired" || s.status === "cancelled",
-  }));
+  // Mark assigned/past sits (will be rendered greyed-out, non-clickable).
+  // « expired » est calculé côté client : statut « published » avec end_date passée.
+  const todayIso = new Date().toISOString().slice(0, 10);
+  items = items.map((s: any) => {
+    const isCompleted = s.status === "completed";
+    const isCancelled = s.status === "cancelled";
+    const isExpired = s.status === "published" && s.end_date && s.end_date < todayIso;
+    return {
+      ...s,
+      isAssigned: s.status === "confirmed" || s.status === "in_progress",
+      isCompleted,
+      isPast: isExpired || isCancelled,
+    };
+  });
  if (housingType !== "all") items = items.filter((s: any) => s.property?.type === housingType);
  if (withPhotosOnly) items = items.filter((s: any) => s.property?.photos?.length > 0);
  if (duration !== "all") {
