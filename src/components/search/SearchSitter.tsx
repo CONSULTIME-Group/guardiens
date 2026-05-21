@@ -979,7 +979,7 @@ const SearchSitter = () => {
 
  // Compteur "annonces disponibles" : on EXCLUT les démos, les attribuées et les terminées
  // pour ne pas surévaluer l'offre réelle.
- const availableSitsCount = results.filter((r: any) => !r.isAssigned && !r.isCompleted && !r.is_demo).length;
+ const availableSitsCount = results.filter((r: any) => !r.isAssigned && !r.isCompleted && !r.isPast && !r.is_demo).length;
  const demoCount = results.filter((r: any) => r.is_demo).length;
  const resultCount = tab === "missions" && missionSubTab === "members" ? availableMembers.length : availableSitsCount;
  const countLabel = tab === "missions" && missionSubTab === "members"
