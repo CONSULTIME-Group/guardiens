@@ -368,6 +368,7 @@ const SmallMissionsPublic = () => {
                       <span className="mt-4 inline-flex items-center text-xs font-semibold text-primary group-hover:underline">
                         Voir la mission →
                       </span>
+                      </div>
                     </Link>
                   </Reveal>
                 );
