@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 import PageMeta from "@/components/PageMeta";
 import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
+import LiveListingsSection from "@/components/landing/LiveListingsSection";
 import RealMembersStrip from "@/components/landing/RealMembersStrip";
 import PublicHeader from "@/components/layout/PublicHeader";
 import FreePeriodBanner from "@/components/marketing/FreePeriodBanner";
@@ -1002,9 +1003,14 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 5 — VITRINE DÉMO (transition entraide → garde) ═══════════════ */}
+      {/* ═══════════════ SECTION 5 — ANNONCES EN COURS (live) ═══════════════ */}
       <RevealSection>
-        <p className="sr-only">Et côté garde, voici à quoi ressemble une annonce.</p>
+        <LiveListingsSection />
+      </RevealSection>
+
+      {/* ═══════════════ SECTION 5bis — VITRINE DÉMO (anatomie d'une annonce) ═══════════════ */}
+      <RevealSection>
+        <p className="sr-only">Et voici l'anatomie détaillée d'une annonce.</p>
         <DemoListingShowcase />
       </RevealSection>
 
