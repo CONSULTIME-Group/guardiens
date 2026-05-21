@@ -318,11 +318,13 @@ const AppRoutes = () => (
       </Route>
       {/* App routes */}
       <Route path="/dashboard" element={<DashboardRouteShell />} />
+      {/* /search est public (consultable sans connexion) */}
+      <Route path="/search" element={<AppLayout><SearchPage /></AppLayout>} />
+      <Route path="/recherche" element={<AppLayout><SearchPage /></AppLayout>} />
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route path="/profile" element={<Profile />} />
-        <Route path="/search" element={<SearchPage />} />
-        <Route path="/recherche" element={<SearchPage />} />
         <Route path="/recherche-gardiens" element={<SearchOwner />} />
+
         <Route path="/messages" element={<Messages />} />
         <Route path="/sits" element={<Sits />} />
         <Route path="/sits/create" element={<CreateSit />} />
