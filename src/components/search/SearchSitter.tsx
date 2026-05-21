@@ -1193,7 +1193,9 @@ const SearchSitter = () => {
  };
 
  // ─── Render ───
- const isSitterLocked = !hasAccess && tab === "sits";
+  // Visiteurs non connectés : annonces visibles (consultation libre pour conversion).
+  // Sitters connectés sans abo : overlay premium maintenu.
+  const isSitterLocked = !!user && !hasAccess && tab === "sits";
 
  return (
  <div className="animate-fade-in relative">
