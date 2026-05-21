@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/dialog";
 import ReportButton from "@/components/reports/ReportButton";
 import PageMeta from "@/components/PageMeta";
+import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
+import { Helmet } from "react-helmet-async";
 const entraideHeader = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/entraide-header.webp";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
@@ -44,6 +46,37 @@ const DURATION_LABELS: Record<string, string> = {
   weekend: "Week-end",
   week: "Semaine",
 };
+
+/** Titlecase pour ville saisie en MAJUSCULES (ex: VERGONS → Vergons, AIX-EN-PROVENCE → Aix-en-Provence). */
+function titlecaseCity(s?: string | null): string {
+  if (!s) return "";
+  const small = new Set(["de", "du", "des", "le", "la", "les", "et", "en", "sur", "sous", "lès", "aux"]);
+  return s.toLowerCase().split(/(\s|-)/).map((part, i) => {
+    if (part === " " || part === "-") return part;
+    if (i > 0 && small.has(part)) return part;
+    return part.charAt(0).toUpperCase() + part.slice(1);
+  }).join("");
+}
+
+function timeAgoFr(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "à l'instant";
+  if (m < 60) return `il y a ${m} min`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `il y a ${h} h`;
+  const d = Math.floor(h / 24);
+  if (d < 7) return `il y a ${d} j`;
+  const w = Math.floor(d / 7);
+  if (w < 5) return `il y a ${w} sem`;
+  return new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+}
+
+function memberSince(iso?: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return `Membre depuis ${d.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}`;
+}
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
   open: { label: "Ouverte", className: "bg-success-soft text-success" },
@@ -167,6 +200,7 @@ const SmallMissionDetail = () => {
   const [feedbackSent, setFeedbackSent] = useState<Record<string, boolean>>({});
   // Received feedbacks
   const [receivedFeedbacks, setReceivedFeedbacks] = useState<any[]>([]);
+  const [relatedMissions, setRelatedMissions] = useState<any[]>([]);
 
   // Current user's response
   const myResponse = responses.find(r => r.responder_id === user?.id);
@@ -179,10 +213,20 @@ const SmallMissionDetail = () => {
     if (!m) { setLoading(false); return; }
     setMission(m);
 
-    const { data: profile } = await supabase.from("profiles")
-      .select("first_name, last_name, avatar_url, city, postal_code, identity_verified")
-      .eq("id", m.user_id).single();
-    setAuthor(profile);
+    // RPC publique: renvoie les champs auteur sûrs même pour les non-connectés
+    const { data: authorRows } = await supabase.rpc("get_mission_author_public", { _mission_id: m.id });
+    const authorRow: any = Array.isArray(authorRows) ? authorRows[0] : authorRows;
+    setAuthor(authorRow ? { ...authorRow, created_at: authorRow.member_since } : null);
+
+    // Related missions — même catégorie ou même ville, statut ouvert, 3 max
+    const { data: related } = await supabase.from("small_missions")
+      .select("id, title, description, category, city, postal_code, created_at, duration_estimate")
+      .eq("status", "open")
+      .neq("id", m.id)
+      .or(`category.eq.${m.category},city.eq.${m.city}`)
+      .order("created_at", { ascending: false })
+      .limit(3);
+    setRelatedMissions(related || []);
 
     const { data: resps } = await supabase.from("small_mission_responses")
       .select("*, responder:profiles!small_mission_responses_responder_id_fkey(first_name, avatar_url)")
@@ -517,6 +561,20 @@ const SmallMissionDetail = () => {
         </div>
         <div className="relative max-w-3xl mx-auto px-6 py-10">
           <PageMeta title={`${mission.title} — Coup de main près de chez vous | Guardiens`} description={mission.description?.slice(0, 155)} />
+          {/* JSON-LD Service + BreadcrumbList */}
+          <Helmet>
+            <script type="application/ld+json">{JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Service",
+              name: mission.title,
+              description: mission.description?.slice(0, 300),
+              areaServed: titlecaseCity(mission.city) || "France",
+              serviceType: catMeta.label,
+              provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
+              offers: { "@type": "Offer", price: "0", priceCurrency: "EUR", availability: mission.status === "open" ? "https://schema.org/InStock" : "https://schema.org/OutOfStock" },
+              datePosted: mission.created_at,
+            })}</script>
+          </Helmet>
           <div className="flex items-center justify-between gap-3 mb-4">
             <Link to="/petites-missions" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
               <ArrowLeft className="h-4 w-4" /> Retour aux missions
@@ -532,10 +590,14 @@ const SmallMissionDetail = () => {
             </Button>
           </div>
           <h1 className="font-heading text-2xl md:text-3xl font-bold">{mission.title}</h1>
+          <p className="text-sm text-foreground/70 mt-2">Coup de main publié {timeAgoFr(mission.created_at)}{mission.city ? ` · ${titlecaseCity(mission.city)}` : ""}</p>
         </div>
       </div>
 
       <div className="p-6 md:p-10 max-w-3xl mx-auto">
+        <div className="mb-4 -mt-2">
+          <PageBreadcrumb items={[{ label: "Coups de main", href: "/petites-missions" }, { label: mission.title }]} />
+        </div>
         {showPublishedBanner && (
           <MissionPublishedBanner
             missionTitle={mission.title}
@@ -556,14 +618,42 @@ const SmallMissionDetail = () => {
         {/* Meta */}
         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-6">
           {(mission.city || mission.postal_code) && (
-            <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" />{[mission.postal_code, mission.city].filter(Boolean).join(" ")}</span>
+            <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" />{[mission.postal_code, titlecaseCity(mission.city)].filter(Boolean).join(" ")}</span>
           )}
           {mission.date_needed && (
             <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" />{format(new Date(mission.date_needed), "d MMMM yyyy", { locale: fr })}</span>
           )}
-          <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" />{DURATION_LABELS[mission.duration_estimate] || mission.duration_estimate}</span>
-          <span className="flex items-center gap-1.5"><Users className="h-4 w-4" />{responses.length} proposition{responses.length > 1 ? "s" : ""}</span>
+          {mission.duration_estimate && (
+            <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" />{DURATION_LABELS[mission.duration_estimate] || mission.duration_estimate}</span>
+          )}
+          {responses.length > 0 && (
+            <span className="flex items-center gap-1.5"><Users className="h-4 w-4" />{responses.length} proposition{responses.length > 1 ? "s" : ""}</span>
+          )}
         </div>
+
+        {/* Author card — en haut pour mise en confiance immédiate */}
+        {author && (
+          <div className="flex items-center gap-3 mb-6 p-4 bg-card rounded-xl border border-border">
+            {author.avatar_url ? (
+              <img src={author.avatar_url} alt={author.first_name} className="w-12 h-12 rounded-full object-cover" />
+            ) : (
+              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center font-heading text-lg font-bold">
+                {author.first_name?.charAt(0) || "?"}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm">
+                Publié par {author.first_name || "un membre"}
+                {author.identity_verified && <span className="ml-2 inline-flex items-center gap-1 text-xs text-success"><CheckCircle2 className="h-3 w-3" /> Identité vérifiée</span>}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {titlecaseCity(author.city) || titlecaseCity(mission.city) || "France"}
+                {memberSince(author.created_at) && <> · {memberSince(author.created_at)}</>}
+              </p>
+            </div>
+            {user && !isAuthor && <ReportButton targetId={mission.id} targetType="profile" />}
+          </div>
+        )}
 
         {/* ── BANNERS ── */}
 
@@ -637,23 +727,9 @@ const SmallMissionDetail = () => {
           <p className="text-sm text-muted-foreground">{mission.exchange_offer}</p>
         </div>
 
-        {/* Author card */}
-        {author && (
-          <div className="flex items-center gap-3 mb-8 p-4 bg-card rounded-xl border border-border">
-            {author.avatar_url ? (
-              <img src={author.avatar_url} alt={author.first_name} className="w-12 h-12 rounded-full object-cover" />
-            ) : (
-              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center font-heading text-lg font-bold">
-                {author.first_name?.charAt(0) || "?"}
-              </div>
-            )}
-            <div className="flex-1">
-              <p className="font-medium">{author.first_name}</p>
-              <p className="text-xs text-muted-foreground">{[author.postal_code, author.city].filter(Boolean).join(" ")}</p>
-            </div>
-            {user && !isAuthor && <ReportButton targetId={mission.id} targetType="profile" />}
-          </div>
-        )}
+        {/* Author card déplacé en haut — bloc supprimé pour éviter doublon */}
+
+
 
         {/* ══════════════════════════════════════════════════════ */}
         {/* ── PUBLISHER VIEW ── */}
@@ -900,12 +976,46 @@ const SmallMissionDetail = () => {
         {/* Not logged in */}
         {!user && (
           <div className="text-center py-8 border-t border-border mt-8">
-            <p className="text-muted-foreground mb-3">Inscrivez-vous gratuitement pour proposer votre aide.</p>
+            <p className="text-muted-foreground mb-3">Inscrivez-vous gratuitement pour proposer votre aide. Sans engagement, en 2 minutes.</p>
             <div className="flex flex-wrap gap-2 justify-center">
               <Link to={`/inscription?redirect=/petites-missions/${mission.id}`}><Button>Créer un compte gratuit</Button></Link>
               <Link to={`/login?redirect=/petites-missions/${mission.id}`}><Button variant="outline">Se connecter</Button></Link>
             </div>
           </div>
+        )}
+
+        {/* Related missions — maillage interne + anti cul-de-sac */}
+        {relatedMissions.length > 0 && (
+          <section className="mt-12 pt-10 border-t border-border">
+            <h2 className="font-heading text-xl font-semibold mb-1">Autres coups de main près d'ici</h2>
+            <p className="text-sm text-muted-foreground mb-5">D'autres personnes cherchent aussi un coup de main.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {relatedMissions.map((rm) => (
+                <Link
+                  key={rm.id}
+                  to={`/petites-missions/${rm.id}`}
+                  className="group flex flex-col p-4 rounded-xl border border-border bg-card hover:border-primary/50 hover:shadow-sm transition-all"
+                >
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wide">
+                      {(CATEGORY_META[rm.category] || CATEGORY_META.animals).label}
+                    </span>
+                    <span className="text-[10px] text-foreground/50">{timeAgoFr(rm.created_at)}</span>
+                  </div>
+                  <h3 className="font-heading font-semibold text-sm leading-snug mb-2 line-clamp-2">{rm.title}</h3>
+                  {rm.description && (
+                    <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{rm.description}</p>
+                  )}
+                  <div className="mt-auto text-xs text-foreground/60">{titlecaseCity(rm.city) || "France"}</div>
+                </Link>
+              ))}
+            </div>
+            <div className="text-center mt-6">
+              <Link to="/petites-missions" className="text-sm font-semibold text-primary hover:underline">
+                Voir tous les coups de main ouverts →
+              </Link>
+            </div>
+          </section>
         )}
       </div>
 
