@@ -1,16 +1,16 @@
 {
   "sources": {
     "city_guides": {
-      "head": "2026-05-05T10:38:22.999136+00:00",
-      "fetchedAt": "2026-05-10T12:37:36.236Z"
+      "head": "2026-05-21T16:17:49.545189+00:00",
+      "fetchedAt": "2026-05-21T18:27:38.549Z"
     },
     "seo_city_pages": {
       "head": "2026-05-04T07:47:07.499343+00:00",
       "fetchedAt": "2026-05-10T12:37:36.240Z"
     },
     "articles": {
-      "head": "2026-05-12T06:53:51.419448+00:00",
-      "fetchedAt": "2026-05-12T06:54:05.758Z"
+      "head": "2026-05-12T09:40:36.018734+00:00",
+      "fetchedAt": "2026-05-21T18:27:38.570Z"
     },
     "seo_department_pages": {
       "head": "2026-03-26T05:46:21.361179+00:00",
@@ -306,6 +306,12 @@
       {
         "loc": "/guides/noyal-pontivy",
         "lastmod": "2026-05-05",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/mouvaux",
+        "lastmod": "2026-05-21",
         "changefreq": "weekly",
         "priority": "0.7"
       }
@@ -621,7 +627,7 @@
       },
       {
         "loc": "/actualites/garde-chat-domicile-lyon",
-        "lastmod": "2026-05-10",
+        "lastmod": "2026-05-12",
         "changefreq": "monthly",
         "priority": "0.6"
       },
@@ -693,7 +699,7 @@
       },
       {
         "loc": "/actualites/vacances-longues-garde-animal-2-semaines",
-        "lastmod": "2026-05-10",
+        "lastmod": "2026-05-12",
         "changefreq": "monthly",
         "priority": "0.6"
       },
