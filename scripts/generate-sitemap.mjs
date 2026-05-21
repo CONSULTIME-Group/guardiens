@@ -159,7 +159,7 @@ async function main() {
 
   console.log("🗺️  Sitemap incremental build…");
 
-  const [articles, seoCity, guides, depts, breeds, profiles] = await Promise.all([
+  const [articles, seoCity, guides, depts, breeds, profiles, sits] = await Promise.all([
     fetchOrCache(
       "articles", cache,
       () => maxUpdatedAt("articles", "updated_at", q => q.eq("published", true)),
@@ -225,6 +225,23 @@ async function main() {
         changefreq: "monthly",
         priority: "0.5",
       }))
+    ),
+    // Annonces individuelles `/annonces/:id` — filtre qualité aligné avec
+    // l'indexabilité côté client (PublicSitDetail) : statut publié, candidatures
+    // ouvertes, titre ≥10 car, description riche.
+    fetchOrCache(
+      "public_sits", cache,
+      () => maxUpdatedAt("sits", "updated_at", q => q.eq("status", "published").eq("accepting_applications", true)),
+      async () => (await supabase.from("sits").select("id, title, updated_at, created_at, daily_routine").eq("status", "published").eq("accepting_applications", true).limit(2000)).data,
+      rows => rows
+        .filter(s => typeof s.title === "string" && s.title.trim().length >= 10)
+        .filter(s => ((s.daily_routine || "").length) >= 100)
+        .map(s => ({
+          loc: `/annonces/${s.id}`,
+          lastmod: (s.updated_at || s.created_at || today).split("T")[0],
+          changefreq: "weekly",
+          priority: "0.7",
+        }))
     ),
   ]);
 
