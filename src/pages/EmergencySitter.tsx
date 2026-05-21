@@ -312,7 +312,7 @@ const EmergencySitter = () => {
             <Link to="/inscription?role=owner">
               <Button size="lg" className="gap-2">
                 <MapPin className="h-4 w-4" />
-                Trouver un gardien d'urgence près de chez moi
+                M'inscrire et être averti(e) du lancement
               </Button>
             </Link>
           </div>
@@ -323,7 +323,7 @@ const EmergencySitter = () => {
       <section className="max-w-4xl mx-auto px-4 py-16">
         <h2 className="font-heading text-2xl font-bold text-center mb-3">Devenez gardien d'urgence</h2>
         <p className="text-center text-muted-foreground mb-10">
-          Quand vous remplissez les conditions, l'invitation apparaît sur votre dashboard. C'est vous qui choisissez.
+          Quand vous remplissez les conditions, l'invitation apparaîtra sur votre dashboard. C'est vous qui choisissez.
         </p>
 
         <div className="grid md:grid-cols-2 gap-8">
