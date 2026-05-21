@@ -185,7 +185,6 @@ title: "Tarifs — 6,99\u00A0€/mois pour les gardiens | Guardiens",
  changeFreq: "weekly",
  },
   {
-  {
    path: "/annonces",
    title: "Annonces de garde d'animaux à domicile en France | Guardiens",
    metaDescription: "Toutes les annonces de garde de chats, chiens et NAC à domicile, partout en France. Filtres par ville, département et critères. Consultation libre, inscription gratuite pour postuler.",
