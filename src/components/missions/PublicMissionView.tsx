@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Share2, CheckCircle2 } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
+import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import { Helmet } from "react-helmet-async";
 
 const entraideHeader =
@@ -264,23 +265,11 @@ const PublicMissionView = ({
 
             {/* Localisation approximative */}
             <div className="bg-card rounded-[2rem] overflow-hidden shadow-sm border border-border">
-              <div className="h-48 relative bg-muted overflow-hidden">
-                <div
-                  className="absolute inset-0 opacity-30"
-                  style={{
-                    backgroundImage:
-                      "radial-gradient(circle at 30% 40%, hsl(var(--primary) / 0.15) 0, transparent 40%), radial-gradient(circle at 70% 60%, hsl(var(--primary) / 0.1) 0, transparent 35%)",
-                  }}
-                  aria-hidden
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-32 h-32 bg-primary/10 border border-primary/20 rounded-full animate-pulse" />
-                  <div className="absolute w-3 h-3 bg-primary rounded-full shadow-lg ring-8 ring-primary/15" />
-                </div>
-                <div className="absolute bottom-3 left-3 bg-card/95 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm border border-border">
-                  {cityLabel}{mission.postal_code ? ` · ${mission.postal_code.slice(0, 2)}` : ""}
-                </div>
-              </div>
+              <ApproximateLocationMap
+                city={mission.city}
+                postalCode={mission.postal_code}
+                className="h-48"
+              />
               <div className="p-5">
                 <p className="font-semibold text-sm text-foreground mb-1">Localisation approximative</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
