@@ -63,7 +63,7 @@ const SearchSeoFooter = () => (
           {HUB_CITIES.map((c) => (
             <li key={c.slug}>
               <Link
-                to={`/garde-animaux/${c.slug}`}
+                to={`/house-sitting/${c.slug}`}
                 className="inline-flex items-center rounded-full border border-border bg-background px-4 py-2 text-sm text-foreground hover:border-primary/40 hover:text-primary transition-colors"
               >
                 Garde d'animaux à {c.name}
