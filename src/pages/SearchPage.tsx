@@ -104,9 +104,14 @@ const SearchPage = () => {
         {showSitterView ? <SearchSitter /> : <SearchOwner />}
       </Suspense>
 
-      {/* Maillage interne + FAQ : uniquement visiteurs anon (SEO + conversion).
+      {/* Pédagogie + rassurance + CTA (anon uniquement) puis maillage interne + FAQ.
           Les membres connectés voient la page outil épurée. */}
-      {!user && <SearchSeoFooter />}
+      {!user && (
+        <>
+          <SearchHowItWorksAnon />
+          <SearchSeoFooter />
+        </>
+      )}
     </>
   );
 };
