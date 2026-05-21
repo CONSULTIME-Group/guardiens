@@ -1546,9 +1546,12 @@ const SearchSitter = () => {
  {member.specialty_label && (
    <p className="text-[13px] font-semibold text-amber-700 mt-1">{member.specialty_label}</p>
  )}
- {member.specialty_description && (
-   <p className="text-xs text-muted-foreground italic line-clamp-2 mt-0.5">{member.specialty_description}</p>
- )}
+  {member.specialty_description && (
+    <p className="text-xs text-muted-foreground italic line-clamp-2 mt-0.5">{member.specialty_description}</p>
+  )}
+  {!member.specialty_description && member.bio && (
+    <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{member.bio}</p>
+  )}
  <div className="flex flex-wrap gap-1.5 mt-1.5">
  {visibleSkills.map((s: string) => {
  const meta = skillMeta[s];
