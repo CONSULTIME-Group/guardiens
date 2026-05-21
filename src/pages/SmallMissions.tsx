@@ -611,9 +611,57 @@ const SmallMissions = () => {
               </div>
             )}
 
-            {/* ═══ Section 2 — Membres disponibles ═══ */}
+            {/* ═══ Section 1bis — Hors périmètre ═══ */}
+            {outOfZoneMissions.length > 0 && (
+              <div className="mt-8 rounded-2xl border border-dashed border-border bg-muted/30 p-5">
+                <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground">
+                      {outOfZoneMissions.length} demande{outOfZoneMissions.length > 1 ? "s" : ""} hors de votre périmètre ({radiusKm} km)
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Visibles uniquement si vous êtes prêt·e à élargir votre zone.
+                    </p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => setRadiusKm(0)}>
+                    Élargir à la France entière
+                  </Button>
+                </div>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {outOfZoneMissions.slice(0, 6).map((m: any, idx: number) => (
+                    <div key={`oz-${m.id}`} className="relative">
+                      <span className="absolute top-2 left-2 z-10 inline-flex items-center gap-1 bg-background/95 backdrop-blur-sm rounded-full px-2.5 py-1 text-[11px] font-semibold text-foreground shadow-sm border border-border">
+                        {formatCity((m.profiles as any)?.city) || "Ailleurs"}
+                        {m._distance != null && (
+                          <span className="text-muted-foreground"> · {Math.round(m._distance)} km</span>
+                        )}
+                      </span>
+                      <div className="opacity-90">
+                        <n
+                          mission={m}
+                          currentUserId={user?.id}
+                          isAuthenticated={isAuthenticated}
+                          canApplyMissions={canApplyMissions}
+                          mode={mode}
+                          compactBio={compactBio}
+                          showBio={showBio}
+                          onNavigateDetail={() => navigate(isAuthenticated ? `/petites-missions/${m.id}` : "/inscription")}
+                          onPropose={() => {
+                            if (!isAuthenticated) { navigate("/inscription"); return; }
+                            setDialogMission(m);
+                            setDialogTarget({ id: m.user_id, name: (m.profiles as any)?.first_name || "ce membre" });
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ═══ Section 2 — Membres disponibles (secondaire) ═══ */}
             {(helperCount > 0 || isAuthenticated) && (
-              <div className="mt-10">
+              <div className="mt-12 pt-8 border-t border-border">
                 {isAuthenticated && mode === "offer" && (
                   <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -640,12 +688,13 @@ const SmallMissions = () => {
                     )}
                   </div>
                 )}
-                <h2 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Et aussi</p>
+                <h3 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
                   {mode === "need" ? "Membres disponibles pour aider" : "Autres membres disponibles"}
                   <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
                     {helperCount} personne{helperCount > 1 ? "s" : ""} du coin
                   </span>
-                </h2>
+                </h3>
                 <div className="space-y-8">
                   {helpersLoading ? (
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
