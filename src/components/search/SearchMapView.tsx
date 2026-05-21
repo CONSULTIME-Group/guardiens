@@ -145,7 +145,7 @@ const SearchMapView = ({
             maxZoom={19}
           />
           {results
-            .filter((item) => showAll || (!item?.is_demo && !item?.isAssigned && !item?.isCompleted))
+            .filter((item) => showAll || (!item?.is_demo && !item?.isAssigned && !item?.isCompleted && !item?.isPast))
             .map((item) => {
               const coords = getCoords(item);
               if (!coords) return null;
