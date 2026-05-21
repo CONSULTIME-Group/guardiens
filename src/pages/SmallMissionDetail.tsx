@@ -550,6 +550,27 @@ const SmallMissionDetail = () => {
     }
   };
 
+  // ─── Vue publique (non connecté) : layout éditorial dédié ───
+  if (!user) {
+    return (
+      <>
+        <PublicHeader />
+        <PublicMissionView
+          mission={mission}
+          author={author}
+          catMeta={{ label: catMeta.label }}
+          durationLabel={mission.duration_estimate ? (DURATION_LABELS[mission.duration_estimate] || mission.duration_estimate) : null}
+          relatedMissions={relatedMissions}
+          titlecaseCity={titlecaseCity}
+          timeAgoFr={timeAgoFr}
+          memberSinceLong={memberSince}
+          onShare={handleSharePublishedLink}
+        />
+        <PublicFooter />
+      </>
+    );
+  }
+
   return (
     <>
       {!user && <PublicHeader />}
