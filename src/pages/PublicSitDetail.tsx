@@ -9,46 +9,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
- Calendar,
- MapPin,
- Star,
- PawPrint,
- Home,
- CheckCircle2,
- ArrowLeft,
- ExternalLink,
- ShieldCheck,
- Heart,
- Users,
- Sparkles,
- HandHeart,
+  ArrowLeft,
+  ExternalLink,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import VerifiedBadge from "@/components/profile/VerifiedBadge";
-import ShareButtons from "@/components/sits/ShareButtons";
 import { trackEvent } from "@/lib/analytics";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { getOgImageAbsoluteUrl } from "@/lib/ogImages";
 import { logger } from "@/lib/logger";
 
-import { TooltipProvider } from "@/components/ui/tooltip";
 import ApplicationModal from "@/components/sits/ApplicationModal";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
-import SitHero from "@/components/sits/shared/SitHero";
-import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
-import PublicSitPitch from "@/components/sits/public/PublicSitPitch";
-import PublicSitGallery from "@/components/sits/public/PublicSitGallery";
-import PublicSitFAQ from "@/components/sits/public/PublicSitFAQ";
-import PublicSitTrustStrip from "@/components/sits/public/PublicSitTrustStrip";
 import PublicSitView from "@/components/sits/PublicSitView";
 import {
- ENV_LABELS as envLabels,
- TYPE_LABELS as typeLabels,
- 
- SPECIES_LABEL as speciesLabel,
+  ENV_LABELS as envLabels,
+  TYPE_LABELS as typeLabels,
+  SPECIES_LABEL as speciesLabel,
 } from "@/components/sits/shared/sitConstants";
 
 type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
@@ -414,103 +393,59 @@ const PublicSitDetail = () => {
  ],
  };
 
- // Visiteurs anonymes → vue éditoriale Modern Minimal (conversion-first).
- if (!isAuthenticated) {
-   const handleShareAnon = async () => {
-     try {
-       if (navigator.share) {
-         await navigator.share({ title: truncatedTitle, url: canonicalUrl });
-       } else {
-         await navigator.clipboard.writeText(canonicalUrl);
-       }
-     } catch { /* silencieux */ }
-   };
-   return (
-     <div className="bg-background">
-       <Helmet>
-         <title>{truncatedTitle}</title>
-         <meta name="description" content={truncatedSeoDesc} />
-         <link rel="canonical" href={canonicalUrl} />
-         <meta name="robots" content={isIndexable ? "index, follow" : "noindex, follow"} />
-         <meta property="og:type" content="article" />
-         <meta property="og:url" content={canonicalUrl} />
-         <meta property="og:title" content={truncatedTitle} />
-         <meta property="og:description" content={truncatedDesc} />
-         <meta property="og:image" content={ogImageUrl} />
-         <meta property="og:image:alt" content={ogImageAlt} />
-         <meta property="og:image:width" content="1920" />
-         <meta property="og:image:height" content="1080" />
-         <meta property="og:site_name" content="Guardiens" />
-         <meta property="og:locale" content="fr_FR" />
-         <meta name="twitter:card" content="summary_large_image" />
-         <meta name="twitter:title" content={truncatedTitle} />
-         <meta name="twitter:description" content={truncatedDesc} />
-         <meta name="twitter:image" content={ogImageUrl} />
-         <meta name="twitter:image:alt" content={ogImageAlt} />
-         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
-         <script type="application/ld+json">{JSON.stringify(breadcrumbLd)}</script>
-       </Helmet>
-       <PublicHeader />
-       <PublicSitView
-         sit={sit}
-         owner={owner}
-         property={property}
-         pets={pets}
-         avgRating={avgRating}
-         reviewCount={reviewCount}
-         latestReviews={latestReviews}
-         naturalDateLabel={naturalDateLabel}
-         urgencyLabel={urgencyLabel}
-         petsPitchSummary={petsPitchSummary}
-         typeLabel={property ? (typeLabels[property.type] || property.type) : null}
-         envLabel={property?.environment ? (envLabels[property.environment] || property.environment) : null}
-         speciesLabel={speciesLabel}
-         onShare={handleShareAnon}
-       />
-       <PublicFooter />
-     </div>
-   );
- }
+  // Handler de partage unifié.
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: truncatedTitle, url: canonicalUrl });
+      } else {
+        await navigator.clipboard.writeText(canonicalUrl);
+      }
+    } catch { /* silencieux */ }
+  };
 
- return (
- <div className="pb-32 bg-background">
- <Helmet>
- <title>{truncatedTitle}</title>
- <meta name="description" content={truncatedSeoDesc} />
- <link rel="canonical" href={canonicalUrl} />
- <meta name="robots" content={isIndexable ? "index, follow" : "noindex, follow"} />
+  const handleApply = () => {
+    try {
+      trackEvent("sit_apply_clicked", {
+        source: "public_sit_detail",
+        metadata: { sit_id: sit.id, viewer_type: viewerType },
+      });
+    } catch {}
+    setApplyOpen(true);
+  };
 
- {/* Open Graph — Facebook, LinkedIn, Slack, WhatsApp */}
- <meta property="og:type" content="article" />
- <meta property="og:url" content={canonicalUrl} />
- <meta property="og:title" content={truncatedTitle} />
- <meta property="og:description" content={truncatedDesc} />
- <meta property="og:image" content={ogImageUrl} />
- <meta property="og:image:alt" content={ogImageAlt} />
- <meta property="og:image:width" content="1920" />
- <meta property="og:image:height" content="1080" />
- <meta property="og:site_name" content="Guardiens" />
- <meta property="og:locale" content="fr_FR" />
+  return (
+    <div className="bg-background">
+      <Helmet>
+        <title>{truncatedTitle}</title>
+        <meta name="description" content={truncatedSeoDesc} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta name="robots" content={isIndexable ? "index, follow" : "noindex, follow"} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={truncatedTitle} />
+        <meta property="og:description" content={truncatedDesc} />
+        <meta property="og:image" content={ogImageUrl} />
+        <meta property="og:image:alt" content={ogImageAlt} />
+        <meta property="og:image:width" content="1920" />
+        <meta property="og:image:height" content="1080" />
+        <meta property="og:site_name" content="Guardiens" />
+        <meta property="og:locale" content="fr_FR" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={truncatedTitle} />
+        <meta name="twitter:description" content={truncatedDesc} />
+        <meta name="twitter:image" content={ogImageUrl} />
+        <meta name="twitter:image:alt" content={ogImageAlt} />
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+        <script type="application/ld+json">{JSON.stringify(breadcrumbLd)}</script>
+      </Helmet>
 
- {/* Twitter Card */}
- <meta name="twitter:card" content="summary_large_image" />
- <meta name="twitter:title" content={truncatedTitle} />
- <meta name="twitter:description" content={truncatedDesc} />
- <meta name="twitter:image" content={ogImageUrl} />
- <meta name="twitter:image:alt" content={ogImageAlt} />
+      {!isAuthenticated && <PublicHeader />}
 
- {/* JSON-LD : lu par Google après rendu JS, indépendant des OG. */}
- <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
- <script type="application/ld+json">{JSON.stringify(breadcrumbLd)}</script>
- </Helmet>
-
- {/* Header public — anonymes uniquement (identité de marque + nav minimale) */}
- {!isAuthenticated && <PublicHeader />}
-
-      {/* Bandeau preview pour le propriétaire de l'annonce — clair, non-intrusif */}
+      {/* Bandeau "aperçu public" — propriétaire de l'annonce */}
       {viewerType === "owner_of_sit" && (
         <div className="bg-primary/5 border-b border-primary/15">
-          <div className="max-w-4xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-2">
+          <div className="max-w-6xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs md:text-sm text-foreground/80">
               <span className="font-medium text-foreground">Aperçu public</span> · ce que voient les visiteurs partageant le lien.
             </p>
@@ -530,462 +465,61 @@ const PublicSitDetail = () => {
         </div>
       )}
 
-      {/* Bandeau toggle pour les comptes "both" (propriétaire + gardien) :
-          ils peuvent choisir de voir la page comme un gardien (= postuler) ou rester en aperçu public. */}
+      {/* Bandeau toggle pour les comptes "both" (propriétaire + gardien) */}
       {viewerType === "proprio" && user && (user as any).role === "both" && (
         <div className="bg-secondary/30 border-b border-border">
-          <div className="max-w-4xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-2">
+          <div className="max-w-6xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs md:text-sm text-foreground/80">
-              Vous consultez cette annonce <span className="font-medium text-foreground">comme propriétaire</span> (aperçu public).
+              Vous consultez cette annonce <span className="font-medium text-foreground">comme propriétaire</span>.
             </p>
-            <div className="flex items-center gap-2">
-              <Button asChild size="sm" variant="outline" className="h-8 text-xs">
-                <Link to={`/sits/${sit.id}?from=share&view=sitter`} className="inline-flex items-center gap-1.5">
-                  Voir comme gardien <ExternalLink className="h-3.5 w-3.5" />
-                </Link>
-              </Button>
-            </div>
+            <Button asChild size="sm" variant="outline" className="h-8 text-xs">
+              <Link to={`/sits/${sit.id}?from=share&view=sitter`} className="inline-flex items-center gap-1.5">
+                Voir comme gardien <ExternalLink className="h-3.5 w-3.5" />
+              </Link>
+            </Button>
           </div>
         </div>
       )}
 
- <div className="max-w-4xl mx-auto">
- {/* ─── HERO ÉDITORIAL ─────────────────────────────────────────────── */}
- <div className="px-4 md:px-10 pt-4 md:pt-6">
- <SitHero photos={photos} city={owner?.city} priority />
- {viewerType === "owner_of_sit" && photos.length === 0 && (
-   <div
-     role="status"
-     className="mt-3 rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
-   >
-     <div>
-       <p className="text-sm font-semibold text-foreground">Votre annonce n'a aucune photo</p>
-       <p className="text-xs text-muted-foreground mt-0.5">
-         Les annonces avec photos reçoivent davantage de candidatures. Ajoutez quelques images de votre logement et de vos animaux.
-       </p>
-     </div>
-     <Button asChild size="sm" className="shrink-0">
-       <Link to={`/sits/${sit.id}/edit`} className="inline-flex items-center gap-1.5">
-         Ajouter des photos
-         <ExternalLink className="h-3.5 w-3.5" />
-       </Link>
-     </Button>
-   </div>
- )}
- </div>
+      <PublicSitView
+        sit={sit}
+        owner={owner}
+        property={property}
+        pets={pets}
+        avgRating={avgRating}
+        reviewCount={reviewCount}
+        latestReviews={latestReviews}
+        naturalDateLabel={naturalDateLabel}
+        urgencyLabel={urgencyLabel}
+        petsPitchSummary={petsPitchSummary}
+        typeLabel={property ? (typeLabels[property.type] || property.type) : null}
+        envLabel={property?.environment ? (envLabels[property.environment] || property.environment) : null}
+        speciesLabel={speciesLabel}
+        onShare={handleShare}
+        isAuthenticated={isAuthenticated}
+        hasAccess={hasAccess}
+        hasApplied={hasApplied}
+        onApply={handleApply}
+      />
 
- <div className="px-5 md:px-10 pb-6 md:pb-10">
- {/* Pill contextuelle au-dessus du H1 — visible et orientée valeur */}
- <div className="mt-5 mb-3 flex flex-wrap items-center gap-2">
- <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
- <Sparkles className="h-3.5 w-3.5" />
- Mission de gardien · Hébergement inclus
- </span>
- {urgencyLabel && (
- <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-secondary/20 text-secondary-foreground border border-secondary/30">
- {urgencyLabel}
- </span>
- )}
- {owner?.city && (
- <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-muted text-foreground">
- <MapPin className="h-3.5 w-3.5 text-primary/70" />
- {owner.city}
- </span>
- )}
- </div>
+      {!isAuthenticated && <PublicFooter />}
 
- {/* Title — sanitize pour corriger les espaces manquants ("4chats" → "4 chats") */}
- <h1 className="font-heading text-3xl md:text-4xl font-bold leading-tight tracking-tight mb-3 text-foreground">
- {sit.title ? sanitizeUserTitle(sit.title) : `Une mission de garde à ${owner?.city || "découvrir"}`}
- </h1>
-
- {/* Date naturelle */}
- <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-6">
- <span className="inline-flex items-center gap-1.5">
- <Calendar className="h-4 w-4 text-primary/70" />
- <span className="font-medium text-foreground">{naturalDateLabel}</span>
- {sit.flexible_dates && (
- <span className="text-[11px] font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full ml-1">
- Dates flexibles
- </span>
- )}
- </span>
- </div>
-
- {/* ─── PITCH NARRATIF + TRUST — visiteurs anonymes uniquement ───── */}
- {!isAuthenticated && (
- <>
- <PublicSitPitch
- ownerFirstName={owner?.first_name}
- city={owner?.city}
- petsSummary={petsPitchSummary}
- durationDays={durationDays}
- datesLabel={naturalDateLabel}
- propertyTypeLabel={property ? typeLabels[property.type] || property.type : null}
- />
- <PublicSitTrustStrip />
- </>
- )}
-
- {/* ─── GALERIE PHOTOS ─────────────────────────────────────────────── */}
- <PublicSitGallery
-   photos={photos}
-   city={owner?.city}
-   ownerFirstName={owner?.first_name}
- />
-
- {/* ─── ANIMAUX ──────────────────────────────────────────────────── */}
- {pets.length > 0 && (
- <section className="mb-6">
- <h2 className="font-heading text-lg font-semibold mb-3 flex items-center gap-2">
- <PawPrint className="h-5 w-5 text-primary" />
- {pets.length === 1 ? "L'animal à garder" : `Les animaux à garder (${pets.length})`}
- </h2>
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
- {pets.map((pet: any) => (
- <div
- key={pet.id}
- className="flex items-center gap-3 bg-card border border-border rounded-2xl px-4 py-3 hover:border-primary/30 transition-colors"
- >
- {pet.photo_url ? (
- <img
- src={pet.photo_url}
- alt={`Photo de ${capitalize(pet.name)}`}
- loading="lazy"
- className="w-12 h-12 rounded-full object-cover shrink-0"
- />
- ) : (
- <span
- className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center font-heading text-base font-bold text-primary shrink-0"
- aria-hidden="true"
- >
- {capitalize(pet.name).charAt(0) || "?"}
- </span>
- )}
- <div className="min-w-0">
- <p className="font-semibold text-sm truncate">{capitalize(pet.name)}</p>
- <p className="text-xs text-muted-foreground truncate">
- {speciesLabel[pet.species] || pet.species}
- {pet.breed ? ` · ${pet.breed}` : ""}
- </p>
- </div>
- </div>
- ))}
- </div>
- </section>
- )}
-
- {/* ─── LOGEMENT ─────────────────────────────────────────────────── */}
- {property && (
- <section className="mb-6 bg-card border border-border rounded-2xl p-5 md:p-6">
- <h2 className="font-heading text-lg font-semibold mb-2 flex items-center gap-2">
- <Home className="h-5 w-5 text-primary" />
- Le logement
- </h2>
- <p className="text-sm font-medium text-foreground">
- {typeLabels[property.type] || property.type}
- {property.environment && (
- <>
- {" · "}
- <span className="text-muted-foreground font-normal">
- {envLabels[property.environment] || property.environment}
- </span>
- </>
- )}
- </p>
- {property.description && (
- <p className="text-sm text-muted-foreground mt-3 leading-relaxed whitespace-pre-line">
- {property.description}
- </p>
- )}
- {environments.length > 0 && (
- <div className="flex flex-wrap gap-1.5 mt-4 pt-4 border-t border-border">
- <span className="text-xs text-muted-foreground self-center mr-1">
- Environnement&nbsp;:
- </span>
- {environments.map((env: string) => (
- <span
- key={env}
- className="px-2.5 py-1 rounded-full bg-accent/60 text-xs font-medium"
- >
- {envLabels[env] || env}
- </span>
- ))}
- </div>
- )}
- </section>
- )}
-
- {/* ─── ROUTINE QUOTIDIENNE ──────────────────────────────────────── */}
- {sit.daily_routine && (
- <section className="mb-6 bg-card border border-border rounded-2xl p-5 md:p-6">
- <h2 className="font-heading text-xl font-semibold mb-3 flex items-center gap-2">
- <Calendar className="h-5 w-5 text-primary" />
- La routine quotidienne
- </h2>
- <p className="text-sm text-foreground/85 leading-relaxed whitespace-pre-line">
- {sit.daily_routine}
- </p>
- </section>
- )}
-
- {/* ─── PROFIL TYPE DE GARDIEN RECHERCHÉ ─────────────────────────── */}
- {sit.open_to && sit.open_to.length > 0 && !sit.open_to.every((t: string) => ["any", "no_preference", "Sans préférence"].includes(t)) && (
- <section className="mb-6">
- <h2 className="font-heading text-base font-semibold mb-2.5 text-foreground">
- Le gardien idéal
- </h2>
- <div className="flex flex-wrap gap-2">
- {sit.open_to.map((t: string) => (
- <span
- key={t}
- className="px-3 py-1.5 rounded-full bg-secondary/15 text-secondary-foreground border border-secondary/20 text-xs font-medium"
- >
- {t}
- </span>
- ))}
- </div>
- </section>
- )}
-
- {/* ─── PROPRIÉTAIRE — carte humaine, mise en avant ──────────────── */}
- {owner && (
- <section className="mb-6 rounded-2xl border-2 border-primary/15 bg-primary/[0.03] p-5 md:p-6">
- <h2 className="font-heading text-base font-semibold mb-4 flex items-center gap-2">
- <Heart className="h-4 w-4 text-primary" />
- Faites connaissance avec {owner.first_name || "votre hôte"}
- </h2>
- <div className="flex items-start gap-4">
- {owner.avatar_url ? (
- <img
- src={owner.avatar_url}
- alt={`Photo de ${owner.first_name}`}
- className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover shrink-0 ring-2 ring-primary/10"
- loading="lazy"
- />
- ) : (
- <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary/10 flex items-center justify-center font-heading text-2xl font-bold text-primary shrink-0 ring-2 ring-primary/10">
- {owner.first_name?.charAt(0) || "?"}
- </div>
- )}
- <div className="flex-1 min-w-0">
- <p className="font-semibold text-base flex items-center flex-wrap gap-1.5">
- {owner.first_name}
- {owner.identity_verified && <VerifiedBadge />}
- {owner.is_founder && (
- <span
- className="text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary"
- title="Membre fondateur"
- >
- Fondateur
- </span>
- )}
- </p>
- <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5 flex-wrap">
- {owner.city && <span>{owner.city}</span>}
- {owner.city &&
- typeof owner.completed_sits_count === "number" &&
- owner.completed_sits_count > 0 && <span aria-hidden="true">·</span>}
- {typeof owner.completed_sits_count === "number" &&
- owner.completed_sits_count > 0 && (
- <span>
- {owner.completed_sits_count} garde
- {owner.completed_sits_count > 1 ? "s" : ""} accomplie
- {owner.completed_sits_count > 1 ? "s" : ""}
- </span>
- )}
- {avgRating && (
- <>
- <span aria-hidden="true">·</span>
- <span className="flex items-center gap-1">
- <Star className="h-3 w-3 text-secondary fill-secondary" />
- {avgRating} ({reviewCount} avis)
- </span>
- </>
- )}
- </div>
- <p className="text-sm text-foreground/80 mt-2.5 leading-relaxed line-clamp-4">
- {owner.bio
- ? owner.bio
- : `${owner.first_name || "Ce membre"} n'a pas encore renseigné de présentation, mais sera ravi(e) d'échanger avec vous.`}
- </p>
- </div>
- </div>
- </section>
- )}
-
- {/* ─── DERNIERS AVIS REÇUS ───────────────────────────────────────── */}
- {latestReviews.length > 0 && (
- <section className="mb-6">
- <h2 className="font-heading text-xl font-semibold mb-3 flex items-center gap-2">
- <Star className="h-5 w-5 text-secondary fill-secondary" />
- Ce que disent les gardiens précédents
- </h2>
- <div className="space-y-3">
- {latestReviews.map((r, i) => (
- <article key={i} className="bg-card border border-border rounded-2xl p-4 md:p-5">
- <div className="flex items-center gap-1.5 mb-1.5">
- {Array.from({ length: 5 }).map((_, k) => (
- <Star
- key={k}
- className={`h-4 w-4 ${k < Math.round(r.overall_rating) ? "text-secondary fill-secondary" : "text-muted-foreground/30"}`}
- />
- ))}
- <span className="text-xs text-muted-foreground ml-1">
- {format(new Date(r.created_at), "MMMM yyyy", { locale: fr })}
- </span>
- </div>
- <p className="text-sm text-foreground/85 leading-relaxed line-clamp-4">
- « {r.comment} »
- </p>
- </article>
- ))}
- </div>
- </section>
- )}
-
-      {/* ─── PARTAGE — propriétaire de l'annonce uniquement, replié par défaut ── */}
-      {viewerType === "owner_of_sit" && (
-        <details className="mb-6 rounded-2xl border border-border bg-card group">
-          <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between text-sm font-medium">
-            <span>Partager cette annonce</span>
-            <span className="text-xs text-muted-foreground group-open:hidden">Ouvrir</span>
-            <span className="text-xs text-muted-foreground hidden group-open:inline">Fermer</span>
-          </summary>
-          <div className="px-4 pb-4">
-            <ShareButtons
-              sitId={sit.id}
-              title={sit.title || `Garde à ${owner?.city || "France"}`}
-              city={owner?.city}
-              source="public_sit_detail"
-              viewerType={viewerType}
-            />
-          </div>
-        </details>
+      {isAuthenticated && sit && (
+        <ApplicationModal
+          open={applyOpen}
+          onOpenChange={setApplyOpen}
+          sitId={sit.id}
+          ownerId={sit.user_id}
+          ownerFirstName={owner?.first_name || ""}
+          petNames={pets.map((p: any) => p.name)}
+          city={owner?.city || ""}
+          startDate={formatDate(sit.start_date)}
+          endDate={formatDate(sit.end_date)}
+          onSuccess={() => setHasApplied(true)}
+        />
       )}
-
- {/* ─── GESTION ─── Volontairement supprimée de l'aperçu public.
-     La page /annonces/:id est un aperçu visiteur ; toutes les actions
-     (Modifier, Guide maison, Annuler) vivent sur /sits/:id, accessible
-     via le bouton « Gérer mon annonce » du bandeau supérieur. */}
-
- {/* ─── MINI-FAQ — visiteurs anonymes uniquement ─────────────────── */}
- {!isAuthenticated && <PublicSitFAQ />}
-
- {/* ─── BLOC DE RÉASSURANCE FINAL ────────────────────────────────── */}
- {!isAuthenticated && (
- <section className="mt-2 rounded-2xl bg-card border border-border p-6 text-center">
- <p className="font-heading text-base md:text-lg font-semibold mb-2">
- Vous gardez l'esprit léger&nbsp;: en cas d'imprévu, le réseau de
- gardiens d'urgence Guardiens prend le relais.
- </p>
- <p className="text-xs text-muted-foreground mb-4">
- Profils vérifiés · Avis croisés · Gardiens d'urgence mobilisables
- </p>
- <Link
- to="/"
- className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
- >
- Découvrir Guardiens en 1 minute →
- </Link>
- </section>
- )}
-
-      {/* ─── CTA STICKY ─── (masqué pour le propriétaire de l'annonce) */}
-      {viewerType !== "owner_of_sit" && (
-      <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-40 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.08)]">
-        <div className="max-w-md mx-auto">
- {/* Réassurance pré-CTA supprimée — déjà couverte par PublicSitTrustStrip et le bloc final */}
- {!(sit as any).accepting_applications ? (
- <Button className="w-full h-12 text-base font-semibold" disabled>
- Candidatures en cours d'analyse
- </Button>
- ) : !isAuthenticated ? (
- <Link
- to="/inscription?role=sitter"
- onClick={() => {
- try {
- trackEvent("sit_apply_blocked", {
- source: "public_sit_detail",
- metadata: { sit_id: sit.id, reason: "not_authenticated", viewer_type: viewerType },
- });
- } catch {}
- }}
- >
- <Button className="w-full h-12 text-base font-semibold">
- {owner?.first_name
- ? `S'inscrire et postuler — aider ${owner.first_name}`
- : "S'inscrire sans frais et postuler"}
- </Button>
- </Link>
- ) : !hasAccess ? (
- <Link
- to="/mon-abonnement"
- onClick={() => {
- try {
- trackEvent("sit_apply_blocked", {
- source: "public_sit_detail",
- metadata: { sit_id: sit.id, reason: "no_subscription", viewer_type: viewerType },
- });
- } catch {}
- }}
- >
- <Button className="w-full h-12 text-base font-semibold">
- S'abonner pour postuler
- </Button>
- </Link>
- ) : hasApplied ? (
- <Button className="w-full h-12 text-base font-semibold" disabled>
- <CheckCircle2 className="h-5 w-5 mr-2" /> Candidature envoyée ✓
- </Button>
- ) : (
- <Button
- className="w-full h-12 text-base font-semibold"
- onClick={() => {
- try {
- trackEvent("sit_apply_clicked", {
- source: "public_sit_detail",
- metadata: { sit_id: sit.id, viewer_type: viewerType },
- });
- } catch {}
- setApplyOpen(true);
- }}
- >
- Postuler à cette garde
- </Button>
- )}
- {/* Note honnêteté : abonnement gardien à venir */}
- {!isAuthenticated && (sit as any).accepting_applications && (
- <p className="text-[11px] text-muted-foreground text-center mt-2 leading-snug">
- Inscription et candidature à 0&nbsp;€ aujourd'hui. Un abonnement gardien sera introduit à terme — vous serez prévenu(e) avant tout changement.
- </p>
- )}
-        </div>
-      </div>
-      )}
-      </div>
- {/* Fin wrapper max-w-4xl */}
- </div>
-
- {/* Footer public — anonymes uniquement */}
- {!isAuthenticated && <PublicFooter />}
-
- {isAuthenticated && sit && (
- <ApplicationModal
- open={applyOpen}
- onOpenChange={setApplyOpen}
- sitId={sit.id}
- ownerId={sit.user_id}
- ownerFirstName={owner?.first_name || ""}
- petNames={pets.map((p: any) => p.name)}
- city={owner?.city || ""}
- startDate={formatDate(sit.start_date)}
- endDate={formatDate(sit.end_date)}
- onSuccess={() => setHasApplied(true)}
- />
- )}
- </div>
- );
+    </div>
+  );
 };
 
 export default PublicSitDetail;

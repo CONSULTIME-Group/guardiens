@@ -1,6 +1,6 @@
 // Vue publique éditoriale (Modern Minimal) — annonces de garde.
-// Cible : visiteurs anonymes uniquement. Objectif : conversion + clarté.
-// Pattern identique à PublicMissionView pour cohérence d'univers.
+// Cible : visiteurs anonymes ET connectés (hors propriétaire de l'annonce).
+// Objectif : conversion + clarté. Pattern aligné avec PublicMissionView.
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Share2, CheckCircle2, Star } from "lucide-react";
@@ -18,12 +18,16 @@ interface SitLike {
   daily_routine?: string | null;
   open_to?: string[] | null;
   user_id: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  accepting_applications?: boolean | null;
 }
 
 interface OwnerLike {
   first_name?: string | null;
   avatar_url?: string | null;
   city?: string | null;
+  postal_code?: string | null;
   bio?: string | null;
   identity_verified?: boolean | null;
   is_founder?: boolean | null;
@@ -66,6 +70,11 @@ interface Props {
   envLabel: string | null;
   speciesLabel: Record<string, string>;
   onShare: () => void;
+  /** Contexte viewer pour adapter le CTA. */
+  isAuthenticated?: boolean;
+  hasAccess?: boolean;
+  hasApplied?: boolean;
+  onApply?: () => void;
 }
 
 const PublicSitView = ({
@@ -82,12 +91,17 @@ const PublicSitView = ({
   envLabel,
   speciesLabel,
   onShare,
+  isAuthenticated = false,
+  hasAccess = false,
+  hasApplied = false,
+  onApply,
 }: Props) => {
   const heroImage = property?.photos?.[0];
   const cityLabel = owner?.city || "France";
   const redirect = `/annonces/${sit.id}`;
   const title = sit.title ? sanitizeUserTitle(sit.title) : `Une mission de garde à ${cityLabel}`;
   const description = property?.description || "";
+  const accepting = sit.accepting_applications !== false;
 
   return (
     <div className="min-h-screen bg-background text-foreground animate-fade-in">
@@ -346,31 +360,57 @@ const PublicSitView = ({
                 </div>
               </div>
 
-              <Link to={`/inscription?role=sitter&redirect=${encodeURIComponent(redirect)}`} className="block">
-                <Button className="w-full py-6 rounded-full font-bold text-base shadow-lg shadow-primary/20">
-                  Postuler à cette garde
+              {!accepting ? (
+                <Button className="w-full py-6 rounded-full font-bold text-base" disabled>
+                  Candidatures en cours d'analyse
                 </Button>
-              </Link>
-
-              <p className="mt-5 text-xs text-center text-muted-foreground px-2 leading-relaxed">
-                Inscription gratuite, 2 minutes. Sans engagement.
-              </p>
-
-              <div className="mt-6 pt-6 border-t border-border space-y-2">
-                <p className="text-xs text-center text-muted-foreground">Déjà membre&nbsp;?</p>
-                <Link to={`/login?redirect=${encodeURIComponent(redirect)}`} className="block">
-                  <Button variant="outline" className="w-full rounded-full">
-                    Se connecter
+              ) : !isAuthenticated ? (
+                <>
+                  <Link to={`/inscription?role=sitter&redirect=${encodeURIComponent(redirect)}`} className="block">
+                    <Button className="w-full py-6 rounded-full font-bold text-base shadow-lg shadow-primary/20">
+                      Postuler à cette garde
+                    </Button>
+                  </Link>
+                  <p className="mt-5 text-xs text-center text-muted-foreground px-2 leading-relaxed">
+                    Inscription gratuite, 2 minutes. Sans engagement.
+                  </p>
+                  <div className="mt-6 pt-6 border-t border-border space-y-2">
+                    <p className="text-xs text-center text-muted-foreground">Déjà membre&nbsp;?</p>
+                    <Link to={`/login?redirect=${encodeURIComponent(redirect)}`} className="block">
+                      <Button variant="outline" className="w-full rounded-full">
+                        Se connecter
+                      </Button>
+                    </Link>
+                  </div>
+                </>
+              ) : hasApplied ? (
+                <Button className="w-full py-6 rounded-full font-bold text-base" disabled>
+                  <CheckCircle2 className="h-5 w-5 mr-2" /> Candidature envoyée
+                </Button>
+              ) : !hasAccess ? (
+                <Link to="/mon-abonnement" className="block">
+                  <Button className="w-full py-6 rounded-full font-bold text-base shadow-lg shadow-primary/20">
+                    S'abonner pour postuler
                   </Button>
                 </Link>
-              </div>
+              ) : (
+                <Button
+                  onClick={onApply}
+                  className="w-full py-6 rounded-full font-bold text-base shadow-lg shadow-primary/20"
+                >
+                  Postuler à cette garde
+                </Button>
+              )}
             </div>
 
             {/* Localisation approximative */}
             <div className="bg-card rounded-[2rem] overflow-hidden shadow-sm border border-border">
               <ApproximateLocationMap
                 city={owner?.city}
-                className="h-48"
+                postalCode={owner?.postal_code}
+                lat={sit.latitude}
+                lng={sit.longitude}
+                className="h-64"
               />
               <div className="p-5">
                 <p className="font-semibold text-sm text-foreground mb-1">Localisation approximative</p>
@@ -399,44 +439,45 @@ const PublicSitView = ({
           </aside>
         </div>
 
-        {/* Bandeau de conversion final */}
-        <section className="mt-24 md:mt-28 bg-primary text-primary-foreground rounded-[2.5rem] p-10 md:p-14 shadow-2xl shadow-primary/20">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
-            <h2 className="font-heading text-3xl md:text-4xl font-bold">
-              Partir l'esprit léger, c'est confier à quelqu'un de confiance.
-            </h2>
-            <p className="text-lg opacity-90 leading-relaxed">
-              Rejoignez la communauté Guardiens : des gardiens vérifiés, un cadre clair, et la liberté de partir sans inquiétude.
-            </p>
-            <div className="flex flex-wrap gap-3 justify-center pt-2">
-              <Link to={`/inscription?role=sitter&redirect=${encodeURIComponent(redirect)}`}>
-                <Button size="lg" variant="secondary" className="rounded-full font-bold">
-                  S'inscrire et postuler
-                </Button>
-              </Link>
-              <Link to={`/login?redirect=${encodeURIComponent(redirect)}`}>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="rounded-full font-bold bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
-                >
-                  Se connecter
-                </Button>
-              </Link>
+        {!isAuthenticated && (
+          <section className="mt-24 md:mt-28 bg-primary text-primary-foreground rounded-[2.5rem] p-10 md:p-14 shadow-2xl shadow-primary/20">
+            <div className="max-w-3xl mx-auto text-center space-y-6">
+              <h2 className="font-heading text-3xl md:text-4xl font-bold">
+                Partir l'esprit léger, c'est confier à quelqu'un de confiance.
+              </h2>
+              <p className="text-lg opacity-90 leading-relaxed">
+                Rejoignez la communauté Guardiens : des gardiens vérifiés, un cadre clair, et la liberté de partir sans inquiétude.
+              </p>
+              <div className="flex flex-wrap gap-3 justify-center pt-2">
+                <Link to={`/inscription?role=sitter&redirect=${encodeURIComponent(redirect)}`}>
+                  <Button size="lg" variant="secondary" className="rounded-full font-bold">
+                    S'inscrire et postuler
+                  </Button>
+                </Link>
+                <Link to={`/login?redirect=${encodeURIComponent(redirect)}`}>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="rounded-full font-bold bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+                  >
+                    Se connecter
+                  </Button>
+                </Link>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-5 pt-4 text-sm opacity-80">
+                <span className="inline-flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4" /> Gratuit
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4" /> Sans engagement
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4" /> 2 minutes
+                </span>
+              </div>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-5 pt-4 text-sm opacity-80">
-              <span className="inline-flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4" /> Gratuit
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4" /> Sans engagement
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4" /> 2 minutes
-              </span>
-            </div>
-          </div>
-        </section>
+          </section>
+        )}
       </div>
     </div>
   );
