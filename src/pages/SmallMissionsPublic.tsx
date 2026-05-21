@@ -609,26 +609,76 @@ const SmallMissionsPublic = () => {
             Des missions ouvertes en ce moment
           </h2>
         </Reveal>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {openMissions.map((m, i) => (
-            <Reveal key={m.id} delay={0.04 * i}>
-              <Link
-                to={`/petites-missions/${m.id}`}
-                className="block h-full p-5 rounded-2xl border border-border bg-card hover:border-primary/40 hover:-translate-y-0.5 transition-all"
-              >
-                <p className="text-[11px] font-body font-semibold tracking-widest uppercase text-primary/70 mb-3">
-                  {CATEGORY_LABEL[m.category] || "Mission"}
-                </p>
-                <h3 className="font-heading text-base md:text-lg font-semibold text-foreground leading-snug mb-2 line-clamp-2">
-                  {m.title}
-                </h3>
-                <p className="text-xs text-foreground/55">
-                  {m.city || "France"}
-                </p>
-              </Link>
-            </Reveal>
-          ))}
-        </div>
+        {(() => {
+          const count = openMissions.length;
+          const gridCls =
+            count === 1
+              ? "grid grid-cols-1 md:grid-cols-2 gap-5 max-w-3xl mx-auto"
+              : count === 2
+              ? "grid grid-cols-1 md:grid-cols-2 gap-5 max-w-4xl mx-auto"
+              : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5";
+          return (
+            <div className={gridCls}>
+              {openMissions.map((m, i) => {
+                const dateNeeded = formatDateNeeded(m.date_needed);
+                const isFeatured = count === 1;
+                return (
+                  <Reveal key={m.id} delay={0.04 * i}>
+                    <Link
+                      to={`/petites-missions/${m.id}`}
+                      className="group relative flex h-full flex-col p-6 md:p-7 rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5 transition-all"
+                    >
+                      <div className="flex items-center justify-between gap-3 mb-3">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-body font-semibold tracking-wide">
+                          {CATEGORY_LABEL[m.category] || "Mission"}
+                        </span>
+                        <span className="text-[11px] text-foreground/50">{timeAgoFr(m.created_at)}</span>
+                      </div>
+                      <h3 className={`font-heading font-semibold text-foreground leading-snug mb-2 line-clamp-2 ${isFeatured ? "text-xl md:text-2xl" : "text-base md:text-lg"}`}>
+                        {m.title}
+                      </h3>
+                      {m.description && (
+                        <p className={`font-body text-sm text-foreground/70 leading-relaxed mb-4 ${isFeatured ? "line-clamp-3" : "line-clamp-2"}`}>
+                          {m.description}
+                        </p>
+                      )}
+                      <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-foreground/60">
+                        <span className="font-medium text-foreground/75">{m.city || "France"}</span>
+                        {dateNeeded && <span aria-hidden>·</span>}
+                        {dateNeeded && <span>{dateNeeded}</span>}
+                        {m.duration_estimate && <span aria-hidden>·</span>}
+                        {m.duration_estimate && <span>{m.duration_estimate}</span>}
+                      </div>
+                      <span className="mt-4 inline-flex items-center text-xs font-semibold text-primary group-hover:underline">
+                        Voir la mission →
+                      </span>
+                    </Link>
+                  </Reveal>
+                );
+              })}
+
+              {count < 3 && (
+                <Reveal delay={0.04 * count}>
+                  <button
+                    type="button"
+                    onClick={goToCreate}
+                    className="group flex h-full w-full flex-col items-center justify-center text-center p-6 md:p-7 rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 hover:border-primary/60 transition-colors"
+                  >
+                    <span className="font-heading text-lg md:text-xl font-semibold text-foreground mb-2">
+                      Votre demande pourrait être ici.
+                    </span>
+                    <span className="font-body text-sm text-foreground/70 mb-4 max-w-xs">
+                      Publiez un coup de main en deux minutes — gratuit, sans engagement.
+                    </span>
+                    <span className="inline-flex items-center text-sm font-semibold text-primary group-hover:underline">
+                      Publier une mission →
+                    </span>
+                  </button>
+                </Reveal>
+              )}
+            </div>
+          );
+        })()}
         <Reveal delay={0.3}>
           <div className="text-center mt-10">
             <Button onClick={goToHelp} variant="outline" className="border-2 border-primary text-primary rounded-full px-8 py-3 h-auto text-sm font-semibold">
