@@ -461,12 +461,26 @@ const SmallMissionDetail = () => {
 
   if (loading) {
     return (
-      <div className="p-6 md:p-10 max-w-3xl mx-auto">
-        <div className="text-muted-foreground">Chargement...</div>
-      </div>
+      <>
+        {!user && <PublicHeader />}
+        <div className="p-6 md:p-10 max-w-3xl mx-auto min-h-[40vh]">
+          <div className="text-muted-foreground">Chargement…</div>
+        </div>
+        {!user && <PublicFooter />}
+      </>
     );
   }
-  if (!mission) return <div className="p-6 md:p-10"><p>Mission introuvable.</p><Link to="/petites-missions" className="text-primary underline mt-2 inline-block">Retour aux missions</Link></div>;
+  if (!mission) return (
+    <>
+      {!user && <PublicHeader />}
+      <div className="p-6 md:p-10 max-w-3xl mx-auto min-h-[40vh]">
+        <h1 className="font-heading text-2xl font-bold mb-2">Mission introuvable</h1>
+        <p className="text-muted-foreground mb-4">Cette mission a peut-être été clôturée ou retirée.</p>
+        <Link to="/petites-missions"><Button>Voir les missions ouvertes</Button></Link>
+      </div>
+      {!user && <PublicFooter />}
+    </>
+  );
 
   const catMeta = CATEGORY_META[mission.category] || CATEGORY_META.animals;
   const CatIcon = catMeta.icon;
