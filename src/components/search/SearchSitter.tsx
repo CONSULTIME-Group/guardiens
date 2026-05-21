@@ -130,10 +130,6 @@ const SearchSitter = () => {
  const [cityPostalCode, setCityPostalCode] = useState<string | null>(null);
  const [alertCreated, setAlertCreated] = useState(false);
  const [isCreatingAlert, setIsCreatingAlert] = useState(false);
- const [crossTabCount, setCrossTabCount] = useState<number | null>(null);
- const [launchModeCount, setLaunchModeCount] = useState<number | null>(null);
- const [nearbyZones, setNearbyZones] = useState<{ deptCode: string; deptName: string; regionCode: string; regionName: string; count: number }[]>([]);
- const [nearbyRegions, setNearbyRegions] = useState<{ regionCode: string; regionName: string; count: number }[]>([]);
 
  const [results, setResults] = useState<any[]>([]);
  const [resultCoords, setResultCoords] = useState<Map<string, { lat: number; lng: number }>>(new Map());
