@@ -9,46 +9,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
- Calendar,
- MapPin,
- Star,
- PawPrint,
- Home,
- CheckCircle2,
- ArrowLeft,
- ExternalLink,
- ShieldCheck,
- Heart,
- Users,
- Sparkles,
- HandHeart,
+  ArrowLeft,
+  ExternalLink,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import VerifiedBadge from "@/components/profile/VerifiedBadge";
-import ShareButtons from "@/components/sits/ShareButtons";
 import { trackEvent } from "@/lib/analytics";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { getOgImageAbsoluteUrl } from "@/lib/ogImages";
 import { logger } from "@/lib/logger";
 
-import { TooltipProvider } from "@/components/ui/tooltip";
 import ApplicationModal from "@/components/sits/ApplicationModal";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
-import SitHero from "@/components/sits/shared/SitHero";
-import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
-import PublicSitPitch from "@/components/sits/public/PublicSitPitch";
-import PublicSitGallery from "@/components/sits/public/PublicSitGallery";
-import PublicSitFAQ from "@/components/sits/public/PublicSitFAQ";
-import PublicSitTrustStrip from "@/components/sits/public/PublicSitTrustStrip";
 import PublicSitView from "@/components/sits/PublicSitView";
 import {
- ENV_LABELS as envLabels,
- TYPE_LABELS as typeLabels,
- 
- SPECIES_LABEL as speciesLabel,
+  ENV_LABELS as envLabels,
+  TYPE_LABELS as typeLabels,
+  SPECIES_LABEL as speciesLabel,
 } from "@/components/sits/shared/sitConstants";
 
 type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
