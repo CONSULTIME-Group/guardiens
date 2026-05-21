@@ -47,10 +47,6 @@ const animalChipToSpecies: Record<string, string> = {
  Chiens: "dog", Chats: "cat", Chevaux: "horse",
  "Animaux de ferme": "farm_animal", NAC: "nac",
 };
-const speciesIcon: Record<string, typeof PawPrint> = {
- dog: PawPrint, cat: Cat, horse: PawPrint, bird: Bird, rodent: PawPrint,
- fish: PawPrint, reptile: PawPrint, farm_animal: Bird, nac: PawPrint,
-};
 
 
 
