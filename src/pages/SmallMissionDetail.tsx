@@ -595,6 +595,9 @@ const SmallMissionDetail = () => {
       </div>
 
       <div className="p-6 md:p-10 max-w-3xl mx-auto">
+        <div className="mb-4 -mt-2">
+          <PageBreadcrumb items={[{ label: "Coups de main", href: "/petites-missions" }, { label: mission.title }]} />
+        </div>
         {showPublishedBanner && (
           <MissionPublishedBanner
             missionTitle={mission.title}
@@ -615,14 +618,42 @@ const SmallMissionDetail = () => {
         {/* Meta */}
         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-6">
           {(mission.city || mission.postal_code) && (
-            <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" />{[mission.postal_code, mission.city].filter(Boolean).join(" ")}</span>
+            <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" />{[mission.postal_code, titlecaseCity(mission.city)].filter(Boolean).join(" ")}</span>
           )}
           {mission.date_needed && (
             <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" />{format(new Date(mission.date_needed), "d MMMM yyyy", { locale: fr })}</span>
           )}
-          <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" />{DURATION_LABELS[mission.duration_estimate] || mission.duration_estimate}</span>
-          <span className="flex items-center gap-1.5"><Users className="h-4 w-4" />{responses.length} proposition{responses.length > 1 ? "s" : ""}</span>
+          {mission.duration_estimate && (
+            <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" />{DURATION_LABELS[mission.duration_estimate] || mission.duration_estimate}</span>
+          )}
+          {responses.length > 0 && (
+            <span className="flex items-center gap-1.5"><Users className="h-4 w-4" />{responses.length} proposition{responses.length > 1 ? "s" : ""}</span>
+          )}
         </div>
+
+        {/* Author card — en haut pour mise en confiance immédiate */}
+        {author && (
+          <div className="flex items-center gap-3 mb-6 p-4 bg-card rounded-xl border border-border">
+            {author.avatar_url ? (
+              <img src={author.avatar_url} alt={author.first_name} className="w-12 h-12 rounded-full object-cover" />
+            ) : (
+              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center font-heading text-lg font-bold">
+                {author.first_name?.charAt(0) || "?"}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm">
+                Publié par {author.first_name || "un membre"}
+                {author.identity_verified && <span className="ml-2 inline-flex items-center gap-1 text-xs text-success"><CheckCircle2 className="h-3 w-3" /> Identité vérifiée</span>}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {titlecaseCity(author.city) || titlecaseCity(mission.city) || "France"}
+                {memberSince(author.created_at) && <> · {memberSince(author.created_at)}</>}
+              </p>
+            </div>
+            {user && !isAuthor && <ReportButton targetId={mission.id} targetType="profile" />}
+          </div>
+        )}
 
         {/* ── BANNERS ── */}
 
