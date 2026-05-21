@@ -12,7 +12,6 @@ Disallow: /mon-abonnement
 Disallow: /notifications
 Disallow: /sits
 Disallow: /annonces/
-Disallow: /search
 Disallow: /recherche-gardiens
 Disallow: /review/
 Disallow: /house-guide/
