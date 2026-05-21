@@ -1518,7 +1518,7 @@ const SearchSitter = () => {
  const visibleSkills = skills.slice(0, 2);
  const extraCount = skills.length - 2;
  return (
- <div key={member.id} className="bg-card rounded-2xl border border-border p-4 flex items-center gap-4">
+ <div key={member.id} className={`bg-card rounded-2xl border p-4 flex items-center gap-4 ${member.is_demo ? "border-amber-300/70 border-dashed" : "border-border"}`}>
  {member.avatar_url ? (
  <img src={member.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover shrink-0" loading="lazy" />
  ) : (
@@ -1532,6 +1532,12 @@ const SearchSitter = () => {
  {member.is_founder && <FounderBadge size="sm" />}
  </div>
  {member.city && <p className="text-xs text-muted-foreground">{member.city}{member.distance != null ? ` · à ${Math.round(member.distance)} km` : ""}</p>}
+ {member.specialty_label && (
+   <p className="text-[13px] font-semibold text-amber-700 mt-1">{member.specialty_label}</p>
+ )}
+ {member.specialty_description && (
+   <p className="text-xs text-muted-foreground italic line-clamp-2 mt-0.5">{member.specialty_description}</p>
+ )}
  <div className="flex flex-wrap gap-1.5 mt-1.5">
  {visibleSkills.map((s: string) => {
  const meta = skillMeta[s];
