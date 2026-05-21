@@ -185,6 +185,19 @@ const EmergencySitter = () => {
         <script type="application/ld+json">{JSON.stringify(serviceJsonLd)}</script>
       </Helmet>
       <PublicHeader />
+
+      {/* Bandeau Bientôt disponible */}
+      <section className="bg-warning/15 border-b border-warning/25 py-3">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <p className="text-sm font-medium text-warning-foreground">
+            Bientôt disponible — Le réseau de gardiens d'urgence sera activé dès que nous aurons suffisamment de profils vérifiés et éprouvés.
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Notre plateforme est jeune. Nous prenons le temps de désigner des gardiens d'urgence sur des critères stricts pour garantir la fiabilité du service.
+          </p>
+        </div>
+      </section>
+
       <PageBreadcrumb items={[{ label: "Gardien d'urgence" }]} />
 
       {/* Hero */}
@@ -299,7 +312,7 @@ const EmergencySitter = () => {
             <Link to="/inscription?role=owner">
               <Button size="lg" className="gap-2">
                 <MapPin className="h-4 w-4" />
-                Trouver un gardien d'urgence près de chez moi
+                M'inscrire et être averti(e) du lancement
               </Button>
             </Link>
           </div>
@@ -310,7 +323,7 @@ const EmergencySitter = () => {
       <section className="max-w-4xl mx-auto px-4 py-16">
         <h2 className="font-heading text-2xl font-bold text-center mb-3">Devenez gardien d'urgence</h2>
         <p className="text-center text-muted-foreground mb-10">
-          Quand vous remplissez les conditions, l'invitation apparaît sur votre dashboard. C'est vous qui choisissez.
+          Quand vous remplissez les conditions, l'invitation apparaîtra sur votre dashboard. C'est vous qui choisissez.
         </p>
 
         <div className="grid md:grid-cols-2 gap-8">
@@ -343,12 +356,10 @@ const EmergencySitter = () => {
         </div>
 
         <div className="text-center mt-8">
-          <Link to="/dashboard">
-            <Button variant="outline" size="lg" className="gap-2">
-              <Zap className="h-4 w-4" />
-              Voir si je suis éligible
-            </Button>
-          </Link>
+          <Button variant="outline" size="lg" className="gap-2" disabled>
+            <Zap className="h-4 w-4" />
+            Éligibilité (à venir)
+          </Button>
         </div>
       </section>
 
@@ -442,15 +453,15 @@ const EmergencySitter = () => {
         </div>
       </section>
 
-      {/* Footer CTA — integrated into PublicFooter area */}
+      {/* Footer CTA */}
       <section className="py-8 text-center border-t border-border">
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <Link to="/inscription?role=owner">
-            <Button size="sm">Trouver un gardien d'urgence</Button>
+            <Button size="sm">S'inscrire — lancement prochain</Button>
           </Link>
-          <Link to="/dashboard">
-            <Button size="sm" variant="outline">Voir mon éligibilité</Button>
-          </Link>
+          <Button size="sm" variant="outline" disabled>
+            Voir mon éligibilité (à venir)
+          </Button>
           <Link to="/faq#gardien-d-urgence" className="text-sm text-primary hover:underline">FAQ complète</Link>
         </div>
       </section>
