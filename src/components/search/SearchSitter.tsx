@@ -1130,11 +1130,16 @@ const SearchSitter = () => {
  Cette garde a déjà trouvé son gardien.
  </p>
  )}
- {isCompleted && (
- <p className="text-xs text-muted-foreground italic mt-3">
- Garde déjà réalisée — pour donner un aperçu de l'activité.
- </p>
- )}
+  {isCompleted && (
+  <p className="text-xs text-muted-foreground italic mt-3">
+  Garde déjà réalisée — pour donner un aperçu de l'activité.
+  </p>
+  )}
+  {isPast && !isCompleted && (
+  <p className="text-xs text-muted-foreground italic mt-3">
+  Annonce passée — consultable à titre d'historique.
+  </p>
+  )}
  {isDemo && (
  <p className="text-xs text-amber-700 italic mt-3 flex items-center gap-1">
  <Sparkles className="h-3 w-3" /> Exemple — cliquez pour découvrir l'expérience complète
