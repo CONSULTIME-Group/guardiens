@@ -47,6 +47,7 @@ import AnimalsPickerPopover from "@/components/search/header/AnimalsPickerPopove
 import { useEmptyStateBreakdown } from "@/hooks/search/useEmptyStateBreakdown";
 import { useSearchAlert } from "@/hooks/search/useSearchAlert";
 import { useSearchUserProfile } from "@/hooks/search/useSearchUserProfile";
+import { normalizeSkillKey, tokenizeSkillPhrases } from "@/lib/skills/tokenize";
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Animaux de ferme", "NAC"];
 const animalChipToSpecies: Record<string, string> = {
@@ -784,6 +785,14 @@ const SearchSitter = () => {
  }
  const memberIds = items.map((m: any) => m.id);
  if (memberIds.length > 0) {
+  const { data: sitterProfiles } = await supabase
+    .from("sitter_profiles")
+    .select("user_id, competences")
+    .in("user_id", memberIds);
+  const competenceMap = new Map<string, string[]>();
+  (sitterProfiles || []).forEach((sp: any) => {
+    if (sp.competences?.length) competenceMap.set(sp.user_id, sp.competences);
+  });
  const { data: reviews } = await supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", memberIds).eq("published", true);
  const reviewMap = new Map<string, { count: number; total: number }>();
  (reviews || []).forEach((r: any) => {
@@ -795,7 +804,7 @@ const SearchSitter = () => {
  (apps || []).forEach((a: any) => { sitsMap.set(a.sitter_id, (sitsMap.get(a.sitter_id) || 0) + 1); });
  items = items.map((m: any) => {
  const rev = reviewMap.get(m.id);
- return {...m, avgRating: rev ? (rev.total / rev.count).toFixed(1) : null, reviewCount: rev?.count || 0, sitsCount: sitsMap.get(m.id) || 0 };
+  return {...m, competences: competenceMap.get(m.id) || [], avgRating: rev ? (rev.total / rev.count).toFixed(1) : null, reviewCount: rev?.count || 0, sitsCount: sitsMap.get(m.id) || 0 };
  });
  }
   if (sort === "closest") items.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
@@ -803,7 +812,10 @@ const SearchSitter = () => {
  // Tri prio : savoir-faire particuliers (competences) AVEC photo > competences sans photo > autres avec photo > autres sans photo.
  // Ce tri prime sur les autres pour mettre en avant la valeur ajoutée (reiki, éducation canine, ostéo…).
  const skillRank = (m: any) => {
-   const hasCompetences = Array.isArray(m.skill_categories) && m.skill_categories.includes("competences");
+    const hasCompetences =
+      tokenizeSkillPhrases(m.competences || []).length > 0 ||
+      !!m.specialty_label ||
+      (Array.isArray(m.skill_categories) && m.skill_categories.includes("competences"));
    const hasAvatar = !!m.avatar_url;
    if (hasCompetences && hasAvatar) return 0;
    if (hasCompetences) return 1;
