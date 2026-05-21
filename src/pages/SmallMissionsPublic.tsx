@@ -12,13 +12,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Helmet } from "react-helmet-async";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
-  MISSIONS_ILLUSTRATIONS,
   MISSIONS_EXAMPLES,
   MISSIONS_FAQ,
   MISSIONS_TESTIMONIALS,
 } from "@/data/missionsPublicContent";
 
-const { spotChien, spotJardin, spotPoules, spotBricolage } = MISSIONS_ILLUSTRATIONS;
 
 /* ── scroll reveal ── */
 function useScrollReveal(threshold = 0.1) {
