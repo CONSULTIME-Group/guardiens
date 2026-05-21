@@ -745,7 +745,7 @@ const SmallMissionsPublic = () => {
           Faire venir un professionnel pour arroser des plantes, déplacer un meuble ou promener un chien revient souvent à 25-40 € par intervention. Sur une saison, le calcul devient déraisonnable pour des gestes qui prennent quinze minutes à une personne du coin. La transaction monétaire transforme un service simple en prestation, avec ce qu'elle implique de cadre, de TVA, et de distance émotionnelle.
         </p>
         <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed mb-6">
-          L'entraide gratuit réintroduit la souplesse. Une heure aujourd'hui, un panier de légumes la semaine prochaine. Un coup de main pour un déménagement, un dîner partagé en retour. Personne ne tient les comptes — et c'est précisément ce qui rend l'échange durable.
+          L'entraide gratuite réintroduit la souplesse. Une heure aujourd'hui, un panier de légumes la semaine prochaine. Un coup de main pour un déménagement, un dîner partagé en retour. Personne ne tient les comptes — et c'est précisément ce qui rend l'échange durable.
         </p>
       </Reveal>
 
@@ -933,7 +933,7 @@ const SmallMissionsPublic = () => {
     "@context": "https://schema.org",
     "@type": "HowTo",
     name: "Publier une demande de coup de main près de chez vous",
-    description: "Comment publier une petite mission d'entraide gratuit sur Guardiens, sans abonnement.",
+    description: "Comment publier une petite mission d'entraide gratuite sur Guardiens, sans abonnement.",
     totalTime: "PT3M",
     step: [
      { "@type": "HowToStep", position: 1, name: "Décrire la mission", text: "Vous décrivez la mission — tonte, bricolage, promener le chien, réceptionner un colis." },
