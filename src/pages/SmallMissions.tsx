@@ -637,7 +637,7 @@ const SmallMissions = () => {
                         )}
                       </span>
                       <div className="opacity-90">
-                        <n
+                        <MissionCard
                           mission={m}
                           currentUserId={user?.id}
                           isAuthenticated={isAuthenticated}
