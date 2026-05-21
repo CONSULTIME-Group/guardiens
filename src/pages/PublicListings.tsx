@@ -55,7 +55,7 @@ export default function PublicListings() {
       const ownerIds = Array.from(new Set(rawSits.map((s) => s.user_id).filter(Boolean)));
       const propIds = Array.from(new Set(rawSits.map((s) => s.property_id).filter(Boolean)));
 
-      const [{ data: owners }, { data: props }] = await Promise.all([
+      const [{ data: owners }, { data: props }, { data: gallery }] = await Promise.all([
         supabase
           .from("public_profiles")
           .select("id, first_name, city")
@@ -64,10 +64,19 @@ export default function PublicListings() {
           .from("properties")
           .select("id, type, cover_photo_url, photos")
           .in("id", propIds),
+        supabase
+          .from("owner_gallery")
+          .select("user_id, photo_url, position")
+          .in("user_id", ownerIds)
+          .order("position", { ascending: true }),
       ]);
 
       const ownerMap = new Map((owners || []).map((o: any) => [o.id, o]));
       const propMap = new Map((props || []).map((p: any) => [p.id, p]));
+      const galleryMap = new Map<string, string>();
+      (gallery || []).forEach((g: any) => {
+        if (g.photo_url && !galleryMap.has(g.user_id)) galleryMap.set(g.user_id, g.photo_url);
+      });
 
       const enriched: LiveSit[] = rawSits.map((s: any) => {
         const o = ownerMap.get(s.user_id);
@@ -80,7 +89,7 @@ export default function PublicListings() {
           city: o?.city ?? null,
           first_name: o?.first_name ?? null,
           cover_photo_url: p?.cover_photo_url ?? null,
-          first_photo: p?.photos?.[0] ?? null,
+          first_photo: p?.photos?.[0] ?? galleryMap.get(s.user_id) ?? null,
           property_type: p?.type ?? null,
         };
       });
