@@ -106,7 +106,7 @@ const SearchMapView = ({
     : [46.6, 2.5];
 
   const visibleResults = results.filter(
-    (item) => showAll || (!item?.is_demo && !item?.isAssigned && !item?.isCompleted)
+    (item) => showAll || (!item?.is_demo && !item?.isAssigned && !item?.isCompleted && !item?.isPast)
   );
   const visibleCoords = visibleResults
     .map((item) => getCoords(item))
