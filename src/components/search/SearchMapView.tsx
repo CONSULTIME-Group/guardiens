@@ -34,7 +34,7 @@ const createPinIcon = (kind: PinKind, isActive: boolean) => {
 
 const getPinKind = (item: any): PinKind => {
   if (item?.is_demo) return "demo";
-  if (item?.isAssigned || item?.isCompleted) return "inactive";
+  if (item?.isAssigned || item?.isCompleted || item?.isPast) return "inactive";
   return "active";
 };
 
