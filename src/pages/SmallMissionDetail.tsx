@@ -727,23 +727,9 @@ const SmallMissionDetail = () => {
           <p className="text-sm text-muted-foreground">{mission.exchange_offer}</p>
         </div>
 
-        {/* Author card */}
-        {author && (
-          <div className="flex items-center gap-3 mb-8 p-4 bg-card rounded-xl border border-border">
-            {author.avatar_url ? (
-              <img src={author.avatar_url} alt={author.first_name} className="w-12 h-12 rounded-full object-cover" />
-            ) : (
-              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center font-heading text-lg font-bold">
-                {author.first_name?.charAt(0) || "?"}
-              </div>
-            )}
-            <div className="flex-1">
-              <p className="font-medium">{author.first_name}</p>
-              <p className="text-xs text-muted-foreground">{[author.postal_code, author.city].filter(Boolean).join(" ")}</p>
-            </div>
-            {user && !isAuthor && <ReportButton targetId={mission.id} targetType="profile" />}
-          </div>
-        )}
+        {/* Author card déplacé en haut — bloc supprimé pour éviter doublon */}
+
+
 
         {/* ══════════════════════════════════════════════════════ */}
         {/* ── PUBLISHER VIEW ── */}
