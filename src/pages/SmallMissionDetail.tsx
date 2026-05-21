@@ -976,12 +976,46 @@ const SmallMissionDetail = () => {
         {/* Not logged in */}
         {!user && (
           <div className="text-center py-8 border-t border-border mt-8">
-            <p className="text-muted-foreground mb-3">Inscrivez-vous gratuitement pour proposer votre aide.</p>
+            <p className="text-muted-foreground mb-3">Inscrivez-vous gratuitement pour proposer votre aide. Sans engagement, en 2 minutes.</p>
             <div className="flex flex-wrap gap-2 justify-center">
               <Link to={`/inscription?redirect=/petites-missions/${mission.id}`}><Button>Créer un compte gratuit</Button></Link>
               <Link to={`/login?redirect=/petites-missions/${mission.id}`}><Button variant="outline">Se connecter</Button></Link>
             </div>
           </div>
+        )}
+
+        {/* Related missions — maillage interne + anti cul-de-sac */}
+        {relatedMissions.length > 0 && (
+          <section className="mt-12 pt-10 border-t border-border">
+            <h2 className="font-heading text-xl font-semibold mb-1">Autres coups de main près d'ici</h2>
+            <p className="text-sm text-muted-foreground mb-5">D'autres personnes cherchent aussi un coup de main.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {relatedMissions.map((rm) => (
+                <Link
+                  key={rm.id}
+                  to={`/petites-missions/${rm.id}`}
+                  className="group flex flex-col p-4 rounded-xl border border-border bg-card hover:border-primary/50 hover:shadow-sm transition-all"
+                >
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wide">
+                      {(CATEGORY_META[rm.category] || CATEGORY_META.animals).label}
+                    </span>
+                    <span className="text-[10px] text-foreground/50">{timeAgoFr(rm.created_at)}</span>
+                  </div>
+                  <h3 className="font-heading font-semibold text-sm leading-snug mb-2 line-clamp-2">{rm.title}</h3>
+                  {rm.description && (
+                    <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{rm.description}</p>
+                  )}
+                  <div className="mt-auto text-xs text-foreground/60">{titlecaseCity(rm.city) || "France"}</div>
+                </Link>
+              ))}
+            </div>
+            <div className="text-center mt-6">
+              <Link to="/petites-missions" className="text-sm font-semibold text-primary hover:underline">
+                Voir tous les coups de main ouverts →
+              </Link>
+            </div>
+          </section>
         )}
       </div>
 
