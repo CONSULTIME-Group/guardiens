@@ -37,6 +37,9 @@ import { getRegionCode, getRegionName, getDeptsInRegion, REGION_NAMES, DEPT_TO_R
 import { trackEvent } from "@/lib/analytics";
 import ReachReassuranceBanner from "@/components/marketing/ReachReassuranceBanner";
 import LocationPickerPopover from "@/components/search/header/LocationPickerPopover";
+import ZonePickerPopover from "@/components/search/header/ZonePickerPopover";
+import DatesPickerPopover from "@/components/search/header/DatesPickerPopover";
+import AnimalsPickerPopover from "@/components/search/header/AnimalsPickerPopover";
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Animaux de ferme", "NAC"];
 const animalChipToSpecies: Record<string, string> = {
@@ -48,7 +51,7 @@ const speciesIcon: Record<string, typeof PawPrint> = {
  fish: PawPrint, reptile: PawPrint, farm_animal: Bird, nac: PawPrint,
 };
 
-const RADIUS_SHORTCUTS = [5, 10, 15, 30, 50];
+
 
 type SortOption = "closest" | "recent" | "rating";
 type SearchTab = "sits" | "missions";
@@ -147,7 +150,7 @@ const SearchSitter = () => {
  const [editingCity, setEditingCity] = useState(false);
  const [cityInput, setCityInput] = useState("");
  const [citySuggestions, setCitySuggestions] = useState<{ nom: string; codesPostaux?: string[] }[]>([]);
-  const [showMoreAnimals, setShowMoreAnimals] = useState(false);
+  
  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
 
@@ -1334,140 +1337,37 @@ const SearchSitter = () => {
    onGeolocate={handleGeolocation}
  />
 
- {/* Zone pill (radius / dept / region / france) */}
- <Popover>
- <PopoverTrigger asChild>
- <button className={pillClass} aria-label="Choisir la zone de recherche">
- <span className="text-foreground">
- {zoneMode === "radius" && `${radius[0]} km`}
- {zoneMode === "dept" && (() => {
- const d = getDeptCode(userPostalCode);
- return d ? `Dépt ${d}` : "Mon département";
- })()}
- {zoneMode === "region" && "Ma région"}
- {zoneMode === "france" && "Toute la France"}
- </span>
- </button>
- </PopoverTrigger>
- <PopoverContent className="w-72 p-3" align="start">
- <div className="space-y-1 mb-3">
- <button
- onClick={() => setZoneMode("radius")}
- className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${zoneMode === "radius" ? "bg-primary/10 text-primary font-medium" : "hover:bg-accent text-foreground"}`}
- >
- Autour de moi <span className="text-xs text-muted-foreground">({radius[0]} km · {densityCounts.radius} {densityCounts.radius > 1 ? "résultats" : "résultat"})</span>
- </button>
- <button
- onClick={() => setZoneMode("dept")}
- disabled={!getDeptCode(userPostalCode)}
- className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${zoneMode === "dept" ? "bg-primary/10 text-primary font-medium" : "hover:bg-accent text-foreground"}`}
- >
- Mon département {getDeptCode(userPostalCode) && (
- <span className="text-xs text-muted-foreground">
- ({getDeptCode(userPostalCode)} {DEPT_NAMES[getDeptCode(userPostalCode)!]} · {densityCounts.dept})
- </span>
- )}
- </button>
-  {/* L'option "Ma région" est volontairement masquée : la promesse produit
-      est « France entière », pas régionale (mémoire core "No AURA"). */}
- <button
- onClick={() => setZoneMode("france")}
- className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${zoneMode === "france" ? "bg-primary/10 text-primary font-medium" : "hover:bg-accent text-foreground"}`}
- >
- Toute la France <span className="text-xs text-muted-foreground">({densityCounts.france})</span>
- </button>
- </div>
- {zoneMode === "radius" && (
- <div className="border-t border-border pt-3 space-y-3">
- <div className="flex flex-wrap gap-1.5">
- {RADIUS_SHORTCUTS.map(r => (
- <button
- key={r}
- onClick={() => setRadius([r])}
- className={`rounded-full px-3 py-1 text-xs transition-colors ${
- radius[0] === r
- ? "bg-primary text-primary-foreground"
- : "border border-border text-muted-foreground hover:border-primary"
- }`}
- >
- {r === 50 ? "50 km+" : `${r} km`}
- </button>
- ))}
- </div>
- {(() => {
- const currentIdx = Math.max(0, ALLOWED_ALERT_RADII.indexOf(radius[0] as any));
- return (
- <Slider
- value={[currentIdx]}
- onValueChange={(v) => setRadius([ALLOWED_ALERT_RADII[v[0]]])}
- min={0}
- max={ALLOWED_ALERT_RADII.length - 1}
- step={1}
- />
- );
- })()}
- </div>
- )}
- </PopoverContent>
- </Popover>
+  {/* Zone pill (radius / dept / region / france) */}
+  <ZonePickerPopover
+    pillClass={pillClass}
+    zoneMode={zoneMode}
+    setZoneMode={setZoneMode}
+    radius={radius}
+    setRadius={setRadius}
+    userPostalCode={userPostalCode}
+    densityCounts={densityCounts}
+  />
 
- {/* Dates pill */}
- <Popover>
- <PopoverTrigger asChild>
- <button className={pillClass}>
- <Calendar className="h-4 w-4 text-primary" />
- <span className="text-foreground">{datesLabel}</span>
- </button>
- </PopoverTrigger>
- <PopoverContent className="w-64 p-4" align="start">
- <div className="space-y-3">
- <div>
- <label className="text-xs text-muted-foreground block mb-1">Du</label>
- <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
- </div>
- <div>
- <label className="text-xs text-muted-foreground block mb-1">Au</label>
- <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
- </div>
- </div>
- </PopoverContent>
- </Popover>
+  {/* Dates pill */}
+  <DatesPickerPopover
+    pillClass={pillClass}
+    datesLabel={datesLabel}
+    startDate={startDate}
+    endDate={endDate}
+    setStartDate={setStartDate}
+    setEndDate={setEndDate}
+  />
 
- {/* Animals pill */}
- <Popover>
- <PopoverTrigger asChild>
- <button className={pillClass}>
- <PawPrint className="h-4 w-4 text-primary" />
- <span className="text-foreground">{animalsLabel}</span>
- </button>
- </PopoverTrigger>
- <PopoverContent className="w-56 p-3" align="start">
- <div className="space-y-2">
- {["Chiens", "Chats"].map(animal => (
- <label key={animal} className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
- <Checkbox checked={animalTypes.includes(animal)} onCheckedChange={() => toggleAnimalFilter(animal)} />
- {animal === "Chiens" && <PawPrint className="h-3.5 w-3.5 text-muted-foreground" />}
- {animal === "Chats" && <Cat className="h-3.5 w-3.5 text-muted-foreground" />}
- {animal}
- </label>
- ))}
- {!showMoreAnimals && (
- <button className="text-xs text-primary hover:underline" onClick={() => setShowMoreAnimals(true)}>
- Voir plus ▾
- </button>
- )}
- {showMoreAnimals && ["Chevaux", "Animaux de ferme", "NAC"].map(animal => (
- <label key={animal} className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
- <Checkbox checked={animalTypes.includes(animal)} onCheckedChange={() => toggleAnimalFilter(animal)} />
- {animal}
- </label>
- ))}
- </div>
- </PopoverContent>
- </Popover>
+  {/* Animals pill */}
+  <AnimalsPickerPopover
+    pillClass={pillClass}
+    animalsLabel={animalsLabel}
+    animalTypes={animalTypes}
+    toggleAnimalFilter={toggleAnimalFilter}
+  />
 
- {/* Verified toggle promu (raccourci confiance) */}
- <button
+  {/* Verified toggle promu (raccourci confiance) */}
+  <button
  onClick={() => setVerifiedOnly(v => !v)}
  aria-pressed={verifiedOnly}
  className={`${pillClass} ${verifiedOnly ? "bg-primary/10 border-primary text-primary" : ""}`}
