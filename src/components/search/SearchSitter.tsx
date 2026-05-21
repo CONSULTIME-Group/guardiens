@@ -708,7 +708,7 @@ const SearchSitter = () => {
  const searchMissions = async (searchCoords: { lat: number; lng: number } | null) => {
  let query = supabase
 .from("small_missions")
-.select("*, owner:profiles!small_missions_user_id_fkey(first_name, avatar_url, city, identity_verified, is_founder)")
+.select("*, owner:public_profiles!small_missions_user_id_fkey(first_name, avatar_url, city, identity_verified, is_founder)")
 .eq("status", "open")
 .order("created_at", { ascending: false });
  const { data } = await query;
@@ -754,7 +754,7 @@ const SearchSitter = () => {
 
  const searchAvailableMembers = async (searchCoords: { lat: number; lng: number } | null) => {
  const { data } = await supabase
-.from("profiles")
+.from("public_profiles")
 .select("id, first_name, avatar_url, city, skill_categories, available_for_help, is_founder")
 .eq("available_for_help", true)
 .not("skill_categories", "eq", "{}");
