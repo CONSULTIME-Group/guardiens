@@ -8,7 +8,6 @@ const NAV_LINKS = [
   { label: "Coups de main", to: "/petites-missions" },
   { label: "Guides locaux", to: "/guides" },
   { label: "Tarifs", to: "/tarifs" },
-  { label: "FAQ", to: "/faq" },
   { label: "Le journal", to: "/actualites" },
 ];
 
