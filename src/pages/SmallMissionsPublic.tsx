@@ -87,6 +87,7 @@ interface OpenMissionRow {
   date_needed: string | null;
   duration_estimate: string | null;
   exchange_offer: string | null;
+  photos: string[] | null;
 }
 
 /* Date relative en français, court */
