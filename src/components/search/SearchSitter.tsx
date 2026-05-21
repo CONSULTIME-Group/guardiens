@@ -754,7 +754,7 @@ const SearchSitter = () => {
 
  const searchAvailableMembers = async (searchCoords: { lat: number; lng: number } | null) => {
  const { data } = await supabase
-.from("profiles")
+.from("public_profiles")
 .select("id, first_name, avatar_url, city, skill_categories, available_for_help, is_founder")
 .eq("available_for_help", true)
 .not("skill_categories", "eq", "{}");
