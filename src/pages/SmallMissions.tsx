@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowRight, X } from "lucide-react";
+import { ArrowRight, X, MapPin } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import PageMeta from "@/components/PageMeta";
 import { useAuth } from "@/contexts/AuthContext";
@@ -579,13 +579,19 @@ const SmallMissions = () => {
               <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-8 text-center space-y-3">
                 <p className="font-heading text-lg font-semibold text-foreground">
                   {mode === "offer"
-                    ? "Aucune demande pour le moment près de chez vous."
-                    : "Personne n'a encore osé près de chez vous."}
+                    ? `Aucune demande à moins de ${radiusKm || 25} km de chez vous.`
+                    : `Personne n'a encore osé à moins de ${radiusKm || 25} km de chez vous.`}
                 </p>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                  {mode === "offer"
-                    ? "Rendez-vous visible : indiquez vos disponibilités juste en dessous. Quand une demande arrivera, vous serez la première personne à qui l'on pense."
-                    : "Soyez la première personne à publier. Une demande d'aujourd'hui, c'est des gens du coin qui la voient demain — et souvent une rencontre qui change la semaine."}
+                  {outOfZoneMissions.length > 0 ? (
+                    <>
+                      <strong className="text-foreground">Bonne nouvelle :</strong> {outOfZoneMissions.length} demande{outOfZoneMissions.length > 1 ? "s sont visibles" : " est visible"} un peu plus loin ↓
+                    </>
+                  ) : mode === "offer" ? (
+                    "Rendez-vous visible : indiquez vos disponibilités juste en dessous. Quand une demande arrivera, vous serez la première personne à qui l'on pense."
+                  ) : (
+                    "Soyez la première personne à publier. Une demande d'aujourd'hui, c'est des gens du coin qui la voient demain — et souvent une rencontre qui change la semaine."
+                  )}
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
                   {mode === "need" && (
@@ -613,18 +619,24 @@ const SmallMissions = () => {
 
             {/* ═══ Section 1bis — Hors périmètre ═══ */}
             {outOfZoneMissions.length > 0 && (
-              <div className="mt-8 rounded-2xl border border-dashed border-border bg-muted/30 p-5">
-                <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
-                  <div>
-                    <h3 className="text-sm font-semibold text-foreground">
-                      {outOfZoneMissions.length} demande{outOfZoneMissions.length > 1 ? "s" : ""} hors de votre périmètre ({radiusKm} km)
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Visibles uniquement si vous êtes prêt·e à élargir votre zone.
-                    </p>
+              <div className="mt-8 rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-primary/10 to-primary/5 p-5 shadow-sm">
+                <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+                  <div className="flex items-start gap-3">
+                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-primary shrink-0">
+                      <MapPin className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <h3 className="font-heading text-base font-semibold text-foreground">
+                        {outOfZoneMissions.length} {outOfZoneMissions.length > 1 ? "autres demandes existent" : "autre demande existe"} un peu plus loin
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Au-delà de votre périmètre actuel ({radiusKm} km). Élargissez pour les voir toutes.
+                      </p>
+                    </div>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => setRadiusKm(0)}>
+                  <Button variant="hero" size="sm" onClick={() => setRadiusKm(0)}>
                     Élargir à la France entière
+                    <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                   </Button>
                 </div>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
