@@ -798,8 +798,19 @@ const SearchSitter = () => {
  return {...m, avgRating: rev ? (rev.total / rev.count).toFixed(1) : null, reviewCount: rev?.count || 0, sitsCount: sitsMap.get(m.id) || 0 };
  });
  }
- if (sort === "closest") items.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
+  if (sort === "closest") items.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
  else if (sort === "rating") items.sort((a: any, b: any) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
+ // Tri prio : savoir-faire particuliers (competences) AVEC photo > competences sans photo > autres avec photo > autres sans photo.
+ // Ce tri prime sur les autres pour mettre en avant la valeur ajoutée (reiki, éducation canine, ostéo…).
+ const skillRank = (m: any) => {
+   const hasCompetences = Array.isArray(m.skill_categories) && m.skill_categories.includes("competences");
+   const hasAvatar = !!m.avatar_url;
+   if (hasCompetences && hasAvatar) return 0;
+   if (hasCompetences) return 1;
+   if (hasAvatar) return 2;
+   return 3;
+ };
+ items.sort((a: any, b: any) => skillRank(a) - skillRank(b));
  // Démos "savoir-faire complémentaires" toujours visibles (reiki, naturopathie, ostéo…)
  // — seulement quand le filtre catégorie est "all" ou "skills".
  const showDemoMembers = missionCategoryFilter === "all" || missionCategoryFilter === "skills";
