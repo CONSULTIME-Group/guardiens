@@ -788,13 +788,8 @@ const SearchSitter = () => {
  return envs.some((e: string) => environments.includes(e));
  });
  }
- // Filter by min_gardien_sits: only show sits where user meets the requirement
- if (user) {
- final = final.filter((item: any) => {
- const minRequired = (item as any).min_gardien_sits || 0;
- return userCompletedSits >= minRequired;
- });
- }
+ // `min_gardien_sits` est une préférence propriétaire, pas un critère bloquant :
+ // l'annonce doit rester visible dans la recherche, comme indiqué dans le formulaire.
  final = sortResults(final, sort);
  // Démos toujours visibles, mais densité adaptée à l'offre réelle :
  //  • 0 vraie annonce         → on garde la cadence 1/3 (page sinon vide)
