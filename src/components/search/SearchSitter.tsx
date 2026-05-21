@@ -380,13 +380,14 @@ const SearchSitter = () => {
  return () => { if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current); };
  }, [doSearch]);
 
- useEffect(() => {
- if (initialLoadDone.current) return;
- if (userCoords || (user && userCity === "")) {
- initialLoadDone.current = true;
- doSearch();
- }
- }, [userCoords, user, userCity]);
+  useEffect(() => {
+  if (initialLoadDone.current) return;
+  // Anon visitors: fire search immediately (no profile coords to wait for) — SEO + signup conversion (Nomador model)
+  if (!user || userCoords || (user && userCity === "")) {
+  initialLoadDone.current = true;
+  doSearch();
+  }
+  }, [userCoords, user, userCity]);
 
  // Reset alert state when city or radius changes
  useEffect(() => {
