@@ -85,9 +85,12 @@ const SearchSitter = () => {
  });
  const [densityCounts, setDensityCounts] = useState<{ radius: number; dept: number; region: number; france: number }>({ radius: 0, dept: 0, region: 0, france: 0 });
  const [userPostalCode, setUserPostalCode] = useState<string | null>(null);
- const [startDate, setStartDate] = useState("");
- const [endDate, setEndDate] = useState("");
- const [animalTypes, setAnimalTypes] = useState<string[]>([]);
+ const [startDate, setStartDate] = useState(() => searchParams.get("debut") || "");
+ const [endDate, setEndDate] = useState(() => searchParams.get("fin") || "");
+ const [animalTypes, setAnimalTypes] = useState<string[]>(() => {
+  const a = searchParams.get("animaux");
+  return a ? a.split(",").map((s) => s.trim()).filter(Boolean) : [];
+ });
  const [housingTypes, setHousingTypes] = useState<HousingFilter[]>([]);
  const [duration, setDuration] = useState("all");
  const [verifiedOnly, setVerifiedOnly] = useState(false);
