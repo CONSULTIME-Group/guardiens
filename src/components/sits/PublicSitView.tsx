@@ -1,6 +1,6 @@
 // Vue publique éditoriale (Modern Minimal) — annonces de garde.
-// Cible : visiteurs anonymes uniquement. Objectif : conversion + clarté.
-// Pattern identique à PublicMissionView pour cohérence d'univers.
+// Cible : visiteurs anonymes ET connectés (hors propriétaire de l'annonce).
+// Objectif : conversion + clarté. Pattern aligné avec PublicMissionView.
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Share2, CheckCircle2, Star } from "lucide-react";
@@ -18,12 +18,16 @@ interface SitLike {
   daily_routine?: string | null;
   open_to?: string[] | null;
   user_id: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  accepting_applications?: boolean | null;
 }
 
 interface OwnerLike {
   first_name?: string | null;
   avatar_url?: string | null;
   city?: string | null;
+  postal_code?: string | null;
   bio?: string | null;
   identity_verified?: boolean | null;
   is_founder?: boolean | null;
@@ -66,6 +70,11 @@ interface Props {
   envLabel: string | null;
   speciesLabel: Record<string, string>;
   onShare: () => void;
+  /** Contexte viewer pour adapter le CTA. */
+  isAuthenticated?: boolean;
+  hasAccess?: boolean;
+  hasApplied?: boolean;
+  onApply?: () => void;
 }
 
 const PublicSitView = ({
