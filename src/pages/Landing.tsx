@@ -1002,9 +1002,14 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 5 — VITRINE DÉMO (transition entraide → garde) ═══════════════ */}
+      {/* ═══════════════ SECTION 5 — ANNONCES EN COURS (live) ═══════════════ */}
       <RevealSection>
-        <p className="sr-only">Et côté garde, voici à quoi ressemble une annonce.</p>
+        <LiveListingsSection />
+      </RevealSection>
+
+      {/* ═══════════════ SECTION 5bis — VITRINE DÉMO (anatomie d'une annonce) ═══════════════ */}
+      <RevealSection>
+        <p className="sr-only">Et voici l'anatomie détaillée d'une annonce.</p>
         <DemoListingShowcase />
       </RevealSection>
 
