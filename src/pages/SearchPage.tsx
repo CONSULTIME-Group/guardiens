@@ -4,6 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Helmet } from "react-helmet-async";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { Button } from "@/components/ui/button";
+import SearchSeoIntro from "@/components/search/SearchSeoIntro";
+import SearchSeoFooter, { SEARCH_FAQ } from "@/components/search/SearchSeoFooter";
 
 const SearchSitter = lazyWithRetry(
   () => import("@/components/search/SearchSitter"),
@@ -14,34 +16,82 @@ const SearchOwner = lazyWithRetry(
   "SearchOwner",
 );
 
+const CANONICAL = "https://guardiens.fr/recherche";
+const TITLE = "Annonces de garde d'animaux à domicile en France · Guardiens";
+const DESCRIPTION =
+  "Découvrez toutes les annonces de garde de chats, chiens et NAC à domicile, partout en France. Consultation libre, inscription gratuite pour postuler.";
+
 const SearchPage = () => {
   const { user, activeRole } = useAuth();
 
-  // Anonymous visitors: show sitter search (browse listings) — SEO + signup conversion
+  // Anonymous visitors and sitter role: show sitter search (browse listings).
   const showSitterView = !user || activeRole === "sitter";
+
+  // JSON-LD : WebPage + BreadcrumbList + FAQPage. L'ItemList n'est pas
+  // matérialisé ici car les annonces sont chargées côté client (Googlebot
+  // les voit après hydratation, le maillage interne via /sits/:id suffit).
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: TITLE,
+      description: DESCRIPTION,
+      url: CANONICAL,
+      inLanguage: "fr-FR",
+      isPartOf: { "@type": "WebSite", name: "Guardiens", url: "https://guardiens.fr" },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Accueil", item: "https://guardiens.fr/" },
+        { "@type": "ListItem", position: 2, name: "Annonces de garde", item: CANONICAL },
+      ],
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: SEARCH_FAQ.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ];
 
   return (
     <>
       <Helmet>
-        <title>Annonces de garde d'animaux à domicile · Guardiens</title>
-        <meta
-          name="description"
-          content="Découvrez les gardes d'animaux à domicile près de chez vous : chats, chiens, NAC. Inscription gratuite pour postuler."
-        />
-        <link rel="canonical" href="/search" />
+        <title>{TITLE}</title>
+        <meta name="description" content={DESCRIPTION} />
+        <meta name="robots" content="index,follow" />
+        <link rel="canonical" href={CANONICAL} />
+        <meta property="og:title" content={TITLE} />
+        <meta property="og:description" content={DESCRIPTION} />
+        <meta property="og:url" content={CANONICAL} />
+        <meta property="og:type" content="website" />
+        <meta property="og:locale" content="fr_FR" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={TITLE} />
+        <meta name="twitter:description" content={DESCRIPTION} />
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
+      {/* H1 + intro éditoriale (rendus pour tous, garantit le H1 unique au crawler) */}
+      <SearchSeoIntro />
+
+      {/* Bandeau visiteur — discret, non sticky pour ne pas manger le viewport mobile */}
       {!user && (
-        <div className="sticky top-0 z-40 bg-primary text-primary-foreground border-b border-primary/30">
-          <div className="container max-w-6xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-sm">
-            <p className="font-medium">
-              Vous consultez les annonces en mode visiteur. Inscrivez-vous gratuitement pour postuler, contacter les propriétaires et ajouter aux favoris.
+        <div className="bg-primary/5 border-b border-primary/20">
+          <div className="container max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-sm">
+            <p className="text-foreground">
+              Consultation libre. Inscrivez-vous pour postuler, contacter les propriétaires et sauvegarder vos favoris.
             </p>
             <div className="flex gap-2">
-              <Button asChild size="sm" variant="secondary">
+              <Button asChild size="sm">
                 <Link to="/inscription">Inscription gratuite</Link>
               </Button>
-              <Button asChild size="sm" variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/10">
+              <Button asChild size="sm" variant="ghost">
                 <Link to="/login">Se connecter</Link>
               </Button>
             </div>
@@ -52,6 +102,10 @@ const SearchPage = () => {
       <Suspense fallback={null}>
         {showSitterView ? <SearchSitter /> : <SearchOwner />}
       </Suspense>
+
+      {/* Maillage interne + FAQ : uniquement visiteurs anon (SEO + conversion).
+          Les membres connectés voient la page outil épurée. */}
+      {!user && <SearchSeoFooter />}
     </>
   );
 };
