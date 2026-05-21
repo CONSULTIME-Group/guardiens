@@ -6,6 +6,7 @@ import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { Button } from "@/components/ui/button";
 import SearchSeoIntro from "@/components/search/SearchSeoIntro";
 import SearchSeoFooter, { SEARCH_FAQ } from "@/components/search/SearchSeoFooter";
+import SearchHowItWorksAnon from "@/components/search/SearchHowItWorksAnon";
 
 const SearchSitter = lazyWithRetry(
   () => import("@/components/search/SearchSitter"),
@@ -103,9 +104,14 @@ const SearchPage = () => {
         {showSitterView ? <SearchSitter /> : <SearchOwner />}
       </Suspense>
 
-      {/* Maillage interne + FAQ : uniquement visiteurs anon (SEO + conversion).
+      {/* Pédagogie + rassurance + CTA (anon uniquement) puis maillage interne + FAQ.
           Les membres connectés voient la page outil épurée. */}
-      {!user && <SearchSeoFooter />}
+      {!user && (
+        <>
+          <SearchHowItWorksAnon />
+          <SearchSeoFooter />
+        </>
+      )}
     </>
   );
 };
