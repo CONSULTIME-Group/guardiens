@@ -185,13 +185,25 @@ title: "Tarifs — 6,99\u00A0€/mois pour les gardiens | Guardiens",
  changeFreq: "weekly",
  },
   {
-  path: "/recherche",
-  title: "Annonces de garde d'animaux à domicile près de chez vous | Guardiens",
-  metaDescription: "Découvrez les gardes d'animaux à domicile près de chez vous : chats, chiens, NAC. Consultez les annonces en libre accès, postulez après inscription gratuite.",
-  h1: "Annonces de garde d'animaux à domicile",
-  sitemapPriority: "0.9",
-  changeFreq: "daily",
-  // Page publique consultable sans connexion (modèle Nomador) — indexable.
+  {
+   path: "/annonces",
+   title: "Annonces de garde d'animaux à domicile en France | Guardiens",
+   metaDescription: "Toutes les annonces de garde de chats, chiens et NAC à domicile, partout en France. Filtres par ville, département et critères. Consultation libre, inscription gratuite pour postuler.",
+   h1: "Annonces de garde d'animaux à domicile",
+   sitemapPriority: "0.9",
+   changeFreq: "daily",
+   // Hub canonique des annonces de garde (modèle public, sans sidebar).
+  },
+  {
+   path: "/recherche",
+   title: "Annonces de garde d'animaux à domicile près de chez vous | Guardiens",
+   metaDescription: "Découvrez les gardes d'animaux à domicile près de chez vous : chats, chiens, NAC. Consultez les annonces en libre accès, postulez après inscription gratuite.",
+   h1: "Annonces de garde d'animaux à domicile",
+   sitemapPriority: "0.4",
+   changeFreq: "daily",
+   // Alias outil pour membres connectés (rendu dans AppLayout avec sidebar).
+   // Canonical pointe vers /annonces côté Helmet pour éviter la duplication.
+   index: false,
   },
  {
  path: "/contact",
