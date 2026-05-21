@@ -8,6 +8,7 @@ import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
+import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 
 interface SitLike {
   id: string;
