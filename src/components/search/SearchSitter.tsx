@@ -36,6 +36,7 @@ import { getDeptCode, DEPT_NAMES } from "@/lib/departments";
 import { getRegionCode, getRegionName, getDeptsInRegion, REGION_NAMES, DEPT_TO_REGION } from "@/lib/regions";
 import { trackEvent } from "@/lib/analytics";
 import ReachReassuranceBanner from "@/components/marketing/ReachReassuranceBanner";
+import LocationPickerPopover from "@/components/search/header/LocationPickerPopover";
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Animaux de ferme", "NAC"];
 const animalChipToSpecies: Record<string, string> = {
