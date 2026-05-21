@@ -118,7 +118,10 @@ const SearchSitter = () => {
  };
  const [demoCheckHistory, setDemoCheckHistory] = useState<DemoCheckRow[]>([]);
 
- const [sort, setSort] = useState<SortOption>("closest");
+ const [sort, setSort] = useState<SortOption>(() => {
+  const s = searchParams.get("tri");
+  return s === "recent" || s === "rating" || s === "closest" ? s : "closest";
+ });
  const [viewMode, setViewMode] = useState<ViewMode>("list");
  const [cityPostalCode, setCityPostalCode] = useState<string | null>(null);
  const [alertCreated, setAlertCreated] = useState(false);
