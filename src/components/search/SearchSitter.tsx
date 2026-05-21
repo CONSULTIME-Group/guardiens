@@ -51,7 +51,7 @@ const speciesIcon: Record<string, typeof PawPrint> = {
  fish: PawPrint, reptile: PawPrint, farm_animal: Bird, nac: PawPrint,
 };
 
-const RADIUS_SHORTCUTS = [5, 10, 15, 30, 50];
+
 
 type SortOption = "closest" | "recent" | "rating";
 type SearchTab = "sits" | "missions";
