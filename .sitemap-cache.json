@@ -1,425 +1,35 @@
 {
   "sources": {
-    "city_guides": {
-      "head": "2026-05-21T16:17:49.545189+00:00",
-      "fetchedAt": "2026-05-21T18:27:38.549Z"
-    },
-    "seo_city_pages": {
-      "head": "2026-05-04T07:47:07.499343+00:00",
-      "fetchedAt": "2026-05-10T12:37:36.240Z"
-    },
     "articles": {
       "head": "2026-05-12T09:40:36.018734+00:00",
-      "fetchedAt": "2026-05-21T18:27:38.570Z"
+      "fetchedAt": "2026-05-21T21:55:32.625Z"
     },
     "seo_department_pages": {
       "head": "2026-03-26T05:46:21.361179+00:00",
-      "fetchedAt": "2026-05-10T12:37:36.248Z"
+      "fetchedAt": "2026-05-21T21:55:32.629Z"
+    },
+    "public_sits": {
+      "head": null,
+      "fetchedAt": "2026-05-21T21:55:32.648Z"
+    },
+    "seo_city_pages": {
+      "head": "2026-05-04T07:47:07.499343+00:00",
+      "fetchedAt": "2026-05-21T21:55:32.668Z"
+    },
+    "city_guides": {
+      "head": "2026-05-21T20:15:30.121997+00:00",
+      "fetchedAt": "2026-05-21T21:55:32.669Z"
     },
     "public_profiles": {
       "head": null,
-      "fetchedAt": "2026-05-10T12:37:36.268Z"
+      "fetchedAt": "2026-05-21T21:55:32.669Z"
     },
     "breed_profiles": {
       "head": null,
-      "fetchedAt": "2026-05-10T12:37:36.293Z"
+      "fetchedAt": "2026-05-21T21:55:32.676Z"
     }
   },
   "entries": {
-    "city_guides": [
-      {
-        "loc": "/guides/lyon",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/clermont-ferrand",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/megeve",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/valence",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/villeurbanne",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/ecully",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/beaujolais",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/chambery",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/annecy",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/saint-etienne",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/tassin-la-demi-lune",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/caluire-et-cuire",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/monts-du-lyonnais",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/saint-didier-au-mont-d-or",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/grenoble",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/saint-priest",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/vaulx-en-velin",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/bron",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/villefranche-sur-saone",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/roanne",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/montelimar",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/romans-sur-isere",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/bourg-en-bresse",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/oyonnax",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/annemasse",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/meyzieu",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/venissieux",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/rillieux-la-pape",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/decines-charpieu",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/oullins",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/saint-martin-d-heres",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/thonon-les-bains",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/aix-les-bains",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/echirolles",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/vichy",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/voiron",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/montlucon",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/vienne",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/moulins",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/bourgoin-jallieu",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/aurillac",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/le-puy-en-velay",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/saint-chamond",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/annonay",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/aubenas",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/schweighouse-sur-moder",
-        "lastmod": "2026-04-26",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/noyal-pontivy",
-        "lastmod": "2026-05-05",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/mouvaux",
-        "lastmod": "2026-05-21",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      }
-    ],
-    "seo_city_pages": [
-      {
-        "loc": "/house-sitting/megeve",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/valence",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/villeurbanne",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/clermont-ferrand",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/annecy",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/ecully",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/chambery",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/beaujolais",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/caluire-et-cuire",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/tassin-la-demi-lune",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/saint-didier-au-mont-d-or",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/saint-etienne",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/monts-du-lyonnais",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/grenoble",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/chamonix",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/bourg-saint-maurice",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/lyon",
-        "lastmod": "2026-05-04",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      }
-    ],
     "articles": [
       {
         "loc": "/actualites/jardinage-entraide-quartier-lyon",
@@ -800,6 +410,419 @@
         "lastmod": "2026-03-26",
         "changefreq": "weekly",
         "priority": "0.8"
+      }
+    ],
+    "public_sits": [],
+    "seo_city_pages": [
+      {
+        "loc": "/house-sitting/megeve",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/valence",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/villeurbanne",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/clermont-ferrand",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/annecy",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/ecully",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/chambery",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/beaujolais",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/caluire-et-cuire",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/tassin-la-demi-lune",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/saint-didier-au-mont-d-or",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/saint-etienne",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/monts-du-lyonnais",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/grenoble",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/chamonix",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/bourg-saint-maurice",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/lyon",
+        "lastmod": "2026-05-04",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      }
+    ],
+    "city_guides": [
+      {
+        "loc": "/guides/lyon",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/clermont-ferrand",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/megeve",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/valence",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/villeurbanne",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/ecully",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/beaujolais",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/chambery",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/annecy",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/saint-etienne",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/tassin-la-demi-lune",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/caluire-et-cuire",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/monts-du-lyonnais",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/saint-didier-au-mont-d-or",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/grenoble",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/saint-priest",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/vaulx-en-velin",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/bron",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/villefranche-sur-saone",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/roanne",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/montelimar",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/romans-sur-isere",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/bourg-en-bresse",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/oyonnax",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/annemasse",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/meyzieu",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/venissieux",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/rillieux-la-pape",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/decines-charpieu",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/oullins",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/saint-martin-d-heres",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/thonon-les-bains",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/aix-les-bains",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/echirolles",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/vichy",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/voiron",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/montlucon",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/vienne",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/moulins",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/bourgoin-jallieu",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/aurillac",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/le-puy-en-velay",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/saint-chamond",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/annonay",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/aubenas",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/schweighouse-sur-moder",
+        "lastmod": "2026-04-26",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/noyal-pontivy",
+        "lastmod": "2026-05-05",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/mouvaux",
+        "lastmod": "2026-05-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/paris",
+        "lastmod": "2026-05-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/nantes",
+        "lastmod": "2026-05-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/rennes",
+        "lastmod": "2026-05-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
       }
     ],
     "public_profiles": [],
