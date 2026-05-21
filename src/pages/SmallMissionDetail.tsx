@@ -45,6 +45,37 @@ const DURATION_LABELS: Record<string, string> = {
   week: "Semaine",
 };
 
+/** Titlecase pour ville saisie en MAJUSCULES (ex: VERGONS → Vergons, AIX-EN-PROVENCE → Aix-en-Provence). */
+function titlecaseCity(s?: string | null): string {
+  if (!s) return "";
+  const small = new Set(["de", "du", "des", "le", "la", "les", "et", "en", "sur", "sous", "lès", "aux"]);
+  return s.toLowerCase().split(/(\s|-)/).map((part, i) => {
+    if (part === " " || part === "-") return part;
+    if (i > 0 && small.has(part)) return part;
+    return part.charAt(0).toUpperCase() + part.slice(1);
+  }).join("");
+}
+
+function timeAgoFr(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "à l'instant";
+  if (m < 60) return `il y a ${m} min`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `il y a ${h} h`;
+  const d = Math.floor(h / 24);
+  if (d < 7) return `il y a ${d} j`;
+  const w = Math.floor(d / 7);
+  if (w < 5) return `il y a ${w} sem`;
+  return new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+}
+
+function memberSince(iso?: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return `Membre depuis ${d.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}`;
+}
+
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
   open: { label: "Ouverte", className: "bg-success-soft text-success" },
   in_progress: { label: "En cours", className: "bg-info-soft text-info" },
