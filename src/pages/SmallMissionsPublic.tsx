@@ -402,12 +402,12 @@ const SmallMissionsPublic = () => {
  <div className="max-w-2xl mx-auto px-6 py-20 md:py-24">
  <Reveal>
  <p className="font-heading text-xl md:text-2xl italic leading-relaxed text-foreground/85 text-center mb-8">
- On n'a pas créé les petites missions pour que les gens se rendent des services. On les a créées parce que les échanges les plus vrais ne passent pas par un virement.
+ Les petites missions, ce n'est pas une bourse au coup de main. C'est une porte entrouverte sur ce qu'on n'avait pas prévu — la chance d'une rencontre, le goût de l'imprévu, l'envie de découvrir.
  </p>
  </Reveal>
  <Reveal delay={0.1}>
  <p className="font-heading text-lg italic leading-relaxed text-foreground/75 text-center">
- Vos bras pour planter les légumes ce week-end. Ses tomates cet été. Peut-être son aide pour repeindre la cuisine en septembre. <span className="text-foreground/90">L'échange n'a pas besoin d'être immédiat pour être juste.</span>
+ On vient donner une heure pour planter, et l'on repart avec une adresse, une recette, parfois une amitié. On propose un coup de main, et c'est une saison qui s'invente, un lien qui se noue, une histoire qui commence. <span className="text-foreground/90">Parfois un simple service. Parfois bien plus. C'est tout ça, à la fois.</span>
  </p>
  </Reveal>
  </div>
