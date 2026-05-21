@@ -122,6 +122,12 @@ const CATEGORY_LABEL: Record<string, string> = {
   other: "Autre",
 };
 
+const DURATION_LABEL: Record<string, string> = {
+  "1-2h": "1-2 heures",
+  half_day: "Demi-journée",
+  several: "Plusieurs passages",
+};
+
 /* ── page ── */
 const SmallMissionsPublic = () => {
  const navigate = useNavigate();
