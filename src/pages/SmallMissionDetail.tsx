@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowLeft, MapPin, Calendar, Clock, Dog, Flower2, Handshake,
   Heart, MessageSquare, CheckCircle2, Users, XCircle, ThumbsUp,
-  ThumbsDown, Star, RotateCcw, Send, Home, X,
+  ThumbsDown, Star, RotateCcw, Send, Home, X, Share2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -25,6 +25,8 @@ import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import MissionPhotoGallery from "@/components/missions/MissionPhotoGallery";
 import MissionPublishedBanner from "@/components/missions/MissionPublishedBanner";
+import PublicHeader from "@/components/layout/PublicHeader";
+import PublicFooter from "@/components/layout/PublicFooter";
 import { isAuthorOf } from "@/lib/ownership";
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
@@ -459,12 +461,26 @@ const SmallMissionDetail = () => {
 
   if (loading) {
     return (
-      <div className="p-6 md:p-10 max-w-3xl mx-auto">
-        <div className="text-muted-foreground">Chargement...</div>
-      </div>
+      <>
+        {!user && <PublicHeader />}
+        <div className="p-6 md:p-10 max-w-3xl mx-auto min-h-[40vh]">
+          <div className="text-muted-foreground">Chargement…</div>
+        </div>
+        {!user && <PublicFooter />}
+      </>
     );
   }
-  if (!mission) return <div className="p-6 md:p-10"><p>Mission introuvable.</p><Link to="/petites-missions" className="text-primary underline mt-2 inline-block">Retour aux missions</Link></div>;
+  if (!mission) return (
+    <>
+      {!user && <PublicHeader />}
+      <div className="p-6 md:p-10 max-w-3xl mx-auto min-h-[40vh]">
+        <h1 className="font-heading text-2xl font-bold mb-2">Mission introuvable</h1>
+        <p className="text-muted-foreground mb-4">Cette mission a peut-être été clôturée ou retirée.</p>
+        <Link to="/petites-missions"><Button>Voir les missions ouvertes</Button></Link>
+      </div>
+      {!user && <PublicFooter />}
+    </>
+  );
 
   const catMeta = CATEGORY_META[mission.category] || CATEGORY_META.animals;
   const CatIcon = catMeta.icon;
@@ -490,7 +506,9 @@ const SmallMissionDetail = () => {
   };
 
   return (
-    <div className="animate-fade-in pb-32">
+    <>
+      {!user && <PublicHeader />}
+      <div className="animate-fade-in pb-32">
       {/* Hero */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0">
@@ -499,9 +517,20 @@ const SmallMissionDetail = () => {
         </div>
         <div className="relative max-w-3xl mx-auto px-6 py-10">
           <PageMeta title={`${mission.title} — Coup de main près de chez vous | Guardiens`} description={mission.description?.slice(0, 155)} />
-          <Link to="/petites-missions" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
-            <ArrowLeft className="h-4 w-4" /> Retour aux missions
-          </Link>
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <Link to="/petites-missions" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+              <ArrowLeft className="h-4 w-4" /> Retour aux missions
+            </Link>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSharePublishedLink}
+              className="gap-1.5 rounded-full"
+              aria-label="Partager cette mission"
+            >
+              <Share2 className="h-4 w-4" /> Partager
+            </Button>
+          </div>
           <h1 className="font-heading text-2xl md:text-3xl font-bold">{mission.title}</h1>
         </div>
       </div>
@@ -870,9 +899,12 @@ const SmallMissionDetail = () => {
 
         {/* Not logged in */}
         {!user && (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground mb-3">Inscrivez-vous à 0 € pour proposer votre aide.</p>
-            <Link to="/inscription"><Button>S'inscrire à 0 €</Button></Link>
+          <div className="text-center py-8 border-t border-border mt-8">
+            <p className="text-muted-foreground mb-3">Inscrivez-vous gratuitement pour proposer votre aide.</p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              <Link to={`/inscription?redirect=/petites-missions/${mission.id}`}><Button>Créer un compte gratuit</Button></Link>
+              <Link to={`/login?redirect=/petites-missions/${mission.id}`}><Button variant="outline">Se connecter</Button></Link>
+            </div>
           </div>
         )}
       </div>
@@ -894,7 +926,9 @@ const SmallMissionDetail = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+      {!user && <PublicFooter />}
+    </>
   );
 };
 
