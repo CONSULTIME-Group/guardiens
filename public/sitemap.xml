@@ -49,7 +49,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/recherche</loc>
+    <loc>https://guardiens.fr/annonces</loc>
     <lastmod>2026-05-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
@@ -830,6 +830,24 @@
   </url>
   <url>
     <loc>https://guardiens.fr/guides/mouvaux</loc>
+    <lastmod>2026-05-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/guides/paris</loc>
+    <lastmod>2026-05-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/guides/nantes</loc>
+    <lastmod>2026-05-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/guides/rennes</loc>
     <lastmod>2026-05-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
