@@ -708,7 +708,7 @@ const SearchSitter = () => {
  const searchMissions = async (searchCoords: { lat: number; lng: number } | null) => {
  let query = supabase
 .from("small_missions")
-.select("*, owner:profiles!small_missions_user_id_fkey(first_name, avatar_url, city, identity_verified, is_founder)")
+.select("*, owner:public_profiles!small_missions_user_id_fkey(first_name, avatar_url, city, identity_verified, is_founder)")
 .eq("status", "open")
 .order("created_at", { ascending: false });
  const { data } = await query;
