@@ -43,6 +43,7 @@ import PublicSitPitch from "@/components/sits/public/PublicSitPitch";
 import PublicSitGallery from "@/components/sits/public/PublicSitGallery";
 import PublicSitFAQ from "@/components/sits/public/PublicSitFAQ";
 import PublicSitTrustStrip from "@/components/sits/public/PublicSitTrustStrip";
+import PublicSitView from "@/components/sits/PublicSitView";
 import {
  ENV_LABELS as envLabels,
  TYPE_LABELS as typeLabels,
