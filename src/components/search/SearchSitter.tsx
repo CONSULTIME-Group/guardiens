@@ -1050,13 +1050,13 @@ const SearchSitter = () => {
  <Sparkles className="h-3 w-3" /> Annonce d'exemple — pour illustrer la plateforme
  </span>
  )}
- {(isAssigned || isCompleted) && (
- <span className="absolute inset-0 flex items-center justify-center">
- <span className="bg-foreground/85 text-background rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wide shadow-md">
- {isCompleted ? "Garde terminée" : "Gardiennage attribué"}
- </span>
- </span>
- )}
+  {(isAssigned || isCompleted || isPast) && (
+  <span className="absolute inset-0 flex items-center justify-center">
+  <span className="bg-foreground/85 text-background rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wide shadow-md">
+  {isPast || isCompleted ? "Annonce passée" : "Gardiennage attribué"}
+  </span>
+  </span>
+  )}
  {!isInactive && !isDemo && item.owner?.identity_verified && (
  <span className="absolute top-3 left-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 text-xs text-primary font-medium">
  <ShieldCheck className="h-3 w-3" /> Vérifié
