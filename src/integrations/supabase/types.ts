@@ -4555,6 +4555,7 @@ export type Database = {
           bio: string | null
           city: string | null
           completed_sits_count: number | null
+          custom_skills: Json | null
           first_name: string | null
           id: string | null
           identity_verified: boolean | null
@@ -4570,6 +4571,7 @@ export type Database = {
           bio?: string | null
           city?: string | null
           completed_sits_count?: number | null
+          custom_skills?: Json | null
           first_name?: string | null
           id?: string | null
           identity_verified?: boolean | null
@@ -4585,6 +4587,7 @@ export type Database = {
           bio?: string | null
           city?: string | null
           completed_sits_count?: number | null
+          custom_skills?: Json | null
           first_name?: string | null
           id?: string | null
           identity_verified?: boolean | null
