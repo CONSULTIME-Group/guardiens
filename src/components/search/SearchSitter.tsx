@@ -63,14 +63,17 @@ const SearchSitter = () => {
  const isMobile = useIsMobile();
  const navigate = useNavigate();
  const { toast } = useToast();
- const [searchParams] = useSearchParams();
+ const [searchParams, setSearchParams] = useSearchParams();
  const [tab, setTab] = useState<SearchTab>("sits");
  const [missionSubTab, setMissionSubTab] = useState<MissionSubTab>("published");
  const [missionTypeFilter, setMissionTypeFilter] = useState<"all" | "besoin" | "offre">("all");
  const [missionCategoryFilter, setMissionCategoryFilter] = useState<"all" | "garden" | "animals" | "skills" | "house">("all");
  const [availableMembers, setAvailableMembers] = useState<any[]>([]);
- const [city, setCity] = useState("");
- const [radius, setRadius] = useState([15]);
+ const [city, setCity] = useState(() => searchParams.get("ville") || "");
+ const [radius, setRadius] = useState(() => {
+  const r = parseInt(searchParams.get("rayon") || "", 10);
+  return [Number.isFinite(r) && r > 0 && r <= 200 ? r : 15];
+ });
  const [zoneMode, setZoneMode] = useState<ZoneMode>(() => {
  if (typeof window === "undefined") return "radius";
  // Param URL ?zone=france — utilisé depuis le dashboard pour ouvrir la
@@ -82,9 +85,12 @@ const SearchSitter = () => {
  });
  const [densityCounts, setDensityCounts] = useState<{ radius: number; dept: number; region: number; france: number }>({ radius: 0, dept: 0, region: 0, france: 0 });
  const [userPostalCode, setUserPostalCode] = useState<string | null>(null);
- const [startDate, setStartDate] = useState("");
- const [endDate, setEndDate] = useState("");
- const [animalTypes, setAnimalTypes] = useState<string[]>([]);
+ const [startDate, setStartDate] = useState(() => searchParams.get("debut") || "");
+ const [endDate, setEndDate] = useState(() => searchParams.get("fin") || "");
+ const [animalTypes, setAnimalTypes] = useState<string[]>(() => {
+  const a = searchParams.get("animaux");
+  return a ? a.split(",").map((s) => s.trim()).filter(Boolean) : [];
+ });
  const [housingTypes, setHousingTypes] = useState<HousingFilter[]>([]);
  const [duration, setDuration] = useState("all");
  const [verifiedOnly, setVerifiedOnly] = useState(false);
@@ -112,7 +118,10 @@ const SearchSitter = () => {
  };
  const [demoCheckHistory, setDemoCheckHistory] = useState<DemoCheckRow[]>([]);
 
- const [sort, setSort] = useState<SortOption>("closest");
+ const [sort, setSort] = useState<SortOption>(() => {
+  const s = searchParams.get("tri");
+  return s === "recent" || s === "rating" || s === "closest" ? s : "closest";
+ });
  const [viewMode, setViewMode] = useState<ViewMode>("list");
  const [cityPostalCode, setCityPostalCode] = useState<string | null>(null);
  const [alertCreated, setAlertCreated] = useState(false);
@@ -393,6 +402,25 @@ const SearchSitter = () => {
  useEffect(() => {
  setAlertCreated(false);
  }, [city, radius]);
+
+ // Sync filters → URL params (shareable URLs for SEO + UX)
+ useEffect(() => {
+  if (!initialLoadDone.current) return;
+  const next = new URLSearchParams(searchParams);
+  const setOrDel = (key: string, value: string | null | undefined) => {
+   if (value) next.set(key, value); else next.delete(key);
+  };
+  setOrDel("ville", city || null);
+  setOrDel("rayon", radius[0] !== 15 ? String(radius[0]) : null);
+  setOrDel("debut", startDate || null);
+  setOrDel("fin", endDate || null);
+  setOrDel("animaux", animalTypes.length ? animalTypes.join(",") : null);
+  setOrDel("tri", sort !== "closest" ? sort : null);
+  const a = next.toString();
+  const b = searchParams.toString();
+  if (a !== b) setSearchParams(next, { replace: true });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [city, radius, startDate, endDate, animalTypes, sort]);
 
  // ─── Mode test démos : snapshot à chaque changement de filtre clé ───
  const lastDemoFiltersRef = useRef<{ city: string; startDate: string; endDate: string; sort: string; tab: string } | null>(null);
