@@ -4550,6 +4550,7 @@ export type Database = {
       }
       public_profiles: {
         Row: {
+          available_for_help: boolean | null
           avatar_url: string | null
           bio: string | null
           city: string | null
@@ -4561,8 +4562,10 @@ export type Database = {
           latitude_approx: number | null
           longitude_approx: number | null
           postal_code: string | null
+          skill_categories: string[] | null
         }
         Insert: {
+          available_for_help?: boolean | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
@@ -4574,8 +4577,10 @@ export type Database = {
           latitude_approx?: never
           longitude_approx?: never
           postal_code?: string | null
+          skill_categories?: string[] | null
         }
         Update: {
+          available_for_help?: boolean | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
@@ -4587,6 +4592,7 @@ export type Database = {
           latitude_approx?: never
           longitude_approx?: never
           postal_code?: string | null
+          skill_categories?: string[] | null
         }
         Relationships: []
       }
