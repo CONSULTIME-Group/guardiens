@@ -44,6 +44,7 @@ import LocationPickerPopover from "@/components/search/header/LocationPickerPopo
 import ZonePickerPopover from "@/components/search/header/ZonePickerPopover";
 import DatesPickerPopover from "@/components/search/header/DatesPickerPopover";
 import AnimalsPickerPopover from "@/components/search/header/AnimalsPickerPopover";
+import { useEmptyStateBreakdown } from "@/hooks/search/useEmptyStateBreakdown";
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Animaux de ferme", "NAC"];
 const animalChipToSpecies: Record<string, string> = {
