@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowRight, X } from "lucide-react";
+import { ArrowRight, X, MapPin } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import PageMeta from "@/components/PageMeta";
 import { useAuth } from "@/contexts/AuthContext";
