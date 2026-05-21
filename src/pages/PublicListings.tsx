@@ -13,16 +13,49 @@ const SearchSitter = lazyWithRetry(
   "SearchSitter",
 );
 
+const CANONICAL = "https://guardiens.fr/annonces";
+const TITLE = "Annonces de garde d'animaux à domicile en France | Guardiens";
+const DESCRIPTION =
+  "Toutes les annonces de garde de chats, chiens et NAC à domicile, partout en France. Filtres par ville, département et critères, carte en direct. Consultation libre, inscription gratuite pour postuler.";
+
+const JSONLD = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: TITLE,
+    description: DESCRIPTION,
+    url: CANONICAL,
+    inLanguage: "fr-FR",
+    isPartOf: { "@type": "WebSite", name: "Guardiens", url: "https://guardiens.fr" },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: "https://guardiens.fr/" },
+      { "@type": "ListItem", position: 2, name: "Annonces de garde", item: CANONICAL },
+    ],
+  },
+];
+
 export default function PublicListings() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Helmet>
-        <title>Annonces de garde en cours — Guardiens</title>
-        <meta
-          name="description"
-          content="Découvrez les annonces de garde en cours partout en France. Filtres par ville, département, critères, et carte en direct. Consultation libre, inscription gratuite pour postuler."
-        />
-        <link rel="canonical" href="https://guardiens.fr/annonces" />
+        <title>{TITLE}</title>
+        <meta name="description" content={DESCRIPTION} />
+        <meta name="robots" content="index,follow" />
+        <link rel="canonical" href={CANONICAL} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={CANONICAL} />
+        <meta property="og:title" content={TITLE} />
+        <meta property="og:description" content={DESCRIPTION} />
+        <meta property="og:site_name" content="Guardiens" />
+        <meta property="og:locale" content="fr_FR" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={TITLE} />
+        <meta name="twitter:description" content={DESCRIPTION} />
+        <script type="application/ld+json">{JSON.stringify(JSONLD)}</script>
       </Helmet>
 
       <PublicHeader />
