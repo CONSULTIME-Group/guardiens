@@ -410,6 +410,114 @@ export const DEMO_MISSIONS = [
   },
 ];
 
+/**
+ * Membres démos — uniquement des profils proposant des SAVOIR-FAIRE
+ * COMPLÉMENTAIRES (au-delà de la garde classique) pour illustrer la richesse
+ * de la communauté : reiki, naturopathie animale, ostéo, comportementaliste,
+ * communication intuitive, dressage positif, etc.
+ *
+ * Toujours marqués `is_demo: true` et `skill_categories: ['competences']`
+ * pour s'intégrer au filtre "Compétences" sans polluer les filtres garde/jardin.
+ */
+export const DEMO_MEMBERS = [
+  {
+    id: "demo-member-001",
+    is_demo: true,
+    first_name: "Anaïs",
+    avatar_url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80",
+    city: "Lyon",
+    skill_categories: ["competences"],
+    specialty_label: "Reiki animalier",
+    specialty_description: "Séance d'apaisement énergétique pour animaux anxieux ou convalescents.",
+    available_for_help: true,
+    is_founder: false,
+    avgRating: "4.9",
+    reviewCount: 12,
+    sitsCount: 0,
+    distance: null,
+  },
+  {
+    id: "demo-member-002",
+    is_demo: true,
+    first_name: "Marc",
+    avatar_url: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80",
+    city: "Annecy",
+    skill_categories: ["competences"],
+    specialty_label: "Naturopathie animale",
+    specialty_description: "Conseils alimentation, plantes et hygiène de vie pour chiens et chats.",
+    available_for_help: true,
+    is_founder: true,
+    avgRating: "4.8",
+    reviewCount: 7,
+    sitsCount: 0,
+    distance: null,
+  },
+  {
+    id: "demo-member-003",
+    is_demo: true,
+    first_name: "Sophie",
+    avatar_url: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80",
+    city: "Grenoble",
+    skill_categories: ["competences"],
+    specialty_label: "Comportementaliste félin",
+    specialty_description: "Analyse des troubles du comportement chez le chat, méthode positive.",
+    available_for_help: true,
+    is_founder: false,
+    avgRating: "5.0",
+    reviewCount: 4,
+    sitsCount: 0,
+    distance: null,
+  },
+  {
+    id: "demo-member-004",
+    is_demo: true,
+    first_name: "Jules",
+    avatar_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80",
+    city: "Lyon",
+    skill_categories: ["competences"],
+    specialty_label: "Éducation canine positive",
+    specialty_description: "Séances ludiques en renforcement positif, marche en laisse, rappel.",
+    available_for_help: true,
+    is_founder: false,
+    avgRating: "4.7",
+    reviewCount: 9,
+    sitsCount: 0,
+    distance: null,
+  },
+  {
+    id: "demo-member-005",
+    is_demo: true,
+    first_name: "Léa",
+    avatar_url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80",
+    city: "Chambéry",
+    skill_categories: ["competences"],
+    specialty_label: "Communication intuitive",
+    specialty_description: "Médiation animale pour comprendre les besoins exprimés par votre compagnon.",
+    available_for_help: true,
+    is_founder: false,
+    avgRating: "4.6",
+    reviewCount: 5,
+    sitsCount: 0,
+    distance: null,
+  },
+  {
+    id: "demo-member-006",
+    is_demo: true,
+    first_name: "Camille",
+    avatar_url: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80",
+    city: "Aix-les-Bains",
+    skill_categories: ["competences"],
+    specialty_label: "Ostéopathie animale",
+    specialty_description: "Praticienne certifiée — mobilité, douleurs chroniques, post-opératoire.",
+    available_for_help: true,
+    is_founder: false,
+    avgRating: "4.9",
+    reviewCount: 11,
+    sitsCount: 0,
+    distance: null,
+  },
+];
+
 /** Threshold: hide demos when real listings reach this count */
 export const DEMO_THRESHOLD = 5;
 
