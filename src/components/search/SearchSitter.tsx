@@ -685,55 +685,54 @@ const SearchSitter = () => {
  return { items: filtered, cityCoords };
  };
 
- const searchSits = async (searchCoords: { lat: number; lng: number } | null) => {
- // On exclut « completed » : ces annonces ne sont pas actionnables et,
- // quand le rayon est vide, elles remontent en première position (carte
- // greyscale « Garde terminée ») et donnent l'impression que la plateforme
- // est inactive. Les annonces attribuées (confirmed/in_progress) sont
- // conservées car elles montrent une dynamique actuelle.
- let query = supabase
+  const searchSits = async (searchCoords: { lat: number; lng: number } | null) => {
+  // On inclut les statuts passés (expired / completed / cancelled) pour la
+  // transparence et le SEO visiteur : ils sont affichés grisés avec le label
+  // « Annonce passée » et ne sont pas actionnables.
+  let query = supabase
 .from("sits")
 .select("*, property:properties!sits_property_id_fkey(type, environment, photos, cover_photo_url)")
-.in("status", ["published", "confirmed", "in_progress"])
+.in("status", ["published", "confirmed", "in_progress", "expired", "completed", "cancelled"])
 .order("created_at", { ascending: false });
- if (startDate) query = query.gte("end_date", startDate);
- if (endDate) query = query.lte("start_date", endDate);
- const { data } = await query;
- let items = data || [];
+  if (startDate) query = query.gte("end_date", startDate);
+  if (endDate) query = query.lte("start_date", endDate);
+  const { data } = await query;
+  let items = data || [];
 
- // Hydrate owner data from public_profiles (safe public view) in a single batched call
- const ownerIds = Array.from(new Set(items.map((s: any) => s.user_id).filter(Boolean)));
- if (ownerIds.length > 0) {
- const [{ data: owners }, { data: galleryRows }] = await Promise.all([
-   supabase
+  // Hydrate owner data from public_profiles (safe public view) in a single batched call
+  const ownerIds = Array.from(new Set(items.map((s: any) => s.user_id).filter(Boolean)));
+  if (ownerIds.length > 0) {
+  const [{ data: owners }, { data: galleryRows }] = await Promise.all([
+    supabase
 .from("public_profiles")
 .select("id, first_name, avatar_url, city, postal_code, identity_verified, is_founder")
 .in("id", ownerIds),
-   supabase
+    supabase
 .from("owner_gallery")
 .select("user_id, photo_url, position")
 .in("user_id", ownerIds)
 .order("position", { ascending: true }),
- ]);
- const ownerMap = new Map((owners || []).map((o: any) => [o.id, o]));
- const galleryFirstMap = new Map<string, string>();
- (galleryRows || []).forEach((g: any) => {
-   if (g?.user_id && g?.photo_url && !galleryFirstMap.has(g.user_id)) {
-     galleryFirstMap.set(g.user_id, g.photo_url);
-   }
- });
- items = items.map((s: any) => ({
-   ...s,
-   owner: ownerMap.get(s.user_id) || null,
-   ownerGalleryFirstPhoto: galleryFirstMap.get(s.user_id) || null,
- }));
- }
- // Mark assigned/completed sits (will be rendered greyed-out, non-clickable)
- items = items.map((s: any) => ({
+  ]);
+  const ownerMap = new Map((owners || []).map((o: any) => [o.id, o]));
+  const galleryFirstMap = new Map<string, string>();
+  (galleryRows || []).forEach((g: any) => {
+    if (g?.user_id && g?.photo_url && !galleryFirstMap.has(g.user_id)) {
+      galleryFirstMap.set(g.user_id, g.photo_url);
+    }
+  });
+  items = items.map((s: any) => ({
+    ...s,
+    owner: ownerMap.get(s.user_id) || null,
+    ownerGalleryFirstPhoto: galleryFirstMap.get(s.user_id) || null,
+  }));
+  }
+  // Mark assigned/past sits (will be rendered greyed-out, non-clickable)
+  items = items.map((s: any) => ({
 ...s,
- isAssigned: s.status === "confirmed" || s.status === "in_progress",
- isCompleted: s.status === "completed",
- }));
+  isAssigned: s.status === "confirmed" || s.status === "in_progress",
+  isCompleted: s.status === "completed",
+  isPast: s.status === "expired" || s.status === "cancelled",
+  }));
  if (housingType !== "all") items = items.filter((s: any) => s.property?.type === housingType);
  if (withPhotosOnly) items = items.filter((s: any) => s.property?.photos?.length > 0);
  if (duration !== "all") {
