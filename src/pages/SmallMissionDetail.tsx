@@ -883,9 +883,12 @@ const SmallMissionDetail = () => {
 
         {/* Not logged in */}
         {!user && (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground mb-3">Inscrivez-vous à 0 € pour proposer votre aide.</p>
-            <Link to="/inscription"><Button>S'inscrire à 0 €</Button></Link>
+          <div className="text-center py-8 border-t border-border mt-8">
+            <p className="text-muted-foreground mb-3">Inscrivez-vous gratuitement pour proposer votre aide.</p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              <Link to={`/inscription?redirect=/petites-missions/${mission.id}`}><Button>Créer un compte gratuit</Button></Link>
+              <Link to={`/login?redirect=/petites-missions/${mission.id}`}><Button variant="outline">Se connecter</Button></Link>
+            </div>
           </div>
         )}
       </div>
