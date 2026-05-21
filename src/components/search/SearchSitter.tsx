@@ -11,7 +11,7 @@ import { ToastAction } from "@/components/ui/toast";
 
 const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
 import SearchListingCard from "@/components/search/listing/SearchListingCard";
-import { DEMO_SITS, DEMO_MISSIONS, interleaveDemos, auditInterleave } from "@/data/demoListings";
+import { DEMO_SITS, DEMO_MISSIONS, DEMO_MEMBERS, interleaveDemos, auditInterleave } from "@/data/demoListings";
 import { normalize } from "@/lib/normalize";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -800,6 +800,12 @@ const SearchSitter = () => {
  }
  if (sort === "closest") items.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
  else if (sort === "rating") items.sort((a: any, b: any) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
+ // Démos "savoir-faire complémentaires" toujours visibles (reiki, naturopathie, ostéo…)
+ // — seulement quand le filtre catégorie est "all" ou "skills".
+ const showDemoMembers = missionCategoryFilter === "all" || missionCategoryFilter === "skills";
+ if (showDemoMembers) {
+   items = interleaveDemos(items, DEMO_MEMBERS as any[], 3);
+ }
  setAvailableMembers(items);
  setResults([]);
  };
@@ -1512,7 +1518,7 @@ const SearchSitter = () => {
  const visibleSkills = skills.slice(0, 2);
  const extraCount = skills.length - 2;
  return (
- <div key={member.id} className="bg-card rounded-2xl border border-border p-4 flex items-center gap-4">
+ <div key={member.id} className={`bg-card rounded-2xl border p-4 flex items-center gap-4 ${member.is_demo ? "border-amber-300/70 border-dashed" : "border-border"}`}>
  {member.avatar_url ? (
  <img src={member.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover shrink-0" loading="lazy" />
  ) : (
@@ -1526,6 +1532,12 @@ const SearchSitter = () => {
  {member.is_founder && <FounderBadge size="sm" />}
  </div>
  {member.city && <p className="text-xs text-muted-foreground">{member.city}{member.distance != null ? ` · à ${Math.round(member.distance)} km` : ""}</p>}
+ {member.specialty_label && (
+   <p className="text-[13px] font-semibold text-amber-700 mt-1">{member.specialty_label}</p>
+ )}
+ {member.specialty_description && (
+   <p className="text-xs text-muted-foreground italic line-clamp-2 mt-0.5">{member.specialty_description}</p>
+ )}
  <div className="flex flex-wrap gap-1.5 mt-1.5">
  {visibleSkills.map((s: string) => {
  const meta = skillMeta[s];
@@ -1547,18 +1559,26 @@ const SearchSitter = () => {
  )}
  </div>
   <div className="flex flex-col items-end gap-2 shrink-0">
-  <span onClick={(e) => e.stopPropagation()}>
-  <FavoriteButton targetType="sitter" targetId={member.id} size="sm" />
-  </span>
-  <span onClick={(e) => e.stopPropagation()}>
-  <InviteToMySitButton sitter={{ id: member.id, first_name: member.first_name }} />
-  </span>
-  <Link
-  to={`/gardiens/${member.id}`}
-  className="text-sm text-primary font-semibold hover:underline"
-  >
-  Voir le profil →
-  </Link>
+  {member.is_demo ? (
+    <span className="text-[10px] font-semibold uppercase tracking-wider bg-amber-100 text-amber-800 rounded-full px-2 py-1">
+      Exemple
+    </span>
+  ) : (
+    <>
+      <span onClick={(e) => e.stopPropagation()}>
+        <FavoriteButton targetType="sitter" targetId={member.id} size="sm" />
+      </span>
+      <span onClick={(e) => e.stopPropagation()}>
+        <InviteToMySitButton sitter={{ id: member.id, first_name: member.first_name }} />
+      </span>
+      <Link
+        to={`/gardiens/${member.id}`}
+        className="text-sm text-primary font-semibold hover:underline"
+      >
+        Voir le profil →
+      </Link>
+    </>
+  )}
   </div>
  </div>
  );
