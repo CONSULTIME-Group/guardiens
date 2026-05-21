@@ -216,6 +216,16 @@ const SmallMissionDetail = () => {
       .eq("id", m.user_id).single();
     setAuthor(profile);
 
+    // Related missions — même catégorie ou même ville, statut ouvert, 3 max
+    const { data: related } = await supabase.from("small_missions")
+      .select("id, title, description, category, city, postal_code, created_at, duration_estimate")
+      .eq("status", "open")
+      .neq("id", m.id)
+      .or(`category.eq.${m.category},city.eq.${m.city}`)
+      .order("created_at", { ascending: false })
+      .limit(3);
+    setRelatedMissions(related || []);
+
     const { data: resps } = await supabase.from("small_mission_responses")
       .select("*, responder:profiles!small_mission_responses_responder_id_fkey(first_name, avatar_url)")
       .eq("mission_id", id).order("created_at", { ascending: false });
