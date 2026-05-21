@@ -395,12 +395,9 @@ const SearchSitter = () => {
   initialLoadDone.current = true;
   doSearch();
   }
-  }, [userCoords, user, userCity]);
+   }, [userCoords, user, userCity]);
 
- // Reset alert state when city or radius changes
- useEffect(() => {
- setAlertCreated(false);
- }, [city, radius]);
+
 
  // Sync filters → URL params (shareable URLs for SEO + UX)
  useEffect(() => {
