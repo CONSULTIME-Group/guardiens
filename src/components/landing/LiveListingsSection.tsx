@@ -165,7 +165,7 @@ const LiveListingsSection: React.FC = () => {
 
         <div className="text-center mt-12">
           <Button asChild size="lg" className="rounded-full">
-            <Link to="/recherche">
+            <Link to="/annonces">
               Voir toutes les annonces
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
