@@ -26,6 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { AdvancedFiltersSheet } from "@/components/search/header/AdvancedFiltersSheet";
 import { SearchEmptyState } from "@/components/search/listing/SearchEmptyState";
+import { OutOfZoneBanner } from "@/components/search/listing/OutOfZoneBanner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, MapPin, Calendar, Star, Lock, Zap, Sparkles } from "lucide-react";
 import { format, differenceInDays, differenceInHours } from "date-fns";
