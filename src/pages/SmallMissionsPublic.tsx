@@ -203,23 +203,17 @@ const SmallMissionsPublic = () => {
  </Reveal>
 
  <Reveal delay={0.1}>
-  <h1 className="font-heading text-5xl md:text-6xl font-bold text-foreground leading-tight max-w-2xl mx-auto">
- Quelqu'un, près de chez vous,<br />a besoin d'un coup de main.
+  <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground leading-tight max-w-2xl mx-auto">
+ Un coup de main, près de chez vous.
  </h1>
- <p className="font-heading text-xl md:text-2xl italic text-foreground/70 mt-4 max-w-lg mx-auto">
- Vous avez une heure, un savoir-faire, deux mains disponibles ? C'est déjà tout ce qu'il faut.
+ <p className="font-heading text-lg md:text-xl italic text-foreground/70 mt-4 max-w-lg mx-auto">
+ Gratuit, sans engagement. Publiez une demande ou proposez votre aide.
  </p>
  </Reveal>
 
- <Reveal delay={0.2}>
- <p className="font-body text-lg text-foreground/70 leading-relaxed text-center max-w-lg mx-auto mt-6">
- Une plante à arroser, un colis à réceptionner, un chien à sortir une heure, un meuble à monter. Des micro-services qui changent une journée — et qui ne demandent ni argent, ni engagement.
- </p>
- </Reveal>
-
- <Reveal delay={0.3}>
+ <Reveal delay={0.25}>
  {/* QW#1 — CTA "offrir" en principal (friction sociale ~0), "demander" en secondaire */}
- <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
+ <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
  <Button onClick={goToHelp} className="bg-primary text-primary-foreground rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary/90 transition-all duration-200">
  Je propose mon aide
  </Button>
@@ -231,6 +225,22 @@ const SmallMissionsPublic = () => {
  Gratuit pour tous. Aucun engagement, aucun jugement.
  </p>
  </Reveal>
+
+ {/* ── Lien direct vers le feed live ── */}
+ {openMissions.length > 0 && (
+   <Reveal delay={0.3}>
+     <a
+       href="#missions-ouvertes"
+       className="inline-flex items-center gap-2 mt-6 px-4 py-2 rounded-full bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/15 transition-colors"
+     >
+       <span className="relative flex h-2 w-2">
+         <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping" />
+         <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+       </span>
+       {openMissions.length} mission{openMissions.length > 1 ? "s" : ""} ouverte{openMissions.length > 1 ? "s" : ""} en ce moment →
+     </a>
+   </Reveal>
+ )}
 
  {/* Mosaïque hero — ancrage visuel (4 illustrations gouache existantes) */}
  <Reveal delay={0.35}>
