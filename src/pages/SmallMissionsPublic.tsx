@@ -87,6 +87,7 @@ interface OpenMissionRow {
   date_needed: string | null;
   duration_estimate: string | null;
   exchange_offer: string | null;
+  photos: string[] | null;
 }
 
 /* Date relative en français, court */
@@ -159,7 +160,7 @@ const SmallMissionsPublic = () => {
       try {
          const { data } = await supabase
            .from("small_missions")
-           .select("id, title, description, category, city, created_at, date_needed, duration_estimate, exchange_offer")
+           .select("id, title, description, category, city, created_at, date_needed, duration_estimate, exchange_offer, photos")
            .eq("status", "open")
            .order("created_at", { ascending: false })
            .limit(6);
@@ -321,8 +322,19 @@ const SmallMissionsPublic = () => {
                   <Reveal key={m.id} delay={0.04 * i}>
                     <Link
                       to={`/petites-missions/${m.id}`}
-                      className="group relative flex h-full flex-col p-6 md:p-7 rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5 transition-all"
+                      className="group relative flex h-full flex-col rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden"
                     >
+                      {m.photos && m.photos.length > 0 && (
+                        <div className="aspect-[16/10] w-full overflow-hidden bg-muted">
+                          <img
+                            src={m.photos[0]}
+                            alt={m.title}
+                            loading="lazy"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        </div>
+                      )}
+                      <div className="flex flex-col flex-1 p-6 md:p-7">
                       <div className="flex items-center justify-between gap-3 mb-3">
                         <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-body font-semibold tracking-wide">
                           {CATEGORY_LABEL[m.category] || "Mission"}
@@ -356,6 +368,7 @@ const SmallMissionsPublic = () => {
                       <span className="mt-4 inline-flex items-center text-xs font-semibold text-primary group-hover:underline">
                         Voir la mission →
                       </span>
+                      </div>
                     </Link>
                   </Reveal>
                 );
