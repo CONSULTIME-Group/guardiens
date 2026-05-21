@@ -17,7 +17,7 @@ import ProposeHelperExchangeDialog from "@/components/missions/ProposeHelperExch
 import { haversineDistance } from "@/lib/geocode";
 
 import {
-  CategoryFilter, ModeFilter, MISSION_TO_SKILL, SKILL_TO_MISSION,
+  CategoryFilter, ModeFilter, MISSION_TO_SKILL, SKILL_TO_MISSION, formatCity,
 } from "@/components/missions/connected/constants";
 import MissionsHero from "@/components/missions/connected/MissionsHero";
 import MissionsArticlesStrip from "@/components/missions/connected/MissionsArticlesStrip";
@@ -260,19 +260,12 @@ const SmallMissions = () => {
   const missionCoords = useEntityCoords(allMissions as any[], { useDbCoords: true });
   const helperCoords = useEntityCoords(availableHelpers as any[], { useDbCoords: true });
 
-  const filteredMissions = useMemo(() => {
+  const filteredMissionsWithZone = useMemo(() => {
     return (allMissions || [])
       .filter((m: any) => {
         if (categoryFilter === "mine") return m.user_id === user?.id;
         if (m.status === "completed" || m.status === "cancelled") return false;
         if (categoryFilter !== "all" && m.category !== categoryFilter) return false;
-        if (originCoords && radiusKm > 0) {
-          const mc = missionCoords.get(m.id);
-          if (mc) {
-            const dist = haversineDistance(originCoords.lat, originCoords.lng, mc.lat, mc.lng);
-            if (dist > radiusKm) return false;
-          }
-        }
         if (normalizedSearch) {
           const titleMatch = m.title?.toLowerCase().includes(normalizedSearch);
           const descMatch = m.description?.toLowerCase().includes(normalizedSearch);
@@ -280,6 +273,18 @@ const SmallMissions = () => {
           if (!titleMatch && !descMatch && !exchangeMatch) return false;
         }
         return true;
+      })
+      .map((m: any) => {
+        let distance: number | null = null;
+        let outOfZone = false;
+        if (originCoords) {
+          const mc = missionCoords.get(m.id);
+          if (mc) {
+            distance = haversineDistance(originCoords.lat, originCoords.lng, mc.lat, mc.lng);
+            if (radiusKm > 0 && distance > radiusKm) outOfZone = true;
+          }
+        }
+        return { ...m, _distance: distance, _outOfZone: outOfZone };
       })
       .sort((a: any, b: any) => {
         const order: Record<string, number> = { open: 0, in_progress: 1, completed: 2 };
@@ -294,6 +299,17 @@ const SmallMissions = () => {
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       });
   }, [allMissions, categoryFilter, user?.id, originCoords, radiusKm, missionCoords, mySkills, normalizedSearch]);
+
+  const filteredMissions = useMemo(
+    () => filteredMissionsWithZone.filter((m: any) => !m._outOfZone),
+    [filteredMissionsWithZone],
+  );
+  const outOfZoneMissions = useMemo(
+    () => filteredMissionsWithZone
+      .filter((m: any) => m._outOfZone)
+      .sort((a: any, b: any) => (a._distance ?? 9999) - (b._distance ?? 9999)),
+    [filteredMissionsWithZone],
+  );
 
   const filteredHelpers = useMemo(() => {
     return (availableHelpers || []).filter((h: any) => {
@@ -485,15 +501,18 @@ const SmallMissions = () => {
               setCategoryFilter={setCategoryFilter}
             />
 
-            {/* ═══ Section 1 — Demandes visibles ═══ */}
-            <h2 className="text-base font-semibold text-foreground mb-2 flex items-center gap-2">
-              {mode === "offer" ? "Demandes à aider" : "Demandes publiées près de chez vous"}
+            {/* ═══ Section 1 — Demandes visibles (HERO) ═══ */}
+            <div className="flex items-center gap-3 mb-2">
+              <span className="h-8 w-1.5 rounded-full bg-primary" aria-hidden />
+              <h2 className="text-xl md:text-2xl font-heading font-bold text-foreground leading-tight">
+                {mode === "offer" ? "Demandes à aider" : "Demandes publiées près de chez vous"}
+              </h2>
               {missionCount > 0 && (
-                <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                <span className="text-xs font-semibold bg-primary/10 text-primary px-2.5 py-1 rounded-full">
                   {missionCount} demande{missionCount > 1 ? "s" : ""}
                 </span>
               )}
-            </h2>
+            </div>
             {missionCount > 0 && (
               <label className="flex items-center gap-2 mb-4 text-xs text-muted-foreground cursor-pointer select-none">
                 <Switch
@@ -592,9 +611,57 @@ const SmallMissions = () => {
               </div>
             )}
 
-            {/* ═══ Section 2 — Membres disponibles ═══ */}
+            {/* ═══ Section 1bis — Hors périmètre ═══ */}
+            {outOfZoneMissions.length > 0 && (
+              <div className="mt-8 rounded-2xl border border-dashed border-border bg-muted/30 p-5">
+                <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground">
+                      {outOfZoneMissions.length} demande{outOfZoneMissions.length > 1 ? "s" : ""} hors de votre périmètre ({radiusKm} km)
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Visibles uniquement si vous êtes prêt·e à élargir votre zone.
+                    </p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => setRadiusKm(0)}>
+                    Élargir à la France entière
+                  </Button>
+                </div>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {outOfZoneMissions.slice(0, 6).map((m: any, idx: number) => (
+                    <div key={`oz-${m.id}`} className="relative">
+                      <span className="absolute top-2 left-2 z-10 inline-flex items-center gap-1 bg-background/95 backdrop-blur-sm rounded-full px-2.5 py-1 text-[11px] font-semibold text-foreground shadow-sm border border-border">
+                        {formatCity((m.profiles as any)?.city) || "Ailleurs"}
+                        {m._distance != null && (
+                          <span className="text-muted-foreground"> · {Math.round(m._distance)} km</span>
+                        )}
+                      </span>
+                      <div className="opacity-90">
+                        <MissionCard
+                          mission={m}
+                          currentUserId={user?.id}
+                          isAuthenticated={isAuthenticated}
+                          canApplyMissions={canApplyMissions}
+                          mode={mode}
+                          compactBio={compactBio}
+                          showBio={showBio}
+                          onNavigateDetail={() => navigate(isAuthenticated ? `/petites-missions/${m.id}` : "/inscription")}
+                          onPropose={() => {
+                            if (!isAuthenticated) { navigate("/inscription"); return; }
+                            setDialogMission(m);
+                            setDialogTarget({ id: m.user_id, name: (m.profiles as any)?.first_name || "ce membre" });
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ═══ Section 2 — Membres disponibles (secondaire) ═══ */}
             {(helperCount > 0 || isAuthenticated) && (
-              <div className="mt-10">
+              <div className="mt-12 pt-8 border-t border-border">
                 {isAuthenticated && mode === "offer" && (
                   <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -621,12 +688,13 @@ const SmallMissions = () => {
                     )}
                   </div>
                 )}
-                <h2 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Et aussi</p>
+                <h3 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
                   {mode === "need" ? "Membres disponibles pour aider" : "Autres membres disponibles"}
                   <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
                     {helperCount} personne{helperCount > 1 ? "s" : ""} du coin
                   </span>
-                </h2>
+                </h3>
                 <div className="space-y-8">
                   {helpersLoading ? (
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
