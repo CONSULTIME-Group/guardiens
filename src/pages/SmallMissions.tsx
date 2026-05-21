@@ -17,7 +17,7 @@ import ProposeHelperExchangeDialog from "@/components/missions/ProposeHelperExch
 import { haversineDistance } from "@/lib/geocode";
 
 import {
-  CategoryFilter, ModeFilter, MISSION_TO_SKILL, SKILL_TO_MISSION,
+  CategoryFilter, ModeFilter, MISSION_TO_SKILL, SKILL_TO_MISSION, formatCity,
 } from "@/components/missions/connected/constants";
 import MissionsHero from "@/components/missions/connected/MissionsHero";
 import MissionsArticlesStrip from "@/components/missions/connected/MissionsArticlesStrip";
