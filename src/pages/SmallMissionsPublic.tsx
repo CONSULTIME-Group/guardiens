@@ -122,6 +122,12 @@ const CATEGORY_LABEL: Record<string, string> = {
   other: "Autre",
 };
 
+const DURATION_LABEL: Record<string, string> = {
+  "1-2h": "1-2 heures",
+  half_day: "Demi-journée",
+  several: "Plusieurs passages",
+};
+
 /* ── page ── */
 const SmallMissionsPublic = () => {
  const navigate = useNavigate();
@@ -197,23 +203,17 @@ const SmallMissionsPublic = () => {
  </Reveal>
 
  <Reveal delay={0.1}>
-  <h1 className="font-heading text-5xl md:text-6xl font-bold text-foreground leading-tight max-w-2xl mx-auto">
- Quelqu'un, près de chez vous,<br />a besoin d'un coup de main.
+  <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground leading-tight max-w-2xl mx-auto">
+ Un coup de main, près de chez vous.
  </h1>
- <p className="font-heading text-xl md:text-2xl italic text-foreground/70 mt-4 max-w-lg mx-auto">
- Vous avez une heure, un savoir-faire, deux mains disponibles ? C'est déjà tout ce qu'il faut.
+ <p className="font-heading text-lg md:text-xl italic text-foreground/70 mt-4 max-w-lg mx-auto">
+ Gratuit, sans engagement. Publiez une demande ou proposez votre aide.
  </p>
  </Reveal>
 
- <Reveal delay={0.2}>
- <p className="font-body text-lg text-foreground/70 leading-relaxed text-center max-w-lg mx-auto mt-6">
- Une plante à arroser, un colis à réceptionner, un chien à sortir une heure, un meuble à monter. Des micro-services qui changent une journée — et qui ne demandent ni argent, ni engagement.
- </p>
- </Reveal>
-
- <Reveal delay={0.3}>
+ <Reveal delay={0.25}>
  {/* QW#1 — CTA "offrir" en principal (friction sociale ~0), "demander" en secondaire */}
- <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
+ <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
  <Button onClick={goToHelp} className="bg-primary text-primary-foreground rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary/90 transition-all duration-200">
  Je propose mon aide
  </Button>
@@ -225,6 +225,22 @@ const SmallMissionsPublic = () => {
  Gratuit pour tous. Aucun engagement, aucun jugement.
  </p>
  </Reveal>
+
+ {/* ── Lien direct vers le feed live ── */}
+ {openMissions.length > 0 && (
+   <Reveal delay={0.3}>
+     <a
+       href="#missions-ouvertes"
+       className="inline-flex items-center gap-2 mt-6 px-4 py-2 rounded-full bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/15 transition-colors"
+     >
+       <span className="relative flex h-2 w-2">
+         <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping" />
+         <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+       </span>
+       {openMissions.length} mission{openMissions.length > 1 ? "s" : ""} ouverte{openMissions.length > 1 ? "s" : ""} en ce moment →
+     </a>
+   </Reveal>
+ )}
 
  {/* Mosaïque hero — ancrage visuel (4 illustrations gouache existantes) */}
  <Reveal delay={0.35}>
@@ -265,6 +281,112 @@ const SmallMissionsPublic = () => {
  </Reveal>
  </div>
  </section>
+
+  {/* ═══ SECTION 1.5 — MISSIONS OUVERTES (preuve sociale dynamique, remontée après hero) ═══ */}
+  {openMissions.length > 0 && (
+    <section id="missions-ouvertes" className="bg-muted/40 border-t border-border/40 scroll-mt-24">
+      <div className="max-w-5xl mx-auto px-6 py-16 md:py-20">
+        <Reveal>
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+            </span>
+            <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/70">
+              En direct · {openMissions.length} mission{openMissions.length > 1 ? "s" : ""} ouverte{openMissions.length > 1 ? "s" : ""}
+            </p>
+          </div>
+          <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center leading-snug mb-3">
+            Voici les coups de main demandés en ce moment.
+          </h2>
+          <p className="font-body text-base text-foreground/65 text-center max-w-xl mx-auto mb-12">
+            Cliquez sur une mission pour la lire, ou publiez la vôtre en deux minutes.
+          </p>
+        </Reveal>
+        {(() => {
+          const count = openMissions.length;
+          const gridCls =
+            count === 1
+              ? "grid grid-cols-1 md:grid-cols-2 gap-5 max-w-3xl mx-auto"
+              : count === 2
+              ? "grid grid-cols-1 md:grid-cols-2 gap-5 max-w-4xl mx-auto"
+              : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5";
+          return (
+            <div className={gridCls}>
+              {openMissions.map((m, i) => {
+                const dateNeeded = formatDateNeeded(m.date_needed);
+                const durationLabel = m.duration_estimate
+                  ? DURATION_LABEL[m.duration_estimate] || null
+                  : null;
+                const isFeatured = count === 1;
+                return (
+                  <Reveal key={m.id} delay={0.04 * i}>
+                    <Link
+                      to={`/petites-missions/${m.id}`}
+                      className="group relative flex h-full flex-col p-6 md:p-7 rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5 transition-all"
+                    >
+                      <div className="flex items-center justify-between gap-3 mb-3">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-body font-semibold tracking-wide">
+                          {CATEGORY_LABEL[m.category] || "Mission"}
+                        </span>
+                        <span className="text-[11px] text-foreground/50">{timeAgoFr(m.created_at)}</span>
+                      </div>
+                      <h3 className={`font-heading font-semibold text-foreground leading-snug mb-2 line-clamp-2 ${isFeatured ? "text-xl md:text-2xl" : "text-base md:text-lg"}`}>
+                        {m.title}
+                      </h3>
+                      {m.description && (
+                        <p className={`font-body text-sm text-foreground/70 leading-relaxed mb-4 ${isFeatured ? "line-clamp-3" : "line-clamp-2"}`}>
+                          {m.description}
+                        </p>
+                      )}
+                      <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-foreground/60">
+                        <span className="font-medium text-foreground/75">{m.city || "France"}</span>
+                        {dateNeeded && <><span aria-hidden>·</span><span>{dateNeeded}</span></>}
+                        {durationLabel && <><span aria-hidden>·</span><span>{durationLabel}</span></>}
+                      </div>
+                      <span className="mt-4 inline-flex items-center text-xs font-semibold text-primary group-hover:underline">
+                        Voir la mission →
+                      </span>
+                    </Link>
+                  </Reveal>
+                );
+              })}
+
+              {count < 3 && (
+                <Reveal delay={0.04 * count}>
+                  <button
+                    type="button"
+                    onClick={goToCreate}
+                    className="group flex h-full w-full flex-col items-center justify-center text-center p-6 md:p-7 rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 hover:border-primary/60 transition-colors"
+                  >
+                    <span className="font-heading text-lg md:text-xl font-semibold text-foreground mb-2">
+                      Votre demande pourrait être ici.
+                    </span>
+                    <span className="font-body text-sm text-foreground/70 mb-4 max-w-xs">
+                      Publiez un coup de main en deux minutes — gratuit, sans engagement.
+                    </span>
+                    <span className="inline-flex items-center text-sm font-semibold text-primary group-hover:underline">
+                      Publier une mission →
+                    </span>
+                  </button>
+                </Reveal>
+              )}
+            </div>
+          );
+        })()}
+        <Reveal delay={0.3}>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mt-10">
+            <Button onClick={goToCreate} className="bg-primary text-primary-foreground rounded-full px-7 py-3 h-auto text-sm font-semibold">
+              Publier ma demande
+            </Button>
+            <Button onClick={goToHelp} variant="outline" className="border-2 border-primary text-primary rounded-full px-7 py-3 h-auto text-sm font-semibold">
+              Proposer mon aide
+            </Button>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  )}
 
   {/* ═══ SECTION 2 — LA CONVICTION (fusionnée avec ex-3.5) ═══ */}
  <section className="bg-background border-t border-border/40">
@@ -597,98 +719,7 @@ const SmallMissionsPublic = () => {
  </div>
   </section>
 
-  {/* ═══ SECTION 5.6 — MISSIONS OUVERTES (preuve sociale dynamique) ═══ */}
-  {openMissions.length > 0 && (
-    <section className="bg-muted/40 border-t border-border/40">
-      <div className="max-w-5xl mx-auto px-6 py-20 md:py-24">
-        <Reveal>
-          <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 text-center mb-4">
-            En direct de la communauté
-          </p>
-          <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center leading-snug mb-12">
-            Des missions ouvertes en ce moment
-          </h2>
-        </Reveal>
-        {(() => {
-          const count = openMissions.length;
-          const gridCls =
-            count === 1
-              ? "grid grid-cols-1 md:grid-cols-2 gap-5 max-w-3xl mx-auto"
-              : count === 2
-              ? "grid grid-cols-1 md:grid-cols-2 gap-5 max-w-4xl mx-auto"
-              : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5";
-          return (
-            <div className={gridCls}>
-              {openMissions.map((m, i) => {
-                const dateNeeded = formatDateNeeded(m.date_needed);
-                const isFeatured = count === 1;
-                return (
-                  <Reveal key={m.id} delay={0.04 * i}>
-                    <Link
-                      to={`/petites-missions/${m.id}`}
-                      className="group relative flex h-full flex-col p-6 md:p-7 rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5 transition-all"
-                    >
-                      <div className="flex items-center justify-between gap-3 mb-3">
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-body font-semibold tracking-wide">
-                          {CATEGORY_LABEL[m.category] || "Mission"}
-                        </span>
-                        <span className="text-[11px] text-foreground/50">{timeAgoFr(m.created_at)}</span>
-                      </div>
-                      <h3 className={`font-heading font-semibold text-foreground leading-snug mb-2 line-clamp-2 ${isFeatured ? "text-xl md:text-2xl" : "text-base md:text-lg"}`}>
-                        {m.title}
-                      </h3>
-                      {m.description && (
-                        <p className={`font-body text-sm text-foreground/70 leading-relaxed mb-4 ${isFeatured ? "line-clamp-3" : "line-clamp-2"}`}>
-                          {m.description}
-                        </p>
-                      )}
-                      <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-foreground/60">
-                        <span className="font-medium text-foreground/75">{m.city || "France"}</span>
-                        {dateNeeded && <span aria-hidden>·</span>}
-                        {dateNeeded && <span>{dateNeeded}</span>}
-                        {m.duration_estimate && <span aria-hidden>·</span>}
-                        {m.duration_estimate && <span>{m.duration_estimate}</span>}
-                      </div>
-                      <span className="mt-4 inline-flex items-center text-xs font-semibold text-primary group-hover:underline">
-                        Voir la mission →
-                      </span>
-                    </Link>
-                  </Reveal>
-                );
-              })}
-
-              {count < 3 && (
-                <Reveal delay={0.04 * count}>
-                  <button
-                    type="button"
-                    onClick={goToCreate}
-                    className="group flex h-full w-full flex-col items-center justify-center text-center p-6 md:p-7 rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 hover:border-primary/60 transition-colors"
-                  >
-                    <span className="font-heading text-lg md:text-xl font-semibold text-foreground mb-2">
-                      Votre demande pourrait être ici.
-                    </span>
-                    <span className="font-body text-sm text-foreground/70 mb-4 max-w-xs">
-                      Publiez un coup de main en deux minutes — gratuit, sans engagement.
-                    </span>
-                    <span className="inline-flex items-center text-sm font-semibold text-primary group-hover:underline">
-                      Publier une mission →
-                    </span>
-                  </button>
-                </Reveal>
-              )}
-            </div>
-          );
-        })()}
-        <Reveal delay={0.3}>
-          <div className="text-center mt-10">
-            <Button onClick={goToHelp} variant="outline" className="border-2 border-primary text-primary rounded-full px-8 py-3 h-auto text-sm font-semibold">
-              Voir toutes les missions ouvertes
-            </Button>
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  )}
+  {/* ═══ SECTION MISSIONS OUVERTES (preuve sociale dynamique) — placeholder, rendu réel après le hero ═══ */}
 
   {/* ═══ SECTION 5.7 — TÉMOIGNAGES ═══ */}
   <section className="bg-background border-t border-border/40">
