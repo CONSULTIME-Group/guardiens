@@ -211,7 +211,7 @@ const SmallMissionDetail = () => {
     setMission(m);
 
     const { data: profile } = await supabase.from("profiles")
-      .select("first_name, last_name, avatar_url, city, postal_code, identity_verified")
+      .select("first_name, last_name, avatar_url, city, postal_code, identity_verified, created_at")
       .eq("id", m.user_id).single();
     setAuthor(profile);
 
