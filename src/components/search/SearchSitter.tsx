@@ -129,8 +129,6 @@ const SearchSitter = () => {
  });
  const [viewMode, setViewMode] = useState<ViewMode>("list");
  const [cityPostalCode, setCityPostalCode] = useState<string | null>(null);
- const [alertCreated, setAlertCreated] = useState(false);
- const [isCreatingAlert, setIsCreatingAlert] = useState(false);
 
  const [results, setResults] = useState<any[]>([]);
  const [resultCoords, setResultCoords] = useState<Map<string, { lat: number; lng: number }>>(new Map());
