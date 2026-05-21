@@ -1215,120 +1215,29 @@ const SearchSitter = () => {
  <span>{verifiedOnly ? "Vérifiés uniquement" : "Vérifié"}</span>
  </button>
 
- {/* Advanced filters pill */}
- <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
- <SheetTrigger asChild>
- <button className={`${pillClass} relative`}>
- <SlidersHorizontal className="h-4 w-4" />
- <span className="text-foreground">Filtres</span>
- {hasActiveFilters && (
- <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary" />
- )}
- </button>
- </SheetTrigger>
-            <SheetContent side="right" className="w-[88vw] sm:w-80 max-w-sm overflow-y-auto">
-              <SheetTitle className="sr-only">Filtres de recherche</SheetTitle>
-              <SheetDescription className="sr-only">Affinez votre recherche avec les filtres ci-dessous.</SheetDescription>
-              <div className="flex items-center justify-between mb-6 mt-2">
- <h3 className="font-heading font-semibold text-lg text-foreground">Filtres</h3>
- <button onClick={resetFilters} className="text-sm text-primary hover:underline">Réinitialiser</button>
- </div>
- <div className="space-y-6">
- {/* Housing type */}
- <div>
- <label className="text-sm font-medium text-foreground mb-2 block">Type de logement</label>
- <div className="flex flex-wrap gap-2">
- {([
- { key: "house" as HousingFilter, label: "Maison" },
- { key: "apartment" as HousingFilter, label: "Appartement" },
- { key: "farm" as HousingFilter, label: "Ferme" },
- ]).map(({ key, label }) => (
- <button
- key={key}
- onClick={() => toggleHousingType(key)}
- className={`rounded-full px-3 py-1.5 text-xs transition-colors ${
- housingTypes.includes(key)
- ? "bg-primary text-primary-foreground"
- : "border border-border text-muted-foreground hover:border-primary"
- }`}
- >
- {label}
- </button>
- ))}
- </div>
- </div>
-
- {/* Environment (visual only) */}
- <div>
- <label className="text-sm font-medium text-foreground mb-2 block">Environnement</label>
- <div className="flex flex-wrap gap-2">
- {envOptions.map(({ key, label }) => (
- <button
- key={key}
- onClick={() => toggleEnv(key)}
- className={`rounded-full px-3 py-1.5 text-xs transition-colors ${
- environments.includes(key)
- ? "bg-primary text-primary-foreground"
- : "border border-border text-muted-foreground hover:border-primary"
- }`}
- >
- {label}
- </button>
- ))}
- </div>
- </div>
-
- {/* Verified toggle */}
- <div>
- <div className="flex items-center justify-between">
- <div>
- <label className="text-sm text-foreground block">Propriétaire avec ID vérifiée</label>
- <span className="text-xs text-muted-foreground">Afficher uniquement les annonces de proprios dont l'identité a été vérifiée</span>
- </div>
- <Switch checked={verifiedOnly} onCheckedChange={setVerifiedOnly} />
- </div>
- </div>
-
- {/* With photos toggle */}
- <div className="flex items-center justify-between">
- <label className="text-sm text-foreground">Annonces avec photos</label>
- <Switch checked={withPhotosOnly} onCheckedChange={setWithPhotosOnly} />
- </div>
-
- {/* Min experience */}
- <div>
- <label className="text-sm font-medium text-foreground mb-2 block">Expérience du propriétaire</label>
- <div className="flex flex-wrap gap-2">
- {([
- { key: "all" as ExperienceFilter, label: "Tous" },
- { key: "1" as ExperienceFilter, label: "1 garde+" },
- { key: "3" as ExperienceFilter, label: "3 gardes+" },
- ]).map(({ key, label }) => (
- <button
- key={key}
- onClick={() => setMinExperience(key)}
- className={`rounded-full px-3 py-1.5 text-xs transition-colors ${
- minExperience === key
- ? "bg-primary text-primary-foreground"
- : "border border-border text-muted-foreground hover:border-primary"
- }`}
- >
- {label}
- </button>
- ))}
- </div>
- </div>
-
- {/* Apply button */}
- <Button className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-medium" onClick={() => {
- doSearch();
- setFilterSheetOpen(false);
- }}>
- Appliquer les filtres
- </Button>
- </div>
- </SheetContent>
- </Sheet>
+  {/* Advanced filters pill */}
+  <AdvancedFiltersSheet
+    open={filterSheetOpen}
+    onOpenChange={setFilterSheetOpen}
+    pillClass={pillClass}
+    hasActiveFilters={hasActiveFilters}
+    resetFilters={resetFilters}
+    housingTypes={housingTypes}
+    toggleHousingType={toggleHousingType}
+    envOptions={envOptions}
+    environments={environments}
+    toggleEnv={toggleEnv}
+    verifiedOnly={verifiedOnly}
+    setVerifiedOnly={setVerifiedOnly}
+    withPhotosOnly={withPhotosOnly}
+    setWithPhotosOnly={setWithPhotosOnly}
+    minExperience={minExperience}
+    setMinExperience={setMinExperience}
+    onApply={() => {
+      doSearch();
+      setFilterSheetOpen(false);
+    }}
+  />
    </div>
    <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:hidden" />
    </div>
