@@ -13,6 +13,7 @@ const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
 import SearchListingCard from "@/components/search/listing/SearchListingCard";
 import { DEMO_SITS, DEMO_MISSIONS, DEMO_MEMBERS, interleaveDemos, auditInterleave } from "@/data/demoListings";
 import { normalize } from "@/lib/normalize";
+import { normalizeSkillKey, tokenizeSkillPhrases } from "@/lib/skills/tokenize";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -47,7 +48,6 @@ import AnimalsPickerPopover from "@/components/search/header/AnimalsPickerPopove
 import { useEmptyStateBreakdown } from "@/hooks/search/useEmptyStateBreakdown";
 import { useSearchAlert } from "@/hooks/search/useSearchAlert";
 import { useSearchUserProfile } from "@/hooks/search/useSearchUserProfile";
-
 const animalChips = ["Chiens", "Chats", "Chevaux", "Animaux de ferme", "NAC"];
 const animalChipToSpecies: Record<string, string> = {
  Chiens: "dog", Chats: "cat", Chevaux: "horse",
@@ -755,7 +755,7 @@ const SearchSitter = () => {
  const searchAvailableMembers = async (searchCoords: { lat: number; lng: number } | null) => {
  const { data } = await supabase
 .from("public_profiles")
-.select("id, first_name, avatar_url, city, bio, skill_categories, available_for_help, is_founder")
+.select("id, first_name, avatar_url, city, bio, skill_categories, custom_skills, available_for_help, is_founder")
 .eq("available_for_help", true)
 .not("skill_categories", "eq", "{}");
  let items = (data || []).filter((m: any) => m.id !== user?.id);
@@ -784,6 +784,14 @@ const SearchSitter = () => {
  }
  const memberIds = items.map((m: any) => m.id);
  if (memberIds.length > 0) {
+  const { data: sitterProfiles } = await supabase
+    .from("sitter_profiles")
+    .select("user_id, competences")
+    .in("user_id", memberIds);
+  const competenceMap = new Map<string, string[]>();
+  (sitterProfiles || []).forEach((sp: any) => {
+    if (sp.competences?.length) competenceMap.set(sp.user_id, sp.competences);
+  });
  const { data: reviews } = await supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", memberIds).eq("published", true);
  const reviewMap = new Map<string, { count: number; total: number }>();
  (reviews || []).forEach((r: any) => {
@@ -795,18 +803,21 @@ const SearchSitter = () => {
  (apps || []).forEach((a: any) => { sitsMap.set(a.sitter_id, (sitsMap.get(a.sitter_id) || 0) + 1); });
  items = items.map((m: any) => {
  const rev = reviewMap.get(m.id);
- return {...m, avgRating: rev ? (rev.total / rev.count).toFixed(1) : null, reviewCount: rev?.count || 0, sitsCount: sitsMap.get(m.id) || 0 };
+  return {...m, competences: competenceMap.get(m.id) || [], avgRating: rev ? (rev.total / rev.count).toFixed(1) : null, reviewCount: rev?.count || 0, sitsCount: sitsMap.get(m.id) || 0 };
  });
  }
   if (sort === "closest") items.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
  else if (sort === "rating") items.sort((a: any, b: any) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
  // Tri prio : savoir-faire particuliers (competences) AVEC photo > competences sans photo > autres avec photo > autres sans photo.
  // Ce tri prime sur les autres pour mettre en avant la valeur ajoutée (reiki, éducation canine, ostéo…).
- const skillRank = (m: any) => {
-   const hasCompetences = Array.isArray(m.skill_categories) && m.skill_categories.includes("competences");
+  const skillRank = (m: any) => {
+    const hasSpecificSkills =
+      tokenizeSkillPhrases(m.custom_skills || []).length > 0 ||
+      tokenizeSkillPhrases(m.competences || []).length > 0 ||
+      !!m.specialty_label;
    const hasAvatar = !!m.avatar_url;
-   if (hasCompetences && hasAvatar) return 0;
-   if (hasCompetences) return 1;
+    if (hasSpecificSkills && hasAvatar) return 0;
+    if (hasSpecificSkills) return 1;
    if (hasAvatar) return 2;
    return 3;
  };
@@ -1528,6 +1539,17 @@ const SearchSitter = () => {
  const skills: string[] = member.skill_categories || [];
  const visibleSkills = skills.slice(0, 2);
  const extraCount = skills.length - 2;
+  const seenSpecialSkills = new Set<string>();
+  const specialSkills = [
+    ...(member.specialty_label ? [member.specialty_label] : []),
+    ...tokenizeSkillPhrases(member.custom_skills || []),
+    ...tokenizeSkillPhrases(member.competences || []),
+  ].filter((label: string) => {
+    const key = normalizeSkillKey(label);
+    if (!key || seenSpecialSkills.has(key)) return false;
+    seenSpecialSkills.add(key);
+    return true;
+  });
  return (
  <div key={member.id} className={`bg-card rounded-2xl border p-4 flex items-center gap-4 ${member.is_demo ? "border-amber-300/70 border-dashed" : "border-border"}`}>
  {member.avatar_url ? (
@@ -1565,6 +1587,16 @@ const SearchSitter = () => {
  })}
  {extraCount > 0 && <span className="text-xs text-muted-foreground self-center">+{extraCount}</span>}
  </div>
+  {specialSkills.length > 0 && (
+  <div className="flex flex-wrap gap-1.5 mt-1.5">
+  {specialSkills.slice(0, 3).map((skill: string) => (
+  <span key={skill} className="rounded-full border border-accent bg-accent/50 text-accent-foreground text-xs px-2.5 py-0.5">
+  {skill}
+  </span>
+  ))}
+  {specialSkills.length > 3 && <span className="text-xs text-muted-foreground self-center">+{specialSkills.length - 3}</span>}
+  </div>
+  )}
  {(member.avgRating || member.sitsCount > 0) && (
  <p className="text-xs text-muted-foreground mt-1">
  {member.avgRating && <>★ {member.avgRating}</>}
