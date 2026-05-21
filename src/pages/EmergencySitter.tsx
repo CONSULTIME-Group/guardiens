@@ -185,6 +185,19 @@ const EmergencySitter = () => {
         <script type="application/ld+json">{JSON.stringify(serviceJsonLd)}</script>
       </Helmet>
       <PublicHeader />
+
+      {/* Bandeau Bientôt disponible */}
+      <section className="bg-warning/15 border-b border-warning/25 py-3">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <p className="text-sm font-medium text-warning-foreground">
+            Bientôt disponible — Le réseau de gardiens d'urgence sera activé dès que nous aurons suffisamment de profils vérifiés et éprouvés.
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Notre plateforme est jeune. Nous prenons le temps de désigner des gardiens d'urgence sur des critères stricts pour garantir la fiabilité du service.
+          </p>
+        </div>
+      </section>
+
       <PageBreadcrumb items={[{ label: "Gardien d'urgence" }]} />
 
       {/* Hero */}
