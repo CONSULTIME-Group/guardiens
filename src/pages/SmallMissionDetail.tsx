@@ -926,7 +926,9 @@ const SmallMissionDetail = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+      {!user && <PublicFooter />}
+    </>
   );
 };
 
