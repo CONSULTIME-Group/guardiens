@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/dialog";
 import ReportButton from "@/components/reports/ReportButton";
 import PageMeta from "@/components/PageMeta";
+import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
+import { Helmet } from "react-helmet-async";
 const entraideHeader = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/entraide-header.webp";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
