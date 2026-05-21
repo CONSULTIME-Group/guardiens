@@ -91,12 +91,17 @@ const PublicSitView = ({
   envLabel,
   speciesLabel,
   onShare,
+  isAuthenticated = false,
+  hasAccess = false,
+  hasApplied = false,
+  onApply,
 }: Props) => {
   const heroImage = property?.photos?.[0];
   const cityLabel = owner?.city || "France";
   const redirect = `/annonces/${sit.id}`;
   const title = sit.title ? sanitizeUserTitle(sit.title) : `Une mission de garde à ${cityLabel}`;
   const description = property?.description || "";
+  const accepting = sit.accepting_applications !== false;
 
   return (
     <div className="min-h-screen bg-background text-foreground animate-fade-in">
