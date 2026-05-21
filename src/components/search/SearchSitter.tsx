@@ -63,7 +63,7 @@ const SearchSitter = () => {
  const isMobile = useIsMobile();
  const navigate = useNavigate();
  const { toast } = useToast();
- const [searchParams] = useSearchParams();
+ const [searchParams, setSearchParams] = useSearchParams();
  const [tab, setTab] = useState<SearchTab>("sits");
  const [missionSubTab, setMissionSubTab] = useState<MissionSubTab>("published");
  const [missionTypeFilter, setMissionTypeFilter] = useState<"all" | "besoin" | "offre">("all");
