@@ -11,7 +11,7 @@ import { ToastAction } from "@/components/ui/toast";
 
 const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
 import SearchListingCard from "@/components/search/listing/SearchListingCard";
-import { DEMO_SITS, DEMO_MISSIONS, interleaveDemos, auditInterleave } from "@/data/demoListings";
+import { DEMO_SITS, DEMO_MISSIONS, DEMO_MEMBERS, interleaveDemos, auditInterleave } from "@/data/demoListings";
 import { normalize } from "@/lib/normalize";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -800,6 +800,12 @@ const SearchSitter = () => {
  }
  if (sort === "closest") items.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
  else if (sort === "rating") items.sort((a: any, b: any) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
+ // Démos "savoir-faire complémentaires" toujours visibles (reiki, naturopathie, ostéo…)
+ // — seulement quand le filtre catégorie est "all" ou "skills".
+ const showDemoMembers = missionCategoryFilter === "all" || missionCategoryFilter === "skills";
+ if (showDemoMembers) {
+   items = interleaveDemos(items, DEMO_MEMBERS as any[], 3);
+ }
  setAvailableMembers(items);
  setResults([]);
  };
