@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
-  { label: "Annonces en cours", to: "/search" },
+  { label: "Annonces en cours", to: "/annonces" },
   { label: "Coups de main", to: "/petites-missions" },
   { label: "Guides locaux", to: "/guides" },
   { label: "Tarifs", to: "/tarifs" },
