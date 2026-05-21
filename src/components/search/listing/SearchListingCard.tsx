@@ -57,7 +57,7 @@ const SearchListingCard = ({
 
   const cardContent = (
     <div
-      className={`relative bg-card rounded-2xl overflow-hidden border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isInactive ? "opacity-60 grayscale-[40%]" : ""} ${isDemo ? "border-amber-400 border-dashed ring-1 ring-amber-200/60" : isOutOfZone ? "border-dashed border-muted-foreground/40" : "border-border"} ${testDemoMode ? (isDemo ? "card-test-demo" : "card-test-real") : ""}`}
+      className={`group relative bg-card rounded-3xl overflow-hidden border transition-all duration-300 ${isClickable ? "cursor-pointer hover:shadow-xl hover:-translate-y-0.5" : ""} ${isInactive ? "opacity-60 grayscale-[40%]" : ""} ${isDemo ? "border-amber-300/70 border-dashed" : isOutOfZone ? "border-dashed border-muted-foreground/30" : "border-border/60"} ${testDemoMode ? (isDemo ? "card-test-demo" : "card-test-real") : ""}`}
       aria-disabled={isInactive || undefined}
       data-testid={isDemo ? "search-card-demo" : "search-card-real"}
       data-demo={isDemo ? "true" : "false"}
@@ -73,14 +73,21 @@ const SearchListingCard = ({
         </span>
       )}
       {coverPhoto && (
-        <div className="h-52 relative">
-          <img src={coverPhoto} alt="" className={`w-full h-full object-cover ${isInactive ? "grayscale" : ""} ${isDemo ? "saturate-[0.85]" : ""}`} loading="lazy" />
+        <div className="aspect-[4/3] relative overflow-hidden">
+          <img
+            src={coverPhoto}
+            alt=""
+            className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${isInactive ? "grayscale" : ""} ${isDemo ? "saturate-[0.85]" : ""}`}
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent pointer-events-none" />
+
           {isDemo && (
             <span
-              className="absolute inset-x-0 top-0 bg-amber-400 text-amber-950 text-[11px] font-semibold uppercase tracking-wide px-3 py-1.5 text-center shadow-sm flex items-center justify-center gap-1.5"
+              className="absolute inset-x-0 top-0 bg-amber-400/95 text-amber-950 text-[10px] font-semibold uppercase tracking-wider px-3 py-1.5 text-center backdrop-blur-sm flex items-center justify-center gap-1.5"
               data-testid="demo-example-badge"
             >
-              <Sparkles className="h-3 w-3" /> Annonce d'exemple — pour illustrer la plateforme
+              <Sparkles className="h-3 w-3" /> Annonce d'exemple
             </span>
           )}
           {(isAssigned || isCompleted || isPast) && (
@@ -90,8 +97,9 @@ const SearchListingCard = ({
               </span>
             </span>
           )}
+
           {!isInactive && !isDemo && item.owner?.identity_verified && (
-            <span className="absolute top-3 left-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 text-xs text-primary font-medium">
+            <span className="absolute top-3 left-3 flex items-center gap-1 bg-background/95 backdrop-blur-sm rounded-full px-2.5 py-1 text-[11px] text-primary font-medium shadow-sm">
               <ShieldCheck className="h-3 w-3" /> Vérifié
             </span>
           )}
@@ -101,89 +109,89 @@ const SearchListingCard = ({
             </span>
           )}
           {item.isNew && !isDemo && !isInactive && (
-            <span className="absolute top-3 left-3 mt-8 bg-primary text-primary-foreground rounded-full px-2 py-1 text-xs flex items-center gap-1">
+            <span className="absolute bottom-3 left-3 bg-primary text-primary-foreground rounded-full px-2.5 py-1 text-[11px] font-medium flex items-center gap-1 shadow-sm">
               <Sparkles className="h-3 w-3" /> Nouveau
             </span>
           )}
           {isOutOfZone && !isInactive && (
             <span
-              className="absolute bottom-3 left-3 inline-flex items-center gap-1 bg-foreground/85 text-background backdrop-blur-sm rounded-full px-2.5 py-1 text-[11px] font-medium shadow-sm"
+              className="absolute bottom-3 right-3 inline-flex items-center gap-1 bg-background/95 text-foreground backdrop-blur-sm rounded-full px-2.5 py-1 text-[11px] font-medium shadow-sm"
               title={`Cette annonce est à ${Math.round(item.distance)} km, au-delà de votre rayon de ${radius} km`}
             >
-              <MapPin className="h-3 w-3" /> Hors zone · {Math.round(item.distance)} km
+              <MapPin className="h-3 w-3" /> {Math.round(item.distance)} km
             </span>
           )}
         </div>
       )}
-      <div className="p-4">
-        <div className="flex items-center gap-2 mb-1">
-          <h3 className="text-base font-semibold text-foreground leading-snug line-clamp-2">
+
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-3 mb-2">
+          <h3 className="text-[15px] font-semibold text-foreground leading-snug line-clamp-2 tracking-tight">
             {item.title || "Sans titre"}
           </h3>
           {item.owner?.is_founder && <FounderBadge size="sm" />}
         </div>
-        <p className={`text-sm mb-2 flex items-center gap-1 ${isOutOfZone ? "text-foreground" : "text-muted-foreground"}`}>
-          <MapPin className={`h-3.5 w-3.5 ${isOutOfZone ? "text-primary" : ""}`} />
-          {item.owner?.city || ""}
+
+        <p className={`text-[13px] mb-3 flex items-center gap-1.5 ${isOutOfZone ? "text-foreground" : "text-muted-foreground"}`}>
+          <MapPin className={`h-3.5 w-3.5 shrink-0 ${isOutOfZone ? "text-primary" : ""}`} />
+          <span className="truncate">{item.owner?.city || ""}</span>
           {item.distance != null && (
-            <span className={isOutOfZone ? "font-semibold text-primary" : ""}>
-              {" · "}
-              {item.distance < 1 ? "< 1" : Math.round(item.distance).toLocaleString("fr-FR").replace(/\s/g, "\u202F")} km
+            <span className={`shrink-0 ${isOutOfZone ? "font-semibold text-primary" : "text-muted-foreground/70"}`}>
+              · {item.distance < 1 ? "< 1" : Math.round(item.distance).toLocaleString("fr-FR").replace(/\s/g, "\u202F")} km
             </span>
           )}
         </p>
-        {Object.keys(petGroups).length > 0 && (
-          <div className="flex flex-wrap items-center gap-3 mb-2">
-            {Object.entries(petGroups).map(([species, names]) => {
-              const IconComp = speciesIcon[species] || PawPrint;
-              return (
-                <span key={species} className="flex items-center gap-0.5 text-amber-700 text-sm">
-                  <IconComp className="h-4 w-4" /> ×{names.length}
-                </span>
-              );
-            })}
-          </div>
-        )}
+
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          {Object.entries(petGroups).map(([species, names]) => {
+            const IconComp = speciesIcon[species] || PawPrint;
+            return (
+              <span
+                key={species}
+                className="inline-flex items-center gap-1 bg-muted/60 text-foreground rounded-full px-2.5 py-1 text-[11px] font-medium"
+              >
+                <IconComp className="h-3.5 w-3.5 text-primary" />
+                ×{names.length}
+              </span>
+            );
+          })}
+          {!isMission && item.start_date && (
+            <span className="inline-flex items-center gap-1 bg-muted/60 text-foreground rounded-full px-2.5 py-1 text-[11px] font-medium">
+              {formatDate(item.start_date)} → {formatDate(item.end_date)}
+            </span>
+          )}
+        </div>
+
         {(item.environments?.length > 0 || item.ownerEnvironments?.length > 0) && (
-          <div className="mb-2">
+          <div className="mb-3">
             <EnvironmentPills selected={item.environments?.length > 0 ? item.environments : item.ownerEnvironments || []} onChange={() => {}} readOnly maxVisible={2} />
           </div>
         )}
-        {!isMission && item.start_date && (
-          <p className="text-xs text-muted-foreground">
-            {formatDate(item.start_date)} → {formatDate(item.end_date)}
-          </p>
-        )}
+
         {isMission && item.description && (
-          <p className="text-sm text-muted-foreground truncate">{item.description}</p>
+          <p className="text-[13px] text-muted-foreground line-clamp-2">{item.description}</p>
         )}
+
         {isAssigned && (
-          <p className="text-xs text-muted-foreground italic mt-3">
-            Cette garde a déjà trouvé son gardien.
-          </p>
+          <p className="text-xs text-muted-foreground italic mt-2">Cette garde a déjà trouvé son gardien.</p>
         )}
         {isCompleted && (
-          <p className="text-xs text-muted-foreground italic mt-3">
-            Garde déjà réalisée — pour donner un aperçu de l'activité.
-          </p>
+          <p className="text-xs text-muted-foreground italic mt-2">Garde déjà réalisée — aperçu de l'activité.</p>
         )}
         {isPast && !isCompleted && (
-          <p className="text-xs text-muted-foreground italic mt-3">
-            Annonce passée — consultable à titre d'historique.
-          </p>
+          <p className="text-xs text-muted-foreground italic mt-2">Annonce passée — consultable à titre d'historique.</p>
         )}
         {isDemo && (
-          <p className="text-xs text-amber-700 italic mt-3 flex items-center gap-1">
-            <Sparkles className="h-3 w-3" /> Exemple — cliquez pour découvrir l'expérience complète
+          <p className="text-xs text-amber-700 italic mt-2 flex items-center gap-1">
+            <Sparkles className="h-3 w-3" /> Exemple — cliquez pour découvrir
           </p>
         )}
+
         {showCTA && !isDemo && (
-          <Link
-            to="/mon-abonnement"
-            className="block w-full py-2 text-sm text-center text-primary bg-primary/10 rounded-xl font-medium mt-3 hover:bg-primary/20 transition-colors"
-          >
-            S'abonner pour postuler
-          </Link>
+          <div className="mt-4 pt-4 border-t border-border/60 flex items-center justify-between text-[13px]">
+            <span className="text-muted-foreground">Inscription gratuite</span>
+            <span className="text-primary font-semibold">Postuler →</span>
+          </div>
         )}
       </div>
     </div>
