@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 
 const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
+import SearchListingCard from "@/components/search/listing/SearchListingCard";
 import { DEMO_SITS, DEMO_MISSIONS, interleaveDemos, auditInterleave } from "@/data/demoListings";
 import { normalize } from "@/lib/normalize";
 import { supabase } from "@/integrations/supabase/client";
