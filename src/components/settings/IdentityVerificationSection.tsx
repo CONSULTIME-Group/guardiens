@@ -150,19 +150,22 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
     }
     setUploadingSelfie(true);
     try {
-      const compressed = await compressImageFile(file, 5, 2048);
-      const ext = compressed.name.split(".").pop();
-      const path = `${user.id}/identity-selfie.${ext}`;
+      const ext = (file.name.split(".").pop() || "").toLowerCase();
+      const isHeic = ext === "heic" || ext === "heif" || file.type === "image/heic" || file.type === "image/heif";
+      const toUpload = isHeic ? file : await compressImageFile(file, 5, 2048);
+      const finalExt = toUpload.name.split(".").pop();
+      const path = `${user.id}/identity-selfie.${finalExt}`;
       await supabase.storage.from("identity-documents").remove([path]);
       const { error: uploadError } = await supabase.storage
         .from("identity-documents")
-        .upload(path, compressed, { upsert: true });
+        .upload(path, toUpload, { upsert: true, contentType: toUpload.type || undefined });
       if (uploadError) throw uploadError;
       await supabase.from("profiles").update({ identity_selfie_url: path } as any).eq("id", user.id);
       setSelfieUrl(path);
       toast.success("Selfie envoyé !");
-    } catch {
-      toast.error("Votre fichier n'a pas pu être envoyé. Vérifiez le format (JPG, PNG) et la taille (max 5 Mo).");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.error(`Envoi impossible : ${msg.slice(0, 160)}`);
       setSelfiePreview(null);
     }
     setUploadingSelfie(false);
