@@ -1651,7 +1651,7 @@ const SearchSitter = () => {
       trackEvent={trackEvent}
     />
  ) : (
- <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 lg:gap-x-16 gap-y-14 lg:gap-y-20">
  {results.map((item, idx) => renderCard(item, idx))}
  </div>
  )}
