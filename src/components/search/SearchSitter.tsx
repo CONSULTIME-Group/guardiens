@@ -692,7 +692,7 @@ const SearchSitter = () => {
   let query = supabase
 .from("sits")
 .select("*, property:properties!sits_property_id_fkey(type, environment, photos, cover_photo_url)")
-.in("status", ["published", "confirmed", "in_progress", "expired", "completed", "cancelled"])
+.in("status", ["published", "confirmed", "in_progress", "completed", "cancelled"])
 .order("created_at", { ascending: false });
   if (startDate) query = query.gte("end_date", startDate);
   if (endDate) query = query.lte("start_date", endDate);
