@@ -68,13 +68,23 @@ async function geocode(city: string, postalCode?: string | null): Promise<LatLng
 const ApproximateLocationMap = ({
   city,
   postalCode,
+  lat,
+  lng,
   radius = 1500,
   className = "",
 }: Props) => {
-  const [coords, setCoords] = useState<LatLng | null>(null);
-  const [loading, setLoading] = useState(true);
+  const hasExact = typeof lat === "number" && typeof lng === "number";
+  const [coords, setCoords] = useState<LatLng | null>(
+    hasExact ? { lat: lat as number, lng: lng as number } : null,
+  );
+  const [loading, setLoading] = useState(!hasExact);
 
   useEffect(() => {
+    if (hasExact) {
+      setCoords({ lat: lat as number, lng: lng as number });
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
     if (!city) {
       setLoading(false);
@@ -87,7 +97,7 @@ const ApproximateLocationMap = ({
       setLoading(false);
     });
     return () => { cancelled = true; };
-  }, [city, postalCode]);
+  }, [city, postalCode, lat, lng, hasExact]);
 
   if (loading || !coords) {
     return (
@@ -125,15 +135,12 @@ const ApproximateLocationMap = ({
         center={[coords.lat, coords.lng]}
         zoom={12}
         scrollWheelZoom={false}
-        zoomControl={false}
-        dragging={false}
-        doubleClickZoom={false}
+        zoomControl={true}
+        dragging={true}
+        doubleClickZoom={true}
         attributionControl={false}
         className="h-full w-full"
         style={{ background: "hsl(var(--muted))" }}
-        whenReady={() => {
-          // Empêche les interactions tout en gardant la lisibilité.
-        }}
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
