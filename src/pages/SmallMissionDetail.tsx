@@ -506,7 +506,9 @@ const SmallMissionDetail = () => {
   };
 
   return (
-    <div className="animate-fade-in pb-32">
+    <>
+      {!user && <PublicHeader />}
+      <div className="animate-fade-in pb-32">
       {/* Hero */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0">
