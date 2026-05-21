@@ -926,9 +926,10 @@ const SearchSitter = () => {
  if (sortBy === "closest") sorted.sort((a, b) => (a.distance ?? 9999) - (b.distance ?? 9999));
  else if (sortBy === "recent") sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
  else if (sortBy === "rating") sorted.sort((a, b) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
- // Always push assigned (greyed-out) sits to the bottom, then completed (history) at the very end
- sorted.sort((a, b) => Number(!!a.isAssigned || !!a.isCompleted) - Number(!!b.isAssigned || !!b.isCompleted));
- sorted.sort((a, b) => Number(!!a.isCompleted) - Number(!!b.isCompleted));
+  // Tri secondaire : on pousse en bas les annonces inactives (attribuées),
+  // puis tout en bas les annonces passées (expirées, complétées, annulées).
+  sorted.sort((a, b) => Number(!!a.isAssigned || !!a.isCompleted || !!a.isPast) - Number(!!b.isAssigned || !!b.isCompleted || !!b.isPast));
+  sorted.sort((a, b) => Number(!!a.isCompleted || !!a.isPast) - Number(!!b.isCompleted || !!b.isPast));
  return sorted;
  };
 
