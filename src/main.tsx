@@ -24,6 +24,9 @@ createRoot(container).render(
 );
 
 const markPrerenderReady = () => {
+  if (window.location.pathname.startsWith("/annonces/")) {
+    return;
+  }
   window.prerenderReady = true;
 };
 

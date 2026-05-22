@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import PageMeta from "@/components/PageMeta";
 import {
   ArrowLeft,
   ExternalLink,
@@ -17,7 +18,6 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { trackEvent } from "@/lib/analytics";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
-import { getOgImageAbsoluteUrl } from "@/lib/ogImages";
 import { logger } from "@/lib/logger";
 
 import ApplicationModal from "@/components/sits/ApplicationModal";
@@ -34,7 +34,8 @@ import {
 type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
 
 const PublicSitDetail = () => {
- const { id } = useParams<{ id: string }>();
+ const { id: rawId } = useParams<{ id: string }>();
+ const id = rawId?.replace(/[\s\u00A0\u200B-\u200D\uFEFF]+/g, "") || undefined;
  const navigate = useNavigate();
  const { user, isAuthenticated } = useAuth();
  const { hasAccess } = useSubscriptionAccess();
@@ -52,6 +53,12 @@ const PublicSitDetail = () => {
  const [hasApplied, setHasApplied] = useState(false);
  const [viewerType, setViewerType] = useState<ViewerType>("anonymous");
  const sitViewFired = useRef(false);
+
+  useEffect(() => {
+    if (!loading && (loadError || !sit)) {
+      window.prerenderReady = true;
+    }
+  }, [loading, loadError, sit]);
 
   useEffect(() => {
     if (!id) return;
@@ -341,6 +348,13 @@ const PublicSitDetail = () => {
  const ogImageUrl = `https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/og-sit?id=${sit.id}`;
  const ogImageAlt = `${sit.title || "Annonce de garde"} — ${cityForTitle}, ${datesShort}`;
 
+  const MetaReady = () => {
+    useEffect(() => {
+      window.prerenderReady = true;
+    }, []);
+    return null;
+  };
+
  const jsonLd = {
  "@context": "https://schema.org",
  "@type": "Service",
@@ -445,27 +459,21 @@ const PublicSitDetail = () => {
 
   return (
     <div className="bg-background">
+      <PageMeta
+        title={truncatedTitle}
+        description={truncatedDesc}
+        path={`/annonces/${sit.id}`}
+        image={ogImageUrl}
+        type="article"
+        canonical={canonicalUrl}
+        noindex={!isIndexable}
+      />
+      <MetaReady />
       <Helmet>
-        <title>{truncatedTitle}</title>
-        <meta name="description" content={truncatedSeoDesc} />
-        <link rel="canonical" href={canonicalUrl} />
-        <meta name="robots" content={isIndexable ? "index, follow" : "noindex, follow"} />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:title" content={truncatedTitle} />
-        <meta property="og:description" content={truncatedDesc} />
-        <meta property="og:image" content={ogImageUrl} />
         <meta property="og:image:alt" content={ogImageAlt} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:image:type" content="image/png" />
-        <meta name="twitter:image" content={ogImageUrl} />
-        <meta property="og:site_name" content="Guardiens" />
-        <meta property="og:locale" content="fr_FR" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={truncatedTitle} />
-        <meta name="twitter:description" content={truncatedDesc} />
-        <meta name="twitter:image" content={ogImageUrl} />
         <meta name="twitter:image:alt" content={ogImageAlt} />
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
         <script type="application/ld+json">{JSON.stringify(breadcrumbLd)}</script>
