@@ -10,6 +10,7 @@ interface SitterRow {
   avatar_url: string | null;
   city: string | null;
   avgRating: string | null;
+  skills: string[];
 }
 
 /**
