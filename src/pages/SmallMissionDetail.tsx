@@ -655,26 +655,51 @@ const SmallMissionDetail = () => {
           )}
         </div>
 
-        {/* Author card — en haut pour mise en confiance immédiate */}
+        {/* Author card — en haut pour mise en confiance immédiate, cliquable vers profil */}
         {author && (
-          <div className="flex items-center gap-3 mb-6 p-4 bg-card rounded-xl border border-border">
-            {author.avatar_url ? (
-              <img src={author.avatar_url} alt={author.first_name} className="w-12 h-12 rounded-full object-cover" />
+          <div className="flex items-center gap-3 mb-6 p-4 bg-card rounded-xl border border-border hover:border-primary/30 transition-colors group">
+            {author.user_id ? (
+              <Link to={`/gardiens/${author.user_id}`} className="flex items-center gap-3 flex-1 min-w-0">
+                {author.avatar_url ? (
+                  <img src={author.avatar_url} alt={author.first_name} className="w-12 h-12 rounded-full object-cover" />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center font-heading text-lg font-bold">
+                    {author.first_name?.charAt(0) || "?"}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm">
+                    Publié par <span className="group-hover:text-primary transition-colors">{author.first_name || "un membre"}</span>
+                    {author.identity_verified && <span className="ml-2 inline-flex items-center gap-1 text-xs text-success"><CheckCircle2 className="h-3 w-3" /> Identité vérifiée</span>}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {titlecaseCity(author.city) || titlecaseCity(mission.city) || "France"}
+                    {memberSince(author.created_at) && <> · {memberSince(author.created_at)}</>}
+                  </p>
+                </div>
+                <span className="text-xs text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity shrink-0 hidden sm:inline">Voir le profil →</span>
+              </Link>
             ) : (
-              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center font-heading text-lg font-bold">
-                {author.first_name?.charAt(0) || "?"}
-              </div>
+              <>
+                {author.avatar_url ? (
+                  <img src={author.avatar_url} alt={author.first_name} className="w-12 h-12 rounded-full object-cover" />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center font-heading text-lg font-bold">
+                    {author.first_name?.charAt(0) || "?"}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm">
+                    Publié par {author.first_name || "un membre"}
+                    {author.identity_verified && <span className="ml-2 inline-flex items-center gap-1 text-xs text-success"><CheckCircle2 className="h-3 w-3" /> Identité vérifiée</span>}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {titlecaseCity(author.city) || titlecaseCity(mission.city) || "France"}
+                    {memberSince(author.created_at) && <> · {memberSince(author.created_at)}</>}
+                  </p>
+                </div>
+              </>
             )}
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-sm">
-                Publié par {author.first_name || "un membre"}
-                {author.identity_verified && <span className="ml-2 inline-flex items-center gap-1 text-xs text-success"><CheckCircle2 className="h-3 w-3" /> Identité vérifiée</span>}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {titlecaseCity(author.city) || titlecaseCity(mission.city) || "France"}
-                {memberSince(author.created_at) && <> · {memberSince(author.created_at)}</>}
-              </p>
-            </div>
             {user && !isAuthor && <ReportButton targetId={mission.id} targetType="profile" />}
           </div>
         )}
