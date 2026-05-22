@@ -146,7 +146,7 @@ const SearchListingCard = ({
           </div>
 
           {item.exchange_offer && (
-            <div className="mt-1.5 rounded-md bg-muted/60 px-1.5 py-1 text-[10px] leading-snug text-foreground/75 line-clamp-2">
+            <div className="mt-1.5 rounded-md bg-muted/70 px-2 py-1 text-[11px] leading-snug text-foreground line-clamp-2">
               <span className="font-semibold text-foreground">Échange : </span>
               {item.exchange_offer}
             </div>
