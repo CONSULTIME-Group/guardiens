@@ -577,46 +577,51 @@ const SmallMissionDetail = () => {
     <>
       {!user && <PublicHeader />}
       <div className="animate-fade-in pb-32">
-      {/* Hero */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0">
-          <img src={entraideHeader} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/75 to-background/60" />
-        </div>
-        <div className="relative max-w-3xl mx-auto px-6 py-10">
-          <PageMeta title={`${mission.title} — Coup de main près de chez vous | Guardiens`} description={mission.description?.slice(0, 155)} />
-          {/* JSON-LD Service + BreadcrumbList */}
-          <Helmet>
-            <script type="application/ld+json">{JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Service",
-              name: mission.title,
-              description: mission.description?.slice(0, 300),
-              areaServed: titlecaseCity(mission.city) || "France",
-              serviceType: catMeta.label,
-              provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
-              offers: { "@type": "Offer", price: "0", priceCurrency: "EUR", availability: mission.status === "open" ? "https://schema.org/InStock" : "https://schema.org/OutOfStock" },
-              datePosted: mission.created_at,
-            })}</script>
-          </Helmet>
-          <div className="flex items-center justify-between gap-3 mb-4">
-            <Link to="/petites-missions" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-              <ArrowLeft className="h-4 w-4" /> Retour aux missions
-            </Link>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSharePublishedLink}
-              className="gap-1.5 rounded-full"
-              aria-label="Partager cette mission"
-            >
-              <Share2 className="h-4 w-4" /> Partager
-            </Button>
+      {/* Hero — photo de la mission si dispo, sinon visuel générique discret */}
+      {(() => {
+        const heroPhoto = mission.photos && mission.photos.length > 0 ? mission.photos[0] : null;
+        return (
+          <div className="relative overflow-hidden">
+            <div className="absolute inset-0">
+              <img src={heroPhoto || entraideHeader} alt="" className="w-full h-full object-cover" />
+              <div className={`absolute inset-0 ${heroPhoto ? "bg-gradient-to-t from-background via-background/85 to-background/30" : "bg-gradient-to-r from-background/90 via-background/75 to-background/60"}`} />
+            </div>
+            <div className={`relative max-w-3xl mx-auto px-6 ${heroPhoto ? "pt-10 pb-8 min-h-[280px] md:min-h-[340px] flex flex-col justify-end" : "py-10"}`}>
+              <PageMeta title={`${mission.title} — Coup de main près de chez vous | Guardiens`} description={mission.description?.slice(0, 155)} />
+              {/* JSON-LD Service + BreadcrumbList */}
+              <Helmet>
+                <script type="application/ld+json">{JSON.stringify({
+                  "@context": "https://schema.org",
+                  "@type": "Service",
+                  name: mission.title,
+                  description: mission.description?.slice(0, 300),
+                  areaServed: titlecaseCity(mission.city) || "France",
+                  serviceType: catMeta.label,
+                  provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
+                  offers: { "@type": "Offer", price: "0", priceCurrency: "EUR", availability: mission.status === "open" ? "https://schema.org/InStock" : "https://schema.org/OutOfStock" },
+                  datePosted: mission.created_at,
+                })}</script>
+              </Helmet>
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <Link to="/petites-missions" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+                  <ArrowLeft className="h-4 w-4" /> Retour aux missions
+                </Link>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSharePublishedLink}
+                  className="gap-1.5 rounded-full"
+                  aria-label="Partager cette mission"
+                >
+                  <Share2 className="h-4 w-4" /> Partager
+                </Button>
+              </div>
+              <h1 className="font-heading text-2xl md:text-3xl font-bold">{mission.title}</h1>
+              <p className="text-sm text-foreground/70 mt-2">Coup de main publié {timeAgoFr(mission.created_at)}{mission.city ? ` · ${titlecaseCity(mission.city)}` : ""}</p>
+            </div>
           </div>
-          <h1 className="font-heading text-2xl md:text-3xl font-bold">{mission.title}</h1>
-          <p className="text-sm text-foreground/70 mt-2">Coup de main publié {timeAgoFr(mission.created_at)}{mission.city ? ` · ${titlecaseCity(mission.city)}` : ""}</p>
-        </div>
-      </div>
+        );
+      })()}
 
       <div className="p-6 md:p-10 max-w-3xl mx-auto">
         <div className="mb-4 -mt-2">
@@ -655,26 +660,51 @@ const SmallMissionDetail = () => {
           )}
         </div>
 
-        {/* Author card — en haut pour mise en confiance immédiate */}
+        {/* Author card — en haut pour mise en confiance immédiate, cliquable vers profil */}
         {author && (
-          <div className="flex items-center gap-3 mb-6 p-4 bg-card rounded-xl border border-border">
-            {author.avatar_url ? (
-              <img src={author.avatar_url} alt={author.first_name} className="w-12 h-12 rounded-full object-cover" />
+          <div className="flex items-center gap-3 mb-6 p-4 bg-card rounded-xl border border-border hover:border-primary/30 transition-colors group">
+            {author.user_id ? (
+              <Link to={`/gardiens/${author.user_id}`} className="flex items-center gap-3 flex-1 min-w-0">
+                {author.avatar_url ? (
+                  <img src={author.avatar_url} alt={author.first_name} className="w-12 h-12 rounded-full object-cover" />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center font-heading text-lg font-bold">
+                    {author.first_name?.charAt(0) || "?"}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm">
+                    Publié par <span className="group-hover:text-primary transition-colors">{author.first_name || "un membre"}</span>
+                    {author.identity_verified && <span className="ml-2 inline-flex items-center gap-1 text-xs text-success"><CheckCircle2 className="h-3 w-3" /> Identité vérifiée</span>}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {titlecaseCity(author.city) || titlecaseCity(mission.city) || "France"}
+                    {memberSince(author.created_at) && <> · {memberSince(author.created_at)}</>}
+                  </p>
+                </div>
+                <span className="text-xs text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity shrink-0 hidden sm:inline">Voir le profil →</span>
+              </Link>
             ) : (
-              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center font-heading text-lg font-bold">
-                {author.first_name?.charAt(0) || "?"}
-              </div>
+              <>
+                {author.avatar_url ? (
+                  <img src={author.avatar_url} alt={author.first_name} className="w-12 h-12 rounded-full object-cover" />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center font-heading text-lg font-bold">
+                    {author.first_name?.charAt(0) || "?"}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm">
+                    Publié par {author.first_name || "un membre"}
+                    {author.identity_verified && <span className="ml-2 inline-flex items-center gap-1 text-xs text-success"><CheckCircle2 className="h-3 w-3" /> Identité vérifiée</span>}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {titlecaseCity(author.city) || titlecaseCity(mission.city) || "France"}
+                    {memberSince(author.created_at) && <> · {memberSince(author.created_at)}</>}
+                  </p>
+                </div>
+              </>
             )}
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-sm">
-                Publié par {author.first_name || "un membre"}
-                {author.identity_verified && <span className="ml-2 inline-flex items-center gap-1 text-xs text-success"><CheckCircle2 className="h-3 w-3" /> Identité vérifiée</span>}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {titlecaseCity(author.city) || titlecaseCity(mission.city) || "France"}
-                {memberSince(author.created_at) && <> · {memberSince(author.created_at)}</>}
-              </p>
-            </div>
             {user && !isAuthor && <ReportButton targetId={mission.id} targetType="profile" />}
           </div>
         )}
@@ -973,14 +1003,46 @@ const SmallMissionDetail = () => {
 
         {/* Non-author: respond form */}
         {user && !isAuthor && !myResponse && mission.status === "open" && canApplyMissions && (
-          <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
-            <div className="max-w-3xl mx-auto space-y-2">
+          <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20 shadow-[0_-4px_20px_-8px_rgba(0,0,0,0.08)]">
+            <div className="max-w-3xl mx-auto space-y-2.5">
+              {/* Amorces — un clic pour démarrer */}
+              {!message.trim() && (() => {
+                const starters = [
+                  `Bonjour ${author?.first_name || ""}, je suis disponible et ${(mission.city ? `je connais bien ${titlecaseCity(mission.city)}` : "pas loin de chez vous")}.`.trim(),
+                  mission.category === "animals"
+                    ? `Bonjour ${author?.first_name || ""}, j'ai l'habitude des animaux et je serais ravi(e) de vous aider.`
+                    : `Bonjour ${author?.first_name || ""}, votre demande me parle, j'aimerais vous aider.`,
+                  `Bonjour ${author?.first_name || ""}, dites-moi quand ça vous arrange, je m'organise.`,
+                ].map(s => s.trim());
+                return (
+                  <div className="flex flex-wrap gap-1.5">
+                    {starters.map((s, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setMessage(s)}
+                        className="text-xs px-2.5 py-1 rounded-full border border-border bg-background hover:bg-accent hover:border-primary/40 transition-colors text-muted-foreground hover:text-foreground"
+                      >
+                        {i === 0 ? "👋 Je suis dispo" : i === 1 ? "🤝 Ça me parle" : "📅 Selon vous"}
+                      </button>
+                    ))}
+                  </div>
+                );
+              })()}
               <Textarea
-                placeholder="Dites bonjour, présentez-vous en deux mots et expliquez ce que vous proposez. Pas besoin d'en faire des tonnes."
+                placeholder={`Dites bonjour à ${author?.first_name || "l'auteur"}, présentez-vous en deux mots. Pas besoin d'en faire des tonnes.`}
                 value={message}
-                onChange={e => setMessage(e.target.value)}
-                className="min-h-[60px]"
+                onChange={e => setMessage(e.target.value.slice(0, 500))}
+                className="min-h-[72px]"
+                maxLength={500}
               />
+              <div className="flex items-center justify-between text-[11px] text-muted-foreground -mt-1">
+                <span className="flex items-center gap-3">
+                  <span className="inline-flex items-center gap-1">✓ Gratuit, entre membres</span>
+                  <span className="hidden sm:inline-flex items-center gap-1">✓ {author?.first_name || "L'auteur"} reçoit votre mot directement</span>
+                </span>
+                <span className={message.length > 450 ? "text-warning" : ""}>{message.length}/500</span>
+              </div>
               <Button
                 className="w-full h-12 text-base font-semibold"
                 onClick={handleRespond}
@@ -990,7 +1052,7 @@ const SmallMissionDetail = () => {
               </Button>
               {!message.trim() && !submitting && (
                 <p className="text-xs text-muted-foreground text-center">
-                  Écrivez un mot ci-dessus pour activer le bouton.
+                  Cliquez sur une amorce ou écrivez un mot pour activer le bouton.
                 </p>
               )}
             </div>
