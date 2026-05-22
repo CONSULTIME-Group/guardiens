@@ -73,7 +73,7 @@ const LiveListingsSection: React.FC = () => {
           city: o?.city ?? null,
           first_name: o?.first_name ?? null,
           avatar_url: o?.avatar_url ?? null,
-          cover_photo_url: p?.cover_photo_url ?? null,
+          cover_photo_url: s.cover_photo_url ?? p?.cover_photo_url ?? null,
           first_photo: p?.photos?.[0] ?? null,
           property_type: p?.type ?? null,
         };
