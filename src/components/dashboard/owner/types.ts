@@ -19,6 +19,8 @@ export interface SitRow {
   user_id: string;
   cancelled_by: string | null;
   applications: { id: string; status: string; sitter_id: string }[];
+  views_30d?: number;
+  views_total?: number;
 }
 
 export interface SitterInfo {
