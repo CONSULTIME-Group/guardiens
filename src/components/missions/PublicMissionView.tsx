@@ -161,35 +161,62 @@ const PublicMissionView = ({
 
             <div className="max-w-2xl space-y-10">
               {/* Auteur */}
-              {author && (
-                <div className="flex items-center gap-5 pb-8 border-b border-border">
-                  <div className="shrink-0">
-                    {author.avatar_url ? (
-                      <img
-                        src={author.avatar_url}
-                        alt={author.first_name || "Auteur"}
-                        className="w-16 h-16 rounded-full object-cover border-2 border-background shadow-sm"
-                      />
-                    ) : (
-                      <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center font-heading text-xl font-bold text-foreground">
-                        {author.first_name?.charAt(0) || "?"}
-                      </div>
-                    )}
+              {author && (() => {
+                const AuthorInner = (
+                  <>
+                    <div className="shrink-0">
+                      {author.avatar_url ? (
+                        <img
+                          src={author.avatar_url}
+                          alt={author.first_name || "Auteur"}
+                          className="w-16 h-16 rounded-full object-cover border-2 border-background shadow-sm"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center font-heading text-xl font-bold text-foreground">
+                          {author.first_name?.charAt(0) || "?"}
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-lg font-semibold text-foreground flex items-center gap-2 flex-wrap">
+                        Proposé par {author.first_name || "un membre"}
+                        {author.identity_verified && (
+                          <span
+                            className="inline-flex items-center gap-1 text-xs font-medium text-success bg-success-soft px-2 py-0.5 rounded-full"
+                            title="Identité vérifiée par nos équipes"
+                          >
+                            <ShieldCheck className="h-3 w-3" />
+                            Identité vérifiée
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {[
+                          memberSinceLong(author.created_at),
+                          titlecaseCity(author.city) || null,
+                        ].filter(Boolean).join(" · ")}
+                      </p>
+                      {author.user_id && (
+                        <p className="text-xs text-primary font-medium mt-1 group-hover:underline">
+                          Voir son profil →
+                        </p>
+                      )}
+                    </div>
+                  </>
+                );
+                return author.user_id ? (
+                  <Link
+                    to={`/gardiens/${author.user_id}`}
+                    className="group flex items-center gap-5 pb-8 border-b border-border hover:opacity-90 transition-opacity"
+                  >
+                    {AuthorInner}
+                  </Link>
+                ) : (
+                  <div className="flex items-center gap-5 pb-8 border-b border-border">
+                    {AuthorInner}
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-lg font-semibold text-foreground">
-                      Proposé par {author.first_name || "un membre"}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {[
-                        author.identity_verified ? "Identité vérifiée" : null,
-                        memberSinceLong(author.created_at),
-                        titlecaseCity(author.city) || null,
-                      ].filter(Boolean).join(" · ")}
-                    </p>
-                  </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* Description */}
               <section>
