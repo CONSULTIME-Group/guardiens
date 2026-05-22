@@ -9,6 +9,7 @@ import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
+import SitHero from "@/components/sits/views/tabs/SitHero";
 
 interface SitLike {
   id: string;
@@ -96,7 +97,10 @@ const PublicSitView = ({
   hasApplied = false,
   onApply,
 }: Props) => {
-  const heroImage = property?.photos?.[0];
+  const photos: string[] = (property?.photos || []).filter(Boolean);
+  const petPhotos = pets
+    .filter((p) => !!p.photo_url)
+    .map((p) => ({ url: p.photo_url as string, name: p.name, species: speciesLabel[p.species] || p.species }));
   const cityLabel = owner?.city || "France";
   const redirect = `/annonces/${sit.id}`;
   const title = sit.title ? sanitizeUserTitle(sit.title) : `Une mission de garde à ${cityLabel}`;
@@ -165,14 +169,13 @@ const PublicSitView = ({
               </div>
             </header>
 
-            {/* Image principale */}
-            {heroImage && (
-              <div className="mb-12 rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
-                <img
-                  src={heroImage}
-                  alt={title}
-                  className="w-full aspect-video object-cover"
-                  loading="eager"
+            {/* Galerie photos — logement + animaux, lightbox plein écran */}
+            {(photos.length > 0 || petPhotos.length > 0) && (
+              <div className="mb-12">
+                <SitHero
+                  photos={photos}
+                  petPhotos={petPhotos}
+                  cityName={owner?.city || undefined}
                 />
               </div>
             )}
