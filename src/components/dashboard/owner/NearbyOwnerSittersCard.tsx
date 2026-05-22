@@ -100,8 +100,8 @@ const NearbyOwnerSittersCard = ({ hideHeader = false }: Props) => {
             {sitters.map((s) => {
               const distance =
                 typeof s.distance_km === "number" ? Math.round(s.distance_km) : null;
-              // 2 savoir-faire secondaires max — différenciants au-delà des animaux.
-              const skills = s.custom_skills.slice(0, 2);
+              // Jusqu'à 4 savoir-faire secondaires — critère de choix clé.
+              const skills = s.custom_skills.slice(0, 4);
               return (
                 <Link
                   key={s.id}
