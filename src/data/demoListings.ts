@@ -339,6 +339,9 @@ export const DEMO_MISSIONS = [
     status: "open",
     duration_estimate: "20 min/jour",
     date_needed: null,
+    photos: [
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&q=80",
+    ],
     created_at: today.toISOString(),
     user_id: "demo",
     latitude: 45.7797,
