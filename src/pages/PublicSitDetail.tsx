@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import PageMeta from "@/components/PageMeta";
 import {
   ArrowLeft,
   ExternalLink,
@@ -52,6 +53,12 @@ const PublicSitDetail = () => {
  const [hasApplied, setHasApplied] = useState(false);
  const [viewerType, setViewerType] = useState<ViewerType>("anonymous");
  const sitViewFired = useRef(false);
+
+  useEffect(() => {
+    if (!loading && (loadError || !sit)) {
+      window.prerenderReady = true;
+    }
+  }, [loading, loadError, sit]);
 
   useEffect(() => {
     if (!id) return;
@@ -185,13 +192,10 @@ const PublicSitDetail = () => {
             });
           } catch {}
         }
-        window.prerenderReady = true;
       } catch (e: any) {
         logger.warn("[PublicSitDetail] load failed", { sit_id: id, error: e?.message });
         setLoadError("error");
-        window.prerenderReady = true;
       } finally {
-        window.prerenderReady = true;
         setLoading(false);
       }
     };
