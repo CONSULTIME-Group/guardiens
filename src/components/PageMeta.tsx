@@ -12,7 +12,7 @@ const getListingOgImageFromPath = (pathname: string): string | null => {
   const match = pathname.match(/^\/annonces\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/?$/i);
   if (!match) return null;
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://erhccyqevdyevpyctsjj.supabase.co";
-  return `${supabaseUrl}/functions/v1/og-sit?id=${match[1]}&v=cover-photo`;
+  return `${supabaseUrl}/functions/v1/og-sit?id=${match[1]}&v=cover-only-20260522`;
 };
 
 interface PageMetaProps {
