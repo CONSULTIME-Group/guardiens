@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import FounderBadge from "@/components/badges/FounderBadge";
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import FavoriteButton from "@/components/shared/FavoriteButton";
@@ -46,13 +46,17 @@ const SearchListingCard = ({
     !isDemo &&
     typeof item.distance === "number" &&
     item.distance > radius;
+  const location = useLocation();
+  const isPublicContext = location.pathname.startsWith("/annonces") || location.pathname.startsWith("/petites-missions");
   const linkTo = isMission
     ? `/petites-missions/${item.id}`
     : isDemo
     ? `/annonces/demo/${item.slug || item.id}`
+    : isPublicContext
+    ? `/annonces/${item.id}`
     : `/sits/${item.id}`;
 
-  const isClickable = (isDemo || hasAccess) && !isInactive;
+  const isClickable = (isDemo || hasAccess || isPublicContext) && !isInactive;
 
   const dateLabel = !isMission && item.start_date
     ? `${formatDate(item.start_date)} → ${formatDate(item.end_date)}`
