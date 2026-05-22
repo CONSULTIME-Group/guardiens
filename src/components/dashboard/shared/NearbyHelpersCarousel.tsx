@@ -217,7 +217,29 @@ const HelperMiniCard = ({
   helper: NearbyHelper;
   ctaHref: string;
 }) => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [contacting, setContacting] = useState(false);
   const firstName = capitalize(helper.first_name || "Membre");
+
+  const handleContact = async () => {
+    if (!user) {
+      toast.error("Connectez-vous pour écrire à ce membre.");
+      return;
+    }
+    if (contacting) return;
+    setContacting(true);
+    try {
+      await startConversationAndNavigate(
+        { otherUserId: helper.id, context: "helper_inquiry" },
+        navigate,
+      );
+    } finally {
+      setContacting(false);
+    }
+  };
+
+
 
   // Pastilles synthétiques uniquement.
   // En base, `custom_skills` peut contenir une phrase entière ("Je peux promener
