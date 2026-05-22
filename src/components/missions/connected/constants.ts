@@ -35,7 +35,8 @@ export const DURATION_LABELS: Record<string, string> = {
   week: "Semaine",
 };
 
-export function formatCity(city: string): string {
+export function formatCity(city: string | null | undefined): string {
+  if (!city) return "";
   return city.replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
