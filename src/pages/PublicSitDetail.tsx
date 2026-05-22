@@ -345,7 +345,7 @@ const PublicSitDetail = () => {
  // og:image — visuel personnalisé généré à la volée (photo de couverture réelle
  // de l'annonce + titre + ville + dates + animaux + propriétaire). Servi par
  // l'edge function `og-sit` (1200×630, optimisé Facebook/LinkedIn/WhatsApp/X).
- const ogImageUrl = `https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/og-sit?id=${sit.id}`;
+ const ogImageUrl = `https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/og-sit?id=${sit.id}&v=cover-photo`;
  const ogImageAlt = `${sit.title || "Annonce de garde"} — ${cityForTitle}, ${datesShort}`;
 
   const MetaReady = () => {
