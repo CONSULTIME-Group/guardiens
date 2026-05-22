@@ -140,7 +140,7 @@ const AdminListings = () => {
   };
 
   const buildShareData = (listing: any) => {
-    const url = `${window.location.origin}/sits/${listing.id}`;
+    const url = `https://guardiens.fr/annonces/${listing.id}`;
     const title = listing.title || "Une annonce de garde sur Guardiens";
     const text = `${title}${listing.owner?.city ? ` — ${listing.owner.city}` : ""} : découvrez cette annonce sur Guardiens.`;
     return { url, title, text };
