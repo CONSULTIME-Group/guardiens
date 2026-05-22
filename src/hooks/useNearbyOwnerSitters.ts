@@ -92,17 +92,29 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
         return { sitters: [], radiusUsed: null, hasGeo };
       }
 
-      // 3. Notes moyennes (batch)
+      // 3. Notes moyennes + compétences sitter (batch)
       const ids = pool.map((p) => p.id);
-      const { data: reviewsData } = await supabase
-        .from("reviews")
-        .select("reviewee_id, overall_rating")
-        .in("reviewee_id", ids)
-        .eq("published", true);
+      const [{ data: reviewsData }, { data: sitterRows }] = await Promise.all([
+        supabase
+          .from("reviews")
+          .select("reviewee_id, overall_rating")
+          .in("reviewee_id", ids)
+          .eq("published", true),
+        supabase
+          .from("sitter_profiles")
+          .select("user_id, competences")
+          .in("user_id", ids),
+      ]);
       const ratingMap = new Map<string, number[]>();
       (reviewsData || []).forEach((r: { reviewee_id: string; overall_rating: number }) => {
         if (!ratingMap.has(r.reviewee_id)) ratingMap.set(r.reviewee_id, []);
         ratingMap.get(r.reviewee_id)!.push(r.overall_rating);
+      });
+      const sitterSkillsMap = new Map<string, string[]>();
+      (sitterRows || []).forEach((s: any) => {
+        if (Array.isArray(s.competences) && s.competences.length > 0) {
+          sitterSkillsMap.set(s.user_id, s.competences.filter((c: any) => typeof c === "string" && c.trim().length > 0));
+        }
       });
 
       const enriched: NearbyOwnerSitter[] = pool.map((p: any) => {
@@ -117,6 +129,10 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
         const avg = ratings.length > 0
           ? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10
           : null;
+        // Priorité aux compétences sitter (labels courts) puis custom_skills profil.
+        const sitterSkills = sitterSkillsMap.get(p.id) || [];
+        const profileCustom = normalizeCustom(p.custom_skills);
+        const mergedSkills = Array.from(new Set([...sitterSkills, ...profileCustom]));
         return {
           id: p.id,
           first_name: p.first_name,
