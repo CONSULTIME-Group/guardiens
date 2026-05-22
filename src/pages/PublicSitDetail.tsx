@@ -191,6 +191,7 @@ const PublicSitDetail = () => {
         setLoadError("error");
         window.prerenderReady = true;
       } finally {
+        window.prerenderReady = true;
         setLoading(false);
       }
     };
