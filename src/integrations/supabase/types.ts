@@ -4920,6 +4920,14 @@ export type Database = {
           pending_app_count: number
         }[]
       }
+      get_sit_views_count: {
+        Args: { p_sit_ids: string[] }
+        Returns: {
+          sit_id: string
+          views_30d: number
+          views_total: number
+        }[]
+      }
       get_unread_messages_count: { Args: { _user_id: string }; Returns: number }
       get_user_email_for_notification: {
         Args: { target_user_id: string }
