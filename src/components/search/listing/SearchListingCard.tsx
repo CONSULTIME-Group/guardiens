@@ -115,50 +115,45 @@ const SearchListingCard = ({
             />
           ) : (
             <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${categoryGradient[item.category] || categoryGradient.other}`}>
-              <span className="font-heading text-2xl font-semibold uppercase tracking-[0.18em] text-foreground/55">
+              <span className="font-heading text-xs font-semibold uppercase tracking-[0.16em] text-foreground/55">
                 {catLabel}
               </span>
             </div>
           )}
           {isDemo && (
-            <span className="absolute top-2 left-2 rounded-full bg-warning px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-warning-foreground shadow-sm">
-              Exemple
+            <span className="absolute top-1.5 left-1.5 rounded-full bg-warning px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.14em] text-warning-foreground shadow-sm">
+              Ex.
             </span>
           )}
           {item.owner?.is_founder && (
-            <div className="absolute top-2 right-2"><FounderBadge size="sm" /></div>
+            <div className="absolute top-1.5 right-1.5"><FounderBadge size="sm" /></div>
           )}
         </div>
 
-        <div className="flex flex-1 flex-col p-4">
-          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
+        <div className="flex flex-1 flex-col p-2.5">
+          <p className="mb-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-primary">
             {catLabel}
           </p>
-          <h3 className="font-heading text-base font-semibold leading-snug text-foreground line-clamp-2">
+          <h3 className="font-heading text-[13px] font-semibold leading-snug text-foreground line-clamp-2">
             {item.title || "Sans titre"}
           </h3>
 
-          {item.description && (
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-2">{item.description}</p>
-          )}
-
-          <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-            <span>{item.owner?.city || item.city || "France"}</span>
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 text-[11px] text-muted-foreground">
+            <span className="truncate">{item.owner?.city || item.city || "France"}</span>
             {item.distance != null && (
-              <span>· {item.distance < 1 ? "< 1" : Math.round(item.distance).toLocaleString("fr-FR").replace(/\s/g, "\u202F")} km</span>
+              <span>· {item.distance < 1 ? "<1" : Math.round(item.distance)} km</span>
             )}
-            {item.duration_estimate && <span>· {item.duration_estimate}</span>}
           </div>
 
           {item.exchange_offer && (
-            <div className="mt-3 rounded-lg bg-muted/60 px-3 py-2 text-xs leading-relaxed text-foreground/80">
+            <div className="mt-1.5 rounded-md bg-muted/60 px-1.5 py-1 text-[10px] leading-snug text-foreground/75 line-clamp-2">
               <span className="font-semibold text-foreground">Échange : </span>
-              <span className="line-clamp-2">{item.exchange_offer}</span>
+              {item.exchange_offer}
             </div>
           )}
 
-          <div className="mt-auto flex items-center justify-end pt-4">
-            <span className="text-sm font-semibold text-primary transition-transform group-hover:translate-x-0.5">
+          <div className="mt-auto flex items-center justify-end pt-2">
+            <span className="text-[11px] font-semibold text-primary transition-transform group-hover:translate-x-0.5">
               Voir →
             </span>
           </div>
