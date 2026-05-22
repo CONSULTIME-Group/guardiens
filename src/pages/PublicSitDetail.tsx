@@ -395,13 +395,40 @@ const PublicSitDetail = () => {
 
   // Handler de partage unifié.
   const handleShare = async () => {
-    try {
-      if (navigator.share) {
+    const canNativeShare =
+      typeof navigator !== "undefined" &&
+      typeof navigator.share === "function" &&
+      window.top === window.self; // navigator.share bloqué dans les iframes (preview)
+    if (canNativeShare) {
+      try {
         await navigator.share({ title: truncatedTitle, url: canonicalUrl });
-      } else {
-        await navigator.clipboard.writeText(canonicalUrl);
+        return;
+      } catch (err: any) {
+        if (err?.name === "AbortError") return; // l'utilisateur a annulé
+        // sinon, on retombe sur le presse-papiers
       }
-    } catch { /* silencieux */ }
+    }
+    try {
+      await navigator.clipboard.writeText(canonicalUrl);
+      toast.success("Lien copié dans le presse-papiers");
+      return;
+    } catch {
+      // fallback ultime : textarea + execCommand
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = canonicalUrl;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        toast.success("Lien copié");
+      } catch {
+        toast.error("Impossible de copier le lien");
+      }
+    }
   };
 
   const handleApply = () => {
