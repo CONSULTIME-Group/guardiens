@@ -334,7 +334,7 @@ const PublicSitDetail = () => {
  const truncatedDesc = ogDescription.length > 200 ? ogDescription.slice(0, 197) + "…" : ogDescription;
 
  // SEO description (≤160 char) — distincte de og:description
- const seoDescription = `Garde à ${cityForTitle} ${datesShort}. ${petsSummary}. ${owner?.first_name || "Un membre"} cherche un gardien du coin sur Guardiens — inscription à 0\u00A0€ pour les propriétaires.`;
+  const seoDescription = `Garde à ${cityForTitle} ${datesShort}. ${petsSummary}. ${owner?.first_name || "Un membre"} cherche un gardien du coin sur Guardiens — inscription gratuite pour les propriétaires.`;
  const truncatedSeoDesc = seoDescription.length > 160 ? seoDescription.slice(0, 157) + "…" : seoDescription;
 
   // Canonical TOUJOURS sur le domaine de prod : sur preview/lovableproject,
@@ -370,7 +370,7 @@ const PublicSitDetail = () => {
  price: "0",
  priceCurrency: "EUR",
  eligibleCustomerType: "Owner",
- description: "À 0 € pour les propriétaires, sans abonnement requis.",
+  description: "Gratuit pour les propriétaires, sans abonnement requis.",
  availability: "https://schema.org/InStock",
  validFrom: sit.start_date,
  validThrough: sit.end_date,
