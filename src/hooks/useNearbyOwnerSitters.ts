@@ -141,7 +141,7 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
           identity_verified: !!p.identity_verified,
           completed_sits_count: p.completed_sits_count || 0,
           skill_categories: p.skill_categories || [],
-          custom_skills: normalizeCustom(p.custom_skills),
+          custom_skills: mergedSkills,
           distance_km,
           is_beyond: false,
           avg_rating: avg,
