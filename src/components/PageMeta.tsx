@@ -34,6 +34,7 @@ const PageMeta = ({
   const location = useLocation();
   const currentPath = normalizePathname(path || location.pathname);
   const currentUrl = buildAbsoluteUrl(currentPath);
+  const canonicalUrl = normalizeCanonical(canonical) ?? currentUrl;
   const metaDescription = description.trim();
   const titleWithoutSuffix = title.replace(/\s*\|\s*Guardiens\s*$/i, "").replace(/\s*—\s*Guardiens\s*$/i, "");
   const fullTitle = currentPath === "/" ? titleWithoutSuffix : `${titleWithoutSuffix} | ${SITE_NAME}`;
@@ -64,7 +65,7 @@ const PageMeta = ({
     };
 
     upsertMetaTag({ attr: "name", key: "robots", content: noindex ? "noindex, follow" : "index, follow" });
-    upsertCanonical(normalizeCanonical(canonical) ?? currentUrl);
+    upsertCanonical(canonicalUrl);
 
     upsertMetaTag({ attr: "property", key: "og:title", content: fullTitle });
     upsertMetaTag({ attr: "property", key: "og:description", content: metaDescription });
@@ -107,12 +108,27 @@ const PageMeta = ({
         type,
       },
     });
-  }, [author, canonical, currentPath, currentUrl, fullTitle, image, metaDescription, noindex, publishedAt, type]);
+  }, [author, canonical, canonicalUrl, currentPath, currentUrl, fullTitle, image, metaDescription, noindex, publishedAt, type]);
 
   return (
     <Helmet>
       <title>{fullTitle}</title>
       <meta name="description" content={metaDescription} />
+      <meta name="robots" content={noindex ? "noindex, follow" : "index, follow"} />
+      <link rel="canonical" href={canonicalUrl} />
+      <meta property="og:title" content={fullTitle} />
+      <meta property="og:description" content={metaDescription} />
+      <meta property="og:url" content={currentUrl} />
+      <meta property="og:image" content={image} />
+      <meta property="og:type" content={type} />
+      <meta property="og:site_name" content={SITE_NAME} />
+      <meta property="og:locale" content="fr_FR" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={fullTitle} />
+      <meta name="twitter:description" content={metaDescription} />
+      <meta name="twitter:image" content={image} />
+      {type === "article" && publishedAt && <meta property="article:published_time" content={publishedAt} />}
+      {type === "article" && author && <meta property="article:author" content={author} />}
     </Helmet>
   );
 };
