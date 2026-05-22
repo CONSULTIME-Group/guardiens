@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import { MapContainer, TileLayer, Circle } from "react-leaflet";
 import L from "leaflet";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Props {
   city?: string | null;
@@ -44,7 +45,17 @@ async function geocode(city: string, postalCode?: string | null): Promise<LatLng
     } catch { /* silencieux */ }
   }
 
-  // 2) Fallback Nominatim (OSM) — par ville
+  // 2) Fallback — edge function geocode (proxy serveur, fiable même en iframe)
+  try {
+    const { data } = await supabase.functions.invoke("geocode", { body: { city } });
+    if (data && typeof (data as any).lat === "number" && typeof (data as any).lng === "number") {
+      const out = { lat: (data as any).lat, lng: (data as any).lng };
+      cache.set(key, out);
+      return out;
+    }
+  } catch { /* silencieux */ }
+
+  // 3) Dernier recours — Nominatim public (peut être bloqué en iframe)
   try {
     const q = encodeURIComponent(`${city}${postalCode ? `, ${postalCode}` : ""}, France`);
     const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`, {
