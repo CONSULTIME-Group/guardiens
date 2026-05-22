@@ -1,3 +1,5 @@
+import { requireAdminOrServiceRole } from '../_shared/require-admin.ts'
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers':
@@ -8,6 +10,9 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
+
+  const authFail = await requireAdminOrServiceRole(req, corsHeaders)
+  if (authFail) return authFail
 
   try {
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
