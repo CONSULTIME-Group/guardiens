@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react"
 import FounderBadge from "@/components/badges/FounderBadge";
 import ReportButton from "@/components/reports/ReportButton";
 import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
-import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutGrid, Map as MapIcon, Cat, Bird, SlidersHorizontal, ShieldCheck, Crosshair, Bell, BellRing, Loader2 } from "lucide-react";
+import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutGrid, Map as MapIcon, Cat, Bird, SlidersHorizontal, ShieldCheck, Crosshair, Bell, BellRing, Loader2, Home, Wrench } from "lucide-react";
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -976,13 +976,13 @@ const SearchSitter = () => {
  </button>
  </div>
  <div className="flex flex-wrap gap-2">
- {([
- { key: "all" as const, label: "Tout", icon: null },
- { key: "garden" as const, label: "Jardin", icon: Sprout },
- { key: "animals" as const, label: "Animaux", icon: PawPrint },
- { key: "skills" as const, label: "Compétences", icon: GraduationCap },
- { key: "house" as const, label: "Coups de main", icon: HandshakeIcon },
- ]).map(({ key, label, icon: Icon }) => (
+				{([
+					{ key: "all" as const, label: "Tout", icon: null },
+					{ key: "house" as const, label: "Maison", icon: Home },
+					{ key: "garden" as const, label: "Jardins", icon: Sprout },
+					{ key: "skills" as const, label: "Bricolage", icon: Wrench },
+					{ key: "animals" as const, label: "Animaux", icon: PawPrint },
+				]).map(({ key, label, icon: Icon }) => (
  <button
  key={key}
  onClick={() => setMissionCategoryFilter(key)}
@@ -1058,70 +1058,82 @@ const SearchSitter = () => {
    onGeolocate={handleGeolocation}
  />
 
-  {/* Zone pill (radius / dept / region / france) */}
-  <ZonePickerPopover
-    pillClass={pillClass}
-    zoneMode={zoneMode}
-    setZoneMode={setZoneMode}
-    radius={radius}
-    setRadius={setRadius}
-    userPostalCode={userPostalCode}
-    densityCounts={densityCounts}
-  />
+   {/* Zone pill (radius / dept / region / france) — désactivé hors connexion */}
+   <div
+     className={!user ? "opacity-60 pointer-events-none" : ""}
+     aria-disabled={!user}
+     title={!user ? "Connectez-vous pour filtrer par distance" : undefined}
+   >
+     <ZonePickerPopover
+       pillClass={pillClass}
+       zoneMode={zoneMode}
+       setZoneMode={setZoneMode}
+       radius={radius}
+       setRadius={setRadius}
+       userPostalCode={userPostalCode}
+       densityCounts={densityCounts}
+     />
+   </div>
 
-  {/* Dates pill */}
-  <DatesPickerPopover
-    pillClass={pillClass}
-    datesLabel={datesLabel}
-    startDate={startDate}
-    endDate={endDate}
-    setStartDate={setStartDate}
-    setEndDate={setEndDate}
-  />
+   {/* Dates pill */}
+   <DatesPickerPopover
+     pillClass={pillClass}
+     datesLabel={datesLabel}
+     startDate={startDate}
+     endDate={endDate}
+     setStartDate={setStartDate}
+     setEndDate={setEndDate}
+   />
 
-  {/* Animals pill */}
-  <AnimalsPickerPopover
-    pillClass={pillClass}
-    animalsLabel={animalsLabel}
-    animalTypes={animalTypes}
-    toggleAnimalFilter={toggleAnimalFilter}
-  />
+   {/* Animals pill */}
+   <AnimalsPickerPopover
+     pillClass={pillClass}
+     animalsLabel={animalsLabel}
+     animalTypes={animalTypes}
+     toggleAnimalFilter={toggleAnimalFilter}
+   />
 
-  {/* Verified toggle promu (raccourci confiance) */}
-  <button
- onClick={() => setVerifiedOnly(v => !v)}
- aria-pressed={verifiedOnly}
- className={`${pillClass} ${verifiedOnly ? "bg-primary/10 border-primary text-primary" : ""}`}
- >
- <ShieldCheck className={`h-4 w-4 ${verifiedOnly ? "text-primary" : "text-muted-foreground"}`} />
- <span>{verifiedOnly ? "Vérifiés uniquement" : "Vérifié"}</span>
- </button>
+   {/* Verified toggle promu (raccourci confiance) */}
+   <button
+  onClick={() => setVerifiedOnly(v => !v)}
+  aria-pressed={verifiedOnly}
+  className={`${pillClass} ${verifiedOnly ? "bg-primary/10 border-primary text-primary" : ""}`}
+  >
+  <ShieldCheck className={`h-4 w-4 ${verifiedOnly ? "text-primary" : "text-muted-foreground"}`} />
+  <span>{verifiedOnly ? "Vérifiés uniquement" : "Vérifié"}</span>
+  </button>
 
-  {/* Advanced filters pill */}
-  <AdvancedFiltersSheet
-    open={filterSheetOpen}
-    onOpenChange={setFilterSheetOpen}
-    pillClass={pillClass}
-    hasActiveFilters={hasActiveFilters}
-    resetFilters={resetFilters}
-    housingTypes={housingTypes}
-    toggleHousingType={toggleHousingType}
-    envOptions={envOptions}
-    environments={environments}
-    toggleEnv={toggleEnv}
-    verifiedOnly={verifiedOnly}
-    setVerifiedOnly={setVerifiedOnly}
-    withPhotosOnly={withPhotosOnly}
-    setWithPhotosOnly={setWithPhotosOnly}
-    minExperience={minExperience}
-    setMinExperience={setMinExperience}
-    onApply={() => {
-      doSearch();
-      setFilterSheetOpen(false);
-    }}
-  />
+   {/* Advanced filters pill — type de logement / environnement, désactivé hors connexion */}
+   <div
+     className={!user ? "opacity-60 pointer-events-none" : ""}
+     aria-disabled={!user}
+     title={!user ? "Connectez-vous pour affiner par type de logement et environnement" : undefined}
+   >
+     <AdvancedFiltersSheet
+       open={filterSheetOpen}
+       onOpenChange={setFilterSheetOpen}
+       pillClass={pillClass}
+       hasActiveFilters={hasActiveFilters}
+       resetFilters={resetFilters}
+       housingTypes={housingTypes}
+       toggleHousingType={toggleHousingType}
+       envOptions={envOptions}
+       environments={environments}
+       toggleEnv={toggleEnv}
+       verifiedOnly={verifiedOnly}
+       setVerifiedOnly={setVerifiedOnly}
+       withPhotosOnly={withPhotosOnly}
+       setWithPhotosOnly={setWithPhotosOnly}
+       minExperience={minExperience}
+       setMinExperience={setMinExperience}
+       onApply={() => {
+         doSearch();
+         setFilterSheetOpen(false);
+       }}
+     />
    </div>
    <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:hidden" />
+   </div>
    </div>
 
  {/* ─── Sort bar + view toggle (sticky avec les pills pour cohérence visuelle) ─── */}
