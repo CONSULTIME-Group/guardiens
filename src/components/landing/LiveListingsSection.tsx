@@ -115,7 +115,7 @@ const LiveListingsSection: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className={`grid grid-cols-1 sm:grid-cols-2 gap-5 ${sits.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3 max-w-5xl mx-auto"}`}>
           {sits.map((s) => {
             const photo = s.cover_photo_url || s.first_photo;
             const dates =
