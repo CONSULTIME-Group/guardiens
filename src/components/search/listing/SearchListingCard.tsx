@@ -76,9 +76,22 @@ const SearchListingCard = ({
   };
 
   if (isMission) {
+    const categoryGradient: Record<string, string> = {
+      garden: "from-[hsl(95_35%_88%)] to-[hsl(95_30%_78%)]",
+      animals: "from-[hsl(28_55%_88%)] to-[hsl(28_50%_78%)]",
+      skills: "from-[hsl(210_45%_90%)] to-[hsl(210_40%_80%)]",
+      house: "from-[hsl(35_45%_90%)] to-[hsl(35_40%_80%)]",
+      home: "from-[hsl(35_45%_90%)] to-[hsl(35_40%_80%)]",
+      errand: "from-[hsl(265_35%_90%)] to-[hsl(265_30%_82%)]",
+      tech: "from-[hsl(200_35%_90%)] to-[hsl(200_30%_80%)]",
+      company: "from-[hsl(340_40%_92%)] to-[hsl(340_35%_84%)]",
+      other: "from-muted to-muted",
+    };
+    const catLabel = missionCategoryLabel[item.category] || "Petite mission";
+
     const missionCard = (
       <article
-        className={`group relative flex gap-4 rounded-xl border border-border bg-card p-3 transition-colors hover:border-primary/35 ${isClickable ? "cursor-pointer" : ""} ${testDemoMode ? (isDemo ? "card-test-demo" : "card-test-real") : ""}`}
+        className={`group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:border-primary/40 hover:shadow-lg ${isClickable ? "cursor-pointer" : ""} ${testDemoMode ? (isDemo ? "card-test-demo" : "card-test-real") : ""}`}
         data-testid={isDemo ? "search-card-demo" : "search-card-real"}
         data-demo={isDemo ? "true" : "false"}
         data-list-index={typeof listIndex === "number" ? listIndex + 1 : undefined}
@@ -91,7 +104,8 @@ const SearchListingCard = ({
             #{listIndex + 1} {isDemo ? "DEMO" : "REAL"}
           </span>
         )}
-        <div className="relative h-24 w-24 sm:h-28 sm:w-28 shrink-0 overflow-hidden rounded-lg bg-muted">
+
+        <div className="relative aspect-square w-full overflow-hidden bg-muted">
           {coverPhoto ? (
             <img
               src={coverPhoto}
@@ -100,53 +114,59 @@ const SearchListingCard = ({
               loading="lazy"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center px-3 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-              {missionCategoryLabel[item.category] || "Mission"}
+            <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${categoryGradient[item.category] || categoryGradient.other}`}>
+              <span className="font-heading text-2xl font-semibold uppercase tracking-[0.18em] text-foreground/55">
+                {catLabel}
+              </span>
             </div>
           )}
           {isDemo && (
-            <span className="absolute inset-x-0 top-0 bg-warning text-warning-foreground py-1 text-center text-[9px] font-semibold uppercase tracking-[0.16em]">
+            <span className="absolute top-2 left-2 rounded-full bg-warning px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-warning-foreground shadow-sm">
               Exemple
             </span>
           )}
+          {item.owner?.is_founder && (
+            <div className="absolute top-2 right-2"><FounderBadge size="sm" /></div>
+          )}
         </div>
 
-        <div className="min-w-0 flex-1 py-1">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
-                {missionCategoryLabel[item.category] || "Petite mission"}
-              </p>
-              <h3 className="font-heading text-lg font-semibold leading-snug text-foreground line-clamp-2">
-                {item.title || "Sans titre"}
-              </h3>
-            </div>
-            {item.owner?.is_founder && <div className="shrink-0"><FounderBadge size="sm" /></div>}
-          </div>
+        <div className="flex flex-1 flex-col p-4">
+          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
+            {catLabel}
+          </p>
+          <h3 className="font-heading text-base font-semibold leading-snug text-foreground line-clamp-2">
+            {item.title || "Sans titre"}
+          </h3>
 
           {item.description && (
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-2">{item.description}</p>
           )}
 
-          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
             <span>{item.owner?.city || item.city || "France"}</span>
             {item.distance != null && (
-              <span>{item.distance < 1 ? "< 1" : Math.round(item.distance).toLocaleString("fr-FR").replace(/\s/g, "\u202F")} km</span>
+              <span>· {item.distance < 1 ? "< 1" : Math.round(item.distance).toLocaleString("fr-FR").replace(/\s/g, "\u202F")} km</span>
             )}
-            {item.duration_estimate && <span>{item.duration_estimate}</span>}
-            {item.exchange_offer && <span className="line-clamp-1">Échange : {item.exchange_offer}</span>}
+            {item.duration_estimate && <span>· {item.duration_estimate}</span>}
+          </div>
+
+          {item.exchange_offer && (
+            <div className="mt-3 rounded-lg bg-muted/60 px-3 py-2 text-xs leading-relaxed text-foreground/80">
+              <span className="font-semibold text-foreground">Échange : </span>
+              <span className="line-clamp-2">{item.exchange_offer}</span>
+            </div>
+          )}
+
+          <div className="mt-auto flex items-center justify-end pt-4">
+            <span className="text-sm font-semibold text-primary transition-transform group-hover:translate-x-0.5">
+              Voir →
+            </span>
           </div>
         </div>
-
-        {!isDemo && (
-          <span className="absolute bottom-3 right-3 hidden text-sm font-semibold text-primary sm:inline-flex">
-            Voir →
-          </span>
-        )}
       </article>
     );
 
-    return isClickable ? <Link to={linkTo}>{missionCard}</Link> : <>{missionCard}</>;
+    return isClickable ? <Link to={linkTo} className="block h-full">{missionCard}</Link> : <>{missionCard}</>;
   }
 
   const cardContent = (
