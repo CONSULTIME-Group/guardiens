@@ -34,7 +34,7 @@ const LiveListingsSection: React.FC = () => {
     (async () => {
       const { data: rawSits } = await supabase
         .from("sits")
-        .select("id, title, start_date, end_date, user_id, property_id")
+        .select("id, title, start_date, end_date, user_id, property_id, cover_photo_url")
         .eq("status", "published")
         .eq("accepting_applications", true)
         .order("created_at", { ascending: false })
@@ -73,7 +73,7 @@ const LiveListingsSection: React.FC = () => {
           city: o?.city ?? null,
           first_name: o?.first_name ?? null,
           avatar_url: o?.avatar_url ?? null,
-          cover_photo_url: p?.cover_photo_url ?? null,
+          cover_photo_url: s.cover_photo_url ?? p?.cover_photo_url ?? null,
           first_photo: p?.photos?.[0] ?? null,
           property_type: p?.type ?? null,
         };
@@ -115,7 +115,7 @@ const LiveListingsSection: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className={`grid grid-cols-1 sm:grid-cols-2 gap-5 ${sits.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3 max-w-5xl mx-auto"}`}>
           {sits.map((s) => {
             const photo = s.cover_photo_url || s.first_photo;
             const dates =
