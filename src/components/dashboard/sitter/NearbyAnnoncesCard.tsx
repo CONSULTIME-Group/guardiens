@@ -1,8 +1,32 @@
 import { Link } from "react-router-dom";
 import { format, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
-import { AlertCircle, RefreshCw, Share2, Compass } from "lucide-react";
+import { AlertCircle, RefreshCw, Share2, Compass, Home } from "lucide-react";
 import { SITTER_PRICE_START } from "@/lib/pricing";
+
+/** Résout la meilleure photo de couverture disponible pour une annonce. */
+const resolveCover = (sit: any): string | null =>
+  sit?.cover_photo_url
+  || sit?.properties?.cover_photo_url
+  || (Array.isArray(sit?.properties?.photos) ? sit.properties.photos[0] : null)
+  || null;
+
+/** Vignette carrée à gauche d'un item d'annonce. Fallback icône maison. */
+const SitThumb = ({ sit }: { sit: any }) => {
+  const src = resolveCover(sit);
+  return src ? (
+    <img
+      src={src}
+      alt=""
+      loading="lazy"
+      className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover shrink-0 ring-1 ring-border"
+    />
+  ) : (
+    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-muted flex items-center justify-center shrink-0 ring-1 ring-border">
+      <Home className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+    </div>
+  );
+};
 
 interface Props {
   nearbyListings: any[];
