@@ -241,6 +241,35 @@ function buildLayout(opts: {
   };
 }
 
+function buildCoverPhotoLayout(bgDataUri: string) {
+  return {
+    type: "div",
+    props: {
+      style: {
+        width: 1200,
+        height: 630,
+        display: "flex",
+        position: "relative",
+        background: "#0F2A3D",
+      },
+      children: {
+        type: "img",
+        props: {
+          src: bgDataUri,
+          style: {
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: 1200,
+            height: 630,
+            objectFit: "cover",
+          },
+        },
+      },
+    },
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -293,7 +322,9 @@ Deno.serve(async (req) => {
     const photo = firstPhoto ? await fetchAsArrayBuffer(firstPhoto) : null;
     const bgDataUri = photo ? toDataUri(photo) : null;
 
-    const layout = buildLayout({
+    // Pour les crawlers sociaux, on force la vraie photo de couverture en plein cadre.
+    // Le mode download garde le visuel composé avec les détails de l'annonce.
+    const layout = bgDataUri && !download ? buildCoverPhotoLayout(bgDataUri) : buildLayout({
       title: truncate(sit.title || `Garde à ${owner?.city || "France"}`, 70),
       city: owner?.city || "France",
       dates: formatDateRange(sit.start_date, sit.end_date),
@@ -319,7 +350,8 @@ Deno.serve(async (req) => {
     const headers: Record<string, string> = {
       ...corsHeaders,
       "Content-Type": "image/png",
-      "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
+      "Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=3600",
+      "X-Guardiens-Og-Source": bgDataUri && !download ? "cover-photo" : "composite",
     };
     if (download) {
       headers["Content-Disposition"] = `attachment; filename="guardiens-annonce-${id.slice(0, 8)}.png"`;
