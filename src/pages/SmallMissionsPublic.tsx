@@ -294,20 +294,14 @@ const SmallMissionsPublic = () => {
         </Reveal>
         {(() => {
           const count = openMissions.length;
-          const gridCls =
-            count === 1
-              ? "grid grid-cols-1 md:grid-cols-2 gap-5 max-w-3xl mx-auto"
-              : count === 2
-              ? "grid grid-cols-1 md:grid-cols-2 gap-5 max-w-4xl mx-auto"
-              : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5";
           return (
-            <div className={gridCls}>
+            <div className="flex flex-col gap-3 max-w-3xl mx-auto">
               {openMissions.map((m, i) => {
                 const dateNeeded = formatDateNeeded(m.date_needed);
                 const durationLabel = m.duration_estimate
                   ? DURATION_LABEL[m.duration_estimate] || null
                   : null;
-                const isFeatured = count === 1;
+                const thumb = m.photos && m.photos.length > 0 ? m.photos[0] : null;
                 const shareMission = async (e: React.MouseEvent) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -322,52 +316,53 @@ const SmallMissionsPublic = () => {
                   <Reveal key={m.id} delay={0.04 * i}>
                     <Link
                       to={`/petites-missions/${m.id}`}
-                      className="group relative flex h-full flex-col rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden"
+                      className="group relative flex items-stretch gap-4 rounded-xl border border-border bg-card hover:border-primary/50 hover:shadow-sm hover:-translate-y-0.5 transition-all overflow-hidden p-3 sm:p-4"
                     >
-                      {m.photos && m.photos.length > 0 && (
-                        <div className="aspect-[16/10] w-full overflow-hidden bg-muted">
+                      <div className="shrink-0 h-20 w-20 sm:h-24 sm:w-24 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
+                        {thumb ? (
                           <img
-                            src={m.photos[0]}
+                            src={thumb}
                             alt={m.title}
                             loading="lazy"
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
-                        </div>
-                      )}
-                      <div className="flex flex-col flex-1 p-6 md:p-7">
-                      <div className="flex items-center justify-between gap-3 mb-3">
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-body font-semibold tracking-wide">
-                          {CATEGORY_LABEL[m.category] || "Mission"}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] text-foreground/50">{timeAgoFr(m.created_at)}</span>
-                          <button
-                            type="button"
-                            onClick={shareMission}
-                            aria-label="Partager cette mission"
-                            title="Partager"
-                            className="inline-flex h-7 w-7 items-center justify-center rounded-full text-foreground/50 hover:text-primary hover:bg-primary/10 transition-colors"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                          </button>
-                        </div>
+                        ) : (
+                          <span className="text-[10px] font-body font-semibold uppercase tracking-wider text-foreground/40 px-1 text-center leading-tight">
+                            {CATEGORY_LABEL[m.category] || "Mission"}
+                          </span>
+                        )}
                       </div>
-                      <h3 className={`font-heading font-semibold text-foreground leading-snug mb-2 line-clamp-2 ${isFeatured ? "text-xl md:text-2xl" : "text-base md:text-lg"}`}>
-                        {m.title}
-                      </h3>
-                      {m.description && (
-                        <p className={`font-body text-sm text-foreground/70 leading-relaxed mb-4 ${isFeatured ? "line-clamp-3" : "line-clamp-2"}`}>
-                          {m.description}
-                        </p>
-                      )}
-                      <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-foreground/60">
-                        <span className="font-medium text-foreground/75">{m.city || "France"}</span>
-                        {dateNeeded && <><span aria-hidden>·</span><span>{dateNeeded}</span></>}
-                        {durationLabel && <><span aria-hidden>·</span><span>{durationLabel}</span></>}
-                      </div>
-                      <span className="mt-4 inline-flex items-center text-xs font-semibold text-primary group-hover:underline">
-                        Voir la mission →
-                      </span>
+                      <div className="flex flex-col flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-body font-semibold tracking-wide">
+                            {CATEGORY_LABEL[m.category] || "Mission"}
+                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] text-foreground/50">{timeAgoFr(m.created_at)}</span>
+                            <button
+                              type="button"
+                              onClick={shareMission}
+                              aria-label="Partager cette mission"
+                              title="Partager"
+                              className="inline-flex h-6 w-6 items-center justify-center rounded-full text-foreground/50 hover:text-primary hover:bg-primary/10 transition-colors"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                            </button>
+                          </div>
+                        </div>
+                        <h3 className="font-heading font-semibold text-foreground leading-snug mb-1 line-clamp-1 text-base">
+                          {m.title}
+                        </h3>
+                        {m.description && (
+                          <p className="font-body text-xs text-foreground/65 leading-relaxed mb-2 line-clamp-2">
+                            {m.description}
+                          </p>
+                        )}
+                        <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-foreground/60">
+                          <span className="font-medium text-foreground/75">{m.city || "France"}</span>
+                          {dateNeeded && <><span aria-hidden>·</span><span>{dateNeeded}</span></>}
+                          {durationLabel && <><span aria-hidden>·</span><span>{durationLabel}</span></>}
+                        </div>
                       </div>
                     </Link>
                   </Reveal>
@@ -379,16 +374,18 @@ const SmallMissionsPublic = () => {
                   <button
                     type="button"
                     onClick={goToCreate}
-                    className="group flex h-full w-full flex-col items-center justify-center text-center p-6 md:p-7 rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 hover:border-primary/60 transition-colors"
+                    className="group flex w-full items-center justify-between gap-4 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 hover:border-primary/60 transition-colors p-4"
                   >
-                    <span className="font-heading text-lg md:text-xl font-semibold text-foreground mb-2">
-                      Votre demande pourrait être ici.
-                    </span>
-                    <span className="font-body text-sm text-foreground/70 mb-4 max-w-xs">
-                      Publiez un coup de main en deux minutes — gratuit, sans engagement.
-                    </span>
-                    <span className="inline-flex items-center text-sm font-semibold text-primary group-hover:underline">
-                      Publier une mission →
+                    <div className="flex flex-col text-left">
+                      <span className="font-heading text-base font-semibold text-foreground">
+                        Votre demande pourrait être ici.
+                      </span>
+                      <span className="font-body text-xs text-foreground/70">
+                        Publiez un coup de main en deux minutes — gratuit, sans engagement.
+                      </span>
+                    </div>
+                    <span className="inline-flex items-center text-sm font-semibold text-primary group-hover:underline shrink-0">
+                      Publier →
                     </span>
                   </button>
                 </Reveal>
