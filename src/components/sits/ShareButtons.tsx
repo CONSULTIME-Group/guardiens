@@ -39,7 +39,9 @@ const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_de
   const [downloading, setDownloading] = useState(false);
 
   // Toujours partager l'URL publique de production — jamais /sits/:id ni la preview.
-  const shareUrl = `https://guardiens.fr/annonces/${sitId}`;
+  // Paramètre volontairement neutre : il contourne le cache social déjà pollué de l'URL nue,
+  // sans impacter la canonical SEO servie par PageMeta.
+  const shareUrl = `https://guardiens.fr/annonces/${sitId}?share=cover-photo-20260522`;
   const trackedShareUrl = (channel: Exclude<ShareChannel, "copy" | "native">) => {
     const url = new URL(shareUrl);
     url.searchParams.set("utm_source", channel === "x" ? "twitter" : channel);
