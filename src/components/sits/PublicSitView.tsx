@@ -169,14 +169,13 @@ const PublicSitView = ({
               </div>
             </header>
 
-            {/* Image principale */}
-            {heroImage && (
-              <div className="mb-12 rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
-                <img
-                  src={heroImage}
-                  alt={title}
-                  className="w-full aspect-video object-cover"
-                  loading="eager"
+            {/* Galerie photos — logement + animaux, lightbox plein écran */}
+            {(photos.length > 0 || petPhotos.length > 0) && (
+              <div className="mb-12">
+                <SitHero
+                  photos={photos}
+                  petPhotos={petPhotos}
+                  cityName={owner?.city || undefined}
                 />
               </div>
             )}
