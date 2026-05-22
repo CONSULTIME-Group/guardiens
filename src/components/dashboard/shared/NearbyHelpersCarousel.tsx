@@ -1,6 +1,6 @@
 import { memo, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { ShieldCheck, ArrowRight, MapPin } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ShieldCheck, ArrowRight, MapPin, MessageSquare, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNearbyHelpers, nextRadiusStep, type NearbyHelper } from "@/hooks/useNearbyHelpers";
@@ -9,6 +9,9 @@ import { useCtaCooldown } from "@/hooks/useCtaCooldown";
 import { capitalize } from "@/components/dashboard/owner/helpers";
 import { tokenizeSkillPhrases, dedupeChipsByLabel } from "@/lib/skills/tokenize";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
+import { startConversationAndNavigate } from "@/lib/conversation";
+import { toast } from "sonner";
+
 
 /**
  * Compteur dual « local · national » de personnes prêtes à donner un coup de main.
