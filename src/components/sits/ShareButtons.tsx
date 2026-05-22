@@ -50,7 +50,7 @@ const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_de
 
   // URL de l'image OG personnalisée (servie par l'edge function og-sit, avec photo réelle)
   const supabaseUrl = (supabase as any)?.supabaseUrl || `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co`;
-  const visualDownloadUrl = `${supabaseUrl}/functions/v1/og-sit?id=${sitId}&download=1`;
+  const visualDownloadUrl = `${supabaseUrl}/functions/v1/og-sit?id=${sitId}&download=1&v=composite-20260522`;
 
   const periodLabel = formatSitPeriod(startDate, endDate);
   const cityPart = city ? ` à ${city}` : "";
