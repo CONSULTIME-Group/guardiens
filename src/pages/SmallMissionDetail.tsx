@@ -30,6 +30,7 @@ import MissionPublishedBanner from "@/components/missions/MissionPublishedBanner
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import PublicMissionView from "@/components/missions/PublicMissionView";
+import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import { isAuthorOf } from "@/lib/ownership";
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
