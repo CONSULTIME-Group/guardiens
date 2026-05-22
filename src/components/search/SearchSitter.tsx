@@ -957,10 +957,10 @@ const SearchSitter = () => {
  ))}
  </div>
  </div>
-
+ 
  {/* Mission sub-tabs */}
  {tab === "missions" && (
- <div className="px-6 pt-3 space-y-3">
+ <div className="px-6 pt-3">
  <div className="flex gap-2">
  <button
  onClick={() => setMissionSubTab("published")}
@@ -975,6 +975,11 @@ const SearchSitter = () => {
  Membres disponibles
  </button>
  </div>
+ </div>
+ )}
+
+ {/* Catégories partagées (Gardes + Missions) */}
+ <div className="px-6 pt-3">
  <div className="flex flex-wrap gap-2">
 				{([
 					{ key: "all" as const, label: "Tout", icon: null },
@@ -985,7 +990,29 @@ const SearchSitter = () => {
 				]).map(({ key, label, icon: Icon }) => (
  <button
  key={key}
- onClick={() => setMissionCategoryFilter(key)}
+ onClick={() => {
+   setMissionCategoryFilter(key);
+   // Sur l'onglet Gardes : on mappe la catégorie aux filtres existants
+   if (tab === "sits") {
+     if (key === "all") {
+       setHousingTypes([]);
+       setEnvironments([]);
+     } else if (key === "house") {
+       setHousingTypes(["house"]);
+       setEnvironments([]);
+     } else if (key === "garden") {
+       setHousingTypes(["farm"]);
+       setEnvironments(["campagne"]);
+     } else if (key === "skills") {
+       // Bricolage : pas de mapping spécifique sur les gardes, on reset
+       setHousingTypes([]);
+       setEnvironments([]);
+     } else if (key === "animals") {
+       setHousingTypes([]);
+       setEnvironments([]);
+     }
+   }
+ }}
  className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors ${
  missionCategoryFilter === key
  ? "bg-foreground text-background border-foreground"
@@ -998,7 +1025,7 @@ const SearchSitter = () => {
  ))}
  </div>
  </div>
- )}
+
 
  {/* Réassurance périmètre — visible avant la barre de recherche */}
  <div className="px-6 pt-4">
@@ -1084,14 +1111,9 @@ const SearchSitter = () => {
      setStartDate={setStartDate}
      setEndDate={setEndDate}
    />
+ 
+ {/* Animals picker retiré — remplacé par la pill catégorie « Animaux » ci-dessus */}
 
-   {/* Animals pill */}
-   <AnimalsPickerPopover
-     pillClass={pillClass}
-     animalsLabel={animalsLabel}
-     animalTypes={animalTypes}
-     toggleAnimalFilter={toggleAnimalFilter}
-   />
 
    {/* Verified toggle promu (raccourci confiance) */}
    <button
