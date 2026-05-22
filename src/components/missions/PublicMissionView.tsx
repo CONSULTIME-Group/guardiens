@@ -30,6 +30,7 @@ interface MissionLike {
 }
 
 interface AuthorLike {
+  user_id?: string | null;
   first_name?: string | null;
   avatar_url?: string | null;
   city?: string | null;
