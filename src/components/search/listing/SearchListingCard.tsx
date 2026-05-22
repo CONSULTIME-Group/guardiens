@@ -48,7 +48,7 @@ const SearchListingCard = ({
     typeof item.distance === "number" &&
     item.distance > radius;
   const location = useLocation();
-  const isPublicContext = location.pathname.startsWith("/annonces") || location.pathname.startsWith("/petites-missions");
+  const isPublicContext = location.pathname.startsWith("/annonces") || location.pathname.startsWith("/petites-missions") || location.pathname.startsWith("/search");
   const linkTo = isMission
     ? `/petites-missions/${item.id}`
     : isDemo
