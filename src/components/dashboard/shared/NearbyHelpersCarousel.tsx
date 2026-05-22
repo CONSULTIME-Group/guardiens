@@ -527,8 +527,23 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
         </div>
       )}
 
+      {/* Explainer concept — TOUJOURS visible, y compris quand le parent
+          rend déjà un titre via SectionEyebrow. Sans cette ligne,
+          l'utilisateur ne comprend pas ce que la liste suggère de faire. */}
+      <p className="text-xs sm:text-sm text-foreground/75 leading-relaxed max-w-prose">
+        Des membres prêts à rendre service ponctuellement&nbsp;: promenade,
+        visite, garde d'1&nbsp;h, dépôt de clés, jardinage, bricolage…
+        <span className="text-muted-foreground"> Cliquez sur «&nbsp;Lui écrire&nbsp;» pour proposer un échange — c'est gratuit, sans engagement.</span>
+      </p>
+      {data?.hasGeo && (
+        <p className="text-[11px] text-muted-foreground -mt-1">
+          Savoir-faire affichés en priorité, puis proximité — {radiusLabel}.
+        </p>
+      )}
+
       {/* Compteur dual local · national — preuve sociale localisée */}
       <HelpersProximityTicker userId={user?.id} />
+
 
       {/* Pas de géoloc → impossible de trier par distance. On le dit franchement
           plutôt que de faire passer 8 profils nationaux pour des « voisins ». */}
