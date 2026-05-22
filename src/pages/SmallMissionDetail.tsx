@@ -1003,14 +1003,46 @@ const SmallMissionDetail = () => {
 
         {/* Non-author: respond form */}
         {user && !isAuthor && !myResponse && mission.status === "open" && canApplyMissions && (
-          <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
-            <div className="max-w-3xl mx-auto space-y-2">
+          <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20 shadow-[0_-4px_20px_-8px_rgba(0,0,0,0.08)]">
+            <div className="max-w-3xl mx-auto space-y-2.5">
+              {/* Amorces — un clic pour démarrer */}
+              {!message.trim() && (() => {
+                const starters = [
+                  `Bonjour ${author?.first_name || ""}, je suis disponible et ${(mission.city ? `je connais bien ${titlecaseCity(mission.city)}` : "pas loin de chez vous")}.`.trim(),
+                  mission.category === "animals"
+                    ? `Bonjour ${author?.first_name || ""}, j'ai l'habitude des animaux et je serais ravi(e) de vous aider.`
+                    : `Bonjour ${author?.first_name || ""}, votre demande me parle, j'aimerais vous aider.`,
+                  `Bonjour ${author?.first_name || ""}, dites-moi quand ça vous arrange, je m'organise.`,
+                ].map(s => s.trim());
+                return (
+                  <div className="flex flex-wrap gap-1.5">
+                    {starters.map((s, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setMessage(s)}
+                        className="text-xs px-2.5 py-1 rounded-full border border-border bg-background hover:bg-accent hover:border-primary/40 transition-colors text-muted-foreground hover:text-foreground"
+                      >
+                        {i === 0 ? "👋 Je suis dispo" : i === 1 ? "🤝 Ça me parle" : "📅 Selon vous"}
+                      </button>
+                    ))}
+                  </div>
+                );
+              })()}
               <Textarea
-                placeholder="Dites bonjour, présentez-vous en deux mots et expliquez ce que vous proposez. Pas besoin d'en faire des tonnes."
+                placeholder={`Dites bonjour à ${author?.first_name || "l'auteur"}, présentez-vous en deux mots. Pas besoin d'en faire des tonnes.`}
                 value={message}
-                onChange={e => setMessage(e.target.value)}
-                className="min-h-[60px]"
+                onChange={e => setMessage(e.target.value.slice(0, 500))}
+                className="min-h-[72px]"
+                maxLength={500}
               />
+              <div className="flex items-center justify-between text-[11px] text-muted-foreground -mt-1">
+                <span className="flex items-center gap-3">
+                  <span className="inline-flex items-center gap-1">✓ Gratuit, entre membres</span>
+                  <span className="hidden sm:inline-flex items-center gap-1">✓ {author?.first_name || "L'auteur"} reçoit votre mot directement</span>
+                </span>
+                <span className={message.length > 450 ? "text-warning" : ""}>{message.length}/500</span>
+              </div>
               <Button
                 className="w-full h-12 text-base font-semibold"
                 onClick={handleRespond}
@@ -1020,7 +1052,7 @@ const SmallMissionDetail = () => {
               </Button>
               {!message.trim() && !submitting && (
                 <p className="text-xs text-muted-foreground text-center">
-                  Écrivez un mot ci-dessus pour activer le bouton.
+                  Cliquez sur une amorce ou écrivez un mot pour activer le bouton.
                 </p>
               )}
             </div>
