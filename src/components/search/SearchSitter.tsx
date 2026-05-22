@@ -1651,7 +1651,9 @@ const SearchSitter = () => {
       trackEvent={trackEvent}
     />
  ) : (
- <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 lg:gap-x-16 gap-y-14 lg:gap-y-20">
+ <div className={tab === "missions"
+   ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4"
+   : "grid grid-cols-1 md:grid-cols-2 gap-x-10 lg:gap-x-16 gap-y-14 lg:gap-y-20"}>
  {results.map((item, idx) => renderCard(item, idx))}
  </div>
  )}
