@@ -48,11 +48,18 @@ function formatDateRange(start: string | null, end: string | null): string {
 }
 
 /** Récupère une image distante en ArrayBuffer + mime. */
+function toRenderableImageUrl(url: string): string {
+  const marker = "/storage/v1/object/public/";
+  if (!url.includes(marker)) return url;
+  const [base, path] = url.split(marker);
+  return `${base}/storage/v1/render/image/public/${path}?width=1200&height=630&resize=cover&quality=85`;
+}
+
 async function fetchAsArrayBuffer(url: string): Promise<{ buf: ArrayBuffer; mime: string } | null> {
   try {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 8000);
-    const res = await fetch(url, { signal: ctrl.signal });
+    const res = await fetch(toRenderableImageUrl(url), { signal: ctrl.signal });
     clearTimeout(timer);
     if (!res.ok) return null;
     const mime = res.headers.get("content-type") || "image/jpeg";
