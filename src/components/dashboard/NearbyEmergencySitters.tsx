@@ -43,9 +43,10 @@ const NearbyEmergencySitters = ({ hideHeader = false }: { hideHeader?: boolean }
         return;
       }
 
-      const [profilesRes, reviewsRes] = await Promise.all([
-        supabase.from("profiles").select("id, first_name, avatar_url, city").in("id", userIds),
+      const [profilesRes, reviewsRes, sitterRes] = await Promise.all([
+        supabase.from("profiles").select("id, first_name, avatar_url, city, custom_skills").in("id", userIds),
         supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", userIds).eq("published", true),
+        supabase.from("sitter_profiles").select("user_id, competences").in("user_id", userIds),
       ]);
 
       const ratingMap = new Map<string, number[]>();
@@ -54,10 +55,35 @@ const NearbyEmergencySitters = ({ hideHeader = false }: { hideHeader?: boolean }
         ratingMap.get(r.reviewee_id)!.push(r.overall_rating);
       });
 
+      const skillsMap = new Map<string, string[]>();
+      (sitterRes.data || []).forEach((s: any) => {
+        if (Array.isArray(s.competences)) {
+          skillsMap.set(
+            s.user_id,
+            s.competences.filter((c: any) => typeof c === "string" && c.trim().length > 0),
+          );
+        }
+      });
+
+      const normalizeCustom = (raw: any): string[] => {
+        if (!raw) return [];
+        const arr = Array.isArray(raw) ? raw : [raw];
+        return arr
+          .flatMap((s: any) =>
+            typeof s === "string"
+              ? s.split(/[,;·•|/]+/).map((x) => x.trim())
+              : [],
+          )
+          .filter((x) => x.length > 0 && x.length < 40);
+      };
+
       const enriched: SitterRow[] = (profilesRes.data || []).slice(0, 3).map((p: any) => {
         const ratings = ratingMap.get(p.id) || [];
         const avg = ratings.length > 0 ? (ratings.reduce((s, v) => s + v, 0) / ratings.length).toFixed(1) : null;
-        return { id: p.id, first_name: p.first_name, avatar_url: p.avatar_url, city: p.city, avgRating: avg };
+        const sitterSkills = skillsMap.get(p.id) || [];
+        const profileSkills = normalizeCustom(p.custom_skills);
+        const skills = Array.from(new Set([...sitterSkills, ...profileSkills])).slice(0, 3);
+        return { id: p.id, first_name: p.first_name, avatar_url: p.avatar_url, city: p.city, avgRating: avg, skills };
       });
 
       setSitters(enriched);
