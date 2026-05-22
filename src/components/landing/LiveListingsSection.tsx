@@ -34,7 +34,7 @@ const LiveListingsSection: React.FC = () => {
     (async () => {
       const { data: rawSits } = await supabase
         .from("sits")
-        .select("id, title, start_date, end_date, user_id, property_id")
+        .select("id, title, start_date, end_date, user_id, property_id, cover_photo_url")
         .eq("status", "published")
         .eq("accepting_applications", true)
         .order("created_at", { ascending: false })
