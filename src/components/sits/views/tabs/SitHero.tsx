@@ -1,15 +1,17 @@
 /**
- * Hero photo principale + bandeau ville/titre superposé.
- * Utilisé en tête de SitImmersiveContent.
+ * Hero photos d'une annonce — version mosaïque moderne (style Airbnb).
  *
- * - Carrousel : photos du logement + photos des animaux concaténées
- * - Vignettes cliquables sous la photo principale
- * - Clic sur la photo principale = ouverture en lightbox plein écran
- * - Navigation clavier (← / → / Esc) + swipe tactile dans la lightbox
+ * - Desktop : mosaïque 2 colonnes (1 grande à gauche + 2x2 vignettes à droite),
+ *   hauteur compacte h-[320px] (réduit de moitié vs ancien layout).
+ * - Mobile : carrousel single-image h-[220px] avec swipe + dots.
+ * - Bandeau ville/titre sous la mosaïque (sortie de l'overlay sombre).
+ * - Bouton "Voir les N photos" en bas-droite ouvre la lightbox.
+ * - Clic sur n'importe quelle tuile → lightbox plein écran sur cette image.
+ * - Lightbox : navigation clavier (← / → / Esc) + swipe tactile.
  */
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { ChevronLeft, ChevronRight, X, Maximize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Grid3x3 } from "lucide-react";
 
 interface PetPhotoItem {
   url: string;
@@ -30,7 +32,6 @@ const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHer
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
-  // Liste consolidée : photos logement (avec marqueur) + photos animaux (avec nom)
   const slides = useMemo(() => {
     const seen = new Set<string>();
     const all: { url: string; caption: string; kind: "logement" | "animal" }[] = [];
@@ -43,7 +44,6 @@ const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHer
       seen.add(p);
       all.push({ url: p, caption: title ? `Photo du logement — ${title}` : "Photo du logement", kind: "logement" });
     }
-
     for (const pet of petPhotos) {
       if (!pet?.url || typeof pet.url !== "string") continue;
       const url = pet.url.trim();
@@ -69,7 +69,6 @@ const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHer
     setIndex((i) => (i - 1 + Math.max(1, total)) % Math.max(1, total));
   }, [total]);
 
-  // Navigation clavier + lock scroll quand la lightbox est ouverte
   useEffect(() => {
     if (!lightboxOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -90,11 +89,9 @@ const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHer
       <div
         role="status"
         aria-live="polite"
-        className="rounded-3xl border border-dashed border-border bg-muted/30 mb-6 px-6 py-10 md:py-14 text-center"
+        className="rounded-2xl border border-dashed border-border bg-muted/30 mb-6 px-6 py-10 text-center"
       >
-        <p className="font-heading text-base md:text-lg text-foreground">
-          Galerie indisponible
-        </p>
+        <p className="font-heading text-base md:text-lg text-foreground">Galerie indisponible</p>
         <p className="mt-1 text-sm text-muted-foreground max-w-md mx-auto">
           L'hôte n'a pas encore ajouté de photos de son logement.
           {cityName ? ` Annonce située à ${cityName}${department ? ` (${department})` : ""}.` : ""}
@@ -102,8 +99,6 @@ const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHer
       </div>
     );
   }
-
-  const current = slides[index];
 
   const handleTouchStart = (e: React.TouchEvent) => setTouchStartX(e.touches[0].clientX);
   const handleTouchEnd = (e: React.TouchEvent) => {
@@ -113,109 +108,155 @@ const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHer
     setTouchStartX(null);
   };
 
+  const openAt = (i: number) => {
+    setIndex(i);
+    setLightboxOpen(true);
+  };
+
+  const mosaic = slides.slice(0, 5);
+  const main = mosaic[0];
+  const sides = mosaic.slice(1, 5); // jusqu'à 4 vignettes
+
+  const current = slides[index];
+
   return (
     <>
-      <div className="rounded-3xl overflow-hidden border border-border bg-card mb-6">
-        <div className="relative">
-          {/* Photo principale cliquable -> ouvre lightbox */}
-          <button
-            type="button"
-            onClick={() => setLightboxOpen(true)}
-            className="group block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            aria-label={`Agrandir la photo ${index + 1} sur ${total}`}
+      <section className="mb-6" aria-label="Galerie photos de la garde">
+        {/* ============== MOBILE : carrousel single-image compact ============== */}
+        <div className="md:hidden">
+          <div
+            className="relative rounded-2xl overflow-hidden bg-muted"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
           >
-            <img
-              src={current.url}
-              alt={current.caption}
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              className="w-full h-[280px] md:h-[420px] object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-            />
-            {/* Icône zoom */}
-            <div className="absolute top-3 right-3 bg-background/85 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity shadow-md">
-              <Maximize2 className="h-4 w-4 text-foreground" aria-hidden="true" />
-            </div>
-            {/* Compteur */}
-            {total > 1 && (
-              <div className="absolute top-3 left-3 bg-background/85 backdrop-blur-sm rounded-full px-2.5 py-1 text-xs font-medium text-foreground shadow-md">
-                {index + 1} / {total}
-              </div>
-            )}
-            {/* Badge type de photo */}
-            {current.kind === "animal" && (
-              <div className="absolute bottom-[88px] md:bottom-[120px] left-3 bg-background/85 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium text-foreground shadow-md">
-                {current.caption}
-              </div>
-            )}
-            {/* Overlay titre / ville (gradient bas) */}
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-5 md:p-8 pointer-events-none">
-              {(cityName || department) && (
-                <p className="mb-2 text-white/90 text-sm font-medium">
-                  {cityName}
-                  {department ? ` · ${department}` : ""}
-                </p>
-              )}
-              {title && (
-                <h1 className="text-2xl md:text-4xl font-bold text-white leading-tight max-w-3xl">
-                  {title}
-                </h1>
-              )}
-            </div>
-          </button>
+            <button
+              type="button"
+              onClick={() => setLightboxOpen(true)}
+              className="block w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              aria-label={`Agrandir la photo ${index + 1} sur ${total}`}
+            >
+              <img
+                src={current.url}
+                alt={current.caption}
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                className="w-full h-[220px] object-cover"
+              />
+            </button>
 
-          {/* Flèches navigation desktop sur la photo principale */}
-          {total > 1 && (
-            <>
-              <button
-                type="button"
-                onClick={prev}
-                aria-label="Photo précédente"
-                className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 items-center justify-center w-10 h-10 rounded-full bg-background/85 hover:bg-background backdrop-blur-sm shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-              >
-                <ChevronLeft className="h-5 w-5 text-foreground" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                onClick={next}
-                aria-label="Photo suivante"
-                className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 items-center justify-center w-10 h-10 rounded-full bg-background/85 hover:bg-background backdrop-blur-sm shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-              >
-                <ChevronRight className="h-5 w-5 text-foreground" aria-hidden="true" />
-              </button>
-            </>
-          )}
+            {total > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={prev}
+                  aria-label="Photo précédente"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-background/90 backdrop-blur-sm shadow flex items-center justify-center"
+                >
+                  <ChevronLeft className="h-5 w-5 text-foreground" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={next}
+                  aria-label="Photo suivante"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-background/90 backdrop-blur-sm shadow flex items-center justify-center"
+                >
+                  <ChevronRight className="h-5 w-5 text-foreground" aria-hidden="true" />
+                </button>
+                <div className="absolute bottom-2 right-2 bg-background/90 backdrop-blur-sm rounded-full px-2.5 py-1 text-xs font-medium text-foreground shadow">
+                  {index + 1} / {total}
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
-        {/* Vignettes cliquables */}
-        {total > 1 && (
-          <div className="flex gap-1.5 p-2 overflow-x-auto bg-card">
-            {slides.map((s, i) => (
+        {/* ============== DESKTOP : mosaïque compacte 2 colonnes ============== */}
+        <div className="hidden md:block">
+          <div className="relative rounded-2xl overflow-hidden">
+            <div className="grid grid-cols-4 grid-rows-2 gap-1.5 h-[320px]">
+              {/* Image principale — col-span 2, row-span 2 */}
               <button
-                key={`${i}-${s.url}`}
                 type="button"
-                onClick={() => setIndex(i)}
-                aria-label={`Voir la photo ${i + 1} sur ${total}${s.kind === "animal" ? ` — ${s.caption}` : ""}`}
-                aria-current={i === index ? "true" : undefined}
-                className={`relative w-20 h-16 md:w-24 md:h-20 rounded-md shrink-0 overflow-hidden border-2 transition-all bg-muted ${
-                  i === index
-                    ? "border-primary ring-2 ring-primary/30"
-                    : "border-transparent opacity-70 hover:opacity-100"
-                }`}
+                onClick={() => openAt(0)}
+                className="col-span-2 row-span-2 group relative overflow-hidden bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                aria-label={`Agrandir la photo principale`}
               >
-                <img src={s.url} alt="" loading="lazy" className="w-full h-full object-cover" />
-                {s.kind === "animal" && (
-                  <span className="absolute bottom-0 inset-x-0 bg-black/50 text-white text-[10px] font-medium px-1 py-0.5 truncate">
-                    {s.caption}
-                  </span>
-                )}
+                <img
+                  src={main.url}
+                  alt={main.caption}
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                />
               </button>
-            ))}
+
+              {/* Vignettes 2x2 — fallback gris si moins de 4 */}
+              {Array.from({ length: 4 }).map((_, i) => {
+                const s = sides[i];
+                if (!s) {
+                  return (
+                    <div
+                      key={`empty-${i}`}
+                      aria-hidden="true"
+                      className="bg-muted/60"
+                    />
+                  );
+                }
+                return (
+                  <button
+                    key={`${i}-${s.url}`}
+                    type="button"
+                    onClick={() => openAt(i + 1)}
+                    className="group relative overflow-hidden bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    aria-label={`Agrandir la photo ${i + 2} sur ${total}`}
+                  >
+                    <img
+                      src={s.url}
+                      alt={s.caption}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    />
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Bouton "Voir les N photos" */}
+            {total > 1 && (
+              <button
+                type="button"
+                onClick={() => setLightboxOpen(true)}
+                className="absolute bottom-3 right-3 inline-flex items-center gap-2 bg-background/95 backdrop-blur-sm hover:bg-background border border-border rounded-full px-3.5 py-1.5 text-xs font-medium text-foreground shadow-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                <Grid3x3 className="h-3.5 w-3.5" aria-hidden="true" />
+                Voir les {total} photos
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Bandeau ville/titre sous la galerie — plus moderne et lisible */}
+        {(title || cityName || department) && (
+          <div className="mt-4">
+            {(cityName || department) && (
+              <p className="text-sm font-medium text-muted-foreground">
+                {cityName}
+                {department ? ` · ${department}` : ""}
+              </p>
+            )}
+            {title && (
+              <h1 className="mt-1 text-2xl md:text-3xl font-bold text-foreground leading-tight">
+                {title}
+              </h1>
+            )}
           </div>
         )}
-      </div>
+      </section>
 
-      {/* Lightbox plein écran via portal */}
+      {/* ============== LIGHTBOX ============== */}
       {lightboxOpen && typeof document !== "undefined" &&
         createPortal(
           <div
@@ -265,7 +306,6 @@ const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHer
               draggable={false}
             />
 
-            {/* Légende + compteur en bas */}
             <div
               className="absolute bottom-6 inset-x-0 flex justify-center pointer-events-none"
               onClick={(e) => e.stopPropagation()}
