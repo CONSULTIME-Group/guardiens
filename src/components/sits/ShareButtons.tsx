@@ -38,10 +38,15 @@ const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_de
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
-  // Always share the public, indexable URL — never the protected /sits/:id one
-  const shareUrl = typeof window !== "undefined"
-    ? `${window.location.origin}/annonces/${sitId}`
-    : `https://guardiens.fr/annonces/${sitId}`;
+  // Toujours partager l'URL publique de production — jamais /sits/:id ni la preview.
+  const shareUrl = `https://guardiens.fr/annonces/${sitId}`;
+  const trackedShareUrl = (channel: Exclude<ShareChannel, "copy" | "native">) => {
+    const url = new URL(shareUrl);
+    url.searchParams.set("utm_source", channel === "x" ? "twitter" : channel);
+    url.searchParams.set("utm_medium", "share");
+    url.searchParams.set("utm_campaign", "listing_share");
+    return url.toString();
+  };
 
   // URL de l'image OG personnalisée (servie par l'edge function og-sit, avec photo réelle)
   const supabaseUrl = (supabase as any)?.supabaseUrl || `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co`;
@@ -65,26 +70,26 @@ const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_de
 
   const handleFacebook = () => {
     track("facebook");
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(trackedShareUrl("facebook"))}&quote=${encodeURIComponent(shareText)}`;
     window.open(url, "_blank", "noopener,noreferrer,width=600,height=600");
   };
 
   const handleWhatsapp = () => {
     track("whatsapp");
-    const url = `https://wa.me/?text=${encodeURIComponent(`${shareText}\n${shareUrl}`)}`;
+    const url = `https://wa.me/?text=${encodeURIComponent(`${shareText}\n${trackedShareUrl("whatsapp")}`)}`;
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const handleX = () => {
     track("x");
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(trackedShareUrl("x"))}`;
     window.open(url, "_blank", "noopener,noreferrer,width=600,height=600");
   };
 
   const handleEmail = () => {
     track("email");
     const subject = encodeURIComponent(`${title} — Guardiens`);
-    const body = encodeURIComponent(`${shareText}\n\n${shareUrl}`);
+    const body = encodeURIComponent(`${shareText}\n\n${trackedShareUrl("email")}`);
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   };
 
