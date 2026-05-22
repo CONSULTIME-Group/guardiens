@@ -335,11 +335,11 @@ const PublicSitDetail = () => {
   // où le prerender sert les meta OG. Sinon, aperçu vide / URL moche.
   const canonicalUrl = `https://guardiens.fr/annonces/${sit.id}`;
 
- // og:image — rotation stable parmi 5 visuels Guardiens (1 par hash de l'ID).
- // Les photos réelles de l'annonce restent affichées dans le hero ; l'OG sert
- // l'identité de marque pour les partages externes.
- const ogImageUrl = getOgImageAbsoluteUrl(sit.id);
- const ogImageAlt = `Guardiens — ${sit.title || "Annonce de garde"}`;
+ // og:image — visuel personnalisé généré à la volée (photo de couverture réelle
+ // de l'annonce + titre + ville + dates + animaux + propriétaire). Servi par
+ // l'edge function `og-sit` (1200×630, optimisé Facebook/LinkedIn/WhatsApp/X).
+ const ogImageUrl = `https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/og-sit?id=${sit.id}`;
+ const ogImageAlt = `${sit.title || "Annonce de garde"} — ${cityForTitle}, ${datesShort}`;
 
  const jsonLd = {
  "@context": "https://schema.org",
