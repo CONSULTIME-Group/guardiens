@@ -12,7 +12,13 @@ project_id = "erhccyqevdyevpyctsjj"
   [functions.process-email-queue]
     verify_jwt = true
   [functions.send-transactional-email]
-    verify_jwt = false
+    verify_jwt = true
+  [functions.send-email-direct]
+    verify_jwt = true
+  [functions.send-test-email]
+    verify_jwt = true
+  [functions.purge-deleted-accounts]
+    verify_jwt = true
   [functions.og-profile]
     verify_jwt = false
   [functions.profile-jsonld]
