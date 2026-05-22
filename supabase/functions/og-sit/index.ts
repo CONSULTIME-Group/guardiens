@@ -255,7 +255,7 @@ Deno.serve(async (req) => {
 
     const { data: sit } = await supabase
       .from("sits")
-      .select("id, title, start_date, end_date, status, user_id, property_id")
+      .select("id, title, start_date, end_date, status, user_id, property_id, cover_photo_url")
       .eq("id", id)
       .maybeSingle();
 
@@ -263,14 +263,15 @@ Deno.serve(async (req) => {
       return new Response("Not found", { status: 404, headers: corsHeaders });
     }
 
-    const [ownerRes, propRes, petsRes] = await Promise.all([
+    const [ownerRes, propRes, petsRes, galleryRes] = await Promise.all([
       supabase.from("public_profiles").select("first_name, city").eq("id", sit.user_id).maybeSingle(),
-      supabase.from("properties").select("photos").eq("id", sit.property_id).maybeSingle(),
+      supabase.from("properties").select("cover_photo_url, photos").eq("id", sit.property_id).maybeSingle(),
       supabase.from("pets").select("species, name").eq("property_id", sit.property_id),
+      supabase.from("owner_gallery").select("photo_url, position").eq("user_id", sit.user_id).order("position", { ascending: true }).limit(1),
     ]);
 
     const owner = ownerRes.data;
-    const property = propRes.data as { photos?: string[] } | null;
+    const property = propRes.data as { cover_photo_url?: string | null; photos?: string[] } | null;
     const pets = petsRes.data || [];
 
     const counts: Record<string, number> = {};
@@ -281,7 +282,7 @@ Deno.serve(async (req) => {
     });
     const petsLine = petsParts.length ? petsParts.join(" · ") : "Animaux à confier";
 
-    const firstPhoto = property?.photos?.[0] ?? null;
+    const firstPhoto = sit.cover_photo_url || property?.cover_photo_url || property?.photos?.find((p) => typeof p === "string" && p.trim()) || galleryRes.data?.[0]?.photo_url || null;
     const photo = firstPhoto ? await fetchAsArrayBuffer(firstPhoto) : null;
     const bgDataUri = photo ? toDataUri(photo) : null;
 
