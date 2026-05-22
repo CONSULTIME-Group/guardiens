@@ -17,7 +17,6 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { trackEvent } from "@/lib/analytics";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
-import { getOgImageAbsoluteUrl } from "@/lib/ogImages";
 import { logger } from "@/lib/logger";
 
 import ApplicationModal from "@/components/sits/ApplicationModal";
@@ -34,7 +33,8 @@ import {
 type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
 
 const PublicSitDetail = () => {
- const { id } = useParams<{ id: string }>();
+ const { id: rawId } = useParams<{ id: string }>();
+ const id = rawId?.replace(/[\s\u00A0\u200B-\u200D\uFEFF]+/g, "") || undefined;
  const navigate = useNavigate();
  const { user, isAuthenticated } = useAuth();
  const { hasAccess } = useSubscriptionAccess();
@@ -185,9 +185,11 @@ const PublicSitDetail = () => {
             });
           } catch {}
         }
+        window.prerenderReady = true;
       } catch (e: any) {
         logger.warn("[PublicSitDetail] load failed", { sit_id: id, error: e?.message });
         setLoadError("error");
+        window.prerenderReady = true;
       } finally {
         setLoading(false);
       }
