@@ -145,11 +145,12 @@ const NearbyOwnerSittersCard = ({ hideHeader = false }: Props) => {
                       )}
                     </p>
                     {skills.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-1.5">
+                      <div className="flex flex-wrap gap-1 mt-1.5 min-w-0">
                         {skills.map((skill) => (
                           <span
                             key={skill}
-                            className="inline-flex items-center rounded-full bg-accent/30 text-accent-foreground px-2 py-0.5 text-[10px] font-medium"
+                            title={skill}
+                            className="inline-flex items-center rounded-full bg-accent/30 text-accent-foreground px-2 py-0.5 text-[10px] font-medium max-w-full truncate"
                           >
                             {skill}
                           </span>
