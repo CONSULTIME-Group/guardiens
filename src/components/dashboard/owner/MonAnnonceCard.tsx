@@ -207,6 +207,12 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
         {isActive && daysUntilStart !== null && daysUntilStart > 0 && (
           <span>dans {daysUntilStart}j</span>
         )}
+        {isActive && typeof currentSit.views_30d === "number" && currentSit.views_30d > 0 && (
+          <span className="inline-flex items-center gap-1" title="Vues uniques estimées sur 30 jours">
+            <Eye className="h-3 w-3" aria-hidden="true" />
+            {currentSit.views_30d} vue{currentSit.views_30d > 1 ? "s" : ""} <span className="opacity-70">(30j)</span>
+          </span>
+        )}
         {isActive && appCount > 0 && (
           <span className="font-medium text-primary">
             {appCount} candidature{appCount > 1 ? "s" : ""}
