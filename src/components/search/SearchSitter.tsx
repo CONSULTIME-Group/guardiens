@@ -1687,7 +1687,7 @@ const SearchSitter = () => {
  ) : (
  <div className={tab === "missions"
    ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4"
-   : "grid grid-cols-1 md:grid-cols-2 gap-x-10 lg:gap-x-16 gap-y-14 lg:gap-y-20"}>
+   : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 lg:gap-x-8 gap-y-10 lg:gap-y-12"}>
  {results.map((item, idx) => renderCard(item, idx))}
  </div>
  )}
