@@ -1,6 +1,6 @@
 import { memo, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { ShieldCheck, ArrowRight, MapPin } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ShieldCheck, ArrowRight, MapPin, MessageSquare, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNearbyHelpers, nextRadiusStep, type NearbyHelper } from "@/hooks/useNearbyHelpers";
@@ -9,6 +9,9 @@ import { useCtaCooldown } from "@/hooks/useCtaCooldown";
 import { capitalize } from "@/components/dashboard/owner/helpers";
 import { tokenizeSkillPhrases, dedupeChipsByLabel } from "@/lib/skills/tokenize";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
+import { startConversationAndNavigate } from "@/lib/conversation";
+import { toast } from "sonner";
+
 
 /**
  * Compteur dual « local · national » de personnes prêtes à donner un coup de main.
@@ -214,7 +217,29 @@ const HelperMiniCard = ({
   helper: NearbyHelper;
   ctaHref: string;
 }) => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [contacting, setContacting] = useState(false);
   const firstName = capitalize(helper.first_name || "Membre");
+
+  const handleContact = async () => {
+    if (!user) {
+      toast.error("Connectez-vous pour écrire à ce membre.");
+      return;
+    }
+    if (contacting) return;
+    setContacting(true);
+    try {
+      await startConversationAndNavigate(
+        { otherUserId: helper.id, context: "helper_inquiry" },
+        navigate,
+      );
+    } finally {
+      setContacting(false);
+    }
+  };
+
+
 
   // Pastilles synthétiques uniquement.
   // En base, `custom_skills` peut contenir une phrase entière ("Je peux promener
@@ -392,18 +417,33 @@ const HelperMiniCard = ({
         )}
       </div>
 
-      {/* Lien profil discret — pas de CTA invasif sur la carte. Les actions
-          (voir missions / demander un coup de main) sont déportées au niveau
-          de la section, comme demandé. */}
-      <div className="mt-auto px-4 sm:px-6 pb-4 sm:pb-6">
+      {/* Footer carte : 2 actions claires — primaire « Lui écrire » qui ouvre
+          une conversation pré-contextualisée (helper_inquiry), secondaire
+          « Voir le profil » pour lever le doute avant de prendre contact. */}
+      <div className="mt-auto px-4 sm:px-6 pb-4 sm:pb-5 pt-1 flex items-center gap-2 border-t border-border/40">
+        <Button
+          size="sm"
+          onClick={handleContact}
+          disabled={contacting}
+          className="flex-1 h-9 rounded-xl text-xs font-semibold gap-1.5"
+          aria-label={`Écrire à ${firstName} pour un coup de main`}
+        >
+          {contacting ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+          ) : (
+            <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />
+          )}
+          Lui écrire
+        </Button>
         <Link
           to={`/gardiens/${helper.id}`}
-          className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground hover:text-primary transition-colors"
+          className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-primary transition-colors shrink-0"
         >
-          Voir le profil
+          Profil
           <ArrowRight className="h-3 w-3 transition-transform group-hover/card:translate-x-0.5" aria-hidden="true" />
         </Link>
       </div>
+
     </article>
   );
 };
@@ -487,8 +527,23 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
         </div>
       )}
 
+      {/* Explainer concept — TOUJOURS visible, y compris quand le parent
+          rend déjà un titre via SectionEyebrow. Sans cette ligne,
+          l'utilisateur ne comprend pas ce que la liste suggère de faire. */}
+      <p className="text-xs sm:text-sm text-foreground/75 leading-relaxed max-w-prose">
+        Des membres prêts à rendre service ponctuellement&nbsp;: promenade,
+        visite, garde d'1&nbsp;h, dépôt de clés, jardinage, bricolage…
+        <span className="text-muted-foreground"> Cliquez sur «&nbsp;Lui écrire&nbsp;» pour proposer un échange — c'est gratuit, sans engagement.</span>
+      </p>
+      {data?.hasGeo && (
+        <p className="text-[11px] text-muted-foreground -mt-1">
+          Savoir-faire affichés en priorité, puis proximité — {radiusLabel}.
+        </p>
+      )}
+
       {/* Compteur dual local · national — preuve sociale localisée */}
       <HelpersProximityTicker userId={user?.id} />
+
 
       {/* Pas de géoloc → impossible de trier par distance. On le dit franchement
           plutôt que de faire passer 8 profils nationaux pour des « voisins ». */}
@@ -620,25 +675,29 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
         </div>
       )}
 
-      {/* CTA déportés au niveau de la section — volontairement discrets
-          (texte + liens), pas de gros boutons pleins pour ne pas écraser
-          le carrousel ni pousser à la création compulsive d'une mission. */}
-      <div className="flex flex-wrap items-center justify-end gap-x-5 gap-y-2 pt-1 text-xs">
-        <Link
-          to="/petites-missions"
-          className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary font-semibold transition-colors"
-        >
-          Voir les petites missions
-          <ArrowRight className="h-3 w-3" aria-hidden="true" />
-        </Link>
-        <Link
-          to={ctaHref}
-          className="inline-flex items-center gap-1 text-primary hover:underline font-semibold"
-        >
-          Demander un coup de main
-          <ArrowRight className="h-3 w-3" aria-hidden="true" />
-        </Link>
+      {/* CTA section : alternative à l'écriture directe — publier une demande
+          publique pour atteindre plus de monde que les profils affichés. */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-2 border-t border-border/40">
+        <p className="text-[11px] text-muted-foreground leading-snug">
+          Vous préférez décrire votre besoin&nbsp;? Publiez une demande&nbsp;:
+          les membres du coin sont alertés.
+        </p>
+        <div className="flex items-center gap-3 shrink-0">
+          <Link
+            to="/petites-missions"
+            className="text-xs text-muted-foreground hover:text-primary font-semibold transition-colors"
+          >
+            Voir les demandes
+          </Link>
+          <Button asChild size="sm" className="h-8 rounded-xl text-xs font-semibold gap-1">
+            <Link to={ctaHref}>
+              Publier une demande
+              <ArrowRight className="h-3 w-3" aria-hidden="true" />
+            </Link>
+          </Button>
+        </div>
       </div>
+
     </section>
   );
 });
