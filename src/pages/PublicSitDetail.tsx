@@ -456,8 +456,10 @@ const PublicSitDetail = () => {
         <meta property="og:description" content={truncatedDesc} />
         <meta property="og:image" content={ogImageUrl} />
         <meta property="og:image:alt" content={ogImageAlt} />
-        <meta property="og:image:width" content="1920" />
-        <meta property="og:image:height" content="1080" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:type" content="image/png" />
+        <meta name="twitter:image" content={ogImageUrl} />
         <meta property="og:site_name" content="Guardiens" />
         <meta property="og:locale" content="fr_FR" />
         <meta name="twitter:card" content="summary_large_image" />
