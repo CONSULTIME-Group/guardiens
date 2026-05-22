@@ -9,6 +9,7 @@ import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
+import SitHero from "@/components/sits/views/tabs/SitHero";
 
 interface SitLike {
   id: string;
