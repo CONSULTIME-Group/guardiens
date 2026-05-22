@@ -148,6 +148,18 @@ const NearbyEmergencySitters = ({ hideHeader = false }: { hideHeader?: boolean }
                     </span>
                   )}
                 </div>
+                {s.skills.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {s.skills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="inline-flex items-center rounded-full bg-accent/30 text-accent-foreground px-2 py-0.5 text-[10px] font-medium"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </Link>
           </li>
