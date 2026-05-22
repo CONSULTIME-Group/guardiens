@@ -976,13 +976,13 @@ const SearchSitter = () => {
  </button>
  </div>
  <div className="flex flex-wrap gap-2">
- {([
- { key: "all" as const, label: "Tout", icon: null },
- { key: "garden" as const, label: "Jardin", icon: Sprout },
- { key: "animals" as const, label: "Animaux", icon: PawPrint },
- { key: "skills" as const, label: "Compétences", icon: GraduationCap },
- { key: "house" as const, label: "Coups de main", icon: HandshakeIcon },
- ]).map(({ key, label, icon: Icon }) => (
+				{([
+					{ key: "all" as const, label: "Tout", icon: null },
+					{ key: "house" as const, label: "Maison", icon: Home },
+					{ key: "garden" as const, label: "Jardins", icon: Sprout },
+					{ key: "skills" as const, label: "Bricolage", icon: Wrench },
+					{ key: "animals" as const, label: "Animaux", icon: PawPrint },
+				]).map(({ key, label, icon: Icon }) => (
  <button
  key={key}
  onClick={() => setMissionCategoryFilter(key)}
