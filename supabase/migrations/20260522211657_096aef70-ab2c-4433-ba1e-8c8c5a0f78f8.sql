@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.get_sit_views_count(uuid[]) FROM PUBLIC, anon;
