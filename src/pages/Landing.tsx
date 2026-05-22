@@ -657,29 +657,34 @@ const Landing = () => {
       {/* ═══════════════ SOMMAIRE DE PAGE — maillage interne ═══════════════ */}
       <nav
         aria-label="Sommaire de la page"
-        className="border-y border-border bg-muted/20"
+        className="border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
       >
-        <div className="max-w-5xl mx-auto px-6 py-4">
+        <div className="max-w-6xl mx-auto px-6">
           <h2 className="sr-only">Sommaire</h2>
-          <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm font-body text-foreground/70">
-            <li><a href="#usages" className="hover:text-primary transition-colors">Garde &amp; entraide</a></li>
-            <li aria-hidden="true" className="text-foreground/20">·</li>
-            <li><a href="#comment-ca-marche" className="hover:text-primary transition-colors">Comment ça marche</a></li>
-            <li aria-hidden="true" className="text-foreground/20">·</li>
-            <li><a href="#entraide" className="hover:text-primary transition-colors">Entraide locale</a></li>
-            <li aria-hidden="true" className="text-foreground/20">·</li>
-            <li><a href="#confiance" className="hover:text-primary transition-colors">Confiance &amp; périmètre</a></li>
-            <li aria-hidden="true" className="text-foreground/20">·</li>
-            <li><a href="#temoignages" className="hover:text-primary transition-colors">Témoignages</a></li>
-            <li aria-hidden="true" className="text-foreground/20">·</li>
-            <li><a href="#notre-histoire" className="hover:text-primary transition-colors">Notre histoire</a></li>
-            <li aria-hidden="true" className="text-foreground/20">·</li>
-            <li><a href="#guides-villes" className="hover:text-primary transition-colors">Guides &amp; villes</a></li>
-            <li aria-hidden="true" className="text-foreground/20">·</li>
-            <li><a href="#faq" className="hover:text-primary transition-colors">FAQ</a></li>
+          <ul className="flex items-center gap-1 overflow-x-auto scrollbar-none py-2.5 -mx-2 px-2">
+            {[
+              { href: "#usages", label: "Garde & entraide" },
+              { href: "#comment-ca-marche", label: "Comment ça marche" },
+              { href: "#entraide", label: "Entraide locale" },
+              { href: "#confiance", label: "Confiance" },
+              { href: "#temoignages", label: "Témoignages" },
+              { href: "#notre-histoire", label: "Notre histoire" },
+              { href: "#guides-villes", label: "Guides & villes" },
+              { href: "#faq", label: "FAQ" },
+            ].map((item) => (
+              <li key={item.href} className="shrink-0">
+                <a
+                  href={item.href}
+                  className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] tracking-[0.14em] uppercase font-body text-foreground/55 hover:text-primary hover:bg-primary/5 transition-colors whitespace-nowrap"
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
           </ul>
         </div>
       </nav>
+
 
       {/* ═══════════════ SECTION 2 — CE QU'ON FAIT ENSEMBLE ═══════════════ */}
       <section id="usages" className="py-24 md:py-32 bg-background scroll-mt-24">
