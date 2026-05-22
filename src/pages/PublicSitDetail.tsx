@@ -470,26 +470,10 @@ const PublicSitDetail = () => {
       />
       <MetaReady />
       <Helmet>
-        <title>{truncatedTitle}</title>
-        <meta name="description" content={truncatedSeoDesc} />
-        <link rel="canonical" href={canonicalUrl} />
-        <meta name="robots" content={isIndexable ? "index, follow" : "noindex, follow"} />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:title" content={truncatedTitle} />
-        <meta property="og:description" content={truncatedDesc} />
-        <meta property="og:image" content={ogImageUrl} />
         <meta property="og:image:alt" content={ogImageAlt} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:image:type" content="image/png" />
-        <meta name="twitter:image" content={ogImageUrl} />
-        <meta property="og:site_name" content="Guardiens" />
-        <meta property="og:locale" content="fr_FR" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={truncatedTitle} />
-        <meta name="twitter:description" content={truncatedDesc} />
-        <meta name="twitter:image" content={ogImageUrl} />
         <meta name="twitter:image:alt" content={ogImageAlt} />
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
         <script type="application/ld+json">{JSON.stringify(breadcrumbLd)}</script>
