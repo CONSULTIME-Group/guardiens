@@ -1111,14 +1111,9 @@ const SearchSitter = () => {
      setStartDate={setStartDate}
      setEndDate={setEndDate}
    />
+ 
+ {/* Animals picker retiré — remplacé par la pill catégorie « Animaux » ci-dessus */}
 
-   {/* Animals pill */}
-   <AnimalsPickerPopover
-     pillClass={pillClass}
-     animalsLabel={animalsLabel}
-     animalTypes={animalTypes}
-     toggleAnimalFilter={toggleAnimalFilter}
-   />
 
    {/* Verified toggle promu (raccourci confiance) */}
    <button
