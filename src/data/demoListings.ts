@@ -339,6 +339,9 @@ export const DEMO_MISSIONS = [
     status: "open",
     duration_estimate: "20 min/jour",
     date_needed: null,
+    photos: [
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&q=80",
+    ],
     created_at: today.toISOString(),
     user_id: "demo",
     latitude: 45.7797,
@@ -367,6 +370,9 @@ export const DEMO_MISSIONS = [
     status: "open",
     duration_estimate: "45 min × 2/sem",
     date_needed: null,
+    photos: [
+      "https://images.unsplash.com/photo-1568572933382-74d440642117?w=800&q=80",
+    ],
     created_at: today.toISOString(),
     user_id: "demo",
     latitude: 45.7953,
@@ -394,6 +400,9 @@ export const DEMO_MISSIONS = [
     status: "open",
     duration_estimate: "2h × 2",
     date_needed: null,
+    photos: [
+      "https://images.unsplash.com/photo-1599598425947-5928c1bf3fb1?w=800&q=80",
+    ],
     created_at: today.toISOString(),
     user_id: "demo",
     latitude: 45.7640,
