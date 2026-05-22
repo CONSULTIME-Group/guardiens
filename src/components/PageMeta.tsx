@@ -8,6 +8,13 @@ import { DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 const DEFAULT_IMAGE = DEFAULT_OG_IMAGE;
 const SITE_NAME = "Guardiens";
 
+const getListingOgImageFromPath = (pathname: string): string | null => {
+  const match = pathname.match(/^\/annonces\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/?$/i);
+  if (!match) return null;
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://erhccyqevdyevpyctsjj.supabase.co";
+  return `${supabaseUrl}/functions/v1/og-sit?id=${match[1]}&v=cover-photo`;
+};
+
 interface PageMetaProps {
   title: string;
   description: string;
@@ -36,6 +43,7 @@ const PageMeta = ({
   const currentUrl = buildAbsoluteUrl(currentPath);
   const canonicalUrl = normalizeCanonical(canonical) ?? currentUrl;
   const metaDescription = description.trim();
+  const resolvedImage = image === DEFAULT_IMAGE ? getListingOgImageFromPath(currentPath) ?? image : image;
   const titleWithoutSuffix = title.replace(/\s*\|\s*Guardiens\s*$/i, "").replace(/\s*—\s*Guardiens\s*$/i, "");
   const fullTitle = currentPath === "/" ? titleWithoutSuffix : `${titleWithoutSuffix} | ${SITE_NAME}`;
 
@@ -70,7 +78,8 @@ const PageMeta = ({
     upsertMetaTag({ attr: "property", key: "og:title", content: fullTitle });
     upsertMetaTag({ attr: "property", key: "og:description", content: metaDescription });
     upsertMetaTag({ attr: "property", key: "og:url", content: currentUrl });
-    upsertMetaTag({ attr: "property", key: "og:image", content: image });
+    upsertMetaTag({ attr: "property", key: "og:image", content: resolvedImage });
+    upsertMetaTag({ attr: "property", key: "og:image:secure_url", content: resolvedImage });
     upsertMetaTag({ attr: "property", key: "og:type", content: type });
     upsertMetaTag({ attr: "property", key: "og:site_name", content: SITE_NAME });
     upsertMetaTag({ attr: "property", key: "og:locale", content: "fr_FR" });
@@ -78,7 +87,7 @@ const PageMeta = ({
     upsertMetaTag({ attr: "name", key: "twitter:card", content: "summary_large_image" });
     upsertMetaTag({ attr: "name", key: "twitter:title", content: fullTitle });
     upsertMetaTag({ attr: "name", key: "twitter:description", content: metaDescription });
-    upsertMetaTag({ attr: "name", key: "twitter:image", content: image });
+    upsertMetaTag({ attr: "name", key: "twitter:image", content: resolvedImage });
 
     if (type === "article" && publishedAt) {
       upsertMetaTag({ attr: "property", key: "article:published_time", content: publishedAt });
@@ -108,7 +117,7 @@ const PageMeta = ({
         type,
       },
     });
-  }, [author, canonical, canonicalUrl, currentPath, currentUrl, fullTitle, image, metaDescription, noindex, publishedAt, type]);
+  }, [author, canonical, canonicalUrl, currentPath, currentUrl, fullTitle, metaDescription, noindex, publishedAt, resolvedImage, type]);
 
   return (
     <Helmet>
@@ -119,14 +128,15 @@ const PageMeta = ({
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={metaDescription} />
       <meta property="og:url" content={currentUrl} />
-      <meta property="og:image" content={image} />
+      <meta property="og:image" content={resolvedImage} />
+      <meta property="og:image:secure_url" content={resolvedImage} />
       <meta property="og:type" content={type} />
       <meta property="og:site_name" content={SITE_NAME} />
       <meta property="og:locale" content="fr_FR" />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={metaDescription} />
-      <meta name="twitter:image" content={image} />
+      <meta name="twitter:image" content={resolvedImage} />
       {type === "article" && publishedAt && <meta property="article:published_time" content={publishedAt} />}
       {type === "article" && author && <meta property="article:author" content={author} />}
     </Helmet>
