@@ -330,9 +330,10 @@ const PublicSitDetail = () => {
  const seoDescription = `Garde à ${cityForTitle} ${datesShort}. ${petsSummary}. ${owner?.first_name || "Un membre"} cherche un gardien du coin sur Guardiens — inscription à 0\u00A0€ pour les propriétaires.`;
  const truncatedSeoDesc = seoDescription.length > 160 ? seoDescription.slice(0, 157) + "…" : seoDescription;
 
- const canonicalUrl = typeof window !== "undefined"
- ? `${window.location.origin}/annonces/${sit.id}`
- : `https://guardiens.fr/annonces/${sit.id}`;
+  // Canonical TOUJOURS sur le domaine de prod : sur preview/lovableproject,
+  // le partage social (FB/LinkedIn/WhatsApp) doit pointer vers guardiens.fr
+  // où le prerender sert les meta OG. Sinon, aperçu vide / URL moche.
+  const canonicalUrl = `https://guardiens.fr/annonces/${sit.id}`;
 
  // og:image — rotation stable parmi 5 visuels Guardiens (1 par hash de l'ID).
  // Les photos réelles de l'annonce restent affichées dans le hero ; l'OG sert

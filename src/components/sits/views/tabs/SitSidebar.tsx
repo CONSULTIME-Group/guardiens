@@ -103,6 +103,31 @@ const SitSidebar = ({
         </Link>
       )}
 
+      {citySlug && cityName && (
+        <Link
+          to={`/house-sitting/${citySlug}`}
+          className="block rounded-2xl border border-border bg-card p-5 hover:border-primary/50 transition-colors group"
+        >
+          <div className="flex items-start gap-3">
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">
+                Toutes les gardes
+              </p>
+              <p className="font-semibold text-sm group-hover:text-primary transition-colors">
+                Voir toutes les annonces à {cityName}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed line-clamp-2">
+                Maisons, animaux et dates disponibles près de chez vous.
+              </p>
+            </div>
+            <ChevronRight
+              aria-hidden="true"
+              className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 mt-1"
+            />
+          </div>
+        </Link>
+      )}
+
       {showSittersLink && sittersLink && sittersScope && (
         <Link
           to={sittersLink}
