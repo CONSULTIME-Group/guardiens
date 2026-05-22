@@ -417,18 +417,33 @@ const HelperMiniCard = ({
         )}
       </div>
 
-      {/* Lien profil discret — pas de CTA invasif sur la carte. Les actions
-          (voir missions / demander un coup de main) sont déportées au niveau
-          de la section, comme demandé. */}
-      <div className="mt-auto px-4 sm:px-6 pb-4 sm:pb-6">
+      {/* Footer carte : 2 actions claires — primaire « Lui écrire » qui ouvre
+          une conversation pré-contextualisée (helper_inquiry), secondaire
+          « Voir le profil » pour lever le doute avant de prendre contact. */}
+      <div className="mt-auto px-4 sm:px-6 pb-4 sm:pb-5 pt-1 flex items-center gap-2 border-t border-border/40">
+        <Button
+          size="sm"
+          onClick={handleContact}
+          disabled={contacting}
+          className="flex-1 h-9 rounded-xl text-xs font-semibold gap-1.5"
+          aria-label={`Écrire à ${firstName} pour un coup de main`}
+        >
+          {contacting ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+          ) : (
+            <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />
+          )}
+          Lui écrire
+        </Button>
         <Link
           to={`/gardiens/${helper.id}`}
-          className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground hover:text-primary transition-colors"
+          className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-primary transition-colors shrink-0"
         >
-          Voir le profil
+          Profil
           <ArrowRight className="h-3 w-3 transition-transform group-hover/card:translate-x-0.5" aria-hidden="true" />
         </Link>
       </div>
+
     </article>
   );
 };
