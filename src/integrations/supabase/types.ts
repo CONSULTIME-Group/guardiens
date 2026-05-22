@@ -4891,6 +4891,7 @@ export type Database = {
           identity_verified: boolean
           member_since: string
           postal_code: string
+          user_id: string
         }[]
       }
       get_or_create_conversation: {
