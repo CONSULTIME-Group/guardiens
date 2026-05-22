@@ -177,7 +177,9 @@ const InlineFeedbackForm = ({
 
 /* ── Main Page ── */
 const SmallMissionDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id: rawId } = useParams<{ id: string }>();
+  // Sanitize: trim whitespace + invisible chars (nbsp \u00A0, zero-width) souvent ajoutés par les partages Facebook/messageries
+  const id = rawId?.replace(/[\s\u00A0\u200B-\u200D\uFEFF]+/g, "") || undefined;
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
