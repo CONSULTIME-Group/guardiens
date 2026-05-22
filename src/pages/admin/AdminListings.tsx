@@ -146,6 +146,14 @@ const AdminListings = () => {
     return { url, title, text };
   };
 
+  const withShareTracking = (url: string, channel: "twitter" | "facebook" | "whatsapp" | "email") => {
+    const tracked = new URL(url);
+    tracked.searchParams.set("utm_source", channel === "twitter" ? "twitter" : channel);
+    tracked.searchParams.set("utm_medium", "share");
+    tracked.searchParams.set("utm_campaign", "admin_listing_share");
+    return tracked.toString();
+  };
+
   const handleCopyLink = async (listing: any) => {
     const { url } = buildShareData(listing);
     try {
@@ -175,7 +183,7 @@ const AdminListings = () => {
 
   const handleShareTo = (listing: any, channel: "twitter" | "facebook" | "whatsapp" | "email") => {
     const data = buildShareData(listing);
-    const encodedUrl = encodeURIComponent(data.url);
+    const encodedUrl = encodeURIComponent(withShareTracking(data.url, channel));
     const encodedText = encodeURIComponent(data.text);
     switch (channel) {
       case "twitter":
