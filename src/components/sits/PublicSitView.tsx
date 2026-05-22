@@ -4,7 +4,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Share2, CheckCircle2, Star } from "lucide-react";
-import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
@@ -109,11 +108,6 @@ const PublicSitView = ({
 
   return (
     <div className="min-h-screen bg-background text-foreground animate-fade-in">
-      <PageMeta
-        title={`${title} — Garde de maison à ${cityLabel} | Guardiens`}
-        description={description.slice(0, 155)}
-      />
-
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {/* Breadcrumb */}
         <div className="mb-8">
