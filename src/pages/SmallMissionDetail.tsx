@@ -574,533 +574,610 @@ const SmallMissionDetail = () => {
     );
   }
 
-  return (
-    <>
-      {!user && <PublicHeader />}
-      <div className="animate-fade-in pb-32">
-      {/* Hero — photo de la mission si dispo, sinon visuel générique discret */}
-      {(() => {
-        const heroPhoto = mission.photos && mission.photos.length > 0 ? mission.photos[0] : null;
-        return (
-          <div className="relative overflow-hidden">
-            <div className="absolute inset-0">
-              <img src={heroPhoto || entraideHeader} alt="" className="w-full h-full object-cover" />
-              <div className={`absolute inset-0 ${heroPhoto ? "bg-gradient-to-t from-background via-background/85 to-background/30" : "bg-gradient-to-r from-background/90 via-background/75 to-background/60"}`} />
+  const heroImage = mission.photos?.[0] || entraideHeader;
+  const extraPhotos = (mission.photos || []).slice(1);
+  const cityLabel = titlecaseCity(mission.city) || "France";
+  const durationLabel = mission.duration_estimate ? (DURATION_LABELS[mission.duration_estimate] || mission.duration_estimate) : null;
+
+  /* ── Sidebar contextuelle ─────────────────────────────────────────── */
+  const renderSidebarCard = () => {
+    // Author : récap propositions
+    if (isAuthor) {
+      return (
+        <div className="bg-card p-7 rounded-[2rem] shadow-xl shadow-foreground/5 border border-border space-y-5">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Votre annonce</p>
+            <span className={`inline-flex items-center gap-2 text-sm font-medium ${mission.status === "open" ? "text-success" : "text-muted-foreground"}`}>
+              <span className={`w-2 h-2 rounded-full ${mission.status === "open" ? "bg-success" : "bg-muted-foreground/50"}`} />
+              {statusMeta.label}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-3 pt-1">
+            <div className="bg-muted/50 rounded-2xl p-4">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Propositions</p>
+              <p className="font-heading text-3xl font-bold text-foreground leading-none">{responses.length}</p>
             </div>
-            <div className={`relative max-w-3xl mx-auto px-6 ${heroPhoto ? "pt-10 pb-8 min-h-[280px] md:min-h-[340px] flex flex-col justify-end" : "py-10"}`}>
-              <PageMeta title={`${mission.title} — Coup de main près de chez vous | Guardiens`} description={mission.description?.slice(0, 155)} />
-              {/* JSON-LD Service + BreadcrumbList */}
-              <Helmet>
-                <script type="application/ld+json">{JSON.stringify({
-                  "@context": "https://schema.org",
-                  "@type": "Service",
-                  name: mission.title,
-                  description: mission.description?.slice(0, 300),
-                  areaServed: titlecaseCity(mission.city) || "France",
-                  serviceType: catMeta.label,
-                  provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
-                  offers: { "@type": "Offer", price: "0", priceCurrency: "EUR", availability: mission.status === "open" ? "https://schema.org/InStock" : "https://schema.org/OutOfStock" },
-                  datePosted: mission.created_at,
-                })}</script>
-              </Helmet>
-              <div className="flex items-center justify-between gap-3 mb-4">
-                <Link to="/petites-missions" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-                  <ArrowLeft className="h-4 w-4" /> Retour aux missions
-                </Link>
+            <div className="bg-muted/50 rounded-2xl p-4">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">En attente</p>
+              <p className="font-heading text-3xl font-bold text-foreground leading-none">{pendingResponses.length}</p>
+            </div>
+          </div>
+          {(mission.status === "open" || mission.status === "in_progress") && responses.length > 0 && (
+            <a href="#propositions" className="block">
+              <Button className="w-full rounded-full" size="lg">Voir les propositions</Button>
+            </a>
+          )}
+          {mission.status === "in_progress" && (
+            <Button onClick={handleMarkCompleted} disabled={completing} variant="outline" className="w-full rounded-full gap-2">
+              <CheckCircle2 className="h-4 w-4" /> {completing ? "Validation…" : "Marquer terminée"}
+            </Button>
+          )}
+          {mission.status === "open" && (
+            <button onClick={() => setCloseModalOpen(true)} className="text-xs text-muted-foreground hover:text-destructive w-full text-center transition-colors">
+              Clôturer sans sélectionner
+            </button>
+          )}
+        </div>
+      );
+    }
+
+    // Candidat avec réponse existante
+    if (myResponse) {
+      if (myResponse.status === "accepted" && mission.status === "in_progress") {
+        return (
+          <div className="bg-card p-7 rounded-[2rem] shadow-xl shadow-foreground/5 border border-success-border space-y-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-success" />
+              <p className="font-heading text-lg font-semibold text-success">Proposition acceptée</p>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {author?.first_name || "L'auteur"} vous a choisi(e). Organisez la suite en direct.
+            </p>
+            <Button onClick={() => navigate("/messages")} className="w-full rounded-full gap-2" size="lg">
+              <MessageSquare className="h-4 w-4" /> Aller à la messagerie
+            </Button>
+          </div>
+        );
+      }
+      if (myResponse.status === "pending") {
+        return (
+          <div className="bg-card p-7 rounded-[2rem] shadow-xl shadow-foreground/5 border border-border space-y-3">
+            <div className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-info" />
+              <p className="font-heading text-lg font-semibold">Proposition envoyée</p>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {author?.first_name || "L'auteur"} a reçu votre mot. Vous serez prévenu(e) dès qu'il y a une réponse.
+            </p>
+            <p className="text-xs text-muted-foreground">Envoyée {timeAgoFr(myResponse.created_at)}.</p>
+          </div>
+        );
+      }
+      if (myResponse.status === "declined") {
+        return (
+          <div className="bg-card p-7 rounded-[2rem] shadow-sm border border-border space-y-3">
+            <div className="flex items-center gap-2">
+              <XCircle className="h-5 w-5 text-muted-foreground" />
+              <p className="font-heading text-lg font-semibold text-muted-foreground">Non retenu(e)</p>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Quelqu'un d'autre a été choisi cette fois. Merci d'avoir osé proposer.
+            </p>
+            <Link to="/petites-missions" className="block">
+              <Button variant="outline" className="w-full rounded-full">Voir d'autres coups de main</Button>
+            </Link>
+          </div>
+        );
+      }
+      return null;
+    }
+
+    // Visiteur connecté — gate (profil incomplet)
+    if (mission.status === "open" && accessLevel === 1) {
+      return (
+        <div className="bg-card p-7 rounded-[2rem] shadow-xl shadow-foreground/5 border border-border">
+          <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="mission" />
+        </div>
+      );
+    }
+
+    // Visiteur connecté — peut postuler
+    if (mission.status === "open" && canApplyMissions) {
+      const starters = [
+        `Bonjour ${author?.first_name || ""}, je suis disponible et ${mission.city ? `je connais bien ${titlecaseCity(mission.city)}` : "pas loin de chez vous"}.`.trim(),
+        mission.category === "animals"
+          ? `Bonjour ${author?.first_name || ""}, j'ai l'habitude des animaux et je serais ravi(e) de vous aider.`
+          : `Bonjour ${author?.first_name || ""}, votre demande me parle, j'aimerais vous aider.`,
+        `Bonjour ${author?.first_name || ""}, dites-moi quand ça vous arrange, je m'organise.`,
+      ].map(s => s.trim());
+
+      return (
+        <div className="bg-card p-7 rounded-[2rem] shadow-xl shadow-foreground/5 border border-border space-y-5">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Proposer mon aide</p>
+            <p className="font-heading text-xl font-bold text-foreground leading-tight">
+              Écrivez un mot à {author?.first_name || "l'auteur"}
+            </p>
+          </div>
+
+          {!message.trim() && (
+            <div className="flex flex-wrap gap-1.5">
+              {starters.map((s, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setMessage(s)}
+                  className="text-xs px-2.5 py-1 rounded-full border border-border bg-background hover:bg-accent hover:border-primary/40 transition-colors text-muted-foreground hover:text-foreground"
+                >
+                  {i === 0 ? "Je suis dispo" : i === 1 ? "Ça me parle" : "Selon vous"}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div>
+            <Textarea
+              placeholder={`Dites bonjour à ${author?.first_name || "l'auteur"}, présentez-vous en deux mots.`}
+              value={message}
+              onChange={e => setMessage(e.target.value.slice(0, 500))}
+              className="min-h-[120px] rounded-2xl text-base"
+              maxLength={500}
+            />
+            <div className="flex items-center justify-between text-[11px] text-muted-foreground mt-1.5 px-1">
+              <span>{author?.first_name || "L'auteur"} reçoit votre mot directement</span>
+              <span className={message.length > 450 ? "text-warning" : ""}>{message.length}/500</span>
+            </div>
+          </div>
+
+          <Button
+            className="w-full rounded-full font-bold text-base shadow-lg shadow-primary/20"
+            size="lg"
+            onClick={handleRespond}
+            disabled={submitting || !message.trim()}
+          >
+            {submitting ? "Envoi…" : "Envoyer ma proposition"}
+          </Button>
+
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground pt-1">
+            <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Gratuit, entre membres</span>
+            <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Sans engagement</span>
+          </div>
+        </div>
+      );
+    }
+
+    // Mission fermée / autres cas — état neutre
+    return (
+      <div className="bg-card p-7 rounded-[2rem] shadow-sm border border-border space-y-3">
+        <p className="font-heading text-lg font-semibold">{statusMeta.label}</p>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {mission.status === "in_progress" && "Cette mission est en cours d'organisation."}
+          {mission.status === "completed" && "Cette mission est terminée. Merci à celles et ceux qui ont aidé."}
+          {mission.status === "cancelled" && "Cette mission a été clôturée sans sélection."}
+        </p>
+        <Link to="/petites-missions" className="block">
+          <Button variant="outline" className="w-full rounded-full">Voir d'autres coups de main</Button>
+        </Link>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-background text-foreground animate-fade-in">
+      <PageMeta title={`${mission.title} — Coup de main près de chez vous | Guardiens`} description={mission.description?.slice(0, 155)} />
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Service",
+          name: mission.title,
+          description: mission.description?.slice(0, 300),
+          areaServed: cityLabel,
+          serviceType: catMeta.label,
+          provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
+          offers: { "@type": "Offer", price: "0", priceCurrency: "EUR", availability: mission.status === "open" ? "https://schema.org/InStock" : "https://schema.org/OutOfStock" },
+          datePosted: mission.created_at,
+        })}</script>
+      </Helmet>
+
+      <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <PageBreadcrumb items={[{ label: "Coups de main", href: "/petites-missions" }, { label: mission.title }]} />
+        </div>
+
+        {/* Banner publication */}
+        {showPublishedBanner && (
+          <div className="mb-6">
+            <MissionPublishedBanner
+              missionTitle={mission.title}
+              isAuthor={isAuthor}
+              published
+              onClose={handleClosePublishedBanner}
+              onToast={(t) => toast(t)}
+            />
+          </div>
+        )}
+
+        {/* Banners statut */}
+        {mission.status === "in_progress" && acceptedResponses.length > 0 && (
+          <div className="bg-success-soft border border-success-border rounded-2xl p-4 mb-6 flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
+            <p className="text-sm font-medium text-success">
+              Mission organisée avec {acceptedResponses.map(r => r.responder?.first_name).filter(Boolean).join(", ")}
+            </p>
+          </div>
+        )}
+        {mission.status === "completed" && (
+          <div className="bg-muted border border-border rounded-2xl p-4 mb-6 flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
+            <p className="text-sm font-medium text-muted-foreground">Mission terminée</p>
+          </div>
+        )}
+        {mission.status === "cancelled" && (
+          <div className="bg-muted border border-border rounded-2xl p-4 mb-6 flex items-center gap-2">
+            <XCircle className="h-5 w-5 text-muted-foreground" />
+            <p className="text-sm font-medium text-muted-foreground">Mission annulée</p>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+          {/* ── COLONNE PRINCIPALE ── */}
+          <article className="lg:col-span-8 min-w-0">
+            <header className="mb-10">
+              <div className="flex items-center gap-3 mb-6 flex-wrap">
+                <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-widest uppercase">
+                  Entraide · {catMeta.label}
+                </span>
+                <span className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase ${statusMeta.className}`}>
+                  {statusMeta.label}
+                </span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleSharePublishedLink}
-                  className="gap-1.5 rounded-full"
-                  aria-label="Partager cette mission"
+                  className="gap-1.5 rounded-full ml-auto"
+                  aria-label="Partager cette annonce"
                 >
-                  <Share2 className="h-4 w-4" /> Partager
+                  <Share2 className="h-3.5 w-3.5" /> Partager
                 </Button>
               </div>
-              <h1 className="font-heading text-2xl md:text-3xl font-bold">{mission.title}</h1>
-              <p className="text-sm text-foreground/70 mt-2">Coup de main publié {timeAgoFr(mission.created_at)}{mission.city ? ` · ${titlecaseCity(mission.city)}` : ""}</p>
-            </div>
-          </div>
-        );
-      })()}
-
-      <div className="p-6 md:p-10 max-w-3xl mx-auto">
-        <div className="mb-4 -mt-2">
-          <PageBreadcrumb items={[{ label: "Coups de main", href: "/petites-missions" }, { label: mission.title }]} />
-        </div>
-        {showPublishedBanner && (
-          <MissionPublishedBanner
-            missionTitle={mission.title}
-            isAuthor={isAuthor}
-            published
-            onClose={handleClosePublishedBanner}
-            onToast={(t) => toast(t)}
-          />
-        )}
-        {/* Category + status */}
-        <div className="flex items-center gap-3 mb-3">
-          <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-accent ${catMeta.colorClass}`}>
-            <CatIcon className="h-3.5 w-3.5" /> {catMeta.label}
-          </span>
-          <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${statusMeta.className}`}>{statusMeta.label}</span>
-        </div>
-
-        {/* Meta */}
-        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-6">
-          {(mission.city || mission.postal_code) && (
-            <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" />{[mission.postal_code, titlecaseCity(mission.city)].filter(Boolean).join(" ")}</span>
-          )}
-          {mission.date_needed && (
-            <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" />{format(new Date(mission.date_needed), "d MMMM yyyy", { locale: fr })}</span>
-          )}
-          {mission.duration_estimate && (
-            <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" />{DURATION_LABELS[mission.duration_estimate] || mission.duration_estimate}</span>
-          )}
-          {responses.length > 0 && (
-            <span className="flex items-center gap-1.5"><Users className="h-4 w-4" />{responses.length} proposition{responses.length > 1 ? "s" : ""}</span>
-          )}
-        </div>
-
-        {/* Author card — en haut pour mise en confiance immédiate, cliquable vers profil */}
-        {author && (
-          <div className="flex items-center gap-3 mb-6 p-4 bg-card rounded-xl border border-border hover:border-primary/30 transition-colors group">
-            {author.user_id ? (
-              <Link to={`/gardiens/${author.user_id}`} className="flex items-center gap-3 flex-1 min-w-0">
-                {author.avatar_url ? (
-                  <img src={author.avatar_url} alt={author.first_name} className="w-12 h-12 rounded-full object-cover" />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center font-heading text-lg font-bold">
-                    {author.first_name?.charAt(0) || "?"}
+              <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6 text-foreground">
+                {mission.title}
+              </h1>
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-base text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-foreground/30" />
+                  <span>{cityLabel}{mission.postal_code ? ` (${mission.postal_code.slice(0, 2)})` : ""}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-foreground/30" />
+                  <span>Publié {timeAgoFr(mission.created_at)}</span>
+                </div>
+                {durationLabel && (
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-foreground/30" />
+                    <span>{durationLabel}</span>
                   </div>
                 )}
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm">
-                    Publié par <span className="group-hover:text-primary transition-colors">{author.first_name || "un membre"}</span>
-                    {author.identity_verified && <span className="ml-2 inline-flex items-center gap-1 text-xs text-success"><CheckCircle2 className="h-3 w-3" /> Identité vérifiée</span>}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {titlecaseCity(author.city) || titlecaseCity(mission.city) || "France"}
-                    {memberSince(author.created_at) && <> · {memberSince(author.created_at)}</>}
-                  </p>
+                {mission.date_needed && (
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-foreground/30" />
+                    <span>{format(new Date(mission.date_needed), "d MMMM yyyy", { locale: fr })}</span>
+                  </div>
+                )}
+                {responses.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-foreground/30" />
+                    <span>{responses.length} proposition{responses.length > 1 ? "s" : ""}</span>
+                  </div>
+                )}
+              </div>
+            </header>
+
+            {/* Image principale */}
+            <div className="mb-12 rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
+              <img
+                src={heroImage}
+                alt={mission.title}
+                className="w-full aspect-video object-cover"
+                loading="eager"
+              />
+            </div>
+
+            {/* Photos additionnelles */}
+            {extraPhotos.length > 0 && (
+              <div className="mb-12">
+                <MissionPhotoGallery photos={mission.photos!} />
+              </div>
+            )}
+
+            <div className="max-w-2xl space-y-10">
+              {/* Auteur */}
+              {author && (() => {
+                const AuthorInner = (
+                  <>
+                    <div className="shrink-0">
+                      {author.avatar_url ? (
+                        <img
+                          src={author.avatar_url}
+                          alt={author.first_name || "Auteur"}
+                          className="w-16 h-16 rounded-full object-cover border-2 border-background shadow-sm"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center font-heading text-xl font-bold text-foreground">
+                          {author.first_name?.charAt(0) || "?"}
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-lg font-semibold text-foreground flex items-center gap-2 flex-wrap">
+                        Proposé par {author.first_name || "un membre"}
+                        {author.identity_verified && (
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-success bg-success-soft px-2 py-0.5 rounded-full">
+                            <ShieldCheck className="h-3 w-3" /> Identité vérifiée
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {[memberSince(author.created_at), titlecaseCity(author.city) || null].filter(Boolean).join(" · ")}
+                      </p>
+                      {author.user_id && (
+                        <p className="text-xs text-primary font-medium mt-1 group-hover:underline">
+                          Voir son profil →
+                        </p>
+                      )}
+                    </div>
+                    {!isAuthor && <ReportButton targetId={mission.id} targetType="profile" />}
+                  </>
+                );
+                return author.user_id ? (
+                  <Link
+                    to={`/gardiens/${author.user_id}`}
+                    className="group flex items-center gap-5 pb-8 border-b border-border hover:opacity-90 transition-opacity"
+                  >
+                    {AuthorInner}
+                  </Link>
+                ) : (
+                  <div className="flex items-center gap-5 pb-8 border-b border-border">
+                    {AuthorInner}
+                  </div>
+                );
+              })()}
+
+              {/* Description */}
+              <section>
+                <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">La mission</h2>
+                <div className="space-y-5 text-lg leading-relaxed text-foreground/85 whitespace-pre-wrap">
+                  {mission.description}
                 </div>
-                <span className="text-xs text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity shrink-0 hidden sm:inline">Voir le profil →</span>
-              </Link>
+              </section>
+
+              {/* En échange */}
+              {mission.exchange_offer && (
+                <section className="bg-muted/60 p-8 md:p-10 rounded-[2rem] border border-border relative overflow-hidden">
+                  <div className="absolute -top-6 -right-6 w-32 h-32 bg-primary/5 rounded-full blur-2xl" aria-hidden />
+                  <h3 className="text-xs font-bold tracking-[0.2em] uppercase mb-4 text-muted-foreground">
+                    En échange de votre aide
+                  </h3>
+                  <blockquote className="font-heading text-xl md:text-2xl italic leading-snug text-foreground/90">
+                    « {mission.exchange_offer} »
+                  </blockquote>
+                </section>
+              )}
+            </div>
+          </article>
+
+          {/* ── SIDEBAR ── */}
+          <aside className="lg:col-span-4 lg:sticky lg:top-8 space-y-6">
+            {renderSidebarCard()}
+
+            {/* Localisation approximative */}
+            <div className="bg-card rounded-[2rem] overflow-hidden shadow-sm border border-border">
+              <ApproximateLocationMap
+                city={mission.city}
+                postalCode={mission.postal_code}
+                lat={mission.latitude}
+                lng={mission.longitude}
+                className="h-64"
+              />
+              <div className="p-5">
+                <p className="font-semibold text-sm text-foreground mb-1">Localisation approximative</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  L'adresse exacte est partagée uniquement après mise en relation, par respect de la vie privée.
+                </p>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        {/* ══════════════════════════════════════════════════════ */}
+        {/* ── PUBLISHER : Propositions reçues ── */}
+        {/* ══════════════════════════════════════════════════════ */}
+        {isAuthor && (mission.status === "open" || mission.status === "in_progress") && (
+          <section id="propositions" className="mt-16 pt-12 border-t border-border scroll-mt-8">
+            <div className="flex items-center gap-3 mb-6">
+              <MessageSquare className="h-5 w-5 text-primary" />
+              <h2 className="font-heading text-2xl md:text-3xl font-bold">
+                Propositions reçues <span className="text-muted-foreground font-normal">({responses.length})</span>
+              </h2>
+            </div>
+            {responses.length === 0 ? (
+              <div className="bg-muted/40 rounded-2xl p-8 text-center">
+                <p className="text-muted-foreground italic">
+                  Pas encore de proposition. Patience — souvent, les premières arrivent dans la journée.
+                </p>
+              </div>
             ) : (
-              <>
-                {author.avatar_url ? (
-                  <img src={author.avatar_url} alt={author.first_name} className="w-12 h-12 rounded-full object-cover" />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center font-heading text-lg font-bold">
-                    {author.first_name?.charAt(0) || "?"}
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm">
-                    Publié par {author.first_name || "un membre"}
-                    {author.identity_verified && <span className="ml-2 inline-flex items-center gap-1 text-xs text-success"><CheckCircle2 className="h-3 w-3" /> Identité vérifiée</span>}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {titlecaseCity(author.city) || titlecaseCity(mission.city) || "France"}
-                    {memberSince(author.created_at) && <> · {memberSince(author.created_at)}</>}
-                  </p>
-                </div>
-              </>
-            )}
-            {user && !isAuthor && <ReportButton targetId={mission.id} targetType="profile" />}
-          </div>
-        )}
-
-        {/* ── BANNERS ── */}
-
-        {/* In progress banner */}
-        {mission.status === "in_progress" && acceptedResponses.length > 0 && (
-          <div className="bg-success-soft border border-success-border rounded-xl p-4 mb-6">
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle2 className="h-5 w-5 text-success" />
-              <p className="font-medium text-success">
-                Mission organisée avec {acceptedResponses.map(r => r.responder?.first_name).filter(Boolean).join(", ")}
-              </p>
-            </div>
-            {isAuthor && (
-              <div className="flex flex-wrap gap-2 mt-3">
-                {acceptedResponses.map(r => (
-                  <Button key={r.id} variant="outline" size="sm" onClick={() => navigate(r.conversation_id ? `/messages?c=${r.conversation_id}` : "/messages")} className="gap-2 border-success-border text-success">
-                    {r.responder?.avatar_url ? <img src={r.responder.avatar_url} className="w-5 h-5 rounded-full object-cover" /> : null}
-                    {r.responder?.first_name} — Messagerie
-                  </Button>
-                ))}
-                <Button
-                  size="sm"
-                  className="gap-2"
-                  onClick={handleMarkCompleted}
-                  disabled={completing}
-                >
-                  <CheckCircle2 className="h-4 w-4" /> {completing ? "Validation…" : "Mission terminée"}
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Completed banner */}
-        {mission.status === "completed" && (
-          <div className="bg-muted border border-border rounded-xl p-4 mb-6 flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
-            <p className="font-medium text-muted-foreground">Mission terminée</p>
-          </div>
-        )}
-
-        {/* Cancelled banner */}
-        {mission.status === "cancelled" && (
-          <div className="bg-muted border border-border rounded-xl p-4 mb-6">
-            <div className="flex items-center gap-2">
-              <XCircle className="h-5 w-5 text-muted-foreground" />
-              <p className="font-medium text-muted-foreground">Mission annulée</p>
-            </div>
-            {isAuthor && (
-              <Link to="/petites-missions/creer" className="text-sm text-primary underline mt-2 inline-block">
-                Publier une nouvelle mission
-              </Link>
-            )}
-          </div>
-        )}
-
-        {/* Description */}
-        <div className="bg-card rounded-xl border border-border p-5 mb-6">
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">{mission.description}</p>
-        </div>
-
-        {/* Photos */}
-        <MissionPhotoGallery photos={mission.photos || []} />
-
-        {/* Exchange */}
-        <div className="bg-primary/5 border border-primary/10 rounded-xl p-5 mb-6">
-          <div className="flex items-center gap-2 mb-2">
-            <Heart className="h-4 w-4 text-primary" />
-            <h3 className="font-heading font-semibold text-sm">En échange</h3>
-          </div>
-          <p className="text-sm text-muted-foreground">{mission.exchange_offer}</p>
-        </div>
-
-        {/* Author card déplacé en haut — bloc supprimé pour éviter doublon */}
-
-
-
-        {/* ══════════════════════════════════════════════════════ */}
-        {/* ── PUBLISHER VIEW ── */}
-        {/* ══════════════════════════════════════════════════════ */}
-        {isAuthor && (
-          <div className="mb-8 space-y-6">
-
-            {/* Responses section — open or in_progress */}
-            {(mission.status === "open" || mission.status === "in_progress") && (
-              <>
-                <h2 className="font-heading text-lg font-semibold flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5 text-primary" />
-                  Propositions reçues ({responses.length})
-                </h2>
-                {responses.length === 0 ? (
-                  <p className="text-sm text-muted-foreground italic py-6 text-center">Pas encore de proposition. Patience — souvent, les premières arrivent dans la journée.</p>
-                ) : (
-                  <div className="space-y-3">
-                    {responses.map((r: any) => (
-                      <div key={r.id} className="bg-card rounded-xl border border-border p-4">
-                        <div className="flex items-start gap-3">
-                          {r.responder?.avatar_url ? (
-                            <img src={r.responder.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
-                          ) : (
-                            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold">
-                              {r.responder?.first_name?.charAt(0) || "?"}
-                            </div>
+              <div className="space-y-3 max-w-3xl">
+                {responses.map((r: any) => (
+                  <div key={r.id} className="bg-card rounded-2xl border border-border p-5">
+                    <div className="flex items-start gap-4">
+                      {r.responder?.avatar_url ? (
+                        <img src={r.responder.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center font-bold">
+                          {r.responder?.first_name?.charAt(0) || "?"}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
+                          <p className="font-semibold">{r.responder?.first_name || "Quelqu'un"}</p>
+                          <p className="text-xs text-muted-foreground">{format(new Date(r.created_at), "d MMM à HH:mm", { locale: fr })}</p>
+                        </div>
+                        <p className="text-sm text-foreground/85 leading-relaxed whitespace-pre-wrap">{r.message}</p>
+                        <div className="flex gap-2 mt-4 flex-wrap">
+                          {r.status === "pending" && (
+                            <>
+                              <Button size="sm" onClick={() => handleAcceptResponse(r.id)} disabled={!!processingResponseId} className="rounded-full">
+                                {processingResponseId === r.id ? "…" : "Accepter"}
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => handleDeclineResponse(r.id)} disabled={!!processingResponseId} className="rounded-full">
+                                Décliner
+                              </Button>
+                            </>
                           )}
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm">{r.responder?.first_name || "Quelqu'un"}</p>
-                            <p className="text-sm text-muted-foreground mt-1">{r.message}</p>
-                            <p className="text-xs text-muted-foreground mt-1">{format(new Date(r.created_at), "d MMM à HH:mm", { locale: fr })}</p>
-                          </div>
-                          <div className="flex gap-2 shrink-0 items-center">
-                            {r.status === "pending" && (
-                              <>
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleAcceptResponse(r.id)}
-                                  disabled={!!processingResponseId}
-                                >
-                                  {processingResponseId === r.id ? "…" : "Accepter"}
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleDeclineResponse(r.id)}
-                                  disabled={!!processingResponseId}
-                                >
-                                  Décliner
-                                </Button>
-                              </>
-                            )}
-                            {r.status === "accepted" && (
-                              <span className="text-xs font-medium text-success bg-success-soft px-2 py-1 rounded-full">Acceptée</span>
-                            )}
-                            {r.status === "declined" && (
-                              <span className="text-xs font-medium text-destructive bg-destructive/10 px-2 py-1 rounded-full">Non retenu(e)</span>
-                            )}
-                          </div>
+                          {r.status === "accepted" && (
+                            <>
+                              <span className="text-xs font-medium text-success bg-success-soft px-3 py-1 rounded-full">Acceptée</span>
+                              <Button size="sm" variant="outline" onClick={() => navigate(r.conversation_id ? `/messages?c=${r.conversation_id}` : "/messages")} className="rounded-full gap-2">
+                                <MessageSquare className="h-3.5 w-3.5" /> Messagerie
+                              </Button>
+                            </>
+                          )}
+                          {r.status === "declined" && (
+                            <span className="text-xs font-medium text-destructive bg-destructive/10 px-3 py-1 rounded-full">Non retenu(e)</span>
+                          )}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* Close without selection — only if open */}
-            {mission.status === "open" && (
-              <Button variant="ghost" className="w-full text-muted-foreground" onClick={() => setCloseModalOpen(true)}>
-                <XCircle className="h-4 w-4 mr-2" /> Clôturer sans sélectionner
-              </Button>
-            )}
-
-            {/* Completed: Feedback forms per accepted person */}
-            {mission.status === "completed" && acceptedResponses.length > 0 && (
-              <div className="space-y-4">
-                <h2 className="font-heading text-lg font-semibold">Laisser un avis</h2>
-                {acceptedResponses.map(r => (
-                  <div key={r.id}>
-                    {feedbackSent[r.responder_id] ? (
-                      <div className="bg-muted/50 rounded-xl p-4 flex items-center gap-2 text-sm text-muted-foreground">
-                        <CheckCircle2 className="h-4 w-4 text-success" />
-                        Avis envoyé pour {r.responder?.first_name}
-                      </div>
-                    ) : (
-                      <InlineFeedbackForm
-                        missionId={id!}
-                        receiverId={r.responder_id}
-                        receiverName={r.responder?.first_name || "l'aidant"}
-                        badges={PUBLISHER_BADGES}
-                        onSubmitted={() => setFeedbackSent(prev => ({ ...prev, [r.responder_id]: true }))}
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Received feedbacks */}
-            {mission.status === "completed" && receivedFeedbacks.length > 0 && (
-              <div className="space-y-3">
-                <h2 className="font-heading text-lg font-semibold">Avis reçus</h2>
-                {receivedFeedbacks.map((fb: any) => (
-                  <div key={fb.id} className="bg-card rounded-xl border border-border p-4 flex items-start gap-3">
-                    {fb.giver?.avatar_url ? (
-                      <img src={fb.giver.avatar_url} className="w-8 h-8 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold">{fb.giver?.first_name?.charAt(0)}</div>
-                    )}
-                    <div>
-                      <p className="text-sm font-medium">{fb.giver?.first_name}</p>
-                      {fb.positive !== null && (
-                        <span className={`inline-flex items-center gap-1 text-xs mt-1 ${fb.positive ? "text-success" : "text-destructive"}`}>
-                          {fb.positive ? <ThumbsUp className="h-3 w-3" /> : <ThumbsDown className="h-3 w-3" />}
-                          {fb.positive ? "Positif" : "Négatif"}
-                        </span>
-                      )}
-                      {fb.comment && <p className="text-sm text-muted-foreground mt-1">{fb.comment}</p>}
                     </div>
                   </div>
                 ))}
               </div>
             )}
-          </div>
+          </section>
         )}
 
         {/* ══════════════════════════════════════════════════════ */}
-        {/* ── CANDIDATE VIEW ── */}
+        {/* ── PUBLISHER : Avis post-mission ── */}
         {/* ══════════════════════════════════════════════════════ */}
-        {user && !isAuthor && myResponse && (
-          <div className="mb-8 space-y-4">
-
-            {/* Accepted */}
-            {myResponse.status === "accepted" && mission.status === "in_progress" && (
-              <>
-                <div className="bg-success-soft border border-success-border rounded-xl p-4 flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-success" />
-                  <p className="font-medium text-success">Proposition acceptée</p>
-                </div>
-                <Button onClick={() => navigate("/messages")} className="w-full gap-2">
-                  <MessageSquare className="h-4 w-4" /> Aller dans la messagerie
-                </Button>
-              </>
-            )}
-
-            {/* Accepted + completed → feedback */}
-            {myResponse.status === "accepted" && mission.status === "completed" && (
-              <>
-                {feedbackSent[mission.user_id] ? (
-                  <div className="bg-muted/50 rounded-xl p-4 flex items-center gap-2 text-sm text-muted-foreground">
-                    <CheckCircle2 className="h-4 w-4 text-success" />
-                    Vous avez donné votre avis — merci !
-                  </div>
-                ) : (
-                  <InlineFeedbackForm
-                    missionId={id!}
-                    receiverId={mission.user_id}
-                    receiverName={author?.first_name || "le publieur"}
-                    badges={CANDIDATE_BADGES}
-                    onSubmitted={() => setFeedbackSent(prev => ({ ...prev, [mission.user_id]: true }))}
-                  />
-                )}
-
-                {/* Received feedbacks */}
-                {receivedFeedbacks.length > 0 && (
-                  <div className="space-y-3">
-                    <h3 className="font-heading text-base font-semibold">Avis reçus</h3>
-                    {receivedFeedbacks.map((fb: any) => (
-                      <div key={fb.id} className="bg-card rounded-xl border border-border p-4 flex items-start gap-3">
-                        {fb.giver?.avatar_url ? (
-                          <img src={fb.giver.avatar_url} className="w-8 h-8 rounded-full object-cover" />
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold">{fb.giver?.first_name?.charAt(0)}</div>
-                        )}
-                        <div>
-                          <p className="text-sm font-medium">{fb.giver?.first_name}</p>
-                          {fb.comment && <p className="text-sm text-muted-foreground mt-1">{fb.comment}</p>}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* Declined */}
-            {myResponse.status === "declined" && (
-              <div className="bg-muted border border-border rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <XCircle className="h-5 w-5 text-muted-foreground" />
-                  <p className="font-medium text-muted-foreground">Non retenu(e)</p>
-                </div>
-                <p className="text-sm text-muted-foreground">Quelqu'un d'autre a été choisi cette fois. Merci d'avoir osé proposer.</p>
-              </div>
-            )}
-
-            {/* Pending */}
-            {myResponse.status === "pending" && mission.status !== "cancelled" && (
-              <div className="bg-info-soft border border-info-border rounded-xl p-4 flex items-center gap-2">
-                <Clock className="h-5 w-5 text-info" />
-                <p className="text-sm text-info">Votre proposition est en attente de réponse.</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Non-author: access gate (uniquement si profil incomplet) */}
-        {user && !isAuthor && !myResponse && mission.status === "open" && accessLevel === 1 && (
-          <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
-            <div className="max-w-3xl mx-auto">
-              <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="mission" />
-            </div>
-          </div>
-        )}
-
-        {/* Non-author: respond form */}
-        {user && !isAuthor && !myResponse && mission.status === "open" && canApplyMissions && (
-          <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20 shadow-[0_-4px_20px_-8px_rgba(0,0,0,0.08)]">
-            <div className="max-w-3xl mx-auto space-y-2.5">
-              {/* Amorces — un clic pour démarrer */}
-              {!message.trim() && (() => {
-                const starters = [
-                  `Bonjour ${author?.first_name || ""}, je suis disponible et ${(mission.city ? `je connais bien ${titlecaseCity(mission.city)}` : "pas loin de chez vous")}.`.trim(),
-                  mission.category === "animals"
-                    ? `Bonjour ${author?.first_name || ""}, j'ai l'habitude des animaux et je serais ravi(e) de vous aider.`
-                    : `Bonjour ${author?.first_name || ""}, votre demande me parle, j'aimerais vous aider.`,
-                  `Bonjour ${author?.first_name || ""}, dites-moi quand ça vous arrange, je m'organise.`,
-                ].map(s => s.trim());
-                return (
-                  <div className="flex flex-wrap gap-1.5">
-                    {starters.map((s, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => setMessage(s)}
-                        className="text-xs px-2.5 py-1 rounded-full border border-border bg-background hover:bg-accent hover:border-primary/40 transition-colors text-muted-foreground hover:text-foreground"
-                      >
-                        {i === 0 ? "👋 Je suis dispo" : i === 1 ? "🤝 Ça me parle" : "📅 Selon vous"}
-                      </button>
-                    ))}
-                  </div>
-                );
-              })()}
-              <Textarea
-                placeholder={`Dites bonjour à ${author?.first_name || "l'auteur"}, présentez-vous en deux mots. Pas besoin d'en faire des tonnes.`}
-                value={message}
-                onChange={e => setMessage(e.target.value.slice(0, 500))}
-                className="min-h-[72px]"
-                maxLength={500}
-              />
-              <div className="flex items-center justify-between text-[11px] text-muted-foreground -mt-1">
-                <span className="flex items-center gap-3">
-                  <span className="inline-flex items-center gap-1">✓ Gratuit, entre membres</span>
-                  <span className="hidden sm:inline-flex items-center gap-1">✓ {author?.first_name || "L'auteur"} reçoit votre mot directement</span>
-                </span>
-                <span className={message.length > 450 ? "text-warning" : ""}>{message.length}/500</span>
-              </div>
-              <Button
-                className="w-full h-12 text-base font-semibold"
-                onClick={handleRespond}
-                disabled={submitting || !message.trim()}
-              >
-                {submitting ? "Envoi..." : "J'ose proposer mon aide"}
-              </Button>
-              {!message.trim() && !submitting && (
-                <p className="text-xs text-muted-foreground text-center">
-                  Cliquez sur une amorce ou écrivez un mot pour activer le bouton.
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Not logged in */}
-        {!user && (
-          <div className="text-center py-8 border-t border-border mt-8">
-            <p className="text-muted-foreground mb-3">Inscrivez-vous gratuitement pour proposer votre aide. Sans engagement, en 2 minutes.</p>
-            <div className="flex flex-wrap gap-2 justify-center">
-              <Link to={`/inscription?redirect=/petites-missions/${mission.id}`}><Button>Créer un compte gratuit</Button></Link>
-              <Link to={`/login?redirect=/petites-missions/${mission.id}`}><Button variant="outline">Se connecter</Button></Link>
-            </div>
-          </div>
-        )}
-
-        {/* Related missions — maillage interne + anti cul-de-sac */}
-        {relatedMissions.length > 0 && (
-          <section className="mt-12 pt-10 border-t border-border">
-            <h2 className="font-heading text-xl font-semibold mb-1">Autres coups de main près d'ici</h2>
-            <p className="text-sm text-muted-foreground mb-5">D'autres personnes cherchent aussi un coup de main.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {relatedMissions.map((rm) => (
-                <Link
-                  key={rm.id}
-                  to={`/petites-missions/${rm.id}`}
-                  className="group flex flex-col p-4 rounded-xl border border-border bg-card hover:border-primary/50 hover:shadow-sm transition-all"
-                >
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wide">
-                      {(CATEGORY_META[rm.category] || CATEGORY_META.animals).label}
-                    </span>
-                    <span className="text-[10px] text-foreground/50">{timeAgoFr(rm.created_at)}</span>
-                  </div>
-                  <h3 className="font-heading font-semibold text-sm leading-snug mb-2 line-clamp-2">{rm.title}</h3>
-                  {rm.description && (
-                    <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{rm.description}</p>
+        {isAuthor && mission.status === "completed" && acceptedResponses.length > 0 && (
+          <section className="mt-16 pt-12 border-t border-border">
+            <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">Laisser un avis</h2>
+            <div className="space-y-4 max-w-3xl">
+              {acceptedResponses.map(r => (
+                <div key={r.id}>
+                  {feedbackSent[r.responder_id] ? (
+                    <div className="bg-muted/50 rounded-2xl p-4 flex items-center gap-2 text-sm text-muted-foreground">
+                      <CheckCircle2 className="h-4 w-4 text-success" />
+                      Avis envoyé pour {r.responder?.first_name}
+                    </div>
+                  ) : (
+                    <InlineFeedbackForm
+                      missionId={id!}
+                      receiverId={r.responder_id}
+                      receiverName={r.responder?.first_name || "l'aidant"}
+                      badges={PUBLISHER_BADGES}
+                      onSubmitted={() => setFeedbackSent(prev => ({ ...prev, [r.responder_id]: true }))}
+                    />
                   )}
-                  <div className="mt-auto text-xs text-foreground/60">{titlecaseCity(rm.city) || "France"}</div>
-                </Link>
+                </div>
               ))}
             </div>
-            <div className="text-center mt-6">
-              <Link to="/petites-missions" className="text-sm font-semibold text-primary hover:underline">
-                Voir tous les coups de main ouverts →
+          </section>
+        )}
+
+        {/* ══════════════════════════════════════════════════════ */}
+        {/* ── CANDIDAT accepté + terminé : avis ── */}
+        {/* ══════════════════════════════════════════════════════ */}
+        {!isAuthor && myResponse?.status === "accepted" && mission.status === "completed" && (
+          <section className="mt-16 pt-12 border-t border-border max-w-3xl">
+            <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">Votre retour sur cette mission</h2>
+            {feedbackSent[mission.user_id] ? (
+              <div className="bg-muted/50 rounded-2xl p-4 flex items-center gap-2 text-sm text-muted-foreground">
+                <CheckCircle2 className="h-4 w-4 text-success" />
+                Vous avez donné votre avis — merci !
+              </div>
+            ) : (
+              <InlineFeedbackForm
+                missionId={id!}
+                receiverId={mission.user_id}
+                receiverName={author?.first_name || "le publieur"}
+                badges={CANDIDATE_BADGES}
+                onSubmitted={() => setFeedbackSent(prev => ({ ...prev, [mission.user_id]: true }))}
+              />
+            )}
+          </section>
+        )}
+
+        {/* Avis reçus */}
+        {receivedFeedbacks.length > 0 && (
+          <section className="mt-12 max-w-3xl">
+            <h3 className="font-heading text-xl font-bold mb-4">Avis reçus</h3>
+            <div className="space-y-3">
+              {receivedFeedbacks.map((fb: any) => (
+                <div key={fb.id} className="bg-card rounded-2xl border border-border p-4 flex items-start gap-3">
+                  {fb.giver?.avatar_url ? (
+                    <img src={fb.giver.avatar_url} className="w-9 h-9 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-xs font-bold">{fb.giver?.first_name?.charAt(0)}</div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold">{fb.giver?.first_name}</p>
+                    {fb.positive !== null && (
+                      <span className={`inline-flex items-center gap-1 text-xs mt-1 ${fb.positive ? "text-success" : "text-destructive"}`}>
+                        {fb.positive ? <ThumbsUp className="h-3 w-3" /> : <ThumbsDown className="h-3 w-3" />}
+                        {fb.positive ? "Positif" : "Négatif"}
+                      </span>
+                    )}
+                    {fb.comment && <p className="text-sm text-muted-foreground mt-1">{fb.comment}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ══════════════════════════════════════════════════════ */}
+        {/* ── Recommandations ── */}
+        {/* ══════════════════════════════════════════════════════ */}
+        {relatedMissions.length > 0 && (
+          <section className="mt-24 md:mt-32 pt-16 border-t border-border">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+              <div>
+                <h2 className="font-heading text-3xl md:text-4xl font-bold mb-2">Près de chez vous</h2>
+                <p className="text-muted-foreground text-lg">
+                  D'autres coups de main à {cityLabel} et alentours
+                </p>
+              </div>
+              <Link
+                to="/petites-missions"
+                className="font-bold text-sm border-b-2 border-foreground pb-1 hover:opacity-70 transition-opacity self-start md:self-auto"
+              >
+                Tout parcourir
               </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+              {relatedMissions.slice(0, 3).map((rm) => (
+                <Link key={rm.id} to={`/petites-missions/${rm.id}`} className="group block">
+                  <div className="rounded-2xl overflow-hidden mb-5 aspect-[4/3] bg-muted shadow-sm">
+                    <div className="w-full h-full bg-gradient-to-br from-primary/10 via-muted to-primary/5 group-hover:scale-105 transition-transform duration-700 flex items-center justify-center">
+                      <span className="font-heading text-3xl font-bold text-primary/30">
+                        {rm.title.charAt(0)}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+                    {(CATEGORY_META[rm.category] || CATEGORY_META.animals).label}
+                  </p>
+                  <h3 className="font-heading text-xl font-bold mb-1 group-hover:text-primary transition-colors line-clamp-2">
+                    {rm.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground font-medium">
+                    {titlecaseCity(rm.city) || "France"} · {timeAgoFr(rm.created_at)}
+                  </p>
+                </Link>
+              ))}
             </div>
           </section>
         )}
@@ -1123,9 +1200,7 @@ const SmallMissionDetail = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      </div>
-      {!user && <PublicFooter />}
-    </>
+    </div>
   );
 };
 
