@@ -577,46 +577,51 @@ const SmallMissionDetail = () => {
     <>
       {!user && <PublicHeader />}
       <div className="animate-fade-in pb-32">
-      {/* Hero */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0">
-          <img src={entraideHeader} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/75 to-background/60" />
-        </div>
-        <div className="relative max-w-3xl mx-auto px-6 py-10">
-          <PageMeta title={`${mission.title} — Coup de main près de chez vous | Guardiens`} description={mission.description?.slice(0, 155)} />
-          {/* JSON-LD Service + BreadcrumbList */}
-          <Helmet>
-            <script type="application/ld+json">{JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Service",
-              name: mission.title,
-              description: mission.description?.slice(0, 300),
-              areaServed: titlecaseCity(mission.city) || "France",
-              serviceType: catMeta.label,
-              provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
-              offers: { "@type": "Offer", price: "0", priceCurrency: "EUR", availability: mission.status === "open" ? "https://schema.org/InStock" : "https://schema.org/OutOfStock" },
-              datePosted: mission.created_at,
-            })}</script>
-          </Helmet>
-          <div className="flex items-center justify-between gap-3 mb-4">
-            <Link to="/petites-missions" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-              <ArrowLeft className="h-4 w-4" /> Retour aux missions
-            </Link>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSharePublishedLink}
-              className="gap-1.5 rounded-full"
-              aria-label="Partager cette mission"
-            >
-              <Share2 className="h-4 w-4" /> Partager
-            </Button>
+      {/* Hero — photo de la mission si dispo, sinon visuel générique discret */}
+      {(() => {
+        const heroPhoto = mission.photos && mission.photos.length > 0 ? mission.photos[0] : null;
+        return (
+          <div className="relative overflow-hidden">
+            <div className="absolute inset-0">
+              <img src={heroPhoto || entraideHeader} alt="" className="w-full h-full object-cover" />
+              <div className={`absolute inset-0 ${heroPhoto ? "bg-gradient-to-t from-background via-background/85 to-background/30" : "bg-gradient-to-r from-background/90 via-background/75 to-background/60"}`} />
+            </div>
+            <div className={`relative max-w-3xl mx-auto px-6 ${heroPhoto ? "pt-10 pb-8 min-h-[280px] md:min-h-[340px] flex flex-col justify-end" : "py-10"}`}>
+              <PageMeta title={`${mission.title} — Coup de main près de chez vous | Guardiens`} description={mission.description?.slice(0, 155)} />
+              {/* JSON-LD Service + BreadcrumbList */}
+              <Helmet>
+                <script type="application/ld+json">{JSON.stringify({
+                  "@context": "https://schema.org",
+                  "@type": "Service",
+                  name: mission.title,
+                  description: mission.description?.slice(0, 300),
+                  areaServed: titlecaseCity(mission.city) || "France",
+                  serviceType: catMeta.label,
+                  provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
+                  offers: { "@type": "Offer", price: "0", priceCurrency: "EUR", availability: mission.status === "open" ? "https://schema.org/InStock" : "https://schema.org/OutOfStock" },
+                  datePosted: mission.created_at,
+                })}</script>
+              </Helmet>
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <Link to="/petites-missions" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+                  <ArrowLeft className="h-4 w-4" /> Retour aux missions
+                </Link>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSharePublishedLink}
+                  className="gap-1.5 rounded-full"
+                  aria-label="Partager cette mission"
+                >
+                  <Share2 className="h-4 w-4" /> Partager
+                </Button>
+              </div>
+              <h1 className="font-heading text-2xl md:text-3xl font-bold">{mission.title}</h1>
+              <p className="text-sm text-foreground/70 mt-2">Coup de main publié {timeAgoFr(mission.created_at)}{mission.city ? ` · ${titlecaseCity(mission.city)}` : ""}</p>
+            </div>
           </div>
-          <h1 className="font-heading text-2xl md:text-3xl font-bold">{mission.title}</h1>
-          <p className="text-sm text-foreground/70 mt-2">Coup de main publié {timeAgoFr(mission.created_at)}{mission.city ? ` · ${titlecaseCity(mission.city)}` : ""}</p>
-        </div>
-      </div>
+        );
+      })()}
 
       <div className="p-6 md:p-10 max-w-3xl mx-auto">
         <div className="mb-4 -mt-2">
