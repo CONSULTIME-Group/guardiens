@@ -184,7 +184,7 @@ const SearchListingCard = ({
 
       {/* ─── Hero visual ─── */}
       <div
-        className={`relative aspect-[4/3.5] overflow-hidden rounded-sm bg-muted transition-all duration-500 ease-out ${
+        className={`relative aspect-[4/3] overflow-hidden rounded-xl bg-muted transition-all duration-500 ease-out ${
           isClickable ? "group-hover:shadow-2xl group-hover:-translate-y-2" : ""
         } ${isDemo ? "ring-1 ring-amber-300/70" : ""}`}
       >
