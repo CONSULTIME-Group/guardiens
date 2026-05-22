@@ -139,8 +139,22 @@ export function useOwnerDashboardData(userId: string | undefined) {
               .limit(20)
           : Promise.resolve({ data: [], error: null });
 
-        const [petsRes, appsRes] = await Promise.all([petsPromise, appsPromise]);
+        const [petsRes, appsRes, viewsRes] = await Promise.all([
+          petsPromise,
+          appsPromise,
+          sitIds.length > 0
+            ? supabase.rpc("get_sit_views_count", { p_sit_ids: sitIds })
+            : Promise.resolve({ data: [], error: null }),
+        ]);
         if (cancelled) return;
+
+        const viewsMap = new Map<string, { views_30d: number; views_total: number }>();
+        ((viewsRes.data || []) as Array<{ sit_id: string; views_30d: number; views_total: number }>)
+          .forEach(v => viewsMap.set(v.sit_id, { views_30d: Number(v.views_30d) || 0, views_total: Number(v.views_total) || 0 }));
+        sitsData.forEach(s => {
+          const v = viewsMap.get(s.id);
+          if (v) { s.views_30d = v.views_30d; s.views_total = v.views_total; }
+        });
 
         const petsData = (petsRes.data || []) as Pet[];
         if (propIds.length > 0) onboardingChecks.hasPets = petsData.length > 0;
