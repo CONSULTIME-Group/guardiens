@@ -145,7 +145,7 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
                       to={`/sits/${sit.id}`}
                       className="group flex items-start gap-3 py-3 first:pt-1 last:pb-1 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:bg-muted/40 hover:translate-x-0.5"
                     >
-                      <div className="w-2 h-2 rounded-full bg-primary/70 shrink-0 mt-1.5 transition-transform duration-200 group-hover:scale-125" />
+                      <SitThumb sit={sit} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm sm:text-base text-foreground leading-snug font-medium transition-colors group-hover:text-primary">
                           {sit.title}
