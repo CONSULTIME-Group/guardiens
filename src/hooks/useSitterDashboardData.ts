@@ -208,7 +208,7 @@ export function useSitterDashboardData(userId: string | undefined) {
       {
         const { data: allListings, error: listErr } = await supabase
           .from("sits")
-          .select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, properties:property_id(photos, type, environment)")
+          .select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, cover_photo_url, properties:property_id(photos, type, environment, cover_photo_url)")
           .eq("status", "published")
           .neq("user_id", userId)
           .order("created_at", { ascending: false })

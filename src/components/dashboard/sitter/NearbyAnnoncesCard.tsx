@@ -1,8 +1,32 @@
 import { Link } from "react-router-dom";
 import { format, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
-import { AlertCircle, RefreshCw, Share2, Compass } from "lucide-react";
+import { AlertCircle, RefreshCw, Share2, Compass, Home } from "lucide-react";
 import { SITTER_PRICE_START } from "@/lib/pricing";
+
+/** Résout la meilleure photo de couverture disponible pour une annonce. */
+const resolveCover = (sit: any): string | null =>
+  sit?.cover_photo_url
+  || sit?.properties?.cover_photo_url
+  || (Array.isArray(sit?.properties?.photos) ? sit.properties.photos[0] : null)
+  || null;
+
+/** Vignette carrée à gauche d'un item d'annonce. Fallback icône maison. */
+const SitThumb = ({ sit }: { sit: any }) => {
+  const src = resolveCover(sit);
+  return src ? (
+    <img
+      src={src}
+      alt=""
+      loading="lazy"
+      className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover shrink-0 ring-1 ring-border"
+    />
+  ) : (
+    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-muted flex items-center justify-center shrink-0 ring-1 ring-border">
+      <Home className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+    </div>
+  );
+};
 
 interface Props {
   nearbyListings: any[];
@@ -121,7 +145,7 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
                       to={`/sits/${sit.id}`}
                       className="group flex items-start gap-3 py-3 first:pt-1 last:pb-1 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:bg-muted/40 hover:translate-x-0.5"
                     >
-                      <div className="w-2 h-2 rounded-full bg-primary/70 shrink-0 mt-1.5 transition-transform duration-200 group-hover:scale-125" />
+                      <SitThumb sit={sit} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm sm:text-base text-foreground leading-snug font-medium transition-colors group-hover:text-primary">
                           {sit.title}
@@ -190,7 +214,7 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
               to={`/sits/${sit.id}`}
               className="group flex items-start gap-3 py-3 first:pt-1 last:pb-1 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:bg-muted/40 hover:translate-x-0.5"
             >
-              <div className="w-2 h-2 rounded-full bg-accent shrink-0 mt-1.5 transition-transform duration-200 group-hover:scale-125" />
+              <SitThumb sit={sit} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-foreground leading-snug font-medium transition-colors group-hover:text-primary">
                   {sit.title}
