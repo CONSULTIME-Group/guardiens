@@ -348,6 +348,13 @@ const PublicSitDetail = () => {
  const ogImageUrl = `https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/og-sit?id=${sit.id}`;
  const ogImageAlt = `${sit.title || "Annonce de garde"} — ${cityForTitle}, ${datesShort}`;
 
+  const MetaReady = () => {
+    useEffect(() => {
+      window.prerenderReady = true;
+    }, []);
+    return null;
+  };
+
  const jsonLd = {
  "@context": "https://schema.org",
  "@type": "Service",
@@ -452,6 +459,16 @@ const PublicSitDetail = () => {
 
   return (
     <div className="bg-background">
+      <PageMeta
+        title={truncatedTitle}
+        description={truncatedDesc}
+        path={`/annonces/${sit.id}`}
+        image={ogImageUrl}
+        type="article"
+        canonical={canonicalUrl}
+        noindex={!isIndexable}
+      />
+      <MetaReady />
       <Helmet>
         <title>{truncatedTitle}</title>
         <meta name="description" content={truncatedSeoDesc} />
