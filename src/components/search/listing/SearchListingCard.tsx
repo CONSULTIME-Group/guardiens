@@ -28,7 +28,8 @@ const SearchListingCard = ({
   testDemoMode,
   formatDate,
 }: SearchListingCardProps) => {
-  const photos: string[] = item.property?.photos || [];
+  const missionPhotos = Array.isArray((item as any).photos) ? (item as any).photos.filter(Boolean) : [];
+  const photos: string[] = item.property?.photos || missionPhotos;
   const coverPhoto = (item as any).cover_photo_url || item.property?.cover_photo_url || photos[0] || (item as any).ownerGalleryFirstPhoto || null;
   const petGroups: Record<string, string[]> = {};
   (item.pets || []).forEach((p: any) => {
@@ -61,6 +62,92 @@ const SearchListingCard = ({
   const dateLabel = !isMission && item.start_date
     ? `${formatDate(item.start_date)} → ${formatDate(item.end_date)}`
     : null;
+
+  const missionCategoryLabel: Record<string, string> = {
+    garden: "Jardin",
+    animals: "Animaux",
+    skills: "Compétences",
+    house: "Maison",
+    errand: "Courses",
+    tech: "Technique",
+    company: "Compagnie",
+    home: "Maison",
+    other: "Autre",
+  };
+
+  if (isMission) {
+    const missionCard = (
+      <article
+        className={`group relative flex gap-4 rounded-xl border border-border bg-card p-3 transition-colors hover:border-primary/35 ${isClickable ? "cursor-pointer" : ""} ${testDemoMode ? (isDemo ? "card-test-demo" : "card-test-real") : ""}`}
+        data-testid={isDemo ? "search-card-demo" : "search-card-real"}
+        data-demo={isDemo ? "true" : "false"}
+        data-list-index={typeof listIndex === "number" ? listIndex + 1 : undefined}
+      >
+        {testDemoMode && typeof listIndex === "number" && (
+          <span
+            className={`absolute z-20 top-2 left-2 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full shadow ${isDemo ? "bg-amber-500 text-amber-50" : "bg-sky-500 text-sky-50"}`}
+            data-testid="search-card-position"
+          >
+            #{listIndex + 1} {isDemo ? "DEMO" : "REAL"}
+          </span>
+        )}
+        <div className="relative h-24 w-24 sm:h-28 sm:w-28 shrink-0 overflow-hidden rounded-lg bg-muted">
+          {coverPhoto ? (
+            <img
+              src={coverPhoto}
+              alt=""
+              className={`h-full w-full object-cover transition-transform duration-500 ${isClickable ? "group-hover:scale-105" : ""}`}
+              loading="lazy"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center px-3 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              {missionCategoryLabel[item.category] || "Mission"}
+            </div>
+          )}
+          {isDemo && (
+            <span className="absolute inset-x-0 top-0 bg-warning text-warning-foreground py-1 text-center text-[9px] font-semibold uppercase tracking-[0.16em]">
+              Exemple
+            </span>
+          )}
+        </div>
+
+        <div className="min-w-0 flex-1 py-1">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+                {missionCategoryLabel[item.category] || "Petite mission"}
+              </p>
+              <h3 className="font-heading text-lg font-semibold leading-snug text-foreground line-clamp-2">
+                {item.title || "Sans titre"}
+              </h3>
+            </div>
+            {item.owner?.is_founder && <div className="shrink-0"><FounderBadge size="sm" /></div>}
+          </div>
+
+          {item.description && (
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-2">{item.description}</p>
+          )}
+
+          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+            <span>{item.owner?.city || item.city || "France"}</span>
+            {item.distance != null && (
+              <span>{item.distance < 1 ? "< 1" : Math.round(item.distance).toLocaleString("fr-FR").replace(/\s/g, "\u202F")} km</span>
+            )}
+            {item.duration_estimate && <span>{item.duration_estimate}</span>}
+            {item.exchange_offer && <span className="line-clamp-1">Échange : {item.exchange_offer}</span>}
+          </div>
+        </div>
+
+        {!isDemo && (
+          <span className="absolute bottom-3 right-3 hidden text-sm font-semibold text-primary sm:inline-flex">
+            Voir →
+          </span>
+        )}
+      </article>
+    );
+
+    return isClickable ? <Link to={linkTo}>{missionCard}</Link> : <>{missionCard}</>;
+  }
 
   const cardContent = (
     <article
