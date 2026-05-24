@@ -431,17 +431,23 @@ const AdminSitsManagement = () => {
                   <div className="space-y-2">
                     {visibleApps.map((app: any) => (
                       <div key={app.id} className="flex items-center justify-between rounded-lg border p-3">
-                        <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => app.sitter_id && navigate(`/gardiens/${app.sitter_id}`)}
+                          disabled={!app.sitter_id}
+                          className="flex items-center gap-3 text-left hover:text-primary transition-colors disabled:cursor-not-allowed disabled:hover:text-foreground"
+                          title={app.sitter_id ? "Voir le profil du gardien" : undefined}
+                        >
                           <Avatar className="h-7 w-7">
                             {app.sitter?.avatar_url ? (
                               <AvatarImage src={app.sitter.avatar_url} />
                             ) : null}
                             <AvatarFallback className="text-xs"><User className="h-3 w-3" /></AvatarFallback>
                           </Avatar>
-                          <span className="text-sm font-medium">
+                          <span className="text-sm font-medium underline-offset-2 hover:underline">
                             {app.sitter?.first_name || "—"}
                           </span>
-                        </div>
+                        </button>
                         {getStatusBadge(app.status)}
                       </div>
                     ))}
