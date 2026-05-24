@@ -26,6 +26,7 @@ const AdminSitsManagement = () => {
   const [search, setSearch] = useState("");
   const [sitters, setSitters] = useState<Record<string, { name: string; avatar: string | null }>>({});
   const [reviews, setReviews] = useState<Record<string, { owner: boolean; sitter: boolean }>>({});
+  const [statsBySit, setStatsBySit] = useState<Record<string, { views: number; messages: number }>>({});
   const [cancelModal, setCancelModal] = useState<{ open: boolean; id: string; type: string; reason: string }>({ open: false, id: "", type: "", reason: "" });
   const [noteModal, setNoteModal] = useState<{ open: boolean; id: string; note: string }>({ open: false, id: "", note: "" });
 
@@ -99,6 +100,20 @@ const AdminSitsManagement = () => {
         }
       });
       setReviews(map);
+    });
+  }, [sits]);
+
+  // Batch fetch view/message counts for the table
+  useEffect(() => {
+    if (!sits.length) { setStatsBySit({}); return; }
+    const ids = sits.map(s => s.id);
+    supabase.rpc("admin_get_sits_stats" as any, { p_sit_ids: ids }).then(({ data, error }) => {
+      if (error) { console.error("admin_get_sits_stats:", error); return; }
+      const map: Record<string, { views: number; messages: number }> = {};
+      (data as any[] || []).forEach(r => {
+        map[r.sit_id] = { views: Number(r.view_count) || 0, messages: Number(r.message_count) || 0 };
+      });
+      setStatsBySit(map);
     });
   }, [sits]);
 
@@ -259,6 +274,8 @@ const AdminSitsManagement = () => {
               <TableHead>Ville</TableHead>
               <TableHead>Dates</TableHead>
               <TableHead>Dernière activité</TableHead>
+              <TableHead className="text-right">Vues</TableHead>
+              <TableHead className="text-right">Msg</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead>Avis</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -266,9 +283,9 @@ const AdminSitsManagement = () => {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Aucune garde</TableCell></TableRow>
+              <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Aucune garde</TableCell></TableRow>
             ) : filtered.map((sit) => {
               const timing = getTimingStatus(sit);
               const sitter = sitters[sit.id];
@@ -303,6 +320,8 @@ const AdminSitsManagement = () => {
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                     {sit.updated_at ? formatDistanceToNow(new Date(sit.updated_at), { addSuffix: true, locale: fr }) : "—"}
                   </TableCell>
+                  <TableCell className="text-right text-sm font-medium tabular-nums">{statsBySit[sit.id]?.views ?? "—"}</TableCell>
+                  <TableCell className="text-right text-sm font-medium tabular-nums">{statsBySit[sit.id]?.messages ?? "—"}</TableCell>
                   <TableCell><Badge variant={timing.variant}>{timing.label}</Badge></TableCell>
                   <TableCell className="text-xs">
                     <div>P: {rev.owner ? "✅" : "❌"}</div>
