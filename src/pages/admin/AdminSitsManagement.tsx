@@ -274,6 +274,8 @@ const AdminSitsManagement = () => {
               <TableHead>Ville</TableHead>
               <TableHead>Dates</TableHead>
               <TableHead>Dernière activité</TableHead>
+              <TableHead className="text-right">Vues</TableHead>
+              <TableHead className="text-right">Msg</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead>Avis</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -281,9 +283,9 @@ const AdminSitsManagement = () => {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Aucune garde</TableCell></TableRow>
+              <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Aucune garde</TableCell></TableRow>
             ) : filtered.map((sit) => {
               const timing = getTimingStatus(sit);
               const sitter = sitters[sit.id];
