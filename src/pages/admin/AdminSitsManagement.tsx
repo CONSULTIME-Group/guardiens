@@ -103,6 +103,20 @@ const AdminSitsManagement = () => {
     });
   }, [sits]);
 
+  // Batch fetch view/message counts for the table
+  useEffect(() => {
+    if (!sits.length) { setStatsBySit({}); return; }
+    const ids = sits.map(s => s.id);
+    supabase.rpc("admin_get_sits_stats" as any, { p_sit_ids: ids }).then(({ data, error }) => {
+      if (error) { console.error("admin_get_sits_stats:", error); return; }
+      const map: Record<string, { views: number; messages: number }> = {};
+      (data as any[] || []).forEach(r => {
+        map[r.sit_id] = { views: Number(r.view_count) || 0, messages: Number(r.message_count) || 0 };
+      });
+      setStatsBySit(map);
+    });
+  }, [sits]);
+
   const getTimingStatus = (sit: any) => {
     if (sit.status === "cancelled") return { label: "Annulée", variant: "destructive" as const };
     if (sit.status === "completed") return { label: "Terminée", variant: "secondary" as const };
