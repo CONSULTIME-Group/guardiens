@@ -708,11 +708,22 @@ const SearchSitter = () => {
  const searchMissions = async (searchCoords: { lat: number; lng: number } | null) => {
  let query = supabase
 .from("small_missions")
-.select("*, owner:public_profiles!small_missions_user_id_fkey(first_name, avatar_url, city, identity_verified, is_founder)")
+.select("*")
 .eq("status", "open")
 .order("created_at", { ascending: false });
  const { data } = await query;
  let items = data || [];
+ // Hydrate owner via public_profiles (anon n'a pas accès à la table profiles
+ // utilisée par le FK embed PostgREST).
+ const ownerIds = Array.from(new Set(items.map((m: any) => m.user_id).filter(Boolean)));
+ if (ownerIds.length > 0) {
+   const { data: owners } = await supabase
+     .from("public_profiles")
+     .select("id, first_name, avatar_url, city, identity_verified, is_founder")
+     .in("id", ownerIds);
+   const ownerMap = new Map<string, any>((owners || []).map((o: any) => [o.id, o]));
+   items = items.map((m: any) => ({ ...m, owner: ownerMap.get(m.user_id) || null }));
+ }
  if (verifiedOnly) items = items.filter((s: any) => s.owner?.identity_verified);
  if (searchCoords) {
  const uniqueCities = [...new Set(items.filter((m: any) => !m.latitude && m.owner?.city).map((m: any) => m.owner.city))] as string[];
