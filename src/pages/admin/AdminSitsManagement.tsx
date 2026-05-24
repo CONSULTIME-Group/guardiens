@@ -138,10 +138,14 @@ const AdminSitsManagement = () => {
     setSheetOpen(true);
     setShowAllApps(false);
     setSheetAppsLoading(true);
+    setSheetStats(null);
 
     // RPC sécurisée : statut + date + gardien (id/prénom/avatar) sans message ni champs internes
-    const res = await supabase.rpc("admin_get_sit_applications", { p_sit_id: sit.id });
-    const data = (res.data || []).map((r: any) => ({
+    const [appsRes, statsRes] = await Promise.all([
+      supabase.rpc("admin_get_sit_applications", { p_sit_id: sit.id }),
+      supabase.rpc("admin_get_sit_stats", { p_sit_id: sit.id }),
+    ]);
+    const data = (appsRes.data || []).map((r: any) => ({
       id: r.id,
       status: r.status,
       created_at: r.created_at,
@@ -151,6 +155,8 @@ const AdminSitsManagement = () => {
 
     setSheetApplications(data);
     setSheetAppsLoading(false);
+    const s = (statsRes.data as any)?.[0];
+    if (s) setSheetStats({ view_count: Number(s.view_count) || 0, message_count: Number(s.message_count) || 0, conversation_count: Number(s.conversation_count) || 0 });
   };
 
   // Sheet: admin status transitions
