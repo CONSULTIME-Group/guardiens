@@ -26,6 +26,7 @@ const AdminSitsManagement = () => {
   const [search, setSearch] = useState("");
   const [sitters, setSitters] = useState<Record<string, { name: string; avatar: string | null }>>({});
   const [reviews, setReviews] = useState<Record<string, { owner: boolean; sitter: boolean }>>({});
+  const [statsBySit, setStatsBySit] = useState<Record<string, { views: number; messages: number }>>({});
   const [cancelModal, setCancelModal] = useState<{ open: boolean; id: string; type: string; reason: string }>({ open: false, id: "", type: "", reason: "" });
   const [noteModal, setNoteModal] = useState<{ open: boolean; id: string; note: string }>({ open: false, id: "", note: "" });
 
