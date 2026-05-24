@@ -34,6 +34,7 @@ const AdminSitsManagement = () => {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetApplications, setSheetApplications] = useState<any[]>([]);
   const [sheetAppsLoading, setSheetAppsLoading] = useState(false);
+  const [sheetStats, setSheetStats] = useState<{ view_count: number; message_count: number; conversation_count: number } | null>(null);
   const [showAllApps, setShowAllApps] = useState(false);
 
   const fetchSits = useCallback(async () => {
@@ -137,10 +138,14 @@ const AdminSitsManagement = () => {
     setSheetOpen(true);
     setShowAllApps(false);
     setSheetAppsLoading(true);
+    setSheetStats(null);
 
     // RPC sécurisée : statut + date + gardien (id/prénom/avatar) sans message ni champs internes
-    const res = await supabase.rpc("admin_get_sit_applications", { p_sit_id: sit.id });
-    const data = (res.data || []).map((r: any) => ({
+    const [appsRes, statsRes] = await Promise.all([
+      supabase.rpc("admin_get_sit_applications", { p_sit_id: sit.id }),
+      supabase.rpc("admin_get_sit_stats", { p_sit_id: sit.id }),
+    ]);
+    const data = (appsRes.data || []).map((r: any) => ({
       id: r.id,
       status: r.status,
       created_at: r.created_at,
@@ -150,6 +155,8 @@ const AdminSitsManagement = () => {
 
     setSheetApplications(data);
     setSheetAppsLoading(false);
+    const s = (statsRes.data as any)?.[0];
+    if (s) setSheetStats({ view_count: Number(s.view_count) || 0, message_count: Number(s.message_count) || 0, conversation_count: Number(s.conversation_count) || 0 });
   };
 
   // Sheet: admin status transitions
@@ -411,6 +418,27 @@ const AdminSitsManagement = () => {
                         {getTimingStatus(selectedSit).label}
                       </Badge>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Section : Statistiques */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Statistiques</h3>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="rounded-lg border p-3 text-center">
+                    <p className="text-2xl font-semibold">{sheetStats?.view_count ?? "—"}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Vues</p>
+                  </div>
+                  <div className="rounded-lg border p-3 text-center">
+                    <p className="text-2xl font-semibold">{sheetStats?.message_count ?? "—"}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Messages</p>
+                  </div>
+                  <div className="rounded-lg border p-3 text-center">
+                    <p className="text-2xl font-semibold">{sheetStats?.conversation_count ?? "—"}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Conversations</p>
                   </div>
                 </div>
               </div>
