@@ -424,6 +424,27 @@ const AdminSitsManagement = () => {
 
               <Separator />
 
+              {/* Section : Statistiques */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Statistiques</h3>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="rounded-lg border p-3 text-center">
+                    <p className="text-2xl font-semibold">{sheetStats?.view_count ?? "—"}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Vues</p>
+                  </div>
+                  <div className="rounded-lg border p-3 text-center">
+                    <p className="text-2xl font-semibold">{sheetStats?.message_count ?? "—"}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Messages</p>
+                  </div>
+                  <div className="rounded-lg border p-3 text-center">
+                    <p className="text-2xl font-semibold">{sheetStats?.conversation_count ?? "—"}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Conversations</p>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
               {/* Section 2: Candidatures */}
               <div className="space-y-3">
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
