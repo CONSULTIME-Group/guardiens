@@ -4748,6 +4748,14 @@ export type Database = {
           status: string
         }[]
       }
+      admin_get_sit_stats: {
+        Args: { p_sit_id: string }
+        Returns: {
+          conversation_count: number
+          message_count: number
+          view_count: number
+        }[]
+      }
       admin_get_user_email: { Args: { p_user_id: string }; Returns: string }
       admin_log_message_failure: {
         Args: {
