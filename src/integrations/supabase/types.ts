@@ -4756,6 +4756,15 @@ export type Database = {
           view_count: number
         }[]
       }
+      admin_get_sits_stats: {
+        Args: { p_sit_ids: string[] }
+        Returns: {
+          conversation_count: number
+          message_count: number
+          sit_id: string
+          view_count: number
+        }[]
+      }
       admin_get_user_email: { Args: { p_user_id: string }; Returns: string }
       admin_log_message_failure: {
         Args: {
