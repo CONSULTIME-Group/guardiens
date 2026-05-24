@@ -34,6 +34,7 @@ const AdminSitsManagement = () => {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetApplications, setSheetApplications] = useState<any[]>([]);
   const [sheetAppsLoading, setSheetAppsLoading] = useState(false);
+  const [sheetStats, setSheetStats] = useState<{ view_count: number; message_count: number; conversation_count: number } | null>(null);
   const [showAllApps, setShowAllApps] = useState(false);
 
   const fetchSits = useCallback(async () => {
