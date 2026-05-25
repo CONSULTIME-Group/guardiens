@@ -217,8 +217,16 @@ const AdminSitsManagement = () => {
       <div>
         <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Gardes</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Suivi opérationnel des gardes confirmées : pairing proprio/gardien, statut temporel, avis.
-          Les annonces en ligne, brouillons et trafic public sont dans l'onglet <span className="font-medium text-foreground">Annonces</span>.
+          Cycle opérationnel post-acceptation (confirmed, completed, cancelled) : pairing proprio/gardien, statut temporel, avis.
+        </p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Pour les annonces publiées (en recherche de gardien), les brouillons et les statistiques de trafic, consultez l'onglet{' '}
+          <button
+            onClick={() => navigate('/admin/listings')}
+            className="font-medium text-foreground underline hover:text-primary transition-colors"
+          >
+            Annonces
+          </button>.
         </p>
       </div>
 
