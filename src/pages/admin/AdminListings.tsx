@@ -308,9 +308,8 @@ const AdminListings = () => {
                     {" → "}
                     {listing.end_date ? format(new Date(listing.end_date), "d MMM yy", { locale: fr }) : "—"}
                   </TableCell>
-                  <TableCell className="text-right text-sm font-medium tabular-nums">{st?.publicViews ?? "—"}</TableCell>
-                  <TableCell className="text-right text-sm font-medium tabular-nums">{st?.memberViews ?? "—"}</TableCell>
-                  <TableCell className="text-right text-sm text-muted-foreground tabular-nums">{st?.uniqueMemberViews ?? "—"}</TableCell>
+                  <TableCell className="text-right text-sm font-medium tabular-nums">{st?.views ?? "—"}</TableCell>
+                  <TableCell className="text-right text-sm text-muted-foreground tabular-nums">{st?.uniqueViews ?? "—"}</TableCell>
                   <TableCell className="text-right text-sm tabular-nums">{st?.messages ?? "—"}</TableCell>
                   <TableCell className="text-right text-sm tabular-nums">{st?.applications ?? "—"}</TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
