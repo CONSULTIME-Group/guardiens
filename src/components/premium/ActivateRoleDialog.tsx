@@ -92,6 +92,13 @@ const ActivateRoleDialog = ({ open, onClose, targetRole }: ActivateRoleDialogPro
     );
   }
 
+  const freeNow = isBeforeLaunch() || isInGracePeriod();
+  const lastFreeDay = new Date(GRACE_END.getTime() - 24 * 60 * 60 * 1000).toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="sm:max-w-md">
@@ -101,12 +108,20 @@ const ActivateRoleDialog = ({ open, onClose, targetRole }: ActivateRoleDialogPro
             Envie de garder des maisons aussi ?
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground text-center">
-            L'abonnement gardien est à 6,99&nbsp;€/mois. Vous avez 30 jours sans frais pour tester — sans engagement. Vous pouvez vous désabonner à tout moment depuis vos paramètres.
+            {freeNow ? (
+              <>
+                L'espace gardien est <strong>à 0 € pour tous jusqu'au {lastFreeDay}</strong>. Activez-le sans frais, sans engagement — l'abonnement (6,99&nbsp;€/mois) ne s'appliquera qu'ensuite, et vous pourrez vous désabonner à tout moment.
+              </>
+            ) : (
+              <>
+                L'abonnement gardien est à 6,99&nbsp;€/mois — sans engagement, résiliable à tout moment depuis vos paramètres.
+              </>
+            )}
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2 pt-2">
           <Button onClick={handleActivateGardien} disabled={loading}>
-            {loading ? "Redirection..." : "essayer sans frais 30 jours →"}
+            {loading ? "Redirection..." : freeNow ? "Activer mon espace gardien →" : "Activer mon abonnement →"}
           </Button>
           <Button variant="ghost" onClick={onClose} disabled={loading}>
             Pas maintenant
