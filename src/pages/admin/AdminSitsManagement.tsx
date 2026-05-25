@@ -21,7 +21,7 @@ const AdminSitsManagement = () => {
   const navigate = useNavigate();
   const [sits, setSits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterStatus, setFilterStatus] = useState("no_draft");
+  const [filterStatus, setFilterStatus] = useState("operational");
   // filterType supprimé : "garde longue durée" n'existe plus
   const [search, setSearch] = useState("");
   const [sitters, setSitters] = useState<Record<string, { name: string; avatar: string | null }>>({});
