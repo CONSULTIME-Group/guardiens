@@ -43,6 +43,8 @@ const AdminSitsManagement = () => {
     const results: any[] = [];
 
     const getStatuses = () => {
+      // "operational" = vraies gardes post-acceptation. Le reste appartient à l'onglet Annonces.
+      if (filterStatus === "operational") return ["confirmed", "completed", "cancelled"];
       if (filterStatus === "no_draft") return ["confirmed", "completed", "cancelled", "published"];
       if (filterStatus === "all") return ["draft", "confirmed", "completed", "cancelled", "published"];
       return [filterStatus];
