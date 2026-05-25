@@ -276,9 +276,8 @@ const AdminListings = () => {
               <TableHead>Proprio</TableHead>
               <TableHead>Ville</TableHead>
               <TableHead>Dates</TableHead>
-              <TableHead className="text-right" title="Visiteurs non connectés (anonymes)">Vues public</TableHead>
-              <TableHead className="text-right" title="Vues par des comptes connectés">Vues membres</TableHead>
-              <TableHead className="text-right" title="Membres distincts ayant vu l'annonce">Membres uniq.</TableHead>
+              <TableHead className="text-right" title="Vues totales (public + membres)">Vues</TableHead>
+              <TableHead className="text-right" title="Visiteurs uniques (par session/membre)">Uniques</TableHead>
               <TableHead className="text-right">Msg</TableHead>
               <TableHead className="text-right">Cand.</TableHead>
               <TableHead>Dernière vue</TableHead>
