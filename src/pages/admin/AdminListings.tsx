@@ -34,6 +34,9 @@ const statusLabels: Record<string, { label: string; variant: "default" | "second
 type Stats = {
   views: number;
   uniqueViews: number;
+  publicViews: number;
+  memberViews: number;
+  uniqueMemberViews: number;
   messages: number;
   conversations: number;
   applications: number;
@@ -94,6 +97,9 @@ const AdminListings = () => {
         map[r.sit_id] = {
           views: Number(r.view_count) || 0,
           uniqueViews: Number(r.unique_view_count) || 0,
+          publicViews: Number(r.public_view_count) || 0,
+          memberViews: Number(r.member_view_count) || 0,
+          uniqueMemberViews: Number(r.unique_member_view_count) || 0,
           messages: Number(r.message_count) || 0,
           conversations: Number(r.conversation_count) || 0,
           applications: Number(r.application_count) || 0,
@@ -258,8 +264,9 @@ const AdminListings = () => {
               <TableHead>Proprio</TableHead>
               <TableHead>Ville</TableHead>
               <TableHead>Dates</TableHead>
-              <TableHead className="text-right">Vues</TableHead>
-              <TableHead className="text-right">Uniques</TableHead>
+              <TableHead className="text-right" title="Visiteurs non connectés (anonymes)">Vues public</TableHead>
+              <TableHead className="text-right" title="Vues par des comptes connectés">Vues membres</TableHead>
+              <TableHead className="text-right" title="Membres distincts ayant vu l'annonce">Membres uniq.</TableHead>
               <TableHead className="text-right">Msg</TableHead>
               <TableHead className="text-right">Cand.</TableHead>
               <TableHead>Dernière vue</TableHead>
@@ -269,9 +276,9 @@ const AdminListings = () => {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={12} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Aucune annonce</TableCell></TableRow>
+              <TableRow><TableCell colSpan={12} className="text-center py-8 text-muted-foreground">Aucune annonce</TableCell></TableRow>
             ) : filtered.map((listing) => {
               const s = statusLabels[listing.status] || statusLabels.draft;
               const st = stats[listing.id];
@@ -290,8 +297,9 @@ const AdminListings = () => {
                     {" → "}
                     {listing.end_date ? format(new Date(listing.end_date), "d MMM yy", { locale: fr }) : "—"}
                   </TableCell>
-                  <TableCell className="text-right text-sm font-medium tabular-nums">{st?.views ?? "—"}</TableCell>
-                  <TableCell className="text-right text-sm text-muted-foreground tabular-nums">{st?.uniqueViews ?? "—"}</TableCell>
+                  <TableCell className="text-right text-sm font-medium tabular-nums">{st?.publicViews ?? "—"}</TableCell>
+                  <TableCell className="text-right text-sm font-medium tabular-nums">{st?.memberViews ?? "—"}</TableCell>
+                  <TableCell className="text-right text-sm text-muted-foreground tabular-nums">{st?.uniqueMemberViews ?? "—"}</TableCell>
                   <TableCell className="text-right text-sm tabular-nums">{st?.messages ?? "—"}</TableCell>
                   <TableCell className="text-right text-sm tabular-nums">{st?.applications ?? "—"}</TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
@@ -360,12 +368,16 @@ const AdminListings = () => {
           {trafficListing && stats[trafficListing.id] && (
             <div className="grid grid-cols-3 gap-2 my-4">
               <div className="rounded-md border p-3 text-center">
-                <div className="text-xl font-semibold tabular-nums">{stats[trafficListing.id].views}</div>
-                <div className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Vues</div>
+                <div className="text-xl font-semibold tabular-nums">{stats[trafficListing.id].publicViews}</div>
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Vues public</div>
               </div>
               <div className="rounded-md border p-3 text-center">
-                <div className="text-xl font-semibold tabular-nums">{stats[trafficListing.id].uniqueViews}</div>
-                <div className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Uniques</div>
+                <div className="text-xl font-semibold tabular-nums">{stats[trafficListing.id].memberViews}</div>
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Vues membres</div>
+              </div>
+              <div className="rounded-md border p-3 text-center">
+                <div className="text-xl font-semibold tabular-nums">{stats[trafficListing.id].uniqueMemberViews}</div>
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Membres uniq.</div>
               </div>
               <div className="rounded-md border p-3 text-center">
                 <div className="text-xl font-semibold tabular-nums">{stats[trafficListing.id].messages}</div>
