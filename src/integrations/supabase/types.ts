@@ -4714,8 +4714,11 @@ export type Database = {
           application_count: number
           conversation_count: number
           last_view_at: string
+          member_view_count: number
           message_count: number
+          public_view_count: number
           sit_id: string
+          unique_member_view_count: number
           unique_view_count: number
           view_count: number
         }[]
