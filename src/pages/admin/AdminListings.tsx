@@ -208,8 +208,14 @@ const AdminListings = () => {
 
   // Totaux d'en-tête
   const totalViews = Object.values(stats).reduce((a, s) => a + s.views, 0);
+  const totalUniques = Object.values(stats).reduce((a, s) => a + s.uniqueViews, 0);
   const totalMsg = Object.values(stats).reduce((a, s) => a + s.messages, 0);
   const totalApps = Object.values(stats).reduce((a, s) => a + s.applications, 0);
+  const lastViewGlobal = Object.values(stats)
+    .map((s) => s.lastViewAt)
+    .filter(Boolean)
+    .sort()
+    .pop() as string | undefined;
 
   return (
     <div className="space-y-6">
