@@ -4550,52 +4550,34 @@ export type Database = {
       }
       public_profiles: {
         Row: {
-          available_for_help: boolean | null
           avatar_url: string | null
           bio: string | null
           city: string | null
-          completed_sits_count: number | null
-          custom_skills: Json | null
+          created_at: string | null
           first_name: string | null
           id: string | null
           identity_verified: boolean | null
           is_founder: boolean | null
-          latitude_approx: number | null
-          longitude_approx: number | null
-          postal_code: string | null
-          skill_categories: string[] | null
         }
         Insert: {
-          available_for_help?: boolean | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
-          completed_sits_count?: number | null
-          custom_skills?: Json | null
+          created_at?: string | null
           first_name?: string | null
           id?: string | null
           identity_verified?: boolean | null
           is_founder?: boolean | null
-          latitude_approx?: never
-          longitude_approx?: never
-          postal_code?: string | null
-          skill_categories?: string[] | null
         }
         Update: {
-          available_for_help?: boolean | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
-          completed_sits_count?: number | null
-          custom_skills?: Json | null
+          created_at?: string | null
           first_name?: string | null
           id?: string | null
           identity_verified?: boolean | null
           is_founder?: boolean | null
-          latitude_approx?: never
-          longitude_approx?: never
-          postal_code?: string | null
-          skill_categories?: string[] | null
         }
         Relationships: []
       }
