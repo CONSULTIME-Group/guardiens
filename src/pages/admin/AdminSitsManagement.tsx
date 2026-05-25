@@ -21,7 +21,7 @@ const AdminSitsManagement = () => {
   const navigate = useNavigate();
   const [sits, setSits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterStatus, setFilterStatus] = useState("no_draft");
+  const [filterStatus, setFilterStatus] = useState("operational");
   // filterType supprimé : "garde longue durée" n'existe plus
   const [search, setSearch] = useState("");
   const [sitters, setSitters] = useState<Record<string, { name: string; avatar: string | null }>>({});
@@ -43,6 +43,8 @@ const AdminSitsManagement = () => {
     const results: any[] = [];
 
     const getStatuses = () => {
+      // "operational" = vraies gardes post-acceptation. Le reste appartient à l'onglet Annonces.
+      if (filterStatus === "operational") return ["confirmed", "completed", "cancelled"];
       if (filterStatus === "no_draft") return ["confirmed", "completed", "cancelled", "published"];
       if (filterStatus === "all") return ["draft", "confirmed", "completed", "cancelled", "published"];
       return [filterStatus];
@@ -212,7 +214,13 @@ const AdminSitsManagement = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Gardes</h1>
+      <div>
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Gardes</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Suivi opérationnel des gardes confirmées : pairing proprio/gardien, statut temporel, avis.
+          Les annonces en ligne, brouillons et trafic public sont dans l'onglet <span className="font-medium text-foreground">Annonces</span>.
+        </p>
+      </div>
 
       {/* Alerts */}
       {(overdueConfirmed.length > 0 || missingReviews14d.length > 0 || cancelledThisWeek.length > 0) && (
@@ -251,15 +259,16 @@ const AdminSitsManagement = () => {
         </div>
         {/* filterType retiré (long-stay supprimé) */}
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-[220px]"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="no_draft">Sans brouillons</SelectItem>
-            <SelectItem value="all">Tous statuts</SelectItem>
-            <SelectItem value="confirmed">Confirmées</SelectItem>
+            <SelectItem value="operational">Opérationnelles (par défaut)</SelectItem>
+            <SelectItem value="confirmed">Confirmées uniquement</SelectItem>
             <SelectItem value="completed">Terminées</SelectItem>
             <SelectItem value="cancelled">Annulées</SelectItem>
-            <SelectItem value="published">Publiées</SelectItem>
+            <SelectItem value="no_draft">+ Annonces publiées</SelectItem>
+            <SelectItem value="published">Publiées (pré-confirmation)</SelectItem>
             <SelectItem value="draft">Brouillons</SelectItem>
+            <SelectItem value="all">Tous statuts</SelectItem>
           </SelectContent>
         </Select>
       </div>

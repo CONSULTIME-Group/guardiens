@@ -4692,12 +4692,32 @@ export type Database = {
           status: string
         }[]
       }
+      admin_get_listing_traffic_sources: {
+        Args: { p_limit?: number; p_sit_id: string }
+        Returns: {
+          hits: number
+          last_hit_at: string
+          referrer_host: string
+        }[]
+      }
       admin_get_listings_application_counts: {
         Args: { p_sit_ids: string[] }
         Returns: {
           app_count: number
           pending_app_count: number
           sit_id: string
+        }[]
+      }
+      admin_get_listings_stats: {
+        Args: { p_sit_ids: string[] }
+        Returns: {
+          application_count: number
+          conversation_count: number
+          last_view_at: string
+          message_count: number
+          sit_id: string
+          unique_view_count: number
+          view_count: number
         }[]
       }
       admin_get_recent_applications_activity: {
