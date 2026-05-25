@@ -34,6 +34,9 @@ const statusLabels: Record<string, { label: string; variant: "default" | "second
 type Stats = {
   views: number;
   uniqueViews: number;
+  publicViews: number;
+  memberViews: number;
+  uniqueMemberViews: number;
   messages: number;
   conversations: number;
   applications: number;
