@@ -31,7 +31,7 @@ const RealMembersStrip = () => {
     (async () => {
       try {
         const { count } = await supabase
-          .from("profiles")
+          .from("public_profiles")
           .select("id", { count: "exact", head: true })
           .not("first_name", "is", null)
           .not("city", "is", null);
@@ -40,7 +40,7 @@ const RealMembersStrip = () => {
         }
 
         const { data } = await supabase
-          .from("profiles")
+          .from("public_profiles")
           .select("id, first_name, city, avatar_url")
           .not("first_name", "is", null)
           .not("city", "is", null)

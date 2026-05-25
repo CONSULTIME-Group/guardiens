@@ -4555,6 +4555,7 @@ export type Database = {
           bio: string | null
           city: string | null
           completed_sits_count: number | null
+          created_at: string | null
           custom_skills: Json | null
           first_name: string | null
           id: string | null
@@ -4563,6 +4564,7 @@ export type Database = {
           latitude_approx: number | null
           longitude_approx: number | null
           postal_code: string | null
+          profile_completion: number | null
           skill_categories: string[] | null
         }
         Insert: {
@@ -4571,6 +4573,7 @@ export type Database = {
           bio?: string | null
           city?: string | null
           completed_sits_count?: number | null
+          created_at?: string | null
           custom_skills?: Json | null
           first_name?: string | null
           id?: string | null
@@ -4579,6 +4582,7 @@ export type Database = {
           latitude_approx?: never
           longitude_approx?: never
           postal_code?: string | null
+          profile_completion?: number | null
           skill_categories?: string[] | null
         }
         Update: {
@@ -4587,6 +4591,7 @@ export type Database = {
           bio?: string | null
           city?: string | null
           completed_sits_count?: number | null
+          created_at?: string | null
           custom_skills?: Json | null
           first_name?: string | null
           id?: string | null
@@ -4595,6 +4600,7 @@ export type Database = {
           latitude_approx?: never
           longitude_approx?: never
           postal_code?: string | null
+          profile_completion?: number | null
           skill_categories?: string[] | null
         }
         Relationships: []
