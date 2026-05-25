@@ -97,6 +97,9 @@ const AdminListings = () => {
         map[r.sit_id] = {
           views: Number(r.view_count) || 0,
           uniqueViews: Number(r.unique_view_count) || 0,
+          publicViews: Number(r.public_view_count) || 0,
+          memberViews: Number(r.member_view_count) || 0,
+          uniqueMemberViews: Number(r.unique_member_view_count) || 0,
           messages: Number(r.message_count) || 0,
           conversations: Number(r.conversation_count) || 0,
           applications: Number(r.application_count) || 0,
