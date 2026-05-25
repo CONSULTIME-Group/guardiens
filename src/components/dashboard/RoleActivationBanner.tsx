@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import ActivateRoleDialog from "@/components/premium/ActivateRoleDialog";
+import { isBeforeLaunch, isInGracePeriod } from "@/lib/constants";
 
 interface RoleActivationBannerProps {
   userRole: string;
@@ -15,10 +16,13 @@ const RoleActivationBanner = ({ userRole }: RoleActivationBannerProps) => {
   if (dismissed || userRole === "both") return null;
 
   const targetRole = userRole === "sitter" ? "proprio" : "gardien";
+  const freeNow = isBeforeLaunch() || isInGracePeriod();
   const text =
     userRole === "sitter"
       ? "Vous avez aussi des animaux à faire garder ? Activez votre espace propriétaire — c'est à 0 € →"
-      : "Envie de garder des maisons ? Essayez sans frais pendant 30 jours →";
+      : freeNow
+        ? "Envie de garder des maisons ? Activez votre espace gardien — à 0 € pour tous en ce moment →"
+        : "Envie de garder des maisons ? Activez votre espace gardien (6,99 €/mois, sans engagement) →";
 
   return (
     <>
