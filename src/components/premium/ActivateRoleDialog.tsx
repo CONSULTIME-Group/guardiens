@@ -12,6 +12,7 @@ import { PawPrint, Home } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { isBeforeLaunch, isInGracePeriod, GRACE_END } from "@/lib/constants";
 
 interface ActivateRoleDialogProps {
   open: boolean;
