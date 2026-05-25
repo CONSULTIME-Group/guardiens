@@ -259,15 +259,16 @@ const AdminSitsManagement = () => {
         </div>
         {/* filterType retiré (long-stay supprimé) */}
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-[220px]"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="no_draft">Sans brouillons</SelectItem>
-            <SelectItem value="all">Tous statuts</SelectItem>
-            <SelectItem value="confirmed">Confirmées</SelectItem>
+            <SelectItem value="operational">Opérationnelles (par défaut)</SelectItem>
+            <SelectItem value="confirmed">Confirmées uniquement</SelectItem>
             <SelectItem value="completed">Terminées</SelectItem>
             <SelectItem value="cancelled">Annulées</SelectItem>
-            <SelectItem value="published">Publiées</SelectItem>
+            <SelectItem value="no_draft">+ Annonces publiées</SelectItem>
+            <SelectItem value="published">Publiées (pré-confirmation)</SelectItem>
             <SelectItem value="draft">Brouillons</SelectItem>
+            <SelectItem value="all">Tous statuts</SelectItem>
           </SelectContent>
         </Select>
       </div>
