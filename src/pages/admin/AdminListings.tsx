@@ -257,9 +257,15 @@ const AdminListings = () => {
 
       <div className="flex flex-wrap gap-2 text-xs">
         <Badge variant="secondary">{filtered.length} annonce{filtered.length > 1 ? "s" : ""}</Badge>
-        <Badge variant="outline">{totalViews} vues cumulées</Badge>
-        <Badge variant="outline">{totalMsg} messages échangés</Badge>
-        <Badge variant="outline">{totalApps} candidatures actives</Badge>
+        <Badge variant="outline">{totalViews} vues</Badge>
+        <Badge variant="outline">{totalUniques} uniques</Badge>
+        <Badge variant="outline">{totalMsg} msg</Badge>
+        <Badge variant="outline">{totalApps} candidatures</Badge>
+        {lastViewGlobal && (
+          <Badge variant="outline">
+            Dernière vue {formatDistanceToNow(new Date(lastViewGlobal), { addSuffix: true, locale: fr })}
+          </Badge>
+        )}
       </div>
 
       <div className="rounded-lg border bg-card overflow-x-auto">
