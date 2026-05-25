@@ -214,7 +214,13 @@ const AdminSitsManagement = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Gardes</h1>
+      <div>
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Gardes</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Suivi opérationnel des gardes confirmées : pairing proprio/gardien, statut temporel, avis.
+          Les annonces en ligne, brouillons et trafic public sont dans l'onglet <span className="font-medium text-foreground">Annonces</span>.
+        </p>
+      </div>
 
       {/* Alerts */}
       {(overdueConfirmed.length > 0 || missingReviews14d.length > 0 || cancelledThisWeek.length > 0) && (
