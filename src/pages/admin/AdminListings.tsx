@@ -378,24 +378,24 @@ const AdminListings = () => {
           {trafficListing && stats[trafficListing.id] && (
             <div className="grid grid-cols-3 gap-2 my-4">
               <div className="rounded-md border p-3 text-center">
+                <div className="text-xl font-semibold tabular-nums">{stats[trafficListing.id].views}</div>
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Vues</div>
+              </div>
+              <div className="rounded-md border p-3 text-center">
+                <div className="text-xl font-semibold tabular-nums">{stats[trafficListing.id].uniqueViews}</div>
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Uniques</div>
+              </div>
+              <div className="rounded-md border p-3 text-center">
                 <div className="text-xl font-semibold tabular-nums">{stats[trafficListing.id].publicViews}</div>
-                <div className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Vues public</div>
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Public</div>
               </div>
               <div className="rounded-md border p-3 text-center">
                 <div className="text-xl font-semibold tabular-nums">{stats[trafficListing.id].memberViews}</div>
-                <div className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Vues membres</div>
-              </div>
-              <div className="rounded-md border p-3 text-center">
-                <div className="text-xl font-semibold tabular-nums">{stats[trafficListing.id].uniqueMemberViews}</div>
-                <div className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Membres uniq.</div>
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Membres</div>
               </div>
               <div className="rounded-md border p-3 text-center">
                 <div className="text-xl font-semibold tabular-nums">{stats[trafficListing.id].messages}</div>
                 <div className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Messages</div>
-              </div>
-              <div className="rounded-md border p-3 text-center">
-                <div className="text-xl font-semibold tabular-nums">{stats[trafficListing.id].conversations}</div>
-                <div className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Conversations</div>
               </div>
               <div className="rounded-md border p-3 text-center">
                 <div className="text-xl font-semibold tabular-nums">{stats[trafficListing.id].applications}</div>
