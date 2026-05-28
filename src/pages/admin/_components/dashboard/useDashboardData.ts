@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format, subWeeks, startOfWeek, endOfWeek } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
-  ShieldCheck, Briefcase, Flag, MessageSquare, BookOpen, ThumbsUp,
+  ShieldCheck, Briefcase, Flag, MessageSquare, BookOpen, ThumbsUp, UserMinus,
 } from "lucide-react";
 import { postalToDept } from "@/lib/departments";
 import type {
@@ -68,6 +68,9 @@ export function useDashboardData(): DashboardData {
         { count: lateVerifications },
         { count: lateContactMessages },
         { count: lateReports },
+        { data: recentStatusChanges },
+        { data: recentDeletions },
+        { data: pendingDeletionsCount },
       ] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "owner"),
@@ -92,6 +95,9 @@ export function useDashboardData(): DashboardData {
         supabase.from("profiles").select("id", { count: "exact", head: true }).or("identity_verification_status.eq.pending,and(identity_verification_status.eq.not_submitted,identity_document_url.not.is.null),and(identity_verification_status.eq.not_submitted,identity_selfie_url.not.is.null)").lt("created_at", ago24h),
         supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new").lt("created_at", ago48h),
         supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").lt("created_at", ago72h),
+        supabase.rpc("admin_get_recent_sit_status_changes" as any, { p_limit: 8 }),
+        supabase.rpc("admin_get_recent_account_deletions" as any, { p_limit: 5 }),
+        supabase.rpc("admin_get_pending_deletions_count" as any),
       ]);
 
       // Compétences saisies dans les profils mais pas encore validées
@@ -144,6 +150,8 @@ export function useDashboardData(): DashboardData {
       const totalSkills = (pendingSkills || 0) + pendingProfileSkills;
       if (totalSkills > 0) actions.push({ label: "Compétences", count: totalSkills, link: "/admin/skills", icon: BookOpen });
       if ((pendingReviewModeration || 0) > 0) actions.push({ label: "Avis en attente", count: pendingReviewModeration || 0, link: "/admin/reviews", icon: ThumbsUp });
+      const pendingDelCount = (pendingDeletionsCount as unknown as number) || 0;
+      if (pendingDelCount > 0) actions.push({ label: "Suppressions compte", count: pendingDelCount, link: "/admin/users?filter=deletion-pending", icon: UserMinus });
       setActionCards(actions);
 
       // En retard
@@ -199,16 +207,26 @@ export function useDashboardData(): DashboardData {
         });
       });
 
-      (recentSits || []).forEach((s: any) => {
-        if (s.status === "published") {
-          const ownerName = s.properties?.first_name || "Un propriétaire";
-          const city = s.properties?.city || "";
+      // Publications & dépublications (historique réel via sit_status_history)
+      (recentStatusChanges || []).forEach((h: any) => {
+        const ownerName = h.owner_first_name || "Un propriétaire";
+        const city = h.owner_city ? ` à ${h.owner_city}` : "";
+        const title = h.sit_title ? ` « ${h.sit_title} »` : "";
+        if (h.new_status === "published") {
           activityItems.push({
-            id: `sit-${s.id}`,
-            text: `${ownerName} a publié une annonce${city ? ` à ${city}` : ""}`,
-            time: s.created_at,
+            id: `pub-${h.id}`,
+            text: `${ownerName} a publié${title}${city}`,
+            time: h.changed_at,
             link: `/admin/listings`,
-            type: "annonce",
+            type: "publication",
+          });
+        } else if (h.old_status === "published") {
+          activityItems.push({
+            id: `unpub-${h.id}`,
+            text: `${ownerName} a dépublié${title} (→ ${h.new_status})`,
+            time: h.changed_at,
+            link: `/admin/listings`,
+            type: "depublication",
           });
         }
       });
@@ -237,8 +255,28 @@ export function useDashboardData(): DashboardData {
         });
       });
 
+      // Demandes de suppression de compte
+      (recentDeletions || []).forEach((d: any) => {
+        const name = d.first_name || "Un membre";
+        const city = d.city ? ` (${d.city})` : "";
+        const scheduled = d.scheduled_for ? new Date(d.scheduled_for) : null;
+        const daysLeft = scheduled ? Math.max(0, Math.ceil((scheduled.getTime() - Date.now()) / 86400000)) : null;
+        const suffix = d.status === "pending" && daysLeft !== null
+          ? ` — suppression effective dans ${daysLeft}j`
+          : d.status === "cancelled" ? " — annulée"
+          : d.status === "completed" ? " — finalisée"
+          : "";
+        activityItems.push({
+          id: `del-${d.id}`,
+          text: `${name}${city} a demandé la suppression de son compte${suffix}`,
+          time: d.requested_at,
+          link: `/admin/users?filter=deletion-pending`,
+          type: "suppression",
+        });
+      });
+
       activityItems.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-      setActivity(activityItems.slice(0, 10));
+      setActivity(activityItems.slice(0, 12));
 
       setLoading(false);
     };

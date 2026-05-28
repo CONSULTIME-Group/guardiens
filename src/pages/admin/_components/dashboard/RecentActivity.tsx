@@ -5,11 +5,14 @@ import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import type { ActivityItem } from "./types";
 
-const ACTIVITY_BADGE: Record<ActivityItem["type"], { label: string; variant: "secondary" | "outline" }> = {
+const ACTIVITY_BADGE: Record<ActivityItem["type"], { label: string; variant: "secondary" | "outline" | "destructive" }> = {
   inscription: { label: "Inscription", variant: "secondary" },
   annonce: { label: "Annonce", variant: "outline" },
   avis: { label: "Avis", variant: "secondary" },
   candidature: { label: "Candidature", variant: "outline" },
+  publication: { label: "Publication", variant: "secondary" },
+  depublication: { label: "Dépubliée", variant: "destructive" },
+  suppression: { label: "Suppression compte", variant: "destructive" },
 };
 
 interface Props {
