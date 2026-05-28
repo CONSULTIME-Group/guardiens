@@ -147,23 +147,28 @@ Deno.serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY manquant");
 
-    // Quota quotidien par utilisateur (best-effort, on n'échoue pas si l'auth manque).
+    // Authentication required: anonymous callers must NOT bypass per-user quotas.
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const authHeader = req.headers.get("Authorization");
-    let userId: string | null = null;
-    let admin: ReturnType<typeof createClient> | null = null;
-
-    if (SUPABASE_URL && SERVICE_KEY && authHeader) {
-      admin = createClient(SUPABASE_URL, SERVICE_KEY, {
-        auth: { persistSession: false, autoRefreshToken: false },
+    if (!authHeader || !SUPABASE_URL || !SERVICE_KEY) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-      const userClient = createClient(SUPABASE_URL, SERVICE_KEY, {
-        global: { headers: { Authorization: authHeader } },
-        auth: { persistSession: false, autoRefreshToken: false },
+    }
+    const admin = createClient(SUPABASE_URL, SERVICE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const userClient = createClient(SUPABASE_URL, SERVICE_KEY, {
+      global: { headers: { Authorization: authHeader } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data: userData } = await userClient.auth.getUser();
+    const userId: string | null = userData?.user?.id ?? null;
+    if (!userId) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-      const { data: userData } = await userClient.auth.getUser();
-      userId = userData?.user?.id ?? null;
     }
 
     // Vérification quota avant d'analyser (lit le compteur du jour).
