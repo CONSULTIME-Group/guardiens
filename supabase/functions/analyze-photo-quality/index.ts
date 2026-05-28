@@ -172,7 +172,7 @@ Deno.serve(async (req) => {
     }
 
     // Vérification quota avant d'analyser (lit le compteur du jour).
-    if (admin && userId) {
+    {
       const today = new Date().toISOString().slice(0, 10);
       const { data: row } = await admin
         .from("ai_photo_analysis_quota")
