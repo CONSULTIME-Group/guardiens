@@ -68,6 +68,9 @@ export function useDashboardData(): DashboardData {
         { count: lateVerifications },
         { count: lateContactMessages },
         { count: lateReports },
+        { data: recentStatusChanges },
+        { data: recentDeletions },
+        { data: pendingDeletionsCount },
       ] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "owner"),
@@ -92,6 +95,9 @@ export function useDashboardData(): DashboardData {
         supabase.from("profiles").select("id", { count: "exact", head: true }).or("identity_verification_status.eq.pending,and(identity_verification_status.eq.not_submitted,identity_document_url.not.is.null),and(identity_verification_status.eq.not_submitted,identity_selfie_url.not.is.null)").lt("created_at", ago24h),
         supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new").lt("created_at", ago48h),
         supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").lt("created_at", ago72h),
+        supabase.rpc("admin_get_recent_sit_status_changes" as any, { p_limit: 8 }),
+        supabase.rpc("admin_get_recent_account_deletions" as any, { p_limit: 5 }),
+        supabase.rpc("admin_get_pending_deletions_count" as any),
       ]);
 
       // Compétences saisies dans les profils mais pas encore validées
