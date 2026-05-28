@@ -150,6 +150,8 @@ export function useDashboardData(): DashboardData {
       const totalSkills = (pendingSkills || 0) + pendingProfileSkills;
       if (totalSkills > 0) actions.push({ label: "Compétences", count: totalSkills, link: "/admin/skills", icon: BookOpen });
       if ((pendingReviewModeration || 0) > 0) actions.push({ label: "Avis en attente", count: pendingReviewModeration || 0, link: "/admin/reviews", icon: ThumbsUp });
+      const pendingDelCount = (pendingDeletionsCount as unknown as number) || 0;
+      if (pendingDelCount > 0) actions.push({ label: "Suppressions compte", count: pendingDelCount, link: "/admin/users?filter=deletion-pending", icon: UserMinus });
       setActionCards(actions);
 
       // En retard
