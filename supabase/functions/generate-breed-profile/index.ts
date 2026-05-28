@@ -14,6 +14,24 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Require authentication: un-cached breeds consume paid AI credits.
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const anonClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+    );
+    const { data: { user } } = await anonClient.auth.getUser(authHeader.replace("Bearer ", ""));
+    if (!user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { species, breed } = await req.json();
     if (!species || !breed) {
       return new Response(JSON.stringify({ error: "species and breed required" }), {
