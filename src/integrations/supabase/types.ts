@@ -3665,6 +3665,44 @@ export type Database = {
           },
         ]
       }
+      sit_status_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          id: string
+          new_status: string
+          old_status: string | null
+          reason: string | null
+          sit_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_status: string
+          old_status?: string | null
+          reason?: string | null
+          sit_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_status?: string
+          old_status?: string | null
+          reason?: string | null
+          sit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sit_status_history_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "sits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sits: {
         Row: {
           accepting_applications: boolean
@@ -3681,12 +3719,14 @@ export type Database = {
           flexible_dates: boolean | null
           id: string
           is_urgent: boolean
+          last_unpublished_reason: string | null
           logement_override: string | null
           max_applications: number | null
           min_gardien_sits: number
           open_to: string[] | null
           owner_message: string | null
           property_id: string
+          published_at: string | null
           reminder_j48_sent: boolean | null
           reminder_j7_sent: boolean | null
           review_j1_sent: boolean | null
@@ -3695,6 +3735,7 @@ export type Database = {
           start_date: string | null
           status: Database["public"]["Enums"]["sit_status"]
           title: string
+          unpublished_at: string | null
           user_id: string
         }
         Insert: {
@@ -3712,12 +3753,14 @@ export type Database = {
           flexible_dates?: boolean | null
           id?: string
           is_urgent?: boolean
+          last_unpublished_reason?: string | null
           logement_override?: string | null
           max_applications?: number | null
           min_gardien_sits?: number
           open_to?: string[] | null
           owner_message?: string | null
           property_id: string
+          published_at?: string | null
           reminder_j48_sent?: boolean | null
           reminder_j7_sent?: boolean | null
           review_j1_sent?: boolean | null
@@ -3726,6 +3769,7 @@ export type Database = {
           start_date?: string | null
           status?: Database["public"]["Enums"]["sit_status"]
           title?: string
+          unpublished_at?: string | null
           user_id: string
         }
         Update: {
@@ -3743,12 +3787,14 @@ export type Database = {
           flexible_dates?: boolean | null
           id?: string
           is_urgent?: boolean
+          last_unpublished_reason?: string | null
           logement_override?: string | null
           max_applications?: number | null
           min_gardien_sits?: number
           open_to?: string[] | null
           owner_message?: string | null
           property_id?: string
+          published_at?: string | null
           reminder_j48_sent?: boolean | null
           reminder_j7_sent?: boolean | null
           review_j1_sent?: boolean | null
@@ -3757,6 +3803,7 @@ export type Database = {
           start_date?: string | null
           status?: Database["public"]["Enums"]["sit_status"]
           title?: string
+          unpublished_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -4729,6 +4776,19 @@ export type Database = {
           view_count: number
         }[]
       }
+      admin_get_pending_deletions_count: { Args: never; Returns: number }
+      admin_get_recent_account_deletions: {
+        Args: { p_limit?: number }
+        Returns: {
+          city: string
+          first_name: string
+          id: string
+          requested_at: string
+          scheduled_for: string
+          status: string
+          user_id: string
+        }[]
+      }
       admin_get_recent_applications_activity: {
         Args: { p_limit?: number }
         Returns: {
@@ -4737,6 +4797,19 @@ export type Database = {
           sit_id: string
           sit_title: string
           sitter_first_name: string
+        }[]
+      }
+      admin_get_recent_sit_status_changes: {
+        Args: { p_limit?: number }
+        Returns: {
+          changed_at: string
+          id: string
+          new_status: string
+          old_status: string
+          owner_city: string
+          owner_first_name: string
+          sit_id: string
+          sit_title: string
         }[]
       }
       admin_get_signup_confirmation_stats: {
