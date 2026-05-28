@@ -207,16 +207,26 @@ export function useDashboardData(): DashboardData {
         });
       });
 
-      (recentSits || []).forEach((s: any) => {
-        if (s.status === "published") {
-          const ownerName = s.properties?.first_name || "Un propriétaire";
-          const city = s.properties?.city || "";
+      // Publications & dépublications (historique réel via sit_status_history)
+      (recentStatusChanges || []).forEach((h: any) => {
+        const ownerName = h.owner_first_name || "Un propriétaire";
+        const city = h.owner_city ? ` à ${h.owner_city}` : "";
+        const title = h.sit_title ? ` « ${h.sit_title} »` : "";
+        if (h.new_status === "published") {
           activityItems.push({
-            id: `sit-${s.id}`,
-            text: `${ownerName} a publié une annonce${city ? ` à ${city}` : ""}`,
-            time: s.created_at,
+            id: `pub-${h.id}`,
+            text: `${ownerName} a publié${title}${city}`,
+            time: h.changed_at,
             link: `/admin/listings`,
-            type: "annonce",
+            type: "publication",
+          });
+        } else if (h.old_status === "published") {
+          activityItems.push({
+            id: `unpub-${h.id}`,
+            text: `${ownerName} a dépublié${title} (→ ${h.new_status})`,
+            time: h.changed_at,
+            link: `/admin/listings`,
+            type: "depublication",
           });
         }
       });
@@ -242,6 +252,26 @@ export function useDashboardData(): DashboardData {
           time: a.created_at,
           link: `/admin/sits-management`,
           type: "candidature",
+        });
+      });
+
+      // Demandes de suppression de compte
+      (recentDeletions || []).forEach((d: any) => {
+        const name = d.first_name || "Un membre";
+        const city = d.city ? ` (${d.city})` : "";
+        const scheduled = d.scheduled_for ? new Date(d.scheduled_for) : null;
+        const daysLeft = scheduled ? Math.max(0, Math.ceil((scheduled.getTime() - Date.now()) / 86400000)) : null;
+        const suffix = d.status === "pending" && daysLeft !== null
+          ? ` — suppression effective dans ${daysLeft}j`
+          : d.status === "cancelled" ? " — annulée"
+          : d.status === "completed" ? " — finalisée"
+          : "";
+        activityItems.push({
+          id: `del-${d.id}`,
+          text: `${name}${city} a demandé la suppression de son compte${suffix}`,
+          time: d.requested_at,
+          link: `/admin/users?filter=deletion-pending`,
+          type: "suppression",
         });
       });
 
