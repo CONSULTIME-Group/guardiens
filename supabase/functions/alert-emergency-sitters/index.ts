@@ -56,6 +56,27 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Ownership check: only the sit owner may alert emergency sitters for it.
+    if (!countOnly && sitId) {
+      const { data: sitRow, error: sitErr } = await supabase
+        .from("sits")
+        .select("id, user_id")
+        .eq("id", sitId)
+        .maybeSingle();
+      if (sitErr || !sitRow) {
+        return new Response(JSON.stringify({ error: "Sit not found" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (sitRow.user_id !== user.id) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     // Geocode the sit city to get lat/lng
     const { data: geoCache } = await supabase
       .from("geocode_cache")

@@ -32,6 +32,15 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders })
   }
 
+  // Restrict to service-role callers (DB trigger via pg_net).
+  const token = req.headers.get('Authorization')?.replace('Bearer ', '')
+  if (token !== SERVICE_KEY) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+
+
   let payload: Payload
   try {
     const body = await req.json()
