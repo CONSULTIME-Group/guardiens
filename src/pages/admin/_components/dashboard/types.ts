@@ -18,7 +18,7 @@ export interface ActivityItem {
   text: string;
   time: string;
   link: string;
-  type: "inscription" | "annonce" | "avis" | "candidature";
+  type: "inscription" | "annonce" | "avis" | "candidature" | "publication" | "depublication" | "suppression";
 }
 
 export interface ActionCard {
