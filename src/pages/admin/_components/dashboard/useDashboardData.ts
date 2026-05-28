@@ -276,7 +276,7 @@ export function useDashboardData(): DashboardData {
       });
 
       activityItems.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-      setActivity(activityItems.slice(0, 10));
+      setActivity(activityItems.slice(0, 12));
 
       setLoading(false);
     };
