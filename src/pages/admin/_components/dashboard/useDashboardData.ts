@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format, subWeeks, startOfWeek, endOfWeek } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
-  ShieldCheck, Briefcase, Flag, MessageSquare, BookOpen, ThumbsUp,
+  ShieldCheck, Briefcase, Flag, MessageSquare, BookOpen, ThumbsUp, UserMinus,
 } from "lucide-react";
 import { postalToDept } from "@/lib/departments";
 import type {
