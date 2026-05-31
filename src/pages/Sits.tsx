@@ -1163,6 +1163,30 @@ const QuickActions = ({
     );
   }
 
+  // Gardien dont la candidature a été annulée car le propriétaire a trouvé
+  // → rebond direct vers la recherche pré-filtrée (même ville + dates)
+  if (
+    !isOwner &&
+    effectiveStatus === "cancelled" &&
+    sit.status === "draft" &&
+    (sit.last_unpublished_reason === "found_offline" || sit.last_unpublished_reason === "found_onplatform")
+  ) {
+    const params = new URLSearchParams();
+    const city = sit.ownerCity || sit.properties?.city || sit.owner?.city || null;
+    if (city) params.set("ville", city);
+    if (sit.start_date) params.set("debut", sit.start_date);
+    if (sit.end_date) params.set("fin", sit.end_date);
+    const qs = params.toString();
+    const searchHref = qs ? `/search?${qs}` : "/search";
+    const hasContext = Boolean(city || sit.start_date || sit.end_date);
+    const label = hasContext ? "Voir les gardes similaires" : "Voir les autres gardes";
+    return (
+      <Link to={searchHref} className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}>
+        <Search className="h-3.5 w-3.5" /> {label}
+      </Link>
+    );
+  }
+
   if (effectiveStatus === "cancelled") {
     return (
       <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-accent text-muted-foreground hover:text-foreground")}>
