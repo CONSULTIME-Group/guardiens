@@ -886,6 +886,16 @@ const SitCard = ({
     const appStatus = sit.application_status;
     if (appStatus === "accepted" && ["confirmed", "in_progress", "completed"].includes(effectiveStatus)) {
       displayStatus = statusConfig[effectiveStatus];
+    } else if (
+      appStatus === "cancelled"
+      && sit.status === "draft"
+      && (sit.last_unpublished_reason === "found_offline" || sit.last_unpublished_reason === "found_onplatform")
+    ) {
+      // Le propriétaire a dépublié en indiquant avoir trouvé un gardien → message dédié
+      displayStatus = appStatusConfig.owner_found;
+    } else if (appStatus === "cancelled" && sit.status === "draft" && sit.unpublished_at) {
+      // Dépubliée pour une autre raison (plans changés, etc.)
+      displayStatus = appStatusConfig.owner_withdrew;
     } else {
       displayStatus = appStatusConfig[appStatus] || statusConfig[effectiveStatus] || statusConfig.draft;
     }
