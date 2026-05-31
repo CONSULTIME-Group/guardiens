@@ -12,6 +12,10 @@ interface SitterStatusBannerProps {
   /** Pour status="draft" + unpublished_at : raison fournie par le propriétaire. */
   unpublishedAt?: string | null;
   unpublishedReason?: string | null;
+  /** Contexte de l'annonce — sert à pré-remplir la recherche de gardes similaires. */
+  city?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
 }
 
 type BannerConfig = {
@@ -61,7 +65,14 @@ const UNPUBLISHED_OTHER: BannerConfig = {
   tone: "border-muted-foreground/20 bg-muted/40 text-muted-foreground",
 };
 
-const SitterStatusBanner = ({ status, unpublishedAt, unpublishedReason }: SitterStatusBannerProps) => {
+const SitterStatusBanner = ({
+  status,
+  unpublishedAt,
+  unpublishedReason,
+  city,
+  startDate,
+  endDate,
+}: SitterStatusBannerProps) => {
   let cfg: BannerConfig | null = CONFIG[status] ?? null;
 
   // Cas dépubliée par le propriétaire (status revient à "draft" + unpublished_at)
@@ -74,6 +85,17 @@ const SitterStatusBanner = ({ status, unpublishedAt, unpublishedReason }: Sitter
 
   if (!cfg) return null;
   const { Icon, title, description, tone } = cfg;
+
+  // Construit une URL de recherche pré-filtrée (même ville + mêmes dates si dispo)
+  // pour transformer le bandeau « plus disponible » en rebond utile.
+  const params = new URLSearchParams();
+  if (city && city.trim()) params.set("ville", city.trim());
+  if (startDate) params.set("debut", startDate);
+  if (endDate) params.set("fin", endDate);
+  const qs = params.toString();
+  const searchHref = qs ? `/search?${qs}` : "/search";
+  const hasContext = Boolean(city || startDate || endDate);
+  const ctaLabel = hasContext ? "Voir les gardes similaires" : "Voir les autres gardes";
 
   return (
     <section
@@ -90,9 +112,9 @@ const SitterStatusBanner = ({ status, unpublishedAt, unpublishedReason }: Sitter
           <p className="text-sm text-muted-foreground mt-1 mb-3">
             {description}
           </p>
-          <Link to="/search">
+          <Link to={searchHref}>
             <Button variant="outline" size="sm">
-              Voir les autres gardes
+              {ctaLabel}
             </Button>
           </Link>
         </div>
