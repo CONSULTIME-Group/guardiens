@@ -173,7 +173,11 @@ const SitterSitView = ({
 
       {/* Bandeau d'état terminal — affiché en premier pour que le gardien
           comprenne immédiatement que l'annonce n'est pas/plus actionnable. */}
-      <SitterStatusBanner status={sit.status} />
+      <SitterStatusBanner
+        status={sit.status}
+        unpublishedAt={(sit as any).unpublished_at ?? null}
+        unpublishedReason={(sit as any).last_unpublished_reason ?? null}
+      />
 
       {badges.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
