@@ -177,6 +177,9 @@ const SitterSitView = ({
         status={sit.status}
         unpublishedAt={(sit as any).unpublished_at ?? null}
         unpublishedReason={(sit as any).last_unpublished_reason ?? null}
+        city={owner?.city ?? null}
+        startDate={sit.start_date}
+        endDate={sit.end_date}
       />
 
       {badges.length > 0 && (
