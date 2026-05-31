@@ -379,8 +379,9 @@ const OwnerSitView = ({
             <AlertDialogDescription asChild>
               <div className="space-y-3 pt-2">
                 <p>
-                  L'annonce repassera en <strong>brouillon</strong> et ne sera plus
-                  visible des gardiens. Vous pourrez la republier à tout moment.
+                  L'annonce sera <strong>dépubliée et archivée</strong>. Elle ne sera plus
+                  visible des gardiens — vous pourrez la republier à tout moment depuis
+                  l'onglet « Archivées ».
                 </p>
                 {pendingAppsToCancel > 0 && (
                   <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm">
@@ -398,6 +399,47 @@ const OwnerSitView = ({
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
+
+          <div className="space-y-3 pt-1">
+            <p className="text-sm font-medium text-foreground">
+              Pourquoi dépubliez-vous cette annonce&nbsp;? <span className="text-destructive">*</span>
+            </p>
+            <RadioGroup
+              value={unpublishReason}
+              onValueChange={setUnpublishReason}
+              disabled={unpublishing}
+              className="gap-2"
+            >
+              {[
+                { v: "found_offline", l: "J'ai trouvé une solution hors plateforme" },
+                { v: "found_onplatform", l: "J'ai trouvé un gardien via la plateforme" },
+                { v: "plans_changed", l: "Mes dates ou mes plans ont changé" },
+                { v: "no_relevant_apps", l: "Je n'ai pas reçu de candidatures adaptées" },
+                { v: "other", l: "Autre raison" },
+              ].map((opt) => (
+                <div key={opt.v} className="flex items-center gap-2">
+                  <RadioGroupItem id={`unpublish-${opt.v}`} value={opt.v} />
+                  <Label htmlFor={`unpublish-${opt.v}`} className="text-sm font-normal cursor-pointer">
+                    {opt.l}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+            {unpublishReason === "other" && (
+              <Textarea
+                placeholder="Précisez (facultatif)…"
+                value={unpublishReasonOther}
+                onChange={(e) => setUnpublishReasonOther(e.target.value)}
+                rows={3}
+                maxLength={500}
+                disabled={unpublishing}
+              />
+            )}
+            <p className="text-xs text-muted-foreground">
+              Votre retour nous aide à améliorer la plateforme — il reste confidentiel.
+            </p>
+          </div>
+
           <AlertDialogFooter>
             <AlertDialogCancel disabled={unpublishing}>Annuler</AlertDialogCancel>
             <AlertDialogAction
@@ -405,7 +447,7 @@ const OwnerSitView = ({
                 e.preventDefault();
                 void handleUnpublish();
               }}
-              disabled={unpublishing}
+              disabled={unpublishing || !unpublishReason}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {unpublishing ? "Dépublication…" : "Dépublier"}
