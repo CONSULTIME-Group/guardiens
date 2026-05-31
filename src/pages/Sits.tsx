@@ -57,6 +57,8 @@ const appStatusConfig: Record<string, { label: string; className: string }> = {
   accepted: { label: "Acceptée", className: "bg-emerald-50 text-emerald-700" },
   rejected: { label: "Déclinée", className: "bg-destructive/10 text-destructive" },
   cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive" },
+  owner_found: { label: "Propriétaire a trouvé", className: "bg-muted text-muted-foreground border border-border" },
+  owner_withdrew: { label: "Annonce retirée", className: "bg-muted text-muted-foreground border border-border" },
 };
 
 type Tab = "upcoming" | "in_progress" | "completed" | "cancelled";
@@ -884,6 +886,16 @@ const SitCard = ({
     const appStatus = sit.application_status;
     if (appStatus === "accepted" && ["confirmed", "in_progress", "completed"].includes(effectiveStatus)) {
       displayStatus = statusConfig[effectiveStatus];
+    } else if (
+      appStatus === "cancelled"
+      && sit.status === "draft"
+      && (sit.last_unpublished_reason === "found_offline" || sit.last_unpublished_reason === "found_onplatform")
+    ) {
+      // Le propriétaire a dépublié en indiquant avoir trouvé un gardien → message dédié
+      displayStatus = appStatusConfig.owner_found;
+    } else if (appStatus === "cancelled" && sit.status === "draft" && sit.unpublished_at) {
+      // Dépubliée pour une autre raison (plans changés, etc.)
+      displayStatus = appStatusConfig.owner_withdrew;
     } else {
       displayStatus = appStatusConfig[appStatus] || statusConfig[effectiveStatus] || statusConfig.draft;
     }
