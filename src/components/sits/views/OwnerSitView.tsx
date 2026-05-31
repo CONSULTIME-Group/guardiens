@@ -247,15 +247,20 @@ const OwnerSitView = ({
     }
 
     const count = (data as number | null) ?? 0;
-    setSit({ ...sit, status: "draft" });
+    setSit({
+      ...sit,
+      status: "draft",
+      unpublished_at: new Date().toISOString(),
+      last_unpublished_reason: reasonText,
+    } as any);
     setUnpublishConfirmOpen(false);
     setUnpublishing(false);
     toast({
       title: "Annonce dépubliée",
       description:
         count > 0
-          ? `Remise en brouillon. ${count} candidature${count > 1 ? "s" : ""} en cours ${count > 1 ? "ont" : "a"} été clôturée${count > 1 ? "s" : ""}.`
-          : "Elle est remise en brouillon. Vous pouvez la republier quand vous voulez.",
+          ? `Archivée. ${count} candidature${count > 1 ? "s" : ""} en cours ${count > 1 ? "ont" : "a"} été clôturée${count > 1 ? "s" : ""}.`
+          : "Elle est archivée. Vous pouvez la republier quand vous voulez depuis l'onglet « Archivées ».",
     });
   };
   // Critères de complétude pour la checklist de publication.
