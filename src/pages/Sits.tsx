@@ -331,7 +331,9 @@ const Sits = () => {
       cancellation_reason: null,
       cancelled_at: null,
       cancelled_by: null,
-    }).eq("id", sitId).eq("user_id", user!.id);
+      unpublished_at: null,
+      last_unpublished_reason: null,
+    } as any).eq("id", sitId).eq("user_id", user!.id);
     toast({ title: "Annonce republiée" });
     loadSits();
   };
