@@ -30,6 +30,9 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -103,6 +106,8 @@ const OwnerSitView = ({
   const [cancelOpen, setCancelOpen] = useState(false);
   const [unpublishConfirmOpen, setUnpublishConfirmOpen] = useState(false);
   const [unpublishing, setUnpublishing] = useState(false);
+  const [unpublishReason, setUnpublishReason] = useState<string>("");
+  const [unpublishReasonOther, setUnpublishReasonOther] = useState<string>("");
   const [pendingAppsToCancel, setPendingAppsToCancel] = useState<number>(0);
   const [logementOverride, setLogementOverride] = useState(initialLogementOverride);
   const [animauxOverride, setAnimauxOverride] = useState(initialAnimauxOverride);
@@ -182,6 +187,8 @@ const OwnerSitView = ({
       .eq("sit_id", sit.id)
       .in("status", ["pending", "viewed", "discussing"]);
     setPendingAppsToCancel(count ?? 0);
+    setUnpublishReason("");
+    setUnpublishReasonOther("");
     setUnpublishConfirmOpen(true);
   };
 
@@ -190,11 +197,18 @@ const OwnerSitView = ({
   // Côté client on ne fait QUE le mapping des erreurs typées → message FR.
   const handleUnpublish = async () => {
     if (unpublishing) return;
+    if (!unpublishReason) return;
     setUnpublishing(true);
+
+    const reasonText =
+      unpublishReason === "other"
+        ? unpublishReasonOther.trim() || "other"
+        : unpublishReason;
 
     const { data, error } = await supabase.rpc("unpublish_sit", {
       p_sit_id: sit.id,
-    });
+      p_reason: reasonText,
+    } as any);
 
     if (error) {
       const raw = error.message || "";
@@ -233,15 +247,20 @@ const OwnerSitView = ({
     }
 
     const count = (data as number | null) ?? 0;
-    setSit({ ...sit, status: "draft" });
+    setSit({
+      ...sit,
+      status: "draft",
+      unpublished_at: new Date().toISOString(),
+      last_unpublished_reason: reasonText,
+    } as any);
     setUnpublishConfirmOpen(false);
     setUnpublishing(false);
     toast({
       title: "Annonce dépubliée",
       description:
         count > 0
-          ? `Remise en brouillon. ${count} candidature${count > 1 ? "s" : ""} en cours ${count > 1 ? "ont" : "a"} été clôturée${count > 1 ? "s" : ""}.`
-          : "Elle est remise en brouillon. Vous pouvez la republier quand vous voulez.",
+          ? `Archivée. ${count} candidature${count > 1 ? "s" : ""} en cours ${count > 1 ? "ont" : "a"} été clôturée${count > 1 ? "s" : ""}.`
+          : "Elle est archivée. Vous pouvez la republier quand vous voulez depuis l'onglet « Archivées ».",
     });
   };
   // Critères de complétude pour la checklist de publication.
@@ -365,8 +384,9 @@ const OwnerSitView = ({
             <AlertDialogDescription asChild>
               <div className="space-y-3 pt-2">
                 <p>
-                  L'annonce repassera en <strong>brouillon</strong> et ne sera plus
-                  visible des gardiens. Vous pourrez la republier à tout moment.
+                  L'annonce sera <strong>dépubliée et archivée</strong>. Elle ne sera plus
+                  visible des gardiens — vous pourrez la republier à tout moment depuis
+                  l'onglet « Archivées ».
                 </p>
                 {pendingAppsToCancel > 0 && (
                   <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm">
@@ -384,6 +404,47 @@ const OwnerSitView = ({
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
+
+          <div className="space-y-3 pt-1">
+            <p className="text-sm font-medium text-foreground">
+              Pourquoi dépubliez-vous cette annonce&nbsp;? <span className="text-destructive">*</span>
+            </p>
+            <RadioGroup
+              value={unpublishReason}
+              onValueChange={setUnpublishReason}
+              disabled={unpublishing}
+              className="gap-2"
+            >
+              {[
+                { v: "found_offline", l: "J'ai trouvé une solution hors plateforme" },
+                { v: "found_onplatform", l: "J'ai trouvé un gardien via la plateforme" },
+                { v: "plans_changed", l: "Mes dates ou mes plans ont changé" },
+                { v: "no_relevant_apps", l: "Je n'ai pas reçu de candidatures adaptées" },
+                { v: "other", l: "Autre raison" },
+              ].map((opt) => (
+                <div key={opt.v} className="flex items-center gap-2">
+                  <RadioGroupItem id={`unpublish-${opt.v}`} value={opt.v} />
+                  <Label htmlFor={`unpublish-${opt.v}`} className="text-sm font-normal cursor-pointer">
+                    {opt.l}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+            {unpublishReason === "other" && (
+              <Textarea
+                placeholder="Précisez (facultatif)…"
+                value={unpublishReasonOther}
+                onChange={(e) => setUnpublishReasonOther(e.target.value)}
+                rows={3}
+                maxLength={500}
+                disabled={unpublishing}
+              />
+            )}
+            <p className="text-xs text-muted-foreground">
+              Votre retour nous aide à améliorer la plateforme — il reste confidentiel.
+            </p>
+          </div>
+
           <AlertDialogFooter>
             <AlertDialogCancel disabled={unpublishing}>Annuler</AlertDialogCancel>
             <AlertDialogAction
@@ -391,7 +452,7 @@ const OwnerSitView = ({
                 e.preventDefault();
                 void handleUnpublish();
               }}
-              disabled={unpublishing}
+              disabled={unpublishing || !unpublishReason}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {unpublishing ? "Dépublication…" : "Dépublier"}

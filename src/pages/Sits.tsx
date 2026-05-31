@@ -47,6 +47,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   completed: { label: "Terminée", className: "bg-muted text-foreground" },
   cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive" },
   expired: { label: "Expirée", className: "bg-red-50 text-red-600 border border-red-100" },
+  unpublished: { label: "Dépubliée", className: "bg-muted text-muted-foreground border border-border" },
 };
 
 const appStatusConfig: Record<string, { label: string; className: string }> = {
@@ -330,14 +331,22 @@ const Sits = () => {
       cancellation_reason: null,
       cancelled_at: null,
       cancelled_by: null,
-    }).eq("id", sitId).eq("user_id", user!.id);
+      unpublished_at: null,
+      last_unpublished_reason: null,
+    } as any).eq("id", sitId).eq("user_id", user!.id);
     toast({ title: "Annonce republiée" });
     loadSits();
   };
 
   // Separate active from archived/expired
+  // Une annonce est considérée « archivée » si :
+  //  - elle a été annulée avec une raison archived/expired (auto-archivage)
+  //  - OU elle a été dépubliée par le propriétaire (status=draft + unpublished_at)
+  const wasUnpublished = (s: any) =>
+    s.status === "draft" && !!s.unpublished_at;
   const isArchived = (s: any) =>
-    s.status === "cancelled" && (s.cancellation_reason === "archived" || s.cancellation_reason === "expired");
+    (s.status === "cancelled" && (s.cancellation_reason === "archived" || s.cancellation_reason === "expired"))
+    || wasUnpublished(s);
   const isExpired = (s: any) => s.cancellation_reason === "expired";
 
   const activeSits = useMemo(() => sits.filter(s => !isArchived(s)), [sits]);
@@ -359,6 +368,8 @@ const Sits = () => {
   }, [activeSits, isOwnerView]);
 
   // Comptages onglets owner — Actives / Brouillons / Archivées
+  // Brouillons = vrais brouillons jamais publiés (unpublished_at IS NULL)
+  // Archivées  = expirées, annulées-archivées, OU dépubliées (status=draft + unpublished_at)
   const ownerTabCounts = useMemo(() => {
     const counts: Record<OwnerTab, number> = { active: 0, drafts: 0, archived: 0 };
     if (!isOwnerView) return counts;
@@ -669,7 +680,14 @@ const Sits = () => {
           {filteredSits.map((sit: any) => {
             // En onglet "archived", on force l'effectiveStatus pour le bon rendu de la card
             const cardSit = isOwnerView && activeOwnerTab === "archived"
-              ? { ...sit, effectiveStatus: isExpired(sit) ? "expired" : "cancelled" }
+              ? {
+                  ...sit,
+                  effectiveStatus: wasUnpublished(sit)
+                    ? "unpublished"
+                    : isExpired(sit)
+                      ? "expired"
+                      : "cancelled",
+                }
               : sit;
             return (
               <SitCard
@@ -1107,7 +1125,7 @@ const QuickActions = ({
     );
   }
 
-  if (effectiveStatus === "expired") {
+  if (effectiveStatus === "expired" || effectiveStatus === "unpublished") {
     return (
       <>
         <button onClick={onRepublish} className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}>
