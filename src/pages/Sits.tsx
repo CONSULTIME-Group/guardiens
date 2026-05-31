@@ -678,7 +678,14 @@ const Sits = () => {
           {filteredSits.map((sit: any) => {
             // En onglet "archived", on force l'effectiveStatus pour le bon rendu de la card
             const cardSit = isOwnerView && activeOwnerTab === "archived"
-              ? { ...sit, effectiveStatus: isExpired(sit) ? "expired" : "cancelled" }
+              ? {
+                  ...sit,
+                  effectiveStatus: wasUnpublished(sit)
+                    ? "unpublished"
+                    : isExpired(sit)
+                      ? "expired"
+                      : "cancelled",
+                }
               : sit;
             return (
               <SitCard
