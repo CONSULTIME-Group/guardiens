@@ -184,6 +184,8 @@ const OwnerSitView = ({
       .eq("sit_id", sit.id)
       .in("status", ["pending", "viewed", "discussing"]);
     setPendingAppsToCancel(count ?? 0);
+    setUnpublishReason("");
+    setUnpublishReasonOther("");
     setUnpublishConfirmOpen(true);
   };
 
@@ -192,11 +194,18 @@ const OwnerSitView = ({
   // Côté client on ne fait QUE le mapping des erreurs typées → message FR.
   const handleUnpublish = async () => {
     if (unpublishing) return;
+    if (!unpublishReason) return;
     setUnpublishing(true);
+
+    const reasonText =
+      unpublishReason === "other"
+        ? unpublishReasonOther.trim() || "other"
+        : unpublishReason;
 
     const { data, error } = await supabase.rpc("unpublish_sit", {
       p_sit_id: sit.id,
-    });
+      p_reason: reasonText,
+    } as any);
 
     if (error) {
       const raw = error.message || "";
