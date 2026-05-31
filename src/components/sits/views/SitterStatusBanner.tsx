@@ -12,6 +12,10 @@ interface SitterStatusBannerProps {
   /** Pour status="draft" + unpublished_at : raison fournie par le propriétaire. */
   unpublishedAt?: string | null;
   unpublishedReason?: string | null;
+  /** Contexte de l'annonce — sert à pré-remplir la recherche de gardes similaires. */
+  city?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
 }
 
 type BannerConfig = {
