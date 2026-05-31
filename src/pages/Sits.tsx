@@ -57,6 +57,8 @@ const appStatusConfig: Record<string, { label: string; className: string }> = {
   accepted: { label: "Acceptée", className: "bg-emerald-50 text-emerald-700" },
   rejected: { label: "Déclinée", className: "bg-destructive/10 text-destructive" },
   cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive" },
+  owner_found: { label: "Propriétaire a trouvé", className: "bg-muted text-muted-foreground border border-border" },
+  owner_withdrew: { label: "Annonce retirée", className: "bg-muted text-muted-foreground border border-border" },
 };
 
 type Tab = "upcoming" | "in_progress" | "completed" | "cancelled";
