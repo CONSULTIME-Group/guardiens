@@ -47,6 +47,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   completed: { label: "Terminée", className: "bg-muted text-foreground" },
   cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive" },
   expired: { label: "Expirée", className: "bg-red-50 text-red-600 border border-red-100" },
+  unpublished: { label: "Dépubliée", className: "bg-muted text-muted-foreground border border-border" },
 };
 
 const appStatusConfig: Record<string, { label: string; className: string }> = {
