@@ -1,20 +1,27 @@
 /**
  * Bandeau d'état affiché au gardien quand l'annonce n'est plus actionnable
- * (cancelled / expired / completed). Le but est de communiquer clairement
- * pourquoi il n'y a plus de bouton "Postuler" sans le laisser deviner.
+ * (cancelled / expired / completed / unpublished). Le but est de communiquer
+ * clairement pourquoi il n'y a plus de bouton "Postuler" sans le laisser deviner.
  */
 import { Link } from "react-router-dom";
-import { XCircle, Clock, CheckCircle2 } from "lucide-react";
+import { XCircle, Clock, CheckCircle2, UserCheck, ArchiveX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface SitterStatusBannerProps {
   status: string;
+  /** Pour status="draft" + unpublished_at : raison fournie par le propriétaire. */
+  unpublishedAt?: string | null;
+  unpublishedReason?: string | null;
 }
 
-const CONFIG: Record<
-  string,
-  { Icon: typeof XCircle; title: string; description: string; tone: string } | null
-> = {
+type BannerConfig = {
+  Icon: typeof XCircle;
+  title: string;
+  description: string;
+  tone: string;
+};
+
+const CONFIG: Record<string, BannerConfig> = {
   cancelled: {
     Icon: XCircle,
     title: "Cette garde a été annulée",
@@ -38,8 +45,33 @@ const CONFIG: Record<
   },
 };
 
-const SitterStatusBanner = ({ status }: SitterStatusBannerProps) => {
-  const cfg = CONFIG[status];
+const UNPUBLISHED_FOUND: BannerConfig = {
+  Icon: UserCheck,
+  title: "Le propriétaire a trouvé un gardien",
+  description:
+    "Cette annonce a été retirée car le propriétaire a confirmé qu'il avait trouvé une solution. Découvrez d'autres gardes ouvertes.",
+  tone: "border-muted-foreground/20 bg-muted/40 text-muted-foreground",
+};
+
+const UNPUBLISHED_OTHER: BannerConfig = {
+  Icon: ArchiveX,
+  title: "Cette annonce a été retirée",
+  description:
+    "Le propriétaire a dépublié son annonce. Vous pouvez explorer d'autres gardes en cours.",
+  tone: "border-muted-foreground/20 bg-muted/40 text-muted-foreground",
+};
+
+const SitterStatusBanner = ({ status, unpublishedAt, unpublishedReason }: SitterStatusBannerProps) => {
+  let cfg: BannerConfig | null = CONFIG[status] ?? null;
+
+  // Cas dépubliée par le propriétaire (status revient à "draft" + unpublished_at)
+  if (!cfg && status === "draft" && unpublishedAt) {
+    cfg =
+      unpublishedReason === "found_offline" || unpublishedReason === "found_onplatform"
+        ? UNPUBLISHED_FOUND
+        : UNPUBLISHED_OTHER;
+  }
+
   if (!cfg) return null;
   const { Icon, title, description, tone } = cfg;
 
