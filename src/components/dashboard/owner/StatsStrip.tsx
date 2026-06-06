@@ -14,7 +14,7 @@ interface StatItem {
   fallback?: string;
   highlight?: boolean;
   to?: string;
-  /** Si défini et value === 0, affiche un placeholder neutre (« — ») au lieu d'un « 0 » grisé. */
+  /** Si défini et value === 0, affiche un placeholder neutre («, ») au lieu d'un « 0 » grisé. */
   emptyHint?: string;
   /** Texte explicatif affiché au survol/tap d'une petite icône info à côté du label. */
   tooltip?: string;
@@ -25,7 +25,7 @@ interface StatsStripProps {
 }
 
 /**
- * Strip horizontal compact de stats — pensé pour s'intégrer sous une carte de pilotage
+ * Strip horizontal compact de stats, pensé pour s'intégrer sous une carte de pilotage
  * (vs. cards séparées). Chaque item garde son affordance cliquable si `to` est fourni.
  */
 const StatsStrip = memo(({ items }: StatsStripProps) => {
@@ -58,7 +58,7 @@ const StatsStrip = memo(({ items }: StatsStripProps) => {
                 {item.value}
               </p>
             ) : showEmptyHint ? (
-              <p className="text-xl md:text-2xl font-heading font-bold leading-none text-muted-foreground/40" aria-label={item.emptyHint}>—</p>
+              <p className="text-xl md:text-2xl font-heading font-bold leading-none text-muted-foreground/40" aria-label={item.emptyHint}>,</p>
             ) : (
               <p className="text-sm text-muted-foreground leading-none mt-1">{item.fallback}</p>
             )}

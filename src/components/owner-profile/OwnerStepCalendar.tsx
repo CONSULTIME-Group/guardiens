@@ -115,7 +115,7 @@ const OwnerStepCalendar = () => {
           <div className="bg-muted/50 rounded-lg p-3 text-sm">
             <span className="font-medium">Période sélectionnée : </span>
             {dateRange.from.toLocaleDateString("fr-FR")}
-            {dateRange.to && ` — ${dateRange.to.toLocaleDateString("fr-FR")}`}
+            {dateRange.to && `, ${dateRange.to.toLocaleDateString("fr-FR")}`}
             {saving && <span className="ml-2 text-muted-foreground">Sauvegarde...</span>}
           </div>
         )}

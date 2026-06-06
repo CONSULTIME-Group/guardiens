@@ -183,7 +183,7 @@ const TestErrorBoundary = () => {
       );
       results.forEach((r) => {
         const status = r.available && r.roundtripOk ? "✅ OK" : "⚠️ Problème";
-        console.log(`${status} — ${r.name}`, {
+        console.log(`${status}, ${r.name}`, {
           available: r.available,
           isMemoryShim: r.isMemoryShim,
           canWrite: r.canWrite,
@@ -273,7 +273,7 @@ const TestErrorBoundary = () => {
       <div className="max-w-3xl mx-auto space-y-6">
         <header className="space-y-2">
           <h1 className="font-heading text-2xl font-bold text-foreground">
-            Test ErrorBoundary — scénarios d'erreurs
+            Test ErrorBoundary, scénarios d'erreurs
           </h1>
           <p className="text-sm text-muted-foreground">
             Cette page simule plusieurs erreurs de rendu pour vérifier que

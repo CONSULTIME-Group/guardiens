@@ -54,7 +54,7 @@ const DEFAULT_FAQ = (cityName: string) => [
  },
  {
  q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityName} ?`,
- a: "Guardiens dispose d'un réseau de Gardiens d'Urgence dans chaque zone. En cas d'imprévu — animal malade, problème technique — le gardien en poste peut déclencher une alerte directement depuis l'application.",
+ a: "Guardiens dispose d'un réseau de Gardiens d'Urgence dans chaque zone. En cas d'imprévu, animal malade, problème technique, le gardien en poste peut déclencher une alerte directement depuis l'application.",
  },
 ];
 
@@ -136,7 +136,7 @@ const CitySchemaOrg = ({ city }: Props) => {
  if (isLyon) {
  graph.push({
  "@type": "LocalBusiness",
- name: "Guardiens — Garde d'animaux à Lyon",
+ name: "Guardiens, Garde d'animaux à Lyon",
  description:
  "Plateforme de garde de chien, de chat et de home sitting à Lyon. Gardiens de proximité vérifiés, sans commission.",
  url: "https://guardiens.fr/house-sitting/lyon",

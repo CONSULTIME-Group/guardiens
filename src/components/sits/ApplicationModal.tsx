@@ -112,7 +112,7 @@ const ApplicationModal = ({
     }
     try { await trackFirstAction("application_sent", { sit_id: sitId }); } catch {}
 
-    // Notifier le propriétaire (in-app + email) — best-effort, ne bloque pas le flux
+    // Notifier le propriétaire (in-app + email), best-effort, ne bloque pas le flux
     try {
       const [{ data: ownerProfile }, { data: sitInfo }, { data: meProfile }] = await Promise.all([
         supabase.from("profiles").select("email, first_name").eq("id", ownerId).maybeSingle(),
@@ -161,7 +161,7 @@ const ApplicationModal = ({
       }
     }
 
-    // Candidature à une garde — RPC atomique (context: sit_application)
+    // Candidature à une garde, RPC atomique (context: sit_application)
     const { data: convId, error: convErr } = await supabase.rpc("get_or_create_conversation", {
       p_other_user_id: ownerId,
       p_context_type: "sit_application",
@@ -206,7 +206,7 @@ const ApplicationModal = ({
             <ShieldCheck className="h-4 w-4 text-primary mt-0.5 shrink-0" />
             <div className="space-y-1 flex-1">
               <p className="text-xs font-semibold text-foreground">
-                Conseil — vérifiez votre identité pour être plus souvent retenu
+                Conseil, vérifiez votre identité pour être plus souvent retenu
               </p>
               <p className="text-xs text-muted-foreground">
                 Les propriétaires acceptent en priorité les profils vérifiés. Vous pouvez postuler dès maintenant et vérifier votre identité plus tard.
@@ -277,7 +277,7 @@ const ApplicationModal = ({
               )}
 
               {/* Badges */}
-              {/* Badges — migration en cours */}
+              {/* Badges, migration en cours */}
 
               {/* Mini gallery */}
               {sitterInfo.gallery.length > 0 && (

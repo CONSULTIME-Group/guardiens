@@ -68,7 +68,7 @@ const promiseRows: Array<{ label: string; value: string; positive: boolean }> = 
 const faqItems = [
  {
   q: `L'accès est-il vraiment gratuit pour tout le monde jusqu'au ${SITTER_PRICE_START} ?`,
-  a: `Oui. Jusqu'au ${SITTER_PRICE_START}, **l'accès complet à Guardiens est gratuit pour tout le monde** — gardiens comme propriétaires, sans exception.
+  a: `Oui. Jusqu'au ${SITTER_PRICE_START}, **l'accès complet à Guardiens est gratuit pour tout le monde**, gardiens comme propriétaires, sans exception.
 
 Aucune carte bancaire n'est demandée à l'inscription. Vous accédez à toutes les fonctionnalités : publier une annonce, postuler aux gardes, échanger par messagerie, laisser des avis, utiliser l'entraide.
 
@@ -78,7 +78,7 @@ Cet accès gratuit ne dépend pas du programme Fondateur : que vous vous inscriv
  },
  {
   q: `Qu'est-ce que le programme Fondateur ?`,
-  a: `Le **programme Fondateur** distingue les premiers membres inscrits sur Guardiens. Ils reçoivent un **badge Fondateur permanent** sur leur profil — un sceau honorifique qui ne sera plus jamais attribué une fois la fenêtre d'inscription refermée.
+  a: `Le **programme Fondateur** distingue les premiers membres inscrits sur Guardiens. Ils reçoivent un **badge Fondateur permanent** sur leur profil, un sceau honorifique qui ne sera plus jamais attribué une fois la fenêtre d'inscription refermée.
 
 Le badge ne change rien à votre accès ni à votre tarif : c'est uniquement une distinction symbolique pour celles et ceux qui ont rejoint l'aventure dès le départ.
 
@@ -90,7 +90,7 @@ Le badge ne change rien à votre accès ni à votre tarif : c'est uniquement une
 
 Publier une annonce, recevoir des candidatures, échanger avec les gardiens, laisser un avis : tout reste gratuit. Ce n'est pas une offre d'appel, c'est un choix de fond sur notre modèle économique.
 
-Guardiens se rémunère uniquement via l'abonnement des gardiens. Côté propriétaire, payer pour rencontrer des personnes de confiance n'aurait pas de sens : ce qui a de la valeur, c'est l'échange — pas l'accès.
+Guardiens se rémunère uniquement via l'abonnement des gardiens. Côté propriétaire, payer pour rencontrer des personnes de confiance n'aurait pas de sens : ce qui a de la valeur, c'est l'échange, pas l'accès.
 
 Pour aller plus loin : [Comment bien choisir son gardien →](/actualites/choisir-gardien-bons-criteres)`,
  },
@@ -106,7 +106,7 @@ La formule **annuelle (65 €/an)** est résiliable à tout moment ; le renouvel
  },
  {
   q: `Pourquoi le 14 juillet ?`,
-  a: `Il fallait une date après plusieurs semaines d'accès gratuit — un repère simple, partagé par toutes et tous. Le **${SITTER_PRICE_START}, fête nationale**, s'est imposé naturellement.
+  a: `Il fallait une date après plusieurs semaines d'accès gratuit, un repère simple, partagé par toutes et tous. Le **${SITTER_PRICE_START}, fête nationale**, s'est imposé naturellement.
 
 C'est ce jour-là que l'accès gratuit prend fin pour les gardiens. À partir du **15 juillet 2026**, l'abonnement gardien à ${SITTER_PRICE} devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit en permanence.`,
  },
@@ -114,9 +114,9 @@ C'est ce jour-là que l'accès gratuit prend fin pour les gardiens. À partir du
   q: "Y a-t-il des frais cachés ?",
   a: `Non. **Jusqu'au ${SITTER_PRICE_START} :** rien à payer pour personne, sans carte bancaire.
 
-**Après le ${SITTER_PRICE_START} — ce que paient les gardiens :** ${SITTER_PRICE}, 10\u00A0€ pour un mois, ou 65\u00A0€/an (−22\u00A0%). C'est tout.
+**Après le ${SITTER_PRICE_START}, ce que paient les gardiens :** ${SITTER_PRICE}, 10\u00A0€ pour un mois, ou 65\u00A0€/an (−22\u00A0%). C'est tout.
 
-**Ce que paient les propriétaires :** Rien, jamais. Publier, recevoir des candidatures, choisir, évaluer — accès gratuit en permanence.
+**Ce que paient les propriétaires :** Rien, jamais. Publier, recevoir des candidatures, choisir, évaluer, accès gratuit en permanence.
 
 **Ce qu'on ne prend pas :** Aucune commission sur les gardes. Pas d'assurance obligatoire, pas de booking fee, pas de frais de mise en relation.`,
  },
@@ -126,15 +126,15 @@ C'est ce jour-là que l'accès gratuit prend fin pour les gardiens. À partir du
 
 **La garde d'animaux à domicile (home sitting)** : un gardien vient chez vous prendre soin de votre maison et de vos animaux pendant votre absence.
 
-**Les petites missions d'entraide entre gens du coin** : un coup de main ponctuel, sans nuitée, sans animal nécessaire — arroser des plantes, ramasser les légumes du jardin, monter un meuble, prêter une perceuse, partager un trajet.
+**Les petites missions d'entraide entre gens du coin** : un coup de main ponctuel, sans nuitée, sans animal nécessaire, arroser des plantes, ramasser les légumes du jardin, monter un meuble, prêter une perceuse, partager un trajet.
 
 Les deux usages sont indépendants : vous pouvez activer l'un, l'autre, ou les deux. L'entraide reste gratuit pour toutes et tous, sans abonnement.`,
  },
  {
   q: "Quels types d'échanges sont possibles ?",
-  a: `Les échanges sur Guardiens passent par **du temps, des compétences ou des objets** — jamais par un paiement direct entre membres.
+  a: `Les échanges sur Guardiens passent par **du temps, des compétences ou des objets**, jamais par un paiement direct entre membres.
 
-**Côté garde :** vous accueillez un gardien chez vous, il prend soin de votre maison et de vos animaux. Aucun argent ne circule entre vous : l'échange se joue dans le service rendu — un toit contre une présence.
+**Côté garde :** vous accueillez un gardien chez vous, il prend soin de votre maison et de vos animaux. Aucun argent ne circule entre vous : l'échange se joue dans le service rendu, un toit contre une présence.
 
 **Côté entraide :** un service rendu peut être remercié par un autre service, un objet partagé, un repas, un cours ou simplement du temps. Quelques exemples concrets :
 - Ramasser des légumes contre un plat maison.
@@ -145,7 +145,7 @@ Les deux usages sont indépendants : vous pouvez activer l'un, l'autre, ou les d
 - Garder un colis, réceptionner une livraison.
 - Aider à porter un meuble, monter une étagère.
 
-Chaque échange est libre, négocié entre les deux personnes et n'engage que vous. Guardiens fournit l'outil et la mise en relation — pas la facture.`,
+Chaque échange est libre, négocié entre les deux personnes et n'engage que vous. Guardiens fournit l'outil et la mise en relation, pas la facture.`,
  },
 ];
 
@@ -180,9 +180,9 @@ const Pricing = () => {
  const daysLeft = Math.ceil(msLeft / 86400000);
 
  const ctaLabels: Record<typeof formule, string> = {
-  one_shot: "Accéder un mois — 10\u00A0€",
-  mensuel: "S'abonner — 6,99\u00A0€/mois",
-  annuel: "Choisir l'annuel — 65\u00A0€/an",
+  one_shot: "Accéder un mois, 10\u00A0€",
+  mensuel: "S'abonner, 6,99\u00A0€/mois",
+  annuel: "Choisir l'annuel, 65\u00A0€/an",
  };
 
  const registerLink = (role?: string) => {
@@ -265,7 +265,7 @@ const Pricing = () => {
    },
    {
     "@type": "Offer",
-    name: "Abonnement Gardien — Mensuel",
+    name: "Abonnement Gardien, Mensuel",
     description: `Abonnement gardien à 6,99 €/mois à partir du 14 juillet 2026. Sans engagement, résiliable à tout moment.`,
     price: String(SITTER_PRICE_NUMERIC),
     priceCurrency: SITTER_PRICE_CURRENCY,
@@ -285,7 +285,7 @@ const Pricing = () => {
    },
    {
     "@type": "Offer",
-    name: "Accès Gardien — Un mois",
+    name: "Accès Gardien, Un mois",
     description: "Paiement unique pour un mois d'accès, sans renouvellement automatique.",
     price: "10.00",
     priceCurrency: SITTER_PRICE_CURRENCY,
@@ -298,7 +298,7 @@ const Pricing = () => {
    },
    {
     "@type": "Offer",
-    name: "Abonnement Gardien — Annuel",
+    name: "Abonnement Gardien, Annuel",
     description: "Abonnement gardien annuel à 65 €/an, soit 5,42 €/mois équivalent (-22 % vs mensuel). Renouvellement annuel automatique, résiliable à tout moment.",
     price: "65.00",
     priceCurrency: SITTER_PRICE_CURRENCY,
@@ -324,8 +324,8 @@ const Pricing = () => {
    <PageMeta
     title={
      before
-      ? `Tarifs Guardiens — Offert pour tous jusqu'au ${SITTER_PRICE_START}`
-      : `Tarifs Guardiens — Offert propriétaires · ${SITTER_PRICE}`
+      ? `Tarifs Guardiens, Offert pour tous jusqu'au ${SITTER_PRICE_START}`
+      : `Tarifs Guardiens, Offert propriétaires · ${SITTER_PRICE}`
     }
     description={
      before
@@ -363,7 +363,7 @@ const Pricing = () => {
       </h1>
       <p className="text-base md:text-lg font-body text-foreground/65 leading-relaxed mb-7">
        {before
-        ? `Jusqu'au ${SITTER_PRICE_START}, l'accès complet est offert — gardiens comme propriétaires. Aucune carte bancaire demandée.`
+        ? `Jusqu'au ${SITTER_PRICE_START}, l'accès complet est offert, gardiens comme propriétaires. Aucune carte bancaire demandée.`
         : `Gratuit pour les propriétaires. ${SITTER_PRICE} pour les gardiens, sans engagement. C'est tout.`}
       </p>
       <div data-testid="pricing-hero-cta" className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -371,7 +371,7 @@ const Pricing = () => {
         to={registerLink("owner")}
         className="inline-flex items-center justify-center bg-primary text-primary-foreground font-body font-semibold text-sm px-7 py-3.5 rounded-full hover:bg-primary/90 transition-colors min-h-[44px]"
        >
-        Publier mon annonce — gratuitement
+        Publier mon annonce, gratuitement
        </Link>
        <Link
         to={registerLink("sitter")}
@@ -382,13 +382,13 @@ const Pricing = () => {
       </div>
      </section>
 
-     {/* Founder Banner — urgence */}
+     {/* Founder Banner, urgence */}
      {before && (
       <section className="mb-12 md:mb-16">
        <div className="w-full max-w-5xl mx-auto bg-gradient-to-br from-amber-50 to-amber-100/50 border border-amber-200/60 rounded-2xl overflow-hidden">
         <div className="bg-amber-100 px-6 py-2.5 text-center">
          <span className="text-sm font-medium text-amber-800 font-body tracking-wide">
-          Programme Fondateur — fenêtre d'inscription en cours
+          Programme Fondateur, fenêtre d'inscription en cours
          </span>
         </div>
 
@@ -408,7 +408,7 @@ const Pricing = () => {
             Inscrivez-vous dès maintenant pour rejoindre les Fondateurs
            </p>
            <p className="text-xs md:text-sm text-amber-800/80 font-body">
-            Un sceau honorifique permanent sur votre profil — il ne sera plus jamais attribué une fois la fenêtre refermée.
+            Un sceau honorifique permanent sur votre profil, il ne sera plus jamais attribué une fois la fenêtre refermée.
            </p>
           </div>
 
@@ -434,7 +434,7 @@ const Pricing = () => {
       </section>
      )}
 
-     {/* Section informative — placée AVANT les cartes payantes pour
+     {/* Section informative, placée AVANT les cartes payantes pour
          installer la valeur (ce qui reste à 0€) avant le prix. */}
      <div className="max-w-5xl mx-auto mb-10">
       <FreeAccountSection />
@@ -458,7 +458,7 @@ const Pricing = () => {
         <ul className="space-y-3 flex-1">
          {ownerFeatures.map((f) => (
           <li key={f} className="flex items-start gap-2.5 text-sm">
-           <span aria-hidden className="text-primary font-body mt-0.5 shrink-0 select-none">—</span>
+           <span aria-hidden className="text-primary font-body mt-0.5 shrink-0 select-none">,</span>
            <span className="font-body text-foreground/70">{f}</span>
           </li>
          ))}
@@ -530,13 +530,13 @@ const Pricing = () => {
         <ul className="space-y-3">
          {sitterFeatures.map((f) => (
           <li key={f} className="flex items-start gap-2.5 text-sm">
-           <span aria-hidden className="text-primary font-body mt-0.5 shrink-0 select-none">—</span>
+           <span aria-hidden className="text-primary font-body mt-0.5 shrink-0 select-none">,</span>
            <span className="text-foreground/70 font-body">{f}</span>
           </li>
          ))}
         </ul>
 
-        {/* Bloc formules — masqué pendant la période gratuite totale.
+        {/* Bloc formules, masqué pendant la période gratuite totale.
             Pattern radiogroup accessible (rôle + arrow keys via tabIndex et aria-checked). */}
         {!before && (
          <div role="radiogroup" aria-label="Choix de la formule gardien" className="bg-background border border-border/50 rounded-xl p-4 space-y-3 text-left">
@@ -595,7 +595,7 @@ const Pricing = () => {
          </div>
         )}
 
-        {/* CTA — bascule entre /inscription (visiteur ou période gratuite) et Stripe Checkout (utilisateur connecté, post-launch) */}
+        {/* CTA, bascule entre /inscription (visiteur ou période gratuite) et Stripe Checkout (utilisateur connecté, post-launch) */}
         <div className="space-y-1 pt-2 mt-auto">
          {before || !user ? (
           <Link
@@ -637,7 +637,7 @@ const Pricing = () => {
       </Card>
      </section>
 
-     {/* ═══ Entraide — exemple concret, hors animaux ═══ */}
+     {/* ═══ Entraide, exemple concret, hors animaux ═══ */}
      <section className="mb-12 md:mb-16 max-w-4xl mx-auto">
       <div className="rounded-2xl border border-border/40 bg-card p-6 md:p-8">
        <div className="flex items-baseline justify-between flex-wrap gap-3 mb-4">
@@ -652,7 +652,7 @@ const Pricing = () => {
         Les petites missions n'ont pas besoin d'animaux pour exister. Nadine cherche un
         coup de main pour ramasser ses légumes. Jacques passe une heure dans son jardin
         et repart avec un plat maison. Aucune garde, aucune carte bancaire, aucune
-        commission — juste un échange entre gens du coin.
+        commission, juste un échange entre gens du coin.
        </p>
        <p className="text-sm font-body text-foreground/55 italic mb-5">
         Cours de cuisine, arrosage de plantes, montage de meuble, prêt d'une perceuse,
@@ -698,7 +698,7 @@ const Pricing = () => {
      {/* Témoignage retiré : aucun avis vérifié à afficher tant que la
          base d'avis réels n'est pas suffisante. Évite les fausses preuves. */}
 
-     {/* ═══ Internal links — villes ═══ */}
+     {/* ═══ Internal links, villes ═══ */}
      <section className="max-w-3xl mx-auto mb-12 md:mb-16">
       <h2 className="font-heading text-xl font-bold text-foreground text-center mb-4">House-sitting par ville</h2>
       <p className="text-sm text-muted-foreground text-center font-body mb-6">

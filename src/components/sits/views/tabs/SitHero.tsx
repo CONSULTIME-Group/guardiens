@@ -1,5 +1,5 @@
 /**
- * Hero photos d'une annonce — version mosaïque moderne (style Airbnb).
+ * Hero photos d'une annonce, version mosaïque moderne (style Airbnb).
  *
  * - Desktop : mosaïque 2 colonnes (1 grande à gauche + 2x2 vignettes à droite),
  *   hauteur compacte h-[320px] (réduit de moitié vs ancien layout).
@@ -42,7 +42,7 @@ const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHer
     for (const p of safeProperty) {
       if (seen.has(p)) continue;
       seen.add(p);
-      all.push({ url: p, caption: title ? `Photo du logement — ${title}` : "Photo du logement", kind: "logement" });
+      all.push({ url: p, caption: title ? `Photo du logement, ${title}` : "Photo du logement", kind: "logement" });
     }
     for (const pet of petPhotos) {
       if (!pet?.url || typeof pet.url !== "string") continue;
@@ -175,7 +175,7 @@ const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHer
         <div className="hidden md:block">
           <div className="relative rounded-2xl overflow-hidden">
             <div className="grid grid-cols-4 grid-rows-2 gap-1.5 h-[320px]">
-              {/* Image principale — col-span 2, row-span 2 */}
+              {/* Image principale, col-span 2, row-span 2 */}
               <button
                 type="button"
                 onClick={() => openAt(0)}
@@ -192,7 +192,7 @@ const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHer
                 />
               </button>
 
-              {/* Vignettes 2x2 — fallback gris si moins de 4 */}
+              {/* Vignettes 2x2, fallback gris si moins de 4 */}
               {Array.from({ length: 4 }).map((_, i) => {
                 const s = sides[i];
                 if (!s) {
@@ -238,7 +238,7 @@ const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHer
           </div>
         </div>
 
-        {/* Bandeau ville/titre sous la galerie — plus moderne et lisible */}
+        {/* Bandeau ville/titre sous la galerie, plus moderne et lisible */}
         {(title || cityName || department) && (
           <div className="mt-4">
             {(cityName || department) && (

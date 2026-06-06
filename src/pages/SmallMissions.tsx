@@ -339,7 +339,7 @@ const SmallMissions = () => {
     try { window.localStorage.setItem("missions:compactBio", compactBio ? "1" : "0"); } catch { /* quota */ }
   }, [compactBio]);
 
-  // Bio toujours affichée (A/B abandonné — trafic insuffisant pour significativité).
+  // Bio toujours affichée (A/B abandonné, trafic insuffisant pour significativité).
   const showBio = true;
 
   // Skills correspondant aux missions actives publiées par le user connecté.
@@ -400,7 +400,7 @@ const SmallMissions = () => {
   return (
     <>
       <PageMeta
-        title="Petites missions — Entre gens du coin | Guardiens"
+        title="Petites missions, Entre gens du coin | Guardiens"
         description="Des coups de main, des échanges, des compétences. Entre gens du coin qui se choisissent."
         noindex
       />
@@ -478,7 +478,7 @@ const SmallMissions = () => {
               setCategoryFilter={setCategoryFilter}
             />
 
-            {/* ═══ Section 1 — Demandes visibles (HERO) ═══ */}
+            {/* ═══ Section 1, Demandes visibles (HERO) ═══ */}
             <div className="flex items-center gap-3 mb-2">
               <span className="h-8 w-1.5 rounded-full bg-primary" aria-hidden />
               <h2 className="text-xl md:text-2xl font-heading font-bold text-foreground leading-tight">
@@ -562,7 +562,7 @@ const SmallMissions = () => {
                   ) : mode === "offer" ? (
                     "Rendez-vous visible : indiquez vos disponibilités juste en dessous. Quand une demande arrivera, vous serez la première personne à qui l'on pense."
                   ) : (
-                    "Soyez la première personne à publier. Une demande d'aujourd'hui, c'est des gens du coin qui la voient demain — et souvent une rencontre qui change la semaine."
+                    "Soyez la première personne à publier. Une demande d'aujourd'hui, c'est des gens du coin qui la voient demain, et souvent une rencontre qui change la semaine."
                   )}
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
@@ -589,7 +589,7 @@ const SmallMissions = () => {
               </div>
             )}
 
-            {/* ═══ Section 1bis — Hors périmètre ═══ */}
+            {/* ═══ Section 1bis, Hors périmètre ═══ */}
             {outOfZoneMissions.length > 0 && (
               <div className="mt-8 rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-primary/10 to-primary/5 p-5 shadow-sm">
                 <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
@@ -643,7 +643,7 @@ const SmallMissions = () => {
               </div>
             )}
 
-            {/* ═══ Section 2 — Membres disponibles (secondaire) ═══ */}
+            {/* ═══ Section 2, Membres disponibles (secondaire) ═══ */}
             {(helperCount > 0 || isAuthenticated) && (
               <div className="mt-12 pt-8 border-t border-border">
                 {isAuthenticated && mode === "offer" && (
@@ -661,7 +661,7 @@ const SmallMissions = () => {
                       />
                       <p className="text-sm text-foreground">
                         {(currentUserProfile as any)?.available_for_help
-                          ? "Vous êtes visible — disponible pour aider"
+                          ? "Vous êtes visible, disponible pour aider"
                           : "Rendez-vous visible auprès des gens du coin"}
                       </p>
                     </div>
@@ -783,7 +783,7 @@ const SmallMissions = () => {
           </div>
         </footer>
 
-        {/* Sticky CTA mobile — masqué quand l'empty-state expose déjà sa CTA
+        {/* Sticky CTA mobile, masqué quand l'empty-state expose déjà sa CTA
             (item 8 : éviter 4 boutons verts empilés sur mobile). */}
         {(missionCount > 0 || helperCount > 0) && (
           <div className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">

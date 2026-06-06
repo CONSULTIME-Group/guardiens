@@ -50,14 +50,14 @@ const HelpersProximityTicker = ({ userId }: { userId?: string }) => {
 };
 
 /**
- * Empty-state du carousel helpers — avec cooldown pour éviter la fatigue.
+ * Empty-state du carousel helpers, avec cooldown pour éviter la fatigue.
  *
  * 3 variantes selon l'historique d'exposition (localStorage, 7j glissants) :
  * - `primary` : carte complète + CTA bouton plein "Inviter un proche"
  * - `soft` : copy raccourcie + lien texte discret (après 3 vues en 7j)
  * - `hidden` : message minimal sans CTA promotionnel (si user a cliqué "Ne plus me proposer")
  *
- * Le ticker "X gardiens actifs" reste affiché dans tous les cas — c'est de la
+ * Le ticker "X gardiens actifs" reste affiché dans tous les cas, c'est de la
  * preuve sociale, pas un CTA, donc pas concerné par le cooldown.
  */
 const EmptyHelpersState = ({ hideHeader, userId }: { hideHeader: boolean; userId?: string }) => {
@@ -140,11 +140,11 @@ const EmptyHelpersState = ({ hideHeader, userId }: { hideHeader: boolean; userId
 
         {variant === "hidden" && (
           <p className="text-sm text-foreground/70 leading-relaxed mt-2 max-w-prose">
-            Repassez bientôt — la communauté s'agrandit chaque semaine près de chez vous.
+            Repassez bientôt, la communauté s'agrandit chaque semaine près de chez vous.
           </p>
         )}
 
-        {/* Savoir-faire disponibles — pédagogie : on montre les catégories
+        {/* Savoir-faire disponibles, pédagogie : on montre les catégories
             de coup de main même quand personne n'est listé, pour que
             l'utilisateur comprenne le périmètre. */}
         <div className="mt-4 pt-4 border-t border-border/40">
@@ -165,7 +165,7 @@ const EmptyHelpersState = ({ hideHeader, userId }: { hideHeader: boolean; userId
 
         <HelpersProximityTicker userId={userId} />
 
-        {/* CTA navigation — toujours visible, même en empty-state, pour
+        {/* CTA navigation, toujours visible, même en empty-state, pour
             permettre de rejoindre la page des petites missions. */}
         <div className="mt-4 pt-3 border-t border-border/40 flex flex-wrap items-center justify-end gap-x-5 gap-y-2 text-xs">
           <Link
@@ -190,7 +190,7 @@ const EmptyHelpersState = ({ hideHeader, userId }: { hideHeader: boolean; userId
 
 
 /**
- * « Près de chez vous — qui peut donner un coup de main ? »
+ * « Près de chez vous, qui peut donner un coup de main ? »
  *
  * Module intentionnel : l'utilisateur choisit une compétence (chips), la liste
  * filtre en direct, et chaque carte ouvre une conversation pré-contextualisée
@@ -199,7 +199,7 @@ const EmptyHelpersState = ({ hideHeader, userId }: { hideHeader: boolean; userId
  * Pourquoi ce parti pris :
  * - on remplace l'affichage passif « 3 cards aléatoires » par une intention.
  * - on déplace la friction du « cliquer pour voir » vers le « cliquer pour
- *   écrire » — la promesse Guardiens, c'est le contact humain, pas le listing.
+ *   écrire », la promesse Guardiens, c'est le contact humain, pas le listing.
  * - le rayon (30 / 50 / 100 km) est affiché pour rester honnête (zone rurale).
  */
 
@@ -267,7 +267,7 @@ const HelperMiniCard = ({
 
   // Fallback : si la bio brute existe mais que la sanitization l'a vidée
   // (bio contenant uniquement email/tél/URL), on affiche un texte neutre
-  // plutôt que rien — pour ne pas laisser la carte « muette ».
+  // plutôt que rien, pour ne pas laisser la carte « muette ».
   const rawBio = (helper.bio || "").trim();
   const sanitized = sanitizeBioForCard(helper.bio);
   const bioTeaser =
@@ -309,7 +309,7 @@ const HelperMiniCard = ({
           {isVeryClose && savoirFaireChips.length > 0 && (
             <span
               className="absolute -bottom-2 -right-2 px-2 py-0.5 bg-primary text-primary-foreground text-[9px] font-bold uppercase tracking-widest rounded-md shadow-md"
-              title="Savoir-faire à moins de 5 km — priorisé pour vous"
+              title="Savoir-faire à moins de 5 km, priorisé pour vous"
               aria-label="Tout près, à moins de 5 kilomètres"
             >
               Tout près
@@ -355,7 +355,7 @@ const HelperMiniCard = ({
       </div>
 
       <div className="px-4 sm:px-6 pb-4 sm:pb-5 space-y-3">
-        {/* Savoir-faire (custom) — affiché EN PREMIER car c'est le différenciant. */}
+        {/* Savoir-faire (custom), affiché EN PREMIER car c'est le différenciant. */}
         {visibleSF.length > 0 ? (
           <div className="space-y-1.5">
             <p className="text-[9px] uppercase tracking-[0.2em] text-accent font-bold">
@@ -381,7 +381,7 @@ const HelperMiniCard = ({
           </p>
         ) : null}
 
-        {/* Catégories — labellisées explicitement pour ne pas laisser de chips orphelines */}
+        {/* Catégories, labellisées explicitement pour ne pas laisser de chips orphelines */}
         {visibleCats.length > 0 && (
           <div className="space-y-1.5">
             <p className="text-[9px] uppercase tracking-[0.2em] text-primary font-bold">
@@ -417,7 +417,7 @@ const HelperMiniCard = ({
         )}
       </div>
 
-      {/* Footer carte : 2 actions claires — primaire « Lui écrire » qui ouvre
+      {/* Footer carte : 2 actions claires, primaire « Lui écrire » qui ouvre
           une conversation pré-contextualisée (helper_inquiry), secondaire
           « Voir le profil » pour lever le doute avant de prendre contact. */}
       <div className="mt-auto px-4 sm:px-6 pb-4 sm:pb-5 pt-1 flex items-center gap-2 border-t border-border/40">
@@ -451,7 +451,7 @@ const HelperMiniCard = ({
 const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boolean } = {}) => {
   const { user } = useAuth();
   const [activeSkill, setActiveSkill] = useState<string | null>(null);
-  // Override rayon — bumped via le lien « Élargir le rayon » dans l'empty-state
+  // Override rayon, bumped via le lien « Élargir le rayon » dans l'empty-state
   // du filtre. Reset à null quand l'utilisateur change/retire le filtre, pour
   // ne pas garder un rayon de 100 km collant.
   const [forcedRadius, setForcedRadius] = useState<number | null>(null);
@@ -521,27 +521,27 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
               Entraide près de chez vous
             </h3>
             <p className="text-xs text-muted-foreground mt-2 max-w-prose">
-              Savoir-faire particuliers affichés en priorité, puis proximité — {radiusLabel}.
+              Savoir-faire particuliers affichés en priorité, puis proximité, {radiusLabel}.
             </p>
           </div>
         </div>
       )}
 
-      {/* Explainer concept — TOUJOURS visible, y compris quand le parent
+      {/* Explainer concept, TOUJOURS visible, y compris quand le parent
           rend déjà un titre via SectionEyebrow. Sans cette ligne,
           l'utilisateur ne comprend pas ce que la liste suggère de faire. */}
       <p className="text-xs sm:text-sm text-foreground/75 leading-relaxed max-w-prose">
         Des membres prêts à rendre service ponctuellement&nbsp;: promenade,
         visite, garde d'1&nbsp;h, dépôt de clés, jardinage, bricolage…
-        <span className="text-muted-foreground"> Cliquez sur «&nbsp;Lui écrire&nbsp;» pour proposer un échange — c'est gratuit, sans engagement.</span>
+        <span className="text-muted-foreground"> Cliquez sur «&nbsp;Lui écrire&nbsp;» pour proposer un échange, c'est gratuit, sans engagement.</span>
       </p>
       {data?.hasGeo && (
         <p className="text-[11px] text-muted-foreground -mt-1">
-          Savoir-faire affichés en priorité, puis proximité — {radiusLabel}.
+          Savoir-faire affichés en priorité, puis proximité, {radiusLabel}.
         </p>
       )}
 
-      {/* Compteur dual local · national — preuve sociale localisée */}
+      {/* Compteur dual local · national, preuve sociale localisée */}
       <HelpersProximityTicker userId={user?.id} />
 
 
@@ -551,7 +551,7 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-warning/10 ring-1 ring-warning/30 px-3 py-2 text-xs">
           <span className="text-foreground/80 font-sans">
             <MapPin className="inline h-3.5 w-3.5 mr-1 text-warning" aria-hidden="true" />
-            Sans votre adresse, impossible de trier par proximité — résultats au hasard.
+            Sans votre adresse, impossible de trier par proximité, résultats au hasard.
           </span>
           <Button asChild size="sm" variant="outline" className="h-7 rounded-lg text-xs">
             <Link to="/profile">Ajouter mon adresse</Link>
@@ -559,7 +559,7 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
         </div>
       )}
 
-      {/* Chips compétences — scroll horizontal sur mobile avec fondu droit
+      {/* Chips compétences, scroll horizontal sur mobile avec fondu droit
           pour signaler qu'il existe d'autres filtres au-delà du bord. */}
       <div className="relative -mx-1">
         <div className="flex gap-2 overflow-x-auto pb-1 px-1 scrollbar-hide">
@@ -603,7 +603,7 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
         <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-background to-transparent sm:hidden" aria-hidden="true" />
       </div>
 
-      {/* Carrousel horizontal premium — partout (hideHeader contrôle seulement le titre). */}
+      {/* Carrousel horizontal premium, partout (hideHeader contrôle seulement le titre). */}
       {filtered.length === 0 ? (
         (() => {
           const activeChip = SKILL_CHIPS.find((c) => c.key === activeSkill);
@@ -675,7 +675,7 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
         </div>
       )}
 
-      {/* CTA section : alternative à l'écriture directe — publier une demande
+      {/* CTA section : alternative à l'écriture directe, publier une demande
           publique pour atteindre plus de monde que les profils affichés. */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-2 border-t border-border/40">
         <p className="text-[11px] text-muted-foreground leading-snug">

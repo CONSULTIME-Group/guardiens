@@ -86,7 +86,7 @@ const BreedProfileCard = ({ species, breed, ownerNote, ownerFirstName, onNoteCha
     <div className="mt-3 rounded-lg border border-border bg-accent/30 p-4 space-y-3">
       <div className="flex items-center gap-2">
         <Info className="h-4 w-4 text-primary shrink-0" />
-        <h4 className="text-sm font-semibold">Fiche race — {breedLabel}</h4>
+        <h4 className="text-sm font-semibold">Fiche race, {breedLabel}</h4>
       </div>
 
       {editable && onNoteChange && (

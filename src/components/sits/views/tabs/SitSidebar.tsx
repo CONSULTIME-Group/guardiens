@@ -1,7 +1,7 @@
 /**
  * Sidebar fiche annonce : profil hôte, lien guide local,
  * lien "voir les gardiens du coin", encart réassurance.
- * Aucune icône Lucide décorative — texte pur (mem://constraints/no-icons-in-content).
+ * Aucune icône Lucide décorative, texte pur (mem://constraints/no-icons-in-content).
  */
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";

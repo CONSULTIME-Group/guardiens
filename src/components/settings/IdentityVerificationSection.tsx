@@ -208,7 +208,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
         {status !== "verified" && (
           <div className="space-y-4">
             <div className="text-xs text-muted-foreground space-y-1">
-              <p className="font-medium text-foreground text-sm">Étape 1 — Pièce d'identité</p>
+              <p className="font-medium text-foreground text-sm">Étape 1, Pièce d'identité</p>
               <p className="text-xs">Documents acceptés :</p>
               <ul className="list-disc list-inside space-y-0.5">
                 <li>Carte d'identité (recto)</li>
@@ -253,7 +253,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
             </label>
 
             <div className="pt-3 border-t border-border space-y-2">
-              <p className="text-sm font-medium text-foreground">Étape 2 — Selfie de vérification</p>
+              <p className="text-sm font-medium text-foreground">Étape 2, Selfie de vérification</p>
               <p className="text-xs text-muted-foreground">
                 {documentUrl
                   ? "Prenez un selfie pour confirmer que la pièce vous appartient. Formats : JPG, PNG · Max 5 Mo"

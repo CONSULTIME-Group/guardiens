@@ -1,5 +1,5 @@
 /**
- * DraftChecklist — état de complétude d'une annonce en brouillon avant publication.
+ * DraftChecklist, état de complétude d'une annonce en brouillon avant publication.
  *
  * Affiché à la place de l'ancien bandeau "Brouillon → Publier".
  * Liste les éléments requis :
@@ -51,7 +51,7 @@ const DraftChecklist = ({
       <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
         <div>
           <p className="font-heading text-base font-semibold">
-            Brouillon — {doneCount} / {items.length} prêts
+            Brouillon, {doneCount} / {items.length} prêts
           </p>
           <p className="text-sm text-muted-foreground">
             {allOk

@@ -1,4 +1,4 @@
-// Audit Tarifs — outil dev-only.
+// Audit Tarifs, outil dev-only.
 // Liste toutes les sources de prix de l'app et signale les divergences avec
 // la source unique de vérité (`src/lib/pricing.ts`). Non indexable, non monté
 // en production.
@@ -96,7 +96,7 @@ function buildRows(): Row[] {
     ok: SITTER_PRICE_NUMERIC === 6.99,
   });
   {
-    const offerPrice = extractOfferPrice(pricingPageSrc, "Abonnement Gardien — Mensuel");
+    const offerPrice = extractOfferPrice(pricingPageSrc, "Abonnement Gardien, Mensuel");
     push({
       formula: "mensuel",
       source: "src/pages/Pricing.tsx (Offer)",
@@ -151,12 +151,12 @@ function buildRows(): Row[] {
       source: "src/pages/Pricing.tsx (state ctaLabels)",
       field: "CTA libellé one_shot",
       found: cta,
-      expected: `Accéder un mois — 10${NBSP}€`,
+      expected: `Accéder un mois, 10${NBSP}€`,
       ok: !!cta && cta.includes("10") && cta.includes("€"),
     });
   }
   {
-    const offerPrice = extractOfferPrice(pricingPageSrc, "Accès Gardien — Un mois");
+    const offerPrice = extractOfferPrice(pricingPageSrc, "Accès Gardien, Un mois");
     push({
       formula: "one_shot",
       source: "src/pages/Pricing.tsx (Offer)",
@@ -221,12 +221,12 @@ function buildRows(): Row[] {
       source: "src/pages/Pricing.tsx (state ctaLabels)",
       field: "CTA libellé annuel",
       found: cta,
-      expected: `Choisir l'annuel — 65${NBSP}€/an`,
+      expected: `Choisir l'annuel, 65${NBSP}€/an`,
       ok: !!cta && cta.includes("65") && cta.includes("€"),
     });
   }
   {
-    const offerPrice = extractOfferPrice(pricingPageSrc, "Abonnement Gardien — Annuel");
+    const offerPrice = extractOfferPrice(pricingPageSrc, "Abonnement Gardien, Annuel");
     push({
       formula: "annuel",
       source: "src/pages/Pricing.tsx (Offer)",
@@ -287,7 +287,7 @@ const AuditTarifs = () => {
       <main className="min-h-screen flex items-center justify-center p-8">
         <Helmet>
           <meta name="robots" content="noindex,nofollow" />
-          <title>Audit tarifs — indisponible</title>
+          <title>Audit tarifs, indisponible</title>
         </Helmet>
         <div className="max-w-md text-center space-y-2">
           <h1 className="text-2xl font-semibold">Audit tarifs</h1>
@@ -310,12 +310,12 @@ const AuditTarifs = () => {
     <main className="min-h-screen p-6 md:p-10 max-w-6xl mx-auto">
       <Helmet>
         <meta name="robots" content="noindex,nofollow" />
-        <title>Audit tarifs — dev</title>
+        <title>Audit tarifs, dev</title>
       </Helmet>
 
       <header className="mb-8 space-y-2">
         <p className="text-xs uppercase tracking-wider text-muted-foreground">
-          Outil dev — non monté en production
+          Outil dev, non monté en production
         </p>
         <h1 className="text-3xl font-semibold">Audit tarifs</h1>
         <p className="text-muted-foreground max-w-2xl">
@@ -332,7 +332,7 @@ const AuditTarifs = () => {
           aria-live="polite"
         >
           {drift.length === 0
-            ? `OK — ${rows.length} sources alignées`
+            ? `OK, ${rows.length} sources alignées`
             : `${drift.length} divergence(s) sur ${rows.length} sources`}
         </div>
       </header>

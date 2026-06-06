@@ -116,7 +116,7 @@ export function BadgeSceauLarge({
         </textPath>
       </text>
 
-      {/* Icon — centered lower to make room for arc text */}
+      {/* Icon, centered lower to make room for arc text */}
       <g
         transform="translate(30, 36) scale(0.9)"
         dangerouslySetInnerHTML={{ __html: def.svgIcon }}

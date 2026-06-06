@@ -10,7 +10,7 @@ interface QuickActionsCardProps {
 }
 
 /**
- * Carte d'actions rapides — placée en tête de l'aside ≥ xl.
+ * Carte d'actions rapides, placée en tête de l'aside ≥ xl.
  * Centralise : disponibilité + raccourcis candidatures/messages + CTA explorer.
  * Remplace l'aside décorative ; donne une vraie utilité actionnable.
  */
@@ -26,7 +26,7 @@ const QuickActionsCard = ({
     </p>
 
     {/* Indicateur de statut (lecture seule). Le toggle réel reste dans le Hero
-        — source de vérité unique pour éviter les états divergents. */}
+       , source de vérité unique pour éviter les états divergents. */}
     <div className="flex items-center justify-between py-2 border-b border-border">
       <div>
         <p className="text-sm font-medium text-foreground">Mode disponible</p>
@@ -83,7 +83,7 @@ const QuickActionsCard = ({
       )}
     </Link>
 
-    {/* CTA secondaire — le CTA primaire de la page est porté par le Cockpit (PriorityActionCard).
+    {/* CTA secondaire, le CTA primaire de la page est porté par le Cockpit (PriorityActionCard).
         On reste en ghost pour ne pas concurrencer. */}
     <Button asChild variant="ghost" className="w-full mt-4 text-foreground/80 hover:text-primary" size="sm">
       <Link to="/search" className="gap-2">

@@ -14,7 +14,7 @@ const OVERNIGHT = ["Oui conjoint/ami", "À discuter", "Non"];
 const SPACES = ["Piscine", "BBQ", "Jardin", "Cuisine complète", "Buanderie"];
 const SMOKER = ["Oui dehors uniquement", "Non"];
 const MEETING_OPTIONS = ["Obligatoire pour moi", "Fortement souhaitée", "Selon disponibilités", "Non nécessaire"];
-const NEWS_OPTIONS = ["Chaque jour", "Tous les 2-3 jours", "En cas d'imprévu uniquement", "Je fais confiance — pas de contrainte"];
+const NEWS_OPTIONS = ["Chaque jour", "Tous les 2-3 jours", "En cas d'imprévu uniquement", "Je fais confiance, pas de contrainte"];
 
 interface Props {
   data: OwnerProfileData;
@@ -110,7 +110,7 @@ const OwnerStepRules = ({ data, onChange }: Props) => (
         <AiSuggestButton field="rules_notes" currentValue={data.rules_notes} onSuggestion={text => onChange({ rules_notes: text })} />
       </div>
       <Textarea value={data.rules_notes} onChange={e => onChange({ rules_notes: e.target.value })}
-        placeholder="Nuancez ici — ex : un BBQ entre amis OK, pas de soirée de groupe"
+        placeholder="Nuancez ici, ex : un BBQ entre amis OK, pas de soirée de groupe"
         className="rounded-lg min-h-[80px]" maxLength={2000} />
       <HintBubble>Soyez clair dès le départ, ça évite 90% des malentendus. Les gardiens préfèrent savoir à quoi s'attendre.</HintBubble>
     </div>

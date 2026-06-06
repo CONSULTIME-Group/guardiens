@@ -97,7 +97,7 @@ export default function AdminMassEmailsStats() {
       { sent: number; clicks: number; visitors: Set<string>; missions: number }
     >();
 
-    // 1) Envois (sent) — agrégation depuis mass_emails (utm_campaign extrait du cta_url)
+    // 1) Envois (sent), agrégation depuis mass_emails (utm_campaign extrait du cta_url)
     for (const m of massEmails) {
       const c = extractCampaign(m.cta_url);
       if (!c) continue;
@@ -182,10 +182,10 @@ export default function AdminMassEmailsStats() {
               <Metric label="Envoyés" value={oser.sent} />
               <Metric label="Clics uniques" value={oser.uniqueVisitors} />
               <Metric label="Missions créées" value={oser.missions} />
-              <Metric label="CTR" value={oser.sent > 0 ? `${oser.ctr.toFixed(1)} %` : "—"} />
+              <Metric label="CTR" value={oser.sent > 0 ? `${oser.ctr.toFixed(1)} %` : ","} />
               <Metric
                 label="Taux de conversion"
-                value={oser.uniqueVisitors > 0 ? `${oser.conversionRate.toFixed(1)} %` : "—"}
+                value={oser.uniqueVisitors > 0 ? `${oser.conversionRate.toFixed(1)} %` : ","}
               />
             </div>
           ) : (
@@ -231,13 +231,13 @@ export default function AdminMassEmailsStats() {
                 {stats.map((s) => (
                   <TableRow key={s.campaign}>
                     <TableCell className="font-medium">{s.campaign}</TableCell>
-                    <TableCell className="text-right">{s.sent || "—"}</TableCell>
+                    <TableCell className="text-right">{s.sent || ","}</TableCell>
                     <TableCell className="text-right">{s.uniqueVisitors}</TableCell>
                     <TableCell className="text-right">
                       {s.missions > 0 ? <Badge variant="secondary">{s.missions}</Badge> : <span className="text-muted-foreground">0</span>}
                     </TableCell>
-                    <TableCell className="text-right">{s.sent > 0 ? `${s.ctr.toFixed(1)} %` : "—"}</TableCell>
-                    <TableCell className="text-right">{s.uniqueVisitors > 0 ? `${s.conversionRate.toFixed(1)} %` : "—"}</TableCell>
+                    <TableCell className="text-right">{s.sent > 0 ? `${s.ctr.toFixed(1)} %` : ","}</TableCell>
+                    <TableCell className="text-right">{s.uniqueVisitors > 0 ? `${s.conversionRate.toFixed(1)} %` : ","}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

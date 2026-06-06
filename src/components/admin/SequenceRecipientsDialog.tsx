@@ -165,7 +165,7 @@ export const SequenceRecipientsDialog = ({ open, onOpenChange, sequenceKey, sequ
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{sequenceLabel} — destinataires</DialogTitle>
+          <DialogTitle>{sequenceLabel}, destinataires</DialogTitle>
           <DialogDescription>
             Liste des utilisateurs entrés dans le parcours sur la période, avec leur progression et engagement.
           </DialogDescription>
@@ -197,7 +197,7 @@ export const SequenceRecipientsDialog = ({ open, onOpenChange, sequenceKey, sequ
                 const name =
                   [j.profiles?.first_name, j.profiles?.last_name].filter(Boolean).join(" ") ||
                   j.profiles?.email ||
-                  "—";
+                  ",";
                 const logs = logsByJourney.get(j.id) ?? [];
                 return (
                   <TableRow key={j.id}>
@@ -218,7 +218,7 @@ export const SequenceRecipientsDialog = ({ open, onOpenChange, sequenceKey, sequ
                       )}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {j.current_step ?? "—"}
+                      {j.current_step ?? ","}
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1.5">
@@ -241,7 +241,7 @@ export const SequenceRecipientsDialog = ({ open, onOpenChange, sequenceKey, sequ
                               key={idx}
                               className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-mono ${tone}`}
                               title={`Étape ${l.step_order} · ${l.template_name} · ${
-                                l.sent ? "envoyé" : `non envoyé (${l.reason ?? "—"})`
+                                l.sent ? "envoyé" : `non envoyé (${l.reason ?? ","})`
                               }${open ? " · ouvert" : ""}${click ? " · cliqué" : ""}`}
                             >
                               {l.step_order}

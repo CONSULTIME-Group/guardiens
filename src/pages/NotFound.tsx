@@ -67,7 +67,7 @@ const NotFound = () => {
               On dirait que ce chien a enterré la page.
             </h1>
             <p className="text-muted-foreground text-lg">
-              La page que vous cherchez n'existe pas — mais la communauté Guardiens, si.
+              La page que vous cherchez n'existe pas, mais la communauté Guardiens, si.
             </p>
           </div>
 

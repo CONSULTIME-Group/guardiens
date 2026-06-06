@@ -54,7 +54,7 @@ const getPasswordStrength = (pw: string): { score: 0 | 1 | 2 | 3 | 4; label: str
  return { score: score as 0 | 1 | 2 | 3 | 4,...map[score] };
 };
 
-/* Common compromised passwords / patterns blocked by Supabase HIBP — we pre-check
+/* Common compromised passwords / patterns blocked by Supabase HIBP, we pre-check
  to avoid the very confusing "weak_password" error that costs us many signups. */
 const COMMON_WEAK_PASSWORDS = new Set([
  "12345678", "123456789", "1234567890", "azertyui", "azerty123",
@@ -124,7 +124,7 @@ const Register = () => {
  if (ref) {
  sessionStorage.setItem("guardiens_ref", ref);
  }
- // Fire-and-forget — fonctionne aussi en anonyme via insertion locale temp
+ // Fire-and-forget, fonctionne aussi en anonyme via insertion locale temp
  trackEvent("signup_started", {
  source: "/inscription",
  metadata: { has_ref: !!ref, preset_role: presetRole || null },
@@ -431,12 +431,12 @@ const Register = () => {
 
  return (
  <div className="min-h-screen flex bg-background">
- {/* /inscription : noindex (anti-cannibalisation brand — siteRoutes.ts index:false). */}
+ {/* /inscription : noindex (anti-cannibalisation brand, siteRoutes.ts index:false). */}
  <Helmet><meta name="robots" content="noindex, follow" /></Helmet>
 
  <AuthIllustrationPanel
  title="Rejoignez une communauté de confiance"
- description="Faites garder votre maison, prêtez main forte, échangez un service : ici, on retisse les liens de proximité — du cœur du village jusqu'aux hameaux de campagne."
+ description="Faites garder votre maison, prêtez main forte, échangez un service : ici, on retisse les liens de proximité, du cœur du village jusqu'aux hameaux de campagne."
  footerSlot={
  totalInscrits !== null && totalInscrits > 0 ? (
  <div className="mt-8 inline-flex items-center gap-3 rounded-full bg-card/85 backdrop-blur-md pl-3 pr-5 py-2 border border-border/60 shadow-sm">
@@ -458,7 +458,7 @@ const Register = () => {
  Retour au site
  </Link>
 
- {/* Right panel — pb-32 pour éviter masquage par cookie banner sur mobile */}
+ {/* Right panel, pb-32 pour éviter masquage par cookie banner sur mobile */}
  <div className="flex-1 flex items-center justify-center px-6 pt-16 pb-24 md:pt-12 md:pb-12">
  <div className="w-full max-w-md">
  <div className="text-center mb-4 lg:mb-8">
@@ -486,7 +486,7 @@ const Register = () => {
  </p>
  <p className="text-xs lg:text-sm text-muted-foreground mt-0.5 lg:mt-1">
  {step === 1
- ? "On commence par votre profil — 30 secondes."
+ ? "On commence par votre profil, 30 secondes."
  : "Vos identifiants et c'est terminé. Promis."}
  </p>
  </>
@@ -503,7 +503,7 @@ const Register = () => {
  </div>
  )}
 
- {/* Bandeau WebView in-app (FB/IG/TikTok) — masqué dans navigateur standard */}
+ {/* Bandeau WebView in-app (FB/IG/TikTok), masqué dans navigateur standard */}
  <InAppBrowserBanner className="mb-4 lg:mb-6" />
 
  {/* Illustration retirée du flux mobile : déjà visible dans le panel desktop gauche, et coûte ~200px précieux sur mobile (la priorité = champs + CTA visibles sans scroller). */}
@@ -521,11 +521,11 @@ const Register = () => {
  <p className="text-muted-foreground text-sm leading-relaxed max-w-sm">
  Nous venons d'envoyer un message à{" "}
  <span className="font-medium text-foreground break-all">{email}</span>.
- Il combine la <strong className="text-foreground">confirmation de votre adresse</strong> et notre <strong className="text-foreground">message de bienvenue</strong> — cliquez sur le bouton à l'intérieur pour activer votre compte.
+ Il combine la <strong className="text-foreground">confirmation de votre adresse</strong> et notre <strong className="text-foreground">message de bienvenue</strong>, cliquez sur le bouton à l'intérieur pour activer votre compte.
  </p>
  </div>
 
- {/* Encadré spam — mis en avant car c'est la cause #1 d'abandon */}
+ {/* Encadré spam, mis en avant car c'est la cause #1 d'abandon */}
  <div className="w-full max-w-sm rounded-lg bg-warning-soft border border-warning-border px-4 py-3 text-left space-y-2">
  <p className="text-sm font-semibold text-warning-foreground">
  Vous ne voyez rien dans votre boîte de réception ?
@@ -536,7 +536,7 @@ const Register = () => {
  </li>
  <li>
  <strong>Hotmail, Outlook ou Live ?</strong> Nos emails y atterrissent
- souvent dans les indésirables — pensez à les marquer « non spam » pour
+ souvent dans les indésirables, pensez à les marquer « non spam » pour
  recevoir les suivants directement en boîte de réception.
  </li>
  <li>
@@ -547,7 +547,7 @@ const Register = () => {
  </ul>
  </div>
 
- {/* Bouton de renvoi — proéminent, avec cooldown anti-spam-click */}
+ {/* Bouton de renvoi, proéminent, avec cooldown anti-spam-click */}
  <Button
  type="button"
  variant="outline"
@@ -562,12 +562,12 @@ const Register = () => {
  ? `Renvoyer dans ${resendCooldown}s`
  : resendCount > 0
  ? "Renvoyer l'email à nouveau"
- : "Je n'ai rien reçu — renvoyer l'email"}
+ : "Je n'ai rien reçu, renvoyer l'email"}
  </Button>
 
- {/* Conseil mobile — déplacé en secondaire car moins critique */}
+ {/* Conseil mobile, déplacé en secondaire car moins critique */}
  <p className="text-xs text-muted-foreground/80 leading-relaxed max-w-sm">
- Sur mobile, ouvrez le lien <strong>dans Chrome ou Safari</strong> — pas dans l'application Facebook ou Instagram, sinon votre session sera perdue.
+ Sur mobile, ouvrez le lien <strong>dans Chrome ou Safari</strong>, pas dans l'application Facebook ou Instagram, sinon votre session sera perdue.
  </p>
 
  <div className="flex flex-col items-center gap-2 pt-2">
@@ -633,7 +633,7 @@ const Register = () => {
   Vous changerez d'avis ? Le rôle reste modifiable à tout moment depuis vos paramètres.
  </p>
 
- {/* Trust strip — réassurances clés juste avant la décision */}
+ {/* Trust strip, réassurances clés juste avant la décision */}
  <ul className="mt-5 lg:mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-[11px] lg:text-xs text-muted-foreground">
  <li className="inline-flex items-center gap-1.5">
  <span className="h-1.5 w-1.5 rounded-full bg-primary/60" aria-hidden="true" />
@@ -704,7 +704,7 @@ const Register = () => {
  </div>
  </div>
 
- {/* Bandeau ETA — rassure sur la durée restante */}
+ {/* Bandeau ETA, rassure sur la durée restante */}
  <div className="flex items-center justify-center gap-2 -mt-1 mb-1 text-xs text-muted-foreground">
   <span className="inline-flex items-center justify-center min-w-[1.75rem] h-6 px-2 rounded-full bg-primary/10 text-primary font-semibold tabular-nums">
    {etaSeconds > 0 ? `${etaSeconds}s` : "✓"}
@@ -767,7 +767,7 @@ const Register = () => {
    8 caractères min. · majuscules, chiffres ou symboles · évitez les mots de passe courants
   </p>
 
-  {/* Détection live des mots de passe trop courants — évite l'erreur HIBP au submit */}
+  {/* Détection live des mots de passe trop courants, évite l'erreur HIBP au submit */}
   {password.length >= 6 && isObviouslyWeak(password) && (
    <p className="text-xs text-warning-foreground bg-warning-soft border border-warning-border rounded px-2 py-1.5 animate-in fade-in-0">
     Ce mot de passe est trop courant. Utilisez « Suggérer un mot de passe fort » ou ajoutez chiffres / symboles.
@@ -798,7 +798,7 @@ const Register = () => {
  </div>
 
 
-          {/* Acceptation légale — fusionnée en une seule case (équivalent juridique) */}
+          {/* Acceptation légale, fusionnée en une seule case (équivalent juridique) */}
           <div
             className={cn(
               "flex items-start gap-3 rounded-lg border p-3 transition-colors",

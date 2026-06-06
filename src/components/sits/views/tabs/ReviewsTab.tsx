@@ -1,5 +1,5 @@
 /**
- * Onglet "Avis" — partagé. Inclut le CTA "Laisser un avis" si la garde est terminée.
+ * Onglet "Avis", partagé. Inclut le CTA "Laisser un avis" si la garde est terminée.
  */
 import { Link } from "react-router-dom";
 import { CheckCircle2 } from "lucide-react";

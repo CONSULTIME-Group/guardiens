@@ -72,9 +72,9 @@ export const NetworkErrorsSection = () => {
       const ctx = r.context ?? {};
       return {
         ...r,
-        route: typeof ctx.route === "string" ? ctx.route : "—",
-        method: typeof ctx.method === "string" ? ctx.method : "—",
-        url: typeof ctx.url === "string" ? ctx.url : "—",
+        route: typeof ctx.route === "string" ? ctx.route : ",",
+        method: typeof ctx.method === "string" ? ctx.method : ",",
+        url: typeof ctx.url === "string" ? ctx.url : ",",
         status: typeof ctx.status === "number" ? ctx.status : 0,
       };
     });

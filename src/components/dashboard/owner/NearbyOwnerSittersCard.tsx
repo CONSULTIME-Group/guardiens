@@ -9,7 +9,7 @@ interface Props {
 }
 
 /**
- * « Gardiens près de chez vous » — jumeau de NearbyAnnoncesCard pour le
+ * « Gardiens près de chez vous », jumeau de NearbyAnnoncesCard pour le
  * dashboard propriétaire. Empty-state compact, fallback hors rayon avec
  * affichage des gardiens les plus proches, mise en avant des savoir-faire
  * secondaires (custom_skills) pour donner à choisir au-delà des animaux.
@@ -88,7 +88,7 @@ const NearbyOwnerSittersCard = ({ hideHeader = false }: Props) => {
         <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 min-w-0">
           {hasBeyond ? (
             <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground font-semibold mb-3">
-              Aucun gardien à moins de 100 km — voici les plus proches disponibles
+              Aucun gardien à moins de 100 km, voici les plus proches disponibles
             </p>
           ) : radiusUsed ? (
             <p className="text-[11px] text-muted-foreground mb-3 px-1">
@@ -100,7 +100,7 @@ const NearbyOwnerSittersCard = ({ hideHeader = false }: Props) => {
             {sitters.map((s) => {
               const distance =
                 typeof s.distance_km === "number" ? Math.round(s.distance_km) : null;
-              // Jusqu'à 4 savoir-faire secondaires — critère de choix clé.
+              // Jusqu'à 4 savoir-faire secondaires, critère de choix clé.
               const skills = s.custom_skills.slice(0, 4);
               return (
                 <Link

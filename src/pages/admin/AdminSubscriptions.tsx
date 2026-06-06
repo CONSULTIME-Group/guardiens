@@ -107,7 +107,7 @@ const AdminSubscriptions = () => {
       await supabase.from("notifications").insert({
         user_id: sub.user_id || sub.id, type: "subscription_offered",
         title: "Accès Premium offert !",
-        body: `L'équipe Guardiens vous offre ${months} mois d'accès Premium. Motif : ${motif || "—"}.`,
+        body: `L'équipe Guardiens vous offre ${months} mois d'accès Premium. Motif : ${motif || ","}.`,
         link: "/dashboard",
       });
       toast.success("Premium offert");
@@ -306,7 +306,7 @@ const AdminSubscriptions = () => {
                   <TableCell>
                     <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${plan.color}`}>{plan.label}</span>
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{sub.started_at ? format(new Date(sub.started_at), "d MMM yyyy", { locale: fr }) : "—"}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{sub.started_at ? format(new Date(sub.started_at), "d MMM yyyy", { locale: fr }) : ","}</TableCell>
                   <TableCell className="text-xs text-muted-foreground">
                     {sub.expires_at ? format(new Date(sub.expires_at), "d MMM yyyy", { locale: fr }) : "Illimité"}
                     {isExpiringSoon && <span className="ml-1 text-warning font-medium">⚠</span>}
@@ -316,7 +316,7 @@ const AdminSubscriptions = () => {
                       {sub.status === "active" ? "Actif" : sub.status === "expired" ? "Expiré" : "Annulé"}
                     </Badge>
                   </TableCell>
-                  <TableCell>{sub.profile?.is_founder ? <Crown className="h-4 w-4 text-warning" /> : "—"}</TableCell>
+                  <TableCell>{sub.profile?.is_founder ? <Crown className="h-4 w-4 text-warning" /> : ","}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
                       <Button variant="ghost" size="icon" title="Voir profil" onClick={() => navigate(`/gardiens/${sub.user_id}`)}>

@@ -79,11 +79,11 @@ const MissionsNearbySection = () => {
       </div>
       <p className="text-sm text-foreground/60 mt-1 mb-4">
        {mySkills.length > 0
-          ? "Les échanges près de chez vous — en priorité ceux qui correspondent à vos compétences."
+          ? "Les échanges près de chez vous, en priorité ceux qui correspondent à vos compétences."
           : "Des gens du coin qui cherchent de l'aide, d'autres qui proposent la leur."}
       </p>
 
-      {/* Tuiles thématiques de modèles — pré-remplissent le formulaire */}
+      {/* Tuiles thématiques de modèles, pré-remplissent le formulaire */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
         {[
           { type: "besoin", id: "need-dog-walk",  label: "Promener mon chien"  },

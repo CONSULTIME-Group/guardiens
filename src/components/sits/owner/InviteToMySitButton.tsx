@@ -180,7 +180,7 @@ const InviteToMySitButton = ({
         {label}
       </Button>
 
-      {/* Dialog de sélection d'annonce — uniquement quand on n'a pas auto-choisi */}
+      {/* Dialog de sélection d'annonce, uniquement quand on n'a pas auto-choisi */}
       <Dialog
         open={open && !chosenSit}
         onOpenChange={(o) => {

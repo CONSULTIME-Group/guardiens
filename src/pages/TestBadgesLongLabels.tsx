@@ -16,7 +16,7 @@ const WIDTH_PRESETS = [
 ] as const
 
 /**
- * Page de test interne — vérifie que les sceaux de badges et leurs libellés
+ * Page de test interne, vérifie que les sceaux de badges et leurs libellés
  * (courts, longs, très longs) s'affichent correctement sur mobile, tablette
  * et desktop, et que la modale ouverte au clic ne masque jamais le titre.
  *
@@ -226,7 +226,7 @@ export default function TestBadgesLongLabels() {
 
         // 2) Capture de chaque modale ouverte à cette largeur
         for (const tc of TEST_CASES) {
-          setProgress(`Modale « ${tc.id} » — ${vp.label}${strictMode ? ' • strict' : ''}…`)
+          setProgress(`Modale « ${tc.id} », ${vp.label}${strictMode ? ' • strict' : ''}…`)
           // Toujours fermer la modale précédente avant d'ouvrir la suivante
           // pour éviter tout chevauchement d'animation Radix
           setStageBadgeId(null)
@@ -264,7 +264,7 @@ export default function TestBadgesLongLabels() {
       toast.success(`${results.length} captures générées`)
     } catch (err) {
       console.error('[TestBadgesLongLabels] capture error', err)
-      toast.error('Erreur pendant la capture — voir la console')
+      toast.error('Erreur pendant la capture, voir la console')
     } finally {
       setStageWidth(null)
       setActiveVp(null)
@@ -294,13 +294,13 @@ export default function TestBadgesLongLabels() {
   return (
     <div className="min-h-screen bg-background px-4 py-10 md:px-8">
       <Helmet>
-        <title>Test — Badges libellés longs</title>
+        <title>Test, Badges libellés longs</title>
         <meta name="robots" content="noindex" />
       </Helmet>
 
       <div className="max-w-5xl mx-auto">
         <h1 className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-2">
-          Test — badges à libellés longs
+          Test, badges à libellés longs
         </h1>
         <p className="text-sm text-muted-foreground mb-6 max-w-2xl">
           Page interne de QA. Cliquez sur chaque sceau pour ouvrir la modale, ou
@@ -453,7 +453,7 @@ export default function TestBadgesLongLabels() {
           }
         `}</style>
 
-        {/* Stage de capture — grille hébergée dans un conteneur redimensionnable.
+        {/* Stage de capture, grille hébergée dans un conteneur redimensionnable.
             Quand stageWidth (capture) ou manualWidth (manuel) est défini, on force la largeur.
             Quand data-stage-vp est défini, on applique aussi le layout responsive correspondant. */}
         <section className="mb-12">
@@ -500,7 +500,7 @@ export default function TestBadgesLongLabels() {
         {/* Sceaux larges (vue planche) */}
         <section className="mb-12">
           <h2 className="text-lg font-heading font-semibold text-foreground mb-4 border-b border-border pb-2">
-            2. Sceaux larges (96 px) — référence visuelle
+            2. Sceaux larges (96 px), référence visuelle
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
             {TEST_CASES.map((tc, i) => {
@@ -524,7 +524,7 @@ export default function TestBadgesLongLabels() {
           </div>
         </section>
 
-        {/* Galerie des captures générées — avec filtres et tri */}
+        {/* Galerie des captures générées, avec filtres et tri */}
         {captures.length > 0 && (() => {
           // Liste des badges présents dans les captures (préserve l'ordre)
           const badgeIdsInCaptures = Array.from(
@@ -647,7 +647,7 @@ export default function TestBadgesLongLabels() {
                     className="h-7 rounded-md border border-input bg-background px-2 text-xs"
                   >
                     <option value="all">Tous</option>
-                    <option value="__none__">— Sans badge (grilles)</option>
+                    <option value="__none__">, Sans badge (grilles)</option>
                     {badgeIdsInCaptures.map(id => (
                       <option key={id} value={id}>
                         {BADGE_DEFINITIONS[id]?.label?.slice(0, 40) ?? id}
@@ -731,7 +731,7 @@ export default function TestBadgesLongLabels() {
         })()}
 
         <p className="text-xs text-muted-foreground italic text-center mt-8">
-          Les libellés affichés ici sont volontairement exagérés pour le QA — ils
+          Les libellés affichés ici sont volontairement exagérés pour le QA, ils
           ne reflètent pas les libellés réels des badges en production.
         </p>
       </div>

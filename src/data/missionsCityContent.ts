@@ -37,22 +37,22 @@ export const MISSIONS_LYON: MissionsCityContent = {
     {
       heading: "Pourquoi l'entraide à domicile prend tout son sens à Lyon",
       body:
-        "Lyon est une ville dense où la vie de quartier reste forte malgré la taille de la métropole. Entre les pentes de la Croix-Rousse, les traboules du Vieux-Lyon, les immeubles haussmanniens de la Presqu'île et les maisons de Monchat ou de Saint-Just, on croise des personnes de palier sans jamais leur parler. Les petites missions inversent cette logique. Elles donnent un prétexte simple — un service ponctuel à domicile — pour entrer en relation avec quelqu'un qui habite à quelques rues. Pas besoin d'attendre une panne de courant ou un déménagement pour faire connaissance.",
+        "Lyon est une ville dense où la vie de quartier reste forte malgré la taille de la métropole. Entre les pentes de la Croix-Rousse, les traboules du Vieux-Lyon, les immeubles haussmanniens de la Presqu'île et les maisons de Monchat ou de Saint-Just, on croise des personnes de palier sans jamais leur parler. Les petites missions inversent cette logique. Elles donnent un prétexte simple, un service ponctuel à domicile, pour entrer en relation avec quelqu'un qui habite à quelques rues. Pas besoin d'attendre une panne de courant ou un déménagement pour faire connaissance.",
     },
     {
       heading: "Quelles missions s'échangent à Lyon et autour",
       body:
-        "Les demandes les plus fréquentes à Lyon tournent autour de quatre univers. Les animaux : nourrir un chat pendant un week-end à Lyon, sortir un chien en semaine quand la journée de travail est trop longue, accompagner un vétérinaire dans le 6e ou le 7e. Le jardin et les plantes : arrosage des balcons fleuris en été, taille d'une petite haie dans une maison de Tassin, ramassage de fruits dans un jardin de Sainte-Foy-lès-Lyon. La maison : réception d'un colis dans un immeuble sans gardien, montage d'un meuble, petit bricolage. Les courses et le quotidien : aller chercher un médicament en pharmacie, dépanner pour une course oubliée, partager un trajet vers un marché de quartier. À chaque fois, l'échange se fait sans argent — un panier de légumes, un café partagé, un service rendu en retour plus tard.",
+        "Les demandes les plus fréquentes à Lyon tournent autour de quatre univers. Les animaux : nourrir un chat pendant un week-end à Lyon, sortir un chien en semaine quand la journée de travail est trop longue, accompagner un vétérinaire dans le 6e ou le 7e. Le jardin et les plantes : arrosage des balcons fleuris en été, taille d'une petite haie dans une maison de Tassin, ramassage de fruits dans un jardin de Sainte-Foy-lès-Lyon. La maison : réception d'un colis dans un immeuble sans gardien, montage d'un meuble, petit bricolage. Les courses et le quotidien : aller chercher un médicament en pharmacie, dépanner pour une course oubliée, partager un trajet vers un marché de quartier. À chaque fois, l'échange se fait sans argent, un panier de légumes, un café partagé, un service rendu en retour plus tard.",
     },
     {
       heading: "Comment publier ou répondre à une mission près de chez vous",
       body:
-        "Si vous habitez à Lyon ou dans un rayon de 25 kilomètres autour de Bellecour, vous pouvez à la fois publier une mission et proposer votre aide. Pour publier, vous décrivez en quelques lignes ce dont vous avez besoin, vous précisez votre quartier ou votre commune, et vous indiquez ce que vous proposez en échange — un produit, un service futur, un simple moment partagé. Les gens du coin voient votre demande et vous contactent par messagerie privée. Si vous voulez aider, vous parcourez les missions ouvertes affichées plus bas sur cette page : elles sont triées par proximité avec Lyon. Les missions d'entraide sont accessibles à toutes les personnes inscrites, sans abonnement, sans commission.",
+        "Si vous habitez à Lyon ou dans un rayon de 25 kilomètres autour de Bellecour, vous pouvez à la fois publier une mission et proposer votre aide. Pour publier, vous décrivez en quelques lignes ce dont vous avez besoin, vous précisez votre quartier ou votre commune, et vous indiquez ce que vous proposez en échange, un produit, un service futur, un simple moment partagé. Les gens du coin voient votre demande et vous contactent par messagerie privée. Si vous voulez aider, vous parcourez les missions ouvertes affichées plus bas sur cette page : elles sont triées par proximité avec Lyon. Les missions d'entraide sont accessibles à toutes les personnes inscrites, sans abonnement, sans commission.",
     },
     {
       heading: "Une logique d'échange, pas de prestation",
       body:
-        "Les petites missions d'entraide à Lyon ne sont pas des micro-jobs rémunérés. Aucune somme d'argent ne circule entre les participants : c'est une règle fondamentale. Cette absence de contrepartie financière protège l'esprit de l'échange et place chacun sur un pied d'égalité. Vous donnez parce que vous le pouvez, vous recevez parce que vous en avez besoin, et l'équilibre se trouve dans la durée. À Lyon comme ailleurs, c'est cette mécanique qui fait fonctionner la confiance : on aide quelqu'un aujourd'hui, on est aidé demain — pas forcément par la même personne.",
+        "Les petites missions d'entraide à Lyon ne sont pas des micro-jobs rémunérés. Aucune somme d'argent ne circule entre les participants : c'est une règle fondamentale. Cette absence de contrepartie financière protège l'esprit de l'échange et place chacun sur un pied d'égalité. Vous donnez parce que vous le pouvez, vous recevez parce que vous en avez besoin, et l'équilibre se trouve dans la durée. À Lyon comme ailleurs, c'est cette mécanique qui fait fonctionner la confiance : on aide quelqu'un aujourd'hui, on est aidé demain, pas forcément par la même personne.",
     },
   ],
   faq: [
@@ -66,7 +66,7 @@ export const MISSIONS_LYON: MissionsCityContent = {
     },
     {
       q: "Faut-il un abonnement pour publier une mission à Lyon ?",
-      a: "Non. Les petites missions d'entraide sont accessibles à tous les membres inscrits sur Guardiens, sans abonnement et sans frais. Seul l'espace gardien — pour les longues gardes à domicile — nécessite un abonnement à 6,99 € par mois.",
+      a: "Non. Les petites missions d'entraide sont accessibles à tous les membres inscrits sur Guardiens, sans abonnement et sans frais. Seul l'espace gardien, pour les longues gardes à domicile, nécessite un abonnement à 6,99 € par mois.",
     },
     {
       q: "Quelle différence avec une garde de maison à Lyon ?",

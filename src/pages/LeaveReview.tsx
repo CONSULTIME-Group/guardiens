@@ -156,7 +156,7 @@ const LeaveReview = () => {
     if (isOwnerReview) {
       return {
         title: "Votre retour sur le gardien",
-        subtitle: "Dites en quoi cette garde avec ce gardien s'est bien passée — ou non.",
+        subtitle: "Dites en quoi cette garde avec ce gardien s'est bien passée, ou non.",
         recommendation: "Recommanderiez-vous ce gardien ?",
         placeholder: "Expliquez concrètement comment la garde s'est passée : échanges, soin des animaux, fiabilité, respect du logement…",
       };
@@ -233,7 +233,7 @@ const LeaveReview = () => {
         .eq("id", user.id)
         .maybeSingle();
 
-      // Get reviewee's email via auth — we need to find it from the conversation or profile
+      // Get reviewee's email via auth, we need to find it from the conversation or profile
       // The reviewee email is fetched from auth.users via edge function
       const revieweeEmail = await (async () => {
         // We can get email from the profiles table if available, otherwise skip

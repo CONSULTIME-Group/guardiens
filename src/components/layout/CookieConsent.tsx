@@ -35,7 +35,7 @@ const CookieConsent = () => {
   };
 
   const handleDismiss = () => {
-    // Fermeture temporaire (réapparaît à la prochaine session) — débloque l'écran
+    // Fermeture temporaire (réapparaît à la prochaine session), débloque l'écran
     try {
       sessionStorage.setItem(SESSION_DISMISS_KEY, "1");
     } catch { /* silencieux */ }
@@ -51,7 +51,7 @@ const CookieConsent = () => {
       aria-label="Bannière de consentement aux cookies"
       className="fixed bottom-0 left-0 right-0 z-[100] bg-card border-t border-border shadow-[0_-4px_16px_rgba(0,0,0,0.08)] animate-in slide-in-from-bottom-4 duration-500"
     >
-      {/* Bouton fermer (mobile uniquement) — laisse l'utilisateur reprendre la main sans choisir */}
+      {/* Bouton fermer (mobile uniquement), laisse l'utilisateur reprendre la main sans choisir */}
       <button
         onClick={handleDismiss}
         aria-label="Fermer la bannière (revenir plus tard)"

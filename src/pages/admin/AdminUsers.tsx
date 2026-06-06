@@ -452,7 +452,7 @@ const AdminUsers = () => {
                       </div>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {user.postal_code || "—"}
+                      {user.postal_code || ","}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {getDeptLabel(user.postal_code)}
@@ -463,7 +463,7 @@ const AdminUsers = () => {
                     <TableCell className="text-sm text-muted-foreground">
                       {user.updated_at
                         ? formatDistanceToNow(new Date(user.updated_at), { addSuffix: true, locale: fr })
-                        : "—"}
+                        : ","}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5">

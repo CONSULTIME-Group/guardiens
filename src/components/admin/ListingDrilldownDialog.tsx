@@ -123,7 +123,7 @@ export const ListingDrilldownDialog = ({ open, onOpenChange, sitId, sitTitle, in
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{sitTitle || "Annonce"} — détails</DialogTitle>
+          <DialogTitle>{sitTitle || "Annonce"}, détails</DialogTitle>
           <DialogDescription>
             Consultation administrateur des candidatures et conversations rattachées à cette annonce.
           </DialogDescription>

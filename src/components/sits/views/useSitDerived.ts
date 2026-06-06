@@ -3,10 +3,10 @@
  * Owner et Sitter. Évite la duplication entre OwnerSitView et SitterSitView.
  *
  * Renvoie :
- * - `avgRating` — moyenne des `overall_rating`, formatée avec 1 décimale (string),
+ * - `avgRating`, moyenne des `overall_rating`, formatée avec 1 décimale (string),
  *   ou `null` si pas d'avis.
- * - `formatDate` — formateur date français court ("d MMMM yyyy"), tolérant aux nulls.
- * - `matchingBadges` — badges affichés au gardien (compatibilité animaux, proximité).
+ * - `formatDate`, formateur date français court ("d MMMM yyyy"), tolérant aux nulls.
+ * - `matchingBadges`, badges affichés au gardien (compatibilité animaux, proximité).
  */
 import { useMemo, useCallback } from "react";
 import { format } from "date-fns";
@@ -23,7 +23,7 @@ interface UseSitDerivedArgs {
   activeRole?: string | null;
   /** Rôle stocké en profil ('owner' | 'sitter' | 'both') */
   userRole?: string | null;
-  /** Prénom — utilisé comme proxy "user a renseigné son profil" */
+  /** Prénom, utilisé comme proxy "user a renseigné son profil" */
   userFirstName?: string | null;
 }
 

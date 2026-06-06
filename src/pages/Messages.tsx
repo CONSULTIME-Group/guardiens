@@ -158,7 +158,7 @@ const Messages = () => {
     const profilesMap = new Map((profilesRes.data || []).map((p: any) => [p.id, p]));
 
     // Résoudre la ville du propriétaire pour chaque sit (lieu de la garde)
-    // — distinct de other_user.city qui peut être la ville du gardien.
+    //, distinct de other_user.city qui peut être la ville du gardien.
     const ownerIdsForSits = Array.from(new Set((sitsRes.data || []).map((s: any) => s.user_id).filter(Boolean)));
     const missingOwnerIds = ownerIdsForSits.filter((id: string) => !profilesMap.has(id));
     if (missingOwnerIds.length > 0) {
@@ -359,8 +359,7 @@ const Messages = () => {
   }, [activeConv?.id, loadMessages]);
 
   useEffect(() => {
-    // Toujours vider l'input à chaque changement de conversation —
-    // aucune suggestion ni pré-remplissage automatique n'est autorisée.
+    // Toujours vider l'input à chaque changement de conversation ,     // aucune suggestion ni pré-remplissage automatique n'est autorisée.
     setNewMessage("");
     if (!activeConv) return;
     loadMessages(activeConv.id);
@@ -583,7 +582,7 @@ const Messages = () => {
       {showList && (
         <div className={`${isMobile && activeConv ? "hidden" : ""} ${isMobile ? "w-full" : "w-80 border-r border-border"} flex flex-col bg-card`}>
           <div className="sticky top-0 z-10 bg-card border-b border-border px-3 pt-3 pb-2 space-y-2">
-            {/* Row 1 — title alone (lisible mobile) + role à droite */}
+            {/* Row 1, title alone (lisible mobile) + role à droite */}
             <div className="flex items-center justify-between gap-2">
               <h1 className="font-heading text-base font-bold truncate">Messagerie</h1>
               <span className="text-[10px] text-muted-foreground truncate shrink-0">
@@ -591,7 +590,7 @@ const Messages = () => {
               </span>
             </div>
 
-            {/* Row 2 — search filter (uniquement si >=5 conversations) */}
+            {/* Row 2, search filter (uniquement si >=5 conversations) */}
             {conversations.length >= 5 && (
               <Input
                 value={searchFilter}
@@ -602,7 +601,7 @@ const Messages = () => {
               />
             )}
 
-            {/* Row 3 — pills compactes */}
+            {/* Row 3, pills compactes */}
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
               <div className="flex gap-1 shrink-0" role="tablist" aria-label="Filtrer les conversations">
                 {pills.map(p => (
@@ -668,7 +667,7 @@ const Messages = () => {
             }}
           />
 
-          {/* Presence + Context card — RGPD: respect show_last_seen */}
+          {/* Presence + Context card, RGPD: respect show_last_seen */}
           {activeConv.other_user?.last_seen_at && activeConv.other_user?.show_last_seen !== false && (
             <div className="px-4 py-1 border-b border-border/50 bg-card/50">
               <PresenceBadge lastSeenAt={activeConv.other_user.last_seen_at} />
@@ -730,7 +729,7 @@ const Messages = () => {
             </div>
           </div>
 
-          {/* Input or Paywall — only gate sit conversations for non-subscribed sitters */}
+          {/* Input or Paywall, only gate sit conversations for non-subscribed sitters */}
           {effectiveRole === "sitter" && !hasAccess && !activeConv.small_mission_id ? (
             <div className="border-t border-border bg-muted/50 p-4 mb-16 md:mb-0">
               <div className="flex items-center gap-3">
@@ -766,7 +765,7 @@ const Messages = () => {
           )}
         </div>
       ) : !isMobile ? (
-        /* Empty state desktop — gouache emptyMailbox conforme à la charte */
+        /* Empty state desktop, gouache emptyMailbox conforme à la charte */
         <div className="flex-1 flex flex-col items-center justify-center h-full bg-background">
           <EmptyState
             illustration="emptyMailbox"

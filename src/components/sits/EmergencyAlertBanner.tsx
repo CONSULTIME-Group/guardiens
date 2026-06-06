@@ -82,7 +82,7 @@ const EmergencyAlertBanner = ({ sitId, sitCity, startDate }: EmergencyAlertBanne
     }
   };
 
-  // CAS 1 — Aucun gardien d'urgence dans un rayon de 100 km : bandeau replié.
+  // CAS 1, Aucun gardien d'urgence dans un rayon de 100 km : bandeau replié.
   if (nearbyCount === 0) {
     return (
       <div className="mb-6 rounded-xl border border-border bg-muted/30 px-4 py-3 relative">
@@ -108,7 +108,7 @@ const EmergencyAlertBanner = ({ sitId, sitCity, startDate }: EmergencyAlertBanne
           <div className="mt-3 text-sm text-muted-foreground space-y-2">
             <p>
               Aucun gardien d'urgence n'est encore disponible près de <strong>{sitCity}</strong>.
-              Le réseau s'étoffe vite — n'hésitez pas à publier votre annonce, elle reste visible
+              Le réseau s'étoffe vite, n'hésitez pas à publier votre annonce, elle reste visible
               de tous les gardiens.
             </p>
             <p className="text-xs">
@@ -122,7 +122,7 @@ const EmergencyAlertBanner = ({ sitId, sitCity, startDate }: EmergencyAlertBanne
     );
   }
 
-  // CAS 2 — Au moins 1 gardien d'urgence dans la zone : bandeau complet.
+  // CAS 2, Au moins 1 gardien d'urgence dans la zone : bandeau complet.
   return (
     <div className="mb-6 rounded-xl border-2 border-primary/30 bg-primary/5 p-4 md:p-5 relative">
       <button
@@ -143,7 +143,7 @@ const EmergencyAlertBanner = ({ sitId, sitCity, startDate }: EmergencyAlertBanne
           </p>
           <p className="text-sm text-muted-foreground">
             Votre garde commence dans <strong>{daysUntilStart} jour{daysUntilStart! > 1 ? "s" : ""}</strong>.
-            <strong> {nearbyCount} gardien{nearbyCount > 1 ? "s" : ""} d'urgence</strong> {nearbyCount > 1 ? "sont disponibles" : "est disponible"} à proximité de {sitCity} — des membres
+            <strong> {nearbyCount} gardien{nearbyCount > 1 ? "s" : ""} d'urgence</strong> {nearbyCount > 1 ? "sont disponibles" : "est disponible"} à proximité de {sitCity}, des membres
             expérimentés (5+ gardes, note ≥ 4.7, identité vérifiée) mobilisables en quelques heures.
           </p>
           <p className="text-xs text-muted-foreground">

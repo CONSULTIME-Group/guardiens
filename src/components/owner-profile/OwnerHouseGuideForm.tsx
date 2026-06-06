@@ -327,7 +327,7 @@ const OwnerHouseGuideForm = () => {
       <div>
         <h3 className="text-lg font-semibold text-foreground mb-1">Guide de la maison</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Ce guide est strictement confidentiel. Il ne sera jamais public. Seul le gardien que vous aurez choisi pourra le consulter — uniquement pendant la durée de sa garde, pas avant, pas après.
+          Ce guide est strictement confidentiel. Il ne sera jamais public. Seul le gardien que vous aurez choisi pourra le consulter, uniquement pendant la durée de sa garde, pas avant, pas après.
         </p>
       </div>
 
@@ -396,13 +396,13 @@ const OwnerHouseGuideForm = () => {
                   Pour enregistrer, complétez au minimum :
                 </p>
                 {!guide.exact_address?.trim() && (
-                  <p className="text-xs text-muted-foreground">· Adresse complète — section Accès & logistique</p>
+                  <p className="text-xs text-muted-foreground">· Adresse complète, section Accès & logistique</p>
                 )}
                 {!guide.access_codes?.trim() && (
-                  <p className="text-xs text-muted-foreground">· Codes d'accès — section Accès & logistique</p>
+                  <p className="text-xs text-muted-foreground">· Codes d'accès, section Accès & logistique</p>
                 )}
                 {!guide.emergency_contact_phone?.trim() && (
-                  <p className="text-xs text-muted-foreground">· Contact d'urgence — section Contacts d'urgence</p>
+                  <p className="text-xs text-muted-foreground">· Contact d'urgence, section Contacts d'urgence</p>
                 )}
               </div>
             )}

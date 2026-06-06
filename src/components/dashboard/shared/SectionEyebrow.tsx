@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 /**
- * SectionEyebrow — En-tête de section éditorial avec filet coloré à gauche.
+ * SectionEyebrow, En-tête de section éditorial avec filet coloré à gauche.
  *
  * Sert à donner une identité visuelle légère par section sans alourdir :
  * un filet vertical 3px coloré + eyebrow uppercase + titre serif.

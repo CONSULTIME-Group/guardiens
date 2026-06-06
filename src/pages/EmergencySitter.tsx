@@ -29,7 +29,7 @@ const steps = [
 const ownerCards = [
   { icon: Clock, title: "Mobilisable en quelques heures", desc: "Pas besoin d'attendre des jours. Les gardiens d'urgence répondent vite." },
   { icon: Shield, title: "Vérifié et expérimenté", desc: "5+ gardes réalisées, note 4.7+, 0 annulation, identité vérifiée." },
-  { icon: MapPin, title: "Des gens du coin", desc: "Sollicités automatiquement dans un rayon de 35 km — ce sont des gens du coin, pas des inconnus." },
+  { icon: MapPin, title: "Des gens du coin", desc: "Sollicités automatiquement dans un rayon de 35 km, ce sont des gens du coin, pas des inconnus." },
 ];
 
 const conditions = [
@@ -50,7 +50,7 @@ const advantages = [
 const stories = [
   {
     name: "Hélène, Lyon 6e",
-    text: "Hospitalisation programmée mais avancée à la dernière minute. Deux chats à la maison, personne autour pour s'en occuper. Elle active l'alerte le mardi soir. Un gardien d'urgence — déjà vérifié, déjà noté — répond dans les deux heures. Rendez-vous le lendemain matin avant qu'elle parte. Au retour, les chats sont toujours là, le frigo aussi.",
+    text: "Hospitalisation programmée mais avancée à la dernière minute. Deux chats à la maison, personne autour pour s'en occuper. Elle active l'alerte le mardi soir. Un gardien d'urgence, déjà vérifié, déjà noté, répond dans les deux heures. Rendez-vous le lendemain matin avant qu'elle parte. Au retour, les chats sont toujours là, le frigo aussi.",
   },
   {
     name: "Pierre, Annecy",
@@ -70,7 +70,7 @@ const stories = [
   },
   {
     name: "Élise, Saint-Étienne",
-    text: "Déménagement précipité — l'ancien proprio a avancé l'état des lieux d'une semaine. Deux chats stressés, un logement en chantier, pas le temps de s'en occuper. L'alerte passe à 9h, un gardien d'urgence répond à 11h. Les chats ont fini la semaine au calme chez le gardien, le temps que tout soit en place.",
+    text: "Déménagement précipité, l'ancien proprio a avancé l'état des lieux d'une semaine. Deux chats stressés, un logement en chantier, pas le temps de s'en occuper. L'alerte passe à 9h, un gardien d'urgence répond à 11h. Les chats ont fini la semaine au calme chez le gardien, le temps que tout soit en place.",
   },
 ];
 
@@ -93,7 +93,7 @@ const faqs = [
   },
   {
     q: "Mon chien est réactif ou anxieux, est-ce possible quand même ?",
-    a: "Oui, c'est même un cas typique d'urgence. Quand vous activez l'alerte, vous précisez le profil de votre animal (réactif, anxieux, soin particulier, etc.). Seuls les gardiens d'urgence ayant l'expérience et la compétence requises sont notifiés. Aucun gardien ne prend une garde sans rencontrer l'animal d'abord — c'est la règle.",
+    a: "Oui, c'est même un cas typique d'urgence. Quand vous activez l'alerte, vous précisez le profil de votre animal (réactif, anxieux, soin particulier, etc.). Seuls les gardiens d'urgence ayant l'expérience et la compétence requises sont notifiés. Aucun gardien ne prend une garde sans rencontrer l'animal d'abord, c'est la règle.",
   },
   {
     q: "Combien ça coûte une garde d'urgence ?",
@@ -117,7 +117,7 @@ const faqs = [
   },
   {
     q: "Que se passe-t-il si je refuse une demande d'urgence ?",
-    a: "Le premier refus n'a aucune conséquence — c'est normal de ne pas être toujours disponible. En revanche, un deuxième refus consécutif entraîne la perte du statut pendant 6 mois. C'est notre garantie pour les propriétaires : un gardien d'urgence est vraiment disponible.",
+    a: "Le premier refus n'a aucune conséquence, c'est normal de ne pas être toujours disponible. En revanche, un deuxième refus consécutif entraîne la perte du statut pendant 6 mois. C'est notre garantie pour les propriétaires : un gardien d'urgence est vraiment disponible.",
   },
   {
     q: "Qu'est-ce que je gagne à être gardien d'urgence ?",
@@ -176,7 +176,7 @@ const EmergencySitter = () => {
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
-        title="Gardien d'urgence — Garde en moins de 24h | Guardiens"
+        title="Gardien d'urgence, Garde en moins de 24h | Guardiens"
         description="Besoin d'un gardien en urgence pour vos animaux ? Activez l'alerte Guardiens et trouvez un gardien vérifié près de chez vous en moins de 24 heures."
         path="/gardien-urgence"
       />
@@ -190,7 +190,7 @@ const EmergencySitter = () => {
       <section className="bg-warning/15 border-b border-warning/25 py-3">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <p className="text-sm font-medium text-warning-foreground">
-            Bientôt disponible — Le réseau de gardiens d'urgence sera activé dès que nous aurons suffisamment de profils vérifiés et éprouvés.
+            Bientôt disponible, Le réseau de gardiens d'urgence sera activé dès que nous aurons suffisamment de profils vérifiés et éprouvés.
           </p>
           <p className="text-xs text-muted-foreground mt-1">
             Notre plateforme est jeune. Nous prenons le temps de désigner des gardiens d'urgence sur des critères stricts pour garantir la fiabilité du service.
@@ -246,7 +246,7 @@ const EmergencySitter = () => {
               Quand le besoin est réel.
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              L'urgence ne ressemble pas toujours à ce qu'on imagine. Voici six situations rencontrées sur Guardiens — toutes résolues en moins de 24 heures.
+              L'urgence ne ressemble pas toujours à ce qu'on imagine. Voici six situations rencontrées sur Guardiens, toutes résolues en moins de 24 heures.
             </p>
           </div>
           <div className="grid md:grid-cols-2 gap-5">
@@ -371,7 +371,7 @@ const EmergencySitter = () => {
             Un engagement, pas juste un badge
           </h3>
           <p className="text-sm text-muted-foreground">
-            Être gardien d'urgence, c'est un engagement. Si vous refusez une demande d'urgence, pas de souci — ça arrive.
+            Être gardien d'urgence, c'est un engagement. Si vous refusez une demande d'urgence, pas de souci, ça arrive.
             Mais si vous refusez plus d'une fois, le statut est retiré et vous ne pourrez pas le réactiver avant 6 mois.
             Les propriétaires comptent sur la disponibilité des gardiens d'urgence.
           </p>
@@ -381,7 +381,7 @@ const EmergencySitter = () => {
         </div>
       </section>
 
-      {/* FAQ — Accordion */}
+      {/* FAQ, Accordion */}
       <section className="bg-muted/50 py-16">
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="font-heading text-2xl font-bold text-center mb-10">Questions fréquentes</h2>
@@ -430,7 +430,7 @@ const EmergencySitter = () => {
         </div>
       </section>
 
-      {/* Pour aller plus loin — maillage interne */}
+      {/* Pour aller plus loin, maillage interne */}
       <section className="py-12 bg-muted/30 border-t border-border">
         <div className="container max-w-4xl mx-auto px-4">
           <p className="text-xs text-muted-foreground tracking-[0.2em] uppercase mb-6 text-center">
@@ -457,7 +457,7 @@ const EmergencySitter = () => {
       <section className="py-8 text-center border-t border-border">
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <Link to="/inscription?role=owner">
-            <Button size="sm">S'inscrire — lancement prochain</Button>
+            <Button size="sm">S'inscrire, lancement prochain</Button>
           </Link>
           <Button size="sm" variant="outline" disabled>
             Voir mon éligibilité (à venir)

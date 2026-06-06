@@ -8,7 +8,7 @@ const capitalize = (name: string) =>
 interface SitterHeroProps {
   userId?: string;
   firstName?: string;
-  /** Avatar gardien — affiché en hero pour identité visuelle (vitrine côté gardien). */
+  /** Avatar gardien, affiché en hero pour identité visuelle (vitrine côté gardien). */
   avatarUrl?: string | null;
   isFounder?: boolean;
   subtitle: string;
@@ -32,7 +32,7 @@ const SitterHero = ({
 
     <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div className="flex items-center gap-3 md:gap-4 min-w-0">
-        {/* Avatar — identité visuelle gardien (vitrine) */}
+        {/* Avatar, identité visuelle gardien (vitrine) */}
         <div className="shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-white/30 bg-white/10 flex items-center justify-center">
           {avatarUrl ? (
             <img src={avatarUrl} alt={`Votre photo de profil`} className="w-full h-full object-cover" loading="lazy" />

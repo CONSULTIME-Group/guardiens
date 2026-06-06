@@ -60,7 +60,7 @@ const ProfileSchemaOrg = ({
     }),
   };
 
-  // ── Service (éligible Rich Results — porte aggregateRating + zone desservie) ──
+  // ── Service (éligible Rich Results, porte aggregateRating + zone desservie) ──
   // Ne crée le bloc Service que pour les gardiens (pas pour les propriétaires purs).
   const isSitter = role === "sitter" || role === "both";
   const hasRating = !!(avgRating && avgRating > 0 && reviewCount && reviewCount > 0);

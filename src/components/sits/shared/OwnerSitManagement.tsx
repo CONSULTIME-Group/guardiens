@@ -1,5 +1,5 @@
 /**
- * Bloc "Gérer cette garde" — visible uniquement par le propriétaire.
+ * Bloc "Gérer cette garde", visible uniquement par le propriétaire.
  * Centralise les actions de gestion : modifier, partager, annuler.
  *
  * Affiché en bas de la page d'annonce pour ne pas polluer la lecture,

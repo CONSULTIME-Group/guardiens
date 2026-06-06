@@ -40,8 +40,8 @@ const RANGES = [
 ];
 
 const formatDelay = (s: number | null) => {
-  if (s === null || s === undefined) return "—";
-  if (s < 0) return "—";
+  if (s === null || s === undefined) return ",";
+  if (s < 0) return ",";
   if (s < 60) return `${Math.round(s)}s`;
   if (s < 3600) return `${Math.round(s / 60)} min`;
   if (s < 86400) return `${(s / 3600).toFixed(1)} h`;
@@ -119,22 +119,22 @@ export const ConfirmationsTab = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card><CardContent className="p-4">
           <div className="text-xs text-muted-foreground">Emails envoyés</div>
-          <div className="text-2xl font-bold">{stats?.total_sent ?? "—"}</div>
+          <div className="text-2xl font-bold">{stats?.total_sent ?? ","}</div>
         </CardContent></Card>
         <Card><CardContent className="p-4">
           <div className="text-xs text-muted-foreground">Confirmés</div>
-          <div className="text-2xl font-bold text-green-700">{stats?.total_confirmed ?? "—"}</div>
+          <div className="text-2xl font-bold text-green-700">{stats?.total_confirmed ?? ","}</div>
           <div className="text-xs text-muted-foreground mt-1">
             Taux : {stats?.confirmation_rate ?? 0}%
           </div>
         </CardContent></Card>
         <Card><CardContent className="p-4">
           <div className="text-xs text-muted-foreground">En attente</div>
-          <div className="text-2xl font-bold text-warning">{stats?.total_pending ?? "—"}</div>
+          <div className="text-2xl font-bold text-warning">{stats?.total_pending ?? ","}</div>
         </CardContent></Card>
         <Card><CardContent className="p-4">
           <div className="text-xs text-muted-foreground">Échecs</div>
-          <div className="text-2xl font-bold text-destructive">{stats?.total_failed ?? "—"}</div>
+          <div className="text-2xl font-bold text-destructive">{stats?.total_failed ?? ","}</div>
         </CardContent></Card>
       </div>
 
@@ -208,7 +208,7 @@ export const ConfirmationsTab = () => {
                   <TableCell className="text-xs">
                     {row.confirmed_at
                       ? format(new Date(row.confirmed_at), "dd MMM HH:mm", { locale: fr })
-                      : "—"}
+                      : ","}
                   </TableCell>
                   <TableCell className="text-xs font-medium">
                     {formatDelay(row.delay_seconds)}

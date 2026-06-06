@@ -183,7 +183,7 @@ const AdminListings = () => {
   const buildShareData = (listing: any) => {
     const url = `https://guardiens.fr/annonces/${listing.id}`;
     const title = listing.title || "Une annonce de garde sur Guardiens";
-    const text = `${title}${listing.owner?.city ? ` — ${listing.owner.city}` : ""} : découvrez cette annonce sur Guardiens.`;
+    const text = `${title}${listing.owner?.city ? `, ${listing.owner.city}` : ""} : découvrez cette annonce sur Guardiens.`;
     return { url, title, text };
   };
   const withShareTracking = (url: string, channel: "twitter" | "facebook" | "whatsapp" | "email") => {
@@ -321,14 +321,14 @@ const AdminListings = () => {
                       <span>{listing.owner?.first_name} {listing.owner?.last_name}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{listing.owner?.city || "—"}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{listing.owner?.city || ","}</TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                    {listing.start_date ? format(new Date(listing.start_date), "d MMM", { locale: fr }) : "—"}
+                    {listing.start_date ? format(new Date(listing.start_date), "d MMM", { locale: fr }) : ","}
                     {" → "}
-                    {listing.end_date ? format(new Date(listing.end_date), "d MMM yy", { locale: fr }) : "—"}
+                    {listing.end_date ? format(new Date(listing.end_date), "d MMM yy", { locale: fr }) : ","}
                   </TableCell>
-                  <TableCell className="text-right text-sm font-medium tabular-nums">{st?.views ?? "—"}</TableCell>
-                  <TableCell className="text-right text-sm text-muted-foreground tabular-nums">{st?.uniqueViews ?? "—"}</TableCell>
+                  <TableCell className="text-right text-sm font-medium tabular-nums">{st?.views ?? ","}</TableCell>
+                  <TableCell className="text-right text-sm text-muted-foreground tabular-nums">{st?.uniqueViews ?? ","}</TableCell>
                   <TableCell className="text-right text-sm tabular-nums">
                     {st && st.messages > 0 ? (
                       <button
@@ -339,7 +339,7 @@ const AdminListings = () => {
                         {st.messages}
                       </button>
                     ) : (
-                      <span className="text-muted-foreground">{st?.messages ?? "—"}</span>
+                      <span className="text-muted-foreground">{st?.messages ?? ","}</span>
                     )}
                   </TableCell>
                   <TableCell className="text-right text-sm tabular-nums">
@@ -352,11 +352,11 @@ const AdminListings = () => {
                         {st.applications}
                       </button>
                     ) : (
-                      <span className="text-muted-foreground">{st?.applications ?? "—"}</span>
+                      <span className="text-muted-foreground">{st?.applications ?? ","}</span>
                     )}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                    {st?.lastViewAt ? formatDistanceToNow(new Date(st.lastViewAt), { addSuffix: true, locale: fr }) : "—"}
+                    {st?.lastViewAt ? formatDistanceToNow(new Date(st.lastViewAt), { addSuffix: true, locale: fr }) : ","}
                   </TableCell>
                   <TableCell><Badge variant={s.variant}>{s.label}</Badge></TableCell>
                   <TableCell className="text-right">
@@ -414,7 +414,7 @@ const AdminListings = () => {
               {trafficListing?.title || "Annonce"}
             </SheetTitle>
             <p className="text-xs text-muted-foreground">
-              {trafficListing?.owner?.first_name} {trafficListing?.owner?.last_name} · {trafficListing?.owner?.city || "—"}
+              {trafficListing?.owner?.first_name} {trafficListing?.owner?.last_name} · {trafficListing?.owner?.city || ","}
             </p>
           </SheetHeader>
 

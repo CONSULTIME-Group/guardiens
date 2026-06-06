@@ -93,7 +93,7 @@ const SitDetailHeader = ({
         {isOwner ? "Retour à mes annonces" : "Retour à la recherche"}
       </Link>
 
-      {/* Hero: Photos gallery avec lightbox — masqué en mode compact car déjà rendu par SitImmersiveContent */}
+      {/* Hero: Photos gallery avec lightbox, masqué en mode compact car déjà rendu par SitImmersiveContent */}
       {!compact && <SitHero photos={photos} city={owner?.city} priority />}
       {/* Title, location, dates, status */}
       <div className="flex items-start justify-between gap-4 mb-1">
@@ -108,7 +108,7 @@ const SitDetailHeader = ({
         <div className="flex items-center gap-2 shrink-0">
           {isOwner && (
             <>
-              {/* Partager (icône) — ouvre un dialog avec toutes les options de partage.
+              {/* Partager (icône), ouvre un dialog avec toutes les options de partage.
                   Remplace l'ancien gros bloc ShareButtons en haut de la fiche. */}
               {showShareAction && (
                 <Dialog open={shareOpen} onOpenChange={setShareOpen}>
@@ -237,7 +237,7 @@ const SitDetailHeader = ({
         </div>
       )}
 
-      {/* Owner card — masquée si on est soi-même le propriétaire OU en mode compact (déjà dans la sidebar immersive) */}
+      {/* Owner card, masquée si on est soi-même le propriétaire OU en mode compact (déjà dans la sidebar immersive) */}
       {owner && !isOwner && !compact && (
         <div className="flex items-center gap-3 mb-6 p-4 bg-card rounded-xl border border-border">
           <Link to={`/gardiens/${owner.id}`}>

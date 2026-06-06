@@ -5,7 +5,7 @@
 const SitFooterReassurance = () => (
   <div className="mt-8 bg-primary/5 border border-primary/10 rounded-xl p-5 text-center">
     <p className="font-heading text-sm font-semibold text-primary">
-      Vous partez l'esprit léger — et si un imprévu survient, votre réseau local
+      Vous partez l'esprit léger, et si un imprévu survient, votre réseau local
       de gardiens prend le relais.
     </p>
     <p className="text-xs text-muted-foreground mt-1">

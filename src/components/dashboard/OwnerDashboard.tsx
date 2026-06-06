@@ -134,7 +134,7 @@ const OwnerDashboard = () => {
   const subtitle = useMemo(() => {
     if (ongoingSit) {
       const daysLeft = ongoingSit.end_date ? differenceInDays(new Date(ongoingSit.end_date), now) : null;
-      return `Votre garde est en cours${daysLeft !== null ? ` — fin dans ${daysLeft} jour${daysLeft > 1 ? "s" : ""}` : ""}.`;
+      return `Votre garde est en cours${daysLeft !== null ? `, fin dans ${daysLeft} jour${daysLeft > 1 ? "s" : ""}` : ""}.`;
     }
     const nextConfirmed = sits.find(s => s.status === "confirmed" && s.start_date && new Date(s.start_date) > now);
     if (nextConfirmed) {
@@ -152,10 +152,10 @@ const OwnerDashboard = () => {
       differenceInDays(now, new Date(s.created_at)) >= 3
     );
     if (stalledPublished) {
-      return "Votre annonce n'a pas encore reçu de candidature — voici 3 leviers pour la relancer.";
+      return "Votre annonce n'a pas encore reçu de candidature, voici 3 leviers pour la relancer.";
     }
     const anyPublished = sits.some(s => s.status === "published");
-    if (anyPublished) return "Votre annonce est en ligne — les candidatures arrivent.";
+    if (anyPublished) return "Votre annonce est en ligne, les candidatures arrivent.";
     return "Publiez votre première annonce pour trouver un gardien.";
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ongoingSit, sits, pendingAppCount]);
@@ -232,7 +232,7 @@ const OwnerDashboard = () => {
     <div className="space-y-6 md:space-y-8 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-8">
 {/* pb mobile = BottomNav (h-16=64px) + Sticky CTA (~72px) + safe-area iPhone notch. */}
 
-      {/* ═══ Hero header (compact — eyebrow + titre + sous-titre contextuel) ═══ */}
+      {/* ═══ Hero header (compact, eyebrow + titre + sous-titre contextuel) ═══ */}
       <header className="px-5 md:px-8 pt-2 animate-fade-in">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div className="min-w-0">
@@ -315,7 +315,7 @@ const OwnerDashboard = () => {
             coverPhoto={propertyCoverPhoto}
           />
 
-          {/* Mes animaux — remonté juste après l'annonce (logique : maison → animaux) */}
+          {/* Mes animaux, remonté juste après l'annonce (logique : maison → animaux) */}
           <DashSection
             eyebrow="Famille"
             title="Mes animaux"
@@ -380,11 +380,11 @@ const OwnerDashboard = () => {
             />
           )}
 
-          {/* ═══ DÉCOUVERTE — Coup de main dans la colonne principale ═══
+          {/* ═══ DÉCOUVERTE, Coup de main dans la colonne principale ═══
               Les gardiens « près de chez vous » sont remontés dans l'aside à droite. */}
           <div className="space-y-6 min-w-0">
 
-            {/* 2. Coup de main — zone WARNING (ambre) : entraide bidirectionnelle */}
+            {/* 2. Coup de main, zone WARNING (ambre) : entraide bidirectionnelle */}
             <section
               aria-labelledby="owner-discovery-missions-heading"
               className="relative rounded-2xl bg-warning/[0.06] ring-1 ring-warning/20 p-3 sm:p-5 min-w-0 overflow-hidden"
@@ -413,7 +413,7 @@ const OwnerDashboard = () => {
           {showEmergencyHelp && <NearbyEmergencySitters />}
           <NearbyOwnerSittersCard />
           <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary px-3 py-1 text-[11px] font-semibold">
-            Espace propriétaire — gratuit
+            Espace propriétaire, gratuit
           </div>
           <StatsStrip
             items={[
@@ -423,7 +423,7 @@ const OwnerDashboard = () => {
               },
               {
                 value: avgRating > 0 ? `${avgRating} ★` : null,
-                fallback: "—",
+                fallback: ",",
                 label: "Note",
                 highlight: avgRating > 0,
                 to: user?.id ? `/gardiens/${user.id}?tab=proprio#avis` : undefined,
@@ -445,7 +445,7 @@ const OwnerDashboard = () => {
             ]}
           />
 
-          {/* Parrainage — levier d'acquisition gratuit */}
+          {/* Parrainage, levier d'acquisition gratuit */}
           <Link
             to="/mon-abonnement#parrainage"
             className="block rounded-2xl border border-border bg-gradient-to-br from-accent/10 to-background p-4 hover:border-primary/40 transition-colors group"
@@ -467,7 +467,7 @@ const OwnerDashboard = () => {
         </aside>
       </div>
 
-      {/* ═══ Preuve sociale — Highlights remontés et déployés par défaut ═══ */}
+      {/* ═══ Preuve sociale, Highlights remontés et déployés par défaut ═══ */}
       {highlights.length > 0 && (
         <section
           className="px-5 md:px-8 pt-2 border-t border-border/40"
@@ -502,7 +502,7 @@ const OwnerDashboard = () => {
         </section>
       )}
 
-      {/* ═══ Footer dashboard — badges inline + ressources ═══ */}
+      {/* ═══ Footer dashboard, badges inline + ressources ═══ */}
       <div className="px-5 md:px-8 pt-2 border-t border-border/40 space-y-3">
         {user?.id && userBadges && userBadges.length > 0 && (
           <div className="rounded-2xl bg-card border border-border px-4 py-3">

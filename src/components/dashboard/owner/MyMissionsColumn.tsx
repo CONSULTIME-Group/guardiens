@@ -38,7 +38,7 @@ const MyMissionsColumn = memo(({ missions }: { missions: SmallMission[] }) => {
       {missions.length === 0 ? (
         <div className="py-2">
           <p className="text-xs text-muted-foreground font-sans mb-3">
-            <span className="font-semibold text-foreground">Osez !</span> Demandez un coup de main en publiant une petite mission, ou proposez quelque chose en échange — un café, une histoire, un service…
+            <span className="font-semibold text-foreground">Osez !</span> Demandez un coup de main en publiant une petite mission, ou proposez quelque chose en échange, un café, une histoire, un service…
           </p>
           <div className="flex flex-col gap-2">
             <Button onClick={() => navigate("/petites-missions/creer")} className="w-full rounded-xl text-xs font-medium">Publier un besoin →</Button>

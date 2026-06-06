@@ -247,7 +247,7 @@ const AdminArticles = () => {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {article.published_at ? format(new Date(article.published_at), "d MMM yyyy", { locale: fr }) : "—"}
+                    {article.published_at ? format(new Date(article.published_at), "d MMM yyyy", { locale: fr }) : ","}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
@@ -278,7 +278,7 @@ const AdminArticles = () => {
         </Table>
       </div>
 
-      {/* CORRECTION 8 — SEO checklist panel */}
+      {/* CORRECTION 8, SEO checklist panel */}
       <Sheet open={!!selectedArticle} onOpenChange={() => setSelectedArticle(null)}>
         <SheetContent>
           <SheetHeader>

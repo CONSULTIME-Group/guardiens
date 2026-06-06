@@ -10,11 +10,11 @@ interface ShareButtonsProps {
   sitId: string;
   title: string;
   city?: string | null;
-  /** Date de début (ISO) — affichée en récap pour confirmer ce qui sera partagé */
+  /** Date de début (ISO), affichée en récap pour confirmer ce qui sera partagé */
   startDate?: string | null;
   /** Date de fin (ISO) */
   endDate?: string | null;
-  /** Where the share is triggered from — used in analytics */
+  /** Where the share is triggered from, used in analytics */
   source?: string;
   /** Compact icon-only variant for hero/secondary placements */
   compact?: boolean;
@@ -38,7 +38,7 @@ const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_de
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
-  // Toujours partager l'URL publique de production — jamais /sits/:id ni la preview.
+  // Toujours partager l'URL publique de production, jamais /sits/:id ni la preview.
   // Paramètre volontairement neutre : il contourne le cache social déjà pollué de l'URL nue,
   // sans impacter la canonical SEO servie par PageMeta.
   const shareUrl = `https://guardiens.fr/annonces/${sitId}?share=cover-photo-20260522`;
@@ -57,7 +57,7 @@ const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_de
   const periodLabel = formatSitPeriod(startDate, endDate);
   const cityPart = city ? ` à ${city}` : "";
   const datePart = periodLabel ? ` (${periodLabel})` : "";
-  const shareText = `${title}${cityPart}${datePart} — une annonce de garde sur Guardiens. Quelqu'un du coin (ou d'ailleurs en France) pour veiller sur la maison ?`;
+  const shareText = `${title}${cityPart}${datePart}, une annonce de garde sur Guardiens. Quelqu'un du coin (ou d'ailleurs en France) pour veiller sur la maison ?`;
 
   const track = (channel: ShareChannel) => {
     try {
@@ -90,7 +90,7 @@ const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_de
 
   const handleEmail = () => {
     track("email");
-    const subject = encodeURIComponent(`${title} — Guardiens`);
+    const subject = encodeURIComponent(`${title}, Guardiens`);
     const body = encodeURIComponent(`${shareText}\n\n${trackedShareUrl("email")}`);
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   };
@@ -112,7 +112,7 @@ const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_de
     try {
       await navigator.share({ title, text: shareText, url: shareUrl });
     } catch {
-      // user cancelled — silent
+      // user cancelled, silent
     }
   };
 

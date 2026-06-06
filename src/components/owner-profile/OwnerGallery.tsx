@@ -329,7 +329,7 @@ const OwnerGallery = () => {
         <div>
           <h2 className="font-heading text-2xl font-bold">Ma galerie</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            {photos.length}/{MAX_PHOTOS} photos — Montrez aux gardiens ce qui rend votre maison unique
+            {photos.length}/{MAX_PHOTOS} photos, Montrez aux gardiens ce qui rend votre maison unique
           </p>
         </div>
       </div>
@@ -373,7 +373,7 @@ const OwnerGallery = () => {
             </button>
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            JPG, PNG ou WEBP — max 5 Mo par photo · plusieurs fichiers acceptés
+            JPG, PNG ou WEBP, max 5 Mo par photo · plusieurs fichiers acceptés
           </p>
           <input
             ref={fileRef}

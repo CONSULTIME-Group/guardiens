@@ -7,7 +7,7 @@
  * est porté par SearchPage (Helmet) pour rester rendu côté serveur.
  *
  * Lien interne : on pointe vers les 3 hubs SEO réels (Lyon / Annecy /
- * Grenoble) — pas de mention régionale (proscrit AURA).
+ * Grenoble), pas de mention régionale (proscrit AURA).
  */
 import { Link } from "react-router-dom";
 

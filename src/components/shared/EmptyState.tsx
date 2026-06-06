@@ -68,7 +68,7 @@ const ILLUSTRATION_SIZES =
 
 import { SVG_FALLBACKS } from "./empty-state-fallbacks";
 
-/* Composant générique image — délègue TOUTE la logique de fondu
+/* Composant générique image, délègue TOUTE la logique de fondu
    (masque radial + blend modes light/dark + filtre dark) à la classe
    utilitaire `.illustration-blend` définie dans src/index.css.
    Aucun style de blend/mask/filter n'est dupliqué ici : la classe est

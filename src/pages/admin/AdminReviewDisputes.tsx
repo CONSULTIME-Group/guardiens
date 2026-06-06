@@ -147,7 +147,7 @@ const AdminReviewDisputes = () => {
 
     toast.success(
       resolveTarget.action === "accepted"
-        ? "Contestation acceptée — l'avis a été dépublié"
+        ? "Contestation acceptée, l'avis a été dépublié"
         : "Contestation refusée"
     );
     setResolveTarget(null);
@@ -174,7 +174,7 @@ const AdminReviewDisputes = () => {
   return (
     <div className="p-4 md:p-8 max-w-5xl mx-auto">
       <Helmet>
-        <title>Contestations d'avis — Admin Guardiens</title>
+        <title>Contestations d'avis, Admin Guardiens</title>
         <meta name="robots" content="noindex,nofollow" />
       </Helmet>
 

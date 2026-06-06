@@ -116,7 +116,7 @@ const ContextualResources = memo(({ annoncesCount, gardesCount, loading }: Conte
             <li key={r.href} role="listitem">
               <Link
                 to={r.href}
-                aria-label={`${r.title} — lire l'article`}
+                aria-label={`${r.title}, lire l'article`}
                 aria-describedby={descId}
                 className={`${CARD_BASE_CLASSES} group hover:bg-primary/5 hover:border-primary/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
               >

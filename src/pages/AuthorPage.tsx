@@ -90,7 +90,7 @@ export default function AuthorPage() {
   return (
     <>
       <PageMeta
-        title={`${author.firstName} — Auteur Guardiens`}
+        title={`${author.firstName}, Auteur Guardiens`}
         description={author.shortBio}
         path={`/auteurs/${author.slug}`}
       />

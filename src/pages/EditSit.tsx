@@ -417,7 +417,7 @@ const EditSit = () => {
             </p>
             <p className="text-warning-foreground/80 text-xs mt-0.5">
               Toute modification (dates, attentes, etc.) n'enverra pas de notification automatique
-              au gardien — pensez à le prévenir via la messagerie.
+              au gardien, pensez à le prévenir via la messagerie.
             </p>
           </div>
         </div>
@@ -425,7 +425,7 @@ const EditSit = () => {
 
       <fieldset disabled={isLocked} className="contents">
         <div className="space-y-5">
-          {/* SECTION 1 — Essentiel : titre + dates */}
+          {/* SECTION 1, Essentiel : titre + dates */}
           <SectionCard
             icon={FileText}
             title="L'essentiel"
@@ -564,7 +564,7 @@ const EditSit = () => {
             </div>
           </SectionCard>
 
-          {/* SECTION 2 — Description */}
+          {/* SECTION 2, Description */}
           <SectionCard
             icon={Sparkles}
             title="Description de la garde"
@@ -589,7 +589,7 @@ const EditSit = () => {
                 )}
               >
                 {trimmedDesc.length === 0
-                  ? `Optionnel — si renseigné, ${MIN_DESC_LENGTH} caractères minimum.`
+                  ? `Optionnel, si renseigné, ${MIN_DESC_LENGTH} caractères minimum.`
                   : `${trimmedDesc.length}/${MIN_DESC_LENGTH} caractères minimum`}
               </p>
               {forbiddenInDesc && (
@@ -600,11 +600,11 @@ const EditSit = () => {
             </div>
           </SectionCard>
 
-          {/* SECTION 3 — Profil de gardien souhaité */}
+          {/* SECTION 3, Profil de gardien souhaité */}
           <SectionCard
             icon={Users}
             title="Gardien recherché"
-            description="Préférences indicatives — tous les profils peuvent postuler."
+            description="Préférences indicatives, tous les profils peuvent postuler."
           >
             <div>
               <Label className="text-sm font-medium mb-2 block">Idéale pour</Label>
@@ -655,7 +655,7 @@ const EditSit = () => {
                     htmlFor="sit-urgent"
                     className="text-sm font-medium flex items-center gap-1.5 cursor-pointer text-warning-foreground"
                   >
-                    <Zap className="h-4 w-4" /> Urgent — garde dans moins de 48 h
+                    <Zap className="h-4 w-4" /> Urgent, garde dans moins de 48 h
                   </Label>
                   <p className="text-xs text-warning-foreground/80 mt-0.5">
                     Les gardiens d'urgence seront alertés en priorité.
@@ -665,7 +665,7 @@ const EditSit = () => {
             )}
           </SectionCard>
 
-          {/* SECTION 4 — Photos (gérées sur le profil propriétaire) */}
+          {/* SECTION 4, Photos (gérées sur le profil propriétaire) */}
           <SectionCard
             icon={ImageIcon}
             title="Photos & couverture"

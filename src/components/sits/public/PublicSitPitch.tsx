@@ -5,7 +5,7 @@
  *
  * Visible UNIQUEMENT pour les visiteurs anonymes.
  *
- * Vocabulaire : on parle de "gardien" (et non "voisin") — c'est le rôle
+ * Vocabulaire : on parle de "gardien" (et non "voisin"), c'est le rôle
  * réel sur la plateforme (vérifié, noté, expérimenté).
  */
 import { Home, PawPrint, Plane, Heart } from "lucide-react";

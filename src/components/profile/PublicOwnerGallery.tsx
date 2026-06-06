@@ -69,7 +69,7 @@ const PublicOwnerGallery = ({ photos, firstName, city }: Props) => {
           >
             <img
               src={photo.photo_url}
-              alt={`${photo.caption} — Logement house-sitting à ${city || "France"} | Guardiens`}
+              alt={`${photo.caption}, Logement house-sitting à ${city || "France"} | Guardiens`}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-end">

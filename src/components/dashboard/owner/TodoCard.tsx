@@ -15,7 +15,7 @@ interface TodoCardProps {
 }
 
 /**
- * Bloc unifié "À faire maintenant" — agrège vérif identité, candidatures à examiner,
+ * Bloc unifié "À faire maintenant", agrège vérif identité, candidatures à examiner,
  * avis à laisser. Disparaît si vide. Remplace les chips éparses du hero.
  */
 const TodoCard = memo(({ items }: TodoCardProps) => {

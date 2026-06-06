@@ -77,7 +77,7 @@ const PublicMissionView = ({
   return (
     <div className="min-h-screen bg-background text-foreground animate-fade-in">
       <PageMeta
-        title={`${mission.title} — Coup de main près de chez vous | Guardiens`}
+        title={`${mission.title}, Coup de main près de chez vous | Guardiens`}
         description={mission.description?.slice(0, 155)}
       />
       <Helmet>
@@ -359,7 +359,7 @@ const PublicMissionView = ({
           </section>
         )}
 
-        {/* Pourquoi rejoindre — réassurance bas de page */}
+        {/* Pourquoi rejoindre, réassurance bas de page */}
         <section className="mt-24 md:mt-28 bg-primary text-primary-foreground rounded-[2.5rem] p-10 md:p-14 shadow-2xl shadow-primary/20">
           <div className="max-w-3xl mx-auto text-center space-y-6">
             <h2 className="font-heading text-3xl md:text-4xl font-bold">

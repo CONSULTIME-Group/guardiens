@@ -13,7 +13,7 @@ interface Row {
 }
 
 /**
- * Performance CTAs articles — agrège analytics_events sur 30j glissants.
+ * Performance CTAs articles, agrège analytics_events sur 30j glissants.
  * - views = page_view source = `article:{slug}` (ou metadata.article_slug)
  * - clicks_mid / clicks_end = cta_click avec metadata.cta_position
  * - signups_7d = signup_completed dont metadata.from_article_slug = slug (J+7)
@@ -108,7 +108,7 @@ export default function ArticleCtaPerformance() {
               <tbody>
                 {rows.map((r) => {
                   const totalClicks = r.clicks_mid + r.clicks_end;
-                  const ctr = r.views > 0 ? ((totalClicks / r.views) * 100).toFixed(1) : "—";
+                  const ctr = r.views > 0 ? ((totalClicks / r.views) * 100).toFixed(1) : ",";
                   return (
                     <tr key={r.article_slug} className="border-b last:border-0">
                       <td className="py-2 pr-3">
@@ -124,7 +124,7 @@ export default function ArticleCtaPerformance() {
                       <td className="py-2 px-2 text-right tabular-nums">{r.views}</td>
                       <td className="py-2 px-2 text-right tabular-nums">{r.clicks_mid}</td>
                       <td className="py-2 px-2 text-right tabular-nums">{r.clicks_end}</td>
-                      <td className="py-2 px-2 text-right tabular-nums">{ctr}{ctr !== "—" ? " %" : ""}</td>
+                      <td className="py-2 px-2 text-right tabular-nums">{ctr}{ctr !== "," ? " %" : ""}</td>
                       <td className="py-2 pl-2 text-right tabular-nums">{r.signups_7d}</td>
                     </tr>
                   );

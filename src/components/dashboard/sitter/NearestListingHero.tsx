@@ -9,7 +9,7 @@ interface NearestListingHeroProps {
 }
 
 /**
- * Carte hero "Annonce phare près de chez vous" — mise en avant
+ * Carte hero "Annonce phare près de chez vous", mise en avant
  * visuelle de la 1ʳᵉ annonce la plus proche du gardien. Format compact
  * (image + titre + dates + CTA), affichée juste après le SitterHero
  * quand il n'y a pas de garde en cours.

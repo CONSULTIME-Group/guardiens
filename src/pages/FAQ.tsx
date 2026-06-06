@@ -143,8 +143,8 @@ const FAQ = () => {
  return (
  <>
  <PageMeta
- title="FAQ Guardiens — Toutes vos questions"
- description="Toutes vos questions sur Guardiens — abonnement gardien, accès propriétaire à 0 €, parrainage et petites missions d'entraide."
+ title="FAQ Guardiens, Toutes vos questions"
+ description="Toutes vos questions sur Guardiens, abonnement gardien, accès propriétaire à 0 €, parrainage et petites missions d'entraide."
  path="/faq"
  />
 

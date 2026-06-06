@@ -20,7 +20,7 @@ const prefetchDemoDetail = () => {
   import("@/data/demoListings").catch(() => {});
 };
 
-// Photo hero (1ère photo) par slug — alignée sur src/data/demoListings.ts
+// Photo hero (1ère photo) par slug, alignée sur src/data/demoListings.ts
 // Évite le 1er paint vide sur mobile en chargeant l'image avant la navigation.
 const DEMO_HERO_BY_SLUG: Record<string, string> = {
   "lyon-laika-jardin":
@@ -86,7 +86,7 @@ const DEMO_LISTINGS = [
     animals: ["2 chats"],
     dates: "20 sept. → 4 oct.",
     title: "Appartement calme, deux chats aux habitudes bien rodées",
-    description: "Appartement lumineux au pied du Vercors. Milo et Louane sont habitués aux gardiens — une semaine et ils vous ont adopté. Quartier animé, tout à pied.",
+    description: "Appartement lumineux au pied du Vercors. Milo et Louane sont habitués aux gardiens, une semaine et ils vous ont adopté. Quartier animé, tout à pied.",
     ownerName: "Giulia",
     ownerPhoto: "/images/landing/avatar-giulia.webp",
     badges: ["ID vérifiée", "Fondatrice"],
@@ -175,7 +175,7 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
     onFocus={onFocusCb}
     onTouchStart={onTouch}
     onClick={handleClick}
-    aria-label={`${DEMO_CARD_CTA_LABEL} : ${title} — ${city}`}
+    aria-label={`${DEMO_CARD_CTA_LABEL} : ${title}, ${city}`}
     className="group bg-card rounded-2xl overflow-hidden border border-border shadow-sm flex flex-col hover:shadow-lg hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
   >
     <div className="relative">

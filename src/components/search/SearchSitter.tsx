@@ -83,7 +83,7 @@ const SearchSitter = () => {
  });
  const [zoneMode, setZoneMode] = useState<ZoneMode>(() => {
  if (typeof window === "undefined") return "radius";
- // Param URL ?zone=france — utilisé depuis le dashboard pour ouvrir la
+ // Param URL ?zone=france, utilisé depuis le dashboard pour ouvrir la
  // recherche directement en mode élargi (« annonces plus loin »).
  const urlZone = searchParams.get("zone");
  if (urlZone === "radius" || urlZone === "dept" || urlZone === "region" || urlZone === "france") return urlZone;
@@ -107,9 +107,9 @@ const SearchSitter = () => {
  // Mode test démos : ?testDemos=1 dans l'URL active un panneau de diagnostic
  // qui vérifie la présence + l'intercalation des annonces d'exemple sur tous
  // les types de recherche (gardes, missions, membres). N'a aucun effet sur la
- // logique de tri/filtre — purement instrumental.
+ // logique de tri/filtre, purement instrumental.
  const testDemoMode = searchParams.get("testDemos") === "1";
- // Historique de vérification (mode test) — une ligne par changement de filtre clé
+ // Historique de vérification (mode test), une ligne par changement de filtre clé
  type DemoCheckRow = {
  ts: number;
  trigger: "city" | "startDate" | "endDate" | "sort" | "tab";
@@ -175,7 +175,7 @@ const SearchSitter = () => {
 
  // ─── City autocomplete via geo.api.gouv.fr ───
  // Comportement unifié : on normalise (sans accents/casse) côté client puis
- // on aiguille vers l'endpoint pertinent — `codePostal` pour 5 chiffres,
+ // on aiguille vers l'endpoint pertinent, `codePostal` pour 5 chiffres,
  // `nom` sinon (l'API gère le fuzzy ascii).
  const citySearchTimeout = useRef<NodeJS.Timeout | null>(null);
  const handleCityInputChange = (val: string) => {
@@ -218,7 +218,7 @@ const SearchSitter = () => {
  };
 
  // ─── Suggestions département & région (locales, dérivées de la saisie) ───
- // (normalize est importé depuis @/lib/normalize — comportement unifié partout)
+ // (normalize est importé depuis @/lib/normalize, comportement unifié partout)
 
  // Renvoie un code postal "représentatif" du département (pour piloter le mode Zone)
  const deptToRefPostalCode = (dept: string): string => {
@@ -375,7 +375,7 @@ const SearchSitter = () => {
 
   useEffect(() => {
   if (initialLoadDone.current) return;
-  // Anon visitors: fire search immediately (no profile coords to wait for) — SEO + signup conversion (Nomador model)
+  // Anon visitors: fire search immediately (no profile coords to wait for), SEO + signup conversion (Nomador model)
   if (!user || userCoords || (user && userCity === "")) {
   initialLoadDone.current = true;
   doSearch();
@@ -838,7 +838,7 @@ const SearchSitter = () => {
  };
  items.sort((a: any, b: any) => skillRank(a) - skillRank(b));
  // Démos "savoir-faire complémentaires" toujours visibles (reiki, naturopathie, ostéo…)
- // — seulement quand le filtre catégorie est "all" ou "skills".
+ //, seulement quand le filtre catégorie est "all" ou "skills".
  const showDemoMembers = missionCategoryFilter === "all" || missionCategoryFilter === "skills";
  if (showDemoMembers) {
    items = interleaveDemos(items, DEMO_MEMBERS as any[], 3);
@@ -1042,11 +1042,11 @@ const SearchSitter = () => {
  </div>
 
 
- {/* Réassurance périmètre — visible avant la barre de recherche */}
+ {/* Réassurance périmètre, visible avant la barre de recherche */}
  <div className="px-6 pt-4">
  <ReachReassuranceBanner
  variant="inline"
- inlineText="Du coin par défaut — élargissez à toute la France quand vous le voulez."
+ inlineText="Du coin par défaut, élargissez à toute la France quand vous le voulez."
  />
  </div>
 
@@ -1100,7 +1100,7 @@ const SearchSitter = () => {
    onGeolocate={handleGeolocation}
  />
 
-   {/* Zone pill (radius / dept / region / france) — désactivé hors connexion */}
+   {/* Zone pill (radius / dept / region / france), désactivé hors connexion */}
    <div
      className={!user ? "opacity-60 pointer-events-none" : ""}
      aria-disabled={!user}
@@ -1127,7 +1127,7 @@ const SearchSitter = () => {
      setEndDate={setEndDate}
    />
  
- {/* Animals picker retiré — remplacé par la pill catégorie « Animaux » ci-dessus */}
+ {/* Animals picker retiré, remplacé par la pill catégorie « Animaux » ci-dessus */}
 
 
    {/* Verified toggle promu (raccourci confiance) */}
@@ -1140,7 +1140,7 @@ const SearchSitter = () => {
   <span>{verifiedOnly ? "Vérifiés uniquement" : "Vérifié"}</span>
   </button>
 
-   {/* Advanced filters pill — type de logement / environnement, désactivé hors connexion */}
+   {/* Advanced filters pill, type de logement / environnement, désactivé hors connexion */}
    <div
      className={!user ? "opacity-60 pointer-events-none" : ""}
      aria-disabled={!user}
@@ -1257,7 +1257,7 @@ const SearchSitter = () => {
  </div>
  </div>
 
- {/* Densité supprimée — déjà visible dans le sélecteur de Zone et le bandeau hors-zone */}
+ {/* Densité supprimée, déjà visible dans le sélecteur de Zone et le bandeau hors-zone */}
 
   {/* ─── Out-of-zone banner ─── */}
   {tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius && (
@@ -1283,7 +1283,7 @@ const SearchSitter = () => {
  </div>
  )}
 
- {/* ─── Mode test démos (?testDemos=1) — panneau diagnostique ─── */}
+ {/* ─── Mode test démos (?testDemos=1), panneau diagnostique ─── */}
  {testDemoMode && (() => {
  const inMembersTab = tab === "missions" && missionSubTab === "members";
  const list = inMembersTab ? availableMembers : results;
@@ -1329,7 +1329,7 @@ const SearchSitter = () => {
  >
  <div className="flex items-center justify-between flex-wrap gap-2">
  <p className="font-mono font-bold text-amber-900 flex items-center gap-2">
- <Sparkles className="h-4 w-4" /> MODE TEST DÉMOS — Onglet&nbsp;: <span className="bg-amber-200 px-2 py-0.5 rounded">{tabLabel}</span>
+ <Sparkles className="h-4 w-4" /> MODE TEST DÉMOS, Onglet&nbsp;: <span className="bg-amber-200 px-2 py-0.5 rounded">{tabLabel}</span>
  </p>
  <Link to={window.location.pathname} className="text-xs text-amber-800 underline hover:no-underline">Désactiver</Link>
  </div>
@@ -1379,7 +1379,7 @@ const SearchSitter = () => {
  ? "Onglet membres : aucune démo attendue (profils réels uniquement)."
  : demoIndices.length > 0
  ? `Démos visibles aux positions : ${demoIndices.map((i) => `#${i + 1}`).join(", ")}`
- : "Aucune démo détectée — vérifier interleaveDemos()"}
+ : "Aucune démo détectée, vérifier interleaveDemos()"}
  </span>
  </li>
  {!inMembersTab && (
@@ -1398,8 +1398,8 @@ const SearchSitter = () => {
  {strictInterleaveOk
  ? realCount >= 3
  ? "1 démo toutes les 3 vraies annonces (positions 4, 8, 12…)"
- : "trop peu de vraies annonces — démos placées en fin de liste"
- : `règle violée — ${missingPositions.length} manquante(s), ${unexpectedPositions.length} hors-règle (voir détails ci-dessous)`}
+ : "trop peu de vraies annonces, démos placées en fin de liste"
+ : `règle violée, ${missingPositions.length} manquante(s), ${unexpectedPositions.length} hors-règle (voir détails ci-dessous)`}
  </span>
  </li>
  )}
@@ -1409,7 +1409,7 @@ const SearchSitter = () => {
  </li>
  </ul>
 
- {/* Tableau de vérification par filtre — historique des changements */}
+ {/* Tableau de vérification par filtre, historique des changements */}
  <div className="pt-2 border-t border-amber-200">
  <div className="flex items-center justify-between mb-1.5">
  <p className="text-xs font-mono font-bold text-amber-900">
@@ -1455,7 +1455,7 @@ const SearchSitter = () => {
  const dates =
  row.startDate || row.endDate
  ? `${row.startDate || "…"} → ${row.endDate || "…"}`
- : "—";
+ : ",";
  return (
  <tr
  key={`${row.ts}-${idx}`}
@@ -1470,15 +1470,15 @@ const SearchSitter = () => {
  <span className="bg-amber-200/70 px-1.5 py-0.5 rounded">{row.trigger}</span>
  </td>
  <td className="px-2 py-1">{row.tab}</td>
- <td className="px-2 py-1 max-w-[120px] truncate" title={row.city || "—"}>
- {row.city || "—"}
+ <td className="px-2 py-1 max-w-[120px] truncate" title={row.city || ","}>
+ {row.city || ","}
  </td>
  <td className="px-2 py-1 whitespace-nowrap">{dates}</td>
  <td className="px-2 py-1">{row.sort}</td>
  <td className="px-2 py-1 text-right text-sky-700 font-semibold">{row.real}</td>
  <td className="px-2 py-1 text-right text-amber-700 font-semibold">{row.demo}</td>
  <td className="px-2 py-1 text-muted-foreground">
- {row.positions.length > 0 ? row.positions.map((p) => `#${p}`).join(", ") : "—"}
+ {row.positions.length > 0 ? row.positions.map((p) => `#${p}`).join(", ") : ","}
  </td>
  <td className="px-2 py-1 text-center">
  {row.tab === "members" ? (
@@ -1508,7 +1508,7 @@ const SearchSitter = () => {
  >
  <p className="font-mono font-bold text-red-700 flex items-center gap-2 text-sm">
  <span aria-hidden="true">❌</span>
- ÉCHEC INTERCALATION — la règle « 1 démo toutes les 3 vraies annonces » n'est pas respectée
+ ÉCHEC INTERCALATION, la règle « 1 démo toutes les 3 vraies annonces » n'est pas respectée
  </p>
  <p className="text-red-900/80">
  Cause possible&nbsp;: changement de filtre, pagination ou tri qui réordonne la liste après{" "}
@@ -1518,13 +1518,13 @@ const SearchSitter = () => {
  <div className="bg-red-50 rounded p-2 border border-red-200">
  <div className="text-red-700/70 text-[10px] uppercase tracking-wide">Positions attendues</div>
  <div className="text-red-900 font-semibold">
- {expectedPositions.length > 0 ? expectedPositions.map((p) => `#${p}`).join(", ") : "—"}
+ {expectedPositions.length > 0 ? expectedPositions.map((p) => `#${p}`).join(", ") : ","}
  </div>
  </div>
  <div className="bg-red-50 rounded p-2 border border-red-200">
  <div className="text-red-700/70 text-[10px] uppercase tracking-wide">Positions observées</div>
  <div className="text-red-900 font-semibold">
- {observedPositions.length > 0 ? observedPositions.map((p) => `#${p}`).join(", ") : "—"}
+ {observedPositions.length > 0 ? observedPositions.map((p) => `#${p}`).join(", ") : ","}
  </div>
  </div>
  {missingPositions.length > 0 && (
@@ -1549,7 +1549,7 @@ const SearchSitter = () => {
  <strong>{expectedInterleavedPositions.length}</strong> démo(s) intercalée(s) aux positions{" "}
  {expectedInterleavedPositions.length > 0
  ? expectedInterleavedPositions.map((p) => `#${p}`).join(", ")
- : "—"}
+ : ","}
  {trailingDemosCount > 0 && (
  <> + <strong>{trailingDemosCount}</strong> démo(s) en fin de liste.</>
  )}

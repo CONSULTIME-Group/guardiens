@@ -78,18 +78,18 @@ function generateAltText(article: ArticleFull): string {
  const title = article.title;
  
  if (cat === "guide_race" || cat === "race") {
- return `${title} — guide garde d'animaux Guardiens`;
+ return `${title}, guide garde d'animaux Guardiens`;
  }
  if (cat === "ville" || cat === "guide_ville") {
- return `House-sitting à ${city || title} — gardiens de confiance`;
+ return `House-sitting à ${city || title}, gardiens de confiance`;
  }
  if (cat === "vie_locale") {
- return `${title} — entraide Guardiens`;
+ return `${title}, entraide Guardiens`;
  }
  if (cat === "guide_lieu" || cat === "guide_local") {
- return city ? `${title} à ${city} — guide Guardiens` : `${title} — guide Guardiens`;
+ return city ? `${title} à ${city}, guide Guardiens` : `${title}, guide Guardiens`;
  }
- return `${title} — Guardiens`;
+ return `${title}, Guardiens`;
 }
 
 
@@ -245,7 +245,7 @@ export default function ArticleDetail() {
   return () => { cancelled = true; };
   }, [slug]);
 
- // CTA tracking — listen for clicks on data-article-cta links inside the rendered article
+ // CTA tracking, listen for clicks on data-article-cta links inside the rendered article
  useEffect(() => {
    if (!article) return;
    const handler = (e: Event) => {
@@ -303,7 +303,7 @@ export default function ArticleDetail() {
  url: link.url || (link.slug ? `/actualites/${link.slug}` : "#"),
  })).filter((l: any) => l.text);
 
- // Schema.org Article — CORRECTION 1
+ // Schema.org Article, CORRECTION 1
  const articleSchema = {
  "@context": "https://schema.org",
  "@type": "Article",
@@ -340,11 +340,11 @@ export default function ArticleDetail() {
  },
  };
 
-  // FAQ schema — parsed from :::faq blocks
+  // FAQ schema, parsed from :::faq blocks
   const faqItems = parseFaqFromMarkdown(article.content);
   const faqSchema = buildFaqSchema(faqItems);
 
-  // HowTo schema — parsed from a "## … étapes …" section (e.g. pilier 01)
+  // HowTo schema, parsed from a "## … étapes …" section (e.g. pilier 01)
   const howToSteps = parseHowToFromMarkdown(article.content);
   const howToSchema = buildHowToSchema(howToSteps, {
     name: article.meta_title || article.title,
@@ -366,7 +366,7 @@ export default function ArticleDetail() {
     />
     <ArticleSeoLogger article={article} />
 
-    {/* Schema.org — Article + (optionnel) FAQPage + (optionnel) HowTo. */}
+    {/* Schema.org, Article + (optionnel) FAQPage + (optionnel) HowTo. */}
     {/* On émet 3 <script> séparés pour rester lisible côté Search Console. */}
     <Helmet>
     <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
@@ -419,7 +419,7 @@ export default function ArticleDetail() {
  <script type="application/ld+json">{JSON.stringify({
  "@context": "https://schema.org",
  "@type": "LocalBusiness",
- "name": `Guardiens — Pet-sitting & House-sitting ${article.city}`,
+ "name": `Guardiens, Pet-sitting & House-sitting ${article.city}`,
  "description": article.excerpt,
  "url": `https://guardiens.fr/actualites/${article.slug}`,
  "address": {
@@ -458,7 +458,7 @@ export default function ArticleDetail() {
  {article.title}
  </h1>
 
- {/* CORRECTION 6 — Date de mise à jour ou publication */}
+ {/* CORRECTION 6, Date de mise à jour ou publication */}
  <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4">
  <Calendar className="h-3.5 w-3.5" />
  {article.updated_at && article.created_at && new Date(article.updated_at).getTime() - new Date(article.created_at).getTime() > 86400000
@@ -481,7 +481,7 @@ export default function ArticleDetail() {
  </div>
  </header>
 
-  {/* CORRECTION 2 — Alt text systématique. Les couvertures PNG (illustrations
+  {/* CORRECTION 2, Alt text systématique. Les couvertures PNG (illustrations
       à fond transparent / coups de pinceau) sont rendues sans cadre ni crop,
       pour donner l'impression que l'illustration est peinte directement sur la
       page. Les couvertures JPG/WebP (photos) gardent le rendu encadré. */}
@@ -516,10 +516,10 @@ export default function ArticleDetail() {
 
  <ArticleRenderer content={article.content} userRole={isAuthenticated ? user?.role : undefined} slug={article.slug} />
 
- {/* Bloc « À propos de l'auteur » — affiché si l'auteur est identifié (Jérémie / Elisa) */}
+ {/* Bloc « À propos de l'auteur », affiché si l'auteur est identifié (Jérémie / Elisa) */}
  <ArticleAuthorBio authorName={article.author_name} />
 
- {/* CORRECTION 3 — À lire aussi (internal links) */}
+ {/* CORRECTION 3, À lire aussi (internal links) */}
  {internalLinks.length > 0 && (
  <div className="mt-10 p-5 rounded-xl bg-muted/50 border border-border">
  <h3 className="font-heading text-lg font-semibold text-foreground mb-3">À lire aussi</h3>

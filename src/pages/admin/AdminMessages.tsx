@@ -78,7 +78,7 @@ export default function AdminMessages() {
       });
       if (statsErr) console.error("admin_message_stats error", statsErr);
 
-      // 2) Top users — RPC admin (contourne RLS, classement fiable)
+      // 2) Top users, RPC admin (contourne RLS, classement fiable)
       const { data: topData, error: topErr } = await supabase.rpc("admin_top_message_users", {
         _since: since,
         _limit: 20,
@@ -107,7 +107,7 @@ export default function AdminMessages() {
   }, [period]);
 
   const roleLabel = (r: string | null) =>
-    r === "owner" ? "Propriétaire" : r === "sitter" ? "Gardien" : r === "both" ? "Les deux" : "—";
+    r === "owner" ? "Propriétaire" : r === "sitter" ? "Gardien" : r === "both" ? "Les deux" : ",";
 
   const maxBar = Math.max(...(stats?.daily.map((d) => d.human + d.system) || [1]), 1);
   const ctxEntries = Object.entries(stats?.by_context || {}).sort((a, b) => b[1] - a[1]);
@@ -167,7 +167,7 @@ export default function AdminMessages() {
               value={
                 stats.last_message_at
                   ? formatDistanceToNow(new Date(stats.last_message_at), { addSuffix: true, locale: fr })
-                  : "—"
+                  : ","
               }
               small
             />
@@ -210,7 +210,7 @@ export default function AdminMessages() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Messages par jour — 14 derniers jours calendaires
+              Messages par jour, 14 derniers jours calendaires
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -250,7 +250,7 @@ export default function AdminMessages() {
       {/* Top users */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Top 20 — Membres les plus actifs (par messages envoyés)</CardTitle>
+          <CardTitle className="text-base">Top 20, Membres les plus actifs (par messages envoyés)</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (

@@ -119,7 +119,7 @@ const AdminSmallMissions = () => {
         <Card className="border-warning-border bg-warning-soft dark:bg-orange-900/10 dark:border-orange-800">
           <CardContent className="p-3 flex items-center gap-3">
             <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
-            <p className="text-sm flex-1">{suspectMissions.length} mission{suspectMissions.length > 1 ? "s" : ""} avec mention d'argent détectée{suspectMissions.length > 1 ? "s" : ""} — à vérifier</p>
+            <p className="text-sm flex-1">{suspectMissions.length} mission{suspectMissions.length > 1 ? "s" : ""} avec mention d'argent détectée{suspectMissions.length > 1 ? "s" : ""}, à vérifier</p>
           </CardContent>
         </Card>
       )}

@@ -237,9 +237,9 @@ const AdminReviews = () => {
                     <TableCell>
                       {badgeCounts[review.sit_id] ? (
                         <Badge variant="outline" className="text-xs">{badgeCounts[review.sit_id]} badge{badgeCounts[review.sit_id] > 1 ? "s" : ""}</Badge>
-                      ) : <span className="text-xs text-muted-foreground">—</span>}
+                      ) : <span className="text-xs text-muted-foreground">,</span>}
                     </TableCell>
-                    <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">{review.comment || "—"}</TableCell>
+                    <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">{review.comment || ","}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{format(new Date(review.created_at), "d MMM yyyy", { locale: fr })}</TableCell>
                     <TableCell>
                       <Badge variant={review.published ? "default" : "outline"}>{review.published ? "Publié" : "Masqué"}</Badge>
@@ -296,7 +296,7 @@ const AdminReviews = () => {
                       {review.sit && (
                         <p className="text-xs text-muted-foreground">
                           Garde : {review.sit.title}
-                          {review.sit.start_date && ` — ${format(new Date(review.sit.start_date), "d MMM yyyy", { locale: fr })}`}
+                          {review.sit.start_date && `, ${format(new Date(review.sit.start_date), "d MMM yyyy", { locale: fr })}`}
                           {review.sit.end_date && ` → ${format(new Date(review.sit.end_date), "d MMM yyyy", { locale: fr })}`}
                         </p>
                       )}
@@ -408,8 +408,8 @@ const AdminReviews = () => {
                       <TableCell className="text-sm">
                         {r.reviewer?.first_name} → {r.reviewee?.first_name}
                       </TableCell>
-                      <TableCell className="text-sm capitalize">{r.cancelled_by_role || "—"}</TableCell>
-                      <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">{r.cancellation_reason || "—"}</TableCell>
+                      <TableCell className="text-sm capitalize">{r.cancelled_by_role || ","}</TableCell>
+                      <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">{r.cancellation_reason || ","}</TableCell>
                       <TableCell>
                         <Badge variant={r.moderation_status === "valide" ? "default" : r.moderation_status === "refuse" ? "destructive" : "outline"}>
                           {r.moderation_status}

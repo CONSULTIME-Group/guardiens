@@ -47,7 +47,7 @@ const EmailPreferences = () => {
   return (
     <div className="min-h-screen bg-background py-10 px-4">
       <Helmet>
-        <title>Préférences email — Guardiens</title>
+        <title>Préférences email, Guardiens</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <div className="mx-auto max-w-2xl space-y-6">

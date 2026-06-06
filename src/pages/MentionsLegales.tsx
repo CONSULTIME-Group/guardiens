@@ -6,7 +6,7 @@ const MentionsLegales = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
-        title="Mentions légales — Éditeur et hébergeur | Guardiens"
+        title="Mentions légales, Éditeur et hébergeur | Guardiens"
         description="Mentions légales de la plateforme Guardiens : éditeur, hébergeur, directeur de publication, propriété intellectuelle et coordonnées de contact."
         path="/mentions-legales"
       />

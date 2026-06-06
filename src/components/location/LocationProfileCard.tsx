@@ -120,7 +120,7 @@ const LocationProfileCard = ({ city, postalCode, onUseDescription, editable = fa
         ))}
       </div>
 
-      {/* Ideal for — highlighted */}
+      {/* Ideal for, highlighted */}
       {profile.ideal_for && (
         <p className="text-sm italic text-primary font-medium pt-1">
           {profile.ideal_for}

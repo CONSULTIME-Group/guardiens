@@ -4,11 +4,10 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /**
- * Carte d'action prioritaire — UN SEUL CTA dominant.
+ * Carte d'action prioritaire, UN SEUL CTA dominant.
  *
  * Pourquoi un composant dédié : la promesse du cockpit est "une seule chose
- * à faire maintenant". Ce composant matérialise cette règle visuellement —
- * gros titre narratif, sous-texte contextuel, CTA plein largeur.
+ * à faire maintenant". Ce composant matérialise cette règle visuellement ,  * gros titre narratif, sous-texte contextuel, CTA plein largeur.
  *
  * Variante "urgency" pilote l'intensité visuelle :
  *  - high   : ring primary, légère teinte

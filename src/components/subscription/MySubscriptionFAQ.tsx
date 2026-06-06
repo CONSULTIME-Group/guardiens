@@ -8,7 +8,7 @@ import {
 const ITEMS = [
   {
     q: "Puis-je résilier à tout moment ?",
-    a: "Oui, sans frais ni préavis. Depuis « Gérer mon abonnement », vous pouvez annuler en un clic — vous gardez l'accès jusqu'à la fin de la période payée.",
+    a: "Oui, sans frais ni préavis. Depuis « Gérer mon abonnement », vous pouvez annuler en un clic, vous gardez l'accès jusqu'à la fin de la période payée.",
   },
   {
     q: "Que se passe-t-il quand mon accès se termine ?",

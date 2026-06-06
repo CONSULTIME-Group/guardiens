@@ -77,7 +77,7 @@ export default function InternationalListings() {
           <p className="mt-4 text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
             Notre communauté grandit aussi au-delà des frontières françaises.
             Découvrez les annonces publiées par des propriétaires installés à
-            l'étranger — Maroc, Espagne, Belgique, Suisse, Portugal et plus.
+            l'étranger, Maroc, Espagne, Belgique, Suisse, Portugal et plus.
           </p>
           <p className="mt-3 text-sm">
             <Link to="/annonces" className="text-primary font-semibold hover:underline underline-offset-4">
@@ -101,7 +101,7 @@ export default function InternationalListings() {
               </h2>
               <p className="text-sm text-muted-foreground max-w-md mx-auto">
                 Vous habitez à l'étranger et cherchez un gardien&nbsp;? Vous
-                pouvez créer votre annonce sur Guardiens — votre pays sera bien
+                pouvez créer votre annonce sur Guardiens, votre pays sera bien
                 pris en compte.
               </p>
               <Link
@@ -138,7 +138,7 @@ export default function InternationalListings() {
                     <div className="p-4">
                       <p className="text-xs text-muted-foreground flex items-center gap-1.5 mb-1.5">
                         <MapPin className="h-3 w-3" />
-                        {s.city || "—"}
+                        {s.city || ","}
                         {s.country && s.country !== "FR" && (
                           <span className="font-medium text-foreground/80">({s.country})</span>
                         )}

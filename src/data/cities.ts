@@ -197,7 +197,7 @@ export const CITIES: CityData[] = [
  {
  name: "Centre-ville Caluire",
  type: "quartier",
- tip: "Commerces de proximité ouverts le dimanche matin — utile pour les urgences vétérinaires mineures.",
+ tip: "Commerces de proximité ouverts le dimanche matin, utile pour les urgences vétérinaires mineures.",
  },
  ],
  riskProfile: [
@@ -244,7 +244,7 @@ export const CITIES: CityData[] = [
  {
  name: "Les Halles de l'Île",
  type: "quartier",
- tip: "Marchés mardi et samedi matin — excellent ancrage de proximité pour les gardiens locaux.",
+ tip: "Marchés mardi et samedi matin, excellent ancrage de proximité pour les gardiens locaux.",
  },
  ],
  riskProfile: [

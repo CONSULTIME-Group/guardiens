@@ -74,7 +74,7 @@ export function BadgeSceau({
     ? format(new Date(obtainedAt), "d MMMM yyyy", { locale: fr })
     : null
 
-  const accessibleLabel = `${def.label}${count > 1 ? ` — obtenu ${count} fois` : ''}${isActive ? '' : ' (expiré)'}`
+  const accessibleLabel = `${def.label}${count > 1 ? `, obtenu ${count} fois` : ''}${isActive ? '' : ' (expiré)'}`
 
   const svgElement = (
     <button

@@ -14,7 +14,7 @@ const ARTICLES = [
   {
     slug: "house-sitting-cadre-juridique-france",
     eyebrow: "Le cadre légal",
-    title: "Pourquoi sans argent — le commodat expliqué",
+    title: "Pourquoi sans argent, le commodat expliqué",
     excerpt: "L'échange entre particuliers, sans paiement, est encadré par l'article 1875 du Code civil.",
     image: `${STORAGE}/cover-juridique-brush.png`,
   },

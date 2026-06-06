@@ -15,7 +15,7 @@ export interface MassEmailFilters {
   id_verifiee?: boolean;
   onboarding_complete?: boolean;
   profile_completion_min?: number; // 0-100 (≥)
-  profile_completion_max?: number; // 0-100 (≤) — cibler profils peu remplis
+  profile_completion_max?: number; // 0-100 (≤), cibler profils peu remplis
   has_completed_sits?: "any" | "yes" | "no"; // a déjà gardé / pas encore
 
   // Cycle de vie
@@ -32,11 +32,11 @@ export interface MassEmailFilters {
   no_sit_published_ever?: boolean;    // proprio n'ayant jamais publié d'annonce
   no_conversation_ever?: boolean;     // n'a jamais initié de conversation
 
-  // Exclusions explicites — ex: ne pas envoyer au propriétaire d'une annonce mise en avant
+  // Exclusions explicites, ex: ne pas envoyer au propriétaire d'une annonce mise en avant
   exclude_user_ids?: string[];
 }
 
-/** Présets rapides "dormants" — un clic pour appliquer un combo de filtres. */
+/** Présets rapides "dormants", un clic pour appliquer un combo de filtres. */
 export interface DormantPreset {
   key: string;
   label: string;
@@ -104,7 +104,7 @@ export const SEGMENT_LABELS: Record<string, string> = {
   fondateurs: "Fondateurs",
 };
 
-/** Compte le nombre de filtres actifs (autres que segment) — pour affichage UI. */
+/** Compte le nombre de filtres actifs (autres que segment), pour affichage UI. */
 export function countActiveFilters(f: MassEmailFilters): number {
   let n = 0;
   if (f.postal_prefix) n++;

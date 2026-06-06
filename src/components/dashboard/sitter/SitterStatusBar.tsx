@@ -9,10 +9,10 @@ interface SitterStatusBarProps {
   avgRating: number;
   reviewsCount: number;
   badgeCount: number;
-  /** Conservé pour compat — non affiché (KPI sans valeur côté gardien). */
+  /** Conservé pour compat, non affiché (KPI sans valeur côté gardien). */
   totalApps?: number;
   reputation: ReputationData | null;
-  /** Si true: stack vertical (1 colonne) — pour usage en sidebar étroite. */
+  /** Si true: stack vertical (1 colonne), pour usage en sidebar étroite. */
   compact?: boolean;
 }
 
@@ -38,7 +38,7 @@ const SitterStatusBar = ({
 
   return (
   <div className={`${wrapperCls} bg-card border border-border rounded-2xl overflow-hidden grid ${gridCls}`}>
-    {/* Zone 1 — MON PROFIL */}
+    {/* Zone 1, MON PROFIL */}
     <div className={`p-4 md:p-5 ${dividerZone1}`}>
       <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">Mon profil</p>
       <div className="h-1.5 bg-muted rounded-full mb-2">
@@ -53,10 +53,10 @@ const SitterStatusBar = ({
       )}
     </div>
 
-    {/* Zone 2 — MES STATS */}
+    {/* Zone 2, MES STATS */}
     <div className={`p-4 md:p-5 ${dividerZone2}`}>
       <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">Mes stats</p>
-      {/* Masquer les KPI à 0 — cohérence avec OwnerDashboard. La tuile
+      {/* Masquer les KPI à 0, cohérence avec OwnerDashboard. La tuile
           « Mes candidatures » a été retirée : un compteur brut d'envois ne
           dit rien (ni statut, ni issue) et démotive en cas de no-reply.
           La bascule Gardien↔Propriétaire reste accessible via la sidebar. */}
@@ -93,7 +93,7 @@ const SitterStatusBar = ({
       )}
     </div>
 
-    {/* Zone 3 — STATUT */}
+    {/* Zone 3, STATUT */}
     <div className="p-4 md:p-5">
       <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">Mon Statut</p>
       <div className="mb-4">
@@ -108,7 +108,7 @@ const SitterStatusBar = ({
         {[
           { label: `3 gardes réalisées (${reputation?.completed_sits ?? 0}/3)`, ok: (reputation?.completed_sits ?? 0) >= 3 },
           { label: `5 badges actifs différents (${reputation?.active_badges ?? 0}/5)`, ok: (reputation?.active_badges ?? 0) >= 5 },
-          { label: `Note ≥ 4.8 (${reputation?.note_moyenne ? Number(reputation.note_moyenne).toFixed(1) : "—"}/4.8)`, ok: (reputation?.note_moyenne ?? 0) >= 4.8 },
+          { label: `Note ≥ 4.8 (${reputation?.note_moyenne ? Number(reputation.note_moyenne).toFixed(1) : ","}/4.8)`, ok: (reputation?.note_moyenne ?? 0) >= 4.8 },
         ].map((c) => (
           <div key={c.label} className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full shrink-0 ${c.ok ? "bg-primary" : "bg-muted-foreground/30"}`} />
@@ -117,7 +117,7 @@ const SitterStatusBar = ({
         ))}
       </div>
       <p className="text-[11px] text-muted-foreground font-sans italic mt-3 leading-snug">
-        Le statut Gardien d'urgence est distinct (note ≥ 4.7) — voir l'éligibilité plus bas.
+        Le statut Gardien d'urgence est distinct (note ≥ 4.7), voir l'éligibilité plus bas.
       </p>
     </div>
   </div>

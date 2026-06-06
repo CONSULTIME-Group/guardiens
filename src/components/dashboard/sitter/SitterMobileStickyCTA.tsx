@@ -17,7 +17,7 @@ const SitterMobileStickyCTA = memo(({ pendingAppsCount = 0, unreadCount = 0 }: S
 
   // Priorité contextuelle : messages non lus > candidatures.
   // Empty state (aucun message / aucune candidature) : on MASQUE le sticky,
-  // car le Hero porte déjà un CTA « Découvrir les gardes » — éviter le doublon
+  // car le Hero porte déjà un CTA « Découvrir les gardes », éviter le doublon
   // et récupérer ~72 px d'espace vertical sur mobile.
   let label = "";
   let to = "";

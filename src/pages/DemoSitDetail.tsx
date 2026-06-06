@@ -97,7 +97,7 @@ const DemoSitDetail = () => {
  return (
  <div className="min-h-screen bg-background">
  <Helmet>
- <title>{`${sit.title} — Annonce d'exemple — Guardiens`}</title>
+ <title>{`${sit.title}, Annonce d'exemple, Guardiens`}</title>
  <meta
  name="description"
  content={`Aperçu d'une annonce de garde Guardiens à ${sit.owner.city}. ${sit.description.slice(0, 120)}…`}
@@ -109,7 +109,7 @@ const DemoSitDetail = () => {
  <div className="sticky top-0 z-30 bg-amber-400 text-amber-950 text-sm font-medium px-4 py-2.5 shadow-sm flex items-center justify-center gap-2">
  <Sparkles className="h-4 w-4 shrink-0" />
  <span className="text-center">
- <strong>Annonce d'exemple</strong> — pour vous montrer l'expérience Guardiens.
+ <strong>Annonce d'exemple</strong>, pour vous montrer l'expérience Guardiens.
  {" "}
  <Link to="/search" className="underline underline-offset-2 hover:no-underline">
  Voir les vraies annonces
@@ -370,7 +370,7 @@ const DemoSitDetail = () => {
  </p>
  </div>
  <p className="text-sm text-amber-900/80 mb-4 leading-relaxed">
- Cette annonce est fictive — elle illustre l'expérience proposée
+ Cette annonce est fictive, elle illustre l'expérience proposée
  par les vrais hôtes Guardiens : fiches précises, conseils race,
  vraies dates, vrais quartiers.
  </p>

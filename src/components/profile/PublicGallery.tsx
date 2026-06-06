@@ -39,7 +39,7 @@ const PublicGallery = ({ photos, firstName }: PublicGalleryProps) => {
           <div key={photo.id} className="group relative aspect-square rounded-xl overflow-hidden cursor-pointer" onClick={() => setLightbox(photo)}>
             <img
               src={photo.photo_url}
-              alt={`Photo de ${photo.animal_breed || photo.animal_type || "animal"} gardé à ${photo.city || ""} par ${firstName} — Guardiens`}
+              alt={`Photo de ${photo.animal_breed || photo.animal_type || "animal"} gardé à ${photo.city || ""} par ${firstName}, Guardiens`}
               className="w-full h-full object-cover transition-transform group-hover:scale-105"
               loading="lazy"
             />

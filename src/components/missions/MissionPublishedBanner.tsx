@@ -25,7 +25,7 @@ export interface MissionPublishedBannerProps {
   isAuthor: boolean;
   /** Vrai si l'URL contient ?published=1. */
   published: boolean;
-  /** Appelé au clic sur X — le parent doit nettoyer l'URL. */
+  /** Appelé au clic sur X, le parent doit nettoyer l'URL. */
   onClose: () => void;
   /** Toast à appeler en cas de succès / échec de copie. */
   onToast: (toast: { title: string; description: string; variant?: "destructive" }) => void;
@@ -42,7 +42,7 @@ export function MissionPublishedBanner({
   dashboardHref = "/dashboard",
 }: MissionPublishedBannerProps) {
   // Verrou de défense en profondeur : si l'une des deux conditions tombe,
-  // on ne rend rien — même si le parent appelle ce composant à tort.
+  // on ne rend rien, même si le parent appelle ce composant à tort.
   if (!published || !isAuthor) return null;
 
   const handleShare = async () => {

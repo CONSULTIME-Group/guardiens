@@ -74,7 +74,7 @@ const OngoingSitHero = memo(({ sit, sitterProfiles, coverPhoto }: OngoingSitHero
               className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/45 via-black/20 to-transparent pointer-events-none sm:hidden"
               aria-hidden="true"
             />
-            {/* Badge J-X — plus gros, plus contrasté, mieux positionné sur mobile */}
+            {/* Badge J-X, plus gros, plus contrasté, mieux positionné sur mobile */}
             <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3">
               <span
                 className={`inline-flex items-center gap-1.5 text-[13px] sm:text-xs font-heading font-bold tracking-tight rounded-full px-3 py-1.5 sm:px-2.5 sm:py-1 shadow-lg ring-1 ring-black/5 backdrop-blur-sm ${
@@ -92,7 +92,7 @@ const OngoingSitHero = memo(({ sit, sitterProfiles, coverPhoto }: OngoingSitHero
           {/* Contenu */}
           <div className="flex-1 p-4 sm:p-5 flex flex-col justify-between min-w-0 gap-3">
             <div className="flex items-start gap-3 min-w-0">
-              {/* Avatar gardien — cliquable */}
+              {/* Avatar gardien, cliquable */}
               <Link
                 to={sitter?.id ? `/gardiens/${sitter.id}` : "#"}
                 className="shrink-0 group/avatar"
@@ -131,8 +131,8 @@ const OngoingSitHero = memo(({ sit, sitterProfiles, coverPhoto }: OngoingSitHero
                       </span>
                       <span className="hidden sm:inline truncate whitespace-nowrap">
                         {daysLeft !== null && daysLeft > 0
-                          ? `Encore ${daysLeft} jour${daysLeft > 1 ? "s" : ""} — fin ${endLabelLong}`
-                          : `Dernier jour — fin ${endLabelLong}`}
+                          ? `Encore ${daysLeft} jour${daysLeft > 1 ? "s" : ""}, fin ${endLabelLong}`
+                          : `Dernier jour, fin ${endLabelLong}`}
                       </span>
                     </span>
                   )}
@@ -155,7 +155,7 @@ const OngoingSitHero = memo(({ sit, sitterProfiles, coverPhoto }: OngoingSitHero
               </div>
             )}
 
-            {/* Actions — pile mobile, ligne sm+ */}
+            {/* Actions, pile mobile, ligne sm+ */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex gap-2 w-full sm:w-auto sm:order-2 shrink-0">
                 {sitter?.id && (

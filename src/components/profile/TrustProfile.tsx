@@ -50,7 +50,7 @@ const TrustProfile = ({ emailVerified, identityVerified, hasAvatar, profileCompl
         </CollapsibleTrigger>
 
         <CollapsibleContent className="mt-4 space-y-4">
-          {/* Pending steps — always visible when open */}
+          {/* Pending steps, always visible when open */}
           {pendingSteps.length > 0 && (
             <div className="space-y-2">
               {pendingSteps.map((step, i) => (
@@ -67,7 +67,7 @@ const TrustProfile = ({ emailVerified, identityVerified, hasAvatar, profileCompl
             </div>
           )}
 
-          {/* Done steps — collapsible sub-section */}
+          {/* Done steps, collapsible sub-section */}
           {doneSteps.length > 0 && (
             <Collapsible defaultOpen={!allDone && doneSteps.length <= 2}>
               <CollapsibleTrigger className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">

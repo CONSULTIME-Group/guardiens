@@ -102,7 +102,7 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
           id="motivation"
           value={data.motivation}
           onChange={e => onChange({ motivation: e.target.value })}
-          placeholder="Ex : J'ai grandi avec des chiens et des chats. Depuis 3 ans je garde des maisons près de chez moi — ma meilleure garde était chez une famille avec deux golden retrievers. Je donne des nouvelles chaque soir avec photos."
+          placeholder="Ex : J'ai grandi avec des chiens et des chats. Depuis 3 ans je garde des maisons près de chez moi, ma meilleure garde était chez une famille avec deux golden retrievers. Je donne des nouvelles chaque soir avec photos."
           className="rounded-lg min-h-[150px]"
           maxLength={2000}
         />
@@ -115,7 +115,7 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
           {motivationLen < 50
             ? `${motivationLen}/50 minimum`
             : motivationLen <= 200
-              ? `${motivationLen} car. — Bien, mais un peu plus serait idéal`
+              ? `${motivationLen} car., Bien, mais un peu plus serait idéal`
               : `${motivationLen} caractères`}
         </p>
         {motivationLen > 0 && motivationLen < 50 && (

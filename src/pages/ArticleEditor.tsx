@@ -79,7 +79,7 @@ const ArticleEditor = () => {
     if (!isNew && id) slugQuery.neq("id", id);
     const { data: dupes } = await slugQuery;
     if (dupes && dupes.length > 0) {
-      toast.error("Ce slug existe déjà — choisissez un slug unique");
+      toast.error("Ce slug existe déjà, choisissez un slug unique");
       return;
     }
 
@@ -305,7 +305,7 @@ const ArticleEditor = () => {
                   {form.meta_title.length}/60
                 </p>
                 {form.meta_title.length > 60 && (
-                  <p className="text-xs text-destructive">Trop long — Google tronquera à 60 caractères</p>
+                  <p className="text-xs text-destructive">Trop long, Google tronquera à 60 caractères</p>
                 )}
               </div>
             </div>
@@ -317,7 +317,7 @@ const ArticleEditor = () => {
                   {form.meta_description.length}/155
                 </p>
                 {form.meta_description.length > 155 && (
-                  <p className="text-xs text-destructive">Trop long — Google tronquera à 155 caractères</p>
+                  <p className="text-xs text-destructive">Trop long, Google tronquera à 155 caractères</p>
                 )}
               </div>
             </div>

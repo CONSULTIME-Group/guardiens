@@ -271,7 +271,7 @@ export default function News() {
 
   const metaTitle =
     activeCategory !== "all"
-      ? `${CATEGORY_LABELS[activeCategory] || "Articles"} — Guides & Conseils`
+      ? `${CATEGORY_LABELS[activeCategory] || "Articles"}, Guides & Conseils`
       : "Guides & Conseils house-sitting";
   const metaPath =
     activeCategory !== "all"

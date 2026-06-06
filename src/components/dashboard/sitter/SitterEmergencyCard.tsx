@@ -20,7 +20,7 @@ interface SitterEmergencyCardProps {
 }
 
 /**
- * Carte unifiée Gardien d'urgence — 3 états :
+ * Carte unifiée Gardien d'urgence, 3 états :
  *   1. LOCKED     → critères non remplis (éligibilité affichée)
  *   2. ELIGIBLE   → tous les critères OK, profil pas encore créé (CTA activation)
  *   3. ACTIVE     → profil créé, pilotage des préférences inline
@@ -182,7 +182,7 @@ const SitterEmergencyCard = ({ hasEmergencyProfile }: SitterEmergencyCardProps) 
     ? previewMode === "active"
     : hasEmergencyProfile;
 
-  // ─── ÉTAT 3 — ACTIVE ───
+  // ─── ÉTAT 3, ACTIVE ───
   if (effectiveHasProfile && effectiveProfile) {
     return (
       <>
@@ -196,7 +196,7 @@ const SitterEmergencyCard = ({ hasEmergencyProfile }: SitterEmergencyCardProps) 
               <div>
                 <p className="font-heading font-semibold text-sm">Gardien d'urgence</p>
                 <p className="text-xs text-muted-foreground">
-                  {effectiveProfile.is_active ? "Actif — visible en cas d'urgence" : "Désactivé"}
+                  {effectiveProfile.is_active ? "Actif, visible en cas d'urgence" : "Désactivé"}
                 </p>
               </div>
             </div>
@@ -210,7 +210,7 @@ const SitterEmergencyCard = ({ hasEmergencyProfile }: SitterEmergencyCardProps) 
               <p>Alertes SMS : <span className="font-medium text-foreground">{effectiveProfile.sms_alerts ? "activées" : "désactivées"}</span></p>
               {(effectiveProfile as any).interventions_count > 0 && (
                 <p className="text-amber-700 font-medium pt-1">
-                  {(effectiveProfile as any).interventions_count} intervention{(effectiveProfile as any).interventions_count > 1 ? "s" : ""} — {(effectiveProfile as any).interventions_count} mois offert{(effectiveProfile as any).interventions_count > 1 ? "s" : ""}
+                  {(effectiveProfile as any).interventions_count} intervention{(effectiveProfile as any).interventions_count > 1 ? "s" : ""}, {(effectiveProfile as any).interventions_count} mois offert{(effectiveProfile as any).interventions_count > 1 ? "s" : ""}
                 </p>
               )}
             </div>
@@ -252,7 +252,7 @@ const SitterEmergencyCard = ({ hasEmergencyProfile }: SitterEmergencyCardProps) 
   // ─── ÉTAT 1 & 2 ───
   const items = [
     { label: `Gardes : ${effectiveChecks.completedSits}/5`, ok: effectiveChecks.completedSits >= 5 },
-    { label: `Note : ${effectiveChecks.avgRating || "—"}/4.7`, ok: effectiveChecks.avgRating >= 4.7 },
+    { label: `Note : ${effectiveChecks.avgRating || ","}/4.7`, ok: effectiveChecks.avgRating >= 4.7 },
     { label: `Annulations (6 mois) : ${effectiveChecks.recentCancellations}`, ok: effectiveChecks.recentCancellations === 0 },
     { label: "Identité vérifiée", ok: effectiveChecks.identityVerified },
     { label: "Abonnement actif", ok: effectiveChecks.hasSubscription },
@@ -260,7 +260,7 @@ const SitterEmergencyCard = ({ hasEmergencyProfile }: SitterEmergencyCardProps) 
   const allOk = previewMode === "eligible" ? true : items.every(i => i.ok);
   const remaining = Math.max(0, 5 - effectiveChecks.completedSits);
 
-  // ─── ÉTAT 2 — ELIGIBLE ───
+  // ─── ÉTAT 2, ELIGIBLE ───
   if (allOk) {
     return (
       <>
@@ -286,7 +286,7 @@ const SitterEmergencyCard = ({ hasEmergencyProfile }: SitterEmergencyCardProps) 
     );
   }
 
-  // ─── ÉTAT 1 — LOCKED ───
+  // ─── ÉTAT 1, LOCKED ───
   return (
     <>
       {PreviewToggle}

@@ -39,5 +39,5 @@ export interface DeptData {
   count: number;
 }
 
-// Tarif gardien standard mensuel (€) — utilisé pour estimer les revenus du mois.
+// Tarif gardien standard mensuel (€), utilisé pour estimer les revenus du mois.
 export const MONTHLY_SUBSCRIPTION_EUR = 6.99;

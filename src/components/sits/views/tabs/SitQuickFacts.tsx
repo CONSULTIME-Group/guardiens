@@ -1,7 +1,7 @@
 /**
  * Cartes "quick facts" : Dates, Logement, Animaux, Cadre.
  * Chaque carte ne s'affiche que si la donnée existe.
- * Aucune icône Lucide décorative — texte pur (mem://constraints/no-icons-in-content).
+ * Aucune icône Lucide décorative, texte pur (mem://constraints/no-icons-in-content).
  */
 import { formatDate, getEnvMeta } from "./sitMeta";
 

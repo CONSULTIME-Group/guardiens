@@ -196,7 +196,7 @@ export const PreviewDiagnosticBanner = () => {
               {issues.map((i, idx) => (
                 <li key={idx} className="truncate" title={i.detail}>
                   <span className="font-semibold">{labelFor(i.kind)}</span>
-                  {" — "}
+                  {", "}
                   <span className="opacity-75">{i.detail}</span>
                 </li>
               ))}

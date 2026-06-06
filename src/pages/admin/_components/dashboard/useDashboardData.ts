@@ -262,9 +262,9 @@ export function useDashboardData(): DashboardData {
         const scheduled = d.scheduled_for ? new Date(d.scheduled_for) : null;
         const daysLeft = scheduled ? Math.max(0, Math.ceil((scheduled.getTime() - Date.now()) / 86400000)) : null;
         const suffix = d.status === "pending" && daysLeft !== null
-          ? ` — suppression effective dans ${daysLeft}j`
-          : d.status === "cancelled" ? " — annulée"
-          : d.status === "completed" ? " — finalisée"
+          ? `, suppression effective dans ${daysLeft}j`
+          : d.status === "cancelled" ? ", annulée"
+          : d.status === "completed" ? ", finalisée"
           : "";
         activityItems.push({
           id: `del-${d.id}`,

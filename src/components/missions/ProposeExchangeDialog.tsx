@@ -51,7 +51,7 @@ const ProposeExchangeDialog = ({
         .single();
       if (mErr) throw mErr;
       if (freshMission?.status === "cancelled" || freshMission?.status === "completed") {
-        toast.error("Cette mission est clôturée — vous ne pouvez plus y répondre.");
+        toast.error("Cette mission est clôturée, vous ne pouvez plus y répondre.");
         setLoading(false);
         return;
       }
@@ -163,7 +163,7 @@ const ProposeExchangeDialog = ({
             <p className="font-medium text-foreground">{mission.exchange_offer}</p>
             {isExpired && (
               <p className="text-xs text-warning mt-1">
-                La date est passée — vous pouvez quand même proposer, parfois ça arrange tout le monde.
+                La date est passée, vous pouvez quand même proposer, parfois ça arrange tout le monde.
               </p>
             )}
           </div>

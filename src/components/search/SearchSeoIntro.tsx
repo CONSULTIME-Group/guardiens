@@ -1,7 +1,7 @@
 /**
  * Bloc éditorial SEO en tête de /recherche.
  *
- * Visible pour tous les visiteurs (anonymes ET connectés) — léger, n'écrase
+ * Visible pour tous les visiteurs (anonymes ET connectés), léger, n'écrase
  * pas l'ergonomie outil. Sert deux objectifs :
  *  - SEO : porter le H1 unique de la page + un paragraphe descriptif riche
  *    en mots-clés (« annonces de garde d'animaux à domicile en France »).

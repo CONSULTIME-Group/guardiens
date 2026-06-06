@@ -217,7 +217,7 @@ export default function PublicSitterProfile() {
         <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Zone d'intervention</h3>
         <p className="text-sm text-foreground/70 font-body">
           {props.hasVehicle
-            ? `Avec véhicule${props.radius ? ` — peut intervenir jusqu'à ${props.radius} km${props.city ? ` autour de ${props.city}` : ''}` : ''}`
+            ? `Avec véhicule${props.radius ? `, peut intervenir jusqu'à ${props.radius} km${props.city ? ` autour de ${props.city}` : ''}` : ''}`
             : props.radius
               ? `Jusqu'à ${props.radius} km${props.city ? ` autour de ${props.city}` : ''}`
               : 'Zone d\'intervention non précisée'}
@@ -361,8 +361,7 @@ export default function PublicSitterProfile() {
         ]);
 
       // Store in local variables before setState.
-      // ⚠️ `public_profiles` (vue publique) ne contient PAS `hero_image_index` —
-      // on doit donc le merger explicitement depuis `profiles` pour que la
+      // ⚠️ `public_profiles` (vue publique) ne contient PAS `hero_image_index` ,       // on doit donc le merger explicitement depuis `profiles` pour que la
       // sélection manuelle survive au reload.
       const publicData = profileRes?.data ?? null;
       const baseData = baseProfileRes?.data ?? null;
@@ -472,7 +471,7 @@ export default function PublicSitterProfile() {
     const loadOwnerData = async () => {
       setOwnerDataLoading(true);
       try {
-        // Query 1 — Animaux via properties
+        // Query 1, Animaux via properties
         let fetchedPets: any[] = [];
         const { data: userProperties } = await supabase
           .from('properties')
@@ -489,7 +488,7 @@ export default function PublicSitterProfile() {
         }
         setPets(fetchedPets);
 
-        // Query 2 — Annonces publiées (pagination progressive : 50 par lot, "Voir plus" charge la suite)
+        // Query 2, Annonces publiées (pagination progressive : 50 par lot, "Voir plus" charge la suite)
         const { data: sitsData, error: sitsErr, count: sitsCount } = await supabase
           .from('sits')
           .select('id, title, start_date, end_date, status, created_at', { count: 'exact' })
@@ -501,7 +500,7 @@ export default function PublicSitterProfile() {
         setOwnerSits(sitsData ?? []);
         setOwnerSitsTotal(sitsCount ?? (sitsData?.length ?? 0));
 
-        // Query 3 — Avis reçus en tant que propriétaire
+        // Query 3, Avis reçus en tant que propriétaire
         const { data: revData, error: revErr } = await supabase
           .from('reviews')
           .select('id, overall_rating, comment, created_at, review_type, reviewer_id, sit_id')
@@ -514,7 +513,7 @@ export default function PublicSitterProfile() {
         const enrichedOwnerReviews = await hydrateReviewers((revData ?? []) as any[]);
         setOwnerReviews(enrichedOwnerReviews);
 
-        // Query 4 — Feedbacks missions
+        // Query 4, Feedbacks missions
         const { data: fbData, error: fbErr } = await supabase
           .from('mission_feedbacks')
           .select('id, positive, comment, created_at, badge_key')
@@ -673,11 +672,11 @@ export default function PublicSitterProfile() {
 
    // SEO
   const animalLabels = animalTypes.map(a => ANIMAL_LABELS[a] || a).join(", ");
-  // Title structuré : nom · ville · signaux de confiance — limité à ~60 caractères.
+  // Title structuré : nom · ville · signaux de confiance, limité à ~60 caractères.
   const trustSignals: string[] = [];
   if (profile?.identity_verified) trustSignals.push("identité vérifiée");
   if (avgRating > 0 && reviewCount > 0) trustSignals.push(`${avgRating.toFixed(1)} ★`);
-  const trustPart = trustSignals.length ? ` — ${trustSignals.join(" · ")}` : "";
+  const trustPart = trustSignals.length ? `, ${trustSignals.join(" · ")}` : "";
   const baseTitle = city ? `${firstName}, gardien à ${city}` : `${firstName}, gardien d'animaux`;
   const candidateTitle = `${baseTitle}${trustPart}`;
   const pageTitle = candidateTitle.length <= 60 ? candidateTitle : baseTitle;
@@ -762,14 +761,14 @@ export default function PublicSitterProfile() {
           url={`https://guardiens.fr/gardiens/${id}`}
         />
       )}
-      {/* Bandes latérales décoratives — desktop ≥ lg uniquement (sinon traversent le contenu en mobile) */}
+      {/* Bandes latérales décoratives, desktop ≥ lg uniquement (sinon traversent le contenu en mobile) */}
       <div className="hidden lg:block" style={{ position: 'fixed', left: 0, top: 0, bottom: 0, width: '56px', background: 'linear-gradient(to right, rgba(45,106,79,0.06), transparent)', pointerEvents: 'none', zIndex: 0 }} aria-hidden="true" />
       <div className="hidden lg:block" style={{ position: 'fixed', right: 0, top: 0, bottom: 0, width: '56px', background: 'linear-gradient(to left, rgba(45,106,79,0.06), transparent)', pointerEvents: 'none', zIndex: 0 }} aria-hidden="true" />
-      {/* Texte vertical gauche — desktop ≥ lg uniquement */}
+      {/* Texte vertical gauche, desktop ≥ lg uniquement */}
       <div className="hidden lg:block" style={{ position: 'fixed', left: '10px', top: '50%', transform: 'translateY(-50%) rotate(-90deg)', fontSize: '9px', letterSpacing: '4px', textTransform: 'uppercase' as const, color: 'rgba(45,106,79,0.28)', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0, fontFamily: 'sans-serif' }} aria-hidden="true">
         Guardiens · House-sitting de proximité
       </div>
-      {/* Texte vertical droit — desktop ≥ lg uniquement */}
+      {/* Texte vertical droit, desktop ≥ lg uniquement */}
       <div className="hidden lg:block" style={{ position: 'fixed', right: '10px', top: '50%', transform: 'translateY(-50%) rotate(90deg)', fontSize: '9px', letterSpacing: '4px', textTransform: 'uppercase' as const, color: 'rgba(45,106,79,0.28)', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0, fontFamily: 'sans-serif' }} aria-hidden="true">
         Gardiens de confiance · Gens du coin
       </div>
@@ -811,7 +810,7 @@ export default function PublicSitterProfile() {
             className="relative overflow-hidden w-full flex items-end bg-[hsl(var(--hero-paper))] max-h-[420px] md:max-h-[520px]"
             style={{ aspectRatio: "1536 / 544" }}
           >
-            {/* Illustration de fond — sketchbook style, déterministe par profil.
+            {/* Illustration de fond, sketchbook style, déterministe par profil.
                 object-contain : on montre le carnet entier (spirales, marges) sans rogner. */}
             <div className="absolute inset-0 z-0 pointer-events-none">
               <img
@@ -836,7 +835,7 @@ export default function PublicSitterProfile() {
               />
             </div>
 
-            {/* Bouton "Changer l'image" — visible uniquement pour le propriétaire du profil.
+            {/* Bouton "Changer l'image", visible uniquement pour le propriétaire du profil.
                 Position en haut à droite du hero, au-dessus des scrims, en z-20 pour
                 rester cliquable malgré les overlays. */}
             {isOwnProfile && (
@@ -854,7 +853,7 @@ export default function PublicSitterProfile() {
         {/* Vignettage très subtil */}
         <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 55%, rgba(90,69,48,0.08) 100%)' }} />
 
-        {/* Scrim de lisibilité — dégradé bas qui remonte derrière le bloc texte.
+        {/* Scrim de lisibilité, dégradé bas qui remonte derrière le bloc texte.
             Plus présent (60% de la hauteur) pour garantir le contraste de la h1, ville,
             badges et stats peu importe la zone de l'illustration. */}
         <div
@@ -982,7 +981,7 @@ export default function PublicSitterProfile() {
                 </div>
               )}
 
-              {/* Trust Score — wrapper self-start pour éviter l'étirement en pleine largeur dans le flex-col */}
+              {/* Trust Score, wrapper self-start pour éviter l'étirement en pleine largeur dans le flex-col */}
               <div className="self-start">
                 <TrustScore
                   identityVerified={profile?.identity_verified || false}
@@ -1010,7 +1009,7 @@ export default function PublicSitterProfile() {
         );
       })()}
 
-      {/* ── BARRE D'ONGLETS — visible si ≥ 2 onglets ── */}
+      {/* ── BARRE D'ONGLETS, visible si ≥ 2 onglets ── */}
       {availableTabs > 1 && (
         <div className="flex border-b border-border bg-card sticky top-0 z-10 max-w-5xl mx-auto">
           {hasSitterProfile && (
@@ -1107,7 +1106,7 @@ export default function PublicSitterProfile() {
 
               return (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2.5 md:gap-3">
-                  {/* Tuile 1 — Animaux acceptés */}
+                  {/* Tuile 1, Animaux acceptés */}
                   <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
                     <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
                       <span className="truncate">Animaux</span>
@@ -1121,7 +1120,7 @@ export default function PublicSitterProfile() {
                     )}
                   </div>
 
-                  {/* Tuile 2 — Zone d'intervention */}
+                  {/* Tuile 2, Zone d'intervention */}
                   <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
                     <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
                       <span className="truncate">Zone</span>
@@ -1144,7 +1143,7 @@ export default function PublicSitterProfile() {
                     </span>
                   </div>
 
-                  {/* Tuile 3 — Disponibilité */}
+                  {/* Tuile 3, Disponibilité */}
                   <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
                     <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
                       <span className="truncate">Disponibilité</span>
@@ -1171,7 +1170,7 @@ export default function PublicSitterProfile() {
                     )}
                   </div>
 
-                  {/* Tuile 4 — Confiance / preuves */}
+                  {/* Tuile 4, Confiance / preuves */}
                   <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
                     <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
                       <span className="truncate">Confiance</span>
@@ -1183,7 +1182,7 @@ export default function PublicSitterProfile() {
                             <>
                               <span className="font-semibold whitespace-nowrap">{avgRating.toFixed(1)}<span className="text-primary">★</span></span>
                               <span className="text-muted-foreground text-[11px] sm:text-xs">
-                                ({reviewCount} avis{reviewCount === 1 ? ' — premier retour' : ''})
+                                ({reviewCount} avis{reviewCount === 1 ? ', premier retour' : ''})
                               </span>
                             </>
                           ) : identityVerified ? (
@@ -1208,14 +1207,14 @@ export default function PublicSitterProfile() {
               );
             })()}
 
-            {/* CTA primaire — visible immédiatement */}
+            {/* CTA primaire, visible immédiatement */}
             {showCTA && (
               <div className="mt-4 md:mt-5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
                 {isOwn ? (
                   <button
                     type="button"
                     disabled
-                    title="Ceci est votre profil public — utilisez « Modifier mon profil » pour le mettre à jour."
+                    title="Ceci est votre profil public, utilisez « Modifier mon profil » pour le mettre à jour."
                     aria-disabled="true"
                     className="inline-flex items-center justify-center bg-muted text-muted-foreground rounded-lg px-6 py-3 text-sm font-medium flex-1 sm:flex-initial cursor-not-allowed opacity-70"
                   >
@@ -1261,7 +1260,7 @@ export default function PublicSitterProfile() {
 
           {/* ── B. CONTENU EN ONGLETS (desktop) / FLUX (mobile) ───────── */}
 
-          {/* — DESKTOP : Tabs Radix — */}
+          {/*, DESKTOP : Tabs Radix, */}
           <div className="hidden md:block">
             <Tabs defaultValue="apropos" className="w-full">
               <TabsList className="w-full justify-start bg-transparent border-b border-border rounded-none h-auto p-0 gap-1">
@@ -1409,7 +1408,7 @@ export default function PublicSitterProfile() {
             </Tabs>
           </div>
 
-          {/* — MOBILE : flux vertical avec ancres — */}
+          {/*, MOBILE : flux vertical avec ancres, */}
           <div className="md:hidden space-y-10">
             {/* À propos */}
             <section id="apropos" aria-label={`À propos de ${firstName}`} className="scroll-mt-24">
@@ -1590,7 +1589,7 @@ export default function PublicSitterProfile() {
                         <span className="text-primary text-base ml-0.5">★</span>
                       </>
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-muted-foreground">,</span>
                     )}
                   </p>
                   <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-body mt-1">
@@ -1682,7 +1681,7 @@ export default function PublicSitterProfile() {
                     archived: { label: 'Archivée', style: 'bg-muted text-foreground/40' },
                     pending: { label: 'En attente', style: 'bg-muted text-foreground/60' },
                   };
-                  const s = statusMap[sit.status] ?? { label: '—', style: 'bg-muted text-foreground/40' };
+                  const s = statusMap[sit.status] ?? { label: ',', style: 'bg-muted text-foreground/40' };
                   const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
                   const isPast = ['completed', 'finished', 'cancelled', 'archived'].includes(sit.status);
                   return (
@@ -1858,7 +1857,7 @@ export default function PublicSitterProfile() {
                     completed: { label: 'Terminée', style: 'bg-muted text-foreground/60' },
                     closed: { label: 'Fermée', style: 'bg-muted text-foreground/40' },
                   };
-                  const s = statusMap[m.status] ?? { label: m.status ?? '—', style: 'bg-muted text-foreground/40' };
+                  const s = statusMap[m.status] ?? { label: m.status ?? ',', style: 'bg-muted text-foreground/40' };
                   return (
                     <div key={m.id} className="flex items-center justify-between gap-4 bg-card border border-border rounded-xl px-4 py-3">
                       <div className="min-w-0">

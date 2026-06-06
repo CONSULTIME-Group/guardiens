@@ -419,7 +419,7 @@ const AdminAnalytics = () => {
             </CardContent>
           </Card>
 
-          {/* Funnel visuel — entonnoir horizontal */}
+          {/* Funnel visuel, entonnoir horizontal */}
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Entonnoir d'activation</CardTitle>

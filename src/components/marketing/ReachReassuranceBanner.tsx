@@ -1,5 +1,5 @@
 /**
- * Bandeau de réassurance « périmètre » — lève l'idée fausse que Guardiens serait
+ * Bandeau de réassurance « périmètre », lève l'idée fausse que Guardiens serait
  * limité au quartier. Le concept reste « gens du coin », mais on rappelle que
  * l'utilisateur peut élargir la recherche partout en France.
  *

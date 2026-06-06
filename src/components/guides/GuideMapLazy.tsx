@@ -5,8 +5,7 @@
  *
  * Bénéfices :
  *  - LCP plus rapide (pas de ~140 kB de JS Leaflet au chargement initial).
- *  - Pas de pénalité SEO (le contenu indexable — liste des lieux —
- *    est déjà dans le HTML rendu en dessous).
+ *  - Pas de pénalité SEO (le contenu indexable, liste des lieux ,  *    est déjà dans le HTML rendu en dessous).
  *  - Économie réseau pour les visiteurs qui ne descendent pas jusqu'à la carte.
  */
 import { lazy, Suspense, useEffect, useRef, useState } from "react";

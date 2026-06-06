@@ -25,7 +25,7 @@ const CRITICAL_ROUTE_PATTERNS: RegExp[] = [
 
 /**
  * Domaines / chemins à ignorer (analytics, third-party, endpoints qui
- * peuvent légitimement renvoyer 4xx — ex: vérification d'unicité).
+ * peuvent légitimement renvoyer 4xx, ex: vérification d'unicité).
  */
 const IGNORED_URL_PATTERNS: RegExp[] = [
   /google-analytics\.com/,
@@ -122,7 +122,7 @@ const NetworkErrorMonitor = () => {
       try {
         response = await originalFetch(...args);
       } catch (err) {
-        // Erreur réseau pure (offline, DNS…) — déjà gérée par OfflineBanner
+        // Erreur réseau pure (offline, DNS…), déjà gérée par OfflineBanner
         throw err;
       }
 
@@ -159,7 +159,7 @@ const NetworkErrorMonitor = () => {
                     return;
                   }
                 } catch {
-                  // ignore — fallback reload
+                  // ignore, fallback reload
                 }
               }
               window.location.reload();

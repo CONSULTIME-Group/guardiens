@@ -40,7 +40,7 @@ const StepSitterProfile = ({ data, onChange }: Props) => {
             id="accompanied_by"
             value={data.accompanied_by}
             onChange={e => onChange({ accompanied_by: e.target.value })}
-            placeholder="Conjoint, enfants — précisez les âges si applicable"
+            placeholder="Conjoint, enfants, précisez les âges si applicable"
             className="rounded-lg h-12"
             maxLength={200}
           />
@@ -62,7 +62,7 @@ const StepSitterProfile = ({ data, onChange }: Props) => {
         </Select>
       </div>
 
-      {/* Availability toggle — moved here from Mobility */}
+      {/* Availability toggle, moved here from Mobility */}
       <div className="flex items-center justify-between rounded-lg border border-primary/20 bg-primary/5 p-4">
         <div>
           <Label className="text-base font-semibold">Je suis disponible</Label>

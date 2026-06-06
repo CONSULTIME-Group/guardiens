@@ -81,7 +81,7 @@ const CreateSmallMission = () => {
 
  const visibleTemplates = templatesFor(missionType);
 
- // Effet ?type= — synchronise le type de mission depuis l'URL.
+ // Effet ?type=, synchronise le type de mission depuis l'URL.
  // (Doit s'exécuter AVANT l'effet ?template= pour qu'un éventuel template applique la dernière source de vérité.)
  useEffect(() => {
    const t = searchParams.get("type");
@@ -89,7 +89,7 @@ const CreateSmallMission = () => {
    // eslint-disable-next-line react-hooks/exhaustive-deps
  }, []);
 
- // Effet ?template= — pré-applique un modèle si le formulaire est vierge.
+ // Effet ?template=, pré-applique un modèle si le formulaire est vierge.
  // Garde-fou : ne JAMAIS écraser une saisie en cours (titre ou description non vides).
  useEffect(() => {
    const templateId = searchParams.get("template");
@@ -195,7 +195,7 @@ const CreateSmallMission = () => {
  <p className="text-sm text-muted-foreground">
  {missionType === "offre"
  ? "Décrivez ce que vous savez faire, même modestement. Quelqu'un du coin a peut-être besoin exactement de ça."
- : "Décrivez votre besoin, même petit. Vous ne dérangez personne — vous offrez une occasion de rendre service."}
+ : "Décrivez votre besoin, même petit. Vous ne dérangez personne, vous offrez une occasion de rendre service."}
  </p>
  <p className="text-xs text-muted-foreground">
  <span className="font-medium text-foreground">À noter :</span> les petites missions sont des coups de main ponctuels, sans nuitée chez la personne.
@@ -228,7 +228,7 @@ const CreateSmallMission = () => {
  </div>
  </div>
 
- {/* Modèles tout prêts — lèvent la friction de la page blanche */}
+ {/* Modèles tout prêts, lèvent la friction de la page blanche */}
  <div className="space-y-2 rounded-xl border border-primary/20 bg-primary/5 p-4">
  <div className="flex items-center justify-between gap-2">
  <div>
@@ -236,7 +236,7 @@ const CreateSmallMission = () => {
  {missionType === "offre" ? "Inspirez-vous d'un exemple" : "Pas sûr·e quoi écrire ?"}
  </p>
  <p className="text-xs text-muted-foreground">
- Cliquez un modèle pour pré-remplir le formulaire — vous pourrez tout ajuster ensuite.
+ Cliquez un modèle pour pré-remplir le formulaire, vous pourrez tout ajuster ensuite.
  </p>
  </div>
  {appliedTemplateId && (

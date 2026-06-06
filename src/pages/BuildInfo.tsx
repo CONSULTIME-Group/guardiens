@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { BUILD_ID, BUILD_TIME, BUILD_MODE, getCurrentBundleHash } from "@/lib/buildInfo";
 
 /**
- * /admin/build-info — Affiche le BUILD_ID + date du dernier build figés
+ * /admin/build-info, Affiche le BUILD_ID + date du dernier build figés
  * dans le bundle au moment de la compilation, ainsi que le hash du fichier
  * /assets/index-XXXX.js réellement servi par le navigateur. Permet de
  * confirmer en un coup d'œil que le nouveau bundle est bien en prod après
@@ -34,21 +34,21 @@ export default function BuildInfo() {
     { k: "Âge du build", v: ageLabel },
     { k: "Mode", v: BUILD_MODE },
     { k: "Bundle JS servi", v: bundleHash ? `index-${bundleHash}.js` : "(dev / non hashé)", mono: true },
-    { k: "User-Agent", v: typeof navigator !== "undefined" ? navigator.userAgent : "—" },
-    { k: "URL courante", v: typeof location !== "undefined" ? location.href : "—", mono: true },
+    { k: "User-Agent", v: typeof navigator !== "undefined" ? navigator.userAgent : "," },
+    { k: "URL courante", v: typeof location !== "undefined" ? location.href : ",", mono: true },
     { k: "Maintenant", v: now, mono: true },
   ];
 
   return (
     <main className="container mx-auto max-w-3xl px-4 py-10">
       <Helmet>
-        <title>Build info — Admin</title>
+        <title>Build info, Admin</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
       <h1 className="text-2xl font-semibold mb-2">État du build frontend</h1>
       <p className="text-sm text-muted-foreground mb-6">
-        Page de diagnostic — confirme que le bundle servi correspond bien au
+        Page de diagnostic, confirme que le bundle servi correspond bien au
         dernier déploiement. Recharger ({" "}
         <kbd className="px-1.5 py-0.5 border rounded text-xs">Ctrl+Shift+R</kbd>
         ) si une valeur semble obsolète.

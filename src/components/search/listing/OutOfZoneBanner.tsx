@@ -70,8 +70,8 @@ export const OutOfZoneBanner = ({
       tabIndex={0}
       aria-label={
         hasLocal
-          ? `Voir ${elsewhere} autres annonces hors de votre rayon — passe en recherche France entière`
-          : `${elsewhere} annonces existent ailleurs en France — passer en recherche France entière`
+          ? `Voir ${elsewhere} autres annonces hors de votre rayon, passe en recherche France entière`
+          : `${elsewhere} annonces existent ailleurs en France, passer en recherche France entière`
       }
       onClick={handleBannerClick}
       onKeyDown={(e) => {

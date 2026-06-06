@@ -85,7 +85,7 @@ const ProfileSidebar = ({
         ) : (
           <span className="inline-flex items-center gap-1 text-xs text-warning-foreground bg-warning-soft border border-warning-border rounded-full px-2 py-0.5">
             <AlertTriangle className="h-3 w-3" aria-hidden="true" />
-            Profil non visible — complétez à 60 %
+            Profil non visible, complétez à 60 %
           </span>
         )}
       </div>
@@ -93,7 +93,7 @@ const ProfileSidebar = ({
       {/* Score breakdown (optional) */}
       {scoreBreakdown}
 
-      {/* Section nav — vertical on desktop, horizontal scroll on mobile */}
+      {/* Section nav, vertical on desktop, horizontal scroll on mobile */}
       <div className="relative lg:static -mr-4 lg:mr-0">
       <nav className="flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-x-visible no-scrollbar pb-2 lg:pb-0 pr-8 lg:pr-0 -mx-1 px-1">
         {sections.map((s) => {
@@ -215,7 +215,7 @@ const ProfileSidebar = ({
           <div className="lg:hidden rounded-lg border border-warning-border bg-warning-soft px-3 py-2.5">
             <p className="text-xs font-medium text-warning-foreground flex items-center gap-1.5">
               <AlertTriangle className="h-3 w-3" aria-hidden="true" />
-              {active.label} — {labels.length} point{labels.length > 1 ? "s" : ""} manquant{labels.length > 1 ? "s" : ""}
+              {active.label}, {labels.length} point{labels.length > 1 ? "s" : ""} manquant{labels.length > 1 ? "s" : ""}
             </p>
             {labels.length === 1 ? (
               <p className="mt-1.5 text-xs text-warning-foreground/90 leading-snug">

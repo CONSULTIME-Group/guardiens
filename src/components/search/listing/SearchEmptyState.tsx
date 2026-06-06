@@ -154,7 +154,7 @@ export const SearchEmptyState = ({
         </div>
       )}
 
-      {/* Action 0 — Mode Lancement (si plateforme globalement vide) */}
+      {/* Action 0, Mode Lancement (si plateforme globalement vide) */}
       {launchModeCount === 0 && (
         <div className="rounded-xl border border-primary/40 bg-gradient-to-br from-primary/10 to-primary/5 p-5 space-y-2">
           <div className="flex items-start gap-3">
@@ -163,14 +163,14 @@ export const SearchEmptyState = ({
               <p className="font-heading font-semibold text-sm text-foreground">Vous êtes parmi les premiers</p>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                 Guardiens vient de lancer. Les premières annonces arrivent en ce moment.
-                En tant que membre fondateur, vous serez notifié dès qu'une mission près de chez vous est publiée — et vous gardez votre statut de fondateur.
+                En tant que membre fondateur, vous serez notifié dès qu'une mission près de chez vous est publiée, et vous gardez votre statut de fondateur.
               </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Action 1 — Suggestion d'élargir si pertinent */}
+      {/* Action 1, Suggestion d'élargir si pertinent */}
       {zoneMode !== "france" && (densityCounts.dept > densityCounts.radius || densityCounts.region > densityCounts.dept || densityCounts.france > 0) && (
         <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-2">
           <div className="flex items-start gap-3">
@@ -202,7 +202,7 @@ export const SearchEmptyState = ({
         </div>
       )}
 
-      {/* Action 2 — Créer une alerte */}
+      {/* Action 2, Créer une alerte */}
       {city && !alertCreated && (
         <div className="rounded-xl border border-border bg-card p-4 space-y-2">
           <div className="flex items-start gap-3">
@@ -234,7 +234,7 @@ export const SearchEmptyState = ({
         </div>
       )}
 
-      {/* Action 3 — Cross-sell vers l'autre onglet */}
+      {/* Action 3, Cross-sell vers l'autre onglet */}
       {crossTabCount !== null && crossTabCount > 0 && (
         <div className="rounded-xl border border-border bg-card p-4 space-y-2">
           <div className="flex items-start gap-3">
@@ -266,7 +266,7 @@ export const SearchEmptyState = ({
         </div>
       )}
 
-      {/* Action 4 — Mode disponible */}
+      {/* Action 4, Mode disponible */}
       {!sitterProfile?.is_available && (
         <div className="rounded-xl border border-border bg-card p-4 space-y-2">
           <div className="flex items-start gap-3">

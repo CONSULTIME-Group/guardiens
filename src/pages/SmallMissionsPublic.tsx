@@ -47,7 +47,7 @@ function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }
  );
 }
 
-/* ── Sticky CTA mobile (QW#6) — visible uniquement <md, après scroll de 600px ── */
+/* ── Sticky CTA mobile (QW#6), visible uniquement <md, après scroll de 600px ── */
 function StickyMobileCta({ onPropose, onAsk }: { onPropose: () => void; onAsk: () => void }) {
  const [visible, setVisible] = useState(false);
  useEffect(() => {
@@ -136,7 +136,7 @@ const SmallMissionsPublic = () => {
   const [kpiMissions, setKpiMissions] = useState<number>(0);
   const [kpiHelpers, setKpiHelpers] = useState<number>(0);
 
-  /* Missions ouvertes — preuve sociale dynamique */
+  /* Missions ouvertes, preuve sociale dynamique */
   const [openMissions, setOpenMissions] = useState<OpenMissionRow[]>([]);
 
   useEffect(() => {
@@ -175,15 +175,15 @@ const SmallMissionsPublic = () => {
  /** Auth-aware navigation: redirect to register if not logged in */
   const goToCreate = () =>
  navigate(isAuthenticated ? "/petites-missions/creer" : "/inscription?redirect=/petites-missions/creer");
- // QW#2 — corrige la route : on envoie sur la page de PUBLICATION d'une offre, pas sur la liste filtrée
+ // QW#2, corrige la route : on envoie sur la page de PUBLICATION d'une offre, pas sur la liste filtrée
  const goToHelp = () =>
  navigate(isAuthenticated ? "/petites-missions/creer?type=offre" : "/inscription?redirect=/petites-missions/creer?type=offre");
 
  return (
  <>
  <PageMeta
- title="Petites missions d'entraide locale — Guardiens"
- description="Échangez des coups de main entre gens du coin. Jardinage, animaux, bricolage — sans argent. Gratuit pour tous."
+ title="Petites missions d'entraide locale, Guardiens"
+ description="Échangez des coups de main entre gens du coin. Jardinage, animaux, bricolage, sans argent. Gratuit pour tous."
  />
 
  <div className="min-h-screen bg-background font-body">
@@ -192,7 +192,7 @@ const SmallMissionsPublic = () => {
   <FreePeriodBanner />
  <PageBreadcrumb items={[{ label: "Petites missions" }]} />
 
- {/* ═══ SECTION 1 — HERO ═══ */}
+ {/* ═══ SECTION 1, HERO ═══ */}
  <section className="bg-background">
  <div className="max-w-2xl mx-auto px-6 py-20 md:py-28 text-center">
  <Reveal>
@@ -211,7 +211,7 @@ const SmallMissionsPublic = () => {
  </Reveal>
 
  <Reveal delay={0.25}>
- {/* QW#1 — CTA "offrir" en principal (friction sociale ~0), "demander" en secondaire */}
+ {/* QW#1, CTA "offrir" en principal (friction sociale ~0), "demander" en secondaire */}
  <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
  <Button onClick={goToHelp} className="bg-primary text-primary-foreground rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary/90 transition-all duration-200">
  Je propose mon aide
@@ -262,7 +262,7 @@ const SmallMissionsPublic = () => {
  </Reveal>
  )}
 
- {/* Réassurance périmètre — promesse mondiale, pas régionale */}
+ {/* Réassurance périmètre, promesse mondiale, pas régionale */}
  <Reveal delay={0.45}>
  <div className="mt-8 max-w-md mx-auto">
  <ReachReassuranceBanner variant="inline" className="text-center" />
@@ -271,7 +271,7 @@ const SmallMissionsPublic = () => {
  </div>
  </section>
 
-  {/* ═══ SECTION 1.5 — MISSIONS OUVERTES (preuve sociale dynamique, remontée après hero) ═══ */}
+  {/* ═══ SECTION 1.5, MISSIONS OUVERTES (preuve sociale dynamique, remontée après hero) ═══ */}
   {openMissions.length > 0 && (
     <section id="missions-ouvertes" className="bg-muted/40 border-t border-border/40 scroll-mt-24">
       <div className="max-w-5xl mx-auto px-6 py-16 md:py-20">
@@ -381,7 +381,7 @@ const SmallMissionsPublic = () => {
                         Votre demande pourrait être ici.
                       </span>
                       <span className="font-body text-xs text-foreground/70">
-                        Publiez un coup de main en deux minutes — gratuit, sans engagement.
+                        Publiez un coup de main en deux minutes, gratuit, sans engagement.
                       </span>
                     </div>
                     <span className="inline-flex items-center text-sm font-semibold text-primary group-hover:underline shrink-0">
@@ -407,12 +407,12 @@ const SmallMissionsPublic = () => {
     </section>
   )}
 
-  {/* ═══ SECTION 2 — LA CONVICTION (fusionnée avec ex-3.5) ═══ */}
+  {/* ═══ SECTION 2, LA CONVICTION (fusionnée avec ex-3.5) ═══ */}
  <section className="bg-background border-t border-border/40">
  <div className="max-w-2xl mx-auto px-6 py-20 md:py-24">
  <Reveal>
  <p className="font-heading text-xl md:text-2xl italic leading-relaxed text-foreground/85 text-center mb-8">
- Les petites missions, ce n'est pas une bourse au coup de main. C'est une porte entrouverte sur ce qu'on n'avait pas prévu — la chance d'une rencontre, le goût de l'imprévu, l'envie de découvrir.
+ Les petites missions, ce n'est pas une bourse au coup de main. C'est une porte entrouverte sur ce qu'on n'avait pas prévu, la chance d'une rencontre, le goût de l'imprévu, l'envie de découvrir.
  </p>
  </Reveal>
  <Reveal delay={0.1}>
@@ -423,7 +423,7 @@ const SmallMissionsPublic = () => {
  </div>
  </section>
 
- {/* ═══ SECTION 2.5 — LEVÉE DES FREINS ═══ */}
+ {/* ═══ SECTION 2.5, LEVÉE DES FREINS ═══ */}
  <section className="bg-background border-t border-border/40">
  <div className="max-w-3xl mx-auto px-6 py-24 md:py-28">
  <Reveal>
@@ -439,7 +439,7 @@ const SmallMissionsPublic = () => {
  {[
  {
  fear: "« Je ne veux pas déranger. »",
- answer: "Personne ne reçoit votre demande de force. Les gens du coin la voient, et seuls ceux qui ont envie d'aider répondent. Vous ne dérangez personne — vous offrez une opportunité.",
+ answer: "Personne ne reçoit votre demande de force. Les gens du coin la voient, et seuls ceux qui ont envie d'aider répondent. Vous ne dérangez personne, vous offrez une opportunité.",
  },
  {
  fear: "« Je n'ai rien à offrir en échange. »",
@@ -447,15 +447,15 @@ const SmallMissionsPublic = () => {
  },
  {
  fear: "« C'est trop petit comme demande. »",
- answer: "Justement. Les petites missions sont faites pour les petites choses — celles qu'on n'ose pas demander parce qu'on a peur de paraître faible ou exigeant. C'est exactement pour ça qu'on a créé cet espace.",
+ answer: "Justement. Les petites missions sont faites pour les petites choses, celles qu'on n'ose pas demander parce qu'on a peur de paraître faible ou exigeant. C'est exactement pour ça qu'on a créé cet espace.",
  },
  {
  fear: "« Je ne connais personne ici. »",
- answer: "C'est précisément le bon moment pour publier. Chaque mission est une porte ouverte sur une rencontre. La première est toujours la plus difficile à oser — la suivante devient évidente.",
+ answer: "C'est précisément le bon moment pour publier. Chaque mission est une porte ouverte sur une rencontre. La première est toujours la plus difficile à oser, la suivante devient évidente.",
  },
  {
  fear: "« Et si personne ne répond ? »",
- answer: "Ça peut arriver. Reformulez, relancez, ou proposez vous-même votre aide ailleurs. La communauté grandit chaque semaine. Votre demande n'est jamais perdue — elle peut trouver quelqu'un demain.",
+ answer: "Ça peut arriver. Reformulez, relancez, ou proposez vous-même votre aide ailleurs. La communauté grandit chaque semaine. Votre demande n'est jamais perdue, elle peut trouver quelqu'un demain.",
  },
  ].map((item, i) => (
  <Reveal key={i} delay={0.05 * i}>
@@ -485,7 +485,7 @@ const SmallMissionsPublic = () => {
  </div>
  </section>
 
- {/* ═══ SECTION 3 — LES DEUX MODES ═══ */}
+ {/* ═══ SECTION 3, LES DEUX MODES ═══ */}
  <section className="bg-muted">
  <div className="max-w-4xl mx-auto px-6 py-24 md:py-32">
  <Reveal>
@@ -509,8 +509,8 @@ const SmallMissionsPublic = () => {
  </h3>
  <div className="space-y-9 flex-1">
  {[
- { n: "01", t: "Vous décrivez la mission — tonte, bricolage, promener le chien, réceptionner un colis." },
- { n: "02", t: "Vous proposez ce que vous donnez en échange — un repas, des légumes, une bouteille." },
+ { n: "01", t: "Vous décrivez la mission, tonte, bricolage, promener le chien, réceptionner un colis." },
+ { n: "02", t: "Vous proposez ce que vous donnez en échange, un repas, des légumes, une bouteille." },
  { n: "03", t: "Des gens du coin voient votre mission et proposent leur aide. Vous choisissez. Vous vous rencontrez." },
  ].map((s) => (
  <div key={s.n}>
@@ -536,8 +536,8 @@ const SmallMissionsPublic = () => {
  </h3>
  <div className="space-y-9 flex-1">
  {[
- { n: "01", t: "Vous décrivez ce que vous savez faire — jardinage, montage meubles, cuisine, aide aux courses." },
- { n: "02", t: "Vous dites ce que vous aimeriez en échange — ou vous laissez l'autre proposer." },
+ { n: "01", t: "Vous décrivez ce que vous savez faire, jardinage, montage meubles, cuisine, aide aux courses." },
+ { n: "02", t: "Vous dites ce que vous aimeriez en échange, ou vous laissez l'autre proposer." },
  { n: "03", t: "Quelqu'un a besoin exactement de ça. Il vous contacte. L'échange commence." },
  ].map((s) => (
  <div key={s.n}>
@@ -555,9 +555,9 @@ const SmallMissionsPublic = () => {
   </div>
  </section>
 
- {/* (ex-section 3.5 « Pourquoi l'entraide fonctionne » fusionnée avec la section 2 — supprimée) */}
+ {/* (ex-section 3.5 « Pourquoi l'entraide fonctionne » fusionnée avec la section 2, supprimée) */}
 
- {/* ═══ SECTION 4 — EXEMPLES ═══ */}
+ {/* ═══ SECTION 4, EXEMPLES ═══ */}
  <section className="bg-background">
  <div className="max-w-5xl mx-auto px-6 py-24 md:py-32">
  <Reveal>
@@ -593,11 +593,11 @@ const SmallMissionsPublic = () => {
 
   <Reveal delay={0.3}>
  <p className="text-center font-body text-base text-foreground/60 italic mt-12">
- L'échange se décide entre vous. Parfois immédiat. Parfois à la saison prochaine. C'est vous qui décidez — pas la plateforme.
+ L'échange se décide entre vous. Parfois immédiat. Parfois à la saison prochaine. C'est vous qui décidez, pas la plateforme.
  </p>
  </Reveal>
 
- {/* CTA intermédiaire — pic d'intention après les exemples */}
+ {/* CTA intermédiaire, pic d'intention après les exemples */}
  <Reveal delay={0.35}>
  <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
  <Button onClick={goToCreate} className="bg-primary text-primary-foreground rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary/90 transition-all duration-200">
@@ -611,7 +611,7 @@ const SmallMissionsPublic = () => {
  </div>
  </section>
 
- {/* ═══ SECTION 4.5 — CE QU'ON ÉCHANGE / CE QU'ON N'ÉCHANGE PAS (densification éditoriale) ═══ */}
+ {/* ═══ SECTION 4.5, CE QU'ON ÉCHANGE / CE QU'ON N'ÉCHANGE PAS (densification éditoriale) ═══ */}
  <section className="bg-background border-t border-border/40">
  <div className="max-w-5xl mx-auto px-6 py-20 md:py-24">
  <Reveal>
@@ -627,7 +627,7 @@ const SmallMissionsPublic = () => {
  </Reveal>
 
  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
- {/* Bloc gauche — ce qu'on échange */}
+ {/* Bloc gauche, ce qu'on échange */}
  <Reveal delay={0.05}>
  <div className="bg-card border border-border rounded-2xl p-8 md:p-10 h-full">
  <h3 className="font-heading text-xl md:text-2xl font-semibold text-foreground mb-6">
@@ -675,7 +675,7 @@ const SmallMissionsPublic = () => {
  </div>
  </Reveal>
 
- {/* Bloc droit — ce qu'on n'échange pas */}
+ {/* Bloc droit, ce qu'on n'échange pas */}
  <Reveal delay={0.1}>
  <div className="bg-card border border-border rounded-2xl p-8 md:p-10 h-full">
  <h3 className="font-heading text-xl md:text-2xl font-semibold text-foreground mb-6">
@@ -686,7 +686,7 @@ const SmallMissionsPublic = () => {
  "De l'argent. Jamais. C'est non négociable, et c'est précisément ce qui rend l'échange beau.",
  "Des services réguliers de garde d'enfants ou d'aide à la personne professionnelle. Pour ça, il faut un cadre déclaré et des assurances adaptées.",
  "Des objets à acheter, à louer, à troquer. Guardiens n'est pas un site de petites annonces.",
- "Du travail au noir déguisé en « petit coup de main ». Si c'est un job, c'est un job — et ça ne passe pas par Guardiens.",
+ "Du travail au noir déguisé en « petit coup de main ». Si c'est un job, c'est un job, et ça ne passe pas par Guardiens.",
  ].map((txt, i) => (
  <div key={i} className="flex gap-4">
  <span
@@ -707,9 +707,9 @@ const SmallMissionsPublic = () => {
  </div>
  </section>
 
- {/* (ex-section 4.6 « Comment ça se passe » supprimée — doublon avec la section 4 Exemples) */}
+ {/* (ex-section 4.6 « Comment ça se passe » supprimée, doublon avec la section 4 Exemples) */}
 
- {/* ═══ SECTION 5 — RÈGLES ═══ */}
+ {/* ═══ SECTION 5, RÈGLES ═══ */}
  <section className="bg-accent-foreground text-accent">
  <div className="max-w-3xl mx-auto px-6 py-24 md:py-32">
  <div className="grid md:grid-cols-3 gap-10 md:gap-0">
@@ -738,9 +738,9 @@ const SmallMissionsPublic = () => {
  </div>
   </section>
 
-  {/* ═══ SECTION MISSIONS OUVERTES (preuve sociale dynamique) — placeholder, rendu réel après le hero ═══ */}
+  {/* ═══ SECTION MISSIONS OUVERTES (preuve sociale dynamique), placeholder, rendu réel après le hero ═══ */}
 
-  {/* ═══ SECTION 5.7 — TÉMOIGNAGES ═══ */}
+  {/* ═══ SECTION 5.7, TÉMOIGNAGES ═══ */}
   <section className="bg-background border-t border-border/40">
     <div className="max-w-5xl mx-auto px-6 py-20 md:py-24">
       <Reveal>
@@ -769,7 +769,7 @@ const SmallMissionsPublic = () => {
     </div>
   </section>
 
-  {/* ═══ SECTION 5.8 — POURQUOI L'ENTRAIDE LOCALE FONCTIONNE (densification YMYL) ═══ */}
+  {/* ═══ SECTION 5.8, POURQUOI L'ENTRAIDE LOCALE FONCTIONNE (densification YMYL) ═══ */}
   <section className="bg-muted/30 border-t border-border/40">
     <div className="max-w-3xl mx-auto px-6 py-20 md:py-24">
       <Reveal>
@@ -783,7 +783,7 @@ const SmallMissionsPublic = () => {
 
       <Reveal delay={0.05}>
         <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed mb-6">
-          Quand on demande un service à une personne du quartier, il se passe quelque chose qu'aucune plateforme tarifée ne peut reproduire : la relation existe avant la transaction. Vous croisez la personne au marché. Vous savez où elle habite. Vous avez intérêt, l'un comme l'autre, à ce que l'échange se passe bien — parce que vous allez vous revoir.
+          Quand on demande un service à une personne du quartier, il se passe quelque chose qu'aucune plateforme tarifée ne peut reproduire : la relation existe avant la transaction. Vous croisez la personne au marché. Vous savez où elle habite. Vous avez intérêt, l'un comme l'autre, à ce que l'échange se passe bien, parce que vous allez vous revoir.
         </p>
       </Reveal>
 
@@ -795,7 +795,7 @@ const SmallMissionsPublic = () => {
           Faire venir un professionnel pour arroser des plantes, déplacer un meuble ou promener un chien revient souvent à 25-40 € par intervention. Sur une saison, le calcul devient déraisonnable pour des gestes qui prennent quinze minutes à une personne du coin. La transaction monétaire transforme un service simple en prestation, avec ce qu'elle implique de cadre, de TVA, et de distance émotionnelle.
         </p>
         <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed mb-6">
-          L'entraide gratuite réintroduit la souplesse. Une heure aujourd'hui, un panier de légumes la semaine prochaine. Un coup de main pour un déménagement, un dîner partagé en retour. Personne ne tient les comptes — et c'est précisément ce qui rend l'échange durable.
+          L'entraide gratuite réintroduit la souplesse. Une heure aujourd'hui, un panier de légumes la semaine prochaine. Un coup de main pour un déménagement, un dîner partagé en retour. Personne ne tient les comptes, et c'est précisément ce qui rend l'échange durable.
         </p>
       </Reveal>
 
@@ -804,16 +804,16 @@ const SmallMissionsPublic = () => {
           Ce que la loi française autorise (et ce qu'elle proscrit)
         </h3>
         <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed mb-6">
-          L'entraide non monétaire entre particuliers est parfaitement légale en France, à condition de respecter trois principes simples. D'abord, aucune somme d'argent ne doit circuler — la contrepartie en nature (repas, produits du jardin, service rendu en retour) reste libre, mais l'argent transforme l'échange en travail dissimulé. Ensuite, le service rendu doit rester ponctuel et accessoire : si la même personne vient garder vos enfants tous les mercredis, ce n'est plus de l'entraide, c'est un emploi à déclarer (chèque emploi-service, par exemple). Enfin, certains domaines restent réservés aux professionnels : aide à la personne médicalisée, garde d'enfants régulière, électricité, plomberie sous pression.
+          L'entraide non monétaire entre particuliers est parfaitement légale en France, à condition de respecter trois principes simples. D'abord, aucune somme d'argent ne doit circuler, la contrepartie en nature (repas, produits du jardin, service rendu en retour) reste libre, mais l'argent transforme l'échange en travail dissimulé. Ensuite, le service rendu doit rester ponctuel et accessoire : si la même personne vient garder vos enfants tous les mercredis, ce n'est plus de l'entraide, c'est un emploi à déclarer (chèque emploi-service, par exemple). Enfin, certains domaines restent réservés aux professionnels : aide à la personne médicalisée, garde d'enfants régulière, électricité, plomberie sous pression.
         </p>
         <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed">
-          Les petites missions Guardiens s'inscrivent strictement dans ce cadre : un coup de main, ponctuel, sans transaction financière, autour de la maison, du jardin, des animaux. C'est volontairement étroit — pour rester sain.
+          Les petites missions Guardiens s'inscrivent strictement dans ce cadre : un coup de main, ponctuel, sans transaction financière, autour de la maison, du jardin, des animaux. C'est volontairement étroit, pour rester sain.
         </p>
       </Reveal>
     </div>
   </section>
 
-  {/* ═══ SECTION 5.5 — POUR ALLER PLUS LOIN (maillage interne) ═══ */}
+  {/* ═══ SECTION 5.5, POUR ALLER PLUS LOIN (maillage interne) ═══ */}
   <section className="py-20 bg-background">
   <div className="max-w-6xl mx-auto px-6">
   <Reveal>
@@ -891,7 +891,7 @@ const SmallMissionsPublic = () => {
   </div>
   </section>
 
-  {/* ═══ SECTION 6 — CTA FINAL ═══ */}
+  {/* ═══ SECTION 6, CTA FINAL ═══ */}
  <section className="bg-primary">
  <div className="max-w-2xl mx-auto px-6 py-24 md:py-32 text-center">
  <Reveal>
@@ -920,7 +920,7 @@ const SmallMissionsPublic = () => {
  </div>
  </section>
 
- {/* ═══ SECTION 7 — FAQ ═══ */}
+ {/* ═══ SECTION 7, FAQ ═══ */}
   <section className="bg-muted/50 py-20 md:py-24">
    <div className="max-w-3xl mx-auto px-6">
     <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center leading-snug mb-10">Questions fréquentes</h2>
@@ -942,7 +942,7 @@ const SmallMissionsPublic = () => {
   {/* ═══ FOOTER ═══ */}
   <PublicFooter />
 
-  {/* Schema.org — Service + FAQPage (dans <head> via Helmet) */}
+  {/* Schema.org, Service + FAQPage (dans <head> via Helmet) */}
   <Helmet>
    <script type="application/ld+json">{JSON.stringify({
     "@context": "https://schema.org",
@@ -986,8 +986,8 @@ const SmallMissionsPublic = () => {
     description: "Comment publier une petite mission d'entraide gratuite sur Guardiens, sans abonnement.",
     totalTime: "PT3M",
     step: [
-     { "@type": "HowToStep", position: 1, name: "Décrire la mission", text: "Vous décrivez la mission — tonte, bricolage, promener le chien, réceptionner un colis." },
-     { "@type": "HowToStep", position: 2, name: "Proposer une contrepartie", text: "Vous proposez ce que vous donnez en échange — un repas, des légumes, une bouteille." },
+     { "@type": "HowToStep", position: 1, name: "Décrire la mission", text: "Vous décrivez la mission, tonte, bricolage, promener le chien, réceptionner un colis." },
+     { "@type": "HowToStep", position: 2, name: "Proposer une contrepartie", text: "Vous proposez ce que vous donnez en échange, un repas, des légumes, une bouteille." },
      { "@type": "HowToStep", position: 3, name: "Choisir et rencontrer", text: "Des gens du coin voient votre mission et proposent leur aide. Vous choisissez. Vous vous rencontrez." },
     ],
    })}</script>
@@ -998,14 +998,14 @@ const SmallMissionsPublic = () => {
     description: "Comment publier une offre d'aide bénévole sur Guardiens et rencontrer des personnes proches qui en ont besoin.",
     totalTime: "PT3M",
     step: [
-     { "@type": "HowToStep", position: 1, name: "Décrire votre savoir-faire", text: "Vous décrivez ce que vous savez faire — jardinage, montage de meubles, cuisine, aide aux courses." },
-     { "@type": "HowToStep", position: 2, name: "Préciser la contrepartie", text: "Vous dites ce que vous aimeriez en échange — ou vous laissez la personne proposer." },
+     { "@type": "HowToStep", position: 1, name: "Décrire votre savoir-faire", text: "Vous décrivez ce que vous savez faire, jardinage, montage de meubles, cuisine, aide aux courses." },
+     { "@type": "HowToStep", position: 2, name: "Préciser la contrepartie", text: "Vous dites ce que vous aimeriez en échange, ou vous laissez la personne proposer." },
      { "@type": "HowToStep", position: 3, name: "Rencontrer et échanger", text: "Quelqu'un a besoin exactement de ça. Il vous contacte. L'échange commence." },
     ],
    })}</script>
    </Helmet>
 
-   {/* QW#6 — Sticky CTA mobile : apparaît après dépassement du hero, masqué en desktop */}
+   {/* QW#6, Sticky CTA mobile : apparaît après dépassement du hero, masqué en desktop */}
    <StickyMobileCta onPropose={goToHelp} onAsk={goToCreate} />
    </div>
   </>

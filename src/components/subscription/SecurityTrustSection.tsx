@@ -19,7 +19,7 @@ const items = [
   {
     icon: MessageSquare,
     title: "Messagerie modérée",
-    desc: "Échangez en confiance — signalements, blocages et modération humaine en cas de besoin.",
+    desc: "Échangez en confiance, signalements, blocages et modération humaine en cas de besoin.",
   },
   {
     icon: Users,

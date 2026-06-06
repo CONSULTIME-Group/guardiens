@@ -6,7 +6,7 @@ import HintBubble from "../profile/HintBubble";
 import AiSuggestButton from "../profile/AiSuggestButton";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
 
-const HANDOVER = ["La veille avec nuit commune", "Le jour du départ", "À distance — clés chez une personne de confiance ou boîte à clé"];
+const HANDOVER = ["La veille avec nuit commune", "Le jour du départ", "À distance, clés chez une personne de confiance ou boîte à clé"];
 const FORMAT = ["Photos + texte court", "Simple message texte", "Appel vidéo ponctuel"];
 const TIME = ["Matin", "Soir", "Pas de préférence"];
 
@@ -39,7 +39,7 @@ const OwnerStepCommunication = ({ data, onChange }: Props) => (
         className="rounded-lg min-h-[80px]" maxLength={2000} />
     </div>
 
-    <h3 className="font-heading text-lg font-semibold mt-4">Pendant la garde — communication</h3>
+    <h3 className="font-heading text-lg font-semibold mt-4">Pendant la garde, communication</h3>
 
     <div className="space-y-2">
       <Label>Format souhaité</Label>

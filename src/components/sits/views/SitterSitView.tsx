@@ -1,5 +1,5 @@
 /**
- * Vue gardien de l'annonce (`/sits/:id` quand on n'est PAS l'owner — sitter, both, ou autre rôle).
+ * Vue gardien de l'annonce (`/sits/:id` quand on n'est PAS l'owner, sitter, both, ou autre rôle).
  *
  * Comportements préservés depuis l'ancien `SitDetail.tsx` :
  * - Badges de matching (animaux compatibles, proximité)
@@ -73,7 +73,7 @@ const SitterSitView = ({
   currentUserId,
   activeRole,
 }: SitterSitViewProps) => {
-  // Lecture directe du profil — supprime les props `userRole`/`userFirstName`
+  // Lecture directe du profil, supprime les props `userRole`/`userFirstName`
   // qui dupliquaient l'info disponible via useAuth.
   const { user } = useAuth();
   const { level: accessLevel, profileCompletion, canApplyGuards } = useAccessLevel();
@@ -149,7 +149,7 @@ const SitterSitView = ({
   // est arrivé via le toggle côté propriétaire (compte both connecté avec
   // ?view=sitter dans l'URL). Pour tout autre cas (anonyme, gardien pur,
   // sitter only, lien partagé recopié), le bandeau n'a pas de sens et
-  // pointerait vers un aperçu non pertinent — on le masque.
+  // pointerait vers un aperçu non pertinent, on le masque.
   const [searchParams] = useSearchParams();
   const fromOwnerToggle =
     searchParams.get("view") === "sitter" &&
@@ -171,7 +171,7 @@ const SitterSitView = ({
         </div>
       )}
 
-      {/* Bandeau d'état terminal — affiché en premier pour que le gardien
+      {/* Bandeau d'état terminal, affiché en premier pour que le gardien
           comprenne immédiatement que l'annonce n'est pas/plus actionnable. */}
       <SitterStatusBanner
         status={sit.status}
@@ -218,7 +218,7 @@ const SitterSitView = ({
         compact
       />
 
-      {/* Apply bar — affichée tout en haut, juste sous le header,
+      {/* Apply bar, affichée tout en haut, juste sous le header,
           pour que le CTA "Postuler" soit visible immédiatement sans scroll. */}
       {activeRole === "sitter" && sit.status === "published" && (() => {
         const days =
@@ -353,7 +353,7 @@ const SitterSitView = ({
         />
       </section>
 
-      {/* Accord de garde — sitter view */}
+      {/* Accord de garde, sitter view */}
       {ownerAccordSigned && ["confirmed", "in_progress", "completed"].includes(sit.status) && (
         <div className="mt-8">
           {accordOpen && accordData ? (
@@ -373,7 +373,7 @@ const SitterSitView = ({
                     ? format(new Date(sitterAccordSigned.accepted_at), "d MMMM yyyy", {
                         locale: fr,
                       })
-                    : "—"}
+                    : ","}
                 </p>
               </div>
             </div>
@@ -392,7 +392,7 @@ const SitterSitView = ({
         </div>
       )}
 
-      {/* Bloc "Annuler ma participation" — gardien confirmé uniquement.
+      {/* Bloc "Annuler ma participation", gardien confirmé uniquement.
           Conditions :
           - Le gardien a candidaté ET est l'attribué (status confirmed/in_progress)
           - La garde n'est ni terminée, ni annulée, ni en brouillon
@@ -426,7 +426,7 @@ const SitterSitView = ({
                 </h2>
                 <p className="text-xs text-muted-foreground mt-1 mb-3">
                   {sit.status === "in_progress"
-                    ? "La garde est en cours. Une annulation maintenant peut mettre le propriétaire en difficulté — contactez-le d'abord si possible."
+                    ? "La garde est en cours. Une annulation maintenant peut mettre le propriétaire en difficulté, contactez-le d'abord si possible."
                     : "Le propriétaire sera notifié immédiatement. Pensez à le prévenir directement avant si possible."}
                 </p>
                 <Button

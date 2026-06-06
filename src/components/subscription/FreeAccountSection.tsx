@@ -1,5 +1,5 @@
 /**
- * Section explicative — Compte offert Guardiens.
+ * Section explicative, Compte offert Guardiens.
  * Affichée sous les cartes payantes (Mensuel / Annuel) sur :
  * - /tarifs (page publique)
  * - /mon-abonnement (espace utilisateur)
@@ -7,7 +7,7 @@
  *
  * Objectif : clarifier ce qui reste accessible sans frais
  * pour TOUS les comptes après le 15 juillet 2026, qu'ils soient
- * abonnés ou non. Aucun CTA — section purement informative.
+ * abonnés ou non. Aucun CTA, section purement informative.
  */
 const accesGratuits: Array<{ titre: string; detail: string }> = [
  {
@@ -23,7 +23,7 @@ const accesGratuits: Array<{ titre: string; detail: string }> = [
  {
  titre: "Conseils sur les races",
  detail:
- "Fiches détaillées sur les races de chiens et chats, comportements, besoins spécifiques — consultables sans abonnement.",
+ "Fiches détaillées sur les races de chiens et chats, comportements, besoins spécifiques, consultables sans abonnement.",
  },
  {
  titre: "Profil public et réputation",
@@ -38,7 +38,7 @@ const accesGratuits: Array<{ titre: string; detail: string }> = [
  {
  titre: "Recherche et favoris",
  detail:
- "Parcourir les annonces, consulter les profils gardiens, ajouter des favoris — accessible sans frais.",
+ "Parcourir les annonces, consulter les profils gardiens, ajouter des favoris, accessible sans frais.",
  },
 ];
 

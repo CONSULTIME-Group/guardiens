@@ -179,7 +179,7 @@ const MissionsCityPage = () => {
                   Aucune mission ouverte à {c.cityName} pour le moment.
                 </p>
                 <p className="font-body text-base text-foreground/65 leading-relaxed mt-3 max-w-xl mx-auto">
-                  La communauté lyonnaise grandit chaque semaine. Publiez la première mission de votre quartier — quelqu'un, près de chez vous, n'attend que ça.
+                  La communauté lyonnaise grandit chaque semaine. Publiez la première mission de votre quartier, quelqu'un, près de chez vous, n'attend que ça.
                 </p>
                 <Link to="/inscription?redirect=/petites-missions/creer" className="inline-block mt-6">
                   <Button className="rounded-full px-8 py-3 h-auto text-sm font-semibold">
@@ -202,7 +202,7 @@ const MissionsCityPage = () => {
         <section className="bg-muted/30 border-t border-border/40">
           <div className="max-w-3xl mx-auto px-6 py-16 md:py-20">
             <h2 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-8 leading-snug">
-              Questions fréquentes — Lyon
+              Questions fréquentes, Lyon
             </h2>
             <Accordion type="single" collapsible className="space-y-3">
               {c.faq.map((f, i) => (

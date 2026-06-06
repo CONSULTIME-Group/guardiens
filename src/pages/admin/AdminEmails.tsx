@@ -195,7 +195,7 @@ const TemplatesTab = () => {
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle className="text-base">Prévisualisation — {previewName}</DialogTitle>
+            <DialogTitle className="text-base">Prévisualisation, {previewName}</DialogTitle>
             {previewSubject && <p className="text-sm text-muted-foreground">Objet : {previewSubject}</p>}
           </DialogHeader>
           <div className="flex-1 overflow-auto border rounded-lg bg-white">
@@ -433,7 +433,7 @@ const LogsTab = () => {
                   <TableCell className="text-xs text-muted-foreground">
                     {format(new Date(log.created_at), "dd MMM HH:mm", { locale: fr })}
                   </TableCell>
-                  <TableCell className="text-xs text-destructive max-w-[200px] truncate">{log.error_message || "—"}</TableCell>
+                  <TableCell className="text-xs text-destructive max-w-[200px] truncate">{log.error_message || ","}</TableCell>
                 </TableRow>
               ))
             )}
@@ -647,7 +647,7 @@ interface TplStats {
   unsubscribed: number;
 }
 
-const pct = (num: number, den: number) => (den > 0 ? `${((num / den) * 100).toFixed(1)}%` : "—");
+const pct = (num: number, den: number) => (den > 0 ? `${((num / den) * 100).toFixed(1)}%` : ",");
 
 const EngagementTab = () => {
   const [rows, setRows] = useState<TplStats[]>([]);

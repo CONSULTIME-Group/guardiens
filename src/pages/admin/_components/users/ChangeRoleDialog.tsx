@@ -74,7 +74,7 @@ const ChangeRoleDialog = ({
         <DialogHeader>
           <DialogTitle>Changer le rôle</DialogTitle>
           <DialogDescription>
-            {userName} — rôle actuel : <strong>{currentRole || "—"}</strong>
+            {userName}, rôle actuel : <strong>{currentRole || ","}</strong>
           </DialogDescription>
         </DialogHeader>
         <div className="py-2 space-y-2">

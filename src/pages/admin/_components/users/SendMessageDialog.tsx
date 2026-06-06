@@ -23,7 +23,7 @@ export const SendMessageDialog = ({ state, sending, onChange, onClose, onSend }:
     <DialogContent>
       <DialogHeader>
         <DialogTitle>
-          {state.step === "edit" ? "Rédiger un message à " : "Prévisualisation — message à "}
+          {state.step === "edit" ? "Rédiger un message à " : "Prévisualisation, message à "}
           {state.userName}
         </DialogTitle>
       </DialogHeader>

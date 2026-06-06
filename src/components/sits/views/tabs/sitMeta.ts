@@ -1,12 +1,12 @@
 /**
  * Constantes / helpers partagés par les onglets de SitImmersiveContent.
  * Extrait de SitImmersiveContent.tsx pour alléger le composant.
- * Aucune icône Lucide ici (mem://constraints/no-icons-in-content) — labels seuls.
+ * Aucune icône Lucide ici (mem://constraints/no-icons-in-content), labels seuls.
  */
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
-// Libellés FR des espèces — remplace les emojis (règle no-emoji dans le contenu).
+// Libellés FR des espèces, remplace les emojis (règle no-emoji dans le contenu).
 export const SPECIES_LABEL: Record<string, string> = {
   dog: "Chien",
   cat: "Chat",

@@ -384,7 +384,7 @@ const AdminSkills = () => {
                             {CATEGORY_LABELS[skill.category] || skill.category}
                           </span>
                         ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
+                          <span className="text-xs text-muted-foreground">,</span>
                         )}
                       </td>
                       <td className="px-4 py-3 align-top">

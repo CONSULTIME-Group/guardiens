@@ -126,7 +126,7 @@ const AdminSEO = () => {
 
   return (
     <div className="space-y-6">
-      {/* BLOC 1 — Status banner */}
+      {/* BLOC 1, Status banner */}
       <StatusBar
         data={seoData}
         loading={loading}
@@ -144,40 +144,40 @@ const AdminSEO = () => {
         </Card>
       )}
 
-      {/* BLOC 2 — Top KPIs */}
+      {/* BLOC 2, Top KPIs */}
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-foreground">Vue d'ensemble</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard
             title="Sessions organiques"
             icon={<Users className="h-4 w-4 text-primary" />}
-            value={ga4 ? ga4.current.sessions.toLocaleString() : "—"}
+            value={ga4 ? ga4.current.sessions.toLocaleString() : ","}
             subtitle="30 derniers jours · GA4"
             change={ga4?.previous ? pctChange(ga4.current.sessions, ga4.previous.sessions) : undefined}
           />
           <MetricCard
             title="Pages avec données GSC"
             icon={<Eye className="h-4 w-4 text-primary" />}
-            value={pagesWithGSC !== null ? pagesWithGSC.toString() : "—"}
+            value={pagesWithGSC !== null ? pagesWithGSC.toString() : ","}
             subtitle={gscAvailable ? "Pages avec ≥1 impression · GSC" : "GSC non disponible"}
           />
           <MetricCard
             title="Sans impression après 7j"
             icon={<FileText className="h-4 w-4 text-primary" />}
-            value={noImpressionCount !== null ? noImpressionCount.toString() : "—"}
+            value={noImpressionCount !== null ? noImpressionCount.toString() : ","}
             subtitle={noImpressionCount !== null ? "Contenus publiés >7j sans impression · GSC" : "GSC non disponible"}
           />
           <MetricCard
             title="Contenus à créer"
             icon={<BarChart3 className="h-4 w-4 text-primary" />}
-            value={priorityToCreate > 0 ? priorityToCreate.toString() : "—"}
+            value={priorityToCreate > 0 ? priorityToCreate.toString() : ","}
             subtitle="Articles prioritaires manquants"
           />
         </div>
       </section>
 
       {/* ══════════════════════════════════════════ */}
-      {/* SECTION — Trafic & audience (GA4)         */}
+      {/* SECTION, Trafic & audience (GA4)         */}
       {/* ══════════════════════════════════════════ */}
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-foreground border-b pb-2">Trafic & audience</h2>
@@ -187,20 +187,20 @@ const AdminSEO = () => {
           <MetricCard
             title="Profils inscrits"
             icon={<UserCheck className="h-4 w-4 text-primary" />}
-            value={profileCount !== null ? profileCount.toLocaleString() : "—"}
+            value={profileCount !== null ? profileCount.toLocaleString() : ","}
             subtitle="Total"
           />
           <MetricCard
             title="Visiteurs uniques"
             icon={<Users className="h-4 w-4 text-primary" />}
-            value={ga4 ? ga4.current.activeUsers.toLocaleString() : "—"}
+            value={ga4 ? ga4.current.activeUsers.toLocaleString() : ","}
             subtitle="30 derniers jours · GA4"
             change={ga4?.previous ? pctChange(ga4.current.activeUsers, ga4.previous.activeUsers) : undefined}
           />
           <MetricCard
             title="Temps moyen"
             icon={<Timer className="h-4 w-4 text-primary" />}
-            value={ga4 ? formatDuration(ga4.current.averageSessionDuration) : "—"}
+            value={ga4 ? formatDuration(ga4.current.averageSessionDuration) : ","}
             subtitle="Par session · GA4"
             change={ga4?.previous ? pctChange(ga4.current.averageSessionDuration, ga4.previous.averageSessionDuration) : undefined}
           />
@@ -224,7 +224,7 @@ const AdminSEO = () => {
                       style={{ height: `${Math.max(2, height)}%` }}
                     >
                       <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-foreground text-background text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                        {d.date.replace(/(\d{4})(\d{2})(\d{2})/, "$3/$2")} — {d.sessions}
+                        {d.date.replace(/(\d{4})(\d{2})(\d{2})/, "$3/$2")}, {d.sessions}
                       </div>
                     </div>
                   );
@@ -239,12 +239,12 @@ const AdminSEO = () => {
       </section>
 
       {/* ══════════════════════════════════════════ */}
-      {/* SECTION — Visibilité SEO (GSC)            */}
+      {/* SECTION, Visibilité SEO (GSC)            */}
       {/* ══════════════════════════════════════════ */}
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-foreground border-b pb-2">Visibilité SEO</h2>
 
-        {/* GSC KPIs — only if data available */}
+        {/* GSC KPIs, only if data available */}
         {gscAvailable && gsc && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <MetricCard
@@ -272,7 +272,7 @@ const AdminSEO = () => {
           </div>
         )}
 
-        {/* Top articles — conditional */}
+        {/* Top articles, conditional */}
         {gscAvailable ? (
           <TopArticlesTable topPages={gsc?.topPages || []} />
         ) : (
@@ -313,13 +313,13 @@ const AdminSEO = () => {
         )}
       </section>
 
-      {/* SECTION — Contenu à créer */}
+      {/* SECTION, Contenu à créer */}
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-foreground border-b pb-2">Contenu à créer</h2>
         <ContentToCreate />
       </section>
 
-      {/* SECTION — Performance CTAs articles */}
+      {/* SECTION, Performance CTAs articles */}
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-foreground border-b pb-2">
           Performance CTAs articles
