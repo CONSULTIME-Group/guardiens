@@ -115,16 +115,19 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
       try {
         const { data: verifyResult, error: verifyError } = await supabase.functions.invoke("verify-identity");
         if (verifyError) throw verifyError;
-        if (verifyResult?.verified) {
-          setStatus("verified");
+        const newStatus = verifyResult?.status || (verifyResult?.verified ? "verified" : "rejected");
+        setStatus(newStatus);
+        if (newStatus === "verified") {
           toast.success("Identité vérifiée avec succès !");
+        } else if (newStatus === "needs_review") {
+          toast.info("Document reçu. Analyse approfondie en cours, réponse sous 24h.");
         } else {
-          setStatus("rejected");
           toast.error(verifyResult?.rejection_reason || "Document refusé. Veuillez soumettre un document valide et lisible.");
         }
       } catch {
         toast.warning("Vérification automatique indisponible. Votre document sera examiné manuellement.");
       }
+
       setUploadProgress(100);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -176,9 +179,11 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
   const statusConfig: Record<string, { icon: React.ElementType; label: string; desc: string; color: string }> = {
     not_submitted: { icon: Upload, label: "Non vérifiée", desc: "Envoyez une pièce d'identité pour débloquer les fonctionnalités avancées (badge vérifié).", color: "text-muted-foreground" },
     pending: { icon: Clock, label: "Vérification en cours", desc: "Votre document est en cours de vérification automatique par IA.", color: "text-warning" },
+    needs_review: { icon: Clock, label: "Analyse approfondie en cours", desc: "Votre document est en cours d'analyse par notre équipe. Réponse sous 24h. Vous pouvez renvoyer un document plus net si besoin.", color: "text-warning" },
     rejected: { icon: AlertCircle, label: "Document refusé", desc: "Votre document n'a pas pu être validé. Veuillez soumettre un nouveau document lisible.", color: "text-destructive" },
     verified: { icon: CheckCircle2, label: "Identité vérifiée", desc: "Votre identité a été vérifiée avec succès. Vous avez accès à toutes les fonctionnalités.", color: "text-success" },
   };
+
 
   const cfg = statusConfig[status] || statusConfig.not_submitted;
   const StatusIcon = cfg.icon;
@@ -194,10 +199,12 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
         <div className="flex items-start gap-3 mb-4">
           <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
             status === "verified" ? "bg-success/15" :
-            status === "pending" ? "bg-warning/15" :
+            (status === "pending" || status === "needs_review") ? "bg-warning/15" :
+            status === "rejected" ? "bg-destructive/15" :
             "bg-muted"
           }`}>
             <StatusIcon className={`h-5 w-5 ${cfg.color}`} />
+
           </div>
           <div>
             <p className={`text-sm font-medium ${cfg.color}`}>{cfg.label}</p>
@@ -246,9 +253,11 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
                   {rateLimited ? "Limite atteinte (5/jour)" :
                    uploading ? "Envoi en cours..." :
                    status === "pending" ? "Renvoyer un document" :
+                   status === "needs_review" ? "Retirer et renvoyer un document" :
                    status === "rejected" ? "Soumettre un nouveau document" :
                    "Envoyer ma pièce d'identité"}
                 </span>
+
               </Button>
             </label>
 
