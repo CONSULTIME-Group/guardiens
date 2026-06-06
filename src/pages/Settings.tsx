@@ -481,7 +481,9 @@ const Settings = () => {
                   <Separator className="my-8" />
                   <IdentityVerificationSection user={user} />
                   <Separator className="my-8" />
-                  <ProVerificationSection user={user} />
+                  <div ref={proSectionRef} id="pro-verification">
+                    <ProVerificationSection user={user} />
+                  </div>
                 </>
               )}
             </div>
