@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import FounderBadge from "@/components/badges/FounderBadge";
+import ProBadge from "@/components/badges/ProBadge";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
@@ -330,7 +331,7 @@ export default function PublicSitterProfile() {
       const [profileRes, baseProfileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes, extExpRes] =
         await Promise.all([
           supabase.from("public_profiles").select("*").eq("id", id).maybeSingle(),
-          supabase.from("profiles").select("id, first_name, last_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index").eq("id", id).maybeSingle(),
+          supabase.from("profiles").select("id, first_name, last_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index, pro_status, pro_specialty, pro_tagline, pro_pricing_note, pro_business_name").eq("id", id).maybeSingle(),
           supabase.from("sitter_profiles").select("*").eq("user_id", id).maybeSingle(),
           supabase.from("badge_attributions").select("badge_id").eq("user_id", id),
           supabase
@@ -930,6 +931,7 @@ export default function PublicSitterProfile() {
                     {firstName}
                   </h1>
                   {profile?.is_founder && <FounderBadge size="sm" />}
+                  <ProBadge status={(profile as any)?.pro_status} size="sm" />
                   {id && <FavoriteButton targetType="sitter" targetId={id} size="md" />}
                   {avgRating > 0 && reviewCount > 0 && (
                     <span className="inline-flex items-baseline gap-1 text-sm font-medium text-foreground/85">
@@ -944,6 +946,16 @@ export default function PublicSitterProfile() {
                   <p className="text-sm sm:text-base text-foreground/80 flex items-center gap-1 font-medium min-w-0 max-w-full break-words">
                     <MapPin className="w-3.5 h-3.5 shrink-0" />
                     <span className="min-w-0 break-words">Gardien à {city}</span>
+                  </p>
+                )}
+                {(profile as any)?.pro_status === "verified" && (profile as any)?.pro_tagline && (
+                  <p className="text-xs sm:text-sm text-foreground/75 italic mt-1 max-w-full break-words">
+                    « {(profile as any).pro_tagline} »
+                  </p>
+                )}
+                {(profile as any)?.pro_status === "verified" && (profile as any)?.pro_pricing_note && (
+                  <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
+                    Tarif indicatif : {(profile as any).pro_pricing_note}
                   </p>
                 )}
               </div>
