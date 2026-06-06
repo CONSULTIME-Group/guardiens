@@ -101,7 +101,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
   // Calculate live completion estimate — must match DB function
   useEffect(() => {
     let score = 0;
-    if (firstName.trim() && postalCode) score += 10;
+    if (firstName.trim() && (postalCode || livesAbroad) && city.trim()) score += 10;
     if (avatarUrl) score += 20;
     if (usesSitterScoring) {
       // Sitter/Both scoring: bio=15, compétences=10, lifestyle=10 (max here = 65)
