@@ -25,6 +25,8 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = false
   [functions.notify-new-message]
     verify_jwt = false
+  [functions.notify-mission-invitation]
+    verify_jwt = true
   [functions.resend-webhook]
     verify_jwt = false
   [functions.track-email-pixel]

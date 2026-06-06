@@ -96,7 +96,7 @@ export default function MatchedHelpersInviteBlock({
 
   const handleInvite = async (helperId: string, firstName: string | null) => {
     setPending((p) => new Set(p).add(helperId));
-    const { error } = await supabase.rpc("invite_helper_to_mission", {
+    const { data: notifId, error } = await supabase.rpc("invite_helper_to_mission", {
       p_mission_id: missionId,
       p_helper_id: helperId,
     });
@@ -111,6 +111,15 @@ export default function MatchedHelpersInviteBlock({
       return;
     }
     setInvited((p) => new Set(p).add(helperId));
+
+    // Si la RPC a effectivement créé la notif (non null = pas de dédup 7j),
+    // on déclenche l'email transactionnel en best-effort (silencieux si erreur).
+    if (notifId) {
+      supabase.functions.invoke("notify-mission-invitation", {
+        body: { mission_id: missionId, helper_id: helperId },
+      }).catch(() => {});
+    }
+
     toast({
       title: "Invitation envoyée",
       description: `${firstName || "Ce membre"} recevra une notification.`,
