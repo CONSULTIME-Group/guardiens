@@ -300,12 +300,38 @@ const SmallMissionsPublic = () => {
           <p className="font-body text-base text-foreground/65 text-center max-w-xl mx-auto mb-12">
             Cliquez sur une mission pour la lire, ou publiez la vôtre en deux minutes.
           </p>
-        </Reveal>
+         </Reveal>
+
+         {/* Onglets Besoins / Offres */}
+         <Reveal delay={0.1}>
+           <div role="tablist" aria-label="Filtrer les missions" className="flex justify-center gap-2 mb-8 flex-wrap">
+             {[
+               { key: "all" as const, label: `Toutes (${openMissions.length})` },
+               { key: "besoin" as const, label: `Demandes (${besoinCount})` },
+               { key: "offre" as const, label: `Propositions d'aide (${offreCount})` },
+             ].map(t => (
+               <button
+                 key={t.key}
+                 role="tab"
+                 aria-selected={missionTab === t.key}
+                 onClick={() => setMissionTab(t.key)}
+                 className={`px-4 py-2 rounded-full text-xs font-body font-semibold tracking-wide transition-colors border ${
+                   missionTab === t.key
+                     ? "bg-primary text-primary-foreground border-primary"
+                     : "bg-card text-foreground/70 border-border hover:border-primary/50 hover:text-foreground"
+                 }`}
+               >
+                 {t.label}
+               </button>
+             ))}
+           </div>
+         </Reveal>
+
         {(() => {
-          const count = openMissions.length;
+          const count = filteredOpenMissions.length;
           return (
             <div className="flex flex-col gap-3 max-w-3xl mx-auto">
-              {openMissions.map((m, i) => {
+              {filteredOpenMissions.map((m, i) => {
                 const dateNeeded = formatDateNeeded(m.date_needed);
                 const durationLabel = m.duration_estimate
                   ? DURATION_LABEL[m.duration_estimate] || null
