@@ -86,6 +86,22 @@ const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<SectionId>("account");
+  const [searchParams] = useSearchParams();
+  const proSectionRef = useRef<HTMLDivElement | null>(null);
+
+  // Deep-link via ?section=security (et autres sections valides).
+  useEffect(() => {
+    const param = searchParams.get("section") as SectionId | null;
+    const valid: SectionId[] = ["account", "security", "spaces", "notifications", "alerts"];
+    if (param && valid.includes(param)) {
+      setActiveSection(param);
+      // Scroll vers la sous-section Pro si demandé.
+      if (searchParams.get("focus") === "pro") {
+        setTimeout(() => proSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // Account
   const [newEmail, setNewEmail] = useState("");
