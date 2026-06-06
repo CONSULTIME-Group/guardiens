@@ -141,7 +141,7 @@ const Privacy = () => {
             </thead>
             <tbody>
               <tr className="border-t border-border"><td className="p-2">Données de compte (profil actif)</td><td className="p-2">Pendant toute la durée de l'inscription</td></tr>
-              <tr className="border-t border-border"><td className="p-2">Données de compte (après suppression)</td><td className="p-2">Effacement dans les 30 jours suivant la demande, sauf obligations légales contraires</td></tr>
+              <tr className="border-t border-border"><td className="p-2">Données de compte (après suppression)</td><td className="p-2">Effacement dans les 7 jours suivant la demande, sauf obligations légales contraires</td></tr>
               <tr className="border-t border-border"><td className="p-2">Selfie de vérification d'identité</td><td className="p-2">Supprimé immédiatement après validation de la vérification</td></tr>
               <tr className="border-t border-border"><td className="p-2">Document d'identité</td><td className="p-2">12 mois maximum après la vérification, sauf obligation légale (notamment LCB-FT)</td></tr>
               <tr className="border-t border-border"><td className="p-2">Messages échangés via la messagerie</td><td className="p-2">Pendant toute la durée du compte, anonymisés à la suppression</td></tr>

@@ -306,7 +306,7 @@ const Settings = () => {
         .update({ bio: "[Compte en cours de suppression]" })
         .eq("id", user.id);
       if (profileError) throw profileError;
-      const successMsg = "Demande enregistrée. Vous avez 30 jours pour l'annuler depuis cette page.";
+      const successMsg = "Demande enregistrée. Vous avez 7 jours pour l'annuler depuis cette page.";
       setDeleteStatus({ type: "success", message: successMsg });
       toast.success(successMsg);
       setDeleteConfirm("");
@@ -482,7 +482,7 @@ const Settings = () => {
           <DialogHeader>
             <DialogTitle className="text-destructive">Supprimer mon compte</DialogTitle>
             <DialogDescription className="text-sm leading-relaxed">
-              En confirmant, vous demandez la suppression de votre compte. Vos données personnelles seront effacées sous <strong>30 jours</strong>. Vos avis publics resteront visibles de manière anonyme. Cette action peut être annulée pendant 30 jours.
+              En confirmant, vous demandez la suppression de votre compte. Vos données personnelles seront effacées sous <strong>7 jours</strong>. Vos avis publics resteront visibles de manière anonyme. Cette action peut être annulée pendant 7 jours.
             </DialogDescription>
           </DialogHeader>
           {activeCommitmentsCount !== null && activeCommitmentsCount > 0 && (
@@ -906,7 +906,7 @@ const DangerSection = ({ user, activeCommitmentsCount, onRequestDelete }: any) =
         <h2 className="font-heading text-lg font-semibold text-destructive">Zone dangereuse</h2>
       </div>
       <p className="text-sm text-foreground/80 mb-4">
-        La suppression de votre compte est irréversible passé un délai de 30 jours.
+        La suppression de votre compte est irréversible passé un délai de 7 jours.
       </p>
 
       {pendingRequest ? (

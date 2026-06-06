@@ -133,7 +133,7 @@ const Cgs = () => {
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">5.3 Effets de la résiliation</h3>
           <p>La résiliation prend effet à la fin de la période en cours pour laquelle le paiement a été effectué. L'utilisateur conserve l'accès aux fonctionnalités payantes jusqu'à cette date. Aucun remboursement prorata temporis n'est effectué pour la fraction d'abonnement déjà entamée, sauf exercice du droit de rétractation dans le délai légal (article 6).</p>
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">5.4 Suppression de compte</h3>
-          <p>L'utilisateur peut supprimer son compte à tout moment depuis les paramètres de son profil. La suppression entraîne une période de grâce de 30 jours durant laquelle le compte peut être réactivé. Au-delà, les données de profil sont supprimées ou anonymisées conformément à la <a href="/confidentialite" className="text-primary hover:underline">Politique de confidentialité</a>.</p>
+          <p>L'utilisateur peut supprimer son compte à tout moment depuis les paramètres de son profil. La suppression entraîne une période de grâce de 7 jours durant laquelle le compte peut être réactivé. Au-delà, les données de profil sont supprimées ou anonymisées conformément à la <a href="/confidentialite" className="text-primary hover:underline">Politique de confidentialité</a>.</p>
 
           {/* 6 */}
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">6. Droit de rétractation</h2>
