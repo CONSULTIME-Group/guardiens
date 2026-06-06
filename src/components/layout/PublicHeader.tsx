@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react";
 const NAV_LINKS = [
   { label: "Annonces en cours", to: "/annonces" },
   { label: "Coups de main", to: "/petites-missions" },
+  { label: "Pros animaliers", to: "/pros", beta: true },
   { label: "Guides locaux", to: "/guides" },
   { label: "Tarifs", to: "/tarifs" },
   { label: "Le journal", to: "/actualites" },
