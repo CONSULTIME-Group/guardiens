@@ -195,14 +195,14 @@ const SmallMissions = () => {
         const coords = await geocodeCached(p.city || p.postal_code);
         setOriginCoords(coords);
         setGeocodingOrigin(false);
-        if (!searchParams.get("radius")) setRadiusKm(25);
+        if (!searchParams.get("radius")) setRadiusKm(30);
       } else if (p?.city) {
         setPostalCodeInput(p.city);
         setGeocodingOrigin(true);
         const coords = await geocodeCached(p.city);
         setOriginCoords(coords);
         setGeocodingOrigin(false);
-        if (!searchParams.get("radius")) setRadiusKm(25);
+        if (!searchParams.get("radius")) setRadiusKm(30);
       }
     })();
   }, [user]);
@@ -456,7 +456,7 @@ const SmallMissions = () => {
                   onClick={() => setMode("need")}
                   className={`px-4 py-2 text-sm rounded-md transition-colors ${mode === "need" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
                 >
-                  Coups de main demandés
+                  Je cherche un coup de main
                 </button>
                 <button
                   role="tab"
@@ -464,7 +464,7 @@ const SmallMissions = () => {
                   onClick={() => setMode("offer")}
                   className={`px-4 py-2 text-sm rounded-md transition-colors ${mode === "offer" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
                 >
-                  Aidants disponibles
+                  J'offre mon aide
                 </button>
               </div>
             </div>
