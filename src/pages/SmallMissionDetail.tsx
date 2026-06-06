@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowLeft, MapPin, Calendar, Clock, Dog, Flower2, Handshake,
   Heart, MessageSquare, CheckCircle2, Users, XCircle, ThumbsUp,
-  ThumbsDown, Star, RotateCcw, Send, Home, X, Share2, ShieldCheck,
+  ThumbsDown, Star, RotateCcw, Send, Home, X, Share2, ShieldCheck, Sparkles,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
