@@ -58,22 +58,22 @@ export const DraftStatsPanel = () => {
     const load = async () => {
       setLoading(true);
       const periods = buildPeriods();
-      const results: PeriodStats[] = [];
-      for (const p of periods) {
-        const counts = emptyCounts();
-        await Promise.all(
-          STATUSES.map(async (status) => {
-            let q = supabase
-              .from("sits")
-              .select("id", { count: "exact", head: true })
-              .eq("status", status as any);
-            if (p.since) q = q.gte("created_at", p.since.toISOString());
-            const { count } = await q;
-            counts[status] = count ?? 0;
-          })
-        );
-        results.push({ label: p.label, since: p.since, counts });
-      }
+      const results: PeriodStats[] = await Promise.all(
+        periods.map(async (p) => {
+          const counts = emptyCounts();
+          const { data, error } = await supabase.rpc("admin_get_sits_status_counts" as any, {
+            p_since: p.since ? p.since.toISOString() : null,
+          });
+          if (error) {
+            console.error("admin_get_sits_status_counts:", error);
+          } else {
+            (data as Array<{ status: string; cnt: number }> | null)?.forEach((row) => {
+              if (row.status in counts) counts[row.status as keyof StatusCounts] = Number(row.cnt) || 0;
+            });
+          }
+          return { label: p.label, since: p.since, counts };
+        })
+      );
       setStats(results);
       setLoading(false);
     };
