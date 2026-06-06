@@ -14,7 +14,22 @@ import ContentToCreate, { PRIORITY_ARTICLES } from "@/components/admin/seo/Conte
 import GSCQueriesTable from "@/components/admin/seo/GSCQueriesTable";
 import TrafficSources from "@/components/admin/seo/TrafficSources";
 import ArticleCtaPerformance from "@/components/admin/seo/ArticleCtaPerformance";
-import { useSeoData } from "@/hooks/useSeoData";
+import IndexNowPanel from "@/components/admin/seo/IndexNowPanel";
+import CannibalizationCard from "@/components/admin/seo/CannibalizationCard";
+import { useSeoData, type GSCRow } from "@/hooks/useSeoData";
+
+function downloadCsv(filename: string, rows: GSCRow[]) {
+  const head = "key,clicks,impressions,ctr,position\n";
+  const body = rows.map((r) => {
+    const key = (r.keys?.[0] ?? "").replace(/"/g, '""');
+    return `"${key}",${r.clicks},${r.impressions},${(r.ctr * 100).toFixed(2)},${r.position.toFixed(1)}`;
+  }).join("\n");
+  const blob = new Blob([head + body], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
 
 function pctChange(current: number, previous: number): number | undefined {
   if (previous === 0 && current === 0) return 0;
@@ -298,8 +313,18 @@ const AdminSEO = () => {
         {/* Top queries GSC */}
         {gsc && gsc.topQueries && gsc.topQueries.length > 0 && (
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg">Top 10 requêtes GSC</CardTitle>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => downloadCsv("gsc-queries.csv", gsc.topQueries)}>
+                  Export CSV
+                </Button>
+                {gsc.topPages && (
+                  <Button variant="outline" size="sm" onClick={() => downloadCsv("gsc-pages.csv", gsc.topPages)}>
+                    Export pages
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               <GSCQueriesTable rows={gsc.topQueries} />
@@ -307,10 +332,19 @@ const AdminSEO = () => {
           </Card>
         )}
 
+        {/* Cannibalisation */}
+        <CannibalizationCard topQueries={gsc?.topQueries} topPages={gsc?.topPages} />
+
         {/* Priority actions */}
         {gsc?.topPages && (
           <PriorityActions topPages={gsc.topPages} />
         )}
+      </section>
+
+      {/* SECTION, Indexation push */}
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold text-foreground border-b pb-2">Indexation</h2>
+        <IndexNowPanel />
       </section>
 
       {/* SECTION, Contenu à créer */}
@@ -342,6 +376,11 @@ const AdminSEO = () => {
         <Button variant="outline" asChild>
           <a href="https://guardiens.fr/sitemap.xml" target="_blank" rel="noopener noreferrer">
             Sitemap <ExternalLink className="h-4 w-4 ml-2" />
+          </a>
+        </Button>
+        <Button variant="outline" asChild>
+          <a href="https://www.bing.com/webmasters" target="_blank" rel="noopener noreferrer">
+            Bing Webmaster <ExternalLink className="h-4 w-4 ml-2" />
           </a>
         </Button>
         <Button variant="default" asChild>
