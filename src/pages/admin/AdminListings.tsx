@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import DraftStatsPanel from "@/components/admin/DraftStatsPanel";
+import ListingDrilldownDialog from "@/components/admin/ListingDrilldownDialog";
 
 const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
   draft: { label: "Brouillon", variant: "outline" },
