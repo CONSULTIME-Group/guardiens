@@ -42,6 +42,23 @@ const BASE_JSONLD = [
 
 export default function PublicListings() {
   const [itemListLd, setItemListLd] = useState<any | null>(null);
+  const [intlCount, setIntlCount] = useState<number>(0);
+
+  // Compte les annonces hors France pour piloter l'indicateur "radar"
+  // (chip pulsant qui pointe vers /annonces/international).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { count } = await supabase
+        .from("sits")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "published")
+        .not("country", "is", null)
+        .neq("country", "FR");
+      if (!cancelled) setIntlCount(count || 0);
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   // Charge un échantillon léger des annonces ouvertes pour émettre un
   // JSON-LD ItemList (utile au carrousel Google « Offres »).
