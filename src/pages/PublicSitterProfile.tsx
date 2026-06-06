@@ -931,6 +931,7 @@ export default function PublicSitterProfile() {
                     {firstName}
                   </h1>
                   {profile?.is_founder && <FounderBadge size="sm" />}
+                  <ProBadge status={(profile as any)?.pro_status} size="sm" />
                   {id && <FavoriteButton targetType="sitter" targetId={id} size="md" />}
                   {avgRating > 0 && reviewCount > 0 && (
                     <span className="inline-flex items-baseline gap-1 text-sm font-medium text-foreground/85">
