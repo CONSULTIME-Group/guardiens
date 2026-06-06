@@ -513,7 +513,7 @@ const SmallMissions = () => {
             ) : missionCount > 0 ? (
               <>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {visibleMissionsList.map((m: any, idx: number) => (
+                  {visibleMissionsList.map((m: any) => (
                     <MissionCard
                       key={`m-${m.id}`}
                       mission={m}
@@ -524,11 +524,6 @@ const SmallMissions = () => {
                       compactBio={compactBio}
                       showBio={showBio}
                       onNavigateDetail={() => {
-                        const hasBio = Boolean(((m.profiles as any)?.bio || "").trim());
-                        void trackEvent("exp_mission_bio_click", {
-                          source: "small_missions",
-                          metadata: { release: BIO_RELEASE_TAG, has_bio: hasBio, position: idx, mission_id: m.id },
-                        });
                         navigate(isAuthenticated ? `/petites-missions/${m.id}` : "/inscription");
                       }}
                       onPropose={() => {
