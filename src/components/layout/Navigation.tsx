@@ -2,7 +2,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, Search, Calendar, MessageSquare, User, LogOut, Settings,
   PawPrint, Newspaper, Shield, Compass, Handshake, Menu, Star,
-  MoreHorizontal, Crown, Plus, Heart, LifeBuoy,
+  MoreHorizontal, Crown, Plus, Heart, LifeBuoy, Briefcase,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -27,9 +27,9 @@ const GroupLabel = ({ label }: { label: string }) => (
 
 // ── Sidebar nav item ──
 const SidebarItem = ({
-  to, icon: Icon, label, badge,
+  to, icon: Icon, label, badge, beta,
 }: {
-  to: string; icon: typeof Home; label: string; badge?: number;
+  to: string; icon: typeof Home; label: string; badge?: number; beta?: boolean;
 }) => (
   <NavLink
     to={to}
@@ -43,9 +43,14 @@ const SidebarItem = ({
     }
   >
     <Icon className="h-[18px] w-[18px]" strokeWidth={1.8} />
-    {label}
+    <span className="flex-1 truncate">{label}</span>
+    {beta && (
+      <span className="text-[9px] uppercase tracking-wider font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
+        Bêta
+      </span>
+    )}
     {badge !== undefined && badge > 0 && (
-      <span className="absolute right-3 bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold tabular-nums">
+      <span className="bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold tabular-nums">
         {badge > 99 ? "99+" : badge}
       </span>
     )}
@@ -260,6 +265,7 @@ export const Sidebar = () => {
               <GroupLabel label="Ressources" />
               <SidebarItem to="/actualites" icon={Newspaper} label="Guides & Conseils" />
               <SidebarItem to="/guides" icon={Compass} label="Guides locaux" />
+              <SidebarItem to="/pros" icon={Briefcase} label="Pros animaliers" beta />
             </>
           );
         })()}
