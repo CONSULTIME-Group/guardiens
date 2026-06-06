@@ -96,15 +96,21 @@ Deno.serve(async (req) => {
           .from("sits")
           .select(`
             id, title, description, start_date, end_date, is_urgent, cover_photo_url,
-            profiles:user_id (first_name, city, postal_code, avatar_url),
+            city, country,
+            profiles:user_id (first_name, city, postal_code, country, avatar_url),
             properties:property_id (photos, type, pets (name, species, photo_url))
           `)
           .eq("status", "published")
+          .or("country.is.null,country.eq.FR")
           .gte("created_at", sinceISO)
           .limit(20);
 
         if (rawSits) {
           for (const sit of rawSits) {
+            // Les alertes par rayon/département/région ciblent la France.
+            // On exclut toute annonce dont le propriétaire ou la fiche déclare un pays != FR.
+            const ownerCountry = (sit.profiles as any)?.country;
+            if (ownerCountry && ownerCountry !== "FR") continue;
             const sitCity = (sit.profiles as any)?.city;
             if (!sitCity) continue;
 
