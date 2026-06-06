@@ -17,6 +17,8 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/comp
 import { cn } from "@/lib/utils";
 import { hasMedication } from "@/lib/medication";
 import { trackFirstAction } from "@/lib/analytics";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { COUNTRIES } from "@/lib/countries";
 
 interface PropertySummary {
   id: string;
@@ -503,14 +505,16 @@ const CreateSit = () => {
             </div>
             <div>
               <Label htmlFor="sit_country" className="text-xs text-muted-foreground">Pays</Label>
-              <Input
-                id="sit_country"
-                value={sitCountry}
-                onChange={(e) => setSitCountry(e.target.value)}
-                placeholder="FR"
-                className="mt-1"
-                maxLength={56}
-              />
+              <Select value={sitCountry || "FR"} onValueChange={(v) => setSitCountry(v)}>
+                <SelectTrigger id="sit_country" className="mt-1">
+                  <SelectValue placeholder="France" />
+                </SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {COUNTRIES.map((c) => (
+                    <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
