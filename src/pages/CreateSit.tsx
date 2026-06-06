@@ -19,6 +19,8 @@ import { hasMedication } from "@/lib/medication";
 import { trackFirstAction } from "@/lib/analytics";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { COUNTRIES } from "@/lib/countries";
+import ImproveListingButton from "@/components/ai/ImproveListingButton";
+import { moderateContent } from "@/lib/moderation";
 
 interface PropertySummary {
   id: string;
@@ -549,7 +551,23 @@ const CreateSit = () => {
         )}
 
         <div>
-          <Label className="text-sm font-medium">Description de la garde *</Label>
+          <div className="flex items-center justify-between gap-2">
+            <Label className="text-sm font-medium">Description de la garde *</Label>
+            <ImproveListingButton
+              title={title}
+              description={specificExpectations}
+              context={{
+                animaux: pets?.map(p => `${p.species}${p.breed ? ` (${p.breed})` : ""}`).join(", "),
+                logement: property?.type,
+                ville: sitCity || ownerCity || undefined,
+                dates: startDate && endDate ? `${startDate} – ${endDate}` : undefined,
+              }}
+              onApply={(patch) => {
+                if (patch.title) setTitle(patch.title);
+                if (patch.description) setSpecificExpectations(patch.description);
+              }}
+            />
+          </div>
           <Textarea
             placeholder="Décrivez ce qui est particulier à cette garde, en plus de ce qui est déjà dans votre profil (min. 50 caractères)"
             value={specificExpectations}
