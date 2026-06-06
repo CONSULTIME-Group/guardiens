@@ -199,10 +199,12 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
         <div className="flex items-start gap-3 mb-4">
           <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
             status === "verified" ? "bg-success/15" :
-            status === "pending" ? "bg-warning/15" :
+            (status === "pending" || status === "needs_review") ? "bg-warning/15" :
+            status === "rejected" ? "bg-destructive/15" :
             "bg-muted"
           }`}>
             <StatusIcon className={`h-5 w-5 ${cfg.color}`} />
+
           </div>
           <div>
             <p className={`text-sm font-medium ${cfg.color}`}>{cfg.label}</p>
