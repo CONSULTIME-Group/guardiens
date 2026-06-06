@@ -116,6 +116,18 @@ const PublicSitDetail = () => {
           } catch { /* silencieux */ }
         }
 
+        // Override : si l'annonce porte une ville/pays spécifiques (résidence secondaire,
+        // garde à l'étranger), ils priment sur la ville du profil propriétaire.
+        const sitCity = (sitData as any).city?.trim();
+        const sitCountry = (sitData as any).country?.trim();
+        if (enrichedOwner && (sitCity || (sitCountry && sitCountry !== "FR"))) {
+          enrichedOwner = {
+            ...enrichedOwner,
+            city: sitCity || enrichedOwner.city,
+            country: sitCountry || (enrichedOwner as any).country || "FR",
+          } as any;
+        }
+
         setOwner(enrichedOwner);
         setProperty(enrichedProperty);
 
