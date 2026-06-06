@@ -481,6 +481,40 @@ const CreateSit = () => {
           </p>
         ) : null}
 
+        {/* Lieu de la garde — facultatif (override du profil) */}
+        <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
+          <div>
+            <Label className="text-sm font-medium">Lieu de la garde <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Renseignez ces champs si la garde se déroule ailleurs que dans votre ville de profil ({ownerCity || "non renseignée"}) — résidence secondaire, garde à l'étranger, etc.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="sit_city" className="text-xs text-muted-foreground">Ville de la garde</Label>
+              <Input
+                id="sit_city"
+                value={sitCity}
+                onChange={(e) => setSitCity(e.target.value)}
+                placeholder={ownerCity || "Ex : Bruxelles"}
+                className="mt-1"
+                maxLength={100}
+              />
+            </div>
+            <div>
+              <Label htmlFor="sit_country" className="text-xs text-muted-foreground">Pays</Label>
+              <Input
+                id="sit_country"
+                value={sitCountry}
+                onChange={(e) => setSitCountry(e.target.value)}
+                placeholder="FR"
+                className="mt-1"
+                maxLength={56}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Option dates flexibles */}
         <div className="flex items-start gap-3">
           <Checkbox
