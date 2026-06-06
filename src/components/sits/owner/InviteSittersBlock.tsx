@@ -69,6 +69,9 @@ interface InviteSittersBlockProps {
   sitCity: string | null;
   /** Code postal du propriétaire — utilisé pour pré-cibler le département. */
   ownerPostalCode?: string | null;
+  /** Pays du propriétaire (ISO ou texte libre). FR/null = comportement standard.
+   *  Toute autre valeur désactive la recherche par département/rayon (FR-only). */
+  ownerCountry?: string | null;
   startDate: string | null;
   endDate: string | null;
   /** Si true → applique un effet visuel d'accent (juste après publication) */
@@ -81,10 +84,12 @@ const InviteSittersBlock = ({
   sitTitle,
   sitCity,
   ownerPostalCode = null,
+  ownerCountry = null,
   startDate,
   endDate,
   highlight = false,
 }: InviteSittersBlockProps) => {
+  const isInternational = !!ownerCountry && ownerCountry !== "FR" && ownerCountry.toLowerCase() !== "france";
   const { data: favorites = [] } = useFavorites("sitter");
   const { data: invitations = [] } = useSitInvitations(sitId);
 
