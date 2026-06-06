@@ -329,8 +329,32 @@ const AdminListings = () => {
                   </TableCell>
                   <TableCell className="text-right text-sm font-medium tabular-nums">{st?.views ?? "—"}</TableCell>
                   <TableCell className="text-right text-sm text-muted-foreground tabular-nums">{st?.uniqueViews ?? "—"}</TableCell>
-                  <TableCell className="text-right text-sm tabular-nums">{st?.messages ?? "—"}</TableCell>
-                  <TableCell className="text-right text-sm tabular-nums">{st?.applications ?? "—"}</TableCell>
+                  <TableCell className="text-right text-sm tabular-nums">
+                    {st && st.messages > 0 ? (
+                      <button
+                        onClick={() => openDrill(listing, "conversations")}
+                        className="font-medium text-foreground hover:text-primary hover:underline"
+                        title="Voir les conversations et lire les messages"
+                      >
+                        {st.messages}
+                      </button>
+                    ) : (
+                      <span className="text-muted-foreground">{st?.messages ?? "—"}</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right text-sm tabular-nums">
+                    {st && st.applications > 0 ? (
+                      <button
+                        onClick={() => openDrill(listing, "applications")}
+                        className="font-medium text-foreground hover:text-primary hover:underline"
+                        title="Voir les candidats"
+                      >
+                        {st.applications}
+                      </button>
+                    ) : (
+                      <span className="text-muted-foreground">{st?.applications ?? "—"}</span>
+                    )}
+                  </TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                     {st?.lastViewAt ? formatDistanceToNow(new Date(st.lastViewAt), { addSuffix: true, locale: fr }) : "—"}
                   </TableCell>
