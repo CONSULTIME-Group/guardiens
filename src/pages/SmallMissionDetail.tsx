@@ -487,8 +487,15 @@ const SmallMissionDetail = () => {
 
   // Valeurs dérivées (calculées à chaque render — pas de mémoïsation prématurée).
   const hasPublishedFlag = searchParams.get("published") === "1";
+  const hasInvitedFlag = searchParams.get("invited") === "1";
   const isAuthor = isAuthorOf(user?.id, mission);
   const showPublishedBanner = Boolean(user?.id) && isAuthor && hasPublishedFlag;
+  const showInvitedBanner =
+    Boolean(user?.id) &&
+    !isAuthor &&
+    hasInvitedFlag &&
+    mission?.status === "open" &&
+    !responses.some((r) => r.responder_id === user?.id);
 
   // useEffect placé AVANT les early returns pour respecter les règles des Hooks
   // (sinon l'ordre des hooks change entre loading=true et loading=false).
