@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import FounderBadge from "@/components/badges/FounderBadge";
+import ProBadge from "@/components/badges/ProBadge";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
