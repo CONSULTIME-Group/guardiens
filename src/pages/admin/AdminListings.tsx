@@ -518,6 +518,15 @@ const AdminListings = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Drill-down candidatures / conversations / messages */}
+      <ListingDrilldownDialog
+        open={drillOpen}
+        onOpenChange={setDrillOpen}
+        sitId={drillSit?.id ?? null}
+        sitTitle={drillSit?.title ?? null}
+        initialTab={drillTab}
+      />
     </div>
   );
 };
