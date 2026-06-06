@@ -278,16 +278,9 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     if (!file || !user) return;
     e.currentTarget.value = "";
 
-    // Guard: HEIC / HEIF non décodables par le canvas → message explicite.
-    const nameLower = file.name.toLowerCase();
-    const isHeic =
-      /heic|heif/i.test(file.type) || nameLower.endsWith(".heic") || nameLower.endsWith(".heif");
-    if (isHeic) {
-      toast.error("Format HEIC non supporté. Exportez votre photo en JPG ou PNG depuis votre iPhone, puis réessayez.");
-      return;
-    }
-    if (file.type && !file.type.startsWith("image/")) {
-      toast.error("Format non supporté. Utilisez une image JPG, PNG ou WebP.");
+    // HEIC/HEIF iPhone : conversion auto en JPG via compressImageFile, pas de blocage.
+    if (file.type && !file.type.startsWith("image/") && !/heic|heif/i.test(file.name)) {
+      toast.error("Format non supporté. Utilisez une image JPG, PNG, WebP ou HEIC.");
       return;
     }
     if (file.size > 15 * 1024 * 1024) {
