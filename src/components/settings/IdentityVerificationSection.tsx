@@ -115,16 +115,19 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
       try {
         const { data: verifyResult, error: verifyError } = await supabase.functions.invoke("verify-identity");
         if (verifyError) throw verifyError;
-        if (verifyResult?.verified) {
-          setStatus("verified");
+        const newStatus = verifyResult?.status || (verifyResult?.verified ? "verified" : "rejected");
+        setStatus(newStatus);
+        if (newStatus === "verified") {
           toast.success("Identité vérifiée avec succès !");
+        } else if (newStatus === "needs_review") {
+          toast.info("Document reçu. Analyse approfondie en cours, réponse sous 24h.");
         } else {
-          setStatus("rejected");
           toast.error(verifyResult?.rejection_reason || "Document refusé. Veuillez soumettre un document valide et lisible.");
         }
       } catch {
         toast.warning("Vérification automatique indisponible. Votre document sera examiné manuellement.");
       }
+
       setUploadProgress(100);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
