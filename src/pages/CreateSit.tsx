@@ -167,6 +167,8 @@ const CreateSit = () => {
         setMaxApplications(s.max_applications || null);
         setOwnerMessage(s.owner_message || "");
         setDailyRoutine(s.daily_routine || "");
+        setSitCity((s as any).city || "");
+        setSitCountry((s as any).country || "FR");
         setIsRepublish(true);
       }
 
