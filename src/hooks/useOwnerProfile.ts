@@ -32,6 +32,7 @@ export interface OwnerProfileData {
   last_name: string;
   city: string;
   postal_code: string;
+  country: string;
   bio: string;
   avatar_url: string;
   // Step 2 - Housing (properties table)
