@@ -43,10 +43,25 @@ async function geocodeFR(city: string, postal: string): Promise<{ lat: number; l
   return { lat, lng };
 }
 
+// Mapping ISO 3166-1 alpha-2 → nom de pays accepté par Nominatim (anglais
+// privilégié pour robustesse internationale). Étendre si besoin.
+const COUNTRY_NAME_BY_CODE: Record<string, string> = {
+  FR: "France", BE: "Belgium", CH: "Switzerland", LU: "Luxembourg", MC: "Monaco",
+  AD: "Andorra", DE: "Germany", ES: "Spain", IT: "Italy", PT: "Portugal",
+  NL: "Netherlands", GB: "United Kingdom", IE: "Ireland", AT: "Austria",
+  DK: "Denmark", SE: "Sweden", NO: "Norway", FI: "Finland", PL: "Poland",
+  CZ: "Czechia", GR: "Greece", CA: "Canada", US: "United States", MX: "Mexico",
+  BR: "Brazil", AR: "Argentina", MA: "Morocco", TN: "Tunisia", DZ: "Algeria",
+  SN: "Senegal", CI: "Côte d'Ivoire", AU: "Australia", NZ: "New Zealand",
+  JP: "Japan", TH: "Thailand", VN: "Vietnam", AE: "United Arab Emirates",
+};
+
 async function geocodeNominatim(city: string, country: string): Promise<{ lat: number; lng: number } | null> {
+  // Si on reçoit un code ISO 2 lettres, on le résout vers son nom anglais.
+  const countryQuery = country.length === 2 ? (COUNTRY_NAME_BY_CODE[country.toUpperCase()] ?? country) : country;
   const params = new URLSearchParams({
     city,
-    country,
+    country: countryQuery,
     format: "json",
     limit: "1",
   });
