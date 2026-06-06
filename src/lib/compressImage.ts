@@ -46,11 +46,29 @@ function canvasToBlob(
   });
 }
 
+async function convertHeicIfNeeded(file: File): Promise<File> {
+  const nameLower = file.name.toLowerCase();
+  const isHeic =
+    /heic|heif/i.test(file.type) ||
+    nameLower.endsWith(".heic") ||
+    nameLower.endsWith(".heif");
+  if (!isHeic) return file;
+  // Lazy import : ~200 ko, chargé uniquement si un HEIC est détecté.
+  const { default: heic2any } = await import("heic2any");
+  const converted = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 });
+  const blob = Array.isArray(converted) ? converted[0] : converted;
+  const newName = file.name.replace(/\.(heic|heif)$/i, ".jpg") || "photo.jpg";
+  return new File([blob], newName, { type: "image/jpeg" });
+}
+
 export async function compressImageFile(
   file: File,
   _maxSizeMB = 5,
   maxWidthOrHeight = 1200
 ): Promise<File> {
+  // Convertit HEIC/HEIF iPhone en JPG avant toute manipulation canvas.
+  file = await convertHeicIfNeeded(file);
+
   // Skip non-image files
   if (!file.type.startsWith("image/")) return file;
 
