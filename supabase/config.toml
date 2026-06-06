@@ -33,3 +33,9 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = false
   [functions.track-email-click]
     verify_jwt = false
+  [functions.improve-sit-description]
+    verify_jwt = true
+  [functions.generate-bio-drafts]
+    verify_jwt = true
+  [functions.moderate-content]
+    verify_jwt = true
