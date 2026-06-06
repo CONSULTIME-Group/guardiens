@@ -131,7 +131,14 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
         if (p.first_name) setFirstName(p.first_name);
         if (p.postal_code) setPostalCode(p.postal_code);
         if (p.city) setCity(p.city);
-        if ((p as any).country) setCountry((p as any).country);
+        if ((p as any).country) {
+          // Tolérance rétro : si un nom libre a été stocké (ex: "Maroc"),
+          // on tente une conversion vers le code ISO pour matcher le Select.
+          const raw = String((p as any).country).trim();
+          const byCode = COUNTRIES.find((c) => c.code.toUpperCase() === raw.toUpperCase());
+          const byName = COUNTRIES.find((c) => c.name.toLowerCase() === raw.toLowerCase());
+          setCountry(byCode?.code ?? byName?.code ?? raw);
+        }
         if (p.avatar_url) setAvatarUrl(p.avatar_url);
         if (p.bio) setBio(p.bio);
         if (p.onboarding_minimal_completed) setMinimalSaved(true);
