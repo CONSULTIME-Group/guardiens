@@ -317,7 +317,10 @@ const PublicSitDetail = () => {
  })();
 
  // ── SEO / OG ──
- const cityForTitle = owner?.city || "France";
+  const ownerCountry = ((owner as any)?.country as string | undefined)?.trim() || (sit as any)?.country?.trim() || "FR";
+  const cityForTitle = (owner?.city && ownerCountry && ownerCountry !== "FR")
+    ? `${owner.city} (${ownerCountry})`
+    : (owner?.city || "France");
  const startFmt = sit.start_date ? format(new Date(sit.start_date), "d MMMM", { locale: fr }) : "";
  const endFmt = sit.end_date ? format(new Date(sit.end_date), "d MMMM yyyy", { locale: fr }) : "";
  const datesShort = startFmt && endFmt ? `du ${startFmt} au ${endFmt}` : "dates flexibles";
