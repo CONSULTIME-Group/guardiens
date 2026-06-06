@@ -102,14 +102,21 @@ const SitDetail = () => {
         ? { ...propertyData, photos: galleryUrls.length > 0 ? galleryUrls : (propertyData as any).photos }
         : propertyData;
 
-      setOwner(ownerData);
+      // Override : la ville/pays de l'annonce priment sur le profil (résidence secondaire, étranger).
+      const sitCity = (sitData as any)?.city?.trim();
+      const sitCountry = (sitData as any)?.country?.trim();
+      const effectiveOwner = ownerData && (sitCity || (sitCountry && sitCountry !== "FR"))
+        ? { ...ownerData, city: sitCity || ownerData.city, country: sitCountry || (ownerData as any).country || "FR" }
+        : ownerData;
+
+      setOwner(effectiveOwner);
       setProperty(enrichedProperty);
       setOwnerProfile(ownerProfileData);
       setReviews(reviewsRes.data || []);
       setOwnerGallery((galleryRes.data || []).map((g: any) => ({ id: g.id, photo_url: g.photo_url })));
 
-      if (ownerData?.city) {
-        geocodeCity(ownerData.city).then((result) => {
+      if (effectiveOwner?.city) {
+        geocodeCity(effectiveOwner.city).then((result) => {
           if (result) setCoords({ lat: result.lat, lng: result.lng });
         });
       }
