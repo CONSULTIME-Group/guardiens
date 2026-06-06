@@ -2796,6 +2796,81 @@ export type Database = {
           },
         ]
       }
+      pro_verifications: {
+        Row: {
+          admin_decision: string | null
+          admin_notes: string | null
+          ai_analysis: Json | null
+          ai_analyzed_at: string | null
+          ai_confidence: number | null
+          ai_red_flags: Json | null
+          ai_status: string | null
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          declared_business_name: string | null
+          declared_siret: string | null
+          declared_specialty: string | null
+          doc_type: Database["public"]["Enums"]["pro_doc_type_enum"]
+          file_name: string | null
+          file_path: string
+          file_size_bytes: number | null
+          id: string
+          mime_type: string | null
+          status: Database["public"]["Enums"]["pro_verification_status_enum"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_decision?: string | null
+          admin_notes?: string | null
+          ai_analysis?: Json | null
+          ai_analyzed_at?: string | null
+          ai_confidence?: number | null
+          ai_red_flags?: Json | null
+          ai_status?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          declared_business_name?: string | null
+          declared_siret?: string | null
+          declared_specialty?: string | null
+          doc_type: Database["public"]["Enums"]["pro_doc_type_enum"]
+          file_name?: string | null
+          file_path: string
+          file_size_bytes?: number | null
+          id?: string
+          mime_type?: string | null
+          status?: Database["public"]["Enums"]["pro_verification_status_enum"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_decision?: string | null
+          admin_notes?: string | null
+          ai_analysis?: Json | null
+          ai_analyzed_at?: string | null
+          ai_confidence?: number | null
+          ai_red_flags?: Json | null
+          ai_status?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          declared_business_name?: string | null
+          declared_siret?: string | null
+          declared_specialty?: string | null
+          doc_type?: Database["public"]["Enums"]["pro_doc_type_enum"]
+          file_name?: string | null
+          file_path?: string
+          file_size_bytes?: number | null
+          id?: string
+          mime_type?: string | null
+          status?: Database["public"]["Enums"]["pro_verification_status_enum"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profile_moderation: {
         Row: {
           admin_notes: string | null
@@ -2879,6 +2954,13 @@ export type Database = {
           onboarding_dismissed_at: string | null
           onboarding_minimal_completed: boolean
           postal_code: string | null
+          pro_approved_at: string | null
+          pro_business_name: string | null
+          pro_pricing_note: string | null
+          pro_siret: string | null
+          pro_specialty: string | null
+          pro_status: Database["public"]["Enums"]["pro_profile_status_enum"]
+          pro_tagline: string | null
           profile_completion: number | null
           referral_code: string | null
           referred_by: string | null
@@ -2922,6 +3004,13 @@ export type Database = {
           onboarding_dismissed_at?: string | null
           onboarding_minimal_completed?: boolean
           postal_code?: string | null
+          pro_approved_at?: string | null
+          pro_business_name?: string | null
+          pro_pricing_note?: string | null
+          pro_siret?: string | null
+          pro_specialty?: string | null
+          pro_status?: Database["public"]["Enums"]["pro_profile_status_enum"]
+          pro_tagline?: string | null
           profile_completion?: number | null
           referral_code?: string | null
           referred_by?: string | null
@@ -2965,6 +3054,13 @@ export type Database = {
           onboarding_dismissed_at?: string | null
           onboarding_minimal_completed?: boolean
           postal_code?: string | null
+          pro_approved_at?: string | null
+          pro_business_name?: string | null
+          pro_pricing_note?: string | null
+          pro_siret?: string | null
+          pro_specialty?: string | null
+          pro_status?: Database["public"]["Enums"]["pro_profile_status_enum"]
+          pro_tagline?: string | null
           profile_completion?: number | null
           referral_code?: string | null
           referred_by?: string | null
@@ -5302,6 +5398,21 @@ export type Database = {
         | "reptile"
         | "farm_animal"
         | "nac"
+      pro_doc_type_enum:
+        | "diploma_acaced"
+        | "diploma_other"
+        | "siret_kbis"
+        | "insurance_rc_pro"
+        | "certification"
+        | "other"
+      pro_profile_status_enum: "none" | "pending" | "verified" | "rejected"
+      pro_verification_status_enum:
+        | "pending"
+        | "auto_approved"
+        | "auto_rejected"
+        | "needs_review"
+        | "approved"
+        | "rejected"
       property_environment:
         | "city_center"
         | "suburban"
@@ -5521,6 +5632,23 @@ export const Constants = {
         "reptile",
         "farm_animal",
         "nac",
+      ],
+      pro_doc_type_enum: [
+        "diploma_acaced",
+        "diploma_other",
+        "siret_kbis",
+        "insurance_rc_pro",
+        "certification",
+        "other",
+      ],
+      pro_profile_status_enum: ["none", "pending", "verified", "rejected"],
+      pro_verification_status_enum: [
+        "pending",
+        "auto_approved",
+        "auto_rejected",
+        "needs_review",
+        "approved",
+        "rejected",
       ],
       property_environment: [
         "city_center",
