@@ -122,13 +122,14 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     const load = async () => {
       const { data: p } = await supabase
         .from("profiles")
-        .select("first_name, postal_code, city, avatar_url, bio, onboarding_minimal_completed, skill_categories")
+        .select("first_name, postal_code, city, avatar_url, bio, onboarding_minimal_completed, skill_categories, country")
         .eq("id", user.id)
         .single();
       if (p) {
         if (p.first_name) setFirstName(p.first_name);
         if (p.postal_code) setPostalCode(p.postal_code);
         if (p.city) setCity(p.city);
+        if ((p as any).country) setCountry((p as any).country);
         if (p.avatar_url) setAvatarUrl(p.avatar_url);
         if (p.bio) setBio(p.bio);
         if (p.onboarding_minimal_completed) setMinimalSaved(true);
