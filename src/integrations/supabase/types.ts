@@ -764,6 +764,7 @@ export type Database = {
           sit_id: string | null
           sitter_id: string
           small_mission_id: string | null
+          unread_reminder_sent_at: string | null
           updated_at: string
         }
         Insert: {
@@ -781,6 +782,7 @@ export type Database = {
           sit_id?: string | null
           sitter_id: string
           small_mission_id?: string | null
+          unread_reminder_sent_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -798,6 +800,7 @@ export type Database = {
           sit_id?: string | null
           sitter_id?: string
           small_mission_id?: string | null
+          unread_reminder_sent_at?: string | null
           updated_at?: string
         }
         Relationships: [

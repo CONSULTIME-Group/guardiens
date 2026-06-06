@@ -45,6 +45,7 @@ import { template as discoverMutualAid0 } from './discover-mutual-aid-0.tsx'
 import { template as sitInvitation } from './sit-invitation.tsx'
 import { template as listingUnpublishedFeedback } from './listing-unpublished-feedback.tsx'
 import { template as missionInvitation } from './mission-invitation.tsx'
+import { template as unreadMessagesReminder } from './unread-messages-reminder.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'nearby-sit-alert': nearbySitAlert,
@@ -83,4 +84,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'sit-invitation': sitInvitation,
   'listing-unpublished-feedback': listingUnpublishedFeedback,
   'mission-invitation': missionInvitation,
+  'unread-messages-reminder': unreadMessagesReminder,
 }
