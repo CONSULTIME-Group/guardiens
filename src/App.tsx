@@ -137,6 +137,7 @@ const MySubscription = lazy(() => import("./pages/MySubscription"));
 const Favorites = lazy(() => import("./pages/Favorites"));
 const PublicSitDetail = lazy(() => import("./pages/PublicSitDetail"));
 const PublicListings = lazy(() => import("./pages/PublicListings"));
+const InternationalListings = lazy(() => import("./pages/InternationalListings"));
 const DemoSitDetail = lazy(() => import("./pages/DemoSitDetail"));
 const PublicSitterProfile = lazy(() => import("./pages/PublicSitterProfile"));
 
