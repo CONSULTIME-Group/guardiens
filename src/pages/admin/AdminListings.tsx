@@ -63,6 +63,16 @@ const AdminListings = () => {
   const [trafficSources, setTrafficSources] = useState<Array<{ referrer_host: string; hits: number; last_hit_at: string }>>([]);
   const [trafficLoading, setTrafficLoading] = useState(false);
 
+  // Drill-down (candidatures + conversations + messages)
+  const [drillOpen, setDrillOpen] = useState(false);
+  const [drillSit, setDrillSit] = useState<{ id: string; title: string | null } | null>(null);
+  const [drillTab, setDrillTab] = useState<"applications" | "conversations">("applications");
+  const openDrill = (listing: any, tab: "applications" | "conversations") => {
+    setDrillSit({ id: listing.id, title: listing.title });
+    setDrillTab(tab);
+    setDrillOpen(true);
+  };
+
   const fetchListings = useCallback(async () => {
     setLoading(true);
     let q = supabase
