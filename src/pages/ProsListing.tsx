@@ -98,9 +98,14 @@ export default function ProsListing() {
             <p className="text-muted-foreground">
               Cet annuaire référence des pros animaliers (vétérinaires, éducateurs, toiletteurs…) qui n'assurent pas
               forcément de garde. Si vous proposez des gardes rémunérées à titre professionnel, demandez plutôt le
-              badge <strong>Gardien Pro vérifié</strong> depuis vos{" "}
-              <Link to="/settings" className="underline font-medium">paramètres</Link>. Il s'affichera sur votre profil
-              et dans la recherche gardiens.
+              badge <strong>Gardien Pro vérifié</strong> depuis{" "}
+              <Link
+                to="/settings?section=security&focus=pro"
+                className="underline font-medium"
+              >
+                Paramètres &gt; Sécurité &gt; Gardien Pro
+              </Link>
+              . Il s'affichera sur votre profil et dans la recherche gardiens.
             </p>
           </div>
         </header>
