@@ -59,6 +59,7 @@ const OwnerStepIdentity = ({ data, onChange, onUploadPhoto }: Props) => {
       <PostalCodeCityFields
         city={data.city}
         postalCode={data.postal_code}
+        country={data.country}
         onChange={onChange}
         cityId="o_city"
         postalId="o_postal"

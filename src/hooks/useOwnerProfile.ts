@@ -13,6 +13,8 @@ export function computeOwnerMissingFields(d: OwnerProfileData, petsCount: number
   if (!d.last_name) missing.push({ step: 1, label: "Nom" });
   if (!d.city) missing.push({ step: 1, label: "Ville" });
   if (!d.bio) missing.push({ step: 1, label: "Bio" });
+  // postal_code n'est requis qu'en France (country === "FR" ou non renseigné).
+  // Les propriétaires à l'étranger renseignent uniquement ville + pays.
   if (!d.property_type) missing.push({ step: 2, label: "Type de logement" });
   if (!d.environment) missing.push({ step: 2, label: "Environnement" });
   if (!d.description) missing.push({ step: 2, label: "Description du logement" });
@@ -30,6 +32,7 @@ export interface OwnerProfileData {
   last_name: string;
   city: string;
   postal_code: string;
+  country: string;
   bio: string;
   avatar_url: string;
   // Step 2 - Housing (properties table)
@@ -91,7 +94,7 @@ export interface Pet {
 }
 
 const defaultData: OwnerProfileData = {
-  first_name: "", last_name: "", city: "", postal_code: "", bio: "", avatar_url: "",
+  first_name: "", last_name: "", city: "", postal_code: "", country: "FR", bio: "", avatar_url: "",
   property_type: "", environment: "", rooms_count: 0, bedrooms_count: 0, car_required: false,
   accessible: false, equipments: [], photos: [], description: "", region_highlights: "",
   environments: [],
@@ -139,6 +142,7 @@ export function useOwnerProfile() {
     setData({
       first_name: p?.first_name || "", last_name: p?.last_name || "",
       city: p?.city || "", postal_code: p?.postal_code || "",
+      country: (p as any)?.country || "FR",
       bio: p?.bio || "", avatar_url: p?.avatar_url || "",
       property_type: prop?.type || "", environment: prop?.environment || "",
       rooms_count: prop?.rooms_count || 0, bedrooms_count: prop?.bedrooms_count || 0,
@@ -224,7 +228,7 @@ export function useOwnerProfile() {
 
     try {
       // Profile fields
-      const profileFields = ["first_name", "last_name", "city", "postal_code", "bio", "avatar_url", "skill_categories", "available_for_help"] as const;
+      const profileFields = ["first_name", "last_name", "city", "postal_code", "country", "bio", "avatar_url", "skill_categories", "available_for_help"] as const;
       const profileUpdate: any = {};
       profileFields.forEach(f => { if (f in stepData) profileUpdate[f] = (stepData as any)[f]; });
       // Owner skill categories alias → canonical profiles.skill_categories
