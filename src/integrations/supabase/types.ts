@@ -2850,6 +2850,7 @@ export type Database = {
           cancellations_as_proprio: number
           city: string | null
           completed_sits_count: number
+          country: string
           cp_relance_count: number | null
           created_at: string
           custom_skills: Json | null
@@ -2892,6 +2893,7 @@ export type Database = {
           cancellations_as_proprio?: number
           city?: string | null
           completed_sits_count?: number
+          country?: string
           cp_relance_count?: number | null
           created_at?: string
           custom_skills?: Json | null
@@ -2934,6 +2936,7 @@ export type Database = {
           cancellations_as_proprio?: number
           city?: string | null
           completed_sits_count?: number
+          country?: string
           cp_relance_count?: number | null
           created_at?: string
           custom_skills?: Json | null

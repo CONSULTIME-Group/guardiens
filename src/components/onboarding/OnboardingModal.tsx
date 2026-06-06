@@ -74,8 +74,11 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
   const [firstName, setFirstName] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [city, setCity] = useState("");
+  const [country, setCountry] = useState("FR");
   const [minimalSaved, setMinimalSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const livesAbroad = country !== "FR";
 
   // ── Slide 1: photo + bio ──
   const [avatarUrl, setAvatarUrl] = useState("");
@@ -92,13 +95,13 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
 
   const fieldsValid =
     firstName.trim().length > 0 &&
-    postalCode.length === 5 &&
-    city.trim().length > 0;
+    city.trim().length > 0 &&
+    (livesAbroad ? country.trim().length > 0 : postalCode.length === 5);
 
   // Calculate live completion estimate — must match DB function
   useEffect(() => {
     let score = 0;
-    if (firstName.trim() && postalCode) score += 10;
+    if (firstName.trim() && (postalCode || livesAbroad) && city.trim()) score += 10;
     if (avatarUrl) score += 20;
     if (usesSitterScoring) {
       // Sitter/Both scoring: bio=15, compétences=10, lifestyle=10 (max here = 65)
@@ -119,13 +122,14 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     const load = async () => {
       const { data: p } = await supabase
         .from("profiles")
-        .select("first_name, postal_code, city, avatar_url, bio, onboarding_minimal_completed, skill_categories")
+        .select("first_name, postal_code, city, avatar_url, bio, onboarding_minimal_completed, skill_categories, country")
         .eq("id", user.id)
         .single();
       if (p) {
         if (p.first_name) setFirstName(p.first_name);
         if (p.postal_code) setPostalCode(p.postal_code);
         if (p.city) setCity(p.city);
+        if ((p as any).country) setCountry((p as any).country);
         if (p.avatar_url) setAvatarUrl(p.avatar_url);
         if (p.bio) setBio(p.bio);
         if (p.onboarding_minimal_completed) setMinimalSaved(true);
@@ -190,8 +194,9 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
       .from("profiles")
       .update({
         first_name: firstName.trim(),
-        postal_code: postalCode,
+        postal_code: livesAbroad ? null : postalCode,
         city: city.trim(),
+        country: country.trim() || "FR",
         onboarding_minimal_completed: true,
       } as any)
       .eq("id", user.id);
@@ -500,19 +505,67 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                   />
                 </div>
 
-                <PostalCodeCityFields
-                  city={city}
-                  postalCode={postalCode}
-                  onChange={(partial) => {
-                    if (partial.city !== undefined) setCity(partial.city);
-                    if (partial.postal_code !== undefined) setPostalCode(partial.postal_code);
-                  }}
-                  cityLabel="Votre ville"
-                  postalLabel="Code postal"
-                  className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-                  inputClassName="rounded-lg h-12"
-                  disabled={minimalSaved}
-                />
+                {!livesAbroad ? (
+                  <PostalCodeCityFields
+                    city={city}
+                    postalCode={postalCode}
+                    onChange={(partial) => {
+                      if (partial.city !== undefined) setCity(partial.city);
+                      if (partial.postal_code !== undefined) setPostalCode(partial.postal_code);
+                    }}
+                    cityLabel="Votre ville"
+                    postalLabel="Code postal"
+                    className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                    inputClassName="rounded-lg h-12"
+                    disabled={minimalSaved}
+                  />
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="onb-city">Votre ville</Label>
+                      <Input
+                        id="onb-city"
+                        placeholder="Ex : Bruxelles"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        className="rounded-lg h-12"
+                        disabled={minimalSaved}
+                        maxLength={100}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="onb-country">Pays</Label>
+                      <Input
+                        id="onb-country"
+                        placeholder="Ex : Belgique"
+                        value={country === "FR" ? "" : country}
+                        onChange={(e) => setCountry(e.target.value)}
+                        className="rounded-lg h-12"
+                        disabled={minimalSaved}
+                        maxLength={60}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {!minimalSaved && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (livesAbroad) {
+                        setCountry("FR");
+                        setCity("");
+                      } else {
+                        setCountry("");
+                        setPostalCode("");
+                        setCity("");
+                      }
+                    }}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    {livesAbroad ? "Je vis en France" : "Je vis à l'étranger"}
+                  </button>
+                )}
 
                 {minimalSaved && (
                   <p className="text-sm text-primary font-medium flex items-center gap-1.5">
@@ -706,8 +759,8 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                 <Progress value={liveCompletion} className="h-2" />
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="flex items-center gap-1.5">
-                    {firstName && postalCode ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
-                    <span className={firstName && postalCode ? "text-foreground" : "text-muted-foreground"}>Prénom & localisation</span>
+                    {firstName && (postalCode || livesAbroad) && city ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
+                    <span className={firstName && (postalCode || livesAbroad) && city ? "text-foreground" : "text-muted-foreground"}>Prénom & localisation</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     {avatarUrl ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
