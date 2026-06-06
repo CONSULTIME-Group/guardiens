@@ -21,6 +21,7 @@ import MessagesListSkeleton from "@/components/messages/MessagesListSkeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { trackFirstAction } from "@/lib/analytics";
+import { moderateContent } from "@/lib/moderation";
 import { appStatusBadge as appStatusLabels } from "@/lib/messageStatus";
 import { useAutoOpenConversation } from "@/hooks/useAutoOpenConversation";
 
@@ -396,7 +397,24 @@ const Messages = () => {
   const handleSend = async () => {
     if (!user || !activeConv || !newMessage.trim()) return;
     setSending(true);
-    await supabase.from("messages").insert({ conversation_id: activeConv.id, sender_id: user.id, content: newMessage.trim() });
+    const trimmed = newMessage.trim();
+    // Modération pré-envoi : seulement pour messages > 30 car. pour limiter le coût.
+    if (trimmed.length >= 30) {
+      const verdict = await moderateContent("message", trimmed);
+      if (verdict.status === "block") {
+        toast({
+          variant: "destructive",
+          title: "Message bloqué",
+          description: verdict.reasons.join(" · ") || "Retirez les coordonnées ou contenus contraires aux CGS.",
+        });
+        setSending(false);
+        return;
+      }
+      if (verdict.status === "warning" && verdict.suggestion) {
+        toast({ title: "Conseil", description: verdict.suggestion });
+      }
+    }
+    await supabase.from("messages").insert({ conversation_id: activeConv.id, sender_id: user.id, content: trimmed });
     // last_message_at + first_message_sent gérés automatiquement par trigger DB
     try { await trackFirstAction("message_sent", { conversation_id: activeConv.id }); } catch {}
     setNewMessage("");
