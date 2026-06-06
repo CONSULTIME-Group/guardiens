@@ -78,6 +78,9 @@ const Terms = lazy(() => import("./pages/Terms"));
 const Cgs = lazy(() => import("./pages/Cgs"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const AdminArticles = lazy(() => import("./pages/AdminArticles"));
+const ProsListing = lazy(() => import("./pages/ProsListing"));
+const ProDetail = lazy(() => import("./pages/ProDetail"));
+const ProOnboarding = lazy(() => import("./pages/ProOnboarding"));
 const ArticleEditor = lazy(() => import("./pages/ArticleEditor"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
@@ -289,6 +292,9 @@ const AppRoutes = () => (
       <Route path="/annonces/demo/:slug" element={<DemoSitDetail />} />
       <Route path="/annonces/:id" element={<PublicSitDetail />} />
       <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
+      <Route path="/pros" element={<ProsListing />} />
+      <Route path="/pros/inscription" element={<ProOnboarding />} />
+      <Route path="/pros/:slug" element={<ProDetail />} />
       <Route element={<AdminLayout />}>
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
