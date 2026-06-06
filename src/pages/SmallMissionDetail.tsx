@@ -27,6 +27,7 @@ import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import MissionPhotoGallery from "@/components/missions/MissionPhotoGallery";
 import MissionPublishedBanner from "@/components/missions/MissionPublishedBanner";
+import MatchedHelpersInviteBlock from "@/components/missions/MatchedHelpersInviteBlock";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import PublicMissionView from "@/components/missions/PublicMissionView";
@@ -796,6 +797,17 @@ const SmallMissionDetail = () => {
               onToast={(t) => toast(t)}
             />
           </div>
+        )}
+
+        {/* Bloc d'invitation directe — uniquement à la publication, pour l'auteur */}
+        {showPublishedBanner && isAuthor && mission.status === "open" && (
+          <MatchedHelpersInviteBlock
+            missionId={mission.id}
+            missionCategory={mission.category}
+            ownerId={mission.user_id}
+            ownerLat={mission.latitude}
+            ownerLng={mission.longitude}
+          />
         )}
 
         {/* Banners statut */}
