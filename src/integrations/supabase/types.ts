@@ -4754,6 +4754,48 @@ export type Database = {
           status: string
         }[]
       }
+      admin_get_conversation_messages: {
+        Args: { p_conversation_id: string }
+        Returns: {
+          content: string
+          created_at: string
+          is_system: boolean
+          message_id: string
+          photo_url: string
+          read_at: string
+          sender_avatar: string
+          sender_id: string
+          sender_name: string
+        }[]
+      }
+      admin_get_listing_applications: {
+        Args: { p_sit_id: string }
+        Returns: {
+          application_id: string
+          avatar_url: string
+          created_at: string
+          first_name: string
+          last_name: string
+          message: string
+          sitter_id: string
+          status: string
+        }[]
+      }
+      admin_get_listing_conversations: {
+        Args: { p_sit_id: string }
+        Returns: {
+          conversation_id: string
+          created_at: string
+          last_message_at: string
+          message_count: number
+          owner_avatar: string
+          owner_id: string
+          owner_name: string
+          sitter_avatar: string
+          sitter_id: string
+          sitter_name: string
+        }[]
+      }
       admin_get_listing_traffic_sources: {
         Args: { p_limit?: number; p_sit_id: string }
         Returns: {
@@ -4874,6 +4916,13 @@ export type Database = {
           message_count: number
           sit_id: string
           view_count: number
+        }[]
+      }
+      admin_get_sits_status_counts: {
+        Args: { p_since?: string }
+        Returns: {
+          cnt: number
+          status: string
         }[]
       }
       admin_get_user_email: { Args: { p_user_id: string }; Returns: string }
