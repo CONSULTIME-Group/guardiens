@@ -83,7 +83,7 @@ const ProVerificationSection = ({ user }: { user: any }) => {
     const { data: verifs } = await supabase
       .from("pro_verifications")
       .select("id, doc_type, file_name, status, ai_confidence, ai_status, created_at, ai_analysis")
-      .eq("id", user.id)
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false });
     setVerifications((verifs ?? []) as ProVerification[]);
     setLoading(false);
