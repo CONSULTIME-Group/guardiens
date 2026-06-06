@@ -228,7 +228,7 @@ export function useOwnerProfile() {
 
     try {
       // Profile fields
-      const profileFields = ["first_name", "last_name", "city", "postal_code", "bio", "avatar_url", "skill_categories", "available_for_help"] as const;
+      const profileFields = ["first_name", "last_name", "city", "postal_code", "country", "bio", "avatar_url", "skill_categories", "available_for_help"] as const;
       const profileUpdate: any = {};
       profileFields.forEach(f => { if (f in stepData) profileUpdate[f] = (stepData as any)[f]; });
       // Owner skill categories alias → canonical profiles.skill_categories
