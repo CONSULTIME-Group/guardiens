@@ -21,6 +21,7 @@ const TRANSACTIONAL: ReadonlyArray<string> = [
   'cancellation-review-published',
   'cancellation-response-published',
   'mission-response',
+  'mission-invitation',
   // Identity / trust / safety
   'identity-verified',
   'identity-rejected',
