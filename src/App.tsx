@@ -81,6 +81,8 @@ const AdminArticles = lazy(() => import("./pages/AdminArticles"));
 const ProsListing = lazy(() => import("./pages/ProsListing"));
 const ProDetail = lazy(() => import("./pages/ProDetail"));
 const ProOnboarding = lazy(() => import("./pages/ProOnboarding"));
+const MyProProfile = lazy(() => import("./pages/MyProProfile"));
+const AdminProDirectory = lazy(() => import("./pages/admin/AdminProDirectory"));
 const ArticleEditor = lazy(() => import("./pages/ArticleEditor"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
@@ -294,6 +296,7 @@ const AppRoutes = () => (
       <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
       <Route path="/pros" element={<ProsListing />} />
       <Route path="/pros/inscription" element={<ProOnboarding />} />
+      <Route path="/pros/mon-espace" element={<MyProProfile />} />
       <Route path="/pros/:slug" element={<ProDetail />} />
       <Route element={<AdminLayout />}>
         <Route path="/admin" element={<AdminDashboard />} />
@@ -306,6 +309,7 @@ const AppRoutes = () => (
         <Route path="/admin/reports" element={<AdminReports />} />
         <Route path="/admin/verifications" element={<AdminVerifications />} />
         <Route path="/admin/pros" element={<AdminPros />} />
+        <Route path="/admin/pros-annuaire" element={<AdminProDirectory />} />
         <Route path="/admin/emails" element={<AdminEmails />} />
         <Route path="/admin/experiences" element={<AdminExperienceVerification />} />
         <Route path="/admin/articles" element={<AdminArticles />} />
