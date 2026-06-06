@@ -55,6 +55,7 @@ const adminNavGroups: NavGroup[] = [
     items: [
       { to: "/admin/users", icon: Users, label: "Utilisateurs" },
       { to: "/admin/verifications", icon: ShieldCheck, label: "Vérifications ID", badgeKey: "verifications" },
+      { to: "/admin/pros", icon: Briefcase, label: "Vérifications Pro", badgeKey: "pros" },
       { to: "/admin/experiences", icon: Briefcase, label: "Expériences", badgeKey: "experiences" },
       { to: "/admin/skills", icon: Lightbulb, label: "Compétences", badgeKey: "skills" },
     ],

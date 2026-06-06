@@ -242,7 +242,6 @@ const AdminPros = () => {
       <AdminPageHeader
         title="Vérifications Pro"
         description="File des dossiers Gardiens Pro à modérer (diplôme, SIRET, autres pièces). L'IA pré-analyse, vous tranchez."
-        icon={Briefcase}
       />
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>

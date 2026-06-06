@@ -87,6 +87,7 @@ const AdminReviews = lazy(() => import("./pages/admin/AdminReviews"));
 const AdminReviewDisputes = lazy(() => import("./pages/admin/AdminReviewDisputes"));
 const AdminReports = lazy(() => import("./pages/admin/AdminReports"));
 const AdminVerifications = lazy(() => import("./pages/admin/AdminVerifications"));
+const AdminPros = lazy(() => import("./pages/admin/AdminPros"));
 const AdminEmails = lazy(() => import("./pages/admin/AdminEmails"));
 const AdminExperienceVerification = lazy(() => import("./pages/admin/AdminExperienceVerification"));
 const PlancheBadges = lazy(() => import("./pages/PlancheBadges"));
@@ -296,6 +297,7 @@ const AppRoutes = () => (
         <Route path="/admin/review-disputes" element={<AdminReviewDisputes />} />
         <Route path="/admin/reports" element={<AdminReports />} />
         <Route path="/admin/verifications" element={<AdminVerifications />} />
+        <Route path="/admin/pros" element={<AdminPros />} />
         <Route path="/admin/emails" element={<AdminEmails />} />
         <Route path="/admin/experiences" element={<AdminExperienceVerification />} />
         <Route path="/admin/articles" element={<AdminArticles />} />
