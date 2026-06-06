@@ -179,9 +179,11 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
   const statusConfig: Record<string, { icon: React.ElementType; label: string; desc: string; color: string }> = {
     not_submitted: { icon: Upload, label: "Non vérifiée", desc: "Envoyez une pièce d'identité pour débloquer les fonctionnalités avancées (badge vérifié).", color: "text-muted-foreground" },
     pending: { icon: Clock, label: "Vérification en cours", desc: "Votre document est en cours de vérification automatique par IA.", color: "text-warning" },
+    needs_review: { icon: Clock, label: "Analyse approfondie en cours", desc: "Votre document est en cours d'analyse par notre équipe. Réponse sous 24h. Vous pouvez renvoyer un document plus net si besoin.", color: "text-warning" },
     rejected: { icon: AlertCircle, label: "Document refusé", desc: "Votre document n'a pas pu être validé. Veuillez soumettre un nouveau document lisible.", color: "text-destructive" },
     verified: { icon: CheckCircle2, label: "Identité vérifiée", desc: "Votre identité a été vérifiée avec succès. Vous avez accès à toutes les fonctionnalités.", color: "text-success" },
   };
+
 
   const cfg = statusConfig[status] || statusConfig.not_submitted;
   const StatusIcon = cfg.icon;
