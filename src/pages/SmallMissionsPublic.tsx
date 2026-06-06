@@ -88,6 +88,7 @@ interface OpenMissionRow {
   duration_estimate: string | null;
   exchange_offer: string | null;
   photos: string[] | null;
+  mission_type: "besoin" | "offre" | null;
 }
 
 /* Date relative en français, court */
@@ -155,22 +156,30 @@ const SmallMissionsPublic = () => {
     void load();
   }, []);
 
+  const [missionTab, setMissionTab] = useState<"all" | "besoin" | "offre">("all");
+
   useEffect(() => {
     const loadOpen = async () => {
       try {
          const { data } = await supabase
            .from("small_missions")
-           .select("id, title, description, category, city, created_at, date_needed, duration_estimate, exchange_offer, photos")
+           .select("id, title, description, category, city, created_at, date_needed, duration_estimate, exchange_offer, photos, mission_type")
            .eq("status", "open")
            .order("created_at", { ascending: false })
-           .limit(6);
-         if (data) setOpenMissions(data as OpenMissionRow[]);
+           .limit(12);
+         if (data) setOpenMissions(data as unknown as OpenMissionRow[]);
       } catch (err) {
         console.warn("small_missions unavailable:", err);
       }
     };
     void loadOpen();
   }, []);
+
+  const filteredOpenMissions = missionTab === "all"
+    ? openMissions
+    : openMissions.filter(m => (m.mission_type ?? "besoin") === missionTab);
+  const besoinCount = openMissions.filter(m => (m.mission_type ?? "besoin") === "besoin").length;
+  const offreCount = openMissions.filter(m => (m.mission_type ?? "besoin") === "offre").length;
 
  /** Auth-aware navigation: redirect to register if not logged in */
   const goToCreate = () =>
