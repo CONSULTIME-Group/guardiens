@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import DraftStatsPanel from "@/components/admin/DraftStatsPanel";
+import ListingDrilldownDialog from "@/components/admin/ListingDrilldownDialog";
 
 const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
   draft: { label: "Brouillon", variant: "outline" },
@@ -61,6 +62,16 @@ const AdminListings = () => {
   const [trafficListing, setTrafficListing] = useState<any | null>(null);
   const [trafficSources, setTrafficSources] = useState<Array<{ referrer_host: string; hits: number; last_hit_at: string }>>([]);
   const [trafficLoading, setTrafficLoading] = useState(false);
+
+  // Drill-down (candidatures + conversations + messages)
+  const [drillOpen, setDrillOpen] = useState(false);
+  const [drillSit, setDrillSit] = useState<{ id: string; title: string | null } | null>(null);
+  const [drillTab, setDrillTab] = useState<"applications" | "conversations">("applications");
+  const openDrill = (listing: any, tab: "applications" | "conversations") => {
+    setDrillSit({ id: listing.id, title: listing.title });
+    setDrillTab(tab);
+    setDrillOpen(true);
+  };
 
   const fetchListings = useCallback(async () => {
     setLoading(true);
@@ -318,8 +329,32 @@ const AdminListings = () => {
                   </TableCell>
                   <TableCell className="text-right text-sm font-medium tabular-nums">{st?.views ?? "—"}</TableCell>
                   <TableCell className="text-right text-sm text-muted-foreground tabular-nums">{st?.uniqueViews ?? "—"}</TableCell>
-                  <TableCell className="text-right text-sm tabular-nums">{st?.messages ?? "—"}</TableCell>
-                  <TableCell className="text-right text-sm tabular-nums">{st?.applications ?? "—"}</TableCell>
+                  <TableCell className="text-right text-sm tabular-nums">
+                    {st && st.messages > 0 ? (
+                      <button
+                        onClick={() => openDrill(listing, "conversations")}
+                        className="font-medium text-foreground hover:text-primary hover:underline"
+                        title="Voir les conversations et lire les messages"
+                      >
+                        {st.messages}
+                      </button>
+                    ) : (
+                      <span className="text-muted-foreground">{st?.messages ?? "—"}</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right text-sm tabular-nums">
+                    {st && st.applications > 0 ? (
+                      <button
+                        onClick={() => openDrill(listing, "applications")}
+                        className="font-medium text-foreground hover:text-primary hover:underline"
+                        title="Voir les candidats"
+                      >
+                        {st.applications}
+                      </button>
+                    ) : (
+                      <span className="text-muted-foreground">{st?.applications ?? "—"}</span>
+                    )}
+                  </TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                     {st?.lastViewAt ? formatDistanceToNow(new Date(st.lastViewAt), { addSuffix: true, locale: fr }) : "—"}
                   </TableCell>
@@ -483,6 +518,15 @@ const AdminListings = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Drill-down candidatures / conversations / messages */}
+      <ListingDrilldownDialog
+        open={drillOpen}
+        onOpenChange={setDrillOpen}
+        sitId={drillSit?.id ?? null}
+        sitTitle={drillSit?.title ?? null}
+        initialTab={drillTab}
+      />
     </div>
   );
 };
