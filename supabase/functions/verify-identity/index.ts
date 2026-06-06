@@ -192,22 +192,28 @@ Rules:
     const verification = JSON.parse(toolCall.function.arguments);
     console.log("Verification result:", JSON.stringify(verification));
 
+    const confidence = typeof verification.confidence === "number" ? verification.confidence : 0;
+    const redFlags: string[] = Array.isArray(verification.red_flags) ? verification.red_flags : [];
+    const AUTO_APPROVE_THRESHOLD = 0.85;
+
+    // Decision: valid + confidence ≥ threshold → verified ; valid + low confidence → needs_review ; invalid → rejected
+    let finalStatus: "verified" | "needs_review" | "rejected";
+    if (!verification.is_valid) finalStatus = "rejected";
+    else if (confidence >= AUTO_APPROVE_THRESHOLD) finalStatus = "verified";
+    else finalStatus = "needs_review";
+
     // Log the verification attempt
     await supabaseAdmin.from("identity_verification_logs").insert({
       user_id: user.id,
-      result: verification.is_valid ? "verified" : "rejected",
+      result: finalStatus === "verified" ? "verified" : finalStatus === "rejected" ? "rejected" : "needs_review",
       document_type: verification.document_type || null,
-      rejection_reason: verification.rejection_reason || null,
+      rejection_reason: verification.rejection_reason || (redFlags.length ? redFlags.join(" ; ") : null),
     });
 
-    // Update the profile and create notification based on verification result
-    if (verification.is_valid) {
+    if (finalStatus === "verified") {
       await supabaseAdmin
         .from("profiles")
-        .update({
-          identity_verified: true,
-          identity_verification_status: "verified",
-        })
+        .update({ identity_verified: true, identity_verification_status: "verified" })
         .eq("id", user.id);
 
       await supabaseAdmin.from("notifications").insert({
@@ -217,16 +223,26 @@ Rules:
         body: "Votre pièce d'identité a été validée avec succès. Vous avez maintenant accès à toutes les fonctionnalités.",
         link: "/settings#verification",
       });
+    } else if (finalStatus === "needs_review") {
+      await supabaseAdmin
+        .from("profiles")
+        .update({ identity_verified: false, identity_verification_status: "needs_review" })
+        .eq("id", user.id);
+
+      await supabaseAdmin.from("notifications").insert({
+        user_id: user.id,
+        type: "identity_pending",
+        title: "Vérification en cours",
+        body: "Votre document est en cours de revue par notre équipe. Vous serez notifié sous 24h.",
+        link: "/settings#verification",
+      });
     } else {
       await supabaseAdmin
         .from("profiles")
-        .update({
-          identity_verified: false,
-          identity_verification_status: "rejected",
-        })
+        .update({ identity_verified: false, identity_verification_status: "rejected" })
         .eq("id", user.id);
 
-      const reason = verification.rejection_reason || "Document non conforme";
+      const reason = verification.rejection_reason || (redFlags.length ? redFlags.join(" ; ") : "Document non conforme");
       await supabaseAdmin.from("notifications").insert({
         user_id: user.id,
         type: "identity_rejected",
@@ -235,6 +251,7 @@ Rules:
         link: "/settings#verification",
       });
     }
+
 
     return new Response(
       JSON.stringify({
