@@ -43,6 +43,7 @@ interface ProVerification {
   id: string;
   doc_type: string;
   file_name: string | null;
+  file_path: string;
   status: string;
   ai_confidence: number | null;
   ai_status: string | null;
