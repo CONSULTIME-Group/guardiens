@@ -260,12 +260,12 @@ export const Sidebar = () => {
                 <SidebarItem to="/search" icon={Search} label={effectiveRole === "owner" ? "Recherche gardiens" : "Recherche"} />
               )}
 
+              <SidebarItem to="/pros" icon={Briefcase} label="Pros animaliers" beta />
               <SidebarItem to="/petites-missions" icon={Handshake} label="Petites missions" badge={missionBadgeCount} />
 
               <GroupLabel label="Ressources" />
               <SidebarItem to="/actualites" icon={Newspaper} label="Guides & Conseils" />
               <SidebarItem to="/guides" icon={Compass} label="Guides locaux" />
-              <SidebarItem to="/pros" icon={Briefcase} label="Pros animaliers" beta />
             </>
           );
         })()}
