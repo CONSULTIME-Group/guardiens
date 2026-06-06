@@ -348,6 +348,24 @@ const CreateSit = () => {
     if (!user || !property || !canPublish) return;
     setPublishing(true);
     try {
+      // Modération pré-publication (fail-open en cas d'IA indispo).
+      const verdict = await moderateContent("sit", `${title}\n\n${specificExpectations}\n\n${ownerMessage}\n\n${dailyRoutine}`);
+      if (verdict.status === "block") {
+        toast({
+          variant: "destructive",
+          title: "Publication bloquée par la modération",
+          description: verdict.reasons.join(" · ") || "Merci de retirer les coordonnées ou contenus contraires aux CGS.",
+        });
+        setPublishing(false);
+        return;
+      }
+      if (verdict.status === "warning") {
+        toast({
+          title: "Annonce publiée avec une réserve",
+          description: verdict.reasons.join(" · "),
+        });
+      }
+
       let expectations = specificExpectations;
       if (flexibleDates && flexibleNotes) {
         expectations = `${expectations}\n\nDates flexibles : ${flexibleNotes}`.trim();
