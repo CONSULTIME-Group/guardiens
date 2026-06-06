@@ -253,9 +253,11 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
                   {rateLimited ? "Limite atteinte (5/jour)" :
                    uploading ? "Envoi en cours..." :
                    status === "pending" ? "Renvoyer un document" :
+                   status === "needs_review" ? "Retirer et renvoyer un document" :
                    status === "rejected" ? "Soumettre un nouveau document" :
                    "Envoyer ma pièce d'identité"}
                 </span>
+
               </Button>
             </label>
 
