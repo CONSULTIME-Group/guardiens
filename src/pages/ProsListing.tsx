@@ -92,6 +92,17 @@ export default function ProsListing() {
               <Link to="/pros/mon-espace">Mon espace pro</Link>
             </Button>
           </div>
+
+          <div className="mt-8 rounded-lg border border-border bg-muted/40 p-4 text-sm">
+            <p className="font-medium mb-1">Vous êtes gardien particulier déclaré en auto-entreprise&nbsp;?</p>
+            <p className="text-muted-foreground">
+              Cet annuaire référence des pros animaliers (vétérinaires, éducateurs, toiletteurs…) qui n'assurent pas
+              forcément de garde. Si vous proposez des gardes rémunérées à titre professionnel, demandez plutôt le
+              badge <strong>Gardien Pro vérifié</strong> depuis vos{" "}
+              <Link to="/settings" className="underline font-medium">paramètres</Link>. Il s'affichera sur votre profil
+              et dans la recherche gardiens.
+            </p>
+          </div>
         </header>
 
         <div className="flex flex-col md:flex-row gap-3 mb-6">
