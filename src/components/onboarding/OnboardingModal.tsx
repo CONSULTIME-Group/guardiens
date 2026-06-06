@@ -24,11 +24,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
 import ChipSelect from "@/components/profile/ChipSelect";
 import { compressImageFile } from "@/lib/compressImage";
 import { trackEvent } from "@/lib/analytics";
+import { COUNTRIES } from "@/lib/countries";
 import gouacheEntraide from "@/assets/onboarding/gouache-entraide.png";
 import gouacheGarde from "@/assets/onboarding/gouache-garde.png";
 import gouacheWelcome from "@/assets/onboarding/gouache-welcome.png";
@@ -129,7 +131,14 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
         if (p.first_name) setFirstName(p.first_name);
         if (p.postal_code) setPostalCode(p.postal_code);
         if (p.city) setCity(p.city);
-        if ((p as any).country) setCountry((p as any).country);
+        if ((p as any).country) {
+          // Tolérance rétro : si un nom libre a été stocké (ex: "Maroc"),
+          // on tente une conversion vers le code ISO pour matcher le Select.
+          const raw = String((p as any).country).trim();
+          const byCode = COUNTRIES.find((c) => c.code.toUpperCase() === raw.toUpperCase());
+          const byName = COUNTRIES.find((c) => c.name.toLowerCase() === raw.toLowerCase());
+          setCountry(byCode?.code ?? byName?.code ?? raw);
+        }
         if (p.avatar_url) setAvatarUrl(p.avatar_url);
         if (p.bio) setBio(p.bio);
         if (p.onboarding_minimal_completed) setMinimalSaved(true);
@@ -535,15 +544,20 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="onb-country">Pays</Label>
-                      <Input
-                        id="onb-country"
-                        placeholder="Ex : Belgique"
+                      <Select
                         value={country === "FR" ? "" : country}
-                        onChange={(e) => setCountry(e.target.value)}
-                        className="rounded-lg h-12"
+                        onValueChange={(v) => setCountry(v)}
                         disabled={minimalSaved}
-                        maxLength={60}
-                      />
+                      >
+                        <SelectTrigger id="onb-country" className="rounded-lg h-12">
+                          <SelectValue placeholder="Sélectionner un pays" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-72">
+                          {COUNTRIES.filter((c) => c.code !== "FR").map((c) => (
+                            <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 )}
