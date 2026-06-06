@@ -116,6 +116,18 @@ const PublicSitDetail = () => {
           } catch { /* silencieux */ }
         }
 
+        // Override : si l'annonce porte une ville/pays spécifiques (résidence secondaire,
+        // garde à l'étranger), ils priment sur la ville du profil propriétaire.
+        const sitCity = (sitData as any).city?.trim();
+        const sitCountry = (sitData as any).country?.trim();
+        if (enrichedOwner && (sitCity || (sitCountry && sitCountry !== "FR"))) {
+          enrichedOwner = {
+            ...enrichedOwner,
+            city: sitCity || enrichedOwner.city,
+            country: sitCountry || (enrichedOwner as any).country || "FR",
+          } as any;
+        }
+
         setOwner(enrichedOwner);
         setProperty(enrichedProperty);
 
@@ -305,7 +317,10 @@ const PublicSitDetail = () => {
  })();
 
  // ── SEO / OG ──
- const cityForTitle = owner?.city || "France";
+  const ownerCountry = ((owner as any)?.country as string | undefined)?.trim() || (sit as any)?.country?.trim() || "FR";
+  const cityForTitle = (owner?.city && ownerCountry && ownerCountry !== "FR")
+    ? `${owner.city} (${ownerCountry})`
+    : (owner?.city || "France");
  const startFmt = sit.start_date ? format(new Date(sit.start_date), "d MMMM", { locale: fr }) : "";
  const endFmt = sit.end_date ? format(new Date(sit.end_date), "d MMMM yyyy", { locale: fr }) : "";
  const datesShort = startFmt && endFmt ? `du ${startFmt} au ${endFmt}` : "dates flexibles";
