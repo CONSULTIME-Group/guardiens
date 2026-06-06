@@ -108,39 +108,29 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-pro",
         messages: [
           {
             role: "system",
-            content: `You are an identity document verification assistant. You must analyze images submitted as identity documents.
+            content: `You are an identity document verification assistant. Analyze the submitted image.
 
 Your task:
-1. Determine if the image is a valid identity document (passport, national ID card, driver's license, residence permit).
-2. Check that the document appears authentic (has security features visible, not obviously edited).
-3. Check that text is legible.
-4. Check that there is a photo visible on the document.
-
-You must respond using the provided tool.
+1. Determine if the image is a valid official identity document (passport, national ID card, driver's license, residence permit).
+2. Check authenticity signals (security features visible, not obviously edited/screenshot of a screen).
+3. Check that text is legible and a photo is visible.
+4. Return a confidence score in [0,1] for your decision.
+5. List red flags if any (blurry, edited, expired, photocopy without official stamp, screen capture, partial document, etc.).
 
 Rules:
-- If the image is NOT an identity document (random photo, meme, blank page, etc.), reject it.
-- If the document is too blurry or unreadable, reject it.
-- If it looks like a valid ID document with a readable name and visible photo, approve it.
-- Do NOT try to verify the actual identity of the person. Just verify it's a real ID document.`,
+- Do NOT try to verify the actual identity of the person. Just verify it's a real, legible ID document.
+- Be strict: if anything is suspicious, set is_valid=false with a clear French reason.
+- Respond ONLY via the provided tool.`,
           },
           {
             role: "user",
             content: [
-              {
-                type: "image_url",
-                image_url: {
-                  url: `data:${mimeType};base64,${base64}`,
-                },
-              },
-              {
-                type: "text",
-                text: "Please verify this identity document.",
-              },
+              { type: "image_url", image_url: { url: `data:${mimeType};base64,${base64}` } },
+              { type: "text", text: "Vérifiez ce document d'identité." },
             ],
           },
         ],
@@ -153,21 +143,16 @@ Rules:
               parameters: {
                 type: "object",
                 properties: {
-                  is_valid: {
-                    type: "boolean",
-                    description: "Whether the document is a valid, legible identity document",
-                  },
+                  is_valid: { type: "boolean", description: "Whether the document is a valid, legible identity document" },
                   document_type: {
                     type: "string",
                     enum: ["passport", "national_id", "drivers_license", "residence_permit", "other", "not_a_document"],
-                    description: "The type of document detected",
                   },
-                  rejection_reason: {
-                    type: "string",
-                    description: "If rejected, a brief reason in French explaining why (e.g. 'Document illisible', 'Ce n\\'est pas une pièce d\\'identité')",
-                  },
+                  confidence: { type: "number", description: "Confidence score between 0 and 1" },
+                  red_flags: { type: "array", items: { type: "string" }, description: "List of issues detected (in French)" },
+                  rejection_reason: { type: "string", description: "If rejected, brief French reason" },
                 },
-                required: ["is_valid", "document_type"],
+                required: ["is_valid", "document_type", "confidence"],
                 additionalProperties: false,
               },
             },
@@ -175,6 +160,7 @@ Rules:
         ],
         tool_choice: { type: "function", function: { name: "verify_document" } },
       }),
+
     });
 
     if (!aiResponse.ok) {
