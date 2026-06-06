@@ -102,9 +102,6 @@ function buildRobotsTxt({ siteUrl, privatePaths, noindexFromStatic }) {
     "# Profils publics : /gardiens/:id reste indexable.",
     "# Le sitemap filtre déjà les profils non-publics (politique : seuls sitter/both publics).",
     "",
-    "# Crawl rate",
-    "Crawl-delay: 1",
-    "",
     `Sitemap: ${siteUrl}/sitemap.xml`,
     "",
   ];
