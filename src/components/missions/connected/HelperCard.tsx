@@ -7,9 +7,11 @@ interface Props {
   helper: any;
   onPropose: () => void;
   onViewProfile: () => void;
+  /** True si l'aidant possède au moins une compétence correspondant à une demande active du user. */
+  matchesMyNeed?: boolean;
 }
 
-const HelperCard = ({ helper: h, onPropose, onViewProfile }: Props) => {
+const HelperCard = ({ helper: h, onPropose, onViewProfile, matchesMyNeed = false }: Props) => {
   const skillCats: string[] = h.skill_categories || [];
   const displayedSkills = skillCats.slice(0, 2);
   const extraCount = skillCats.length - 2;

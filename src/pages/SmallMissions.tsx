@@ -372,17 +372,22 @@ const SmallMissions = () => {
     try { localStorage.setItem("guardiens_skill_prompt_dismissed", "true"); } catch {}
   };
 
-  const renderHelperCard = useCallback((h: any) => (
-    <HelperCard
-      key={`h-${h.id}`}
-      helper={h}
-      onPropose={() => {
-        if (!isAuthenticated) { navigate("/inscription"); return; }
-        setHelperDialogTarget(h);
-      }}
-      onViewProfile={() => navigate(`/gardiens/${h.id}`)}
-    />
-  ), [isAuthenticated, navigate]);
+  const renderHelperCard = useCallback((h: any) => {
+    const helperSkills: string[] = h.skill_categories || [];
+    const matchesMyNeed = helperSkills.some((s) => myActiveNeedSkills.has(s));
+    return (
+      <HelperCard
+        key={`h-${h.id}`}
+        helper={h}
+        matchesMyNeed={matchesMyNeed}
+        onPropose={() => {
+          if (!isAuthenticated) { navigate("/inscription"); return; }
+          setHelperDialogTarget(h);
+        }}
+        onViewProfile={() => navigate(`/gardiens/${h.id}`)}
+      />
+    );
+  }, [isAuthenticated, navigate, myActiveNeedSkills]);
 
   // Paginated slices
   const visibleMissionsList = useMemo(() => filteredMissions.slice(0, visibleMissions), [filteredMissions, visibleMissions]);
