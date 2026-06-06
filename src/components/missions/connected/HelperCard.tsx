@@ -7,9 +7,11 @@ interface Props {
   helper: any;
   onPropose: () => void;
   onViewProfile: () => void;
+  /** True si l'aidant possède au moins une compétence correspondant à une demande active du user. */
+  matchesMyNeed?: boolean;
 }
 
-const HelperCard = ({ helper: h, onPropose, onViewProfile }: Props) => {
+const HelperCard = ({ helper: h, onPropose, onViewProfile, matchesMyNeed = false }: Props) => {
   const skillCats: string[] = h.skill_categories || [];
   const displayedSkills = skillCats.slice(0, 2);
   const extraCount = skillCats.length - 2;
@@ -28,8 +30,8 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile }: Props) => {
   const bioTeaser = h.bio?.trim() || null;
 
   return (
-    <div className="rounded-lg border border-border bg-card p-5 space-y-3 transition-colors hover:border-primary/30 flex flex-col">
-      <div className="flex items-center justify-between gap-2">
+    <div className={`rounded-lg border bg-card p-5 space-y-3 transition-colors flex flex-col ${matchesMyNeed ? "border-primary/40 shadow-sm" : "border-border hover:border-primary/30"}`}>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <span className="inline-block text-xs rounded-full bg-primary/10 text-primary px-3 py-1">
           Disponible pour aider
         </span>
@@ -40,6 +42,11 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile }: Props) => {
           </span>
         )}
       </div>
+      {matchesMyNeed && (
+        <span className="inline-flex items-center self-start gap-1 text-xs font-semibold rounded-full bg-success-soft text-success px-2.5 py-1">
+          Correspond à votre demande
+        </span>
+      )}
       <div className="flex items-center gap-3">
         {h.avatar_url ? (
           <img src={h.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover border border-border" />

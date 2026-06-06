@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,16 +28,7 @@ import ExamplesSection from "@/components/missions/connected/ExamplesSection";
 import OfferDialog from "@/components/missions/connected/OfferDialog";
 import { geocodeCached, useEntityCoords } from "@/hooks/missions/useGeocodedCoords";
 import { useAllMissions, useAvailableHelpers } from "@/hooks/missions/useMissionsData";
-import { trackEvent } from "@/lib/analytics";
-import { useScrollDepthTracker } from "@/hooks/useScrollDepthTracker";
 
-/**
- * Cohorte before/after pour mesurer l'impact de l'ajout de la mini-bio sur MissionCard.
- * Cette constante n'altère pas le rendu — elle sert uniquement à étiqueter les
- * événements analytics pour comparer pré-release vs post-release côté requête.
- * Bump la date si la copy ou le format change (nouvelle cohorte).
- */
-const BIO_RELEASE_TAG = "mission_card_bio_v1_2026_05_17";
 
 const SmallMissions = () => {
   const { isAuthenticated, user, switchRole } = useAuth();
@@ -195,14 +186,14 @@ const SmallMissions = () => {
         const coords = await geocodeCached(p.city || p.postal_code);
         setOriginCoords(coords);
         setGeocodingOrigin(false);
-        if (!searchParams.get("radius")) setRadiusKm(25);
+        if (!searchParams.get("radius")) setRadiusKm(30);
       } else if (p?.city) {
         setPostalCodeInput(p.city);
         setGeocodingOrigin(true);
         const coords = await geocodeCached(p.city);
         setOriginCoords(coords);
         setGeocodingOrigin(false);
-        if (!searchParams.get("radius")) setRadiusKm(25);
+        if (!searchParams.get("radius")) setRadiusKm(30);
       }
     })();
   }, [user]);
@@ -348,39 +339,20 @@ const SmallMissions = () => {
     try { window.localStorage.setItem("missions:compactBio", compactBio ? "1" : "0"); } catch { /* quota */ }
   }, [compactBio]);
 
-  // ---------------------------------------------------------------------------
-  // Mesure before/after : impact de la mini-bio sur MissionCard.
-  // Plus de bucketing A/B (trafic trop faible pour atteindre la significativité).
-  // Tous les utilisateurs voient la bio (showBio = true). On compare les KPI
-  // pré-release vs post-release via le tag de cohorte `BIO_RELEASE_TAG`.
-  // Événements :
-  //   - exp_mission_bio_exposure : 1 fois par session/page (release)
-  //   - exp_mission_bio_click    : à chaque clic carte (release, position, hasBio)
-  //   - exp_mission_bio_scroll   : scroll max % à la sortie de page (release, isMobile)
-  // ---------------------------------------------------------------------------
+  // Bio toujours affichée (A/B abandonné — trafic insuffisant pour significativité).
   const showBio = true;
 
-  const exposureFiredRef = useRef(false);
-  useEffect(() => {
-    if (exposureFiredRef.current) return;
-    if (missionCount === 0) return;
-    exposureFiredRef.current = true;
-    void trackEvent("exp_mission_bio_exposure", {
-      source: "small_missions",
-      metadata: { release: BIO_RELEASE_TAG, mission_count: missionCount },
-    });
-  }, [missionCount]);
+  // Skills correspondant aux missions actives publiées par le user connecté.
+  // Sert à badger les helpers qui collent aux besoins en cours côté propriétaire.
+  const myActiveNeedSkills = useMemo(() => {
+    if (!user?.id) return new Set<string>();
+    const cats = (allMissions || [])
+      .filter((m: any) => m.user_id === user.id && (m.status === "open" || m.status === "in_progress"))
+      .map((m: any) => MISSION_TO_SKILL[m.category])
+      .filter(Boolean);
+    return new Set<string>(cats);
+  }, [allMissions, user?.id]);
 
-  const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches;
-  useScrollDepthTracker(
-    (maxPct) => {
-      void trackEvent("exp_mission_bio_scroll", {
-        source: "small_missions",
-        metadata: { release: BIO_RELEASE_TAG, max_scroll_pct: maxPct, is_mobile: isMobile },
-      });
-    },
-    missionCount > 0
-  );
 
   const { priorityHelpers, complementaryHelpers } = useMemo(() => {
     const priority: any[] = [];
@@ -400,17 +372,22 @@ const SmallMissions = () => {
     try { localStorage.setItem("guardiens_skill_prompt_dismissed", "true"); } catch {}
   };
 
-  const renderHelperCard = useCallback((h: any) => (
-    <HelperCard
-      key={`h-${h.id}`}
-      helper={h}
-      onPropose={() => {
-        if (!isAuthenticated) { navigate("/inscription"); return; }
-        setHelperDialogTarget(h);
-      }}
-      onViewProfile={() => navigate(`/gardiens/${h.id}`)}
-    />
-  ), [isAuthenticated, navigate]);
+  const renderHelperCard = useCallback((h: any) => {
+    const helperSkills: string[] = h.skill_categories || [];
+    const matchesMyNeed = helperSkills.some((s) => myActiveNeedSkills.has(s));
+    return (
+      <HelperCard
+        key={`h-${h.id}`}
+        helper={h}
+        matchesMyNeed={matchesMyNeed}
+        onPropose={() => {
+          if (!isAuthenticated) { navigate("/inscription"); return; }
+          setHelperDialogTarget(h);
+        }}
+        onViewProfile={() => navigate(`/gardiens/${h.id}`)}
+      />
+    );
+  }, [isAuthenticated, navigate, myActiveNeedSkills]);
 
   // Paginated slices
   const visibleMissionsList = useMemo(() => filteredMissions.slice(0, visibleMissions), [filteredMissions, visibleMissions]);
@@ -456,7 +433,7 @@ const SmallMissions = () => {
                   onClick={() => setMode("need")}
                   className={`px-4 py-2 text-sm rounded-md transition-colors ${mode === "need" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
                 >
-                  Coups de main demandés
+                  Je cherche un coup de main
                 </button>
                 <button
                   role="tab"
@@ -464,7 +441,7 @@ const SmallMissions = () => {
                   onClick={() => setMode("offer")}
                   className={`px-4 py-2 text-sm rounded-md transition-colors ${mode === "offer" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
                 >
-                  Aidants disponibles
+                  J'offre mon aide
                 </button>
               </div>
             </div>
@@ -541,7 +518,7 @@ const SmallMissions = () => {
             ) : missionCount > 0 ? (
               <>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {visibleMissionsList.map((m: any, idx: number) => (
+                  {visibleMissionsList.map((m: any) => (
                     <MissionCard
                       key={`m-${m.id}`}
                       mission={m}
@@ -552,11 +529,6 @@ const SmallMissions = () => {
                       compactBio={compactBio}
                       showBio={showBio}
                       onNavigateDetail={() => {
-                        const hasBio = Boolean(((m.profiles as any)?.bio || "").trim());
-                        void trackEvent("exp_mission_bio_click", {
-                          source: "small_missions",
-                          metadata: { release: BIO_RELEASE_TAG, has_bio: hasBio, position: idx, mission_id: m.id },
-                        });
                         navigate(isAuthenticated ? `/petites-missions/${m.id}` : "/inscription");
                       }}
                       onPropose={() => {
@@ -579,8 +551,8 @@ const SmallMissions = () => {
               <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-8 text-center space-y-3">
                 <p className="font-heading text-lg font-semibold text-foreground">
                   {mode === "offer"
-                    ? `Aucune demande à moins de ${radiusKm || 25} km de chez vous.`
-                    : `Personne n'a encore osé à moins de ${radiusKm || 25} km de chez vous.`}
+                    ? `Aucune demande à moins de ${radiusKm || 30} km de chez vous.`
+                    : `Personne n'a encore osé à moins de ${radiusKm || 30} km de chez vous.`}
                 </p>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
                   {outOfZoneMissions.length > 0 ? (
