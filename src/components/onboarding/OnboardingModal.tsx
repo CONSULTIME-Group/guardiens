@@ -759,8 +759,8 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                 <Progress value={liveCompletion} className="h-2" />
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="flex items-center gap-1.5">
-                    {firstName && postalCode ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
-                    <span className={firstName && postalCode ? "text-foreground" : "text-muted-foreground"}>Prénom & localisation</span>
+                    {firstName && (postalCode || livesAbroad) && city ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
+                    <span className={firstName && (postalCode || livesAbroad) && city ? "text-foreground" : "text-muted-foreground"}>Prénom & localisation</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     {avatarUrl ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
