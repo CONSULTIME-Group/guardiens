@@ -117,6 +117,8 @@ const CreateSit = () => {
   const [ownerMessage, setOwnerMessage] = useState("");
   const [dailyRoutine, setDailyRoutine] = useState("");
   const [coverPhotoUrl, setCoverPhotoUrl] = useState<string | null>(null);
+  const [sitCity, setSitCity] = useState<string>("");
+  const [sitCountry, setSitCountry] = useState<string>("FR");
 
   const [property, setProperty] = useState<PropertySummary | null>(null);
   const [pets, setPets] = useState<PetSummary[]>([]);
