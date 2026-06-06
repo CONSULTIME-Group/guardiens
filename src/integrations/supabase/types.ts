@@ -2288,6 +2288,36 @@ export type Database = {
           },
         ]
       }
+      moderation_logs: {
+        Row: {
+          content_type: string
+          created_at: string
+          excerpt: string | null
+          id: string
+          reasons: Json
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          reasons?: Json
+          status: string
+          user_id?: string | null
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          reasons?: Json
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       notification_preferences: {
         Row: {
           created_at: string
