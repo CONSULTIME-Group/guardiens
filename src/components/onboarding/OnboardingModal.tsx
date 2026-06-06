@@ -505,19 +505,67 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                   />
                 </div>
 
-                <PostalCodeCityFields
-                  city={city}
-                  postalCode={postalCode}
-                  onChange={(partial) => {
-                    if (partial.city !== undefined) setCity(partial.city);
-                    if (partial.postal_code !== undefined) setPostalCode(partial.postal_code);
-                  }}
-                  cityLabel="Votre ville"
-                  postalLabel="Code postal"
-                  className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-                  inputClassName="rounded-lg h-12"
-                  disabled={minimalSaved}
-                />
+                {!livesAbroad ? (
+                  <PostalCodeCityFields
+                    city={city}
+                    postalCode={postalCode}
+                    onChange={(partial) => {
+                      if (partial.city !== undefined) setCity(partial.city);
+                      if (partial.postal_code !== undefined) setPostalCode(partial.postal_code);
+                    }}
+                    cityLabel="Votre ville"
+                    postalLabel="Code postal"
+                    className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                    inputClassName="rounded-lg h-12"
+                    disabled={minimalSaved}
+                  />
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="onb-city">Votre ville</Label>
+                      <Input
+                        id="onb-city"
+                        placeholder="Ex : Bruxelles"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        className="rounded-lg h-12"
+                        disabled={minimalSaved}
+                        maxLength={100}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="onb-country">Pays</Label>
+                      <Input
+                        id="onb-country"
+                        placeholder="Ex : Belgique"
+                        value={country === "FR" ? "" : country}
+                        onChange={(e) => setCountry(e.target.value)}
+                        className="rounded-lg h-12"
+                        disabled={minimalSaved}
+                        maxLength={60}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {!minimalSaved && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (livesAbroad) {
+                        setCountry("FR");
+                        setCity("");
+                      } else {
+                        setCountry("");
+                        setPostalCode("");
+                        setCity("");
+                      }
+                    }}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    {livesAbroad ? "Je vis en France" : "Je vis à l'étranger"}
+                  </button>
+                )}
 
                 {minimalSaved && (
                   <p className="text-sm text-primary font-medium flex items-center gap-1.5">
