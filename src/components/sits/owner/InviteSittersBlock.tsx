@@ -370,7 +370,7 @@ const InviteSittersBlock = ({
               {sentCount >= 20 && " — limite de 20 par 24 h atteinte"}
             </p>
           )}
-          {ownerCoords && remainingQuota > 0 && (
+          {ownerCoords && remainingQuota > 0 && !isInternational && (
             <div className="mt-3">
               <Button
                 size="sm"
@@ -421,6 +421,17 @@ const InviteSittersBlock = ({
         </TabsContent>
 
         <TabsContent value="search" className="mt-4 space-y-3">
+          {isInternational && (
+            <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs text-foreground">
+              <p className="font-medium mb-1">Annonce internationale</p>
+              <p className="text-muted-foreground">
+                Votre annonce est hors France : la recherche par département et le rayon
+                géographique sont désactivés (notre base de gardiens est principalement
+                française). Vous pouvez toujours rechercher par prénom/ville et inviter
+                directement, ou inviter depuis vos favoris.
+              </p>
+            </div>
+          )}
           {/* Toggle mode : Département vs Rayon depuis ma ville */}
           <div className="inline-flex rounded-lg border border-border bg-background/80 p-0.5 text-xs">
             <button
