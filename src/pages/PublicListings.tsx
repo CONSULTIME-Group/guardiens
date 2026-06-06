@@ -42,6 +42,23 @@ const BASE_JSONLD = [
 
 export default function PublicListings() {
   const [itemListLd, setItemListLd] = useState<any | null>(null);
+  const [intlCount, setIntlCount] = useState<number>(0);
+
+  // Compte les annonces hors France pour piloter l'indicateur "radar"
+  // (chip pulsant qui pointe vers /annonces/international).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { count } = await supabase
+        .from("sits")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "published")
+        .not("country", "is", null)
+        .neq("country", "FR");
+      if (!cancelled) setIntlCount(count || 0);
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   // Charge un échantillon léger des annonces ouvertes pour émettre un
   // JSON-LD ItemList (utile au carrousel Google « Offres »).
@@ -129,6 +146,25 @@ export default function PublicListings() {
               Tarifs
             </Link>
           </nav>
+
+          {/* ─── Radar : annonces hors France ─── */}
+          {intlCount > 0 && (
+            <Link
+              to="/annonces/international"
+              className="mt-5 inline-flex items-center gap-2.5 rounded-full bg-accent/40 hover:bg-accent/60 border border-border px-4 py-2 text-sm transition-colors group"
+              aria-label={`${intlCount} annonce${intlCount > 1 ? "s" : ""} hors France`}
+            >
+              <span className="relative flex h-2.5 w-2.5 shrink-0" aria-hidden="true">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary" />
+              </span>
+              <span className="text-foreground">
+                <span className="font-semibold">{intlCount}</span>{" "}
+                annonce{intlCount > 1 ? "s" : ""} hors France
+              </span>
+              <span className="text-muted-foreground group-hover:text-foreground transition-colors" aria-hidden>→</span>
+            </Link>
+          )}
         </section>
 
         <Suspense
@@ -165,6 +201,12 @@ export default function PublicListings() {
                 <Link to="/tarifs" className="group inline-flex items-baseline gap-2 text-foreground hover:text-primary transition-colors">
                   <span className="font-medium">Tarifs gardien</span>
                   <span className="text-muted-foreground">— 6,99 €/mois ou 12 € one-shot</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/annonces/international" className="group inline-flex items-baseline gap-2 text-foreground hover:text-primary transition-colors">
+                  <span className="font-medium">Annonces hors France</span>
+                  <span className="text-muted-foreground">— Maroc, Espagne, Belgique…</span>
                 </Link>
               </li>
             </ul>

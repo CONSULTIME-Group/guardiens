@@ -137,6 +137,7 @@ const MySubscription = lazy(() => import("./pages/MySubscription"));
 const Favorites = lazy(() => import("./pages/Favorites"));
 const PublicSitDetail = lazy(() => import("./pages/PublicSitDetail"));
 const PublicListings = lazy(() => import("./pages/PublicListings"));
+const InternationalListings = lazy(() => import("./pages/InternationalListings"));
 const DemoSitDetail = lazy(() => import("./pages/DemoSitDetail"));
 const PublicSitterProfile = lazy(() => import("./pages/PublicSitterProfile"));
 
@@ -281,6 +282,7 @@ const AppRoutes = () => (
       <Route path="/profil/:id" element={<RedirectProfil />} />
       <Route path="/proprietaires/:id" element={<RedirectProprietaire />} />
       <Route path="/annonces" element={<PublicListings />}/>
+      <Route path="/annonces/international" element={<InternationalListings />} />
       <Route path="/annonces/demo/:slug" element={<DemoSitDetail />} />
       <Route path="/annonces/:id" element={<PublicSitDetail />} />
       <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
