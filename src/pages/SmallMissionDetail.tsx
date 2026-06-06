@@ -223,7 +223,7 @@ const SmallMissionDetail = () => {
     const authorRow: any = Array.isArray(authorRows) ? authorRows[0] : authorRows;
     setAuthor(authorRow ? { ...authorRow, created_at: authorRow.member_since } : null);
 
-    // Related missions — même catégorie ou même ville, statut ouvert, 3 max
+    // Related missions, même catégorie ou même ville, statut ouvert, 3 max
     const { data: related } = await supabase.from("small_missions")
       .select("id, title, description, category, city, postal_code, created_at, duration_estimate")
       .eq("status", "open")
@@ -299,7 +299,7 @@ const SmallMissionDetail = () => {
           link: `/petites-missions/${id}`,
         });
 
-        // Email transactionnel — propriétaire de la mission notifié (non-bloquant)
+        // Email transactionnel, propriétaire de la mission notifié (non-bloquant)
         sendTransactionalEmail({
           templateName: "mission-response",
           recipientUserId: fresh.user_id,
@@ -485,7 +485,7 @@ const SmallMissionDetail = () => {
     }
   };
 
-  // Valeurs dérivées (calculées à chaque render — pas de mémoïsation prématurée).
+  // Valeurs dérivées (calculées à chaque render, pas de mémoïsation prématurée).
   const hasPublishedFlag = searchParams.get("published") === "1";
   const hasInvitedFlag = searchParams.get("invited") === "1";
   const isAuthor = isAuthorOf(user?.id, mission);
@@ -680,7 +680,7 @@ const SmallMissionDetail = () => {
       return null;
     }
 
-    // Visiteur connecté — gate (profil incomplet)
+    // Visiteur connecté, gate (profil incomplet)
     if (mission.status === "open" && accessLevel === 1) {
       return (
         <div className="bg-card p-7 rounded-[2rem] shadow-xl shadow-foreground/5 border border-border">
@@ -689,7 +689,7 @@ const SmallMissionDetail = () => {
       );
     }
 
-    // Visiteur connecté — peut postuler
+    // Visiteur connecté, peut postuler
     if (mission.status === "open" && canApplyMissions) {
       const starters = [
         `Bonjour ${author?.first_name || ""}, je suis disponible et ${mission.city ? `je connais bien ${titlecaseCity(mission.city)}` : "pas loin de chez vous"}.`.trim(),
@@ -754,7 +754,7 @@ const SmallMissionDetail = () => {
       );
     }
 
-    // Mission fermée / autres cas — état neutre
+    // Mission fermée / autres cas, état neutre
     return (
       <div className="bg-card p-7 rounded-[2rem] shadow-sm border border-border space-y-3">
         <p className="font-heading text-lg font-semibold">{statusMeta.label}</p>
@@ -772,7 +772,7 @@ const SmallMissionDetail = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground animate-fade-in">
-      <PageMeta title={`${mission.title} — Coup de main près de chez vous | Guardiens`} description={mission.description?.slice(0, 155)} />
+      <PageMeta title={`${mission.title}, Coup de main près de chez vous | Guardiens`} description={mission.description?.slice(0, 155)} />
       <Helmet>
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
@@ -819,7 +819,7 @@ const SmallMissionDetail = () => {
           </div>
         )}
 
-        {/* Bloc d'invitation directe — uniquement à la publication, pour l'auteur */}
+        {/* Bloc d'invitation directe, uniquement à la publication, pour l'auteur */}
         {showPublishedBanner && isAuthor && mission.status === "open" && (
           <MatchedHelpersInviteBlock
             missionId={mission.id}
@@ -1036,7 +1036,7 @@ const SmallMissionDetail = () => {
             {responses.length === 0 ? (
               <div className="bg-muted/40 rounded-2xl p-8 text-center">
                 <p className="text-muted-foreground italic">
-                  Pas encore de proposition. Patience — souvent, les premières arrivent dans la journée.
+                  Pas encore de proposition. Patience, souvent, les premières arrivent dans la journée.
                 </p>
               </div>
             ) : (
@@ -1127,7 +1127,7 @@ const SmallMissionDetail = () => {
             {feedbackSent[mission.user_id] ? (
               <div className="bg-muted/50 rounded-2xl p-4 flex items-center gap-2 text-sm text-muted-foreground">
                 <CheckCircle2 className="h-4 w-4 text-success" />
-                Vous avez donné votre avis — merci !
+                Vous avez donné votre avis, merci !
               </div>
             ) : (
               <InlineFeedbackForm

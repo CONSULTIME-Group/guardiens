@@ -45,7 +45,7 @@ const SitterBottomColumns = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
-      {/* Colonne gauche — Annonces */}
+      {/* Colonne gauche, Annonces */}
       <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 transition-shadow duration-300 hover:shadow-sm">
         <div className="flex justify-between items-center mb-4">
           <p className="text-sm font-semibold text-foreground">Annonces près de chez vous</p>
@@ -93,7 +93,7 @@ const SitterBottomColumns = ({
         )}
       </div>
 
-      {/* Colonne droite — Petites missions (mes missions + autour de vous) */}
+      {/* Colonne droite, Petites missions (mes missions + autour de vous) */}
       <SitterMissionsSection
         myMissions={myMissions}
         nearbyMissions={nearbyMissions}

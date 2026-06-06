@@ -61,7 +61,7 @@ const SitterBadgesSection = ({ groupedBadges, condensed = false }: SitterBadgesS
   return (
     <section aria-labelledby="sitter-badges-heading" className="space-y-3">
       <h3 id="sitter-badges-heading" className="sr-only">
-        Mes badges — {summaryText}
+        Mes badges, {summaryText}
       </h3>
       <p
         className="sr-only"

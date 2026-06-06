@@ -271,7 +271,7 @@ const SearchListingCard = ({
         </div>
       </div>
 
-      {/* ─── Body — editorial ─── */}
+      {/* ─── Body, editorial ─── */}
       <div className="mt-6 px-1">
         <div className="flex items-start justify-between gap-3">
           <h3 className="font-heading text-2xl md:text-[26px] font-medium leading-[1.15] text-foreground tracking-tight line-clamp-2">
@@ -313,13 +313,13 @@ const SearchListingCard = ({
           <p className="mt-3 text-xs text-muted-foreground italic">Cette garde a déjà trouvé son gardien.</p>
         )}
         {isCompleted && (
-          <p className="mt-3 text-xs text-muted-foreground italic">Garde déjà réalisée — aperçu de l'activité.</p>
+          <p className="mt-3 text-xs text-muted-foreground italic">Garde déjà réalisée, aperçu de l'activité.</p>
         )}
         {isPast && !isCompleted && (
-          <p className="mt-3 text-xs text-muted-foreground italic">Annonce passée — consultable à titre d'historique.</p>
+          <p className="mt-3 text-xs text-muted-foreground italic">Annonce passée, consultable à titre d'historique.</p>
         )}
         {isDemo && (
-          <p className="mt-3 text-xs text-amber-700 italic">Exemple — cliquez pour découvrir</p>
+          <p className="mt-3 text-xs text-amber-700 italic">Exemple, cliquez pour découvrir</p>
         )}
       </div>
     </article>

@@ -22,7 +22,7 @@ const MissionsHero = ({ missionCount = 0, helperCount = 0, onPropose }: Props) =
           Petites missions près de chez vous
         </h1>
         <p className="text-sm md:text-base text-muted-foreground max-w-xl mx-auto">
-          Demandez un coup de main ou proposez le vôtre — entre gens du coin, sans argent.
+          Demandez un coup de main ou proposez le vôtre, entre gens du coin, sans argent.
         </p>
         {hasActivity && (
           <p className="text-xs text-muted-foreground">
@@ -39,7 +39,7 @@ const MissionsHero = ({ missionCount = 0, helperCount = 0, onPropose }: Props) =
             )}
           </p>
         )}
-        {/* Item 8 — un seul CTA primaire dans le hero, le second devient un lien tertiaire
+        {/* Item 8, un seul CTA primaire dans le hero, le second devient un lien tertiaire
             pour limiter le mur de boutons verts (4 → 2 sur mobile). */}
         <div className="flex flex-col sm:flex-row items-center gap-3 justify-center pt-1">
           <Link to="/petites-missions/creer">

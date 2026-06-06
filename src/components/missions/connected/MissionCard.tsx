@@ -81,12 +81,12 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
               Demandé par <span className="font-medium text-foreground">{authorLabel}</span>
             </span>
           </div>
-          {/* Mini bio de l'auteur — donne du contexte humain (« qui est cette personne ? »)
+          {/* Mini bio de l'auteur, donne du contexte humain (« qui est cette personne ? »)
               avant que l'utilisateur clique pour ouvrir le détail. Caché si auteur = vous. */}
           {showBio && (() => {
             const safeBio = sanitizeBioForCard((m.profiles as any)?.bio);
 
-            // Bio absente — l'auteur voit un CTA discret l'invitant à se présenter ;
+            // Bio absente, l'auteur voit un CTA discret l'invitant à se présenter ;
             // les autres voient un placeholder neutre (« Sans présentation ») pour ne
             // pas stigmatiser la personne et garder la hauteur de carte stable.
             if (!safeBio) {
@@ -123,7 +123,7 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
             );
           })()}
           <p className="text-xs text-muted-foreground">
-            {formatCity(m.city || "—")} · {formatDuration(m.duration_estimate || "—")}
+            {formatCity(m.city || ",")} · {formatDuration(m.duration_estimate || ",")}
             {formatDateNeeded(m.date_needed) && <> · pour le {formatDateNeeded(m.date_needed)}</>}
           </p>
           <p className="text-xs text-muted-foreground">En échange : {m.exchange_offer}</p>

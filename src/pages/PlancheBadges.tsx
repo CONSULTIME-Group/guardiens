@@ -13,7 +13,7 @@ export default function PlancheBadges() {
   return (
     <div className="min-h-screen bg-background px-4 py-10 md:px-8">
       <Helmet>
-        <title>Planche des badges — Guardiens</title>
+        <title>Planche des badges, Guardiens</title>
         <meta name="robots" content="noindex" />
       </Helmet>
 

@@ -81,7 +81,7 @@ const SearchPage = () => {
       {/* H1 + intro éditoriale (rendus pour tous, garantit le H1 unique au crawler) */}
       <SearchSeoIntro />
 
-      {/* Bandeau visiteur — discret, non sticky pour préserver le viewport mobile.
+      {/* Bandeau visiteur, discret, non sticky pour préserver le viewport mobile.
           Hiérarchie : libellé "Consultation libre" + bénéfice clair + CTA primaire. */}
       {!user && (
         <div className="bg-primary/5 border-b border-primary/20">

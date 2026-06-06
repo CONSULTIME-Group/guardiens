@@ -99,7 +99,7 @@ const RealMembersStrip = () => {
         <span className="font-semibold text-foreground">
           Plus de {roundedTotal} membres
         </span>{" "}
-        ont déjà rejoint le réseau, partout en France — de Valence à Quimper, de
+        ont déjà rejoint le réseau, partout en France, de Valence à Quimper, de
         Paris à Sète.
       </p>
     </div>

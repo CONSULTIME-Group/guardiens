@@ -17,7 +17,7 @@ const Cgs = () => {
           Conditions Générales de Services
         </h1>
         <p className="text-sm text-muted-foreground mb-8">
-          Version 1 — Dernière mise à jour : 3 mai 2026
+          Version 1, Dernière mise à jour : 3 mai 2026
         </p>
 
         <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
@@ -197,12 +197,12 @@ const Cgs = () => {
           </ul>
 
           {/* Annexe */}
-          <h2 className="font-heading text-xl font-bold text-foreground pt-4">Annexe — Formulaire-type de rétractation</h2>
+          <h2 className="font-heading text-xl font-bold text-foreground pt-4">Annexe, Formulaire-type de rétractation</h2>
           <p className="italic text-sm">
-            (à remplir et à renvoyer uniquement si vous souhaitez vous rétracter du contrat — annexe à l'art. R.&nbsp;221-1 C. conso)
+            (à remplir et à renvoyer uniquement si vous souhaitez vous rétracter du contrat, annexe à l'art. R.&nbsp;221-1 C. conso)
           </p>
           <div className="border border-border rounded-md p-4 bg-muted/20 text-sm space-y-2">
-            <p><strong className="text-foreground">À l'attention de</strong>&nbsp;: Jérémie Martinot — Guardiens, 22 rue Juiverie, 69005 Lyon — contact@guardiens.fr</p>
+            <p><strong className="text-foreground">À l'attention de</strong>&nbsp;: Jérémie Martinot, Guardiens, 22 rue Juiverie, 69005 Lyon, contact@guardiens.fr</p>
             <p>Je vous notifie par la présente ma rétractation du contrat portant sur la prestation de services ci-dessous&nbsp;:</p>
             <ul className="list-disc pl-6 space-y-1">
               <li><strong className="text-foreground">Prestation</strong>&nbsp;: abonnement Gardien</li>

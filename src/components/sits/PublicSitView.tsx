@@ -1,4 +1,4 @@
-// Vue publique éditoriale (Modern Minimal) — annonces de garde.
+// Vue publique éditoriale (Modern Minimal), annonces de garde.
 // Cible : visiteurs anonymes ET connectés (hors propriétaire de l'annonce).
 // Objectif : conversion + clarté. Pattern aligné avec PublicMissionView.
 import { Link } from "react-router-dom";
@@ -163,7 +163,7 @@ const PublicSitView = ({
               </div>
             </header>
 
-            {/* Galerie photos — logement + animaux, lightbox plein écran */}
+            {/* Galerie photos, logement + animaux, lightbox plein écran */}
             {(photos.length > 0 || petPhotos.length > 0) && (
               <div className="mb-12">
                 <SitHero

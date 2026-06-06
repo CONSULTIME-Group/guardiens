@@ -1,5 +1,5 @@
 /**
- * PetPhoto — affiche la photo d'un animal avec un fallback neutre
+ * PetPhoto, affiche la photo d'un animal avec un fallback neutre
  * (pas d'emoji décoratif, pas d'icône Lucide visible : conforme à la règle
  * "no-icons-in-content"). Gère aussi le cas où l'URL est cassée à l'exécution.
  */

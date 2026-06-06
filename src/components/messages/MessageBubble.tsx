@@ -49,8 +49,8 @@ const systemMessageText = (
       gardien: "Vous avez annulé cette garde.",
     },
     candidature_expiree: {
-      proprio: "Candidature expirée — sans réponse dans les 48h.",
-      gardien: "Candidature expirée — sans réponse dans les 48h.",
+      proprio: "Candidature expirée, sans réponse dans les 48h.",
+      gardien: "Candidature expirée, sans réponse dans les 48h.",
     },
     garde_en_cours: {
       proprio: `La garde a commencé. ${name || "Le gardien"} est sur place.`,

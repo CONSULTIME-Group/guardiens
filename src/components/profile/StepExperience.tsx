@@ -19,7 +19,7 @@ const ANIMAL_TYPES = ["Tous", "Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux 
 const EXPERIENCE_OPTIONS = ["Débutant", "1-3 ans", "3-5 ans", "5+ ans"];
 const SPECIES_OPTIONS = ["Chien", "Chat", "Cheval", "Oiseau", "Animal de ferme", "NAC"];
 const DOG_SIZES = ["Petit (< 10kg)", "Moyen (10-25kg)", "Grand (> 25kg)", "Toutes tailles"];
-const OWN_ANIMALS = ["Oui — chien", "Oui — chat", "Oui — autre", "Non"];
+const OWN_ANIMALS = ["Oui, chien", "Oui, chat", "Oui, autre", "Non"];
 const GUARD_EXPERIENCE = ["Première fois", "1-5 gardes", "5-20 gardes", "20+ gardes"];
 
 interface Props {

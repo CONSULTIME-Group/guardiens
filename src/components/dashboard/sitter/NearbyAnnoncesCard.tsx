@@ -40,7 +40,7 @@ interface Props {
 }
 
 /**
- * Carte "Annonces près de chez vous" — extraite de SitterBottomColumns
+ * Carte "Annonces près de chez vous", extraite de SitterBottomColumns
  * pour pouvoir être utilisée seule dans un onglet de la zone Découverte.
  */
 const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListingsRadius = null, isAvailable = false, hideHeader = false }: Props) => {
@@ -84,7 +84,7 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
         // Cas "vraiment vide" : bloc compact (pas de pavé). Le parrainage
         // reste accessible mais sur 1 ligne, pas en hero.
         // Cas "hors rayon mais on a des suggestions" : on inverse la hiérarchie
-        // — les annonces plus loin deviennent le contenu principal, l'empty
+        //, les annonces plus loin deviennent le contenu principal, l'empty
         // state se réduit à une mention discrète en tête.
         if (!hasFallback) {
           return (
@@ -132,7 +132,7 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
           <div className="space-y-3 min-w-0">
             <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 min-w-0">
               <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground font-semibold mb-3">
-                Aucune garde à moins de 100 km — voici les plus proches disponibles
+                Aucune garde à moins de 100 km, voici les plus proches disponibles
               </p>
               <div className="divide-y divide-border/60">
                 {nearbyListings.slice(0, 5).map((sit: any) => {
@@ -199,7 +199,7 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
         {(nearbyListingsRadius || hasBeyond) && (
           <p className="text-[11px] text-muted-foreground mb-2 px-1">
             {hasBeyond
-              ? "Aucune annonce dans un rayon de 100 km — voici la/les plus proche(s) disponible(s)."
+              ? "Aucune annonce dans un rayon de 100 km, voici la/les plus proche(s) disponible(s)."
               : `Annonces dans un rayon de ${nearbyListingsRadius} km.`}
           </p>
         )}

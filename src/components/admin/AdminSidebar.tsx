@@ -228,7 +228,7 @@ export const AdminSidebar = () => {
                           : "text-muted-foreground hover:bg-accent hover:text-foreground"
                       )
                     }
-                    aria-label={collapsed ? `${item.label}${badgeLabel ? ` — ${badgeLabel}` : ""}` : undefined}
+                    aria-label={collapsed ? `${item.label}${badgeLabel ? `, ${badgeLabel}` : ""}` : undefined}
                   >
                     <span className="relative shrink-0">
                       <item.icon className="h-4 w-4" />

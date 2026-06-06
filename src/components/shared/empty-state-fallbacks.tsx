@@ -2,15 +2,15 @@
  * SVG fallbacks ultra-légers pour les états vides.
  * Affichés uniquement si le WebP gouache échoue à charger (réseau, 404, blocage).
  * Style : trait simple, palette sémantique du site (currentColor + tons crème/sapin/terre).
- * Pas de dégradés complexes — l'objectif est d'éviter le blanc, pas de remplacer la peinture.
+ * Pas de dégradés complexes, l'objectif est d'éviter le blanc, pas de remplacer la peinture.
  */
 
 import type { IllustrationKey } from "./EmptyState";
-// Note : import type pur — n'introduit pas de cycle runtime.
+// Note : import type pur, n'introduit pas de cycle runtime.
 
 /* Couleurs alignées sur la palette gouache : sapin, terre, crème.
    Utilise des HSL fixes (pas de tokens) car les SVG inline doivent rester
-   stables même si le thème change — l'opacité s'adapte via mix-blend-multiply. */
+   stables même si le thème change, l'opacité s'adapte via mix-blend-multiply. */
 const INK = "hsl(150, 47%, 23%)"; // vert sapin profond
 const WARM = "hsl(28, 42%, 41%)"; // terre brune
 const SOFT = "hsl(35, 45%, 92%)"; // crème
@@ -105,7 +105,7 @@ const SitterReadySvg = () => (
   </svg>
 );
 
-/* QuietLeaf : feuille morte posée sur un sol — silence apaisé, rien à signaler */
+/* QuietLeaf : feuille morte posée sur un sol, silence apaisé, rien à signaler */
 const QuietLeafSvg = () => (
   <svg {...baseProps}>
     <ellipse cx="100" cy="155" rx="70" ry="6" fill={SOFT} stroke="none" />

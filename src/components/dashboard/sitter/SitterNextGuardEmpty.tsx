@@ -3,7 +3,7 @@ import { Calendar, ArrowRight } from "lucide-react";
 
 /**
  * Empty state symétrique de SitterNextGuard.
- * Affiché quand le gardien n'a pas de prochaine garde — garde
+ * Affiché quand le gardien n'a pas de prochaine garde, garde
  * la même hauteur visuelle pour éviter le saut de layout.
  */
 const SitterNextGuardEmpty = () => (

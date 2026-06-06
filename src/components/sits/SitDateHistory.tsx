@@ -21,7 +21,7 @@ interface Props {
 }
 
 const formatDate = (d: string | null) =>
-  d ? format(new Date(d), "d MMM yyyy", { locale: fr }) : "—";
+  d ? format(new Date(d), "d MMM yyyy", { locale: fr }) : ",";
 
 const roleLabel = (role: string | null) => {
   switch (role) {

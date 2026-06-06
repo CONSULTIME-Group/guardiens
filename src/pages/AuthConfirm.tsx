@@ -29,7 +29,7 @@ const AuthConfirm = () => {
     const hashError = hashParams.get("error_description") || hashParams.get("error");
     if (hashError) {
       setError(hashError);
-      return; // Don't set up listeners — show error UI immediately
+      return; // Don't set up listeners, show error UI immediately
     }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -181,7 +181,7 @@ const AuthConfirm = () => {
               </Button>
             )}
             {resent && (
-              <p className="text-sm text-primary font-medium">✓ Email renvoyé — vérifiez votre boîte.</p>
+              <p className="text-sm text-primary font-medium">✓ Email renvoyé, vérifiez votre boîte.</p>
             )}
             <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground">
               Retour à la connexion

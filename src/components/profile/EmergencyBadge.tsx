@@ -23,7 +23,7 @@ const EmergencyBadge = ({ size = "sm", showTooltip = true }: EmergencyBadgeProps
     <Tooltip>
       <TooltipTrigger asChild>{badge}</TooltipTrigger>
       <TooltipContent>
-        <p className="text-xs">Gardien d'urgence — Expérimenté, fiable, mobilisable rapidement</p>
+        <p className="text-xs">Gardien d'urgence, Expérimenté, fiable, mobilisable rapidement</p>
       </TooltipContent>
     </Tooltip>
   );

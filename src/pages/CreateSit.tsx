@@ -242,7 +242,7 @@ const CreateSit = () => {
     load();
   }, [user, fromSitId, draftIdParam]);
 
-  // Auto-save draft (debounced) — fires after first user edit
+  // Auto-save draft (debounced), fires after first user edit
   useEffect(() => {
     if (!user || !property || !initialLoadedRef.current) return;
     // Mark as edited on first state change after initial load
@@ -336,7 +336,7 @@ const CreateSit = () => {
     const animals = animalParts.length > 0 ? animalParts.join(" et ") : "animaux";
     const cityPart = ownerCity ? ` à ${ownerCity}` : "";
     const dayWord = nDays > 1 ? "jours" : "jour";
-    return `Garde de ${animals}${cityPart} — ${nDays} ${dayWord}`;
+    return `Garde de ${animals}${cityPart}, ${nDays} ${dayWord}`;
   };
 
   // Show urgent option: not confirmed, start < 7 days or flexible
@@ -456,7 +456,7 @@ const CreateSit = () => {
             )}
           </div>
           <Input
-            placeholder={nDays > 0 ? buildSuggestedTitle() : "Ex : Garde de 2 chats à Écully — 10 jours en août"}
+            placeholder={nDays > 0 ? buildSuggestedTitle() : "Ex : Garde de 2 chats à Écully, 10 jours en août"}
             value={title}
             onChange={e => setTitle(e.target.value)}
           />
@@ -483,12 +483,12 @@ const CreateSit = () => {
           </p>
         ) : null}
 
-        {/* Lieu de la garde — facultatif (override du profil) */}
+        {/* Lieu de la garde, facultatif (override du profil) */}
         <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
           <div>
             <Label className="text-sm font-medium">Lieu de la garde <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Renseignez ces champs si la garde se déroule ailleurs que dans votre ville de profil ({ownerCity || "non renseignée"}) — résidence secondaire, garde à l'étranger, etc.
+              Renseignez ces champs si la garde se déroule ailleurs que dans votre ville de profil ({ownerCity || "non renseignée"}), résidence secondaire, garde à l'étranger, etc.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -567,14 +567,14 @@ const CreateSit = () => {
           </p>
         </div>
 
-        {/* Journée type — facultatif */}
+        {/* Journée type, facultatif */}
         <div>
           <Label className="text-sm font-medium">Une journée type <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
           <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">
-            Décrivez le déroulé d'une journée — matin, midi, soir. Les gardiens adorent ce niveau de détail.
+            Décrivez le déroulé d'une journée, matin, midi, soir. Les gardiens adorent ce niveau de détail.
           </p>
           <Textarea
-            placeholder={"Ex :\nMatin — Sortie du chien 30 min, gamelles, ouverture du jardin.\nMidi — Visite rapide, fontaine à recharger.\nSoir — Promenade 30 min, repas, câlins obligatoires 🥰"}
+            placeholder={"Ex :\nMatin, Sortie du chien 30 min, gamelles, ouverture du jardin.\nMidi, Visite rapide, fontaine à recharger.\nSoir, Promenade 30 min, repas, câlins obligatoires 🥰"}
             value={dailyRoutine}
             onChange={e => setDailyRoutine(e.target.value.slice(0, 1500))}
             className="mt-1 font-mono text-[13px]"
@@ -583,7 +583,7 @@ const CreateSit = () => {
           <p className="text-[11px] text-muted-foreground mt-1 text-right">{dailyRoutine.length}/1500</p>
         </div>
 
-        {/* Mot de l'hôte — facultatif */}
+        {/* Mot de l'hôte, facultatif */}
         <div>
           <Label className="text-sm font-medium">Un mot de vous <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
           <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">
@@ -599,17 +599,17 @@ const CreateSit = () => {
           <p className="text-[11px] text-muted-foreground mt-1 text-right">{ownerMessage.length}/800</p>
         </div>
 
-        {/* CORRECTION 1 — "Idéale pour" */}
+        {/* CORRECTION 1, "Idéale pour" */}
         <div>
           <Label className="text-sm font-medium mb-1 block">Idéale pour (optionnel)</Label>
-          <p className="text-xs text-muted-foreground mb-3">Une indication pour les gardiens — tout le monde peut postuler.</p>
+          <p className="text-xs text-muted-foreground mb-3">Une indication pour les gardiens, tout le monde peut postuler.</p>
           <ChipSelect options={openToOptions} selected={openTo} onChange={setOpenTo} />
         </div>
 
-        {/* CORRECTION 4 — Gardes minimum gardien souhaité */}
+        {/* CORRECTION 4, Gardes minimum gardien souhaité */}
         <div>
           <Label className="text-sm font-medium text-foreground mb-1 block">Expérience souhaitée du gardien</Label>
-          <p className="text-xs text-muted-foreground mb-3">Une préférence — les gardiens avec moins d'expérience peuvent aussi postuler.</p>
+          <p className="text-xs text-muted-foreground mb-3">Une préférence, les gardiens avec moins d'expérience peuvent aussi postuler.</p>
           <div className="flex flex-wrap gap-2">
             {MIN_SITS_OPTIONS.map(opt => (
               <button
@@ -674,7 +674,7 @@ const CreateSit = () => {
           <EnvironmentPills selected={sitEnvironments} onChange={setSitEnvironments} />
         </div>
 
-        {/* CORRECTION 3 — Urgent */}
+        {/* CORRECTION 3, Urgent */}
         {showUrgent && (
           <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
             <Checkbox
@@ -684,7 +684,7 @@ const CreateSit = () => {
             />
             <div>
               <label className="text-sm font-medium flex items-center gap-1.5 cursor-pointer text-amber-800" onClick={() => setIsUrgent(!isUrgent)}>
-                <Zap className="h-4 w-4" /> Urgent — garde dans moins de 48h
+                <Zap className="h-4 w-4" /> Urgent, garde dans moins de 48h
               </label>
               <p className="text-xs text-amber-600 mt-0.5">
                 Les gardiens d'urgence seront alertés en priorité
@@ -712,7 +712,7 @@ const CreateSit = () => {
                 </div>
               )}
 
-              {/* CORRECTION 5 — Aperçu photos + sélection couverture */}
+              {/* CORRECTION 5, Aperçu photos + sélection couverture */}
               <div className="mt-3">
                 <p className="text-sm font-medium text-foreground mb-1">Photos affichées sur l'annonce</p>
                 {ownerPhotos.length > 0 ? (
@@ -747,7 +747,7 @@ const CreateSit = () => {
                   </>
                 ) : (
                   <div className="bg-muted rounded-xl p-3">
-                    <p className="text-xs text-muted-foreground">Aucune photo — les annonces avec photos reçoivent davantage de candidatures.</p>
+                    <p className="text-xs text-muted-foreground">Aucune photo, les annonces avec photos reçoivent davantage de candidatures.</p>
                   </div>
                 )}
                 <Link to="/owner-profile#galerie" className="text-xs text-primary hover:underline mt-2 inline-block">
@@ -766,7 +766,7 @@ const CreateSit = () => {
                 <div key={i} className="flex items-center gap-3">
                   {pet.photo_url && <img src={pet.photo_url} alt={pet.name} className="w-10 h-10 rounded-full object-cover" />}
                   <div>
-                    <p className="text-sm font-medium">{speciesLabels[pet.species]?.split(" ")[0]} {pet.name}{pet.breed ? ` — ${pet.breed}` : ""}</p>
+                    <p className="text-sm font-medium">{speciesLabels[pet.species]?.split(" ")[0]} {pet.name}{pet.breed ? `, ${pet.breed}` : ""}</p>
                     <p className="text-xs text-muted-foreground">
                       {[
                         pet.walk_duration && pet.walk_duration !== "none" ? walkLabels[pet.walk_duration] + " de balade" : null,
@@ -825,7 +825,7 @@ const CreateSit = () => {
         </SummaryCard>
       </div>
 
-      {/* CORRECTION 6 — Publish button */}
+      {/* CORRECTION 6, Publish button */}
       <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40">
         <div className="max-w-3xl mx-auto flex gap-2">
           <Button

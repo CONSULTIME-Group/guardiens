@@ -418,7 +418,7 @@ const AdminVerifications = () => {
                                   {format(new Date(ev.ts), "d MMM yyyy HH:mm", { locale: fr })}
                                 </span>
                                 <span className="font-medium">{ev.label}</span>
-                                {ev.detail && <span className="text-muted-foreground italic">— {ev.detail}</span>}
+                                {ev.detail && <span className="text-muted-foreground italic">, {ev.detail}</span>}
                               </li>
                             ))}
                           </ol>
@@ -426,8 +426,8 @@ const AdminVerifications = () => {
                       );
                     })()}
                     <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-border">
-                      <Button size="sm" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => handleApprove(user.id)} title={isIncomplete ? "Dossier incomplet — validation possible sur la base des éléments fournis" : undefined}><ShieldCheck className="h-4 w-4" /> {busyUserId === user.id ? "Validation..." : "Valider"}</Button>
-                      <Button size="sm" variant="destructive" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => setRejectModal({ open: true, userId: user.id, reason: "", customReason: "" })} title={isIncomplete ? "Dossier incomplet — décision possible sur la base des éléments fournis" : undefined}><ShieldX className="h-4 w-4" /> Refuser</Button>
+                      <Button size="sm" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => handleApprove(user.id)} title={isIncomplete ? "Dossier incomplet, validation possible sur la base des éléments fournis" : undefined}><ShieldCheck className="h-4 w-4" /> {busyUserId === user.id ? "Validation..." : "Valider"}</Button>
+                      <Button size="sm" variant="destructive" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => setRejectModal({ open: true, userId: user.id, reason: "", customReason: "" })} title={isIncomplete ? "Dossier incomplet, décision possible sur la base des éléments fournis" : undefined}><ShieldX className="h-4 w-4" /> Refuser</Button>
                       <Button size="sm" variant="outline" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => handleRequestResend(user.id)}><RotateCcw className="h-4 w-4" /> {isIncomplete ? "Réinitialiser le dossier" : "Demander nouveau document"}</Button>
                       <Button size="sm" variant="secondary" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => handleRemind(user.id)} title="Renvoyer une notification + email pour relancer le membre"><RotateCcw className="h-4 w-4" /> Relancer</Button>
                     </div>
@@ -496,7 +496,7 @@ const AdminVerifications = () => {
                       <TableCell className="hidden md:table-cell text-sm">{format(new Date(user.updated_at), "d MMM yyyy", { locale: fr })}</TableCell>
                       <TableCell>{statusBadge(user.identity_verification_status)}</TableCell>
                       <TableCell className="hidden lg:table-cell text-sm text-muted-foreground max-w-[200px] truncate">
-                        {user._rejectionReason || "—"}
+                        {user._rejectionReason || ","}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center justify-end gap-1">
@@ -603,7 +603,7 @@ const AdminVerifications = () => {
       {/* Document viewer modal */}
       <Dialog open={docModal.open} onOpenChange={(o) => !o && setDocModal({ open: false, userId: null, docUrl: null, selfieUrl: null, name: "", status: null })}>
         <DialogContent className="max-w-3xl w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Documents — {docModal.name}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Documents, {docModal.name}</DialogTitle></DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <p className="text-xs font-medium text-muted-foreground uppercase">Pièce d'identité</p>
@@ -630,7 +630,7 @@ const AdminVerifications = () => {
                   setRejectModal({ open: true, userId: docModal.userId!, reason: "", customReason: "" });
                   setDocModal({ open: false, userId: null, docUrl: null, selfieUrl: null, name: "", status: null });
                 }}
-                title={!docModal.docUrl || !docModal.selfieUrl ? "Dossier incomplet — décision possible sur la base des éléments fournis" : undefined}
+                title={!docModal.docUrl || !docModal.selfieUrl ? "Dossier incomplet, décision possible sur la base des éléments fournis" : undefined}
               >
                 <ShieldX className="h-4 w-4" /> Invalider
               </Button>
@@ -642,7 +642,7 @@ const AdminVerifications = () => {
                   setDocModal({ open: false, userId: null, docUrl: null, selfieUrl: null, name: "", status: null });
                   await handleApprove(uid);
                 }}
-                title={!docModal.docUrl || !docModal.selfieUrl ? "Dossier incomplet — validation possible sur la base des éléments fournis (selfie + photo de profil)" : undefined}
+                title={!docModal.docUrl || !docModal.selfieUrl ? "Dossier incomplet, validation possible sur la base des éléments fournis (selfie + photo de profil)" : undefined}
               >
                 <ShieldCheck className="h-4 w-4" /> Valider
               </Button>

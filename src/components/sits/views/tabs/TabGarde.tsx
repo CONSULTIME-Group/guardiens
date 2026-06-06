@@ -1,7 +1,7 @@
 /**
  * Onglet "Garde" : mot de l'hôte, journée type, aperçus cliquables
  * vers les autres onglets (Animaux / Logement / Attentes).
- * Aucune icône Lucide décorative — seuls ArrowRight (nav) et Info (statut) restent.
+ * Aucune icône Lucide décorative, seuls ArrowRight (nav) et Info (statut) restent.
  */
 import { ArrowRight, Info } from "lucide-react";
 import { parseRoutine, cleanFreeText } from "./parseRoutine";

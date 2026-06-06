@@ -86,7 +86,7 @@ export default function AdminTestSitterFields() {
 
   return (
     <div className="container max-w-2xl py-8 space-y-6">
-      <h1 className="text-2xl font-bold">Test — 5 champs StepExperience</h1>
+      <h1 className="text-2xl font-bold">Test, 5 champs StepExperience</h1>
       <Card className="p-6 space-y-4">
         <p className="text-sm text-muted-foreground">
           Injecte des valeurs de test dans <code>sitter_profiles</code> pour

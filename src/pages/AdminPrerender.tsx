@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
 /**
- * /admin/prerender — Force le re-snapshot Prerender de pages SEO précises
+ * /admin/prerender, Force le re-snapshot Prerender de pages SEO précises
  * sans attendre le cycle automatique post-publish.
  *
  * Sources :
@@ -105,7 +105,7 @@ export default function AdminPrerender() {
   return (
     <main className="container mx-auto max-w-5xl px-4 py-10">
       <Helmet>
-        <title>Re-snapshot Prerender — Admin</title>
+        <title>Re-snapshot Prerender, Admin</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 

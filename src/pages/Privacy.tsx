@@ -14,7 +14,7 @@ const Privacy = () => {
 
       <main className="px-6 md:px-12 py-16 max-w-3xl mx-auto">
         <h1 className="font-heading text-3xl md:text-4xl font-bold mb-2">Politique de confidentialité</h1>
-        <p className="text-sm text-muted-foreground mb-8">Version 2 — Dernière mise à jour : 3 mai 2026</p>
+        <p className="text-sm text-muted-foreground mb-8">Version 2, Dernière mise à jour : 3 mai 2026</p>
 
         <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
           <p>
@@ -28,7 +28,7 @@ const Privacy = () => {
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">1. Responsable du traitement</h2>
           <p>Le responsable du traitement des données personnelles est :</p>
           <ul className="list-disc pl-6 space-y-1">
-            <li><strong className="text-foreground">Guardiens — Jérémie Martinot</strong>, entrepreneur individuel</li>
+            <li><strong className="text-foreground">Guardiens, Jérémie Martinot</strong>, entrepreneur individuel</li>
             <li><strong className="text-foreground">Adresse</strong> : 22 rue Juiverie, 69005 Lyon, France</li>
             <li><strong className="text-foreground">SIRET</strong> : 894 864 040 00015</li>
             <li><strong className="text-foreground">Contact général</strong> : <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a></li>
@@ -52,7 +52,7 @@ const Privacy = () => {
           <ul className="list-disc pl-6 space-y-1">
             <li>Nom, prénom</li>
             <li>Adresse email</li>
-            <li>Mot de passe (haché par algorithme bcrypt — jamais stocké en clair)</li>
+            <li>Mot de passe (haché par algorithme bcrypt, jamais stocké en clair)</li>
           </ul>
 
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">3.2 Données de profil</h3>
@@ -145,7 +145,7 @@ const Privacy = () => {
               <tr className="border-t border-border"><td className="p-2">Selfie de vérification d'identité</td><td className="p-2">Supprimé immédiatement après validation de la vérification</td></tr>
               <tr className="border-t border-border"><td className="p-2">Document d'identité</td><td className="p-2">12 mois maximum après la vérification, sauf obligation légale (notamment LCB-FT)</td></tr>
               <tr className="border-t border-border"><td className="p-2">Messages échangés via la messagerie</td><td className="p-2">Pendant toute la durée du compte, anonymisés à la suppression</td></tr>
-              <tr className="border-t border-border"><td className="p-2">Avis publiés</td><td className="p-2">Conservés sous forme anonymisée après suppression du compte (intérêt légitime — intégrité du système d'évaluation)</td></tr>
+              <tr className="border-t border-border"><td className="p-2">Avis publiés</td><td className="p-2">Conservés sous forme anonymisée après suppression du compte (intérêt légitime, intégrité du système d'évaluation)</td></tr>
               <tr className="border-t border-border"><td className="p-2">Données de connexion (logs)</td><td className="p-2">12 mois conformément à l'article L. 34-1 du Code des postes et communications électroniques</td></tr>
               <tr className="border-t border-border"><td className="p-2">Données de facturation</td><td className="p-2">10 ans conformément à l'article L. 123-22 du Code de commerce</td></tr>
               <tr className="border-t border-border"><td className="p-2">Cookies de mesure d'audience</td><td className="p-2">13 mois maximum (recommandation CNIL)</td></tr>
@@ -165,10 +165,10 @@ const Privacy = () => {
               </tr>
             </thead>
             <tbody>
-              <tr className="border-t border-border"><td className="p-2"><strong className="text-foreground">Supabase Inc.</strong></td><td className="p-2">Hébergement BDD, authentification, stockage</td><td className="p-2">UE (Francfort) — sauvegardes US possibles</td><td className="p-2">EU-US Data Privacy Framework + Clauses contractuelles types</td></tr>
+              <tr className="border-t border-border"><td className="p-2"><strong className="text-foreground">Supabase Inc.</strong></td><td className="p-2">Hébergement BDD, authentification, stockage</td><td className="p-2">UE (Francfort), sauvegardes US possibles</td><td className="p-2">EU-US Data Privacy Framework + Clauses contractuelles types</td></tr>
               <tr className="border-t border-border"><td className="p-2"><strong className="text-foreground">Lovable AB</strong></td><td className="p-2">Plateforme de développement et déploiement front-end</td><td className="p-2">Suède (UE)</td><td className="p-2">Pas de transfert hors UE</td></tr>
-              <tr className="border-t border-border"><td className="p-2"><strong className="text-foreground">Cloudflare Inc.</strong> (via Cloudflare Ireland Ltd)</td><td className="p-2">DNS, CDN, protection anti-DDoS, edge computing</td><td className="p-2">Réseau mondial — société-mère US</td><td className="p-2">EU-US Data Privacy Framework + Clauses contractuelles types</td></tr>
-              <tr className="border-t border-border"><td className="p-2"><strong className="text-foreground">Stripe Payments Europe Ltd</strong> (filiale de Stripe Inc.)</td><td className="p-2">Traitement des paiements et abonnements</td><td className="p-2">UE (Dublin) — transferts US encadrés</td><td className="p-2">EU-US Data Privacy Framework + Clauses contractuelles types</td></tr>
+              <tr className="border-t border-border"><td className="p-2"><strong className="text-foreground">Cloudflare Inc.</strong> (via Cloudflare Ireland Ltd)</td><td className="p-2">DNS, CDN, protection anti-DDoS, edge computing</td><td className="p-2">Réseau mondial, société-mère US</td><td className="p-2">EU-US Data Privacy Framework + Clauses contractuelles types</td></tr>
+              <tr className="border-t border-border"><td className="p-2"><strong className="text-foreground">Stripe Payments Europe Ltd</strong> (filiale de Stripe Inc.)</td><td className="p-2">Traitement des paiements et abonnements</td><td className="p-2">UE (Dublin), transferts US encadrés</td><td className="p-2">EU-US Data Privacy Framework + Clauses contractuelles types</td></tr>
               <tr className="border-t border-border"><td className="p-2"><strong className="text-foreground">Resend Inc.</strong></td><td className="p-2">Envoi d'emails transactionnels</td><td className="p-2">États-Unis</td><td className="p-2">EU-US Data Privacy Framework + Clauses contractuelles types</td></tr>
               <tr className="border-t border-border"><td className="p-2"><strong className="text-foreground">Prerender LLC</strong></td><td className="p-2">Pré-rendu serveur pour indexation SEO</td><td className="p-2">États-Unis</td><td className="p-2">EU-US Data Privacy Framework + Clauses contractuelles types</td></tr>
               <tr className="border-t border-border"><td className="p-2"><strong className="text-foreground">Google LLC</strong> (via Google Ireland Ltd)</td><td className="p-2">Mesure d'audience Google Analytics 4 (sous réserve de consentement)</td><td className="p-2">UE/US</td><td className="p-2">EU-US Data Privacy Framework + Clauses contractuelles types</td></tr>
@@ -279,7 +279,7 @@ const Privacy = () => {
           </p>
           <ul className="list-disc pl-6 space-y-1">
             <li><strong className="text-foreground">Site web</strong> : <a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">www.cnil.fr/fr/plaintes</a></li>
-            <li><strong className="text-foreground">Adresse postale</strong> : CNIL — 3 Place de Fontenoy, TSA 80715, 75334 Paris Cedex 07</li>
+            <li><strong className="text-foreground">Adresse postale</strong> : CNIL, 3 Place de Fontenoy, TSA 80715, 75334 Paris Cedex 07</li>
             <li><strong className="text-foreground">Téléphone</strong> : 01 53 73 22 22</li>
           </ul>
 

@@ -3,7 +3,7 @@
  * affiché en tête de l'onglet Logement côté propriétaire.
  *
  * La logique de debounce et de flush est gérée par le parent (OwnerSitView)
- * via la prop `saveOverride` — voir le hook flushOverrides associé.
+ * via la prop `saveOverride`, voir le hook flushOverrides associé.
  */
 import { useId } from "react";
 

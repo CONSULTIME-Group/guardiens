@@ -88,7 +88,7 @@ const SitHero = ({ photos, city, priority = false }: SitHeroProps) => {
   }
 
   const altFor = (i: number) =>
-    `Photo ${i + 1} sur ${total} de la garde à ${cityLabel} (logement et animaux) — annonce Guardiens`;
+    `Photo ${i + 1} sur ${total} de la garde à ${cityLabel} (logement et animaux), annonce Guardiens`;
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStartX(e.touches[0].clientX);
@@ -106,7 +106,7 @@ const SitHero = ({ photos, city, priority = false }: SitHeroProps) => {
   return (
     <>
       <div className="mb-6 relative">
-        {/* Photo principale — cliquable, ouvre lightbox */}
+        {/* Photo principale, cliquable, ouvre lightbox */}
         <button
           type="button"
           onClick={() => setLightboxOpen(true)}
@@ -175,7 +175,7 @@ const SitHero = ({ photos, city, priority = false }: SitHeroProps) => {
         )}
       </div>
 
-      {/* Lightbox — rendue via portal pour échapper à tout stacking context
+      {/* Lightbox, rendue via portal pour échapper à tout stacking context
           parent (sidebar sticky, layout flex) et garantir un vrai plein écran. */}
       {lightboxOpen && typeof document !== "undefined" &&
         createPortal(

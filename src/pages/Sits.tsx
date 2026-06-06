@@ -115,7 +115,7 @@ const Sits = () => {
   const [sits, setSits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Onglet actif synchronisé avec l'URL (?tab=...) — partageable, retour navigateur OK
+  // Onglet actif synchronisé avec l'URL (?tab=...), partageable, retour navigateur OK
   const validTabs: Tab[] = ["upcoming", "in_progress", "completed", "cancelled"];
   const validOwnerTabs: OwnerTab[] = ["active", "drafts", "archived"];
   const urlTab = searchParams.get("tab");
@@ -131,7 +131,7 @@ const Sits = () => {
     }, { replace: true });
   }, [setSearchParams]);
 
-  // (showArchived state removed — replaced by tabs)
+  // (showArchived state removed, replaced by tabs)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [archiveConfirm, setArchiveConfirm] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -369,7 +369,7 @@ const Sits = () => {
     return counts;
   }, [activeSits, isOwnerView]);
 
-  // Comptages onglets owner — Actives / Brouillons / Archivées
+  // Comptages onglets owner, Actives / Brouillons / Archivées
   // Brouillons = vrais brouillons jamais publiés (unpublished_at IS NULL)
   // Archivées  = expirées, annulées-archivées, OU dépubliées (status=draft + unpublished_at)
   const ownerTabCounts = useMemo(() => {
@@ -500,7 +500,7 @@ const Sits = () => {
         )}
       </div>
 
-      {/* Tabs — mask-fade à droite pour signaler le scroll horizontal sur mobile */}
+      {/* Tabs, mask-fade à droite pour signaler le scroll horizontal sur mobile */}
       <div
         className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide"
         style={{
@@ -753,7 +753,7 @@ const Sits = () => {
                 <GuideField
                   label="Wifi"
                   value={openGuide.wifi_name && openGuide.wifi_password
-                    ? `${openGuide.wifi_name} — ${openGuide.wifi_password}`
+                    ? `${openGuide.wifi_name}, ${openGuide.wifi_password}`
                     : openGuide.wifi_name ?? null}
                   copyable
                 />
@@ -839,7 +839,7 @@ const Sits = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Sticky CTA mobile owner — visible dès qu'il y a au moins une annonce */}
+      {/* Sticky CTA mobile owner, visible dès qu'il y a au moins une annonce */}
       {isOwnerView && sits.length > 0 && (
         <MobileStickyCTA label="Publier une annonce" to="/sits/create" />
       )}
@@ -917,7 +917,7 @@ const SitCard = ({
           Garde en cours
           {sit.end_date && (() => {
             const remaining = differenceInDays(parseISO(sit.end_date), new Date());
-            return remaining > 0 ? ` — ${remaining} jour${remaining > 1 ? "s" : ""} restant${remaining > 1 ? "s" : ""}` : " — Dernier jour";
+            return remaining > 0 ? `, ${remaining} jour${remaining > 1 ? "s" : ""} restant${remaining > 1 ? "s" : ""}` : ", Dernier jour";
           })()}
         </div>
       )}

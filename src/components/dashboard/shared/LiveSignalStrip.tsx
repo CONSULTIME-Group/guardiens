@@ -9,14 +9,14 @@ import {
 } from "@/components/ui/tooltip";
 
 /**
- * Bandeau signal vivant — preuve sociale temps réel.
+ * Bandeau signal vivant, preuve sociale temps réel.
  *
  * Pourquoi : sur un dashboard à 0 sit/0 candidature, le user ressent du vide.
- * Ce strip apporte 1 ligne de "battement de cœur" — montre que la plateforme
+ * Ce strip apporte 1 ligne de "battement de cœur", montre que la plateforme
  * est habitée, même si son propre coin est calme.
  *
  * Format : pulse vert + 2 segments séparés par "·".
- * Pas un CTA — juste un signal. Pas d'action, pas de clic.
+ * Pas un CTA, juste un signal. Pas d'action, pas de clic.
  *
  * Le slot `secondarySignal` permet d'injecter une info contextuelle locale
  * (ex : "12 annonces publiées en 24h", "3 candidats en attente").

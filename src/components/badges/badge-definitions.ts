@@ -6,7 +6,7 @@ export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'steel'
 export type BadgeCategory = 'gardien' | 'proprio' | 'special' | 'mission'
 
 export interface BadgeDefinition {
-  label: string           // nom complet — tooltip + aria-label
+  label: string           // nom complet, tooltip + aria-label
   labelArc: string        // texte pour BadgeSceauLarge (MAJUSCULES)
   category: BadgeCategory
   tooltip: string         // affiché au survol Radix Tooltip
@@ -14,7 +14,7 @@ export interface BadgeDefinition {
   fixedTier?: BadgeTier   // si défini, getTier() retourne toujours cette valeur
   bg: string              // couleur fond du cercle
   iconColor: string       // couleur icône par défaut
-  svgIcon: string         // paths SVG — viewBox 0 0 40 40
+  svgIcon: string         // paths SVG, viewBox 0 0 40 40
 }
 
 // ─── FONCTIONS UTILITAIRES ──────────────────────────────────
@@ -34,7 +34,7 @@ export const isBadgeActive = (id: string, lastObtainedAt: string): boolean => {
   return differenceInMonths(new Date(), new Date(lastObtainedAt)) < 12
 }
 
-// IDs par catégorie — utilisés pour construire les grilles
+// IDs par catégorie, utilisés pour construire les grilles
 export const GARDIEN_BADGE_IDS: string[] = [
   'animaux_heureux', 'maison_nickel', 'potager_respire', 'nouvelles_quot',
   'debrouillard', 'au_dela_attentes', 'voisins_adorent', 'invite_noel',
@@ -55,12 +55,12 @@ export const MISSION_BADGE_IDS: string[] = [
   'coup_de_main_or', 'super_voisin', 'on_remet_ca',
 ]
 
-// ─── DÉFINITIONS — 31 BADGES ────────────────────────────────
+// ─── DÉFINITIONS, 31 BADGES ────────────────────────────────
 
 export const BADGE_DEFINITIONS: Record<string, BadgeDefinition> = {
 
   // ══════════════════════════════════════════════════════════
-  // GARDIENS — #1A3C34 | attribués par les proprios | max 3/avis
+  // GARDIENS, #1A3C34 | attribués par les proprios | max 3/avis
   // ══════════════════════════════════════════════════════════
 
   animaux_heureux: {
@@ -166,13 +166,13 @@ export const BADGE_DEFINITIONS: Record<string, BadgeDefinition> = {
     label: "Confiance totale",
     labelArc: "CONFIANCE TOTALE",
     category: 'gardien', expirable: true,
-    tooltip: "Honnêteté et intégrité absolue validées — accès aux zones sensibles sans dérive.",
+    tooltip: "Honnêteté et intégrité absolue validées, accès aux zones sensibles sans dérive.",
     bg: '#1A3C34', iconColor: '#FDF0CC',
     svgIcon: `<path d="M15 19 Q15 14 20 14 Q25 14 25 19" fill="none" stroke="#FDF0CC" stroke-width="1.5"/><rect x="13" y="19" width="14" height="10" rx="2" fill="none" stroke="#FDF0CC" stroke-width="1.5"/><path d="M20 23c0-1.5 2-1.5 2 0 0 1.5-2 2.5-2 2.5s-2-1-2-2.5c0-1.5 2-1.5 2 0" fill="#FDF0CC"/>`,
   },
 
   // ══════════════════════════════════════════════════════════
-  // PROPRIOS — #191970 | attribués par les gardiens | max 3/avis
+  // PROPRIOS, #191970 | attribués par les gardiens | max 3/avis
   // ══════════════════════════════════════════════════════════
 
   guide_oignons: {
@@ -284,7 +284,7 @@ export const BADGE_DEFINITIONS: Record<string, BadgeDefinition> = {
   },
 
   // ══════════════════════════════════════════════════════════
-  // SPÉCIAUX — métal fixe | admin ou automatique
+  // SPÉCIAUX, métal fixe | admin ou automatique
   // ══════════════════════════════════════════════════════════
 
   fondateur: {
@@ -318,7 +318,7 @@ export const BADGE_DEFINITIONS: Record<string, BadgeDefinition> = {
     label: "À jamais la 1ère",
     labelArc: "À JAMAIS LA 1ÈRE",
     category: 'special', expirable: false, fixedTier: 'gold',
-    tooltip: "Première annonce publiée sur Guardiens — merci pour votre confiance dès les tout débuts.",
+    tooltip: "Première annonce publiée sur Guardiens, merci pour votre confiance dès les tout débuts.",
     bg: '#7A5200', iconColor: '#FFE27A',
     svgIcon: `<text x="20" y="26" text-anchor="middle" font-family="Georgia, serif" font-size="18" font-weight="bold" fill="#FFE27A">1</text><path d="M14 11l1 2.5 2.5.5-2 1.8.5 2.7-2-1.4-2 1.4.5-2.7-2-1.8 2.5-.5z" fill="#FFE27A" opacity="0.9"/><path d="M26 11l1 2.5 2.5.5-2 1.8.5 2.7-2-1.4-2 1.4.5-2.7-2-1.8 2.5-.5z" fill="#FFE27A" opacity="0.9"/>`,
   },
@@ -333,7 +333,7 @@ export const BADGE_DEFINITIONS: Record<string, BadgeDefinition> = {
   },
 
   // ══════════════════════════════════════════════════════════
-  // MISSIONS — #2F2F2F | 1 max par mission | métal fixe gris
+  // MISSIONS, #2F2F2F | 1 max par mission | métal fixe gris
   // ══════════════════════════════════════════════════════════
 
   coup_de_main_or: {

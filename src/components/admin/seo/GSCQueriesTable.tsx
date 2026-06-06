@@ -31,7 +31,7 @@ const GSCQueriesTable = ({ rows }: GSCTableProps) => {
       </TableHeader>
       <TableBody>
         {rows.map((row, i) => {
-          const label = row.keys?.[0] || "—";
+          const label = row.keys?.[0] || ",";
           return (
             <TableRow key={i}>
               <TableCell className="max-w-[300px]">

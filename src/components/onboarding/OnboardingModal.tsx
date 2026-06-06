@@ -100,7 +100,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     city.trim().length > 0 &&
     (livesAbroad ? country.trim().length > 0 : postalCode.length === 5);
 
-  // Calculate live completion estimate — must match DB function
+  // Calculate live completion estimate, must match DB function
   useEffect(() => {
     let score = 0;
     if (firstName.trim() && (postalCode || livesAbroad) && city.trim()) score += 10;
@@ -439,16 +439,16 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs text-muted-foreground font-medium">
-              {slide === 0 ? "Étape 1 sur 3 — Faisons connaissance" :
-               slide === 1 ? "Étape 2 sur 3 — Votre première impression" :
-               slide === 2 ? "Étape 3 sur 3 — Vos savoir-faire" :
+              {slide === 0 ? "Étape 1 sur 3, Faisons connaissance" :
+               slide === 1 ? "Étape 2 sur 3, Votre première impression" :
+               slide === 2 ? "Étape 3 sur 3, Vos savoir-faire" :
                "Découverte de Guardiens"}
             </p>
           </div>
           <Progress value={slide <= 2 ? ((slide + 1) / 3) * 100 : 100} className="h-1.5" />
         </div>
 
-        {/* Role tabs — only for "both" users on read-only slides */}
+        {/* Role tabs, only for "both" users on read-only slides */}
         {slide >= 3 && userRole === "both" && (
           <div className="flex justify-center gap-1 mb-6">
             <button
@@ -483,7 +483,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                   Bienvenue sur Guardiens.
                 </h2>
                 <p className="text-base text-foreground/80 leading-relaxed mt-2">
-                  En 2 minutes, rendez votre profil attractif. Commençons par faire connaissance — 30 secondes.
+                  En 2 minutes, rendez votre profil attractif. Commençons par faire connaissance, 30 secondes.
                 </p>
                 <p className="text-xs text-muted-foreground italic mt-2">
                   Vous pourrez tout modifier plus tard depuis votre profil.
@@ -633,13 +633,13 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                     id="onb-bio"
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
-                    placeholder="Présentez-vous en quelques mots — ce qui vous fait aimer les animaux suffit."
+                    placeholder="Présentez-vous en quelques mots, ce qui vous fait aimer les animaux suffit."
                     className="rounded-lg min-h-[120px] resize-none"
                     maxLength={2000}
                   />
                   <p className={`text-xs ${bio.length >= 50 ? "text-primary" : "text-muted-foreground"}`}>
                     {bio.length}/50 caractères min.
-                    {bio.length >= 50 && " — OK"}
+                    {bio.length >= 50 && ", OK"}
                   </p>
                 </div>
               </div>
@@ -914,7 +914,7 @@ const EntraideSlide = () => (
       conseil sur une race que vous connaissez bien.
     </p>
     <p className="text-base text-foreground/80 leading-relaxed">
-      Les petites missions d'entraide, c'est l'échange au quotidien — vos
+      Les petites missions d'entraide, c'est l'échange au quotidien, vos
       compétences contre un repas, un service rendu, une connexion qui dure.
       Jamais d'argent. Juste du concret.
     </p>

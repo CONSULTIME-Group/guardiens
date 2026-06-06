@@ -1,5 +1,5 @@
 /**
- * Modèles de petites missions — pré-remplissent le formulaire de création
+ * Modèles de petites missions, pré-remplissent le formulaire de création
  * pour lever la friction de la page blanche.
  *
  * Règles :
@@ -21,7 +21,7 @@ export type MissionTemplate = {
 };
 
 export const MISSION_TEMPLATES: MissionTemplate[] = [
-  // ─── BESOINS — Animaux ───
+  // ─── BESOINS, Animaux ───
   {
     id: "need-dog-walk",
     type: "besoin",
@@ -67,7 +67,7 @@ export const MISSION_TEMPLATES: MissionTemplate[] = [
     exchange: "Les œufs de la semaine sont pour vous",
   },
 
-  // ─── BESOINS — Maison ───
+  // ─── BESOINS, Maison ───
   {
     id: "need-mail",
     type: "besoin",
@@ -102,7 +102,7 @@ export const MISSION_TEMPLATES: MissionTemplate[] = [
     exchange: "Un bon repas partagé, je cuisine bien",
   },
 
-  // ─── BESOINS — Jardin ───
+  // ─── BESOINS, Jardin ───
   {
     id: "need-watering",
     type: "besoin",
@@ -133,7 +133,7 @@ export const MISSION_TEMPLATES: MissionTemplate[] = [
     label: "Verger à ramasser",
     title: "Ramasser les pommes du verger",
     description:
-      "Mes pommiers débordent et je n'arrive pas à tout ramasser. Je cherche quelqu'un qui aurait envie de venir une demi-journée — vous repartez avec votre récolte.",
+      "Mes pommiers débordent et je n'arrive pas à tout ramasser. Je cherche quelqu'un qui aurait envie de venir une demi-journée, vous repartez avec votre récolte.",
     exchange: "La moitié de ce que vous ramassez est à vous",
   },
 
@@ -147,7 +147,7 @@ export const MISSION_TEMPLATES: MissionTemplate[] = [
     title: "Je peux promener un chien le week-end",
     description:
       "J'aime marcher et j'ai du temps libre le week-end. Je peux promener votre chien une heure ou deux, parc ou campagne. Calme, à l'aise avec les animaux, je reviens avec lui en pleine forme.",
-    exchange: "À voir ensemble — un café, un fruit du jardin, ce qui vous fait plaisir",
+    exchange: "À voir ensemble, un café, un fruit du jardin, ce qui vous fait plaisir",
   },
   {
     id: "offer-cat-feed",
@@ -158,7 +158,7 @@ export const MISSION_TEMPLATES: MissionTemplate[] = [
     title: "Je peux passer nourrir votre chat en semaine",
     description:
       "Je travaille à proximité et peux facilement passer une fois par jour nourrir votre chat, changer l'eau et la litière. Habitué·e aux animaux, ponctuel·le, discret·e.",
-    exchange: "À voir ensemble — un petit geste suffit",
+    exchange: "À voir ensemble, un petit geste suffit",
   },
   {
     id: "offer-garden",
@@ -191,7 +191,7 @@ export const MISSION_TEMPLATES: MissionTemplate[] = [
     title: "Je partage mon savoir (à préciser)",
     description:
       "J'ai une compétence que j'aime partager (à compléter : cuisine, couture, informatique, langue, musique, etc.). Je peux donner une ou deux heures pour vous transmettre les bases ou vous dépanner.",
-    exchange: "Le plaisir de transmettre — ou ce que vous voulez offrir en retour",
+    exchange: "Le plaisir de transmettre, ou ce que vous voulez offrir en retour",
   },
 ];
 

@@ -1,5 +1,5 @@
 /**
- * Page de test interne — utilisée UNIQUEMENT par la régression visuelle
+ * Page de test interne, utilisée UNIQUEMENT par la régression visuelle
  * `tests/visual/empty-state-halo.spec.ts`. Elle rend chaque illustration
  * EmptyState dans 3 contextes représentatifs (page, carte, modale) à des
  * positions stables, pour que Playwright puisse :
@@ -37,7 +37,7 @@ const Block = ({
 );
 
 const TestEmptyStates = () => {
-  // Override de thème via `?theme=dark|light` — utile pour les tests visuels
+  // Override de thème via `?theme=dark|light`, utile pour les tests visuels
   // qui ne peuvent pas manipuler localStorage avant chargement.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -56,7 +56,7 @@ const TestEmptyStates = () => {
       <Helmet><meta name="robots" content="noindex,nofollow" /></Helmet>
       <h1 className="font-heading text-xl">EmptyState halo regression harness</h1>
 
-      {/* 1. PAGE — fond direct = --background */}
+      {/* 1. PAGE, fond direct = --background */}
       <section data-context-section="page" className="bg-background space-y-6">
         <h2 className="text-sm uppercase tracking-wider text-muted-foreground">Page</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -66,7 +66,7 @@ const TestEmptyStates = () => {
         </div>
       </section>
 
-      {/* 2. CARTE — fond = --card (souvent blanc pur) */}
+      {/* 2. CARTE, fond = --card (souvent blanc pur) */}
       <section data-context-section="card" className="space-y-6">
         <h2 className="text-sm uppercase tracking-wider text-muted-foreground">Carte</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -78,7 +78,7 @@ const TestEmptyStates = () => {
         </div>
       </section>
 
-      {/* 3. MODALE simulée — fond = --popover, encadrée d'un overlay sombre */}
+      {/* 3. MODALE simulée, fond = --popover, encadrée d'un overlay sombre */}
       <section data-context-section="modal" className="space-y-6">
         <h2 className="text-sm uppercase tracking-wider text-muted-foreground">Modale</h2>
         <div className="bg-foreground/40 p-6 rounded-lg">
@@ -95,7 +95,7 @@ const TestEmptyStates = () => {
         </div>
       </section>
 
-      {/* 4. SECTION MUTED — détecte les écarts sur fond gris-bleu */}
+      {/* 4. SECTION MUTED, détecte les écarts sur fond gris-bleu */}
       <section data-context-section="muted" className="bg-muted text-muted-foreground rounded-lg space-y-6 p-4">
         <h2 className="text-sm uppercase tracking-wider">Section muted</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -78,7 +78,7 @@ const THIRD_PARTY_REASON_LABELS: Record<string, { label: string; explanation: st
   anonymous_inline: {
     label: "Script inline anonyme",
     explanation:
-      "Aucune source identifiable et stack majoritairement anonyme — typique d'un JS injecté inline par un WebView ou un script tiers.",
+      "Aucune source identifiable et stack majoritairement anonyme, typique d'un JS injecté inline par un WebView ou un script tiers.",
   },
   empty_source: {
     label: "Source vide",
@@ -112,7 +112,7 @@ const AdminErrors = () => {
     if (filter === "resolved") q = q.not("resolved_at", "is", null);
     if (severityFilter !== "all") q = q.eq("severity", severityFilter);
     // Par défaut, on masque les erreurs marquées tierces (autofill WebView FB/IG, extensions…)
-    // — elles polluent le panneau alors qu'elles ne viennent pas de notre bundle.
+    //, elles polluent le panneau alors qu'elles ne viennent pas de notre bundle.
     else q = q.neq("severity", "ignored_third_party");
     const { data, error } = await q;
     if (error) toast.error("Erreur de chargement");
@@ -341,7 +341,7 @@ const AdminErrors = () => {
                       </div>
                       <p className="text-sm font-medium text-foreground line-clamp-2">{e.message}</p>
                       <p className="text-xs text-muted-foreground mt-1 truncate">
-                        {e.url ?? "—"}
+                        {e.url ?? ","}
                         {e.source ? ` · ${e.source}${e.line_no ? `:${e.line_no}` : ""}` : ""}
                       </p>
                       {e.user_email && (
@@ -367,7 +367,7 @@ const AdminErrors = () => {
                   Détails de l'erreur
                 </DialogTitle>
                 <DialogDescription>
-                  Vue ×{selected.occurrences} fois — première fois{" "}
+                  Vue ×{selected.occurrences} fois, première fois{" "}
                   {format(new Date(selected.first_seen_at), "Pp", { locale: fr })}
                 </DialogDescription>
               </DialogHeader>

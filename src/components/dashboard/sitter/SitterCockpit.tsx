@@ -6,7 +6,7 @@ import LiveSignalStrip from "@/components/dashboard/shared/LiveSignalStrip";
 import { useSitterPriorityAction } from "@/hooks/useSitterPriorityAction";
 
 /**
- * Cockpit gardien — bloc unifié au-dessus du pli.
+ * Cockpit gardien, bloc unifié au-dessus du pli.
  *
  * Remplace l'empilement Hero + Checklist + FreePeriodBanner + NextGuard +
  * StatusBar (~900px) par 3 zones denses :
@@ -14,7 +14,7 @@ import { useSitterPriorityAction } from "@/hooks/useSitterPriorityAction";
  *   2. PriorityActionCard (UN seul CTA contextuel basé sur la règle de priorité)
  *   3. LiveSignalStrip (preuve sociale temps réel, pas de CTA)
  *
- * Pourquoi : un dashboard répond à 3 questions — Où en suis-je ? Que faire
+ * Pourquoi : un dashboard répond à 3 questions, Où en suis-je ? Que faire
  * maintenant ? Que se passe-t-il autour ? Pas 5 KPIs en strip horizontal.
  */
 
@@ -56,13 +56,13 @@ const SitterCockpit = ({
 
   return (
     <section
-      aria-label="Espace gardien — synthèse"
+      aria-label="Espace gardien, synthèse"
       className="px-4 sm:px-5 md:px-8 pt-3 sm:pt-4 md:pt-5 pb-1"
     >
       {/* ─── Tuile héro éditoriale ─── */}
       <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-accent/60 via-card to-accent/30 shadow-sm">
         <div className="relative grid gap-0">
-          {/* Colonne gauche — contenu */}
+          {/* Colonne gauche, contenu */}
           <div className="p-5 sm:p-6 md:p-7 space-y-4">
             {/* Ligne 1 : eyebrow + avatar + nom + dispo */}
             <div className="flex items-start justify-between gap-3 flex-wrap">
@@ -104,7 +104,7 @@ const SitterCockpit = ({
                   id="sitter-availability-toggle"
                   role="switch"
                   aria-checked={isAvailable}
-                  aria-label={isAvailable ? "Vous êtes disponible — désactiver" : "Vous êtes indisponible — activer"}
+                  aria-label={isAvailable ? "Vous êtes disponible, désactiver" : "Vous êtes indisponible, activer"}
                   onClick={onToggleAvailability}
                   className={`group inline-flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
                     isAvailable
@@ -123,7 +123,7 @@ const SitterCockpit = ({
               </div>
             </div>
 
-            {/* Action prioritaire — un seul CTA dominant */}
+            {/* Action prioritaire, un seul CTA dominant */}
             <PriorityActionCard
               eyebrow={priority.eyebrow}
               title={priority.title}

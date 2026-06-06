@@ -163,23 +163,23 @@ const OwnerSitView = ({
   }, [flushOverrides]);
 
   const isDraft = sit.status === "draft";
-  // canCancel — propriétaire :
+  // canCancel, propriétaire :
   // - confirmed uniquement : la modale d'annulation génère un avis envers
   //   le gardien accepté ; sans gardien (published) ce flux n'a pas de sens
   //   (utiliser Archiver / Supprimer à la place).
   // - bloqué dès que la date de fin est passée : on n'annule pas une garde
-  //   déjà terminée — le lifecycle l'auto-archive ou l'auto-complète.
+  //   déjà terminée, le lifecycle l'auto-archive ou l'auto-complète.
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const endDate = sit.end_date ? new Date(sit.end_date) : null;
   const isPast = endDate ? endDate < today : false;
   const canCancel = !isPast && sit.status === "confirmed";
-  // canUnpublish — propriétaire d'une annonce publiée sans gardien accepté :
+  // canUnpublish, propriétaire d'une annonce publiée sans gardien accepté :
   // on remet simplement en brouillon (pas d'avis, pas de notification gardien).
   const canUnpublish = !isPast && sit.status === "published";
 
   // Étape 1 : ouvre la modale de confirmation en pré-comptant les candidatures
-  // actives qui seront clôturées — l'owner doit voir l'impact avant de cliquer.
+  // actives qui seront clôturées, l'owner doit voir l'impact avant de cliquer.
   const requestUnpublish = async () => {
     const { count } = await supabase
       .from("applications")
@@ -274,7 +274,7 @@ const OwnerSitView = ({
   };
   const canPublish = Object.values(checklist).every(Boolean);
 
-  // Dérivés partagés (avgRating + formatDate) — voir useSitDerived.
+  // Dérivés partagés (avgRating + formatDate), voir useSitDerived.
   const { avgRating, formatDate } = useSitDerived({
     reviews,
     context: "owner",
@@ -331,7 +331,7 @@ const OwnerSitView = ({
         />
       )}
 
-      {/* Confirmation publication — rappel des dates exactes */}
+      {/* Confirmation publication, rappel des dates exactes */}
       <AlertDialog open={publishConfirmOpen} onOpenChange={setPublishConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -376,7 +376,7 @@ const OwnerSitView = ({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Confirmation dépublication — précise l'impact (candidatures clôturées). */}
+      {/* Confirmation dépublication, précise l'impact (candidatures clôturées). */}
       <AlertDialog open={unpublishConfirmOpen} onOpenChange={(o) => !unpublishing && setUnpublishConfirmOpen(o)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -385,7 +385,7 @@ const OwnerSitView = ({
               <div className="space-y-3 pt-2">
                 <p>
                   L'annonce sera <strong>dépubliée et archivée</strong>. Elle ne sera plus
-                  visible des gardiens — vous pourrez la republier à tout moment depuis
+                  visible des gardiens, vous pourrez la republier à tout moment depuis
                   l'onglet « Archivées ».
                 </p>
                 {pendingAppsToCancel > 0 && (
@@ -441,7 +441,7 @@ const OwnerSitView = ({
               />
             )}
             <p className="text-xs text-muted-foreground">
-              Votre retour nous aide à améliorer la plateforme — il reste confidentiel.
+              Votre retour nous aide à améliorer la plateforme, il reste confidentiel.
             </p>
           </div>
 
@@ -461,7 +461,7 @@ const OwnerSitView = ({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Emergency sitter alert — owner only, published sit starting within 15 days */}
+      {/* Emergency sitter alert, owner only, published sit starting within 15 days */}
       {sit.status === "published" && owner?.city && (
         <EmergencyAlertBanner
           sitId={sit.id}
@@ -470,7 +470,7 @@ const OwnerSitView = ({
         />
       )}
 
-      {/* Header partagé (compact) — actions Partager / Modifier / Aperçu gardien + statut.
+      {/* Header partagé (compact), actions Partager / Modifier / Aperçu gardien + statut.
           Le partage est désormais une icône dans le header (plus de gros bloc). */}
       <SitDetailHeader
         sitId={sit.id}
@@ -512,7 +512,7 @@ const OwnerSitView = ({
         </div>
       )}
 
-      {/* Aperçu de l'annonce — vue identique à celle des gardiens, EN PREMIER pour
+      {/* Aperçu de l'annonce, vue identique à celle des gardiens, EN PREMIER pour
           que le propriétaire visualise immédiatement à quoi ressemble son annonce. */}
       <SitImmersiveContent
         sit={sit}
@@ -522,7 +522,7 @@ const OwnerSitView = ({
         ownerProfile={ownerProfile}
       />
 
-      {/* Inviter des gardiens — action proactive avant les candidatures */}
+      {/* Inviter des gardiens, action proactive avant les candidatures */}
       {sit.status === "published" && (
         <InviteSittersBlock
           sitId={sit.id}
@@ -537,7 +537,7 @@ const OwnerSitView = ({
         />
       )}
 
-      {/* Candidatures reçues — APRÈS l'aperçu et l'invitation */}
+      {/* Candidatures reçues, APRÈS l'aperçu et l'invitation */}
       <section className="mt-8 mb-8 rounded-2xl border border-border bg-card p-5 md:p-6">
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <Users className="h-5 w-5 text-primary" />
@@ -572,7 +572,7 @@ const OwnerSitView = ({
         />
       </section>
 
-      {/* Photos & couverture — déplacé en bas dans un Collapsible (gestion ponctuelle) */}
+      {/* Photos & couverture, déplacé en bas dans un Collapsible (gestion ponctuelle) */}
       <Collapsible className="mt-2 mb-8 rounded-2xl border border-border bg-card">
         <CollapsibleTrigger className="group w-full flex items-center justify-between gap-2 p-5 md:p-6 text-left">
           <div>
@@ -613,7 +613,7 @@ const OwnerSitView = ({
         </CollapsibleTrigger>
         <CollapsibleContent className="px-5 md:px-6 pb-5 md:pb-6 space-y-4">
           <p className="text-xs text-muted-foreground">
-            Le logement et les animaux se gèrent depuis votre profil — les modifications
+            Le logement et les animaux se gèrent depuis votre profil, les modifications
             s'appliquent à toutes vos annonces.{" "}
             <Link to="/owner-profile" className="text-primary hover:underline">
               Modifier mon profil →

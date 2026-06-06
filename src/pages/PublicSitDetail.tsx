@@ -1,7 +1,7 @@
-// Page publique partagée d'une annonce — accessible sans compte, indexable.
+// Page publique partagée d'une annonce, accessible sans compte, indexable.
 // Utilisée pour le partage externe (Facebook, LinkedIn, WhatsApp, lien direct).
 // Les meta og:* sont injectées via Helmet ; les caches sociaux liront index.html
-// après prerender (Prerender.io / Cloudflare Worker — TODO infra).
+// après prerender (Prerender.io / Cloudflare Worker, TODO infra).
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -329,15 +329,15 @@ const PublicSitDetail = () => {
  ? pets.map((p: any) => `${p.name} (${speciesLabel[p.species] || p.species})`).join(", ")
  : "animaux à confier";
 
- // og:title — titre de l'annonce + ville (si dispo) + suffixe Guardiens
+ // og:title, titre de l'annonce + ville (si dispo) + suffixe Guardiens
  const ownerCity = owner?.city?.trim() || "";
  const baseTitle = sit.title || "Garde de maison et animaux";
  const ogTitle = ownerCity
- ? `${baseTitle} à ${ownerCity} — Guardiens`
- : `${baseTitle} — Guardiens`;
+ ? `${baseTitle} à ${ownerCity}, Guardiens`
+ : `${baseTitle}, Guardiens`;
  const truncatedTitle = ogTitle.length > 60 ? ogTitle.slice(0, 57) + "…" : ogTitle;
 
- // og:description — ville (si dispo) + dates en français + description courte du logement
+ // og:description, ville (si dispo) + dates en français + description courte du logement
  const propertyDescShort = property?.description
  ? (property.description.length > 80 ? property.description.slice(0, 77) + "…" : property.description)
  : "";
@@ -348,8 +348,8 @@ const PublicSitDetail = () => {
  : "Partez l'esprit tranquille avec un gardien près de chez vous. Guardiens, c'est la confiance entre gens du coin.";
  const truncatedDesc = ogDescription.length > 200 ? ogDescription.slice(0, 197) + "…" : ogDescription;
 
- // SEO description (≤160 char) — distincte de og:description
-  const seoDescription = `Garde à ${cityForTitle} ${datesShort}. ${petsSummary}. ${owner?.first_name || "Un membre"} cherche un gardien du coin sur Guardiens — inscription gratuite pour les propriétaires.`;
+ // SEO description (≤160 char), distincte de og:description
+  const seoDescription = `Garde à ${cityForTitle} ${datesShort}. ${petsSummary}. ${owner?.first_name || "Un membre"} cherche un gardien du coin sur Guardiens, inscription gratuite pour les propriétaires.`;
  const truncatedSeoDesc = seoDescription.length > 160 ? seoDescription.slice(0, 157) + "…" : seoDescription;
 
   // Canonical TOUJOURS sur le domaine de prod : sur preview/lovableproject,
@@ -357,11 +357,11 @@ const PublicSitDetail = () => {
   // où le prerender sert les meta OG. Sinon, aperçu vide / URL moche.
   const canonicalUrl = `https://guardiens.fr/annonces/${sit.id}`;
 
- // og:image — visuel personnalisé généré à la volée (photo de couverture réelle
+ // og:image, visuel personnalisé généré à la volée (photo de couverture réelle
  // de l'annonce + titre + ville + dates + animaux + propriétaire). Servi par
  // l'edge function `og-sit` (1200×630, optimisé Facebook/LinkedIn/WhatsApp/X).
  const ogImageUrl = `https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/og-sit?id=${sit.id}&v=cover-only-20260522`;
- const ogImageAlt = `${sit.title || "Annonce de garde"} — ${cityForTitle}, ${datesShort}`;
+ const ogImageAlt = `${sit.title || "Annonce de garde"}, ${cityForTitle}, ${datesShort}`;
 
   const MetaReady = () => {
     useEffect(() => {
@@ -499,7 +499,7 @@ const PublicSitDetail = () => {
 
       {!isAuthenticated && <PublicHeader />}
 
-      {/* Bandeau "aperçu public" — propriétaire de l'annonce */}
+      {/* Bandeau "aperçu public", propriétaire de l'annonce */}
       {viewerType === "owner_of_sit" && (
         <div className="bg-primary/5 border-b border-primary/15">
           <div className="max-w-6xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-2">

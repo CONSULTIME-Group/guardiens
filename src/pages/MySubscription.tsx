@@ -123,7 +123,7 @@ function ReferralSection({ referralCode, userId }: { referralCode: string | null
 const FOUNDER_FAQ = [
   {
     q: "C'est vraiment offert jusqu'au 15 juillet ?",
-    a: "Oui. Aucune carte bancaire demandée avant le 15 juillet. Après cette date, vous choisissez librement de souscrire — rien ne démarre automatiquement.",
+    a: "Oui. Aucune carte bancaire demandée avant le 15 juillet. Après cette date, vous choisissez librement de souscrire, rien ne démarre automatiquement.",
   },
   {
     q: "Que se passe-t-il après le 15 juillet ?",
@@ -280,7 +280,7 @@ const MySubscription = () => {
     if (searchParams.get("success") === "true") {
       const formula = searchParams.get("formula");
       const messages: Record<string, string> = {
-        monthly: "Votre abonnement gardien est activé — bienvenue chez Guardiens.",
+        monthly: "Votre abonnement gardien est activé, bienvenue chez Guardiens.",
         one_shot: "Votre accès d'un mois est actif. Bonne garde !",
         prorata: "Votre accès 2026 est activé. Merci pour votre soutien.",
       };
@@ -288,7 +288,7 @@ const MySubscription = () => {
       setTimeout(() => loadData(), 2000);
       window.history.replaceState({}, "", "/mon-abonnement");
     } else if (searchParams.get("cancelled") === "true") {
-      toast("Paiement annulé — vous pouvez choisir une formule à tout moment.");
+      toast("Paiement annulé, vous pouvez choisir une formule à tout moment.");
       window.history.replaceState({}, "", "/mon-abonnement");
     }
   }, [searchParams, loadData]);
@@ -325,7 +325,7 @@ const MySubscription = () => {
   }
 
   const isFounder = !!profile?.is_founder;
-  const renewalFormatted = sub?.expires_at ? format(new Date(sub.expires_at), "d MMMM yyyy", { locale: fr }) : "—";
+  const renewalFormatted = sub?.expires_at ? format(new Date(sub.expires_at), "d MMMM yyyy", { locale: fr }) : ",";
   const planLabel = sub?.plan === "monthly" ? "Formule mensuelle"
     : sub?.plan === "yearly" ? "Accès 2026"
     : sub?.plan === "oneshot" ? "Accès d'un mois"
@@ -340,11 +340,11 @@ const MySubscription = () => {
   const progressPct = Math.min(100, Math.round(((totalMs - remainingMs) / totalMs) * 100));
 
   // ══════════════════════════════════════════════════════════
-  // VUE — PRE_LAUNCH
+  // VUE, PRE_LAUNCH
   // ══════════════════════════════════════════════════════════
   if (view === "pre_launch") {
     return (
-      <PageShell subtitle="Tout est offert pendant la bêta — aucun paiement avant le 15 juillet 2026.">
+      <PageShell subtitle="Tout est offert pendant la bêta, aucun paiement avant le 15 juillet 2026.">
         {isNewMember && (
           <div className="bg-primary/10 border border-primary/20 rounded-xl px-5 py-4 flex items-start gap-3" role="status" aria-live="polite">
             <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
@@ -367,7 +367,7 @@ const MySubscription = () => {
               Tout est offert jusqu'au 14 juillet 2026.
             </h2>
             <p className="text-base text-muted-foreground font-body max-w-sm leading-relaxed">
-              Guardiens est en version bêta. Toutes les fonctionnalités sont ouvertes — sans restriction.
+              Guardiens est en version bêta. Toutes les fonctionnalités sont ouvertes, sans restriction.
             </p>
             {memberCount !== null && memberCount > 0 && memberCount < 200 && (
               <p className="text-xs text-muted-foreground font-body" aria-live="polite">
@@ -528,7 +528,7 @@ const MySubscription = () => {
 
         {/* Pricing preview */}
         <div className="bg-card border border-border rounded-xl p-5 space-y-3">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground font-body">Après le 15 juillet — la formule</p>
+          <p className="text-xs uppercase tracking-widest text-muted-foreground font-body">Après le 15 juillet, la formule</p>
           <div className="flex flex-col items-center text-center space-y-1">
             <p className="font-heading text-3xl font-bold text-primary">
               6,99 €<span className="text-sm font-normal text-muted-foreground">/mois</span>
@@ -582,11 +582,11 @@ const MySubscription = () => {
   }
 
   // ══════════════════════════════════════════════════════════
-  // VUE — PROPRIÉTAIRE
+  // VUE, PROPRIÉTAIRE
   // ══════════════════════════════════════════════════════════
   if (view === "owner") {
     return (
-      <PageShell subtitle="L'espace propriétaire est offert — sans frais ni engagement.">
+      <PageShell subtitle="L'espace propriétaire est offert, sans frais ni engagement.">
         <section className="bg-card border border-border rounded-xl p-6 sm:p-8 space-y-5">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -595,7 +595,7 @@ const MySubscription = () => {
             <div className="space-y-1">
               <h2 className="text-xl font-heading font-semibold">Tout est offert pour les propriétaires.</h2>
               <p className="text-sm text-muted-foreground font-body">
-                Publiez vos annonces, recevez des candidatures et échangez avec les gardiens — sans frais.
+                Publiez vos annonces, recevez des candidatures et échangez avec les gardiens, sans frais.
               </p>
             </div>
           </div>
@@ -656,7 +656,7 @@ const MySubscription = () => {
   }
 
   // ══════════════════════════════════════════════════════════
-  // VUE — FONDATEUR ACTIF
+  // VUE, FONDATEUR ACTIF
   // ══════════════════════════════════════════════════════════
   if (view === "founder_active") {
     return (
@@ -697,7 +697,7 @@ const MySubscription = () => {
               Choisir ma formule pour le 15 juillet
             </Button>
             <p className="text-xs text-muted-foreground italic text-center max-w-xs font-body">
-              Votre abonnement démarrera le 15 juillet — vous ne perdrez pas un seul jour.
+              Votre abonnement démarrera le 15 juillet, vous ne perdrez pas un seul jour.
             </p>
           </div>
 
@@ -725,7 +725,7 @@ const MySubscription = () => {
   }
 
   // ══════════════════════════════════════════════════════════
-  // VUE — FONDATEUR POST-GRÂCE
+  // VUE, FONDATEUR POST-GRÂCE
   // ══════════════════════════════════════════════════════════
   if (view === "founder_post_grace") {
     return (
@@ -734,7 +734,7 @@ const MySubscription = () => {
           <BadgeSceauLarge id="fondateur" size={52} />
           <h2 className="font-heading text-2xl font-semibold text-foreground">Reprenez là où vous vous êtes arrêté.</h2>
           <p className="text-sm text-muted-foreground font-body max-w-md">
-            Merci d'avoir été là dès le premier jour. Choisissez librement votre formule — votre profil et votre historique sont conservés.
+            Merci d'avoir été là dès le premier jour. Choisissez librement votre formule, votre profil et votre historique sont conservés.
           </p>
         </div>
         <EntraideLibreBanner />
@@ -747,7 +747,7 @@ const MySubscription = () => {
   }
 
   // ══════════════════════════════════════════════════════════
-  // VUE — NON ABONNÉ
+  // VUE, NON ABONNÉ
   // ══════════════════════════════════════════════════════════
   if (view === "never_subscribed") {
     return (
@@ -800,7 +800,7 @@ const MySubscription = () => {
   }
 
   // ══════════════════════════════════════════════════════════
-  // VUE — ABONNÉ ACTIF
+  // VUE, ABONNÉ ACTIF
   // ══════════════════════════════════════════════════════════
   if (view === "subscribed") {
     return (
@@ -844,7 +844,7 @@ const MySubscription = () => {
                     ? "Accès d'un mois"
                     : sub?.plan === "yearly"
                       ? "Accès 2026 prorata"
-                      : "—"}
+                      : ","}
               </span>
             </div>
             <div className="flex justify-between text-sm font-body items-center pt-2 border-t border-border">
@@ -895,11 +895,11 @@ const MySubscription = () => {
   }
 
   // ══════════════════════════════════════════════════════════
-  // VUE — EXPIRÉ
+  // VUE, EXPIRÉ
   // ══════════════════════════════════════════════════════════
   if (view === "expired") {
     return (
-      <PageShell subtitle="Reprenez là où vous vous êtes arrêté — votre profil est conservé.">
+      <PageShell subtitle="Reprenez là où vous vous êtes arrêté, votre profil est conservé.">
         <div className="text-center space-y-3">
           <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center mx-auto">
             <Clock className="h-6 w-6 text-muted-foreground" />
@@ -967,7 +967,7 @@ const MySubscription = () => {
     <PageShell>
       {loadError && (
         <p className="text-xs text-muted-foreground text-center font-body">
-          Impossible de charger votre statut — réessayez.
+          Impossible de charger votre statut, réessayez.
         </p>
       )}
     </PageShell>

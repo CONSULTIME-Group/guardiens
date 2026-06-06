@@ -43,19 +43,19 @@ export default function PricingCardsCheckout() {
             </p>
             <ul className="text-sm font-body space-y-2 mb-6 flex-1">
               <li className="flex items-start gap-2">
-                <span aria-hidden className="text-primary mt-0.5 shrink-0 select-none">—</span>
+                <span aria-hidden className="text-primary mt-0.5 shrink-0 select-none">,</span>
                 <span>Sans engagement</span>
               </li>
               <li className="flex items-start gap-2">
-                <span aria-hidden className="text-primary mt-0.5 shrink-0 select-none">—</span>
+                <span aria-hidden className="text-primary mt-0.5 shrink-0 select-none">,</span>
                 <span>Résiliable en un clic</span>
               </li>
               <li className="flex items-start gap-2">
-                <span aria-hidden className="text-primary mt-0.5 shrink-0 select-none">—</span>
+                <span aria-hidden className="text-primary mt-0.5 shrink-0 select-none">,</span>
                 <span>Accès complet à toutes les fonctionnalités</span>
               </li>
               <li className="flex items-start gap-2">
-                <span aria-hidden className="text-primary mt-0.5 shrink-0 select-none">—</span>
+                <span aria-hidden className="text-primary mt-0.5 shrink-0 select-none">,</span>
                 <span>Aucune commission sur les gardes</span>
               </li>
             </ul>

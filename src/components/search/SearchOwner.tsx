@@ -125,7 +125,7 @@ const SearchOwner = () => {
     );
   }, []);
 
-  // Load owner city + postal code on mount — URL params take precedence
+  // Load owner city + postal code on mount, URL params take precedence
   useEffect(() => {
     const urlCity = searchParams.get("city");
     const urlPostal = searchParams.get("postal_code");
@@ -176,7 +176,7 @@ const SearchOwner = () => {
   // Reference postal code (selected city if available, else user CP)
   const getZoneRefPostalCode = (): string | null => cityPostalCode ?? userPostalCode;
 
-  // Contact handler — propriétaire qui sonde un gardien (context: sitter_inquiry)
+  // Contact handler, propriétaire qui sonde un gardien (context: sitter_inquiry)
   const handleContact = async (sitterId: string) => {
     if (!user) {
       toast.error("Connectez-vous pour contacter un gardien");
@@ -276,11 +276,11 @@ const SearchOwner = () => {
     const shareText = `Je cherche un gardien d'animaux près de ${city || "chez moi"} sur Guardiens. Tu peux t'inscrire ici :`;
     if (navigator.share) {
       try {
-        await navigator.share({ title: "Guardiens — devenez gardien", text: shareText, url });
+        await navigator.share({ title: "Guardiens, devenez gardien", text: shareText, url });
       } catch { /* user cancelled */ }
     } else {
       await navigator.clipboard.writeText(`${shareText} ${url}`);
-      toast.success("Lien copié — partagez-le à une personne de confiance.");
+      toast.success("Lien copié, partagez-le à une personne de confiance.");
     }
   };
 
@@ -314,7 +314,7 @@ const SearchOwner = () => {
       searchCoords = await geocodeCity(city);
     }
 
-    // Compute density counters (always — drives the zone selector UI)
+    // Compute density counters (always, drives the zone selector UI)
     const radiusCount = searchCoords ? items.filter((s: any) => {
       const c = s.profile?.city; if (!c) return false;
       const co = cityCoords.get(c); if (!co) return false;
@@ -529,7 +529,7 @@ const SearchOwner = () => {
   const sortPillBase = "snap-start shrink-0 rounded-full px-3 py-1 min-h-9 inline-flex items-center text-xs border border-border text-muted-foreground cursor-pointer hover:border-primary transition-colors whitespace-nowrap";
   const sortPillActive = "snap-start shrink-0 rounded-full px-3 py-1 min-h-9 inline-flex items-center text-xs bg-foreground text-background cursor-pointer whitespace-nowrap";
 
-  // Zone mode chips — l'option "région" est volontairement absente : la
+  // Zone mode chips, l'option "région" est volontairement absente : la
   // promesse produit est « France entière », pas régionale (mémoire "No AURA").
   const zoneChips: Array<{ key: ZoneMode; label: string; count: number; disabled?: boolean }> = [
     { key: "radius", label: `${radius[0]} km`, count: densityCounts.radius, disabled: !city },
@@ -542,14 +542,14 @@ const SearchOwner = () => {
       {/* Title */}
       <div className="px-6 pt-6 pb-2 md:pt-8 space-y-1.5">
         <h1 className="font-heading text-3xl font-bold">Trouver un gardien</h1>
-        <p className="text-sm text-muted-foreground">Le gardien idéal pour votre maison et vos animaux — du coin par défaut, élargissez à toute la France à tout moment.</p>
+        <p className="text-sm text-muted-foreground">Le gardien idéal pour votre maison et vos animaux, du coin par défaut, élargissez à toute la France à tout moment.</p>
       </div>
 
       {/* Sticky search bar */}
       <div className="sticky top-[52px] md:top-0 z-[1100] bg-background border-b-2 border-border shadow-sm px-6 py-3 space-y-3">
         <div className="relative -mr-6 sm:mr-0">
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pr-10 sm:pr-0 snap-x snap-mandatory scroll-px-6 overscroll-x-contain">
-          {/* PILL 1 — Localisation */}
+          {/* PILL 1, Localisation */}
           <Popover open={openPop === "loc"} onOpenChange={(o) => setOpenPop(o ? "loc" : null)}>
             <PopoverTrigger asChild>
               <button className={city ? pillActive : pillBase}>
@@ -602,7 +602,7 @@ const SearchOwner = () => {
             </PopoverContent>
           </Popover>
 
-          {/* PILL 2 — Rayon (only meaningful in radius zone mode) */}
+          {/* PILL 2, Rayon (only meaningful in radius zone mode) */}
           {zoneMode === "radius" && (
             <Popover open={openPop === "rad"} onOpenChange={(o) => setOpenPop(o ? "rad" : null)}>
               <PopoverTrigger asChild>
@@ -633,8 +633,8 @@ const SearchOwner = () => {
             </Popover>
           )}
 
-          {/* PILL 3 — Dates : retiré tant que la disponibilité datée gardien n'est pas modélisée */}
-          {/* PILL 4 — Animaux */}
+          {/* PILL 3, Dates : retiré tant que la disponibilité datée gardien n'est pas modélisée */}
+          {/* PILL 4, Animaux */}
           <Popover open={openPop === "animals"} onOpenChange={(o) => setOpenPop(o ? "animals" : null)}>
             <PopoverTrigger asChild>
               <button className={animalTypes.length > 0 ? pillActive : pillBase}>{animalLabel}</button>
@@ -646,7 +646,7 @@ const SearchOwner = () => {
             </PopoverContent>
           </Popover>
 
-          {/* PILL 5 — Filtres avancés */}
+          {/* PILL 5, Filtres avancés */}
           <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
             <SheetTrigger asChild>
               <button className={pillBase + " relative"}>
@@ -664,7 +664,7 @@ const SearchOwner = () => {
               </div>
 
               <div className="space-y-6">
-                {/* Section 1 — Disponibilité */}
+                {/* Section 1, Disponibilité */}
                 <div className="space-y-3">
                   <h4 className="text-sm font-medium">Disponibilité</h4>
                   <div className="flex items-center justify-between">
@@ -676,7 +676,7 @@ const SearchOwner = () => {
                   </div>
                 </div>
 
-                {/* Section 2 — Profil de confiance */}
+                {/* Section 2, Profil de confiance */}
                 <div className="space-y-3">
                   <h4 className="text-sm font-medium">Profil de confiance</h4>
                   <div className="flex items-center justify-between">
@@ -689,7 +689,7 @@ const SearchOwner = () => {
                   </div>
                 </div>
 
-                {/* Section 3 — Mobilité */}
+                {/* Section 3, Mobilité */}
                 <div className="space-y-3">
                   <h4 className="text-sm font-medium">Mobilité</h4>
                   <div className="flex items-center justify-between">
@@ -698,7 +698,7 @@ const SearchOwner = () => {
                   </div>
                 </div>
 
-                {/* Section 4 — Expérience */}
+                {/* Section 4, Expérience */}
                 <div className="space-y-3">
                   <h4 className="text-sm font-medium">Gardes validées minimum</h4>
                   <div className="flex gap-2 flex-wrap">
@@ -709,7 +709,7 @@ const SearchOwner = () => {
                   <p className="text-xs text-muted-foreground">Basé sur les gardes réalisées sur Guardiens</p>
                 </div>
 
-                {/* Section 5 — Note moyenne */}
+                {/* Section 5, Note moyenne */}
                 <div className={`space-y-3 ${!hasAnyRating ? "opacity-50 pointer-events-none" : ""}`}>
                   <h4 className="text-sm font-medium">Note minimum</h4>
                   <div className="flex gap-2 flex-wrap">
@@ -850,7 +850,7 @@ const SearchOwner = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {/* Carte 1 — Élargir la zone (si une zone plus large a des résultats) */}
+                {/* Carte 1, Élargir la zone (si une zone plus large a des résultats) */}
                 {expansion && (
                   <button
                     onClick={() => {
@@ -869,7 +869,7 @@ const SearchOwner = () => {
                   </button>
                 )}
 
-                {/* Carte 2 — Créer une alerte */}
+                {/* Carte 2, Créer une alerte */}
                 <button
                   onClick={handleCreateAlert}
                   disabled={!city || alertCreated || isCreatingAlert}
@@ -890,7 +890,7 @@ const SearchOwner = () => {
                   </p>
                 </button>
 
-                {/* Carte 3 — Inviter un voisin */}
+                {/* Carte 3, Inviter un voisin */}
                 <button
                   onClick={handleShareInvite}
                   className="text-left p-4 rounded-xl border border-border bg-card hover:border-primary transition-colors"
@@ -904,7 +904,7 @@ const SearchOwner = () => {
                   </p>
                 </button>
 
-                {/* Carte 4 — Publier annonce visible */}
+                {/* Carte 4, Publier annonce visible */}
                 <button
                   onClick={() => {
                     trackEvent("search_empty_action", { source: "owner", metadata: { action: "create_sit", zone_mode: zoneMode } });
@@ -950,7 +950,7 @@ const SearchOwner = () => {
               {city && alertCreated && (
                 <div className="mb-4 flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-2.5 text-xs text-primary">
                   <BellRing className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                  Alerte créée — vous serez prévenu·e par e-mail.
+                  Alerte créée, vous serez prévenu·e par e-mail.
                 </div>
               )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
@@ -968,7 +968,7 @@ const SearchOwner = () => {
                     aria-label={`Voir le profil de ${firstName}`}
                     className="group relative bg-card rounded-xl overflow-hidden border border-border hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40 transition-all flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    {/* Quick actions — favori + contacter */}
+                    {/* Quick actions, favori + contacter */}
                     <div className="absolute top-2 right-2 z-10 flex items-center gap-1.5">
                       <FavoriteButton targetType="sitter" targetId={s.user_id} />
                       <button
@@ -984,7 +984,7 @@ const SearchOwner = () => {
                       </button>
                     </div>
 
-                    {/* Photo — carré, cadrage haut pour ne pas couper les visages */}
+                    {/* Photo, carré, cadrage haut pour ne pas couper les visages */}
                     <div className="relative">
                       {profile?.avatar_url ? (
                         <div className="aspect-square w-full overflow-hidden bg-muted">
@@ -1036,7 +1036,7 @@ const SearchOwner = () => {
                         )}
                       </div>
 
-                      {/* Animal pills — zone réservée pour aligner */}
+                      {/* Animal pills, zone réservée pour aligner */}
                       <div className="flex flex-wrap gap-1 mt-1.5 min-h-[1.5rem]">
                         {sitterAnimalTypes.slice(0, 3).map((a: string) => (
                           <span key={a} className="text-[11px] bg-muted text-foreground/80 rounded-full px-2 py-0.5">{a}</span>
@@ -1046,7 +1046,7 @@ const SearchOwner = () => {
                         )}
                       </div>
 
-                      {/* Bio — zone réservée 2 lignes pour aligner les cartes */}
+                      {/* Bio, zone réservée 2 lignes pour aligner les cartes */}
                       <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 min-h-[2rem]">
                         {bio || <span className="opacity-0">.</span>}
                       </p>

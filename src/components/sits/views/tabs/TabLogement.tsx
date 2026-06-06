@@ -1,7 +1,7 @@
 /**
  * Onglet "Logement & quartier" : description + équipements + photos extra
  * + lien guide local + LocationProfileCard.
- * Aucune icône Lucide décorative — seules ChevronRight (nav) reste.
+ * Aucune icône Lucide décorative, seules ChevronRight (nav) reste.
  */
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";

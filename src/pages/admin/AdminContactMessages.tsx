@@ -277,7 +277,7 @@ const AdminContactMessages = () => {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{msg.assigned_to || "—"}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{msg.assigned_to || ","}</TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-1">
                         <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => handleView(msg)}>

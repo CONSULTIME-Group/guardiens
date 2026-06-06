@@ -30,7 +30,7 @@ const PageBreadcrumb = ({ items }: PageBreadcrumbProps) => {
   const currentPath = location.pathname.replace(/\/+$/, "") || "/";
   const currentUrl = `${BASE_URL}${currentPath}`;
 
-  // Schema.org BreadcrumbList — every ListItem MUST have an `item` URL
+  // Schema.org BreadcrumbList, every ListItem MUST have an `item` URL
   // (Google now flags missing URLs on the last item as invalid).
   const schemaItems = allItems.map((item, i) => {
     const isLast = i === allItems.length - 1;

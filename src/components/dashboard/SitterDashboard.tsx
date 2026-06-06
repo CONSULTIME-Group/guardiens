@@ -65,10 +65,10 @@ const SitterDashboard = () => {
   const subtitle = nextGuard
     ? `Votre prochaine garde est dans ${nextGuard.daysUntil} jour${nextGuard.daysUntil > 1 ? "s" : ""}.`
     : hasAcceptedRecent
-    ? "Félicitations — votre candidature a été acceptée."
+    ? "Félicitations, votre candidature a été acceptée."
     : "Explorez les annonces près de chez vous.";
 
-  // ── Checklist UNIFIÉE — fusion onboarding + profile completion ──
+  // ── Checklist UNIFIÉE, fusion onboarding + profile completion ──
   // Items atomiques actionnables (pas l'agrégat profile_completion).
   // NB : le toggle "mode disponible" est porté UNIQUEMENT par SitterHero
   // (source de vérité unique). On ne le duplique plus ici.
@@ -87,7 +87,7 @@ const SitterDashboard = () => {
   // ── Bloc activation unifié ──
   const ChecklistBlock = (
     <section aria-labelledby="onboarding-checklist-heading" className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
-      {/* Toast inline CP manquant — remplace le bandeau destructif full-width */}
+      {/* Toast inline CP manquant, remplace le bandeau destructif full-width */}
       {!postalCode && (
         <div className="mb-3 flex items-start gap-3 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3" role="alert">
           <AlertCircle className="h-4 w-4 text-warning shrink-0 mt-0.5" aria-hidden="true" />
@@ -108,7 +108,7 @@ const SitterDashboard = () => {
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-primary" aria-hidden="true" />
                 <span className="text-sm font-medium text-primary">
-                  Profil prêt — {allItems.length}/{allItems.length} étapes complétées
+                  Profil prêt, {allItems.length}/{allItems.length} étapes complétées
                 </span>
               </div>
             </AccordionTrigger>
@@ -132,7 +132,7 @@ const SitterDashboard = () => {
           <div className="mb-3">
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs text-muted-foreground">
-                {completedItems.length}/{allItems.length} étapes — {progressPct}%
+                {completedItems.length}/{allItems.length} étapes, {progressPct}%
               </span>
             </div>
             <Progress value={progressPct} />
@@ -181,7 +181,7 @@ const SitterDashboard = () => {
   // le bas de dashboard et clarifier la hiérarchie (1 zone "à explorer"
   // au lieu de 3 cartes empilées). Toutes fermées par défaut.
   const SecondaryAccordion = (
-    <section aria-label="Mon espace gardien — détails" className="rounded-2xl border border-border bg-card overflow-hidden">
+    <section aria-label="Mon espace gardien, détails" className="rounded-2xl border border-border bg-card overflow-hidden">
       <Accordion type="single" collapsible>
         <AccordionItem value="conseils" className="border-b border-border last:border-0">
           <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
@@ -280,7 +280,7 @@ const SitterDashboard = () => {
     </section>
   );
 
-  // Emergency en version compacte (1 ligne) — l'ancienne carte ~200px était
+  // Emergency en version compacte (1 ligne), l'ancienne carte ~200px était
   // disproportionnée pour une fonction conditionnelle.
   const buildEmergencyBlock = (sidebar: boolean) => (
     <section
@@ -294,12 +294,12 @@ const SitterDashboard = () => {
     </section>
   );
 
-  // ── Zone Découverte — sections indépendantes (plus d'onglets).
+  // ── Zone Découverte, sections indépendantes (plus d'onglets).
   // Ordre validé : Annonces → Coup de main → Conseils (replié).
   // Logique d'emptiness : on évite d'afficher 2 cartes vides côte à côte.
   // - Annonces : si rien dans 100 km, on remplace la carte par 1 message clair.
   // - Coup de main : si pas de missions (mienne ni du coin), on masque
-  //   SitterMissionsSection — la carte helpers (qui a son propre empty-state
+  //   SitterMissionsSection, la carte helpers (qui a son propre empty-state
   //   premium avec CTA parrainage) reste seule visible et porte le message.
   const annoncesEmpty = !nearbyError && nearbyListings.length === 0;
   const missionsEmpty =
@@ -308,7 +308,7 @@ const SitterDashboard = () => {
 
   const DiscoverySections = (
     <div className="space-y-6 min-w-0">
-      {/* 1. Annonces — zone PRIMARY (vert sapin) : garde rémunérée */}
+      {/* 1. Annonces, zone PRIMARY (vert sapin) : garde rémunérée */}
       <section
         aria-labelledby="discovery-annonces-heading"
         className="relative rounded-2xl bg-primary/[0.04] ring-1 ring-primary/15 p-3 sm:p-5 min-w-0 overflow-hidden"
@@ -331,7 +331,7 @@ const SitterDashboard = () => {
         </div>
       </section>
 
-      {/* 2. Coup de main — zone WARNING (ambre) : entraide */}
+      {/* 2. Coup de main, zone WARNING (ambre) : entraide */}
       <section
         aria-labelledby="discovery-missions-heading"
         className="relative rounded-2xl bg-warning/[0.06] ring-1 ring-warning/20 p-3 sm:p-5 min-w-0 overflow-hidden"
@@ -385,7 +385,7 @@ const SitterDashboard = () => {
         nearbyListings={nearbyListings}
       />
 
-      {/* Erreurs de fetch — affichées discrètement sous le cockpit pour ne pas
+      {/* Erreurs de fetch, affichées discrètement sous le cockpit pour ne pas
           polluer le pli, mais restent visibles pour debug utilisateur. */}
       {(nextGuardError || nearbyError) && (
         <div className="px-4 sm:px-5 md:px-8 mt-2 space-y-2">
@@ -408,7 +408,7 @@ const SitterDashboard = () => {
         </div>
       )}
 
-      {/* FreePeriodBanner — 1 ligne sous le cockpit, pas un bloc en hero */}
+      {/* FreePeriodBanner, 1 ligne sous le cockpit, pas un bloc en hero */}
       {!nextGuard && (
         <div className="px-4 sm:px-5 md:px-8 mt-3">
           <FreePeriodBanner />
@@ -425,9 +425,9 @@ const SitterDashboard = () => {
 
             {/* ═══ 2-COLUMN LAYOUT ≥ xl ═══ */}
 
-            {/* Version pleine largeur — visible < xl */}
+            {/* Version pleine largeur, visible < xl */}
             <div className="xl:hidden mt-4">
-              {/* Checklist — toujours rendue sous le cockpit en mobile (l'empty-state
+              {/* Checklist, toujours rendue sous le cockpit en mobile (l'empty-state
                   est déjà géré par la PriorityActionCard du cockpit). */}
               {ChecklistBlock}
 
@@ -444,9 +444,9 @@ const SitterDashboard = () => {
         );
       })()}
 
-      {/* Version 2 colonnes — visible ≥ xl */}
+      {/* Version 2 colonnes, visible ≥ xl */}
       <div className="hidden xl:grid xl:grid-cols-12 xl:gap-6 xl:px-8 min-w-0 mt-4">
-        {/* MAIN COLUMN — 8/12 */}
+        {/* MAIN COLUMN, 8/12 */}
         <div className="xl:col-span-8 min-w-0">
           <div className="[&>*]:!px-0 [&>*]:!mx-0">
             {ChecklistBlock}
@@ -457,7 +457,7 @@ const SitterDashboard = () => {
           </div>
         </div>
 
-        {/* SIDE COLUMN — 4/12 — ACTIONS UNIQUEMENT (audit #3 : pas de décoration en aside) */}
+        {/* SIDE COLUMN, 4/12, ACTIONS UNIQUEMENT (audit #3 : pas de décoration en aside) */}
         <aside aria-label="Actions rapides" className="xl:col-span-4 min-w-0">
           <QuickActionsCard
             pendingAppsCount={pendingAppsCount}
@@ -468,14 +468,14 @@ const SitterDashboard = () => {
         </aside>
       </div>
 
-      {/* Statut / badges / urgence — pleine largeur sous le layout 2 colonnes en xl.
+      {/* Statut / badges / urgence, pleine largeur sous le layout 2 colonnes en xl.
           Sur < xl, déjà rendus dans la version pleine largeur ci-dessus. */}
       <div className="hidden xl:block xl:px-8 mt-6 space-y-3">
         {SecondaryAccordion}
         {buildEmergencyBlock(false)}
       </div>
 
-      {/* Lien discret "Revoir la présentation" — relégué en pied */}
+      {/* Lien discret "Revoir la présentation", relégué en pied */}
       <div className="px-4 sm:px-5 md:px-8 mt-2 mb-4 text-center">
         <button onClick={() => setSearchParams({ tour: "true" })} className="text-xs text-muted-foreground underline-offset-4 hover:underline">
           Revoir la présentation

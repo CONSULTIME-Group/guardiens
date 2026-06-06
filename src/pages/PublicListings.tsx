@@ -1,6 +1,6 @@
-// Page publique éditoriale — toutes les annonces de garde ouvertes.
-// Réutilise le moteur de recherche complet (SearchSitter) — filtres,
-// département/ville/critères + carte live — mais dans un shell public
+// Page publique éditoriale, toutes les annonces de garde ouvertes.
+// Réutilise le moteur de recherche complet (SearchSitter), filtres,
+// département/ville/critères + carte live, mais dans un shell public
 // (header + footer), sans la sidebar dashboard.
 import { Suspense, useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
@@ -188,25 +188,25 @@ export default function PublicListings() {
               <li>
                 <Link to="/petites-missions" className="group inline-flex items-baseline gap-2 text-foreground hover:text-primary transition-colors">
                   <span className="font-medium">Petites missions</span>
-                  <span className="text-muted-foreground">— coups de main de proximité, gratuits</span>
+                  <span className="text-muted-foreground">, coups de main de proximité, gratuits</span>
                 </Link>
               </li>
               <li>
                 <Link to="/guides-locaux" className="group inline-flex items-baseline gap-2 text-foreground hover:text-primary transition-colors">
                   <span className="font-medium">Guides locaux</span>
-                  <span className="text-muted-foreground">— villes et conseils</span>
+                  <span className="text-muted-foreground">, villes et conseils</span>
                 </Link>
               </li>
               <li>
                 <Link to="/tarifs" className="group inline-flex items-baseline gap-2 text-foreground hover:text-primary transition-colors">
                   <span className="font-medium">Tarifs gardien</span>
-                  <span className="text-muted-foreground">— 6,99 €/mois ou 12 € one-shot</span>
+                  <span className="text-muted-foreground">, 6,99 €/mois ou 12 € one-shot</span>
                 </Link>
               </li>
               <li>
                 <Link to="/annonces/international" className="group inline-flex items-baseline gap-2 text-foreground hover:text-primary transition-colors">
                   <span className="font-medium">Annonces hors France</span>
-                  <span className="text-muted-foreground">— Maroc, Espagne, Belgique…</span>
+                  <span className="text-muted-foreground">, Maroc, Espagne, Belgique…</span>
                 </Link>
               </li>
             </ul>

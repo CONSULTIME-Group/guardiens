@@ -188,7 +188,7 @@ const ConversationHeader = ({
     if (error) { toast.error("Erreur"); return; }
     toast.success(`Candidature de ${sitterName} acceptée`);
 
-    // Email transactionnel — sitter informé de l'acceptation (non-bloquant)
+    // Email transactionnel, sitter informé de l'acceptation (non-bloquant)
     sendTransactionalEmail({
       templateName: "application-accepted",
       recipientUserId: conv.sitter_id,
@@ -212,7 +212,7 @@ const ConversationHeader = ({
     if (error) { toast.error("Erreur"); return; }
     toast.success("Candidature déclinée");
 
-    // Email transactionnel — sitter informé du refus (non-bloquant)
+    // Email transactionnel, sitter informé du refus (non-bloquant)
     sendTransactionalEmail({
       templateName: "application-declined",
       recipientUserId: conv.sitter_id,
@@ -225,7 +225,7 @@ const ConversationHeader = ({
 
   return (
     <div className="border-b border-border bg-card">
-      {/* Line 1 — Avatar + Name + Badge + Actions */}
+      {/* Line 1, Avatar + Name + Badge + Actions */}
       <div className="flex items-start justify-between gap-3 p-4">
         <div className="flex items-center gap-3 min-w-0">
           {isMobile && (
@@ -262,7 +262,7 @@ const ConversationHeader = ({
                 </span>
               )}
               {isFounder && <FounderBadge size="sm" />}
-              {/* MOD 3/7 — Application status badge in header */}
+              {/* MOD 3/7, Application status badge in header */}
               {appBadge && !isSmallMission && (
                 <span className={`${appBadge.className} rounded-full px-2 py-0.5 text-xs shrink-0`}>
                   {appBadge.label}
@@ -315,7 +315,7 @@ const ConversationHeader = ({
         </div>
       </div>
 
-      {/* Line 2 — Sit context: title + dates + city (du propriétaire = lieu de la garde) */}
+      {/* Line 2, Sit context: title + dates + city (du propriétaire = lieu de la garde) */}
       {conv.sit_id && conv.sit?.title && (
         <div className="px-4 py-2 border-t border-border/50 bg-accent/30">
           <p

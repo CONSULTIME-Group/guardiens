@@ -106,7 +106,7 @@ const PriorityActions = ({ topPages }: PriorityActionsProps) => {
         <CardContent>
           <div className="flex items-center gap-3 p-4 rounded-lg bg-emerald-50 text-emerald-700">
             <CheckCircle2 className="h-5 w-5" />
-            <span className="text-sm font-medium">Tout va bien — continuez à publier 🚀</span>
+            <span className="text-sm font-medium">Tout va bien, continuez à publier 🚀</span>
           </div>
         </CardContent>
       </Card>

@@ -131,7 +131,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  ip_address: ipAddress,
  });
  if (error) throw error;
- toast("Accord confirmé — merci !");
+ toast("Accord confirmé, merci !");
  setAlreadySigned({ accepted_at: new Date().toISOString() });
  onClose?.();
  } else {
@@ -143,12 +143,12 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  p_ip_address: null,
  });
  if (error) throw error;
- toast("Accord confirmé — vous recevrez le PDF par email.");
+ toast("Accord confirmé, vous recevrez le PDF par email.");
  onClose?.();
  }
  } catch (err: any) {
  console.error("[AccordDeGarde] accept failed", err);
- toast.error(err?.message || "Une erreur est survenue — réessayez dans un instant.");
+ toast.error(err?.message || "Une erreur est survenue, réessayez dans un instant.");
  } finally {
  setIsLoading(false);
  }
@@ -164,7 +164,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  Signé le{" "}
  {alreadySigned.accepted_at
  ? format(new Date(alreadySigned.accepted_at), "d MMMM yyyy 'à' HH:mm", { locale: fr })
- : "—"}
+ : ","}
  </p>
  {onClose && (
  <button
@@ -180,7 +180,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
 
  const buttonLabel =
  role === "gardien"
- ? "C'est bon pour moi — j'ai lu et j'accepte"
+ ? "C'est bon pour moi, j'ai lu et j'accepte"
  : "C'est bon pour moi →";
 
  return (
@@ -231,8 +231,8 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  <p className="font-semibold text-sm mb-2">Ce que {g} prend en charge</p>
  <ul className="space-y-1">
  <li className="text-sm pl-3 border-l-2 border-primary/30">Prendre soin des animaux selon les habitudes décrites dans le guide de la maison, du premier au dernier jour.</li>
- <li className="text-sm pl-3 border-l-2 border-primary/30">Donner des nouvelles régulièrement — une photo ou un message court suffit.</li>
- <li className="text-sm pl-3 border-l-2 border-primary/30">Prévenir {p} sans attendre en cas d'imprévu — animal, logement, question.</li>
+ <li className="text-sm pl-3 border-l-2 border-primary/30">Donner des nouvelles régulièrement, une photo ou un message court suffit.</li>
+ <li className="text-sm pl-3 border-l-2 border-primary/30">Prévenir {p} sans attendre en cas d'imprévu, animal, logement, question.</li>
  <li className="text-sm pl-3 border-l-2 border-primary/30">Laisser le logement propre et en bon état au départ.</li>
  <li className="text-sm pl-3 border-l-2 border-primary/30">Ne pas donner accès au logement à une tierce personne sans accord explicite de {p}.</li>
  </ul>
@@ -282,7 +282,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  {garde.urgences?.vetNom ? (
  <p>Vétérinaire habituel : {garde.urgences.vetNom} · {garde.urgences.vetTel} · {garde.urgences.vetAdresse}</p>
  ) : (
- <p className="italic text-muted-foreground">Vétérinaire non renseigné — à compléter dans le guide.</p>
+ <p className="italic text-muted-foreground">Vétérinaire non renseigné, à compléter dans le guide.</p>
  )}
  {garde.urgences?.urgences24h && (
  <p>Urgences 24h/24 : {garde.urgences.urgences24h}</p>
@@ -294,7 +294,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  </p>
  ) : (
  <p className="italic text-muted-foreground text-sm mt-3">
- Montant non renseigné — à convenir entre les parties. 150€ est une base courante.
+ Montant non renseigné, à convenir entre les parties. 150€ est une base courante.
  </p>
  )}
  </div>
@@ -303,7 +303,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  <div>
  <p className="font-semibold text-sm mb-2">Si quelque chose se passe dans le logement</p>
  <p className="text-sm">
- La première chose à faire est de prévenir {p}. {g} ne contacte aucun artisan sans accord préalable, sauf urgence manifeste — fuite d'eau active ou panne de chauffage en hiver.
+ La première chose à faire est de prévenir {p}. {g} ne contacte aucun artisan sans accord préalable, sauf urgence manifeste, fuite d'eau active ou panne de chauffage en hiver.
  </p>
  {garde.montantLogementMax != null && (
  <p className="text-sm mt-2">
@@ -332,10 +332,10 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  Le logement de {p} est couvert par son assurance habitation pour les sinistres liés au bâtiment. {g} vérifie que sa responsabilité civile personnelle est active avant la garde. En cas de doute, un appel à son assureur avant le départ règle la question.
  </p>
  <p className="text-sm mt-3">
- Si un animal causait un dommage à une tierce personne pendant la garde, c'est l'assurance habitation de {p} qui a vocation à intervenir — pas la responsabilité de {g}. Un point à vérifier avec son assureur avant de partir.
+ Si un animal causait un dommage à une tierce personne pendant la garde, c'est l'assurance habitation de {p} qui a vocation à intervenir, pas la responsabilité de {g}. Un point à vérifier avec son assureur avant de partir.
  </p>
  <p className="text-sm mt-3">
- Si {g} se blessait dans le logement, chaque partie reste couverte par sa propre assurance. On recommande à {g} de vérifier sa couverture accidents personnelle avant la garde — ça prend cinq minutes.
+ Si {g} se blessait dans le logement, chaque partie reste couverte par sa propre assurance. On recommande à {g} de vérifier sa couverture accidents personnelle avant la garde, ça prend cinq minutes.
  </p>
  <p className="italic text-xs text-muted-foreground mt-2">
  Cet accord ne remplace pas vos assurances respectives.
@@ -359,7 +359,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
 
  <hr className="border-border my-2" />
  <p className="text-center text-xs text-muted-foreground">
- Accord généré par Guardiens — en attente de confirmation des deux parties.
+ Accord généré par Guardiens, en attente de confirmation des deux parties.
  </p>
  <a
  href="/faq#avant-la-garde"

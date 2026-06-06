@@ -10,7 +10,7 @@ const normalizeWhitespace = (s: string) =>
 
 const stripBullet = (s: string) =>
   s
-    .replace(/^\s*(?:[-*•–—→▪►●·★☆▶▷▸▹»>]+|[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u2600-\u27BF])+\s*/u, "")
+    .replace(/^\s*(?:[-*•–,→▪►●·★☆▶▷▸▹»>]+|[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u2600-\u27BF])+\s*/u, "")
     .replace(/^\s*\d+\s*[)°.\-/:]\s*/, "")
     .replace(/^[\s*_`~]+/, "")
     .replace(/[\s*_`~]+$/, "")
@@ -52,12 +52,12 @@ export const parseRoutine = (raw: string | null) => {
   const cleaned = normalizeWhitespace(raw);
 
   const segments = cleaned
-    .split(/\r?\n+|\s*[•|]\s*|\s+\/\s+|\s+[—–]\s+(?=(?:matin|midi|soir|nuit|apr|aprem|apr[èeé]m)\b)|\s*[,;]\s+(?=(?:matin|midi|soir|nuit|apr|aprem|apr[èeé]m)\b)|\s+(?=\d+\s*[)°.\-/:]\s*(?:matin|midi|soir|nuit|apr|aprem|apr[èeé]m)\b)/i)
+    .split(/\r?\n+|\s*[•|]\s*|\s+\/\s+|\s+[,–]\s+(?=(?:matin|midi|soir|nuit|apr|aprem|apr[èeé]m)\b)|\s*[,;]\s+(?=(?:matin|midi|soir|nuit|apr|aprem|apr[èeé]m)\b)|\s+(?=\d+\s*[)°.\-/:]\s*(?:matin|midi|soir|nuit|apr|aprem|apr[èeé]m)\b)/i)
     .map((l) => stripBullet(l))
     .filter(Boolean);
 
   const re =
-    /^[\s«»"'(\[\{*_`~]*\s*(matin|midi|soir|nuit|apr[èeé]s?[- ]?midi|apr[èeé]m(?:[- ]?midi)?|aprem(?:[- ]?midi)?)\s*[»"'\]\)\}*_`~]*\s*(?:(?:\([^)]*\)|\[[^\]]*\]|\{[^}]*\})\s*)*[—–\-:.\)=→»]?\s*(.*)$/i;
+    /^[\s«»"'(\[\{*_`~]*\s*(matin|midi|soir|nuit|apr[èeé]s?[- ]?midi|apr[èeé]m(?:[- ]?midi)?|aprem(?:[- ]?midi)?)\s*[»"'\]\)\}*_`~]*\s*(?:(?:\([^)]*\)|\[[^\]]*\]|\{[^}]*\})\s*)*[,–\-:.\)=→»]?\s*(.*)$/i;
 
   const blocks: { key: string; label: string; text: string }[] = [];
   const leftover: string[] = [];

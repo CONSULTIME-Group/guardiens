@@ -5,7 +5,7 @@ import HintBubble from "./HintBubble";
 import ChipSelect from "./ChipSelect";
 import type { SitterProfileData } from "@/hooks/useSitterProfile";
 
-const VEHICLE_OPTIONS = ["Oui — voiture", "Oui — moto", "Non — transports en commun", "Non — vélo uniquement"];
+const VEHICLE_OPTIONS = ["Oui, voiture", "Oui, moto", "Non, transports en commun", "Non, vélo uniquement"];
 
 const DURATION_OPTIONS = ["1-3 jours", "1 semaine", "2 semaines", "1 mois", "Flexible"];
 const DURATION_VALUES: Record<string, string> = {
@@ -85,7 +85,7 @@ const StepMobility = ({ data, onChange }: Props) => {
           min={10} max={100} step={5}
           className="py-2"
         />
-        <HintBubble>Plus votre rayon est large, plus vous verrez d'annonces. Mais la proximité est un atout — les propriétaires préfèrent les gardiens proches.</HintBubble>
+        <HintBubble>Plus votre rayon est large, plus vous verrez d'annonces. Mais la proximité est un atout, les propriétaires préfèrent les gardiens proches.</HintBubble>
       </div>
 
       {/* Durée minimum souhaitée */}
@@ -153,7 +153,7 @@ const StepMobility = ({ data, onChange }: Props) => {
           }}
         />
         <p className="text-xs text-muted-foreground">
-          Vos préférences — pas une contrainte. Cela aide les propriétaires à vous choisir.
+          Vos préférences, pas une contrainte. Cela aide les propriétaires à vous choisir.
         </p>
       </div>
     </div>

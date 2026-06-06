@@ -34,7 +34,7 @@ export const FreePeriodBanner = ({ className = "" }: FreePeriodBannerProps) => {
       <div className="container mx-auto flex flex-col items-center justify-center gap-1 px-4 py-2.5 text-center text-sm sm:flex-row sm:gap-3">
         <span className="font-semibold">À 0 € pour tous</span>
         <span className="text-foreground/80">
-          jusqu'au {lastDayLabel} inclus — abonnement requis à partir du {endLabel}.
+          jusqu'au {lastDayLabel} inclus, abonnement requis à partir du {endLabel}.
         </span>
       </div>
     </div>

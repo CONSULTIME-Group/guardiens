@@ -34,13 +34,13 @@ interface MassEmail {
   status: string;
 }
 
-// Campagne "Oser demander" — pré-remplie pour faciliter l'envoi en 1 clic.
+// Campagne "Oser demander", pré-remplie pour faciliter l'envoi en 1 clic.
 const OSER_SUBJECT = "Et si vous osiez demander, vous aussi ?";
 const OSER_BODY = `Bonjour,
 
 Vous connaissez ce moment : un rendez-vous qui tombe mal, un week-end qui s'annonce, et personne pour passer nourrir le chat ou sortir le chien. On encaisse, on s'organise seul, on n'ose pas déranger.
 
-Pourtant, autour de vous, il y a des gens prêts à donner un coup de main — gratuitement, simplement, parce que ça leur fait plaisir.
+Pourtant, autour de vous, il y a des gens prêts à donner un coup de main, gratuitement, simplement, parce que ça leur fait plaisir.
 
 À Hyères, <strong>Annie</strong> vient de proposer de partager son savoir avec qui en aurait besoin. Et autour d'elle, on voit aussi passer une <strong>séance de Reiki</strong> à échanger contre un service, des <strong>cours de pain maison</strong>, un <strong>coup de main pour un déménagement</strong>, un <strong>café & écoute</strong> partagé un dimanche, ou encore quelques heures pour <strong>arroser les plantes</strong> ou <strong>réceptionner un colis</strong>.
 
@@ -48,7 +48,7 @@ C'est ça, l'entraide chez Guardiens : des gens du coin, des animaux à choyer, 
 
 La seule chose qui manque encore ? <strong>Votre demande à vous.</strong>
 
-Trois minutes suffisent pour la publier. Et très souvent, c'est la première réponse reçue qui change tout — qui prouve qu'on n'est pas seul, que ça marche, qu'on peut compter sur les autres.
+Trois minutes suffisent pour la publier. Et très souvent, c'est la première réponse reçue qui change tout, qui prouve qu'on n'est pas seul, que ça marche, qu'on peut compter sur les autres.
 
 Pour comprendre comment ça fonctionne concrètement, <a href="https://guardiens.fr/actualites/petites-missions-entraide-guardiens?utm_source=mass_email&utm_campaign=oser-2026-05&utm_content=article" style="color:#2C6E49;font-weight:600;text-decoration:underline">lisez notre article dédié aux petites missions d'entraide</a>.
 
@@ -58,7 +58,7 @@ Et si c'était aujourd'hui ?
 L'équipe Guardiens.`;
 
 const AdminMassEmails = () => {
-  // Form state — pré-rempli avec la campagne "Oser demander"
+  // Form state, pré-rempli avec la campagne "Oser demander"
   const [segment, setSegment] = useState<Segment>("tous");
   const [filters, setFilters] = useState<MassEmailFilters>({});
   const [subject, setSubject] = useState(OSER_SUBJECT);
@@ -160,7 +160,7 @@ const AdminMassEmails = () => {
         },
       });
       if (error) throw error;
-      toast.success(`Envoi lancé — ${data.sent} emails en cours d'expédition`);
+      toast.success(`Envoi lancé, ${data.sent} emails en cours d'expédition`);
       setSubject(""); setBody(""); setCtaEnabled(false); setCtaLabel(""); setCtaUrl("");
       loadHistory();
     } catch (err: any) {
@@ -197,7 +197,7 @@ const AdminMassEmails = () => {
                     <Loader2 className="h-3 w-3 animate-spin" /> Calcul…
                   </span>
                 ) : (
-                  `→ ${recipientCount ?? "—"} destinataires correspondent à ces critères`
+                  `→ ${recipientCount ?? ","} destinataires correspondent à ces critères`
                 )}
               </p>
             </CardContent>
@@ -307,7 +307,7 @@ const AdminMassEmails = () => {
                 <p className="text-xs text-muted-foreground">
                   Tout est pré-rempli et tracé (campaign : <code className="font-mono">{effectiveCampaign}</code>).
                   Cliquez ci-dessous pour ouvrir l'aperçu, puis confirmez l'envoi à{" "}
-                  <strong className="text-foreground">{recipientCount ?? "—"}</strong> destinataires.
+                  <strong className="text-foreground">{recipientCount ?? ","}</strong> destinataires.
                 </p>
               </div>
             </div>
@@ -410,7 +410,7 @@ const AdminMassEmails = () => {
                 <div className="text-sm space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Objet</span>
-                    <span className="font-medium text-right max-w-[60%] truncate">{subject || "—"}</span>
+                    <span className="font-medium text-right max-w-[60%] truncate">{subject || ","}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Corps</span>
@@ -427,7 +427,7 @@ const AdminMassEmails = () => {
                 <div className="rounded-lg border border-border p-4 space-y-2">
                   <h3 className="text-sm font-semibold">Lien & tracking</h3>
                   <div className="text-xs text-muted-foreground break-all bg-muted/40 p-2 rounded">
-                    {withUtm(ctaUrl) || "—"}
+                    {withUtm(ctaUrl) || ","}
                   </div>
                   {utmEnabled && (
                     <div className="flex flex-wrap gap-1.5 text-xs">
@@ -471,7 +471,7 @@ const AdminMassEmails = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Confirmation finale — saisie obligatoire du nombre de destinataires */}
+      {/* Confirmation finale, saisie obligatoire du nombre de destinataires */}
       <AlertDialog
         open={confirmOpen}
         onOpenChange={(open) => {

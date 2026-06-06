@@ -56,9 +56,9 @@ const SLUG_LABELS: Record<string, string> = {
   "yorkshire-terrier-guide-race": "Yorkshire Terrier",
   "beagle-guide-race": "Beagle",
   "maine-coon-guide-race": "Maine Coon",
-  "jardinage-entraide-quartier-grenoble": "Jardinage & échange — Grenoble",
-  "aide-courses-entraide-annecy": "Aide courses — Annecy",
-  "bricolage-entraide-chambery": "Bricolage — Chambéry",
+  "jardinage-entraide-quartier-grenoble": "Jardinage & échange, Grenoble",
+  "aide-courses-entraide-annecy": "Aide courses, Annecy",
+  "bricolage-entraide-chambery": "Bricolage, Chambéry",
 };
 
 function humanizeSlug(slug: string): string {
@@ -146,7 +146,7 @@ const ContentToCreate = () => {
                     <TableCell className="text-right">{current}</TableCell>
                     <TableCell className="text-right text-muted-foreground">{obj.goal}</TableCell>
                     <TableCell className="text-right">
-                      {missing > 0 ? <span className="font-medium text-destructive">{missing}</span> : "—"}
+                      {missing > 0 ? <span className="font-medium text-destructive">{missing}</span> : ","}
                     </TableCell>
                     <TableCell className="text-center">
                       {status === "done" ? (

@@ -89,7 +89,7 @@ const GuidesListing = () => {
   return (
     <>
       <PageMeta
-        title="Guides locaux pet sitting — Parcs, vétos, cafés dog-friendly | Guardiens"
+        title="Guides locaux pet sitting, Parcs, vétos, cafés dog-friendly | Guardiens"
         description="Guides pratiques pour gardiens d'animaux : parcs dog-friendly, vétérinaires, cafés accueillants, sentiers de balade. Tout savoir avant d'arriver dans une nouvelle ville."
         path="/guides"
       />
@@ -107,7 +107,7 @@ const GuidesListing = () => {
               Guides locaux
             </h1>
             <p className="text-muted-foreground text-lg max-w-xl">
-              Où promener, où soigner, où bruncher — tout ce qu'un gardien doit savoir en arrivant dans une nouvelle ville.
+              Où promener, où soigner, où bruncher, tout ce qu'un gardien doit savoir en arrivant dans une nouvelle ville.
             </p>
           </div>
         </header>

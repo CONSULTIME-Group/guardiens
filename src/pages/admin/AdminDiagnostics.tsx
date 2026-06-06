@@ -155,7 +155,7 @@ const AdminDiagnostics = () => {
       const cur = m.get(r.sit_id) || {
         total: 0,
         pending: 0,
-        title: r.sit?.title || "—",
+        title: r.sit?.title || ",",
       };
       cur.total += 1;
       if (r.status === "pending") cur.pending += 1;
@@ -168,7 +168,7 @@ const AdminDiagnostics = () => {
     <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Diagnostic — Candidatures</h1>
+          <h1 className="text-2xl font-bold text-foreground">Diagnostic, Candidatures</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Liste des candidatures retournées par la requête Supabase{" "}
             <code className="text-xs bg-muted px-1.5 py-0.5 rounded">applications</code> avec
@@ -189,11 +189,11 @@ const AdminDiagnostics = () => {
         <CardContent className="space-y-1.5 text-sm">
           <div className="flex gap-2">
             <span className="text-muted-foreground w-32">auth.uid()</span>
-            <code className="text-xs bg-muted px-2 py-0.5 rounded">{user?.id || "—"}</code>
+            <code className="text-xs bg-muted px-2 py-0.5 rounded">{user?.id || ","}</code>
           </div>
           <div className="flex gap-2">
             <span className="text-muted-foreground w-32">email</span>
-            <span>{user?.email || "—"}</span>
+            <span>{user?.email || ","}</span>
           </div>
           <div className="flex gap-2 items-center">
             <span className="text-muted-foreground w-32">rôle admin</span>
@@ -380,20 +380,20 @@ const AdminDiagnostics = () => {
                           to={`/sits/${r.sit_id}`}
                           className="hover:underline text-primary text-sm"
                         >
-                          {r.sit?.title || "—"}
+                          {r.sit?.title || ","}
                         </Link>
                       </TableCell>
                       <TableCell className="text-sm">
                         {r.owner
                           ? `${r.owner.first_name || ""} ${r.owner.last_name || ""}`.trim() ||
-                            "—"
-                          : "—"}
+                            ","
+                          : ","}
                       </TableCell>
                       <TableCell className="text-sm">
                         {r.sitter
                           ? `${r.sitter.first_name || ""} ${r.sitter.last_name || ""}`.trim() ||
-                            "—"
-                          : "—"}
+                            ","
+                          : ","}
                       </TableCell>
                       <TableCell>
                         <Badge className={statusColor[r.status] || ""}>{r.status}</Badge>

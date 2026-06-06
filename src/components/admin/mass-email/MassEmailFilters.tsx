@@ -29,7 +29,7 @@ export const MassEmailFiltersPanel = ({ segment, setSegment, filters, setFilters
 
   return (
     <div className="space-y-4">
-      {/* Présets rapides — Dormants */}
+      {/* Présets rapides, Dormants */}
       <Card className="border-primary/30 bg-primary/5">
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -207,8 +207,8 @@ export const MassEmailFiltersPanel = ({ segment, setSegment, filters, setFilters
                     <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="any">Peu importe</SelectItem>
-                      <SelectItem value="yes">Oui — au moins 1 garde</SelectItem>
-                      <SelectItem value="no">Non — jamais de garde</SelectItem>
+                      <SelectItem value="yes">Oui, au moins 1 garde</SelectItem>
+                      <SelectItem value="no">Non, jamais de garde</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

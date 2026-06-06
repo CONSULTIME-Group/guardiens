@@ -27,7 +27,7 @@ async function geocode(city: string, postalCode?: string | null): Promise<LatLng
   const key = `${city}|${postalCode || ""}`.toLowerCase();
   if (cache.has(key)) return cache.get(key) ?? null;
 
-  // 1) FR — geo.api.gouv.fr (rapide, sans rate-limit)
+  // 1) FR, geo.api.gouv.fr (rapide, sans rate-limit)
   if (postalCode && /^\d{5}$/.test(postalCode)) {
     try {
       const res = await fetch(
@@ -45,7 +45,7 @@ async function geocode(city: string, postalCode?: string | null): Promise<LatLng
     } catch { /* silencieux */ }
   }
 
-  // 2) Fallback — edge function geocode (proxy serveur, fiable même en iframe)
+  // 2) Fallback, edge function geocode (proxy serveur, fiable même en iframe)
   try {
     const { data } = await supabase.functions.invoke("geocode", { body: { city } });
     if (data && typeof (data as any).lat === "number" && typeof (data as any).lng === "number") {
@@ -55,7 +55,7 @@ async function geocode(city: string, postalCode?: string | null): Promise<LatLng
     }
   } catch { /* silencieux */ }
 
-  // 3) Dernier recours — Nominatim public (peut être bloqué en iframe)
+  // 3) Dernier recours, Nominatim public (peut être bloqué en iframe)
   try {
     const q = encodeURIComponent(`${city}${postalCode ? `, ${postalCode}` : ""}, France`);
     const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`, {

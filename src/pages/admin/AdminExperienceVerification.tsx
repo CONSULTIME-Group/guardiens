@@ -131,7 +131,7 @@ const AdminExperienceVerification = () => {
             )}
             <div>
               <p className="font-medium text-sm">{exp.profile?.first_name} {exp.profile?.last_name}</p>
-              <p className="text-xs text-muted-foreground capitalize">{exp.profile?.role || "—"}</p>
+              <p className="text-xs text-muted-foreground capitalize">{exp.profile?.role || ","}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -147,25 +147,25 @@ const AdminExperienceVerification = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
           <div>
             <p className="text-xs text-muted-foreground uppercase tracking-wide">Plateforme</p>
-            <p className="font-medium">{exp.platform_name || "—"}</p>
+            <p className="font-medium">{exp.platform_name || ","}</p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground uppercase tracking-wide">Durée</p>
-            <p className="font-medium">{exp.duration || "—"}</p>
+            <p className="font-medium">{exp.duration || ","}</p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground uppercase tracking-wide">Date</p>
-            <p className="font-medium">{exp.experience_date || "—"}</p>
+            <p className="font-medium">{exp.experience_date || ","}</p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground uppercase tracking-wide">Lieu</p>
-            <p className="font-medium">{[exp.city, exp.country].filter(Boolean).join(", ") || "—"}</p>
+            <p className="font-medium">{[exp.city, exp.country].filter(Boolean).join(", ") || ","}</p>
           </div>
         </div>
 
         <div>
           <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Animaux</p>
-          <p className="text-sm">{exp.animal_types || "—"}</p>
+          <p className="text-sm">{exp.animal_types || ","}</p>
         </div>
 
         <div>
@@ -210,7 +210,7 @@ const AdminExperienceVerification = () => {
           </div>
         )}
 
-        {/* Actions — only for pending */}
+        {/* Actions, only for pending */}
         {activeTab === "pending" && (
           <div className="flex items-center gap-3 pt-2 border-t border-border">
             <Button size="sm" className="gap-1.5" onClick={() => handleVerify(exp.id, exp.user_id)}>

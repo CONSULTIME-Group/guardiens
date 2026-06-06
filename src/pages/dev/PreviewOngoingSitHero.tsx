@@ -37,7 +37,7 @@ export default function PreviewOngoingSitHero() {
       <Helmet><meta name="robots" content="noindex,nofollow" /></Helmet>
       <div className="max-w-5xl mx-auto space-y-4">
         <p className="text-xs text-muted-foreground">
-          Preview isolée — OngoingSitHero (J-3, sit en cours)
+          Preview isolée, OngoingSitHero (J-3, sit en cours)
         </p>
         <OngoingSitHero sit={ongoingSit} sitterProfiles={{ "sitter-1": sitterInfo }} />
       </div>

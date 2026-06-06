@@ -1,7 +1,7 @@
 /**
  * Onglet "Attentes" : attentes spécifiques de l'hôte + cadre de vie
  * + préférences gardien (open_to, expérience minimum).
- * Aucune icône Lucide décorative — texte pur.
+ * Aucune icône Lucide décorative, texte pur.
  */
 import { getEnvMeta } from "./sitMeta";
 

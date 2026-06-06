@@ -175,7 +175,7 @@ const SitterGallery = () => {
               </div>
               <div>
                 <Label>Légende *</Label>
-                <Textarea value={caption} onChange={e => setCaption(e.target.value)} placeholder="Ex : Luna, golden retriever, 2 semaines à Annecy — janvier 2025" rows={2} />
+                <Textarea value={caption} onChange={e => setCaption(e.target.value)} placeholder="Ex : Luna, golden retriever, 2 semaines à Annecy, janvier 2025" rows={2} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>

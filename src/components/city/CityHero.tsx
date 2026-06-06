@@ -60,7 +60,7 @@ export default function CityHero({
 
         <div className="relative z-10 w-full max-w-6xl mx-auto px-4 pb-10 pt-24 md:pb-14">
           {/* Breadcrumb */}
-          {/* Fil d'Ariane visuel — le BreadcrumbList structuré est fourni en JSON-LD via CitySchemaOrg pour éviter les doublons et les éléments invalides détectés par GSC. */}
+          {/* Fil d'Ariane visuel, le BreadcrumbList structuré est fourni en JSON-LD via CitySchemaOrg pour éviter les doublons et les éléments invalides détectés par GSC. */}
           <nav className="text-sm text-white/70 mb-4" aria-label="Fil d'Ariane">
             <ol className="flex items-center gap-1.5 flex-wrap">
               <li>

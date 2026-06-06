@@ -86,7 +86,7 @@ const ScoreBreakdown = ({
         showPreview ? "border-primary/40 shadow-sm" : "border-border"
       )}
     >
-      {/* Aperçu badge — visible quand le brouillon change le score */}
+      {/* Aperçu badge, visible quand le brouillon change le score */}
       {showPreview && (
         <div className="flex items-center justify-between gap-2 px-3 py-2 bg-primary/5 border-b border-primary/20">
           <div className="flex items-center gap-2 min-w-0">

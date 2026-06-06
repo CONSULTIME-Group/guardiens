@@ -32,7 +32,7 @@ export default function AdminRelanceIncomplet() {
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">Relance profils incomplets — J+2</h1>
+          <h1 className="text-2xl font-bold">Relance profils incomplets, J+2</h1>
           <p className="text-muted-foreground mt-1">
             Envoie le mail "votre profil est invisible" aux membres avec 0% de complétion inscrits depuis +2 jours.
           </p>
@@ -41,7 +41,7 @@ export default function AdminRelanceIncomplet() {
         <Card>
           <CardHeader>
             <CardTitle>1. Estimer la cible</CardTitle>
-            <CardDescription>Aperçu sans envoi — applique tous les filtres (suppression, déjà envoyés).</CardDescription>
+            <CardDescription>Aperçu sans envoi, applique tous les filtres (suppression, déjà envoyés).</CardDescription>
           </CardHeader>
           <CardContent>
             <Button onClick={() => run(true)} disabled={loading !== null} variant="outline">

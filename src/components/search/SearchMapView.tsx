@@ -267,7 +267,7 @@ const SearchMapView = ({
                 )}
                 {isDemo ? (
                   <p className="text-[11px] text-amber-700 italic text-center py-1">
-                    Exemple fictif — non disponible
+                    Exemple fictif, non disponible
                   </p>
                 ) : linkTo && hasAccess ? (
                   <Link

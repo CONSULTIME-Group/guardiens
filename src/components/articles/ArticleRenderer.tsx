@@ -152,7 +152,7 @@ function addEndCTA(html: string, slug?: string): string {
 interface ArticleRendererProps {
   content: string;
   userRole?: "owner" | "sitter" | "both";
-  /** Slug de l'article — utilisé pour instrumenter les CTAs (data-article-slug). */
+  /** Slug de l'article, utilisé pour instrumenter les CTAs (data-article-slug). */
   slug?: string;
 }
 
@@ -161,7 +161,7 @@ interface ArticleRendererProps {
  *
  * Les liens éditoriaux placés à la main dans le markdown
  * (ex. `[s'inscrire](/inscription?role=owner)` dans un paragraphe pédagogique)
- * ne sont JAMAIS touchés — ils n'ont pas l'attribut `data-cta-position="end"`.
+ * ne sont JAMAIS touchés, ils n'ont pas l'attribut `data-cta-position="end"`.
  *
  * Le CTA mid-article n'est pas réécrit non plus : il est masqué en CSS pour
  * les utilisateurs logués via le sélecteur `[data-cta-block="mid"]`.

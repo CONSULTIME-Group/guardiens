@@ -131,7 +131,7 @@ const CityPage = () => {
  : [
  { q: `Comment trouver un gardien de maison à ${cityData.name} ?`, a: `Sur Guardiens, vous publiez une annonce et les gardiens disponibles à ${cityData.name} et ses environs postulent directement. Chaque gardien est vérifié manuellement avant d'apparaître sur la plateforme.` },
  { q: `Est-ce vraiment à 0 € pour les propriétaires à ${cityData.name} ?`, a: "Oui. Guardiens est à 0 € pour tous les propriétaires. Seuls les gardiens paient un abonnement pour accéder aux annonces et postuler." },
- { q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityData.name} ?`, a: `Guardiens dispose d'un réseau de Gardiens d'Urgence dans chaque zone. En cas d'imprévu — animal malade, problème technique — le gardien en poste peut déclencher une alerte.` },
+ { q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityData.name} ?`, a: `Guardiens dispose d'un réseau de Gardiens d'Urgence dans chaque zone. En cas d'imprévu, animal malade, problème technique, le gardien en poste peut déclencher une alerte.` },
  { q: `Combien coûte une pension pour animaux à ${cityData.name} ?`, a: `Les pensions autour de ${cityData.name} facturent en moyenne 25 à 45 euros par nuit et par animal. Sur Guardiens, c'est sans frais pour le propriétaire : le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel.` },
  { q: `Comment devenir gardien à ${cityData.name} ?`, a: `Inscrivez-vous, complétez votre profil et faites vérifier votre identité. Vous pourrez ensuite postuler aux gardes disponibles en ${cityData.department}. L'abonnement gardien est de 6,99 euros par mois, résiliable à tout moment.` },
  ];
@@ -173,7 +173,7 @@ const CityPage = () => {
  })()}
 
  <div className="min-h-screen bg-background relative">
- {/* Text hero — only when no image hero */}
+ {/* Text hero, only when no image hero */}
  {!CITY_HERO_IMAGES[cityData.slug] && (
  <section className="max-w-5xl mx-auto px-4 py-16">
  <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground mb-6">
@@ -352,7 +352,7 @@ const CityPage = () => {
  </section>
  )}
 
- {/* Internal links — maillage stratégique vers guide local + département parent */}
+ {/* Internal links, maillage stratégique vers guide local + département parent */}
  <section className="max-w-5xl mx-auto px-4 py-8 border-t border-border">
  <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm">
  <Link to={`/guides/${cityData.slug}`} className="text-primary hover:underline">

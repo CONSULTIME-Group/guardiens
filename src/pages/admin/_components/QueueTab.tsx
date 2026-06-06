@@ -64,7 +64,7 @@ const statusBadge = (s: string) => {
 };
 
 const fmt = (d: string | null) =>
-  d ? format(new Date(d), "dd/MM/yyyy HH:mm", { locale: fr }) : "—";
+  d ? format(new Date(d), "dd/MM/yyyy HH:mm", { locale: fr }) : ",";
 
 const urgencyBadge = (metadata: SendLogRow["metadata"]) => {
   if (!metadata) return null;
@@ -239,7 +239,7 @@ export function QueueTab() {
           </div>
           {rows.length === 200 && (
             <p className="text-xs text-muted-foreground">
-              Affichage limité à 200 lignes — affinez le filtre pour voir le reste.
+              Affichage limité à 200 lignes, affinez le filtre pour voir le reste.
             </p>
           )}
         </CardContent>
@@ -303,7 +303,7 @@ export function QueueTab() {
                 {idemRows.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center text-sm text-muted-foreground py-8">
-                      {idemLoading ? "Chargement…" : "Aucun doublon sur la période — l'idempotence fait son travail."}
+                      {idemLoading ? "Chargement…" : "Aucun doublon sur la période, l'idempotence fait son travail."}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -393,14 +393,14 @@ export function QueueTab() {
                           {r.open_count > 0 ? (
                             <span title={`Dernière : ${fmt(r.last_opened_at)}`}>{r.open_count}</span>
                           ) : (
-                            "—"
+                            ","
                           )}
                         </TableCell>
                         <TableCell className="text-center text-sm">
                           {r.click_count > 0 ? (
                             <span title={r.last_clicked_url ?? ""}>{r.click_count}</span>
                           ) : (
-                            "—"
+                            ","
                           )}
                         </TableCell>
                         <TableCell className="text-xs">
@@ -411,10 +411,10 @@ export function QueueTab() {
                               {r.error_message}
                             </div>
                           )}
-                          {!r.bounced_at && !r.complained_at && !r.error_message && "—"}
+                          {!r.bounced_at && !r.complained_at && !r.error_message && ","}
                         </TableCell>
                         <TableCell className="text-xs font-mono truncate max-w-[160px]" title={r.resend_id ?? ""}>
-                          {r.resend_id ?? "—"}
+                          {r.resend_id ?? ","}
                         </TableCell>
                       </TableRow>
                     ))

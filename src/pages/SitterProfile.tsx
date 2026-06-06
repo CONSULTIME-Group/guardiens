@@ -36,7 +36,7 @@ const SECTIONS_META = [
 
 /**
  * Critère de score étendu : inclut la section où l'utilisateur peut le compléter.
- * Source UNIQUE de vérité — la jauge %, les sections « Complété ✓ » et les labels
+ * Source UNIQUE de vérité, la jauge %, les sections « Complété ✓ » et les labels
  * « → champ manquant » dérivent tous de la même liste.
  */
 type ScoredCriterion = ScoreCriterion & { section: string; kind: "essential" | "bonus" };
@@ -256,7 +256,7 @@ const SitterProfile = () => {
   // Chaque critère est rattaché à la section où l'utilisateur peut le compléter.
   // Total = 100 par construction (essentiels 80 + bonus 20). Réplique du SQL.
   const scoredCriteria: ScoredCriterion[] = [
-    // Essentiels — 80 pts
+    // Essentiels, 80 pts
     { section: "identity", kind: "essential", label: "Prénom + code postal", points: 15,
       ok: !!(mergedData.first_name && mergedData.postal_code) },
     { section: "identity", kind: "essential", label: "Photo de profil", points: 20,
@@ -267,7 +267,7 @@ const SitterProfile = () => {
       ok: (mergedData.lifestyle?.length ?? 0) > 0, hint: "Onglet Profil gardien." },
     { section: "mobility", kind: "essential", label: "Rayon géographique défini", points: 15,
       ok: (mergedData.geographic_radius ?? 0) > 0, hint: "Onglet Mobilité & Rayon." },
-    // Bonus — 20 pts
+    // Bonus, 20 pts
     { section: "identity", kind: "bonus", label: "Bio ≥ 50 caractères", points: 10,
       ok: (mergedData.bio?.length ?? 0) >= 50, hint: `${mergedData.bio?.length ?? 0}/50 caractères.` },
     { section: "gallery", kind: "bonus", label: "Au moins 1 photo de galerie", points: 5,
@@ -318,7 +318,7 @@ const SitterProfile = () => {
             dirtySection={dirty ? activeSection : undefined}
             onSectionClick={(id) => {
               setActiveSection(id);
-              // Scroll vers le contenu correspondant — utile sur mobile et quand
+              // Scroll vers le contenu correspondant, utile sur mobile et quand
               // la sidebar est sticky : l'utilisateur voit immédiatement le
               // bloc de formulaire visé (ex: Mobilité & Rayon).
               requestAnimationFrame(() => {
@@ -380,7 +380,7 @@ const SitterProfile = () => {
                 />
               )}
 
-              {/* Bouton « Suivant » — auto-sauvegarde puis avance. */}
+              {/* Bouton « Suivant », auto-sauvegarde puis avance. */}
               {nextSection && (
                 <div className="mt-8 pt-6 border-t border-border flex justify-end">
                   <Button

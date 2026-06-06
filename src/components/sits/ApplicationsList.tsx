@@ -189,7 +189,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", acceptedConv.id);
     }
 
-    // Send notification to sitter — with dedup guard
+    // Send notification to sitter, with dedup guard
     const { data: existingNotif } = await supabase
       .from("notifications")
       .select("id")
@@ -231,7 +231,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         link: `/mes-gardes`,
       });
 
-      // Email transactionnel — candidature acceptée (gardien)
+      // Email transactionnel, candidature acceptée (gardien)
       sendTransactionalEmail({
         templateName: "application-accepted",
         recipientUserId: sitterId,
@@ -242,7 +242,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         },
       }).catch(() => {});
 
-      // Email transactionnel — garde confirmée (propriétaire)
+      // Email transactionnel, garde confirmée (propriétaire)
       let endFormatted = "";
       if (endDate) {
         try { endFormatted = format(parseISO(endDate), "dd MMMM yyyy", { locale: fr }); } catch { endFormatted = endDate; }
@@ -284,7 +284,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
           await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", rejConv.id);
         }
 
-        // Email transactionnel — candidature non retenue (non-bloquant)
+        // Email transactionnel, candidature non retenue (non-bloquant)
         sendTransactionalEmail({
           templateName: "application-declined",
           recipientUserId: ra.sitter_id,
@@ -377,7 +377,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", rejConv.id);
       }
 
-      // Email transactionnel — candidature déclinée manuellement (non-bloquant)
+      // Email transactionnel, candidature déclinée manuellement (non-bloquant)
       sendTransactionalEmail({
         templateName: "application-declined",
         recipientUserId: app.sitter_id,
@@ -439,7 +439,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
 
     return (
       <div key={app.id} className="bg-card border border-border rounded-2xl p-5 mb-4">
-        {/* LINE 1 — Identity */}
+        {/* LINE 1, Identity */}
         <div className="flex items-center gap-3">
           <Link to={`/gardiens/${app.sitter_id}`} className="shrink-0">
             {sitter?.avatar_url ? (
@@ -472,17 +472,17 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
           </span>
         </div>
 
-        {/* LINE 2 — Badges */}
-        {/* Badges — migration en cours */}
+        {/* LINE 2, Badges */}
+        {/* Badges, migration en cours */}
 
-        {/* LINE 3 — Message */}
+        {/* LINE 3, Message */}
         {app.message && (
           <div className="bg-muted/50 rounded-xl p-3 text-sm text-foreground/80 my-3 italic">
             {app.message}
           </div>
         )}
 
-        {/* LINE 4 — CTAs */}
+        {/* LINE 4, CTAs */}
         {(app.status === "pending" || app.status === "viewed") && (
           <div className="flex items-center gap-2 mt-4 flex-wrap">
             <Link

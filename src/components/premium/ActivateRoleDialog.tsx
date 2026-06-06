@@ -110,11 +110,11 @@ const ActivateRoleDialog = ({ open, onClose, targetRole }: ActivateRoleDialogPro
           <DialogDescription className="text-sm text-muted-foreground text-center">
             {freeNow ? (
               <>
-                L'espace gardien est <strong>à 0 € pour tous jusqu'au {lastFreeDay}</strong>. Activez-le sans frais, sans engagement — l'abonnement (6,99&nbsp;€/mois) ne s'appliquera qu'ensuite, et vous pourrez vous désabonner à tout moment.
+                L'espace gardien est <strong>à 0 € pour tous jusqu'au {lastFreeDay}</strong>. Activez-le sans frais, sans engagement, l'abonnement (6,99&nbsp;€/mois) ne s'appliquera qu'ensuite, et vous pourrez vous désabonner à tout moment.
               </>
             ) : (
               <>
-                L'abonnement gardien est à 6,99&nbsp;€/mois — sans engagement, résiliable à tout moment depuis vos paramètres.
+                L'abonnement gardien est à 6,99&nbsp;€/mois, sans engagement, résiliable à tout moment depuis vos paramètres.
               </>
             )}
           </DialogDescription>

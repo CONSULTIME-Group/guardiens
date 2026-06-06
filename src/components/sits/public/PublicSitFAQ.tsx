@@ -2,9 +2,9 @@
  * Mini-FAQ honnête pour les visiteurs anonymes de la page d'annonce.
  * Traite les objections clés avant qu'elles ne deviennent des freins.
  *
- * NOTE — Politique de transparence sur l'abonnement :
+ * NOTE, Politique de transparence sur l'abonnement :
  * À ce jour, l'inscription et la candidature sont à 0 € pour tout le
- * monde. Un abonnement gardien sera introduit à terme — on l'annonce ici
+ * monde. Un abonnement gardien sera introduit à terme, on l'annonce ici
  * sans le cacher pour préserver la confiance.
  */
 import { useState } from "react";
@@ -13,7 +13,7 @@ import { ChevronDown } from "lucide-react";
 const FAQ_ITEMS: Array<{ q: string; a: string }> = [
   {
     q: "C'est vraiment à 0 € ?",
-    a: "Oui : la garde est 100 % à 0 €, sans aucun paiement entre membres. Le gardien est logé sans frais, le propriétaire ne paie pas non plus. L'inscription et la candidature sont à 0 € aujourd'hui — un abonnement gardien sera introduit à terme pour faire vivre la plateforme, et vous serez prévenu(e) bien avant tout changement.",
+    a: "Oui : la garde est 100 % à 0 €, sans aucun paiement entre membres. Le gardien est logé sans frais, le propriétaire ne paie pas non plus. L'inscription et la candidature sont à 0 € aujourd'hui, un abonnement gardien sera introduit à terme pour faire vivre la plateforme, et vous serez prévenu(e) bien avant tout changement.",
   },
   {
     q: "Comment je suis protégé(e) en tant que gardien ?",
@@ -21,7 +21,7 @@ const FAQ_ITEMS: Array<{ q: string; a: string }> = [
   },
   {
     q: "Je n'ai jamais gardé d'animaux, est-ce que je peux postuler ?",
-    a: "Oui, totalement. Beaucoup de gardes conviennent à des profils débutants — chats indépendants, séjours courts, animaux faciles. Précisez votre expérience et vos motivations dans votre message&nbsp;: c'est le propriétaire qui choisit son gardien.",
+    a: "Oui, totalement. Beaucoup de gardes conviennent à des profils débutants, chats indépendants, séjours courts, animaux faciles. Précisez votre expérience et vos motivations dans votre message&nbsp;: c'est le propriétaire qui choisit son gardien.",
   },
   {
     q: "Combien de temps prend l'inscription ?",

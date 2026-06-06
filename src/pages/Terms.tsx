@@ -17,7 +17,7 @@ const Terms = () => {
           Conditions Générales d'Utilisation
         </h1>
         <p className="text-sm text-muted-foreground mb-8">
-          Version 5 — Dernière mise à jour : 3 mai 2026
+          Version 5, Dernière mise à jour : 3 mai 2026
         </p>
 
         <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">

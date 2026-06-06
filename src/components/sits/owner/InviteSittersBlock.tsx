@@ -56,7 +56,7 @@ interface SitterRow {
   avatar_url: string | null;
   city: string | null;
   bio: string | null;
-  /** Distance en km depuis le propriétaire — défini uniquement en mode rayon. */
+  /** Distance en km depuis le propriétaire, défini uniquement en mode rayon. */
   distance_km?: number | null;
 }
 
@@ -67,7 +67,7 @@ interface InviteSittersBlockProps {
   ownerId: string;
   sitTitle: string;
   sitCity: string | null;
-  /** Code postal du propriétaire — utilisé pour pré-cibler le département. */
+  /** Code postal du propriétaire, utilisé pour pré-cibler le département. */
   ownerPostalCode?: string | null;
   /** Pays du propriétaire (ISO ou texte libre). FR/null = comportement standard.
    *  Toute autre valeur désactive la recherche par département/rayon (FR-only). */
@@ -355,7 +355,7 @@ const InviteSittersBlock = ({
             </Badge>
             {highlight && (
               <Badge className="text-[11px] font-medium bg-primary text-primary-foreground">
-                Annonce publiée — à vous de jouer
+                Annonce publiée, à vous de jouer
               </Badge>
             )}
           </div>
@@ -367,7 +367,7 @@ const InviteSittersBlock = ({
             <p className="text-xs text-primary/80 mt-2 font-medium">
               {sentCount} invitation{sentCount > 1 ? "s" : ""} envoyée{sentCount > 1 ? "s" : ""}
               {appliedCount > 0 && ` · ${appliedCount} candidature${appliedCount > 1 ? "s" : ""} reçue${appliedCount > 1 ? "s" : ""}`}
-              {sentCount >= 20 && " — limite de 20 par 24 h atteinte"}
+              {sentCount >= 20 && ", limite de 20 par 24 h atteinte"}
             </p>
           )}
           {ownerCoords && remainingQuota > 0 && !isInternational && (
@@ -483,7 +483,7 @@ const InviteSittersBlock = ({
                   <SelectItem value="all">Tous les départements</SelectItem>
                   {deptOptions.map(([code, name]) => (
                     <SelectItem key={code} value={code}>
-                      {code} — {name}
+                      {code}, {name}
                     </SelectItem>
                   ))}
                 </SelectContent>

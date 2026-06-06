@@ -109,7 +109,7 @@ const OwnerExperiences = () => {
     <div className="space-y-6">
       <h2 className="font-heading text-2xl font-bold">Mes expériences d'accueil</h2>
       <p className="text-sm text-muted-foreground">
-        Montrez que vous avez l'habitude d'accueillir des gardiens — importez vos expériences d'autres plateformes.
+        Montrez que vous avez l'habitude d'accueillir des gardiens, importez vos expériences d'autres plateformes.
       </p>
 
       {/* Existing experiences */}

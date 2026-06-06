@@ -64,7 +64,7 @@ function genUUID(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
   }
-  // Fallback simple — uniforme suffisant pour cette mesure de répartition.
+  // Fallback simple, uniforme suffisant pour cette mesure de répartition.
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
     const v = c === "x" ? r : (r & 0x3) | 0x8;
@@ -151,7 +151,7 @@ export default function TestHeroDistribution() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Debug — Distribution des hero</title>
+        <title>Debug, Distribution des hero</title>
         <meta name="robots" content="noindex,nofollow" />
       </Helmet>
 
@@ -159,7 +159,7 @@ export default function TestHeroDistribution() {
         {/* ── En-tête ── */}
         <header className="space-y-2">
           <h1 className="text-2xl font-heading font-bold">
-            Distribution des hero — debug
+            Distribution des hero, debug
           </h1>
           <p className="text-sm text-muted-foreground">
             Simule {total.toLocaleString("fr-FR")} sitterId aléatoires et mesure la
@@ -301,7 +301,7 @@ export default function TestHeroDistribution() {
         {/* ── Notes ── */}
         <section className="text-xs text-muted-foreground border-t border-border pt-4 space-y-1">
           <p>
-            <strong>Note :</strong> chaque relance utilise de nouveaux UUID — la
+            <strong>Note :</strong> chaque relance utilise de nouveaux UUID, la
             distribution converge vers les cibles à mesure que l'échantillon
             grandit. Sur 10 000 tirages, un écart de ±0,5 pt est normal ; sur
             100 000, on doit descendre sous ±0,2 pt.
@@ -359,7 +359,7 @@ function Histogram({ counts }: { counts: number[] }) {
             key={idx}
             className={`flex-1 min-w-0 ${CATEGORY_COLORS[cat].bar} rounded-t-sm transition-all`}
             style={{ height: `${Math.max(h, 2)}%` }}
-            title={`#${String(idx + 1).padStart(3, "0")} (${CATEGORY_LABELS[cat]}) — ${c} tirages`}
+            title={`#${String(idx + 1).padStart(3, "0")} (${CATEGORY_LABELS[cat]}), ${c} tirages`}
           />
         );
       })}

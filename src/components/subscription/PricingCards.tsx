@@ -11,7 +11,7 @@ import {
 } from "@/lib/pricing";
 import FreeAccountSection from "./FreeAccountSection";
 
-// NOTE — Le calcul prorata 2026 (`calculateYearlyProrata`) a été supprimé.
+// NOTE, Le calcul prorata 2026 (`calculateYearlyProrata`) a été supprimé.
 // Risque DGCCRF / L121-2 : prix affiché ≠ prix débité. La formule annuelle
 // facture désormais un montant fixe de 65 €/an (cf. `src/lib/pricing.ts`)
 // quel que soit le moment de la souscription.
@@ -55,7 +55,7 @@ export default function PricingCards() {
             {SITTER_PRICE_NUMERIC.toString().replace(".", ",")}&nbsp;&#8364;
           </p>
           <p className="text-sm font-body text-muted-foreground mb-4">
-            / mois — sans engagement
+            / mois, sans engagement
           </p>
           <ul className="text-sm font-body text-foreground/70 space-y-2 mb-6 flex-1">
             <li className="flex items-center gap-2">
@@ -85,7 +85,7 @@ export default function PricingCards() {
           </button>
         </div>
 
-        {/* Annuel — 65 €/an, prix fixe (plus de prorata) */}
+        {/* Annuel, 65 €/an, prix fixe (plus de prorata) */}
         <div className="bg-primary text-primary-foreground rounded-2xl p-6 flex flex-col relative overflow-hidden">
           <span className="absolute top-4 right-4 bg-white/20 text-white text-xs font-body px-2 py-0.5 rounded-full">
             -{SITTER_PRICE_ANNUAL_DISCOUNT_PCT}%
@@ -97,7 +97,7 @@ export default function PricingCards() {
             {SITTER_PRICE_ANNUAL_NUMERIC}&nbsp;&#8364;
           </p>
           <p className="text-sm font-body text-white/70 mb-1">
-            / an — soit {SITTER_PRICE_ANNUAL_MONTHLY_EQUIV} équivalent
+            / an, soit {SITTER_PRICE_ANNUAL_MONTHLY_EQUIV} équivalent
           </p>
           <p className="text-xs font-body text-white/75 mb-4">
             Renouvellement annuel automatique. Résiliable à tout moment.
@@ -124,7 +124,7 @@ export default function PricingCards() {
             {loading === "annuel" && <Loader2 className="h-4 w-4 animate-spin" />}
             {loading === "annuel"
               ? "Redirection…"
-              : `Choisir l'annuel — ${SITTER_PRICE_ANNUAL_NUMERIC}\u00A0\u20AC/an`}
+              : `Choisir l'annuel, ${SITTER_PRICE_ANNUAL_NUMERIC}\u00A0\u20AC/an`}
           </button>
         </div>
 

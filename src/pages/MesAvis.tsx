@@ -76,7 +76,7 @@ const MesAvis = () => {
   return (
     <div className="p-4 md:p-8 max-w-3xl mx-auto">
       <Helmet>
-        <title>Mes avis — Guardiens</title>
+        <title>Mes avis, Guardiens</title>
         <meta name="robots" content="noindex,nofollow" />
       </Helmet>
 
@@ -226,7 +226,7 @@ const ReviewsList = ({
             {dispute?.status === "accepted" && (
               <div className="flex items-center gap-1.5 text-xs text-success mt-3 bg-success/5 rounded-md px-2.5 py-1.5">
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                Contestation acceptée — l'avis a été retiré
+                Contestation acceptée, l'avis a été retiré
               </div>
             )}
             {dispute?.status === "rejected" && (

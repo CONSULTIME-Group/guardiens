@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TooltipProvider } from "@/components/ui/tooltip";
-// Helmet removed — Schema.org now lives in <ProfileSchemaOrg />
+// Helmet removed, Schema.org now lives in <ProfileSchemaOrg />
 import PageMeta from "@/components/PageMeta";
 import ReviewsDisplay from "@/components/reviews/ReviewsDisplay";
 import ReportButton from "@/components/reports/ReportButton";
@@ -142,7 +142,7 @@ const PublicProfile = () => {
   const roleLabel = isSitter && isOwner
     ? "Gardien & Propriétaire"
     : isSitter ? "Gardien vérifié" : "Propriétaire";
-  const metaTitle = `${firstName} — ${roleLabel} à ${profile.city || "France"} | Guardiens`;
+  const metaTitle = `${firstName}, ${roleLabel} à ${profile.city || "France"} | Guardiens`;
   const metaDesc = isSitter
     ? `${firstName}, gardien à ${profile.city || "France"}. ${totalSits} garde${totalSits > 1 ? "s" : ""}, note ${reviewStats.avg.toFixed(1)}/5. ${topBadge ? topBadge + ". " : ""}Contactez-le sur Guardiens.`
     : `${firstName}, propriétaire à ${profile.city || "France"}. ${pets.length} animal${pets.length > 1 ? "ux" : ""}. ${totalSits} garde${totalSits > 1 ? "s" : ""}, note ${reviewStats.avg.toFixed(1)}/5.`;
@@ -221,7 +221,7 @@ const PublicProfile = () => {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="font-heading text-2xl font-bold text-foreground">{firstName}</h1>
-                {/* Status badges — migration en cours */}
+                {/* Status badges, migration en cours */}
               </div>
 
               <div className="flex items-center gap-3 text-sm mt-1 flex-wrap text-muted-foreground">
@@ -265,7 +265,7 @@ const PublicProfile = () => {
             )}
             <MetricCell
               label="Note"
-              value={reviewStats.count > 0 ? reviewStats.avg.toFixed(1) : "—"}
+              value={reviewStats.count > 0 ? reviewStats.avg.toFixed(1) : ","}
               suffix={reviewStats.count > 0 ? <Star className="h-3.5 w-3.5 fill-yellow-500 text-yellow-500 ml-0.5" /> : undefined}
             />
             <MetricCell
@@ -294,7 +294,7 @@ const PublicProfile = () => {
           )}
 
           {/* === BADGES === */}
-          {/* Badges — migration en cours */}
+          {/* Badges, migration en cours */}
 
           {/* === TABS === */}
           <Tabs defaultValue={defaultTab} className="w-full">

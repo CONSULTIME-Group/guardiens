@@ -111,7 +111,7 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile, matchesMyNeed = false
         </p>
       )}
 
-      {/* Item 9 — éviter le mur de CTAs verts répétés.
+      {/* Item 9, éviter le mur de CTAs verts répétés.
           Action primaire = découvrir le profil (chemin naturel) ;
           contact en secondaire/outline pour qui sait déjà. */}
       <div className="flex items-center gap-2 pt-2 mt-auto">

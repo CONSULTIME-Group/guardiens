@@ -8,7 +8,7 @@ interface Props {
 }
 
 /**
- * Galerie publique — grille cliquable + lightbox clavier/swipe.
+ * Galerie publique, grille cliquable + lightbox clavier/swipe.
  * Affichée sous le pitch, indépendante du Hero (qui ne montre que la photo de couv).
  */
 const PublicSitGallery = ({ photos, city, ownerFirstName }: Props) => {
@@ -40,7 +40,7 @@ const PublicSitGallery = ({ photos, city, ownerFirstName }: Props) => {
   const altFor = (i: number) =>
     `Photo ${i + 1} sur ${total} du logement${city ? ` à ${city}` : ""}${
       ownerFirstName ? ` proposé par ${ownerFirstName}` : ""
-    } — Guardiens`;
+    }, Guardiens`;
 
   const openAt = (i: number) => {
     setIndex(i);

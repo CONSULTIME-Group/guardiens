@@ -208,13 +208,13 @@ export function HeroPickerModal({
                       : "border-border hover:border-foreground/30"
                   }`}
                   style={{ aspectRatio: "1536 / 544" }}
-                  title={`Illustration n°${String(it.idx + 1).padStart(3, "0")} — ${CATEGORY_LABELS[it.category]}`}
+                  title={`Illustration n°${String(it.idx + 1).padStart(3, "0")}, ${CATEGORY_LABELS[it.category]}`}
                 >
                   <img
                     src={it.src}
                     srcSet={it.mobileSrc ? `${it.mobileSrc} 768w, ${it.src} 1536w` : undefined}
                     sizes="(max-width: 639px) 50vw, 25vw"
-                    alt={`Illustration ${it.idx + 1} — ${CATEGORY_LABELS[it.category]}`}
+                    alt={`Illustration ${it.idx + 1}, ${CATEGORY_LABELS[it.category]}`}
                     loading="lazy"
                     decoding="async"
                     className="w-full h-full object-contain"
@@ -279,7 +279,7 @@ export function HeroPickerModal({
                     '"Caveat", "Kalam", "Bradley Hand", "Segoe Print", "Comic Sans MS", cursive',
                 }}
               >
-                n° {String(previewItem.idx + 1).padStart(3, "0")} —{" "}
+                n° {String(previewItem.idx + 1).padStart(3, "0")},{" "}
                 {CATEGORY_LABELS[previewItem.category]}
               </span>
 

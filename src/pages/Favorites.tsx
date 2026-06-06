@@ -63,7 +63,7 @@ const Favorites = () => {
 
   return (
     <>
-      <PageMeta title="Mes favoris — Guardiens" description="Retrouvez vos gardiens et annonces sauvegardés." />
+      <PageMeta title="Mes favoris, Guardiens" description="Retrouvez vos gardiens et annonces sauvegardés." />
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-8">
           <Heart className="h-6 w-6 text-red-500 fill-red-500" />

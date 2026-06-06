@@ -67,7 +67,7 @@ function getSeasonalBanner(): { title: string; description: string } {
 
 
 
-// Témoignages — répartition géographique équilibrée (France entière, hors
+// Témoignages, répartition géographique équilibrée (France entière, hors
 // concentration AURA), avec date et libellé "Programme Fondateurs" pour
 // l'E-E-A-T (Expérience réelle + transparence).
 const testimonials = [
@@ -105,7 +105,7 @@ const testimonials = [
     name: "Elena",
     detail: "Gardienne · Annecy (74)",
     period: "Mars 2026",
-    text: "J'ai commencé par arroser les plantes d'un membre contre un repas. Maintenant je garde sa maison quand elle part. C'est comme ça que ça marche ici — doucement, naturellement.",
+    text: "J'ai commencé par arroser les plantes d'un membre contre un repas. Maintenant je garde sa maison quand elle part. C'est comme ça que ça marche ici, doucement, naturellement.",
   },
 ];
 
@@ -484,7 +484,7 @@ const Landing = () => {
                       priceCurrency: SITTER_PRICE_CURRENCY,
                       unitCode: "MON",
                       description:
-                        "Abonnement gardien à 6,99 €/mois après le 14 juillet 2026 — accès sans abonnement jusqu'à cette date.",
+                        "Abonnement gardien à 6,99 €/mois après le 14 juillet 2026, accès sans abonnement jusqu'à cette date.",
                     },
                   },
                   {
@@ -567,7 +567,7 @@ const Landing = () => {
       <PublicHeader />
       <FreePeriodBanner />
 
-      {/* ═══════════════ SECTION 1 — HERO (épuré, 5 blocs) ═══════════════ */}
+      {/* ═══════════════ SECTION 1, HERO (épuré, 5 blocs) ═══════════════ */}
       <section id="main-content" role="main" className="relative w-full min-h-screen flex items-center overflow-hidden">
         <img
           src="/hero-landing.webp"
@@ -595,7 +595,7 @@ const Landing = () => {
 
             <p className="font-body text-lg md:text-xl text-white/85 max-w-xl mb-4 leading-relaxed animate-hero-fade-up animation-delay-700">
               Faire garder votre maison et vos animaux par un gardien du coin pendant vos absences.
-              Ou demander — et rendre — un coup de main près de chez vous, avec ou sans animaux.
+              Ou demander, et rendre, un coup de main près de chez vous, avec ou sans animaux.
             </p>
             <p className="font-body text-base md:text-lg text-white/70 max-w-xl mb-10 leading-relaxed italic animate-hero-fade-up animation-delay-700">
               Et derrière chaque échange, une rencontre que vous n'auriez pas cherchée.
@@ -654,7 +654,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SOMMAIRE DE PAGE — maillage interne ═══════════════ */}
+      {/* ═══════════════ SOMMAIRE DE PAGE, maillage interne ═══════════════ */}
       <nav
         aria-label="Sommaire de la page"
         className="border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
@@ -686,7 +686,7 @@ const Landing = () => {
       </nav>
 
 
-      {/* ═══════════════ SECTION 2 — CE QU'ON FAIT ENSEMBLE ═══════════════ */}
+      {/* ═══════════════ SECTION 2, CE QU'ON FAIT ENSEMBLE ═══════════════ */}
       <section id="usages" className="py-24 md:py-32 bg-background scroll-mt-24">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
@@ -697,7 +697,7 @@ const Landing = () => {
               Garde d'animaux à domicile et entraide locale.
             </h2>
             <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16 italic">
-              Le home sitting d'un côté, l'entraide entre gens du coin de l'autre. À vous de choisir — l'un, l'autre, ou les deux.
+              Le home sitting d'un côté, l'entraide entre gens du coin de l'autre. À vous de choisir, l'un, l'autre, ou les deux.
             </p>
           </RevealSection>
 
@@ -736,11 +736,11 @@ const Landing = () => {
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-body font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
                   Gratuit
                 </div>
-                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Entraide locale — indépendante de la garde</p>
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Entraide locale, indépendante de la garde</p>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Un coup de main, un échange.</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                   Arroser un potager, monter une étagère, partager une compétence, rendre une visite à une personne isolée.
-                  Aucune garde, aucun animal nécessaire — juste des gens du coin qui s'entraident.
+                  Aucune garde, aucun animal nécessaire, juste des gens du coin qui s'entraident.
                 </p>
                 <a href="#entraide" className="text-sm font-body text-primary font-medium hover:underline">
                   Découvrir l'entraide →
@@ -769,7 +769,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 2bis — CE QUI ARRIVE EN PLUS ═══════════════ */}
+      {/* ═══════════════ SECTION 2bis, CE QUI ARRIVE EN PLUS ═══════════════ */}
       <section id="rencontre" className="py-24 md:py-32 bg-accent/40 border-y border-accent scroll-mt-24">
         <div className="max-w-3xl mx-auto px-6">
           <RevealSection>
@@ -785,23 +785,22 @@ const Landing = () => {
                 Ce qu'on raconte rarement, c'est ce qui se passe <em>autour</em>.
                 Connaître la mami du coin et son histoire parce qu'on l'a aidée à ramasser
                 ses fruits du jardin. Échanger avec Gerardo pendant qu'il vous donne
-                un coup de main pour bricoler — et lui proposer un repas fait maison en retour.
+                un coup de main pour bricoler, et lui proposer un repas fait maison en retour.
               </p>
               <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/80 mb-5">
                 Pas besoin d'un animal pour qu'une rencontre commence.
                 Demander un coup de main, en proposer un : c'est déjà ouvrir une porte.
-                Garder une maison, c'est en ouvrir une autre — un même geste, deux échelles.
+                Garder une maison, c'est en ouvrir une autre, un même geste, deux échelles.
               </p>
               <p className="font-heading text-xl md:text-2xl italic text-foreground leading-snug">
-                On apprend, on découvre, on s'attache —
-                sans aller le chercher. Juste en laissant la place à ce qui peut arriver.
+                On apprend, on découvre, on s'attache ,                 sans aller le chercher. Juste en laissant la place à ce qui peut arriver.
               </p>
             </div>
           </RevealSection>
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 3 — COMMENT ÇA MARCHE ═══════════════ */}
+      {/* ═══════════════ SECTION 3, COMMENT ÇA MARCHE ═══════════════ */}
       <section id="comment-ca-marche" className="py-24 md:py-32 bg-muted/30 scroll-mt-24">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
@@ -835,7 +834,7 @@ const Landing = () => {
                 </div>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Publiez votre annonce</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70">
-                  Vos dates, vos animaux, votre maison. Quelques minutes suffisent — votre annonce est en ligne.
+                  Vos dates, vos animaux, votre maison. Quelques minutes suffisent, votre annonce est en ligne.
                 </p>
               </div>
             </RevealSection>
@@ -858,7 +857,7 @@ const Landing = () => {
                 </div>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Choisissez après une rencontre</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70">
-                  Des gardiens du coin postulent. Vous lisez les profils, les avis, vous échangez. Puis vous vous voyez — un café, une visite — avant de décider.
+                  Des gardiens du coin postulent. Vous lisez les profils, les avis, vous échangez. Puis vous vous voyez, un café, une visite, avant de décider.
                 </p>
               </div>
             </RevealSection>
@@ -881,7 +880,7 @@ const Landing = () => {
                 </div>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Partez l'esprit léger</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70">
-                  L'accord de garde signé, votre gardien s'installe. Vous recevez des nouvelles. Vous rentrez chez vous — souvent avec une nouvelle relation.
+                  L'accord de garde signé, votre gardien s'installe. Vous recevez des nouvelles. Vous rentrez chez vous, souvent avec une nouvelle relation.
                 </p>
               </div>
             </RevealSection>
@@ -912,7 +911,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 4 — OSEZ L'ENTRAIDE ═══════════════ */}
+      {/* ═══════════════ SECTION 4, OSEZ L'ENTRAIDE ═══════════════ */}
       <section id="entraide" className="py-24 md:py-32 bg-accent scroll-mt-24">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
@@ -927,7 +926,7 @@ const Landing = () => {
               qui venait fixer un volet. Quelqu'un à qui on offrait une part de gâteau ou un coup de main en retour.
             </p>
             <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-16 text-lg leading-relaxed">
-              Cette habitude n'a pas disparu — on n'ose simplement plus la première question. Guardiens, c'est le prétexte pour la reposer — et au passage, vivre des expériences qu'aucun voyage organisé ne vous offrira.
+              Cette habitude n'a pas disparu, on n'ose simplement plus la première question. Guardiens, c'est le prétexte pour la reposer, et au passage, vivre des expériences qu'aucun voyage organisé ne vous offrira.
             </p>
           </RevealSection>
 
@@ -939,7 +938,7 @@ const Landing = () => {
                 </h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                   Votre potager pendant les vacances. Vos poules ce week-end. Promener votre chien après une opération.
-                  Le demander, ce n'est pas avouer une faiblesse — c'est faire confiance.
+                  Le demander, ce n'est pas avouer une faiblesse, c'est faire confiance.
                 </p>
                 <p className="text-sm font-body font-medium text-primary">
                   Sans argent, sans abonnement. C'est le pari.
@@ -954,7 +953,7 @@ const Landing = () => {
                 </h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                   Vous savez tailler les rosiers. Vous adorez les chiens. Vous avez deux heures samedi matin.
-                  Proposez — et vivez ce que vous n'auriez jamais vécu sans cette rencontre.
+                  Proposez, et vivez ce que vous n'auriez jamais vécu sans cette rencontre.
                 </p>
                 <p className="text-sm font-body font-medium text-primary">
                   C'est comme ça qu'un tissu local se retisse.
@@ -1008,18 +1007,18 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 5 — ANNONCES EN COURS (live) ═══════════════ */}
+      {/* ═══════════════ SECTION 5, ANNONCES EN COURS (live) ═══════════════ */}
       <RevealSection>
         <LiveListingsSection />
       </RevealSection>
 
-      {/* ═══════════════ SECTION 5bis — VITRINE DÉMO (anatomie d'une annonce) ═══════════════ */}
+      {/* ═══════════════ SECTION 5bis, VITRINE DÉMO (anatomie d'une annonce) ═══════════════ */}
       <RevealSection>
         <p className="sr-only">Et voici l'anatomie détaillée d'une annonce.</p>
         <DemoListingShowcase />
       </RevealSection>
 
-      {/* ═══════════════ SECTION 6 — CONFIANCE & PÉRIMÈTRE ═══════════════ */}
+      {/* ═══════════════ SECTION 6, CONFIANCE & PÉRIMÈTRE ═══════════════ */}
       <section id="confiance" className="bg-background py-24 md:py-32 scroll-mt-24" aria-labelledby="trust-heading">
         <div className="max-w-6xl mx-auto px-5 sm:px-6">
           <RevealSection className="text-center max-w-3xl mx-auto mb-16">
@@ -1091,7 +1090,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 7 — TÉMOIGNAGES ═══════════════ */}
+      {/* ═══════════════ SECTION 7, TÉMOIGNAGES ═══════════════ */}
       <section id="temoignages" className="py-24 md:py-32 bg-background scroll-mt-24">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
@@ -1180,7 +1179,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 8 — NOTRE HISTOIRE ═══════════════ */}
+      {/* ═══════════════ SECTION 8, NOTRE HISTOIRE ═══════════════ */}
       <section id="notre-histoire" className="bg-muted/30 scroll-mt-24">
         <div className="max-w-6xl mx-auto px-6 py-24 md:py-32">
           <RevealSection>
@@ -1221,10 +1220,10 @@ const Landing = () => {
                 Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous ne nous attendions pas à ce que cela compte autant.
               </p>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                C'est pour cela que nous avons construit Guardiens — pour que vous viviez cela aussi.
+                C'est pour cela que nous avons construit Guardiens, pour que vous viviez cela aussi.
               </p>
               <span className="text-sm font-body italic text-foreground/50 mt-10 block">
-                — Jérémie &amp; Elisa
+               , Jérémie &amp; Elisa
               </span>
             </RevealSection>
           </div>
@@ -1243,7 +1242,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 9 — GUIDES + VILLES (fusion SEO) ═══════════════ */}
+      {/* ═══════════════ SECTION 9, GUIDES + VILLES (fusion SEO) ═══════════════ */}
       <section id="guides-villes" className="py-24 md:py-32 bg-background scroll-mt-24">
         <div className="max-w-6xl mx-auto px-6">
           <RevealSection className="text-center mb-14">
@@ -1254,7 +1253,7 @@ const Landing = () => {
               House-sitting près de chez vous.
             </h2>
             <p className="text-lg font-body text-foreground/70 max-w-2xl mx-auto">
-              Des guides concrets pour préparer votre garde, et des hubs locaux pour les villes les plus actives — Lyon, Annecy, Grenoble, et partout en France.
+              Des guides concrets pour préparer votre garde, et des hubs locaux pour les villes les plus actives, Lyon, Annecy, Grenoble, et partout en France.
             </p>
           </RevealSection>
 
@@ -1360,7 +1359,7 @@ const Landing = () => {
                     >
                       <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
                       <span className="text-sm leading-relaxed">
-                        <strong>House-sitting à Lyon</strong> — Des gardiens vérifiés dans chaque arrondissement, du Vieux Lyon à la Croix-Rousse, en passant par la Part-Dieu et Confluence.
+                        <strong>House-sitting à Lyon</strong>, Des gardiens vérifiés dans chaque arrondissement, du Vieux Lyon à la Croix-Rousse, en passant par la Part-Dieu et Confluence.
                       </span>
                     </Link>
                   </li>
@@ -1371,7 +1370,7 @@ const Landing = () => {
                     >
                       <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
                       <span className="text-sm leading-relaxed">
-                        <strong>House-sitting à Annecy</strong> — Lac, montagne, résidences secondaires en Haute-Savoie. Des gardiens locaux qui connaissent le gel, les accès et les vétos.
+                        <strong>House-sitting à Annecy</strong>, Lac, montagne, résidences secondaires en Haute-Savoie. Des gardiens locaux qui connaissent le gel, les accès et les vétos.
                       </span>
                     </Link>
                   </li>
@@ -1382,7 +1381,7 @@ const Landing = () => {
                     >
                       <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
                       <span className="text-sm leading-relaxed">
-                        <strong>House-sitting à Grenoble</strong> — Au pied du Vercors, de la Chartreuse et de Belledonne. Des gardiens qui connaissent la cuvette et les sentiers de la Bastille.
+                        <strong>House-sitting à Grenoble</strong>, Au pied du Vercors, de la Chartreuse et de Belledonne. Des gardiens qui connaissent la cuvette et les sentiers de la Bastille.
                       </span>
                     </Link>
                   </li>
@@ -1393,7 +1392,7 @@ const Landing = () => {
                     >
                       <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
                       <span className="text-sm leading-relaxed">
-                        <strong>Partout en France</strong> — Du Pays basque à la Bretagne, en passant par les Alpes, la Provence et le Nord. Le réseau s'étend dans toutes les régions.
+                        <strong>Partout en France</strong>, Du Pays basque à la Bretagne, en passant par les Alpes, la Provence et le Nord. Le réseau s'étend dans toutes les régions.
                       </span>
                     </Link>
                   </li>
@@ -1410,7 +1409,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 9bis — FAQ (section dédiée, miroir du JSON-LD FAQPage) ═══════════════ */}
+      {/* ═══════════════ SECTION 9bis, FAQ (section dédiée, miroir du JSON-LD FAQPage) ═══════════════ */}
       <section id="faq" className="py-24 md:py-32 bg-background scroll-mt-24" aria-labelledby="faq-heading">
         <div className="max-w-3xl mx-auto px-[5%] md:px-[8%]">
           <RevealSection>
@@ -1471,7 +1470,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 10 — CTA FINAL (fusion Fondateur + double CTA) ═══════════════ */}
+      {/* ═══════════════ SECTION 10, CTA FINAL (fusion Fondateur + double CTA) ═══════════════ */}
       <section id="commencer" className="py-24 md:py-32 bg-primary scroll-mt-24">
         <RevealSection className="max-w-2xl mx-auto px-6 text-center">
           <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-6 bg-white/15 border border-white/30">
@@ -1483,8 +1482,7 @@ const Landing = () => {
             Votre prochaine histoire commence ici.
           </h2>
           <p className="font-body text-lg text-white/85 leading-relaxed max-w-lg mx-auto mb-10">
-            Vous partirez l'esprit léger. Vous rentrerez avec autre chose —
-            un coin découvert, une rencontre, quelqu'un que vous n'auriez jamais croisé.
+            Vous partirez l'esprit léger. Vous rentrerez avec autre chose ,             un coin découvert, une rencontre, quelqu'un que vous n'auriez jamais croisé.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
             <button

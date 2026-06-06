@@ -146,7 +146,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
   return (
     <div className="space-y-6">
       <h2 className="font-heading text-2xl font-bold">Les animaux</h2>
-      <HintBubble>Chaque animal a sa fiche. Plus vous êtes précis, plus le gardien sera préparé — et rassuré.</HintBubble>
+      <HintBubble>Chaque animal a sa fiche. Plus vous êtes précis, plus le gardien sera préparé, et rassuré.</HintBubble>
 
       {pets.map(pet => (
         <div key={pet.id} className="bg-muted/30 rounded-lg border border-border overflow-hidden">
@@ -155,7 +155,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
             {pet.photo_url && <img src={pet.photo_url} alt={pet.name} className="w-12 h-12 rounded-lg object-cover cursor-pointer hover:ring-2 ring-primary transition-all" onClick={(e) => { e.stopPropagation(); setLightboxUrl(pet.photo_url!); }} />}
             <div className="flex-1">
               <span className="font-semibold">{pet.name}</span>
-              <span className="text-sm text-muted-foreground ml-2">{speciesLabel(pet.species)}{pet.breed ? ` — ${pet.breed}` : ""}</span>
+              <span className="text-sm text-muted-foreground ml-2">{speciesLabel(pet.species)}{pet.breed ? `, ${pet.breed}` : ""}</span>
             </div>
             {expandedId === pet.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>

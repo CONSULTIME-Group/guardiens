@@ -172,7 +172,7 @@ const GuideDetail = () => {
   return (
     <>
       <PageMeta
-        title={`Guide pet sitting ${guide.city} — Parcs, vétos, cafés dog-friendly | Guardiens`}
+        title={`Guide pet sitting ${guide.city}, Parcs, vétos, cafés dog-friendly | Guardiens`}
         description={`Guide pratique pour pet sitters à ${guide.city} : parcs dog-friendly, vétérinaires, cafés accueillants, sentiers de balade. ${guide.ideal_for}`}
         path={`/guides/${guide.slug}`}
       />
@@ -183,7 +183,7 @@ const GuideDetail = () => {
           { label: guide.city },
         ]} />
 
-        {/* Bouton retour — revient à la page précédente si possible (annonce, recherche…), sinon liste des guides */}
+        {/* Bouton retour, revient à la page précédente si possible (annonce, recherche…), sinon liste des guides */}
         <div className="max-w-5xl mx-auto px-4 pt-3">
           <button
             type="button"
@@ -314,7 +314,7 @@ const GuideDetail = () => {
           {nearbyGuides.length > 0 && (
             <div className="mt-14 border-t border-border pt-10">
               <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
-                Guides proches — {guide.department}
+                Guides proches, {guide.department}
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                 {nearbyGuides.map((ng) => (
@@ -395,7 +395,7 @@ const GuideDetail = () => {
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "TouristDestination",
-              name: `${guide.city} — Guide pet sitting`,
+              name: `${guide.city}, Guide pet sitting`,
               description: `Guide pratique pour les gardiens d'animaux à ${guide.city}. ${guide.intro}`,
               url: `https://guardiens.fr/guides/${guide.slug}`,
               touristType: ["Pet sitter", "House sitter", "Gardien d'animaux"],

@@ -137,13 +137,13 @@ const PostPublishRecapDialog = ({
             value={loading ? "…" : favCount.toString()}
             hint={
               favCount === 0
-                ? "Aucun favori — sauvegardez les profils qui vous plaisent en parcourant la recherche."
+                ? "Aucun favori, sauvegardez les profils qui vous plaisent en parcourant la recherche."
                 : "Profils que vous avez sauvegardés."
             }
           />
           <RecapRow
             icon={MapPin}
-            label={deptName ? `Dans votre département (${deptCode} — ${deptName})` : "Dans votre département"}
+            label={deptName ? `Dans votre département (${deptCode}, ${deptName})` : "Dans votre département"}
             value={loading ? "…" : deptCount.toString()}
             hint={
               !deptCode

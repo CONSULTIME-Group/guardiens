@@ -122,7 +122,7 @@ const ProposeHelperExchangeDialog = ({
         <DialogHeader>
           <DialogTitle>Proposer un échange à {helper.first_name}</DialogTitle>
           <DialogDescription>
-            {helper.first_name} a indiqué être disponible — n'hésitez pas, c'est exactement pour ça que cette personne est là.
+            {helper.first_name} a indiqué être disponible, n'hésitez pas, c'est exactement pour ça que cette personne est là.
           </DialogDescription>
         </DialogHeader>
 

@@ -151,7 +151,7 @@ const PostConfirmationChecklist = ({
         <div>
           <h3 className="font-heading font-semibold text-sm flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-green-600" />
-            Garde confirmée — Préparez l'arrivée
+            Garde confirmée, Préparez l'arrivée
           </h3>
           {daysUntilStart !== null && daysUntilStart > 0 && (
             <p className="text-xs text-muted-foreground mt-0.5">

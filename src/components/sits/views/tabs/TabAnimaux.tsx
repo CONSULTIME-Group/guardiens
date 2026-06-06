@@ -1,6 +1,6 @@
 /**
  * Onglet "Animaux" : sommaire si plusieurs, puis fiche détaillée par animal.
- * Aucune icône Lucide décorative — seules Pill / AlertTriangle (statut santé) et Info (statut) restent.
+ * Aucune icône Lucide décorative, seules Pill / AlertTriangle (statut santé) et Info (statut) restent.
  */
 import { Pill, AlertTriangle, Info } from "lucide-react";
 import { PetPhoto } from "@/components/sits/views/PetPhoto";
@@ -75,7 +75,7 @@ const TabAnimaux = ({ safePets, ownerName }: TabAnimauxProps) => {
           className="rounded-2xl border border-border bg-muted/30 p-3 md:p-4"
         >
           <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
-            {safePets.length} pensionnaires — cliquez pour aller à une fiche
+            {safePets.length} pensionnaires, cliquez pour aller à une fiche
           </p>
           <div className="flex flex-wrap gap-2">
             {safePets.map((p, idx) => {
@@ -219,7 +219,7 @@ const TabAnimaux = ({ safePets, ownerName }: TabAnimauxProps) => {
                   <AccordionTrigger className="py-2.5 text-sm font-medium hover:no-underline">
                     <span className="flex items-center gap-2">
                       <Info aria-hidden="true" className="h-4 w-4 text-primary" />
-                      Voir la fiche race — {pet.breed}
+                      Voir la fiche race, {pet.breed}
                     </span>
                   </AccordionTrigger>
                   <AccordionContent className="pb-3">

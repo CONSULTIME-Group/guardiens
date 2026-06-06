@@ -1,7 +1,7 @@
 /**
  * Static demo listings injected client-side into search results
  * when there are NO real listings yet.
- * These never hit the database — no FK issues.
+ * These never hit the database, no FK issues.
  *
  * Each demo sit is enriched so it can be opened on a dedicated demo
  * detail page (/annonces/demo/:slug) showing the full Guardiens experience:
@@ -80,7 +80,7 @@ export const DEMO_SITS: DemoSit[] = [
     is_demo: true,
     title: "Maison avec jardin, Laïka la Malinoise et son drôle de trio",
     description:
-      "Nous partons deux semaines en famille et cherchons un gardien bienveillant pour veiller sur notre maison et nos trois animaux : une malinoise sportive, un Maine Coon majestueux et Coco, notre perroquet gris du Gabon — un sacré personnage. Quartier calme et arboré du 6ᵉ, à deux pas du parc de la Tête d'Or. Maison spacieuse avec jardin clos, idéale pour Laïka qui adore les longues balades.",
+      "Nous partons deux semaines en famille et cherchons un gardien bienveillant pour veiller sur notre maison et nos trois animaux : une malinoise sportive, un Maine Coon majestueux et Coco, notre perroquet gris du Gabon, un sacré personnage. Quartier calme et arboré du 6ᵉ, à deux pas du parc de la Tête d'Or. Maison spacieuse avec jardin clos, idéale pour Laïka qui adore les longues balades.",
     start_date: addDays(21),
     end_date: addDays(35),
     status: "published",
@@ -143,10 +143,10 @@ export const DEMO_SITS: DemoSit[] = [
     ],
     schedule: {
       morning: "Sortie running ou vélo avec Laïka 45 min, gamelles, ouverture cage de Coco 1h.",
-      midday: "Visite rapide au jardin, fontaine à eau à recharger, quelques mots à Coco — il adore.",
+      midday: "Visite rapide au jardin, fontaine à eau à recharger, quelques mots à Coco, il adore.",
       evening: "Promenade Laïka 45 min, repas du soir, brossage de Milo, câlins obligatoires.",
       notes:
-        "Comptez environ 2h30 de présence active par jour. Laïka a besoin de se dépenser — un gardien sportif sera ravi.",
+        "Comptez environ 2h30 de présence active par jour. Laïka a besoin de se dépenser, un gardien sportif sera ravi.",
     },
     ownerMessage:
       "On confie nos animaux à un membre du coin de confiance plutôt qu'à une pension. Vous repartirez sûrement avec des cookies maison de mon mari et une connaissance fine du quartier !",
@@ -205,7 +205,7 @@ export const DEMO_SITS: DemoSit[] = [
         breed: "Jument Mérens",
         age: "11 ans",
         notes:
-          "Vit au pré attenant. Foin matin et soir, vérifier l'abreuvoir. Pansage simple si vous aimez — pas obligatoire. Très docile, parfaite pour débuter au contact des chevaux.",
+          "Vit au pré attenant. Foin matin et soir, vérifier l'abreuvoir. Pansage simple si vous aimez, pas obligatoire. Très docile, parfaite pour débuter au contact des chevaux.",
       },
       {
         species: "horse",
@@ -238,7 +238,7 @@ export const DEMO_SITS: DemoSit[] = [
       midday: "Vérifier les abreuvoirs (chevaux + poules), possible cueillette tomates/courgettes.",
       evening: "Foin du soir aux équidés, fermeture poulailler après le coucher du soleil, repas Moustache.",
       notes:
-        "Comptez 2h par jour. Aucune compétence équestre exigée — on vous montre tout à l'arrivée. Possibilité de baignade au lac juste devant !",
+        "Comptez 2h par jour. Aucune compétence équestre exigée, on vous montre tout à l'arrivée. Possibilité de baignade au lac juste devant !",
     },
     ownerMessage:
       "Vous repartirez avec des œufs, des légumes, et probablement l'envie de revenir. Notre maison est ouverte aux gens curieux et respectueux de la nature.",
@@ -297,7 +297,7 @@ export const DEMO_SITS: DemoSit[] = [
         breed: "Husky sibérien",
         age: "4 ans",
         notes:
-          "Très câlin et bavard (ouh-ouh sonores en accueil !). Deux belles sorties par jour obligatoires (1h le matin, 45 min le soir) — sinon il s'ennuie. Tenu en laisse hors zones autorisées : un husky, ça file comme une flèche.",
+          "Très câlin et bavard (ouh-ouh sonores en accueil !). Deux belles sorties par jour obligatoires (1h le matin, 45 min le soir), sinon il s'ennuie. Tenu en laisse hors zones autorisées : un husky, ça file comme une flèche.",
       },
       {
         species: "cat",
@@ -313,7 +313,7 @@ export const DEMO_SITS: DemoSit[] = [
       midday: "Pause pipi rapide pour Yuki en bas de l'immeuble, Milo dort.",
       evening: "Repas à 18h précises, sortie Yuki 45 min, nettoyage litière, séance jeu/câlins 20 min.",
       notes:
-        "Comptez 2h30 par jour. Yuki est l'attraction du quartier — préparez-vous à être abordé par tous les enfants !",
+        "Comptez 2h30 par jour. Yuki est l'attraction du quartier, préparez-vous à être abordé par tous les enfants !",
     },
     ownerMessage:
       "Yuki et Milo sont mes bébés. J'aime quand mes gardiens m'envoient une photo par jour, même rapide. En échange, je vous laisse mon vélo, mon Netflix et la liste de mes adresses préférées en ville !",
@@ -390,7 +390,7 @@ export const DEMO_MISSIONS = [
   {
     id: "demo-mission-003",
     is_demo: true,
-    title: "Tailler la haie et désherber l'allée — 2 après-midis",
+    title: "Tailler la haie et désherber l'allée, 2 après-midis",
     description:
       "Haie de 15 mètres à tailler et allée à désherber. Outils fournis, prévoir gants.",
     category: "garden",
@@ -420,7 +420,7 @@ export const DEMO_MISSIONS = [
 ];
 
 /**
- * Membres démos — uniquement des profils proposant des SAVOIR-FAIRE
+ * Membres démos, uniquement des profils proposant des SAVOIR-FAIRE
  * COMPLÉMENTAIRES (au-delà de la garde classique) pour illustrer la richesse
  * de la communauté : reiki, naturopathie animale, ostéo, comportementaliste,
  * communication intuitive, dressage positif, etc.
@@ -517,7 +517,7 @@ export const DEMO_MEMBERS = [
     city: "Aix-les-Bains",
     skill_categories: ["competences"],
     specialty_label: "Ostéopathie animale",
-    specialty_description: "Praticienne certifiée — mobilité, douleurs chroniques, post-opératoire.",
+    specialty_description: "Praticienne certifiée, mobilité, douleurs chroniques, post-opératoire.",
     available_for_help: true,
     is_founder: false,
     avgRating: "4.9",

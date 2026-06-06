@@ -86,7 +86,7 @@ const Unsubscribe = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Helmet>
-        <title>Désinscription email — Guardiens</title>
+        <title>Désinscription email, Guardiens</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <Card className="w-full max-w-lg">

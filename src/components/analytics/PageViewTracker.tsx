@@ -25,7 +25,7 @@ const PageViewTracker = () => {
     //   et seraient comptés comme page_view alors que ce sont des requêtes de crawlers
     //   ou de bots qui scannent les sourcemaps. On y trouve aussi des littéraux de
     //   template non interpolés (ex: /assets/${e}, /assets/'+e+') extraits du code
-    //   minifié — du bruit pur.
+    //   minifié, du bruit pur.
     // - extensions de fichiers statiques requêtés en direct.
     const isAssetNoise =
       path.startsWith("/assets/") ||

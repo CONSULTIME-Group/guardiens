@@ -7,7 +7,7 @@ import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 const FLAG_KEY = "fb_ref_active";          // posée par FacebookReferralTracker
-const SEEN_KEY = "fb_ref_feedback_seen";   // localStorage — ne pas re-prompter avant 30j
+const SEEN_KEY = "fb_ref_feedback_seen";   // localStorage, ne pas re-prompter avant 30j
 const SEEN_TTL_MS = 1000 * 60 * 60 * 24 * 30;
 const SHOW_DELAY_MS = 25_000;
 
@@ -33,7 +33,7 @@ const DISMISS_REASONS: Array<{ key: DismissReason; label: string }> = [
  * postés sur les annonces de garde Facebook.
  *
  * Flow :
- * 1. Prompt initial — 3 réactions rapides (Utile / Bof / Commenter).
+ * 1. Prompt initial, 3 réactions rapides (Utile / Bof / Commenter).
  * 2. Si l'utilisateur clique X sans réagir → étape « pourquoi »
  *    (5 raisons rapides + champ libre optionnel).
  * 3. Sortie sans choisir de raison = dismiss "silent".
@@ -167,7 +167,7 @@ const FacebookReferralFeedback = () => {
             <p className="text-xs text-muted-foreground mt-0.5">
               {askingDismiss
                 ? "Qu'est-ce qui vous fait fermer ce message ? (1 clic)"
-                : "Vous arrivez de Facebook — votre avis m'aide énormément."}
+                : "Vous arrivez de Facebook, votre avis m'aide énormément."}
             </p>
           </div>
           <button

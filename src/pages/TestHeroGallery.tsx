@@ -42,7 +42,7 @@ const ANCHOR_ORDER: Record<HeroAnchor, number> = {
   right: 2,
 };
 
-// Hash déterministe pour le mode "shuffle" — même ordre à chaque rendu sans
+// Hash déterministe pour le mode "shuffle", même ordre à chaque rendu sans
 // dépendance externe (évite la dépendance à Math.random qui changerait au moindre re-render).
 function stableHash(n: number): number {
   let h = (n + 0x9e3779b9) | 0;
@@ -146,7 +146,7 @@ export default function TestHeroGallery() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>QA — Galerie hero (100 images)</title>
+        <title>QA, Galerie hero (100 images)</title>
         <meta name="robots" content="noindex,nofollow" />
       </Helmet>
 
@@ -156,7 +156,7 @@ export default function TestHeroGallery() {
           <div className="flex items-baseline justify-between gap-4 flex-wrap">
             <div>
               <h1 className="text-xl font-heading font-bold">
-                Galerie hero — {filtered.length} / {items.length}
+                Galerie hero, {filtered.length} / {items.length}
               </h1>
               <p className="text-xs text-muted-foreground">
                 Banque utilisée par les profils gardiens. Filtrez et comparez le rendu réel au brut.
@@ -365,7 +365,7 @@ function HeroCard({
           <ZoomIn className="w-6 h-6 text-white drop-shadow-lg" />
         </span>
 
-        {/* Annotation manuscrite "n° 042 / 100" — façon feutre bleu sur le coin du carnet.
+        {/* Annotation manuscrite "n° 042 / 100", façon feutre bleu sur le coin du carnet.
             Police 'cursive' (système) + légère rotation pour casser l'alignement parfait
             et imiter l'écriture à main levée. Le total est dérivé de HERO_BANK.length. */}
         <span
@@ -510,7 +510,7 @@ function HeroZoomModal({
     []
   );
 
-  // Zoom centré sur un point (clientX/Y) — pour wheel + double-tap
+  // Zoom centré sur un point (clientX/Y), pour wheel + double-tap
   const zoomAt = useCallback(
     (clientX: number, clientY: number, nextScale: number) => {
       const el = containerRef.current;
@@ -598,7 +598,7 @@ function HeroZoomModal({
       };
       dragRef.current = null;
     } else if (activePointers.current.size === 1) {
-      // Drag (un doigt / souris) — uniquement utile si zoomé
+      // Drag (un doigt / souris), uniquement utile si zoomé
       dragRef.current = { startX: e.clientX, startY: e.clientY, tx0: tx, ty0: ty };
 
       // Détection double-tap (tactile)
@@ -779,10 +779,10 @@ function HeroZoomModal({
             <div className="absolute left-0 right-0 border-t border-dashed border-emerald-400/70" style={{ top: "42%" }} />
             {/* Légende */}
             <div className="absolute bottom-2 left-2 text-[10px] text-white/70 font-mono space-x-3 bg-black/40 px-2 py-1 rounded">
-              <span className="text-blue-300">— 20% (left)</span>
-              <span className="text-white/70">— 50% (center)</span>
-              <span className="text-purple-300">— 80% (right)</span>
-              <span className="text-emerald-300">— 42% Y</span>
+              <span className="text-blue-300">, 20% (left)</span>
+              <span className="text-white/70">, 50% (center)</span>
+              <span className="text-purple-300">, 80% (right)</span>
+              <span className="text-emerald-300">, 42% Y</span>
             </div>
           </div>
         )}
@@ -985,7 +985,7 @@ function HeroFullPageModal({
         </button>
       </div>
 
-      {/* Contenu — scrollable sur mobile */}
+      {/* Contenu, scrollable sur mobile */}
       <div className="flex-1 overflow-auto">
         <div className="min-h-full flex flex-col lg:flex-row">
           {/* ─── Carnet entier ─── */}
@@ -1001,7 +1001,7 @@ function HeroFullPageModal({
                   item.mobileSrc ? `${item.mobileSrc} 768w, ${item.src} 1536w` : undefined
                 }
                 sizes="(max-width: 1023px) 100vw, 66vw"
-                alt={`Hero #${item.fileNum} — vue pleine page`}
+                alt={`Hero #${item.fileNum}, vue pleine page`}
                 width={1536}
                 height={544}
                 loading="eager"
@@ -1095,7 +1095,7 @@ function HeroFullPageModal({
             <DetailRow label="Dimensions natives">
               <span className="font-mono text-xs">1536 × 544 px</span>
               <p className="text-xs text-muted-foreground mt-1">
-                Ratio ≈ 2.82 — pleine largeur du hero profil.
+                Ratio ≈ 2.82, pleine largeur du hero profil.
               </p>
             </DetailRow>
 

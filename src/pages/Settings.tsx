@@ -94,7 +94,7 @@ const Settings = () => {
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
 
-  // Master notif toggle (UI only — derives from individual toggles)
+  // Master notif toggle (UI only, derives from individual toggles)
   const allNotifsOn = useMemo(
     () =>
       prefs.email_new_application && prefs.email_messages && prefs.email_reminders &&
@@ -140,7 +140,7 @@ const Settings = () => {
     load();
   }, [user]);
 
-  // Active commitments check (sits & applications) — for the deletion safeguard
+  // Active commitments check (sits & applications), for the deletion safeguard
   useEffect(() => {
     if (!user) return;
     (async () => {
@@ -379,7 +379,7 @@ const Settings = () => {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Paramètres — Guardiens</title>
+        <title>Paramètres, Guardiens</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
@@ -388,7 +388,7 @@ const Settings = () => {
         <h1 className="font-heading text-2xl md:text-3xl font-bold mt-4 mb-6">Paramètres</h1>
 
         <div className="md:grid md:grid-cols-[260px_1fr] md:gap-8">
-          {/* Sidebar — desktop */}
+          {/* Sidebar, desktop */}
           <aside className="hidden md:block">
             <nav aria-label="Navigation des paramètres" className="sticky top-6 space-y-6">
               {Object.entries(groupedSections).map(([group, items]) => (
@@ -426,7 +426,7 @@ const Settings = () => {
             </nav>
           </aside>
 
-          {/* Tabs — mobile */}
+          {/* Tabs, mobile */}
           <div className="md:hidden mb-4 -mx-4 px-4 overflow-x-auto">
             <div className="flex gap-1 pb-2 w-max">
               {SECTIONS.map((s) => {

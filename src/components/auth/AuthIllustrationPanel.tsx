@@ -148,7 +148,7 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
     // synchronisés avec la PNG. Permet au navigateur de récupérer les
     // premiers octets pendant l'idle, sans bloquer les ressources critiques.
     // Aucun preload si reduced-motion, save-data, connexion lente, ou
-    // cinemagraph désynchronisé — dans ces cas on reste sur la PNG.
+    // cinemagraph désynchronisé, dans ces cas on reste sur la PNG.
     useEffect(() => {
       if (typeof document === "undefined") return;
       if (!isCinemagraphInSync || !animate || !hasEnteredViewport) return;
@@ -188,7 +188,7 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
       // (codec non supporté, réseau coupé, decode KO sans émettre d'`error`,
       // tous les <source> épuisés…), on bascule sur l'image fixe. La PNG sous
       // les deux vidéos reste TOUJOURS visible, donc l'utilisateur ne voit
-      // jamais d'écran vide — au pire l'illustration statique.
+      // jamais d'écran vide, au pire l'illustration statique.
       const fallbackTimer = window.setTimeout(() => {
         if (a.readyState < 3 /* HAVE_FUTURE_DATA */) {
           setAnimate(false);
@@ -340,7 +340,7 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
         {/*
           Calque image + voile : strictement décoratif, en arrière-plan (z-0),
           non-interactif (pointer-events-none sur le wrapper ET le voile).
-          Toute la moitié gauche est non-cliquable par design — aucune action
+          Toute la moitié gauche est non-cliquable par design, aucune action
           utilisateur ne vit ici, le contenu interactif est dans la moitié droite.
         */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
@@ -358,7 +358,7 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
               // UNIFICATION DU FOND : le papier de la gouache a été pré-aligné
               // au pixel près sur bg-background (hsl 40 33% 97% ≈ #FAF8F5),
               // donc les bandes laissées libres par object-contain (haut, gauche,
-              // droite) se confondent visuellement avec la peinture — aucune
+              // droite) se confondent visuellement avec la peinture, aucune
               // démarcation visible, même en plein écran 4K.
               objectPosition: "50% 100%",
               // Léger fade uniquement sur le bord droit pour fondre vers le formulaire.

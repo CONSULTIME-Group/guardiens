@@ -326,19 +326,19 @@ const AdminSitsManagement = () => {
                         {sitter.avatar && <img src={sitter.avatar} className="w-5 h-5 rounded-full object-cover" />}
                         <span>{sitter.name}</span>
                       </div>
-                    ) : "—"}
+                    ) : ","}
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{sit.owner?.city || "—"}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{sit.owner?.city || ","}</TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                    {sit.start_date ? format(new Date(sit.start_date), "d MMM", { locale: fr }) : "—"}
+                    {sit.start_date ? format(new Date(sit.start_date), "d MMM", { locale: fr }) : ","}
                     {" → "}
-                    {sit.end_date ? format(new Date(sit.end_date), "d MMM yy", { locale: fr }) : "—"}
+                    {sit.end_date ? format(new Date(sit.end_date), "d MMM yy", { locale: fr }) : ","}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                    {sit.created_at ? formatDistanceToNow(new Date(sit.created_at), { addSuffix: true, locale: fr }) : "—"}
+                    {sit.created_at ? formatDistanceToNow(new Date(sit.created_at), { addSuffix: true, locale: fr }) : ","}
                   </TableCell>
-                  <TableCell className="text-right text-sm font-medium tabular-nums">{statsBySit[sit.id]?.views ?? "—"}</TableCell>
-                  <TableCell className="text-right text-sm font-medium tabular-nums">{statsBySit[sit.id]?.messages ?? "—"}</TableCell>
+                  <TableCell className="text-right text-sm font-medium tabular-nums">{statsBySit[sit.id]?.views ?? ","}</TableCell>
+                  <TableCell className="text-right text-sm font-medium tabular-nums">{statsBySit[sit.id]?.messages ?? ","}</TableCell>
                   <TableCell><Badge variant={timing.variant}>{timing.label}</Badge></TableCell>
                   <TableCell className="text-xs">
                     <div>P: {rev.owner ? "✅" : "❌"}</div>
@@ -408,7 +408,7 @@ const AdminSitsManagement = () => {
                     <div>
                       <p className="text-xs text-muted-foreground">Propriétaire</p>
                       <p className="text-sm font-medium">
-                        {selectedSit.owner?.first_name || "—"}
+                        {selectedSit.owner?.first_name || ","}
                       </p>
                     </div>
                   </div>
@@ -424,7 +424,7 @@ const AdminSitsManagement = () => {
                     <div>
                       <p className="text-xs text-muted-foreground">Gardien assigné</p>
                       <p className="text-sm font-medium">
-                        {sitters[selectedSit.id]?.name || "—"}
+                        {sitters[selectedSit.id]?.name || ","}
                       </p>
                     </div>
                   </div>
@@ -437,9 +437,9 @@ const AdminSitsManagement = () => {
                     <div>
                       <p className="text-xs text-muted-foreground">Dates</p>
                       <p className="text-sm font-medium">
-                        {selectedSit.start_date ? format(new Date(selectedSit.start_date), "d MMM yyyy", { locale: fr }) : "—"}
+                        {selectedSit.start_date ? format(new Date(selectedSit.start_date), "d MMM yyyy", { locale: fr }) : ","}
                         {" → "}
-                        {selectedSit.end_date ? format(new Date(selectedSit.end_date), "d MMM yyyy", { locale: fr }) : "—"}
+                        {selectedSit.end_date ? format(new Date(selectedSit.end_date), "d MMM yyyy", { locale: fr }) : ","}
                       </p>
                     </div>
                   </div>
@@ -465,15 +465,15 @@ const AdminSitsManagement = () => {
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Statistiques</h3>
                 <div className="grid grid-cols-3 gap-2">
                   <div className="rounded-lg border p-3 text-center">
-                    <p className="text-2xl font-semibold">{sheetStats?.view_count ?? "—"}</p>
+                    <p className="text-2xl font-semibold">{sheetStats?.view_count ?? ","}</p>
                     <p className="text-xs text-muted-foreground mt-1">Vues</p>
                   </div>
                   <div className="rounded-lg border p-3 text-center">
-                    <p className="text-2xl font-semibold">{sheetStats?.message_count ?? "—"}</p>
+                    <p className="text-2xl font-semibold">{sheetStats?.message_count ?? ","}</p>
                     <p className="text-xs text-muted-foreground mt-1">Messages</p>
                   </div>
                   <div className="rounded-lg border p-3 text-center">
-                    <p className="text-2xl font-semibold">{sheetStats?.conversation_count ?? "—"}</p>
+                    <p className="text-2xl font-semibold">{sheetStats?.conversation_count ?? ","}</p>
                     <p className="text-xs text-muted-foreground mt-1">Conversations</p>
                   </div>
                 </div>
@@ -509,7 +509,7 @@ const AdminSitsManagement = () => {
                             <AvatarFallback className="text-xs"><User className="h-3 w-3" /></AvatarFallback>
                           </Avatar>
                           <span className="text-sm font-medium underline-offset-2 hover:underline">
-                            {app.sitter?.first_name || "—"}
+                            {app.sitter?.first_name || ","}
                           </span>
                         </button>
                         {getStatusBadge(app.status)}

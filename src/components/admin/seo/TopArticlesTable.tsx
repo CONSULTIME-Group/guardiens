@@ -190,13 +190,13 @@ const TopArticlesTable = ({ topPages }: TopArticlesTableProps) => {
                     </span>
                   </TableCell>
                   <TableCell className={`text-right ${clicksColor}`}>
-                    {row.hasGSC ? row.clicks : "—"}
+                    {row.hasGSC ? row.clicks : ","}
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground">
-                    {row.hasGSC ? row.impressions.toLocaleString() : "—"}
+                    {row.hasGSC ? row.impressions.toLocaleString() : ","}
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground">
-                    {row.hasGSC ? `${(row.ctr * 100).toFixed(1)}%` : "—"}
+                    {row.hasGSC ? `${(row.ctr * 100).toFixed(1)}%` : ","}
                   </TableCell>
                   <TableCell className="text-center">
                     {row.hasGSC ? (
@@ -204,7 +204,7 @@ const TopArticlesTable = ({ topPages }: TopArticlesTableProps) => {
                         {Math.round(row.position * 10) / 10}
                       </Badge>
                     ) : (
-                      "—"
+                      ","
                     )}
                   </TableCell>
                   <TableCell>

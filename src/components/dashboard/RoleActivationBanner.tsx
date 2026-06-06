@@ -19,9 +19,9 @@ const RoleActivationBanner = ({ userRole }: RoleActivationBannerProps) => {
   const freeNow = isBeforeLaunch() || isInGracePeriod();
   const text =
     userRole === "sitter"
-      ? "Vous avez aussi des animaux à faire garder ? Activez votre espace propriétaire — c'est à 0 € →"
+      ? "Vous avez aussi des animaux à faire garder ? Activez votre espace propriétaire, c'est à 0 € →"
       : freeNow
-        ? "Envie de garder des maisons ? Activez votre espace gardien — à 0 € pour tous en ce moment →"
+        ? "Envie de garder des maisons ? Activez votre espace gardien, à 0 € pour tous en ce moment →"
         : "Envie de garder des maisons ? Activez votre espace gardien (6,99 €/mois, sans engagement) →";
 
   return (

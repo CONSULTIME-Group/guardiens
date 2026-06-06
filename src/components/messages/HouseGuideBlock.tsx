@@ -123,7 +123,7 @@ const GuideSection = ({ icon: Icon, title, children }: { icon: React.ElementType
 
 const ContactRow = ({ label, name, phone }: { label: string; name: string; phone: string }) => (
   <div className="flex items-center justify-between text-sm">
-    <span>{label}{name ? ` — ${name}` : ""}</span>
+    <span>{label}{name ? `, ${name}` : ""}</span>
     {phone && <a href={`tel:${phone}`} className="text-primary underline text-xs">{phone}</a>}
   </div>
 );

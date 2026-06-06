@@ -205,7 +205,7 @@ export default function AdminHeroWeights() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Admin — Poids des hero</title>
+        <title>Admin, Poids des hero</title>
         <meta name="robots" content="noindex,nofollow" />
       </Helmet>
 
@@ -214,7 +214,7 @@ export default function AdminHeroWeights() {
         <header className="space-y-2">
           <div className="flex items-baseline justify-between gap-4 flex-wrap">
             <h1 className="text-2xl font-heading font-bold">
-              Poids des hero — administration
+              Poids des hero, administration
             </h1>
             <Link
               to="/test/hero-distribution"
@@ -361,7 +361,7 @@ export default function AdminHeroWeights() {
         {/* Aperçu de simulation */}
         <section className="space-y-3">
           <h2 className="text-lg font-heading font-semibold">
-            Aperçu — distribution simulée sur {SIM_SAMPLE.toLocaleString("fr-FR")}{" "}
+            Aperçu, distribution simulée sur {SIM_SAMPLE.toLocaleString("fr-FR")}{" "}
             profils
           </h2>
           <div className="space-y-1.5">

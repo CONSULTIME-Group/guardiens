@@ -64,7 +64,7 @@ const Contact = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
-        title="Contact — Guardiens"
+        title="Contact, Guardiens"
         description="Contactez l'équipe Guardiens pour toute question sur le house-sitting de proximité."
         path="/contact"
       />

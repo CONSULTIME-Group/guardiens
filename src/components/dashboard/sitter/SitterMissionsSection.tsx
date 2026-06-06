@@ -34,7 +34,7 @@ const SitterMissionsSection = memo(({
     () => myMissions.filter(m => m.status !== "completed").length,
     [myMissions]
   );
-  // Item 12 — ne pas atterrir sur "Les miennes" si seules des missions terminées
+  // Item 12, ne pas atterrir sur "Les miennes" si seules des missions terminées
   // (cartes barrées en grisé = mauvais signal). On préfère "Autour de vous".
   const [tab, setTab] = useState<"mine" | "nearby">(
     openCount > 0 ? "mine" : "nearby"
@@ -113,7 +113,7 @@ const SitterMissionsSection = memo(({
         ) : sortedMine.length === 0 ? (
           <div className="py-1">
             <p className="text-xs text-muted-foreground font-sans mb-3">
-              <span className="font-semibold text-foreground">Osez !</span> Demandez un coup de main, ou proposez quelque chose en échange — un café, une histoire, un service…
+              <span className="font-semibold text-foreground">Osez !</span> Demandez un coup de main, ou proposez quelque chose en échange, un café, une histoire, un service…
             </p>
             <div className="flex flex-col gap-2">
               <Button

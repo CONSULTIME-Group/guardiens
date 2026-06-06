@@ -83,7 +83,7 @@ const CancellationReviewCard = ({ review, currentUserId }: { review: any; curren
           Annulation de garde
         </span>
         <span className="text-xs text-muted-foreground">
-          — {format(new Date(review.created_at), "MMMM yyyy", { locale: fr })}
+         , {format(new Date(review.created_at), "MMMM yyyy", { locale: fr })}
         </span>
       </div>
 
@@ -137,7 +137,7 @@ const CancellationReviewCard = ({ review, currentUserId }: { review: any; curren
       {submitted && (
         <div className="border-t border-border mt-3 pt-3">
           <p className="text-xs text-primary font-medium">
-            Réponse soumise — en attente de validation.
+            Réponse soumise, en attente de validation.
           </p>
         </div>
       )}

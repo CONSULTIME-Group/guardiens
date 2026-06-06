@@ -8,11 +8,11 @@ import type { AccessLevel } from "@/hooks/useAccessLevel";
 interface AccessGateBannerProps {
   level: AccessLevel;
   profileCompletion: number;
-  /** "mission" | "guard" — changes the wording */
+  /** "mission" | "guard", changes the wording */
   context?: "mission" | "guard";
   /** Si true, affiche le bandeau de recommandation ID au level 2.
    *  Par défaut false : la vérification n'étant plus bloquante,
-   *  on n'affiche plus de bandeau gênant — on utilise un encart léger ailleurs. */
+   *  on n'affiche plus de bandeau gênant, on utilise un encart léger ailleurs. */
   showIdentityRecommendation?: boolean;
 }
 
@@ -122,7 +122,7 @@ const AccessGateBanner = ({ level, profileCompletion, context = "guard", showIde
           <Star className="h-5 w-5 text-primary mt-0.5 shrink-0" />
           <div className="space-y-2">
             <p className="font-semibold text-[15px] text-foreground">
-              Abonnement requis pour postuler aux gardes — 6,99 €/mois
+              Abonnement requis pour postuler aux gardes, 6,99 €/mois
             </p>
             <p className="text-sm text-muted-foreground">
               Les petites missions sont accessibles, mais les gardes nécessitent un abonnement actif.

@@ -1,5 +1,5 @@
 /**
- * Section pédagogique pour visiteurs anonymes — affichée entre le bloc
+ * Section pédagogique pour visiteurs anonymes, affichée entre le bloc
  * recherche et le footer SEO.
  *
  * Objectif : transformer la consultation libre en inscription. Le visiteur

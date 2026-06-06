@@ -32,7 +32,7 @@ const SECTIONS_META = [
 
 /**
  * Critère de score étendu : inclut la section où l'utilisateur peut le compléter.
- * Source UNIQUE de vérité — la jauge %, les sections « Complété ✓ » et les labels
+ * Source UNIQUE de vérité, la jauge %, les sections « Complété ✓ » et les labels
  * « → champ manquant » dérivent tous de la même liste.
  */
 type ScoredCriterion = ScoreCriterion & { section: string; kind: "essential" | "bonus" };
@@ -175,7 +175,7 @@ const OwnerProfilePage = () => {
 
   // Source UNIQUE pour la jauge ET la sidebar : un seul set de critères pondérés.
   const scoredCriteria: ScoredCriterion[] = [
-    // Essentiels — 75 pts
+    // Essentiels, 75 pts
     { section: "identity", kind: "essential", label: "Prénom + code postal", points: 10,
       ok: !!(mergedData.first_name && mergedData.postal_code) },
     { section: "identity", kind: "essential", label: "Photo de profil", points: 15,
@@ -186,7 +186,7 @@ const OwnerProfilePage = () => {
       ok: (mergedData.description?.length ?? 0) >= 50, hint: `${mergedData.description?.length ?? 0}/50 caractères.` },
     { section: "gallery", kind: "essential", label: "Au moins 1 photo dans la Galerie", points: 15,
       ok: galleryCount > 0, hint: "Onglet Galerie." },
-    // Bonus — 25 pts
+    // Bonus, 25 pts
     { section: "identity", kind: "bonus", label: "Bio ≥ 50 caractères", points: 10,
       ok: (mergedData.bio?.length ?? 0) >= 50, hint: `${mergedData.bio?.length ?? 0}/50 caractères.` },
     { section: "skills", kind: "bonus", label: "Au moins 1 compétence proprio", points: 10,
@@ -215,7 +215,7 @@ const OwnerProfilePage = () => {
   // Avertit l'utilisateur s'il quitte la page avec des modifications non sauvegardées.
   useUnsavedChanges(dirty);
 
-  // Section suivante (pour le bouton « Suivant ») — ignore les sections déjà complètes.
+  // Section suivante (pour le bouton « Suivant »), ignore les sections déjà complètes.
   const currentIndex = SECTIONS_META.findIndex(s => s.id === activeSection);
   const nextSection = SECTIONS_META[currentIndex + 1];
 
@@ -289,7 +289,7 @@ const OwnerProfilePage = () => {
               )}
               {activeSection === "gallery" && <OwnerGallery />}
 
-              {/* Bouton « Suivant » — auto-sauvegarde puis avance dans la liste. */}
+              {/* Bouton « Suivant », auto-sauvegarde puis avance dans la liste. */}
               {nextSection && (
                 <div className="mt-8 pt-6 border-t border-border flex justify-end">
                   <Button

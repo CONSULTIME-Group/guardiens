@@ -1,5 +1,5 @@
 /**
- * SitPhotoManager — gestion intégrée des photos & couverture sur la fiche annonce owner.
+ * SitPhotoManager, gestion intégrée des photos & couverture sur la fiche annonce owner.
  *
  * Périmètre :
  *  - Affiche les photos de la galerie propriétaire (`owner_gallery`).
@@ -378,7 +378,7 @@ const SitPhotoManager = ({
           />
           <div className="flex-1 min-w-[200px]">
             <p className="text-sm font-medium text-foreground">
-              Couverture suggérée — score qualité {suggestion.score}/100
+              Couverture suggérée, score qualité {suggestion.score}/100
             </p>
             <p className="text-xs text-muted-foreground">{suggestion.summary}</p>
           </div>
