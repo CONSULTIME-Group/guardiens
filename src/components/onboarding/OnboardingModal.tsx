@@ -74,8 +74,11 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
   const [firstName, setFirstName] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [city, setCity] = useState("");
+  const [country, setCountry] = useState("FR");
   const [minimalSaved, setMinimalSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const livesAbroad = country !== "FR";
 
   // ── Slide 1: photo + bio ──
   const [avatarUrl, setAvatarUrl] = useState("");
@@ -92,8 +95,8 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
 
   const fieldsValid =
     firstName.trim().length > 0 &&
-    postalCode.length === 5 &&
-    city.trim().length > 0;
+    city.trim().length > 0 &&
+    (livesAbroad ? country.trim().length > 0 : postalCode.length === 5);
 
   // Calculate live completion estimate — must match DB function
   useEffect(() => {
