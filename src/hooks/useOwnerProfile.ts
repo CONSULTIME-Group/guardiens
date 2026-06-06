@@ -94,7 +94,7 @@ export interface Pet {
 }
 
 const defaultData: OwnerProfileData = {
-  first_name: "", last_name: "", city: "", postal_code: "", bio: "", avatar_url: "",
+  first_name: "", last_name: "", city: "", postal_code: "", country: "FR", bio: "", avatar_url: "",
   property_type: "", environment: "", rooms_count: 0, bedrooms_count: 0, car_required: false,
   accessible: false, equipments: [], photos: [], description: "", region_highlights: "",
   environments: [],
