@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react";
 const NAV_LINKS = [
   { label: "Annonces en cours", to: "/annonces" },
   { label: "Coups de main", to: "/petites-missions" },
+  { label: "Pros animaliers", to: "/pros", beta: true },
   { label: "Guides locaux", to: "/guides" },
   { label: "Tarifs", to: "/tarifs" },
   { label: "Le journal", to: "/actualites" },
@@ -37,6 +38,11 @@ export default function PublicHeader() {
               aria-current={isActive(l.to) ? "page" : undefined}
             >
               {l.label}
+              {l.beta && (
+                <span className="ml-1.5 text-[9px] uppercase tracking-wider font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
+                  Bêta
+                </span>
+              )}
             </Button>
           ))}
           <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
@@ -74,6 +80,11 @@ export default function PublicHeader() {
               }`}
             >
               {l.label}
+              {l.beta && (
+                <span className="ml-1.5 text-[9px] uppercase tracking-wider font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
+                  Bêta
+                </span>
+              )}
             </Link>
           ))}
           <div className="pt-2 border-t border-border">
