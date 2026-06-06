@@ -579,8 +579,8 @@ const SmallMissions = () => {
               <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-8 text-center space-y-3">
                 <p className="font-heading text-lg font-semibold text-foreground">
                   {mode === "offer"
-                    ? `Aucune demande à moins de ${radiusKm || 25} km de chez vous.`
-                    : `Personne n'a encore osé à moins de ${radiusKm || 25} km de chez vous.`}
+                    ? `Aucune demande à moins de ${radiusKm || 30} km de chez vous.`
+                    : `Personne n'a encore osé à moins de ${radiusKm || 30} km de chez vous.`}
                 </p>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
                   {outOfZoneMissions.length > 0 ? (
