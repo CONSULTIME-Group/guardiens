@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowLeft, MapPin, Calendar, Clock, Dog, Flower2, Handshake,
   Heart, MessageSquare, CheckCircle2, Users, XCircle, ThumbsUp,
-  ThumbsDown, Star, RotateCcw, Send, Home, X, Share2, ShieldCheck,
+  ThumbsDown, Star, RotateCcw, Send, Home, X, Share2, ShieldCheck, Sparkles,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -487,8 +487,15 @@ const SmallMissionDetail = () => {
 
   // Valeurs dérivées (calculées à chaque render — pas de mémoïsation prématurée).
   const hasPublishedFlag = searchParams.get("published") === "1";
+  const hasInvitedFlag = searchParams.get("invited") === "1";
   const isAuthor = isAuthorOf(user?.id, mission);
   const showPublishedBanner = Boolean(user?.id) && isAuthor && hasPublishedFlag;
+  const showInvitedBanner =
+    Boolean(user?.id) &&
+    !isAuthor &&
+    hasInvitedFlag &&
+    mission?.status === "open" &&
+    !responses.some((r) => r.responder_id === user?.id);
 
   // useEffect placé AVANT les early returns pour respecter les règles des Hooks
   // (sinon l'ordre des hooks change entre loading=true et loading=false).
@@ -796,6 +803,19 @@ const SmallMissionDetail = () => {
               onClose={handleClosePublishedBanner}
               onToast={(t) => toast(t)}
             />
+          </div>
+        )}
+
+        {/* Bannière d'invitation côté gardien */}
+        {showInvitedBanner && (
+          <div className="mb-6 bg-info-soft border border-info-border rounded-2xl p-4 flex items-start gap-3">
+            <Sparkles className="h-5 w-5 text-info shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-medium text-info">Vous avez été invité à donner un coup de main</p>
+              <p className="text-sm text-info/80 mt-1">
+                Vos compétences correspondent à cette demande. Lisez les détails puis proposez votre aide en un clic ci-dessous.
+              </p>
+            </div>
           </div>
         )}
 
