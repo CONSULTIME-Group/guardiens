@@ -23,6 +23,7 @@ import {
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import ActiveRolesSection from "@/components/settings/ActiveRolesSection";
 import IdentityVerificationSection from "@/components/settings/IdentityVerificationSection";
+import ProVerificationSection from "@/components/settings/ProVerificationSection";
 import AlertsSection from "@/components/settings/AlertsSection";
 import OwnerPitchSection from "@/components/settings/OwnerPitchSection";
 import { useTheme } from "@/contexts/ThemeContext";
