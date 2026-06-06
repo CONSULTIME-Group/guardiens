@@ -276,6 +276,8 @@ const CreateSit = () => {
         owner_message: ownerMessage.trim() || null,
         daily_routine: dailyRoutine.trim() || null,
         cover_photo_url: coverPhotoUrl ?? (ownerPhotos.length > 0 ? ownerPhotos[0] : null),
+        city: sitCity.trim() || null,
+        country: sitCountry.trim() || "FR",
       };
       if (draftId) {
         const { error } = await supabase.from("sits").update(payload).eq("id", draftId).eq("status", "draft");
