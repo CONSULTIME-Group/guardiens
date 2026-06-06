@@ -196,6 +196,8 @@ const CreateSit = () => {
           setOwnerMessage(d.owner_message || "");
           setDailyRoutine(d.daily_routine || "");
           setCoverPhotoUrl(d.cover_photo_url || null);
+          setSitCity((d as any).city || "");
+          setSitCountry((d as any).country || "FR");
         }
       }
 
