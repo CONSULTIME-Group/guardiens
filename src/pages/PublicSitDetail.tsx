@@ -419,8 +419,11 @@ const PublicSitDetail = () => {
  "@type": "BreadcrumbList",
  itemListElement: [
  { "@type": "ListItem", position: 1, name: "Accueil", item: `${origin}/` },
- ...(citySlug ? [{ "@type": "ListItem", position: 2, name: cityForTitle, item: `${origin}/house-sitting/${citySlug}` }] : []),
- { "@type": "ListItem", position: citySlug ? 3 : 2, name: sit.title || "Annonce de garde", item: canonicalUrl },
+       // Le 2e niveau de breadcrumb pointe vers une page silo /house-sitting/<ville>
+       // qui n'existe que pour les villes FR (silos SEO Lyon/Annecy/Grenoble + autres CityPages).
+       // On l'omet pour les annonces internationales pour éviter une URL en 404.
+       ...(citySlug && (!ownerCountry || ownerCountry === "FR") ? [{ "@type": "ListItem", position: 2, name: cityForTitle, item: `${origin}/house-sitting/${citySlug}` }] : []),
+       { "@type": "ListItem", position: (citySlug && (!ownerCountry || ownerCountry === "FR")) ? 3 : 2, name: sit.title || "Annonce de garde", item: canonicalUrl },
  ],
  };
 
