@@ -69,6 +69,7 @@ const SearchOwner = () => {
   const [availableOnly, setAvailableOnly] = useState(false);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [emergencyOnly, setEmergencyOnly] = useState(false);
+  const [proOnly, setProOnly] = useState(false);
   const [minSits, setMinSits] = useState<string>("all");
   const [minRating, setMinRating] = useState<string>("all");
   const [sort, setSort] = useState<SortOption>("closest");
@@ -290,7 +291,7 @@ const SearchOwner = () => {
 
     const { data: sitters } = await supabase
       .from("sitter_profiles")
-      .select("*, profile:profiles!sitter_profiles_user_id_fkey(first_name, last_name, avatar_url, city, postal_code, profile_completion, identity_verified, completed_sits_count, bio)")
+      .select("*, profile:profiles!sitter_profiles_user_id_fkey(first_name, last_name, avatar_url, city, postal_code, profile_completion, identity_verified, completed_sits_count, bio, pro_status, pro_specialty)")
       .limit(500);
 
     let items = (sitters || []).filter((s: any) => s.profile?.profile_completion >= 60);
@@ -378,6 +379,8 @@ const SearchOwner = () => {
     if (availableOnly) items = items.filter((s: any) => s.is_available);
     // Filter: verified
     if (verifiedOnly) items = items.filter((s: any) => s.profile?.identity_verified);
+    // Filter: pros only (verified pro_status)
+    if (proOnly) items = items.filter((s: any) => s.profile?.pro_status === "verified");
     // Filter: animal types
     if (animalTypes.length > 0 && !animalTypes.includes("Tous")) {
       const wanted = animalTypes.map(a => animalChipToType[a]).filter(Boolean);
@@ -465,7 +468,7 @@ const SearchOwner = () => {
     setResults(final);
     setSearchCenter(searchCoords);
     setLoading(false);
-  }, [city, cityPostalCode, userPostalCode, radius, zoneMode, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, minSits, minRating, sort, franceTotalSitters]);
+  }, [city, cityPostalCode, userPostalCode, radius, zoneMode, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, proOnly, minSits, minRating, sort, franceTotalSitters]);
 
   // Auto-search on filter change (debounced)
   useEffect(() => {
@@ -473,9 +476,9 @@ const SearchOwner = () => {
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => { handleSearch(); }, 400);
     return () => clearTimeout(debounceRef.current);
-  }, [initialLoaded, city, cityPostalCode, radius, zoneMode, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, minSits, minRating, sort, handleSearch]);
+  }, [initialLoaded, city, cityPostalCode, radius, zoneMode, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, proOnly, minSits, minRating, sort, handleSearch]);
 
-  const hasActiveFilters = vehicled || availableOnly || verifiedOnly || emergencyOnly || minSits !== "all" || minRating !== "all";
+  const hasActiveFilters = vehicled || availableOnly || verifiedOnly || emergencyOnly || proOnly || minSits !== "all" || minRating !== "all";
   const hasAnyRating = results.some((s: any) => s.avgRating !== null);
 
   // Zone helpers
@@ -506,6 +509,7 @@ const SearchOwner = () => {
     setAvailableOnly(false);
     setVerifiedOnly(false);
     setEmergencyOnly(false);
+    setProOnly(false);
     setMinSits("all");
     setMinRating("all");
   };
@@ -686,6 +690,13 @@ const SearchOwner = () => {
                   <div className="flex items-center justify-between">
                     <p className="text-sm flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Gardiens d'urgence</p>
                     <Switch checked={emergencyOnly} onCheckedChange={setEmergencyOnly} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm">Gardiens Pro uniquement</p>
+                      <p className="text-xs text-muted-foreground">Professionnels animaliers déclarés et vérifiés</p>
+                    </div>
+                    <Switch checked={proOnly} onCheckedChange={setProOnly} />
                   </div>
                 </div>
 
@@ -1013,6 +1024,9 @@ const SearchOwner = () => {
                         {firstName}
                         {profile?.identity_verified && (
                           <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium ml-1.5 inline-block align-middle">Vérifié</span>
+                        )}
+                        {profile?.pro_status === "verified" && (
+                          <span className="text-xs bg-accent text-accent-foreground px-2 py-0.5 rounded-full font-medium ml-1.5 inline-block align-middle">Pro</span>
                         )}
                       </p>
                       {(profile?.city || distLabel) && (
