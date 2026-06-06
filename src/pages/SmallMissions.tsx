@@ -28,7 +28,6 @@ import ExamplesSection from "@/components/missions/connected/ExamplesSection";
 import OfferDialog from "@/components/missions/connected/OfferDialog";
 import { geocodeCached, useEntityCoords } from "@/hooks/missions/useGeocodedCoords";
 import { useAllMissions, useAvailableHelpers } from "@/hooks/missions/useMissionsData";
-import { useAllMissions, useAvailableHelpers } from "@/hooks/missions/useMissionsData";
 
 
 const SmallMissions = () => {
