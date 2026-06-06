@@ -21,6 +21,7 @@ interface NavItem {
 
 const BADGE_TITLES: Record<string, string> = {
   verifications: "vérifications d'identité en attente",
+  pros: "dossiers Gardien Pro à modérer",
   experiences: "expériences externes à vérifier",
   skills: "compétences proposées à valider",
   reviewsModeration: "avis en attente de modération",
@@ -130,6 +131,7 @@ export const AdminSidebar = () => {
         supabase.from("admin_message_logs").select("id", { count: "exact", head: true }).eq("status", "failed"),
         supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").eq("target_type", "sit"),
         supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").eq("target_type", "small_mission"),
+        supabase.from("pro_verifications").select("id", { count: "exact", head: true }).in("status", ["needs_review", "pending"]),
       ]);
 
       // Compétences saisies dans les profils mais pas encore validées
@@ -165,6 +167,7 @@ export const AdminSidebar = () => {
         adminMessageFailed: results[9].count || 0,
         reportsSit: results[10].count || 0,
         reportsMission: results[11].count || 0,
+        pros: results[12].count || 0,
       });
     };
     fetchBadges();
