@@ -255,10 +255,14 @@ Rules:
 
     return new Response(
       JSON.stringify({
-        verified: verification.is_valid,
+        verified: finalStatus === "verified",
+        status: finalStatus,
         document_type: verification.document_type,
+        confidence,
+        red_flags: redFlags,
         rejection_reason: verification.rejection_reason || null,
       }),
+
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
