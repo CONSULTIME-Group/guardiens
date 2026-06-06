@@ -16,6 +16,7 @@ import TrafficSources from "@/components/admin/seo/TrafficSources";
 import ArticleCtaPerformance from "@/components/admin/seo/ArticleCtaPerformance";
 import IndexNowPanel from "@/components/admin/seo/IndexNowPanel";
 import CannibalizationCard from "@/components/admin/seo/CannibalizationCard";
+import BingVisibilityCard from "@/components/admin/seo/BingVisibilityCard";
 import { useSeoData, type GSCRow } from "@/hooks/useSeoData";
 
 function downloadCsv(filename: string, rows: GSCRow[]) {
@@ -334,6 +335,9 @@ const AdminSEO = () => {
 
         {/* Cannibalisation */}
         <CannibalizationCard topQueries={gsc?.topQueries} topPages={gsc?.topPages} />
+
+        {/* Bing */}
+        <BingVisibilityCard />
 
         {/* Priority actions */}
         {gsc?.topPages && (
