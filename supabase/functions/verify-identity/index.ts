@@ -108,39 +108,29 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-pro",
         messages: [
           {
             role: "system",
-            content: `You are an identity document verification assistant. You must analyze images submitted as identity documents.
+            content: `You are an identity document verification assistant. Analyze the submitted image.
 
 Your task:
-1. Determine if the image is a valid identity document (passport, national ID card, driver's license, residence permit).
-2. Check that the document appears authentic (has security features visible, not obviously edited).
-3. Check that text is legible.
-4. Check that there is a photo visible on the document.
-
-You must respond using the provided tool.
+1. Determine if the image is a valid official identity document (passport, national ID card, driver's license, residence permit).
+2. Check authenticity signals (security features visible, not obviously edited/screenshot of a screen).
+3. Check that text is legible and a photo is visible.
+4. Return a confidence score in [0,1] for your decision.
+5. List red flags if any (blurry, edited, expired, photocopy without official stamp, screen capture, partial document, etc.).
 
 Rules:
-- If the image is NOT an identity document (random photo, meme, blank page, etc.), reject it.
-- If the document is too blurry or unreadable, reject it.
-- If it looks like a valid ID document with a readable name and visible photo, approve it.
-- Do NOT try to verify the actual identity of the person. Just verify it's a real ID document.`,
+- Do NOT try to verify the actual identity of the person. Just verify it's a real, legible ID document.
+- Be strict: if anything is suspicious, set is_valid=false with a clear French reason.
+- Respond ONLY via the provided tool.`,
           },
           {
             role: "user",
             content: [
-              {
-                type: "image_url",
-                image_url: {
-                  url: `data:${mimeType};base64,${base64}`,
-                },
-              },
-              {
-                type: "text",
-                text: "Please verify this identity document.",
-              },
+              { type: "image_url", image_url: { url: `data:${mimeType};base64,${base64}` } },
+              { type: "text", text: "Vérifiez ce document d'identité." },
             ],
           },
         ],
@@ -153,21 +143,16 @@ Rules:
               parameters: {
                 type: "object",
                 properties: {
-                  is_valid: {
-                    type: "boolean",
-                    description: "Whether the document is a valid, legible identity document",
-                  },
+                  is_valid: { type: "boolean", description: "Whether the document is a valid, legible identity document" },
                   document_type: {
                     type: "string",
                     enum: ["passport", "national_id", "drivers_license", "residence_permit", "other", "not_a_document"],
-                    description: "The type of document detected",
                   },
-                  rejection_reason: {
-                    type: "string",
-                    description: "If rejected, a brief reason in French explaining why (e.g. 'Document illisible', 'Ce n\\'est pas une pièce d\\'identité')",
-                  },
+                  confidence: { type: "number", description: "Confidence score between 0 and 1" },
+                  red_flags: { type: "array", items: { type: "string" }, description: "List of issues detected (in French)" },
+                  rejection_reason: { type: "string", description: "If rejected, brief French reason" },
                 },
-                required: ["is_valid", "document_type"],
+                required: ["is_valid", "document_type", "confidence"],
                 additionalProperties: false,
               },
             },
@@ -175,6 +160,7 @@ Rules:
         ],
         tool_choice: { type: "function", function: { name: "verify_document" } },
       }),
+
     });
 
     if (!aiResponse.ok) {
@@ -206,22 +192,28 @@ Rules:
     const verification = JSON.parse(toolCall.function.arguments);
     console.log("Verification result:", JSON.stringify(verification));
 
+    const confidence = typeof verification.confidence === "number" ? verification.confidence : 0;
+    const redFlags: string[] = Array.isArray(verification.red_flags) ? verification.red_flags : [];
+    const AUTO_APPROVE_THRESHOLD = 0.85;
+
+    // Decision: valid + confidence ≥ threshold → verified ; valid + low confidence → needs_review ; invalid → rejected
+    let finalStatus: "verified" | "needs_review" | "rejected";
+    if (!verification.is_valid) finalStatus = "rejected";
+    else if (confidence >= AUTO_APPROVE_THRESHOLD) finalStatus = "verified";
+    else finalStatus = "needs_review";
+
     // Log the verification attempt
     await supabaseAdmin.from("identity_verification_logs").insert({
       user_id: user.id,
-      result: verification.is_valid ? "verified" : "rejected",
+      result: finalStatus === "verified" ? "verified" : finalStatus === "rejected" ? "rejected" : "needs_review",
       document_type: verification.document_type || null,
-      rejection_reason: verification.rejection_reason || null,
+      rejection_reason: verification.rejection_reason || (redFlags.length ? redFlags.join(" ; ") : null),
     });
 
-    // Update the profile and create notification based on verification result
-    if (verification.is_valid) {
+    if (finalStatus === "verified") {
       await supabaseAdmin
         .from("profiles")
-        .update({
-          identity_verified: true,
-          identity_verification_status: "verified",
-        })
+        .update({ identity_verified: true, identity_verification_status: "verified" })
         .eq("id", user.id);
 
       await supabaseAdmin.from("notifications").insert({
@@ -231,16 +223,26 @@ Rules:
         body: "Votre pièce d'identité a été validée avec succès. Vous avez maintenant accès à toutes les fonctionnalités.",
         link: "/settings#verification",
       });
+    } else if (finalStatus === "needs_review") {
+      await supabaseAdmin
+        .from("profiles")
+        .update({ identity_verified: false, identity_verification_status: "needs_review" })
+        .eq("id", user.id);
+
+      await supabaseAdmin.from("notifications").insert({
+        user_id: user.id,
+        type: "identity_pending",
+        title: "Vérification en cours",
+        body: "Votre document est en cours de revue par notre équipe. Vous serez notifié sous 24h.",
+        link: "/settings#verification",
+      });
     } else {
       await supabaseAdmin
         .from("profiles")
-        .update({
-          identity_verified: false,
-          identity_verification_status: "rejected",
-        })
+        .update({ identity_verified: false, identity_verification_status: "rejected" })
         .eq("id", user.id);
 
-      const reason = verification.rejection_reason || "Document non conforme";
+      const reason = verification.rejection_reason || (redFlags.length ? redFlags.join(" ; ") : "Document non conforme");
       await supabaseAdmin.from("notifications").insert({
         user_id: user.id,
         type: "identity_rejected",
@@ -250,12 +252,17 @@ Rules:
       });
     }
 
+
     return new Response(
       JSON.stringify({
-        verified: verification.is_valid,
+        verified: finalStatus === "verified",
+        status: finalStatus,
         document_type: verification.document_type,
+        confidence,
+        red_flags: redFlags,
         rejection_reason: verification.rejection_reason || null,
       }),
+
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
