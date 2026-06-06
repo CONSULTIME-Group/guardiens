@@ -948,6 +948,16 @@ export default function PublicSitterProfile() {
                     <span className="min-w-0 break-words">Gardien à {city}</span>
                   </p>
                 )}
+                {(profile as any)?.pro_status === "verified" && (profile as any)?.pro_tagline && (
+                  <p className="text-xs sm:text-sm text-foreground/75 italic mt-1 max-w-full break-words">
+                    « {(profile as any).pro_tagline} »
+                  </p>
+                )}
+                {(profile as any)?.pro_status === "verified" && (profile as any)?.pro_pricing_note && (
+                  <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
+                    Tarif indicatif : {(profile as any).pro_pricing_note}
+                  </p>
+                )}
               </div>
 
               {(profile?.identity_verified || profile?.is_founder || emergencyActive || hasActiveSubscription) && (
