@@ -28,16 +28,8 @@ import ExamplesSection from "@/components/missions/connected/ExamplesSection";
 import OfferDialog from "@/components/missions/connected/OfferDialog";
 import { geocodeCached, useEntityCoords } from "@/hooks/missions/useGeocodedCoords";
 import { useAllMissions, useAvailableHelpers } from "@/hooks/missions/useMissionsData";
-import { trackEvent } from "@/lib/analytics";
-import { useScrollDepthTracker } from "@/hooks/useScrollDepthTracker";
+import { useAllMissions, useAvailableHelpers } from "@/hooks/missions/useMissionsData";
 
-/**
- * Cohorte before/after pour mesurer l'impact de l'ajout de la mini-bio sur MissionCard.
- * Cette constante n'altère pas le rendu — elle sert uniquement à étiqueter les
- * événements analytics pour comparer pré-release vs post-release côté requête.
- * Bump la date si la copy ou le format change (nouvelle cohorte).
- */
-const BIO_RELEASE_TAG = "mission_card_bio_v1_2026_05_17";
 
 const SmallMissions = () => {
   const { isAuthenticated, user, switchRole } = useAuth();
