@@ -70,7 +70,7 @@ const ProVerificationSection = ({ user }: { user: any }) => {
     const { data: profile } = await supabase
       .from("profiles")
       .select("pro_status, pro_specialty, pro_business_name, pro_siret, pro_tagline, pro_pricing_note")
-      .eq("user_id", user.id)
+      .eq("id", user.id)
       .maybeSingle();
     if (profile) {
       setProStatus(((profile as any).pro_status as ProStatus) ?? "none");
@@ -83,7 +83,7 @@ const ProVerificationSection = ({ user }: { user: any }) => {
     const { data: verifs } = await supabase
       .from("pro_verifications")
       .select("id, doc_type, file_name, status, ai_confidence, ai_status, created_at, ai_analysis")
-      .eq("user_id", user.id)
+      .eq("id", user.id)
       .order("created_at", { ascending: false });
     setVerifications((verifs ?? []) as ProVerification[]);
     setLoading(false);
@@ -103,7 +103,7 @@ const ProVerificationSection = ({ user }: { user: any }) => {
         pro_tagline: tagline.trim() || null,
         pro_pricing_note: pricingNote.trim() || null,
       } as any)
-      .eq("user_id", user.id);
+      .eq("id", user.id);
     setSaving(false);
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
