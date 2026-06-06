@@ -24,11 +24,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
 import ChipSelect from "@/components/profile/ChipSelect";
 import { compressImageFile } from "@/lib/compressImage";
 import { trackEvent } from "@/lib/analytics";
+import { COUNTRIES } from "@/lib/countries";
 import gouacheEntraide from "@/assets/onboarding/gouache-entraide.png";
 import gouacheGarde from "@/assets/onboarding/gouache-garde.png";
 import gouacheWelcome from "@/assets/onboarding/gouache-welcome.png";
@@ -535,15 +537,20 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="onb-country">Pays</Label>
-                      <Input
-                        id="onb-country"
-                        placeholder="Ex : Belgique"
+                      <Select
                         value={country === "FR" ? "" : country}
-                        onChange={(e) => setCountry(e.target.value)}
-                        className="rounded-lg h-12"
+                        onValueChange={(v) => setCountry(v)}
                         disabled={minimalSaved}
-                        maxLength={60}
-                      />
+                      >
+                        <SelectTrigger id="onb-country" className="rounded-lg h-12">
+                          <SelectValue placeholder="Sélectionner un pays" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-72">
+                          {COUNTRIES.filter((c) => c.code !== "FR").map((c) => (
+                            <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 )}
