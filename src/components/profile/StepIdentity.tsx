@@ -7,6 +7,7 @@ import HintBubble from "./HintBubble";
 import PostalCodeCityFields from "./PostalCodeCityFields";
 import { cn } from "@/lib/utils";
 import type { SitterProfileData } from "@/hooks/useSitterProfile";
+import GenerateBioButton from "@/components/ai/GenerateBioButton";
 
 interface Props {
   data: SitterProfileData;
@@ -81,7 +82,10 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
 
       {/* Bio */}
       <div className="space-y-2">
-        <Label htmlFor="bio">Bio</Label>
+        <div className="flex items-center justify-between gap-2">
+          <Label htmlFor="bio">Bio</Label>
+          <GenerateBioButton onPick={(text) => onChange({ bio: text })} />
+        </div>
         <Textarea
           id="bio"
           value={data.bio}

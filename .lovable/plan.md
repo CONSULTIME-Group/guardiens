@@ -1,131 +1,56 @@
+## Objectif
 
-# Refonte Dashboards — Direction "Cockpit"
+Intégrer 3 fonctionnalités LLM légères via Lovable AI Gateway (Gemini Flash, ~0.01€/appel, aucune clé à fournir), sans toucher au produit existant.
 
-## Diagnostic actuel (ce qui ne marche pas)
+## 1. Réécriture d'annonce (bouton "Améliorer ma description")
 
-**Sitter Dashboard**
-- 5 blocs verticaux empilés au-dessus du pli (Hero + Checklist + FreePeriodBanner + NextGuard + StatusBar) → ~900px avant la première donnée actionnable.
-- `SitterStatusBar` affiche 5 KPIs (profil%, sits, note, badges, candidatures) → pour un gardien à 0 sit, c'est **5 zéros = signal d'inutilité**.
-- `SitterEmergencyCard` occupe ~200px pour une fonction conditionnelle (CTA compléter) qui ne s'applique qu'à une minorité.
-- Ton **institutionnel** (informatif, neutre) plutôt qu'**incitatif** (verbe d'action, prochaine étape claire).
+- Edge function `improve-sit-description` : entrée = texte brut + contexte (animaux, type logement, dates), sortie JSON `{ title, description, suggestions[] }`.
+- Bouton ajouté dans le formulaire de création/édition de sit, à côté du champ description.
+- Modal de prévisualisation avant/après avec acceptation partielle (titre seul, description seule, ou les deux).
+- Garde-fou tone : vouvoiement obligatoire, pas de tiret cadratin, pas du mot proscrit « voisin », pas d'AURA (mémoires projet respectées).
 
-**Owner Dashboard**
-- Symétriquement : trop de cartes "métier" (annonces, missions, candidats, conseils) en parallèle, aucune hiérarchie d'urgence.
-- L'œil ne sait pas où aller en premier.
+## 2. Bio guidée gardien (3 brouillons à partir de 5 questions)
 
-## Principe directeur
+- Edge function `generate-bio-drafts` : entrée = 5 réponses courtes (expériences animaux, dispos, motivations, style, lieu), sortie = 3 brouillons distincts (chaleureux / pro / décontracté).
+- Ajout dans le profil gardien : bouton "Générer ma bio" qui ouvre un mini-wizard (5 questions courtes) puis affiche les 3 cartes. Clic = remplit le champ bio.
+- Booste le completion score (seuil 60% pour Level 1).
 
-**Un dashboard répond à 3 questions, dans cet ordre :**
-1. **Où en suis-je ?** → 1 métrique signature (pas 5)
-2. **Que dois-je faire MAINTENANT ?** → 1 action prioritaire, contextuelle, urgente
-3. **Qu'est-ce qui se passe autour ?** → 1 signal de vie (preuve sociale, opportunité fraîche)
+## 3. Modération pré-publication (annonces + messages)
 
-Tout le reste descend sous le pli.
+- Edge function `moderate-content` : entrée = texte + type (annonce/message), sortie = `{ status: ok|warning|block, reasons[] }`.
+- Détection : coordonnées (tel, email, adresses), tentatives de transaction off-platform, propos hors-charte, mot proscrit.
+- Hook côté front : appelé silencieusement à la soumission. Si `warning` → toast non bloquant avec correction suggérée. Si `block` → modal explicative + lien CGS.
+- Trace en DB (`moderation_logs`) pour la file admin existante.
 
-## Wireframe — Sitter Cockpit (mobile-first)
+## Architecture technique
 
-```text
-┌─────────────────────────────────────────┐
-│  Bonjour Jérémie  ·  Gardien · niveau 1 │ ← Greeting condensé
-│  ─────────────────────────────────────  │
-│  🟢 Disponible  [toggle]                │ ← 1 ligne, switch visible
-├─────────────────────────────────────────┤
-│  PROCHAINE ÉTAPE                        │ ← eyebrow contextuel
-│  Vous êtes à 2 candidatures             │
-│  d'un statut Super Sitter.              │ ← phrase narrative
-│  ┌─────────────────────────────────┐    │
-│  │  Voir les annonces près de moi  │ →  │ ← 1 CTA primary unique
-│  └─────────────────────────────────┘    │
-├─────────────────────────────────────────┤
-│  🔴 LIVE · 121 gardiens actifs ce       │ ← signal vivant (pulse)
-│  matin · 12 annonces nouvelles 24h      │
-└─────────────────────────────────────────┘
+- 3 edge functions Supabase, modèle `google/gemini-3-flash-preview`, `verify_jwt=true` par défaut.
+- Provider helper partagé `_shared/ai-gateway.ts`.
+- Lazy-import depuis le front (pas de surcoût bundle).
+- Toasts via `sonner` existant.
+- Aucune nouvelle dépendance npm.
 
-Sous le pli (inchangé) :
-  - Découverte (Annonces / Coup de main / Conseils)
-  - Réputation détaillée (ancien StatusBar, dans un Accordion fermé)
-  - Emergency Card (collapsée en 1 ligne avec lien "Configurer →")
-  - Badges (déjà condensé)
+## DB (nouvelle table)
+
+```sql
+create table public.moderation_logs (
+  id uuid pk default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade,
+  content_type text, -- 'sit' | 'message' | 'bio'
+  status text,      -- 'ok' | 'warning' | 'block'
+  reasons jsonb,
+  excerpt text,
+  created_at timestamptz default now()
+);
 ```
++ RLS : user voit ses propres logs, admin via `has_role`, GRANT standards.
 
-## Wireframe — Owner Cockpit
+## Hors scope (à proposer plus tard si succès)
 
-```text
-┌─────────────────────────────────────────┐
-│  Bonjour Marie  ·  Propriétaire         │
-├─────────────────────────────────────────┤
-│  À ACTION                               │
-│  3 candidats vous attendent             │ ← compteur sémantique
-│  sur votre annonce "Maison à Annecy"    │
-│  ┌─────────────────────────────────┐    │
-│  │  Examiner les candidatures      │ →  │
-│  └─────────────────────────────────┘    │
-├─────────────────────────────────────────┤
-│  🔴 LIVE · 4 gardiens vérifiés à <30km  │
-│  cherchent une garde cette semaine      │
-└─────────────────────────────────────────┘
+- Matching sémantique (embeddings) → phase 2
+- Réponses suggérées en messagerie → phase 2
+- Chat FAQ → phase 3
 
-Sous le pli :
-  - Mes annonces (cartes)
-  - Coup de main
-  - Réputation/Avis reçus
-```
+## Coût estimé
 
-## Règles de calcul de "l'action prioritaire"
-
-**Sitter** (priorité décroissante) :
-1. NextGuard programmée → "Garde dans X jours · préparer"
-2. Candidature acceptée non vue → "Confirmer votre venue"
-3. Profil < 60% → "Compléter votre profil pour être visible"
-4. 0 candidature 30j → "Postuler à une annonce proche"
-5. Par défaut → "Voir les annonces près de moi"
-
-**Owner** (priorité décroissante) :
-1. Candidatures en attente → "Examiner X candidats"
-2. Annonce expirant <7j → "Renouveler votre annonce"
-3. Aucune annonce → "Publier votre première annonce"
-4. Sit confirmé → "Préparer l'arrivée du gardien"
-5. Par défaut → "Voir les gardiens proches"
-
-## Composants à créer / modifier
-
-**Nouveaux**
-- `src/components/dashboard/sitter/SitterCockpit.tsx` — bloc unifié
-- `src/components/dashboard/owner/OwnerCockpit.tsx`
-- `src/components/dashboard/shared/LiveSignalStrip.tsx` — pulse + compteurs
-- `src/components/dashboard/shared/PriorityActionCard.tsx` — narration + CTA
-- `src/hooks/useSitterPriorityAction.ts` / `useOwnerPriorityAction.ts` — calcul règle
-
-**Supprimés du haut de pli (déplacés sous le pli)**
-- `SitterHero` → fusionné dans Cockpit (greeting + toggle)
-- `SitterStatusBar` → déplacé dans Accordion "Ma réputation détaillée"
-- `SitterEmergencyCard` → collapsé en 1 ligne sous le pli
-- `SitterNextGuard` → fusionné dans PriorityActionCard quand applicable
-- `NearestListingHero` → fusionné dans PriorityActionCard
-- `FreePeriodBanner` → déplacé en footer du Cockpit (1 ligne)
-
-**Conservés strictement inchangés** (sidebar protégé, role toggle)
-
-## Custom_skills pastilles
-
-Vérification : déjà en pills dans `HelperMiniCard` (l.239). Ce que vous voyez probablement comme "texte" = la bio italique serif ("« texte »"). À confirmer avec capture. Sinon je ne touche pas.
-
-## Risques
-
-- **[P] Calcul "prochaine étape" complexe** : la règle priorisée nécessite 4-5 requêtes que `useSitterDashboardData` fait déjà. Réutiliser, pas dupliquer.
-- **[C] Changement disruptif** : utilisateurs habitués au layout actuel peuvent être perdus. Mitigation : pas de période transitoire, conviction.
-- **[M] LiveSignalStrip** : nécessite count gardiens actifs + nouvelles annonces 24h. La 1re existe déjà (`useActiveSittersCount`), la 2e est à créer.
-- **[R] Ton "incitatif"** sans devenir agressif/SaaS : narration en vouvoiement, factuelle, pas de "🚀 Boostez vos performances !". Inspiration : New York Times reader dashboard, pas Notion.
-
-## Livrables de cette passe
-
-1. Cockpit gardien (composant + hook + intégration dans `SitterDashboard.tsx`)
-2. Cockpit proprio (composant + hook + intégration dans `OwnerDashboard.tsx`)
-3. LiveSignalStrip partagé
-4. Migration des blocs déplacés sous le pli (Accordion réputation, Emergency 1-line)
-
-**Hors scope explicite** : redesign des cartes sous le pli (Annonces, Coup de main, Conseils — déjà travaillées).
-
-## Validation demandée
-
-Si vous validez ce plan, je commence par le **Sitter Cockpit** (le plus critique), je vous montre, vous validez visuellement, puis je décline sur Owner. Pas tout d'un coup.
+~0.005–0.02 € par appel selon longueur. Modération = appel court (~0.003 €). Réécriture/bio = ~0.015 €. Volume gardien actuel = négligeable sur le budget Lovable AI.

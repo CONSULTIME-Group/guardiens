@@ -19,6 +19,8 @@ import { hasMedication } from "@/lib/medication";
 import { trackFirstAction } from "@/lib/analytics";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { COUNTRIES } from "@/lib/countries";
+import ImproveListingButton from "@/components/ai/ImproveListingButton";
+import { moderateContent } from "@/lib/moderation";
 
 interface PropertySummary {
   id: string;
@@ -346,6 +348,24 @@ const CreateSit = () => {
     if (!user || !property || !canPublish) return;
     setPublishing(true);
     try {
+      // Modération pré-publication (fail-open en cas d'IA indispo).
+      const verdict = await moderateContent("sit", `${title}\n\n${specificExpectations}\n\n${ownerMessage}\n\n${dailyRoutine}`);
+      if (verdict.status === "block") {
+        toast({
+          variant: "destructive",
+          title: "Publication bloquée par la modération",
+          description: verdict.reasons.join(" · ") || "Merci de retirer les coordonnées ou contenus contraires aux CGS.",
+        });
+        setPublishing(false);
+        return;
+      }
+      if (verdict.status === "warning") {
+        toast({
+          title: "Annonce publiée avec une réserve",
+          description: verdict.reasons.join(" · "),
+        });
+      }
+
       let expectations = specificExpectations;
       if (flexibleDates && flexibleNotes) {
         expectations = `${expectations}\n\nDates flexibles : ${flexibleNotes}`.trim();
@@ -549,7 +569,23 @@ const CreateSit = () => {
         )}
 
         <div>
-          <Label className="text-sm font-medium">Description de la garde *</Label>
+          <div className="flex items-center justify-between gap-2">
+            <Label className="text-sm font-medium">Description de la garde *</Label>
+            <ImproveListingButton
+              title={title}
+              description={specificExpectations}
+              context={{
+                animaux: pets?.map(p => `${p.species}${p.breed ? ` (${p.breed})` : ""}`).join(", "),
+                logement: property?.type,
+                ville: sitCity || ownerCity || undefined,
+                dates: startDate && endDate ? `${startDate} – ${endDate}` : undefined,
+              }}
+              onApply={(patch) => {
+                if (patch.title) setTitle(patch.title);
+                if (patch.description) setSpecificExpectations(patch.description);
+              }}
+            />
+          </div>
           <Textarea
             placeholder="Décrivez ce qui est particulier à cette garde, en plus de ce qui est déjà dans votre profil (min. 50 caractères)"
             value={specificExpectations}
