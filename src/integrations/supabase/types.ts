@@ -2796,6 +2796,117 @@ export type Database = {
           },
         ]
       }
+      pro_profiles: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          category: Database["public"]["Enums"]["pro_category"]
+          city: string | null
+          cover_url: string | null
+          created_at: string
+          description: string | null
+          diplomes: string[]
+          email_contact: string | null
+          horaires: Json
+          id: string
+          latitude: number | null
+          logo_url: string | null
+          longitude: number | null
+          ordre_number: string | null
+          phone: string | null
+          postal_code: string | null
+          raison_sociale: string
+          rejection_reason: string | null
+          siret: string | null
+          siret_verified: boolean
+          slug: string
+          social_links: Json
+          status: Database["public"]["Enums"]["pro_moderation_status"]
+          sub_categories: string[]
+          tarif_max: number | null
+          tarif_min: number | null
+          tarif_note: string | null
+          updated_at: string
+          urgences_24_7: boolean
+          user_id: string
+          website: string | null
+          zone_cities: string[]
+          zone_radius_km: number | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          category: Database["public"]["Enums"]["pro_category"]
+          city?: string | null
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          diplomes?: string[]
+          email_contact?: string | null
+          horaires?: Json
+          id?: string
+          latitude?: number | null
+          logo_url?: string | null
+          longitude?: number | null
+          ordre_number?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          raison_sociale: string
+          rejection_reason?: string | null
+          siret?: string | null
+          siret_verified?: boolean
+          slug: string
+          social_links?: Json
+          status?: Database["public"]["Enums"]["pro_moderation_status"]
+          sub_categories?: string[]
+          tarif_max?: number | null
+          tarif_min?: number | null
+          tarif_note?: string | null
+          updated_at?: string
+          urgences_24_7?: boolean
+          user_id: string
+          website?: string | null
+          zone_cities?: string[]
+          zone_radius_km?: number | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          category?: Database["public"]["Enums"]["pro_category"]
+          city?: string | null
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          diplomes?: string[]
+          email_contact?: string | null
+          horaires?: Json
+          id?: string
+          latitude?: number | null
+          logo_url?: string | null
+          longitude?: number | null
+          ordre_number?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          raison_sociale?: string
+          rejection_reason?: string | null
+          siret?: string | null
+          siret_verified?: boolean
+          slug?: string
+          social_links?: Json
+          status?: Database["public"]["Enums"]["pro_moderation_status"]
+          sub_categories?: string[]
+          tarif_max?: number | null
+          tarif_min?: number | null
+          tarif_note?: string | null
+          updated_at?: string
+          urgences_24_7?: boolean
+          user_id?: string
+          website?: string | null
+          zone_cities?: string[]
+          zone_radius_km?: number | null
+        }
+        Relationships: []
+      }
       pro_verifications: {
         Row: {
           admin_decision: string | null
@@ -5398,6 +5509,15 @@ export type Database = {
         | "reptile"
         | "farm_animal"
         | "nac"
+      pro_category:
+        | "veterinaire"
+        | "pet_sitter_pro"
+        | "educateur"
+        | "toiletteur"
+        | "osteopathe"
+        | "dresseur_sportif"
+        | "transporteur"
+        | "photographe"
       pro_doc_type_enum:
         | "diploma_acaced"
         | "diploma_other"
@@ -5405,6 +5525,7 @@ export type Database = {
         | "insurance_rc_pro"
         | "certification"
         | "other"
+      pro_moderation_status: "pending" | "approved" | "rejected"
       pro_profile_status_enum: "none" | "pending" | "verified" | "rejected"
       pro_verification_status_enum:
         | "pending"
@@ -5633,6 +5754,16 @@ export const Constants = {
         "farm_animal",
         "nac",
       ],
+      pro_category: [
+        "veterinaire",
+        "pet_sitter_pro",
+        "educateur",
+        "toiletteur",
+        "osteopathe",
+        "dresseur_sportif",
+        "transporteur",
+        "photographe",
+      ],
       pro_doc_type_enum: [
         "diploma_acaced",
         "diploma_other",
@@ -5641,6 +5772,7 @@ export const Constants = {
         "certification",
         "other",
       ],
+      pro_moderation_status: ["pending", "approved", "rejected"],
       pro_profile_status_enum: ["none", "pending", "verified", "rejected"],
       pro_verification_status_enum: [
         "pending",
