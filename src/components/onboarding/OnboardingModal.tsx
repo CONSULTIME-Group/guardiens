@@ -194,8 +194,9 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
       .from("profiles")
       .update({
         first_name: firstName.trim(),
-        postal_code: postalCode,
+        postal_code: livesAbroad ? null : postalCode,
         city: city.trim(),
+        country: country.trim() || "FR",
         onboarding_minimal_completed: true,
       } as any)
       .eq("id", user.id);
