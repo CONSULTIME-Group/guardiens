@@ -117,6 +117,8 @@ const CreateSit = () => {
   const [ownerMessage, setOwnerMessage] = useState("");
   const [dailyRoutine, setDailyRoutine] = useState("");
   const [coverPhotoUrl, setCoverPhotoUrl] = useState<string | null>(null);
+  const [sitCity, setSitCity] = useState<string>("");
+  const [sitCountry, setSitCountry] = useState<string>("FR");
 
   const [property, setProperty] = useState<PropertySummary | null>(null);
   const [pets, setPets] = useState<PetSummary[]>([]);
@@ -146,7 +148,7 @@ const CreateSit = () => {
       // If republishing, fetch the source sit in parallel
       let sourceSitRes: { data: any } | null = null;
       if (fromSitId) {
-        sourceSitRes = await supabase.from("sits").select("title, specific_expectations, open_to, environments, min_gardien_sits, flexible_dates, max_applications, owner_message, daily_routine").eq("id", fromSitId).single();
+        sourceSitRes = await supabase.from("sits").select("title, specific_expectations, open_to, environments, min_gardien_sits, flexible_dates, max_applications, owner_message, daily_routine, city, country").eq("id", fromSitId).single();
       }
 
       setProfileCompletion(profileRes.data?.profile_completion || 0);
@@ -165,6 +167,8 @@ const CreateSit = () => {
         setMaxApplications(s.max_applications || null);
         setOwnerMessage(s.owner_message || "");
         setDailyRoutine(s.daily_routine || "");
+        setSitCity((s as any).city || "");
+        setSitCountry((s as any).country || "FR");
         setIsRepublish(true);
       }
 
@@ -192,6 +196,8 @@ const CreateSit = () => {
           setOwnerMessage(d.owner_message || "");
           setDailyRoutine(d.daily_routine || "");
           setCoverPhotoUrl(d.cover_photo_url || null);
+          setSitCity((d as any).city || "");
+          setSitCountry((d as any).country || "FR");
         }
       }
 
@@ -244,7 +250,7 @@ const CreateSit = () => {
     }, 1500);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, startDate, endDate, flexibleDates, flexibleNotes, specificExpectations, openTo, isUrgent, sitEnvironments, minGardienSits, maxApplications, ownerMessage, dailyRoutine, coverPhotoUrl]);
+  }, [title, startDate, endDate, flexibleDates, flexibleNotes, specificExpectations, openTo, isUrgent, sitEnvironments, minGardienSits, maxApplications, ownerMessage, dailyRoutine, coverPhotoUrl, sitCity, sitCountry]);
 
   const saveDraft = async ({ silent = false }: { silent?: boolean } = {}) => {
     if (!user || !property) return null;
@@ -270,6 +276,8 @@ const CreateSit = () => {
         owner_message: ownerMessage.trim() || null,
         daily_routine: dailyRoutine.trim() || null,
         cover_photo_url: coverPhotoUrl ?? (ownerPhotos.length > 0 ? ownerPhotos[0] : null),
+        city: sitCity.trim() || null,
+        country: sitCountry.trim() || "FR",
       };
       if (draftId) {
         const { error } = await supabase.from("sits").update(payload).eq("id", draftId).eq("status", "draft");
@@ -358,6 +366,8 @@ const CreateSit = () => {
         owner_message: ownerMessage.trim() || null,
         daily_routine: dailyRoutine.trim() || null,
         cover_photo_url: coverPhotoUrl ?? (ownerPhotos.length > 0 ? ownerPhotos[0] : null),
+        city: sitCity.trim() || null,
+        country: sitCountry.trim() || "FR",
       };
 
       let sitId = draftId;
@@ -470,6 +480,40 @@ const CreateSit = () => {
             Durée : <span className="font-medium text-foreground">{nDays} {nDays > 1 ? "jours" : "jour"}</span>
           </p>
         ) : null}
+
+        {/* Lieu de la garde — facultatif (override du profil) */}
+        <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
+          <div>
+            <Label className="text-sm font-medium">Lieu de la garde <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Renseignez ces champs si la garde se déroule ailleurs que dans votre ville de profil ({ownerCity || "non renseignée"}) — résidence secondaire, garde à l'étranger, etc.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="sit_city" className="text-xs text-muted-foreground">Ville de la garde</Label>
+              <Input
+                id="sit_city"
+                value={sitCity}
+                onChange={(e) => setSitCity(e.target.value)}
+                placeholder={ownerCity || "Ex : Bruxelles"}
+                className="mt-1"
+                maxLength={100}
+              />
+            </div>
+            <div>
+              <Label htmlFor="sit_country" className="text-xs text-muted-foreground">Pays</Label>
+              <Input
+                id="sit_country"
+                value={sitCountry}
+                onChange={(e) => setSitCountry(e.target.value)}
+                placeholder="FR"
+                className="mt-1"
+                maxLength={56}
+              />
+            </div>
+          </div>
+        </div>
 
         {/* Option dates flexibles */}
         <div className="flex items-start gap-3">

@@ -3714,6 +3714,8 @@ export type Database = {
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
+          city: string | null
+          country: string | null
           cover_photo_url: string | null
           created_at: string
           daily_routine: string | null
@@ -3748,6 +3750,8 @@ export type Database = {
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
+          city?: string | null
+          country?: string | null
           cover_photo_url?: string | null
           created_at?: string
           daily_routine?: string | null
@@ -3782,6 +3786,8 @@ export type Database = {
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
+          city?: string | null
+          country?: string | null
           cover_photo_url?: string | null
           created_at?: string
           daily_routine?: string | null
