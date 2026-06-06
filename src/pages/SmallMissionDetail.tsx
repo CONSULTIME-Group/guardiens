@@ -978,7 +978,16 @@ const SmallMissionDetail = () => {
 
               {/* Description */}
               <section>
-                <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">La mission</h2>
+                <div className="flex items-center gap-2 mb-5 flex-wrap">
+                  <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground">
+                    {(mission as any).mission_type === "offre" ? "La proposition" : "La mission"}
+                  </h2>
+                  {(mission as any).mission_type === "offre" && (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-success/15 text-success text-xs font-body font-semibold tracking-wide">
+                      Propose son aide
+                    </span>
+                  )}
+                </div>
                 <div className="space-y-5 text-lg leading-relaxed text-foreground/85 whitespace-pre-wrap">
                   {mission.description}
                 </div>
@@ -989,7 +998,7 @@ const SmallMissionDetail = () => {
                 <section className="bg-muted/60 p-8 md:p-10 rounded-[2rem] border border-border relative overflow-hidden">
                   <div className="absolute -top-6 -right-6 w-32 h-32 bg-primary/5 rounded-full blur-2xl" aria-hidden />
                   <h3 className="text-xs font-bold tracking-[0.2em] uppercase mb-4 text-muted-foreground">
-                    En échange de votre aide
+                    {(mission as any).mission_type === "offre" ? "Ce que je souhaite en échange" : "En échange de votre aide"}
                   </h3>
                   <blockquote className="font-heading text-xl md:text-2xl italic leading-snug text-foreground/90">
                     « {mission.exchange_offer} »
