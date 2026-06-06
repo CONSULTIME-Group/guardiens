@@ -13,6 +13,8 @@ export function computeOwnerMissingFields(d: OwnerProfileData, petsCount: number
   if (!d.last_name) missing.push({ step: 1, label: "Nom" });
   if (!d.city) missing.push({ step: 1, label: "Ville" });
   if (!d.bio) missing.push({ step: 1, label: "Bio" });
+  // postal_code n'est requis qu'en France (country === "FR" ou non renseigné).
+  // Les propriétaires à l'étranger renseignent uniquement ville + pays.
   if (!d.property_type) missing.push({ step: 2, label: "Type de logement" });
   if (!d.environment) missing.push({ step: 2, label: "Environnement" });
   if (!d.description) missing.push({ step: 2, label: "Description du logement" });
