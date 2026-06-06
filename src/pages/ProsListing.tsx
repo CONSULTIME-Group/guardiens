@@ -68,16 +68,28 @@ export default function ProsListing() {
 
       <main className="container mx-auto px-4 py-10 max-w-6xl min-w-0">
         <header className="mb-10">
-          <h1 className="text-4xl font-display font-bold mb-3">
-            Pros animaliers près de chez vous
-          </h1>
+          <div className="flex items-center gap-3 flex-wrap mb-3">
+            <h1 className="text-4xl font-display font-bold">
+              Pros animaliers près de chez vous
+            </h1>
+            <span className="text-[10px] uppercase tracking-wider font-bold bg-amber-100 text-amber-800 px-2 py-1 rounded">
+              Bêta
+            </span>
+          </div>
           <p className="text-lg text-muted-foreground max-w-2xl">
             Vétérinaires, éducateurs, toiletteurs, ostéopathes, transporteurs, photographes…
             tous les pros vérifiés au service de vos animaux, partout en France.
           </p>
-          <div className="mt-6">
+          <p className="text-sm text-muted-foreground mt-2">
+            Annuaire en phase bêta : les premières fiches arrivent. Vous êtes pro ?
+            Inscrivez-vous gratuitement, votre fiche sera validée sous 48h.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-2">
             <Button asChild>
               <Link to="/pros/inscription">Inscrire mon activité</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/pros/mon-espace">Mon espace pro</Link>
             </Button>
           </div>
         </header>
