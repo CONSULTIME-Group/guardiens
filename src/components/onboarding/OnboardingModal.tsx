@@ -277,21 +277,52 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     const file = e.currentTarget.files?.[0];
     if (!file || !user) return;
     e.currentTarget.value = "";
+
+    // Guard: HEIC / HEIF non décodables par le canvas → message explicite.
+    const nameLower = file.name.toLowerCase();
+    const isHeic =
+      /heic|heif/i.test(file.type) || nameLower.endsWith(".heic") || nameLower.endsWith(".heif");
+    if (isHeic) {
+      toast.error("Format HEIC non supporté. Exportez votre photo en JPG ou PNG depuis votre iPhone, puis réessayez.");
+      return;
+    }
+    if (file.type && !file.type.startsWith("image/")) {
+      toast.error("Format non supporté. Utilisez une image JPG, PNG ou WebP.");
+      return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error("Image trop lourde (max 15 Mo). Réduisez la taille puis réessayez.");
+      return;
+    }
+
     setUploading(true);
     try {
-      const compressed = await compressImageFile(file);
-      const ext = compressed.name.split(".").pop() || "webp";
+      // Si la compression échoue (image exotique, navigateur), on tente l'upload du fichier original.
+      let toUpload: File = file;
+      try {
+        toUpload = await compressImageFile(file);
+      } catch (compressErr) {
+        console.warn("[avatar] compression failed, uploading original", compressErr);
+      }
+      const ext = (toUpload.name.split(".").pop() || "jpg").toLowerCase();
       const path = `${user.id}/avatar.${ext}`;
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(path, compressed, { upsert: true });
+        .upload(path, toUpload, { upsert: true, contentType: toUpload.type || undefined });
       if (uploadError) throw uploadError;
       const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
       const url = `${urlData.publicUrl}?t=${Date.now()}`;
-      await supabase.from("profiles").update({ avatar_url: url }).eq("id", user.id);
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: url })
+        .eq("id", user.id);
+      if (updateError) throw updateError;
       setAvatarUrl(url);
-    } catch {
-      toast.error("Erreur lors de l'envoi de la photo.");
+      toast.success("Photo de profil mise à jour.");
+    } catch (err: any) {
+      console.error("[avatar] upload failed", err);
+      const msg = err?.message || "Erreur inconnue";
+      toast.error(`Envoi de la photo impossible : ${msg}`);
     } finally {
       setUploading(false);
     }
