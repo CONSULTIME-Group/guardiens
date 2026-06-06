@@ -806,6 +806,19 @@ const SmallMissionDetail = () => {
           </div>
         )}
 
+        {/* Bannière d'invitation côté gardien */}
+        {showInvitedBanner && (
+          <div className="mb-6 bg-info-soft border border-info-border rounded-2xl p-4 flex items-start gap-3">
+            <Sparkles className="h-5 w-5 text-info shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-medium text-info">Vous avez été invité à donner un coup de main</p>
+              <p className="text-sm text-info/80 mt-1">
+                Vos compétences correspondent à cette demande. Lisez les détails puis proposez votre aide en un clic ci-dessous.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Bloc d'invitation directe — uniquement à la publication, pour l'auteur */}
         {showPublishedBanner && isAuthor && mission.status === "open" && (
           <MatchedHelpersInviteBlock
