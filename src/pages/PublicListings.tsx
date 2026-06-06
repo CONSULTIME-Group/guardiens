@@ -203,6 +203,12 @@ export default function PublicListings() {
                   <span className="text-muted-foreground">— 6,99 €/mois ou 12 € one-shot</span>
                 </Link>
               </li>
+              <li>
+                <Link to="/annonces/international" className="group inline-flex items-baseline gap-2 text-foreground hover:text-primary transition-colors">
+                  <span className="font-medium">Annonces hors France</span>
+                  <span className="text-muted-foreground">— Maroc, Espagne, Belgique…</span>
+                </Link>
+              </li>
             </ul>
           </div>
         </section>
