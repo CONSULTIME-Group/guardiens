@@ -142,6 +142,7 @@ export function useOwnerProfile() {
     setData({
       first_name: p?.first_name || "", last_name: p?.last_name || "",
       city: p?.city || "", postal_code: p?.postal_code || "",
+      country: (p as any)?.country || "FR",
       bio: p?.bio || "", avatar_url: p?.avatar_url || "",
       property_type: prop?.type || "", environment: prop?.environment || "",
       rooms_count: prop?.rooms_count || 0, bedrooms_count: prop?.bedrooms_count || 0,
