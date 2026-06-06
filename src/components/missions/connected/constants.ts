@@ -9,7 +9,7 @@ export const MISSION_TO_SKILL: Record<string, string> = {
   animals: "animaux",
   garden: "jardin",
   skills: "competences",
-  house: "house",
+  house: "coups_de_main",
 };
 
 export const SKILL_TO_MISSION: Record<string, string> = {
