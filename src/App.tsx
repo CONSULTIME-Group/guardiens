@@ -281,6 +281,7 @@ const AppRoutes = () => (
       <Route path="/profil/:id" element={<RedirectProfil />} />
       <Route path="/proprietaires/:id" element={<RedirectProprietaire />} />
       <Route path="/annonces" element={<PublicListings />}/>
+      <Route path="/annonces/international" element={<InternationalListings />} />
       <Route path="/annonces/demo/:slug" element={<DemoSitDetail />} />
       <Route path="/annonces/:id" element={<PublicSitDetail />} />
       <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
