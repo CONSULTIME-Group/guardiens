@@ -5085,6 +5085,10 @@ export type Database = {
         Args: { p_slug_from: string }
         Returns: undefined
       }
+      invite_helper_to_mission: {
+        Args: { p_helper_id: string; p_mission_id: string }
+        Returns: string
+      }
       is_account_empty: { Args: { _user_id: string }; Returns: boolean }
       is_profile_ready_for_action: {
         Args: { p_user_id?: string }
