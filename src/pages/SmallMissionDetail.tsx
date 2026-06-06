@@ -691,20 +691,39 @@ const SmallMissionDetail = () => {
 
     // Visiteur connecté, peut postuler
     if (mission.status === "open" && canApplyMissions) {
-      const starters = [
-        `Bonjour ${author?.first_name || ""}, je suis disponible et ${mission.city ? `je connais bien ${titlecaseCity(mission.city)}` : "pas loin de chez vous"}.`.trim(),
-        mission.category === "animals"
-          ? `Bonjour ${author?.first_name || ""}, j'ai l'habitude des animaux et je serais ravi(e) de vous aider.`
-          : `Bonjour ${author?.first_name || ""}, votre demande me parle, j'aimerais vous aider.`,
-        `Bonjour ${author?.first_name || ""}, dites-moi quand ça vous arrange, je m'organise.`,
-      ].map(s => s.trim());
+      const isOffer = (mission as any).mission_type === "offre";
+      const starters = isOffer
+        ? [
+            `Bonjour ${author?.first_name || ""}, votre proposition m'intéresse, j'aurais besoin d'un coup de main.`.trim(),
+            `Bonjour ${author?.first_name || ""}, merci pour votre offre, dites-moi vos disponibilités.`.trim(),
+            `Bonjour ${author?.first_name || ""}, on peut en discuter ? J'ai un besoin qui correspond.`.trim(),
+          ]
+        : [
+            `Bonjour ${author?.first_name || ""}, je suis disponible et ${mission.city ? `je connais bien ${titlecaseCity(mission.city)}` : "pas loin de chez vous"}.`.trim(),
+            mission.category === "animals"
+              ? `Bonjour ${author?.first_name || ""}, j'ai l'habitude des animaux et je serais ravi(e) de vous aider.`
+              : `Bonjour ${author?.first_name || ""}, votre demande me parle, j'aimerais vous aider.`,
+            `Bonjour ${author?.first_name || ""}, dites-moi quand ça vous arrange, je m'organise.`,
+          ];
+
+      const eyebrow = isOffer ? "Solliciter cette aide" : "Proposer mon aide";
+      const heading = isOffer
+        ? `Répondez à ${author?.first_name || "l'auteur"}`
+        : `Écrivez un mot à ${author?.first_name || "l'auteur"}`;
+      const ctaLabel = isOffer ? "Envoyer ma demande" : "Envoyer ma proposition";
+      const chipLabels = isOffer
+        ? ["Ça m'intéresse", "Vos dispos ?", "On en discute"]
+        : ["Je suis dispo", "Ça me parle", "Selon vous"];
+      const placeholder = isOffer
+        ? `Dites bonjour à ${author?.first_name || "l'auteur"}, expliquez votre besoin en deux mots.`
+        : `Dites bonjour à ${author?.first_name || "l'auteur"}, présentez-vous en deux mots.`;
 
       return (
         <div className="bg-card p-7 rounded-[2rem] shadow-xl shadow-foreground/5 border border-border space-y-5">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Proposer mon aide</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{eyebrow}</p>
             <p className="font-heading text-xl font-bold text-foreground leading-tight">
-              Écrivez un mot à {author?.first_name || "l'auteur"}
+              {heading}
             </p>
           </div>
 
@@ -717,7 +736,7 @@ const SmallMissionDetail = () => {
                   onClick={() => setMessage(s)}
                   className="text-xs px-2.5 py-1 rounded-full border border-border bg-background hover:bg-accent hover:border-primary/40 transition-colors text-muted-foreground hover:text-foreground"
                 >
-                  {i === 0 ? "Je suis dispo" : i === 1 ? "Ça me parle" : "Selon vous"}
+                  {chipLabels[i]}
                 </button>
               ))}
             </div>
@@ -725,7 +744,7 @@ const SmallMissionDetail = () => {
 
           <div>
             <Textarea
-              placeholder={`Dites bonjour à ${author?.first_name || "l'auteur"}, présentez-vous en deux mots.`}
+              placeholder={placeholder}
               value={message}
               onChange={e => setMessage(e.target.value.slice(0, 500))}
               className="min-h-[120px] rounded-2xl text-base"
@@ -743,7 +762,7 @@ const SmallMissionDetail = () => {
             onClick={handleRespond}
             disabled={submitting || !message.trim()}
           >
-            {submitting ? "Envoi…" : "Envoyer ma proposition"}
+            {submitting ? "Envoi…" : ctaLabel}
           </Button>
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground pt-1">
