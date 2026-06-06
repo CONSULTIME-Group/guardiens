@@ -369,9 +369,16 @@ const SmallMissionsPublic = () => {
                       </div>
                       <div className="flex flex-col flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2 mb-1">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-body font-semibold tracking-wide">
-                            {CATEGORY_LABEL[m.category] || "Mission"}
-                          </span>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-body font-semibold tracking-wide">
+                              {CATEGORY_LABEL[m.category] || "Mission"}
+                            </span>
+                            {(m.mission_type ?? "besoin") === "offre" && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-success/15 text-success text-[10px] font-body font-semibold tracking-wide">
+                                Propose son aide
+                              </span>
+                            )}
+                          </div>
                           <div className="flex items-center gap-1.5">
                             <span className="text-[10px] text-foreground/50">{timeAgoFr(m.created_at)}</span>
                             <button
