@@ -4238,6 +4238,7 @@ export type Database = {
           id: string
           latitude: number | null
           longitude: number | null
+          mission_type: Database["public"]["Enums"]["mission_type_enum"]
           photos: string[]
           postal_code: string
           status: Database["public"]["Enums"]["small_mission_status"]
@@ -4256,6 +4257,7 @@ export type Database = {
           id?: string
           latitude?: number | null
           longitude?: number | null
+          mission_type?: Database["public"]["Enums"]["mission_type_enum"]
           photos?: string[]
           postal_code?: string
           status?: Database["public"]["Enums"]["small_mission_status"]
@@ -4274,6 +4276,7 @@ export type Database = {
           id?: string
           latitude?: number | null
           longitude?: number | null
+          mission_type?: Database["public"]["Enums"]["mission_type_enum"]
           photos?: string[]
           postal_code?: string
           status?: Database["public"]["Enums"]["small_mission_status"]
@@ -5282,6 +5285,7 @@ export type Database = {
         | "confirmed"
         | "completed"
         | "cancelled"
+      mission_type_enum: "besoin" | "offre"
       owner_gallery_category:
         | "home_life"
         | "animals_life"
@@ -5499,6 +5503,7 @@ export const Constants = {
         "completed",
         "cancelled",
       ],
+      mission_type_enum: ["besoin", "offre"],
       owner_gallery_category: [
         "home_life",
         "animals_life",

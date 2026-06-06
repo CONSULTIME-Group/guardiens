@@ -88,6 +88,7 @@ interface OpenMissionRow {
   duration_estimate: string | null;
   exchange_offer: string | null;
   photos: string[] | null;
+  mission_type: "besoin" | "offre" | null;
 }
 
 /* Date relative en français, court */
@@ -155,22 +156,30 @@ const SmallMissionsPublic = () => {
     void load();
   }, []);
 
+  const [missionTab, setMissionTab] = useState<"all" | "besoin" | "offre">("all");
+
   useEffect(() => {
     const loadOpen = async () => {
       try {
          const { data } = await supabase
            .from("small_missions")
-           .select("id, title, description, category, city, created_at, date_needed, duration_estimate, exchange_offer, photos")
+           .select("id, title, description, category, city, created_at, date_needed, duration_estimate, exchange_offer, photos, mission_type")
            .eq("status", "open")
            .order("created_at", { ascending: false })
-           .limit(6);
-         if (data) setOpenMissions(data as OpenMissionRow[]);
+           .limit(12);
+         if (data) setOpenMissions(data as unknown as OpenMissionRow[]);
       } catch (err) {
         console.warn("small_missions unavailable:", err);
       }
     };
     void loadOpen();
   }, []);
+
+  const filteredOpenMissions = missionTab === "all"
+    ? openMissions
+    : openMissions.filter(m => (m.mission_type ?? "besoin") === missionTab);
+  const besoinCount = openMissions.filter(m => (m.mission_type ?? "besoin") === "besoin").length;
+  const offreCount = openMissions.filter(m => (m.mission_type ?? "besoin") === "offre").length;
 
  /** Auth-aware navigation: redirect to register if not logged in */
   const goToCreate = () =>
@@ -291,12 +300,38 @@ const SmallMissionsPublic = () => {
           <p className="font-body text-base text-foreground/65 text-center max-w-xl mx-auto mb-12">
             Cliquez sur une mission pour la lire, ou publiez la vôtre en deux minutes.
           </p>
-        </Reveal>
+         </Reveal>
+
+         {/* Onglets Besoins / Offres */}
+         <Reveal delay={0.1}>
+           <div role="tablist" aria-label="Filtrer les missions" className="flex justify-center gap-2 mb-8 flex-wrap">
+             {[
+               { key: "all" as const, label: `Toutes (${openMissions.length})` },
+               { key: "besoin" as const, label: `Demandes (${besoinCount})` },
+               { key: "offre" as const, label: `Propositions d'aide (${offreCount})` },
+             ].map(t => (
+               <button
+                 key={t.key}
+                 role="tab"
+                 aria-selected={missionTab === t.key}
+                 onClick={() => setMissionTab(t.key)}
+                 className={`px-4 py-2 rounded-full text-xs font-body font-semibold tracking-wide transition-colors border ${
+                   missionTab === t.key
+                     ? "bg-primary text-primary-foreground border-primary"
+                     : "bg-card text-foreground/70 border-border hover:border-primary/50 hover:text-foreground"
+                 }`}
+               >
+                 {t.label}
+               </button>
+             ))}
+           </div>
+         </Reveal>
+
         {(() => {
-          const count = openMissions.length;
+          const count = filteredOpenMissions.length;
           return (
             <div className="flex flex-col gap-3 max-w-3xl mx-auto">
-              {openMissions.map((m, i) => {
+              {filteredOpenMissions.map((m, i) => {
                 const dateNeeded = formatDateNeeded(m.date_needed);
                 const durationLabel = m.duration_estimate
                   ? DURATION_LABEL[m.duration_estimate] || null
@@ -334,9 +369,16 @@ const SmallMissionsPublic = () => {
                       </div>
                       <div className="flex flex-col flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2 mb-1">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-body font-semibold tracking-wide">
-                            {CATEGORY_LABEL[m.category] || "Mission"}
-                          </span>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-body font-semibold tracking-wide">
+                              {CATEGORY_LABEL[m.category] || "Mission"}
+                            </span>
+                            {(m.mission_type ?? "besoin") === "offre" && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-success/15 text-success text-[10px] font-body font-semibold tracking-wide">
+                                Propose son aide
+                              </span>
+                            )}
+                          </div>
                           <div className="flex items-center gap-1.5">
                             <span className="text-[10px] text-foreground/50">{timeAgoFr(m.created_at)}</span>
                             <button

@@ -134,6 +134,7 @@ const CreateSmallMission = () => {
  title: title.trim(),
  description: description.trim(),
  category: category as any,
+ mission_type: missionType,
  exchange_offer: exchangeOffer.trim(),
  city: city.trim(),
  postal_code: postalCode.trim(),
