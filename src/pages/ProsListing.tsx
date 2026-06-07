@@ -86,12 +86,12 @@ export default function ProsListing() {
             </span>
           </div>
           <p className="text-lg text-muted-foreground max-w-2xl">
-            Vétérinaires, éducateurs, toiletteurs, ostéopathes, transporteurs, photographes…
-            tous les pros vérifiés au service de vos animaux, partout en France.
+            Vétérinaires, éducateurs, toiletteurs, ostéopathes, transporteurs, photographes :
+            retrouvez les pros animaliers de confiance, en France entière.
           </p>
           <p className="text-sm text-muted-foreground mt-2">
-            Annuaire en phase bêta : les premières fiches arrivent. Vous êtes pro ?
-            Inscrivez-vous gratuitement, votre fiche sera validée sous 48h.
+            Annuaire en phase bêta, les premières fiches arrivent. Vous êtes pro&nbsp;?
+            L'inscription est gratuite et votre fiche est validée sous 48&nbsp;h.
           </p>
           <div className="mt-6 flex flex-wrap gap-2">
             <Button asChild>
