@@ -943,6 +943,10 @@ export default function PublicSitterProfile() {
                   )}
                 </div>
 
+                {sitterProfile?.reply_median_minutes != null && (
+                  <ReplyTimeBadge minutes={sitterProfile.reply_median_minutes} className="self-start mt-1" />
+                )}
+
                 {city && (
                   <p className="text-sm sm:text-base text-foreground/80 flex items-center gap-1 font-medium min-w-0 max-w-full break-words">
                     <MapPin className="w-3.5 h-3.5 shrink-0" />
