@@ -278,6 +278,55 @@ export default function ProOnboarding() {
                 </div>
               </div>
 
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="tmin">Tarif min (€)</Label>
+                  <Input id="tmin" type="number" min={0}
+                    value={form.tarif_min}
+                    onChange={(e) => update("tarif_min", e.target.value)} />
+                </div>
+                <div>
+                  <Label htmlFor="tmax">Tarif max (€)</Label>
+                  <Input id="tmax" type="number" min={0}
+                    value={form.tarif_max}
+                    onChange={(e) => update("tarif_max", e.target.value)} />
+                </div>
+                <div>
+                  <Label htmlFor="zone">Rayon (km)</Label>
+                  <Input id="zone" type="number" min={1} max={300}
+                    value={form.zone_radius_km}
+                    onChange={(e) => update("zone_radius_km", e.target.value)} />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="tnote">Précisions tarifs</Label>
+                <Input id="tnote" value={form.tarif_note}
+                  onChange={(e) => update("tarif_note", e.target.value)}
+                  placeholder="Ex : forfait consultation, sur devis…" />
+              </div>
+
+              <div>
+                <Label htmlFor="hor">Horaires d'ouverture</Label>
+                <Textarea id="hor" rows={3} value={form.horaires_text}
+                  onChange={(e) => update("horaires_text", e.target.value)}
+                  placeholder="Ex : Lun-Ven 9h-19h, Sam 9h-13h" />
+              </div>
+
+              <div>
+                <Label htmlFor="dipl">Diplômes et certifications (1 par ligne)</Label>
+                <Textarea id="dipl" rows={3} value={form.diplomes}
+                  onChange={(e) => update("diplomes", e.target.value)}
+                  placeholder={"ACACED\nDocteur vétérinaire (Maisons-Alfort, 2015)"} />
+              </div>
+
+              <div>
+                <Label htmlFor="ord">N° d'inscription à l'Ordre (vétérinaires)</Label>
+                <Input id="ord" value={form.ordre_number}
+                  onChange={(e) => update("ordre_number", e.target.value)}
+                  placeholder="Ex : 12345" />
+              </div>
+
               <div>
                 <Label htmlFor="web">Site web</Label>
                 <Input
