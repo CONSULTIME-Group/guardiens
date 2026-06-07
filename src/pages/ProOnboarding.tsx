@@ -92,12 +92,12 @@ export default function ProOnboarding() {
         .toString(36)
         .slice(2, 6)}`;
 
-      const { error } = await supabase.from("pro_profiles" as any).insert({
+      const { error } = await supabase.from("pro_profiles").insert({
         user_id: user.id,
         slug,
         raison_sociale: form.raison_sociale,
         siret: form.siret || null,
-        category: form.category,
+        category: form.category as ProCategory,
         city: form.city || null,
         postal_code: form.postal_code || null,
         description: form.description || null,
@@ -112,7 +112,7 @@ export default function ProOnboarding() {
       if (error) throw error;
 
       toast.success("Fiche envoyée. Modération sous 48h.");
-      navigate("/pros");
+      navigate("/pros/mon-espace");
     } catch (err: any) {
       toast.error(err?.message ?? "Une erreur est survenue.");
     } finally {
