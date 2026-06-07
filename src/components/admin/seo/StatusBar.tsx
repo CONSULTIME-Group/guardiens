@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import type { SeoData } from "@/hooks/useSeoData";
+import { useBingData } from "@/hooks/useBingData";
 
 interface StatusBarProps {
   data: SeoData | null;
