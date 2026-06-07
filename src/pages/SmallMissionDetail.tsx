@@ -398,6 +398,17 @@ const SmallMissionDetail = () => {
         link: convId ? `/messages?c=${convId}` : `/messages`,
       });
 
+      sendTransactionalEmail({
+        templateName: "mission-proposal-accepted",
+        recipientUserId: resp.responder_id,
+        idempotencyKey: `mission-proposal-accepted-${responseId}`,
+        templateData: {
+          authorFirstName: (author as any)?.first_name || "",
+          missionTitle: mission.title,
+          conversationId: convId || "",
+        },
+      }).catch(() => {});
+
       toast({ title: "Proposition acceptée !" });
     } catch (err: any) {
       logger.error("[handleAcceptResponse]", { err: String(err) });
@@ -425,6 +436,13 @@ const SmallMissionDetail = () => {
         title: "Proposition non retenue",
         body: `Quelqu'un d'autre a été choisi pour "${mission.title}". Merci pour votre proposition.`,
       });
+
+      sendTransactionalEmail({
+        templateName: "mission-proposal-declined",
+        recipientUserId: resp.responder_id,
+        idempotencyKey: `mission-proposal-declined-${responseId}`,
+        templateData: { missionTitle: mission.title },
+      }).catch(() => {});
     } catch (err: any) {
       logger.error("[handleDeclineResponse]", { err: String(err) });
       toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible de décliner." });
