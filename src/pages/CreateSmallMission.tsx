@@ -347,7 +347,7 @@ const CreateSmallMission = () => {
  {/* Date */}
  <div className="space-y-2">
  <Label>Date (optionnel)</Label>
- <Input type="date" value={dateNeeded} onChange={(e) => setDateNeeded(e.target.value)} />
+ <Input type="date" lang="fr-FR" min={new Date().toISOString().split("T")[0]} value={dateNeeded} onChange={(e) => setDateNeeded(e.target.value)} />
  </div>
 
  {/* Durée */}
