@@ -30,7 +30,7 @@ export default function ProsListing() {
     (async () => {
       setLoading(true);
       const { data } = await supabase
-        .from("pro_profiles" as any)
+        .from("pro_profiles")
         .select("id, slug, raison_sociale, category, city, logo_url, description, urgences_24_7")
         .eq("status", "approved")
         .order("created_at", { ascending: false });

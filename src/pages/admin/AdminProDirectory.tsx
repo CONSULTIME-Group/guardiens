@@ -39,7 +39,7 @@ export default function AdminProDirectory() {
   const load = async (t: Tab) => {
     setLoading(true);
     const { data } = await supabase
-      .from("pro_profiles" as any)
+      .from("pro_profiles")
       .select("*")
       .eq("status", t)
       .order("created_at", { ascending: false });
@@ -59,7 +59,7 @@ export default function AdminProDirectory() {
     } else {
       patch.rejection_reason = reasonById[row.id] ?? "Non conforme aux exigences de l'annuaire.";
     }
-    const { error } = await supabase.from("pro_profiles" as any).update(patch).eq("id", row.id);
+    const { error } = await supabase.from("pro_profiles").update(patch).eq("id", row.id);
     if (error) {
       toast.error(error.message);
       return;
