@@ -37,6 +37,12 @@ import SectionEyebrow from "./shared/SectionEyebrow";
 import TodoCard, { type TodoItem } from "./owner/TodoCard";
 import PriorityActionCard from "./shared/PriorityActionCard";
 import { useOwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
+import ActivationScoreCard from "./owner/ActivationScoreCard";
+import NextActionsList from "./owner/NextActionsList";
+import {
+  computeOwnerNextActions,
+  computeOwnerActivationScore,
+} from "@/lib/nextActions/owner";
 
 import {
   SPECIES_LABEL,
@@ -189,6 +195,27 @@ const OwnerDashboard = () => {
     nearbySittersCount: nearbyOwnerSittersData?.sitters?.length,
   });
 
+  // Liste complète d'actions séquentielles + score d'activation 0/6,
+  // calculée à partir des mêmes données déjà chargées (zéro fetch supplémentaire).
+  const nextActionsInput = useMemo(
+    () => ({
+      sits,
+      pets,
+      pendingAppCount,
+      pendingReviews: pendingReviews.map((r: any) => ({
+        sitId: r.sitId,
+        sitterId: r.sitterId,
+        sitterName: r.sitterName,
+      })),
+      verificationStatus,
+      profileCompletion: user?.profileCompletion ?? 0,
+      hasPropertyType: !!propertyType,
+    }),
+    [sits, pets, pendingAppCount, pendingReviews, verificationStatus, user?.profileCompletion, propertyType]
+  );
+  const nextActions = useMemo(() => computeOwnerNextActions(nextActionsInput), [nextActionsInput]);
+  const activationScore = useMemo(() => computeOwnerActivationScore(nextActionsInput), [nextActionsInput]);
+
   /* ── Render ── */
 
 
@@ -305,6 +332,19 @@ const OwnerDashboard = () => {
           urgency={priorityAction.urgency}
         />
       </div>
+
+      {/* ═══ Et ensuite : 2 actions suivantes + score d'activation ═══
+          Évite l'effet « page blanche » : même si PriorityActionCard a sa
+          cible, on suggère les prochaines étapes utiles. La carte
+          d'activation s'auto-retire quand 6/6 est atteint. */}
+      {(nextActions.length > 1 || !activationScore.allDone) && (
+        <div className="px-5 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <NextActionsList actions={nextActions} excludeId={priorityAction.variant} />
+          <ActivationScoreCard score={activationScore} />
+        </div>
+      )}
+
+
 
 
 
