@@ -1038,6 +1038,7 @@ const SearchOwner = () => {
                           {distLabel}
                         </p>
                       )}
+                      <PresenceBadge lastSeenAt={profile?.last_seen_at} className="mt-0.5" />
 
                       {/* Rating + experience */}
                       <div className="flex items-center gap-2 mt-1 min-h-[1rem]">
