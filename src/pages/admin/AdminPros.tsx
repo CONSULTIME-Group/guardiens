@@ -67,7 +67,7 @@ const AdminPros = () => {
     setLoading(true);
     let query = supabase
       .from("pro_verifications")
-      .select("*, profiles:profiles!pro_verifications_user_id_fkey(first_name, last_name, email, avatar_url)")
+      .select("*")
       .order("updated_at", { ascending: false })
       .limit(200);
 
@@ -86,20 +86,34 @@ const AdminPros = () => {
       setLoading(false);
       return;
     }
-    setRows((data as any) || []);
+
+    // Hydrate profils en seconde requête, la FK pointe sur auth.users
+    // donc PostgREST ne peut pas embed directement profiles.
+    const items = (data as any[]) || [];
+    const userIds = Array.from(new Set(items.map((r) => r.user_id).filter(Boolean)));
+    let profilesById: Record<string, any> = {};
+    if (userIds.length > 0) {
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, email, avatar_url")
+        .in("id", userIds);
+      profilesById = Object.fromEntries((profs ?? []).map((p: any) => [p.id, p]));
+    }
+    const hydrated = items.map((r) => ({ ...r, profiles: profilesById[r.user_id] ?? null }));
+    setRows(hydrated as any);
     setLoading(false);
 
     // Pré-signer les URLs en parallèle
-    const items = (data as any[]) || [];
     const urls: Record<string, string> = {};
     await Promise.all(
-      items.map(async (r) => {
+      hydrated.map(async (r) => {
         const { data: s } = await supabase.storage.from("pro-documents").createSignedUrl(r.file_path, 600);
         if (s?.signedUrl) urls[r.id] = s.signedUrl;
       })
     );
     setSignedUrls((prev) => ({ ...prev, ...urls }));
   }, [tab]);
+
 
   useEffect(() => {
     fetchRows();
