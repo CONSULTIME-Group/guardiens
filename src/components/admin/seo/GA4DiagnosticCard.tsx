@@ -1,0 +1,209 @@
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Activity, RefreshCw, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+
+interface DailyPoint { date: string; events: number; sessions: number }
+interface Diag {
+  measurement_id: string;
+  property_id: string;
+  service_account_configured: boolean;
+  service_account_email?: string;
+  realtime_active_users?: number;
+  realtime_error?: string;
+  last_event_date?: string | null;
+  last_event_count?: number;
+  total_events_30d?: number;
+  total_sessions_30d?: number;
+  last_event_error?: string;
+  daily_series?: DailyPoint[];
+  error?: string;
+  checked_at: string;
+}
+
+const formatGa4Date = (d: string) => {
+  if (!d || d.length !== 8) return d;
+  const date = new Date(`${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6,8)}T00:00:00Z`);
+  return format(date, "dd MMM yyyy", { locale: fr });
+};
+
+const GA4DiagnosticCard = () => {
+  const [data, setData] = useState<Diag | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [tagDetected, setTagDetected] = useState<boolean | null>(null);
+  const [localLastEvent, setLocalLastEvent] = useState<string | null>(null);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const { data: res, error } = await supabase.functions.invoke("ga4-diagnostic");
+      if (error) throw error;
+      setData(res as Diag);
+    } catch (e) {
+      setData({
+        measurement_id: "",
+        property_id: "",
+        service_account_configured: false,
+        checked_at: new Date().toISOString(),
+        error: (e as Error).message,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+    // Detect gtag in current page
+    setTagDetected(typeof (window as any).gtag === "function");
+    // Last analytics_events row from our own table
+    supabase
+      .from("analytics_events")
+      .select("created_at")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data: row }) => setLocalLastEvent(row?.created_at ?? null));
+  }, []);
+
+  const ga4Healthy =
+    data?.service_account_configured &&
+    !data?.realtime_error &&
+    !data?.last_event_error &&
+    (data?.total_events_30d ?? 0) > 0;
+
+  const StatusIcon = ({ ok, warn }: { ok: boolean; warn?: boolean }) =>
+    ok ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> :
+    warn ? <AlertTriangle className="h-4 w-4 text-warning" /> :
+    <XCircle className="h-4 w-4 text-destructive" />;
+
+  return (
+    <Card>
+      <CardHeader className="pb-3 flex flex-row items-center justify-between gap-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+          <Activity className="h-4 w-4 text-primary" /> Diagnostic GA4
+          {data && (
+            <Badge variant={ga4Healthy ? "default" : "destructive"} className="ml-2">
+              {ga4Healthy ? "OK" : "À vérifier"}
+            </Badge>
+          )}
+        </CardTitle>
+        <Button size="sm" variant="ghost" onClick={load} disabled={loading}>
+          <RefreshCw className={`h-3.5 w-3.5 mr-1 ${loading ? "animate-spin" : ""}`} />
+          Recharger
+        </Button>
+      </CardHeader>
+      <CardContent className="space-y-4 text-sm">
+        {/* Identifiants */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="rounded-md border bg-muted/30 px-3 py-2">
+            <p className="text-xs text-muted-foreground">Measurement ID</p>
+            <code className="text-sm font-mono">{data?.measurement_id || "–"}</code>
+          </div>
+          <div className="rounded-md border bg-muted/30 px-3 py-2">
+            <p className="text-xs text-muted-foreground">Property ID</p>
+            <code className="text-sm font-mono">{data?.property_id || "–"}</code>
+          </div>
+        </div>
+
+        {/* Statuts */}
+        <div className="space-y-2 border rounded-md p-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-muted-foreground">Tag gtag.js chargé sur cette page</span>
+            <span className="flex items-center gap-1.5">
+              <StatusIcon ok={!!tagDetected} />
+              <span className="font-medium">{tagDetected ? "Présent" : "Absent"}</span>
+            </span>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-muted-foreground">Compte de service Google</span>
+            <span className="flex items-center gap-1.5">
+              <StatusIcon ok={!!data?.service_account_configured} />
+              <span className="font-medium">
+                {data?.service_account_configured ? "Configuré" : "Manquant"}
+              </span>
+            </span>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-muted-foreground">Utilisateurs actifs (temps réel · 30 min)</span>
+            <span className="flex items-center gap-1.5">
+              <StatusIcon
+                ok={(data?.realtime_active_users ?? 0) > 0}
+                warn={!data?.realtime_error && (data?.realtime_active_users ?? 0) === 0}
+              />
+              <span className="font-medium tabular-nums">
+                {data?.realtime_error ? "Erreur" : (data?.realtime_active_users ?? "–")}
+              </span>
+            </span>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-muted-foreground">Dernier événement reçu (GA4)</span>
+            <span className="flex items-center gap-1.5">
+              <StatusIcon
+                ok={!!data?.last_event_date}
+                warn={!data?.last_event_error && !data?.last_event_date}
+              />
+              <span className="font-medium">
+                {data?.last_event_error
+                  ? "Erreur"
+                  : data?.last_event_date
+                    ? `${formatGa4Date(data.last_event_date)} · ${(data.last_event_count ?? 0).toLocaleString()} ev.`
+                    : "Aucun"}
+              </span>
+            </span>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-muted-foreground">Dernier événement local (table analytics_events)</span>
+            <span className="flex items-center gap-1.5">
+              <StatusIcon ok={!!localLastEvent} />
+              <span className="font-medium">
+                {localLastEvent
+                  ? format(new Date(localLastEvent), "dd MMM yyyy HH:mm", { locale: fr })
+                  : "Aucun"}
+              </span>
+            </span>
+          </div>
+        </div>
+
+        {/* Totaux 30j */}
+        {data && !data.last_event_error && (
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-md border bg-muted/30 px-3 py-2">
+              <p className="text-xs text-muted-foreground">Événements (30j)</p>
+              <p className="text-lg font-bold tabular-nums">
+                {(data.total_events_30d ?? 0).toLocaleString()}
+              </p>
+            </div>
+            <div className="rounded-md border bg-muted/30 px-3 py-2">
+              <p className="text-xs text-muted-foreground">Sessions (30j)</p>
+              <p className="text-lg font-bold tabular-nums">
+                {(data.total_sessions_30d ?? 0).toLocaleString()}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Erreurs */}
+        {(data?.error || data?.realtime_error || data?.last_event_error) && (
+          <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 space-y-1 text-xs text-destructive">
+            {data.error && <p><strong>Erreur :</strong> {data.error}</p>}
+            {data.realtime_error && <p><strong>Realtime :</strong> {data.realtime_error}</p>}
+            {data.last_event_error && <p><strong>Historique :</strong> {data.last_event_error}</p>}
+          </div>
+        )}
+
+        {data?.service_account_email && (
+          <p className="text-[11px] text-muted-foreground">
+            Compte de service : <code>{data.service_account_email}</code>
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+export default GA4DiagnosticCard;
