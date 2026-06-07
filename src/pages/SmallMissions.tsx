@@ -74,6 +74,18 @@ const SmallMissions = () => {
 
   const [competenceSearch, setCompetenceSearch] = useState(searchParams.get("q") || "");
 
+  // ── Legacy ?type=offre → ?mode=offer (normalisation immédiate, avant le 1er render visible) ──
+  useEffect(() => {
+    if (searchParams.get("type")) {
+      const next = new URLSearchParams(searchParams);
+      const legacy = next.get("type");
+      next.delete("type");
+      if (legacy === "offre" && !next.get("mode")) next.set("mode", "offer");
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ── Sync filters → URL ──
   useEffect(() => {
     const next = new URLSearchParams(searchParams);
@@ -414,7 +426,8 @@ const SmallMissions = () => {
 
       <div className="min-h-screen bg-background">
         <MissionsHero
-          missionCount={(allMissions || []).filter((m: any) => m.status === "open" || m.status === "in_progress").length}
+          needCount={(allMissions || []).filter((m: any) => (m.status === "open" || m.status === "in_progress") && (m.mission_type ?? "besoin") === "besoin").length}
+          offerCount={(allMissions || []).filter((m: any) => (m.status === "open" || m.status === "in_progress") && m.mission_type === "offre").length}
           helperCount={(availableHelpers || []).length}
           onPropose={() => {
             if (!isAuthenticated) { navigate("/inscription?redirect=/petites-missions"); return; }

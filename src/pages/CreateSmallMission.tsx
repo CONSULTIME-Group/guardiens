@@ -4,10 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format, parseISO, startOfDay } from "date-fns";
+import { fr } from "date-fns/locale";
 import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dog, Flower2, Home, Handshake, Heart, ChevronLeft, Lock } from "lucide-react";
+import { Dog, Flower2, Home, Handshake, Heart, ChevronLeft, Lock, CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -347,7 +352,34 @@ const CreateSmallMission = () => {
  {/* Date */}
  <div className="space-y-2">
  <Label>Date (optionnel)</Label>
- <Input type="date" lang="fr-FR" min={new Date().toISOString().split("T")[0]} value={dateNeeded} onChange={(e) => setDateNeeded(e.target.value)} />
+ <Popover>
+ <PopoverTrigger asChild>
+ <Button
+ type="button"
+ variant="outline"
+ className={cn("w-full justify-start text-left font-normal", !dateNeeded && "text-muted-foreground")}
+ >
+ <CalendarIcon className="mr-2 h-4 w-4" />
+ {dateNeeded ? format(parseISO(dateNeeded), "EEEE d MMMM yyyy", { locale: fr }) : <span>Choisir une date</span>}
+ </Button>
+ </PopoverTrigger>
+ <PopoverContent className="w-auto p-0" align="start">
+ <Calendar
+ mode="single"
+ locale={fr}
+ selected={dateNeeded ? parseISO(dateNeeded) : undefined}
+ onSelect={(d) => setDateNeeded(d ? format(d, "yyyy-MM-dd") : "")}
+ disabled={(d) => d < startOfDay(new Date())}
+ initialFocus
+ className={cn("p-3 pointer-events-auto")}
+ />
+ {dateNeeded && (
+ <div className="border-t border-border p-2">
+ <Button type="button" variant="ghost" size="sm" className="w-full" onClick={() => setDateNeeded("")}>Effacer</Button>
+ </div>
+ )}
+ </PopoverContent>
+ </Popover>
  </div>
 
  {/* Durée */}
