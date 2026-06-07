@@ -298,8 +298,25 @@ const AdminSEO = () => {
           </div>
         )}
 
+        {/* Sélecteur de période, applique aux KPIs Bing + graph */}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <p className="text-xs text-muted-foreground">Période Bing</p>
+          <ToggleGroup
+            type="single"
+            size="sm"
+            value={String(bingPeriod)}
+            onValueChange={(v) => v && setBingPeriod(Number(v) as BingPeriodDays)}
+            className="border rounded-md"
+          >
+            <ToggleGroupItem value="7" className="text-xs px-3">7j</ToggleGroupItem>
+            <ToggleGroupItem value="28" className="text-xs px-3">28j</ToggleGroupItem>
+            <ToggleGroupItem value="90" className="text-xs px-3">90j</ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+
         {/* Bing KPIs, alignés sur GSC */}
-        <BingKpiRow />
+        <BingKpiRow period={bingPeriod} />
+
 
         {/* Priority actions, remonté juste après les KPIs car le plus actionnable */}
         {gsc?.topPages && (
