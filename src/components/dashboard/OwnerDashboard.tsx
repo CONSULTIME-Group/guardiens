@@ -292,6 +292,22 @@ const OwnerDashboard = () => {
         </div>
       </header>
 
+      {/* ═══ Action prioritaire unique , UN seul CTA dominant ═══
+          Synthétise « la seule chose à faire maintenant » avant les listes
+          détaillées (TodoCard) qui restent disponibles plus bas. */}
+      <div className="px-5 md:px-8">
+        <PriorityActionCard
+          eyebrow={priorityAction.eyebrow}
+          title={priorityAction.title}
+          description={priorityAction.description}
+          ctaLabel={priorityAction.ctaLabel}
+          ctaTo={priorityAction.ctaTo}
+          urgency={priorityAction.urgency}
+        />
+      </div>
+
+
+
       {/* Bannière dual-role : déplacée APRÈS le hero (l'utilisateur lit
           d'abord son nom, ensuite l'incitation à activer l'espace gardien). */}
       <div className="px-5 md:px-8">
