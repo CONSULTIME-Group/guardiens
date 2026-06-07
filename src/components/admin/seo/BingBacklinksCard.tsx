@@ -11,8 +11,9 @@ export default function BingBacklinksCard() {
 
   if (data?.error || isLoading) return null;
 
-  const rows = (data?.links && "d" in data.links ? data.links.d : undefined) as BingLinkRow[] | undefined;
-  if (!rows || rows.length === 0) return null;
+  const raw = (data?.links && "d" in data.links ? data.links.d : undefined) as unknown;
+  const rows: BingLinkRow[] = Array.isArray(raw) ? (raw as BingLinkRow[]) : [];
+  if (rows.length === 0) return null;
 
   const top = [...rows].sort((a, b) => (b.Count ?? 0) - (a.Count ?? 0)).slice(0, 15);
   const total = rows.reduce((s, r) => s + (r.Count ?? 0), 0);
