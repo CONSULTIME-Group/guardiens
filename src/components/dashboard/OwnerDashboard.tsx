@@ -195,6 +195,27 @@ const OwnerDashboard = () => {
     nearbySittersCount: nearbyOwnerSittersData?.sitters?.length,
   });
 
+  // Liste complète d'actions séquentielles + score d'activation 0/6,
+  // calculée à partir des mêmes données déjà chargées (zéro fetch supplémentaire).
+  const nextActionsInput = useMemo(
+    () => ({
+      sits,
+      pets,
+      pendingAppCount,
+      pendingReviews: pendingReviews.map((r: any) => ({
+        sitId: r.sitId,
+        sitterId: r.sitterId,
+        sitterName: r.sitterName,
+      })),
+      verificationStatus,
+      profileCompletion: user?.profileCompletion ?? 0,
+      hasPropertyType: !!propertyType,
+    }),
+    [sits, pets, pendingAppCount, pendingReviews, verificationStatus, user?.profileCompletion, propertyType]
+  );
+  const nextActions = useMemo(() => computeOwnerNextActions(nextActionsInput), [nextActionsInput]);
+  const activationScore = useMemo(() => computeOwnerActivationScore(nextActionsInput), [nextActionsInput]);
+
   /* ── Render ── */
 
 
