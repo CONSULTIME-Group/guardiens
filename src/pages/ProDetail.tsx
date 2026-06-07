@@ -102,7 +102,12 @@ export default function ProDetail() {
               className="w-24 h-24 rounded-xl object-contain bg-muted"
             />
           ) : (
-            <div className="w-24 h-24 rounded-xl bg-muted" />
+            <div
+              className={`w-24 h-24 rounded-xl flex items-center justify-center font-semibold text-2xl ${cat?.placeholderClass ?? "bg-muted text-muted-foreground"}`}
+              aria-hidden="true"
+            >
+              {getProInitials(pro.raison_sociale)}
+            </div>
           )}
           <div className="min-w-0">
             <h1 className="text-3xl font-display font-bold">{pro.raison_sociale}</h1>
