@@ -254,9 +254,13 @@ const SmallMissions = () => {
   const filteredMissionsWithZone = useMemo(() => {
     return (allMissions || [])
       .filter((m: any) => {
-        if (categoryFilter === "mine") return m.user_id === user?.id;
-        if (m.status === "completed" || m.status === "cancelled") return false;
-        if (categoryFilter !== "all" && m.category !== categoryFilter) return false;
+        if (m.status === "cancelled") return false;
+        if (categoryFilter === "mine") {
+          if (m.user_id !== user?.id) return false;
+        } else {
+          if (m.status === "completed") return false;
+          if (categoryFilter !== "all" && m.category !== categoryFilter) return false;
+        }
         const mType = (m.mission_type ?? "besoin");
         if (mode === "need" && mType !== "besoin") return false;
         if (mode === "offer" && mType !== "offre") return false;
@@ -481,15 +485,15 @@ const SmallMissions = () => {
               setCategoryFilter={setCategoryFilter}
             />
 
-            {/* ═══ Section 1, Demandes visibles (HERO) ═══ */}
+            {/* ═══ Section 1, Demandes ou Propositions visibles (HERO) ═══ */}
             <div className="flex items-center gap-3 mb-2">
               <span className="h-8 w-1.5 rounded-full bg-primary" aria-hidden />
               <h2 className="text-xl md:text-2xl font-heading font-bold text-foreground leading-tight">
-                {mode === "offer" ? "Demandes à aider" : "Demandes publiées près de chez vous"}
+                {mode === "offer" ? "Propositions d'aide près de chez vous" : "Demandes près de chez vous"}
               </h2>
               {missionCount > 0 && (
                 <span className="text-xs font-semibold bg-primary/10 text-primary px-2.5 py-1 rounded-full">
-                  {missionCount} demande{missionCount > 1 ? "s" : ""}
+                  {missionCount} {mode === "offer" ? "proposition" : "demande"}{missionCount > 1 ? "s" : ""}
                 </span>
               )}
             </div>
@@ -532,10 +536,10 @@ const SmallMissions = () => {
                       compactBio={compactBio}
                       showBio={showBio}
                       onNavigateDetail={() => {
-                        navigate(isAuthenticated ? `/petites-missions/${m.id}` : "/inscription");
+                        navigate(`/petites-missions/${m.id}`);
                       }}
                       onPropose={() => {
-                        if (!isAuthenticated) { navigate("/inscription"); return; }
+                        if (!isAuthenticated) { navigate(`/inscription?redirect=${encodeURIComponent(`/petites-missions/${m.id}`)}`); return; }
                         setDialogMission(m);
                         setDialogTarget({ id: m.user_id, name: (m.profiles as any)?.first_name || "ce membre" });
                       }}
@@ -554,35 +558,27 @@ const SmallMissions = () => {
               <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-8 text-center space-y-3">
                 <p className="font-heading text-lg font-semibold text-foreground">
                   {mode === "offer"
-                    ? `Aucune demande à moins de ${radiusKm || 30} km de chez vous.`
-                    : `Personne n'a encore osé à moins de ${radiusKm || 30} km de chez vous.`}
+                    ? `Aucune proposition à moins de ${radiusKm || 30} km de chez vous.`
+                    : `Aucune demande à moins de ${radiusKm || 30} km de chez vous.`}
                 </p>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
                   {outOfZoneMissions.length > 0 ? (
                     <>
-                      <strong className="text-foreground">Bonne nouvelle :</strong> {outOfZoneMissions.length} demande{outOfZoneMissions.length > 1 ? "s sont visibles" : " est visible"} un peu plus loin ↓
+                      <strong className="text-foreground">Bonne nouvelle :</strong> {outOfZoneMissions.length} {mode === "offer" ? "proposition" : "demande"}{outOfZoneMissions.length > 1 ? "s sont visibles" : " est visible"} un peu plus loin ↓
                     </>
                   ) : mode === "offer" ? (
-                    "Rendez-vous visible : indiquez vos disponibilités juste en dessous. Quand une demande arrivera, vous serez la première personne à qui l'on pense."
+                    "Soyez la première personne à proposer votre aide. Publiez ce que vous savez faire et les gens du coin viendront à vous."
                   ) : (
-                    "Soyez la première personne à publier. Une demande d'aujourd'hui, c'est des gens du coin qui la voient demain, et souvent une rencontre qui change la semaine."
+                    "Soyez la première personne à publier votre besoin. Une demande d'aujourd'hui, c'est des gens du coin qui la voient demain, et souvent une rencontre qui change la semaine."
                   )}
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
-                  {mode === "need" && (
-                    <Link to="/petites-missions/creer" className="inline-block">
-                      <Button variant="hero" size="lg">
-                        J'ose, je publie ma demande
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </Link>
-                  )}
-                  {mode === "offer" && (
-                    <Button variant="hero" size="lg" onClick={openOfferDialog}>
-                      J'ai du temps à offrir
+                  <Link to="/petites-missions/creer" className="inline-block">
+                    <Button variant="hero" size="lg">
+                      {mode === "offer" ? "J'ose, je publie ma proposition" : "J'ose, je publie ma demande"}
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
-                  )}
+                  </Link>
                   {radiusKm > 0 && (
                     <Button variant="outline" size="lg" onClick={() => setRadiusKm(0)}>
                       Élargir à la France entière
@@ -602,7 +598,7 @@ const SmallMissions = () => {
                     </span>
                     <div>
                       <h3 className="font-heading text-base font-semibold text-foreground">
-                        {outOfZoneMissions.length} {outOfZoneMissions.length > 1 ? "autres demandes existent" : "autre demande existe"} un peu plus loin
+                        {outOfZoneMissions.length} {outOfZoneMissions.length > 1 ? (mode === "offer" ? "autres propositions existent" : "autres demandes existent") : (mode === "offer" ? "autre proposition existe" : "autre demande existe")} un peu plus loin
                       </h3>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         Au-delà de votre périmètre actuel ({radiusKm} km). Élargissez pour les voir toutes.
@@ -618,7 +614,7 @@ const SmallMissions = () => {
                   {outOfZoneMissions.slice(0, 6).map((m: any, idx: number) => (
                     <div key={`oz-${m.id}`} className="relative">
                       <span className="absolute top-2 left-2 z-10 inline-flex items-center gap-1 bg-background/95 backdrop-blur-sm rounded-full px-2.5 py-1 text-[11px] font-semibold text-foreground shadow-sm border border-border">
-                        {formatCity((m.profiles as any)?.city) || "Ailleurs"}
+                        {formatCity(m.city) || "Ailleurs"}
                         {m._distance != null && (
                           <span className="text-muted-foreground"> · {Math.round(m._distance)} km</span>
                         )}
@@ -632,9 +628,9 @@ const SmallMissions = () => {
                           mode={mode}
                           compactBio={compactBio}
                           showBio={showBio}
-                          onNavigateDetail={() => navigate(isAuthenticated ? `/petites-missions/${m.id}` : "/inscription")}
+                          onNavigateDetail={() => navigate(`/petites-missions/${m.id}`)}
                           onPropose={() => {
-                            if (!isAuthenticated) { navigate("/inscription"); return; }
+                            if (!isAuthenticated) { navigate(`/inscription?redirect=${encodeURIComponent(`/petites-missions/${m.id}`)}`); return; }
                             setDialogMission(m);
                             setDialogTarget({ id: m.user_id, name: (m.profiles as any)?.first_name || "ce membre" });
                           }}
