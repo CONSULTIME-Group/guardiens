@@ -126,6 +126,16 @@ export default function ProsListing() {
             onChange={(e) => setQuery(e.target.value)}
             className="md:max-w-sm"
           />
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortKey)}
+            className="h-10 rounded-md border border-input bg-background px-3 text-sm md:max-w-[180px]"
+            aria-label="Trier par"
+          >
+            <option value="recent">Plus récents</option>
+            <option value="alpha">Ordre alphabétique</option>
+            <option value="city">Par ville</option>
+          </select>
           <div className="flex flex-wrap gap-2">
             <Badge
               variant={category === "all" ? "default" : "outline"}
