@@ -46,7 +46,22 @@ export default function ProOnboarding() {
   });
 
   useEffect(() => {
-    if (!user) navigate("/login?redirect=/pros/inscription");
+    if (!user) {
+      navigate("/login?redirect=/pros/inscription");
+      return;
+    }
+    // F-09: empêche la création d'une 2e fiche pro
+    (async () => {
+      const { data: existing } = await supabase
+        .from("pro_profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (existing) {
+        toast.info("Vous avez déjà une fiche pro. Redirection vers votre espace.");
+        navigate("/pros/mon-espace", { replace: true });
+      }
+    })();
   }, [user, navigate]);
 
   const update = (k: string, v: any) => setForm((f) => ({ ...f, [k]: v }));
