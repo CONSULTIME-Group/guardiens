@@ -195,6 +195,7 @@ const AdminSmallMissions = () => {
                   <TableCell className="text-sm text-muted-foreground">{format(new Date(m.created_at), "d MMM yyyy", { locale: fr })}</TableCell>
                   <TableCell><Badge variant={status.variant}>{status.label}</Badge></TableCell>
                   <TableCell className="text-sm font-medium">{responseCounts[m.id] || 0}</TableCell>
+                  <TableCell className="text-sm font-medium tabular-nums">{m.view_count ?? 0}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
                       <Button variant="ghost" size="icon" title="Voir" onClick={() => navigate(`/petites-missions/${m.id}`)}>
