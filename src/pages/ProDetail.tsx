@@ -21,7 +21,7 @@ export default function ProDetail() {
       const { data } = await supabase
         .from("pro_profiles")
         .select(
-          "id, slug, raison_sociale, category, city, postal_code, description, phone, website, email_contact, urgences_24_7, siret_verified, logo_url, cover_url, tarif_min, tarif_max, tarif_note, hours, diplomas, zone, order_number"
+          "id, slug, raison_sociale, category, sub_categories, city, postal_code, description, phone, website, email_contact, urgences_24_7, siret_verified, logo_url, cover_url, tarif_min, tarif_max, tarif_note, horaires, diplomes, ordre_number, zone_radius_km, zone_cities"
         )
         .eq("slug", slug)
         .eq("status", "approved")
