@@ -1270,6 +1270,23 @@ const SmallMissionDetail = () => {
         )}
       </div>
 
+      {/* Mobile sticky CTA */}
+      {!isAuthor && mission.status === "open" && canApplyMissions && !hasResponded && (
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.15)]">
+          <Button
+            size="lg"
+            className="w-full rounded-full font-bold text-base shadow-lg shadow-primary/20"
+            onClick={() => {
+              const el = document.getElementById("proposer-aide");
+              el?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+          >
+            {(mission as any).mission_type === "offre" ? "Solliciter cette aide" : "Proposer mon aide"}
+          </Button>
+        </div>
+      )}
+
+
       {/* Close without selection modal */}
       <Dialog open={closeModalOpen} onOpenChange={setCloseModalOpen}>
         <DialogContent>
