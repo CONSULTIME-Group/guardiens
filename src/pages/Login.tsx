@@ -18,8 +18,14 @@ import { InAppBrowserBanner } from "@/components/auth/InAppBrowserBanner";
 import { AuthIllustrationPanel } from "@/components/auth/AuthIllustrationPanel";
 import { trackEvent } from "@/lib/analytics";
 import { startOAuthFlow, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const Login = () => {
+  const [capsLockOn, setCapsLockOn] = useState(false);
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState(searchParams.get("email") ?? "");
   const [password, setPassword] = useState("");
@@ -129,7 +135,10 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex bg-background">
-      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+      <Helmet>
+        <title>Connexion, guardiens</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
 
       <AuthIllustrationPanel
         title="L'entraide locale, retrouvée"
@@ -155,6 +164,8 @@ const Login = () => {
             <p className="text-muted-foreground">Content de vous revoir</p>
           </div>
 
+          {/* Avertissement WebView in-app : doit apparaître AVANT le bouton Google
+              (OAuth Google bloqué en WebView). */}
           <InAppBrowserBanner className="mb-6" />
 
           {/* Google Sign-In */}
@@ -162,7 +173,7 @@ const Login = () => {
             type="button"
             variant="outline"
             size="lg"
-            className="w-full mb-4"
+            className="w-full mb-3"
             onClick={handleGoogleSignIn}
             disabled={isGoogleLoading || isLoading}
           >
@@ -175,10 +186,9 @@ const Login = () => {
             {isGoogleLoading ? "Connexion…" : "Continuer avec Google"}
           </Button>
 
-          {/* Clickwrap RGPD : couvre le cas où Google crée un nouveau compte
-              depuis /login (premier OAuth) sans passer par la case CGU de /inscription.
-              Mention explicite du responsable de traitement, des données reçues et des droits. */}
-          <p className="text-center text-[11px] text-muted-foreground -mt-2 mb-4 leading-relaxed px-2 sm:px-4">
+          {/* Clickwrap RGPD condensé. Détail RGPD complet replié dans un Popover
+              pour ne pas étouffer le CTA Google tout en restant accessible. */}
+          <p className="text-center text-[11px] text-muted-foreground mb-4 leading-relaxed px-2 sm:px-4">
             En continuant avec Google, vous acceptez nos{" "}
             <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
               conditions d'utilisation
@@ -186,14 +196,22 @@ const Login = () => {
             et notre{" "}
             <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
               politique de confidentialité
-            </Link>.
-            <span className="block mt-1 text-[10px] text-muted-foreground/80">
-              Google nous transmet uniquement votre nom, votre email et votre photo de profil.
-              Vos données sont hébergées en Europe par Guardiens (responsable de traitement).
-              Vous gardez à tout moment un droit d'accès, de rectification et de suppression
-              {" "}(RGPD, art. 15 à 17).
-            </span>
+            </Link>.{" "}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button type="button" className="underline hover:text-foreground">
+                  Détails RGPD
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="text-[11px] leading-relaxed w-72">
+                Google nous transmet uniquement votre nom, votre email et votre photo de profil.
+                Vos données sont hébergées en Europe par Guardiens (responsable de traitement).
+                Vous gardez à tout moment un droit d'accès, de rectification et de suppression
+                (RGPD, art. 15 à 17).
+              </PopoverContent>
+            </Popover>
           </p>
+
 
           <div className="relative my-6" role="separator">
             <div className="absolute inset-0 flex items-center">
@@ -214,6 +232,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoFocus={!email}
                 className="rounded-lg h-12"
                 {...getAuthFieldAttrs("email")}
               />
@@ -226,9 +245,14 @@ const Login = () => {
                   type={showPassword ? "text" : "password"}
                   placeholder="Votre mot de passe"
                   value={password}
+                  autoFocus={!!email}
                   onChange={(e) => { setPassword(e.target.value); setPasswordError(null); }}
+                  onKeyDown={(e) => setCapsLockOn(e.getModifierState && e.getModifierState("CapsLock"))}
+                  onKeyUp={(e) => setCapsLockOn(e.getModifierState && e.getModifierState("CapsLock"))}
+                  onBlur={() => setCapsLockOn(false)}
                   required
                   className="rounded-lg h-12 pr-12"
+                  aria-describedby={capsLockOn ? "capslock-hint" : undefined}
                   {...getAuthFieldAttrs("password")}
                 />
                 <button
@@ -241,35 +265,33 @@ const Login = () => {
                   {showPassword ? <EyeOff className="h-5 w-5" aria-hidden="true" /> : <Eye className="h-5 w-5" aria-hidden="true" />}
                 </button>
               </div>
+              {capsLockOn && (
+                <p id="capslock-hint" className="text-xs text-warning-foreground">
+                  Verrouillage majuscules activé.
+                </p>
+              )}
               {passwordError && (
                 <div className="space-y-2">
                   <p className="text-sm text-destructive">{passwordError}</p>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
-                    <Link to="/forgot-password" className="text-primary hover:underline">
-                      Mot de passe oublié ?
+                  {failedAttempts >= 2 && (
+                    <Link to={`/inscription${(() => {
+                      const params = new URLSearchParams();
+                      if (email) params.set("email", email);
+                      if (redirectTarget) params.set("redirect", redirectTarget);
+                      const qs = params.toString();
+                      return qs ? `?${qs}` : "";
+                    })()}`} className="text-sm text-primary hover:underline">
+                      Pas encore de compte ? Inscrivez-vous
                     </Link>
-                    {failedAttempts >= 2 && (
-                      <Link to={`/inscription${(() => {
-                        const params = new URLSearchParams();
-                        if (email) params.set("email", email);
-                        if (redirectTarget) params.set("redirect", redirectTarget);
-                        const qs = params.toString();
-                        return qs ? `?${qs}` : "";
-                      })()}`} className="text-primary hover:underline">
-                        Pas encore de compte ? Inscrivez-vous
-                      </Link>
-                    )}
-                  </div>
+                  )}
                 </div>
               )}
             </div>
-            {!passwordError && (
-              <div className="flex justify-end">
-                <Link to="/forgot-password" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Mot de passe oublié ?
-                </Link>
-              </div>
-            )}
+            <div className="flex justify-end">
+              <Link to="/forgot-password" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                Mot de passe oublié ?
+              </Link>
+            </div>
             <Button type="submit" className="w-full" size="lg" disabled={isLoading || isGoogleLoading}>
               {isLoading ? "Connexion..." : "Se connecter"}
             </Button>
