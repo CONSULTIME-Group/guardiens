@@ -35,6 +35,8 @@ import MobileStickyCTA from "./owner/MobileStickyCTA";
 import LiveSignalStrip from "./shared/LiveSignalStrip";
 import SectionEyebrow from "./shared/SectionEyebrow";
 import TodoCard, { type TodoItem } from "./owner/TodoCard";
+import PriorityActionCard from "./shared/PriorityActionCard";
+import { useOwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
 
 import {
   SPECIES_LABEL,
