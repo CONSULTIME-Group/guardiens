@@ -75,6 +75,13 @@ export default function AdminProDirectory() {
         description="Valider ou refuser les fiches de l'annuaire des pros animaliers."
       />
 
+      <div className="mb-4 flex flex-wrap gap-2 text-sm">
+        <Button asChild variant="outline" size="sm">
+          <Link to="/admin/pros">Vérifications Pro (diplômes, SIRET)</Link>
+        </Button>
+      </div>
+
+
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
         <TabsList>
           <TabsTrigger value="pending">En attente</TabsTrigger>
