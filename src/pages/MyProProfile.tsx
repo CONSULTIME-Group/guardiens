@@ -85,6 +85,15 @@ export default function MyProProfile() {
         website: profile.website,
         email_contact: profile.email_contact,
         urgences_24_7: profile.urgences_24_7,
+        tarif_min: profile.tarif_min === "" || profile.tarif_min == null ? null : Number(profile.tarif_min),
+        tarif_max: profile.tarif_max === "" || profile.tarif_max == null ? null : Number(profile.tarif_max),
+        tarif_note: profile.tarif_note ?? null,
+        diplomes: Array.isArray(profile.diplomes)
+          ? profile.diplomes
+          : (profile.diplomes ?? "").toString().split("\n").map((s: string) => s.trim()).filter(Boolean),
+        ordre_number: profile.ordre_number ?? null,
+        zone_radius_km: profile.zone_radius_km ? Number(profile.zone_radius_km) : 20,
+        horaires: profile.horaires_text ? { text: profile.horaires_text } : (profile.horaires ?? {}),
         logo_url,
       };
 
