@@ -1,18 +1,11 @@
 // Pousse une ou plusieurs URLs vers IndexNow (Bing, Yandex, Seznam, Naver).
 // Doc : https://www.indexnow.org/documentation
 //
-// POST body : { urls?: string[], slugs?: string[], all?: boolean }
+// POST body : { urls?: string[], slugs?: string[], all?: boolean, source?: string }
 //   - urls   : URLs absolues ou chemins
 //   - slugs  : slugs d'articles publiés (prefixés /actualites/)
 //   - all    : pousse tous les articles publiés + pages SEO de villes/guides
-//
-// Réponse IndexNow :
-//   200 OK     URL submitted successfully
-//   202        URL received. IndexNow key validation pending.
-//   400        Bad request (format)
-//   403        Forbidden (clé invalide)
-//   422        Unprocessable Entity (clé/host mismatch)
-//   429        Too many requests
+//   - source : libellé pour l'historique ("manual", "auto-no-impression", etc.)
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -47,12 +40,28 @@ function toAbsolute(input: string): string | null {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const supa = createClient(supabaseUrl, serviceKey);
+
+  // Identifie l'utilisateur déclencheur (best-effort, pas bloquant)
+  let triggeredBy: string | null = null;
+  try {
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader) {
+      const token = authHeader.replace(/^Bearer\s+/i, "");
+      const { data: { user } } = await supa.auth.getUser(token);
+      triggeredBy = user?.id ?? null;
+    }
+  } catch { /* silencieux */ }
+
   try {
     const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
-    const { urls = [], slugs = [], all = false } = body as {
+    const { urls = [], slugs = [], all = false, source = "manual" } = body as {
       urls?: string[];
       slugs?: string[];
       all?: boolean;
+      source?: string;
     };
 
     const set = new Set<string>();
@@ -65,9 +74,6 @@ Deno.serve(async (req) => {
     }
 
     if (all) {
-      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-      const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-      const supa = createClient(supabaseUrl, serviceKey);
       const [a, c, g] = await Promise.all([
         supa.from("articles").select("slug").eq("published", true),
         supa.from("seo_city_pages").select("slug"),
@@ -100,9 +106,24 @@ Deno.serve(async (req) => {
     });
 
     const text = await res.text();
+    const ok = res.status >= 200 && res.status < 300;
+
+    // Log dans l'historique (best-effort, ne bloque pas la réponse)
+    try {
+      await supa.from("indexnow_submissions").insert({
+        url_count: urlList.length,
+        sample_urls: urlList.slice(0, 10),
+        status_code: res.status,
+        ok,
+        source,
+        triggered_by: triggeredBy,
+        response_snippet: text.slice(0, 500),
+      });
+    } catch { /* silencieux */ }
+
     return new Response(
       JSON.stringify({
-        ok: res.status >= 200 && res.status < 300,
+        ok,
         status: res.status,
         submitted: urlList.length,
         sample: urlList.slice(0, 5),
