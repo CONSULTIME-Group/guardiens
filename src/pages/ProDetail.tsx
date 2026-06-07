@@ -134,7 +134,7 @@ export default function ProDetail() {
               <CardContent className="p-6 space-y-2">
                 <h2 className="font-semibold mb-2">Contact</h2>
                 {pro.phone && <p>Téléphone : {pro.phone}</p>}
-                {pro.email_contact && <p>Email : {pro.email_contact}</p>}
+                {pro.email_contact && <ObfuscatedEmail email={pro.email_contact} />}
                 {pro.website && (
                   <p>
                     Site :{" "}
