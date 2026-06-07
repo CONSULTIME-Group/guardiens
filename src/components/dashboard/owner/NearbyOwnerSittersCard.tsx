@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Compass, Share2, Star, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
+import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 
 interface Props {
   /** Cache le header quand le parent rend déjà un eyebrow. */
@@ -108,18 +109,24 @@ const NearbyOwnerSittersCard = ({ hideHeader = false }: Props) => {
                   to={`/gardiens/${s.id}`}
                   className="group flex items-start gap-3 py-3 first:pt-1 last:pb-1 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:bg-muted/40 hover:translate-x-0.5"
                 >
-                  {s.avatar_url ? (
-                    <img
-                      src={s.avatar_url}
-                      alt=""
-                      className="w-11 h-11 rounded-full object-cover shrink-0 ring-1 ring-border"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="w-11 h-11 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground shrink-0">
-                      {s.first_name?.charAt(0) || "?"}
-                    </div>
-                  )}
+                  <TrustHaloAvatar
+                    verified={s.identity_verified}
+                    avgRating={s.avg_rating}
+                    sitsCount={s.completed_sits_count}
+                  >
+                    {s.avatar_url ? (
+                      <img
+                        src={s.avatar_url}
+                        alt=""
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground">
+                        {s.first_name?.charAt(0) || "?"}
+                      </div>
+                    )}
+                  </TrustHaloAvatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <p className="text-sm font-semibold text-foreground truncate transition-colors group-hover:text-primary">
