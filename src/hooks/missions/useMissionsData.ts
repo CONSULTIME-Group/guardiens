@@ -11,7 +11,7 @@ export function useAllMissions(currentUserId?: string) {
         .select("*, mission_type, profiles:user_id(first_name, avatar_url, bio)")
         .in("status", ["open", "in_progress", "completed"] as any[])
         .order("created_at", { ascending: false })
-        .limit(50);
+        .limit(200);
 
       if (!missions || missions.length === 0) return [];
 
@@ -47,7 +47,7 @@ export function useAvailableHelpers(currentUserId: string | undefined, enabled: 
         .select("id, first_name, avatar_url, city, postal_code, skill_categories, available_for_help, custom_skills, bio, latitude, longitude, identity_verified")
         .eq("available_for_help", true)
         .not("skill_categories", "eq", "{}")
-        .limit(50);
+        .limit(200);
       if (!data) return [];
 
       const helperIds = data.map((h: any) => h.id);

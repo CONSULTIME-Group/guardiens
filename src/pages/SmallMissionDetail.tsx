@@ -398,6 +398,17 @@ const SmallMissionDetail = () => {
         link: convId ? `/messages?c=${convId}` : `/messages`,
       });
 
+      sendTransactionalEmail({
+        templateName: "mission-proposal-accepted",
+        recipientUserId: resp.responder_id,
+        idempotencyKey: `mission-proposal-accepted-${responseId}`,
+        templateData: {
+          authorFirstName: (author as any)?.first_name || "",
+          missionTitle: mission.title,
+          conversationId: convId || "",
+        },
+      }).catch(() => {});
+
       toast({ title: "Proposition acceptée !" });
     } catch (err: any) {
       logger.error("[handleAcceptResponse]", { err: String(err) });
@@ -425,6 +436,13 @@ const SmallMissionDetail = () => {
         title: "Proposition non retenue",
         body: `Quelqu'un d'autre a été choisi pour "${mission.title}". Merci pour votre proposition.`,
       });
+
+      sendTransactionalEmail({
+        templateName: "mission-proposal-declined",
+        recipientUserId: resp.responder_id,
+        idempotencyKey: `mission-proposal-declined-${responseId}`,
+        templateData: { missionTitle: mission.title },
+      }).catch(() => {});
     } catch (err: any) {
       logger.error("[handleDeclineResponse]", { err: String(err) });
       toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible de décliner." });
@@ -1037,7 +1055,7 @@ const SmallMissionDetail = () => {
           </article>
 
           {/* ── SIDEBAR ── */}
-          <aside className="lg:col-span-4 lg:sticky lg:top-8 space-y-6">
+          <aside id="proposer-aide" className="lg:col-span-4 lg:sticky lg:top-8 space-y-6 scroll-mt-20">
             {renderSidebarCard()}
 
             {/* Localisation approximative */}
@@ -1251,6 +1269,23 @@ const SmallMissionDetail = () => {
           </section>
         )}
       </div>
+
+      {/* Mobile sticky CTA */}
+      {!isAuthor && mission.status === "open" && canApplyMissions && !hasResponded && (
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.15)]">
+          <Button
+            size="lg"
+            className="w-full rounded-full font-bold text-base shadow-lg shadow-primary/20"
+            onClick={() => {
+              const el = document.getElementById("proposer-aide");
+              el?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+          >
+            {(mission as any).mission_type === "offre" ? "Solliciter cette aide" : "Proposer mon aide"}
+          </Button>
+        </div>
+      )}
+
 
       {/* Close without selection modal */}
       <Dialog open={closeModalOpen} onOpenChange={setCloseModalOpen}>
