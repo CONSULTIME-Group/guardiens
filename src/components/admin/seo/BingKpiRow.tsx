@@ -1,6 +1,6 @@
 import MetricCard from "@/components/admin/seo/MetricCard";
 import { MousePointerClick, Eye, Globe } from "lucide-react";
-import { useBingData } from "@/hooks/useBingData";
+import { useBingData, type BingPeriodDays } from "@/hooks/useBingData";
 
 function pctChange(current: number, previous: number): number | undefined {
   if (previous === 0 && current === 0) return 0;
@@ -8,13 +8,13 @@ function pctChange(current: number, previous: number): number | undefined {
   return ((current - previous) / previous) * 100;
 }
 
-/**
- * Ligne de 3 KPI Bing (clics, impressions, position moyenne) avec
- * comparatif vs période précédente. Affichée uniquement si l'API renvoie
- * des données.
- */
-export default function BingKpiRow() {
-  const { data, isLoading } = useBingData();
+interface Props {
+  period?: BingPeriodDays;
+}
+
+export default function BingKpiRow({ period = 28 }: Props) {
+  const { data, isLoading } = useBingData(period);
+  const label = `${period} derniers jours · Bing`;
 
   if (data?.error) return null;
   const s = data?.summary;
@@ -22,8 +22,8 @@ export default function BingKpiRow() {
     if (isLoading) {
       return (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <MetricCard title="Clics Bing" icon={<MousePointerClick className="h-4 w-4 text-primary" />} value="…" subtitle="28 derniers jours · Bing" />
-          <MetricCard title="Impressions Bing" icon={<Eye className="h-4 w-4 text-primary" />} value="…" subtitle="28 derniers jours · Bing" />
+          <MetricCard title="Clics Bing" icon={<MousePointerClick className="h-4 w-4 text-primary" />} value="…" subtitle={label} />
+          <MetricCard title="Impressions Bing" icon={<Eye className="h-4 w-4 text-primary" />} value="…" subtitle={label} />
           <MetricCard title="Position moy. Bing" icon={<Globe className="h-4 w-4 text-primary" />} value="…" subtitle="Bing" />
         </div>
       );
@@ -37,14 +37,14 @@ export default function BingKpiRow() {
         title="Clics Bing"
         icon={<MousePointerClick className="h-4 w-4 text-primary" />}
         value={s.current.clicks.toLocaleString()}
-        subtitle="28 derniers jours · Bing"
+        subtitle={label}
         change={pctChange(s.current.clicks, s.previous.clicks)}
       />
       <MetricCard
         title="Impressions Bing"
         icon={<Eye className="h-4 w-4 text-primary" />}
         value={s.current.impressions.toLocaleString()}
-        subtitle="28 derniers jours · Bing"
+        subtitle={label}
         change={pctChange(s.current.impressions, s.previous.impressions)}
       />
       <MetricCard

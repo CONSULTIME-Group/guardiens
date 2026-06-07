@@ -20,8 +20,13 @@ import CannibalizationCard from "@/components/admin/seo/CannibalizationCard";
 import BingVisibilityCard from "@/components/admin/seo/BingVisibilityCard";
 import BingKpiRow from "@/components/admin/seo/BingKpiRow";
 import BingOnlyQueriesCard from "@/components/admin/seo/BingOnlyQueriesCard";
+import BingBacklinksCard from "@/components/admin/seo/BingBacklinksCard";
 import NoImpressionActionable from "@/components/admin/seo/NoImpressionActionable";
+import UrlInspectionCard from "@/components/admin/seo/UrlInspectionCard";
+import CoreWebVitalsCard from "@/components/admin/seo/CoreWebVitalsCard";
 import { useSeoData, type GSCRow } from "@/hooks/useSeoData";
+import type { BingPeriodDays } from "@/hooks/useBingData";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 function downloadCsv(filename: string, rows: GSCRow[]) {
   const head = "key,clicks,impressions,ctr,position\n";
@@ -55,6 +60,7 @@ const AdminSEO = () => {
   const [profileCount, setProfileCount] = useState<number | null>(null);
   const [existingSlugs, setExistingSlugs] = useState<Set<string>>(new Set());
   const [publishedArticles, setPublishedArticles] = useState<{ slug: string; published_at: string | null }[]>([]);
+  const [bingPeriod, setBingPeriod] = useState<BingPeriodDays>(28);
 
   useEffect(() => {
     const fetchArticleStats = async () => {
@@ -292,8 +298,25 @@ const AdminSEO = () => {
           </div>
         )}
 
+        {/* Sélecteur de période, applique aux KPIs Bing + graph */}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <p className="text-xs text-muted-foreground">Période Bing</p>
+          <ToggleGroup
+            type="single"
+            size="sm"
+            value={String(bingPeriod)}
+            onValueChange={(v) => v && setBingPeriod(Number(v) as BingPeriodDays)}
+            className="border rounded-md"
+          >
+            <ToggleGroupItem value="7" className="text-xs px-3">7j</ToggleGroupItem>
+            <ToggleGroupItem value="28" className="text-xs px-3">28j</ToggleGroupItem>
+            <ToggleGroupItem value="90" className="text-xs px-3">90j</ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+
         {/* Bing KPIs, alignés sur GSC */}
-        <BingKpiRow />
+        <BingKpiRow period={bingPeriod} />
+
 
         {/* Priority actions, remonté juste après les KPIs car le plus actionnable */}
         {gsc?.topPages && (
@@ -358,15 +381,26 @@ const AdminSEO = () => {
         <CannibalizationCard topQueries={gsc?.topQueries} topPages={gsc?.topPages} />
 
         {/* Bing détail (graph + top requêtes + top pages) */}
-        <BingVisibilityCard />
+        <BingVisibilityCard period={bingPeriod} />
+
+        {/* Backlinks Bing */}
+        <BingBacklinksCard />
+      </section>
+
+      {/* SECTION, Performance technique (Core Web Vitals) */}
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold text-foreground border-b pb-2">Performance technique</h2>
+        <CoreWebVitalsCard />
       </section>
 
       {/* SECTION, Indexation push */}
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-foreground border-b pb-2">Indexation</h2>
+        <UrlInspectionCard />
         <IndexNowPanel />
         <IndexNowHistory />
       </section>
+
 
       {/* SECTION, Contenu à créer */}
       <section className="space-y-4">

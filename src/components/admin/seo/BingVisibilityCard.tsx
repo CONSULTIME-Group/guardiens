@@ -1,9 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
-import { useBingData, type BingTrafficRow } from "@/hooks/useBingData";
+import { useBingData, type BingTrafficRow, type BingPeriodDays } from "@/hooks/useBingData";
 
-export default function BingVisibilityCard() {
-  const { data, isLoading } = useBingData();
+export default function BingVisibilityCard({ period = 28 }: { period?: BingPeriodDays }) {
+  const { data, isLoading } = useBingData(period);
+
 
   if (isLoading) {
     return (
@@ -54,7 +55,7 @@ export default function BingVisibilityCard() {
       <CardContent className="space-y-4">
         {byDay.length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-muted-foreground mb-2">Impressions Bing par jour (28j)</p>
+            <p className="text-xs font-semibold text-muted-foreground mb-2">Impressions Bing par jour ({period}j)</p>
             <div className="h-24 flex items-end gap-[2px]">
               {byDay.map((d, i) => {
                 const max = Math.max(...byDay.map((x) => x.impressions), 1);

@@ -1,12 +1,13 @@
-// Bing Webmaster Tools API, équivalent fetch-seo-data côté Google.
+// Bing Webmaster Tools API.
 // Doc : https://learn.microsoft.com/en-us/bingwebmaster/getting-access
 //
 // Endpoints utilisés :
-//   GetRankAndTrafficStats        clics + impressions par jour
-//   GetQueryStats                 top requêtes
-//   GetPageStats                  top pages
+//   GetRankAndTrafficStats   clics + impressions par jour
+//   GetQueryStats            top requêtes
+//   GetPageStats             top pages
+//   GetLinkCounts            backlinks (top 1000)
 //
-// Calcule en plus : totaux période courante (28j), période précédente, séries jour.
+// Paramètre ?period=7|28|90 (défaut 28) pour la fenêtre courante et précédente.
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,16 +19,14 @@ const SITE_URL = "https://guardiens.fr/";
 const BASE = "https://ssl.bing.com/webmaster/api.svc/json";
 
 interface BingDailyRow {
-  Date?: string; // "/Date(1700000000000)/" ou ISO selon l'API
+  Date?: string;
   Clicks?: number;
   Impressions?: number;
   AvgClickPosition?: number;
   AvgImpressionPosition?: number;
 }
 
-interface BingListResponse<T> {
-  d?: T[];
-}
+interface BingListResponse<T> { d?: T[]; }
 
 async function bing<T = unknown>(endpoint: string, apiKey: string): Promise<T> {
   const url = `${BASE}/${endpoint}?apikey=${encodeURIComponent(apiKey)}&siteUrl=${encodeURIComponent(SITE_URL)}`;
@@ -37,7 +36,6 @@ async function bing<T = unknown>(endpoint: string, apiKey: string): Promise<T> {
   try { return JSON.parse(text) as T; } catch { return { raw: text } as unknown as T; }
 }
 
-// Parse "/Date(1700000000000)/" → ms epoch ou ISO string → ms
 function parseBingDate(raw: string | undefined): number | null {
   if (!raw) return null;
   const m = raw.match(/\/Date\((-?\d+)\)\//);
@@ -82,22 +80,30 @@ Deno.serve(async (req) => {
     );
   }
 
+  // Période demandée par le client
+  let periodDays = 28;
   try {
-    const [trafficRaw, queriesRaw, pagesRaw] = await Promise.all([
+    const url = new URL(req.url);
+    const p = Number(url.searchParams.get("period"));
+    if ([7, 28, 90].includes(p)) periodDays = p;
+  } catch {}
+
+  try {
+    const [trafficRaw, queriesRaw, pagesRaw, linksRaw] = await Promise.all([
       bing<BingListResponse<BingDailyRow>>("GetRankAndTrafficStats", apiKey).catch((e) => ({ error: String(e) }) as any),
       bing("GetQueryStats", apiKey).catch((e) => ({ error: String(e) })),
       bing("GetPageStats", apiKey).catch((e) => ({ error: String(e) })),
+      bing("GetLinkCounts?page=0", apiKey).catch((e) => ({ error: String(e) })),
     ]);
 
-    // Calcul des totaux période courante (28j) vs précédente (28j antérieurs)
     let summary: { current: PeriodTotals; previous: PeriodTotals; byDay: Array<{ date: string; clicks: number; impressions: number }> } | null = null;
     const rows = (trafficRaw && "d" in trafficRaw ? (trafficRaw as BingListResponse<BingDailyRow>).d : undefined) || [];
     if (rows.length > 0) {
       const now = Date.now();
       const day = 86400000;
-      const currentStart = now - 28 * day;
+      const currentStart = now - periodDays * day;
       const previousEnd = currentStart - 1;
-      const previousStart = previousEnd - 28 * day;
+      const previousStart = previousEnd - periodDays * day;
 
       const current = summarize(rows, currentStart, now);
       const previous = summarize(rows, previousStart, previousEnd);
@@ -121,11 +127,13 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         site: SITE_URL,
+        period_days: periodDays,
         updated_at: new Date().toISOString(),
         summary,
         traffic: trafficRaw,
         queries: queriesRaw,
         pages: pagesRaw,
+        links: linksRaw,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
