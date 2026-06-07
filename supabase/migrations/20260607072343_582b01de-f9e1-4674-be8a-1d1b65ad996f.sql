@@ -1,0 +1,1 @@
+CREATE POLICY "Responder can delete own pending response" ON public.small_mission_responses FOR DELETE TO authenticated USING (auth.uid() = responder_id AND status = 'pending');
