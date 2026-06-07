@@ -43,6 +43,13 @@ export default function ProOnboarding() {
     website: "",
     email_contact: "",
     urgences_24_7: false,
+    tarif_min: "" as string,
+    tarif_max: "" as string,
+    tarif_note: "",
+    diplomes: "", // texte libre, 1 par ligne
+    ordre_number: "",
+    zone_radius_km: "20",
+    horaires_text: "",
   });
 
   useEffect(() => {
@@ -117,6 +124,15 @@ export default function ProOnboarding() {
           email_contact: form.email_contact || null,
           urgences_24_7: form.urgences_24_7,
           logo_url: logoUrl,
+          tarif_min: form.tarif_min ? parseInt(form.tarif_min, 10) : null,
+          tarif_max: form.tarif_max ? parseInt(form.tarif_max, 10) : null,
+          tarif_note: form.tarif_note || null,
+          diplomes: form.diplomes
+            ? form.diplomes.split("\n").map((s) => s.trim()).filter(Boolean)
+            : [],
+          ordre_number: form.ordre_number || null,
+          zone_radius_km: form.zone_radius_km ? parseInt(form.zone_radius_km, 10) : 20,
+          horaires: form.horaires_text ? { text: form.horaires_text } : {},
           status: "pending",
         });
         if (!error) {
@@ -260,6 +276,55 @@ export default function ProOnboarding() {
                     onChange={(e) => update("email_contact", e.target.value)}
                   />
                 </div>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="tmin">Tarif min (€)</Label>
+                  <Input id="tmin" type="number" min={0}
+                    value={form.tarif_min}
+                    onChange={(e) => update("tarif_min", e.target.value)} />
+                </div>
+                <div>
+                  <Label htmlFor="tmax">Tarif max (€)</Label>
+                  <Input id="tmax" type="number" min={0}
+                    value={form.tarif_max}
+                    onChange={(e) => update("tarif_max", e.target.value)} />
+                </div>
+                <div>
+                  <Label htmlFor="zone">Rayon (km)</Label>
+                  <Input id="zone" type="number" min={1} max={300}
+                    value={form.zone_radius_km}
+                    onChange={(e) => update("zone_radius_km", e.target.value)} />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="tnote">Précisions tarifs</Label>
+                <Input id="tnote" value={form.tarif_note}
+                  onChange={(e) => update("tarif_note", e.target.value)}
+                  placeholder="Ex : forfait consultation, sur devis…" />
+              </div>
+
+              <div>
+                <Label htmlFor="hor">Horaires d'ouverture</Label>
+                <Textarea id="hor" rows={3} value={form.horaires_text}
+                  onChange={(e) => update("horaires_text", e.target.value)}
+                  placeholder="Ex : Lun-Ven 9h-19h, Sam 9h-13h" />
+              </div>
+
+              <div>
+                <Label htmlFor="dipl">Diplômes et certifications (1 par ligne)</Label>
+                <Textarea id="dipl" rows={3} value={form.diplomes}
+                  onChange={(e) => update("diplomes", e.target.value)}
+                  placeholder={"ACACED\nDocteur vétérinaire (Maisons-Alfort, 2015)"} />
+              </div>
+
+              <div>
+                <Label htmlFor="ord">N° d'inscription à l'Ordre (vétérinaires)</Label>
+                <Input id="ord" value={form.ordre_number}
+                  onChange={(e) => update("ordre_number", e.target.value)}
+                  placeholder="Ex : 12345" />
               </div>
 
               <div>

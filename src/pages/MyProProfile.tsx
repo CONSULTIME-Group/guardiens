@@ -44,7 +44,11 @@ export default function MyProProfile() {
         navigate("/pros/inscription");
         return;
       }
-      setProfile(data);
+      setProfile({
+        ...data,
+        diplomes: Array.isArray((data as any).diplomes) ? (data as any).diplomes.join("\n") : "",
+        horaires_text: (data as any).horaires?.text ?? "",
+      });
       setLoading(false);
     })();
   }, [user, navigate]);
@@ -85,6 +89,15 @@ export default function MyProProfile() {
         website: profile.website,
         email_contact: profile.email_contact,
         urgences_24_7: profile.urgences_24_7,
+        tarif_min: profile.tarif_min === "" || profile.tarif_min == null ? null : Number(profile.tarif_min),
+        tarif_max: profile.tarif_max === "" || profile.tarif_max == null ? null : Number(profile.tarif_max),
+        tarif_note: profile.tarif_note ?? null,
+        diplomes: Array.isArray(profile.diplomes)
+          ? profile.diplomes
+          : (profile.diplomes ?? "").toString().split("\n").map((s: string) => s.trim()).filter(Boolean),
+        ordre_number: profile.ordre_number ?? null,
+        zone_radius_km: profile.zone_radius_km ? Number(profile.zone_radius_km) : 20,
+        horaires: profile.horaires_text ? { text: profile.horaires_text } : (profile.horaires ?? {}),
         logo_url,
       };
 
@@ -258,6 +271,52 @@ export default function MyProProfile() {
                 value={profile.website ?? ""}
                 onChange={(e) => update("website", e.target.value)}
               />
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-4">
+              <div>
+                <Label>Tarif min (€)</Label>
+                <Input type="number" min={0}
+                  value={profile.tarif_min ?? ""}
+                  onChange={(e) => update("tarif_min", e.target.value)} />
+              </div>
+              <div>
+                <Label>Tarif max (€)</Label>
+                <Input type="number" min={0}
+                  value={profile.tarif_max ?? ""}
+                  onChange={(e) => update("tarif_max", e.target.value)} />
+              </div>
+              <div>
+                <Label>Rayon (km)</Label>
+                <Input type="number" min={1} max={300}
+                  value={profile.zone_radius_km ?? ""}
+                  onChange={(e) => update("zone_radius_km", e.target.value)} />
+              </div>
+            </div>
+
+            <div>
+              <Label>Précisions tarifs</Label>
+              <Input value={profile.tarif_note ?? ""}
+                onChange={(e) => update("tarif_note", e.target.value)} />
+            </div>
+
+            <div>
+              <Label>Horaires d'ouverture</Label>
+              <Textarea rows={3} value={profile.horaires_text ?? ""}
+                onChange={(e) => update("horaires_text", e.target.value)}
+                placeholder="Ex : Lun-Ven 9h-19h, Sam 9h-13h" />
+            </div>
+
+            <div>
+              <Label>Diplômes et certifications (1 par ligne)</Label>
+              <Textarea rows={3} value={profile.diplomes ?? ""}
+                onChange={(e) => update("diplomes", e.target.value)} />
+            </div>
+
+            <div>
+              <Label>N° d'inscription à l'Ordre</Label>
+              <Input value={profile.ordre_number ?? ""}
+                onChange={(e) => update("ordre_number", e.target.value)} />
             </div>
 
             <div className="flex items-center gap-2">
