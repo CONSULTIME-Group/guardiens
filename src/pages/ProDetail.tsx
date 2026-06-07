@@ -81,6 +81,17 @@ export default function ProDetail() {
         </div>
       )}
 
+      {pro.cover_url && (
+        <div className="w-full h-48 md:h-64 bg-muted overflow-hidden">
+          <img
+            src={pro.cover_url}
+            alt={`Couverture ${pro.raison_sociale}`}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        </div>
+      )}
+
       <main className="container mx-auto px-4 py-10 max-w-4xl min-w-0">
         <div className="flex items-start gap-5 mb-8">
           {pro.logo_url ? (
