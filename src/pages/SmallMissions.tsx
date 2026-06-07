@@ -257,6 +257,9 @@ const SmallMissions = () => {
         if (categoryFilter === "mine") return m.user_id === user?.id;
         if (m.status === "completed" || m.status === "cancelled") return false;
         if (categoryFilter !== "all" && m.category !== categoryFilter) return false;
+        const mType = (m.mission_type ?? "besoin");
+        if (mode === "need" && mType !== "besoin") return false;
+        if (mode === "offer" && mType !== "offre") return false;
         if (normalizedSearch) {
           const titleMatch = m.title?.toLowerCase().includes(normalizedSearch);
           const descMatch = m.description?.toLowerCase().includes(normalizedSearch);

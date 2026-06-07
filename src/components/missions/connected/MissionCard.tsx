@@ -78,7 +78,7 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
               </span>
             )}
             <span>
-              Demandé par <span className="font-medium text-foreground">{authorLabel}</span>
+              {(m.mission_type === "offre") ? "Proposé par " : "Demandé par "}<span className="font-medium text-foreground">{authorLabel}</span>
             </span>
           </div>
           {/* Mini bio de l'auteur, donne du contexte humain (« qui est cette personne ? »)
