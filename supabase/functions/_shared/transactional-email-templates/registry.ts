@@ -46,6 +46,8 @@ import { template as sitInvitation } from './sit-invitation.tsx'
 import { template as listingUnpublishedFeedback } from './listing-unpublished-feedback.tsx'
 import { template as missionInvitation } from './mission-invitation.tsx'
 import { template as unreadMessagesReminder } from './unread-messages-reminder.tsx'
+import { template as missionProposalAccepted } from './mission-proposal-accepted.tsx'
+import { template as missionProposalDeclined } from './mission-proposal-declined.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'nearby-sit-alert': nearbySitAlert,
@@ -85,4 +87,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'listing-unpublished-feedback': listingUnpublishedFeedback,
   'mission-invitation': missionInvitation,
   'unread-messages-reminder': unreadMessagesReminder,
+  'mission-proposal-accepted': missionProposalAccepted,
+  'mission-proposal-declined': missionProposalDeclined,
 }
