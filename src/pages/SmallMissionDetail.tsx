@@ -962,7 +962,7 @@ const SmallMissionDetail = () => {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-lg font-semibold text-foreground flex items-center gap-2 flex-wrap">
-                        Proposé par {author.first_name || "un membre"}
+                        {(mission as any).mission_type === "offre" ? "Proposé par" : "Demandé par"} {author.first_name || "un membre"}
                         {author.identity_verified && (
                           <span className="inline-flex items-center gap-1 text-xs font-medium text-success bg-success-soft px-2 py-0.5 rounded-full">
                             <ShieldCheck className="h-3 w-3" /> Identité vérifiée

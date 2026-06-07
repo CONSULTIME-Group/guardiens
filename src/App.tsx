@@ -282,6 +282,7 @@ const AppRoutes = () => (
       <Route path="/gardien-urgence" element={<EmergencySitter />} />
       <Route path="/petites-missions" element={<SmallMissionsRoute />} />
       <Route path="/petites-missions/creer" element={<ProtectedRoute><CreateSmallMission /></ProtectedRoute>} />
+      <Route path="/petites-missions/nouveau" element={<Navigate to="/petites-missions/creer" replace />} />
       <Route path="/petites-missions/lyon" element={<MissionsCityPage />} />
       <Route path="/petites-missions/:id" element={<SmallMissionDetail />} />
       {/* Legacy: garde longue durée supprimée — redirige vers la home publique */}
