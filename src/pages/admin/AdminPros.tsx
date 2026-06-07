@@ -244,6 +244,14 @@ const AdminPros = () => {
         description="File des dossiers Gardiens Pro à modérer (diplôme, SIRET, autres pièces). L'IA pré-analyse, vous tranchez."
       />
 
+      <div className="flex flex-wrap gap-2 text-sm">
+        <Button asChild variant="outline" size="sm">
+          <Link to="/admin/pros-annuaire">
+            <Briefcase className="h-4 w-4 mr-1" aria-hidden="true" /> Annuaire pros (fiches publiques)
+          </Link>
+        </Button>
+      </div>
+
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
         <TabsList>
           <TabsTrigger value="needs_review">
@@ -256,7 +264,7 @@ const AdminPros = () => {
 
         <TabsContent value={tab} className="mt-4 space-y-3">
           {loading ? (
-            <div className="text-sm text-muted-foreground">Chargement,..</div>
+            <div className="text-sm text-muted-foreground">Chargement…</div>
           ) : rows.length === 0 ? (
             <Card><CardContent className="p-8 text-center text-sm text-muted-foreground">Aucun dossier dans cet onglet.</CardContent></Card>
           ) : (

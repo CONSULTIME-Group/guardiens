@@ -123,10 +123,27 @@ export default function MyProProfile() {
       </Helmet>
 
       <main className="container mx-auto px-4 py-10 max-w-2xl min-w-0">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
           <h1 className="text-3xl font-display font-bold">Mon espace pro</h1>
-          {statusBadge}
+          <div className="flex items-center gap-2">
+            {profile.status === "approved" && profile.slug && (
+              <Button asChild variant="outline" size="sm">
+                <a href={`/pros/${profile.slug}`} target="_blank" rel="noopener noreferrer">
+                  Voir ma fiche publique
+                </a>
+              </Button>
+            )}
+            {statusBadge}
+          </div>
         </div>
+
+        <Card className="mb-5 border-border/60">
+          <CardContent className="p-4 text-sm text-muted-foreground">
+            Cette fiche apparaît dans <strong>l'annuaire public des pros animaliers</strong>. Si vous êtes par ailleurs gardien sur la plateforme et que vous souhaitez obtenir la pastille <strong>« Pro vérifié »</strong> sur votre profil gardien, complétez la section dédiée dans{" "}
+            <a href="/settings#pro" className="underline">vos paramètres</a>.
+          </CardContent>
+        </Card>
+
 
         {profile.status === "rejected" && profile.rejection_reason && (
           <Card className="mb-5 border-destructive/40">
