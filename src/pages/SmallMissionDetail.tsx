@@ -1055,7 +1055,7 @@ const SmallMissionDetail = () => {
           </article>
 
           {/* ── SIDEBAR ── */}
-          <aside className="lg:col-span-4 lg:sticky lg:top-8 space-y-6">
+          <aside id="proposer-aide" className="lg:col-span-4 lg:sticky lg:top-8 space-y-6 scroll-mt-20">
             {renderSidebarCard()}
 
             {/* Localisation approximative */}
