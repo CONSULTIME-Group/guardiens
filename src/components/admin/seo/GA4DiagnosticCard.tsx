@@ -35,8 +35,30 @@ const formatGa4Date = (d: string) => {
 const GA4DiagnosticCard = () => {
   const [data, setData] = useState<Diag | null>(null);
   const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
   const [tagDetected, setTagDetected] = useState<boolean | null>(null);
   const [localLastEvent, setLocalLastEvent] = useState<string | null>(null);
+
+  const fetchLocalLast = async () => {
+    const { data: row } = await supabase
+      .from("analytics_events")
+      .select("created_at")
+      .eq("event_type", "admin_ga4_diag_test")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (row?.created_at) {
+      setLocalLastEvent(row.created_at);
+      return;
+    }
+    const { data: any } = await supabase
+      .from("analytics_events")
+      .select("created_at")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    setLocalLastEvent(any?.created_at ?? null);
+  };
 
   const load = async () => {
     setLoading(true);
@@ -57,19 +79,53 @@ const GA4DiagnosticCard = () => {
     }
   };
 
+  const sendTestEvent = async () => {
+    setSending(true);
+    try {
+      // 1) Fire GA4 event via gtag (if present)
+      const gtag = (window as any).gtag;
+      let gtagSent = false;
+      if (typeof gtag === "function") {
+        gtag("event", "admin_ga4_diag_test", {
+          event_category: "admin_diagnostic",
+          event_label: new Date().toISOString(),
+          send_to: data?.measurement_id,
+        });
+        gtagSent = true;
+      }
+      // 2) Insert local analytics_events row
+      const { data: { user } } = await supabase.auth.getUser();
+      const { error: insertError } = await supabase.from("analytics_events").insert({
+        event_type: "admin_ga4_diag_test",
+        source: "admin/seo",
+        user_id: user?.id ?? null,
+        metadata: { ts: new Date().toISOString(), gtag: gtagSent },
+      });
+      if (insertError) throw insertError;
+      await fetchLocalLast();
+      toast({
+        title: "Événement de test envoyé",
+        description: gtagSent
+          ? "Envoyé à GA4 et à la table locale. GA4 peut mettre quelques minutes à le refléter."
+          : "Tag GA4 absent sur cette page. Événement local enregistré.",
+      });
+    } catch (e) {
+      toast({
+        title: "Échec de l'envoi",
+        description: (e as Error).message,
+        variant: "destructive",
+      });
+    } finally {
+      setSending(false);
+    }
+  };
+
   useEffect(() => {
     load();
-    // Detect gtag in current page
     setTagDetected(typeof (window as any).gtag === "function");
-    // Last analytics_events row from our own table
-    supabase
-      .from("analytics_events")
-      .select("created_at")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle()
-      .then(({ data: row }) => setLocalLastEvent(row?.created_at ?? null));
+    fetchLocalLast();
   }, []);
+
 
   const ga4Healthy =
     data?.service_account_configured &&
