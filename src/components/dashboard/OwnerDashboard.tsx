@@ -37,6 +37,12 @@ import SectionEyebrow from "./shared/SectionEyebrow";
 import TodoCard, { type TodoItem } from "./owner/TodoCard";
 import PriorityActionCard from "./shared/PriorityActionCard";
 import { useOwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
+import ActivationScoreCard from "./owner/ActivationScoreCard";
+import NextActionsList from "./owner/NextActionsList";
+import {
+  computeOwnerNextActions,
+  computeOwnerActivationScore,
+} from "@/lib/nextActions/owner";
 
 import {
   SPECIES_LABEL,
