@@ -31,6 +31,7 @@ import { trackEvent } from "@/lib/analytics";
 import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 import ReachReassuranceBanner from "@/components/marketing/ReachReassuranceBanner";
 import PresenceBadge from "@/components/messages/PresenceBadge";
+import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 
