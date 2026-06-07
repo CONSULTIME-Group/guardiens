@@ -1776,6 +1776,42 @@ export type Database = {
           },
         ]
       }
+      indexnow_submissions: {
+        Row: {
+          id: string
+          ok: boolean
+          response_snippet: string | null
+          sample_urls: string[]
+          source: string | null
+          status_code: number | null
+          submitted_at: string
+          triggered_by: string | null
+          url_count: number
+        }
+        Insert: {
+          id?: string
+          ok?: boolean
+          response_snippet?: string | null
+          sample_urls?: string[]
+          source?: string | null
+          status_code?: number | null
+          submitted_at?: string
+          triggered_by?: string | null
+          url_count: number
+        }
+        Update: {
+          id?: string
+          ok?: boolean
+          response_snippet?: string | null
+          sample_urls?: string[]
+          source?: string | null
+          status_code?: number | null
+          submitted_at?: string
+          triggered_by?: string | null
+          url_count?: number
+        }
+        Relationships: []
+      }
       journey_step_log: {
         Row: {
           created_at: string

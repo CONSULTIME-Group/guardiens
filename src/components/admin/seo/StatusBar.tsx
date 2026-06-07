@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import type { SeoData } from "@/hooks/useSeoData";
+import { useBingData } from "@/hooks/useBingData";
 
 interface StatusBarProps {
   data: SeoData | null;
@@ -27,6 +28,12 @@ const StatusBar = ({ data, loading, refreshing, onRefresh }: StatusBarProps) => 
   const gscImpressions = data?.gsc?.current?.impressions ?? 0;
   const gscAvailable = gscClicks > 0 || gscImpressions > 0;
 
+  // Statut Bing (best-effort, ne bloque pas le rendu)
+  const { data: bingData, isLoading: bingLoading } = useBingData();
+  const bingImpressions = bingData?.summary?.current?.impressions ?? 0;
+  const bingAvailable = !bingData?.error && bingImpressions > 0;
+  const bingConfigured = bingData?.error !== "BING_WEBMASTER_API_KEY not configured";
+
   type SourceStatus = "active" | "partial" | "unavailable" | "loading";
 
   const ga4Status: SourceStatus = loading && !data ? "loading" : ga4Active ? "active" : "unavailable";
@@ -35,6 +42,13 @@ const StatusBar = ({ data, loading, refreshing, onRefresh }: StatusBarProps) => 
     : gscAvailable
       ? gscImpressions > 100 ? "active" : "partial"
       : "unavailable";
+  const bingStatus: SourceStatus = bingLoading
+    ? "loading"
+    : !bingConfigured
+      ? "unavailable"
+      : bingAvailable
+        ? bingImpressions > 50 ? "active" : "partial"
+        : "unavailable";
 
   const statusIcon = (s: SourceStatus) => {
     if (s === "active") return <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />;
@@ -81,6 +95,10 @@ const StatusBar = ({ data, loading, refreshing, onRefresh }: StatusBarProps) => 
           <div className="flex items-center gap-1.5">
             {statusIcon(gscStatus)}
             <span className="text-foreground">{statusLabel("GSC", gscStatus)}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            {statusIcon(bingStatus)}
+            <span className="text-foreground">{statusLabel("Bing", bingStatus)}</span>
           </div>
           {updatedAtRelative && (
             <span className={`text-xs ${isStale ? "text-warning font-medium" : "text-muted-foreground"}`}>

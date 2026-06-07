@@ -15,8 +15,12 @@ import GSCQueriesTable from "@/components/admin/seo/GSCQueriesTable";
 import TrafficSources from "@/components/admin/seo/TrafficSources";
 import ArticleCtaPerformance from "@/components/admin/seo/ArticleCtaPerformance";
 import IndexNowPanel from "@/components/admin/seo/IndexNowPanel";
+import IndexNowHistory from "@/components/admin/seo/IndexNowHistory";
 import CannibalizationCard from "@/components/admin/seo/CannibalizationCard";
 import BingVisibilityCard from "@/components/admin/seo/BingVisibilityCard";
+import BingKpiRow from "@/components/admin/seo/BingKpiRow";
+import BingOnlyQueriesCard from "@/components/admin/seo/BingOnlyQueriesCard";
+import NoImpressionActionable from "@/components/admin/seo/NoImpressionActionable";
 import { useSeoData, type GSCRow } from "@/hooks/useSeoData";
 
 function downloadCsv(filename: string, rows: GSCRow[]) {
@@ -255,12 +259,12 @@ const AdminSEO = () => {
       </section>
 
       {/* ══════════════════════════════════════════ */}
-      {/* SECTION, Visibilité SEO (GSC)            */}
+      {/* SECTION, Visibilité SEO (GSC + Bing)     */}
       {/* ══════════════════════════════════════════ */}
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-foreground border-b pb-2">Visibilité SEO</h2>
 
-        {/* GSC KPIs, only if data available */}
+        {/* GSC KPIs */}
         {gscAvailable && gsc && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <MetricCard
@@ -287,6 +291,20 @@ const AdminSEO = () => {
             />
           </div>
         )}
+
+        {/* Bing KPIs, alignés sur GSC */}
+        <BingKpiRow />
+
+        {/* Priority actions, remonté juste après les KPIs car le plus actionnable */}
+        {gsc?.topPages && (
+          <PriorityActions topPages={gsc.topPages} />
+        )}
+
+        {/* Actionnable : articles sans impression GSC après 7j, avec push IndexNow 1-clic */}
+        <NoImpressionActionable
+          publishedArticles={publishedArticles}
+          topPages={gsc?.topPages}
+        />
 
         {/* Top articles, conditional */}
         {gscAvailable ? (
@@ -333,22 +351,21 @@ const AdminSEO = () => {
           </Card>
         )}
 
+        {/* Requêtes uniquement Bing, différentiel vs Google */}
+        <BingOnlyQueriesCard gscQueries={gsc?.topQueries} />
+
         {/* Cannibalisation */}
         <CannibalizationCard topQueries={gsc?.topQueries} topPages={gsc?.topPages} />
 
-        {/* Bing */}
+        {/* Bing détail (graph + top requêtes + top pages) */}
         <BingVisibilityCard />
-
-        {/* Priority actions */}
-        {gsc?.topPages && (
-          <PriorityActions topPages={gsc.topPages} />
-        )}
       </section>
 
       {/* SECTION, Indexation push */}
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-foreground border-b pb-2">Indexation</h2>
         <IndexNowPanel />
+        <IndexNowHistory />
       </section>
 
       {/* SECTION, Contenu à créer */}

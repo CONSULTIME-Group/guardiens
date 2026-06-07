@@ -1,47 +1,14 @@
-import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
 import { AlertCircle } from "lucide-react";
-
-interface BingTrafficRow {
-  Date?: string;
-  Clicks?: number;
-  Impressions?: number;
-  Query?: string;
-  Page?: string;
-  AvgClickPosition?: number;
-  AvgImpressionPosition?: number;
-}
-
-interface BingResponse {
-  error?: string;
-  traffic?: { d?: BingTrafficRow[] } | { error: string };
-  queries?: { d?: BingTrafficRow[] } | { error: string };
-  pages?: { d?: BingTrafficRow[] } | { error: string };
-}
-
-function sum(rows: BingTrafficRow[] | undefined, key: keyof BingTrafficRow): number {
-  if (!rows) return 0;
-  return rows.reduce((acc, r) => acc + (Number(r[key]) || 0), 0);
-}
+import { useBingData, type BingTrafficRow } from "@/hooks/useBingData";
 
 export default function BingVisibilityCard() {
-  const [data, setData] = useState<BingResponse | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading } = useBingData();
 
-  useEffect(() => {
-    (async () => {
-      const { data, error } = await supabase.functions.invoke("fetch-bing-data");
-      if (error) setData({ error: error.message });
-      else setData(data as BingResponse);
-      setLoading(false);
-    })();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <Card>
-        <CardHeader><CardTitle className="text-lg">Visibilité Bing</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-lg">Visibilité Bing, détail</CardTitle></CardHeader>
         <CardContent className="text-sm text-muted-foreground">Chargement…</CardContent>
       </Card>
     );
@@ -75,49 +42,77 @@ export default function BingVisibilityCard() {
     );
   }
 
-  const trafficRows = (data?.traffic && "d" in data.traffic ? data.traffic.d : undefined) as BingTrafficRow[] | undefined;
   const queryRows = (data?.queries && "d" in data.queries ? data.queries.d : undefined) as BingTrafficRow[] | undefined;
   const pageRows = (data?.pages && "d" in data.pages ? data.pages.d : undefined) as BingTrafficRow[] | undefined;
-
-  const clicks = sum(trafficRows, "Clicks");
-  const impressions = sum(trafficRows, "Impressions");
+  const byDay = data?.summary?.byDay ?? [];
 
   return (
     <Card>
-      <CardHeader><CardTitle className="text-lg">Visibilité Bing</CardTitle></CardHeader>
+      <CardHeader>
+        <CardTitle className="text-lg">Visibilité Bing, détail</CardTitle>
+      </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
-          <div><div className="text-muted-foreground text-xs">Clics</div><div className="font-mono text-xl">{clicks.toLocaleString()}</div></div>
-          <div><div className="text-muted-foreground text-xs">Impressions</div><div className="font-mono text-xl">{impressions.toLocaleString()}</div></div>
-          <div><div className="text-muted-foreground text-xs">CTR</div><div className="font-mono text-xl">{impressions > 0 ? ((clicks / impressions) * 100).toFixed(2) : "0"}%</div></div>
-        </div>
-
-        {queryRows && queryRows.length > 0 && (
+        {byDay.length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-muted-foreground mb-2">Top requêtes Bing</p>
-            <div className="space-y-1 text-xs">
-              {queryRows.slice(0, 10).map((q, i) => (
-                <div key={i} className="flex justify-between gap-2">
-                  <span className="truncate">{q.Query ?? "–"}</span>
-                  <span className="font-mono shrink-0">{q.Clicks ?? 0} · {q.Impressions ?? 0}</span>
-                </div>
-              ))}
+            <p className="text-xs font-semibold text-muted-foreground mb-2">Impressions Bing par jour (28j)</p>
+            <div className="h-24 flex items-end gap-[2px]">
+              {byDay.map((d, i) => {
+                const max = Math.max(...byDay.map((x) => x.impressions), 1);
+                const height = (d.impressions / max) * 100;
+                return (
+                  <div
+                    key={i}
+                    className="flex-1 bg-primary/50 hover:bg-primary rounded-t transition-colors relative group cursor-default"
+                    style={{ height: `${Math.max(2, height)}%` }}
+                  >
+                    <div className="absolute -top-9 left-1/2 -translate-x-1/2 bg-foreground text-background text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                      {d.date.slice(8, 10)}/{d.date.slice(5, 7)}, {d.impressions} imp · {d.clicks} cl
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
 
-        {pageRows && pageRows.length > 0 && (
-          <div>
-            <p className="text-xs font-semibold text-muted-foreground mb-2">Top pages Bing</p>
-            <div className="space-y-1 text-xs">
-              {pageRows.slice(0, 10).map((p, i) => (
-                <div key={i} className="flex justify-between gap-2">
-                  <span className="truncate font-mono">{p.Page ?? "–"}</span>
-                  <span className="font-mono shrink-0">{p.Clicks ?? 0} · {p.Impressions ?? 0}</span>
-                </div>
-              ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {queryRows && queryRows.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground mb-2">Top requêtes Bing</p>
+              <div className="space-y-1 text-xs">
+                {queryRows.slice(0, 10).map((q, i) => (
+                  <div key={i} className="flex justify-between gap-2 border-b border-border/40 pb-1">
+                    <span className="truncate">{q.Query ?? "–"}</span>
+                    <span className="font-mono shrink-0 text-muted-foreground">
+                      {q.Clicks ?? 0} cl · {q.Impressions ?? 0} imp
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+
+          {pageRows && pageRows.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground mb-2">Top pages Bing</p>
+              <div className="space-y-1 text-xs">
+                {pageRows.slice(0, 10).map((p, i) => (
+                  <div key={i} className="flex justify-between gap-2 border-b border-border/40 pb-1">
+                    <span className="truncate font-mono">{(p.Page ?? "–").replace(/^https?:\/\/[^/]+/, "")}</span>
+                    <span className="font-mono shrink-0 text-muted-foreground">
+                      {p.Clicks ?? 0} cl · {p.Impressions ?? 0} imp
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {!queryRows?.length && !pageRows?.length && byDay.length === 0 && (
+          <p className="text-sm text-muted-foreground py-4 text-center">
+            Aucune donnée Bing pour le moment. Vérifiez que le site est bien vérifié dans Bing Webmaster.
+          </p>
         )}
       </CardContent>
     </Card>

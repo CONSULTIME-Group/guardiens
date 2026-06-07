@@ -2,11 +2,11 @@
 // Doc : https://learn.microsoft.com/en-us/bingwebmaster/getting-access
 //
 // Endpoints utilisés :
-//   GetRankAndTrafficStats        clics + impressions agrégés (30j)
+//   GetRankAndTrafficStats        clics + impressions par jour
 //   GetQueryStats                 top requêtes
 //   GetPageStats                  top pages
 //
-// Auth : ?apikey=XXX en query string. Pas d'OAuth requis.
+// Calcule en plus : totaux période courante (28j), période précédente, séries jour.
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,12 +17,58 @@ const corsHeaders = {
 const SITE_URL = "https://guardiens.fr/";
 const BASE = "https://ssl.bing.com/webmaster/api.svc/json";
 
-async function bing(endpoint: string, apiKey: string): Promise<unknown> {
+interface BingDailyRow {
+  Date?: string; // "/Date(1700000000000)/" ou ISO selon l'API
+  Clicks?: number;
+  Impressions?: number;
+  AvgClickPosition?: number;
+  AvgImpressionPosition?: number;
+}
+
+interface BingListResponse<T> {
+  d?: T[];
+}
+
+async function bing<T = unknown>(endpoint: string, apiKey: string): Promise<T> {
   const url = `${BASE}/${endpoint}?apikey=${encodeURIComponent(apiKey)}&siteUrl=${encodeURIComponent(SITE_URL)}`;
   const res = await fetch(url, { headers: { Accept: "application/json" } });
   const text = await res.text();
   if (!res.ok) throw new Error(`Bing ${endpoint} ${res.status}: ${text.slice(0, 300)}`);
-  try { return JSON.parse(text); } catch { return { raw: text }; }
+  try { return JSON.parse(text) as T; } catch { return { raw: text } as unknown as T; }
+}
+
+// Parse "/Date(1700000000000)/" → ms epoch ou ISO string → ms
+function parseBingDate(raw: string | undefined): number | null {
+  if (!raw) return null;
+  const m = raw.match(/\/Date\((-?\d+)\)\//);
+  if (m) return Number(m[1]);
+  const t = Date.parse(raw);
+  return Number.isFinite(t) ? t : null;
+}
+
+interface PeriodTotals {
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  position: number;
+}
+
+function summarize(rows: BingDailyRow[], startMs: number, endMs: number): PeriodTotals {
+  let clicks = 0, impressions = 0, posSum = 0, posCount = 0;
+  for (const r of rows) {
+    const t = parseBingDate(r.Date);
+    if (t === null || t < startMs || t > endMs) continue;
+    clicks += Number(r.Clicks) || 0;
+    impressions += Number(r.Impressions) || 0;
+    const p = Number(r.AvgImpressionPosition);
+    if (Number.isFinite(p) && p > 0) { posSum += p; posCount += 1; }
+  }
+  return {
+    clicks,
+    impressions,
+    ctr: impressions > 0 ? clicks / impressions : 0,
+    position: posCount > 0 ? posSum / posCount : 0,
+  };
 }
 
 Deno.serve(async (req) => {
@@ -37,19 +83,49 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const [traffic, queries, pages] = await Promise.all([
-      bing("GetRankAndTrafficStats", apiKey).catch((e) => ({ error: String(e) })),
+    const [trafficRaw, queriesRaw, pagesRaw] = await Promise.all([
+      bing<BingListResponse<BingDailyRow>>("GetRankAndTrafficStats", apiKey).catch((e) => ({ error: String(e) }) as any),
       bing("GetQueryStats", apiKey).catch((e) => ({ error: String(e) })),
       bing("GetPageStats", apiKey).catch((e) => ({ error: String(e) })),
     ]);
+
+    // Calcul des totaux période courante (28j) vs précédente (28j antérieurs)
+    let summary: { current: PeriodTotals; previous: PeriodTotals; byDay: Array<{ date: string; clicks: number; impressions: number }> } | null = null;
+    const rows = (trafficRaw && "d" in trafficRaw ? (trafficRaw as BingListResponse<BingDailyRow>).d : undefined) || [];
+    if (rows.length > 0) {
+      const now = Date.now();
+      const day = 86400000;
+      const currentStart = now - 28 * day;
+      const previousEnd = currentStart - 1;
+      const previousStart = previousEnd - 28 * day;
+
+      const current = summarize(rows, currentStart, now);
+      const previous = summarize(rows, previousStart, previousEnd);
+
+      const byDay = rows
+        .map((r) => {
+          const t = parseBingDate(r.Date);
+          if (t === null || t < currentStart) return null;
+          return {
+            date: new Date(t).toISOString().slice(0, 10),
+            clicks: Number(r.Clicks) || 0,
+            impressions: Number(r.Impressions) || 0,
+          };
+        })
+        .filter((x): x is { date: string; clicks: number; impressions: number } => x !== null)
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      summary = { current, previous, byDay };
+    }
 
     return new Response(
       JSON.stringify({
         site: SITE_URL,
         updated_at: new Date().toISOString(),
-        traffic,
-        queries,
-        pages,
+        summary,
+        traffic: trafficRaw,
+        queries: queriesRaw,
+        pages: pagesRaw,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
