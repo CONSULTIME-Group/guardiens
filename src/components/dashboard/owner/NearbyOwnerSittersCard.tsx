@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Compass, Share2, Star, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
+import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 
 interface Props {
   /** Cache le header quand le parent rend déjà un eyebrow. */
