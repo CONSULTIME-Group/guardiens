@@ -85,6 +85,12 @@ export function initConsent() {
     disableGoogleAnalytics();
     return;
   }
-  // Léger délai pour ne pas bloquer le LCP
-  setTimeout(loadGoogleAnalytics, 2000);
+  // Charge GA tôt mais hors du chemin critique du LCP.
+  // 2 s était trop long : rebonds rapides / connexions mobiles lentes
+  // partaient avant l'envoi du page_view, ce qui sous-mesurait le trafic.
+  if (typeof (window as any).requestIdleCallback === "function") {
+    (window as any).requestIdleCallback(() => loadGoogleAnalytics(), { timeout: 1500 });
+  } else {
+    setTimeout(loadGoogleAnalytics, 300);
+  }
 }
