@@ -3,7 +3,8 @@ import { useParams, Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/hooks/useAdmin";
-import { getCategoryByValue } from "@/lib/proCategories";
+import { getCategoryByValue, getProInitials } from "@/lib/proCategories";
+import ObfuscatedEmail from "@/components/pros/ObfuscatedEmail";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -101,7 +102,12 @@ export default function ProDetail() {
               className="w-24 h-24 rounded-xl object-contain bg-muted"
             />
           ) : (
-            <div className="w-24 h-24 rounded-xl bg-muted" />
+            <div
+              className={`w-24 h-24 rounded-xl flex items-center justify-center font-semibold text-2xl ${cat?.placeholderClass ?? "bg-muted text-muted-foreground"}`}
+              aria-hidden="true"
+            >
+              {getProInitials(pro.raison_sociale)}
+            </div>
           )}
           <div className="min-w-0">
             <h1 className="text-3xl font-display font-bold">{pro.raison_sociale}</h1>
@@ -128,7 +134,7 @@ export default function ProDetail() {
               <CardContent className="p-6 space-y-2">
                 <h2 className="font-semibold mb-2">Contact</h2>
                 {pro.phone && <p>Téléphone : {pro.phone}</p>}
-                {pro.email_contact && <p>Email : {pro.email_contact}</p>}
+                {pro.email_contact && <ObfuscatedEmail email={pro.email_contact} />}
                 {pro.website && (
                   <p>
                     Site :{" "}

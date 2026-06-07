@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
-import { PRO_CATEGORIES, getCategoryByValue } from "@/lib/proCategories";
+import { PRO_CATEGORIES, getCategoryByValue, getProInitials } from "@/lib/proCategories";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -86,12 +86,12 @@ export default function ProsListing() {
             </span>
           </div>
           <p className="text-lg text-muted-foreground max-w-2xl">
-            Vétérinaires, éducateurs, toiletteurs, ostéopathes, transporteurs, photographes…
-            tous les pros vérifiés au service de vos animaux, partout en France.
+            Vétérinaires, éducateurs, toiletteurs, ostéopathes, transporteurs, photographes :
+            retrouvez les pros animaliers de confiance, en France entière.
           </p>
           <p className="text-sm text-muted-foreground mt-2">
-            Annuaire en phase bêta : les premières fiches arrivent. Vous êtes pro ?
-            Inscrivez-vous gratuitement, votre fiche sera validée sous 48h.
+            Annuaire en phase bêta, les premières fiches arrivent. Vous êtes pro&nbsp;?
+            L'inscription est gratuite et votre fiche est validée sous 48&nbsp;h.
           </p>
           <div className="mt-6 flex flex-wrap gap-2">
             <Button asChild>
@@ -190,7 +190,12 @@ export default function ProsListing() {
                             className="w-14 h-14 rounded-lg object-contain bg-muted"
                           />
                         ) : (
-                          <div className="w-14 h-14 rounded-lg bg-muted" />
+                          <div
+                            className={`w-14 h-14 rounded-lg flex items-center justify-center font-semibold text-lg ${cat?.placeholderClass ?? "bg-muted text-muted-foreground"}`}
+                            aria-hidden="true"
+                          >
+                            {getProInitials(p.raison_sociale)}
+                          </div>
                         )}
                         <div className="min-w-0">
                           <h2 className="font-semibold truncate group-hover:underline">
