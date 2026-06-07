@@ -209,6 +209,9 @@ const AdminSEO = () => {
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-foreground border-b pb-2">Trafic & audience</h2>
 
+        <GA4DiagnosticCard />
+
+
         {/* KPIs GA4 */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <MetricCard
