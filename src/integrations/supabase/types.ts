@@ -4230,6 +4230,8 @@ export type Database = {
           preferred_frequency: string | null
           preferred_periods: string[] | null
           references_text: string | null
+          reply_median_minutes: number | null
+          reply_stats_updated_at: string | null
           sitter_type: string | null
           smoker: boolean | null
           strict_rules_ok: boolean | null
@@ -4272,6 +4274,8 @@ export type Database = {
           preferred_frequency?: string | null
           preferred_periods?: string[] | null
           references_text?: string | null
+          reply_median_minutes?: number | null
+          reply_stats_updated_at?: string | null
           sitter_type?: string | null
           smoker?: boolean | null
           strict_rules_ok?: boolean | null
@@ -4314,6 +4318,8 @@ export type Database = {
           preferred_frequency?: string | null
           preferred_periods?: string[] | null
           references_text?: string | null
+          reply_median_minutes?: number | null
+          reply_stats_updated_at?: string | null
           sitter_type?: string | null
           smoker?: boolean | null
           strict_rules_ok?: boolean | null
@@ -5485,6 +5491,11 @@ export type Database = {
         Returns: undefined
       }
       recalculate_completed_sits: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
+      refresh_all_sitter_reply_stats: { Args: never; Returns: number }
+      refresh_sitter_reply_stats: {
         Args: { p_user_id: string }
         Returns: undefined
       }
