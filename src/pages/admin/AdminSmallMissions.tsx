@@ -166,14 +166,15 @@ const AdminSmallMissions = () => {
               <TableHead>Date</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead>Réponses</TableHead>
+              <TableHead title="Nombre de vues uniques (hors auteur, 1/session)">Vues</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Aucune mission</TableCell></TableRow>
+              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Aucune mission</TableCell></TableRow>
             ) : filtered.map((m) => {
               const status = statusLabels[m.status] || { label: m.status, variant: "outline" as const };
               const isSuspect = moneyPattern.test(m.description || "") || moneyPattern.test(m.exchange_offer || "");
