@@ -259,6 +259,17 @@ const SmallMissionDetail = () => {
 
   useEffect(() => { load(); }, [load]);
 
+  // Compteur de vues : 1 fois par mission par session (sessionStorage)
+  useEffect(() => {
+    if (!id || id.startsWith("demo-")) return;
+    try {
+      const key = `mission_viewed_${id}`;
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+      supabase.rpc("increment_small_mission_view" as any, { _mission_id: id });
+    } catch { /* silencieux */ }
+  }, [id]);
+
   // Realtime : l'auteur voit immédiatement les nouvelles propositions et changements de statut
   useEffect(() => {
     if (!id) return;

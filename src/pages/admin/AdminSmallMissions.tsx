@@ -166,14 +166,15 @@ const AdminSmallMissions = () => {
               <TableHead>Date</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead>Réponses</TableHead>
+              <TableHead title="Nombre de vues uniques (hors auteur, 1/session)">Vues</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Aucune mission</TableCell></TableRow>
+              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Aucune mission</TableCell></TableRow>
             ) : filtered.map((m) => {
               const status = statusLabels[m.status] || { label: m.status, variant: "outline" as const };
               const isSuspect = moneyPattern.test(m.description || "") || moneyPattern.test(m.exchange_offer || "");
@@ -194,6 +195,7 @@ const AdminSmallMissions = () => {
                   <TableCell className="text-sm text-muted-foreground">{format(new Date(m.created_at), "d MMM yyyy", { locale: fr })}</TableCell>
                   <TableCell><Badge variant={status.variant}>{status.label}</Badge></TableCell>
                   <TableCell className="text-sm font-medium">{responseCounts[m.id] || 0}</TableCell>
+                  <TableCell className="text-sm font-medium tabular-nums">{m.view_count ?? 0}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
                       <Button variant="ghost" size="icon" title="Voir" onClick={() => navigate(`/petites-missions/${m.id}`)}>
