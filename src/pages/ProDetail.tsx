@@ -69,8 +69,17 @@ export default function ProDetail() {
           name="description"
           content={pro.description?.slice(0, 155) ?? `${cat?.label} ${pro.city ?? ""}`}
         />
+        {isPreview || pro.status !== "approved" ? (
+          <meta name="robots" content="noindex,nofollow" />
+        ) : null}
         <link rel="canonical" href={`https://guardiens.fr/pros/${pro.slug}`} />
       </Helmet>
+
+      {isPreview && pro.status !== "approved" && (
+        <div className="bg-amber-100 text-amber-900 text-sm py-2 px-4 text-center">
+          Prévisualisation admin : fiche en statut <strong>{pro.status}</strong> (non publiée).
+        </div>
+      )}
 
       <main className="container mx-auto px-4 py-10 max-w-4xl min-w-0">
         <div className="flex items-start gap-5 mb-8">
