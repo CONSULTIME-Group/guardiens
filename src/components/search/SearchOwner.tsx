@@ -28,6 +28,7 @@ import EmergencyBadge from "@/components/profile/EmergencyBadge";
 import { getDeptCode, DEPT_NAMES } from "@/lib/departments";
 import { getRegionCode, getRegionName } from "@/lib/regions";
 import { trackEvent } from "@/lib/analytics";
+import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 import ReachReassuranceBanner from "@/components/marketing/ReachReassuranceBanner";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
