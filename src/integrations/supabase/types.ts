@@ -5522,6 +5522,10 @@ export type Database = {
         Returns: boolean
       }
       slugify_city: { Args: { input: string }; Returns: string }
+      trigger_indexnow_push: {
+        Args: { _path: string; _source: string }
+        Returns: undefined
+      }
       unpublish_sit:
         | { Args: { p_sit_id: string }; Returns: number }
         | { Args: { p_reason?: string; p_sit_id: string }; Returns: number }
