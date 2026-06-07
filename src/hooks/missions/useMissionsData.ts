@@ -40,6 +40,7 @@ export function useAllMissions(currentUserId?: string) {
 export function useAvailableHelpers(currentUserId: string | undefined, enabled: boolean) {
   return useQuery({
     queryKey: ["available-helpers"],
+    staleTime: 2 * 60 * 1000,
     queryFn: async () => {
       const { data } = await supabase
         .from("profiles")
