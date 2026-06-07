@@ -1093,6 +1093,7 @@ const SearchOwner = () => {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm truncate">{firstName}</p>
                     {s._dist != null && s._dist !== Infinity && <p className="text-xs text-muted-foreground">{s._dist === 0 ? "Dans votre ville" : `${s._dist} km`}</p>}
+                    <PresenceBadge lastSeenAt={profile?.last_seen_at} />
                     <div className="flex gap-3 text-xs text-muted-foreground mt-0.5">
                       {s.avgRating !== null && <span className="flex items-center gap-0.5"><Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />{s.avgRating.toFixed(1)}</span>}
                       {(profile?.completed_sits_count || 0) > 0 && <span>{profile.completed_sits_count} garde{profile.completed_sits_count > 1 ? "s" : ""}</span>}
