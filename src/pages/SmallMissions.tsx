@@ -74,6 +74,18 @@ const SmallMissions = () => {
 
   const [competenceSearch, setCompetenceSearch] = useState(searchParams.get("q") || "");
 
+  // ── Legacy ?type=offre → ?mode=offer (normalisation immédiate, avant le 1er render visible) ──
+  useEffect(() => {
+    if (searchParams.get("type")) {
+      const next = new URLSearchParams(searchParams);
+      const legacy = next.get("type");
+      next.delete("type");
+      if (legacy === "offre" && !next.get("mode")) next.set("mode", "offer");
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ── Sync filters → URL ──
   useEffect(() => {
     const next = new URLSearchParams(searchParams);
