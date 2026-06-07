@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 export function useAllMissions(currentUserId?: string) {
   return useQuery({
     queryKey: ["small-missions-all"],
+    staleTime: 2 * 60 * 1000,
     queryFn: async () => {
       const { data: missions } = await supabase
         .from("small_missions")

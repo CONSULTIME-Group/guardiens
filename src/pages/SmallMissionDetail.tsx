@@ -218,47 +218,56 @@ const SmallMissionDetail = () => {
     if (!m) { setLoading(false); return; }
     setMission(m);
 
-    // RPC publique: renvoie les champs auteur sûrs même pour les non-connectés
-    const { data: authorRows } = await supabase.rpc("get_mission_author_public", { _mission_id: m.id });
-    const authorRow: any = Array.isArray(authorRows) ? authorRows[0] : authorRows;
+    // Parallélisation : tous ces appels sont indépendants une fois la mission chargée
+    const [authorRes, relatedRes, respsRes, givenFbRes, recFbRes] = await Promise.all([
+      supabase.rpc("get_mission_author_public", { _mission_id: m.id }),
+      supabase.from("small_missions")
+        .select("id, title, description, category, city, postal_code, created_at, duration_estimate")
+        .eq("status", "open")
+        .neq("id", m.id)
+        .or(`category.eq.${m.category},city.eq.${m.city}`)
+        .order("created_at", { ascending: false })
+        .limit(3),
+      supabase.from("small_mission_responses")
+        .select("*, responder:profiles!small_mission_responses_responder_id_fkey(first_name, avatar_url)")
+        .eq("mission_id", id).order("created_at", { ascending: false }),
+      user
+        ? supabase.from("mission_feedbacks" as any).select("receiver_id").eq("mission_id", id).eq("giver_id", user.id)
+        : Promise.resolve({ data: [] as any[] }),
+      user
+        ? supabase.from("mission_feedbacks" as any)
+            .select("*, giver:profiles!mission_feedbacks_giver_id_fkey(first_name, avatar_url)")
+            .eq("mission_id", id).eq("receiver_id", user.id)
+        : Promise.resolve({ data: [] as any[] }),
+    ]);
+
+    const authorRow: any = Array.isArray(authorRes.data) ? authorRes.data[0] : authorRes.data;
     setAuthor(authorRow ? { ...authorRow, created_at: authorRow.member_since } : null);
-
-    // Related missions, même catégorie ou même ville, statut ouvert, 3 max
-    const { data: related } = await supabase.from("small_missions")
-      .select("id, title, description, category, city, postal_code, created_at, duration_estimate")
-      .eq("status", "open")
-      .neq("id", m.id)
-      .or(`category.eq.${m.category},city.eq.${m.city}`)
-      .order("created_at", { ascending: false })
-      .limit(3);
-    setRelatedMissions(related || []);
-
-    const { data: resps } = await supabase.from("small_mission_responses")
-      .select("*, responder:profiles!small_mission_responses_responder_id_fkey(first_name, avatar_url)")
-      .eq("mission_id", id).order("created_at", { ascending: false });
-    setResponses(resps || []);
+    setRelatedMissions(relatedRes.data || []);
+    setResponses(respsRes.data || []);
 
     if (user) {
-      setHasResponded(!!(resps?.some((r: any) => r.responder_id === user.id)));
-
-      // Load feedbacks given by current user for this mission
-      const { data: givenFb } = await supabase.from("mission_feedbacks" as any)
-        .select("receiver_id").eq("mission_id", id).eq("giver_id", user.id);
+      setHasResponded(!!(respsRes.data?.some((r: any) => r.responder_id === user.id)));
       const sentMap: Record<string, boolean> = {};
-      givenFb?.forEach((f: any) => { sentMap[f.receiver_id] = true; });
+      (givenFbRes.data as any[])?.forEach((f: any) => { sentMap[f.receiver_id] = true; });
       setFeedbackSent(sentMap);
-
-      // Load feedbacks received by current user
-      const { data: recFb } = await supabase.from("mission_feedbacks" as any)
-        .select("*, giver:profiles!mission_feedbacks_giver_id_fkey(first_name, avatar_url)")
-        .eq("mission_id", id).eq("receiver_id", user.id);
-      setReceivedFeedbacks(recFb || []);
+      setReceivedFeedbacks((recFbRes.data as any[]) || []);
     }
 
     setLoading(false);
   }, [id, user, navigate]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Realtime : l'auteur voit immédiatement les nouvelles propositions et changements de statut
+  useEffect(() => {
+    if (!id) return;
+    const channel = supabase
+      .channel(`mission-detail-${id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "small_mission_responses", filter: `mission_id=eq.${id}` }, () => { load(); })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [id, load]);
 
   const handleRespond = async () => {
     if (!user || !id || !message.trim() || submitting) return;
