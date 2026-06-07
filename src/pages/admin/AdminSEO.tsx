@@ -24,6 +24,7 @@ import BingBacklinksCard from "@/components/admin/seo/BingBacklinksCard";
 import NoImpressionActionable from "@/components/admin/seo/NoImpressionActionable";
 import UrlInspectionCard from "@/components/admin/seo/UrlInspectionCard";
 import CoreWebVitalsCard from "@/components/admin/seo/CoreWebVitalsCard";
+import GA4DiagnosticCard from "@/components/admin/seo/GA4DiagnosticCard";
 import { useSeoData, type GSCRow } from "@/hooks/useSeoData";
 import type { BingPeriodDays } from "@/hooks/useBingData";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -207,6 +208,9 @@ const AdminSEO = () => {
       {/* ══════════════════════════════════════════ */}
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-foreground border-b pb-2">Trafic & audience</h2>
+
+        <GA4DiagnosticCard />
+
 
         {/* KPIs GA4 */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
