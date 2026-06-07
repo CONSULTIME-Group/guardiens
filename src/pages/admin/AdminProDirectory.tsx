@@ -160,7 +160,7 @@ export default function AdminProDirectory() {
                                 Refuser
                               </Button>
                               <Button asChild size="sm" variant="outline">
-                                <Link to={`/pros/${row.slug}`} target="_blank">
+                                <Link to={`/pros/${row.slug}?preview=1`} target="_blank">
                                   Prévisualiser
                                 </Link>
                               </Button>

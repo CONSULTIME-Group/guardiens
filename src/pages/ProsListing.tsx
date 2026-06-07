@@ -20,11 +20,14 @@ type ProRow = {
   urgences_24_7: boolean;
 };
 
+type SortKey = "recent" | "alpha" | "city";
+
 export default function ProsListing() {
   const [pros, setPros] = useState<ProRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<string | "all">("all");
   const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<SortKey>("recent");
 
   useEffect(() => {
     (async () => {
@@ -40,7 +43,7 @@ export default function ProsListing() {
   }, []);
 
   const filtered = useMemo(() => {
-    return pros.filter((p) => {
+    const list = pros.filter((p) => {
       if (category !== "all" && p.category !== category) return false;
       if (query) {
         const q = query.toLowerCase();
@@ -53,7 +56,13 @@ export default function ProsListing() {
       }
       return true;
     });
-  }, [pros, category, query]);
+    const sorter: Record<SortKey, (a: ProRow, b: ProRow) => number> = {
+      recent: () => 0, // déjà trié desc par created_at côté SQL
+      alpha: (a, b) => a.raison_sociale.localeCompare(b.raison_sociale, "fr"),
+      city: (a, b) => (a.city ?? "").localeCompare(b.city ?? "", "fr"),
+    };
+    return [...list].sort(sorter[sort]);
+  }, [pros, category, query, sort]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -117,6 +126,16 @@ export default function ProsListing() {
             onChange={(e) => setQuery(e.target.value)}
             className="md:max-w-sm"
           />
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortKey)}
+            className="h-10 rounded-md border border-input bg-background px-3 text-sm md:max-w-[180px]"
+            aria-label="Trier par"
+          >
+            <option value="recent">Plus récents</option>
+            <option value="alpha">Ordre alphabétique</option>
+            <option value="city">Par ville</option>
+          </select>
           <div className="flex flex-wrap gap-2">
             <Badge
               variant={category === "all" ? "default" : "outline"}
