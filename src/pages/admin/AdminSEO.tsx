@@ -381,15 +381,26 @@ const AdminSEO = () => {
         <CannibalizationCard topQueries={gsc?.topQueries} topPages={gsc?.topPages} />
 
         {/* Bing détail (graph + top requêtes + top pages) */}
-        <BingVisibilityCard />
+        <BingVisibilityCard period={bingPeriod} />
+
+        {/* Backlinks Bing */}
+        <BingBacklinksCard />
+      </section>
+
+      {/* SECTION, Performance technique (Core Web Vitals) */}
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold text-foreground border-b pb-2">Performance technique</h2>
+        <CoreWebVitalsCard />
       </section>
 
       {/* SECTION, Indexation push */}
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-foreground border-b pb-2">Indexation</h2>
+        <UrlInspectionCard />
         <IndexNowPanel />
         <IndexNowHistory />
       </section>
+
 
       {/* SECTION, Contenu à créer */}
       <section className="space-y-4">
