@@ -36,7 +36,7 @@ export default function MyProProfile() {
     (async () => {
       setLoading(true);
       const { data } = await supabase
-        .from("pro_profiles" as any)
+        .from("pro_profiles")
         .select("*")
         .eq("user_id", user.id)
         .maybeSingle();
@@ -95,7 +95,7 @@ export default function MyProProfile() {
       if (profile.status === "rejected") patch.status = "pending";
 
       const { error } = await supabase
-        .from("pro_profiles" as any)
+        .from("pro_profiles")
         .update(patch)
         .eq("id", profile.id);
       if (error) throw error;
