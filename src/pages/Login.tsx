@@ -135,7 +135,10 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex bg-background">
-      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+      <Helmet>
+        <title>Connexion, guardiens</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
 
       <AuthIllustrationPanel
         title="L'entraide locale, retrouvée"
