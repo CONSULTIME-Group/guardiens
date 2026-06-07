@@ -177,26 +177,26 @@ const AdminSEO = () => {
           <MetricCard
             title="Sessions organiques"
             icon={<Users className="h-4 w-4 text-primary" />}
-            value={ga4 ? ga4.current.sessions.toLocaleString() : ","}
+            value={ga4 ? ga4.current.sessions.toLocaleString() : "–"}
             subtitle="30 derniers jours · GA4"
             change={ga4?.previous ? pctChange(ga4.current.sessions, ga4.previous.sessions) : undefined}
           />
           <MetricCard
             title="Pages avec données GSC"
             icon={<Eye className="h-4 w-4 text-primary" />}
-            value={pagesWithGSC !== null ? pagesWithGSC.toString() : ","}
+            value={pagesWithGSC !== null ? pagesWithGSC.toString() : "–"}
             subtitle={gscAvailable ? "Pages avec ≥1 impression · GSC" : "GSC non disponible"}
           />
           <MetricCard
             title="Sans impression après 7j"
             icon={<FileText className="h-4 w-4 text-primary" />}
-            value={noImpressionCount !== null ? noImpressionCount.toString() : ","}
+            value={noImpressionCount !== null ? noImpressionCount.toString() : "–"}
             subtitle={noImpressionCount !== null ? "Contenus publiés >7j sans impression · GSC" : "GSC non disponible"}
           />
           <MetricCard
             title="Contenus à créer"
             icon={<BarChart3 className="h-4 w-4 text-primary" />}
-            value={priorityToCreate > 0 ? priorityToCreate.toString() : ","}
+            value={priorityToCreate > 0 ? priorityToCreate.toString() : "–"}
             subtitle="Articles prioritaires manquants"
           />
         </div>
@@ -213,24 +213,25 @@ const AdminSEO = () => {
           <MetricCard
             title="Profils inscrits"
             icon={<UserCheck className="h-4 w-4 text-primary" />}
-            value={profileCount !== null ? profileCount.toLocaleString() : ","}
+            value={profileCount !== null ? profileCount.toLocaleString() : "–"}
             subtitle="Total"
           />
           <MetricCard
             title="Visiteurs uniques"
             icon={<Users className="h-4 w-4 text-primary" />}
-            value={ga4 ? ga4.current.activeUsers.toLocaleString() : ","}
+            value={ga4 ? ga4.current.activeUsers.toLocaleString() : "–"}
             subtitle="30 derniers jours · GA4"
             change={ga4?.previous ? pctChange(ga4.current.activeUsers, ga4.previous.activeUsers) : undefined}
           />
           <MetricCard
             title="Temps moyen"
             icon={<Timer className="h-4 w-4 text-primary" />}
-            value={ga4 ? formatDuration(ga4.current.averageSessionDuration) : ","}
+            value={ga4 ? formatDuration(ga4.current.averageSessionDuration) : "–"}
             subtitle="Par session · GA4"
             change={ga4?.previous ? pctChange(ga4.current.averageSessionDuration, ga4.previous.averageSessionDuration) : undefined}
           />
         </div>
+
 
         {/* Sessions GA4 chart */}
         {ga4 && ga4.current.sessionsByDay.length > 0 && (

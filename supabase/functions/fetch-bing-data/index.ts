@@ -29,7 +29,12 @@ interface BingDailyRow {
 interface BingListResponse<T> { d?: T[]; }
 
 async function bing<T = unknown>(endpoint: string, apiKey: string): Promise<T> {
-  const url = `${BASE}/${endpoint}?apikey=${encodeURIComponent(apiKey)}&siteUrl=${encodeURIComponent(SITE_URL)}`;
+  // Endpoint can already contain a query string (e.g. "GetLinkCounts?page=0").
+  // We must append apikey/siteUrl with the correct separator, otherwise the URL
+  // becomes malformed (".../GetLinkCounts?page=0?apikey=...") and Bing returns
+  // ErrorCode 3 "InvalidApiKey".
+  const sep = endpoint.includes("?") ? "&" : "?";
+  const url = `${BASE}/${endpoint}${sep}apikey=${encodeURIComponent(apiKey)}&siteUrl=${encodeURIComponent(SITE_URL)}`;
   const res = await fetch(url, { headers: { Accept: "application/json" } });
   const text = await res.text();
   if (!res.ok) throw new Error(`Bing ${endpoint} ${res.status}: ${text.slice(0, 300)}`);
