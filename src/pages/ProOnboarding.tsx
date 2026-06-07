@@ -43,6 +43,13 @@ export default function ProOnboarding() {
     website: "",
     email_contact: "",
     urgences_24_7: false,
+    tarif_min: "" as string,
+    tarif_max: "" as string,
+    tarif_note: "",
+    diplomes: "", // texte libre, 1 par ligne
+    ordre_number: "",
+    zone_radius_km: "20",
+    horaires_text: "",
   });
 
   useEffect(() => {
