@@ -546,8 +546,24 @@ const SmallMissionDetail = () => {
     return (
       <>
         {!user && <PublicHeader />}
-        <div className="p-6 md:p-10 max-w-3xl mx-auto min-h-[40vh]">
-          <div className="text-muted-foreground">Chargement…</div>
+        <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 animate-pulse">
+          <div className="h-4 w-48 bg-muted rounded mb-6" />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+            <div className="lg:col-span-8 space-y-6">
+              <div className="h-64 md:h-80 bg-muted rounded-[2rem]" />
+              <div className="h-8 w-3/4 bg-muted rounded" />
+              <div className="h-4 w-1/2 bg-muted rounded" />
+              <div className="space-y-2">
+                <div className="h-4 w-full bg-muted rounded" />
+                <div className="h-4 w-full bg-muted rounded" />
+                <div className="h-4 w-2/3 bg-muted rounded" />
+              </div>
+            </div>
+            <div className="lg:col-span-4 space-y-6">
+              <div className="h-72 bg-muted rounded-[2rem]" />
+              <div className="h-48 bg-muted rounded-[2rem]" />
+            </div>
+          </div>
         </div>
         {!user && <PublicFooter />}
       </>
@@ -839,7 +855,7 @@ const SmallMissionDetail = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground animate-fade-in">
-      <PageMeta title={`${mission.title}, Coup de main près de chez vous | Guardiens`} description={mission.description?.slice(0, 155)} />
+      <PageMeta title={`${mission.title}, Coup de main près de chez vous | Guardiens`} description={mission.description?.slice(0, 155)} image={mission.photos?.[0]} type="article" publishedAt={mission.created_at} />
       <Helmet>
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
