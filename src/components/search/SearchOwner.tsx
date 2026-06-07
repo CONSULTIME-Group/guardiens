@@ -31,6 +31,7 @@ import { trackEvent } from "@/lib/analytics";
 import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 import ReachReassuranceBanner from "@/components/marketing/ReachReassuranceBanner";
 import PresenceBadge from "@/components/messages/PresenceBadge";
+import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -293,7 +294,7 @@ const SearchOwner = () => {
 
     const { data: sitters } = await supabase
       .from("sitter_profiles")
-      .select("*, profile:profiles!sitter_profiles_user_id_fkey(first_name, last_name, avatar_url, city, postal_code, profile_completion, identity_verified, completed_sits_count, bio, pro_status, pro_specialty, last_seen_at)")
+      .select("*, reply_median_minutes, profile:profiles!sitter_profiles_user_id_fkey(first_name, last_name, avatar_url, city, postal_code, profile_completion, identity_verified, completed_sits_count, bio, pro_status, pro_specialty, last_seen_at)")
       .limit(500);
 
     let items = (sitters || []).filter((s: any) => s.profile?.profile_completion >= 60);
@@ -1038,7 +1039,10 @@ const SearchOwner = () => {
                           {distLabel}
                         </p>
                       )}
-                      <PresenceBadge lastSeenAt={profile?.last_seen_at} className="mt-0.5" />
+                      <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                        <PresenceBadge lastSeenAt={profile?.last_seen_at} />
+                        <ReplyTimeBadge minutes={s.reply_median_minutes} />
+                      </div>
 
                       {/* Rating + experience */}
                       <div className="flex items-center gap-2 mt-1 min-h-[1rem]">
@@ -1093,7 +1097,10 @@ const SearchOwner = () => {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm truncate">{firstName}</p>
                     {s._dist != null && s._dist !== Infinity && <p className="text-xs text-muted-foreground">{s._dist === 0 ? "Dans votre ville" : `${s._dist} km`}</p>}
-                    <PresenceBadge lastSeenAt={profile?.last_seen_at} />
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <PresenceBadge lastSeenAt={profile?.last_seen_at} />
+                      <ReplyTimeBadge minutes={s.reply_median_minutes} />
+                    </div>
                     <div className="flex gap-3 text-xs text-muted-foreground mt-0.5">
                       {s.avgRating !== null && <span className="flex items-center gap-0.5"><Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />{s.avgRating.toFixed(1)}</span>}
                       {(profile?.completed_sits_count || 0) > 0 && <span>{profile.completed_sits_count} garde{profile.completed_sits_count > 1 ? "s" : ""}</span>}

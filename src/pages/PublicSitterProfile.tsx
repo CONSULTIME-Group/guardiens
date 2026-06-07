@@ -10,6 +10,7 @@ import BadgeRow from "@/components/badges/BadgeRow";
 import SpecialBadgeHighlight from "@/components/badges/SpecialBadgeHighlight";
 import { BadgeSceau } from "@/components/badges/BadgeSceau";
 import StatutGardienBadge from "@/components/profile/StatutGardienBadge";
+import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
 import { useProfileReputation, useUserBadges } from "@/hooks/useProfileReputation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
@@ -941,6 +942,10 @@ export default function PublicSitterProfile() {
                     </span>
                   )}
                 </div>
+
+                {sitterProfile?.reply_median_minutes != null && (
+                  <ReplyTimeBadge minutes={sitterProfile.reply_median_minutes} className="self-start mt-1" />
+                )}
 
                 {city && (
                   <p className="text-sm sm:text-base text-foreground/80 flex items-center gap-1 font-medium min-w-0 max-w-full break-words">
