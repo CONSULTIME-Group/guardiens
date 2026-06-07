@@ -73,6 +73,15 @@ export default function ProOnboarding() {
       toast.error("Raison sociale et catégorie sont obligatoires.");
       return;
     }
+    // F-11 : au moins un moyen de contact public
+    if (!form.phone && !form.email_contact && !form.website) {
+      toast.error("Renseignez au moins un contact (téléphone, email ou site web).");
+      return;
+    }
+    if (!form.city) {
+      toast.error("La ville est obligatoire pour le référencement local.");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -88,28 +97,41 @@ export default function ProOnboarding() {
         logoUrl = pub.publicUrl;
       }
 
-      const slug = `${slugify(form.raison_sociale)}-${slugify(form.city || "fr")}-${Math.random()
-        .toString(36)
-        .slice(2, 6)}`;
-
-      const { error } = await supabase.from("pro_profiles").insert({
-        user_id: user.id,
-        slug,
-        raison_sociale: form.raison_sociale,
-        siret: form.siret || null,
-        category: form.category as ProCategory,
-        city: form.city || null,
-        postal_code: form.postal_code || null,
-        description: form.description || null,
-        phone: form.phone || null,
-        website: form.website || null,
-        email_contact: form.email_contact || null,
-        urgences_24_7: form.urgences_24_7,
-        logo_url: logoUrl,
-        status: "pending",
-      });
-
-      if (error) throw error;
+      // F-12 : slug stable + anti-collision (retry avec suffixe incrémenté)
+      const baseSlug = `${slugify(form.raison_sociale)}-${slugify(form.city)}`;
+      let attempt = 0;
+      let lastError: any = null;
+      while (attempt < 5) {
+        const slug = attempt === 0 ? baseSlug : `${baseSlug}-${attempt + 1}`;
+        const { error } = await supabase.from("pro_profiles").insert({
+          user_id: user.id,
+          slug,
+          raison_sociale: form.raison_sociale,
+          siret: form.siret || null,
+          category: form.category as ProCategory,
+          city: form.city || null,
+          postal_code: form.postal_code || null,
+          description: form.description || null,
+          phone: form.phone || null,
+          website: form.website || null,
+          email_contact: form.email_contact || null,
+          urgences_24_7: form.urgences_24_7,
+          logo_url: logoUrl,
+          status: "pending",
+        });
+        if (!error) {
+          lastError = null;
+          break;
+        }
+        // 23505 = unique_violation (collision sur slug)
+        if ((error as any).code !== "23505") {
+          lastError = error;
+          break;
+        }
+        attempt++;
+        lastError = error;
+      }
+      if (lastError) throw lastError;
 
       toast.success("Fiche envoyée. Modération sous 48h.");
       navigate("/pros/mon-espace");
