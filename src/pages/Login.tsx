@@ -18,8 +18,14 @@ import { InAppBrowserBanner } from "@/components/auth/InAppBrowserBanner";
 import { AuthIllustrationPanel } from "@/components/auth/AuthIllustrationPanel";
 import { trackEvent } from "@/lib/analytics";
 import { startOAuthFlow, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const Login = () => {
+  const [capsLockOn, setCapsLockOn] = useState(false);
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState(searchParams.get("email") ?? "");
   const [password, setPassword] = useState("");
