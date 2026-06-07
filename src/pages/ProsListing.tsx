@@ -190,7 +190,12 @@ export default function ProsListing() {
                             className="w-14 h-14 rounded-lg object-contain bg-muted"
                           />
                         ) : (
-                          <div className="w-14 h-14 rounded-lg bg-muted" />
+                          <div
+                            className={`w-14 h-14 rounded-lg flex items-center justify-center font-semibold text-lg ${cat?.placeholderClass ?? "bg-muted text-muted-foreground"}`}
+                            aria-hidden="true"
+                          >
+                            {getProInitials(p.raison_sociale)}
+                          </div>
                         )}
                         <div className="min-w-0">
                           <h2 className="font-semibold truncate group-hover:underline">
