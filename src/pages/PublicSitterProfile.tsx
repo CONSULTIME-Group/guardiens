@@ -10,6 +10,7 @@ import BadgeRow from "@/components/badges/BadgeRow";
 import SpecialBadgeHighlight from "@/components/badges/SpecialBadgeHighlight";
 import { BadgeSceau } from "@/components/badges/BadgeSceau";
 import StatutGardienBadge from "@/components/profile/StatutGardienBadge";
+import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
 import { useProfileReputation, useUserBadges } from "@/hooks/useProfileReputation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
