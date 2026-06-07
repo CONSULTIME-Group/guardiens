@@ -24,6 +24,7 @@ import BingBacklinksCard from "@/components/admin/seo/BingBacklinksCard";
 import NoImpressionActionable from "@/components/admin/seo/NoImpressionActionable";
 import UrlInspectionCard from "@/components/admin/seo/UrlInspectionCard";
 import CoreWebVitalsCard from "@/components/admin/seo/CoreWebVitalsCard";
+import GA4DiagnosticCard from "@/components/admin/seo/GA4DiagnosticCard";
 import { useSeoData, type GSCRow } from "@/hooks/useSeoData";
 import type { BingPeriodDays } from "@/hooks/useBingData";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
