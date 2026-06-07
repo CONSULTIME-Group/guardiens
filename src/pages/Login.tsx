@@ -232,6 +232,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoFocus={!email}
                 className="rounded-lg h-12"
                 {...getAuthFieldAttrs("email")}
               />
@@ -244,9 +245,14 @@ const Login = () => {
                   type={showPassword ? "text" : "password"}
                   placeholder="Votre mot de passe"
                   value={password}
+                  autoFocus={!!email}
                   onChange={(e) => { setPassword(e.target.value); setPasswordError(null); }}
+                  onKeyDown={(e) => setCapsLockOn(e.getModifierState && e.getModifierState("CapsLock"))}
+                  onKeyUp={(e) => setCapsLockOn(e.getModifierState && e.getModifierState("CapsLock"))}
+                  onBlur={() => setCapsLockOn(false)}
                   required
                   className="rounded-lg h-12 pr-12"
+                  aria-describedby={capsLockOn ? "capslock-hint" : undefined}
                   {...getAuthFieldAttrs("password")}
                 />
                 <button
@@ -259,35 +265,33 @@ const Login = () => {
                   {showPassword ? <EyeOff className="h-5 w-5" aria-hidden="true" /> : <Eye className="h-5 w-5" aria-hidden="true" />}
                 </button>
               </div>
+              {capsLockOn && (
+                <p id="capslock-hint" className="text-xs text-warning-foreground">
+                  Verrouillage majuscules activé.
+                </p>
+              )}
               {passwordError && (
                 <div className="space-y-2">
                   <p className="text-sm text-destructive">{passwordError}</p>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
-                    <Link to="/forgot-password" className="text-primary hover:underline">
-                      Mot de passe oublié ?
+                  {failedAttempts >= 2 && (
+                    <Link to={`/inscription${(() => {
+                      const params = new URLSearchParams();
+                      if (email) params.set("email", email);
+                      if (redirectTarget) params.set("redirect", redirectTarget);
+                      const qs = params.toString();
+                      return qs ? `?${qs}` : "";
+                    })()}`} className="text-sm text-primary hover:underline">
+                      Pas encore de compte ? Inscrivez-vous
                     </Link>
-                    {failedAttempts >= 2 && (
-                      <Link to={`/inscription${(() => {
-                        const params = new URLSearchParams();
-                        if (email) params.set("email", email);
-                        if (redirectTarget) params.set("redirect", redirectTarget);
-                        const qs = params.toString();
-                        return qs ? `?${qs}` : "";
-                      })()}`} className="text-primary hover:underline">
-                        Pas encore de compte ? Inscrivez-vous
-                      </Link>
-                    )}
-                  </div>
+                  )}
                 </div>
               )}
             </div>
-            {!passwordError && (
-              <div className="flex justify-end">
-                <Link to="/forgot-password" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Mot de passe oublié ?
-                </Link>
-              </div>
-            )}
+            <div className="flex justify-end">
+              <Link to="/forgot-password" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                Mot de passe oublié ?
+              </Link>
+            </div>
             <Button type="submit" className="w-full" size="lg" disabled={isLoading || isGoogleLoading}>
               {isLoading ? "Connexion..." : "Se connecter"}
             </Button>
