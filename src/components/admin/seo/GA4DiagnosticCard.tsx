@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Activity, RefreshCw, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
+import { Activity, RefreshCw, CheckCircle2, AlertTriangle, XCircle, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
