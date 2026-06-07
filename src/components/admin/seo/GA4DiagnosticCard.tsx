@@ -122,8 +122,24 @@ const GA4DiagnosticCard = () => {
 
   useEffect(() => {
     load();
-    setTagDetected(typeof (window as any).gtag === "function");
     fetchLocalLast();
+    // Poll pour gtag pendant 6 s : le script est chargé en async via
+    // requestIdleCallback, il peut ne pas être encore prêt au mount.
+    let elapsed = 0;
+    const interval = window.setInterval(() => {
+      const present = typeof (window as any).gtag === "function";
+      if (present) {
+        setTagDetected(true);
+        window.clearInterval(interval);
+        return;
+      }
+      elapsed += 500;
+      if (elapsed >= 6000) {
+        setTagDetected(false);
+        window.clearInterval(interval);
+      }
+    }, 500);
+    return () => window.clearInterval(interval);
   }, []);
 
 
