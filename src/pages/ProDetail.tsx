@@ -150,6 +150,37 @@ export default function ProDetail() {
               </CardContent>
             </Card>
           )}
+
+          {pro.horaires?.text && (
+            <Card>
+              <CardContent className="p-6 space-y-2">
+                <h2 className="font-semibold mb-2">Horaires</h2>
+                <p className="whitespace-pre-line text-sm">{pro.horaires.text}</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {Array.isArray(pro.diplomes) && pro.diplomes.length > 0 && (
+            <Card>
+              <CardContent className="p-6 space-y-2">
+                <h2 className="font-semibold mb-2">Diplômes et certifications</h2>
+                <ul className="list-disc list-inside text-sm space-y-1">
+                  {pro.diplomes.map((d: string, i: number) => <li key={i}>{d}</li>)}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {(pro.ordre_number || pro.zone_radius_km) && (
+            <Card>
+              <CardContent className="p-6 space-y-2 text-sm">
+                {pro.ordre_number && <p>N° Ordre : {pro.ordre_number}</p>}
+                {pro.zone_radius_km && (
+                  <p>Zone d'intervention : {pro.zone_radius_km} km autour de {pro.city ?? "la ville indiquée"}</p>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
       </main>
     </div>
