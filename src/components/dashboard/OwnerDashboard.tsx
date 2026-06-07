@@ -230,6 +230,20 @@ const OwnerDashboard = () => {
     });
   }
 
+  // Action prioritaire unique , miroir du SitterCockpit côté propriétaire.
+  // Pioche LA chose la plus urgente parmi toutes les données déjà chargées.
+  const priorityAction = useOwnerPriorityAction({
+    sits,
+    pendingAppCount,
+    pendingReviews: pendingReviews.map((r: any) => ({
+      sitId: r.sitId,
+      sitterId: r.sitterId,
+      sitterName: r.sitterName,
+    })),
+    verificationStatus,
+    nearbySittersCount: nearbyOwnerSittersData?.sitters?.length,
+  });
+
   return (
     <div className="space-y-6 md:space-y-8 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-8">
 {/* pb mobile = BottomNav (h-16=64px) + Sticky CTA (~72px) + safe-area iPhone notch. */}
