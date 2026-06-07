@@ -291,7 +291,7 @@ Deno.serve(async (req) => {
       "https://www.googleapis.com/auth/analytics.readonly",
     ]);
 
-    const ga4PropertyId = Deno.env.get("GA4_PROPERTY_ID") || "530010609";
+    const ga4PropertyId = (Deno.env.get("GA4_PROPERTY_ID") || "530010609").trim();
 
     // Date ranges
     // GSC publie avec 2-3j de latence → on demande J-30 → J-2 (au cas où J-2 soit déjà dispo)
