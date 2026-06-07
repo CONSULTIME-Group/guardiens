@@ -51,13 +51,13 @@ const GA4DiagnosticCard = () => {
       setLocalLastEvent(row.created_at);
       return;
     }
-    const { data: any } = await supabase
+    const { data: anyRow } = await supabase
       .from("analytics_events")
       .select("created_at")
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    setLocalLastEvent(any?.created_at ?? null);
+    setLocalLastEvent(anyRow?.created_at ?? null);
   };
 
   const load = async () => {
