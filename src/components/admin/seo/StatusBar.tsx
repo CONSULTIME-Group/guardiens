@@ -96,6 +96,10 @@ const StatusBar = ({ data, loading, refreshing, onRefresh }: StatusBarProps) => 
             {statusIcon(gscStatus)}
             <span className="text-foreground">{statusLabel("GSC", gscStatus)}</span>
           </div>
+          <div className="flex items-center gap-1.5">
+            {statusIcon(bingStatus)}
+            <span className="text-foreground">{statusLabel("Bing", bingStatus)}</span>
+          </div>
           {updatedAtRelative && (
             <span className={`text-xs ${isStale ? "text-warning font-medium" : "text-muted-foreground"}`}>
               Mise à jour {updatedAtRelative}
