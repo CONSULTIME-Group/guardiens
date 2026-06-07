@@ -15,6 +15,8 @@ export const PRO_CATEGORIES: Array<{
   shortDesc: string;
   requiresOrdre?: boolean;
   requiresDiplome?: boolean;
+  /** Tailwind classes for the placeholder background when no logo is uploaded */
+  placeholderClass: string;
 }> = [
   {
     value: "veterinaire",
