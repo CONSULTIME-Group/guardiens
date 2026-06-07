@@ -685,6 +685,27 @@ const SmallMissionDetail = () => {
               {author?.first_name || "L'auteur"} a reçu votre mot. Vous serez prévenu(e) dès qu'il y a une réponse.
             </p>
             <p className="text-xs text-muted-foreground">Envoyée {timeAgoFr(myResponse.created_at)}.</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full rounded-full"
+              onClick={async () => {
+                if (!confirm("Retirer votre proposition ?")) return;
+                const { error } = await supabase
+                  .from("small_mission_responses")
+                  .delete()
+                  .eq("id", myResponse.id);
+                if (error) {
+                  toast({ variant: "destructive", title: "Erreur", description: error.message });
+                  return;
+                }
+                setHasResponded(false);
+                setResponses(prev => prev.filter(r => r.id !== myResponse.id));
+                toast({ title: "Proposition retirée" });
+              }}
+            >
+              Retirer ma proposition
+            </Button>
           </div>
         );
       }
