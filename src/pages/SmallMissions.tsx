@@ -414,7 +414,8 @@ const SmallMissions = () => {
 
       <div className="min-h-screen bg-background">
         <MissionsHero
-          missionCount={(allMissions || []).filter((m: any) => m.status === "open" || m.status === "in_progress").length}
+          needCount={(allMissions || []).filter((m: any) => (m.status === "open" || m.status === "in_progress") && (m.mission_type ?? "besoin") === "besoin").length}
+          offerCount={(allMissions || []).filter((m: any) => (m.status === "open" || m.status === "in_progress") && m.mission_type === "offre").length}
           helperCount={(availableHelpers || []).length}
           onPropose={() => {
             if (!isAuthenticated) { navigate("/inscription?redirect=/petites-missions"); return; }
