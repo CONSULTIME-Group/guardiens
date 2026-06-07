@@ -20,8 +20,13 @@ import CannibalizationCard from "@/components/admin/seo/CannibalizationCard";
 import BingVisibilityCard from "@/components/admin/seo/BingVisibilityCard";
 import BingKpiRow from "@/components/admin/seo/BingKpiRow";
 import BingOnlyQueriesCard from "@/components/admin/seo/BingOnlyQueriesCard";
+import BingBacklinksCard from "@/components/admin/seo/BingBacklinksCard";
 import NoImpressionActionable from "@/components/admin/seo/NoImpressionActionable";
+import UrlInspectionCard from "@/components/admin/seo/UrlInspectionCard";
+import CoreWebVitalsCard from "@/components/admin/seo/CoreWebVitalsCard";
 import { useSeoData, type GSCRow } from "@/hooks/useSeoData";
+import type { BingPeriodDays } from "@/hooks/useBingData";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 function downloadCsv(filename: string, rows: GSCRow[]) {
   const head = "key,clicks,impressions,ctr,position\n";
@@ -55,6 +60,7 @@ const AdminSEO = () => {
   const [profileCount, setProfileCount] = useState<number | null>(null);
   const [existingSlugs, setExistingSlugs] = useState<Set<string>>(new Set());
   const [publishedArticles, setPublishedArticles] = useState<{ slug: string; published_at: string | null }[]>([]);
+  const [bingPeriod, setBingPeriod] = useState<BingPeriodDays>(28);
 
   useEffect(() => {
     const fetchArticleStats = async () => {
