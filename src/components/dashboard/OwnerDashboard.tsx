@@ -174,7 +174,23 @@ const OwnerDashboard = () => {
       .sort((a, b) => new Date(a.start_date!).getTime() - new Date(b.start_date!).getTime())[0];
   }, [sits]);
 
+  // Action prioritaire unique , miroir SitterCockpit côté propriétaire.
+  // Pioche LA chose la plus urgente parmi les données déjà chargées.
+  // Doit rester avant tout early return (rules of hooks).
+  const priorityAction = useOwnerPriorityAction({
+    sits,
+    pendingAppCount,
+    pendingReviews: pendingReviews.map((r: any) => ({
+      sitId: r.sitId,
+      sitterId: r.sitterId,
+      sitterName: r.sitterName,
+    })),
+    verificationStatus,
+    nearbySittersCount: nearbyOwnerSittersData?.sitters?.length,
+  });
+
   /* ── Render ── */
+
 
   if (loading) return <DashboardSkeleton />;
 
