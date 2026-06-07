@@ -44,7 +44,11 @@ export default function MyProProfile() {
         navigate("/pros/inscription");
         return;
       }
-      setProfile(data);
+      setProfile({
+        ...data,
+        diplomes: Array.isArray((data as any).diplomes) ? (data as any).diplomes.join("\n") : "",
+        horaires_text: (data as any).horaires?.text ?? "",
+      });
       setLoading(false);
     })();
   }, [user, navigate]);
