@@ -15,8 +15,12 @@ import GSCQueriesTable from "@/components/admin/seo/GSCQueriesTable";
 import TrafficSources from "@/components/admin/seo/TrafficSources";
 import ArticleCtaPerformance from "@/components/admin/seo/ArticleCtaPerformance";
 import IndexNowPanel from "@/components/admin/seo/IndexNowPanel";
+import IndexNowHistory from "@/components/admin/seo/IndexNowHistory";
 import CannibalizationCard from "@/components/admin/seo/CannibalizationCard";
 import BingVisibilityCard from "@/components/admin/seo/BingVisibilityCard";
+import BingKpiRow from "@/components/admin/seo/BingKpiRow";
+import BingOnlyQueriesCard from "@/components/admin/seo/BingOnlyQueriesCard";
+import NoImpressionActionable from "@/components/admin/seo/NoImpressionActionable";
 import { useSeoData, type GSCRow } from "@/hooks/useSeoData";
 
 function downloadCsv(filename: string, rows: GSCRow[]) {
