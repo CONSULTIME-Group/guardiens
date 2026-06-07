@@ -4482,6 +4482,7 @@ export type Database = {
           title: string
           updated_at: string
           user_id: string
+          view_count: number
         }
         Insert: {
           category?: Database["public"]["Enums"]["small_mission_category"]
@@ -4501,6 +4502,7 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id: string
+          view_count?: number
         }
         Update: {
           category?: Database["public"]["Enums"]["small_mission_category"]
@@ -4520,6 +4522,7 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+          view_count?: number
         }
         Relationships: [
           {
@@ -5375,6 +5378,10 @@ export type Database = {
       }
       increment_redirect_hit: {
         Args: { p_slug_from: string }
+        Returns: undefined
+      }
+      increment_small_mission_view: {
+        Args: { _mission_id: string }
         Returns: undefined
       }
       invite_helper_to_mission: {
