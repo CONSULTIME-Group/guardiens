@@ -246,7 +246,7 @@ const AdminPros = () => {
 
       <div className="flex flex-wrap gap-2 text-sm">
         <Button asChild variant="outline" size="sm">
-          <Link to="/admin/pros-directory">
+          <Link to="/admin/pros-annuaire">
             <Briefcase className="h-4 w-4 mr-1" aria-hidden="true" /> Annuaire pros (fiches publiques)
           </Link>
         </Button>
