@@ -35,6 +35,8 @@ import MobileStickyCTA from "./owner/MobileStickyCTA";
 import LiveSignalStrip from "./shared/LiveSignalStrip";
 import SectionEyebrow from "./shared/SectionEyebrow";
 import TodoCard, { type TodoItem } from "./owner/TodoCard";
+import PriorityActionCard from "./shared/PriorityActionCard";
+import { useOwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
 
 import {
   SPECIES_LABEL,
@@ -172,7 +174,23 @@ const OwnerDashboard = () => {
       .sort((a, b) => new Date(a.start_date!).getTime() - new Date(b.start_date!).getTime())[0];
   }, [sits]);
 
+  // Action prioritaire unique , miroir SitterCockpit côté propriétaire.
+  // Pioche LA chose la plus urgente parmi les données déjà chargées.
+  // Doit rester avant tout early return (rules of hooks).
+  const priorityAction = useOwnerPriorityAction({
+    sits,
+    pendingAppCount,
+    pendingReviews: pendingReviews.map((r: any) => ({
+      sitId: r.sitId,
+      sitterId: r.sitterId,
+      sitterName: r.sitterName,
+    })),
+    verificationStatus,
+    nearbySittersCount: nearbyOwnerSittersData?.sitters?.length,
+  });
+
   /* ── Render ── */
+
 
   if (loading) return <DashboardSkeleton />;
 
@@ -228,6 +246,9 @@ const OwnerDashboard = () => {
     });
   }
 
+
+
+
   return (
     <div className="space-y-6 md:space-y-8 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-8">
 {/* pb mobile = BottomNav (h-16=64px) + Sticky CTA (~72px) + safe-area iPhone notch. */}
@@ -270,6 +291,22 @@ const OwnerDashboard = () => {
           </Button>
         </div>
       </header>
+
+      {/* ═══ Action prioritaire unique , UN seul CTA dominant ═══
+          Synthétise « la seule chose à faire maintenant » avant les listes
+          détaillées (TodoCard) qui restent disponibles plus bas. */}
+      <div className="px-5 md:px-8">
+        <PriorityActionCard
+          eyebrow={priorityAction.eyebrow}
+          title={priorityAction.title}
+          description={priorityAction.description}
+          ctaLabel={priorityAction.ctaLabel}
+          ctaTo={priorityAction.ctaTo}
+          urgency={priorityAction.urgency}
+        />
+      </div>
+
+
 
       {/* Bannière dual-role : déplacée APRÈS le hero (l'utilisateur lit
           d'abord son nom, ensuite l'incitation à activer l'espace gardien). */}
