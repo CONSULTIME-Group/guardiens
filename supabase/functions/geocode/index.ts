@@ -56,7 +56,12 @@ Deno.serve(async (req) => {
     });
 
     if (!res.ok) {
-      throw new Error(`Nominatim returned ${res.status}`);
+      // Rate limit ou indisponibilité, on dégrade proprement, pas de 500.
+      console.warn(`Nominatim returned ${res.status} for "${city}"`);
+      return new Response(
+        JSON.stringify({ error: "GEOCODING_UNAVAILABLE", fallback: true, lat: null, lng: null }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const results = await res.json();
@@ -81,9 +86,10 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     console.error("Geocode error:", error);
-    return new Response(JSON.stringify({ error: "Geocoding failed" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    // Toujours 200 + fallback, le front gère l'absence de coords.
+    return new Response(
+      JSON.stringify({ error: "GEOCODING_FAILED", fallback: true, lat: null, lng: null }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 });
