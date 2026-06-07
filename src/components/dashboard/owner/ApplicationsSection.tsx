@@ -65,13 +65,20 @@ const AppCard = memo(({ app, sitterProfiles }: { app: AppRow; sitterProfiles: Re
         }
       } : undefined}
     >
-      <div className="w-12 h-12 rounded-full bg-primary/15 text-primary font-bold flex items-center justify-center text-lg font-sans shrink-0 overflow-hidden">
+      <TrustHaloAvatar
+        size="h-12 w-12"
+        verified={sitter?.identity_verified}
+        avgRating={sitter?.avgNote ? Number(sitter.avgNote) : null}
+        sitsCount={sitter?.completed_sits_count}
+      >
         {sitter?.avatar_url ? (
-          <img src={sitter.avatar_url} alt={`Photo de ${sitter.first_name || 'gardien'}`} className="w-full h-full rounded-full object-cover" />
+          <img src={sitter.avatar_url} alt={`Photo de ${sitter.first_name || 'gardien'}`} className="w-full h-full object-cover" />
         ) : (
-          sitter?.first_name?.charAt(0)?.toUpperCase() || "?"
+          <div className="w-full h-full bg-primary/15 text-primary font-bold flex items-center justify-center text-lg font-sans">
+            {sitter?.first_name?.charAt(0)?.toUpperCase() || "?"}
+          </div>
         )}
-      </div>
+      </TrustHaloAvatar>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-foreground">{capitalize(sitter?.first_name)}</p>
         <p className="text-xs text-muted-foreground font-sans mt-0.5 truncate">
