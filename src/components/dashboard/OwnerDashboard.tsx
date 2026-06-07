@@ -333,6 +333,19 @@ const OwnerDashboard = () => {
         />
       </div>
 
+      {/* ═══ Et ensuite : 2 actions suivantes + score d'activation ═══
+          Évite l'effet « page blanche » : même si PriorityActionCard a sa
+          cible, on suggère les prochaines étapes utiles. La carte
+          d'activation s'auto-retire quand 6/6 est atteint. */}
+      {(nextActions.length > 1 || !activationScore.allDone) && (
+        <div className="px-5 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <NextActionsList actions={nextActions} excludeId={priorityAction.variant} />
+          <ActivationScoreCard score={activationScore} />
+        </div>
+      )}
+
+
+
 
 
       {/* Bannière dual-role : déplacée APRÈS le hero (l'utilisateur lit
