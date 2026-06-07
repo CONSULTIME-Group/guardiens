@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import DashSection from "./DashSection";
 import { capitalize } from "./helpers";
 import type { AppRow, SitterInfo } from "./types";
+import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 
 interface ApplicationsSectionProps {
   recentApps: AppRow[];
