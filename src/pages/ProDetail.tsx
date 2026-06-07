@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
+import { useAdmin } from "@/hooks/useAdmin";
 import { getCategoryByValue } from "@/lib/proCategories";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ProDetail() {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
+  const { isAdmin } = useAdmin();
+  const isPreview = searchParams.get("preview") === "1" && isAdmin;
   const [pro, setPro] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -17,19 +21,20 @@ export default function ProDetail() {
     if (!slug) return;
     (async () => {
       setLoading(true);
-      // F-07: ne sélectionner que les colonnes publiques (pas user_id, approved_by, rejection_reason)
-      const { data } = await supabase
+      // F-07: ne sélectionner que les colonnes publiques
+      // F-25: en mode preview admin, on ignore le filtre status
+      let req = supabase
         .from("pro_profiles")
         .select(
-          "id, slug, raison_sociale, category, sub_categories, city, postal_code, description, phone, website, email_contact, urgences_24_7, siret_verified, logo_url, cover_url, tarif_min, tarif_max, tarif_note, horaires, diplomes, ordre_number, zone_radius_km, zone_cities"
+          "id, slug, raison_sociale, category, sub_categories, city, postal_code, description, phone, website, email_contact, urgences_24_7, siret_verified, logo_url, cover_url, tarif_min, tarif_max, tarif_note, horaires, diplomes, ordre_number, zone_radius_km, zone_cities, status"
         )
-        .eq("slug", slug)
-        .eq("status", "approved")
-        .maybeSingle();
+        .eq("slug", slug);
+      if (!isPreview) req = req.eq("status", "approved");
+      const { data } = await req.maybeSingle();
       setPro(data);
       setLoading(false);
     })();
-  }, [slug]);
+  }, [slug, isPreview]);
 
   if (loading) {
     return (
