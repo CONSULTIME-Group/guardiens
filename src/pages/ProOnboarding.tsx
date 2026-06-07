@@ -124,6 +124,15 @@ export default function ProOnboarding() {
           email_contact: form.email_contact || null,
           urgences_24_7: form.urgences_24_7,
           logo_url: logoUrl,
+          tarif_min: form.tarif_min ? parseInt(form.tarif_min, 10) : null,
+          tarif_max: form.tarif_max ? parseInt(form.tarif_max, 10) : null,
+          tarif_note: form.tarif_note || null,
+          diplomes: form.diplomes
+            ? form.diplomes.split("\n").map((s) => s.trim()).filter(Boolean)
+            : [],
+          ordre_number: form.ordre_number || null,
+          zone_radius_km: form.zone_radius_km ? parseInt(form.zone_radius_km, 10) : 20,
+          horaires: form.horaires_text ? { text: form.horaires_text } : {},
           status: "pending",
         });
         if (!error) {
