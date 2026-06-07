@@ -149,10 +149,16 @@ const GA4DiagnosticCard = () => {
             </Badge>
           )}
         </CardTitle>
-        <Button size="sm" variant="ghost" onClick={load} disabled={loading}>
-          <RefreshCw className={`h-3.5 w-3.5 mr-1 ${loading ? "animate-spin" : ""}`} />
-          Recharger
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={sendTestEvent} disabled={sending}>
+            <Send className={`h-3.5 w-3.5 mr-1 ${sending ? "animate-pulse" : ""}`} />
+            Envoyer un événement test
+          </Button>
+          <Button size="sm" variant="ghost" onClick={load} disabled={loading}>
+            <RefreshCw className={`h-3.5 w-3.5 mr-1 ${loading ? "animate-spin" : ""}`} />
+            Recharger
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
         {/* Identifiants */}
