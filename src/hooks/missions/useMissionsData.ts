@@ -7,7 +7,7 @@ export function useAllMissions(currentUserId?: string) {
     queryFn: async () => {
       const { data: missions } = await supabase
         .from("small_missions")
-        .select("*, profiles:user_id(first_name, avatar_url, bio)")
+        .select("*, mission_type, profiles:user_id(first_name, avatar_url, bio)")
         .in("status", ["open", "in_progress", "completed"] as any[])
         .order("created_at", { ascending: false })
         .limit(50);
