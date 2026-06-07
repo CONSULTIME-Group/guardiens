@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
-import { PRO_CATEGORIES, getCategoryByValue } from "@/lib/proCategories";
+import { PRO_CATEGORIES, getCategoryByValue, getProInitials } from "@/lib/proCategories";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
