@@ -85,6 +85,7 @@ export default function AuthorPage() {
       name: "Guardiens",
       url: "https://guardiens.fr",
     },
+    ...(author.sameAs && author.sameAs.length > 0 && { sameAs: author.sameAs }),
   };
 
   return (
