@@ -628,19 +628,19 @@ exports[`SitterEmergencyCard — modes aperçu > snapshot — vue ACTIVE (profil
       class="px-1.5 py-0.5 rounded-full transition text-muted-foreground hover:text-foreground"
       type="button"
     >
-      locked
+      Verrouillé
     </button>
     <button
       class="px-1.5 py-0.5 rounded-full transition text-muted-foreground hover:text-foreground"
       type="button"
     >
-      eligible
+      Éligible
     </button>
     <button
       class="px-1.5 py-0.5 rounded-full transition bg-amber-500 text-white font-medium"
       type="button"
     >
-      active
+      Actif
     </button>
     <button
       aria-label="Quitter l'aperçu (revenir aux données réelles)"
@@ -689,7 +689,7 @@ exports[`SitterEmergencyCard — modes aperçu > snapshot — vue ACTIVE (profil
           <p
             class="text-xs text-muted-foreground"
           >
-            Actif — visible en cas d'urgence
+            Actif, visible en cas d'urgence
           </p>
         </div>
       </div>
@@ -737,7 +737,7 @@ exports[`SitterEmergencyCard — modes aperçu > snapshot — vue ACTIVE (profil
       <p
         class="text-amber-700 font-medium pt-1"
       >
-        2 interventions — 6 mois offerts
+        2 interventions, 2 mois offerts
       </p>
     </div>
     <button
@@ -805,19 +805,19 @@ exports[`SitterEmergencyCard — modes aperçu > snapshot — vue ELIGIBLE (tous
       class="px-1.5 py-0.5 rounded-full transition text-muted-foreground hover:text-foreground"
       type="button"
     >
-      locked
+      Verrouillé
     </button>
     <button
       class="px-1.5 py-0.5 rounded-full transition bg-amber-500 text-white font-medium"
       type="button"
     >
-      eligible
+      Éligible
     </button>
     <button
       class="px-1.5 py-0.5 rounded-full transition text-muted-foreground hover:text-foreground"
       type="button"
     >
-      active
+      Actif
     </button>
     <button
       aria-label="Quitter l'aperçu (revenir aux données réelles)"
@@ -917,19 +917,19 @@ exports[`SitterEmergencyCard — modes aperçu > snapshot — vue LOCKED (critè
       class="px-1.5 py-0.5 rounded-full transition bg-amber-500 text-white font-medium"
       type="button"
     >
-      locked
+      Verrouillé
     </button>
     <button
       class="px-1.5 py-0.5 rounded-full transition text-muted-foreground hover:text-foreground"
       type="button"
     >
-      eligible
+      Éligible
     </button>
     <button
       class="px-1.5 py-0.5 rounded-full transition text-muted-foreground hover:text-foreground"
       type="button"
     >
-      active
+      Actif
     </button>
     <button
       aria-label="Quitter l'aperçu (revenir aux données réelles)"
@@ -1012,7 +1012,7 @@ exports[`SitterEmergencyCard — modes aperçu > snapshot — vue LOCKED (critè
         <span
           class="text-muted-foreground"
         >
-          Gardes : 1/3
+          Gardes : 1/5
         </span>
       </div>
       <div
@@ -1148,7 +1148,7 @@ exports[`SitterEmergencyCard — modes aperçu > snapshot — vue LOCKED (critè
     <p
       class="text-xs text-muted-foreground"
     >
-      Encore 2 gardes pour débloquer le statut.
+      Encore 4 gardes pour débloquer le statut.
     </p>
     <a
       class="text-xs text-primary hover:underline inline-flex items-center gap-1"
