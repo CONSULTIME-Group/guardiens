@@ -80,6 +80,17 @@ export async function trackEvent(eventType: EventType, opts: TrackOptions = {}) 
 }
 
 /**
+ * Helper dédié aux clics sur les CTAs primaires.
+ * Centralise le nom + l'emplacement pour faciliter l'analyse de funnel.
+ */
+export function trackCtaClick(name: string, location: string, extra?: Record<string, any>) {
+  void trackEvent("cta_click", {
+    source: location,
+    metadata: { name, location, ...(extra ?? {}) },
+  });
+}
+
+/**
  * Variante qui accepte un user_id explicite (utile juste après signup
  * quand la session n'est pas encore propagée).
  */
