@@ -43,24 +43,108 @@ const LYON_FAQ = [
  },
 ];
 
-const DEFAULT_FAQ = (cityName: string) => [
+const ANNECY_FAQ = [
  {
- q: `Comment trouver un gardien de maison à ${cityName} ?`,
- a: `Sur Guardiens, vous publiez une annonce et les gardiens disponibles à ${cityName} et ses environs postulent directement. Chaque gardien est vérifié manuellement avant d'apparaître sur la plateforme.`,
+ q: "Comment trouver un gardien de confiance à Annecy ?",
+ a: "Vous publiez votre annonce gratuitement et les gardiens disponibles à Annecy et en Haute-Savoie postulent. Chaque profil est vérifié manuellement (pièce d'identité, avis croisés, badges de fiabilité). Vous échangez avec les candidats via la messagerie et organisez une rencontre avant de confier vos clés.",
  },
  {
- q: `Est-ce vraiment à 0 € pour les propriétaires à ${cityName} ?`,
- a: "Oui. Guardiens est à 0 € pour tous les propriétaires. Seuls les gardiens paient un abonnement pour accéder aux annonces et postuler.",
+ q: "Les gardiens à Annecy sont-ils habitués aux logements de montagne ?",
+ a: "Oui. Nos gardiens locaux connaissent les spécificités hivernales : gestion du chauffage, prévention du gel des canalisations, accès difficiles par grand froid. Ils anticipent aussi l'affluence estivale autour du lac et adaptent les sorties chien aux pistes forestières moins fréquentées.",
  },
  {
- q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityName} ?`,
- a: "Guardiens dispose d'un réseau de Gardiens d'Urgence dans chaque zone. En cas d'imprévu, animal malade, problème technique, le gardien en poste peut déclencher une alerte directement depuis l'application.",
+ q: "Puis-je faire garder un chien actif qui a besoin de longues balades ?",
+ a: "Absolument. Annecy et ses alentours (Forêt du Crêt du Maure, tour du lac, Semnoz) sont un terrain de jeu idéal. Précisez le rythme habituel de votre chien dans l'annonce, les gardiens sélectionnent leurs candidatures en conséquence.",
+ },
+ {
+ q: "Que se passe-t-il en cas d'urgence vétérinaire à Annecy ?",
+ a: "Le guide de la maison que vous remplissez avant le départ contient les coordonnées de votre vétérinaire et de la clinique d'urgence la plus proche. En cas d'imprévu, le gardien suit ces consignes. Le réseau Gardien d'Urgence Guardiens est mobilisable en quelques heures sur la Haute-Savoie.",
+ },
+ {
+ q: "Combien coûte une garde de maison à Annecy ?",
+ a: "Pour les propriétaires, Guardiens est gratuit : aucun frais, aucune commission. Les gardiens accèdent à la plateforme via un abonnement modeste (6,99 €/mois), et tous les gardiens sont gratuits jusqu'au 14 juillet 2026.",
+ },
+ {
+ q: "Combien de temps à l'avance publier mon annonce pour les vacances d'été ?",
+ a: "Annecy est très demandée en été. Pour juillet-août, publiez idéalement 4 à 6 semaines à l'avance pour recevoir un large choix de candidatures. Pour un week-end hors saison, 1 à 2 semaines suffisent généralement.",
  },
 ];
 
+const GRENOBLE_FAQ = [
+ {
+ q: "Comment trouver un home sitter à Grenoble et en Isère ?",
+ a: "Vous publiez gratuitement votre annonce sur Guardiens et les gardiens vérifiés disponibles à Grenoble et dans le bassin grenoblois postulent. Vous choisissez le profil qui vous convient après échange et rencontre.",
+ },
+ {
+ q: "Les gardiens à Grenoble connaissent-ils les sorties chien adaptées en montagne ?",
+ a: "Oui. Beaucoup de nos gardiens grenoblois pratiquent eux-mêmes la randonnée ou le trail. Ils connaissent les sentiers de la Bastille, du Vercors et de la Chartreuse, ainsi que les zones à éviter en été (forte chaleur en plaine) et en hiver (neige, sel de déneigement).",
+ },
+ {
+ q: "Comment se passe la garde dans un appartement en centre-ville ?",
+ a: "La majorité de nos gardes à Grenoble se font en appartement. Les gardiens organisent les sorties chien selon les habitudes que vous décrivez (Jardin de Ville, parc Paul-Mistral, berges de l'Isère). Pour les chats, ils respectent les rituels alimentaires et de litière indiqués dans le guide de la maison.",
+ },
+ {
+ q: "Mon animal a un traitement médical, est-ce gérable ?",
+ a: "Oui. Vous renseignez précisément le protocole dans le guide de la maison (médicament, posologie, horaires). Les gardiens confirment au candidatant qu'ils sont à l'aise avec l'administration de traitements.",
+ },
+ {
+ q: "Est-ce que Guardiens couvre les communes autour de Grenoble ?",
+ a: "Oui. Le maillage couvre l'ensemble du bassin grenoblois : Échirolles, Saint-Martin-d'Hères, Meylan, Voiron, Vif. Indiquez votre commune exacte dans l'annonce, les gardiens géolocalisés à proximité reçoivent une alerte.",
+ },
+ {
+ q: "À combien revient une garde de chien à Grenoble ?",
+ a: "Pour les propriétaires, c'est gratuit : aucun frais ni commission sur la plateforme. Les gardiens souscrivent un abonnement à 6,99 €/mois et sont gratuits jusqu'au 14 juillet 2026.",
+ },
+];
+
+const CHAMBERY_FAQ = [
+ {
+ q: "Comment trouver un gardien de confiance à Chambéry ?",
+ a: "Vous publiez votre annonce gratuitement sur Guardiens, les gardiens vérifiés disponibles à Chambéry et en Savoie postulent. Vous échangez avec eux et organisez une rencontre avant la garde.",
+ },
+ {
+ q: "Les gardiens à Chambéry connaissent-ils les contraintes saisonnières ?",
+ a: "Oui. Nos gardiens savoyards gèrent le chauffage en hiver, la prévention du gel, ainsi que la chaleur estivale en cluse. Ils adaptent les sorties chien : tôt le matin l'été, sentiers ombragés (Charvet, Lac du Bourget) en demi-saison.",
+ },
+ {
+ q: "Puis-je faire garder mon animal pour une absence longue en Savoie ?",
+ a: "Oui. Guardiens accepte les gardes de toute durée, du week-end à plusieurs semaines. Précisez la durée exacte dans l'annonce, les gardiens disponibles sur la période vous contactent.",
+ },
+ {
+ q: "Que se passe-t-il en cas de problème pendant la garde ?",
+ a: "Le gardien suit les consignes du guide de la maison (vétérinaire, contact technique, personne de confiance). Le réseau Gardien d'Urgence Guardiens peut être mobilisé sur la Savoie en cas d'imprévu majeur.",
+ },
+ {
+ q: "Combien coûte Guardiens à Chambéry ?",
+ a: "Pour les propriétaires, c'est entièrement gratuit. Les gardiens accèdent à la plateforme via un abonnement à 6,99 €/mois (ou 12 € en one-shot), et tous les gardiens sont gratuits jusqu'au 14 juillet 2026.",
+ },
+];
+
+const DEFAULT_FAQ = (cityName: string) => [
+ {
+ q: `Comment trouver un gardien de maison à ${cityName} ?`,
+ a: `Sur Guardiens, vous publiez une annonce gratuite et les gardiens disponibles à ${cityName} et ses environs postulent directement. Chaque gardien est vérifié manuellement avant d'apparaître sur la plateforme.`,
+ },
+ {
+ q: `Est-ce vraiment gratuit pour les propriétaires à ${cityName} ?`,
+ a: "Oui. Guardiens est gratuit pour tous les propriétaires : aucun frais, aucune commission. Seuls les gardiens souscrivent un abonnement (6,99 €/mois) pour accéder aux annonces et postuler.",
+ },
+ {
+ q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityName} ?`,
+ a: "Guardiens dispose d'un réseau de Gardiens d'Urgence dans chaque zone. En cas d'imprévu (animal malade, problème technique), le gardien en poste peut déclencher une alerte directement depuis l'application.",
+ },
+];
+
+const FAQ_BY_SLUG: Record<string, Array<{ q: string; a: string }>> = {
+ lyon: LYON_FAQ,
+ annecy: ANNECY_FAQ,
+ grenoble: GRENOBLE_FAQ,
+ chambery: CHAMBERY_FAQ,
+};
+
 const CitySchemaOrg = ({ city }: Props) => {
  const isLyon = city.slug === "lyon";
- const faqItems = isLyon ? LYON_FAQ : DEFAULT_FAQ(city.name);
+ const faqItems = FAQ_BY_SLUG[city.slug] || DEFAULT_FAQ(city.name);
 
  const graph: any[] = [
  {
