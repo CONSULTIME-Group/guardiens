@@ -450,6 +450,21 @@ const SitterSitView = ({
       {/* Note: la barre d'action "Postuler" est désormais affichée tout en haut,
           juste sous le header (cf. ApplyBar plus haut dans ce composant). */}
 
+      {/* Sticky mobile : favoris + CTA principal, padding bottom géré côté layout via safe-area */}
+      <SitMobileStickyApply
+        sitId={sit.id}
+        state={
+          !sit.accepting_applications
+            ? "closed"
+            : hasApplied
+              ? "applied"
+              : accessLevel === 1 || !canApplyGuards
+                ? "blocked"
+                : "apply"
+        }
+        onApply={() => setApplyOpen(true)}
+      />
+
       <ApplicationModal
         open={applyOpen}
         onOpenChange={setApplyOpen}
