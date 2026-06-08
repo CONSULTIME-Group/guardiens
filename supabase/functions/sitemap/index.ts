@@ -12,6 +12,7 @@ const staticPages = [
   { loc: "/guides", priority: "0.8", changefreq: "weekly" },
   { loc: "/actualites", priority: "0.8", changefreq: "daily" },
   { loc: "/a-propos", priority: "0.6", changefreq: "monthly" },
+  { loc: "/observatoire-garde-animaux", priority: "0.9", changefreq: "monthly" },
   { loc: "/auteurs/jeremie", priority: "0.5", changefreq: "monthly" },
   { loc: "/auteurs/elisa", priority: "0.5", changefreq: "monthly" },
 ];
