@@ -1,56 +1,35 @@
-## Objectif
+## Périmètre (hors tarifs, gratuité préservée)
 
-Intégrer 3 fonctionnalités LLM légères via Lovable AI Gateway (Gemini Flash, ~0.01€/appel, aucune clé à fournir), sans toucher au produit existant.
+Vous avez raison, on garde la promesse « à 0 € jusqu'au 14 juillet 2026 » partout. Je n'enlève rien à ce sujet, j'ajuste juste les wordings qui parlent encore de prix payant comme si c'était actif aujourd'hui.
 
-## 1. Réécriture d'annonce (bouton "Améliorer ma description")
+## Vague 1, quick wins safe (ce tour)
 
-- Edge function `improve-sit-description` : entrée = texte brut + contexte (animaux, type logement, dates), sortie JSON `{ title, description, suggestions[] }`.
-- Bouton ajouté dans le formulaire de création/édition de sit, à côté du champ description.
-- Modal de prévisualisation avant/après avec acceptation partielle (titre seul, description seule, ou les deux).
-- Garde-fou tone : vouvoiement obligatoire, pas de tiret cadratin, pas du mot proscrit « voisin », pas d'AURA (mémoires projet respectées).
+1. **PremiumGateDialog** : rendre le wording free-period aware via `isInGracePeriod()` / `isBeforeLaunch()`. Affiche « Activer mon espace gardien, à 0 € en ce moment » pendant la gratuité, sinon « 6,99 €/mois sans engagement ». Supprime « essayer sans frais » ambigu.
+2. **Typographie tarifs** : ajouter `font-display tabular-nums` sur les prix dans `PricingCards.tsx` et `PricingCardsCheckout.tsx`.
+3. **Analytics `cta_click`** : helper `trackCtaClick(name, location)` dans `src/lib/analytics.ts`, branché sur 3 CTAs primaires (Hero principal, PremiumGate, RoleActivationBanner).
 
-## 2. Bio guidée gardien (3 brouillons à partir de 5 questions)
+## Vague 2, UX/UI (tour suivant, après votre OK)
 
-- Edge function `generate-bio-drafts` : entrée = 5 réponses courtes (expériences animaux, dispos, motivations, style, lieu), sortie = 3 brouillons distincts (chaleureux / pro / décontracté).
-- Ajout dans le profil gardien : bouton "Générer ma bio" qui ouvre un mini-wizard (5 questions courtes) puis affiche les 3 cartes. Clic = remplit le champ bio.
-- Booste le completion score (seuil 60% pour Level 1).
+4. Hero : CTA unique primaire, secondaire en `ghost`.
+5. Hero : micro social proof (37 familles, 234 animaux, 4.9/5) avec composant existant si dispo.
+6. Sticky CTA mobile sur `SitDetail` et `SitterProfile`.
+7. Empty states : remplacer Lucide par gouaches existantes (audit ciblé).
+8. Favoris : bouton flottant `SitDetail`.
 
-## 3. Modération pré-publication (annonces + messages)
+## Vague 3, SEO (tour suivant)
 
-- Edge function `moderate-content` : entrée = texte + type (annonce/message), sortie = `{ status: ok|warning|block, reasons[] }`.
-- Détection : coordonnées (tel, email, adresses), tentatives de transaction off-platform, propos hors-charte, mot proscrit.
-- Hook côté front : appelé silencieusement à la soumission. Si `warning` → toast non bloquant avec correction suggérée. Si `block` → modal explicative + lien CGS.
-- Trace en DB (`moderation_logs`) pour la file admin existante.
+9. CityPage : bloc « Villes proches » + JSON-LD `Service` avec `areaServed`.
+10. SitDetail images : `loading="lazy"` + `fetchpriority="low"` sauf cover.
+11. Sitemap : `lastmod` dynamique par article.
+12. Article pilier « Combien coûte un gardien d'animaux à domicile en France en 2026 ? » (rédaction = gros morceau, à confirmer ton/longueur).
 
-## Architecture technique
+## Hors scope explicite
 
-- 3 edge functions Supabase, modèle `google/gemini-3-flash-preview`, `verify_jwt=true` par défaut.
-- Provider helper partagé `_shared/ai-gateway.ts`.
-- Lazy-import depuis le front (pas de surcoût bundle).
-- Toasts via `sonner` existant.
-- Aucune nouvelle dépendance npm.
+- Toute mention « 6,99 € » présentée comme prix actif sans condition de date, KO. On garde la double formulation conditionnelle partout.
+- Renommer « sit/sitter » en « garde/gardien » côté UI : prévu mais en lot dédié (risque de régression i18n / tests), pas mélangé avec le reste.
 
-## DB (nouvelle table)
+## Validation
 
-```sql
-create table public.moderation_logs (
-  id uuid pk default gen_random_uuid(),
-  user_id uuid references auth.users(id) on delete cascade,
-  content_type text, -- 'sit' | 'message' | 'bio'
-  status text,      -- 'ok' | 'warning' | 'block'
-  reasons jsonb,
-  excerpt text,
-  created_at timestamptz default now()
-);
-```
-+ RLS : user voit ses propres logs, admin via `has_role`, GRANT standards.
+Tests Vitest existants (`no-trial-wording`, `free-period-dates-consistency`, `pricing-oneshot-consistency`) doivent rester verts à chaque vague.
 
-## Hors scope (à proposer plus tard si succès)
-
-- Matching sémantique (embeddings) → phase 2
-- Réponses suggérées en messagerie → phase 2
-- Chat FAQ → phase 3
-
-## Coût estimé
-
-~0.005–0.02 € par appel selon longueur. Modération = appel court (~0.003 €). Réécriture/bio = ~0.015 €. Volume gardien actuel = négligeable sur le budget Lovable AI.
+Je commence par la Vague 1 dès votre feu vert, ou je file direct si vous me dites « go ».
