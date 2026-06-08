@@ -2,6 +2,7 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import ActivateRoleDialog from "@/components/premium/ActivateRoleDialog";
 import { isBeforeLaunch, isInGracePeriod } from "@/lib/constants";
+import { trackCtaClick } from "@/lib/analytics";
 
 interface RoleActivationBannerProps {
   userRole: string;
