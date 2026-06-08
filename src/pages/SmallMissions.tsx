@@ -585,19 +585,21 @@ const SmallMissions = () => {
                     "Soyez la première personne à publier votre besoin. Une demande d'aujourd'hui, c'est des gens du coin qui la voient demain, et souvent une rencontre qui change la semaine."
                   )}
                 </p>
-                <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
-                  <Link to="/petites-missions/creer" className="inline-block">
-                    <Button variant="hero" size="lg">
-                      {mode === "offer" ? "J'ose, je publie ma proposition" : "J'ose, je publie ma demande"}
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
-                  {radiusKm > 0 && (
-                    <Button variant="outline" size="lg" onClick={() => setRadiusKm(0)}>
-                      Élargir à la France entière
-                    </Button>
-                  )}
-                </div>
+                {outOfZoneMissions.length === 0 && (
+                  <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+                    <Link to="/petites-missions/creer" className="inline-block">
+                      <Button variant="hero" size="lg">
+                        {mode === "offer" ? "J'ose, je publie ma proposition" : "J'ose, je publie ma demande"}
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </Link>
+                    {radiusKm > 0 && (
+                      <Button variant="outline" size="lg" onClick={() => setRadiusKm(0)}>
+                        Élargir à la France entière
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
