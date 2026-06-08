@@ -30,6 +30,7 @@ const ProfileSchemaOrg = ({
   knowsAbout,
   url,
   role,
+  events,
 }: ProfileSchemaProps) => {
   // ── Person de base (toujours présent) ──
   const person: Record<string, any> = {
