@@ -82,6 +82,10 @@ const ALLOWED_FILES = new Set<string>([
   // Home = icône de navigation (breadcrumb racine, nav primaire)
   "src/components/layout/Breadcrumbs.tsx",
   "src/components/layout/Navigation.tsx",
+  // MapPin / Calendar = métadonnées fonctionnelles (lieu, date) sur les listings,
+  // pas du décor éditorial.
+  "src/pages/GuidesListing.tsx",
+  "src/pages/News.tsx",
 ]);
 
 /** Dossiers ignorés (vendor / générés). */
