@@ -762,6 +762,17 @@ export default function PublicSitterProfile() {
           knowsAbout={animalLabels ? animalLabels.split(', ') : undefined}
           role={hasSitterProfile && hasOwnerProfile ? 'both' : hasSitterProfile ? 'sitter' : hasOwnerProfile ? 'owner' : undefined}
           url={`https://guardiens.fr/gardiens/${id}`}
+          events={buildTrustTimeline({
+            memberSince: profile?.created_at,
+            reviews,
+            badges: (userBadges || []).map((b: any) => ({
+              badge_id: b.badge_id,
+              created_at: b.created_at,
+              count: b.count ?? 1,
+            })),
+            completedSits,
+            lastActivity: sitterProfile?.last_seen_at ?? null,
+          }).map((e) => ({ name: e.label, date: e.date }))}
         />
       )}
       {/* Bandes latérales décoratives, desktop ≥ lg uniquement (sinon traversent le contenu en mobile) */}
