@@ -30,13 +30,16 @@ function escapeXml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 }
 
-function urlEntry(loc: string, lastmod: string, changefreq: string, priority: string): string {
+function urlEntry(loc: string, lastmod: string, changefreq: string, priority: string, imageUrl?: string | null): string {
+  const imageBlock = imageUrl
+    ? `    <image:image>\n      <image:loc>${escapeXml(imageUrl)}</image:loc>\n    </image:image>\n`
+    : "";
   return `  <url>
     <loc>${escapeXml(SITE_URL + loc)}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
-  </url>\n`;
+${imageBlock}  </url>\n`;
 }
 
 const PRIORITY_MAP: Record<string, string> = {
