@@ -74,6 +74,8 @@ const ArticleDetail = lazy(() => import("./pages/ArticleDetail"));
 const AuthorPage = lazy(() => import("./pages/AuthorPage"));
 const About = lazy(() => import("./pages/About"));
 const Observatoire = lazy(() => import("./pages/Observatoire"));
+const BreedsListing = lazy(() => import("./pages/BreedsListing"));
+const BreedPage = lazy(() => import("./pages/BreedPage"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Cgs = lazy(() => import("./pages/Cgs"));
@@ -278,6 +280,8 @@ const AppRoutes = () => (
       <Route path="/guide" element={<Navigate to="/guides" replace />} />
       <Route path="/guide/:slug" element={<NavigateGuideSlug />} />
       <Route path="/house-sitting/:slug" element={<CityPage />} />
+      <Route path="/races" element={<BreedsListing />} />
+      <Route path="/races/:slug" element={<BreedPage />} />
       <Route path="/departement/:slug" element={<DepartmentPage />} />
       <Route path="/tarifs" element={<Pricing />} />
       <Route path="/test-accord" element={<div className="p-6 bg-background min-h-screen"><TestAccordLazy /></div>} />
