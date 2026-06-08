@@ -13,6 +13,8 @@ interface ProfileSchemaProps {
   knowsAbout?: string[];
   url: string;
   role?: "sitter" | "owner" | "both";
+  /** Évènements publics (Person.event) pour enrichir le parcours dans Schema.org. */
+  events?: Array<{ name: string; date: string }>;
 }
 
 const ProfileSchemaOrg = ({
