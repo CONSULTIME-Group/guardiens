@@ -450,6 +450,9 @@ const SitterSitView = ({
       {/* Note: la barre d'action "Postuler" est désormais affichée tout en haut,
           juste sous le header (cf. ApplyBar plus haut dans ce composant). */}
 
+      {/* Spacer pour éviter que la sticky mobile masque le contenu */}
+      <div className="md:hidden h-20" aria-hidden="true" />
+
       {/* Sticky mobile : favoris + CTA principal, padding bottom géré côté layout via safe-area */}
       <SitMobileStickyApply
         sitId={sit.id}
