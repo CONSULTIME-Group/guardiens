@@ -73,6 +73,7 @@ const News = lazy(() => import("./pages/News"));
 const ArticleDetail = lazy(() => import("./pages/ArticleDetail"));
 const AuthorPage = lazy(() => import("./pages/AuthorPage"));
 const About = lazy(() => import("./pages/About"));
+const Observatoire = lazy(() => import("./pages/Observatoire"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Cgs = lazy(() => import("./pages/Cgs"));
