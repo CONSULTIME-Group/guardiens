@@ -294,11 +294,35 @@ const CityPage = () => {
  Les gardiens Guardiens couvrent {cityData.name} et ses communes alentour.
  </p>
  <div className="flex flex-wrap gap-2">
- {content.nearbyTowns.map((town) => (
- <Badge key={town} variant="outline" className="text-sm px-3 py-1">
- {town}
- </Badge>
- ))}
+ {content.nearbyTowns.map((town) => {
+   // Si la ville voisine existe en CityPage, on la transforme en lien interne pour le maillage SEO.
+   const townSlug = town
+     .toLowerCase()
+     .normalize("NFD")
+     .replace(/[\u0300-\u036f]/g, "")
+     .replace(/[^a-z0-9]+/g, "-")
+     .replace(/^-|-$/g, "");
+   const linked = CITIES.find((c) => c.slug === townSlug);
+   if (linked) {
+     return (
+       <Link
+         key={town}
+         to={`/house-sitting/${linked.slug}`}
+         className="inline-flex"
+         aria-label={`Voir la page house-sitting à ${linked.name}`}
+       >
+         <Badge variant="outline" className="text-sm px-3 py-1 hover:bg-primary/5 hover:border-primary/40 transition-colors cursor-pointer">
+           {town}
+         </Badge>
+       </Link>
+     );
+   }
+   return (
+     <Badge key={town} variant="outline" className="text-sm px-3 py-1">
+       {town}
+     </Badge>
+   );
+ })}
  </div>
  </section>
  )}
