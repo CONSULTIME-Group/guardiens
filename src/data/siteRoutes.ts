@@ -296,6 +296,22 @@ title: "Tarifs — 6,99\u00A0€/mois pour les gardiens | Guardiens",
   sitemapPriority: "0.5",
   changeFreq: "monthly",
  },
+ {
+  path: "/observatoire-garde-animaux",
+  title: "Observatoire de la garde d'animaux à domicile en France | Guardiens",
+  metaDescription: "Chiffres-clés sur la garde d'animaux à domicile en France : nombre d'animaux accompagnés, modèle économique, vérifications, badges. Datapoints sourcés Guardiens.",
+  h1: "Observatoire de la garde d'animaux à domicile",
+  sitemapPriority: "0.9",
+  changeFreq: "monthly",
+ },
+ {
+  path: "/races",
+  title: "Races d'animaux : guides de garde à domicile | Guardiens",
+  metaDescription: "Conseils de garde par race : tempérament, besoins, recommandations pour gardiens. Chiens, chats, NAC, équidés. Guides rédigés à partir de gardes réelles.",
+  h1: "Guides de garde par race",
+  sitemapPriority: "0.8",
+  changeFreq: "weekly",
+ },
 ];
 
 /**

@@ -208,12 +208,19 @@ async function main() {
       "breed_profiles", cache,
       () => maxUpdatedAt("breed_profiles", "generated_at"),
       async () => (await supabase.from("breed_profiles").select("breed, species, generated_at")).data,
-      rows => rows.map(bp => ({
-        loc: `/races/${bp.species.toLowerCase()}-${bp.breed.toLowerCase().replace(/\s+/g, "-")}`,
-        lastmod: (bp.generated_at || today).split("T")[0],
-        changefreq: "monthly",
-        priority: "0.6",
-      }))
+      rows => {
+        // Slug aligné avec src/lib/normalize.ts → slugify() (sinon soft-404 sur accents)
+        const slugifyBreed = (s) =>
+          s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .replace(/œ/g, "oe").replace(/æ/g, "ae")
+            .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+        return rows.map(bp => ({
+          loc: `/races/${bp.species.toLowerCase()}-${slugifyBreed(bp.breed)}`,
+          lastmod: (bp.generated_at || today).split("T")[0],
+          changefreq: "monthly",
+          priority: "0.6",
+        }));
+      }
     ),
     fetchOrCache(
       "public_profiles", cache,

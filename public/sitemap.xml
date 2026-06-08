@@ -2,141 +2,165 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://guardiens.fr/</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/tarifs</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/faq</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/petites-missions</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/petites-missions/lyon</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/gardien-urgence</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/pros</loc>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/guides</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/annonces</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/contact</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/a-propos</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/cgu</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/cgs</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/confidentialite</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/mentions-legales</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/auteurs/jeremie</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/auteurs/elisa</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/observatoire-garde-animaux</loc>
+    <lastmod>2026-06-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/races</loc>
+    <lastmod>2026-06-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/house-sitting/annecy</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/lyon</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/grenoble</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/caluire-et-cuire</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/chambery</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/aura</loc>
-    <lastmod>2026-05-25</lastmod>
+    <lastmod>2026-06-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/devenir-gardien-pro-animalier</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/jardinage-entraide-quartier-lyon</loc>
@@ -157,10 +181,10 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/c-est-quoi-le-house-sitting</loc>
+    <loc>https://guardiens.fr/actualites/berger-australien-guide-race</loc>
     <lastmod>2026-05-10</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/arroser-plantes-vacances-grenoble</loc>
@@ -187,16 +211,52 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/bengal-guide-race</loc>
-    <lastmod>2026-05-10</lastmod>
+    <loc>https://guardiens.fr/actualites/comment-devenir-home-sitter-france-guide-debutant</loc>
+    <lastmod>2026-06-06</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/veterinaire-urgence-grenoble-isere</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/persan-guide-race</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/petites-missions-entraide-guardiens</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/c-est-quoi-le-house-sitting</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/s-absenter-avec-animal-guide-solutions-2026</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/bengal-guide-race</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/garde-animaux-croix-rousse-lyon</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/golden-retriever-guide-race-complet</loc>
@@ -223,16 +283,22 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/actualites/house-sitting-aura-guide-complet</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/actualites/comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers</loc>
     <lastmod>2026-05-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/persan-guide-race</loc>
-    <lastmod>2026-05-10</lastmod>
+    <loc>https://guardiens.fr/actualites/vacances-longues-garde-animal-2-semaines</loc>
+    <lastmod>2026-05-12</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/securite-confiance-house-sitting</loc>
@@ -241,7 +307,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/petites-missions-entraide-guardiens</loc>
+    <loc>https://guardiens.fr/actualites/gerer-imprevu-pendant-garde</loc>
     <lastmod>2026-05-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -263,12 +329,6 @@
     <lastmod>2026-05-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/s-absenter-avec-animal-guide-solutions-2026</loc>
-    <lastmod>2026-05-10</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/labrador-retriever-guide-race</loc>
@@ -295,10 +355,28 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/actualites/garde-animaux-savoie-guide</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/actualites/berger-allemand-guide-race</loc>
     <lastmod>2026-05-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/pet-sitting-clermont-ferrand</loc>
+    <lastmod>2026-04-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/gerer-animaux-difficiles-garde</loc>
+    <lastmod>2026-04-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/veterinaire-urgence-lyon-guide</loc>
@@ -308,12 +386,6 @@
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/faire-garder-animal-pendant-hospitalisation</loc>
-    <lastmod>2026-05-10</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/house-sitting-aura-guide-complet</loc>
     <lastmod>2026-05-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -331,13 +403,13 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/gerer-imprevu-pendant-garde</loc>
-    <lastmod>2026-05-10</lastmod>
+    <loc>https://guardiens.fr/actualites/accueillir-gardien-bonnes-pratiques</loc>
+    <lastmod>2026-04-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/garde-animaux-savoie-guide</loc>
+    <loc>https://guardiens.fr/actualites/cavalier-king-charles-guide-race</loc>
     <lastmod>2026-05-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -353,18 +425,6 @@
     <lastmod>2026-04-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/pet-sitting-clermont-ferrand</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/gerer-animaux-difficiles-garde</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/house-sitting-hiver-montagne-savoie</loc>
@@ -391,32 +451,20 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/accueillir-gardien-bonnes-pratiques</loc>
+    <loc>https://guardiens.fr/actualites/parcs-chiens-lyon-guide-complet</loc>
     <lastmod>2026-04-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/choisir-gardien-bons-criteres</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/garde-animaux-croix-rousse-lyon</loc>
-    <lastmod>2026-05-10</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/cavalier-king-charles-guide-race</loc>
-    <lastmod>2026-05-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/vacances-longues-garde-animal-2-semaines</loc>
-    <lastmod>2026-05-12</lastmod>
+    <loc>https://guardiens.fr/actualites/veterinaire-urgence-annecy-haute-savoie</loc>
+    <lastmod>2026-04-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/choisir-gardien-bons-criteres</loc>
+    <lastmod>2026-04-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -445,31 +493,13 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/parcs-chiens-lyon-guide-complet</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/veterinaire-urgence-annecy-haute-savoie</loc>
-    <lastmod>2026-04-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/pension-chien-alternatives-guide</loc>
+    <loc>https://guardiens.fr/actualites/checklist-partir-vacances-animaux</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/berger-australien-guide-race</loc>
-    <lastmod>2026-05-10</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/checklist-partir-vacances-animaux</loc>
+    <loc>https://guardiens.fr/actualites/pension-chien-alternatives-guide</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -543,6 +573,36 @@
   <url>
     <loc>https://guardiens.fr/house-sitting/bourg-saint-maurice</loc>
     <lastmod>2026-03-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/paris</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/marseille</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/bordeaux</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/nantes</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/toulouse</loc>
+    <lastmod>2026-06-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -893,5 +953,101 @@
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/races/dog-malinois</loc>
+    <lastmod>2026-03-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/races/cat-bleu-de-russe</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/races/cat-maine-coon</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/races/dog-croise-bichon</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/races/bird-gris-du-gabon</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/races/horse-ane-du-cotentin</loc>
+    <lastmod>2026-04-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/races/horse-jument-merens</loc>
+    <lastmod>2026-04-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/races/cat-chat-des-forets-norvegiennes</loc>
+    <lastmod>2026-04-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/races/farm_animal-poules-marans</loc>
+    <lastmod>2026-04-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/races/cat-sacre-de-birmanie</loc>
+    <lastmod>2026-04-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/races/dog-husky-siberien</loc>
+    <lastmod>2026-04-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/races/rodent-rat</loc>
+    <lastmod>2026-05-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/races/cat-europeen</loc>
+    <lastmod>2026-05-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/races/dog-beauceron</loc>
+    <lastmod>2026-05-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/races/dog-jack-russel</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/races/dog-teclem</loc>
+    <lastmod>2026-05-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>

@@ -1,373 +1,35 @@
 {
   "sources": {
-    "articles": {
-      "head": "2026-05-12T09:40:36.018734+00:00",
-      "fetchedAt": "2026-05-21T21:55:32.625Z"
-    },
     "seo_department_pages": {
       "head": "2026-03-26T05:46:21.361179+00:00",
-      "fetchedAt": "2026-05-21T21:55:32.629Z"
+      "fetchedAt": "2026-06-08T07:21:18.116Z"
     },
-    "public_sits": {
-      "head": null,
-      "fetchedAt": "2026-05-21T21:55:32.648Z"
-    },
-    "seo_city_pages": {
-      "head": "2026-05-04T07:47:07.499343+00:00",
-      "fetchedAt": "2026-05-21T21:55:32.668Z"
-    },
-    "city_guides": {
-      "head": "2026-05-21T20:15:30.121997+00:00",
-      "fetchedAt": "2026-05-21T21:55:32.669Z"
+    "breed_profiles": {
+      "head": "2026-05-24T21:01:12.702919+00:00",
+      "fetchedAt": "2026-06-08T07:21:18.123Z"
     },
     "public_profiles": {
       "head": null,
-      "fetchedAt": "2026-05-21T21:55:32.669Z"
+      "fetchedAt": "2026-06-08T07:21:18.136Z"
     },
-    "breed_profiles": {
+    "city_guides": {
+      "head": "2026-05-21T20:15:30.121997+00:00",
+      "fetchedAt": "2026-06-08T07:21:18.141Z"
+    },
+    "articles": {
+      "head": "2026-06-06T13:49:48.281916+00:00",
+      "fetchedAt": "2026-06-08T07:21:18.147Z"
+    },
+    "public_sits": {
       "head": null,
-      "fetchedAt": "2026-05-21T21:55:32.676Z"
+      "fetchedAt": "2026-06-08T07:21:18.169Z"
+    },
+    "seo_city_pages": {
+      "head": "2026-06-06T07:52:00.978104+00:00",
+      "fetchedAt": "2026-06-08T07:21:18.199Z"
     }
   },
   "entries": {
-    "articles": [
-      {
-        "loc": "/actualites/jardinage-entraide-quartier-lyon",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/actualites/preparer-maison-avant-garde",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/parcs-balades-chiens-grenoble-guide",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/c-est-quoi-le-house-sitting",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/arroser-plantes-vacances-grenoble",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/actualites/arroser-plantes-vacances-lyon",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/actualites/garde-chat-domicile-house-sitting",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/devenir-gardien-urgence-guardiens",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/bengal-guide-race",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/veterinaire-urgence-grenoble-isere",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/golden-retriever-guide-race-complet",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/jardinage-entraide-quartier-annecy",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/actualites/house-sitting-cadre-juridique-france",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/creer-profil-gardien-attractif",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.9"
-      },
-      {
-        "loc": "/actualites/persan-guide-race",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/securite-confiance-house-sitting",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/petites-missions-entraide-guardiens",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/garde-animaux-haute-savoie-guide",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/house-sitting-vs-pension-comparatif",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/garde-chat-presquile-lyon",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/actualites/s-absenter-avec-animal-guide-solutions-2026",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/labrador-retriever-guide-race",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/jardinage-entraide-locale-grenoble",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/actualites/rediger-bonne-annonce-house-sitting",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/maine-coon-guide-race",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/berger-allemand-guide-race",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/veterinaire-urgence-lyon-guide",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/faire-garder-animal-pendant-hospitalisation",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/house-sitting-aura-guide-complet",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/que-faire-probleme-pendant-garde",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/pet-sitting-saint-etienne-loire",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/gerer-imprevu-pendant-garde",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/garde-animaux-savoie-guide",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/garde-chat-domicile-lyon",
-        "lastmod": "2026-05-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/parcs-balades-chiens-annecy-guide",
-        "lastmod": "2026-04-15",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/pet-sitting-clermont-ferrand",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/gerer-animaux-difficiles-garde",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/house-sitting-hiver-montagne-savoie",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/siamois-guide-race",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/arroser-plantes-vacances-annecy",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/actualites/bien-etre-animal-pendant-absence",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/accueillir-gardien-bonnes-pratiques",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/choisir-gardien-bons-criteres",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/garde-animaux-croix-rousse-lyon",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/actualites/cavalier-king-charles-guide-race",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/vacances-longues-garde-animal-2-semaines",
-        "lastmod": "2026-05-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/house-sitting-week-end-court-sejour-aura",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/house-sitting-noel-fetes-fin-annee",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/reussir-premiere-garde-house-sitting",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/house-sitting-ete-aura-guide",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/parcs-chiens-lyon-guide-complet",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/veterinaire-urgence-annecy-haute-savoie",
-        "lastmod": "2026-04-15",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/pension-chien-alternatives-guide",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/berger-australien-guide-race",
-        "lastmod": "2026-05-10",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/checklist-partir-vacances-animaux",
-        "lastmod": "2026-04-14",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      }
-    ],
     "seo_department_pages": [
       {
         "loc": "/departement/puy-de-dome",
@@ -412,111 +74,105 @@
         "priority": "0.8"
       }
     ],
-    "public_sits": [],
-    "seo_city_pages": [
+    "breed_profiles": [
       {
-        "loc": "/house-sitting/megeve",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/dog-malinois",
+        "lastmod": "2026-03-27",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/house-sitting/valence",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/cat-bleu-de-russe",
+        "lastmod": "2026-04-22",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/house-sitting/villeurbanne",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/cat-maine-coon",
+        "lastmod": "2026-04-22",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/house-sitting/clermont-ferrand",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/dog-croise-bichon",
+        "lastmod": "2026-04-22",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/house-sitting/annecy",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/bird-gris-du-gabon",
+        "lastmod": "2026-04-22",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/house-sitting/ecully",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/horse-ane-du-cotentin",
+        "lastmod": "2026-04-26",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/house-sitting/chambery",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/horse-jument-merens",
+        "lastmod": "2026-04-26",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/house-sitting/beaujolais",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/cat-chat-des-forets-norvegiennes",
+        "lastmod": "2026-04-26",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/house-sitting/caluire-et-cuire",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/farm_animal-poules-marans",
+        "lastmod": "2026-04-26",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/house-sitting/tassin-la-demi-lune",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/cat-sacre-de-birmanie",
+        "lastmod": "2026-04-29",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/house-sitting/saint-didier-au-mont-d-or",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/dog-husky-siberien",
+        "lastmod": "2026-04-29",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/house-sitting/saint-etienne",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/rodent-rat",
+        "lastmod": "2026-05-01",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/house-sitting/monts-du-lyonnais",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/cat-europeen",
+        "lastmod": "2026-05-05",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/house-sitting/grenoble",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/dog-beauceron",
+        "lastmod": "2026-05-05",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/house-sitting/chamonix",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/dog-jack-russel",
+        "lastmod": "2026-05-11",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/house-sitting/bourg-saint-maurice",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/lyon",
-        "lastmod": "2026-05-04",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/dog-teclem",
+        "lastmod": "2026-05-24",
+        "changefreq": "monthly",
+        "priority": "0.6"
       }
     ],
+    "public_profiles": [],
     "city_guides": [
       {
         "loc": "/guides/lyon",
@@ -825,7 +481,490 @@
         "priority": "0.7"
       }
     ],
-    "public_profiles": [],
-    "breed_profiles": []
+    "articles": [
+      {
+        "loc": "/actualites/devenir-gardien-pro-animalier",
+        "lastmod": "2026-06-06",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/jardinage-entraide-quartier-lyon",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/actualites/preparer-maison-avant-garde",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/parcs-balades-chiens-grenoble-guide",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/berger-australien-guide-race",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/arroser-plantes-vacances-grenoble",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/actualites/arroser-plantes-vacances-lyon",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/actualites/garde-chat-domicile-house-sitting",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/devenir-gardien-urgence-guardiens",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/comment-devenir-home-sitter-france-guide-debutant",
+        "lastmod": "2026-06-06",
+        "changefreq": "monthly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/actualites/veterinaire-urgence-grenoble-isere",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/persan-guide-race",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/petites-missions-entraide-guardiens",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/c-est-quoi-le-house-sitting",
+        "lastmod": "2026-06-06",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/s-absenter-avec-animal-guide-solutions-2026",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/bengal-guide-race",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/garde-animaux-croix-rousse-lyon",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/actualites/golden-retriever-guide-race-complet",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/jardinage-entraide-quartier-annecy",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/actualites/house-sitting-cadre-juridique-france",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/creer-profil-gardien-attractif",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/house-sitting-aura-guide-complet",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.9"
+      },
+      {
+        "loc": "/actualites/vacances-longues-garde-animal-2-semaines",
+        "lastmod": "2026-05-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/securite-confiance-house-sitting",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/gerer-imprevu-pendant-garde",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/garde-animaux-haute-savoie-guide",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/house-sitting-vs-pension-comparatif",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/garde-chat-presquile-lyon",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/actualites/labrador-retriever-guide-race",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/jardinage-entraide-locale-grenoble",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/actualites/rediger-bonne-annonce-house-sitting",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/maine-coon-guide-race",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/garde-animaux-savoie-guide",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/berger-allemand-guide-race",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/pet-sitting-clermont-ferrand",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/gerer-animaux-difficiles-garde",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/veterinaire-urgence-lyon-guide",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/faire-garder-animal-pendant-hospitalisation",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/que-faire-probleme-pendant-garde",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/pet-sitting-saint-etienne-loire",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/accueillir-gardien-bonnes-pratiques",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/cavalier-king-charles-guide-race",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/garde-chat-domicile-lyon",
+        "lastmod": "2026-05-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/parcs-balades-chiens-annecy-guide",
+        "lastmod": "2026-04-15",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/house-sitting-hiver-montagne-savoie",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/siamois-guide-race",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/arroser-plantes-vacances-annecy",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/actualites/bien-etre-animal-pendant-absence",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/parcs-chiens-lyon-guide-complet",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/veterinaire-urgence-annecy-haute-savoie",
+        "lastmod": "2026-04-15",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/choisir-gardien-bons-criteres",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/house-sitting-week-end-court-sejour-aura",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/house-sitting-noel-fetes-fin-annee",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/reussir-premiere-garde-house-sitting",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/house-sitting-ete-aura-guide",
+        "lastmod": "2026-05-10",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/checklist-partir-vacances-animaux",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/pension-chien-alternatives-guide",
+        "lastmod": "2026-04-14",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      }
+    ],
+    "public_sits": [],
+    "seo_city_pages": [
+      {
+        "loc": "/house-sitting/megeve",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/valence",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/villeurbanne",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/clermont-ferrand",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/annecy",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/ecully",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/chambery",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/beaujolais",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/caluire-et-cuire",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/tassin-la-demi-lune",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/saint-didier-au-mont-d-or",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/saint-etienne",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/monts-du-lyonnais",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/grenoble",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/chamonix",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/bourg-saint-maurice",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/lyon",
+        "lastmod": "2026-05-04",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/paris",
+        "lastmod": "2026-06-06",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/marseille",
+        "lastmod": "2026-06-06",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/bordeaux",
+        "lastmod": "2026-06-06",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/nantes",
+        "lastmod": "2026-06-06",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/toulouse",
+        "lastmod": "2026-06-06",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      }
+    ]
   }
 }
