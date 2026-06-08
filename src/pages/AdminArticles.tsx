@@ -54,9 +54,10 @@ interface SeoCheck {
   noForbiddenVocab: boolean;
 }
 
-// Forbidden vocabulary per project Core memory: « AURA », « Auvergne-Rhône-Alpes »,
-// « voisin/voisine/voisins/voisinage », tiret cadratin « — ».
-const FORBIDDEN_REGEX = /AURA|Auvergne-Rhône-Alpes|voisin(e|s|age)?|\u2014/i;
+// Forbidden vocabulary per project Core memory: « AURA » (uppercase acronym only,
+// pas le verbe « aura »), « Auvergne-Rhône-Alpes », « voisin/voisine/voisins/voisinage »
+// (avec word boundary pour éviter « avoisinant »), tiret cadratin « — ».
+const FORBIDDEN_REGEX = /\bAURA\b|Auvergne-Rhône-Alpes|\bvoisin(e|s|age)?\b|\u2014/;
 
 function getSeoScore(article: any): { score: "green" | "orange" | "red"; checks: SeoCheck } {
   const mt = (article.meta_title || "").trim();
