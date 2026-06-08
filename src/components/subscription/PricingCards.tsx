@@ -22,6 +22,7 @@ export default function PricingCards() {
   const [loading, setLoading] = useState<Formula | null>(null);
 
   const handleCheckout = async (formula: Formula) => {
+    trackCtaClick("pricing_checkout", "pricing_cards", { formula });
     setLoading(formula);
     try {
       const { data, error } = await supabase.functions.invoke(
