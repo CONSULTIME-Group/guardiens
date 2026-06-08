@@ -132,33 +132,31 @@ const CitySchemaOrg = ({ city }: Props) => {
  },
  ];
 
- // Add LocalBusiness for Lyon
- if (isLyon) {
+ // LocalBusiness pour toutes les villes hub (Lyon, Annecy, Grenoble, Chambéry…)
+ // Éligibilité Google Local Pack + AI Overviews.
+ const LOCAL_BUSINESS_CITIES = ["lyon", "annecy", "grenoble", "chambery", "caluire-et-cuire"];
+ if (LOCAL_BUSINESS_CITIES.includes(city.slug)) {
  graph.push({
  "@type": "LocalBusiness",
- name: "Guardiens, Garde d'animaux à Lyon",
- description:
- "Plateforme de garde de chien, de chat et de home sitting à Lyon. Gardiens de proximité vérifiés, sans commission.",
- url: "https://guardiens.fr/house-sitting/lyon",
- telephone: "",
+ name: `Guardiens, Garde d'animaux à ${city.name}`,
+ description: `Plateforme de garde de chien, de chat et de home sitting à ${city.name}. Gardiens de proximité vérifiés, sans commission.`,
+ url: `https://guardiens.fr/house-sitting/${city.slug}`,
  address: {
  "@type": "PostalAddress",
- streetAddress: "Rue Juiverie",
- addressLocality: "Lyon",
- postalCode: "69005",
- addressRegion: "France",
+ addressLocality: city.name,
+ addressRegion: city.department,
  addressCountry: "FR",
  },
  geo: {
  "@type": "GeoCoordinates",
- latitude: 45.764,
- longitude: 4.8357,
+ latitude: city.coordinates?.lat,
+ longitude: city.coordinates?.lng,
  },
  areaServed: {
  "@type": "City",
- name: "Lyon",
+ name: city.name,
  },
- priceRange: "À 0 € pour les propriétaires",
+ priceRange: "Gratuit pour les propriétaires",
  });
  }
 
