@@ -27,6 +27,7 @@ import AccessGateBanner from "@/components/access/AccessGateBanner";
 import ApplicationModal from "@/components/sits/ApplicationModal";
 import PostConfirmationChecklist from "@/components/sits/PostConfirmationChecklist";
 import CancelSitModal from "@/components/sits/CancelSitModal";
+import SitMobileStickyApply from "@/components/sits/SitMobileStickyApply";
 
 import SitDetailHeader from "./SitDetailHeader";
 import SitFooterReassurance from "./SitFooterReassurance";
@@ -448,6 +449,24 @@ const SitterSitView = ({
 
       {/* Note: la barre d'action "Postuler" est désormais affichée tout en haut,
           juste sous le header (cf. ApplyBar plus haut dans ce composant). */}
+
+      {/* Spacer pour éviter que la sticky mobile masque le contenu */}
+      <div className="md:hidden h-20" aria-hidden="true" />
+
+      {/* Sticky mobile : favoris + CTA principal, padding bottom géré côté layout via safe-area */}
+      <SitMobileStickyApply
+        sitId={sit.id}
+        state={
+          !sit.accepting_applications
+            ? "closed"
+            : hasApplied
+              ? "applied"
+              : accessLevel === 1 || !canApplyGuards
+                ? "blocked"
+                : "apply"
+        }
+        onApply={() => setApplyOpen(true)}
+      />
 
       <ApplicationModal
         open={applyOpen}
