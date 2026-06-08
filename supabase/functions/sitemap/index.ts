@@ -190,9 +190,15 @@ Deno.serve(async () => {
   }
 
   // Breed profiles
+  // IMPORTANT : ce slug DOIT correspondre à `slugify()` côté client
+  // (src/lib/normalize.ts) — sinon soft-404 sur toutes les races accentuées.
+  const slugifyBreed = (s: string) =>
+    s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/œ/g, "oe").replace(/æ/g, "ae")
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   if (breedProfiles) {
     for (const bp of breedProfiles) {
-      const slug = `${bp.species.toLowerCase()}-${bp.breed.toLowerCase().replace(/\s+/g, "-")}`;
+      const slug = `${bp.species.toLowerCase()}-${slugifyBreed(bp.breed)}`;
       xml += urlEntry(`/races/${slug}`, (bp.generated_at || today).split("T")[0], "monthly", "0.6");
     }
   }
