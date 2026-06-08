@@ -61,6 +61,13 @@ const ProfileSchemaOrg = ({
         recognizedBy: { "@type": "Organization", name: "Guardiens" },
       },
     }),
+    ...(events && events.length > 0 && {
+      subjectOf: events.map((e) => ({
+        "@type": "Event",
+        name: e.name,
+        startDate: e.date.slice(0, 10),
+      })),
+    }),
   };
 
   // ── Service (éligible Rich Results, porte aggregateRating + zone desservie) ──
