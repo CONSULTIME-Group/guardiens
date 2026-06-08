@@ -160,7 +160,8 @@ Deno.serve(async () => {
         `/actualites/${a.slug}`,
         (a.updated_at || a.published_at || today).split("T")[0],
         changefreq,
-        priority
+        priority,
+        a.cover_image_url
       );
     }
   }
