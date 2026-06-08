@@ -75,6 +75,7 @@ const PublicSitGallery = ({ photos, city, ownerFirstName }: Props) => {
               alt={altFor(i)}
               loading="lazy"
               decoding="async"
+              fetchPriority="low"
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
             <span className="absolute top-1.5 right-1.5 bg-background/85 backdrop-blur-sm rounded-full p-1.5 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity shadow-md">
