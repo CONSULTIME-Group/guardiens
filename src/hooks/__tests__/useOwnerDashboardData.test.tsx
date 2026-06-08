@@ -37,10 +37,18 @@ vi.mock("@/integrations/supabase/client", () => {
     return chain;
   };
 
+  const channel: any = {
+    on: () => channel,
+    subscribe: () => channel,
+    unsubscribe: () => Promise.resolve("ok"),
+  };
+
   return {
     supabase: {
       from: (table: string) => buildChain(table),
       rpc: () => Promise.resolve({ data: null, error: null }),
+      channel: () => channel,
+      removeChannel: () => Promise.resolve("ok"),
     },
   };
 });

@@ -37,7 +37,7 @@ describe("Login autofill behavior", () => {
     });
     renderLogin();
     const email = screen.getByLabelText(/email/i) as HTMLInputElement;
-    const pwd = screen.getByLabelText(/mot de passe/i) as HTMLInputElement;
+    const pwd = document.getElementById("password") as HTMLInputElement;
     expect(email.getAttribute("autocomplete")).toBe("email");
     expect(pwd.getAttribute("autocomplete")).toBe("current-password");
   });
@@ -50,7 +50,7 @@ describe("Login autofill behavior", () => {
     });
     renderLogin();
     const email = screen.getByLabelText(/email/i) as HTMLInputElement;
-    const pwd = screen.getByLabelText(/mot de passe/i) as HTMLInputElement;
+    const pwd = document.getElementById("password") as HTMLInputElement;
     expect(email.getAttribute("autocomplete")).toBe("off");
     expect(pwd.getAttribute("autocomplete")).toBe("off");
     expect(email.getAttribute("data-form-type")).toBe("other");

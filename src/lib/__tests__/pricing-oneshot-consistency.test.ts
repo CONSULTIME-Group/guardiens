@@ -43,16 +43,16 @@ describe("Prix ponctuel — cohérence UI / state / pricing.ts / Schema.org", ()
   });
 
   it("Pricing.tsx affiche le CTA ponctuel avec '10\\u00A0€'", () => {
-    // Libellé CTA exact : "Accéder un mois — 10 €"
+    // Libellé CTA exact : "Accéder un mois, 10 €" (virgule, pas de tiret cadratin)
     expect(PRICING_PAGE).toMatch(
-      /one_shot:\s*["']Accéder un mois — 10\\u00A0€["']/,
+      /one_shot:\s*["']Accéder un mois, 10\\u00A0€["']/,
     );
   });
 
   it("Schema.org Offer one_shot facture 10.00 EUR à l'URL plan=one_shot", () => {
-    // Extraction de l'objet Offer 'Accès Gardien — Un mois'
+    // Extraction de l'objet Offer 'Accès Gardien, Un mois'
     const offerMatch = PRICING_PAGE.match(
-      /"Accès Gardien — Un mois"[\s\S]*?priceValidUntil:[^,]+,/,
+      /"Accès Gardien, Un mois"[\s\S]*?priceValidUntil:[^,]+,/,
     );
     expect(offerMatch, "Offer one_shot introuvable dans Pricing.tsx").not.toBeNull();
     const offerBlock = offerMatch![0];
