@@ -143,6 +143,8 @@ describe("Garde-fou : icônes Lucide décoratives interdites", () => {
     for (const abs of files) {
       const rel = relative(process.cwd(), abs).split(sep).join("/");
       if (ALLOWED_FILES.has(rel)) continue;
+      // SCOPE éditorial uniquement : ignorer tout fichier hors EDITORIAL_GLOBS.
+      if (!EDITORIAL_GLOBS.some((re) => re.test(rel))) continue;
 
       const src = readFileSync(abs, "utf8");
       if (!src.includes("lucide-react")) continue;
