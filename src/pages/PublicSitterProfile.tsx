@@ -1415,11 +1415,27 @@ export default function PublicSitterProfile() {
               )}
 
               {/* Onglet Confiance */}
-              {userBadges && userBadges.length > 0 && (
+              {((userBadges && userBadges.length > 0) || profile?.created_at) && (
                 <TabsContent value="confiance" className="pt-6">
-                  <div className="space-y-4">
-                    <SpecialBadgeHighlight userBadges={userBadges} />
-                    <BadgeRow badges={userBadges} />
+                  <div className="space-y-6">
+                    {userBadges && userBadges.length > 0 && (
+                      <>
+                        <SpecialBadgeHighlight userBadges={userBadges} />
+                        <BadgeRow badges={userBadges} />
+                      </>
+                    )}
+                    <TrustTimeline
+                      memberSince={profile?.created_at}
+                      reviews={reviews}
+                      badges={(userBadges || []).map((b: any) => ({
+                        badge_id: b.badge_id,
+                        created_at: b.created_at,
+                        count: b.count ?? 1,
+                      }))}
+                      completedSits={completedSits}
+                      lastActivity={sitterProfile?.last_seen_at ?? null}
+                      firstName={firstName}
+                    />
                   </div>
                 </TabsContent>
               )}
