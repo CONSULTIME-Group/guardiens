@@ -42,11 +42,12 @@ interface Input {
   pendingReviews: Array<{ sitId: string; sitterId: string; sitterName?: string }>;
   verificationStatus: string | null;
   nearbySittersCount?: number;
+  nearbySittersRadius?: number | null;
 }
 
 export function useOwnerPriorityAction(input: Input): OwnerPriorityAction {
   return useMemo(() => {
-    const { sits, pendingAppCount, pendingReviews, verificationStatus, nearbySittersCount } = input;
+    const { sits, pendingAppCount, pendingReviews, verificationStatus, nearbySittersCount, nearbySittersRadius } = input;
     const now = new Date();
 
     // 1. Garde en cours
