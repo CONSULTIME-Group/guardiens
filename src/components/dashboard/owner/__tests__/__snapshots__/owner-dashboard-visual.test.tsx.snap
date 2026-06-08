@@ -54,10 +54,10 @@ exports[`Owner Dashboard — visual snapshots > MissionsTabsCard > matches snaps
       href="/petites-missions/mission-1"
     >
       <div
-        class="w-2 h-2 rounded-full shrink-0 transition-transform duration-200 group-hover:scale-125 bg-primary"
+        class="w-2 h-2 rounded-full shrink-0 bg-primary transition-transform duration-200 group-hover:scale-125"
       />
       <p
-        class="text-xs font-sans flex-1 truncate transition-colors text-foreground group-hover:text-primary"
+        class="text-xs font-sans flex-1 truncate text-foreground group-hover:text-primary transition-colors"
       >
         Promener mon chien
       </p>
@@ -125,10 +125,10 @@ exports[`Owner Dashboard — visual snapshots > MissionsTabsCard > matches snaps
       href="/petites-missions/mission-1"
     >
       <div
-        class="w-2 h-2 rounded-full shrink-0 transition-transform duration-200 group-hover:scale-125 bg-primary"
+        class="w-2 h-2 rounded-full shrink-0 bg-primary transition-transform duration-200 group-hover:scale-125"
       />
       <p
-        class="text-xs font-sans flex-1 truncate transition-colors text-foreground group-hover:text-primary"
+        class="text-xs font-sans flex-1 truncate text-foreground group-hover:text-primary transition-colors"
       >
         Promener mon chien
       </p>
@@ -181,7 +181,7 @@ exports[`Owner Dashboard — visual snapshots > MonAnnonceCard > matches snapsho
       </span>
     </div>
     <button
-      aria-label="2 candidatures en attente — voir les candidats"
+      aria-label="2 candidatures en attente, voir les candidats"
       class="w-full flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 px-3 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       type="button"
     >
@@ -394,7 +394,7 @@ exports[`Owner Dashboard — visual snapshots > MonAnnonceCard > matches snapsho
       </span>
     </div>
     <button
-      aria-label="2 candidatures en attente — voir les candidats"
+      aria-label="2 candidatures en attente, voir les candidats"
       class="w-full flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 px-3 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       type="button"
     >
@@ -573,7 +573,7 @@ exports[`Owner Dashboard — visual snapshots > OngoingSitHero > matches snapsho
   class="px-4 sm:px-5 md:px-8 mb-6 md:mb-8"
 >
   <div
-    class="group block bg-card border border-border rounded-2xl overflow-hidden transition-all duration-300 ease-out hover:shadow-lg hover:border-primary/30"
+    class="group block bg-primary/5 border-2 border-primary/30 rounded-2xl overflow-hidden transition-all duration-300 ease-out hover:shadow-lg hover:border-primary/50"
   >
     <div
       class="flex flex-col sm:flex-row"
@@ -754,7 +754,7 @@ exports[`Owner Dashboard — visual snapshots > OngoingSitHero > matches snapsho
                 <span
                   class="hidden sm:inline truncate whitespace-nowrap"
                 >
-                  Encore 2 jours — fin mardi 14 avril
+                  Encore 2 jours, fin mardi 14 avril
                 </span>
               </span>
             </div>
@@ -846,7 +846,7 @@ exports[`Owner Dashboard — visual snapshots > OngoingSitHero > matches snapsho
   class="px-4 sm:px-5 md:px-8 mb-6 md:mb-8"
 >
   <div
-    class="group block bg-card border border-border rounded-2xl overflow-hidden transition-all duration-300 ease-out hover:shadow-lg hover:border-primary/30"
+    class="group block bg-primary/5 border-2 border-primary/30 rounded-2xl overflow-hidden transition-all duration-300 ease-out hover:shadow-lg hover:border-primary/50"
   >
     <div
       class="flex flex-col sm:flex-row"
@@ -1027,7 +1027,7 @@ exports[`Owner Dashboard — visual snapshots > OngoingSitHero > matches snapsho
                 <span
                   class="hidden sm:inline truncate whitespace-nowrap"
                 >
-                  Encore 2 jours — fin mardi 14 avril
+                  Encore 2 jours, fin mardi 14 avril
                 </span>
               </span>
             </div>
@@ -1133,9 +1133,11 @@ exports[`Owner Dashboard — visual snapshots > StatsStrip > matches snapshot on
         3
       </p>
       <p
-        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 group-hover:text-foreground/80"
+        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 inline-flex items-center gap-1 justify-center md:justify-start group-hover:text-foreground/80"
       >
-        Annonces
+        <span>
+          Annonces
+        </span>
       </p>
     </div>
   </a>
@@ -1153,9 +1155,11 @@ exports[`Owner Dashboard — visual snapshots > StatsStrip > matches snapshot on
         12
       </p>
       <p
-        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 group-hover:text-foreground/80"
+        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 inline-flex items-center gap-1 justify-center md:justify-start group-hover:text-foreground/80"
       >
-        Candidatures
+        <span>
+          Candidatures
+        </span>
       </p>
     </div>
   </a>
@@ -1169,9 +1173,11 @@ exports[`Owner Dashboard — visual snapshots > StatsStrip > matches snapshot on
         4.8
       </p>
       <p
-        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 "
+        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 inline-flex items-center gap-1 justify-center md:justify-start "
       >
-        Note moyenne
+        <span>
+          Note moyenne
+        </span>
       </p>
     </div>
   </div>
@@ -1185,9 +1191,11 @@ exports[`Owner Dashboard — visual snapshots > StatsStrip > matches snapshot on
         —
       </p>
       <p
-        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 "
+        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 inline-flex items-center gap-1 justify-center md:justify-start "
       >
-        À venir
+        <span>
+          À venir
+        </span>
       </p>
     </div>
   </div>
@@ -1213,9 +1221,11 @@ exports[`Owner Dashboard — visual snapshots > StatsStrip > matches snapshot on
         3
       </p>
       <p
-        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 group-hover:text-foreground/80"
+        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 inline-flex items-center gap-1 justify-center md:justify-start group-hover:text-foreground/80"
       >
-        Annonces
+        <span>
+          Annonces
+        </span>
       </p>
     </div>
   </a>
@@ -1233,9 +1243,11 @@ exports[`Owner Dashboard — visual snapshots > StatsStrip > matches snapshot on
         12
       </p>
       <p
-        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 group-hover:text-foreground/80"
+        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 inline-flex items-center gap-1 justify-center md:justify-start group-hover:text-foreground/80"
       >
-        Candidatures
+        <span>
+          Candidatures
+        </span>
       </p>
     </div>
   </a>
@@ -1249,9 +1261,11 @@ exports[`Owner Dashboard — visual snapshots > StatsStrip > matches snapshot on
         4.8
       </p>
       <p
-        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 "
+        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 inline-flex items-center gap-1 justify-center md:justify-start "
       >
-        Note moyenne
+        <span>
+          Note moyenne
+        </span>
       </p>
     </div>
   </div>
@@ -1265,9 +1279,11 @@ exports[`Owner Dashboard — visual snapshots > StatsStrip > matches snapshot on
         —
       </p>
       <p
-        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 "
+        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 inline-flex items-center gap-1 justify-center md:justify-start "
       >
-        À venir
+        <span>
+          À venir
+        </span>
       </p>
     </div>
   </div>
