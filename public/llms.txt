@@ -16,6 +16,9 @@ Guardiens est gratuit pour les propriétaires. Les gardiens accèdent au service
 - [Petites missions à Lyon](/petites-missions/lyon): Hub local des coups de main entre membres à Lyon.
 - [Gardien d'urgence](/gardien-urgence): Trouver un gardien rapidement en cas d'imprévu.
 - [Guides de villes](/guides): Guides locaux indépendants des annonces de garde.
+- [Annonces de garde](/annonces): Toutes les annonces de garde à domicile, partout en France.
+- [Pros animaliers](/pros): Annuaire de vétérinaires, éducateurs, toiletteurs, ostéopathes, transporteurs vérifiés.
+- [Races d'animaux](/races): Guides de garde par race (chiens, chats, NAC, équidés), conseils gardien.
 - [Contact](/contact): Nous écrire.
 
 ## Légal
