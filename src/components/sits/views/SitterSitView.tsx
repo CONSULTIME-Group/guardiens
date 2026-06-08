@@ -27,6 +27,7 @@ import AccessGateBanner from "@/components/access/AccessGateBanner";
 import ApplicationModal from "@/components/sits/ApplicationModal";
 import PostConfirmationChecklist from "@/components/sits/PostConfirmationChecklist";
 import CancelSitModal from "@/components/sits/CancelSitModal";
+import SitMobileStickyApply from "@/components/sits/SitMobileStickyApply";
 
 import SitDetailHeader from "./SitDetailHeader";
 import SitFooterReassurance from "./SitFooterReassurance";
