@@ -10,6 +10,7 @@ import {
   SITTER_PRICE_ANNUAL_DISCOUNT_PCT,
 } from "@/lib/pricing";
 import FreeAccountSection from "./FreeAccountSection";
+import { trackCtaClick } from "@/lib/analytics";
 
 // NOTE, Le calcul prorata 2026 (`calculateYearlyProrata`) a été supprimé.
 // Risque DGCCRF / L121-2 : prix affiché ≠ prix débité. La formule annuelle
