@@ -35,11 +35,6 @@ const EDITORIAL_GLOBS: RegExp[] = [
 ];
 
 /** Icônes Lucide décoratives strictement interdites DANS LE CONTENU ÉDITORIAL. */
-
-
-const SRC_DIR = join(process.cwd(), "src");
-
-/** Icônes Lucide décoratives strictement interdites. */
 const DENYLIST = [
   // Catégoriels / illustratifs — toujours décoratifs dans nos cartes
   "Heart",
