@@ -52,7 +52,7 @@ function normalizeCustom(raw: unknown): string[] {
 }
 
 export function useNearbyOwnerSitters(currentUserId: string | undefined) {
-  return useQuery<{ sitters: NearbyOwnerSitter[]; radiusUsed: number | null; hasGeo: boolean }>({
+  return useQuery<{ sitters: NearbyOwnerSitter[]; radiusUsed: number | null; hasGeo: boolean; totalCount: number }>({
     queryKey: ["nearby-owner-sitters", currentUserId],
     enabled: !!currentUserId,
     staleTime: 5 * 60 * 1000,
