@@ -57,7 +57,7 @@ export const parseRoutine = (raw: string | null) => {
     .filter(Boolean);
 
   const re =
-    /^[\s«»"'(\[\{*_`~]*\s*(matin|midi|soir|nuit|apr[èeé]s?[- ]?midi|apr[èeé]m(?:[- ]?midi)?|aprem(?:[- ]?midi)?)\s*[»"'\]\)\}*_`~]*\s*(?:(?:\([^)]*\)|\[[^\]]*\]|\{[^}]*\})\s*)*[,–\-:.\)=→»]?\s*(.*)$/i;
+    /^[\s«»"'(\[\{*_`~]*\s*(matin|midi|soir|nuit|apr[èeé]s?[- ]?midi|apr[èeé]m(?:[- ]?midi)?|aprem(?:[- ]?midi)?)\s*[»"'\]\)\}*_`~]*\s*(?:(?:\([^)]*\)|\[[^\]]*\]|\{[^}]*\})\s*)*[,–—\-:.\)=→»]?\s*(.*)$/i;
 
   const blocks: { key: string; label: string; text: string }[] = [];
   const leftover: string[] = [];
