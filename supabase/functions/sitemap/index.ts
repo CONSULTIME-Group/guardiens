@@ -30,13 +30,16 @@ function escapeXml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 }
 
-function urlEntry(loc: string, lastmod: string, changefreq: string, priority: string): string {
+function urlEntry(loc: string, lastmod: string, changefreq: string, priority: string, imageUrl?: string | null): string {
+  const imageBlock = imageUrl
+    ? `    <image:image>\n      <image:loc>${escapeXml(imageUrl)}</image:loc>\n    </image:image>\n`
+    : "";
   return `  <url>
     <loc>${escapeXml(SITE_URL + loc)}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
-  </url>\n`;
+${imageBlock}  </url>\n`;
 }
 
 const PRIORITY_MAP: Record<string, string> = {
@@ -88,7 +91,7 @@ Deno.serve(async () => {
   ] = await Promise.all([
     supabase
       .from("articles")
-      .select("slug, category, updated_at, published_at")
+      .select("slug, category, updated_at, published_at, cover_image_url")
       .eq("published", true)
       .or("noindex.is.null,noindex.eq.false")
       .order("published_at", { ascending: false }),
@@ -116,7 +119,7 @@ Deno.serve(async () => {
   const today = new Date().toISOString().split("T")[0];
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 `;
 
   // Static pages
@@ -157,7 +160,8 @@ Deno.serve(async () => {
         `/actualites/${a.slug}`,
         (a.updated_at || a.published_at || today).split("T")[0],
         changefreq,
-        priority
+        priority,
+        a.cover_image_url
       );
     }
   }
