@@ -31,6 +31,7 @@ import PublicExperiences from "@/components/profile/PublicExperiences";
 import TrustScore from "@/components/profile/TrustScore";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import ProfileSchemaOrg from "@/components/seo/ProfileSchemaOrg";
+import TrustTimeline from "@/components/profile/TrustTimeline";
 import { hydrateReviewers } from "@/lib/hydrateReviewers";
 import { getSitterHeroImage, getSitterHeroAnchor, getSitterHeroSources } from "@/lib/heroBank";
 import { useHeroWeights } from "@/hooks/useHeroWeights";
