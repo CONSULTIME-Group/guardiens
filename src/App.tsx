@@ -266,6 +266,7 @@ const AppRoutes = () => (
       <Route path="/blog" element={<Navigate to="/actualites" replace />} />
       <Route path="/blog/:slug" element={<NavigateBlogSlug />} />
       <Route path="/a-propos" element={<About />} />
+      <Route path="/observatoire-garde-animaux" element={<Observatoire />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/cgu" element={<Terms />} />
       <Route path="/cgs" element={<Cgs />} />
