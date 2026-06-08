@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import FreeAccountSection from "./FreeAccountSection";
+import { trackCtaClick } from "@/lib/analytics";
 
 export default function PricingCardsCheckout() {
   const [loading, setLoading] = useState<"monthly" | null>(null);
 
   const handleCheckout = async () => {
+    trackCtaClick("pricing_checkout_single", "pricing_cards_checkout", { formula: "monthly" });
     setLoading("monthly");
     try {
       const { data, error } = await supabase.functions.invoke("create-checkout-session", {
