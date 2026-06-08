@@ -91,7 +91,7 @@ Deno.serve(async () => {
   ] = await Promise.all([
     supabase
       .from("articles")
-      .select("slug, category, updated_at, published_at")
+      .select("slug, category, updated_at, published_at, cover_image_url")
       .eq("published", true)
       .or("noindex.is.null,noindex.eq.false")
       .order("published_at", { ascending: false }),
