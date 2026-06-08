@@ -93,7 +93,7 @@ export default function PricingCards() {
           <p className="text-xs tracking-widest uppercase text-white/60 font-body mb-3">
             Annuel
           </p>
-          <p className="text-3xl font-heading font-bold mb-1">
+          <p className="text-3xl font-heading font-bold tabular-nums mb-1">
             {SITTER_PRICE_ANNUAL_NUMERIC}&nbsp;&#8364;
           </p>
           <p className="text-sm font-body text-white/70 mb-1">
