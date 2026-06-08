@@ -49,7 +49,7 @@ describe("AuthIllustrationPanel — prefers-reduced-motion", () => {
     expect(img!.className).toContain("object-bottom");
   });
 
-  it("monte les deux <video> du crossfade quand reduced-motion N'EST PAS demandé", () => {
+  it("monte une <video> unique (lecture unique + freeze) hors reduced-motion", () => {
     vi.useFakeTimers();
     mockMatchMedia(false);
     const { container } = render(
@@ -58,8 +58,9 @@ describe("AuthIllustrationPanel — prefers-reduced-motion", () => {
     act(() => {
       vi.advanceTimersByTime(1500);
     });
-    // Deux <video> = crossfade ping-pong pour boucle invisible.
-    expect(container.querySelectorAll("video").length).toBe(2);
+    // v3 : <video> unique (loop=false + freeze sur dernière frame).
+    // Le crossfade A/B a été supprimé pour économiser CPU/batterie.
+    expect(container.querySelectorAll("video").length).toBe(1);
     vi.useRealTimers();
   });
 });
