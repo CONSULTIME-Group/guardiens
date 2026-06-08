@@ -31,6 +31,8 @@ import PublicExperiences from "@/components/profile/PublicExperiences";
 import TrustScore from "@/components/profile/TrustScore";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import ProfileSchemaOrg from "@/components/seo/ProfileSchemaOrg";
+import TrustTimeline from "@/components/profile/TrustTimeline";
+import { buildTrustTimeline } from "@/lib/trustTimeline";
 import { hydrateReviewers } from "@/lib/hydrateReviewers";
 import { getSitterHeroImage, getSitterHeroAnchor, getSitterHeroSources } from "@/lib/heroBank";
 import { useHeroWeights } from "@/hooks/useHeroWeights";
@@ -761,6 +763,17 @@ export default function PublicSitterProfile() {
           knowsAbout={animalLabels ? animalLabels.split(', ') : undefined}
           role={hasSitterProfile && hasOwnerProfile ? 'both' : hasSitterProfile ? 'sitter' : hasOwnerProfile ? 'owner' : undefined}
           url={`https://guardiens.fr/gardiens/${id}`}
+          events={buildTrustTimeline({
+            memberSince: profile?.created_at,
+            reviews,
+            badges: (userBadges || []).map((b: any) => ({
+              badge_id: b.badge_id,
+              created_at: b.created_at,
+              count: b.count ?? 1,
+            })),
+            completedSits,
+            lastActivity: sitterProfile?.last_seen_at ?? null,
+          }).map((e) => ({ name: e.label, date: e.date }))}
         />
       )}
       {/* Bandes latérales décoratives, desktop ≥ lg uniquement (sinon traversent le contenu en mobile) */}
@@ -1309,7 +1322,7 @@ export default function PublicSitterProfile() {
                     Galerie ({gallery.length})
                   </TabsTrigger>
                 )}
-                {userBadges && userBadges.length > 0 && (
+                {((userBadges && userBadges.length > 0) || profile?.created_at) && (
                   <TabsTrigger
                     value="confiance"
                     className="data-[state=active]:bg-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-body"
@@ -1414,11 +1427,27 @@ export default function PublicSitterProfile() {
               )}
 
               {/* Onglet Confiance */}
-              {userBadges && userBadges.length > 0 && (
+              {((userBadges && userBadges.length > 0) || profile?.created_at) && (
                 <TabsContent value="confiance" className="pt-6">
-                  <div className="space-y-4">
-                    <SpecialBadgeHighlight userBadges={userBadges} />
-                    <BadgeRow badges={userBadges} />
+                  <div className="space-y-6">
+                    {userBadges && userBadges.length > 0 && (
+                      <>
+                        <SpecialBadgeHighlight userBadges={userBadges} />
+                        <BadgeRow badges={userBadges} />
+                      </>
+                    )}
+                    <TrustTimeline
+                      memberSince={profile?.created_at}
+                      reviews={reviews}
+                      badges={(userBadges || []).map((b: any) => ({
+                        badge_id: b.badge_id,
+                        created_at: b.created_at,
+                        count: b.count ?? 1,
+                      }))}
+                      completedSits={completedSits}
+                      lastActivity={sitterProfile?.last_seen_at ?? null}
+                      firstName={firstName}
+                    />
                   </div>
                 </TabsContent>
               )}
@@ -1520,14 +1549,30 @@ export default function PublicSitterProfile() {
             )}
 
             {/* Confiance */}
-            {userBadges && userBadges.length > 0 && (
+            {((userBadges && userBadges.length > 0) || profile?.created_at) && (
               <section id="confiance" aria-label="Confiance et vérifications" className="scroll-mt-24">
                 <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
                   Confiance & vérifications
                 </h2>
                 <div className="space-y-4">
-                  <SpecialBadgeHighlight userBadges={userBadges} />
-                  <BadgeRow badges={userBadges} />
+                  {userBadges && userBadges.length > 0 && (
+                    <>
+                      <SpecialBadgeHighlight userBadges={userBadges} />
+                      <BadgeRow badges={userBadges} />
+                    </>
+                  )}
+                  <TrustTimeline
+                    memberSince={profile?.created_at}
+                    reviews={reviews}
+                    badges={(userBadges || []).map((b: any) => ({
+                      badge_id: b.badge_id,
+                      created_at: b.created_at,
+                      count: b.count ?? 1,
+                    }))}
+                    completedSits={completedSits}
+                    lastActivity={sitterProfile?.last_seen_at ?? null}
+                    firstName={firstName}
+                  />
                 </div>
               </section>
             )}

@@ -13,6 +13,8 @@ interface ProfileSchemaProps {
   knowsAbout?: string[];
   url: string;
   role?: "sitter" | "owner" | "both";
+  /** Évènements publics (Person.event) pour enrichir le parcours dans Schema.org. */
+  events?: Array<{ name: string; date: string }>;
 }
 
 const ProfileSchemaOrg = ({
@@ -28,6 +30,7 @@ const ProfileSchemaOrg = ({
   knowsAbout,
   url,
   role,
+  events,
 }: ProfileSchemaProps) => {
   // ── Person de base (toujours présent) ──
   const person: Record<string, any> = {
@@ -57,6 +60,13 @@ const ProfileSchemaOrg = ({
         credentialCategory: "Identity Verified",
         recognizedBy: { "@type": "Organization", name: "Guardiens" },
       },
+    }),
+    ...(events && events.length > 0 && {
+      subjectOf: events.map((e) => ({
+        "@type": "Event",
+        name: e.name,
+        startDate: e.date.slice(0, 10),
+      })),
     }),
   };
 
