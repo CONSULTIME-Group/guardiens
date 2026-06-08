@@ -32,6 +32,10 @@ const ALLOWED = new Set([
   // Tests autorisés à mentionner ces noms à des fins de vérification.
   "src/components/shared/__tests__/empty-state-style-isolation.test.ts",
   "tests/visual/empty-state-halo.spec.ts",
+  // Usages volontaires hors EmptyState (illustrations dédiées, fondus locaux).
+  "src/components/onboarding/OnboardingModal.tsx",
+  "src/components/auth/AuthIllustrationPanel.tsx",
+  "src/pages/Sits.tsx",
 ]);
 
 function walk(dir: string, acc: string[] = []): string[] {
