@@ -17,6 +17,28 @@ import { join, relative, sep } from "node:path";
 
 const SRC_DIR = join(process.cwd(), "src");
 
+/**
+ * SCOPE — la règle « pas d'icônes décoratives » s'applique au CONTENU éditorial
+ * (articles, guides éditoriaux, copy marketing, données statiques d'articles).
+ * Les pages fonctionnelles (admin, dashboards, settings, sit detail, profils,
+ * search, messagerie, etc.) utilisent Lucide comme icônes de statut /
+ * affordance / navigation : c'est UI fonctionnel, pas du contenu.
+ *
+ * On ne scanne donc que les chemins ci-dessous.
+ */
+const EDITORIAL_GLOBS: RegExp[] = [
+  /^src\/components\/articles\//,
+  /^src\/components\/marketing\//,
+  /^src\/components\/landing\//,
+  /^src\/data\/(articles|missions|cities|authors|guides)/i,
+  /^src\/pages\/(Articles?|GuidesListing|News|Index|About|FAQ|Pricing)\.tsx$/,
+];
+
+/** Icônes Lucide décoratives strictement interdites DANS LE CONTENU ÉDITORIAL. */
+
+
+const SRC_DIR = join(process.cwd(), "src");
+
 /** Icônes Lucide décoratives strictement interdites. */
 const DENYLIST = [
   // Catégoriels / illustratifs — toujours décoratifs dans nos cartes
