@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import FreeAccountSection from "./FreeAccountSection";
+import { trackCtaClick } from "@/lib/analytics";
 
 export default function PricingCardsCheckout() {
   const [loading, setLoading] = useState<"monthly" | null>(null);
 
   const handleCheckout = async () => {
+    trackCtaClick("pricing_checkout_single", "pricing_cards_checkout", { formula: "monthly" });
     setLoading("monthly");
     try {
       const { data, error } = await supabase.functions.invoke("create-checkout-session", {
@@ -35,7 +37,7 @@ export default function PricingCardsCheckout() {
           <div className="bg-card border-2 border-primary rounded-xl p-6 flex flex-col">
             <p className="font-heading text-lg font-semibold mb-2">Espace gardien</p>
             <p className="mb-1">
-              <span className="text-3xl font-heading font-bold">6,99 €</span>
+              <span className="text-3xl font-heading font-bold tabular-nums">6,99 €</span>
               <span className="text-sm text-muted-foreground font-body">/mois</span>
             </p>
             <p className="text-xs text-muted-foreground font-body mb-4">

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import ActivateRoleDialog from "@/components/premium/ActivateRoleDialog";
 import { isBeforeLaunch, isInGracePeriod } from "@/lib/constants";
+import { trackCtaClick } from "@/lib/analytics";
 
 interface RoleActivationBannerProps {
   userRole: string;
@@ -29,7 +30,10 @@ const RoleActivationBanner = ({ userRole }: RoleActivationBannerProps) => {
       <ActivateRoleDialog open={dialogOpen} onClose={() => setDialogOpen(false)} targetRole={targetRole} />
       <div className="bg-primary/5 border border-primary/20 rounded-lg px-4 py-3 text-sm text-foreground/80 flex items-center justify-between gap-4">
         <button
-          onClick={() => setDialogOpen(true)}
+          onClick={() => {
+            trackCtaClick("role_activation_banner", "dashboard", { target_role: targetRole });
+            setDialogOpen(true);
+          }}
           className="text-left hover:text-foreground transition-colors"
         >
           {text}

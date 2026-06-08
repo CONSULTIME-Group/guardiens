@@ -10,6 +10,7 @@ import {
   SITTER_PRICE_ANNUAL_DISCOUNT_PCT,
 } from "@/lib/pricing";
 import FreeAccountSection from "./FreeAccountSection";
+import { trackCtaClick } from "@/lib/analytics";
 
 // NOTE, Le calcul prorata 2026 (`calculateYearlyProrata`) a été supprimé.
 // Risque DGCCRF / L121-2 : prix affiché ≠ prix débité. La formule annuelle
@@ -22,6 +23,7 @@ export default function PricingCards() {
   const [loading, setLoading] = useState<Formula | null>(null);
 
   const handleCheckout = async (formula: Formula) => {
+    trackCtaClick("pricing_checkout", "pricing_cards", { formula });
     setLoading(formula);
     try {
       const { data, error } = await supabase.functions.invoke(
@@ -51,7 +53,7 @@ export default function PricingCards() {
           <p className="text-xs tracking-widest uppercase text-muted-foreground font-body mb-3">
             Mensuel
           </p>
-          <p className="text-3xl font-heading font-bold mb-1">
+          <p className="text-3xl font-heading font-bold tabular-nums mb-1">
             {SITTER_PRICE_NUMERIC.toString().replace(".", ",")}&nbsp;&#8364;
           </p>
           <p className="text-sm font-body text-muted-foreground mb-4">
@@ -93,7 +95,7 @@ export default function PricingCards() {
           <p className="text-xs tracking-widest uppercase text-white/60 font-body mb-3">
             Annuel
           </p>
-          <p className="text-3xl font-heading font-bold mb-1">
+          <p className="text-3xl font-heading font-bold tabular-nums mb-1">
             {SITTER_PRICE_ANNUAL_NUMERIC}&nbsp;&#8364;
           </p>
           <p className="text-sm font-body text-white/70 mb-1">
