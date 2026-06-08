@@ -43,29 +43,52 @@ export function setStoredConsent(value: ConsentValue) {
 const GA_ID = "G-9JP4VR1RRP";
 let gaLoaded = false;
 
+function installGtagStub() {
+  const w = window as any;
+  w.dataLayer = w.dataLayer || [];
+  if (typeof w.gtag !== "function") {
+    w.gtag = function gtag(...args: any[]) {
+      w.dataLayer.push(args);
+    };
+  }
+  return w.gtag as (...args: any[]) => void;
+}
+
 export function loadGoogleAnalytics() {
   if (gaLoaded || typeof window === "undefined") return;
+  if ((window as any)[`ga-disable-${GA_ID}`]) return;
   gaLoaded = true;
+
+  const gtag = installGtagStub();
+  gtag("js", new Date());
+  // Mesure d'audience exemptée CNIL : IP anonymisée, pas de pub/remarketing,
+  // pas de Google Signals, pas de partage cross-produits.
+  gtag("config", GA_ID, {
+    send_page_view: true,
+    page_path: window.location.pathname + window.location.search,
+    page_location: window.location.href,
+    anonymize_ip: true,
+    allow_google_signals: false,
+    allow_ad_personalization_signals: false,
+  });
+
   const s = document.createElement("script");
   s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
   s.async = true;
   document.head.appendChild(s);
-    s.onload = () => {
-      (window as any).dataLayer = (window as any).dataLayer || [];
-      function gtag(...args: any[]) {
-        (window as any).dataLayer.push(args);
-      }
-      (window as any).gtag = gtag;
-      gtag("js", new Date());
-      // Mesure d'audience exemptée CNIL : IP anonymisée, pas de pub/remarketing,
-      // pas de Google Signals, pas de partage cross-produits.
-      gtag("config", GA_ID, {
-        send_page_view: true,
-        anonymize_ip: true,
-        allow_google_signals: false,
-        allow_ad_personalization_signals: false,
-      });
-    };
+}
+
+export function trackGoogleAnalyticsPageView(path: string) {
+  if (typeof window === "undefined") return;
+  if ((window as any)[`ga-disable-${GA_ID}`]) return;
+  const gtag = (window as any).gtag;
+  if (typeof gtag !== "function") return;
+  gtag("event", "page_view", {
+    send_to: GA_ID,
+    page_path: path,
+    page_location: `${window.location.origin}${path}`,
+    page_title: document.title,
+  });
 }
 
 export function disableGoogleAnalytics() {
