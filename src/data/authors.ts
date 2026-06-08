@@ -25,6 +25,8 @@ export interface Author {
   /** URLs publiques de l'auteur (LinkedIn, X, site perso…) pour Schema.org `sameAs`.
    *  Renforce l'E-E-A-T signalé aux moteurs et aux LLM. */
   sameAs?: string[];
+}
+
 
 export const AUTHORS: Author[] = [
   {
