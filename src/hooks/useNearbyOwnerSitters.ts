@@ -89,7 +89,7 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
         .limit(500);
 
       if (!pool || pool.length === 0) {
-        return { sitters: [], radiusUsed: null, hasGeo };
+        return { sitters: [], radiusUsed: null, hasGeo, totalCount: 0 };
       }
 
       // 3. Notes moyennes + compétences sitter (batch)
@@ -129,7 +129,6 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
         const avg = ratings.length > 0
           ? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10
           : null;
-        // Priorité aux compétences sitter (labels courts) puis custom_skills profil.
         const sitterSkills = sitterSkillsMap.get(p.id) || [];
         const profileCustom = normalizeCustom(p.custom_skills);
         const mergedSkills = Array.from(new Set([...sitterSkills, ...profileCustom]));
@@ -153,7 +152,6 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
           const da = a.distance_km ?? Infinity;
           const db = b.distance_km ?? Infinity;
           if (da !== db) return da - db;
-          // tie-break : vérifié > expérimenté > note
           if (a.identity_verified !== b.identity_verified) return a.identity_verified ? -1 : 1;
           if (a.completed_sits_count !== b.completed_sits_count) return b.completed_sits_count - a.completed_sits_count;
           return (b.avg_rating ?? 0) - (a.avg_rating ?? 0);
@@ -164,6 +162,7 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
           sitters: sortByDistance(enriched).slice(0, MAX_RESULTS),
           radiusUsed: null,
           hasGeo: false,
+          totalCount: enriched.length,
         };
       }
 
@@ -176,15 +175,15 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
             sitters: sortByDistance(inRange).slice(0, MAX_RESULTS),
             radiusUsed: radius,
             hasGeo: true,
+            totalCount: inRange.length,
           };
         }
       }
 
-      // Aucun dans 100 km : fallback « is_beyond » avec les plus proches.
       const beyond = sortByDistance(withDistance)
         .slice(0, MAX_RESULTS)
         .map((s) => ({ ...s, is_beyond: true }));
-      return { sitters: beyond, radiusUsed: null, hasGeo: true };
+      return { sitters: beyond, radiusUsed: null, hasGeo: true, totalCount: withDistance.length };
     },
   });
 }
