@@ -192,7 +192,8 @@ const OwnerDashboard = () => {
       sitterName: r.sitterName,
     })),
     verificationStatus,
-    nearbySittersCount: nearbyOwnerSittersData?.sitters?.length,
+    nearbySittersCount: nearbyOwnerSittersData?.totalCount,
+    nearbySittersRadius: nearbyOwnerSittersData?.radiusUsed,
   });
 
   // Liste complète d'actions séquentielles + score d'activation 0/6,

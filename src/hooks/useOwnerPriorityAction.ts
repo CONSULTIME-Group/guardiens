@@ -42,11 +42,12 @@ interface Input {
   pendingReviews: Array<{ sitId: string; sitterId: string; sitterName?: string }>;
   verificationStatus: string | null;
   nearbySittersCount?: number;
+  nearbySittersRadius?: number | null;
 }
 
 export function useOwnerPriorityAction(input: Input): OwnerPriorityAction {
   return useMemo(() => {
-    const { sits, pendingAppCount, pendingReviews, verificationStatus, nearbySittersCount } = input;
+    const { sits, pendingAppCount, pendingReviews, verificationStatus, nearbySittersCount, nearbySittersRadius } = input;
     const now = new Date();
 
     // 1. Garde en cours
@@ -177,7 +178,7 @@ export function useOwnerPriorityAction(input: Input): OwnerPriorityAction {
       eyebrow: "Tout est en ordre",
       title:
         nearbySittersCount && nearbySittersCount > 0
-          ? `${nearbySittersCount} gardien${nearbySittersCount > 1 ? "s" : ""} près de chez vous.`
+          ? `${nearbySittersCount} gardien${nearbySittersCount > 1 ? "s" : ""} ${nearbySittersRadius ? `dans un rayon de ${nearbySittersRadius} km` : "près de chez vous"}.`
           : "Découvrez les gardiens près de chez vous.",
       description: "Constituez votre cercle de confiance pour vos prochaines absences.",
       ctaLabel: "Voir les gardiens",
@@ -190,5 +191,6 @@ export function useOwnerPriorityAction(input: Input): OwnerPriorityAction {
     input.pendingReviews,
     input.verificationStatus,
     input.nearbySittersCount,
+    input.nearbySittersRadius,
   ]);
 }
