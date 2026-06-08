@@ -51,7 +51,7 @@ export default function PricingCards() {
           <p className="text-xs tracking-widest uppercase text-muted-foreground font-body mb-3">
             Mensuel
           </p>
-          <p className="text-3xl font-heading font-bold mb-1">
+          <p className="text-3xl font-heading font-bold tabular-nums mb-1">
             {SITTER_PRICE_NUMERIC.toString().replace(".", ",")}&nbsp;&#8364;
           </p>
           <p className="text-sm font-body text-muted-foreground mb-4">
