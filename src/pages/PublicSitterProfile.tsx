@@ -1537,14 +1537,30 @@ export default function PublicSitterProfile() {
             )}
 
             {/* Confiance */}
-            {userBadges && userBadges.length > 0 && (
+            {((userBadges && userBadges.length > 0) || profile?.created_at) && (
               <section id="confiance" aria-label="Confiance et vérifications" className="scroll-mt-24">
                 <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
                   Confiance & vérifications
                 </h2>
                 <div className="space-y-4">
-                  <SpecialBadgeHighlight userBadges={userBadges} />
-                  <BadgeRow badges={userBadges} />
+                  {userBadges && userBadges.length > 0 && (
+                    <>
+                      <SpecialBadgeHighlight userBadges={userBadges} />
+                      <BadgeRow badges={userBadges} />
+                    </>
+                  )}
+                  <TrustTimeline
+                    memberSince={profile?.created_at}
+                    reviews={reviews}
+                    badges={(userBadges || []).map((b: any) => ({
+                      badge_id: b.badge_id,
+                      created_at: b.created_at,
+                      count: b.count ?? 1,
+                    }))}
+                    completedSits={completedSits}
+                    lastActivity={sitterProfile?.last_seen_at ?? null}
+                    firstName={firstName}
+                  />
                 </div>
               </section>
             )}
