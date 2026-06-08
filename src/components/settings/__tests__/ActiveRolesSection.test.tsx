@@ -11,7 +11,13 @@ const mockSwitchRole = vi.fn();
 const mockRefreshProfile = vi.fn(async () => {});
 const mockUpdate = vi.fn(async (..._args: unknown[]) => ({ error: null }));
 const mockEq = vi.fn((..._args: unknown[]) => mockUpdate());
-const mockFrom = vi.fn((_table: string) => ({ update: (_payload: unknown) => ({ eq: mockEq }) }));
+const mockMaybeSingle = vi.fn(async () => ({ data: { is_available: true }, error: null }));
+const mockSelectEq = vi.fn(() => ({ maybeSingle: mockMaybeSingle }));
+const mockSelect = vi.fn(() => ({ eq: mockSelectEq }));
+const mockFrom = vi.fn((_table: string) => ({
+  update: (_payload: unknown) => ({ eq: mockEq }),
+  select: (_cols?: string) => mockSelect(),
+}));
 const mockInvoke = vi.fn(async (_name: string, _opts?: unknown) => ({ data: { url: "https://stripe.test/portal" }, error: null }));
 const toastSuccess = vi.fn();
 const toastError = vi.fn();
