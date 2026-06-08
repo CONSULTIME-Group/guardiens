@@ -45,32 +45,59 @@ const categoryColors: Record<string, string> = {
 
 interface SeoCheck {
   hasMetaTitle: boolean;
+  hasMetaTitleLength: boolean;
   hasMetaDescription: boolean;
+  hasMetaDescriptionLength: boolean;
   hasHeroImageAlt: boolean;
   hasInternalLinks: boolean;
+  hasMinContentLength: boolean;
+  noForbiddenVocab: boolean;
 }
 
+// Forbidden vocabulary per project Core memory: « AURA », « Auvergne-Rhône-Alpes »,
+// « voisin/voisine/voisins/voisinage », tiret cadratin « — ».
+const FORBIDDEN_REGEX = /AURA|Auvergne-Rhône-Alpes|voisin(e|s|age)?|\u2014/i;
+
 function getSeoScore(article: any): { score: "green" | "orange" | "red"; checks: SeoCheck } {
+  const mt = (article.meta_title || "").trim();
+  const md = (article.meta_description || "").trim();
+  const content = article.content || "";
+  const title = article.title || "";
+  const excerpt = article.excerpt || "";
+  const haystack = `${title}\n${content}\n${excerpt}\n${mt}\n${md}`;
+
   const checks: SeoCheck = {
-    hasMetaTitle: !!(article.meta_title && article.meta_title.trim()),
-    hasMetaDescription: !!(article.meta_description && article.meta_description.trim()),
+    hasMetaTitle: !!mt,
+    hasMetaTitleLength: mt.length > 0 && mt.length <= 60,
+    hasMetaDescription: !!md,
+    hasMetaDescriptionLength: md.length >= 120 && md.length <= 160,
     hasHeroImageAlt: !!(article.hero_image_alt && article.hero_image_alt.trim()),
     hasInternalLinks: Array.isArray(article.internal_links) && article.internal_links.length >= 2,
+    hasMinContentLength: content.length >= 3000,
+    noForbiddenVocab: !FORBIDDEN_REGEX.test(haystack),
   };
-  
-  const total = Object.values(checks).filter(Boolean).length;
-  
+
+  // Bloquants rouges : meta absentes ou vocabulaire proscrit ou contenu < 2000.
   if (!checks.hasMetaTitle || !checks.hasMetaDescription) return { score: "red", checks };
-  if (total >= 4) return { score: "green", checks };
+  if (!checks.noForbiddenVocab) return { score: "red", checks };
+  if (content.length < 2000) return { score: "red", checks };
+
+  const total = Object.values(checks).filter(Boolean).length;
+  if (total === 8) return { score: "green", checks };
   return { score: "orange", checks };
 }
 
 const seoLabels: Record<keyof SeoCheck, string> = {
-  hasMetaTitle: "Meta title",
-  hasMetaDescription: "Meta description",
-  hasHeroImageAlt: "Alt text image",
-  hasInternalLinks: "Liens internes (≥2)",
+  hasMetaTitle: "Meta title présent",
+  hasMetaTitleLength: "Meta title ≤ 60 caractères",
+  hasMetaDescription: "Meta description présente",
+  hasMetaDescriptionLength: "Meta description 120–160 caractères",
+  hasHeroImageAlt: "Alt text image hero",
+  hasInternalLinks: "Liens internes (≥ 2)",
+  hasMinContentLength: "Contenu ≥ 3000 caractères",
+  noForbiddenVocab: "Vocabulaire conforme (pas d'AURA, voisin, tiret cadratin)",
 };
+
 
 const AdminArticles = () => {
   const navigate = useNavigate();
