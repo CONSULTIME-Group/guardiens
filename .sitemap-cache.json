@@ -1,81 +1,35 @@
 {
   "sources": {
-    "public_profiles": {
-      "head": null,
-      "fetchedAt": "2026-06-08T07:19:24.294Z"
-    },
-    "breed_profiles": {
-      "head": null,
-      "fetchedAt": "2026-06-08T07:19:24.325Z"
+    "city_guides": {
+      "head": "2026-05-21T20:15:30.121997+00:00",
+      "fetchedAt": "2026-06-08T07:19:52.982Z"
     },
     "seo_department_pages": {
       "head": "2026-03-26T05:46:21.361179+00:00",
-      "fetchedAt": "2026-06-08T07:19:24.327Z"
-    },
-    "city_guides": {
-      "head": "2026-05-21T20:15:30.121997+00:00",
-      "fetchedAt": "2026-06-08T07:19:24.329Z"
+      "fetchedAt": "2026-06-08T07:19:52.983Z"
     },
     "seo_city_pages": {
       "head": "2026-06-06T07:52:00.978104+00:00",
-      "fetchedAt": "2026-06-08T07:19:24.329Z"
-    },
-    "public_sits": {
-      "head": null,
-      "fetchedAt": "2026-06-08T07:19:24.331Z"
+      "fetchedAt": "2026-06-08T07:19:52.995Z"
     },
     "articles": {
       "head": "2026-06-06T13:49:48.281916+00:00",
-      "fetchedAt": "2026-06-08T07:19:24.339Z"
+      "fetchedAt": "2026-06-08T07:19:52.996Z"
+    },
+    "breed_profiles": {
+      "head": "2026-05-24T21:01:12.702919+00:00",
+      "fetchedAt": "2026-06-08T07:19:53.049Z"
+    },
+    "public_sits": {
+      "head": null,
+      "fetchedAt": "2026-06-08T07:19:53.053Z"
+    },
+    "public_profiles": {
+      "head": null,
+      "fetchedAt": "2026-06-08T07:19:53.066Z"
     }
   },
   "entries": {
-    "public_profiles": [],
-    "breed_profiles": [],
-    "seo_department_pages": [
-      {
-        "loc": "/departement/puy-de-dome",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/rhone",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/savoie",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/drome",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/isere",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/loire",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/haute-savoie",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      }
-    ],
     "city_guides": [
       {
         "loc": "/guides/lyon",
@@ -384,6 +338,50 @@
         "priority": "0.7"
       }
     ],
+    "seo_department_pages": [
+      {
+        "loc": "/departement/puy-de-dome",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/rhone",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/savoie",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/drome",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/isere",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/loire",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/haute-savoie",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      }
+    ],
     "seo_city_pages": [
       {
         "loc": "/house-sitting/megeve",
@@ -518,7 +516,6 @@
         "priority": "0.8"
       }
     ],
-    "public_sits": [],
     "articles": [
       {
         "loc": "/actualites/devenir-gardien-pro-animalier",
@@ -868,6 +865,106 @@
         "changefreq": "monthly",
         "priority": "0.6"
       }
-    ]
+    ],
+    "breed_profiles": [
+      {
+        "loc": "/races/dog-malinois",
+        "lastmod": "2026-03-27",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-bleu-de-russe",
+        "lastmod": "2026-04-22",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-maine-coon",
+        "lastmod": "2026-04-22",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-croise-bichon",
+        "lastmod": "2026-04-22",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/bird-gris-du-gabon",
+        "lastmod": "2026-04-22",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/horse-ane-du-cotentin",
+        "lastmod": "2026-04-26",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/horse-jument-merens",
+        "lastmod": "2026-04-26",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-chat-des-forets-norvegiennes",
+        "lastmod": "2026-04-26",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/farm_animal-poules-marans",
+        "lastmod": "2026-04-26",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-sacre-de-birmanie",
+        "lastmod": "2026-04-29",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-husky-siberien",
+        "lastmod": "2026-04-29",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/rodent-rat",
+        "lastmod": "2026-05-01",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-europeen",
+        "lastmod": "2026-05-05",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-beauceron",
+        "lastmod": "2026-05-05",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-jack-russel",
+        "lastmod": "2026-05-11",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-teclem",
+        "lastmod": "2026-05-24",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      }
+    ],
+    "public_sits": [],
+    "public_profiles": []
   }
 }
