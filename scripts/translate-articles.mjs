@@ -115,7 +115,7 @@ async function main() {
   const have = new Set((existing || []).map((e) => `${e.article_id}:${e.lang}`));
 
   let done = 0, skipped = 0, failed = 0;
-  for (const art of articles) {
+  for (const art of filtered) {
     for (const lang of LANGS) {
       const key = `${art.id}:${lang}`;
       if (!FORCE && have.has(key)) { skipped++; continue; }
