@@ -55,6 +55,16 @@ type ProfileDraft<T> = {
 
 const OwnerProfilePage = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
+  const tp = (k: string, opts?: any) => t(`profile_page.${k}`, opts) as string;
+  const SECTIONS_META = useMemo(
+    () => SECTIONS_BASE.map(s => ({
+      ...s,
+      label: tp(`owner_sections.${s.id}.label`),
+      subtitle: tp(`owner_sections.${s.id}.subtitle`),
+    })),
+    [t]
+  );
   const {
     data, pets, loading, saving, completion, missingFields, lastSyncedAt,
     saveStep, addPet, updatePet, removePet, uploadPhoto,
