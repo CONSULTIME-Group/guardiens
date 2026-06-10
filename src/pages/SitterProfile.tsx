@@ -67,6 +67,16 @@ const SECTION_PARAM_MAP: Record<string, string> = {
 
 const SitterProfile = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
+  const tp = (k: string, opts?: any) => t(`profile_page.${k}`, opts) as string;
+  const SECTIONS_META = useMemo(
+    () => SECTIONS_BASE.map(s => ({
+      ...s,
+      label: tp(`sitter_sections.${s.id}.label`),
+      subtitle: tp(`sitter_sections.${s.id}.subtitle`),
+    })),
+    [t]
+  );
   const [searchParams] = useSearchParams();
   const {
     data, pastAnimals, loading, saving, completion, missingFields, lastSyncedAt,
