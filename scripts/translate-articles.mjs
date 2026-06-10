@@ -86,8 +86,18 @@ Rules:
   const data = await res.json();
   const content = data.choices?.[0]?.message?.content;
   if (!content) throw new Error("Empty AI response");
-  const parsed = JSON.parse(content);
-  return parsed;
+  // Robust parse: handle stray trailing comma, accidental code fences
+  let cleaned = content.trim().replace(/^```json\s*/i, "").replace(/```$/, "").trim();
+  try {
+    return JSON.parse(cleaned);
+  } catch (e) {
+    // Try to recover by trimming after last closing brace
+    const lastBrace = cleaned.lastIndexOf("}");
+    if (lastBrace > 0) {
+      try { return JSON.parse(cleaned.slice(0, lastBrace + 1)); } catch {}
+    }
+    throw e;
+  }
 }
 
 async function main() {
@@ -119,32 +129,33 @@ async function main() {
     for (const lang of LANGS) {
       const key = `${art.id}:${lang}`;
       if (!FORCE && have.has(key)) { skipped++; continue; }
-      try {
-        process.stdout.write(`[${lang}] ${art.slug} … `);
-        const tr = await translateArticle(art, lang);
-        const slug = `${art.slug}-${lang}`;
-        const { error: upErr } = await supabase
-          .from("article_translations")
-          .upsert({
-            article_id: art.id,
-            lang,
-            slug,
-            title: tr.title || "",
-            excerpt: tr.excerpt || "",
-            content: tr.content || "",
-            meta_title: tr.meta_title || null,
-            meta_description: tr.meta_description || null,
-            hero_image_alt: tr.hero_image_alt || null,
-          }, { onConflict: "article_id,lang" });
-        if (upErr) throw upErr;
-        done++;
-        console.log("ok");
-      } catch (e) {
-        failed++;
-        console.log(`FAIL: ${e.message}`);
+      let tr = null, lastErr = null;
+      for (let attempt = 0; attempt < 2 && !tr; attempt++) {
+        try {
+          process.stdout.write(`[${lang}] ${art.slug}${attempt > 0 ? " (retry)" : ""} … `);
+          tr = await translateArticle(art, lang);
+        } catch (e) {
+          lastErr = e;
+          process.stdout.write(`FAIL(${e.message.slice(0, 60)}) `);
+          await new Promise((r) => setTimeout(r, 1500));
+        }
       }
-      // gentle pacing
-      await new Promise((r) => setTimeout(r, 400));
+      if (!tr) { failed++; console.log("GIVE UP"); continue; }
+      const slug = `${art.slug}-${lang}`;
+      const { error: upErr } = await supabase
+        .from("article_translations")
+        .upsert({
+          article_id: art.id, lang, slug,
+          title: tr.title || "",
+          excerpt: tr.excerpt || "",
+          content: tr.content || "",
+          meta_title: tr.meta_title || null,
+          meta_description: tr.meta_description || null,
+          hero_image_alt: tr.hero_image_alt || null,
+        }, { onConflict: "article_id,lang" });
+      if (upErr) { failed++; console.log(`UPSERT FAIL: ${upErr.message}`); }
+      else { done++; console.log("ok"); }
+      await new Promise((r) => setTimeout(r, 300));
     }
   }
   console.log(`\nDone: ${done} translated, ${skipped} skipped, ${failed} failed.`);
