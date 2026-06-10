@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -131,6 +132,7 @@ function ArticleSeoLogger({ article }: { article: ArticleFull }) {
 export default function ArticleDetail() {
  const { slug } = useParams<{ slug: string }>();
  const navigate = useNavigate();
+ const { i18n } = useTranslation();
  const { user, isAuthenticated } = useAuth();
  const [article, setArticle] = useState<ArticleFull | null>(null);
  const [loading, setLoading] = useState(true);
@@ -166,7 +168,31 @@ export default function ArticleDetail() {
 .eq("slug", slug)
 .eq("published", true)
 .maybeSingle();
- const art = data as ArticleFull | null;
+ let art = data as ArticleFull | null;
+ // Overlay traduction si langue ≠ fr
+ const currentLang = (i18n.language || "fr").split("-")[0].toLowerCase();
+ if (art && ["en", "es", "it", "de"].includes(currentLang)) {
+   const { data: tr, error: trErr } = await supabase
+     .from("article_translations")
+     .select("title, excerpt, content, meta_title, meta_description, hero_image_alt")
+     .eq("article_id", art.id)
+     .eq("lang", currentLang)
+     .maybeSingle();
+   if (trErr) console.warn("[i18n] translation fetch error", trErr);
+   if (tr) {
+     art = {
+       ...art,
+       title: tr.title || art.title,
+       excerpt: tr.excerpt || art.excerpt,
+       content: tr.content || art.content,
+       meta_title: tr.meta_title ?? art.meta_title,
+       meta_description: tr.meta_description ?? art.meta_description,
+       hero_image_alt: tr.hero_image_alt ?? art.hero_image_alt,
+     };
+   } else {
+     console.info(`[i18n] no ${currentLang} translation for ${art.slug}`);
+   }
+ }
  setArticle(art);
  setLoading(false);
  window.prerenderReady = true;
@@ -243,7 +269,7 @@ export default function ArticleDetail() {
  };
   fetchAll();
   return () => { cancelled = true; };
-  }, [slug]);
+  }, [slug, i18n.language]);
 
  // CTA tracking, listen for clicks on data-article-cta links inside the rendered article
  useEffect(() => {

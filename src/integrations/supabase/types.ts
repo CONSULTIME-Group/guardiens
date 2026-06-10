@@ -339,6 +339,59 @@ export type Database = {
           },
         ]
       }
+      article_translations: {
+        Row: {
+          article_id: string
+          content: string
+          created_at: string
+          excerpt: string
+          hero_image_alt: string | null
+          id: string
+          lang: string
+          meta_description: string | null
+          meta_title: string | null
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          article_id: string
+          content?: string
+          created_at?: string
+          excerpt?: string
+          hero_image_alt?: string | null
+          id?: string
+          lang: string
+          meta_description?: string | null
+          meta_title?: string | null
+          slug: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          article_id?: string
+          content?: string
+          created_at?: string
+          excerpt?: string
+          hero_image_alt?: string | null
+          id?: string
+          lang?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_translations_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       articles: {
         Row: {
           author_name: string
