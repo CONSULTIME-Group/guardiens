@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { useSearchParams, Link } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
@@ -13,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Calendar, MapPin, ArrowRight, ChevronLeft, ChevronRight, Search, AlertCircle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { fr, enUS, es, it as itLocale, de as deLocale } from "date-fns/locale";
 
 interface Article {
   id: string;
@@ -29,23 +30,10 @@ interface Article {
   published_at: string | null;
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-  guide_central: "Guides essentiels",
-  guide_race: "Races",
-  guide_lieu: "Guide lieu",
-  guide_ville: "Guide ville",
-  conseil_gardien: "Conseils gardiens",
-  conseil_proprio: "Conseils propriétaires",
-  conseil: "Conseils",
-  temoignage: "Témoignage",
-  actualite: "Actualité",
-  ville: "Villes",
-  thematique: "House-sitting",
-  guide_local: "Guides locaux",
-  saisonnier: "Saisonniers",
-  guide_pratique: "Guides pratiques",
-  vie_locale: "Vie locale & Entraide",
-};
+const CATEGORY_KEYS = [
+  "guide_central","guide_race","guide_lieu","guide_ville","conseil_gardien","conseil_proprio",
+  "conseil","temoignage","actualite","ville","thematique","guide_local","saisonnier","guide_pratique","vie_locale",
+];
 
 const CATEGORY_COLORS: Record<string, string> = {
   guide_central: "bg-primary/10 text-primary",
@@ -67,7 +55,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 const PAGE_SIZE = 9;
 
-const VALID_CATEGORIES = new Set(Object.keys(CATEGORY_LABELS));
+const VALID_CATEGORIES = new Set(CATEGORY_KEYS);
 
 function buildPageList(current: number, total: number): (number | "…")[] {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
@@ -88,6 +76,9 @@ function isNew(publishedAt: string | null): boolean {
 }
 
 export default function News() {
+  const { t, i18n } = useTranslation();
+  const tCat = (key: string) => t(`news.categories.${key}`, { defaultValue: key });
+  const dateLocale = (({ fr, en: enUS, es, it: itLocale, de: deLocale } as any)[i18n.language?.split("-")[0]] || fr);
   const [articles, setArticles] = useState<Article[]>([]);
   const [vieLocaleArticles, setVieLocaleArticles] = useState<Article[]>([]);
   const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
@@ -124,6 +115,22 @@ export default function News() {
 
   useEffect(() => {
     let cancelled = false;
+    const lang = (i18n.language || "fr").split("-")[0].toLowerCase();
+    const overlayTranslations = async (list: Article[], lg: string): Promise<Article[]> => {
+      if (!["en", "es", "it", "de"].includes(lg) || list.length === 0) return list;
+      const { data: trs } = await supabase
+        .from("article_translations")
+        .select("article_id, title, excerpt")
+        .eq("lang", lg)
+        .in("article_id", list.map((a) => a.id));
+      const map = new Map<string, { title?: string; excerpt?: string }>();
+      (trs || []).forEach((tr: any) => map.set(tr.article_id, { title: tr.title, excerpt: tr.excerpt }));
+      return list.map((a) => {
+        const tr = map.get(a.id);
+        if (!tr) return a;
+        return { ...a, title: tr.title || a.title, excerpt: tr.excerpt || a.excerpt };
+      });
+    };
     const fetchArticles = async () => {
       setLoading(true);
       setError(null);
@@ -152,11 +159,14 @@ export default function News() {
       const { data, count, error: qError } = await query;
       if (cancelled) return;
       if (qError) {
-        setError("Impossible de charger les articles. Veuillez réessayer.");
+        setError(t("news.error"));
         setArticles([]);
         setTotalCount(0);
       } else {
-        setArticles((data as Article[]) || []);
+        const list = (data as Article[]) || [];
+        const overlaid = await overlayTranslations(list, lang);
+        if (cancelled) return;
+        setArticles(overlaid);
         setTotalCount(count || 0);
       }
       setLoading(false);
@@ -173,7 +183,9 @@ export default function News() {
         .or("noindex.is.null,noindex.eq.false")
         .order("published_at", { ascending: false })
         .limit(3);
-      if (!cancelled) setVieLocaleArticles((data as Article[]) || []);
+      const list = (data as Article[]) || [];
+      const overlaid = await overlayTranslations(list, lang);
+      if (!cancelled) setVieLocaleArticles(overlaid);
     };
 
     fetchArticles();
@@ -183,7 +195,7 @@ export default function News() {
     return () => {
       cancelled = true;
     };
-  }, [activeCategory, currentPage, urlSearch]);
+  }, [activeCategory, currentPage, urlSearch, i18n.language]);
 
   // Fetch category counts once (only categories that have at least one article are shown)
   useEffect(() => {
@@ -260,19 +272,19 @@ export default function News() {
       ...present.filter((k) => !CATEGORY_ORDER.includes(k)).sort(),
     ];
     return [
-      { key: "all", label: "Tous", count: totalArticles },
+      { key: "all", label: t("news.all", "Tous"), count: totalArticles },
       ...ordered.map((k) => ({
         key: k,
-        label: CATEGORY_LABELS[k] || k,
+        label: tCat(k),
         count: categoryCounts[k],
       })),
     ];
-  }, [categoryCounts, totalArticles]);
+  }, [categoryCounts, totalArticles, i18n.language]);
 
   const metaTitle =
     activeCategory !== "all"
-      ? `${CATEGORY_LABELS[activeCategory] || "Articles"}, Guides & Conseils`
-      : "Guides & Conseils house-sitting";
+      ? t("news.meta_title_category", { cat: tCat(activeCategory) })
+      : t("news.meta_title_default");
   const metaPath =
     activeCategory !== "all"
       ? `/actualites?categorie=${activeCategory}${currentPage > 1 ? `&page=${currentPage}` : ""}`
@@ -290,19 +302,19 @@ export default function News() {
     <>
       <PageMeta
         title={metaTitle}
-        description="Conseils house-sitting, guides pratiques, témoignages et actualités de la communauté Guardiens. Tout pour bien préparer une garde."
+        description={t("news.meta_description")}
         path={metaPath}
       />
       <PublicHeader />
       <div className="max-w-4xl mx-auto px-4 py-8 animate-fade-in">
-        <PageBreadcrumb items={[{ label: "Guides & Conseils" }]} />
+        <PageBreadcrumb items={[{ label: t("news.breadcrumb") }]} />
 
         <header className="mb-8">
           <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-2">
-            Guides & Conseils
+            {t("news.title")}
           </h1>
           <p className="text-muted-foreground text-lg">
-            Conseils, guides et astuces pour les propriétaires et gardiens d'animaux.
+            {t("news.subtitle")}
           </p>
         </header>
 
@@ -312,17 +324,17 @@ export default function News() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
             <Input
               type="search"
-              placeholder="Rechercher un article…"
+              placeholder={t("news.search_placeholder")}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               className="pl-10"
-              aria-label="Rechercher dans les articles"
+              aria-label={t("news.search_aria")}
             />
           </div>
           {hasActiveFilters && (
             <Button variant="outline" onClick={resetFilters} className="shrink-0 gap-2">
               <RotateCcw className="h-4 w-4" aria-hidden="true" />
-              Réinitialiser les filtres
+              {t("news.reset_filters")}
             </Button>
           )}
         </div>
@@ -362,9 +374,9 @@ export default function News() {
         {/* Featured "Vie locale & Entraide" section */}
         {activeCategory === "all" && !urlSearch.trim() && vieLocaleArticles.length > 0 && !loading && (
           <div className="mb-10 p-6 rounded-xl bg-warning-soft/40">
-            <h2 className="font-heading text-xl font-bold mb-1">Vie locale & Entraide</h2>
+            <h2 className="font-heading text-xl font-bold mb-1">{t("news.vie_locale_title")}</h2>
             <p className="text-muted-foreground text-sm mb-5">
-              Des échanges sans argent, des gens du coin qui se rendent service, une autre façon de vivre ensemble.
+              {t("news.vie_locale_subtitle")}
             </p>
             <div className="grid sm:grid-cols-3 gap-4 mb-4">
               {vieLocaleArticles.map((a) => (
@@ -388,7 +400,7 @@ export default function News() {
               }
               className="text-primary text-sm font-medium hover:underline inline-flex items-center gap-1"
             >
-              Voir tous les articles <ArrowRight className="h-3 w-3" />
+              {t("news.see_all")} <ArrowRight className="h-3 w-3" />
             </button>
           </div>
         )}
@@ -412,19 +424,19 @@ export default function News() {
           <div className="text-center py-16 space-y-4">
             <AlertCircle className="h-10 w-10 text-destructive mx-auto" aria-hidden="true" />
             <p className="text-destructive">{error}</p>
-            <Button variant="outline" onClick={() => updateParams(() => {}, true)}>Réessayer</Button>
+            <Button variant="outline" onClick={() => updateParams(() => {}, true)}>{t("news.retry")}</Button>
           </div>
         ) : visibleArticles.length === 0 ? (
           <div className="text-center py-16 space-y-3">
             <p className="text-muted-foreground text-lg">
               {urlSearch.trim()
-                ? `Aucun article ne correspond à « ${urlSearch.trim()} ».`
-                : "Aucun article pour le moment. Revenez bientôt !"}
+                ? t("news.empty_search", { q: urlSearch.trim() })
+                : t("news.empty_default")}
             </p>
             {hasActiveFilters && (
               <Button variant="outline" onClick={resetFilters} className="gap-2">
                 <RotateCcw className="h-4 w-4" aria-hidden="true" />
-                Réinitialiser les filtres
+                {t("news.reset_filters")}
               </Button>
             )}
           </div>
@@ -450,10 +462,10 @@ export default function News() {
                       <CardContent className="p-5 space-y-3">
                         <div className="flex items-center gap-2 flex-wrap">
                           <Badge variant="secondary" className={CATEGORY_COLORS[article.category] || ""}>
-                            {CATEGORY_LABELS[article.category] || article.category}
+                            {tCat(article.category)}
                           </Badge>
                           {isNew(article.published_at) && (
-                            <Badge className="bg-primary text-primary-foreground">Nouveau</Badge>
+                            <Badge className="bg-primary text-primary-foreground">{t("news.new_badge")}</Badge>
                           )}
                           {article.city && (
                             <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -473,11 +485,11 @@ export default function News() {
                               className="flex items-center gap-1 text-xs text-muted-foreground"
                             >
                               <Calendar className="h-3 w-3" aria-hidden="true" />
-                              {format(new Date(article.published_at), "d MMM yyyy", { locale: fr })}
+                              {format(new Date(article.published_at), "d MMM yyyy", { locale: dateLocale })}
                             </time>
                           )}
                           <span className="flex items-center gap-1 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                            Lire <ArrowRight className="h-3 w-3" aria-hidden="true" />
+                            {t("news.read")} <ArrowRight className="h-3 w-3" aria-hidden="true" />
                           </span>
                         </div>
                       </CardContent>
@@ -489,13 +501,13 @@ export default function News() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <nav className="flex items-center justify-center gap-2 mt-10" aria-label="Pagination">
+              <nav className="flex items-center justify-center gap-2 mt-10" aria-label={t("news.pagination_aria")}>
                 <Button
                   variant="outline"
                   size="icon"
                   disabled={currentPage <= 1}
                   onClick={() => goToPage(currentPage - 1)}
-                  aria-label="Page précédente"
+                  aria-label={t("news.prev_page")}
                 >
                   <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                 </Button>
@@ -509,7 +521,7 @@ export default function News() {
                       size="sm"
                       onClick={() => goToPage(p)}
                       aria-current={p === currentPage ? "page" : undefined}
-                      aria-label={`Page ${p}`}
+                      aria-label={t("news.page_aria", { n: p })}
                       className="min-w-[36px]"
                     >
                       {p}
@@ -521,7 +533,7 @@ export default function News() {
                   size="icon"
                   disabled={currentPage >= totalPages}
                   onClick={() => goToPage(currentPage + 1)}
-                  aria-label="Page suivante"
+                  aria-label={t("news.next_page")}
                 >
                   <ChevronRight className="h-4 w-4" aria-hidden="true" />
                 </Button>

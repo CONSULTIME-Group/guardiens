@@ -413,5 +413,47 @@
       "saisonnier": "Saisonal",
       "guide_central": "Hauptleitfaden"
     }
+  },
+  "news": {
+    "title": "Ratgeber & Tipps",
+    "subtitle": "Tipps, Ratgeber und Tricks für Tierhalter und Tiersitter.",
+    "meta_description": "House-Sitting-Tipps, praktische Ratgeber, Erfahrungsberichte und Neuigkeiten der Guardiens-Community. Alles, um eine Betreuung gut vorzubereiten.",
+    "meta_title_default": "Ratgeber & Tipps zum House-Sitting",
+    "meta_title_category": "{{cat}}, Ratgeber & Tipps",
+    "breadcrumb": "Ratgeber & Tipps",
+    "search_placeholder": "Artikel suchen…",
+    "search_aria": "In Artikeln suchen",
+    "reset_filters": "Filter zurücksetzen",
+    "all": "Alle",
+    "new_badge": "Neu",
+    "read": "Lesen",
+    "vie_locale_title": "Lokales Leben & Nachbarschaftshilfe",
+    "vie_locale_subtitle": "Austausch ohne Geld, Leute aus der Gegend, die sich helfen, eine andere Art zusammenzuleben.",
+    "see_all": "Alle Artikel ansehen",
+    "empty_search": "Kein Artikel passt zu « {{q}} ».",
+    "empty_default": "Noch keine Artikel. Bald wieder vorbeischauen!",
+    "error": "Artikel können nicht geladen werden. Bitte erneut versuchen.",
+    "retry": "Erneut versuchen",
+    "pagination_aria": "Seitennummerierung",
+    "prev_page": "Vorherige Seite",
+    "next_page": "Nächste Seite",
+    "page_aria": "Seite {{n}}",
+    "categories": {
+      "guide_central": "Wesentliche Ratgeber",
+      "guide_race": "Rassen",
+      "guide_lieu": "Ortsratgeber",
+      "guide_ville": "Stadtratgeber",
+      "conseil_gardien": "Tipps Sitter",
+      "conseil_proprio": "Tipps Halter",
+      "conseil": "Tipps",
+      "temoignage": "Erfahrungsbericht",
+      "actualite": "Aktuelles",
+      "ville": "Städte",
+      "thematique": "House-sitting",
+      "guide_local": "Lokale Ratgeber",
+      "saisonnier": "Saisonal",
+      "guide_pratique": "Praktische Ratgeber",
+      "vie_locale": "Lokales Leben & Nachbarschaftshilfe"
+    }
   }
 }

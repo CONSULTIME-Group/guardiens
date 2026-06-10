@@ -413,5 +413,47 @@
       "saisonnier": "Saisonnier",
       "guide_central": "Guide central"
     }
+  },
+  "news": {
+    "title": "Guides & Conseils",
+    "subtitle": "Conseils, guides et astuces pour les propriétaires et gardiens d'animaux.",
+    "meta_description": "Conseils house-sitting, guides pratiques, témoignages et actualités de la communauté Guardiens. Tout pour bien préparer une garde.",
+    "meta_title_default": "Guides & Conseils house-sitting",
+    "meta_title_category": "{{cat}}, Guides & Conseils",
+    "breadcrumb": "Guides & Conseils",
+    "search_placeholder": "Rechercher un article…",
+    "search_aria": "Rechercher dans les articles",
+    "reset_filters": "Réinitialiser les filtres",
+    "all": "Tous",
+    "new_badge": "Nouveau",
+    "read": "Lire",
+    "vie_locale_title": "Vie locale & Entraide",
+    "vie_locale_subtitle": "Des échanges sans argent, des gens du coin qui se rendent service, une autre façon de vivre ensemble.",
+    "see_all": "Voir tous les articles",
+    "empty_search": "Aucun article ne correspond à « {{q}} ».",
+    "empty_default": "Aucun article pour le moment. Revenez bientôt !",
+    "error": "Impossible de charger les articles. Veuillez réessayer.",
+    "retry": "Réessayer",
+    "pagination_aria": "Pagination",
+    "prev_page": "Page précédente",
+    "next_page": "Page suivante",
+    "page_aria": "Page {{n}}",
+    "categories": {
+      "guide_central": "Guides essentiels",
+      "guide_race": "Races",
+      "guide_lieu": "Guide lieu",
+      "guide_ville": "Guide ville",
+      "conseil_gardien": "Conseils gardiens",
+      "conseil_proprio": "Conseils propriétaires",
+      "conseil": "Conseils",
+      "temoignage": "Témoignage",
+      "actualite": "Actualité",
+      "ville": "Villes",
+      "thematique": "House-sitting",
+      "guide_local": "Guides locaux",
+      "saisonnier": "Saisonniers",
+      "guide_pratique": "Guides pratiques",
+      "vie_locale": "Vie locale & Entraide"
+    }
   }
 }
