@@ -156,10 +156,7 @@ export default function PublicListings() {
                 <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping" />
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary" />
               </span>
-              <span className="text-foreground">
-                <span className="font-semibold">{intlCount}</span>{" "}
-                {t("public_listings.intl_count", { count: intlCount }).replace(/^\d+\s*/, "")}
-              </span>
+              <span className="text-foreground">{intlLabel}</span>
               <span className="text-muted-foreground group-hover:text-foreground transition-colors" aria-hidden>→</span>
             </Link>
           )}
