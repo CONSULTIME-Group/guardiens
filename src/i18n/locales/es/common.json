@@ -5,13 +5,13 @@
     "current": "Idioma actual: {{lang}}"
   },
   "nav": {
-    "listings": "Anuncios actuales",
+    "listings": "Anuncios en curso",
     "small_missions": "Pequeños favores",
     "pros": "Profesionales de animales",
     "guides": "Guías locales",
     "pricing": "Tarifas",
     "news": "El diario",
-    "login": "Iniciar sesión",
+    "login": "Conexión",
     "register": "Crear mi cuenta",
     "menu": "Menú",
     "beta": "Beta"
@@ -27,7 +27,7 @@
     "links": {
       "all_guides": "Todas las guías",
       "articles": "Artículos",
-      "house_sitting_guide": "Guía del house-sitting",
+      "house_sitting_guide": "Guía de house-sitting",
       "faq": "Preguntas frecuentes",
       "pricing": "Tarifas",
       "what_is_house_sitting": "Qué es el house-sitting",
@@ -41,11 +41,26 @@
     "tagline": "House-sitting de proximidad",
     "version": "Guardiens · Versión Beta · 2026",
     "legal": {
-      "cgu": "Condiciones Generales de Uso",
-      "cgs": "Condiciones Generales de Servicio",
+      "cgu": "Términos y condiciones",
+      "cgs": "Condiciones de servicio",
       "privacy": "Política de privacidad",
       "legal_notice": "Aviso legal",
       "contact": "Contacto"
+    }
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "Ayuda mutua · Cuidado de animales · Home sitting",
+      "title_main": "El cuidado de animales, los pequeños favores,",
+      "title_accent": "el encuentro.",
+      "lede": "Haga que un cuidador local cuide su casa y sus animales durante sus ausencias. O pida, y devuelva, pequeños favores cerca de usted, con o sin animales.",
+      "lede_italic": "Y detrás de cada intercambio, un encuentro que usted no habría buscado.",
+      "cta_owner": "Publicar mi anuncio",
+      "cta_sitter": "Quiero ser cuidador",
+      "kpi_houses": "casas cuidadas",
+      "kpi_animals": "animales acompañados",
+      "kpi_members": "inscritos",
+      "kpi_missions": "misiones de ayuda mutua"
     }
   }
 }

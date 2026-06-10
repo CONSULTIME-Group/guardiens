@@ -8,10 +8,10 @@
     "listings": "Aktuelle Anzeigen",
     "small_missions": "Kleine Hilfen",
     "pros": "Tierprofis",
-    "guides": "Lokale Guides",
-    "pricing": "Tarife",
-    "news": "Journal",
-    "login": "Anmelden",
+    "guides": "Lokale Reiseführer",
+    "pricing": "Preise",
+    "news": "Das Journal",
+    "login": "Anmeldung",
     "register": "Konto erstellen",
     "menu": "Menü",
     "beta": "Beta"
@@ -20,16 +20,16 @@
     "sections": {
       "by_city": "House-sitting nach Stadt",
       "by_department": "Nach Departement",
-      "local_guides": "Lokale Guides",
+      "local_guides": "Lokale Reiseführer",
       "resources": "Ressourcen",
       "guardiens": "Guardiens"
     },
     "links": {
-      "all_guides": "Alle Guides",
+      "all_guides": "Alle Reiseführer",
       "articles": "Artikel",
       "house_sitting_guide": "House-sitting Ratgeber",
       "faq": "FAQ",
-      "pricing": "Tarife",
+      "pricing": "Preise",
       "what_is_house_sitting": "Was ist House-sitting",
       "about": "Über uns",
       "contact": "Kontakt",
@@ -41,11 +41,26 @@
     "tagline": "House-sitting in Ihrer Nähe",
     "version": "Guardiens · Version Beta · 2026",
     "legal": {
-      "cgu": "Nutzungsbedingungen",
-      "cgs": "Allgemeine Servicebedingungen",
-      "privacy": "Datenschutzrichtlinie",
+      "cgu": "AGB",
+      "cgs": "Bedingungen",
+      "privacy": "Datenschutzerklärung",
       "legal_notice": "Impressum",
       "contact": "Kontakt"
+    }
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "Gegenseitige Hilfe · Tierbetreuung · Home Sitting",
+      "title_main": "Tierbetreuung, die kleine Hilfe,",
+      "title_accent": "die Begegnung.",
+      "lede": "Lassen Sie Ihr Haus und Ihre Tiere während Ihrer Abwesenheit von einem Betreuer aus der Nähe hüten. Oder bitten Sie um eine kleine Hilfe in Ihrer Nachbarschaft und leisten Sie diese, mit oder ohne Tiere.",
+      "lede_italic": "Und hinter jedem Austausch steht eine Begegnung, nach der Sie sonst nicht gesucht hätten.",
+      "cta_owner": "Meine Anzeige veröffentlichen",
+      "cta_sitter": "Ich möchte betreuen",
+      "kpi_houses": "gehütete Häuser",
+      "kpi_animals": "begleitete Tiere",
+      "kpi_members": "Registrierte",
+      "kpi_missions": "Hilfseinsätze"
     }
   }
 }
