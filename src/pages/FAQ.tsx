@@ -85,19 +85,19 @@ const FAQ = () => {
  }, [entries, location.hash, slugToEntryId]);
 
  const categoryLabels: Record<string, string> = {
- general: "Questions générales",
- owner: "Pour les propriétaires",
- sitter: "Pour les gardiens",
- security: "Sécurité & confiance",
- pricing: "Tarifs & abonnements",
- "Fonctionnement": "Fonctionnement",
- "Tarifs": "Tarifs & abonnements",
- "Avant la garde": "Avant la garde",
- "Pendant la garde": "Pendant la garde",
- "Confiance et sécurité": "Confiance & sécurité",
- "Gardien d'urgence": "Gardien d'urgence",
- "Petites missions": "Petites missions",
- "Mon compte": "Mon compte",
+ general: t("faq.categories.general"),
+ owner: t("faq.categories.owner"),
+ sitter: t("faq.categories.sitter"),
+ security: t("faq.categories.security"),
+ pricing: t("faq.categories.pricing"),
+ "Fonctionnement": t("faq.categories.operation"),
+ "Tarifs": t("faq.categories.pricing"),
+ "Avant la garde": t("faq.categories.before_sit"),
+ "Pendant la garde": t("faq.categories.during_sit"),
+ "Confiance et sécurité": t("faq.categories.trust_safety"),
+ "Gardien d'urgence": t("faq.categories.emergency_sitter"),
+ "Petites missions": t("faq.categories.small_missions"),
+ "Mon compte": t("faq.categories.my_account"),
  };
 
 	// Convertit le markdown en HTML simple toléré par Schema.org/FAQPage
