@@ -543,5 +543,65 @@
       "message_min": "Mindestens 10 Zeichen",
       "message_max": "2000 Zeichen max"
     }
+  },
+  "breeds_listing": {
+    "meta_title": "Tierrassen: Betreuungsanleitungen zu Hause | Guardiens",
+    "meta_description": "Pflegetipps nach Rasse: Temperament, Bedürfnisse, Empfehlungen für Sitter. Hunde, Katzen, Exoten, Equiden.",
+    "h1": "Betreuungsanleitungen nach Rasse",
+    "subtitle": "Temperament, Ernährung, praktische Tipps für Sitter und Besitzer. Verfasst aus echten Einsätzen in ganz Frankreich.",
+    "species": {
+      "dog": "Hunde",
+      "cat": "Katzen",
+      "bird": "Vögel",
+      "rodent": "Nagetiere",
+      "farm_animal": "Bauernhoftiere",
+      "horse": "Equiden"
+    }
+  },
+  "public_listings": {
+    "meta_title": "Anzeigen für Tierbetreuung zu Hause in Frankreich | Guardiens",
+    "meta_description": "Alle Anzeigen für Katzen-, Hunde- und Exotenbetreuung zu Hause in ganz Frankreich. Filter nach Stadt, Department und Kriterien, Live-Karte.",
+    "eyebrow": "Offene Anzeigen · Ganz Frankreich",
+    "h1": "Anzeigen für Tierbetreuung zu Hause",
+    "subtitle": "Stöbern Sie frei in den von Besitzern angebotenen Betreuungen: Katzen, Hunde, Exoten, auf dem Land oder in der Stadt. Filtern Sie nach Ort, Daten und Kriterien oder sehen Sie die Live-Karte.",
+    "see_also_missions": "Siehe auch: kleine Aufträge in Ihrer Nähe",
+    "local_guides": "Lokale Guides",
+    "pricing": "Preise",
+    "intl_count_one": "{{count}} Anzeige außerhalb Frankreichs",
+    "intl_count_other": "{{count}} Anzeigen außerhalb Frankreichs",
+    "explore_title": "Auch entdecken",
+    "explore_missions": "Kleine Aufträge",
+    "explore_missions_desc": ", lokale Hilfen, kostenlos",
+    "explore_guides_desc": ", Städte und Tipps",
+    "explore_pricing": "Sitter-Tarife",
+    "explore_pricing_desc": ", 6,99 €/Monat oder 12 € einmalig",
+    "explore_intl": "Anzeigen außerhalb Frankreichs",
+    "explore_intl_desc": ", Marokko, Spanien, Belgien…"
+  },
+  "pros_listing": {
+    "meta_title": "Tierprofi-Verzeichnis in Ihrer Nähe | Guardiens",
+    "meta_description": "Finden Sie Tierärzte, Trainer, Hundefriseure, Osteopathen und andere verifizierte Tierprofis in Ihrer Nähe.",
+    "h1": "Tierprofis in Ihrer Nähe",
+    "beta": "Beta",
+    "intro": "Tierärzte, Trainer, Hundefriseure, Osteopathen, Transporteure, Fotografen: vertrauenswürdige Tierprofis in ganz Frankreich.",
+    "beta_note": "Verzeichnis in Beta, erste Einträge kommen. Sie sind Profi? Die Registrierung ist kostenlos und Ihr Eintrag wird innerhalb von 48 Std. validiert.",
+    "register_cta": "Meine Tätigkeit eintragen",
+    "my_space": "Mein Profi-Bereich",
+    "sitter_box_title": "Sind Sie privater Sitter als Selbstständiger registriert?",
+    "sitter_box_body_before": "Dieses Verzeichnis listet Tierprofis (Tierärzte, Trainer, Hundefriseure…), die nicht unbedingt Betreuung anbieten. Wenn Sie professionell bezahlte Betreuungen anbieten, beantragen Sie das Abzeichen ",
+    "sitter_box_badge": "Verifizierter Profi-Sitter",
+    "sitter_box_body_after": " unter ",
+    "sitter_box_link": "Einstellungen > Sicherheit > Profi-Sitter",
+    "sitter_box_body_end": ". Es erscheint auf Ihrem Profil und in der Sittersuche.",
+    "search_placeholder": "Profi, Stadt suchen…",
+    "sort_aria": "Sortieren nach",
+    "sort_recent": "Neueste",
+    "sort_alpha": "Alphabetisch",
+    "sort_city": "Nach Stadt",
+    "all": "Alle",
+    "empty": "Kein Profi entspricht derzeit Ihrer Suche.",
+    "be_first": "Erster sein, der sich einträgt",
+    "emergencies_24_7": "Notfälle 24/7",
+    "logo_alt": "Logo {{name}}"
   }
 }
