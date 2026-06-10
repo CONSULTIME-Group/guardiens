@@ -164,6 +164,8 @@ RevealSection.displayName = "RevealSection";
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
   const seasonal = getSeasonalBanner();
 
   // OAuth mobile fallback : si Google nous renvoie sur "/" alors qu'un flux
