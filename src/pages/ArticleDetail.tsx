@@ -170,13 +170,15 @@ export default function ArticleDetail() {
 .maybeSingle();
  let art = data as ArticleFull | null;
  // Overlay traduction si langue ≠ fr
- if (art && i18n.language && i18n.language !== "fr") {
-   const { data: tr } = await supabase
+ const currentLang = (i18n.language || "fr").split("-")[0].toLowerCase();
+ if (art && ["en", "es", "it", "de"].includes(currentLang)) {
+   const { data: tr, error: trErr } = await supabase
      .from("article_translations")
      .select("title, excerpt, content, meta_title, meta_description, hero_image_alt")
      .eq("article_id", art.id)
-     .eq("lang", i18n.language)
+     .eq("lang", currentLang)
      .maybeSingle();
+   if (trErr) console.warn("[i18n] translation fetch error", trErr);
    if (tr) {
      art = {
        ...art,
@@ -187,6 +189,8 @@ export default function ArticleDetail() {
        meta_description: tr.meta_description ?? art.meta_description,
        hero_image_alt: tr.hero_image_alt ?? art.hero_image_alt,
      };
+   } else {
+     console.info(`[i18n] no ${currentLang} translation for ${art.slug}`);
    }
  }
  setArticle(art);
