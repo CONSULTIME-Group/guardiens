@@ -218,6 +218,11 @@ export default function ArticleRenderer({ content, userRole, slug }: ArticleRend
   html = addEndCTA(html, slug);
   html = adaptEndCTAsForRole(html, userRole);
 
+  // Sanitize against XSS (e.g. <script>, onerror=) before injection.
+  const safeHtml = DOMPurify.sanitize(html, {
+    ADD_ATTR: ["target", "rel", "data-user-logged-in", "loading", "decoding"],
+  });
+
   // `data-user-logged-in` permet de masquer le CTA mid en CSS pour les
   // utilisateurs connectés (cf. règle dans index.css).
   return (
