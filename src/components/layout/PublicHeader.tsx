@@ -1,17 +1,18 @@
 import { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import LanguageSwitcher from "./LanguageSwitcher";
 
-const NAV_LINKS = [
-  { label: "Annonces en cours", to: "/annonces" },
-  { label: "Coups de main", to: "/petites-missions" },
-  { label: "Pros animaliers", to: "/pros", beta: true },
-  { label: "Guides locaux", to: "/guides" },
-  { label: "Tarifs", to: "/tarifs" },
-  { label: "Le journal", to: "/actualites" },
-];
+const NAV_DEFS = [
+  { key: "listings", to: "/annonces" },
+  { key: "small_missions", to: "/petites-missions" },
+  { key: "pros", to: "/pros", beta: true },
+  { key: "guides", to: "/guides" },
+  { key: "pricing", to: "/tarifs" },
+  { key: "news", to: "/actualites" },
+] as const;
 
 export default function PublicHeader() {
   const navigate = useNavigate();
