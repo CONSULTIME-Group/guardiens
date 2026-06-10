@@ -229,7 +229,7 @@ export default function ArticleRenderer({ content, userRole, slug }: ArticleRend
     <div
       className="article-rich-content"
       data-user-logged-in={userRole ? "true" : "false"}
-      dangerouslySetInnerHTML={{ __html: html }}
+      dangerouslySetInnerHTML={{ __html: safeHtml }}
     />
   );
 }
