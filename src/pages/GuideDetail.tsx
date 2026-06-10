@@ -267,15 +267,16 @@ const GuideDetail = () => {
         <main className="max-w-5xl mx-auto px-4 pb-16">
           <div className="space-y-10">
             {categories.map((cat) => {
-              const config = CATEGORY_CONFIG[cat] || { label: cat, icon: MapPin, color: "gray" };
+              const config = CATEGORY_CONFIG[cat] || { key: cat, icon: MapPin, color: "gray" };
               const Icon = config.icon;
               const catPlaces = filteredPlaces.filter((p) => p.category === cat);
+              const catLabel = t(`guide_detail.categories.${config.key}`, cat);
 
               return (
                 <section key={cat}>
                   <h2 className="font-heading text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
                     <Icon className="h-5 w-5" style={{ color: config.color }} />
-                    {config.label}
+                    {catLabel}
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {catPlaces.map((place) => (
@@ -289,18 +290,18 @@ const GuideDetail = () => {
                           <p className="text-sm text-foreground/80 mb-2">{place.description}</p>
                           <div className="flex items-center gap-2 mb-2">
                             {place.dogs_welcome && (
-                              <Badge variant="outline" className="text-xs">Chiens bienvenus</Badge>
+                              <Badge variant="outline" className="text-xs">{t("guide_detail.dogs_welcome")}</Badge>
                             )}
                             {place.leash_required !== null && (
                               <Badge variant="outline" className="text-xs">
-                                {place.leash_required ? "En laisse" : "Chiens libres"}
+                                {place.leash_required ? t("guide_detail.leash") : t("guide_detail.leash_free")}
                               </Badge>
                             )}
                           </div>
                           {place.tips && (
                             <div className="bg-accent/50 rounded-md p-2.5 mt-2">
                               <p className="text-xs italic text-muted-foreground">
-                                Bon à savoir : {place.tips}
+                                {t("guide_detail.good_to_know", { tips: place.tips })}
                               </p>
                             </div>
                           )}
