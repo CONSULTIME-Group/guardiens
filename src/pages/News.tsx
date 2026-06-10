@@ -489,7 +489,7 @@ export default function News() {
                             </time>
                           )}
                           <span className="flex items-center gap-1 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                            Lire <ArrowRight className="h-3 w-3" aria-hidden="true" />
+                            {t("news.read")} <ArrowRight className="h-3 w-3" aria-hidden="true" />
                           </span>
                         </div>
                       </CardContent>
