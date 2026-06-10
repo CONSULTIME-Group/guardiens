@@ -19,7 +19,7 @@
   "footer": {
     "sections": {
       "by_city": "House-sitting per città",
-      "by_department": "Per dipartimento",
+      "by_department": "Per provincia",
       "local_guides": "Guide locali",
       "resources": "Risorse",
       "guardiens": "Guardiens"
@@ -27,11 +27,11 @@
     "links": {
       "all_guides": "Tutte le guide",
       "articles": "Articoli",
-      "house_sitting_guide": "Guida al house-sitting",
+      "house_sitting_guide": "Guida all'house-sitting",
       "faq": "FAQ",
       "pricing": "Tariffe",
-      "what_is_house_sitting": "Cos'è il house-sitting",
-      "about": "Chi siamo",
+      "what_is_house_sitting": "Cos'è l'house-sitting",
+      "about": "A proposito",
       "contact": "Contatti",
       "register": "Iscrizione",
       "small_missions": "Piccole missioni",
@@ -53,8 +53,8 @@
       "eyebrow": "Reciproco aiuto · Cura degli animali · Home sitting",
       "title_main": "La cura degli animali, il piccolo aiuto,",
       "title_accent": "l'incontro.",
-      "lede": "Fate sorvegliare la vostra casa e i vostri animali da un custode locale durante le vostre assenze. Oppure chiedete e ricambiate piccoli aiuti vicino a voi, con o senza animali.",
-      "lede_italic": "E dietro ogni scambio, un incontro che non avreste cercato.",
+      "lede": "Faccia custodire la Sua casa e i Suoi animali da un custode della zona durante le Sue assenze. Oppure chieda e offra piccoli aiuti vicino a Lei, con o senza animali.",
+      "lede_italic": "E dietro ogni scambio, un incontro che non avreste altrimenti cercato.",
       "cta_owner": "Pubblicare il mio annuncio",
       "cta_sitter": "Voglio fare il custode",
       "kpi_houses": "case custodite",
@@ -65,9 +65,9 @@
     "toc": {
       "aria": "Sommario della pagina",
       "title": "Sommario",
-      "care_aid": "Cura & aiuto",
+      "care_aid": "Custodia & aiuto",
       "how": "Come funziona",
-      "aid": "Aiuto locale",
+      "aid": "Aiuto reciproco locale",
       "trust": "Fiducia",
       "testimonials": "Testimonianze",
       "story": "La nostra storia",
@@ -75,43 +75,43 @@
       "faq": "FAQ"
     },
     "usages": {
-      "eyebrow": "Quello che facciamo insieme",
-      "title": "Cura degli animali a domicilio e aiuto locale.",
-      "lede": "Il home sitting da un lato, l'aiuto tra persone della zona dall'altro. Spetta a Lei scegliere l'uno, l'altro, o entrambi.",
+      "eyebrow": "Cosa facciamo insieme",
+      "title": "Cura degli animali a domicilio e aiuto reciproco locale.",
+      "lede": "L'home sitting da un lato, l'aiuto tra persone della zona dall'altro. A Lei la scelta: l'uno, l'altro, o entrambi.",
       "owner": {
         "tag": "Proprietari",
         "title": "Partire con la mente leggera.",
-        "text": "Qualcuno della zona vigila sulla vostra casa e sui vostri animali. Lo incontrate prima di partire. Siete voi a scegliere.",
+        "text": "Qualcuno della zona veglia sulla Sua casa e sui Suoi animali. Potrete incontrarvi prima della partenza. È Lei a scegliere.",
         "badge": "Senza abbonamento",
         "cta": "Cerco un custode →"
       },
       "sitter": {
         "tag": "Custodi",
         "title": "Custodire e scoprire.",
-        "text": "Vivete in varie case, con gli animali, in angoli che non avreste mai esplorato altrimenti. Una custodia è anche un viaggio.",
+        "text": "Viva in case diverse, con animali, in luoghi che non avrebbe mai esplorato diversamente. Una custodia è anche un viaggio.",
         "cta": "Voglio fare il custode →"
       },
       "mutual": {
         "badge": "Gratuito",
         "tag": "Aiuto locale, indipendente dalla custodia",
         "title": "Un piccolo aiuto, uno scambio.",
-        "text": "Innaffiare un orto, montare uno scaffale, condividere una competenza, fare visita a una persona isolata. Nessuna custodia o animale necessario, solo persone della zona che si aiutano a vicenda.",
-        "cta": "Scoprire l'aiuto reciproco →"
+        "text": "Innaffiare l'orto, montare uno scaffale, condividere una competenza, fare visita a una persona isolata. Nessuna custodia, nessun animale necessario, solo persone della zona che si aiutano a vicenda.",
+        "cta": "Scoprire i piccoli aiuti →"
       },
       "urgency": {
         "eyebrow": "Imprevisto dell'ultimo minuto",
         "title": "Una partenza improvvisa?",
-        "text": "Ospedalizzazione, spostamento last minute, emergenza familiare: un custode locale può subentrare in poche ore.",
-        "cta": "Trovare un custode in emergenza →"
+        "text": "Ospedalizzazione, trasferta dell'ultimo minuto, emergenza familiare: un custode della zona può intervenire in poche ore.",
+        "cta": "Trovare un custode in urgenza →"
       }
     },
     "meeting": {
-      "eyebrow": "Quello che non si scrive mai in un annuncio",
+      "eyebrow": "Ciò che non si scrive mai in un annuncio",
       "title_a": "Il vero pretesto,",
       "title_b": "è l'incontro.",
-      "p1": "Ciò che raramente si racconta è quello che succede intorno. Conoscere la nonnina del quartiere e la sua storia perché l'avete aiutata a raccogliere i frutti in giardino. Scambiare due parole con Gerardo mentre vi dà piccoli aiuti con il fai-da-te e offrirgli in cambio un pasto fatto in casa.",
-      "p2": "Non serve un animale perché inizi un incontro. Chiedere un piccolo aiuto o proporne uno è già aprire una porta. Custodire una casa è aprirne un'altra, lo stesso gesto su due scale diverse.",
-      "p3": "Si impara, si scopre, ci si affeziona, senza cercarlo intenzionalmente. Solo lasciando spazio a ciò che può accadere."
+      "p1": "Ciò che raramente si racconta è quello che succede intorno. Conoscere la nonna della zona e la sua storia perché l'avete aiutata a raccogliere i frutti del giardino. Scambiare due parole con Gerardo mentre vi dà un piccolo aiuto con il fai-da-te, e offrirgli un pasto fatto in casa in cambio.",
+      "p2": "Non serve un animale perché inizi un incontro. Chiedere un piccolo aiuto, o proporne uno: significa già aprire una porta. Custodire una casa significa aprirne un'altra, un unico gesto, due scale diverse.",
+      "p3": "Si impara, si scopre, ci si affeziona, senza cercarlo. Semplicemente lasciando spazio a ciò che può accadere."
     },
     "how": {
       "eyebrow": "Semplice e trasparente",
@@ -119,9 +119,9 @@
       "step1_title": "Pubblichi il Suo annuncio",
       "step1_text": "Le Sue date, i Suoi animali, la Sua casa. Bastano pochi minuti, il Suo annuncio è online.",
       "step2_title": "Scelga dopo un incontro",
-      "step2_text": "Dei custodi locali si candidano. Lei legge i profili, le recensioni, dialoga con loro. Poi vi vedete per un caffè, una visita, prima di decidere.",
+      "step2_text": "Dei custodi della zona si candidano. Lei legge i profili, le recensioni, vi scambiate messaggi. Poi vi incontrate per un caffè o una visita prima di decidere.",
       "step3_title": "Parta con la mente leggera",
-      "step3_text": "Firmato l'accordo di custodia, il Suo custode si installa. Riceverà notizie. Tornerà a casa, spesso con una nuova relazione.",
+      "step3_text": "Firmato l'accordo di custodia, il Suo custode si stabilisce. Riceverà notizie. Tornerà a casa, spesso con una nuova amicizia.",
       "cta_owner": "Pubblicare il mio annuncio",
       "cta_secondary": "O iniziare con un piccolo aiuto →",
       "footnote": "Iscrizione in 2 minuti · Senza carta di credito"
@@ -129,31 +129,31 @@
     "aid": {
       "eyebrow": "Per tutti · Senza abbonamento · Senza denaro",
       "title": "Osi chiedere. Osi proporre.",
-      "p1": "Un tempo c'era qualcuno della zona che passava a innaffiare il giardino, che custodiva il cane, che veniva a riparare una persiana. Qualcuno a cui si offriva una fetta di torta o un piccolo aiuto in cambio.",
-      "p2": "Questa abitudine non è scomparsa, semplicemente non osiamo più fare la prima domanda. Guardiens è il pretesto per rifarla e, nel frattempo, vivere esperienze che nessun viaggio organizzato vi offrirà.",
-      "need_title": "«Ho bisogno di piccoli aiuti»",
-      "need_text": "Il Suo orto durante le vacanze. Le Sue galline questo weekend. Portare a spasso il Suo cane dopo un'operazione. Chiederlo non significa ammettere una debolezza, ma dare fiducia.",
-      "need_footer": "Senza denaro, senza abbonamento. È la nostra scommessa.",
+      "p1": "Un tempo c'era qualcuno della zona che passava a innaffiare il giardino, che badava al cane, che veniva a riparare una persiana. Qualcuno a cui si offriva una fetta di torta o un aiuto in cambio.",
+      "p2": "Questa abitudine non è scomparsa, semplicemente non osiamo più fare la prima domanda. Guardiens è il pretesto per rifarla e, nel frattempo, vivere esperienze che nessun viaggio organizzato Le offrirà.",
+      "need_title": "«Ho bisogno di un piccolo aiuto»",
+      "need_text": "Il Suo orto durante le vacanze. Le Sue galline questo fine settimana. Portare a spasso il Suo cane dopo un'operazione. Chiederlo non è ammettere una debolezza, è dare fiducia.",
+      "need_footer": "Senza denaro, senza abbonamento. Questa è la sfida.",
       "offer_title": "«Posso dedicare un po' del mio tempo»",
-      "offer_text": "Sa potare le rose. Adora i cani. Ha due ore libere il sabato mattina. Si proponga e viva quello che non avrebbe mai vissuto senza questo incontro.",
+      "offer_text": "Sa potare i rosai. Adora i cani. Ha due ore sabato mattina. Proponga, e viva ciò che non avrebbe mai vissuto senza quell'incontro.",
       "offer_footer": "È così che si ricuce il tessuto locale.",
       "seen_this_week": "Alcuni scambi visti su Guardiens questa settimana",
       "examples": {
         "water_plants": "Innaffiare le piante",
-        "small_diy": "Piccoli lavori di casa",
+        "small_diy": "Piccoli lavori di fai-da-te",
         "garden_pruning": "Potare il giardino",
         "bread_class": "Corso di pane fatto in casa",
         "reiki": "Sessione di Reiki",
         "parcel": "Ricevere un pacco",
-        "carpool": "Passaggio in auto",
-        "seedlings": "Talee e semine",
-        "coffee_listen": "Caffè & ascolto",
+        "carpool": "Passaggio per appuntamento",
+        "seedlings": "Talee, semina",
+        "coffee_listen": "Caffè e ascolto",
         "groceries": "Aiuto con la spesa",
-        "moving_help": "Piccoli aiuti per trasloco",
+        "moving_help": "Aiuto per trasloco",
         "sewing": "Imparare il cucito"
       },
       "quote": "La vita di villaggio non è scomparsa. Aspettava solo che qualcuno osasse fare la prima domanda.",
-      "cta": "Scoprire le piccole missioni"
+      "cta": "Scoprire i piccoli aiuti"
     },
     "trust": {
       "eyebrow": "Fiducia & raggio d'azione",
@@ -164,13 +164,13 @@
       "p2_title": "Incontro prima di ogni custodia",
       "p2_text": "Un caffè, una visita dell'alloggio, un giro delle istruzioni. La fiducia non si indovina: si costruisce guardandosi negli occhi.",
       "p3_title": "Profili verificati, recensioni incrociate",
-      "p3_text": "Documento d'identità controllato entro 24 ore, recensioni pubblicate dai proprietari precedenti, storico delle custodie effettuate. Tutto è trasparente.",
-      "p4_title": "Dalla Sua via all'altro capo della nazione",
-      "p4_text": "Hyper-local per un aiuto rapido, raggio più ampio per cambiare aria: Lei decide fin dove vuole arrivare. Ogni custodia diventa una porta che si apre."
+      "p3_text": "Documento d'identità controllato entro 24 ore, recensioni pubblicate dai proprietari precedenti, cronologia delle custodie effettuate. Tutto è trasparente.",
+      "p4_title": "Dalla Sua via all'altro capo dell'Italia",
+      "p4_text": "Iper-locale per un aiuto rapido, più ampio per cambiare aria: Lei decide fin dove spingersi. Ogni custodia diventa una porta che si apre."
     },
     "testimonials": {
       "title": "Hanno osato. Ecco cosa è rimasto loro.",
-      "source": "Testimonianze raccolte tra i membri del programma Fondatore (gennaio – maggio 2026). Nomi e città reali, racconti anonimizzati su richiesta.",
+      "source": "Testimonianze raccolte tra i membri del programma Fondatore (gennaio – maggio 2026). Nomi e città reali, racconti resi anonimi su loro richiesta.",
       "prev_aria": "Testimonianza precedente",
       "next_aria": "Testimonianza successiva",
       "page_aria": "Vai alla pagina delle testimonianze {{n}}",
@@ -179,51 +179,215 @@
     "story": {
       "eyebrow": "La nostra storia",
       "title": "Tutto è iniziato con un visto.",
-      "p1": "L'abitudine di aprirsi alle persone del posto si è persa. Per mancanza di un pretesto.",
-      "p2": "Elisa, la mia compagna e co-fondatrice di Guardiens, è arrivata dall'Argentina con un visto che non le permetteva di lavorare. Si occupava di custodire animali. Tornava a casa con delle storie: persone che aprivano la loro porta e la loro vita, liberamente. Sconosciuti che finivano per invitarci a Natale.",
-      "p3": "Elisa ed io abbiamo custodito 37 case in cinque anni, tra villaggi, città e borgate.",
+      "p1": "L'abitudine di aprirsi alle persone della zona si è persa. Per mancanza di un pretesto.",
+      "p2": "Elisa, la mia compagna e co-fondatrice di Guardiens, è arrivata dall'Argentina con un visto che non le permetteva di lavorare. Custodiva animali. Tornava con delle storie: persone che aprivano la loro porta, la loro vita, liberamente. Sconosciuti che finivano per invitarci a Natale.",
+      "p3": "Elisa ed io abbiamo custodito 37 case in cinque anni, in villaggi, città, frazioni.",
       "quote": "Non abbiamo mai solo custodito case. Siamo stati invitati nelle vite delle persone.",
-      "p4": "È quello che la comunità faceva naturalmente.",
-      "p5": "Guardiens è il pretesto che mancava. Da un lato, le piccole missioni di aiuto reciproco tra persone della zona: un orto innaffiato in cambio di un pasto, una competenza contro un'altra, un piccolo aiuto che viene ricambiato in natura. Dall'altro, in modo indipendente, il house-sitting: le Sue chiavi affidate a qualcuno che ha guardato negli occhi.",
-      "p6": "Partirà con la mente leggera. Tornerà con una storia. Non ci aspettavamo che questo contasse così tanto.",
+      "p4": "È ciò che la vita di comunità faceva naturalmente.",
+      "p5": "Guardiens è il pretesto che mancava. Da un lato, i piccoli aiuti tra vicini: un orto innaffiato in cambio di un pasto, una competenza contro un'altra, un aiuto reso in natura. Dall'altro, indipendentemente, l'home sitting: le Suo chiavi affidate a qualcuno che ha guardato negli occhi.",
+      "p6": "Partirà con la mente leggera. Tornerà con una storia. Non ci aspettavamo che contasse così tanto.",
       "p7": "È per questo che abbiamo costruito Guardiens, affinché anche Lei possa vivere tutto questo.",
       "signature": ", Jérémie & Elisa"
     },
     "cities": {
       "eyebrow": "Guide & città",
       "title": "House-sitting vicino a Lei.",
-      "lede": "Guide concrete per preparare la Sua custodia e hub locali per le città più attive come Lyon, Annecy, Grenoble, e in tutta la Francia.",
+      "lede": "Guide concrete per preparare la Sua custodia e hub locali per le città più attive, Lyon, Annecy, Grenoble, e in tutta la Francia.",
       "guides_tag": "Guide & consigli",
       "guides_title": "Preparare la Sua custodia",
       "all_articles": "Tutti gli articoli",
       "all_guides": "Guide locali per città",
       "cities_tag": "House-sitting per città",
       "cities_title": "Vicino a Lei",
-      "cities_footer": "Qualunque sia il Suo dipartimento, troverà un custode nelle vicinanze."
+      "cities_footer": "Qualunque sia la Sua provincia, troverà un custode nelle vicinanze."
     },
     "faq": {
       "title": "Domande frequenti",
-      "q1": "Cos'è il house-sitting?",
-      "a1": "Il house-sitting è uno scambio di servizi: un custode abita senza spese nella Sua casa durante la Sua assenza e si prende cura dei Suoi animali. Lo scambio non implica alcuna transazione finanziaria tra le due parti.",
+      "q1": "Cos'è l'house-sitting?",
+      "a1": "L'house-sitting è uno scambio di servizi: un custode abita gratuitamente nella Sua casa durante la Sua assenza e si prende cura dei Suoi animali. Lo scambio non implica alcuna transazione finanziaria tra le due parti.",
       "q2": "Bisogna pagare per iscriversi come proprietario?",
-      "a2": "L'iscrizione, la pubblicazione degli annunci e gli scambi con i custodi non richiedono abbonamento per i proprietari. Nessuna carta di credito richiesta. I custodi beneficiano di un accesso senza abbonamento fino al 14 luglio 2026, dopodiché l'abbonamento sarà di 6,99 €/mese. L'aiuto reciproco tra persone della zona rimane senza abbonamento per tutti.",
+      "a2": "L'iscrizione, la pubblicazione di annunci e gli scambi con i custodi non richiedono abbonamento per i proprietari. Nessuna carta di credito richiesta. I custodi beneficiano di un accesso senza abbonamento fino al 14 luglio 2026, dopodiché l'abbonamento sarà di 6,99 €/mese. I piccoli aiuti tra persone della zona rimangono senza abbonamento per tutti.",
       "q3": "Come trovare un pet sitter vicino a me?",
-      "a3": "Si iscriva su Guardiens, pubblichi il Suo annuncio di custodia con le date e i Suoi animali, e riceva candidature da custodi che abitano vicino a Lei. Lei sceglierà dopo un incontro.",
+      "a3": "Si iscriva su Guardiens, pubblichi il Suo annuncio di custodia con le date e i Suoi animali, e riceva candidature di custodi che vivono vicino a Lei. Sceglierà dopo un incontro.",
       "q4": "Chi sono i custodi su Guardiens?",
-      "a4": "Persone della zona, verificate dal nostro team. Ogni profilo supera una verifica d'identità (documento d'identità + selfie) elaborata entro 24 ore. Può vedere anche le loro recensioni pubblicate dai proprietari precedenti.",
+      "a4": "Persone della zona, verificate dal nostro team. Ogni profilo supera una verifica d'identità (documento d'identità + selfie) elaborata entro 24 ore. Vedrà anche le loro recensioni pubblicate dai proprietari precedenti.",
       "q5": "Come si svolge una custodia su Guardiens?",
-      "a5": "Lei pubblica l'annuncio, i custodi della zona si candidano, Lei sceglie dopo un incontro, poi il Suo custode si installa. Un accordo di custodia opzionale definisce gli impegni di ciascuno durante il periodo.",
+      "a5": "Lei pubblica l'annuncio, i custodi della zona si candidano, Lei sceglie dopo un incontro, poi il Suo custode si stabilisce. Un accordo di custodia opzionale definisce gli impegni di ciascuno durante la custodia.",
       "q6": "Guardiens è disponibile in tutta la Francia?",
-      "a6": "Sì. La rete Guardiens si estende in tutte le regioni della Francia, dai Paesi Baschi alla Bretagna, passando per le Alpi e il Nord. Troverà un custode vicino a Lei in qualsiasi dipartimento."
+      "a6": "Sì. La rete Guardiens si estende in tutte le regioni della Francia, dai Paesi Baschi alla Bretagna, passando per le Alpi e il Nord. Troverà un custode vicino a Lei ovunque si trovi."
     },
     "final": {
       "badge_program": "Programma Fondatore",
       "badge_offer": "Badge offerto prima del 14 luglio 2026",
       "title": "La Sua prossima storia inizia qui.",
-      "lede": "Partirà con la mente leggera. Tornerà con qualcosa di diverso: un luogo scoperto, un incontro, qualcuno che non avrebbe mai incrociato.",
+      "lede": "Partirà con la mente leggera. Tornerà con qualcos'altro: un luogo scoperto, un incontro, qualcuno che non avrebbe mai incrociato.",
       "cta_owner": "Pubblicare il mio annuncio",
       "cta_sitter": "Voglio fare il custode",
       "footnote": "Iscrizione in 2 minuti, senza carta di credito."
+    }
+  },
+  "faq": {
+    "title": "Domande frequenti",
+    "lede": "Tutto ciò che deve sapere sull'house-sitting con Guardiens.",
+    "loading": "Caricamento…",
+    "empty": "Nessuna domanda per il momento.",
+    "not_found_question": "Non trova la risposta alla Sua domanda?",
+    "contact_us": "Ci contatti",
+    "pricing_cta_title": "Tutto sulle nostre tariffe",
+    "pricing_cta_text": "Gratuito per i proprietari. 6,99 €/mese per i custodi, senza impegno.",
+    "pricing_cta_link": "Legga l'articolo tariffe 2026",
+    "meta_title": "FAQ Guardiens, tutte le Sue domande",
+    "meta_description": "Tutte le Sue domande su Guardiens, abbonamento custode, spazio proprietario gratuito, passaparola e piccoli aiuti di reciproco soccorso.",
+    "categories": {
+      "general": "Domande generali",
+      "owner": "Per i proprietari",
+      "sitter": "Per i custodi",
+      "security": "Sicurezza & fiducia",
+      "pricing": "Tariffe & abbonamenti",
+      "operation": "Funzionamento",
+      "before_sit": "Prima della custodia",
+      "during_sit": "Durante la custodia",
+      "trust_safety": "Fiducia & sicurezza",
+      "emergency_sitter": "Custode d'emergenza",
+      "small_missions": "Piccole missioni",
+      "my_account": "Il mio account"
+    }
+  },
+  "pricing": {
+    "meta": {
+      "title_before": "Tariffe Guardiens, offerto per tutti fino al {{date}}",
+      "title_after": "Tariffe Guardiens, gratuito per proprietari · {{price}}",
+      "desc_before": "Accesso offerto fino al {{date}} per tutti, custodi e proprietari. Senza carta di credito, senza commissioni.",
+      "desc_after": "Gratuito per i proprietari. {{price}} per i custodi, senza impegno. Senza commissioni, senza costi nascosti."
+    },
+    "hero": {
+      "eyebrow": "Senza commissioni, senza costi nascosti",
+      "title_before_a": "Offerto.",
+      "title_before_b": "Per tutti.",
+      "title_after_a": "Un prezzo unico.",
+      "title_after_b": "Trasparente.",
+      "lede_before": "Fino al {{date}}, l'accesso completo è offerto a custodi e proprietari. Nessuna carta di credito richiesta.",
+      "lede_after": "Gratuito per i proprietari. {{price}} per i custodi, senza impegno. Tutto qui.",
+      "cta_owner": "Pubblicare il mio annuncio, gratuitamente",
+      "cta_sitter": "Voglio fare il custode"
+    },
+    "founder": {
+      "window": "Programma Fondatore, finestra di iscrizione in corso",
+      "days_one": "{{count}} giorno",
+      "days_other": "{{count}} giorni",
+      "before_sub": "prima dell'abbonamento custode",
+      "join_title": "Si iscriva ora per unirsi ai Fondatori",
+      "join_text": "Un sigillo onorifico permanente sul Suo profilo; non sarà mai più assegnato una volta chiusa la finestra.",
+      "cta": "Diventare Fondatore"
+    },
+    "grace": {
+      "title": "I Fondatori hanno tempo fino al {{date}}",
+      "text": "I primi membri mantengono l'accesso gratuito fino al {{date}}. Dopo tale data, per i custodi sarà necessario l'abbonamento a {{price}}. Il badge Fondatore rimarrà visibile sul Suo profilo."
+    },
+    "owner_card": {
+      "badge": "Sempre gratuito",
+      "label": "Proprietario",
+      "price": "Gratuito",
+      "subtitle": "Senza abbonamento, senza carta di credito.",
+      "cta": "Pubblicare un annuncio",
+      "features": [
+        "Pubblichi un annuncio in 5 minuti",
+        "Riceva candidature di custodi con identità verificata",
+        "Scambi messaggi con loro prima di scegliere",
+        "I Suoi animali rimangono nella loro casa, con le loro abitudini e i loro riferimenti",
+        "Lasci una recensione dopo ogni custodia"
+      ]
+    },
+    "sitter_card": {
+      "badge_offered_months": "Offerto {{count}} mesi",
+      "badge_offered_days_one": "Offerto ancora per {{count}} giorno",
+      "badge_offered_days_other": "Offerto ancora per {{count}} giorni",
+      "badge_most_chosen": "Il più scelto",
+      "label": "Custode",
+      "price_free": "Gratuito",
+      "free_until": "Fino al {{date}}, poi {{price}}",
+      "per_year": "/anno",
+      "per_month_short": "al mese",
+      "from": "a partire da",
+      "per_month": "/mese",
+      "note_monthly": "Senza impegno · Cancellabile in qualsiasi momento",
+      "note_annual": "Ovvero {{equiv}} €/mese equivalente · Cancellabile in qualsiasi momento",
+      "note_oneshot": "Pagamento unico · Senza rinnovo",
+      "features": [
+        "Si candidi per custodie vicino a Lei",
+        "Acceda agli annunci completi (animali, casa, date, aspettative)",
+        "Messaggistica diretta con i proprietari",
+        "Profilo di fiducia con recensioni incrociate e badge",
+        "Modalità «Sono disponibile» per essere trovato senza cercare",
+        "Guide locali e schede razze complete"
+      ],
+      "formulas_label": "Scelta della formula custode",
+      "three_formulas": "Tre formule",
+      "oneshot_title": "Accesso un mese",
+      "oneshot_sub": "Pagamento immediato · Senza rinnovo",
+      "monthly_title": "Mensile",
+      "monthly_tag": "Il più scelto",
+      "monthly_sub": "Senza impegno · Cancellabile in qualsiasi momento",
+      "annual_title": "Annuale",
+      "annual_sub": "Un pagamento all'anno · Rinnovo annuale · Cancellabile in qualsiasi momento",
+      "annual_equiv": "Ovvero ~{{equiv}} €/mese equivalente · Risparmio di {{savings}} €/anno",
+      "cta_become_sitter": "Diventare custode",
+      "cta_oneshot": "Accedi per un mese, 10 €",
+      "cta_monthly": "Abbonati, 6,99 €/mese",
+      "cta_annual": "Scegli l'annuale, 65 €/anno",
+      "opening_checkout": "Apertura del pagamento…",
+      "note_before": "Nessuna carta di credito richiesta.",
+      "note_visitor": "Iscrizione gratuita. Nessuna carta di credito prima della sottoscrizione di una formula.",
+      "note_after_monthly": "Senza impegno. Cancellabile in qualsiasi momento.",
+      "note_after_annual": "Rinnovo annuale automatico. Cancellabile in qualsiasi momento.",
+      "note_after_oneshot": "Pagamento unico per un mese di accesso, senza rinnovo."
+    },
+    "mutual": {
+      "title": "L'aiuto reciproco, indipendente dalla custodia",
+      "free_tag": "Gratuito per tutti",
+      "p1": "Le piccole missioni non hanno bisogno di animali per esistere. Nadine cerca un piccolo aiuto per raccogliere le verdure. Jacques passa un'ora nel suo giardino e riparte con un piatto fatto in casa. Nessuna custodia, nessuna carta di credito, nessuna commissione, solo uno scambio tra persone del posto.",
+      "p2": "Corsi di cucina, innaffiare piante, montaggio mobili, prestito di un trapano, tragitto condiviso verso la stazione: tutto passa per i piccoli aiuti, senza abbonamento.",
+      "cta": "Scoprire i piccoli aiuti →"
+    },
+    "promise": {
+      "title": "Il nostro impegno tariffario",
+      "lede": "Sei promesse concrete, senza asterischi o costi nascosti.",
+      "rows": {
+        "commission": "Commissione sulla custodia",
+        "commission_val": "0 %",
+        "verification": "Verifica d'identità",
+        "verification_val": "Inclusa",
+        "mutual": "Reciproco aiuto & piccoli aiuti",
+        "mutual_val": "Gratuito",
+        "card": "Carta di credito all'iscrizione",
+        "card_val": "Mai",
+        "intro": "Costi di intermediazione",
+        "intro_val": "Nessuno",
+        "commit": "Vincolo di durata",
+        "commit_val": "Nessuno"
+      }
+    },
+    "cities": {
+      "title": "House-sitting per città",
+      "lede_a": "Scopra i custodi verificati disponibili nella Sua città. Un imprevisto? I nostri",
+      "lede_link": "custodi d'emergenza",
+      "lede_b": "sono mobilitabili in poche ore."
+    },
+    "faq_section": {
+      "title": "Domande frequenti",
+      "lede": "Domande sul modello? Ecco le risposte dirette.",
+      "see_all": "Vedi tutte le domande →"
+    },
+    "detail_article": {
+      "intro": "Preferisce leggere tutto nei dettagli?",
+      "link": "Scopra le nostre tariffe nel dettaglio →"
+    },
+    "final_cta": {
+      "title_before": "Si unisca a Guardiens da subito",
+      "title_after": "Pronto a unirsi a Guardiens?",
+      "lede": "Senza carta di credito all'iscrizione. Deciderà in seguito.",
+      "cta_sitter": "Diventare custode",
+      "cta_owner": "Pubblicare un annuncio"
     }
   }
 }
