@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { useSearchParams, Link } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
@@ -13,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Calendar, MapPin, ArrowRight, ChevronLeft, ChevronRight, Search, AlertCircle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { fr, enUS, es, it as itLocale, de as deLocale } from "date-fns/locale";
 
 interface Article {
   id: string;
