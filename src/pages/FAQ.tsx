@@ -146,7 +146,7 @@ const FAQ = () => {
  <>
  <PageMeta
  title={t("faq.meta_title")}
- description="Toutes vos questions sur Guardiens, abonnement gardien, accès propriétaire à 0 €, parrainage et petites missions d'entraide."
+ description={t("faq.meta_description")}
  path="/faq"
  />
 
