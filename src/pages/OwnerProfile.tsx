@@ -186,24 +186,22 @@ const OwnerProfilePage = () => {
 
   // Source UNIQUE pour la jauge ET la sidebar : un seul set de critères pondérés.
   const scoredCriteria: ScoredCriterion[] = [
-    // Essentiels, 75 pts
-    { section: "identity", kind: "essential", label: "Prénom + code postal", points: 10,
+    { section: "identity", kind: "essential", label: tp("criteria.name_postal"), points: 10,
       ok: !!(mergedData.first_name && mergedData.postal_code) },
-    { section: "identity", kind: "essential", label: "Photo de profil", points: 15,
-      ok: !!mergedData.avatar_url, hint: "Onglet Identité." },
-    { section: "animals", kind: "essential", label: "Au moins 1 animal renseigné", points: 20,
-      ok: pets.length > 0, hint: "Onglet Animaux." },
-    { section: "housing", kind: "essential", label: "Logement décrit (≥ 50 caractères)", points: 15,
-      ok: (mergedData.description?.length ?? 0) >= 50, hint: `${mergedData.description?.length ?? 0}/50 caractères.` },
-    { section: "gallery", kind: "essential", label: "Au moins 1 photo dans la Galerie", points: 15,
-      ok: galleryCount > 0, hint: "Onglet Galerie." },
-    // Bonus, 25 pts
-    { section: "identity", kind: "bonus", label: "Bio ≥ 50 caractères", points: 10,
-      ok: (mergedData.bio?.length ?? 0) >= 50, hint: `${mergedData.bio?.length ?? 0}/50 caractères.` },
-    { section: "skills", kind: "bonus", label: "Au moins 1 compétence proprio", points: 10,
-      ok: (mergedData.owner_competences?.length ?? 0) > 0, hint: "Onglet Compétences." },
-    { section: "identity", kind: "bonus", label: "Identité vérifiée", points: 5,
-      ok: !!user?.identityVerified, hint: "Paramètres → Vérification." },
+    { section: "identity", kind: "essential", label: tp("criteria.avatar"), points: 15,
+      ok: !!mergedData.avatar_url, hint: tp("hints.tab_identity") },
+    { section: "animals", kind: "essential", label: tp("criteria.pet"), points: 20,
+      ok: pets.length > 0, hint: tp("hints.tab_animals") },
+    { section: "housing", kind: "essential", label: tp("criteria.housing_desc"), points: 15,
+      ok: (mergedData.description?.length ?? 0) >= 50, hint: tp("hints.chars_50", { count: mergedData.description?.length ?? 0 }) },
+    { section: "gallery", kind: "essential", label: tp("criteria.gallery_one"), points: 15,
+      ok: galleryCount > 0, hint: tp("hints.tab_gallery") },
+    { section: "identity", kind: "bonus", label: tp("criteria.bio_50"), points: 10,
+      ok: (mergedData.bio?.length ?? 0) >= 50, hint: tp("hints.chars_50", { count: mergedData.bio?.length ?? 0 }) },
+    { section: "skills", kind: "bonus", label: tp("criteria.owner_skill"), points: 10,
+      ok: (mergedData.owner_competences?.length ?? 0) > 0, hint: tp("hints.tab_skills") },
+    { section: "identity", kind: "bonus", label: tp("criteria.identity_verified"), points: 5,
+      ok: !!user?.identityVerified, hint: tp("hints.settings_verif") },
   ];
 
   const ownerEssentials = scoredCriteria.filter(c => c.kind === "essential");
