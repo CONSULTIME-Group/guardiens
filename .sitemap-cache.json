@@ -1,169 +1,35 @@
 {
   "sources": {
-    "seo_city_pages": {
-      "head": "2026-06-06T07:52:00.978104+00:00",
-      "fetchedAt": "2026-06-10T05:22:06.125Z"
-    },
     "articles": {
       "head": "2026-06-06T13:49:48.281916+00:00",
-      "fetchedAt": "2026-06-10T05:22:06.151Z"
-    },
-    "seo_department_pages": {
-      "head": "2026-03-26T05:46:21.361179+00:00",
-      "fetchedAt": "2026-06-10T05:22:06.155Z"
-    },
-    "city_guides": {
-      "head": "2026-05-21T20:15:30.121997+00:00",
-      "fetchedAt": "2026-06-10T05:22:06.157Z"
-    },
-    "public_sits": {
-      "head": null,
-      "fetchedAt": "2026-06-10T05:22:06.166Z"
+      "fetchedAt": "2026-06-10T06:24:09.276Z"
     },
     "public_profiles": {
       "head": null,
-      "fetchedAt": "2026-06-10T05:22:06.167Z"
+      "fetchedAt": "2026-06-10T06:24:09.326Z"
     },
     "breed_profiles": {
       "head": "2026-06-09T17:37:37.799828+00:00",
-      "fetchedAt": "2026-06-10T05:22:06.238Z"
+      "fetchedAt": "2026-06-10T06:24:09.328Z"
+    },
+    "city_guides": {
+      "head": "2026-05-21T20:15:30.121997+00:00",
+      "fetchedAt": "2026-06-10T06:24:09.350Z"
+    },
+    "seo_department_pages": {
+      "head": "2026-03-26T05:46:21.361179+00:00",
+      "fetchedAt": "2026-06-10T06:24:09.353Z"
+    },
+    "public_sits": {
+      "head": null,
+      "fetchedAt": "2026-06-10T06:24:09.357Z"
+    },
+    "seo_city_pages": {
+      "head": "2026-06-06T07:52:00.978104+00:00",
+      "fetchedAt": "2026-06-10T06:24:09.362Z"
     }
   },
   "entries": {
-    "seo_city_pages": [
-      {
-        "loc": "/house-sitting/megeve",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/valence",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/villeurbanne",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/clermont-ferrand",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/annecy",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/ecully",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/chambery",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/beaujolais",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/caluire-et-cuire",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/tassin-la-demi-lune",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/saint-didier-au-mont-d-or",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/saint-etienne",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/monts-du-lyonnais",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/grenoble",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/chamonix",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/bourg-saint-maurice",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/lyon",
-        "lastmod": "2026-05-04",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/paris",
-        "lastmod": "2026-06-06",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/marseille",
-        "lastmod": "2026-06-06",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/bordeaux",
-        "lastmod": "2026-06-06",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/nantes",
-        "lastmod": "2026-06-06",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/toulouse",
-        "lastmod": "2026-06-06",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      }
-    ],
     "articles": [
       {
         "loc": "/actualites/devenir-gardien-pro-animalier",
@@ -514,48 +380,121 @@
         "priority": "0.6"
       }
     ],
-    "seo_department_pages": [
+    "public_profiles": [],
+    "breed_profiles": [
       {
-        "loc": "/departement/puy-de-dome",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/dog-malinois",
+        "lastmod": "2026-03-27",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/departement/rhone",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/cat-bleu-de-russe",
+        "lastmod": "2026-04-22",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/departement/savoie",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/cat-maine-coon",
+        "lastmod": "2026-04-22",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/departement/drome",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/dog-croise-bichon",
+        "lastmod": "2026-04-22",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/departement/isere",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/bird-gris-du-gabon",
+        "lastmod": "2026-04-22",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/departement/loire",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/horse-ane-du-cotentin",
+        "lastmod": "2026-04-26",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
-        "loc": "/departement/haute-savoie",
-        "lastmod": "2026-03-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
+        "loc": "/races/horse-jument-merens",
+        "lastmod": "2026-04-26",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-chat-des-forets-norvegiennes",
+        "lastmod": "2026-04-26",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/farm_animal-poules-marans",
+        "lastmod": "2026-04-26",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-sacre-de-birmanie",
+        "lastmod": "2026-04-29",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-husky-siberien",
+        "lastmod": "2026-04-29",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/rodent-rat",
+        "lastmod": "2026-05-01",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-europeen",
+        "lastmod": "2026-05-05",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-beauceron",
+        "lastmod": "2026-05-05",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-jack-russel",
+        "lastmod": "2026-05-11",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-teclem",
+        "lastmod": "2026-05-24",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/bird-perroquet-gris-du-gabon",
+        "lastmod": "2026-06-08",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-berger-belge-malinois",
+        "lastmod": "2026-06-08",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-beldi",
+        "lastmod": "2026-06-09",
+        "changefreq": "monthly",
+        "priority": "0.6"
       }
     ],
     "city_guides": [
@@ -866,122 +805,183 @@
         "priority": "0.7"
       }
     ],
+    "seo_department_pages": [
+      {
+        "loc": "/departement/puy-de-dome",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/rhone",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/savoie",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/drome",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/isere",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/loire",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/haute-savoie",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      }
+    ],
     "public_sits": [],
-    "public_profiles": [],
-    "breed_profiles": [
+    "seo_city_pages": [
       {
-        "loc": "/races/dog-malinois",
-        "lastmod": "2026-03-27",
-        "changefreq": "monthly",
-        "priority": "0.6"
+        "loc": "/house-sitting/megeve",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
       },
       {
-        "loc": "/races/cat-bleu-de-russe",
-        "lastmod": "2026-04-22",
-        "changefreq": "monthly",
-        "priority": "0.6"
+        "loc": "/house-sitting/valence",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
       },
       {
-        "loc": "/races/cat-maine-coon",
-        "lastmod": "2026-04-22",
-        "changefreq": "monthly",
-        "priority": "0.6"
+        "loc": "/house-sitting/villeurbanne",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
       },
       {
-        "loc": "/races/dog-croise-bichon",
-        "lastmod": "2026-04-22",
-        "changefreq": "monthly",
-        "priority": "0.6"
+        "loc": "/house-sitting/clermont-ferrand",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
       },
       {
-        "loc": "/races/bird-gris-du-gabon",
-        "lastmod": "2026-04-22",
-        "changefreq": "monthly",
-        "priority": "0.6"
+        "loc": "/house-sitting/annecy",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
       },
       {
-        "loc": "/races/horse-ane-du-cotentin",
-        "lastmod": "2026-04-26",
-        "changefreq": "monthly",
-        "priority": "0.6"
+        "loc": "/house-sitting/ecully",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
       },
       {
-        "loc": "/races/horse-jument-merens",
-        "lastmod": "2026-04-26",
-        "changefreq": "monthly",
-        "priority": "0.6"
+        "loc": "/house-sitting/chambery",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
       },
       {
-        "loc": "/races/cat-chat-des-forets-norvegiennes",
-        "lastmod": "2026-04-26",
-        "changefreq": "monthly",
-        "priority": "0.6"
+        "loc": "/house-sitting/beaujolais",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
       },
       {
-        "loc": "/races/farm_animal-poules-marans",
-        "lastmod": "2026-04-26",
-        "changefreq": "monthly",
-        "priority": "0.6"
+        "loc": "/house-sitting/caluire-et-cuire",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
       },
       {
-        "loc": "/races/cat-sacre-de-birmanie",
-        "lastmod": "2026-04-29",
-        "changefreq": "monthly",
-        "priority": "0.6"
+        "loc": "/house-sitting/tassin-la-demi-lune",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
       },
       {
-        "loc": "/races/dog-husky-siberien",
-        "lastmod": "2026-04-29",
-        "changefreq": "monthly",
-        "priority": "0.6"
+        "loc": "/house-sitting/saint-didier-au-mont-d-or",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
       },
       {
-        "loc": "/races/rodent-rat",
-        "lastmod": "2026-05-01",
-        "changefreq": "monthly",
-        "priority": "0.6"
+        "loc": "/house-sitting/saint-etienne",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
       },
       {
-        "loc": "/races/cat-europeen",
-        "lastmod": "2026-05-05",
-        "changefreq": "monthly",
-        "priority": "0.6"
+        "loc": "/house-sitting/monts-du-lyonnais",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
       },
       {
-        "loc": "/races/dog-beauceron",
-        "lastmod": "2026-05-05",
-        "changefreq": "monthly",
-        "priority": "0.6"
+        "loc": "/house-sitting/grenoble",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
       },
       {
-        "loc": "/races/dog-jack-russel",
-        "lastmod": "2026-05-11",
-        "changefreq": "monthly",
-        "priority": "0.6"
+        "loc": "/house-sitting/chamonix",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
       },
       {
-        "loc": "/races/dog-teclem",
-        "lastmod": "2026-05-24",
-        "changefreq": "monthly",
-        "priority": "0.6"
+        "loc": "/house-sitting/bourg-saint-maurice",
+        "lastmod": "2026-03-26",
+        "changefreq": "weekly",
+        "priority": "0.8"
       },
       {
-        "loc": "/races/bird-perroquet-gris-du-gabon",
-        "lastmod": "2026-06-08",
-        "changefreq": "monthly",
-        "priority": "0.6"
+        "loc": "/house-sitting/lyon",
+        "lastmod": "2026-05-04",
+        "changefreq": "weekly",
+        "priority": "0.8"
       },
       {
-        "loc": "/races/dog-berger-belge-malinois",
-        "lastmod": "2026-06-08",
-        "changefreq": "monthly",
-        "priority": "0.6"
+        "loc": "/house-sitting/paris",
+        "lastmod": "2026-06-06",
+        "changefreq": "weekly",
+        "priority": "0.8"
       },
       {
-        "loc": "/races/dog-beldi",
-        "lastmod": "2026-06-09",
-        "changefreq": "monthly",
-        "priority": "0.6"
+        "loc": "/house-sitting/marseille",
+        "lastmod": "2026-06-06",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/bordeaux",
+        "lastmod": "2026-06-06",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/nantes",
+        "lastmod": "2026-06-06",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/toulouse",
+        "lastmod": "2026-06-06",
+        "changefreq": "weekly",
+        "priority": "0.8"
       }
     ]
   }
