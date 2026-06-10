@@ -801,10 +801,10 @@ const Landing = () => {
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
-              Simple et transparent
+              {t("landing.how.eyebrow")}
             </span>
             <h2 id="how-it-works" className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-4 scroll-mt-24">
-              Comment ça marche ?
+              {t("landing.how.title")}
             </h2>
             <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16">
               {seasonal.description}
