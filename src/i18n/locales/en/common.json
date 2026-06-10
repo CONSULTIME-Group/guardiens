@@ -1040,5 +1040,81 @@
     "sticky_offer": "Offer my help",
     "sticky_need": "Post my request",
     "this_member": "this member"
+  },
+  "missions_hero": {
+    "title": "Small missions near you",
+    "subtitle": "Ask for a helping hand or offer yours, among local folks, no money involved.",
+    "seg_demands_one": "{{count}} request",
+    "seg_demands_other": "{{count}} requests",
+    "seg_offers_one": "{{count}} offer to help",
+    "seg_offers_other": "{{count}} offers to help",
+    "seg_helpers_one": "{{count}} person ready to help",
+    "seg_helpers_other": "{{count}} people ready to help",
+    "cta_publish": "I'll do it, post my request",
+    "cta_propose": "or make myself visible as a helper →"
+  },
+  "mission_card": {
+    "demand": "Requested by ",
+    "offer": "Offered by ",
+    "you": "you",
+    "first_to_help": "First to help",
+    "proposals_one": "{{count}} proposal",
+    "proposals_other": "{{count}} proposals",
+    "add_bio_cta": "Add a short bio to reassure sitters",
+    "no_bio": "No introduction yet",
+    "exchange_label": "In exchange: {{exchange}}",
+    "for_date": "for {{date}}",
+    "found": "Found",
+    "in_progress": "In progress",
+    "your_mission": "Your mission",
+    "complete_profile": "Complete your profile",
+    "proposal_sent": "Proposal sent",
+    "help_name": "Help {{name}}",
+    "propose_to": "Offer to {{name}}",
+    "default_member": "a member"
+  },
+  "helper_card": {
+    "available": "Available to help",
+    "identity_verified": "Verified identity",
+    "matches_need": "Matches your request",
+    "default_member": "Available member",
+    "skills_label": "Know-how",
+    "stats_with_rating": "Rating {{rating}} · {{count}} mission completed",
+    "stats_with_rating_other": "Rating {{rating}} · {{count}} missions completed",
+    "stats_one": "{{count}} mission completed",
+    "stats_other": "{{count}} missions completed",
+    "view_profile": "View profile",
+    "contact": "Contact",
+    "contact_aria": "Contact {{name}}",
+    "this_member": "this member"
+  },
+  "offer_dialog": {
+    "title": "I have time to offer",
+    "description": "Indicate the areas where you can help, add your specific skills and describe what you offer.",
+    "saved_title": "Your availability is saved",
+    "saved_subtitle": "Local members can now find you.",
+    "skills_label": "Areas of skills",
+    "free_text_label": "Free description (optional)",
+    "free_text_placeholder": "E.g., I can water plants, walk a dog, help with small DIY jobs…",
+    "saving": "Saving…",
+    "submit": "I'm available to help",
+    "select_one": "Select at least one area"
+  },
+  "mission_filters": {
+    "postal_placeholder": "Postal code",
+    "radius_label": "Radius",
+    "radius_aria": "Search radius in kilometers",
+    "radius_all": "All of France",
+    "radius_km": "{{km}} km",
+    "skill_placeholder": "Search a skill (e.g., water garden)"
+  },
+  "mission_examples": {
+    "title": "A few examples of exchanges",
+    "exchange_label": "In exchange: {{exchange}}"
+  },
+  "missions_articles": {
+    "title": "Go further",
+    "all_journal": "Full journal →",
+    "read": "Read the article"
   }
 }
