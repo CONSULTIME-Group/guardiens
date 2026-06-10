@@ -1049,33 +1049,33 @@ const Landing = () => {
             <RevealOnScroll from="right" delay={120} className="order-1 lg:order-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">01</p>
-                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Gratuit pour les propriétaires</h3>
+                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">{t("landing.trust.p1_title")}</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Annonce, candidatures, messagerie : tout est gratuit. Pas de carte bancaire demandée.
+                  {t("landing.trust.p1_text")}
                 </p>
               </article>
 
               <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">02</p>
-                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Rencontre avant chaque garde</h3>
+                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">{t("landing.trust.p2_title")}</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Un café, une visite du logement, un tour des consignes. La confiance ne se devine pas : elle se construit, en se regardant.
+                  {t("landing.trust.p2_text")}
                 </p>
               </article>
 
               <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">03</p>
-                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Profils vérifiés, avis croisés</h3>
+                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">{t("landing.trust.p3_title")}</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Pièce d'identité contrôlée sous 24 h, avis publiés par les propriétaires précédents, historique des gardes réalisées. Tout est lisible.
+                  {t("landing.trust.p3_text")}
                 </p>
               </article>
 
               <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">04</p>
-                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">De votre rue à l'autre bout de la France</h3>
+                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">{t("landing.trust.p4_title")}</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Hyper-local pour un dépannage, élargi pour changer d'air : vous décidez jusqu'où vous voulez aller. Chaque garde devient une porte qui s'ouvre.
+                  {t("landing.trust.p4_text")}
                 </p>
               </article>
             </RevealOnScroll>
