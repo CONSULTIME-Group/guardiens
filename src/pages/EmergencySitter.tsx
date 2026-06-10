@@ -17,7 +17,7 @@ const stepColors = [
 
 const EmergencySitter = () => {
   const { t } = useTranslation();
-  const tp = (k: string) => t(`emergency_page.${k}`);
+  const tp = (k: string): string => t(`emergency_page.${k}`) as string;
 
   const steps = [
     { icon: Zap, title: tp("step1_title"), desc: tp("step1_desc") },

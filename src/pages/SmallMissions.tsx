@@ -33,7 +33,7 @@ import { useAllMissions, useAvailableHelpers } from "@/hooks/missions/useMission
 
 const SmallMissions = () => {
   const { t } = useTranslation();
-  const tp = (k: string, opts?: any) => t(`small_missions_page.${k}`, opts);
+  const tp = (k: string, opts?: any): string => t(`small_missions_page.${k}`, opts) as string;
   const { isAuthenticated, user, switchRole } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
