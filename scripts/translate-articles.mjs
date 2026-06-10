@@ -99,7 +99,14 @@ async function main() {
     .order("published_at", { ascending: false })
     .limit(LIMIT);
   if (error) throw error;
-  console.log(`${articles.length} articles, langs: ${LANGS.join(",")}`);
+
+  // Exclude articles whose slug is the source of a redirect (never displayed)
+  const { data: redirectsRows } = await supabase
+    .from("redirects")
+    .select("slug_from");
+  const redirected = new Set((redirectsRows || []).map((r) => r.slug_from));
+  const filtered = articles.filter((a) => !redirected.has(a.slug));
+  console.log(`${filtered.length} active articles (${articles.length - filtered.length} redirected, skipped), langs: ${LANGS.join(",")}`);
 
   // Existing pairs
   const { data: existing } = await supabase
