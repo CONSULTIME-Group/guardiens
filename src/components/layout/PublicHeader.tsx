@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import LanguageSwitcher from "./LanguageSwitcher";
 
-const NAV_DEFS = [
+const NAV_DEFS: ReadonlyArray<{ key: string; to: string; beta?: boolean }> = [
   { key: "listings", to: "/annonces" },
   { key: "small_missions", to: "/petites-missions" },
   { key: "pros", to: "/pros", beta: true },
   { key: "guides", to: "/guides" },
   { key: "pricing", to: "/tarifs" },
   { key: "news", to: "/actualites" },
-] as const;
+];
 
 export default function PublicHeader() {
   const navigate = useNavigate();
