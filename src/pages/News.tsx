@@ -501,13 +501,13 @@ export default function News() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <nav className="flex items-center justify-center gap-2 mt-10" aria-label="Pagination">
+              <nav className="flex items-center justify-center gap-2 mt-10" aria-label={t("news.pagination_aria")}>
                 <Button
                   variant="outline"
                   size="icon"
                   disabled={currentPage <= 1}
                   onClick={() => goToPage(currentPage - 1)}
-                  aria-label="Page précédente"
+                  aria-label={t("news.prev_page")}
                 >
                   <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                 </Button>
@@ -521,7 +521,7 @@ export default function News() {
                       size="sm"
                       onClick={() => goToPage(p)}
                       aria-current={p === currentPage ? "page" : undefined}
-                      aria-label={`Page ${p}`}
+                      aria-label={t("news.page_aria", { n: p })}
                       className="min-w-[36px]"
                     >
                       {p}
@@ -533,7 +533,7 @@ export default function News() {
                   size="icon"
                   disabled={currentPage >= totalPages}
                   onClick={() => goToPage(currentPage + 1)}
-                  aria-label="Page suivante"
+                  aria-label={t("news.next_page")}
                 >
                   <ChevronRight className="h-4 w-4" aria-hidden="true" />
                 </Button>
