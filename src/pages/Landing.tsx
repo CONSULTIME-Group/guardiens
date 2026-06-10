@@ -891,17 +891,17 @@ const Landing = () => {
                 }}
                 className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
               >
-                Publier mon annonce
+                {t("landing.how.cta_owner")}
               </button>
               <a
                 href="#entraide"
                 className="font-body text-sm font-medium tracking-wide rounded-full px-8 py-3.5 bg-transparent text-foreground border border-border hover:border-primary/40 hover:text-primary transition-all duration-200"
               >
-                Ou commencer par un coup de main →
+                {t("landing.how.cta_secondary")}
               </a>
             </div>
             <p className="mt-3 text-xs text-muted-foreground font-body">
-              Inscription en 2 minutes · Sans carte bancaire
+              {t("landing.how.footnote")}
             </p>
           </RevealSection>
         </div>
