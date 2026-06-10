@@ -79,7 +79,7 @@ export default function AuthorPage() {
   return (
     <>
       <PageMeta
-        title={`${author.firstName}, Auteur Guardiens`}
+        title={t("author_page.meta_title", { name: author.firstName })}
         description={author.shortBio}
         path={`/auteurs/${author.slug}`}
       />
@@ -90,7 +90,7 @@ export default function AuthorPage() {
       <main id="main-content">
         <PageBreadcrumb
           items={[
-            { label: "Auteurs", href: "/actualites" },
+            { label: t("author_page.breadcrumb_authors"), href: "/actualites" },
             { label: author.firstName },
           ]}
         />
@@ -99,7 +99,7 @@ export default function AuthorPage() {
           <header className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-12">
             <img
               src={author.photo}
-              alt={`Portrait de ${author.firstName}`}
+              alt={t("author_page.portrait_alt", { name: author.firstName })}
               width={144}
               height={144}
               loading="eager"
@@ -121,7 +121,7 @@ export default function AuthorPage() {
               id="author-articles-heading"
               className="font-heading text-xl font-semibold text-foreground mb-5"
             >
-              Articles signés {author.firstName}
+              {t("author_page.articles_by", { name: author.firstName })}
             </h2>
 
             {loading ? (
@@ -133,7 +133,7 @@ export default function AuthorPage() {
             ) : articles.length === 0 ? (
               <Card>
                 <CardContent className="py-10 text-center text-sm text-muted-foreground">
-                  Aucun article publié pour le moment.
+                  {t("author_page.no_articles")}
                 </CardContent>
               </Card>
             ) : (
@@ -143,7 +143,7 @@ export default function AuthorPage() {
                     <Card className="h-full hover:shadow-md transition-shadow">
                       <CardContent className="p-4">
                         <Badge variant="secondary" className="mb-2 text-xs">
-                          {CATEGORY_LABELS[a.category] || a.category}
+                          {t(`author_page.categories.${a.category}`, { defaultValue: a.category })}
                         </Badge>
                         <h3 className="font-heading font-semibold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-1">
                           {a.title}
@@ -152,7 +152,7 @@ export default function AuthorPage() {
                           {a.excerpt}
                         </p>
                         <span className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary">
-                          Lire <ArrowRight className="h-3 w-3" />
+                          {t("author_page.read")} <ArrowRight className="h-3 w-3" />
                         </span>
                       </CardContent>
                     </Card>
