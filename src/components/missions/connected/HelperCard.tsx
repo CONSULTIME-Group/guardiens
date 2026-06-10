@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, ArrowRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { SKILL_PILL_META } from "./constants";
 import { tokenizeSkillPhrases, normalizeSkillKey } from "@/lib/skills/tokenize";
 
@@ -12,14 +13,13 @@ interface Props {
 }
 
 const HelperCard = ({ helper: h, onPropose, onViewProfile, matchesMyNeed = false }: Props) => {
+  const { t } = useTranslation();
+  const tp = (k: string, opts?: any) => t(k, opts) as string;
   const skillCats: string[] = h.skill_categories || [];
   const displayedSkills = skillCats.slice(0, 2);
   const extraCount = skillCats.length - 2;
   const customSkills: string[] = tokenizeSkillPhrases((h.custom_skills as string[]) || []);
   const comps: string[] = tokenizeSkillPhrases((h.competences as string[]) || []);
-  // Compétences "spéciales" = saisies en libre (savoir-faire unique).
-  // Custom prioritaire, dédup insensible à la casse ET aux diacritiques
-  // (« Cuisine » == « cuisiné » == « CUISINE  »).
   const seen = new Set<string>();
   const specialSkills = [...customSkills, ...comps].filter((s) => {
     const k = normalizeSkillKey(s);
@@ -28,23 +28,25 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile, matchesMyNeed = false
     return true;
   });
   const bioTeaser = h.bio?.trim() || null;
+  const memberName = h.first_name || tp("helper_card.default_member");
+  const contactName = h.first_name || tp("helper_card.this_member");
 
   return (
     <div className={`rounded-lg border bg-card p-5 space-y-3 transition-colors flex flex-col ${matchesMyNeed ? "border-primary/40 shadow-sm" : "border-border hover:border-primary/30"}`}>
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <span className="inline-block text-xs rounded-full bg-primary/10 text-primary px-3 py-1">
-          Disponible pour aider
+          {tp("helper_card.available")}
         </span>
         {h.identity_verified && (
-          <span className="inline-flex items-center gap-1 text-xs text-success" title="Identité vérifiée">
+          <span className="inline-flex items-center gap-1 text-xs text-success" title={tp("helper_card.identity_verified")}>
             <ShieldCheck className="h-3.5 w-3.5" />
-            Identité vérifiée
+            {tp("helper_card.identity_verified")}
           </span>
         )}
       </div>
       {matchesMyNeed && (
         <span className="inline-flex items-center self-start gap-1 text-xs font-semibold rounded-full bg-success-soft text-success px-2.5 py-1">
-          Correspond à votre demande
+          {tp("helper_card.matches_need")}
         </span>
       )}
       <div className="flex items-center gap-3">
@@ -56,19 +58,17 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile, matchesMyNeed = false
           </div>
         )}
         <div>
-          <p className="text-base font-heading font-semibold text-foreground">{h.first_name || "Membre disponible"}</p>
+          <p className="text-base font-heading font-semibold text-foreground">{memberName}</p>
           {h.city && <p className="text-xs text-muted-foreground">{h.city}</p>}
         </div>
       </div>
 
-      {/* Catégories génériques */}
       <div className="flex flex-wrap gap-1.5">
         {displayedSkills.map((key: string) => {
-          const meta = SKILL_PILL_META[key];
-          if (!meta) return null;
+          if (!SKILL_PILL_META[key]) return null;
           return (
             <span key={key} className="rounded-full border border-primary/20 bg-primary/10 text-primary px-2.5 py-0.5 text-xs">
-              {meta.label}
+              {tp(`mission_categories.${key === "competences" ? "skills" : key}`)}
             </span>
           );
         })}
@@ -77,11 +77,10 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile, matchesMyNeed = false
         )}
       </div>
 
-      {/* Compétences spéciales (savoir-faire unique) */}
       {specialSkills.length > 0 && (
         <div>
           <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium mb-1">
-            Savoir-faire
+            {tp("helper_card.skills_label")}
           </p>
           <div className="flex flex-wrap gap-1">
             {specialSkills.slice(0, 3).map((c: string) => (
@@ -98,7 +97,6 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile, matchesMyNeed = false
         </div>
       )}
 
-      {/* Mini bio */}
       {bioTeaser && (
         <p className="text-xs text-foreground/75 leading-snug line-clamp-2 italic">
           « {bioTeaser} »
@@ -107,26 +105,25 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile, matchesMyNeed = false
 
       {h.sits_count > 0 && (
         <p className="text-xs text-foreground/60">
-          {h.review_count > 0 ? `Note ${h.review_avg.toFixed(1)} · ` : ""}{h.sits_count} mission{h.sits_count > 1 ? "s" : ""} accomplie{h.sits_count > 1 ? "s" : ""}
+          {h.review_count > 0
+            ? tp(h.sits_count > 1 ? "helper_card.stats_with_rating_other" : "helper_card.stats_with_rating", { rating: h.review_avg.toFixed(1), count: h.sits_count })
+            : tp(h.sits_count > 1 ? "helper_card.stats_other" : "helper_card.stats_one", { count: h.sits_count })}
         </p>
       )}
 
-      {/* Item 9, éviter le mur de CTAs verts répétés.
-          Action primaire = découvrir le profil (chemin naturel) ;
-          contact en secondaire/outline pour qui sait déjà. */}
       <div className="flex items-center gap-2 pt-2 mt-auto">
         <Button onClick={onViewProfile} size="sm" variant="outline" className="flex-1">
-          Voir le profil
+          {tp("helper_card.view_profile")}
         </Button>
         <Button
           onClick={onPropose}
           size="sm"
           variant="ghost"
           className="shrink-0 text-primary hover:text-primary hover:bg-primary/10"
-          aria-label={`Contacter ${h.first_name || "ce membre"}`}
-          title={`Contacter ${h.first_name || "ce membre"}`}
+          aria-label={tp("helper_card.contact_aria", { name: contactName })}
+          title={tp("helper_card.contact_aria", { name: contactName })}
         >
-          Contacter
+          {tp("helper_card.contact")}
           <ArrowRight className="ml-1 h-3.5 w-3.5" />
         </Button>
       </div>

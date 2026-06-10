@@ -1040,5 +1040,103 @@
     "sticky_offer": "Meine Hilfe anbieten",
     "sticky_need": "Meine Anfrage veröffentlichen",
     "this_member": "dieses Mitglied"
+  },
+  "missions_hero": {
+    "title": "Kleine Einsätze in deiner Nähe",
+    "subtitle": "Bitten Sie um Hilfe oder bieten Sie Ihre an, unter Leuten aus der Gegend, ohne Geld.",
+    "seg_demands_one": "{{count}} Anfrage",
+    "seg_demands_other": "{{count}} Anfragen",
+    "seg_offers_one": "{{count}} Hilfsangebot",
+    "seg_offers_other": "{{count}} Hilfsangebote",
+    "seg_helpers_one": "{{count}} Person bereit zu helfen",
+    "seg_helpers_other": "{{count}} Personen bereit zu helfen",
+    "cta_publish": "Ich trau' mich, ich poste meine Anfrage",
+    "cta_propose": "oder mich als Helfer sichtbar machen →"
+  },
+  "mission_card": {
+    "demand": "Angefragt von ",
+    "offer": "Angeboten von ",
+    "you": "Ihnen",
+    "first_to_help": "Erster Helfer",
+    "proposals_one": "{{count}} Vorschlag",
+    "proposals_other": "{{count}} Vorschläge",
+    "add_bio_cta": "Fügen Sie eine Mini-Bio hinzu, um die Tierhüter zu beruhigen",
+    "no_bio": "Noch keine Vorstellung",
+    "exchange_label": "Im Tausch: {{exchange}}",
+    "for_date": "für den {{date}}",
+    "found": "Gefunden",
+    "in_progress": "Läuft",
+    "your_mission": "Ihr Einsatz",
+    "complete_profile": "Profil vervollständigen",
+    "proposal_sent": "Vorschlag gesendet",
+    "help_name": "{{name}} helfen",
+    "propose_to": "{{name}} anbieten",
+    "default_member": "ein Mitglied"
+  },
+  "helper_card": {
+    "available": "Verfügbar zum Helfen",
+    "identity_verified": "Identität verifiziert",
+    "matches_need": "Entspricht Ihrer Anfrage",
+    "default_member": "Verfügbares Mitglied",
+    "skills_label": "Know-how",
+    "stats_with_rating": "Bewertung {{rating}} · {{count}} Einsatz abgeschlossen",
+    "stats_with_rating_other": "Bewertung {{rating}} · {{count}} Einsätze abgeschlossen",
+    "stats_one": "{{count}} Einsatz abgeschlossen",
+    "stats_other": "{{count}} Einsätze abgeschlossen",
+    "view_profile": "Profil ansehen",
+    "contact": "Kontaktieren",
+    "contact_aria": "{{name}} kontaktieren",
+    "this_member": "dieses Mitglied"
+  },
+  "offer_dialog": {
+    "title": "Ich habe Zeit zu geben",
+    "description": "Geben Sie an, in welchen Bereichen Sie helfen können, fügen Sie Ihre spezifischen Fähigkeiten hinzu und beschreiben Sie, was Sie anbieten.",
+    "saved_title": "Ihre Verfügbarkeit ist gespeichert",
+    "saved_subtitle": "Die Mitglieder aus der Gegend können Sie nun finden.",
+    "skills_label": "Kompetenzbereiche",
+    "free_text_label": "Freie Beschreibung (optional)",
+    "free_text_placeholder": "Z.B.: Ich kann Pflanzen gießen, einen Hund ausführen, bei kleinen Arbeiten helfen…",
+    "saving": "Speichern…",
+    "submit": "Ich bin bereit zu helfen",
+    "select_one": "Wählen Sie mindestens einen Bereich"
+  },
+  "mission_filters": {
+    "postal_placeholder": "Postleitzahl",
+    "radius_label": "Radius",
+    "radius_aria": "Suchradius in Kilometern",
+    "radius_all": "Ganz Frankreich",
+    "radius_km": "{{km}} km",
+    "skill_placeholder": "Eine Fähigkeit suchen (z.B.: Garten gießen)"
+  },
+  "mission_examples": {
+    "title": "Einige Beispiele für Tauschangebote",
+    "exchange_label": "Im Tausch: {{exchange}}"
+  },
+  "missions_articles": {
+    "title": "Weiterlesen",
+    "all_journal": "Ganzes Journal →",
+    "read": "Artikel lesen"
+  },
+  "mission_categories": {
+    "animals": "Tiere",
+    "garden": "Garten",
+    "house": "Haus",
+    "skills": "Kompetenzen"
+  },
+  "mission_filter_pills": {
+    "all": "Alle",
+    "garden": "Garten",
+    "animals": "Tiere",
+    "skills": "Kompetenzen",
+    "house": "Haus",
+    "mine": "Meine Einsätze"
+  },
+  "mission_durations": {
+    "1-2h": "1-2 Stunden",
+    "half_day": "Halber Tag",
+    "full_day": "Ganzer Tag",
+    "several": "Mehrere Tage",
+    "weekend": "Wochenende",
+    "week": "Woche"
   }
 }

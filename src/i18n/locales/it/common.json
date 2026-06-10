@@ -1040,5 +1040,103 @@
     "sticky_offer": "Offrire il mio aiuto",
     "sticky_need": "Pubblicare la mia richiesta",
     "this_member": "questo membro"
+  },
+  "missions_hero": {
+    "title": "Piccole missioni vicino a te",
+    "subtitle": "Chiedi una mano o offri la tua, tra gente del posto, senza soldi.",
+    "seg_demands_one": "{{count}} richiesta",
+    "seg_demands_other": "{{count}} richieste",
+    "seg_offers_one": "{{count}} offerta di aiuto",
+    "seg_offers_other": "{{count}} offerte di aiuto",
+    "seg_helpers_one": "{{count}} persona pronta ad aiutare",
+    "seg_helpers_other": "{{count}} persone pronte ad aiutare",
+    "cta_publish": "Mi lancio, pubblico la mia richiesta",
+    "cta_propose": "o rendermi visibile come aiutante →"
+  },
+  "mission_card": {
+    "demand": "Richiesto da ",
+    "offer": "Offerto da ",
+    "you": "tu",
+    "first_to_help": "Primo ad aiutare",
+    "proposals_one": "{{count}} proposta",
+    "proposals_other": "{{count}} proposte",
+    "add_bio_cta": "Aggiungi una mini-bio per rassicurare i custodi",
+    "no_bio": "Senza presentazione per ora",
+    "exchange_label": "In cambio: {{exchange}}",
+    "for_date": "per il {{date}}",
+    "found": "Trovato",
+    "in_progress": "In corso",
+    "your_mission": "La tua missione",
+    "complete_profile": "Completa il tuo profilo",
+    "proposal_sent": "Proposta inviata",
+    "help_name": "Aiutare {{name}}",
+    "propose_to": "Proporre a {{name}}",
+    "default_member": "un membro"
+  },
+  "helper_card": {
+    "available": "Disponibile ad aiutare",
+    "identity_verified": "Identità verificata",
+    "matches_need": "Corrisponde alla tua richiesta",
+    "default_member": "Membro disponibile",
+    "skills_label": "Competenze",
+    "stats_with_rating": "Valutazione {{rating}} · {{count}} missione completata",
+    "stats_with_rating_other": "Valutazione {{rating}} · {{count}} missioni completate",
+    "stats_one": "{{count}} missione completata",
+    "stats_other": "{{count}} missioni completate",
+    "view_profile": "Vedi profilo",
+    "contact": "Contatta",
+    "contact_aria": "Contatta {{name}}",
+    "this_member": "questo membro"
+  },
+  "offer_dialog": {
+    "title": "Ho tempo da offrire",
+    "description": "Indica in quali ambiti puoi aiutare, aggiungi le tue competenze specifiche e descrivi cosa proponi.",
+    "saved_title": "La tua disponibilità è registrata",
+    "saved_subtitle": "I membri del posto possono ora trovarti.",
+    "skills_label": "Ambiti di competenza",
+    "free_text_label": "Descrizione libera (opzionale)",
+    "free_text_placeholder": "Es.: Posso annaffiare le piante, portare a spasso un cane, dare una mano per piccoli lavori…",
+    "saving": "Salvataggio…",
+    "submit": "Sono disponibile ad aiutare",
+    "select_one": "Seleziona almeno un ambito"
+  },
+  "mission_filters": {
+    "postal_placeholder": "Codice postale",
+    "radius_label": "Raggio",
+    "radius_aria": "Raggio di ricerca in chilometri",
+    "radius_all": "Tutta la Francia",
+    "radius_km": "{{km}} km",
+    "skill_placeholder": "Cerca una competenza (es.: annaffiare giardino)"
+  },
+  "mission_examples": {
+    "title": "Alcuni esempi di scambi",
+    "exchange_label": "In cambio: {{exchange}}"
+  },
+  "missions_articles": {
+    "title": "Per approfondire",
+    "all_journal": "Tutto il giornale →",
+    "read": "Leggi l'articolo"
+  },
+  "mission_categories": {
+    "animals": "Animali",
+    "garden": "Giardino",
+    "house": "Casa",
+    "skills": "Competenze"
+  },
+  "mission_filter_pills": {
+    "all": "Tutto",
+    "garden": "Giardino",
+    "animals": "Animali",
+    "skills": "Competenze",
+    "house": "Casa",
+    "mine": "Le mie missioni"
+  },
+  "mission_durations": {
+    "1-2h": "1-2 ore",
+    "half_day": "Mezza giornata",
+    "full_day": "Giornata",
+    "several": "Più giorni",
+    "weekend": "Weekend",
+    "week": "Settimana"
   }
 }
