@@ -603,5 +603,19 @@
     "be_first": "Être le premier inscrit",
     "emergencies_24_7": "Urgences 24/7",
     "logo_alt": "Logo {{name}}"
+  },
+  "intl_listings": {
+    "meta_title": "Annonces de garde d'animaux à l'étranger | Guardiens",
+    "meta_description": "Annonces de garde d'animaux à domicile hors de France : Maroc, Espagne, Belgique, Suisse, Portugal et plus. Consultation libre, inscription gratuite pour postuler.",
+    "kicker": "Annonces hors France",
+    "title": "Gardes d'animaux à l'étranger",
+    "subtitle": "Notre communauté grandit aussi au-delà des frontières françaises. Découvrez les annonces publiées par des propriétaires installés à l'étranger, Maroc, Espagne, Belgique, Suisse, Portugal et plus.",
+    "back_link": "← Revenir aux annonces en France",
+    "empty_title": "Pas encore d'annonce hors France",
+    "empty_body": "Vous habitez à l'étranger et cherchez un gardien ? Vous pouvez créer votre annonce sur Guardiens, votre pays sera bien pris en compte.",
+    "empty_cta": "Publier mon annonce →",
+    "default_title": "Garde d'animaux",
+    "cover_alt": "Annonce de garde",
+    "flexible_dates": "Dates flexibles"
   }
 }

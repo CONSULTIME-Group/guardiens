@@ -603,5 +603,19 @@
     "be_first": "Ser el primero en inscribirse",
     "emergencies_24_7": "Urgencias 24/7",
     "logo_alt": "Logo {{name}}"
+  },
+  "intl_listings": {
+    "meta_title": "Anuncios de cuidado de animales en el extranjero | Guardiens",
+    "meta_description": "Anuncios de cuidado de animales a domicilio fuera de Francia: Marruecos, España, Bélgica, Suiza, Portugal y más. Consulta libre, registro gratuito para postular.",
+    "kicker": "Anuncios fuera de Francia",
+    "title": "Cuidado de animales en el extranjero",
+    "subtitle": "Nuestra comunidad también crece más allá de las fronteras francesas. Descubra los anuncios publicados por propietarios instalados en el extranjero: Marruecos, España, Bélgica, Suiza, Portugal y más.",
+    "back_link": "← Volver a los anuncios en Francia",
+    "empty_title": "Aún no hay anuncios fuera de Francia",
+    "empty_body": "¿Vive en el extranjero y busca un cuidador? Puede crear su anuncio en Guardiens, su país será tenido en cuenta.",
+    "empty_cta": "Publicar mi anuncio →",
+    "default_title": "Cuidado de animales",
+    "cover_alt": "Anuncio de cuidado",
+    "flexible_dates": "Fechas flexibles"
   }
 }

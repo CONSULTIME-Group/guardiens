@@ -1,20 +1,17 @@
 // Page dédiée aux annonces de garde hors France.
 // Volontairement légère : pas de carte (les distances FR n'ont pas de sens ici),
 // pas de filtres complexes. Une grille simple avec ville + pays + visuel + lien.
-// Découle d'un besoin réel remonté par un propriétaire à Marrakech (juin 2026).
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Globe2, MapPin } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const CANONICAL = "https://guardiens.fr/annonces/international";
-const TITLE = "Annonces de garde d'animaux à l'étranger | Guardiens";
-const DESCRIPTION =
-  "Annonces de garde d'animaux à domicile hors de France : Maroc, Espagne, Belgique, Suisse, Portugal et plus. Consultation libre, inscription gratuite pour postuler.";
 
 type IntlSit = {
   id: string;
@@ -27,16 +24,21 @@ type IntlSit = {
   property?: { photos?: string[] | null } | null;
 };
 
-function formatPeriod(s?: string | null, e?: string | null) {
-  if (!s && !e) return "Dates flexibles";
-  const fmt = (d: string) =>
-    new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
-  if (s && e) return `${fmt(s)} → ${fmt(e)}`;
-  return fmt((s || e) as string);
-}
-
 export default function InternationalListings() {
+  const { t, i18n } = useTranslation();
   const [sits, setSits] = useState<IntlSit[] | null>(null);
+
+  const locale =
+    ({ fr: "fr-FR", en: "en-GB", es: "es-ES", it: "it-IT", de: "de-DE" } as Record<string, string>)[i18n.language] ||
+    "fr-FR";
+
+  function formatPeriod(s?: string | null, e?: string | null) {
+    if (!s && !e) return t("intl_listings.flexible_dates");
+    const fmt = (d: string) =>
+      new Date(d).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" });
+    if (s && e) return `${fmt(s)} → ${fmt(e)}`;
+    return fmt((s || e) as string);
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -58,8 +60,8 @@ export default function InternationalListings() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Helmet>
-        <title>{TITLE}</title>
-        <meta name="description" content={DESCRIPTION} />
+        <title>{t("intl_listings.meta_title")}</title>
+        <meta name="description" content={t("intl_listings.meta_description")} />
         <meta name="robots" content="noindex,follow" />
         <link rel="canonical" href={CANONICAL} />
       </Helmet>
@@ -69,19 +71,17 @@ export default function InternationalListings() {
       <main id="main-content" className="flex-1 min-w-0" role="main">
         <section className="max-w-6xl mx-auto px-4 md:px-6 pt-10 pb-6">
           <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-3 flex items-center gap-2">
-            <Globe2 className="h-3.5 w-3.5" /> Annonces hors France
+            <Globe2 className="h-3.5 w-3.5" /> {t("intl_listings.kicker")}
           </p>
           <h1 className="font-heading text-3xl md:text-4xl lg:text-5xl font-medium leading-tight text-foreground tracking-tight max-w-3xl">
-            Gardes d'animaux à l'étranger
+            {t("intl_listings.title")}
           </h1>
           <p className="mt-4 text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
-            Notre communauté grandit aussi au-delà des frontières françaises.
-            Découvrez les annonces publiées par des propriétaires installés à
-            l'étranger, Maroc, Espagne, Belgique, Suisse, Portugal et plus.
+            {t("intl_listings.subtitle")}
           </p>
           <p className="mt-3 text-sm">
             <Link to="/annonces" className="text-primary font-semibold hover:underline underline-offset-4">
-              ← Revenir aux annonces en France
+              {t("intl_listings.back_link")}
             </Link>
           </p>
         </section>
@@ -97,18 +97,16 @@ export default function InternationalListings() {
             <div className="border border-dashed border-border rounded-2xl p-10 text-center">
               <Globe2 className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
               <h2 className="font-heading text-xl font-medium text-foreground mb-2">
-                Pas encore d'annonce hors France
+                {t("intl_listings.empty_title")}
               </h2>
               <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                Vous habitez à l'étranger et cherchez un gardien&nbsp;? Vous
-                pouvez créer votre annonce sur Guardiens, votre pays sera bien
-                pris en compte.
+                {t("intl_listings.empty_body")}
               </p>
               <Link
                 to="/inscription"
                 className="inline-flex mt-5 items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity"
               >
-                Publier mon annonce →
+                {t("intl_listings.empty_cta")}
               </Link>
             </div>
           ) : (
@@ -125,7 +123,7 @@ export default function InternationalListings() {
                       {cover ? (
                         <img
                           src={cover}
-                          alt={s.title || "Annonce de garde"}
+                          alt={s.title || t("intl_listings.cover_alt")}
                           loading="lazy"
                           className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
                         />
@@ -144,7 +142,7 @@ export default function InternationalListings() {
                         )}
                       </p>
                       <h3 className="font-heading text-base font-medium text-foreground line-clamp-2 mb-2">
-                        {s.title || "Garde d'animaux"}
+                        {s.title || t("intl_listings.default_title")}
                       </h3>
                       <p className="text-xs text-muted-foreground">
                         {formatPeriod(s.start_date, s.end_date)}
