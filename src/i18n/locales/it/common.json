@@ -603,5 +603,19 @@
     "be_first": "Sii il primo a iscriverti",
     "emergencies_24_7": "Emergenze 24/7",
     "logo_alt": "Logo {{name}}"
+  },
+  "intl_listings": {
+    "meta_title": "Annunci di pet-sitting all'estero | Guardiens",
+    "meta_description": "Annunci di pet-sitting a domicilio fuori dalla Francia: Marocco, Spagna, Belgio, Svizzera, Portogallo e oltre. Consultazione libera, iscrizione gratuita per candidarsi.",
+    "kicker": "Annunci fuori dalla Francia",
+    "title": "Pet-sitting all'estero",
+    "subtitle": "La nostra comunità cresce anche oltre i confini francesi. Scoprite gli annunci pubblicati da proprietari residenti all'estero: Marocco, Spagna, Belgio, Svizzera, Portogallo e oltre.",
+    "back_link": "← Torna agli annunci in Francia",
+    "empty_title": "Nessun annuncio fuori dalla Francia",
+    "empty_body": "Vivete all'estero e cercate un pet-sitter? Potete creare il vostro annuncio su Guardiens, il vostro paese sarà preso in considerazione.",
+    "empty_cta": "Pubblicare il mio annuncio →",
+    "default_title": "Pet-sitting",
+    "cover_alt": "Annuncio di pet-sitting",
+    "flexible_dates": "Date flessibili"
   }
 }

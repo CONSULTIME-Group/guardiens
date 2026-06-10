@@ -603,5 +603,19 @@
     "be_first": "Be the first to register",
     "emergencies_24_7": "24/7 emergencies",
     "logo_alt": "Logo {{name}}"
+  },
+  "intl_listings": {
+    "meta_title": "Pet-sitting listings abroad | Guardiens",
+    "meta_description": "In-home pet-sitting listings outside France: Morocco, Spain, Belgium, Switzerland, Portugal and more. Free browsing, free sign-up to apply.",
+    "kicker": "Listings outside France",
+    "title": "Pet sits abroad",
+    "subtitle": "Our community is growing beyond French borders too. Browse listings posted by owners based abroad: Morocco, Spain, Belgium, Switzerland, Portugal and more.",
+    "back_link": "← Back to listings in France",
+    "empty_title": "No listing outside France yet",
+    "empty_body": "You live abroad and need a sitter? You can create your listing on Guardiens, your country will be taken into account.",
+    "empty_cta": "Post my listing →",
+    "default_title": "Pet sit",
+    "cover_alt": "Pet-sit listing",
+    "flexible_dates": "Flexible dates"
   }
 }

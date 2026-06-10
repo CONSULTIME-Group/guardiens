@@ -603,5 +603,19 @@
     "be_first": "Erster sein, der sich einträgt",
     "emergencies_24_7": "Notfälle 24/7",
     "logo_alt": "Logo {{name}}"
+  },
+  "intl_listings": {
+    "meta_title": "Tierbetreuungs-Anzeigen im Ausland | Guardiens",
+    "meta_description": "Anzeigen für Tierbetreuung zu Hause außerhalb Frankreichs: Marokko, Spanien, Belgien, Schweiz, Portugal und mehr. Freie Einsicht, kostenlose Anmeldung zur Bewerbung.",
+    "kicker": "Anzeigen außerhalb Frankreichs",
+    "title": "Tierbetreuung im Ausland",
+    "subtitle": "Unsere Community wächst auch über die französischen Grenzen hinaus. Entdecken Sie Anzeigen von Besitzern im Ausland: Marokko, Spanien, Belgien, Schweiz, Portugal und mehr.",
+    "back_link": "← Zurück zu den Anzeigen in Frankreich",
+    "empty_title": "Noch keine Anzeige außerhalb Frankreichs",
+    "empty_body": "Sie leben im Ausland und suchen eine Betreuungsperson? Sie können Ihre Anzeige auf Guardiens erstellen, Ihr Land wird berücksichtigt.",
+    "empty_cta": "Anzeige veröffentlichen →",
+    "default_title": "Tierbetreuung",
+    "cover_alt": "Tierbetreuungs-Anzeige",
+    "flexible_dates": "Flexible Daten"
   }
 }
