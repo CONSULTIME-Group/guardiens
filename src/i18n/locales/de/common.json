@@ -1116,5 +1116,27 @@
     "title": "Weiterlesen",
     "all_journal": "Ganzes Journal →",
     "read": "Artikel lesen"
+  },
+  "mission_categories": {
+    "animals": "Tiere",
+    "garden": "Garten",
+    "house": "Haus",
+    "skills": "Kompetenzen"
+  },
+  "mission_filter_pills": {
+    "all": "Alle",
+    "garden": "Garten",
+    "animals": "Tiere",
+    "skills": "Kompetenzen",
+    "house": "Haus",
+    "mine": "Meine Einsätze"
+  },
+  "mission_durations": {
+    "1-2h": "1-2 Stunden",
+    "half_day": "Halber Tag",
+    "full_day": "Ganzer Tag",
+    "several": "Mehrere Tage",
+    "weekend": "Wochenende",
+    "week": "Woche"
   }
 }

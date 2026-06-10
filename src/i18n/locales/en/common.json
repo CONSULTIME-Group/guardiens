@@ -1116,5 +1116,27 @@
     "title": "Go further",
     "all_journal": "Full journal →",
     "read": "Read the article"
+  },
+  "mission_categories": {
+    "animals": "Animals",
+    "garden": "Garden",
+    "house": "Home",
+    "skills": "Skills"
+  },
+  "mission_filter_pills": {
+    "all": "All",
+    "garden": "Garden",
+    "animals": "Animals",
+    "skills": "Skills",
+    "house": "Home",
+    "mine": "My missions"
+  },
+  "mission_durations": {
+    "1-2h": "1-2 hours",
+    "half_day": "Half day",
+    "full_day": "Full day",
+    "several": "Several days",
+    "weekend": "Weekend",
+    "week": "Week"
   }
 }

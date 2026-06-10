@@ -1116,5 +1116,27 @@
     "title": "Per approfondire",
     "all_journal": "Tutto il giornale →",
     "read": "Leggi l'articolo"
+  },
+  "mission_categories": {
+    "animals": "Animali",
+    "garden": "Giardino",
+    "house": "Casa",
+    "skills": "Competenze"
+  },
+  "mission_filter_pills": {
+    "all": "Tutto",
+    "garden": "Giardino",
+    "animals": "Animali",
+    "skills": "Competenze",
+    "house": "Casa",
+    "mine": "Le mie missioni"
+  },
+  "mission_durations": {
+    "1-2h": "1-2 ore",
+    "half_day": "Mezza giornata",
+    "full_day": "Giornata",
+    "several": "Più giorni",
+    "weekend": "Weekend",
+    "week": "Settimana"
   }
 }

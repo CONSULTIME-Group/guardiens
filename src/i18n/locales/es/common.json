@@ -1116,5 +1116,27 @@
     "title": "Para profundizar",
     "all_journal": "Todo el diario →",
     "read": "Leer el artículo"
+  },
+  "mission_categories": {
+    "animals": "Animales",
+    "garden": "Jardín",
+    "house": "Casa",
+    "skills": "Habilidades"
+  },
+  "mission_filter_pills": {
+    "all": "Todo",
+    "garden": "Jardín",
+    "animals": "Animales",
+    "skills": "Habilidades",
+    "house": "Casa",
+    "mine": "Mis misiones"
+  },
+  "mission_durations": {
+    "1-2h": "1-2 horas",
+    "half_day": "Media jornada",
+    "full_day": "Jornada",
+    "several": "Varios días",
+    "weekend": "Fin de semana",
+    "week": "Semana"
   }
 }
