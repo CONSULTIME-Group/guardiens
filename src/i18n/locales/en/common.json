@@ -413,5 +413,47 @@
       "saisonnier": "Seasonal",
       "guide_central": "Main guide"
     }
+  },
+  "news": {
+    "title": "Guides & Advice",
+    "subtitle": "Tips, guides and advice for pet owners and sitters.",
+    "meta_description": "House-sitting tips, practical guides, testimonials and news from the Guardiens community. Everything to prepare a sit.",
+    "meta_title_default": "House-sitting guides & advice",
+    "meta_title_category": "{{cat}}, Guides & Advice",
+    "breadcrumb": "Guides & Advice",
+    "search_placeholder": "Search an article…",
+    "search_aria": "Search in articles",
+    "reset_filters": "Reset filters",
+    "all": "All",
+    "new_badge": "New",
+    "read": "Read",
+    "vie_locale_title": "Local life & Mutual aid",
+    "vie_locale_subtitle": "Exchanges without money, local people helping each other, another way of living together.",
+    "see_all": "See all articles",
+    "empty_search": "No article matches « {{q}} ».",
+    "empty_default": "No article yet. Come back soon!",
+    "error": "Unable to load articles. Please try again.",
+    "retry": "Retry",
+    "pagination_aria": "Pagination",
+    "prev_page": "Previous page",
+    "next_page": "Next page",
+    "page_aria": "Page {{n}}",
+    "categories": {
+      "guide_central": "Essential guides",
+      "guide_race": "Breeds",
+      "guide_lieu": "Place guide",
+      "guide_ville": "City guide",
+      "conseil_gardien": "Sitter tips",
+      "conseil_proprio": "Owner tips",
+      "conseil": "Tips",
+      "temoignage": "Testimonial",
+      "actualite": "News",
+      "ville": "Cities",
+      "thematique": "House-sitting",
+      "guide_local": "Local guides",
+      "saisonnier": "Seasonal",
+      "guide_pratique": "Practical guides",
+      "vie_locale": "Local life & Mutual aid"
+    }
   }
 }

@@ -413,5 +413,47 @@
       "saisonnier": "Estacional",
       "guide_central": "Guía central"
     }
+  },
+  "news": {
+    "title": "Guías y Consejos",
+    "subtitle": "Consejos, guías y trucos para propietarios y cuidadores de animales.",
+    "meta_description": "Consejos de house-sitting, guías prácticas, testimonios y novedades de la comunidad Guardiens. Todo para preparar una guarda.",
+    "meta_title_default": "Guías y consejos de house-sitting",
+    "meta_title_category": "{{cat}}, Guías y Consejos",
+    "breadcrumb": "Guías y Consejos",
+    "search_placeholder": "Buscar un artículo…",
+    "search_aria": "Buscar en los artículos",
+    "reset_filters": "Restablecer filtros",
+    "all": "Todos",
+    "new_badge": "Nuevo",
+    "read": "Leer",
+    "vie_locale_title": "Vida local y Ayuda mutua",
+    "vie_locale_subtitle": "Intercambios sin dinero, gente del barrio que se ayuda, otra forma de vivir juntos.",
+    "see_all": "Ver todos los artículos",
+    "empty_search": "Ningún artículo coincide con « {{q}} ».",
+    "empty_default": "Aún no hay artículos. ¡Vuelve pronto!",
+    "error": "No se pueden cargar los artículos. Inténtelo de nuevo.",
+    "retry": "Reintentar",
+    "pagination_aria": "Paginación",
+    "prev_page": "Página anterior",
+    "next_page": "Página siguiente",
+    "page_aria": "Página {{n}}",
+    "categories": {
+      "guide_central": "Guías esenciales",
+      "guide_race": "Razas",
+      "guide_lieu": "Guía de lugar",
+      "guide_ville": "Guía de ciudad",
+      "conseil_gardien": "Consejos cuidadores",
+      "conseil_proprio": "Consejos propietarios",
+      "conseil": "Consejos",
+      "temoignage": "Testimonio",
+      "actualite": "Actualidad",
+      "ville": "Ciudades",
+      "thematique": "House-sitting",
+      "guide_local": "Guías locales",
+      "saisonnier": "Temporada",
+      "guide_pratique": "Guías prácticas",
+      "vie_locale": "Vida local y Ayuda mutua"
+    }
   }
 }
