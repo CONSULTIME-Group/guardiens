@@ -251,19 +251,19 @@ export default function News() {
       ...present.filter((k) => !CATEGORY_ORDER.includes(k)).sort(),
     ];
     return [
-      { key: "all", label: "Tous", count: totalArticles },
+      { key: "all", label: t("news.all", "Tous"), count: totalArticles },
       ...ordered.map((k) => ({
         key: k,
-        label: CATEGORY_LABELS[k] || k,
+        label: tCat(k),
         count: categoryCounts[k],
       })),
     ];
-  }, [categoryCounts, totalArticles]);
+  }, [categoryCounts, totalArticles, i18n.language]);
 
   const metaTitle =
     activeCategory !== "all"
-      ? `${CATEGORY_LABELS[activeCategory] || "Articles"}, Guides & Conseils`
-      : "Guides & Conseils house-sitting";
+      ? t("news.meta_title_category", { cat: tCat(activeCategory) })
+      : t("news.meta_title_default");
   const metaPath =
     activeCategory !== "all"
       ? `/actualites?categorie=${activeCategory}${currentPage > 1 ? `&page=${currentPage}` : ""}`
