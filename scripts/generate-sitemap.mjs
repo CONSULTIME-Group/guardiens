@@ -275,10 +275,10 @@ async function main() {
   const entries = [];
 
   for (const page of staticPages) {
-    entries.push(urlEntry(page.loc, today, page.changefreq, page.priority));
+    entries.push(urlEntryWithLangAlternates(page.loc, today, page.changefreq, page.priority));
   }
   for (const slug of cityLandingPages) {
-    entries.push(urlEntry(`/house-sitting/${slug}`, today, "weekly", "0.9"));
+    entries.push(urlEntryWithLangAlternates(`/house-sitting/${slug}`, today, "weekly", "0.9"));
   }
   for (const e of articles) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of seoCity) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
