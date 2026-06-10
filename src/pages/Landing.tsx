@@ -1429,15 +1429,15 @@ const Landing = () => {
       <section id="commencer" className="py-24 md:py-32 bg-primary scroll-mt-24">
         <RevealSection className="max-w-2xl mx-auto px-6 text-center">
           <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-6 bg-white/15 border border-white/30">
-            <span className="font-body text-xs text-white uppercase tracking-widest">Programme Fondateur</span>
+            <span className="font-body text-xs text-white uppercase tracking-widest">{t("landing.final.badge_program")}</span>
             <span aria-hidden="true" className="text-white/40">·</span>
-            <span className="font-body text-xs text-white/90">Badge offert avant le 14 juillet 2026</span>
+            <span className="font-body text-xs text-white/90">{t("landing.final.badge_offer")}</span>
           </div>
           <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6">
-            Votre prochaine histoire commence ici.
+            {t("landing.final.title")}
           </h2>
           <p className="font-body text-lg text-white/85 leading-relaxed max-w-lg mx-auto mb-10">
-            Vous partirez l'esprit léger. Vous rentrerez avec autre chose ,             un coin découvert, une rencontre, quelqu'un que vous n'auriez jamais croisé.
+            {t("landing.final.lede")}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
             <button
@@ -1447,7 +1447,7 @@ const Landing = () => {
               }}
               className="font-body text-sm font-bold tracking-wide rounded-full px-10 py-4 bg-white text-primary hover:bg-background hover:scale-[1.02] transition-all duration-200"
             >
-              Publier mon annonce
+              {t("landing.final.cta_owner")}
             </button>
             <button
               onClick={() => {
@@ -1456,11 +1456,11 @@ const Landing = () => {
               }}
               className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-transparent text-white border-2 border-white/40 hover:bg-white/10 transition-all duration-200"
             >
-              Je veux garder
+              {t("landing.final.cta_sitter")}
             </button>
           </div>
           <p className="text-xs text-white/70 font-body">
-            Inscription en 2 minutes, sans carte bancaire.
+            {t("landing.final.footnote")}
           </p>
         </RevealSection>
       </section>
