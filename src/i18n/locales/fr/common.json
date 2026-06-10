@@ -1194,5 +1194,104 @@
     "toast_error_title": "Erreur",
     "toast_published_title": "Mission publiée.",
     "toast_published_desc": "On vous emmène la voir."
+  },
+  "profile_page": {
+    "sitter_meta_title": "Mon profil",
+    "sitter_meta_description": "Modifiez votre profil gardien Guardiens.",
+    "next": "Suivant : {{label}}",
+    "saved": "Modifications enregistrées",
+    "dirty": "Modifications non sauvegardées",
+    "saving": "Sauvegarde…",
+    "save": "Sauvegarder",
+    "tooltip_nothing": "Aucune modification à sauvegarder",
+    "tooltip_blocked": "Sauvegarde impossible",
+    "tooltip_motivation": "Motivation trop courte ({{count}}/50 caractères)",
+    "mobility_toast_title": "Mobilité complétée",
+    "mobility_toast_desc": "Vos préférences de mobilité sont enregistrées.",
+    "owner_sections": {
+      "identity": {
+        "label": "Identité",
+        "subtitle": "Qui vous êtes"
+      },
+      "housing": {
+        "label": "Logement",
+        "subtitle": "Votre maison"
+      },
+      "animals": {
+        "label": "Animaux",
+        "subtitle": "Vos animaux"
+      },
+      "rules": {
+        "label": "Attentes",
+        "subtitle": "Ce que vous cherchez"
+      },
+      "communication": {
+        "label": "Accueil",
+        "subtitle": "Accueil & guide"
+      },
+      "skills": {
+        "label": "Compétences",
+        "subtitle": "Ce que vous pouvez offrir"
+      },
+      "gallery": {
+        "label": "Galerie",
+        "subtitle": "Photos de votre maison"
+      }
+    },
+    "sitter_sections": {
+      "identity": {
+        "label": "Identité",
+        "subtitle": "Qui vous êtes"
+      },
+      "sitter": {
+        "label": "Profil gardien",
+        "subtitle": "Votre expérience"
+      },
+      "experience": {
+        "label": "Animaux",
+        "subtitle": "Ce que vous acceptez"
+      },
+      "mobility": {
+        "label": "Mobilité & Rayon",
+        "subtitle": "Votre rayon"
+      },
+      "gallery": {
+        "label": "Galerie",
+        "subtitle": "Vos gardes en photos"
+      },
+      "experiences": {
+        "label": "Expériences",
+        "subtitle": "Expériences hors Guardiens"
+      },
+      "skills": {
+        "label": "Compétences",
+        "subtitle": "Ce que vous savez faire"
+      }
+    },
+    "criteria": {
+      "name_postal": "Prénom + code postal",
+      "avatar": "Photo de profil",
+      "pet": "Au moins 1 animal renseigné",
+      "housing_desc": "Logement décrit (≥ 50 caractères)",
+      "gallery_one": "Au moins 1 photo dans la Galerie",
+      "bio_50": "Bio ≥ 50 caractères",
+      "owner_skill": "Au moins 1 compétence proprio",
+      "identity_verified": "Identité vérifiée",
+      "skill": "Au moins 1 compétence",
+      "lifestyle": "Au moins 1 mode de vie",
+      "radius": "Rayon géographique défini",
+      "sitter_gallery_one": "Au moins 1 photo de galerie"
+    },
+    "hints": {
+      "tab_identity": "Onglet Identité.",
+      "tab_animals": "Onglet Animaux.",
+      "tab_gallery": "Onglet Galerie.",
+      "tab_skills": "Onglet Compétences.",
+      "tab_sitter": "Onglet Profil gardien.",
+      "tab_mobility": "Onglet Mobilité & Rayon.",
+      "settings_verif": "Paramètres → Vérification.",
+      "chars_50": "{{count}}/50 caractères.",
+      "add_avatar_identity": "Ajoutez une photo dans Identité."
+    }
   }
 }

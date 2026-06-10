@@ -1194,5 +1194,104 @@
     "toast_error_title": "Errore",
     "toast_published_title": "Missione pubblicata.",
     "toast_published_desc": "La portiamo a vederla."
+  },
+  "profile_page": {
+    "sitter_meta_title": "Il mio profilo",
+    "sitter_meta_description": "Modifichi il suo profilo di guardiano Guardiens.",
+    "next": "Avanti: {{label}}",
+    "saved": "Modifiche salvate",
+    "dirty": "Modifiche non salvate",
+    "saving": "Salvataggio…",
+    "save": "Salvare",
+    "tooltip_nothing": "Niente da salvare",
+    "tooltip_blocked": "Impossibile salvare",
+    "tooltip_motivation": "Motivazione troppo corta ({{count}}/50 caratteri)",
+    "mobility_toast_title": "Mobilità completata",
+    "mobility_toast_desc": "Le sue preferenze di mobilità sono state salvate.",
+    "owner_sections": {
+      "identity": {
+        "label": "Identità",
+        "subtitle": "Chi è"
+      },
+      "housing": {
+        "label": "Alloggio",
+        "subtitle": "La sua casa"
+      },
+      "animals": {
+        "label": "Animali",
+        "subtitle": "I suoi animali"
+      },
+      "rules": {
+        "label": "Aspettative",
+        "subtitle": "Ciò che cerca"
+      },
+      "communication": {
+        "label": "Accoglienza",
+        "subtitle": "Accoglienza e guida"
+      },
+      "skills": {
+        "label": "Competenze",
+        "subtitle": "Ciò che può offrire"
+      },
+      "gallery": {
+        "label": "Galleria",
+        "subtitle": "Foto della sua casa"
+      }
+    },
+    "sitter_sections": {
+      "identity": {
+        "label": "Identità",
+        "subtitle": "Chi è"
+      },
+      "sitter": {
+        "label": "Profilo guardiano",
+        "subtitle": "La sua esperienza"
+      },
+      "experience": {
+        "label": "Animali",
+        "subtitle": "Ciò che accetta"
+      },
+      "mobility": {
+        "label": "Mobilità e raggio",
+        "subtitle": "Il suo raggio"
+      },
+      "gallery": {
+        "label": "Galleria",
+        "subtitle": "Le sue guardie in foto"
+      },
+      "experiences": {
+        "label": "Esperienze",
+        "subtitle": "Esperienze fuori da Guardiens"
+      },
+      "skills": {
+        "label": "Competenze",
+        "subtitle": "Ciò che sa fare"
+      }
+    },
+    "criteria": {
+      "name_postal": "Nome + codice postale",
+      "avatar": "Foto profilo",
+      "pet": "Almeno 1 animale registrato",
+      "housing_desc": "Alloggio descritto (≥ 50 caratteri)",
+      "gallery_one": "Almeno 1 foto nella galleria",
+      "bio_50": "Bio ≥ 50 caratteri",
+      "owner_skill": "Almeno 1 competenza proprietario",
+      "identity_verified": "Identità verificata",
+      "skill": "Almeno 1 competenza",
+      "lifestyle": "Almeno 1 stile di vita",
+      "radius": "Raggio geografico definito",
+      "sitter_gallery_one": "Almeno 1 foto di galleria"
+    },
+    "hints": {
+      "tab_identity": "Scheda Identità.",
+      "tab_animals": "Scheda Animali.",
+      "tab_gallery": "Scheda Galleria.",
+      "tab_skills": "Scheda Competenze.",
+      "tab_sitter": "Scheda Profilo guardiano.",
+      "tab_mobility": "Scheda Mobilità e raggio.",
+      "settings_verif": "Impostazioni → Verifica.",
+      "chars_50": "{{count}}/50 caratteri.",
+      "add_avatar_identity": "Aggiunga una foto nella scheda Identità."
+    }
   }
 }

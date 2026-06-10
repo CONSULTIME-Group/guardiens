@@ -1194,5 +1194,104 @@
     "toast_error_title": "Error",
     "toast_published_title": "Mission published.",
     "toast_published_desc": "Taking you to see it."
+  },
+  "profile_page": {
+    "sitter_meta_title": "My profile",
+    "sitter_meta_description": "Edit your Guardiens sitter profile.",
+    "next": "Next: {{label}}",
+    "saved": "Changes saved",
+    "dirty": "Unsaved changes",
+    "saving": "Saving…",
+    "save": "Save",
+    "tooltip_nothing": "Nothing to save",
+    "tooltip_blocked": "Cannot save",
+    "tooltip_motivation": "Motivation too short ({{count}}/50 characters)",
+    "mobility_toast_title": "Mobility completed",
+    "mobility_toast_desc": "Your mobility preferences have been saved.",
+    "owner_sections": {
+      "identity": {
+        "label": "Identity",
+        "subtitle": "Who you are"
+      },
+      "housing": {
+        "label": "Home",
+        "subtitle": "Your house"
+      },
+      "animals": {
+        "label": "Animals",
+        "subtitle": "Your animals"
+      },
+      "rules": {
+        "label": "Expectations",
+        "subtitle": "What you're looking for"
+      },
+      "communication": {
+        "label": "Welcome",
+        "subtitle": "Welcome & guide"
+      },
+      "skills": {
+        "label": "Skills",
+        "subtitle": "What you can offer"
+      },
+      "gallery": {
+        "label": "Gallery",
+        "subtitle": "Photos of your home"
+      }
+    },
+    "sitter_sections": {
+      "identity": {
+        "label": "Identity",
+        "subtitle": "Who you are"
+      },
+      "sitter": {
+        "label": "Sitter profile",
+        "subtitle": "Your experience"
+      },
+      "experience": {
+        "label": "Animals",
+        "subtitle": "What you accept"
+      },
+      "mobility": {
+        "label": "Mobility & radius",
+        "subtitle": "Your range"
+      },
+      "gallery": {
+        "label": "Gallery",
+        "subtitle": "Your sits in pictures"
+      },
+      "experiences": {
+        "label": "Experiences",
+        "subtitle": "Experiences outside Guardiens"
+      },
+      "skills": {
+        "label": "Skills",
+        "subtitle": "What you can do"
+      }
+    },
+    "criteria": {
+      "name_postal": "First name + postal code",
+      "avatar": "Profile photo",
+      "pet": "At least 1 pet listed",
+      "housing_desc": "Home described (≥ 50 characters)",
+      "gallery_one": "At least 1 photo in the gallery",
+      "bio_50": "Bio ≥ 50 characters",
+      "owner_skill": "At least 1 owner skill",
+      "identity_verified": "Identity verified",
+      "skill": "At least 1 skill",
+      "lifestyle": "At least 1 lifestyle",
+      "radius": "Geographic radius defined",
+      "sitter_gallery_one": "At least 1 gallery photo"
+    },
+    "hints": {
+      "tab_identity": "Identity tab.",
+      "tab_animals": "Animals tab.",
+      "tab_gallery": "Gallery tab.",
+      "tab_skills": "Skills tab.",
+      "tab_sitter": "Sitter profile tab.",
+      "tab_mobility": "Mobility & radius tab.",
+      "settings_verif": "Settings → Verification.",
+      "chars_50": "{{count}}/50 characters.",
+      "add_avatar_identity": "Add a photo in the Identity tab."
+    }
   }
 }
