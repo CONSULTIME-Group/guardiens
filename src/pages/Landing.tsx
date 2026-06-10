@@ -1240,13 +1240,13 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto px-6">
           <RevealSection className="text-center mb-14">
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
-              Guides &amp; villes
+              {t("landing.cities.eyebrow")}
             </span>
             <h2 id="house-sitting-pres-de-chez-vous" className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug mb-4 scroll-mt-24">
-              House-sitting près de chez vous.
+              {t("landing.cities.title")}
             </h2>
             <p className="text-lg font-body text-foreground/70 max-w-2xl mx-auto">
-              Des guides concrets pour préparer votre garde, et des hubs locaux pour les villes les plus actives, Lyon, Annecy, Grenoble, et partout en France.
+              {t("landing.cities.lede")}
             </p>
           </RevealSection>
 
@@ -1254,9 +1254,9 @@ const Landing = () => {
             {/* Colonne Guides */}
             <RevealSection delay={0.1}>
               <div className="rounded-2xl bg-card border border-border p-8 h-full">
-                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-2">Guides &amp; conseils</p>
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-2">{t("landing.cities.guides_tag")}</p>
                 <h3 className="font-heading text-2xl font-semibold text-foreground mb-6">
-                  Préparer votre garde
+                  {t("landing.cities.guides_title")}
                 </h3>
                 <ul className="space-y-3">
                   <li>
