@@ -828,9 +828,9 @@ const Landing = () => {
                     1
                   </div>
                 </div>
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Publiez votre annonce</h3>
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">{t("landing.how.step1_title")}</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70">
-                  Vos dates, vos animaux, votre maison. Quelques minutes suffisent, votre annonce est en ligne.
+                  {t("landing.how.step1_text")}
                 </p>
               </div>
             </RevealSection>
