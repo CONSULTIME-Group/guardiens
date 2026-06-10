@@ -143,11 +143,14 @@ export default function News() {
       const { data, count, error: qError } = await query;
       if (cancelled) return;
       if (qError) {
-        setError("Impossible de charger les articles. Veuillez réessayer.");
+        setError(t("news.error"));
         setArticles([]);
         setTotalCount(0);
       } else {
-        setArticles((data as Article[]) || []);
+        const list = (data as Article[]) || [];
+        const overlaid = await overlayTranslations(list, lang);
+        if (cancelled) return;
+        setArticles(overlaid);
         setTotalCount(count || 0);
       }
       setLoading(false);
@@ -164,7 +167,9 @@ export default function News() {
         .or("noindex.is.null,noindex.eq.false")
         .order("published_at", { ascending: false })
         .limit(3);
-      if (!cancelled) setVieLocaleArticles((data as Article[]) || []);
+      const list = (data as Article[]) || [];
+      const overlaid = await overlayTranslations(list, lang);
+      if (!cancelled) setVieLocaleArticles(overlaid);
     };
 
     fetchArticles();
@@ -174,7 +179,7 @@ export default function News() {
     return () => {
       cancelled = true;
     };
-  }, [activeCategory, currentPage, urlSearch]);
+  }, [activeCategory, currentPage, urlSearch, i18n.language]);
 
   // Fetch category counts once (only categories that have at least one article are shown)
   useEffect(() => {
