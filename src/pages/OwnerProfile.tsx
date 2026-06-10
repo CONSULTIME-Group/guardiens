@@ -329,10 +329,10 @@ const OwnerProfilePage = () => {
           <p className="text-xs text-muted-foreground" aria-live="polite">
             {saved && !dirty ? (
               <span className="inline-flex items-center gap-1 text-primary">
-                <Check className="h-3.5 w-3.5" aria-hidden="true" /> Modifications enregistrées
+                <Check className="h-3.5 w-3.5" aria-hidden="true" /> {tp("saved")}
               </span>
             ) : dirty ? (
-              "Modifications non sauvegardées"
+              tp("dirty")
             ) : null}
           </p>
           <Tooltip>
@@ -345,16 +345,16 @@ const OwnerProfilePage = () => {
                   size="lg"
                 >
                   {saving ? (
-                    <><Loader2 className="h-4 w-4 animate-spin" /> Sauvegarde…</>
+                    <><Loader2 className="h-4 w-4 animate-spin" /> {tp("saving")}</>
                   ) : (
-                    <><Check className="h-4 w-4" /> Sauvegarder</>
+                    <><Check className="h-4 w-4" /> {tp("save")}</>
                   )}
                 </Button>
               </span>
             </TooltipTrigger>
             {!dirty && !saving && (
               <TooltipContent side="top">
-                Aucune modification à sauvegarder
+                {tp("tooltip_nothing")}
               </TooltipContent>
             )}
           </Tooltip>
