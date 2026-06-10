@@ -1,5 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Home, Search } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
@@ -50,6 +51,7 @@ const DiggingDogSvg = () => (
 
 const NotFound = () => {
   const location = useLocation();
+  const { t } = useTranslation();
 
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
@@ -57,36 +59,36 @@ const NotFound = () => {
 
   return (
     <>
-      <PageMeta title="Page introuvable | Guardiens" description="La page que vous cherchez n'existe pas." noindex />
+      <PageMeta title={t("not_found.meta_title")} description={t("not_found.meta_description")} noindex />
       <div className="flex min-h-screen items-center justify-center px-4 bg-background">
         <div className="text-center max-w-lg space-y-6">
           <DiggingDogSvg />
 
           <div className="space-y-3">
             <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground">
-              On dirait que ce chien a enterré la page.
+              {t("not_found.title")}
             </h1>
             <p className="text-muted-foreground text-lg">
-              La page que vous cherchez n'existe pas, mais la communauté Guardiens, si.
+              {t("not_found.subtitle")}
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Button asChild size="lg" className="gap-2">
-              <Link to="/"><Home className="h-4 w-4" /> Retour à l'accueil</Link>
+              <Link to="/"><Home className="h-4 w-4" /> {t("not_found.home_cta")}</Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="gap-2">
-              <Link to="/search"><Search className="h-4 w-4" /> Chercher une garde</Link>
+              <Link to="/search"><Search className="h-4 w-4" /> {t("not_found.search_cta")}</Link>
             </Button>
           </div>
 
           <div className="pt-4 border-t border-border/50">
-            <p className="text-xs text-muted-foreground mb-2">Liens utiles</p>
+            <p className="text-xs text-muted-foreground mb-2">{t("not_found.useful_links")}</p>
             <div className="flex items-center justify-center gap-4 text-sm">
-              <Link to="/" className="text-primary hover:underline">Accueil</Link>
-              <Link to="/search" className="text-primary hover:underline">Recherche</Link>
-              <Link to="/actualites" className="text-primary hover:underline">Actualités</Link>
-              <Link to="/faq" className="text-primary hover:underline">FAQ</Link>
+              <Link to="/" className="text-primary hover:underline">{t("not_found.link_home")}</Link>
+              <Link to="/search" className="text-primary hover:underline">{t("not_found.link_search")}</Link>
+              <Link to="/actualites" className="text-primary hover:underline">{t("not_found.link_news")}</Link>
+              <Link to="/faq" className="text-primary hover:underline">{t("not_found.link_faq")}</Link>
             </div>
           </div>
         </div>

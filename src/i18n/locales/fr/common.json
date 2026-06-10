@@ -617,5 +617,62 @@
     "default_title": "Garde d'animaux",
     "cover_alt": "Annonce de garde",
     "flexible_dates": "Dates flexibles"
+  },
+  "not_found": {
+    "meta_title": "Page introuvable | Guardiens",
+    "meta_description": "La page que vous cherchez n'existe pas.",
+    "title": "On dirait que ce chien a enterré la page.",
+    "subtitle": "La page que vous cherchez n'existe pas, mais la communauté Guardiens, si.",
+    "home_cta": "Retour à l'accueil",
+    "search_cta": "Chercher une garde",
+    "useful_links": "Liens utiles",
+    "link_home": "Accueil",
+    "link_search": "Recherche",
+    "link_news": "Actualités",
+    "link_faq": "FAQ"
+  },
+  "author_page": {
+    "meta_title": "{{name}}, Auteur Guardiens",
+    "breadcrumb_authors": "Auteurs",
+    "portrait_alt": "Portrait de {{name}}",
+    "articles_by": "Articles signés {{name}}",
+    "no_articles": "Aucun article publié pour le moment.",
+    "read": "Lire",
+    "categories": {
+      "conseil": "Conseil",
+      "conseil_gardien": "Conseil gardien",
+      "conseil_proprio": "Conseil proprio",
+      "guide_pratique": "Guide pratique",
+      "guide_lieu": "Guide lieu",
+      "guide_local": "Guide local",
+      "guide_race": "Guide race",
+      "ville": "Ville",
+      "vie_locale": "Vie locale",
+      "saisonnier": "Saisonnier",
+      "temoignage": "Témoignage",
+      "actualite": "Actualité"
+    }
+  },
+  "unsubscribe": {
+    "meta_title": "Désinscription email, Guardiens",
+    "title": "Vos préférences email",
+    "loading": "Vérification en cours…",
+    "intro": "Vous pouvez choisir précisément quels emails recevoir, ou vous désinscrire de l'ensemble des envois non essentiels. Les emails essentiels (confirmations de garde, identité, sécurité) restent toujours envoyés.",
+    "product_title": "Conseils & accompagnement",
+    "product_desc": "Conseils pour publier votre annonce, complétion de profil, rappels d'avis.",
+    "alert_title": "Alertes nouvelles annonces",
+    "alert_desc": "Notifications dès qu'une nouvelle garde apparaît dans une de vos zones.",
+    "digest_title": "Récapitulatifs",
+    "digest_desc": "Synthèses périodiques de votre activité (à venir).",
+    "save": "Enregistrer mes choix",
+    "disable_all": "Tout désactiver",
+    "success_partial": "Préférences enregistrées",
+    "success_partial_desc": "Vous continuerez à recevoir uniquement les catégories activées.",
+    "success_all": "Désinscription confirmée",
+    "success_all_desc": "Vous ne recevrez plus d'emails non essentiels.",
+    "already": "Vous êtes déjà désinscrit(e).",
+    "invalid": "Lien invalide ou expiré.",
+    "invalid_link": "Gérer mes préférences depuis mon compte",
+    "error": "Une erreur est survenue. Veuillez réessayer."
   }
 }

@@ -617,5 +617,62 @@
     "default_title": "Pet-sitting",
     "cover_alt": "Annuncio di pet-sitting",
     "flexible_dates": "Date flessibili"
+  },
+  "not_found": {
+    "meta_title": "Pagina non trovata | Guardiens",
+    "meta_description": "La pagina che cerca non esiste.",
+    "title": "Sembra che questo cane abbia seppellito la pagina.",
+    "subtitle": "La pagina che cerca non esiste, ma la comunità Guardiens, sì.",
+    "home_cta": "Torna alla home",
+    "search_cta": "Cerca una cura",
+    "useful_links": "Link utili",
+    "link_home": "Home",
+    "link_search": "Ricerca",
+    "link_news": "Attualità",
+    "link_faq": "FAQ"
+  },
+  "author_page": {
+    "meta_title": "{{name}}, Autore Guardiens",
+    "breadcrumb_authors": "Autori",
+    "portrait_alt": "Ritratto di {{name}}",
+    "articles_by": "Articoli di {{name}}",
+    "no_articles": "Nessun articolo pubblicato al momento.",
+    "read": "Leggi",
+    "categories": {
+      "conseil": "Consiglio",
+      "conseil_gardien": "Consiglio sitter",
+      "conseil_proprio": "Consiglio proprietario",
+      "guide_pratique": "Guida pratica",
+      "guide_lieu": "Guida luogo",
+      "guide_local": "Guida locale",
+      "guide_race": "Guida razza",
+      "ville": "Città",
+      "vie_locale": "Vita locale",
+      "saisonnier": "Stagionale",
+      "temoignage": "Testimonianza",
+      "actualite": "Attualità"
+    }
+  },
+  "unsubscribe": {
+    "meta_title": "Disiscrizione email, Guardiens",
+    "title": "Le sue preferenze email",
+    "loading": "Verifica in corso…",
+    "intro": "Può scegliere con precisione quali email ricevere, o disiscriversi da tutti gli invii non essenziali. Le email essenziali (conferme, identità, sicurezza) vengono sempre inviate.",
+    "product_title": "Consigli e accompagnamento",
+    "product_desc": "Consigli per pubblicare il suo annuncio, completamento del profilo, promemoria recensioni.",
+    "alert_title": "Avvisi nuovi annunci",
+    "alert_desc": "Notifiche appena appare una nuova cura in una delle sue zone.",
+    "digest_title": "Riassunti",
+    "digest_desc": "Sintesi periodiche della sua attività (in arrivo).",
+    "save": "Salva le mie scelte",
+    "disable_all": "Disattiva tutto",
+    "success_partial": "Preferenze salvate",
+    "success_partial_desc": "Riceverà solo le categorie attivate.",
+    "success_all": "Disiscrizione confermata",
+    "success_all_desc": "Non riceverà più email non essenziali.",
+    "already": "È già disiscritto(a).",
+    "invalid": "Link non valido o scaduto.",
+    "invalid_link": "Gestire le mie preferenze dal mio account",
+    "error": "Si è verificato un errore. Riprovi."
   }
 }

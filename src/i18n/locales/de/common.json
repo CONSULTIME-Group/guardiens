@@ -617,5 +617,62 @@
     "default_title": "Tierbetreuung",
     "cover_alt": "Tierbetreuungs-Anzeige",
     "flexible_dates": "Flexible Daten"
+  },
+  "not_found": {
+    "meta_title": "Seite nicht gefunden | Guardiens",
+    "meta_description": "Die gesuchte Seite existiert nicht.",
+    "title": "Es scheint, dieser Hund hat die Seite vergraben.",
+    "subtitle": "Die gesuchte Seite existiert nicht, aber die Guardiens-Community schon.",
+    "home_cta": "Zurück zur Startseite",
+    "search_cta": "Betreuung suchen",
+    "useful_links": "Nützliche Links",
+    "link_home": "Startseite",
+    "link_search": "Suche",
+    "link_news": "Aktuelles",
+    "link_faq": "FAQ"
+  },
+  "author_page": {
+    "meta_title": "{{name}}, Guardiens-Autor",
+    "breadcrumb_authors": "Autoren",
+    "portrait_alt": "Porträt von {{name}}",
+    "articles_by": "Artikel von {{name}}",
+    "no_articles": "Noch keine Artikel veröffentlicht.",
+    "read": "Lesen",
+    "categories": {
+      "conseil": "Ratgeber",
+      "conseil_gardien": "Tipps für Sitter",
+      "conseil_proprio": "Tipps für Halter",
+      "guide_pratique": "Praktischer Leitfaden",
+      "guide_lieu": "Ortsguide",
+      "guide_local": "Lokaler Guide",
+      "guide_race": "Rasse-Guide",
+      "ville": "Stadt",
+      "vie_locale": "Lokales Leben",
+      "saisonnier": "Saisonal",
+      "temoignage": "Erfahrungsbericht",
+      "actualite": "Aktuell"
+    }
+  },
+  "unsubscribe": {
+    "meta_title": "E-Mail-Abmeldung, Guardiens",
+    "title": "Ihre E-Mail-Einstellungen",
+    "loading": "Überprüfung läuft…",
+    "intro": "Sie können genau auswählen, welche E-Mails Sie erhalten, oder sich von allen nicht wesentlichen E-Mails abmelden. Wesentliche E-Mails (Bestätigungen, Identität, Sicherheit) werden immer gesendet.",
+    "product_title": "Tipps & Begleitung",
+    "product_desc": "Tipps zur Veröffentlichung Ihrer Anzeige, Profilvervollständigung, Bewertungserinnerungen.",
+    "alert_title": "Benachrichtigungen für neue Anzeigen",
+    "alert_desc": "Benachrichtigungen, sobald eine neue Betreuung in einer Ihrer Zonen erscheint.",
+    "digest_title": "Zusammenfassungen",
+    "digest_desc": "Regelmäßige Zusammenfassungen Ihrer Aktivität (in Kürze).",
+    "save": "Auswahl speichern",
+    "disable_all": "Alle deaktivieren",
+    "success_partial": "Einstellungen gespeichert",
+    "success_partial_desc": "Sie erhalten nur die aktivierten Kategorien.",
+    "success_all": "Abmeldung bestätigt",
+    "success_all_desc": "Sie erhalten keine nicht wesentlichen E-Mails mehr.",
+    "already": "Sie sind bereits abgemeldet.",
+    "invalid": "Ungültiger oder abgelaufener Link.",
+    "invalid_link": "Einstellungen über mein Konto verwalten",
+    "error": "Ein Fehler ist aufgetreten. Bitte erneut versuchen."
   }
 }
