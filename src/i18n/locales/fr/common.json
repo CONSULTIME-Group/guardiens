@@ -225,5 +225,169 @@
       "cta_sitter": "Je veux garder",
       "footnote": "Inscription en 2 minutes, sans carte bancaire."
     }
+  },
+  "faq": {
+    "title": "Questions fréquentes",
+    "lede": "Tout ce que vous devez savoir sur le house-sitting avec Guardiens.",
+    "loading": "Chargement…",
+    "empty": "Aucune question pour le moment.",
+    "not_found_question": "Vous ne trouvez pas la réponse à votre question ?",
+    "contact_us": "Contactez-nous",
+    "pricing_cta_title": "Tout savoir sur nos tarifs",
+    "pricing_cta_text": "Gratuit pour les propriétaires. 6,99 €/mois pour les gardiens, sans engagement.",
+    "pricing_cta_link": "Lire l'article tarifs 2026",
+    "meta_title": "FAQ Guardiens, Toutes vos questions",
+    "meta_description": "Toutes vos questions sur Guardiens, abonnement gardien, espace propriétaire gratuit, parrainage et petites missions d'entraide.",
+    "categories": {
+      "general": "Questions générales",
+      "owner": "Pour les propriétaires",
+      "sitter": "Pour les gardiens",
+      "security": "Sécurité & confiance",
+      "pricing": "Tarifs & abonnements",
+      "operation": "Fonctionnement",
+      "before_sit": "Avant la garde",
+      "during_sit": "Pendant la garde",
+      "trust_safety": "Confiance & sécurité",
+      "emergency_sitter": "Gardien d'urgence",
+      "small_missions": "Petites missions",
+      "my_account": "Mon compte"
+    }
+  },
+  "pricing": {
+    "meta": {
+      "title_before": "Tarifs Guardiens, Offert pour tous jusqu'au {{date}}",
+      "title_after": "Tarifs Guardiens, Gratuit propriétaires · {{price}}",
+      "desc_before": "Accès offert jusqu'au {{date}} pour tous, gardiens comme propriétaires. Sans carte bancaire, sans commission.",
+      "desc_after": "Gratuit pour les propriétaires. {{price}} pour les gardiens, sans engagement. Sans commission, sans frais cachés."
+    },
+    "hero": {
+      "eyebrow": "Sans commission, sans frais cachés",
+      "title_before_a": "Offert.",
+      "title_before_b": "Pour tout le monde.",
+      "title_after_a": "Un seul prix.",
+      "title_after_b": "Transparent.",
+      "lede_before": "Jusqu'au {{date}}, l'accès complet est offert, gardiens comme propriétaires. Aucune carte bancaire demandée.",
+      "lede_after": "Gratuit pour les propriétaires. {{price}} pour les gardiens, sans engagement. C'est tout.",
+      "cta_owner": "Publier mon annonce, gratuitement",
+      "cta_sitter": "Je veux garder"
+    },
+    "founder": {
+      "window": "Programme Fondateur, fenêtre d'inscription en cours",
+      "days_one": "{{count}} jour",
+      "days_other": "{{count}} jours",
+      "before_sub": "avant l'abonnement gardien",
+      "join_title": "Inscrivez-vous dès maintenant pour rejoindre les Fondateurs",
+      "join_text": "Un sceau honorifique permanent sur votre profil, il ne sera plus jamais attribué une fois la fenêtre refermée.",
+      "cta": "Devenir Fondateur"
+    },
+    "grace": {
+      "title": "Les Fondateurs ont jusqu'au {{date}}",
+      "text": "Les premiers membres conservent leur accès gratuit jusqu'au {{date}}. Après cette date, l'abonnement à {{price}} sera nécessaire pour les gardiens. Le badge Fondateur reste affiché sur votre profil."
+    },
+    "owner_card": {
+      "badge": "Toujours gratuit",
+      "label": "Propriétaire",
+      "price": "Gratuit",
+      "subtitle": "Sans abonnement, sans carte bancaire.",
+      "cta": "Publier une annonce",
+      "features": [
+        "Publiez une annonce en 5 minutes",
+        "Recevez des candidatures de gardiens dont l'identité est vérifiée",
+        "Échangez avec eux avant de choisir",
+        "Vos animaux restent dans leur maison, leurs habitudes, leurs repères",
+        "Laissez un avis après chaque garde"
+      ]
+    },
+    "sitter_card": {
+      "badge_offered_months": "Offert {{count}} mois",
+      "badge_offered_days_one": "Offert encore {{count}} jour",
+      "badge_offered_days_other": "Offert encore {{count}} jours",
+      "badge_most_chosen": "Le plus choisi",
+      "label": "Gardien",
+      "price_free": "Gratuit",
+      "free_until": "Jusqu'au {{date}}, puis {{price}}",
+      "per_year": "/an",
+      "per_month_short": "le mois",
+      "from": "à partir de",
+      "per_month": "/mois",
+      "note_monthly": "Sans engagement · Résiliable à tout moment",
+      "note_annual": "Soit {{equiv}} €/mois équivalent · Résiliable à tout moment",
+      "note_oneshot": "Paiement unique · Sans renouvellement",
+      "features": [
+        "Postulez aux gardes près de chez vous",
+        "Accédez aux annonces complètes (animaux, maison, dates, attentes)",
+        "Messagerie directe avec les propriétaires",
+        "Profil de confiance avec avis croisés et écussons",
+        "Mode « Je suis disponible » pour être trouvé sans chercher",
+        "Guides locaux et fiches races complètes"
+      ],
+      "formulas_label": "Choix de la formule gardien",
+      "three_formulas": "Trois formules",
+      "oneshot_title": "Accès un mois",
+      "oneshot_sub": "Paiement immédiat · Sans renouvellement",
+      "monthly_title": "Mensuel",
+      "monthly_tag": "Le plus choisi",
+      "monthly_sub": "Sans engagement · Résiliable à tout moment",
+      "annual_title": "Annuel",
+      "annual_sub": "Un paiement par an · Renouvellement annuel · Résiliable à tout moment",
+      "annual_equiv": "Soit ~{{equiv}} €/mois équivalent · Économie de {{savings}} €/an",
+      "cta_become_sitter": "Devenir gardien",
+      "cta_oneshot": "Accéder un mois, 10 €",
+      "cta_monthly": "S'abonner, 6,99 €/mois",
+      "cta_annual": "Choisir l'annuel, 65 €/an",
+      "opening_checkout": "Ouverture du paiement…",
+      "note_before": "Aucune carte bancaire demandée.",
+      "note_visitor": "Inscription gratuite. Aucune carte bancaire avant la souscription d'une formule.",
+      "note_after_monthly": "Sans engagement. Résiliable à tout moment.",
+      "note_after_annual": "Renouvellement annuel automatique. Résiliable à tout moment.",
+      "note_after_oneshot": "Paiement unique pour un mois d'accès, sans renouvellement."
+    },
+    "mutual": {
+      "title": "L'entraide, indépendante de la garde",
+      "free_tag": "Gratuit pour tous",
+      "p1": "Les petites missions n'ont pas besoin d'animaux pour exister. Nadine cherche un coup de main pour ramasser ses légumes. Jacques passe une heure dans son jardin et repart avec un plat maison. Aucune garde, aucune carte bancaire, aucune commission, juste un échange entre gens du coin.",
+      "p2": "Cours de cuisine, arrosage de plantes, montage de meuble, prêt d'une perceuse, trajet partagé jusqu'à la gare : tout passe par l'entraide, sans abonnement.",
+      "cta": "Découvrir les petites missions →"
+    },
+    "promise": {
+      "title": "Notre engagement tarifaire",
+      "lede": "Six promesses concrètes, sans astérisque ni frais cachés.",
+      "rows": {
+        "commission": "Commission sur la garde",
+        "commission_val": "0 %",
+        "verification": "Vérification d'identité",
+        "verification_val": "Incluse",
+        "mutual": "Entraide & petites missions",
+        "mutual_val": "Gratuit",
+        "card": "Carte bancaire à l'inscription",
+        "card_val": "Jamais",
+        "intro": "Frais de mise en relation",
+        "intro_val": "Aucun",
+        "commit": "Engagement de durée",
+        "commit_val": "Aucun"
+      }
+    },
+    "cities": {
+      "title": "House-sitting par ville",
+      "lede_a": "Découvrez les gardiens vérifiés disponibles dans votre ville. Un imprévu ? Nos",
+      "lede_link": "gardiens d'urgence",
+      "lede_b": "sont mobilisables en quelques heures."
+    },
+    "faq_section": {
+      "title": "Questions fréquentes",
+      "lede": "Des questions sur le modèle ? Voici les réponses directes.",
+      "see_all": "Voir toutes les questions →"
+    },
+    "detail_article": {
+      "intro": "Vous préférez tout lire en détail ?",
+      "link": "Découvrir nos tarifs en détail →"
+    },
+    "final_cta": {
+      "title_before": "Rejoignez Guardiens dès maintenant",
+      "title_after": "Prêt à rejoindre Guardiens ?",
+      "lede": "Sans carte bancaire à l'inscription. Vous décidez ensuite.",
+      "cta_sitter": "Devenir gardien",
+      "cta_owner": "Publier une annonce"
+    }
   }
 }
