@@ -30,23 +30,10 @@ interface Article {
   published_at: string | null;
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-  guide_central: "Guides essentiels",
-  guide_race: "Races",
-  guide_lieu: "Guide lieu",
-  guide_ville: "Guide ville",
-  conseil_gardien: "Conseils gardiens",
-  conseil_proprio: "Conseils propriétaires",
-  conseil: "Conseils",
-  temoignage: "Témoignage",
-  actualite: "Actualité",
-  ville: "Villes",
-  thematique: "House-sitting",
-  guide_local: "Guides locaux",
-  saisonnier: "Saisonniers",
-  guide_pratique: "Guides pratiques",
-  vie_locale: "Vie locale & Entraide",
-};
+const CATEGORY_KEYS = [
+  "guide_central","guide_race","guide_lieu","guide_ville","conseil_gardien","conseil_proprio",
+  "conseil","temoignage","actualite","ville","thematique","guide_local","saisonnier","guide_pratique","vie_locale",
+];
 
 const CATEGORY_COLORS: Record<string, string> = {
   guide_central: "bg-primary/10 text-primary",
@@ -68,7 +55,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 const PAGE_SIZE = 9;
 
-const VALID_CATEGORIES = new Set(Object.keys(CATEGORY_LABELS));
+const VALID_CATEGORIES = new Set(CATEGORY_KEYS);
 
 function buildPageList(current: number, total: number): (number | "…")[] {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
