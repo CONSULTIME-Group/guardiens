@@ -617,5 +617,62 @@
     "default_title": "Cuidado de animales",
     "cover_alt": "Anuncio de cuidado",
     "flexible_dates": "Fechas flexibles"
+  },
+  "not_found": {
+    "meta_title": "Página no encontrada | Guardiens",
+    "meta_description": "La página que busca no existe.",
+    "title": "Parece que este perro enterró la página.",
+    "subtitle": "La página que busca no existe, pero la comunidad Guardiens, sí.",
+    "home_cta": "Volver al inicio",
+    "search_cta": "Buscar un cuidado",
+    "useful_links": "Enlaces útiles",
+    "link_home": "Inicio",
+    "link_search": "Búsqueda",
+    "link_news": "Noticias",
+    "link_faq": "FAQ"
+  },
+  "author_page": {
+    "meta_title": "{{name}}, Autor Guardiens",
+    "breadcrumb_authors": "Autores",
+    "portrait_alt": "Retrato de {{name}}",
+    "articles_by": "Artículos de {{name}}",
+    "no_articles": "Aún no hay artículos publicados.",
+    "read": "Leer",
+    "categories": {
+      "conseil": "Consejo",
+      "conseil_gardien": "Consejo cuidador",
+      "conseil_proprio": "Consejo propietario",
+      "guide_pratique": "Guía práctica",
+      "guide_lieu": "Guía lugar",
+      "guide_local": "Guía local",
+      "guide_race": "Guía raza",
+      "ville": "Ciudad",
+      "vie_locale": "Vida local",
+      "saisonnier": "Estacional",
+      "temoignage": "Testimonio",
+      "actualite": "Actualidad"
+    }
+  },
+  "unsubscribe": {
+    "meta_title": "Cancelar suscripción, Guardiens",
+    "title": "Sus preferencias de email",
+    "loading": "Verificando…",
+    "intro": "Puede elegir con precisión qué emails recibir, o darse de baja de todos los envíos no esenciales. Los emails esenciales (confirmaciones, identidad, seguridad) se envían siempre.",
+    "product_title": "Consejos y acompañamiento",
+    "product_desc": "Consejos para publicar su anuncio, completar perfil, recordatorios de reseñas.",
+    "alert_title": "Alertas de nuevos anuncios",
+    "alert_desc": "Notificaciones en cuanto aparezca un nuevo cuidado en una de sus zonas.",
+    "digest_title": "Resúmenes",
+    "digest_desc": "Síntesis periódicas de su actividad (próximamente).",
+    "save": "Guardar mis preferencias",
+    "disable_all": "Desactivar todo",
+    "success_partial": "Preferencias guardadas",
+    "success_partial_desc": "Solo recibirá las categorías activadas.",
+    "success_all": "Cancelación confirmada",
+    "success_all_desc": "Ya no recibirá emails no esenciales.",
+    "already": "Ya está dado(a) de baja.",
+    "invalid": "Enlace no válido o expirado.",
+    "invalid_link": "Gestionar mis preferencias desde mi cuenta",
+    "error": "Se produjo un error. Inténtelo de nuevo."
   }
 }

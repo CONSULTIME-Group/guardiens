@@ -617,5 +617,62 @@
     "default_title": "Pet sit",
     "cover_alt": "Pet-sit listing",
     "flexible_dates": "Flexible dates"
+  },
+  "not_found": {
+    "meta_title": "Page not found | Guardiens",
+    "meta_description": "The page you're looking for doesn't exist.",
+    "title": "Looks like this dog buried the page.",
+    "subtitle": "The page you're looking for doesn't exist, but the Guardiens community does.",
+    "home_cta": "Back to home",
+    "search_cta": "Find a sit",
+    "useful_links": "Useful links",
+    "link_home": "Home",
+    "link_search": "Search",
+    "link_news": "News",
+    "link_faq": "FAQ"
+  },
+  "author_page": {
+    "meta_title": "{{name}}, Guardiens Author",
+    "breadcrumb_authors": "Authors",
+    "portrait_alt": "Portrait of {{name}}",
+    "articles_by": "Articles by {{name}}",
+    "no_articles": "No articles published yet.",
+    "read": "Read",
+    "categories": {
+      "conseil": "Advice",
+      "conseil_gardien": "Sitter tips",
+      "conseil_proprio": "Owner tips",
+      "guide_pratique": "Practical guide",
+      "guide_lieu": "Place guide",
+      "guide_local": "Local guide",
+      "guide_race": "Breed guide",
+      "ville": "City",
+      "vie_locale": "Local life",
+      "saisonnier": "Seasonal",
+      "temoignage": "Testimonial",
+      "actualite": "News"
+    }
+  },
+  "unsubscribe": {
+    "meta_title": "Email unsubscribe, Guardiens",
+    "title": "Your email preferences",
+    "loading": "Verifying…",
+    "intro": "You can choose exactly which emails to receive, or unsubscribe from all non-essential emails. Essential emails (sit confirmations, identity, security) are always sent.",
+    "product_title": "Tips & guidance",
+    "product_desc": "Tips for publishing your listing, profile completion, review reminders.",
+    "alert_title": "New listing alerts",
+    "alert_desc": "Notifications as soon as a new sit appears in one of your zones.",
+    "digest_title": "Digests",
+    "digest_desc": "Periodic summaries of your activity (coming soon).",
+    "save": "Save my choices",
+    "disable_all": "Disable all",
+    "success_partial": "Preferences saved",
+    "success_partial_desc": "You'll only receive the enabled categories.",
+    "success_all": "Unsubscribe confirmed",
+    "success_all_desc": "You won't receive any non-essential emails.",
+    "already": "You're already unsubscribed.",
+    "invalid": "Invalid or expired link.",
+    "invalid_link": "Manage my preferences from my account",
+    "error": "An error occurred. Please try again."
   }
 }
