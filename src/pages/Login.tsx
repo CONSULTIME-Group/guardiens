@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -25,6 +26,7 @@ import {
 } from "@/components/ui/popover";
 
 const Login = () => {
+  const { t } = useTranslation();
   const [capsLockOn, setCapsLockOn] = useState(false);
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState(searchParams.get("email") ?? "");
@@ -108,8 +110,8 @@ const Login = () => {
             toast({ variant: "destructive", title: resendInfo.title, description: resendInfo.description });
           } else {
             toast({
-              title: "Email renvoyé",
-              description: "Un nouvel email de confirmation vient d'être envoyé.",
+              title: t("login_page.email_resent_title"),
+              description: t("login_page.email_resent_body"),
             });
           }
         };
@@ -118,8 +120,8 @@ const Login = () => {
           title: info.title,
           description: info.description,
           action: (
-            <ToastAction altText="Renvoyer" onClick={handleResend}>
-              Renvoyer l'email
+            <ToastAction altText={t("login_page.resend_email")} onClick={handleResend}>
+              {t("login_page.resend_email")}
             </ToastAction>
           ),
         });
@@ -136,14 +138,14 @@ const Login = () => {
   return (
     <div className="min-h-screen flex bg-background">
       <Helmet>
-        <title>Connexion, guardiens</title>
+        <title>{t("login_page.meta_title")}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
       <AuthIllustrationPanel
-        title="L'entraide locale, retrouvée"
-        tagline="Un coup de main, un lien de confiance."
-        description="Un gardien près de chez vous veille sur votre maison et vos animaux. Et entre gens du coin, on ose à nouveau demander, et proposer un coup de main."
+        title={t("login_page.panel_title")}
+        tagline={t("login_page.panel_tagline")}
+        description={t("login_page.panel_description")}
       />
 
       <div className="flex-1 flex items-center justify-center px-6 py-12">
@@ -153,7 +155,7 @@ const Login = () => {
             className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6 gap-1"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Retour au site
+            {t("auth_common.back_to_site")}
           </Link>
           <div className="text-center mb-10">
             <Link to="/" className="inline-block">
@@ -161,14 +163,11 @@ const Login = () => {
                 <span className="text-primary">g</span>uardiens
               </h1>
             </Link>
-            <p className="text-muted-foreground">Content de vous revoir</p>
+            <p className="text-muted-foreground">{t("login_page.welcome_back")}</p>
           </div>
 
-          {/* Avertissement WebView in-app : doit apparaître AVANT le bouton Google
-              (OAuth Google bloqué en WebView). */}
           <InAppBrowserBanner className="mb-6" />
 
-          {/* Google Sign-In */}
           <Button
             type="button"
             variant="outline"
@@ -183,31 +182,26 @@ const Login = () => {
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            {isGoogleLoading ? "Connexion…" : "Continuer avec Google"}
+            {isGoogleLoading ? t("login_page.google_loading") : t("login_page.google_continue")}
           </Button>
 
-          {/* Clickwrap RGPD condensé. Détail RGPD complet replié dans un Popover
-              pour ne pas étouffer le CTA Google tout en restant accessible. */}
           <p className="text-center text-[11px] text-muted-foreground mb-4 leading-relaxed px-2 sm:px-4">
-            En continuant avec Google, vous acceptez nos{" "}
+            {t("login_page.gdpr_prefix")}{" "}
             <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
-              conditions d'utilisation
+              {t("login_page.gdpr_terms")}
             </Link>{" "}
-            et notre{" "}
+            {t("login_page.gdpr_and")}{" "}
             <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
-              politique de confidentialité
+              {t("login_page.gdpr_privacy")}
             </Link>.{" "}
             <Popover>
               <PopoverTrigger asChild>
                 <button type="button" className="underline hover:text-foreground">
-                  Détails RGPD
+                  {t("login_page.gdpr_details")}
                 </button>
               </PopoverTrigger>
               <PopoverContent className="text-[11px] leading-relaxed w-72">
-                Google nous transmet uniquement votre nom, votre email et votre photo de profil.
-                Vos données sont hébergées en Europe par Guardiens (responsable de traitement).
-                Vous gardez à tout moment un droit d'accès, de rectification et de suppression
-                (RGPD, art. 15 à 17).
+                {t("login_page.gdpr_popover")}
               </PopoverContent>
             </Popover>
           </p>
@@ -218,17 +212,17 @@ const Login = () => {
               <span className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">ou avec votre email</span>
+              <span className="bg-background px-2 text-muted-foreground">{t("login_page.or_email")}</span>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("auth_common.email")}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="vous@exemple.com"
+                placeholder={t("auth_common.email_placeholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -238,12 +232,12 @@ const Login = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Mot de passe</Label>
+              <Label htmlFor="password">{t("auth_common.password")}</Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Votre mot de passe"
+                  placeholder={t("login_page.password_placeholder")}
                   value={password}
                   autoFocus={!!email}
                   onChange={(e) => { setPassword(e.target.value); setPasswordError(null); }}
@@ -258,7 +252,7 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                  aria-label={showPassword ? t("auth_common.hide_password") : t("auth_common.show_password")}
                   aria-pressed={showPassword}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
@@ -267,7 +261,7 @@ const Login = () => {
               </div>
               {capsLockOn && (
                 <p id="capslock-hint" className="text-xs text-warning-foreground">
-                  Verrouillage majuscules activé.
+                  {t("auth_common.capslock_on")}
                 </p>
               )}
               {passwordError && (
@@ -281,7 +275,7 @@ const Login = () => {
                       const qs = params.toString();
                       return qs ? `?${qs}` : "";
                     })()}`} className="text-sm text-primary hover:underline">
-                      Pas encore de compte ? Inscrivez-vous
+                      {t("login_page.no_account_prompt")}
                     </Link>
                   )}
                 </div>
@@ -289,17 +283,17 @@ const Login = () => {
             </div>
             <div className="flex justify-end">
               <Link to="/forgot-password" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                Mot de passe oublié ?
+                {t("login_page.forgot")}
               </Link>
             </div>
             <Button type="submit" className="w-full" size="lg" disabled={isLoading || isGoogleLoading}>
-              {isLoading ? "Connexion..." : "Se connecter"}
+              {isLoading ? t("login_page.submitting") : t("login_page.submit")}
             </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
-            Pas encore de compte ?{" "}
-            <Link to={`/inscription${buildRedirectQuery(redirectTarget)}`} className="text-primary font-medium hover:underline">Créer un compte</Link>
+            {t("login_page.no_account")}{" "}
+            <Link to={`/inscription${buildRedirectQuery(redirectTarget)}`} className="text-primary font-medium hover:underline">{t("login_page.create_account")}</Link>
           </p>
         </div>
       </div>
