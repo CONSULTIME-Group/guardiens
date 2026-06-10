@@ -1,12 +1,37 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet-async";
 import { buildAbsoluteUrl, normalizeCanonical, normalizePathname } from "@/lib/seo";
 import { logSeoSnapshot } from "@/lib/seoDebugLog";
 import { DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
+import { SUPPORTED_LANGS, type SupportedLang } from "@/i18n";
 
 const DEFAULT_IMAGE = DEFAULT_OG_IMAGE;
 const SITE_NAME = "Guardiens";
+
+const OG_LOCALES: Record<SupportedLang, string> = {
+  fr: "fr_FR",
+  en: "en_GB",
+  es: "es_ES",
+  it: "it_IT",
+  de: "de_DE",
+};
+
+// Adds ?lang=xx to a URL while preserving any existing query params.
+const addLangParam = (url: string, lang: string): string => {
+  try {
+    const u = new URL(url);
+    if (lang === "fr") {
+      u.searchParams.delete("lang");
+    } else {
+      u.searchParams.set("lang", lang);
+    }
+    return u.toString();
+  } catch {
+    return url;
+  }
+};
 
 const getListingOgImageFromPath = (pathname: string): string | null => {
   const match = pathname.match(/^\/annonces\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/?$/i);
@@ -39,6 +64,8 @@ const PageMeta = ({
   canonical,
 }: PageMetaProps) => {
   const location = useLocation();
+  const { i18n } = useTranslation();
+  const currentLang = ((SUPPORTED_LANGS as readonly string[]).includes(i18n.language) ? i18n.language : "fr") as SupportedLang;
   const currentPath = normalizePathname(path || location.pathname);
   const currentUrl = buildAbsoluteUrl(currentPath);
   const canonicalUrl = normalizeCanonical(canonical) ?? currentUrl;
@@ -46,6 +73,11 @@ const PageMeta = ({
   const resolvedImage = image === DEFAULT_IMAGE ? getListingOgImageFromPath(currentPath) ?? image : image;
   const titleWithoutSuffix = title.replace(/\s*\|\s*Guardiens\s*$/i, "").replace(/\s*,\s*Guardiens\s*$/i, "");
   const fullTitle = currentPath === "/" ? titleWithoutSuffix : `${titleWithoutSuffix} | ${SITE_NAME}`;
+  // hreflang alternates : same URL with ?lang=xx (fr = no param, also serves as x-default)
+  const hreflangAlternates = SUPPORTED_LANGS.map((lng) => ({
+    lang: lng,
+    href: addLangParam(canonicalUrl, lng),
+  }));
 
   useEffect(() => {
     const upsertMetaTag = ({ attr, key, content }: { attr: "name" | "property"; key: string; content: string }) => {
@@ -72,8 +104,28 @@ const PageMeta = ({
       document.head.appendChild(link);
     };
 
+    const upsertHreflangAlternates = () => {
+      document.head.querySelectorAll('link[rel="alternate"][data-page-meta="true"]').forEach((node) => node.remove());
+      hreflangAlternates.forEach(({ lang, href }) => {
+        const link = document.createElement("link");
+        link.setAttribute("rel", "alternate");
+        link.setAttribute("hreflang", lang);
+        link.setAttribute("href", href);
+        link.setAttribute("data-page-meta", "true");
+        document.head.appendChild(link);
+      });
+      // x-default = FR (canonical)
+      const xdef = document.createElement("link");
+      xdef.setAttribute("rel", "alternate");
+      xdef.setAttribute("hreflang", "x-default");
+      xdef.setAttribute("href", addLangParam(canonicalUrl, "fr"));
+      xdef.setAttribute("data-page-meta", "true");
+      document.head.appendChild(xdef);
+    };
+
     upsertMetaTag({ attr: "name", key: "robots", content: noindex ? "noindex, follow" : "index, follow" });
     upsertCanonical(canonicalUrl);
+    upsertHreflangAlternates();
 
     upsertMetaTag({ attr: "property", key: "og:title", content: fullTitle });
     upsertMetaTag({ attr: "property", key: "og:description", content: metaDescription });
@@ -82,7 +134,7 @@ const PageMeta = ({
     upsertMetaTag({ attr: "property", key: "og:image:secure_url", content: resolvedImage });
     upsertMetaTag({ attr: "property", key: "og:type", content: type });
     upsertMetaTag({ attr: "property", key: "og:site_name", content: SITE_NAME });
-    upsertMetaTag({ attr: "property", key: "og:locale", content: "fr_FR" });
+    upsertMetaTag({ attr: "property", key: "og:locale", content: OG_LOCALES[currentLang] });
 
     upsertMetaTag({ attr: "name", key: "twitter:card", content: "summary_large_image" });
     upsertMetaTag({ attr: "name", key: "twitter:title", content: fullTitle });
@@ -117,7 +169,7 @@ const PageMeta = ({
         type,
       },
     });
-  }, [author, canonical, canonicalUrl, currentPath, currentUrl, fullTitle, metaDescription, noindex, publishedAt, resolvedImage, type]);
+  }, [author, canonical, canonicalUrl, currentPath, currentUrl, currentLang, fullTitle, metaDescription, noindex, publishedAt, resolvedImage, type]);
 
   return (
     <Helmet>
@@ -125,6 +177,10 @@ const PageMeta = ({
       <meta name="description" content={metaDescription} />
       <meta name="robots" content={noindex ? "noindex, follow" : "index, follow"} />
       <link rel="canonical" href={canonicalUrl} />
+      {hreflangAlternates.map(({ lang, href }) => (
+        <link key={lang} rel="alternate" hrefLang={lang} href={href} />
+      ))}
+      <link rel="alternate" hrefLang="x-default" href={addLangParam(canonicalUrl, "fr")} />
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={metaDescription} />
       <meta property="og:url" content={currentUrl} />
@@ -132,7 +188,7 @@ const PageMeta = ({
       <meta property="og:image:secure_url" content={resolvedImage} />
       <meta property="og:type" content={type} />
       <meta property="og:site_name" content={SITE_NAME} />
-      <meta property="og:locale" content="fr_FR" />
+      <meta property="og:locale" content={OG_LOCALES[currentLang]} />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={metaDescription} />
