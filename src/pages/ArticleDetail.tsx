@@ -504,7 +504,7 @@ export default function ArticleDetail() {
  {article.published_at && (
  <span className="flex items-center gap-1">
  <Calendar className="h-3.5 w-3.5" />
- {format(new Date(article.published_at), "d MMMM yyyy", { locale: fr })}
+ {format(new Date(article.published_at), "d MMMM yyyy", { locale: (({ fr, en: enUS, es, it: itLocale, de: deLocale } as any)[i18n.language] || fr) })}
  </span>
  )}
  </div>
