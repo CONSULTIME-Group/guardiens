@@ -589,19 +589,18 @@ const Landing = () => {
           <div className="max-w-2xl lg:max-w-3xl">
 
             <p className="font-body text-xs text-white/70 tracking-[0.2em] uppercase mb-6 animate-hero-fade-up">
-              Entraide · Garde d'animaux · Home sitting
+              {t("landing.hero.eyebrow")}
             </p>
 
             <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6 animate-hero-fade-up animation-delay-400 max-w-3xl">
-              La garde d'animaux, le coup de main, <span className="text-white/80">la rencontre.</span>
+              {t("landing.hero.title_main")} <span className="text-white/80">{t("landing.hero.title_accent")}</span>
             </h1>
 
             <p className="font-body text-lg md:text-xl text-white/85 max-w-xl mb-4 leading-relaxed animate-hero-fade-up animation-delay-700">
-              Faire garder votre maison et vos animaux par un gardien du coin pendant vos absences.
-              Ou demander, et rendre, un coup de main près de chez vous, avec ou sans animaux.
+              {t("landing.hero.lede")}
             </p>
             <p className="font-body text-base md:text-lg text-white/70 max-w-xl mb-10 leading-relaxed italic animate-hero-fade-up animation-delay-700">
-              Et derrière chaque échange, une rencontre que vous n'auriez pas cherchée.
+              {t("landing.hero.lede_italic")}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 animate-hero-fade-up animation-delay-900">
@@ -612,7 +611,7 @@ const Landing = () => {
                 }}
                 className="font-body text-base font-semibold tracking-wide rounded-full px-12 py-4 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200 shadow-xl shadow-primary/40 ring-2 ring-primary-foreground/10"
               >
-                Publier mon annonce
+                {t("landing.hero.cta_owner")}
               </button>
               <button
                 onClick={() => {
@@ -621,7 +620,7 @@ const Landing = () => {
                 }}
                 className="font-body text-sm font-medium tracking-wide rounded-full px-7 py-3 bg-transparent text-white border border-white/60 hover:bg-white/10 transition-all duration-200"
               >
-                Je veux garder
+                {t("landing.hero.cta_sitter")}
               </button>
             </div>
 
@@ -630,25 +629,25 @@ const Landing = () => {
                 {kpiMaisons > 0 && (
                   <div className="border-r border-white/20 pr-12 last:border-r-0 last:pr-0">
                     <span className="block text-3xl font-heading font-bold text-white">{kpiMaisons}</span>
-                    <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">maisons gardées</span>
+                    <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_houses")}</span>
                   </div>
                 )}
                 {kpiAnimaux > 0 && (
                   <div className="border-r border-white/20 pr-12 last:border-r-0 last:pr-0">
                     <span className="block text-3xl font-heading font-bold text-white">{kpiAnimaux}</span>
-                    <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">animaux accompagnés</span>
+                    <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_animals")}</span>
                   </div>
                 )}
                 {kpiInscrits > 0 && (
                   <div className="border-r border-white/20 pr-12 last:border-r-0 last:pr-0">
                     <span className="block text-3xl font-heading font-bold text-white">{kpiInscrits}</span>
-                    <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">inscrits</span>
+                    <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_members")}</span>
                   </div>
                 )}
                 {kpiMissions > 0 && (
                   <div>
                     <span className="block text-3xl font-heading font-bold text-white">{kpiMissions}</span>
-                    <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">missions d'entraide</span>
+                    <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_missions")}</span>
                   </div>
                 )}
               </div>
