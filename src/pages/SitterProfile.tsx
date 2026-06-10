@@ -266,24 +266,22 @@ const SitterProfile = () => {
   // Chaque critère est rattaché à la section où l'utilisateur peut le compléter.
   // Total = 100 par construction (essentiels 80 + bonus 20). Réplique du SQL.
   const scoredCriteria: ScoredCriterion[] = [
-    // Essentiels, 80 pts
-    { section: "identity", kind: "essential", label: "Prénom + code postal", points: 15,
+    { section: "identity", kind: "essential", label: tp("criteria.name_postal"), points: 15,
       ok: !!(mergedData.first_name && mergedData.postal_code) },
-    { section: "identity", kind: "essential", label: "Photo de profil", points: 20,
-      ok: !!mergedData.avatar_url, hint: "Ajoutez une photo dans Identité." },
-    { section: "skills", kind: "essential", label: "Au moins 1 compétence", points: 15,
-      ok: (mergedData.competences?.length ?? 0) > 0, hint: "Onglet Compétences." },
-    { section: "sitter", kind: "essential", label: "Au moins 1 mode de vie", points: 15,
-      ok: (mergedData.lifestyle?.length ?? 0) > 0, hint: "Onglet Profil gardien." },
-    { section: "mobility", kind: "essential", label: "Rayon géographique défini", points: 15,
-      ok: (mergedData.geographic_radius ?? 0) > 0, hint: "Onglet Mobilité & Rayon." },
-    // Bonus, 20 pts
-    { section: "identity", kind: "bonus", label: "Bio ≥ 50 caractères", points: 10,
-      ok: (mergedData.bio?.length ?? 0) >= 50, hint: `${mergedData.bio?.length ?? 0}/50 caractères.` },
-    { section: "gallery", kind: "bonus", label: "Au moins 1 photo de galerie", points: 5,
-      ok: hasGalleryPhoto, hint: "Onglet Galerie." },
-    { section: "identity", kind: "bonus", label: "Identité vérifiée", points: 5,
-      ok: !!user?.identityVerified, hint: "Paramètres → Vérification." },
+    { section: "identity", kind: "essential", label: tp("criteria.avatar"), points: 20,
+      ok: !!mergedData.avatar_url, hint: tp("hints.add_avatar_identity") },
+    { section: "skills", kind: "essential", label: tp("criteria.skill"), points: 15,
+      ok: (mergedData.competences?.length ?? 0) > 0, hint: tp("hints.tab_skills") },
+    { section: "sitter", kind: "essential", label: tp("criteria.lifestyle"), points: 15,
+      ok: (mergedData.lifestyle?.length ?? 0) > 0, hint: tp("hints.tab_sitter") },
+    { section: "mobility", kind: "essential", label: tp("criteria.radius"), points: 15,
+      ok: (mergedData.geographic_radius ?? 0) > 0, hint: tp("hints.tab_mobility") },
+    { section: "identity", kind: "bonus", label: tp("criteria.bio_50"), points: 10,
+      ok: (mergedData.bio?.length ?? 0) >= 50, hint: tp("hints.chars_50", { count: mergedData.bio?.length ?? 0 }) },
+    { section: "gallery", kind: "bonus", label: tp("criteria.sitter_gallery_one"), points: 5,
+      ok: hasGalleryPhoto, hint: tp("hints.tab_gallery") },
+    { section: "identity", kind: "bonus", label: tp("criteria.identity_verified"), points: 5,
+      ok: !!user?.identityVerified, hint: tp("hints.settings_verif") },
   ];
 
   const sitterEssentials = scoredCriteria.filter(c => c.kind === "essential");
