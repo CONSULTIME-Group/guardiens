@@ -738,5 +738,23 @@
     "email_resent_title": "Email resent",
     "email_resent_body": "A new confirmation email has just been sent.",
     "resend_email": "Resend email"
+  },
+  "favorites_page": {
+    "meta_title": "My favorites, Guardiens",
+    "meta_description": "Find your saved keepers and listings.",
+    "title": "My favorites",
+    "empty_title": "No favorites yet",
+    "empty_description": "Browse keeper profiles or listings and click the heart icon to find them here.",
+    "explore_sitters": "Explore keepers",
+    "tab_sitters": "Keepers",
+    "tab_sits": "Listings",
+    "no_sitter_fav_title": "No favorite keeper",
+    "no_sitter_fav_desc": "Find trusted keepers and save them.",
+    "search_sitter": "Search a keeper",
+    "no_sit_fav_title": "No favorite listing",
+    "no_sit_fav_desc": "Save listings to find them easily.",
+    "view_listings": "View listings",
+    "member_fallback": "Member",
+    "listing_fallback": "House-sitting listing"
   }
 }

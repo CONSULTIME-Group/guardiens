@@ -738,5 +738,23 @@
     "email_resent_title": "Email renvoyé",
     "email_resent_body": "Un nouvel email de confirmation vient d'être envoyé.",
     "resend_email": "Renvoyer l'email"
+  },
+  "favorites_page": {
+    "meta_title": "Mes favoris, Guardiens",
+    "meta_description": "Retrouvez vos gardiens et annonces sauvegardés.",
+    "title": "Mes favoris",
+    "empty_title": "Aucun favori pour l'instant",
+    "empty_description": "Parcourez les profils de gardiens ou les annonces et cliquez sur l'icône cœur pour les retrouver ici.",
+    "explore_sitters": "Explorer les gardiens",
+    "tab_sitters": "Gardiens",
+    "tab_sits": "Annonces",
+    "no_sitter_fav_title": "Aucun gardien en favori",
+    "no_sitter_fav_desc": "Trouvez des gardiens de confiance et sauvegardez-les.",
+    "search_sitter": "Chercher un gardien",
+    "no_sit_fav_title": "Aucune annonce en favori",
+    "no_sit_fav_desc": "Sauvegardez des annonces pour les retrouver facilement.",
+    "view_listings": "Voir les annonces",
+    "member_fallback": "Membre",
+    "listing_fallback": "Annonce de garde"
   }
 }
