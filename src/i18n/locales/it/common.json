@@ -389,5 +389,29 @@
       "cta_sitter": "Diventare custode",
       "cta_owner": "Pubblicare un annuncio"
     }
+  },
+  "article": {
+    "home": "Home",
+    "news": "Notizie",
+    "updatedOn": "Aggiornato il {{date}}",
+    "publishedOn": "Pubblicato il {{date}}",
+    "categories": {
+      "conseil": "Consiglio",
+      "guide_ville": "Guida città",
+      "race": "Razze e specie",
+      "temoignage": "Testimonianza",
+      "astuce": "Suggerimento",
+      "conseil_gardien": "Consiglio guardiano",
+      "conseil_proprio": "Consiglio proprietario",
+      "guide_race": "Guida razza",
+      "guide_lieu": "Guida luogo",
+      "actualite": "Attualità",
+      "ville": "Città",
+      "vie_locale": "Vita locale",
+      "guide_local": "Guida locale",
+      "guide_pratique": "Guida pratica",
+      "saisonnier": "Stagionale",
+      "guide_central": "Guida principale"
+    }
   }
 }
