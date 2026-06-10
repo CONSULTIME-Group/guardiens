@@ -236,8 +236,8 @@ const SitterProfile = () => {
       const mobilityNowComplete = (merged.geographic_radius ?? 0) > 0;
       if (mobilityNowComplete && !mobilityWasComplete) {
         toast({
-          title: "Mobilité complétée",
-          description: "Vos préférences de mobilité sont enregistrées.",
+          title: tp("mobility_toast_title"),
+          description: tp("mobility_toast_desc"),
         });
       }
     }
