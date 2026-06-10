@@ -756,5 +756,24 @@
     "view_listings": "Voir les annonces",
     "member_fallback": "Membre",
     "listing_fallback": "Annonce de garde"
+  },
+  "auth_confirm": {
+    "meta_title": "Confirmation de votre compte",
+    "validating_title": "Validation en cours",
+    "validating_body": "Nous finalisons votre confirmation de compte et votre connexion sécurisée.",
+    "back_to_login": "Retour à la connexion",
+    "invalid_title": "Lien invalide ou expiré",
+    "expired_body": "Ce lien de confirmation a expiré. Demandez-en un nouveau ci-dessous.",
+    "resend_cta": "Renvoyer un email de confirmation",
+    "resend_success_inline": "✓ Email renvoyé, vérifiez votre boîte.",
+    "prompt_email": "Entrez votre adresse email pour recevoir un nouveau lien :",
+    "resend_toast_title": "Email renvoyé",
+    "resend_toast_body": "Vérifiez votre boîte de réception.",
+    "error_toast_title": "Erreur",
+    "recovery_validated_title": "Lien validé",
+    "recovery_validated_body": "Vous pouvez maintenant choisir un nouveau mot de passe.",
+    "confirmed_title": "Email confirmé",
+    "confirmed_body": "Votre compte est activé !",
+    "expired_fallback": "Le lien a expiré. Demandez un nouvel email de confirmation."
   }
 }

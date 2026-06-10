@@ -756,5 +756,24 @@
     "view_listings": "Vedi annunci",
     "member_fallback": "Membro",
     "listing_fallback": "Annuncio di custodia"
+  },
+  "auth_confirm": {
+    "meta_title": "Conferma del suo account",
+    "validating_title": "Convalida in corso",
+    "validating_body": "Stiamo completando la conferma del suo account e l'accesso sicuro.",
+    "back_to_login": "Torna all'accesso",
+    "invalid_title": "Link non valido o scaduto",
+    "expired_body": "Questo link di conferma è scaduto. Richiedine uno nuovo qui sotto.",
+    "resend_cta": "Invia di nuovo l'email di conferma",
+    "resend_success_inline": "✓ Email inviata, controlli la sua casella.",
+    "prompt_email": "Inserisca il suo indirizzo email per ricevere un nuovo link:",
+    "resend_toast_title": "Email rinviata",
+    "resend_toast_body": "Controlli la sua casella di posta.",
+    "error_toast_title": "Errore",
+    "recovery_validated_title": "Link convalidato",
+    "recovery_validated_body": "Ora può scegliere una nuova password.",
+    "confirmed_title": "Email confermata",
+    "confirmed_body": "Il suo account è attivo.",
+    "expired_fallback": "Il link è scaduto. Richieda una nuova email di conferma."
   }
 }

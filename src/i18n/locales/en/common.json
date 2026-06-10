@@ -756,5 +756,24 @@
     "view_listings": "View listings",
     "member_fallback": "Member",
     "listing_fallback": "House-sitting listing"
+  },
+  "auth_confirm": {
+    "meta_title": "Confirming your account",
+    "validating_title": "Validating",
+    "validating_body": "We are finalising your account confirmation and secure sign-in.",
+    "back_to_login": "Back to login",
+    "invalid_title": "Invalid or expired link",
+    "expired_body": "This confirmation link has expired. Request a new one below.",
+    "resend_cta": "Resend confirmation email",
+    "resend_success_inline": "✓ Email sent, check your inbox.",
+    "prompt_email": "Enter your email address to receive a new link:",
+    "resend_toast_title": "Email resent",
+    "resend_toast_body": "Check your inbox.",
+    "error_toast_title": "Error",
+    "recovery_validated_title": "Link validated",
+    "recovery_validated_body": "You can now choose a new password.",
+    "confirmed_title": "Email confirmed",
+    "confirmed_body": "Your account is active!",
+    "expired_fallback": "The link has expired. Request a new confirmation email."
   }
 }
