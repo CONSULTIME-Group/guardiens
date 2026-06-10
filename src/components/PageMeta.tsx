@@ -104,8 +104,28 @@ const PageMeta = ({
       document.head.appendChild(link);
     };
 
+    const upsertHreflangAlternates = () => {
+      document.head.querySelectorAll('link[rel="alternate"][data-page-meta="true"]').forEach((node) => node.remove());
+      hreflangAlternates.forEach(({ lang, href }) => {
+        const link = document.createElement("link");
+        link.setAttribute("rel", "alternate");
+        link.setAttribute("hreflang", lang);
+        link.setAttribute("href", href);
+        link.setAttribute("data-page-meta", "true");
+        document.head.appendChild(link);
+      });
+      // x-default = FR (canonical)
+      const xdef = document.createElement("link");
+      xdef.setAttribute("rel", "alternate");
+      xdef.setAttribute("hreflang", "x-default");
+      xdef.setAttribute("href", addLangParam(canonicalUrl, "fr"));
+      xdef.setAttribute("data-page-meta", "true");
+      document.head.appendChild(xdef);
+    };
+
     upsertMetaTag({ attr: "name", key: "robots", content: noindex ? "noindex, follow" : "index, follow" });
     upsertCanonical(canonicalUrl);
+    upsertHreflangAlternates();
 
     upsertMetaTag({ attr: "property", key: "og:title", content: fullTitle });
     upsertMetaTag({ attr: "property", key: "og:description", content: metaDescription });
@@ -114,7 +134,7 @@ const PageMeta = ({
     upsertMetaTag({ attr: "property", key: "og:image:secure_url", content: resolvedImage });
     upsertMetaTag({ attr: "property", key: "og:type", content: type });
     upsertMetaTag({ attr: "property", key: "og:site_name", content: SITE_NAME });
-    upsertMetaTag({ attr: "property", key: "og:locale", content: "fr_FR" });
+    upsertMetaTag({ attr: "property", key: "og:locale", content: OG_LOCALES[currentLang] });
 
     upsertMetaTag({ attr: "name", key: "twitter:card", content: "summary_large_image" });
     upsertMetaTag({ attr: "name", key: "twitter:title", content: fullTitle });
