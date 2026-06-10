@@ -658,21 +658,21 @@ const Landing = () => {
 
       {/* ═══════════════ SOMMAIRE DE PAGE, maillage interne ═══════════════ */}
       <nav
-        aria-label="Sommaire de la page"
+        aria-label={t("landing.toc.aria")}
         className="border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
       >
         <div className="max-w-6xl mx-auto px-6">
-          <h2 className="sr-only">Sommaire</h2>
+          <h2 className="sr-only">{t("landing.toc.title")}</h2>
           <ul className="flex items-center gap-1 overflow-x-auto scrollbar-none py-2.5 -mx-2 px-2">
             {[
-              { href: "#usages", label: "Garde & entraide" },
-              { href: "#comment-ca-marche", label: "Comment ça marche" },
-              { href: "#entraide", label: "Entraide locale" },
-              { href: "#confiance", label: "Confiance" },
-              { href: "#temoignages", label: "Témoignages" },
-              { href: "#notre-histoire", label: "Notre histoire" },
-              { href: "#guides-villes", label: "Guides & villes" },
-              { href: "#faq", label: "FAQ" },
+              { href: "#usages", label: t("landing.toc.care_aid") },
+              { href: "#comment-ca-marche", label: t("landing.toc.how") },
+              { href: "#entraide", label: t("landing.toc.aid") },
+              { href: "#confiance", label: t("landing.toc.trust") },
+              { href: "#temoignages", label: t("landing.toc.testimonials") },
+              { href: "#notre-histoire", label: t("landing.toc.story") },
+              { href: "#guides-villes", label: t("landing.toc.cities") },
+              { href: "#faq", label: t("landing.toc.faq") },
             ].map((item) => (
               <li key={item.href} className="shrink-0">
                 <a
