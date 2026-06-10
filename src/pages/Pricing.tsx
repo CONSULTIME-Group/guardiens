@@ -389,7 +389,7 @@ const Pricing = () => {
         to={registerLink("sitter")}
         className="inline-flex items-center justify-center bg-transparent text-foreground border border-foreground/30 font-body font-medium text-sm px-7 py-3.5 rounded-full hover:bg-foreground/5 transition-colors min-h-[44px]"
        >
-        Je veux garder
+        {t("pricing.hero.cta_sitter")}
        </Link>
       </div>
      </section>
@@ -428,7 +428,7 @@ const Pricing = () => {
            to="/inscription"
            className="shrink-0 inline-flex items-center gap-2 bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px] whitespace-nowrap"
           >
-           Devenir Fondateur
+           {t("pricing.founder.cta")}
           </Link>
          </div>
         </div>
@@ -462,7 +462,7 @@ const Pricing = () => {
         <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">{t("pricing.owner_card.label")}</div>
         <CardTitle className="font-heading text-5xl font-bold text-foreground">{t("pricing.owner_card.price")}</CardTitle>
         <p className="text-sm font-body text-foreground/60 mt-2">
-         Sans abonnement, sans carte bancaire.
+         {t("pricing.owner_card.subtitle")}
         </p>
        </CardHeader>
        <CardContent className="space-y-5 px-8 pb-8 pt-2 flex-1 flex flex-col">
@@ -481,7 +481,7 @@ const Pricing = () => {
            className="w-full min-h-[44px] font-body"
            size="lg"
           >
-           Publier une annonce
+           {t("pricing.owner_card.cta")}
           </Button>
          </Link>
         </div>
@@ -658,7 +658,7 @@ const Pricing = () => {
          L'entraide, indépendante de la garde
         </h2>
         <span className="text-xs uppercase tracking-wider font-body text-primary">
-         Gratuit pour tous
+         {t("pricing.mutual.free_tag")}
         </span>
        </div>
        <p className="text-sm md:text-base font-body text-foreground/70 leading-relaxed mb-4">
