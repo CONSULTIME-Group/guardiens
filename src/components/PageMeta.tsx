@@ -1,12 +1,37 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet-async";
 import { buildAbsoluteUrl, normalizeCanonical, normalizePathname } from "@/lib/seo";
 import { logSeoSnapshot } from "@/lib/seoDebugLog";
 import { DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
+import { SUPPORTED_LANGS, type SupportedLang } from "@/i18n";
 
 const DEFAULT_IMAGE = DEFAULT_OG_IMAGE;
 const SITE_NAME = "Guardiens";
+
+const OG_LOCALES: Record<SupportedLang, string> = {
+  fr: "fr_FR",
+  en: "en_GB",
+  es: "es_ES",
+  it: "it_IT",
+  de: "de_DE",
+};
+
+// Adds ?lang=xx to a URL while preserving any existing query params.
+const addLangParam = (url: string, lang: string): string => {
+  try {
+    const u = new URL(url);
+    if (lang === "fr") {
+      u.searchParams.delete("lang");
+    } else {
+      u.searchParams.set("lang", lang);
+    }
+    return u.toString();
+  } catch {
+    return url;
+  }
+};
 
 const getListingOgImageFromPath = (pathname: string): string | null => {
   const match = pathname.match(/^\/annonces\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/?$/i);
