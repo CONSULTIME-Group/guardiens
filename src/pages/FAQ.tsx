@@ -35,6 +35,7 @@ interface FaqEntry {
 }
 
 const FAQ = () => {
+ const { t } = useTranslation();
  const { data: entries = [], isLoading } = useQuery({
  queryKey: ["faq-entries"],
  queryFn: async () => {
