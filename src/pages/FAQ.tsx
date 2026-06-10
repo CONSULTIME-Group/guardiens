@@ -258,7 +258,7 @@ const FAQ = () => {
 
  <div className="mt-10 rounded-xl border border-primary/20 bg-primary/5 p-6 text-center">
  <p className="font-heading font-semibold text-foreground mb-1">{t("faq.pricing_cta_title")}</p>
- <p className="text-sm text-muted-foreground mb-4">À 0 € pour les propriétaires. 6,99 €/mois pour les gardiens, sans engagement.</p>
+ <p className="text-sm text-muted-foreground mb-4">{t("faq.pricing_cta_text")}</p>
  <Link
  to="/actualites/nouveaux-tarifs-2026"
  className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
