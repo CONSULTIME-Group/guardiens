@@ -129,33 +129,32 @@ async function main() {
     for (const lang of LANGS) {
       const key = `${art.id}:${lang}`;
       if (!FORCE && have.has(key)) { skipped++; continue; }
-      try {
-        process.stdout.write(`[${lang}] ${art.slug} … `);
-        const tr = await translateArticle(art, lang);
-        const slug = `${art.slug}-${lang}`;
-        const { error: upErr } = await supabase
-          .from("article_translations")
-          .upsert({
-            article_id: art.id,
-            lang,
-            slug,
-            title: tr.title || "",
-            excerpt: tr.excerpt || "",
-            content: tr.content || "",
-            meta_title: tr.meta_title || null,
-            meta_description: tr.meta_description || null,
-            hero_image_alt: tr.hero_image_alt || null,
-          }, { onConflict: "article_id,lang" });
-        if (upErr) throw upErr;
-        done++;
-        console.log("ok");
-      } catch (e) {
-        failed++;
-        console.log(`FAIL: ${e.message}`);
+      let tr = null, lastErr = null;
+      for (let attempt = 0; attempt < 2 && !tr; attempt++) {
+        try {
+          process.stdout.write(`[${lang}] ${art.slug}${attempt > 0 ? " (retry)" : ""} … `);
+          tr = await translateArticle(art, lang);
+        } catch (e) {
+          lastErr = e;
+          process.stdout.write(`FAIL(${e.message.slice(0, 60)}) `);
+          await new Promise((r) => setTimeout(r, 1500));
+        }
       }
-      // gentle pacing
-      await new Promise((r) => setTimeout(r, 400));
-    }
+      if (!tr) { failed++; console.log("GIVE UP"); continue; }
+      const slug = `${art.slug}-${lang}`;
+      const { error: upErr } = await supabase
+        .from("article_translations")
+        .upsert({
+          article_id: art.id, lang, slug,
+          title: tr.title || "",
+          excerpt: tr.excerpt || "",
+          content: tr.content || "",
+          meta_title: tr.meta_title || null,
+          meta_description: tr.meta_description || null,
+          hero_image_alt: tr.hero_image_alt || null,
+        }, { onConflict: "article_id,lang" });
+      if (upErr) { failed++; console.log(`UPSERT FAIL: ${upErr.message}`); }
+      else { done++; console.log("ok"); }
   }
   console.log(`\nDone: ${done} translated, ${skipped} skipped, ${failed} failed.`);
 }
