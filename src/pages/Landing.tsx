@@ -1392,7 +1392,7 @@ const Landing = () => {
                 </ul>
                 <div className="mt-6 pt-6 border-t border-border">
                   <p className="text-xs text-foreground/60 leading-relaxed">
-                    Quel que soit votre département, vous trouvez un gardien à proximité.
+                    {t("landing.cities.cities_footer")}
                   </p>
                 </div>
               </div>
