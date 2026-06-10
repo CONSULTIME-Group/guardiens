@@ -302,19 +302,19 @@ export default function News() {
     <>
       <PageMeta
         title={metaTitle}
-        description="Conseils house-sitting, guides pratiques, témoignages et actualités de la communauté Guardiens. Tout pour bien préparer une garde."
+        description={t("news.meta_description")}
         path={metaPath}
       />
       <PublicHeader />
       <div className="max-w-4xl mx-auto px-4 py-8 animate-fade-in">
-        <PageBreadcrumb items={[{ label: "Guides & Conseils" }]} />
+        <PageBreadcrumb items={[{ label: t("news.breadcrumb") }]} />
 
         <header className="mb-8">
           <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-2">
-            Guides & Conseils
+            {t("news.title")}
           </h1>
           <p className="text-muted-foreground text-lg">
-            Conseils, guides et astuces pour les propriétaires et gardiens d'animaux.
+            {t("news.subtitle")}
           </p>
         </header>
 
@@ -324,17 +324,17 @@ export default function News() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
             <Input
               type="search"
-              placeholder="Rechercher un article…"
+              placeholder={t("news.search_placeholder")}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               className="pl-10"
-              aria-label="Rechercher dans les articles"
+              aria-label={t("news.search_aria")}
             />
           </div>
           {hasActiveFilters && (
             <Button variant="outline" onClick={resetFilters} className="shrink-0 gap-2">
               <RotateCcw className="h-4 w-4" aria-hidden="true" />
-              Réinitialiser les filtres
+              {t("news.reset_filters")}
             </Button>
           )}
         </div>
@@ -374,9 +374,9 @@ export default function News() {
         {/* Featured "Vie locale & Entraide" section */}
         {activeCategory === "all" && !urlSearch.trim() && vieLocaleArticles.length > 0 && !loading && (
           <div className="mb-10 p-6 rounded-xl bg-warning-soft/40">
-            <h2 className="font-heading text-xl font-bold mb-1">Vie locale & Entraide</h2>
+            <h2 className="font-heading text-xl font-bold mb-1">{t("news.vie_locale_title")}</h2>
             <p className="text-muted-foreground text-sm mb-5">
-              Des échanges sans argent, des gens du coin qui se rendent service, une autre façon de vivre ensemble.
+              {t("news.vie_locale_subtitle")}
             </p>
             <div className="grid sm:grid-cols-3 gap-4 mb-4">
               {vieLocaleArticles.map((a) => (
@@ -400,7 +400,7 @@ export default function News() {
               }
               className="text-primary text-sm font-medium hover:underline inline-flex items-center gap-1"
             >
-              Voir tous les articles <ArrowRight className="h-3 w-3" />
+              {t("news.see_all")} <ArrowRight className="h-3 w-3" />
             </button>
           </div>
         )}
@@ -424,19 +424,19 @@ export default function News() {
           <div className="text-center py-16 space-y-4">
             <AlertCircle className="h-10 w-10 text-destructive mx-auto" aria-hidden="true" />
             <p className="text-destructive">{error}</p>
-            <Button variant="outline" onClick={() => updateParams(() => {}, true)}>Réessayer</Button>
+            <Button variant="outline" onClick={() => updateParams(() => {}, true)}>{t("news.retry")}</Button>
           </div>
         ) : visibleArticles.length === 0 ? (
           <div className="text-center py-16 space-y-3">
             <p className="text-muted-foreground text-lg">
               {urlSearch.trim()
-                ? `Aucun article ne correspond à « ${urlSearch.trim()} ».`
-                : "Aucun article pour le moment. Revenez bientôt !"}
+                ? t("news.empty_search", { q: urlSearch.trim() })
+                : t("news.empty_default")}
             </p>
             {hasActiveFilters && (
               <Button variant="outline" onClick={resetFilters} className="gap-2">
                 <RotateCcw className="h-4 w-4" aria-hidden="true" />
-                Réinitialiser les filtres
+                {t("news.reset_filters")}
               </Button>
             )}
           </div>
@@ -462,10 +462,10 @@ export default function News() {
                       <CardContent className="p-5 space-y-3">
                         <div className="flex items-center gap-2 flex-wrap">
                           <Badge variant="secondary" className={CATEGORY_COLORS[article.category] || ""}>
-                            {CATEGORY_LABELS[article.category] || article.category}
+                            {tCat(article.category)}
                           </Badge>
                           {isNew(article.published_at) && (
-                            <Badge className="bg-primary text-primary-foreground">Nouveau</Badge>
+                            <Badge className="bg-primary text-primary-foreground">{t("news.new_badge")}</Badge>
                           )}
                           {article.city && (
                             <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -485,7 +485,7 @@ export default function News() {
                               className="flex items-center gap-1 text-xs text-muted-foreground"
                             >
                               <Calendar className="h-3 w-3" aria-hidden="true" />
-                              {format(new Date(article.published_at), "d MMM yyyy", { locale: fr })}
+                              {format(new Date(article.published_at), "d MMM yyyy", { locale: dateLocale })}
                             </time>
                           )}
                           <span className="flex items-center gap-1 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
