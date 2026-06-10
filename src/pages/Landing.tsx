@@ -658,21 +658,21 @@ const Landing = () => {
 
       {/* ═══════════════ SOMMAIRE DE PAGE, maillage interne ═══════════════ */}
       <nav
-        aria-label="Sommaire de la page"
+        aria-label={t("landing.toc.aria")}
         className="border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
       >
         <div className="max-w-6xl mx-auto px-6">
-          <h2 className="sr-only">Sommaire</h2>
+          <h2 className="sr-only">{t("landing.toc.title")}</h2>
           <ul className="flex items-center gap-1 overflow-x-auto scrollbar-none py-2.5 -mx-2 px-2">
             {[
-              { href: "#usages", label: "Garde & entraide" },
-              { href: "#comment-ca-marche", label: "Comment ça marche" },
-              { href: "#entraide", label: "Entraide locale" },
-              { href: "#confiance", label: "Confiance" },
-              { href: "#temoignages", label: "Témoignages" },
-              { href: "#notre-histoire", label: "Notre histoire" },
-              { href: "#guides-villes", label: "Guides & villes" },
-              { href: "#faq", label: "FAQ" },
+              { href: "#usages", label: t("landing.toc.care_aid") },
+              { href: "#comment-ca-marche", label: t("landing.toc.how") },
+              { href: "#entraide", label: t("landing.toc.aid") },
+              { href: "#confiance", label: t("landing.toc.trust") },
+              { href: "#temoignages", label: t("landing.toc.testimonials") },
+              { href: "#notre-histoire", label: t("landing.toc.story") },
+              { href: "#guides-villes", label: t("landing.toc.cities") },
+              { href: "#faq", label: t("landing.toc.faq") },
             ].map((item) => (
               <li key={item.href} className="shrink-0">
                 <a
@@ -693,42 +693,42 @@ const Landing = () => {
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
-              Ce qu'on fait ensemble
+              {t("landing.usages.eyebrow")}
             </span>
             <h2 id="garde-et-entraide" className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-3 scroll-mt-24">
-              Garde d'animaux à domicile et entraide locale.
+              {t("landing.usages.title")}
             </h2>
             <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16 italic">
-              Le home sitting d'un côté, l'entraide entre gens du coin de l'autre. À vous de choisir, l'un, l'autre, ou les deux.
+              {t("landing.usages.lede")}
             </p>
           </RevealSection>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <RevealSection delay={0.1}>
               <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full">
-                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Propriétaires</p>
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Partir l'esprit léger.</h3>
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">{t("landing.usages.owner.tag")}</p>
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">{t("landing.usages.owner.title")}</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  Quelqu'un du coin veille sur votre maison et vos animaux. Vous le rencontrez avant de partir. Vous choisissez.
+                  {t("landing.usages.owner.text")}
                 </p>
                 <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-body font-medium mb-4">
-                  Sans abonnement
+                  {t("landing.usages.owner.badge")}
                 </span>
                 <Link to="/inscription?role=owner" className="block text-sm font-body text-primary font-medium hover:underline">
-                  Je cherche un gardien →
+                  {t("landing.usages.owner.cta")}
                 </Link>
               </div>
             </RevealSection>
 
             <RevealSection delay={0.2}>
               <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full">
-                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Gardiens</p>
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Garder, et découvrir.</h3>
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">{t("landing.usages.sitter.tag")}</p>
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">{t("landing.usages.sitter.title")}</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  Vivez dans des maisons, avec des animaux, dans des coins que vous n'auriez jamais explorés autrement. Une garde, c'est aussi un voyage.
+                  {t("landing.usages.sitter.text")}
                 </p>
                 <Link to="/inscription?role=sitter" className="text-sm font-body text-primary font-medium hover:underline">
-                  Je veux garder →
+                  {t("landing.usages.sitter.cta")}
                 </Link>
               </div>
             </RevealSection>
@@ -736,16 +736,15 @@ const Landing = () => {
             <RevealSection delay={0.3}>
               <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full border-2 border-primary/20 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-body font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
-                  Gratuit
+                  {t("landing.usages.mutual.badge")}
                 </div>
-                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Entraide locale, indépendante de la garde</p>
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Un coup de main, un échange.</h3>
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">{t("landing.usages.mutual.tag")}</p>
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">{t("landing.usages.mutual.title")}</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  Arroser un potager, monter une étagère, partager une compétence, rendre une visite à une personne isolée.
-                  Aucune garde, aucun animal nécessaire, juste des gens du coin qui s'entraident.
+                  {t("landing.usages.mutual.text")}
                 </p>
                 <a href="#entraide" className="text-sm font-body text-primary font-medium hover:underline">
-                  Découvrir l'entraide →
+                  {t("landing.usages.mutual.cta")}
                 </a>
               </div>
             </RevealSection>
@@ -754,17 +753,17 @@ const Landing = () => {
           <RevealSection delay={0.4}>
             <div className="mt-10 bg-accent/40 border border-accent rounded-2xl p-6 md:p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <p className="text-xs tracking-widest uppercase text-foreground/60 font-body mb-1">Imprévu de dernière minute</p>
-                <h3 className="text-lg font-heading font-semibold text-foreground">Un départ précipité ?</h3>
+                <p className="text-xs tracking-widest uppercase text-foreground/60 font-body mb-1">{t("landing.usages.urgency.eyebrow")}</p>
+                <h3 className="text-lg font-heading font-semibold text-foreground">{t("landing.usages.urgency.title")}</h3>
                 <p className="text-sm font-body text-foreground/70 mt-1">
-                  Hospitalisation, déplacement de dernière minute, urgence familiale : un gardien du coin peut prendre le relais en quelques heures.
+                  {t("landing.usages.urgency.text")}
                 </p>
               </div>
               <Link
                 to="/gardien-urgence"
                 className="shrink-0 inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-foreground text-background font-body font-medium text-sm hover:bg-foreground/90 transition-colors"
               >
-                Trouver un gardien en urgence →
+                {t("landing.usages.urgency.cta")}
               </Link>
             </div>
           </RevealSection>
@@ -776,26 +775,21 @@ const Landing = () => {
         <div className="max-w-3xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/70 font-body mb-6 block text-center">
-              Ce qu'on n'écrit jamais dans une annonce
+              {t("landing.meeting.eyebrow")}
             </span>
             <h2 id="le-vrai-pretexte" className="font-heading text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.15] text-foreground text-center mb-10 scroll-mt-24">
-              Le vrai prétexte,<br className="hidden md:inline" /> c'est la rencontre.
+              {t("landing.meeting.title_a")}<br className="hidden md:inline" /> {t("landing.meeting.title_b")}
             </h2>
 
             <div className="border-l-4 border-primary pl-6 md:pl-8 max-w-2xl mx-auto">
               <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/80 mb-5">
-                Ce qu'on raconte rarement, c'est ce qui se passe <em>autour</em>.
-                Connaître la mami du coin et son histoire parce qu'on l'a aidée à ramasser
-                ses fruits du jardin. Échanger avec Gerardo pendant qu'il vous donne
-                un coup de main pour bricoler, et lui proposer un repas fait maison en retour.
+                {t("landing.meeting.p1")}
               </p>
               <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/80 mb-5">
-                Pas besoin d'un animal pour qu'une rencontre commence.
-                Demander un coup de main, en proposer un : c'est déjà ouvrir une porte.
-                Garder une maison, c'est en ouvrir une autre, un même geste, deux échelles.
+                {t("landing.meeting.p2")}
               </p>
               <p className="font-heading text-xl md:text-2xl italic text-foreground leading-snug">
-                On apprend, on découvre, on s'attache ,                 sans aller le chercher. Juste en laissant la place à ce qui peut arriver.
+                {t("landing.meeting.p3")}
               </p>
             </div>
           </RevealSection>
@@ -807,10 +801,10 @@ const Landing = () => {
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
-              Simple et transparent
+              {t("landing.how.eyebrow")}
             </span>
             <h2 id="how-it-works" className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-4 scroll-mt-24">
-              Comment ça marche ?
+              {t("landing.how.title")}
             </h2>
             <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16">
               {seasonal.description}
@@ -834,9 +828,9 @@ const Landing = () => {
                     1
                   </div>
                 </div>
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Publiez votre annonce</h3>
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">{t("landing.how.step1_title")}</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70">
-                  Vos dates, vos animaux, votre maison. Quelques minutes suffisent, votre annonce est en ligne.
+                  {t("landing.how.step1_text")}
                 </p>
               </div>
             </RevealSection>
@@ -857,9 +851,9 @@ const Landing = () => {
                     2
                   </div>
                 </div>
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Choisissez après une rencontre</h3>
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">{t("landing.how.step2_title")}</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70">
-                  Des gardiens du coin postulent. Vous lisez les profils, les avis, vous échangez. Puis vous vous voyez, un café, une visite, avant de décider.
+                  {t("landing.how.step2_text")}
                 </p>
               </div>
             </RevealSection>
@@ -880,9 +874,9 @@ const Landing = () => {
                     3
                   </div>
                 </div>
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Partez l'esprit léger</h3>
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">{t("landing.how.step3_title")}</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70">
-                  L'accord de garde signé, votre gardien s'installe. Vous recevez des nouvelles. Vous rentrez chez vous, souvent avec une nouvelle relation.
+                  {t("landing.how.step3_text")}
                 </p>
               </div>
             </RevealSection>
@@ -897,17 +891,17 @@ const Landing = () => {
                 }}
                 className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
               >
-                Publier mon annonce
+                {t("landing.how.cta_owner")}
               </button>
               <a
                 href="#entraide"
                 className="font-body text-sm font-medium tracking-wide rounded-full px-8 py-3.5 bg-transparent text-foreground border border-border hover:border-primary/40 hover:text-primary transition-all duration-200"
               >
-                Ou commencer par un coup de main →
+                {t("landing.how.cta_secondary")}
               </a>
             </div>
             <p className="mt-3 text-xs text-muted-foreground font-body">
-              Inscription en 2 minutes · Sans carte bancaire
+              {t("landing.how.footnote")}
             </p>
           </RevealSection>
         </div>
@@ -918,17 +912,16 @@ const Landing = () => {
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
-              Pour tous · Sans abonnement · Sans argent
+              {t("landing.aid.eyebrow")}
             </span>
             <h2 id="osez-l-entraide" className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-6 scroll-mt-24">
-              Osez demander. Osez proposer.
+              {t("landing.aid.title")}
             </h2>
             <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-4 text-lg leading-relaxed">
-              Avant, il y avait quelqu'un du coin qui passait arroser le jardin, qui gardait le chien,
-              qui venait fixer un volet. Quelqu'un à qui on offrait une part de gâteau ou un coup de main en retour.
+              {t("landing.aid.p1")}
             </p>
             <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-16 text-lg leading-relaxed">
-              Cette habitude n'a pas disparu, on n'ose simplement plus la première question. Guardiens, c'est le prétexte pour la reposer, et au passage, vivre des expériences qu'aucun voyage organisé ne vous offrira.
+              {t("landing.aid.p2")}
             </p>
           </RevealSection>
 
@@ -936,14 +929,13 @@ const Landing = () => {
             <RevealSection delay={0.1}>
               <div className="bg-card rounded-2xl p-8 shadow-sm h-full">
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">
-                  « J'ai besoin d'un coup de main »
+                  {t("landing.aid.need_title")}
                 </h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  Votre potager pendant les vacances. Vos poules ce week-end. Promener votre chien après une opération.
-                  Le demander, ce n'est pas avouer une faiblesse, c'est faire confiance.
+                  {t("landing.aid.need_text")}
                 </p>
                 <p className="text-sm font-body font-medium text-primary">
-                  Sans argent, sans abonnement. C'est le pari.
+                  {t("landing.aid.need_footer")}
                 </p>
               </div>
             </RevealSection>
@@ -951,14 +943,13 @@ const Landing = () => {
             <RevealSection delay={0.2}>
               <div className="bg-card rounded-2xl p-8 shadow-sm h-full">
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">
-                  « Je peux donner un peu de mon temps »
+                  {t("landing.aid.offer_title")}
                 </h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  Vous savez tailler les rosiers. Vous adorez les chiens. Vous avez deux heures samedi matin.
-                  Proposez, et vivez ce que vous n'auriez jamais vécu sans cette rencontre.
+                  {t("landing.aid.offer_text")}
                 </p>
                 <p className="text-sm font-body font-medium text-primary">
-                  C'est comme ça qu'un tissu local se retisse.
+                  {t("landing.aid.offer_footer")}
                 </p>
               </div>
             </RevealSection>
@@ -966,28 +957,28 @@ const Landing = () => {
 
           <RevealSection delay={0.25} className="mt-16">
             <p className="text-center text-xs tracking-widest uppercase text-primary/60 font-body mb-6">
-              Quelques échanges vus sur Guardiens cette semaine
+              {t("landing.aid.seen_this_week")}
             </p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 max-w-5xl mx-auto">
               {[
-                "Arroser les plantes",
-                "Petit bricolage",
-                "Tailler le jardin",
-                "Cours de pain maison",
-                "Séance de Reiki",
-                "Réceptionner un colis",
-                "Covoiturage rdv",
-                "Bouture, semis",
-                "Café & écoute",
-                "Aide aux courses",
-                "Coup de main déménagement",
-                "Apprendre la couture",
-              ].map((label) => (
+                "water_plants",
+                "small_diy",
+                "garden_pruning",
+                "bread_class",
+                "reiki",
+                "parcel",
+                "carpool",
+                "seedlings",
+                "coffee_listen",
+                "groceries",
+                "moving_help",
+                "sewing",
+              ].map((key) => (
                 <div
-                  key={label}
+                  key={key}
                   className="flex items-center justify-center text-center bg-card rounded-xl px-3 py-4 border border-border/60 hover:border-primary/40 hover:shadow-sm transition-all min-h-[64px]"
                 >
-                  <span className="text-xs font-body text-foreground/80 leading-tight">{label}</span>
+                  <span className="text-xs font-body text-foreground/80 leading-tight">{t(`landing.aid.examples.${key}`)}</span>
                 </div>
               ))}
             </div>
@@ -996,14 +987,14 @@ const Landing = () => {
           <RevealSection delay={0.3} className="text-center mt-12">
             <div className="border-l-4 border-primary pl-6 max-w-xl mx-auto text-left mb-10">
               <p className="text-xl md:text-2xl font-heading font-semibold italic text-foreground leading-snug">
-                La vie de village n'a pas disparu. Elle attendait simplement qu'on ose la première question.
+                {t("landing.aid.quote")}
               </p>
             </div>
             <Link
               to="/petites-missions"
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-full font-body font-medium text-sm hover:bg-primary/90 transition-colors"
             >
-              Découvrir les petites missions <ArrowRight className="h-4 w-4" />
+              {t("landing.aid.cta")} <ArrowRight className="h-4 w-4" />
             </Link>
           </RevealSection>
         </div>
@@ -1025,13 +1016,13 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto px-5 sm:px-6">
           <RevealSection className="text-center max-w-3xl mx-auto mb-16">
             <p className="text-xs md:text-[13px] tracking-[0.2em] uppercase text-primary font-body font-medium">
-              Confiance &amp; périmètre
+              {t("landing.trust.eyebrow")}
             </p>
             <h2 id="trust-heading" className="font-heading text-4xl md:text-5xl font-semibold text-foreground mt-4 leading-tight">
-              Choisir en confiance, à un kilomètre comme à mille.
+              {t("landing.trust.title")}
             </h2>
             <p className="text-base md:text-lg text-muted-foreground mt-5 leading-relaxed">
-              Quatre repères pour partir tranquille : gratuit côté propriétaires, rencontre avant chaque garde, profils vérifiés, et un périmètre que vous fixez vous-même.
+              {t("landing.trust.lede")}
             </p>
           </RevealSection>
 
@@ -1058,33 +1049,33 @@ const Landing = () => {
             <RevealOnScroll from="right" delay={120} className="order-1 lg:order-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">01</p>
-                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Gratuit pour les propriétaires</h3>
+                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">{t("landing.trust.p1_title")}</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Annonce, candidatures, messagerie : tout est gratuit. Pas de carte bancaire demandée.
+                  {t("landing.trust.p1_text")}
                 </p>
               </article>
 
               <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">02</p>
-                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Rencontre avant chaque garde</h3>
+                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">{t("landing.trust.p2_title")}</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Un café, une visite du logement, un tour des consignes. La confiance ne se devine pas : elle se construit, en se regardant.
+                  {t("landing.trust.p2_text")}
                 </p>
               </article>
 
               <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">03</p>
-                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Profils vérifiés, avis croisés</h3>
+                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">{t("landing.trust.p3_title")}</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Pièce d'identité contrôlée sous 24 h, avis publiés par les propriétaires précédents, historique des gardes réalisées. Tout est lisible.
+                  {t("landing.trust.p3_text")}
                 </p>
               </article>
 
               <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body">04</p>
-                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">De votre rue à l'autre bout de la France</h3>
+                <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">{t("landing.trust.p4_title")}</h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  Hyper-local pour un dépannage, élargi pour changer d'air : vous décidez jusqu'où vous voulez aller. Chaque garde devient une porte qui s'ouvre.
+                  {t("landing.trust.p4_text")}
                 </p>
               </article>
             </RevealOnScroll>
@@ -1097,10 +1088,10 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
             <h2 id="ils-ont-ose" className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug scroll-mt-24">
-              Ils ont osé. Voici ce qu'il leur reste.
+              {t("landing.testimonials.title")}
             </h2>
             <p className="mt-4 font-body text-sm text-foreground/55 max-w-xl mx-auto">
-              Témoignages recueillis auprès des membres du programme Fondateur (janvier – mai 2026). Prénoms et villes réels, récits anonymisés à leur demande.
+              {t("landing.testimonials.source")}
             </p>
           </RevealSection>
 
@@ -1114,7 +1105,7 @@ const Landing = () => {
             <button
               onClick={() => goToTestimonialPage(selectedIndex - 1)}
               className="absolute -left-2 md:-left-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full border border-foreground/20 flex items-center justify-center hover:bg-foreground/5 transition-colors text-foreground/40 hover:text-foreground/70 disabled:opacity-40 disabled:hover:bg-transparent"
-              aria-label="Témoignage précédent"
+              aria-label={t("landing.testimonials.prev_aria")}
               disabled={testimonialPages.length <= 1}
             >
               <ArrowLeft className="h-4 w-4" />
@@ -1122,7 +1113,7 @@ const Landing = () => {
             <button
               onClick={() => goToTestimonialPage(selectedIndex + 1)}
               className="absolute -right-2 md:-right-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full border border-foreground/20 flex items-center justify-center hover:bg-foreground/5 transition-colors text-foreground/40 hover:text-foreground/70 disabled:opacity-40 disabled:hover:bg-transparent"
-              aria-label="Témoignage suivant"
+              aria-label={t("landing.testimonials.next_aria")}
               disabled={testimonialPages.length <= 1}
             >
               <ArrowRight className="h-4 w-4" />
@@ -1130,28 +1121,28 @@ const Landing = () => {
 
             <div className="overflow-hidden px-3">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {(testimonialPages[selectedIndex] ?? []).map((t) => (
-                  <figure key={t.name} className="min-w-0">
+                {(testimonialPages[selectedIndex] ?? []).map((quote) => (
+                  <figure key={quote.name} className="min-w-0">
                     <blockquote className="rounded-2xl p-10 h-full bg-card border border-border shadow-sm flex flex-col">
                       <span aria-hidden className="block font-heading text-7xl leading-none mb-3 select-none text-primary/40">
                         "
                       </span>
                       <p className="font-body text-base md:text-lg text-foreground/70 leading-relaxed italic mb-6 flex-1">
-                        {t.text}
+                        {quote.text}
                       </p>
                       <figcaption className="flex items-center gap-3 pt-4 border-t border-border/60">
                         <span aria-hidden className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-heading text-sm font-semibold">
-                          {getInitials(t.name)}
+                          {getInitials(quote.name)}
                         </span>
                         <span className="flex flex-col leading-tight">
                           <span className="font-body text-sm font-semibold text-foreground">
-                            {t.name}
+                            {quote.name}
                           </span>
                           <span className="font-body text-xs text-foreground/55">
-                            {t.detail}
+                            {quote.detail}
                           </span>
                           <span className="font-body text-[11px] text-foreground/40 mt-0.5 uppercase tracking-widest">
-                            {t.period} · Programme Fondateur
+                            {quote.period} · {t("landing.testimonials.program_label")}
                           </span>
                         </span>
                       </figcaption>
@@ -1167,7 +1158,7 @@ const Landing = () => {
                   key={i}
                   onClick={() => goToTestimonialPage(i)}
                   className="inline-flex items-center justify-center min-w-11 min-h-11 group"
-                  aria-label={`Aller à la page de témoignages ${i + 1}`}
+                  aria-label={t("landing.testimonials.page_aria", { n: i + 1 })}
                 >
                   <span
                     className={`block w-2.5 h-2.5 rounded-full transition-colors ${
@@ -1186,46 +1177,46 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto px-6 py-24 md:py-32">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
-              Notre histoire
+              {t("landing.story.eyebrow")}
             </span>
             <h2 id="commence-avec-un-visa" className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-12 scroll-mt-24">
-              Tout a commencé avec un visa.
+              {t("landing.story.title")}
             </h2>
           </RevealSection>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-start">
             <RevealSection delay={0.1}>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                L'habitude de s'ouvrir aux gens du coin s'est perdue. Par manque de prétexte.
+                {t("landing.story.p1")}
               </p>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                Elisa, ma compagne et co-fondatrice de Guardiens, est arrivée d'Argentine avec un visa qui ne lui permettait pas de travailler. Elle gardait des animaux. Elle rentrait avec des histoires : des gens qui ouvraient leur porte, leur vie, librement. Des inconnus qui finissaient par nous inviter à Noël.
+                {t("landing.story.p2")}
               </p>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                Elisa et moi avons gardé 37 maisons en cinq ans, dans des villages, des villes, des hameaux.
+                {t("landing.story.p3")}
               </p>
               <div className="border-l-4 border-primary pl-6 my-8">
                 <p className="text-2xl md:text-3xl font-heading font-semibold italic text-foreground leading-snug">
-                  On n'a jamais gardé des maisons. On a été invités dans des vies.
+                  {t("landing.story.quote")}
                 </p>
               </div>
             </RevealSection>
 
             <RevealSection delay={0.2}>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                C'est ça que le village faisait naturellement.
+                {t("landing.story.p4")}
               </p>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                Guardiens, c'est le prétexte qui manquait. D'un côté, les petites missions d'entraide entre gens du coin : un potager arrosé contre un repas, une compétence contre une autre, un coup de main qui se rend en nature. De l'autre, indépendamment, le home sitting : vos clés confiées à quelqu'un que vous avez regardé dans les yeux.
+                {t("landing.story.p5")}
               </p>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous ne nous attendions pas à ce que cela compte autant.
+                {t("landing.story.p6")}
               </p>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                C'est pour cela que nous avons construit Guardiens, pour que vous viviez cela aussi.
+                {t("landing.story.p7")}
               </p>
               <span className="text-sm font-body italic text-foreground/50 mt-10 block">
-               , Jérémie &amp; Elisa
+                {t("landing.story.signature")}
               </span>
             </RevealSection>
           </div>
@@ -1249,13 +1240,13 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto px-6">
           <RevealSection className="text-center mb-14">
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
-              Guides &amp; villes
+              {t("landing.cities.eyebrow")}
             </span>
             <h2 id="house-sitting-pres-de-chez-vous" className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug mb-4 scroll-mt-24">
-              House-sitting près de chez vous.
+              {t("landing.cities.title")}
             </h2>
             <p className="text-lg font-body text-foreground/70 max-w-2xl mx-auto">
-              Des guides concrets pour préparer votre garde, et des hubs locaux pour les villes les plus actives, Lyon, Annecy, Grenoble, et partout en France.
+              {t("landing.cities.lede")}
             </p>
           </RevealSection>
 
@@ -1263,9 +1254,9 @@ const Landing = () => {
             {/* Colonne Guides */}
             <RevealSection delay={0.1}>
               <div className="rounded-2xl bg-card border border-border p-8 h-full">
-                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-2">Guides &amp; conseils</p>
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-2">{t("landing.cities.guides_tag")}</p>
                 <h3 className="font-heading text-2xl font-semibold text-foreground mb-6">
-                  Préparer votre garde
+                  {t("landing.cities.guides_title")}
                 </h3>
                 <ul className="space-y-3">
                   <li>
@@ -1337,10 +1328,10 @@ const Landing = () => {
                 </ul>
                 <div className="mt-6 pt-6 border-t border-border flex flex-col sm:flex-row gap-3">
                   <Button asChild variant="outline" size="sm" className="rounded-full">
-                    <Link to="/actualites">Tous les articles</Link>
+                    <Link to="/actualites">{t("landing.cities.all_articles")}</Link>
                   </Button>
                   <Button asChild variant="outline" size="sm" className="rounded-full">
-                    <Link to="/guides">Guides locaux par ville</Link>
+                    <Link to="/guides">{t("landing.cities.all_guides")}</Link>
                   </Button>
                 </div>
               </div>
@@ -1349,9 +1340,9 @@ const Landing = () => {
             {/* Colonne Villes */}
             <RevealSection delay={0.2}>
               <div className="rounded-2xl bg-card border border-border p-8 h-full">
-                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-2">House-sitting par ville</p>
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-2">{t("landing.cities.cities_tag")}</p>
                 <h3 className="font-heading text-2xl font-semibold text-foreground mb-6">
-                  Près de chez vous
+                  {t("landing.cities.cities_title")}
                 </h3>
                 <ul className="space-y-3">
                   <li>
@@ -1401,7 +1392,7 @@ const Landing = () => {
                 </ul>
                 <div className="mt-6 pt-6 border-t border-border">
                   <p className="text-xs text-foreground/60 leading-relaxed">
-                    Quel que soit votre département, vous trouvez un gardien à proximité.
+                    {t("landing.cities.cities_footer")}
                   </p>
                 </div>
               </div>
@@ -1416,57 +1407,19 @@ const Landing = () => {
         <div className="max-w-3xl mx-auto px-[5%] md:px-[8%]">
           <RevealSection>
             <h2 id="faq-heading" className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center mb-10 scroll-mt-24">
-              Questions fréquentes
+              {t("landing.faq.title")}
             </h2>
             <dl className="space-y-6">
-              <div className="bg-card border border-border rounded-2xl p-6">
-                <dt className="font-heading font-semibold text-foreground mb-2">
-                  Qu'est-ce que le house-sitting ?
-                </dt>
-                <dd className="text-sm text-foreground/70 leading-relaxed">
-                  Le house-sitting est un échange de services : un gardien habite sans frais dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties.
-                </dd>
-              </div>
-              <div className="bg-card border border-border rounded-2xl p-6">
-                <dt className="font-heading font-semibold text-foreground mb-2">
-                  Faut-il payer pour s'inscrire en tant que propriétaire ?
-                </dt>
-                <dd className="text-sm text-foreground/70 leading-relaxed">
-                  L'inscription, la publication d'annonces et les échanges avec les gardiens sont sans abonnement requis pour les propriétaires. Aucune carte bancaire demandée. Les gardiens bénéficient d'un accès sans abonnement jusqu'au 14 juillet 2026, puis l'abonnement est à 6,99 €/mois. L'entraide entre gens du coin reste sans abonnement pour tous.
-                </dd>
-              </div>
-              <div className="bg-card border border-border rounded-2xl p-6">
-                <dt className="font-heading font-semibold text-foreground mb-2">
-                  Comment trouver un pet sitter près de chez moi ?
-                </dt>
-                <dd className="text-sm text-foreground/70 leading-relaxed">
-                  Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous. Vous choisissez après une rencontre.
-                </dd>
-              </div>
-              <div className="bg-card border border-border rounded-2xl p-6">
-                <dt className="font-heading font-semibold text-foreground mb-2">
-                  Qui sont les gardiens sur Guardiens ?
-                </dt>
-                <dd className="text-sm text-foreground/70 leading-relaxed">
-                  Des gens du coin, vérifiés par notre équipe. Chaque profil passe une vérification d'identité (pièce d'identité + selfie) traitée sous 24 h. Vous voyez aussi leurs avis publiés par les propriétaires précédents.
-                </dd>
-              </div>
-              <div className="bg-card border border-border rounded-2xl p-6">
-                <dt className="font-heading font-semibold text-foreground mb-2">
-                  Comment se déroule une garde sur Guardiens ?
-                </dt>
-                <dd className="text-sm text-foreground/70 leading-relaxed">
-                  Vous publiez votre annonce, les gardiens du coin postulent, vous choisissez après une rencontre, puis votre gardien s'installe. Un accord de garde optionnel encadre les engagements de chacun pendant la garde.
-                </dd>
-              </div>
-              <div className="bg-card border border-border rounded-2xl p-6">
-                <dt className="font-heading font-semibold text-foreground mb-2">
-                  Guardiens est-il disponible partout en France ?
-                </dt>
-                <dd className="text-sm text-foreground/70 leading-relaxed">
-                  Oui. Le réseau Guardiens s'étend dans toutes les régions de France, du Pays basque à la Bretagne, en passant par les Alpes et le Nord. Vous trouverez un gardien près de chez vous quel que soit votre département.
-                </dd>
-              </div>
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <div key={n} className="bg-card border border-border rounded-2xl p-6">
+                  <dt className="font-heading font-semibold text-foreground mb-2">
+                    {t(`landing.faq.q${n}`)}
+                  </dt>
+                  <dd className="text-sm text-foreground/70 leading-relaxed">
+                    {t(`landing.faq.a${n}`)}
+                  </dd>
+                </div>
+              ))}
             </dl>
           </RevealSection>
         </div>
@@ -1476,15 +1429,15 @@ const Landing = () => {
       <section id="commencer" className="py-24 md:py-32 bg-primary scroll-mt-24">
         <RevealSection className="max-w-2xl mx-auto px-6 text-center">
           <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-6 bg-white/15 border border-white/30">
-            <span className="font-body text-xs text-white uppercase tracking-widest">Programme Fondateur</span>
+            <span className="font-body text-xs text-white uppercase tracking-widest">{t("landing.final.badge_program")}</span>
             <span aria-hidden="true" className="text-white/40">·</span>
-            <span className="font-body text-xs text-white/90">Badge offert avant le 14 juillet 2026</span>
+            <span className="font-body text-xs text-white/90">{t("landing.final.badge_offer")}</span>
           </div>
           <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6">
-            Votre prochaine histoire commence ici.
+            {t("landing.final.title")}
           </h2>
           <p className="font-body text-lg text-white/85 leading-relaxed max-w-lg mx-auto mb-10">
-            Vous partirez l'esprit léger. Vous rentrerez avec autre chose ,             un coin découvert, une rencontre, quelqu'un que vous n'auriez jamais croisé.
+            {t("landing.final.lede")}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
             <button
@@ -1494,7 +1447,7 @@ const Landing = () => {
               }}
               className="font-body text-sm font-bold tracking-wide rounded-full px-10 py-4 bg-white text-primary hover:bg-background hover:scale-[1.02] transition-all duration-200"
             >
-              Publier mon annonce
+              {t("landing.final.cta_owner")}
             </button>
             <button
               onClick={() => {
@@ -1503,11 +1456,11 @@ const Landing = () => {
               }}
               className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-transparent text-white border-2 border-white/40 hover:bg-white/10 transition-all duration-200"
             >
-              Je veux garder
+              {t("landing.final.cta_sitter")}
             </button>
           </div>
           <p className="text-xs text-white/70 font-body">
-            Inscription en 2 minutes, sans carte bancaire.
+            {t("landing.final.footnote")}
           </p>
         </RevealSection>
       </section>

@@ -61,6 +61,169 @@
       "kpi_animals": "animaux accompagnés",
       "kpi_members": "inscrits",
       "kpi_missions": "missions d'entraide"
+    },
+    "toc": {
+      "aria": "Sommaire de la page",
+      "title": "Sommaire",
+      "care_aid": "Garde & entraide",
+      "how": "Comment ça marche",
+      "aid": "Entraide locale",
+      "trust": "Confiance",
+      "testimonials": "Témoignages",
+      "story": "Notre histoire",
+      "cities": "Guides & villes",
+      "faq": "FAQ"
+    },
+    "usages": {
+      "eyebrow": "Ce qu'on fait ensemble",
+      "title": "Garde d'animaux à domicile et entraide locale.",
+      "lede": "Le home sitting d'un côté, l'entraide entre gens du coin de l'autre. À vous de choisir, l'un, l'autre, ou les deux.",
+      "owner": {
+        "tag": "Propriétaires",
+        "title": "Partir l'esprit léger.",
+        "text": "Quelqu'un du coin veille sur votre maison et vos animaux. Vous le rencontrez avant de partir. Vous choisissez.",
+        "badge": "Sans abonnement",
+        "cta": "Je cherche un gardien →"
+      },
+      "sitter": {
+        "tag": "Gardiens",
+        "title": "Garder, et découvrir.",
+        "text": "Vivez dans des maisons, avec des animaux, dans des coins que vous n'auriez jamais explorés autrement. Une garde, c'est aussi un voyage.",
+        "cta": "Je veux garder →"
+      },
+      "mutual": {
+        "badge": "Gratuit",
+        "tag": "Entraide locale, indépendante de la garde",
+        "title": "Un coup de main, un échange.",
+        "text": "Arroser un potager, monter une étagère, partager une compétence, rendre une visite à une personne isolée. Aucune garde, aucun animal nécessaire, juste des gens du coin qui s'entraident.",
+        "cta": "Découvrir l'entraide →"
+      },
+      "urgency": {
+        "eyebrow": "Imprévu de dernière minute",
+        "title": "Un départ précipité ?",
+        "text": "Hospitalisation, déplacement de dernière minute, urgence familiale : un gardien du coin peut prendre le relais en quelques heures.",
+        "cta": "Trouver un gardien en urgence →"
+      }
+    },
+    "meeting": {
+      "eyebrow": "Ce qu'on n'écrit jamais dans une annonce",
+      "title_a": "Le vrai prétexte,",
+      "title_b": "c'est la rencontre.",
+      "p1": "Ce qu'on raconte rarement, c'est ce qui se passe autour. Connaître la mami du coin et son histoire parce qu'on l'a aidée à ramasser ses fruits du jardin. Échanger avec Gerardo pendant qu'il vous donne un coup de main pour bricoler, et lui proposer un repas fait maison en retour.",
+      "p2": "Pas besoin d'un animal pour qu'une rencontre commence. Demander un coup de main, en proposer un : c'est déjà ouvrir une porte. Garder une maison, c'est en ouvrir une autre, un même geste, deux échelles.",
+      "p3": "On apprend, on découvre, on s'attache, sans aller le chercher. Juste en laissant la place à ce qui peut arriver."
+    },
+    "how": {
+      "eyebrow": "Simple et transparent",
+      "title": "Comment ça marche ?",
+      "step1_title": "Publiez votre annonce",
+      "step1_text": "Vos dates, vos animaux, votre maison. Quelques minutes suffisent, votre annonce est en ligne.",
+      "step2_title": "Choisissez après une rencontre",
+      "step2_text": "Des gardiens du coin postulent. Vous lisez les profils, les avis, vous échangez. Puis vous vous voyez, un café, une visite, avant de décider.",
+      "step3_title": "Partez l'esprit léger",
+      "step3_text": "L'accord de garde signé, votre gardien s'installe. Vous recevez des nouvelles. Vous rentrez chez vous, souvent avec une nouvelle relation.",
+      "cta_owner": "Publier mon annonce",
+      "cta_secondary": "Ou commencer par un coup de main →",
+      "footnote": "Inscription en 2 minutes · Sans carte bancaire"
+    },
+    "aid": {
+      "eyebrow": "Pour tous · Sans abonnement · Sans argent",
+      "title": "Osez demander. Osez proposer.",
+      "p1": "Avant, il y avait quelqu'un du coin qui passait arroser le jardin, qui gardait le chien, qui venait fixer un volet. Quelqu'un à qui on offrait une part de gâteau ou un coup de main en retour.",
+      "p2": "Cette habitude n'a pas disparu, on n'ose simplement plus la première question. Guardiens, c'est le prétexte pour la reposer, et au passage, vivre des expériences qu'aucun voyage organisé ne vous offrira.",
+      "need_title": "« J'ai besoin d'un coup de main »",
+      "need_text": "Votre potager pendant les vacances. Vos poules ce week-end. Promener votre chien après une opération. Le demander, ce n'est pas avouer une faiblesse, c'est faire confiance.",
+      "need_footer": "Sans argent, sans abonnement. C'est le pari.",
+      "offer_title": "« Je peux donner un peu de mon temps »",
+      "offer_text": "Vous savez tailler les rosiers. Vous adorez les chiens. Vous avez deux heures samedi matin. Proposez, et vivez ce que vous n'auriez jamais vécu sans cette rencontre.",
+      "offer_footer": "C'est comme ça qu'un tissu local se retisse.",
+      "seen_this_week": "Quelques échanges vus sur Guardiens cette semaine",
+      "examples": {
+        "water_plants": "Arroser les plantes",
+        "small_diy": "Petit bricolage",
+        "garden_pruning": "Tailler le jardin",
+        "bread_class": "Cours de pain maison",
+        "reiki": "Séance de Reiki",
+        "parcel": "Réceptionner un colis",
+        "carpool": "Covoiturage rdv",
+        "seedlings": "Bouture, semis",
+        "coffee_listen": "Café & écoute",
+        "groceries": "Aide aux courses",
+        "moving_help": "Coup de main déménagement",
+        "sewing": "Apprendre la couture"
+      },
+      "quote": "La vie de village n'a pas disparu. Elle attendait simplement qu'on ose la première question.",
+      "cta": "Découvrir les petites missions"
+    },
+    "trust": {
+      "eyebrow": "Confiance & périmètre",
+      "title": "Choisir en confiance, à un kilomètre comme à mille.",
+      "lede": "Quatre repères pour partir tranquille : gratuit côté propriétaires, rencontre avant chaque garde, profils vérifiés, et un périmètre que vous fixez vous-même.",
+      "p1_title": "Gratuit pour les propriétaires",
+      "p1_text": "Annonce, candidatures, messagerie : tout est gratuit. Pas de carte bancaire demandée.",
+      "p2_title": "Rencontre avant chaque garde",
+      "p2_text": "Un café, une visite du logement, un tour des consignes. La confiance ne se devine pas : elle se construit, en se regardant.",
+      "p3_title": "Profils vérifiés, avis croisés",
+      "p3_text": "Pièce d'identité contrôlée sous 24 h, avis publiés par les propriétaires précédents, historique des gardes réalisées. Tout est lisible.",
+      "p4_title": "De votre rue à l'autre bout de la France",
+      "p4_text": "Hyper-local pour un dépannage, élargi pour changer d'air : vous décidez jusqu'où vous voulez aller. Chaque garde devient une porte qui s'ouvre."
+    },
+    "testimonials": {
+      "title": "Ils ont osé. Voici ce qu'il leur reste.",
+      "source": "Témoignages recueillis auprès des membres du programme Fondateur (janvier – mai 2026). Prénoms et villes réels, récits anonymisés à leur demande.",
+      "prev_aria": "Témoignage précédent",
+      "next_aria": "Témoignage suivant",
+      "page_aria": "Aller à la page de témoignages {{n}}",
+      "program_label": "Programme Fondateur"
+    },
+    "story": {
+      "eyebrow": "Notre histoire",
+      "title": "Tout a commencé avec un visa.",
+      "p1": "L'habitude de s'ouvrir aux gens du coin s'est perdue. Par manque de prétexte.",
+      "p2": "Elisa, ma compagne et co-fondatrice de Guardiens, est arrivée d'Argentine avec un visa qui ne lui permettait pas de travailler. Elle gardait des animaux. Elle rentrait avec des histoires : des gens qui ouvraient leur porte, leur vie, librement. Des inconnus qui finissaient par nous inviter à Noël.",
+      "p3": "Elisa et moi avons gardé 37 maisons en cinq ans, dans des villages, des villes, des hameaux.",
+      "quote": "On n'a jamais gardé des maisons. On a été invités dans des vies.",
+      "p4": "C'est ça que le village faisait naturellement.",
+      "p5": "Guardiens, c'est le prétexte qui manquait. D'un côté, les petites missions d'entraide entre gens du coin : un potager arrosé contre un repas, une compétence contre une autre, un coup de main qui se rend en nature. De l'autre, indépendamment, le home sitting : vos clés confiées à quelqu'un que vous avez regardé dans les yeux.",
+      "p6": "Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous ne nous attendions pas à ce que cela compte autant.",
+      "p7": "C'est pour cela que nous avons construit Guardiens, pour que vous viviez cela aussi.",
+      "signature": ", Jérémie & Elisa"
+    },
+    "cities": {
+      "eyebrow": "Guides & villes",
+      "title": "House-sitting près de chez vous.",
+      "lede": "Des guides concrets pour préparer votre garde, et des hubs locaux pour les villes les plus actives, Lyon, Annecy, Grenoble, et partout en France.",
+      "guides_tag": "Guides & conseils",
+      "guides_title": "Préparer votre garde",
+      "all_articles": "Tous les articles",
+      "all_guides": "Guides locaux par ville",
+      "cities_tag": "House-sitting par ville",
+      "cities_title": "Près de chez vous",
+      "cities_footer": "Quel que soit votre département, vous trouvez un gardien à proximité."
+    },
+    "faq": {
+      "title": "Questions fréquentes",
+      "q1": "Qu'est-ce que le house-sitting ?",
+      "a1": "Le house-sitting est un échange de services : un gardien habite sans frais dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties.",
+      "q2": "Faut-il payer pour s'inscrire en tant que propriétaire ?",
+      "a2": "L'inscription, la publication d'annonces et les échanges avec les gardiens sont sans abonnement requis pour les propriétaires. Aucune carte bancaire demandée. Les gardiens bénéficient d'un accès sans abonnement jusqu'au 14 juillet 2026, puis l'abonnement est à 6,99 €/mois. L'entraide entre gens du coin reste sans abonnement pour tous.",
+      "q3": "Comment trouver un pet sitter près de chez moi ?",
+      "a3": "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous. Vous choisissez après une rencontre.",
+      "q4": "Qui sont les gardiens sur Guardiens ?",
+      "a4": "Des gens du coin, vérifiés par notre équipe. Chaque profil passe une vérification d'identité (pièce d'identité + selfie) traitée sous 24 h. Vous voyez aussi leurs avis publiés par les propriétaires précédents.",
+      "q5": "Comment se déroule une garde sur Guardiens ?",
+      "a5": "Vous publiez votre annonce, les gardiens du coin postulent, vous choisissez après une rencontre, puis votre gardien s'installe. Un accord de garde optionnel encadre les engagements de chacun pendant la garde.",
+      "q6": "Guardiens est-il disponible partout en France ?",
+      "a6": "Oui. Le réseau Guardiens s'étend dans toutes les régions de France, du Pays basque à la Bretagne, en passant par les Alpes et le Nord. Vous trouverez un gardien près de chez vous quel que soit votre département."
+    },
+    "final": {
+      "badge_program": "Programme Fondateur",
+      "badge_offer": "Badge offert avant le 14 juillet 2026",
+      "title": "Votre prochaine histoire commence ici.",
+      "lede": "Vous partirez l'esprit léger. Vous rentrerez avec autre chose, un coin découvert, une rencontre, quelqu'un que vous n'auriez jamais croisé.",
+      "cta_owner": "Publier mon annonce",
+      "cta_sitter": "Je veux garder",
+      "footnote": "Inscription en 2 minutes, sans carte bancaire."
     }
   }
 }
