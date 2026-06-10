@@ -171,7 +171,7 @@ const GuidesListing = () => {
                                   </div>
                                   <div>
                                     <h3 className="font-semibold text-foreground">{guide.city}</h3>
-                                    <p className="text-xs text-muted-foreground">{count} lieux référencés</p>
+                                    <p className="text-xs text-muted-foreground">{t("guides.places_count", { n: count })}</p>
                                   </div>
                                 </div>
                                 <p className="text-sm text-muted-foreground italic line-clamp-2">
