@@ -76,6 +76,9 @@ function isNew(publishedAt: string | null): boolean {
 }
 
 export default function News() {
+  const { t, i18n } = useTranslation();
+  const tCat = (key: string) => t(`news.categories.${key}`, { defaultValue: key });
+  const dateLocale = (({ fr, en: enUS, es, it: itLocale, de: deLocale } as any)[i18n.language?.split("-")[0]] || fr);
   const [articles, setArticles] = useState<Article[]>([]);
   const [vieLocaleArticles, setVieLocaleArticles] = useState<Article[]>([]);
   const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
