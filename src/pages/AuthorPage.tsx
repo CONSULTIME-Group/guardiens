@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -23,20 +24,6 @@ interface ArticleRow {
   author_name: string;
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-  conseil: "Conseil",
-  conseil_gardien: "Conseil gardien",
-  conseil_proprio: "Conseil proprio",
-  guide_pratique: "Guide pratique",
-  guide_lieu: "Guide lieu",
-  guide_local: "Guide local",
-  guide_race: "Guide race",
-  ville: "Ville",
-  vie_locale: "Vie locale",
-  saisonnier: "Saisonnier",
-  temoignage: "Témoignage",
-  actualite: "Actualité",
-};
 
 export default function AuthorPage() {
   const { slug } = useParams<{ slug: string }>();
