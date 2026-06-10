@@ -21,7 +21,7 @@ import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
-const SECTIONS_BASE = [
+const SECTIONS_BASE: Array<{ id: string; num: number; optional?: boolean }> = [
   { id: "identity", num: 1 },
   { id: "housing", num: 2 },
   { id: "animals", num: 3 },
@@ -29,7 +29,7 @@ const SECTIONS_BASE = [
   { id: "communication", num: 5, optional: true },
   { id: "skills", num: 6 },
   { id: "gallery", num: 7 },
-] as const;
+];
 
 /**
  * Critère de score étendu : inclut la section où l'utilisateur peut le compléter.
