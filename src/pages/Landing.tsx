@@ -1328,10 +1328,10 @@ const Landing = () => {
                 </ul>
                 <div className="mt-6 pt-6 border-t border-border flex flex-col sm:flex-row gap-3">
                   <Button asChild variant="outline" size="sm" className="rounded-full">
-                    <Link to="/actualites">Tous les articles</Link>
+                    <Link to="/actualites">{t("landing.cities.all_articles")}</Link>
                   </Button>
                   <Button asChild variant="outline" size="sm" className="rounded-full">
-                    <Link to="/guides">Guides locaux par ville</Link>
+                    <Link to="/guides">{t("landing.cities.all_guides")}</Link>
                   </Button>
                 </div>
               </div>
