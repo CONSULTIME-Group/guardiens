@@ -86,8 +86,18 @@ Rules:
   const data = await res.json();
   const content = data.choices?.[0]?.message?.content;
   if (!content) throw new Error("Empty AI response");
-  const parsed = JSON.parse(content);
-  return parsed;
+  // Robust parse: handle stray trailing comma, accidental code fences
+  let cleaned = content.trim().replace(/^```json\s*/i, "").replace(/```$/, "").trim();
+  try {
+    return JSON.parse(cleaned);
+  } catch (e) {
+    // Try to recover by trimming after last closing brace
+    const lastBrace = cleaned.lastIndexOf("}");
+    if (lastBrace > 0) {
+      try { return JSON.parse(cleaned.slice(0, lastBrace + 1)); } catch {}
+    }
+    throw e;
+  }
 }
 
 async function main() {
