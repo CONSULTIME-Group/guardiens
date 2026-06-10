@@ -1,18 +1,51 @@
 {
   "language": {
     "label": "Sprache",
-    "switcher_aria": "Sprache wechseln",
+    "switcher_aria": "Sprache ändern",
     "current": "Aktuelle Sprache: {{lang}}"
   },
   "nav": {
     "listings": "Aktuelle Anzeigen",
     "small_missions": "Kleine Hilfen",
-    "pros": "Tier-Profis",
+    "pros": "Tierprofis",
     "guides": "Lokale Guides",
-    "pricing": "Preise",
-    "news": "Das Journal",
+    "pricing": "Tarife",
+    "news": "Journal",
     "login": "Anmelden",
     "register": "Konto erstellen",
-    "menu": "Menü"
+    "menu": "Menü",
+    "beta": "Beta"
+  },
+  "footer": {
+    "sections": {
+      "by_city": "House-sitting nach Stadt",
+      "by_department": "Nach Departement",
+      "local_guides": "Lokale Guides",
+      "resources": "Ressourcen",
+      "guardiens": "Guardiens"
+    },
+    "links": {
+      "all_guides": "Alle Guides",
+      "articles": "Artikel",
+      "house_sitting_guide": "House-sitting Ratgeber",
+      "faq": "FAQ",
+      "pricing": "Tarife",
+      "what_is_house_sitting": "Was ist House-sitting",
+      "about": "Über uns",
+      "contact": "Kontakt",
+      "register": "Registrierung",
+      "small_missions": "Kleine Hilfen",
+      "emergency_sitter": "Notfall-Betreuer",
+      "pet_pros": "Tierprofis"
+    },
+    "tagline": "House-sitting in Ihrer Nähe",
+    "version": "Guardiens · Version Beta · 2026",
+    "legal": {
+      "cgu": "Nutzungsbedingungen",
+      "cgs": "Allgemeine Servicebedingungen",
+      "privacy": "Datenschutzrichtlinie",
+      "legal_notice": "Impressum",
+      "contact": "Kontakt"
+    }
   }
 }

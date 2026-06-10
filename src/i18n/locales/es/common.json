@@ -1,18 +1,51 @@
 {
   "language": {
     "label": "Idioma",
-    "switcher_aria": "Cambiar idioma",
+    "switcher_aria": "Cambiar de idioma",
     "current": "Idioma actual: {{lang}}"
   },
   "nav": {
-    "listings": "Anuncios abiertos",
+    "listings": "Anuncios actuales",
     "small_missions": "Pequeños favores",
-    "pros": "Profesionales animales",
+    "pros": "Profesionales de animales",
     "guides": "Guías locales",
     "pricing": "Tarifas",
-    "news": "La revista",
+    "news": "El diario",
     "login": "Iniciar sesión",
-    "register": "Crear cuenta",
-    "menu": "Menú"
+    "register": "Crear mi cuenta",
+    "menu": "Menú",
+    "beta": "Beta"
+  },
+  "footer": {
+    "sections": {
+      "by_city": "House-sitting por ciudad",
+      "by_department": "Por departamento",
+      "local_guides": "Guías locales",
+      "resources": "Recursos",
+      "guardiens": "Guardiens"
+    },
+    "links": {
+      "all_guides": "Todas las guías",
+      "articles": "Artículos",
+      "house_sitting_guide": "Guía del house-sitting",
+      "faq": "Preguntas frecuentes",
+      "pricing": "Tarifas",
+      "what_is_house_sitting": "Qué es el house-sitting",
+      "about": "Acerca de",
+      "contact": "Contacto",
+      "register": "Registro",
+      "small_missions": "Pequeños favores",
+      "emergency_sitter": "Cuidador de emergencia",
+      "pet_pros": "Profesionales de animales"
+    },
+    "tagline": "House-sitting de proximidad",
+    "version": "Guardiens · Versión Beta · 2026",
+    "legal": {
+      "cgu": "Condiciones Generales de Uso",
+      "cgs": "Condiciones Generales de Servicio",
+      "privacy": "Política de privacidad",
+      "legal_notice": "Aviso legal",
+      "contact": "Contacto"
+    }
   }
 }
