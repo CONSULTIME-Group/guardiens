@@ -1,23 +1,24 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
+  const { t } = useTranslation();
   return (
     <footer ref={ref} className="bg-footer border-t border-white/10">
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-16">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10 mb-12">
           <div>
-            <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">House-sitting par ville</h3>
+            <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.by_city")}</h3>
             <ul className="space-y-2">
               <li><Link to="/house-sitting/lyon" className="font-body text-sm text-white/75 hover:text-white transition-colors">House-sitting Lyon</Link></li>
               <li><Link to="/house-sitting/annecy" className="font-body text-sm text-white/75 hover:text-white transition-colors">House-sitting Annecy</Link></li>
               <li><Link to="/house-sitting/grenoble" className="font-body text-sm text-white/75 hover:text-white transition-colors">House-sitting Grenoble</Link></li>
               <li><Link to="/house-sitting/chambery" className="font-body text-sm text-white/75 hover:text-white transition-colors">House-sitting Chambéry</Link></li>
-              
             </ul>
           </div>
           <div>
-            <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">Par département</h3>
+            <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.by_department")}</h3>
             <ul className="space-y-2">
               <li><Link to="/departement/rhone" className="font-body text-sm text-white/75 hover:text-white transition-colors">Rhône (69)</Link></li>
               <li><Link to="/departement/haute-savoie" className="font-body text-sm text-white/75 hover:text-white transition-colors">Haute-Savoie (74)</Link></li>
@@ -29,9 +30,9 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
             </ul>
           </div>
           <div>
-            <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">Guides locaux</h3>
+            <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.local_guides")}</h3>
             <ul className="space-y-2">
-              <li><Link to="/guides" className="font-body text-sm text-white/75 hover:text-white transition-colors">Tous les guides</Link></li>
+              <li><Link to="/guides" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.all_guides")}</Link></li>
               <li><Link to="/guides/lyon" className="font-body text-sm text-white/75 hover:text-white transition-colors">Guide Lyon</Link></li>
               <li><Link to="/guides/annecy" className="font-body text-sm text-white/75 hover:text-white transition-colors">Guide Annecy</Link></li>
               <li><Link to="/guides/grenoble" className="font-body text-sm text-white/75 hover:text-white transition-colors">Guide Grenoble</Link></li>
@@ -40,24 +41,24 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
             </ul>
           </div>
           <div>
-            <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">Ressources</h3>
+            <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.resources")}</h3>
             <ul className="space-y-2">
-              <li><Link to="/actualites" className="font-body text-sm text-white/75 hover:text-white transition-colors">Articles</Link></li>
-              <li><Link to="/actualites/house-sitting-aura-guide-complet" className="font-body text-sm text-white/75 hover:text-white transition-colors">Guide du house-sitting</Link></li>
-              <li><Link to="/faq" className="font-body text-sm text-white/75 hover:text-white transition-colors">FAQ</Link></li>
-              <li><Link to="/tarifs" className="font-body text-sm text-white/75 hover:text-white transition-colors">Tarifs</Link></li>
-              <li><Link to="/actualites/c-est-quoi-le-house-sitting" className="font-body text-sm text-white/75 hover:text-white transition-colors">C'est quoi le house-sitting</Link></li>
+              <li><Link to="/actualites" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.articles")}</Link></li>
+              <li><Link to="/actualites/house-sitting-aura-guide-complet" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_guide")}</Link></li>
+              <li><Link to="/faq" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.faq")}</Link></li>
+              <li><Link to="/tarifs" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.pricing")}</Link></li>
+              <li><Link to="/actualites/c-est-quoi-le-house-sitting" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.what_is_house_sitting")}</Link></li>
             </ul>
           </div>
           <div>
-            <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">Guardiens</h3>
+            <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.guardiens")}</h3>
             <ul className="space-y-2">
-              <li><Link to="/a-propos" className="font-body text-sm text-white/75 hover:text-white transition-colors">À propos</Link></li>
-              <li><Link to="/contact" className="font-body text-sm text-white/75 hover:text-white transition-colors">Contact</Link></li>
-              <li><Link to="/inscription" className="font-body text-sm text-white/75 hover:text-white transition-colors">Inscription</Link></li>
-              <li><Link to="/petites-missions" className="font-body text-sm text-white/75 hover:text-white transition-colors">Petites missions</Link></li>
-              <li><Link to="/gardien-urgence" className="font-body text-sm text-white/75 hover:text-white transition-colors">Gardien d'urgence</Link></li>
-              <li><Link to="/pros" className="font-body text-sm text-white/75 hover:text-white transition-colors">Pros animaliers <span className="ml-1 text-[9px] uppercase tracking-wider font-bold bg-amber-200/90 text-amber-900 px-1.5 py-0.5 rounded">Bêta</span></Link></li>
+              <li><Link to="/a-propos" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.about")}</Link></li>
+              <li><Link to="/contact" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.contact")}</Link></li>
+              <li><Link to="/inscription" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.register")}</Link></li>
+              <li><Link to="/petites-missions" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.small_missions")}</Link></li>
+              <li><Link to="/gardien-urgence" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.emergency_sitter")}</Link></li>
+              <li><Link to="/pros" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.pet_pros")} <span className="ml-1 text-[9px] uppercase tracking-wider font-bold bg-amber-200/90 text-amber-900 px-1.5 py-0.5 rounded">{t("nav.beta")}</span></Link></li>
             </ul>
           </div>
         </div>
@@ -68,21 +69,21 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
               <span className="text-primary">g</span>uardiens
             </h3>
             <p className="font-body text-sm text-white/70">
-              House-sitting de proximité
+              {t("footer.tagline")}
             </p>
           </div>
           <div className="flex flex-wrap gap-4 text-sm text-white/75 font-body">
-            <span className="text-xs text-white/80 font-body">Guardiens · Version bêta · 2026</span>
+            <span className="text-xs text-white/80 font-body">{t("footer.version")}</span>
             <span aria-hidden="true" className="text-white/40">·</span>
-            <Link to="/cgu" className="hover:text-white transition-colors">CGU</Link>
+            <Link to="/cgu" className="hover:text-white transition-colors">{t("footer.legal.cgu")}</Link>
             <span aria-hidden="true" className="text-white/40">·</span>
-            <Link to="/cgs" className="hover:text-white transition-colors">CGS</Link>
+            <Link to="/cgs" className="hover:text-white transition-colors">{t("footer.legal.cgs")}</Link>
             <span aria-hidden="true" className="text-white/40">·</span>
-            <Link to="/confidentialite" className="hover:text-white transition-colors">Politique de confidentialité</Link>
+            <Link to="/confidentialite" className="hover:text-white transition-colors">{t("footer.legal.privacy")}</Link>
             <span aria-hidden="true" className="text-white/40">·</span>
-            <Link to="/mentions-legales" className="hover:text-white transition-colors">Mentions légales</Link>
+            <Link to="/mentions-legales" className="hover:text-white transition-colors">{t("footer.legal.legal_notice")}</Link>
             <span aria-hidden="true" className="text-white/40">·</span>
-            <Link to="/contact" className="hover:text-white transition-colors">Contact</Link>
+            <Link to="/contact" className="hover:text-white transition-colors">{t("footer.legal.contact")}</Link>
           </div>
         </div>
       </div>

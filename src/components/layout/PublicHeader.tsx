@@ -17,6 +17,7 @@ const NAV_DEFS = [
 export default function PublicHeader() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
@@ -30,7 +31,7 @@ export default function PublicHeader() {
 
         {/* Desktop nav */}
         <nav className="hidden sm:flex gap-1 items-center">
-          {NAV_LINKS.map((l) => (
+          {NAV_DEFS.map((l) => (
             <Button
               key={l.to}
               variant="ghost"
@@ -39,19 +40,19 @@ export default function PublicHeader() {
               className={isActive(l.to) ? "text-primary font-semibold" : ""}
               aria-current={isActive(l.to) ? "page" : undefined}
             >
-              {l.label}
+              {t(`nav.${l.key}`)}
               {l.beta && (
                 <span className="ml-1.5 text-[9px] uppercase tracking-wider font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
-                  Bêta
+                  {t("nav.beta")}
                 </span>
               )}
             </Button>
           ))}
           <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
-            Connexion
+            {t("nav.login")}
           </Button>
           <Button size="sm" onClick={() => navigate("/inscription")}>
-            Créer mon compte
+            {t("nav.register")}
           </Button>
           <LanguageSwitcher />
         </nav>
@@ -60,9 +61,9 @@ export default function PublicHeader() {
         <div className="flex sm:hidden items-center gap-1">
           <LanguageSwitcher compact />
           <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
-            Connexion
+            {t("nav.login")}
           </Button>
-          <Button size="icon" variant="ghost" onClick={() => setOpen(!open)} aria-label="Menu">
+          <Button size="icon" variant="ghost" onClick={() => setOpen(!open)} aria-label={t("nav.menu")}>
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
@@ -71,7 +72,7 @@ export default function PublicHeader() {
       {/* Mobile dropdown */}
       {open && (
         <nav className="sm:hidden border-t border-border bg-background px-[5%] py-4 space-y-1 animate-in slide-in-from-top-2 duration-200">
-          {NAV_LINKS.map((l) => (
+          {NAV_DEFS.map((l) => (
             <Link
               key={l.to}
               to={l.to}
@@ -83,17 +84,17 @@ export default function PublicHeader() {
                   : "text-foreground hover:bg-accent"
               }`}
             >
-              {l.label}
+              {t(`nav.${l.key}`)}
               {l.beta && (
                 <span className="ml-1.5 text-[9px] uppercase tracking-wider font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
-                  Bêta
+                  {t("nav.beta")}
                 </span>
               )}
             </Link>
           ))}
           <div className="pt-2 border-t border-border">
             <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/inscription"); }}>
-              Créer mon compte
+              {t("nav.register")}
             </Button>
           </div>
         </nav>
