@@ -313,7 +313,7 @@ const OwnerProfilePage = () => {
                       });
                     }}
                   >
-                    Suivant : {nextSection.label}
+                    {tp("next", { label: nextSection.label })}
                     <ArrowRight className="h-4 w-4" aria-hidden="true" />
                   </Button>
                 </div>
