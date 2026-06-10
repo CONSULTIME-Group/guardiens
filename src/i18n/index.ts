@@ -35,8 +35,9 @@ void i18n
       de: { common: deCommon },
     },
     detection: {
-      order: ["cookie", "localStorage", "navigator", "htmlTag"],
+      order: ["querystring", "cookie", "localStorage", "navigator", "htmlTag"],
       caches: ["cookie", "localStorage"],
+      lookupQuerystring: "lang",
       lookupCookie: "lang",
       lookupLocalStorage: "lang",
       cookieMinutes: 60 * 24 * 365,
