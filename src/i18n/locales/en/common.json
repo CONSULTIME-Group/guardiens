@@ -7,7 +7,7 @@
   "nav": {
     "listings": "Current listings",
     "small_missions": "Small favours",
-    "pros": "Pet pros",
+    "pros": "Pet professionals",
     "guides": "Local guides",
     "pricing": "Pricing",
     "news": "The journal",
@@ -35,17 +35,32 @@
       "contact": "Contact",
       "register": "Registration",
       "small_missions": "Small favours",
-      "emergency_sitter": "Emergency caretaker",
-      "pet_pros": "Pet pros"
+      "emergency_sitter": "Emergency caretaker / pet & home sitter",
+      "pet_pros": "Pet professionals"
     },
     "tagline": "Local house-sitting",
     "version": "Guardiens · Beta version · 2026",
     "legal": {
-      "cgu": "T&Cs",
-      "cgs": "General Terms of Service",
+      "cgu": "Terms of Use",
+      "cgs": "Terms of Service",
       "privacy": "Privacy policy",
       "legal_notice": "Legal notice",
       "contact": "Contact"
+    }
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "Mutual aid · Pet sitting · Home sitting",
+      "title_main": "Pet sitting, small favours,",
+      "title_accent": "the connection.",
+      "lede": "Have your home and pets looked after by a local caretaker / pet & home sitter during your absences. Or ask for, and provide, a small favour near you, with or without pets.",
+      "lede_italic": "And behind every exchange, a connection you wouldn't have otherwise looked for.",
+      "cta_owner": "Publish my listing",
+      "cta_sitter": "I want to sit",
+      "kpi_houses": "homes sat",
+      "kpi_animals": "pets accompanied",
+      "kpi_members": "registered",
+      "kpi_missions": "mutual aid missions"
     }
   }
 }

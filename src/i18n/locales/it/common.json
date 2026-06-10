@@ -12,7 +12,7 @@
     "pricing": "Tariffe",
     "news": "Il giornale",
     "login": "Accedi",
-    "register": "Crei il Suo account",
+    "register": "Creare il mio account",
     "menu": "Menu",
     "beta": "Beta"
   },
@@ -31,9 +31,9 @@
       "faq": "FAQ",
       "pricing": "Tariffe",
       "what_is_house_sitting": "Cos'è il house-sitting",
-      "about": "Chi siamo",
+      "about": "Informazioni",
       "contact": "Contatti",
-      "register": "Registrazione",
+      "register": "Iscrizione",
       "small_missions": "Piccoli aiuti",
       "emergency_sitter": "Custode d'emergenza",
       "pet_pros": "Professionisti per animali"
@@ -46,6 +46,21 @@
       "privacy": "Informativa sulla privacy",
       "legal_notice": "Note legali",
       "contact": "Contatti"
+    }
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "Aiuto reciproco · Cura degli animali · Home sitting",
+      "title_main": "La cura degli animali, i piccoli aiuti,",
+      "title_accent": "l'incontro.",
+      "lede": "Fare custodire la Sua casa e i Suoi animali da un custode della zona durante le Sue assenze. Oppure richiedere, e offrire, piccoli aiuti vicino a Lei, con o senza animali.",
+      "lede_italic": "E dietro ogni scambio, un incontro che non avreste cercato.",
+      "cta_owner": "Pubblicare il mio annuncio",
+      "cta_sitter": "Voglio fare il custode",
+      "kpi_houses": "case custodite",
+      "kpi_animals": "animali accuditi",
+      "kpi_members": "iscritti",
+      "kpi_missions": "missioni di aiuto reciproco"
     }
   }
 }
