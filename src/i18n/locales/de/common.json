@@ -738,5 +738,23 @@
     "email_resent_title": "E-Mail erneut gesendet",
     "email_resent_body": "Eine neue Bestätigungs-E-Mail wurde gerade gesendet.",
     "resend_email": "E-Mail erneut senden"
+  },
+  "favorites_page": {
+    "meta_title": "Meine Favoriten, Guardiens",
+    "meta_description": "Finden Sie Ihre gespeicherten Hüter und Anzeigen.",
+    "title": "Meine Favoriten",
+    "empty_title": "Noch keine Favoriten",
+    "empty_description": "Durchstöbern Sie Hüter-Profile oder Anzeigen und klicken Sie auf das Herz, um sie hier zu finden.",
+    "explore_sitters": "Hüter entdecken",
+    "tab_sitters": "Hüter",
+    "tab_sits": "Anzeigen",
+    "no_sitter_fav_title": "Kein favorisierter Hüter",
+    "no_sitter_fav_desc": "Finden Sie vertrauenswürdige Hüter und speichern Sie sie.",
+    "search_sitter": "Hüter suchen",
+    "no_sit_fav_title": "Keine favorisierte Anzeige",
+    "no_sit_fav_desc": "Speichern Sie Anzeigen, um sie leicht wiederzufinden.",
+    "view_listings": "Anzeigen ansehen",
+    "member_fallback": "Mitglied",
+    "listing_fallback": "Betreuungsanzeige"
   }
 }

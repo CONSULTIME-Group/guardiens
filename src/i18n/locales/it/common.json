@@ -738,5 +738,23 @@
     "email_resent_title": "Email reinviata",
     "email_resent_body": "Una nuova email di conferma è stata appena inviata.",
     "resend_email": "Reinvia email"
+  },
+  "favorites_page": {
+    "meta_title": "I miei preferiti, Guardiens",
+    "meta_description": "Trova i tuoi guardiani e annunci salvati.",
+    "title": "I miei preferiti",
+    "empty_title": "Nessun preferito per ora",
+    "empty_description": "Sfoglia i profili dei guardiani o gli annunci e clicca sul cuore per ritrovarli qui.",
+    "explore_sitters": "Esplora i guardiani",
+    "tab_sitters": "Guardiani",
+    "tab_sits": "Annunci",
+    "no_sitter_fav_title": "Nessun guardiano preferito",
+    "no_sitter_fav_desc": "Trova guardiani di fiducia e salvali.",
+    "search_sitter": "Cerca un guardiano",
+    "no_sit_fav_title": "Nessun annuncio preferito",
+    "no_sit_fav_desc": "Salva gli annunci per ritrovarli facilmente.",
+    "view_listings": "Vedi annunci",
+    "member_fallback": "Membro",
+    "listing_fallback": "Annuncio di custodia"
   }
 }
