@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import PageMeta from "@/components/PageMeta";
 import PublicHeader from "@/components/layout/PublicHeader";
@@ -6,12 +7,13 @@ import PublicFooter from "@/components/layout/PublicFooter";
 
 const About = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
-        title="À propos de Guardiens"
-        description="Découvrez l'histoire de Guardiens, née d'une passion pour les animaux et le house-sitting de proximité."
+        title={t("about.meta_title")}
+        description={t("about.meta_description")}
         path="/a-propos"
       />
       <PublicHeader />
