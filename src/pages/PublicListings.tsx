@@ -5,6 +5,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
@@ -16,9 +17,6 @@ const SearchSitter = lazyWithRetry(
 );
 
 const CANONICAL = "https://guardiens.fr/annonces";
-const TITLE = "Annonces de garde d'animaux à domicile en France | Guardiens";
-const DESCRIPTION =
-  "Toutes les annonces de garde de chats, chiens et NAC à domicile, partout en France. Filtres par ville, département et critères, carte en direct. Consultation libre, inscription gratuite pour postuler.";
 
 const BASE_JSONLD = [
   {
