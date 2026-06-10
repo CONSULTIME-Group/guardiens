@@ -543,5 +543,65 @@
       "message_min": "Minimum 10 characters",
       "message_max": "2000 characters max"
     }
+  },
+  "breeds_listing": {
+    "meta_title": "Pet breeds: in-home care guides | Guardiens",
+    "meta_description": "Care tips by breed: temperament, needs, recommendations for sitters. Dogs, cats, exotic pets, equines. Guides based on real sits.",
+    "h1": "Care guides by breed",
+    "subtitle": "Temperament, diet, practical tips for sitters and owners. Written from real sits across France.",
+    "species": {
+      "dog": "Dogs",
+      "cat": "Cats",
+      "bird": "Birds",
+      "rodent": "Rodents",
+      "farm_animal": "Farm animals",
+      "horse": "Equines"
+    }
+  },
+  "public_listings": {
+    "meta_title": "Pet sitting listings across France | Guardiens",
+    "meta_description": "All in-home pet sitting listings for cats, dogs and exotic pets across France. Filter by city, department and criteria, live map. Free to browse, free sign-up to apply.",
+    "eyebrow": "Open listings · All of France",
+    "h1": "In-home pet sitting listings",
+    "subtitle": "Browse freely the sits offered by owners: cats, dogs, exotic pets, in the countryside or in the city. Filter by location, dates and criteria, or view the live map.",
+    "see_also_missions": "See also: small missions near you",
+    "local_guides": "Local guides",
+    "pricing": "Pricing",
+    "intl_count_one": "{{count}} listing outside France",
+    "intl_count_other": "{{count}} listings outside France",
+    "explore_title": "Explore also",
+    "explore_missions": "Small missions",
+    "explore_missions_desc": ", local quick help, free",
+    "explore_guides_desc": ", cities and tips",
+    "explore_pricing": "Sitter pricing",
+    "explore_pricing_desc": ", €6.99/month or €12 one-off",
+    "explore_intl": "International listings",
+    "explore_intl_desc": ", Morocco, Spain, Belgium…"
+  },
+  "pros_listing": {
+    "meta_title": "Pet pros directory near you | Guardiens",
+    "meta_description": "Find vets, trainers, groomers, osteopaths and other verified pet professionals near you.",
+    "h1": "Pet professionals near you",
+    "beta": "Beta",
+    "intro": "Vets, trainers, groomers, osteopaths, transporters, photographers: trusted pet pros across France.",
+    "beta_note": "Directory in beta, first listings coming. You're a pro? Sign-up is free and your listing is validated within 48 h.",
+    "register_cta": "Register my business",
+    "my_space": "My pro space",
+    "sitter_box_title": "Are you a private sitter registered as self-employed?",
+    "sitter_box_body_before": "This directory lists pet pros (vets, trainers, groomers…) who don't necessarily offer sitting. If you offer paid sits professionally, request the ",
+    "sitter_box_badge": "Verified Pro Sitter",
+    "sitter_box_body_after": " badge from ",
+    "sitter_box_link": "Settings > Security > Pro Sitter",
+    "sitter_box_body_end": ". It will show on your profile and in sitter search.",
+    "search_placeholder": "Search a pro, a city…",
+    "sort_aria": "Sort by",
+    "sort_recent": "Most recent",
+    "sort_alpha": "Alphabetical",
+    "sort_city": "By city",
+    "all": "All",
+    "empty": "No pro matches your search yet.",
+    "be_first": "Be the first to register",
+    "emergencies_24_7": "24/7 emergencies",
+    "logo_alt": "Logo {{name}}"
   }
 }

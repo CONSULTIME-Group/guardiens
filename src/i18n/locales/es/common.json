@@ -543,5 +543,65 @@
       "message_min": "Mínimo 10 caracteres",
       "message_max": "2000 caracteres máx"
     }
+  },
+  "breeds_listing": {
+    "meta_title": "Razas de mascotas: guías de cuidado a domicilio | Guardiens",
+    "meta_description": "Consejos de cuidado por raza: temperamento, necesidades, recomendaciones para cuidadores. Perros, gatos, NAC, équidos.",
+    "h1": "Guías de cuidado por raza",
+    "subtitle": "Temperamento, alimentación, consejos prácticos para cuidadores y propietarios. Redactados a partir de cuidados reales en toda Francia.",
+    "species": {
+      "dog": "Perros",
+      "cat": "Gatos",
+      "bird": "Aves",
+      "rodent": "Roedores",
+      "farm_animal": "Animales de granja",
+      "horse": "Équidos"
+    }
+  },
+  "public_listings": {
+    "meta_title": "Anuncios de cuidado de mascotas a domicilio en Francia | Guardiens",
+    "meta_description": "Todos los anuncios de cuidado de gatos, perros y NAC a domicilio en toda Francia. Filtros por ciudad, departamento y criterios, mapa en directo.",
+    "eyebrow": "Anuncios abiertos · Toda Francia",
+    "h1": "Anuncios de cuidado de mascotas a domicilio",
+    "subtitle": "Explore libremente los cuidados ofrecidos por los propietarios: gatos, perros, NAC, en el campo o en la ciudad. Filtre por ubicación, fechas y criterios o vea el mapa en directo.",
+    "see_also_missions": "Ver también: pequeñas misiones cerca de usted",
+    "local_guides": "Guías locales",
+    "pricing": "Tarifas",
+    "intl_count_one": "{{count}} anuncio fuera de Francia",
+    "intl_count_other": "{{count}} anuncios fuera de Francia",
+    "explore_title": "Explorar también",
+    "explore_missions": "Pequeñas misiones",
+    "explore_missions_desc": ", ayudas locales, gratis",
+    "explore_guides_desc": ", ciudades y consejos",
+    "explore_pricing": "Tarifas cuidador",
+    "explore_pricing_desc": ", 6,99 €/mes o 12 € pago único",
+    "explore_intl": "Anuncios fuera de Francia",
+    "explore_intl_desc": ", Marruecos, España, Bélgica…"
+  },
+  "pros_listing": {
+    "meta_title": "Directorio de profesionales animales cerca de usted | Guardiens",
+    "meta_description": "Encuentre veterinarios, educadores, peluqueros, osteópatas y otros profesionales animales verificados cerca de usted.",
+    "h1": "Profesionales animales cerca de usted",
+    "beta": "Beta",
+    "intro": "Veterinarios, educadores, peluqueros, osteópatas, transportistas, fotógrafos: profesionales animales de confianza en toda Francia.",
+    "beta_note": "Directorio en fase beta, llegan las primeras fichas. ¿Es profesional? La inscripción es gratuita y su ficha se valida en 48 h.",
+    "register_cta": "Inscribir mi actividad",
+    "my_space": "Mi espacio pro",
+    "sitter_box_title": "¿Es cuidador particular registrado como autónomo?",
+    "sitter_box_body_before": "Este directorio incluye profesionales animales (veterinarios, educadores, peluqueros…) que no necesariamente cuidan. Si ofrece cuidados remunerados profesionalmente, solicite la insignia ",
+    "sitter_box_badge": "Cuidador Pro verificado",
+    "sitter_box_body_after": " desde ",
+    "sitter_box_link": "Ajustes > Seguridad > Cuidador Pro",
+    "sitter_box_body_end": ". Aparecerá en su perfil y en la búsqueda de cuidadores.",
+    "search_placeholder": "Buscar un profesional, una ciudad…",
+    "sort_aria": "Ordenar por",
+    "sort_recent": "Más recientes",
+    "sort_alpha": "Orden alfabético",
+    "sort_city": "Por ciudad",
+    "all": "Todos",
+    "empty": "Ningún profesional coincide con su búsqueda por el momento.",
+    "be_first": "Ser el primero en inscribirse",
+    "emergencies_24_7": "Urgencias 24/7",
+    "logo_alt": "Logo {{name}}"
   }
 }

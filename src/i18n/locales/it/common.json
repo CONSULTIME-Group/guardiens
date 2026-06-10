@@ -543,5 +543,65 @@
       "message_min": "Minimo 10 caratteri",
       "message_max": "2000 caratteri max"
     }
+  },
+  "breeds_listing": {
+    "meta_title": "Razze di animali: guide alla cura a domicilio | Guardiens",
+    "meta_description": "Consigli di cura per razza: temperamento, esigenze, raccomandazioni per i sitter. Cani, gatti, NAC, equidi.",
+    "h1": "Guide alla cura per razza",
+    "subtitle": "Temperamento, alimentazione, consigli pratici per sitter e proprietari. Redatti da cure reali in tutta la Francia.",
+    "species": {
+      "dog": "Cani",
+      "cat": "Gatti",
+      "bird": "Uccelli",
+      "rodent": "Roditori",
+      "farm_animal": "Animali da fattoria",
+      "horse": "Equidi"
+    }
+  },
+  "public_listings": {
+    "meta_title": "Annunci di pet sitting a domicilio in Francia | Guardiens",
+    "meta_description": "Tutti gli annunci di pet sitting per gatti, cani e NAC a domicilio in tutta la Francia. Filtri per città, dipartimento e criteri, mappa live.",
+    "eyebrow": "Annunci aperti · Tutta la Francia",
+    "h1": "Annunci di pet sitting a domicilio",
+    "subtitle": "Sfogli liberamente le cure proposte dai proprietari: gatti, cani, NAC, in campagna o in città. Filtri per posizione, date e criteri o visualizzi la mappa live.",
+    "see_also_missions": "Vedi anche: piccole missioni vicino a te",
+    "local_guides": "Guide locali",
+    "pricing": "Tariffe",
+    "intl_count_one": "{{count}} annuncio fuori dalla Francia",
+    "intl_count_other": "{{count}} annunci fuori dalla Francia",
+    "explore_title": "Esplora anche",
+    "explore_missions": "Piccole missioni",
+    "explore_missions_desc": ", aiuti locali, gratuiti",
+    "explore_guides_desc": ", città e consigli",
+    "explore_pricing": "Tariffe sitter",
+    "explore_pricing_desc": ", 6,99 €/mese o 12 € una tantum",
+    "explore_intl": "Annunci fuori dalla Francia",
+    "explore_intl_desc": ", Marocco, Spagna, Belgio…"
+  },
+  "pros_listing": {
+    "meta_title": "Elenco professionisti animali vicino a te | Guardiens",
+    "meta_description": "Trova veterinari, educatori, toelettatori, osteopati e altri professionisti animali verificati vicino a te.",
+    "h1": "Professionisti animali vicino a te",
+    "beta": "Beta",
+    "intro": "Veterinari, educatori, toelettatori, osteopati, trasportatori, fotografi: professionisti animali di fiducia in tutta la Francia.",
+    "beta_note": "Elenco in fase beta, arrivano le prime schede. Sei un professionista? L'iscrizione è gratuita e la tua scheda viene convalidata entro 48 h.",
+    "register_cta": "Iscrivere la mia attività",
+    "my_space": "Il mio spazio pro",
+    "sitter_box_title": "Sei un sitter privato registrato come autonomo?",
+    "sitter_box_body_before": "Questo elenco include professionisti animali (veterinari, educatori, toelettatori…) che non necessariamente offrono cure. Se offri cure retribuite professionalmente, richiedi il badge ",
+    "sitter_box_badge": "Sitter Pro verificato",
+    "sitter_box_body_after": " da ",
+    "sitter_box_link": "Impostazioni > Sicurezza > Sitter Pro",
+    "sitter_box_body_end": ". Apparirà sul tuo profilo e nella ricerca sitter.",
+    "search_placeholder": "Cerca un professionista, una città…",
+    "sort_aria": "Ordina per",
+    "sort_recent": "Più recenti",
+    "sort_alpha": "Ordine alfabetico",
+    "sort_city": "Per città",
+    "all": "Tutti",
+    "empty": "Nessun professionista corrisponde alla tua ricerca per il momento.",
+    "be_first": "Sii il primo a iscriverti",
+    "emergencies_24_7": "Emergenze 24/7",
+    "logo_alt": "Logo {{name}}"
   }
 }
