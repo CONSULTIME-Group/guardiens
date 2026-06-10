@@ -47,5 +47,20 @@
       "legal_notice": "Mentions légales",
       "contact": "Contact"
     }
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "Entraide · Garde d'animaux · Home sitting",
+      "title_main": "La garde d'animaux, le coup de main,",
+      "title_accent": "la rencontre.",
+      "lede": "Faire garder votre maison et vos animaux par un gardien du coin pendant vos absences. Ou demander, et rendre, un coup de main près de chez vous, avec ou sans animaux.",
+      "lede_italic": "Et derrière chaque échange, une rencontre que vous n'auriez pas cherchée.",
+      "cta_owner": "Publier mon annonce",
+      "cta_sitter": "Je veux garder",
+      "kpi_houses": "maisons gardées",
+      "kpi_animals": "animaux accompagnés",
+      "kpi_members": "inscrits",
+      "kpi_missions": "missions d'entraide"
+    }
   }
 }
