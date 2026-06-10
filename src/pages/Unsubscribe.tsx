@@ -21,6 +21,7 @@ const post = (body: Record<string, unknown>) =>
   }).then((r) => r.json().then((d) => ({ ok: r.ok, data: d })));
 
 const Unsubscribe = () => {
+  const { t } = useTranslation();
   const [params] = useSearchParams();
   const token = params.get("token");
   const [status, setStatus] = useState<Status>("loading");
