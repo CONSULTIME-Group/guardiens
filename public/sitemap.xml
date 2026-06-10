@@ -1,160 +1,316 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://guardiens.fr/</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/"/>
   </url>
   <url>
     <loc>https://guardiens.fr/tarifs</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/tarifs"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/tarifs?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/tarifs?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/tarifs?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/tarifs?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/tarifs"/>
   </url>
   <url>
     <loc>https://guardiens.fr/faq</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/faq"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/faq?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/faq?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/faq?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/faq?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/faq"/>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/actualites"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/actualites?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/actualites?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/actualites?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/actualites?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/actualites"/>
   </url>
   <url>
     <loc>https://guardiens.fr/petites-missions</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/petites-missions"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/petites-missions?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/petites-missions?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/petites-missions?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/petites-missions?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/petites-missions"/>
   </url>
   <url>
     <loc>https://guardiens.fr/petites-missions/lyon</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/petites-missions/lyon"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/petites-missions/lyon?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/petites-missions/lyon?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/petites-missions/lyon?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/petites-missions/lyon?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/petites-missions/lyon"/>
   </url>
   <url>
     <loc>https://guardiens.fr/gardien-urgence</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/gardien-urgence"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/gardien-urgence?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/gardien-urgence?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/gardien-urgence?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/gardien-urgence?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/gardien-urgence"/>
   </url>
   <url>
     <loc>https://guardiens.fr/pros</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/pros"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/pros?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/pros?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/pros?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/pros?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/pros"/>
   </url>
   <url>
     <loc>https://guardiens.fr/guides</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/guides"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/guides?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/guides?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/guides?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/guides?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/guides"/>
   </url>
   <url>
     <loc>https://guardiens.fr/annonces</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/annonces"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/annonces?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/annonces?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/annonces?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/annonces?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/annonces"/>
   </url>
   <url>
     <loc>https://guardiens.fr/contact</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/contact"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/contact?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/contact?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/contact?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/contact?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/contact"/>
   </url>
   <url>
     <loc>https://guardiens.fr/a-propos</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/a-propos"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/a-propos?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/a-propos?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/a-propos?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/a-propos?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/a-propos"/>
   </url>
   <url>
     <loc>https://guardiens.fr/cgu</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/cgu"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/cgu?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/cgu?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/cgu?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/cgu?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/cgu"/>
   </url>
   <url>
     <loc>https://guardiens.fr/cgs</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/cgs"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/cgs?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/cgs?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/cgs?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/cgs?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/cgs"/>
   </url>
   <url>
     <loc>https://guardiens.fr/confidentialite</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/confidentialite"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/confidentialite?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/confidentialite?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/confidentialite?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/confidentialite?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/confidentialite"/>
   </url>
   <url>
     <loc>https://guardiens.fr/mentions-legales</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/mentions-legales"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/mentions-legales?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/mentions-legales?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/mentions-legales?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/mentions-legales?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/mentions-legales"/>
   </url>
   <url>
     <loc>https://guardiens.fr/auteurs/jeremie</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/auteurs/jeremie"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/auteurs/jeremie?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/auteurs/jeremie?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/auteurs/jeremie?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/auteurs/jeremie?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/auteurs/jeremie"/>
   </url>
   <url>
     <loc>https://guardiens.fr/auteurs/elisa</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/auteurs/elisa"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/auteurs/elisa?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/auteurs/elisa?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/auteurs/elisa?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/auteurs/elisa?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/auteurs/elisa"/>
   </url>
   <url>
     <loc>https://guardiens.fr/observatoire-garde-animaux</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/observatoire-garde-animaux"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/observatoire-garde-animaux?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/observatoire-garde-animaux?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/observatoire-garde-animaux?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/observatoire-garde-animaux?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/observatoire-garde-animaux"/>
   </url>
   <url>
     <loc>https://guardiens.fr/races</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/races"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/races?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/races?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/races?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/races?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/races"/>
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/annecy</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/house-sitting/annecy"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/house-sitting/annecy?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/house-sitting/annecy?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/house-sitting/annecy?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/house-sitting/annecy?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/house-sitting/annecy"/>
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/lyon</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/house-sitting/lyon"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/house-sitting/lyon?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/house-sitting/lyon?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/house-sitting/lyon?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/house-sitting/lyon?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/house-sitting/lyon"/>
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/grenoble</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/house-sitting/grenoble"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/house-sitting/grenoble?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/house-sitting/grenoble?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/house-sitting/grenoble?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/house-sitting/grenoble?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/house-sitting/grenoble"/>
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/caluire-et-cuire</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/house-sitting/caluire-et-cuire"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/house-sitting/caluire-et-cuire?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/house-sitting/caluire-et-cuire?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/house-sitting/caluire-et-cuire?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/house-sitting/caluire-et-cuire?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/house-sitting/caluire-et-cuire"/>
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/chambery</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/house-sitting/chambery"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/house-sitting/chambery?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/house-sitting/chambery?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/house-sitting/chambery?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/house-sitting/chambery?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/house-sitting/chambery"/>
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/aura</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/house-sitting/aura"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/house-sitting/aura?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/house-sitting/aura?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/house-sitting/aura?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/house-sitting/aura?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/house-sitting/aura"/>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/devenir-gardien-pro-animalier</loc>
@@ -175,10 +331,22 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/actualites/house-sitting-noel-fetes-fin-annee</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/actualites/parcs-balades-chiens-grenoble-guide</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/house-sitting-ete-aura-guide</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/berger-australien-guide-race</loc>
@@ -277,13 +445,13 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/creer-profil-gardien-attractif</loc>
+    <loc>https://guardiens.fr/actualites/house-sitting-aura-guide-complet</loc>
     <lastmod>2026-05-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/house-sitting-aura-guide-complet</loc>
+    <loc>https://guardiens.fr/actualites/creer-profil-gardien-attractif</loc>
     <lastmod>2026-05-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -463,32 +631,20 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/choisir-gardien-bons-criteres</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/actualites/house-sitting-week-end-court-sejour-aura</loc>
     <lastmod>2026-05-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/house-sitting-noel-fetes-fin-annee</loc>
-    <lastmod>2026-05-10</lastmod>
+    <loc>https://guardiens.fr/actualites/choisir-gardien-bons-criteres</loc>
+    <lastmod>2026-04-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/reussir-premiere-garde-house-sitting</loc>
     <lastmod>2026-04-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/house-sitting-ete-aura-guide</loc>
-    <lastmod>2026-05-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1047,6 +1203,24 @@
   <url>
     <loc>https://guardiens.fr/races/dog-teclem</loc>
     <lastmod>2026-05-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/races/bird-perroquet-gris-du-gabon</loc>
+    <lastmod>2026-06-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/races/dog-berger-belge-malinois</loc>
+    <lastmod>2026-06-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/races/dog-beldi</loc>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
