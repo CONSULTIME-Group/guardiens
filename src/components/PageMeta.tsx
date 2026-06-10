@@ -64,6 +64,8 @@ const PageMeta = ({
   canonical,
 }: PageMetaProps) => {
   const location = useLocation();
+  const { i18n } = useTranslation();
+  const currentLang = ((SUPPORTED_LANGS as readonly string[]).includes(i18n.language) ? i18n.language : "fr") as SupportedLang;
   const currentPath = normalizePathname(path || location.pathname);
   const currentUrl = buildAbsoluteUrl(currentPath);
   const canonicalUrl = normalizeCanonical(canonical) ?? currentUrl;
@@ -71,6 +73,11 @@ const PageMeta = ({
   const resolvedImage = image === DEFAULT_IMAGE ? getListingOgImageFromPath(currentPath) ?? image : image;
   const titleWithoutSuffix = title.replace(/\s*\|\s*Guardiens\s*$/i, "").replace(/\s*,\s*Guardiens\s*$/i, "");
   const fullTitle = currentPath === "/" ? titleWithoutSuffix : `${titleWithoutSuffix} | ${SITE_NAME}`;
+  // hreflang alternates : same URL with ?lang=xx (fr = no param, also serves as x-default)
+  const hreflangAlternates = SUPPORTED_LANGS.map((lng) => ({
+    lang: lng,
+    href: addLangParam(canonicalUrl, lng),
+  }));
 
   useEffect(() => {
     const upsertMetaTag = ({ attr, key, content }: { attr: "name" | "property"; key: string; content: string }) => {
