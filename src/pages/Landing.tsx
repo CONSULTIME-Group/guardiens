@@ -5,6 +5,7 @@ import howtoStep1 from "@/assets/illustrations/howto-step-1-annonce.png";
 import howtoStep2 from "@/assets/illustrations/howto-step-2-rencontre.png";
 import howtoStep3 from "@/assets/illustrations/howto-step-3-depart.png";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
