@@ -92,6 +92,26 @@ function urlEntry(loc, lastmod, changefreq, priority) {
   </url>`;
 }
 
+// Routes UI traduites en EN/ES/IT/DE via i18next (header, footer, landing, pricing, faq).
+// Signale les alternates linguistiques à Google via xhtml:link.
+const I18N_LANGS = ["fr", "en", "es", "it", "de"];
+function urlEntryWithLangAlternates(loc, lastmod, changefreq, priority) {
+  const base = escapeXml(SITE_URL + loc);
+  const alt = I18N_LANGS.map((lng) => {
+    const href = lng === "fr" ? base : `${base}${loc.includes("?") ? "&" : "?"}lang=${lng}`;
+    return `    <xhtml:link rel="alternate" hreflang="${lng}" href="${escapeXml(href)}"/>`;
+  }).join("\n");
+  const xDefault = `    <xhtml:link rel="alternate" hreflang="x-default" href="${base}"/>`;
+  return `  <url>
+    <loc>${base}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
+${alt}
+${xDefault}
+  </url>`;
+}
+
 function loadCache() {
   if (FORCE) return { sources: {}, entries: {} };
   try {
