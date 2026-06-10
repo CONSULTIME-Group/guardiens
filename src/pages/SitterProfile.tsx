@@ -311,7 +311,7 @@ const SitterProfile = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <PageMeta title="Mon profil" description="Modifiez votre profil gardien Guardiens." noindex />
+      <PageMeta title={tp("sitter_meta_title")} description={tp("sitter_meta_description")} noindex />
 
       <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto animate-fade-in">
         <div className="flex flex-col lg:flex-row gap-8">
