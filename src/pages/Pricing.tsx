@@ -636,14 +636,14 @@ const Pricing = () => {
          )}
          <p className="text-xs font-body text-foreground/50 text-center mt-2">
            {before
-           ? "Aucune carte bancaire demandée."
-           : !user
-            ? "Inscription gratuite. Aucune carte bancaire avant la souscription d'une formule."
-            : formule === "mensuel"
-             ? "Sans engagement. Résiliable à tout moment."
-             : formule === "annuel"
-              ? "Renouvellement annuel automatique. Résiliable à tout moment."
-              : "Paiement unique pour un mois d'accès, sans renouvellement."}
+            ? t("pricing.sitter_card.note_before")
+            : !user
+             ? t("pricing.sitter_card.note_visitor")
+             : formule === "mensuel"
+              ? t("pricing.sitter_card.note_after_monthly")
+              : formule === "annuel"
+               ? t("pricing.sitter_card.note_after_annual")
+               : t("pricing.sitter_card.note_after_oneshot")}
          </p>
         </div>
        </CardContent>
