@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { marked } from "marked";
+import DOMPurify from "dompurify";
 import { Search, TreePine, Users, CheckCircle2, Lightbulb, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
