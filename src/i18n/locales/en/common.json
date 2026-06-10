@@ -389,5 +389,29 @@
       "cta_sitter": "Become a sitter",
       "cta_owner": "Publish a listing"
     }
+  },
+  "article": {
+    "home": "Home",
+    "news": "News",
+    "updatedOn": "Updated on {{date}}",
+    "publishedOn": "Published on {{date}}",
+    "categories": {
+      "conseil": "Advice",
+      "guide_ville": "City guide",
+      "race": "Breeds & species",
+      "temoignage": "Testimonial",
+      "astuce": "Tip",
+      "conseil_gardien": "Sitter advice",
+      "conseil_proprio": "Owner advice",
+      "guide_race": "Breed guide",
+      "guide_lieu": "Place guide",
+      "actualite": "News",
+      "ville": "City",
+      "vie_locale": "Local life",
+      "guide_local": "Local guide",
+      "guide_pratique": "Practical guide",
+      "saisonnier": "Seasonal",
+      "guide_central": "Main guide"
+    }
   }
 }

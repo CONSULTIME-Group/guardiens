@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { useTranslation } from "react-i18next";
 
 export interface BreadcrumbItem {
   label: string;
@@ -19,10 +20,11 @@ const BASE_URL = "https://guardiens.fr";
  */
 const PageBreadcrumb = ({ items }: PageBreadcrumbProps) => {
   const location = useLocation();
+  const { t } = useTranslation();
 
-  // Always prepend "Accueil"
+  // Always prepend "Home"
   const allItems: BreadcrumbItem[] = [
-    { label: "Accueil", href: "/" },
+    { label: t("article.home", "Accueil"), href: "/" },
     ...items,
   ];
 

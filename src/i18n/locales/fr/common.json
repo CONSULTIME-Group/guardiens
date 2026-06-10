@@ -389,5 +389,29 @@
       "cta_sitter": "Devenir gardien",
       "cta_owner": "Publier une annonce"
     }
+  },
+  "article": {
+    "home": "Accueil",
+    "news": "Actualités",
+    "updatedOn": "Mis à jour le {{date}}",
+    "publishedOn": "Publié le {{date}}",
+    "categories": {
+      "conseil": "Conseil",
+      "guide_ville": "Guide ville",
+      "race": "Races & espèces",
+      "temoignage": "Témoignage",
+      "astuce": "Astuce",
+      "conseil_gardien": "Conseil gardien",
+      "conseil_proprio": "Conseil proprio",
+      "guide_race": "Guide race",
+      "guide_lieu": "Guide lieu",
+      "actualite": "Actualité",
+      "ville": "Ville",
+      "vie_locale": "Vie locale",
+      "guide_local": "Guide local",
+      "guide_pratique": "Guide pratique",
+      "saisonnier": "Saisonnier",
+      "guide_central": "Guide central"
+    }
   }
 }

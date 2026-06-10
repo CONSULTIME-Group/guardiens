@@ -389,5 +389,29 @@
       "cta_sitter": "Betreuer werden",
       "cta_owner": "Anzeige veröffentlichen"
     }
+  },
+  "article": {
+    "home": "Startseite",
+    "news": "Aktuelles",
+    "updatedOn": "Aktualisiert am {{date}}",
+    "publishedOn": "Veröffentlicht am {{date}}",
+    "categories": {
+      "conseil": "Ratgeber",
+      "guide_ville": "Stadtführer",
+      "race": "Rassen & Arten",
+      "temoignage": "Erfahrungsbericht",
+      "astuce": "Tipp",
+      "conseil_gardien": "Tipp Guardian",
+      "conseil_proprio": "Tipp Halter",
+      "guide_race": "Rasseführer",
+      "guide_lieu": "Ortsführer",
+      "actualite": "Aktuelles",
+      "ville": "Stadt",
+      "vie_locale": "Lokales Leben",
+      "guide_local": "Lokaler Führer",
+      "guide_pratique": "Praktischer Leitfaden",
+      "saisonnier": "Saisonal",
+      "guide_central": "Hauptleitfaden"
+    }
   }
 }

@@ -389,5 +389,29 @@
       "cta_sitter": "Convertirse en cuidador",
       "cta_owner": "Publicar un anuncio"
     }
+  },
+  "article": {
+    "home": "Inicio",
+    "news": "Noticias",
+    "updatedOn": "Actualizado el {{date}}",
+    "publishedOn": "Publicado el {{date}}",
+    "categories": {
+      "conseil": "Consejo",
+      "guide_ville": "Guía de ciudad",
+      "race": "Razas y especies",
+      "temoignage": "Testimonio",
+      "astuce": "Truco",
+      "conseil_gardien": "Consejo guardián",
+      "conseil_proprio": "Consejo propietario",
+      "guide_race": "Guía de raza",
+      "guide_lieu": "Guía de lugar",
+      "actualite": "Actualidad",
+      "ville": "Ciudad",
+      "vie_locale": "Vida local",
+      "guide_local": "Guía local",
+      "guide_pratique": "Guía práctica",
+      "saisonnier": "Estacional",
+      "guide_central": "Guía central"
+    }
   }
 }

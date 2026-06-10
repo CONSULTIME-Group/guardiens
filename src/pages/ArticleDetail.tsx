@@ -11,7 +11,7 @@ import PageMeta from "@/components/PageMeta";
 import { Helmet } from "react-helmet-async";
 import { logSeoSnapshot } from "@/lib/seoDebugLog";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { fr, enUS, es, it as itLocale, de as deLocale } from "date-fns/locale";
 import ArticleRenderer, { resolveImagePath } from "@/components/articles/ArticleRenderer";
 import ArticleAuthorBio from "@/components/articles/ArticleAuthorBio";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -132,7 +132,7 @@ function ArticleSeoLogger({ article }: { article: ArticleFull }) {
 export default function ArticleDetail() {
  const { slug } = useParams<{ slug: string }>();
  const navigate = useNavigate();
- const { i18n } = useTranslation();
+ const { t, i18n } = useTranslation();
  const { user, isAuthenticated } = useAuth();
  const [article, setArticle] = useState<ArticleFull | null>(null);
  const [loading, setLoading] = useState(true);
@@ -460,8 +460,8 @@ export default function ArticleDetail() {
  )}
 
  <main id="main-content">
- <PageBreadcrumb items={[
- { label: "Actualités", href: "/actualites" },
+  <PageBreadcrumb items={[
+ { label: t("article.news", "Actualités"), href: "/actualites" },
  { label: article.title },
  ]} />
 
@@ -470,7 +470,7 @@ export default function ArticleDetail() {
  <header className="mb-8">
  <div className="flex items-center gap-2 mb-3 flex-wrap">
  <Badge variant="secondary">
- {CATEGORY_LABELS[article.category] || article.category}
+ {t(`article.categories.${article.category}`, CATEGORY_LABELS[article.category] || article.category)}
  </Badge>
  {article.city && (
  <span className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -487,10 +487,13 @@ export default function ArticleDetail() {
  {/* CORRECTION 6, Date de mise à jour ou publication */}
  <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4">
  <Calendar className="h-3.5 w-3.5" />
- {article.updated_at && article.created_at && new Date(article.updated_at).getTime() - new Date(article.created_at).getTime() > 86400000
- ? <span>Mis à jour le {format(new Date(article.updated_at), "d MMMM yyyy", { locale: fr })}</span>
- : <span>Publié le {format(new Date(article.published_at || article.created_at), "d MMMM yyyy", { locale: fr })}</span>
- }
+ {(() => {
+   const dfLocale = ({ fr, en: enUS, es, it: itLocale, de: deLocale } as any)[i18n.language] || fr;
+   const isUpdated = article.updated_at && article.created_at && new Date(article.updated_at).getTime() - new Date(article.created_at).getTime() > 86400000;
+   const d = isUpdated ? article.updated_at : (article.published_at || article.created_at);
+   const formatted = format(new Date(d), "d MMMM yyyy", { locale: dfLocale });
+   return <span>{t(isUpdated ? "article.updatedOn" : "article.publishedOn", { date: formatted, defaultValue: `${isUpdated ? "Mis à jour le" : "Publié le"} ${formatted}` })}</span>;
+ })()}
  </div>
 
  <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -501,7 +504,7 @@ export default function ArticleDetail() {
  {article.published_at && (
  <span className="flex items-center gap-1">
  <Calendar className="h-3.5 w-3.5" />
- {format(new Date(article.published_at), "d MMMM yyyy", { locale: fr })}
+ {format(new Date(article.published_at), "d MMMM yyyy", { locale: (({ fr, en: enUS, es, it: itLocale, de: deLocale } as any)[i18n.language] || fr) })}
  </span>
  )}
  </div>
