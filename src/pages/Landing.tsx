@@ -1016,13 +1016,13 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto px-5 sm:px-6">
           <RevealSection className="text-center max-w-3xl mx-auto mb-16">
             <p className="text-xs md:text-[13px] tracking-[0.2em] uppercase text-primary font-body font-medium">
-              Confiance &amp; périmètre
+              {t("landing.trust.eyebrow")}
             </p>
             <h2 id="trust-heading" className="font-heading text-4xl md:text-5xl font-semibold text-foreground mt-4 leading-tight">
-              Choisir en confiance, à un kilomètre comme à mille.
+              {t("landing.trust.title")}
             </h2>
             <p className="text-base md:text-lg text-muted-foreground mt-5 leading-relaxed">
-              Quatre repères pour partir tranquille : gratuit côté propriétaires, rencontre avant chaque garde, profils vérifiés, et un périmètre que vous fixez vous-même.
+              {t("landing.trust.lede")}
             </p>
           </RevealSection>
 
