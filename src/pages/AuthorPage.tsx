@@ -27,6 +27,7 @@ interface ArticleRow {
 
 export default function AuthorPage() {
   const { slug } = useParams<{ slug: string }>();
+  const { t } = useTranslation();
   const author = slug ? getAuthorBySlug(slug) : undefined;
 
   const [articles, setArticles] = useState<ArticleRow[]>([]);
