@@ -3,6 +3,7 @@
 // Sortie : { title, description, suggestions[] }
 
 import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "../_shared/ai-gateway.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS_HEADERS });
@@ -21,7 +22,18 @@ Deno.serve(async (req) => {
     }
 
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      });
+    }
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } }, auth: { persistSession: false, autoRefreshToken: false } },
+    );
+    const { data: u, error: ue } = await supabase.auth.getUser();
+    if (ue || !u?.user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
       });

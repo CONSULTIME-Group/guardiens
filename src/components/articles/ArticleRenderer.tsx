@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { marked } from "marked";
+import DOMPurify from "dompurify";
 import { Search, TreePine, Users, CheckCircle2, Lightbulb, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
@@ -217,13 +218,18 @@ export default function ArticleRenderer({ content, userRole, slug }: ArticleRend
   html = addEndCTA(html, slug);
   html = adaptEndCTAsForRole(html, userRole);
 
+  // Sanitize against XSS (e.g. <script>, onerror=) before injection.
+  const safeHtml = DOMPurify.sanitize(html, {
+    ADD_ATTR: ["target", "rel", "data-user-logged-in", "loading", "decoding"],
+  });
+
   // `data-user-logged-in` permet de masquer le CTA mid en CSS pour les
   // utilisateurs connectés (cf. règle dans index.css).
   return (
     <div
       className="article-rich-content"
       data-user-logged-in={userRole ? "true" : "false"}
-      dangerouslySetInnerHTML={{ __html: html }}
+      dangerouslySetInnerHTML={{ __html: safeHtml }}
     />
   );
 }
