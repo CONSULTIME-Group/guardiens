@@ -1,4 +1,5 @@
 import { marked } from "marked";
+import DOMPurify from "dompurify";
 import { useMemo } from "react";
 
 interface Section {
@@ -15,7 +16,7 @@ export default function CityArticleBody({ sections }: CityArticleBodyProps) {
   const renderedSections = useMemo(() => {
     return sections.map((s) => ({
       ...s,
-      html: marked.parse(s.content, { async: false }) as string,
+      html: DOMPurify.sanitize(marked.parse(s.content, { async: false }) as string),
     }));
   }, [sections]);
 
