@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -31,6 +32,8 @@ import { useAllMissions, useAvailableHelpers } from "@/hooks/missions/useMission
 
 
 const SmallMissions = () => {
+  const { t } = useTranslation();
+  const tp = (k: string, opts?: any): string => t(`small_missions_page.${k}`, opts) as string;
   const { isAuthenticated, user, switchRole } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -419,8 +422,8 @@ const SmallMissions = () => {
   return (
     <>
       <PageMeta
-        title="Petites missions, Entre gens du coin | Guardiens"
-        description="Des coups de main, des échanges, des compétences. Entre gens du coin qui se choisissent."
+        title={tp("meta_title")}
+        description={tp("meta_description")}
         noindex
       />
 
@@ -440,20 +443,20 @@ const SmallMissions = () => {
             {isAuthenticated && !canApplyMissions && (
               <div className="flex justify-center">
                 <Button variant="hero" size="lg" disabled className="gap-1">
-                  Complétez votre profil pour publier
+                  {tp("complete_profile_cta")}
                 </Button>
               </div>
             )}
 
             <div className="flex items-center justify-center">
-              <div className="inline-flex items-center gap-1 bg-muted rounded-lg p-1" role="tablist" aria-label="Filtrer la liste">
+              <div className="inline-flex items-center gap-1 bg-muted rounded-lg p-1" role="tablist" aria-label={tp("tabs_aria")}>
                 <button
                   role="tab"
                   aria-selected={mode === "need"}
                   onClick={() => setMode("need")}
                   className={`px-4 py-2 text-sm rounded-md transition-colors ${mode === "need" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
                 >
-                  Je cherche un coup de main
+                  {tp("tab_need")}
                 </button>
                 <button
                   role="tab"
@@ -461,7 +464,7 @@ const SmallMissions = () => {
                   onClick={() => setMode("offer")}
                   className={`px-4 py-2 text-sm rounded-md transition-colors ${mode === "offer" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
                 >
-                  J'offre mon aide
+                  {tp("tab_offer")}
                 </button>
               </div>
             </div>
@@ -473,13 +476,13 @@ const SmallMissions = () => {
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex items-start gap-3">
                 <div className="flex-1">
                   <p className="text-sm text-foreground font-medium">
-                    Osez dire ce que vous savez faire. Même un petit talent peut changer la semaine de quelqu'un.
+                    {tp("skill_prompt")}
                   </p>
                   <button onClick={openOfferDialog} className="text-sm text-primary font-semibold mt-1 inline-block hover:underline">
-                    Déclarer mes compétences →
+                    {tp("skill_prompt_cta")}
                   </button>
                 </div>
-                <button onClick={dismissSkillPrompt} className="text-muted-foreground hover:text-foreground shrink-0" aria-label="Fermer">
+                <button onClick={dismissSkillPrompt} className="text-muted-foreground hover:text-foreground shrink-0" aria-label={tp("close")}>
                   <X className="h-4 w-4" />
                 </button>
               </div>
@@ -502,11 +505,11 @@ const SmallMissions = () => {
             <div className="flex items-center gap-3 mb-2">
               <span className="h-8 w-1.5 rounded-full bg-primary" aria-hidden />
               <h2 className="text-xl md:text-2xl font-heading font-bold text-foreground leading-tight">
-                {mode === "offer" ? "Propositions d'aide près de chez vous" : "Demandes près de chez vous"}
+                {mode === "offer" ? tp("section_offer_title") : tp("section_need_title")}
               </h2>
               {missionCount > 0 && (
                 <span className="text-xs font-semibold bg-primary/10 text-primary px-2.5 py-1 rounded-full">
-                  {missionCount} {mode === "offer" ? "proposition" : "demande"}{missionCount > 1 ? "s" : ""}
+                  {missionCount} {mode === "offer" ? tp(missionCount > 1 ? "count_proposal_other" : "count_proposal_one") : tp(missionCount > 1 ? "count_demand_other" : "count_demand_one")}
                 </span>
               )}
             </div>
@@ -515,9 +518,9 @@ const SmallMissions = () => {
                 <Switch
                   checked={compactBio}
                   onCheckedChange={setCompactBio}
-                  aria-label="Afficher les bios en version compacte"
+                  aria-label={tp("compact_bio_aria")}
                 />
-                <span>Bios compactes (1 ligne)</span>
+                <span>{tp("compact_bio_label")}</span>
               </label>
             )}
 
@@ -554,7 +557,7 @@ const SmallMissions = () => {
                       onPropose={() => {
                         if (!isAuthenticated) { navigate(`/inscription?redirect=${encodeURIComponent(`/petites-missions/${m.id}`)}`); return; }
                         setDialogMission(m);
-                        setDialogTarget({ id: m.user_id, name: (m.profiles as any)?.first_name || "ce membre" });
+                        setDialogTarget({ id: m.user_id, name: (m.profiles as any)?.first_name || tp("this_member") });
                       }}
                     />
                   ))}
@@ -562,7 +565,7 @@ const SmallMissions = () => {
                 {missionCount > visibleMissions && (
                   <div className="flex justify-center pt-4">
                     <Button variant="outline" onClick={() => setVisibleMissions((n) => n + PAGE_SIZE)}>
-                      Voir plus de demandes ({missionCount - visibleMissions} restantes)
+                      {tp("see_more_demands", { count: missionCount - visibleMissions })}
                     </Button>
                   </div>
                 )}
@@ -571,31 +574,31 @@ const SmallMissions = () => {
               <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-8 text-center space-y-3">
                 <p className="font-heading text-lg font-semibold text-foreground">
                   {mode === "offer"
-                    ? `Aucune proposition à moins de ${radiusKm || 30} km de chez vous.`
-                    : `Aucune demande à moins de ${radiusKm || 30} km de chez vous.`}
+                    ? tp("empty_offer_title", { km: radiusKm || 30 })
+                    : tp("empty_need_title", { km: radiusKm || 30 })}
                 </p>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
                   {outOfZoneMissions.length > 0 ? (
                     <>
-                      <strong className="text-foreground">Bonne nouvelle :</strong> {outOfZoneMissions.length} {mode === "offer" ? "proposition" : "demande"}{outOfZoneMissions.length > 1 ? "s sont visibles" : " est visible"} un peu plus loin ↓
+                      <strong className="text-foreground">{tp("good_news_strong")}</strong> {outOfZoneMissions.length} {mode === "offer" ? tp(outOfZoneMissions.length > 1 ? "count_proposal_other" : "count_proposal_one") : tp(outOfZoneMissions.length > 1 ? "count_demand_other" : "count_demand_one")}{tp(outOfZoneMissions.length > 1 ? "outofzone_offer_visible_other" : "outofzone_offer_visible_one")}
                     </>
                   ) : mode === "offer" ? (
-                    "Soyez la première personne à proposer votre aide. Publiez ce que vous savez faire et les gens du coin viendront à vous."
+                    tp("empty_offer_text_no_oz")
                   ) : (
-                    "Soyez la première personne à publier votre besoin. Une demande d'aujourd'hui, c'est des gens du coin qui la voient demain, et souvent une rencontre qui change la semaine."
+                    tp("empty_need_text_no_oz")
                   )}
                 </p>
                 {outOfZoneMissions.length === 0 && (
                   <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
                     <Link to="/petites-missions/creer" className="inline-block">
                       <Button variant="hero" size="lg">
-                        {mode === "offer" ? "J'ose, je publie ma proposition" : "J'ose, je publie ma demande"}
+                        {mode === "offer" ? tp("publish_offer_cta") : tp("publish_need_cta")}
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </Link>
                     {radiusKm > 0 && (
                       <Button variant="outline" size="lg" onClick={() => setRadiusKm(0)}>
-                        Élargir à la France entière
+                        {tp("widen_france")}
                       </Button>
                     )}
                   </div>
@@ -613,15 +616,15 @@ const SmallMissions = () => {
                     </span>
                     <div>
                       <h3 className="font-heading text-base font-semibold text-foreground">
-                        {outOfZoneMissions.length} {outOfZoneMissions.length > 1 ? (mode === "offer" ? "autres propositions existent" : "autres demandes existent") : (mode === "offer" ? "autre proposition existe" : "autre demande existe")} un peu plus loin
+                        {outOfZoneMissions.length} {outOfZoneMissions.length > 1 ? (mode === "offer" ? tp("oz_others_offer_other") : tp("oz_others_need_other")) : (mode === "offer" ? tp("oz_others_offer_one") : tp("oz_others_need_one"))}
                       </h3>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        Au-delà de votre périmètre actuel ({radiusKm} km). Élargissez pour les voir toutes.
+                        {tp("oz_subtitle", { km: radiusKm })}
                       </p>
                     </div>
                   </div>
                   <Button variant="hero" size="sm" onClick={() => setRadiusKm(0)}>
-                    Élargir à la France entière
+                    {tp("widen_france")}
                     <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -629,7 +632,7 @@ const SmallMissions = () => {
                   {outOfZoneMissions.slice(0, 6).map((m: any, idx: number) => (
                     <div key={`oz-${m.id}`} className="relative">
                       <span className="absolute top-2 left-2 z-10 inline-flex items-center gap-1 bg-background/95 backdrop-blur-sm rounded-full px-2.5 py-1 text-[11px] font-semibold text-foreground shadow-sm border border-border">
-                        {formatCity(m.city) || "Ailleurs"}
+                        {formatCity(m.city) || tp("elsewhere")}
                         {m._distance != null && (
                           <span className="text-muted-foreground"> · {Math.round(m._distance)} km</span>
                         )}
@@ -647,7 +650,7 @@ const SmallMissions = () => {
                           onPropose={() => {
                             if (!isAuthenticated) { navigate(`/inscription?redirect=${encodeURIComponent(`/petites-missions/${m.id}`)}`); return; }
                             setDialogMission(m);
-                            setDialogTarget({ id: m.user_id, name: (m.profiles as any)?.first_name || "ce membre" });
+                            setDialogTarget({ id: m.user_id, name: (m.profiles as any)?.first_name || tp("this_member") });
                           }}
                         />
                       </div>
@@ -675,22 +678,22 @@ const SmallMissions = () => {
                       />
                       <p className="text-sm text-foreground">
                         {(currentUserProfile as any)?.available_for_help
-                          ? "Vous êtes visible, disponible pour aider"
-                          : "Rendez-vous visible auprès des gens du coin"}
+                          ? tp("visible_yes")
+                          : tp("visible_no")}
                       </p>
                     </div>
                     {(currentUserProfile as any)?.available_for_help && (
                       <button onClick={openOfferDialog} className="text-xs text-primary font-semibold hover:underline">
-                        Modifier
+                        {tp("modify")}
                       </button>
                     )}
                   </div>
                 )}
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Et aussi</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">{tp("and_also")}</p>
                 <h3 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
-                  {mode === "need" ? "Membres disponibles pour aider" : "Autres membres disponibles"}
+                  {mode === "need" ? tp("members_for_need") : tp("members_other")}
                   <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
-                    {helperCount} personne{helperCount > 1 ? "s" : ""} du coin
+                    {tp(helperCount > 1 ? "people_local_other" : "people_local_one", { count: helperCount })}
                   </span>
                 </h3>
                 <div className="space-y-8">
@@ -725,10 +728,10 @@ const SmallMissions = () => {
                         <div className="space-y-3">
                           <div className="flex items-center gap-3">
                             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                              En complémentaire
+                              {tp("complementary")}
                             </h3>
                             <span className="text-xs text-muted-foreground">
-                              Disponibles sans compétence précisée
+                              {tp("complementary_desc")}
                             </span>
                             <div className="flex-1 h-px bg-border" />
                           </div>
@@ -741,7 +744,7 @@ const SmallMissions = () => {
                       {totalHelpersAvailable > totalHelpersShown && (
                         <div className="flex justify-center pt-2">
                           <Button variant="outline" onClick={() => setVisibleHelpers((n) => n + PAGE_SIZE)}>
-                            Voir plus de personnes ({totalHelpersAvailable - totalHelpersShown} restantes)
+                            {tp("see_more_people", { count: totalHelpersAvailable - totalHelpersShown })}
                           </Button>
                         </div>
                       )}
@@ -750,26 +753,26 @@ const SmallMissions = () => {
                         <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-8 text-center space-y-3">
                           <p className="font-heading text-lg font-semibold text-foreground">
                             {mode === "offer"
-                              ? "Vous seriez la première personne disponible ici."
-                              : "Personne ne s'est encore déclaré disponible près de chez vous."}
+                              ? tp("empty_helpers_offer_title")
+                              : tp("empty_helpers_need_title")}
                           </p>
                           <p className="text-sm text-muted-foreground max-w-md mx-auto">
                             {mode === "offer"
-                              ? "Activez votre disponibilité ci-dessus : votre présence donne envie aux autres d'oser à leur tour."
-                              : "Élargissez le rayon, ou publiez votre demande : les personnes du coin reçoivent une alerte et se manifestent souvent dans la journée."}
+                              ? tp("empty_helpers_offer_text")
+                              : tp("empty_helpers_need_text")}
                           </p>
                           <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
                             {mode === "need" && (
                               <Link to="/petites-missions/creer" className="inline-block">
                                 <Button variant="hero" size="lg">
-                                  J'ose, je publie ma demande
+                                  {tp("publish_need_cta")}
                                   <ArrowRight className="ml-2 h-4 w-4" />
                                 </Button>
                               </Link>
                             )}
                             {radiusKm > 0 && (
                               <Button variant="outline" size="lg" onClick={() => setRadiusKm(0)}>
-                                Élargir à la France entière
+                                {tp("widen_france")}
                               </Button>
                             )}
                           </div>
@@ -789,11 +792,11 @@ const SmallMissions = () => {
 
         <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
           <div className="max-w-6xl mx-auto px-4 flex flex-wrap justify-center gap-4">
-            <Link to="/a-propos" className="hover:text-foreground">À propos</Link>
-            <Link to="/contact" className="hover:text-foreground">Contact</Link>
-            <Link to="/cgu" className="hover:text-foreground">CGU</Link>
-            <Link to="/confidentialite" className="hover:text-foreground">Confidentialité</Link>
-            <Link to="/mentions-legales" className="hover:text-foreground">Mentions légales</Link>
+            <Link to="/a-propos" className="hover:text-foreground">{tp("footer_about")}</Link>
+            <Link to="/contact" className="hover:text-foreground">{tp("footer_contact")}</Link>
+            <Link to="/cgu" className="hover:text-foreground">{tp("footer_cgu")}</Link>
+            <Link to="/confidentialite" className="hover:text-foreground">{tp("footer_privacy")}</Link>
+            <Link to="/mentions-legales" className="hover:text-foreground">{tp("footer_legal")}</Link>
           </div>
         </footer>
 
@@ -812,7 +815,7 @@ const SmallMissions = () => {
               }}
               disabled={isAuthenticated && !canApplyMissions}
             >
-              {mode === "offer" ? "Proposer mon aide" : "Publier ma demande"}
+              {mode === "offer" ? tp("sticky_offer") : tp("sticky_need")}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
