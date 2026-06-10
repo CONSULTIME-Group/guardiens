@@ -1,5 +1,6 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -20,14 +21,14 @@ import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
-const SECTIONS_META = [
-  { id: "identity", num: 1, label: "Identité", subtitle: "Qui vous êtes" },
-  { id: "housing", num: 2, label: "Logement", subtitle: "Votre maison" },
-  { id: "animals", num: 3, label: "Animaux", subtitle: "Vos animaux" },
-  { id: "rules", num: 4, label: "Attentes", subtitle: "Ce que vous cherchez", optional: true },
-  { id: "communication", num: 5, label: "Accueil", subtitle: "Accueil & guide", optional: true },
-  { id: "skills", num: 6, label: "Compétences", subtitle: "Ce que vous pouvez offrir" },
-  { id: "gallery", num: 7, label: "Galerie", subtitle: "Photos de votre maison" },
+const SECTIONS_BASE: Array<{ id: string; num: number; optional?: boolean }> = [
+  { id: "identity", num: 1 },
+  { id: "housing", num: 2 },
+  { id: "animals", num: 3 },
+  { id: "rules", num: 4, optional: true },
+  { id: "communication", num: 5, optional: true },
+  { id: "skills", num: 6 },
+  { id: "gallery", num: 7 },
 ];
 
 /**
@@ -54,6 +55,16 @@ type ProfileDraft<T> = {
 
 const OwnerProfilePage = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
+  const tp = (k: string, opts?: any) => t(`profile_page.${k}`, opts) as string;
+  const SECTIONS_META = useMemo(
+    () => SECTIONS_BASE.map(s => ({
+      ...s,
+      label: tp(`owner_sections.${s.id}.label`),
+      subtitle: tp(`owner_sections.${s.id}.subtitle`),
+    })),
+    [t]
+  );
   const {
     data, pets, loading, saving, completion, missingFields, lastSyncedAt,
     saveStep, addPet, updatePet, removePet, uploadPhoto,
@@ -175,24 +186,22 @@ const OwnerProfilePage = () => {
 
   // Source UNIQUE pour la jauge ET la sidebar : un seul set de critères pondérés.
   const scoredCriteria: ScoredCriterion[] = [
-    // Essentiels, 75 pts
-    { section: "identity", kind: "essential", label: "Prénom + code postal", points: 10,
+    { section: "identity", kind: "essential", label: tp("criteria.name_postal"), points: 10,
       ok: !!(mergedData.first_name && mergedData.postal_code) },
-    { section: "identity", kind: "essential", label: "Photo de profil", points: 15,
-      ok: !!mergedData.avatar_url, hint: "Onglet Identité." },
-    { section: "animals", kind: "essential", label: "Au moins 1 animal renseigné", points: 20,
-      ok: pets.length > 0, hint: "Onglet Animaux." },
-    { section: "housing", kind: "essential", label: "Logement décrit (≥ 50 caractères)", points: 15,
-      ok: (mergedData.description?.length ?? 0) >= 50, hint: `${mergedData.description?.length ?? 0}/50 caractères.` },
-    { section: "gallery", kind: "essential", label: "Au moins 1 photo dans la Galerie", points: 15,
-      ok: galleryCount > 0, hint: "Onglet Galerie." },
-    // Bonus, 25 pts
-    { section: "identity", kind: "bonus", label: "Bio ≥ 50 caractères", points: 10,
-      ok: (mergedData.bio?.length ?? 0) >= 50, hint: `${mergedData.bio?.length ?? 0}/50 caractères.` },
-    { section: "skills", kind: "bonus", label: "Au moins 1 compétence proprio", points: 10,
-      ok: (mergedData.owner_competences?.length ?? 0) > 0, hint: "Onglet Compétences." },
-    { section: "identity", kind: "bonus", label: "Identité vérifiée", points: 5,
-      ok: !!user?.identityVerified, hint: "Paramètres → Vérification." },
+    { section: "identity", kind: "essential", label: tp("criteria.avatar"), points: 15,
+      ok: !!mergedData.avatar_url, hint: tp("hints.tab_identity") },
+    { section: "animals", kind: "essential", label: tp("criteria.pet"), points: 20,
+      ok: pets.length > 0, hint: tp("hints.tab_animals") },
+    { section: "housing", kind: "essential", label: tp("criteria.housing_desc"), points: 15,
+      ok: (mergedData.description?.length ?? 0) >= 50, hint: tp("hints.chars_50", { count: mergedData.description?.length ?? 0 }) },
+    { section: "gallery", kind: "essential", label: tp("criteria.gallery_one"), points: 15,
+      ok: galleryCount > 0, hint: tp("hints.tab_gallery") },
+    { section: "identity", kind: "bonus", label: tp("criteria.bio_50"), points: 10,
+      ok: (mergedData.bio?.length ?? 0) >= 50, hint: tp("hints.chars_50", { count: mergedData.bio?.length ?? 0 }) },
+    { section: "skills", kind: "bonus", label: tp("criteria.owner_skill"), points: 10,
+      ok: (mergedData.owner_competences?.length ?? 0) > 0, hint: tp("hints.tab_skills") },
+    { section: "identity", kind: "bonus", label: tp("criteria.identity_verified"), points: 5,
+      ok: !!user?.identityVerified, hint: tp("hints.settings_verif") },
   ];
 
   const ownerEssentials = scoredCriteria.filter(c => c.kind === "essential");
@@ -304,7 +313,7 @@ const OwnerProfilePage = () => {
                       });
                     }}
                   >
-                    Suivant : {nextSection.label}
+                    {tp("next", { label: nextSection.label })}
                     <ArrowRight className="h-4 w-4" aria-hidden="true" />
                   </Button>
                 </div>
@@ -320,10 +329,10 @@ const OwnerProfilePage = () => {
           <p className="text-xs text-muted-foreground" aria-live="polite">
             {saved && !dirty ? (
               <span className="inline-flex items-center gap-1 text-primary">
-                <Check className="h-3.5 w-3.5" aria-hidden="true" /> Modifications enregistrées
+                <Check className="h-3.5 w-3.5" aria-hidden="true" /> {tp("saved")}
               </span>
             ) : dirty ? (
-              "Modifications non sauvegardées"
+              tp("dirty")
             ) : null}
           </p>
           <Tooltip>
@@ -336,16 +345,16 @@ const OwnerProfilePage = () => {
                   size="lg"
                 >
                   {saving ? (
-                    <><Loader2 className="h-4 w-4 animate-spin" /> Sauvegarde…</>
+                    <><Loader2 className="h-4 w-4 animate-spin" /> {tp("saving")}</>
                   ) : (
-                    <><Check className="h-4 w-4" /> Sauvegarder</>
+                    <><Check className="h-4 w-4" /> {tp("save")}</>
                   )}
                 </Button>
               </span>
             </TooltipTrigger>
             {!dirty && !saving && (
               <TooltipContent side="top">
-                Aucune modification à sauvegarder
+                {tp("tooltip_nothing")}
               </TooltipContent>
             )}
           </Tooltip>

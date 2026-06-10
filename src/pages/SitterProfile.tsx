@@ -1,5 +1,6 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, Check, CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -23,15 +24,14 @@ import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import FillSavoirFaireBanner from "@/components/profile/FillSavoirFaireBanner";
 
-// Sections affichées dans la sidebar. `optional: true` = pas de calcul de complétion (purement décoratif).
-const SECTIONS_META = [
-  { id: "identity", num: 1, label: "Identité", subtitle: "Qui vous êtes" },
-  { id: "sitter", num: 2, label: "Profil gardien", subtitle: "Votre expérience" },
-  { id: "experience", num: 3, label: "Animaux", subtitle: "Ce que vous acceptez" },
-  { id: "mobility", num: 4, label: "Mobilité & Rayon", subtitle: "Votre rayon" },
-  { id: "gallery", num: 5, label: "Galerie", subtitle: "Vos gardes en photos", optional: true },
-  { id: "experiences", num: 6, label: "Expériences", subtitle: "Expériences hors Guardiens", optional: true },
-  { id: "skills", num: 7, label: "Compétences", subtitle: "Ce que vous savez faire" },
+const SECTIONS_BASE: Array<{ id: string; num: number; optional?: boolean }> = [
+  { id: "identity", num: 1 },
+  { id: "sitter", num: 2 },
+  { id: "experience", num: 3 },
+  { id: "mobility", num: 4 },
+  { id: "gallery", num: 5, optional: true },
+  { id: "experiences", num: 6, optional: true },
+  { id: "skills", num: 7 },
 ];
 
 /**
@@ -67,6 +67,16 @@ const SECTION_PARAM_MAP: Record<string, string> = {
 
 const SitterProfile = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
+  const tp = (k: string, opts?: any) => t(`profile_page.${k}`, opts) as string;
+  const SECTIONS_META = useMemo(
+    () => SECTIONS_BASE.map(s => ({
+      ...s,
+      label: tp(`sitter_sections.${s.id}.label`),
+      subtitle: tp(`sitter_sections.${s.id}.subtitle`),
+    })),
+    [t]
+  );
   const [searchParams] = useSearchParams();
   const {
     data, pastAnimals, loading, saving, completion, missingFields, lastSyncedAt,
@@ -226,8 +236,8 @@ const SitterProfile = () => {
       const mobilityNowComplete = (merged.geographic_radius ?? 0) > 0;
       if (mobilityNowComplete && !mobilityWasComplete) {
         toast({
-          title: "Mobilité complétée",
-          description: "Vos préférences de mobilité sont enregistrées.",
+          title: tp("mobility_toast_title"),
+          description: tp("mobility_toast_desc"),
         });
       }
     }
@@ -256,24 +266,22 @@ const SitterProfile = () => {
   // Chaque critère est rattaché à la section où l'utilisateur peut le compléter.
   // Total = 100 par construction (essentiels 80 + bonus 20). Réplique du SQL.
   const scoredCriteria: ScoredCriterion[] = [
-    // Essentiels, 80 pts
-    { section: "identity", kind: "essential", label: "Prénom + code postal", points: 15,
+    { section: "identity", kind: "essential", label: tp("criteria.name_postal"), points: 15,
       ok: !!(mergedData.first_name && mergedData.postal_code) },
-    { section: "identity", kind: "essential", label: "Photo de profil", points: 20,
-      ok: !!mergedData.avatar_url, hint: "Ajoutez une photo dans Identité." },
-    { section: "skills", kind: "essential", label: "Au moins 1 compétence", points: 15,
-      ok: (mergedData.competences?.length ?? 0) > 0, hint: "Onglet Compétences." },
-    { section: "sitter", kind: "essential", label: "Au moins 1 mode de vie", points: 15,
-      ok: (mergedData.lifestyle?.length ?? 0) > 0, hint: "Onglet Profil gardien." },
-    { section: "mobility", kind: "essential", label: "Rayon géographique défini", points: 15,
-      ok: (mergedData.geographic_radius ?? 0) > 0, hint: "Onglet Mobilité & Rayon." },
-    // Bonus, 20 pts
-    { section: "identity", kind: "bonus", label: "Bio ≥ 50 caractères", points: 10,
-      ok: (mergedData.bio?.length ?? 0) >= 50, hint: `${mergedData.bio?.length ?? 0}/50 caractères.` },
-    { section: "gallery", kind: "bonus", label: "Au moins 1 photo de galerie", points: 5,
-      ok: hasGalleryPhoto, hint: "Onglet Galerie." },
-    { section: "identity", kind: "bonus", label: "Identité vérifiée", points: 5,
-      ok: !!user?.identityVerified, hint: "Paramètres → Vérification." },
+    { section: "identity", kind: "essential", label: tp("criteria.avatar"), points: 20,
+      ok: !!mergedData.avatar_url, hint: tp("hints.add_avatar_identity") },
+    { section: "skills", kind: "essential", label: tp("criteria.skill"), points: 15,
+      ok: (mergedData.competences?.length ?? 0) > 0, hint: tp("hints.tab_skills") },
+    { section: "sitter", kind: "essential", label: tp("criteria.lifestyle"), points: 15,
+      ok: (mergedData.lifestyle?.length ?? 0) > 0, hint: tp("hints.tab_sitter") },
+    { section: "mobility", kind: "essential", label: tp("criteria.radius"), points: 15,
+      ok: (mergedData.geographic_radius ?? 0) > 0, hint: tp("hints.tab_mobility") },
+    { section: "identity", kind: "bonus", label: tp("criteria.bio_50"), points: 10,
+      ok: (mergedData.bio?.length ?? 0) >= 50, hint: tp("hints.chars_50", { count: mergedData.bio?.length ?? 0 }) },
+    { section: "gallery", kind: "bonus", label: tp("criteria.sitter_gallery_one"), points: 5,
+      ok: hasGalleryPhoto, hint: tp("hints.tab_gallery") },
+    { section: "identity", kind: "bonus", label: tp("criteria.identity_verified"), points: 5,
+      ok: !!user?.identityVerified, hint: tp("hints.settings_verif") },
   ];
 
   const sitterEssentials = scoredCriteria.filter(c => c.kind === "essential");
@@ -303,7 +311,7 @@ const SitterProfile = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <PageMeta title="Mon profil" description="Modifiez votre profil gardien Guardiens." noindex />
+      <PageMeta title={tp("sitter_meta_title")} description={tp("sitter_meta_description")} noindex />
 
       <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto animate-fade-in">
         <div className="flex flex-col lg:flex-row gap-8">
@@ -396,7 +404,7 @@ const SitterProfile = () => {
                       });
                     }}
                   >
-                    Suivant : {nextSection.label}
+                    {tp("next", { label: nextSection.label })}
                     <ArrowRight className="h-4 w-4" aria-hidden="true" />
                   </Button>
                 </div>
@@ -412,10 +420,10 @@ const SitterProfile = () => {
           <p className="text-xs text-muted-foreground" aria-live="polite">
             {saved && !dirty ? (
               <span className="inline-flex items-center gap-1 text-primary">
-                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> Modifications enregistrées
+                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> {tp("saved")}
               </span>
             ) : dirty ? (
-              "Modifications non sauvegardées"
+              tp("dirty")
             ) : null}
           </p>
           <Tooltip>
@@ -428,9 +436,9 @@ const SitterProfile = () => {
                   size="lg"
                 >
                   {saving ? (
-                    <><Loader2 className="h-4 w-4 animate-spin" /> Sauvegarde…</>
+                    <><Loader2 className="h-4 w-4 animate-spin" /> {tp("saving")}</>
                   ) : (
-                    <><Check className="h-4 w-4" /> Sauvegarder</>
+                    <><Check className="h-4 w-4" /> {tp("save")}</>
                   )}
                 </Button>
               </span>
@@ -438,10 +446,10 @@ const SitterProfile = () => {
             {!canSave && !saving && (
               <TooltipContent side="top">
                 {motivationBlocks
-                  ? `Motivation trop courte (${motivationLength}/50 caractères)`
+                  ? tp("tooltip_motivation", { count: motivationLength })
                   : !dirty
-                    ? "Aucune modification à sauvegarder"
-                    : "Sauvegarde impossible"}
+                    ? tp("tooltip_nothing")
+                    : tp("tooltip_blocked")}
               </TooltipContent>
             )}
           </Tooltip>
