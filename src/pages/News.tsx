@@ -115,6 +115,22 @@ export default function News() {
 
   useEffect(() => {
     let cancelled = false;
+    const lang = (i18n.language || "fr").split("-")[0].toLowerCase();
+    const overlayTranslations = async (list: Article[], lg: string): Promise<Article[]> => {
+      if (!["en", "es", "it", "de"].includes(lg) || list.length === 0) return list;
+      const { data: trs } = await supabase
+        .from("article_translations")
+        .select("article_id, title, excerpt")
+        .eq("lang", lg)
+        .in("article_id", list.map((a) => a.id));
+      const map = new Map<string, { title?: string; excerpt?: string }>();
+      (trs || []).forEach((tr: any) => map.set(tr.article_id, { title: tr.title, excerpt: tr.excerpt }));
+      return list.map((a) => {
+        const tr = map.get(a.id);
+        if (!tr) return a;
+        return { ...a, title: tr.title || a.title, excerpt: tr.excerpt || a.excerpt };
+      });
+    };
     const fetchArticles = async () => {
       setLoading(true);
       setError(null);
