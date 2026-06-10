@@ -70,6 +70,7 @@ const StarRating = ({ rating }: { rating: number | null }) => {
 };
 
 const GuideDetail = () => {
+  const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
