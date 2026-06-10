@@ -300,6 +300,23 @@ async function main() {
     ),
   ]);
 
+  // Map slug → langs disponibles (article_translations join articles)
+  const articleLangs = new Map();
+  try {
+    const { data: trRows } = await supabase
+      .from("article_translations")
+      .select("lang, articles!inner(slug)");
+    for (const r of trRows || []) {
+      const slug = r.articles?.slug;
+      if (!slug) continue;
+      if (!articleLangs.has(slug)) articleLangs.set(slug, new Set());
+      articleLangs.get(slug).add(r.lang);
+    }
+    console.log(`  ↳ article_translations: ${trRows?.length || 0} alternates (${articleLangs.size} articles)`);
+  } catch (e) {
+    console.warn("  ⚠️  Failed to fetch article_translations:", e.message);
+  }
+
   const entries = [];
 
   for (const page of staticPages) {
@@ -308,7 +325,11 @@ async function main() {
   for (const slug of cityLandingPages) {
     entries.push(urlEntryWithLangAlternates(`/house-sitting/${slug}`, today, "weekly", "0.9"));
   }
-  for (const e of articles) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
+  for (const e of articles) {
+    const slug = e.loc.replace(/^\/actualites\//, "");
+    const langs = Array.from(articleLangs.get(slug) || []);
+    entries.push(articleUrlEntry(e.loc, e.lastmod, e.changefreq, e.priority, langs));
+  }
   for (const e of seoCity) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of guides) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of depts) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
