@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,7 @@ import { Helmet } from "react-helmet-async";
 import authIllustration from "@/assets/auth-illustration.webp";
 
 const ResetPassword = () => {
+  const { t } = useTranslation();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -19,7 +21,6 @@ const ResetPassword = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if user already has a recovery session (arrived via /auth/confirm redirect)
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) setIsRecovery(true);
     });
@@ -37,16 +38,16 @@ const ResetPassword = () => {
     if (password !== confirmPassword) {
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: "Les mots de passe ne correspondent pas.",
+        title: t("auth_common.error_title"),
+        description: t("reset_password.mismatch"),
       });
       return;
     }
     if (password.length < 8) {
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: "Le mot de passe doit contenir au moins 8 caractères.",
+        title: t("auth_common.error_title"),
+        description: t("reset_password.too_short"),
       });
       return;
     }
@@ -55,15 +56,15 @@ const ResetPassword = () => {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
       toast({
-        title: "Mot de passe mis à jour !",
-        description: "Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
+        title: t("reset_password.updated_title"),
+        description: t("reset_password.updated_body"),
       });
       navigate("/login");
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de mettre à jour le mot de passe. Le lien a peut-être expiré.",
+        title: t("auth_common.error_title"),
+        description: t("reset_password.update_failed"),
       });
     } finally {
       setIsLoading(false);
@@ -73,27 +74,25 @@ const ResetPassword = () => {
   return (
     <div className="min-h-screen flex bg-background">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
-      {/* Left panel - illustration (hidden on mobile) */}
       <div className="hidden lg:flex lg:w-1/2 bg-accent items-center justify-center p-12 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/10" />
         <div className="relative z-10 flex flex-col items-center text-center max-w-lg">
           <img
             src={authIllustration}
-            alt="Chien et chat heureux"
+            alt={t("reset_password.illustration_alt")}
             width={400}
             height={400}
             className="mb-8 drop-shadow-lg"
           />
           <h2 className="font-heading text-2xl font-semibold text-foreground mb-3">
-            Nouveau départ
+            {t("reset_password.panel_title")}
           </h2>
           <p className="text-muted-foreground leading-relaxed">
-            Choisissez un mot de passe sécurisé pour protéger votre compte et vos informations.
+            {t("reset_password.panel_description")}
           </p>
         </div>
       </div>
 
-      {/* Right panel - form */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
           <div className="text-center mb-10">
@@ -102,14 +101,13 @@ const ResetPassword = () => {
                 <span className="text-primary">g</span>uardiens
               </h1>
             </Link>
-            <p className="text-muted-foreground">Choisissez un nouveau mot de passe</p>
+            <p className="text-muted-foreground">{t("reset_password.subtitle")}</p>
           </div>
 
-          {/* Illustration mobile only */}
           <div className="flex justify-center mb-8 lg:hidden">
             <img
               src={authIllustration}
-              alt="Chien et chat heureux"
+              alt={t("reset_password.illustration_alt")}
               width={200}
               height={200}
               className="drop-shadow-md"
@@ -118,12 +116,12 @@ const ResetPassword = () => {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="password">Nouveau mot de passe</Label>
+              <Label htmlFor="password">{t("reset_password.new_password")}</Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Minimum 8 caractères"
+                  placeholder={t("reset_password.new_placeholder")}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -134,17 +132,18 @@ const ResetPassword = () => {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={showPassword ? t("auth_common.hide_password") : t("auth_common.show_password")}
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
+              <Label htmlFor="confirm-password">{t("reset_password.confirm_password")}</Label>
               <Input
                 id="confirm-password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Retapez votre mot de passe"
+                placeholder={t("reset_password.confirm_placeholder")}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
@@ -153,13 +152,13 @@ const ResetPassword = () => {
               />
             </div>
             <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-              {isLoading ? "Mise à jour..." : "Mettre à jour le mot de passe"}
+              {isLoading ? t("reset_password.submitting") : t("reset_password.submit")}
             </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
             <Link to="/login" className="text-primary font-medium hover:underline">
-              Retour à la connexion
+              {t("auth_common.back_to_login")}
             </Link>
           </p>
         </div>
