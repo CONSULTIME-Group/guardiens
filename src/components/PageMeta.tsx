@@ -169,7 +169,7 @@ const PageMeta = ({
         type,
       },
     });
-  }, [author, canonical, canonicalUrl, currentPath, currentUrl, fullTitle, metaDescription, noindex, publishedAt, resolvedImage, type]);
+  }, [author, canonical, canonicalUrl, currentPath, currentUrl, currentLang, fullTitle, metaDescription, noindex, publishedAt, resolvedImage, type]);
 
   return (
     <Helmet>
@@ -177,6 +177,10 @@ const PageMeta = ({
       <meta name="description" content={metaDescription} />
       <meta name="robots" content={noindex ? "noindex, follow" : "index, follow"} />
       <link rel="canonical" href={canonicalUrl} />
+      {hreflangAlternates.map(({ lang, href }) => (
+        <link key={lang} rel="alternate" hrefLang={lang} href={href} />
+      ))}
+      <link rel="alternate" hrefLang="x-default" href={addLangParam(canonicalUrl, "fr")} />
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={metaDescription} />
       <meta property="og:url" content={currentUrl} />
@@ -184,7 +188,7 @@ const PageMeta = ({
       <meta property="og:image:secure_url" content={resolvedImage} />
       <meta property="og:type" content={type} />
       <meta property="og:site_name" content={SITE_NAME} />
-      <meta property="og:locale" content="fr_FR" />
+      <meta property="og:locale" content={OG_LOCALES[currentLang]} />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={metaDescription} />
