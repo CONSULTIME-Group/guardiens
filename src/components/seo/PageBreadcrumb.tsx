@@ -20,10 +20,11 @@ const BASE_URL = "https://guardiens.fr";
  */
 const PageBreadcrumb = ({ items }: PageBreadcrumbProps) => {
   const location = useLocation();
+  const { t } = useTranslation();
 
-  // Always prepend "Accueil"
+  // Always prepend "Home"
   const allItems: BreadcrumbItem[] = [
-    { label: "Accueil", href: "/" },
+    { label: t("article.home", "Accueil"), href: "/" },
     ...items,
   ];
 
