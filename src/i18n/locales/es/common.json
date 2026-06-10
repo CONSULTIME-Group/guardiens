@@ -756,5 +756,24 @@
     "view_listings": "Ver anuncios",
     "member_fallback": "Miembro",
     "listing_fallback": "Anuncio de cuidado"
+  },
+  "auth_confirm": {
+    "meta_title": "Confirmando su cuenta",
+    "validating_title": "Validando",
+    "validating_body": "Estamos finalizando la confirmación de su cuenta y su acceso seguro.",
+    "back_to_login": "Volver al inicio de sesión",
+    "invalid_title": "Enlace no válido o caducado",
+    "expired_body": "Este enlace de confirmación ha caducado. Solicite uno nuevo a continuación.",
+    "resend_cta": "Reenviar el correo de confirmación",
+    "resend_success_inline": "✓ Correo reenviado, revise su bandeja de entrada.",
+    "prompt_email": "Introduzca su correo electrónico para recibir un nuevo enlace:",
+    "resend_toast_title": "Correo reenviado",
+    "resend_toast_body": "Revise su bandeja de entrada.",
+    "error_toast_title": "Error",
+    "recovery_validated_title": "Enlace validado",
+    "recovery_validated_body": "Ahora puede elegir una nueva contraseña.",
+    "confirmed_title": "Correo confirmado",
+    "confirmed_body": "Su cuenta está activa.",
+    "expired_fallback": "El enlace ha caducado. Solicite un nuevo correo de confirmación."
   }
 }

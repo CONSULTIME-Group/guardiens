@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useNavigate } from "react-router-dom";
 import { Loader2, MailCheck, AlertTriangle, RefreshCw } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { trackEventWithUserId } from "@/lib/analytics";
 
 const AuthConfirm = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const handled = useRef(false);
@@ -21,15 +23,13 @@ const AuthConfirm = () => {
 
     const url = new URL(window.location.href);
     const rawNext = url.searchParams.get("next") || "/dashboard";
-    // Sécurité : on n'accepte que les chemins internes (pas d'URL absolue, pas de protocol-relative).
     const next = /^\/(?!\/)/.test(rawNext) ? rawNext : "/dashboard";
 
-    // Check for error in hash fragment (Supabase redirects errors there)
     const hashParams = new URLSearchParams(window.location.hash.replace("#", ""));
     const hashError = hashParams.get("error_description") || hashParams.get("error");
     if (hashError) {
       setError(hashError);
-      return; // Don't set up listeners, show error UI immediately
+      return;
     }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -43,16 +43,11 @@ const AuthConfirm = () => {
 
           if (event === "PASSWORD_RECOVERY") {
             toast({
-              title: "Lien validé",
-              description: "Vous pouvez maintenant choisir un nouveau mot de passe.",
+              title: t("auth_confirm.recovery_validated_title"),
+              description: t("auth_confirm.recovery_validated_body"),
             });
             navigate("/reset-password", { replace: true });
           } else {
-            // ── Émission signup_email_confirmed (avant redirect) ──
-            // C'est ICI que le funnel doit incrémenter, pas dans Dashboard :
-            // AuthConfirm consomme le hash type=signup et redirige vers /dashboard
-            // sans hash, ce qui empêchait l'émission côté Dashboard.
-            // Déduplication via localStorage par user_id.
             try {
               const userId = session?.user?.id ?? null;
               if (userId) {
@@ -60,8 +55,6 @@ const AuthConfirm = () => {
                 if (!localStorage.getItem(flagKey)) {
                   localStorage.setItem(flagKey, "1");
 
-                  // Récupère le rôle depuis profiles pour que les filtres
-                  // owner/sitter du dashboard admin fonctionnent.
                   let role: string | null = null;
                   try {
                     const { data: prof } = await supabase
@@ -76,10 +69,6 @@ const AuthConfirm = () => {
                     source: "/auth/confirm",
                     metadata: { user_id: userId, role, via: "email_link" },
                   });
-                  // Émet aussi `signup_completed` ici : c'est le vrai signal de
-                  // fin d'inscription quand l'email n'est pas auto-confirmé.
-                  // Sans ça, le funnel admin reste bloqué à 0 alors que des
-                  // comptes sont bien créés (cf. cas du 26/04 : 70 starts → 18 comptes).
                   const completedKey = `signup_completed_tracked_${userId}`;
                   if (!localStorage.getItem(completedKey)) {
                     localStorage.setItem(completedKey, "1");
@@ -93,8 +82,8 @@ const AuthConfirm = () => {
             } catch { /* silencieux */ }
 
             toast({
-              title: "Email confirmé",
-              description: "Votre compte est activé !",
+              title: t("auth_confirm.confirmed_title"),
+              description: t("auth_confirm.confirmed_body"),
             });
             navigate(next, { replace: true });
           }
@@ -102,7 +91,6 @@ const AuthConfirm = () => {
       }
     );
 
-    // Try explicit OTP verification for token_hash in query params
     const tokenHash = url.searchParams.get("token_hash");
     const type = url.searchParams.get("type");
 
@@ -115,7 +103,6 @@ const AuthConfirm = () => {
       });
     }
 
-    // Timeout: if nothing happens after 15s, check session one more time
     const timeout = setTimeout(async () => {
       const { data } = await supabase.auth.getSession();
       if (data.session) {
@@ -124,19 +111,18 @@ const AuthConfirm = () => {
         return;
       }
       subscription.unsubscribe();
-      setError("Le lien a expiré. Demandez un nouvel email de confirmation.");
+      setError(t("auth_confirm.expired_fallback"));
     }, 15000);
 
     return () => {
       clearTimeout(timeout);
       subscription.unsubscribe();
     };
-  }, [navigate, toast]);
+  }, [navigate, toast, t]);
 
   const handleResend = async () => {
     setResending(true);
-    // Try to get email from a previous session or prompt user
-    const email = window.prompt("Entrez votre adresse email pour recevoir un nouveau lien :");
+    const email = window.prompt(t("auth_confirm.prompt_email"));
     if (!email) {
       setResending(false);
       return;
@@ -149,14 +135,14 @@ const AuthConfirm = () => {
     if (resendError) {
       toast({
         variant: "destructive",
-        title: "Erreur",
+        title: t("auth_confirm.error_toast_title"),
         description: resendError.message,
       });
     } else {
       setResent(true);
       toast({
-        title: "Email renvoyé",
-        description: "Vérifiez votre boîte de réception.",
+        title: t("auth_confirm.resend_toast_title"),
+        description: t("auth_confirm.resend_toast_body"),
       });
     }
   };
@@ -167,24 +153,24 @@ const AuthConfirm = () => {
         <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
         <div className="w-full max-w-md rounded-3xl border border-border bg-card p-8 text-center shadow-sm">
           <AlertTriangle className="mx-auto mb-4 h-10 w-10 text-destructive" />
-          <h1 className="font-heading text-2xl font-semibold text-foreground">Lien invalide ou expiré</h1>
+          <h1 className="font-heading text-2xl font-semibold text-foreground">{t("auth_confirm.invalid_title")}</h1>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
             {error.includes("expired")
-              ? "Ce lien de confirmation a expiré. Demandez-en un nouveau ci-dessous."
+              ? t("auth_confirm.expired_body")
               : error}
           </p>
           <div className="mt-6 flex flex-col gap-3">
             {!resent && (
               <Button onClick={handleResend} disabled={resending} className="gap-2">
                 <RefreshCw className={`h-4 w-4 ${resending ? "animate-spin" : ""}`} />
-                Renvoyer un email de confirmation
+                {t("auth_confirm.resend_cta")}
               </Button>
             )}
             {resent && (
-              <p className="text-sm text-primary font-medium">✓ Email renvoyé, vérifiez votre boîte.</p>
+              <p className="text-sm text-primary font-medium">{t("auth_confirm.resend_success_inline")}</p>
             )}
             <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground">
-              Retour à la connexion
+              {t("auth_confirm.back_to_login")}
             </Link>
           </div>
         </div>
@@ -197,13 +183,13 @@ const AuthConfirm = () => {
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       <div className="w-full max-w-md rounded-3xl border border-border bg-card p-8 text-center shadow-sm">
         <MailCheck className="mx-auto mb-4 h-10 w-10 text-primary" />
-        <h1 className="font-heading text-2xl font-semibold text-foreground">Validation en cours</h1>
+        <h1 className="font-heading text-2xl font-semibold text-foreground">{t("auth_confirm.validating_title")}</h1>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          Nous finalisons votre confirmation de compte et votre connexion sécurisée.
+          {t("auth_confirm.validating_body")}
         </p>
         <Loader2 className="mx-auto mt-6 h-6 w-6 animate-spin text-primary" />
         <Link to="/login" className="mt-6 inline-block text-sm text-muted-foreground hover:text-foreground">
-          Retour à la connexion
+          {t("auth_confirm.back_to_login")}
         </Link>
       </div>
     </div>

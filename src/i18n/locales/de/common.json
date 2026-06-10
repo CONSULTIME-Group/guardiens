@@ -756,5 +756,24 @@
     "view_listings": "Anzeigen ansehen",
     "member_fallback": "Mitglied",
     "listing_fallback": "Betreuungsanzeige"
+  },
+  "auth_confirm": {
+    "meta_title": "Konto wird bestätigt",
+    "validating_title": "Wird überprüft",
+    "validating_body": "Wir schließen die Bestätigung Ihres Kontos und Ihre sichere Anmeldung ab.",
+    "back_to_login": "Zurück zur Anmeldung",
+    "invalid_title": "Ungültiger oder abgelaufener Link",
+    "expired_body": "Dieser Bestätigungslink ist abgelaufen. Fordern Sie unten einen neuen an.",
+    "resend_cta": "Bestätigungs-E-Mail erneut senden",
+    "resend_success_inline": "✓ E-Mail gesendet, prüfen Sie Ihr Postfach.",
+    "prompt_email": "Geben Sie Ihre E-Mail-Adresse ein, um einen neuen Link zu erhalten:",
+    "resend_toast_title": "E-Mail erneut gesendet",
+    "resend_toast_body": "Prüfen Sie Ihr Postfach.",
+    "error_toast_title": "Fehler",
+    "recovery_validated_title": "Link bestätigt",
+    "recovery_validated_body": "Sie können jetzt ein neues Passwort wählen.",
+    "confirmed_title": "E-Mail bestätigt",
+    "confirmed_body": "Ihr Konto ist aktiv.",
+    "expired_fallback": "Der Link ist abgelaufen. Fordern Sie eine neue Bestätigungs-E-Mail an."
   }
 }
