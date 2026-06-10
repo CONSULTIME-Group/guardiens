@@ -318,7 +318,7 @@ const GuideDetail = () => {
           {nearbyGuides.length > 0 && (
             <div className="mt-14 border-t border-border pt-10">
               <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
-                Guides proches, {guide.department}
+                {t("guide_detail.nearby_title", { department: guide.department })}
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                 {nearbyGuides.map((ng) => (
@@ -339,7 +339,7 @@ const GuideDetail = () => {
           {relatedArticles.length > 0 && (
             <div className="mt-14 border-t border-border pt-10">
               <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
-                Articles sur {guide.city}
+                {t("guide_detail.related_title", { city: guide.city })}
               </h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {relatedArticles.map((a: any) => (
@@ -351,7 +351,7 @@ const GuideDetail = () => {
                         </h3>
                         <p className="text-xs text-muted-foreground line-clamp-2">{a.excerpt}</p>
                         <span className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary">
-                          Lire <ArrowRight className="h-3 w-3" />
+                          {t("guide_detail.read")} <ArrowRight className="h-3 w-3" />
                         </span>
                       </CardContent>
                     </Card>
@@ -364,13 +364,13 @@ const GuideDetail = () => {
           {/* CTA */}
           <div className="mt-14 text-center border-t border-border pt-10">
             <p className="text-muted-foreground mb-4">
-              Vous allez garder à {guide.city} ?
+              {t("guide_detail.cta_question", { city: guide.city })}
             </p>
             <Link
               to={`/house-sitting/${guide.slug}`}
               className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
             >
-              Voir les gardes à {guide.city}
+              {t("guide_detail.see_sits", { city: guide.city })}
             </Link>
           </div>
         </main>
