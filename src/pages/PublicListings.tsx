@@ -18,32 +18,37 @@ const SearchSitter = lazyWithRetry(
 
 const CANONICAL = "https://guardiens.fr/annonces";
 
-const BASE_JSONLD = [
-  {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    name: TITLE,
-    description: DESCRIPTION,
-    url: CANONICAL,
-    inLanguage: "fr-FR",
-    isPartOf: { "@type": "WebSite", name: "Guardiens", url: "https://guardiens.fr" },
-  },
-  {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Accueil", item: "https://guardiens.fr/" },
-      { "@type": "ListItem", position: 2, name: "Annonces de garde", item: CANONICAL },
-    ],
-  },
-];
-
 export default function PublicListings() {
+  const { t, i18n } = useTranslation();
   const [itemListLd, setItemListLd] = useState<any | null>(null);
   const [intlCount, setIntlCount] = useState<number>(0);
 
-  // Compte les annonces hors France pour piloter l'indicateur "radar"
-  // (chip pulsant qui pointe vers /annonces/international).
+  const TITLE = t("public_listings.meta_title");
+  const DESCRIPTION = t("public_listings.meta_description");
+  const BREADCRUMB_HOME = t("breadcrumb.home", { defaultValue: "Accueil" });
+  const BREADCRUMB_LISTINGS = t("nav.listings", { defaultValue: "Annonces de garde" });
+
+  const BASE_JSONLD = [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: TITLE,
+      description: DESCRIPTION,
+      url: CANONICAL,
+      inLanguage: i18n.language,
+      isPartOf: { "@type": "WebSite", name: "Guardiens", url: "https://guardiens.fr" },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: BREADCRUMB_HOME, item: "https://guardiens.fr/" },
+        { "@type": "ListItem", position: 2, name: BREADCRUMB_LISTINGS, item: CANONICAL },
+      ],
+    },
+  ];
+
+  // Compte les annonces hors France pour piloter l'indicateur "radar".
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -58,8 +63,7 @@ export default function PublicListings() {
     return () => { cancelled = true; };
   }, []);
 
-  // Charge un échantillon léger des annonces ouvertes pour émettre un
-  // JSON-LD ItemList (utile au carrousel Google « Offres »).
+  // ItemList JSON-LD pour Google
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -73,21 +77,22 @@ export default function PublicListings() {
       setItemListLd({
         "@context": "https://schema.org",
         "@type": "ItemList",
-        name: "Annonces de garde d'animaux ouvertes",
+        name: TITLE,
         url: CANONICAL,
         numberOfItems: data.length,
         itemListElement: data.map((s: any, i: number) => ({
           "@type": "ListItem",
           position: i + 1,
           url: `https://guardiens.fr/annonces/${s.id}`,
-          name: s.title || "Garde d'animaux",
+          name: s.title || BREADCRUMB_LISTINGS,
         })),
       });
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [TITLE, BREADCRUMB_LISTINGS]);
 
   const jsonld = itemListLd ? [...BASE_JSONLD, itemListLd] : BASE_JSONLD;
+  const intlLabel = t("public_listings.intl_count", { count: intlCount, defaultValue: `${intlCount} listings outside France` });
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -101,7 +106,6 @@ export default function PublicListings() {
         <meta property="og:title" content={TITLE} />
         <meta property="og:description" content={DESCRIPTION} />
         <meta property="og:site_name" content="Guardiens" />
-        <meta property="og:locale" content="fr_FR" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={TITLE} />
         <meta name="twitter:description" content={DESCRIPTION} />
@@ -111,46 +115,42 @@ export default function PublicListings() {
       <PublicHeader />
 
       <main id="main-content" className="flex-1 min-w-0" role="main">
-        {/* ─── Hero éditorial + H1 SEO ─── */}
         <section className="max-w-6xl mx-auto px-4 md:px-6 pt-10 pb-6">
           <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
-            Annonces ouvertes · France entière
+            {t("public_listings.eyebrow")}
           </p>
           <h1 className="font-heading text-3xl md:text-4xl lg:text-5xl font-medium leading-tight text-foreground tracking-tight max-w-3xl">
-            Annonces de garde d'animaux à domicile
+            {t("public_listings.h1")}
           </h1>
           <p className="mt-4 text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
-            Parcourez librement les gardes proposées par les propriétaires&nbsp;:
-            chats, chiens, NAC, à la campagne ou en ville. Filtrez par localisation,
-            dates et critères, ou visualisez la carte en direct.
+            {t("public_listings.subtitle")}
           </p>
-          <nav aria-label="Voir aussi" className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+          <nav aria-label={t("public_listings.see_also_missions")} className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
             <Link
               to="/petites-missions"
               className="inline-flex items-center gap-1.5 text-primary font-semibold hover:underline underline-offset-4"
             >
-              Voir aussi&nbsp;: petites missions près de chez vous <span aria-hidden>→</span>
+              {t("public_listings.see_also_missions")} <span aria-hidden>→</span>
             </Link>
             <Link
               to="/guides-locaux"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
-              Guides locaux
+              {t("public_listings.local_guides")}
             </Link>
             <Link
               to="/tarifs"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
-              Tarifs
+              {t("public_listings.pricing")}
             </Link>
           </nav>
 
-          {/* ─── Radar : annonces hors France ─── */}
           {intlCount > 0 && (
             <Link
               to="/annonces/international"
               className="mt-5 inline-flex items-center gap-2.5 rounded-full bg-accent/40 hover:bg-accent/60 border border-border px-4 py-2 text-sm transition-colors group"
-              aria-label={`${intlCount} annonce${intlCount > 1 ? "s" : ""} hors France`}
+              aria-label={intlLabel}
             >
               <span className="relative flex h-2.5 w-2.5 shrink-0" aria-hidden="true">
                 <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping" />
@@ -158,7 +158,7 @@ export default function PublicListings() {
               </span>
               <span className="text-foreground">
                 <span className="font-semibold">{intlCount}</span>{" "}
-                annonce{intlCount > 1 ? "s" : ""} hors France
+                {t("public_listings.intl_count", { count: intlCount }).replace(/^\d+\s*/, "")}
               </span>
               <span className="text-muted-foreground group-hover:text-foreground transition-colors" aria-hidden>→</span>
             </Link>
@@ -176,35 +176,34 @@ export default function PublicListings() {
           <SearchSitter />
         </Suspense>
 
-        {/* ─── Maillage interne bas de page ─── */}
         <section className="border-t border-border/60 mt-12">
           <div className="max-w-6xl mx-auto px-4 md:px-6 py-10">
             <h2 className="font-heading text-xl font-medium text-foreground mb-4">
-              Explorer aussi
+              {t("public_listings.explore_title")}
             </h2>
             <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-sm">
               <li>
                 <Link to="/petites-missions" className="group inline-flex items-baseline gap-2 text-foreground hover:text-primary transition-colors">
-                  <span className="font-medium">Petites missions</span>
-                  <span className="text-muted-foreground">, coups de main de proximité, gratuits</span>
+                  <span className="font-medium">{t("public_listings.explore_missions")}</span>
+                  <span className="text-muted-foreground">{t("public_listings.explore_missions_desc")}</span>
                 </Link>
               </li>
               <li>
                 <Link to="/guides-locaux" className="group inline-flex items-baseline gap-2 text-foreground hover:text-primary transition-colors">
-                  <span className="font-medium">Guides locaux</span>
-                  <span className="text-muted-foreground">, villes et conseils</span>
+                  <span className="font-medium">{t("public_listings.local_guides")}</span>
+                  <span className="text-muted-foreground">{t("public_listings.explore_guides_desc")}</span>
                 </Link>
               </li>
               <li>
                 <Link to="/tarifs" className="group inline-flex items-baseline gap-2 text-foreground hover:text-primary transition-colors">
-                  <span className="font-medium">Tarifs gardien</span>
-                  <span className="text-muted-foreground">, 6,99 €/mois ou 12 € one-shot</span>
+                  <span className="font-medium">{t("public_listings.explore_pricing")}</span>
+                  <span className="text-muted-foreground">{t("public_listings.explore_pricing_desc")}</span>
                 </Link>
               </li>
               <li>
                 <Link to="/annonces/international" className="group inline-flex items-baseline gap-2 text-foreground hover:text-primary transition-colors">
-                  <span className="font-medium">Annonces hors France</span>
-                  <span className="text-muted-foreground">, Maroc, Espagne, Belgique…</span>
+                  <span className="font-medium">{t("public_listings.explore_intl")}</span>
+                  <span className="text-muted-foreground">{t("public_listings.explore_intl_desc")}</span>
                 </Link>
               </li>
             </ul>
