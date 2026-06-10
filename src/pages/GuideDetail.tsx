@@ -157,7 +157,7 @@ const GuideDetail = () => {
   if (guideLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Chargement...</div>
+        <div className="animate-pulse text-muted-foreground">{t("guide_detail.loading")}</div>
       </div>
     );
   }
@@ -165,8 +165,8 @@ const GuideDetail = () => {
   if (!guide) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
-        <p className="text-muted-foreground">Guide introuvable.</p>
-        <Link to="/guides" className="text-primary hover:underline">← Retour aux guides</Link>
+        <p className="text-muted-foreground">{t("guide_detail.not_found")}</p>
+        <Link to="/guides" className="text-primary hover:underline">{t("guide_detail.back_to_guides")}</Link>
       </div>
     );
   }
@@ -174,14 +174,14 @@ const GuideDetail = () => {
   return (
     <>
       <PageMeta
-        title={`Guide pet sitting ${guide.city}, Parcs, vétos, cafés dog-friendly | Guardiens`}
-        description={`Guide pratique pour pet sitters à ${guide.city} : parcs dog-friendly, vétérinaires, cafés accueillants, sentiers de balade. ${guide.ideal_for}`}
+        title={t("guide_detail.meta_title", { city: guide.city })}
+        description={t("guide_detail.meta_description", { city: guide.city, ideal: guide.ideal_for })}
         path={`/guides/${guide.slug}`}
       />
 
       <div className="min-h-screen bg-background">
         <PageBreadcrumb items={[
-          { label: "Guides locaux", href: "/guides" },
+          { label: t("guide_detail.breadcrumb"), href: "/guides" },
           { label: guide.city },
         ]} />
 
@@ -195,19 +195,19 @@ const GuideDetail = () => {
             }}
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
           >
-            <ArrowLeft className="h-4 w-4" /> Retour
+            <ArrowLeft className="h-4 w-4" /> {t("guide_detail.back")}
           </button>
         </div>
 
         {/* Header */}
         <header className="relative overflow-hidden border-b border-border">
           <div className="absolute inset-0">
-            <img src={guideHeaderImg} alt={`Guide pet sitting ${guide.city}`} className="w-full h-full object-cover" />
+            <img src={guideHeaderImg} alt={t("guide_detail.header_alt", { city: guide.city })} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/70 to-background/40" />
           </div>
           <div className="relative max-w-5xl mx-auto px-4 py-10 sm:py-14">
           <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground mb-4">
-            Guide du gardien à {guide.city}
+            {t("guide_detail.title", { city: guide.city })}
           </h1>
           <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl mb-3">
             {guide.intro}
@@ -221,36 +221,37 @@ const GuideDetail = () => {
           <div className="mt-5 relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher un lieu, un parc, un véto..."
+              placeholder={t("guide_detail.search_placeholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
             />
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-4">
-            <Badge variant="secondary">{places.length} lieux référencés</Badge>
+            <Badge variant="secondary">{t("guide_detail.places_count", { count: places.length })}</Badge>
             <Link
               to={`/house-sitting/${guide.slug}`}
               className="text-sm text-primary hover:underline flex items-center gap-1"
             >
-              Voir les gardes à {guide.city} <ArrowRight className="h-3.5 w-3.5" />
+              {t("guide_detail.see_sits", { city: guide.city })} <ArrowRight className="h-3.5 w-3.5" />
             </Link>
             {guide.department && (
               <Link
                 to={`/departement/${slugify(guide.department)}`}
                 className="text-sm text-primary hover:underline flex items-center gap-1"
               >
-                House-sitting dans le {guide.department} <ArrowRight className="h-3.5 w-3.5" />
+                {t("guide_detail.see_department", { department: guide.department })} <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             )}
             <Link
               to="/petites-missions"
               className="text-sm text-primary hover:underline flex items-center gap-1"
             >
-              Petites missions d'entraide <ArrowRight className="h-3.5 w-3.5" />
+              {t("guide_detail.small_missions")} <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
         </div>
+
 
         {/* Map (chargée à la demande, sans bloquer le LCP ni le SEO) */}
         {placesWithCoords.length > 0 && (
