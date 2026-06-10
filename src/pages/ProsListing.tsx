@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { PRO_CATEGORIES, getCategoryByValue, getProInitials } from "@/lib/proCategories";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,6 +24,7 @@ type ProRow = {
 type SortKey = "recent" | "alpha" | "city";
 
 export default function ProsListing() {
+  const { t } = useTranslation();
   const [pros, setPros] = useState<ProRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<string | "all">("all");
@@ -67,10 +69,10 @@ export default function ProsListing() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Annuaire des pros animaliers près de chez vous | Guardiens</title>
+        <title>{t("pros_listing.meta_title")}</title>
         <meta
           name="description"
-          content="Trouvez vétérinaires, éducateurs, toiletteurs, ostéopathes et autres professionnels animaliers vérifiés près de chez vous."
+          content={t("pros_listing.meta_description")}
         />
         <link rel="canonical" href="https://guardiens.fr/pros" />
       </Helmet>
@@ -79,49 +81,47 @@ export default function ProsListing() {
         <header className="mb-10">
           <div className="flex items-center gap-3 flex-wrap mb-3">
             <h1 className="text-4xl font-display font-bold">
-              Pros animaliers près de chez vous
+              {t("pros_listing.h1")}
             </h1>
             <span className="text-[10px] uppercase tracking-wider font-bold bg-amber-100 text-amber-800 px-2 py-1 rounded">
-              Bêta
+              {t("pros_listing.beta")}
             </span>
           </div>
           <p className="text-lg text-muted-foreground max-w-2xl">
-            Vétérinaires, éducateurs, toiletteurs, ostéopathes, transporteurs, photographes :
-            retrouvez les pros animaliers de confiance, en France entière.
+            {t("pros_listing.intro")}
           </p>
           <p className="text-sm text-muted-foreground mt-2">
-            Annuaire en phase bêta, les premières fiches arrivent. Vous êtes pro&nbsp;?
-            L'inscription est gratuite et votre fiche est validée sous 48&nbsp;h.
+            {t("pros_listing.beta_note")}
           </p>
           <div className="mt-6 flex flex-wrap gap-2">
             <Button asChild>
-              <Link to="/pros/inscription">Inscrire mon activité</Link>
+              <Link to="/pros/inscription">{t("pros_listing.register_cta")}</Link>
             </Button>
             <Button asChild variant="outline">
-              <Link to="/pros/mon-espace">Mon espace pro</Link>
+              <Link to="/pros/mon-espace">{t("pros_listing.my_space")}</Link>
             </Button>
           </div>
 
           <div className="mt-8 rounded-lg border border-border bg-muted/40 p-4 text-sm">
-            <p className="font-medium mb-1">Vous êtes gardien particulier déclaré en auto-entreprise&nbsp;?</p>
+            <p className="font-medium mb-1">{t("pros_listing.sitter_box_title")}</p>
             <p className="text-muted-foreground">
-              Cet annuaire référence des pros animaliers (vétérinaires, éducateurs, toiletteurs…) qui n'assurent pas
-              forcément de garde. Si vous proposez des gardes rémunérées à titre professionnel, demandez plutôt le
-              badge <strong>Gardien Pro vérifié</strong> depuis{" "}
+              {t("pros_listing.sitter_box_body_before")}
+              <strong>{t("pros_listing.sitter_box_badge")}</strong>
+              {t("pros_listing.sitter_box_body_after")}
               <Link
                 to="/settings?section=security&focus=pro"
                 className="underline font-medium"
               >
-                Paramètres &gt; Sécurité &gt; Gardien Pro
+                {t("pros_listing.sitter_box_link")}
               </Link>
-              . Il s'affichera sur votre profil et dans la recherche gardiens.
+              {t("pros_listing.sitter_box_body_end")}
             </p>
           </div>
         </header>
 
         <div className="flex flex-col md:flex-row gap-3 mb-6">
           <Input
-            placeholder="Rechercher un pro, une ville…"
+            placeholder={t("pros_listing.search_placeholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="md:max-w-sm"
@@ -130,11 +130,11 @@ export default function ProsListing() {
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
             className="h-10 rounded-md border border-input bg-background px-3 text-sm md:max-w-[180px]"
-            aria-label="Trier par"
+            aria-label={t("pros_listing.sort_aria")}
           >
-            <option value="recent">Plus récents</option>
-            <option value="alpha">Ordre alphabétique</option>
-            <option value="city">Par ville</option>
+            <option value="recent">{t("pros_listing.sort_recent")}</option>
+            <option value="alpha">{t("pros_listing.sort_alpha")}</option>
+            <option value="city">{t("pros_listing.sort_city")}</option>
           </select>
           <div className="flex flex-wrap gap-2">
             <Badge
@@ -142,7 +142,7 @@ export default function ProsListing() {
               className="cursor-pointer"
               onClick={() => setCategory("all")}
             >
-              Tous
+              {t("pros_listing.all")}
             </Badge>
             {PRO_CATEGORIES.map((c) => (
               <Badge
@@ -166,10 +166,10 @@ export default function ProsListing() {
         ) : filtered.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center text-muted-foreground">
-              Aucun pro ne correspond à votre recherche pour le moment.
+              {t("pros_listing.empty")}
               <div className="mt-4">
                 <Button asChild variant="outline">
-                  <Link to="/pros/inscription">Être le premier inscrit</Link>
+                  <Link to="/pros/inscription">{t("pros_listing.be_first")}</Link>
                 </Button>
               </div>
             </CardContent>
@@ -186,7 +186,7 @@ export default function ProsListing() {
                         {p.logo_url ? (
                           <img
                             src={p.logo_url}
-                            alt={`Logo ${p.raison_sociale}`}
+                            alt={t("pros_listing.logo_alt", { name: p.raison_sociale })}
                             className="w-14 h-14 rounded-lg object-contain bg-muted"
                           />
                         ) : (
@@ -214,7 +214,7 @@ export default function ProsListing() {
                       )}
                       {p.urgences_24_7 && (
                         <Badge variant="secondary" className="mt-3">
-                          Urgences 24/7
+                          {t("pros_listing.emergencies_24_7")}
                         </Badge>
                       )}
                     </CardContent>
