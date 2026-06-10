@@ -265,7 +265,7 @@ export default function ArticleDetail() {
  };
   fetchAll();
   return () => { cancelled = true; };
-  }, [slug]);
+  }, [slug, i18n.language]);
 
  // CTA tracking, listen for clicks on data-article-cta links inside the rendered article
  useEffect(() => {
