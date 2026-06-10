@@ -1,5 +1,6 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, Check, CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -23,15 +24,14 @@ import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import FillSavoirFaireBanner from "@/components/profile/FillSavoirFaireBanner";
 
-// Sections affichées dans la sidebar. `optional: true` = pas de calcul de complétion (purement décoratif).
-const SECTIONS_META = [
-  { id: "identity", num: 1, label: "Identité", subtitle: "Qui vous êtes" },
-  { id: "sitter", num: 2, label: "Profil gardien", subtitle: "Votre expérience" },
-  { id: "experience", num: 3, label: "Animaux", subtitle: "Ce que vous acceptez" },
-  { id: "mobility", num: 4, label: "Mobilité & Rayon", subtitle: "Votre rayon" },
-  { id: "gallery", num: 5, label: "Galerie", subtitle: "Vos gardes en photos", optional: true },
-  { id: "experiences", num: 6, label: "Expériences", subtitle: "Expériences hors Guardiens", optional: true },
-  { id: "skills", num: 7, label: "Compétences", subtitle: "Ce que vous savez faire" },
+const SECTIONS_BASE: Array<{ id: string; num: number; optional?: boolean }> = [
+  { id: "identity", num: 1 },
+  { id: "sitter", num: 2 },
+  { id: "experience", num: 3 },
+  { id: "mobility", num: 4 },
+  { id: "gallery", num: 5, optional: true },
+  { id: "experiences", num: 6, optional: true },
+  { id: "skills", num: 7 },
 ];
 
 /**
