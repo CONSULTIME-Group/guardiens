@@ -775,26 +775,21 @@ const Landing = () => {
         <div className="max-w-3xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/70 font-body mb-6 block text-center">
-              Ce qu'on n'écrit jamais dans une annonce
+              {t("landing.meeting.eyebrow")}
             </span>
             <h2 id="le-vrai-pretexte" className="font-heading text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.15] text-foreground text-center mb-10 scroll-mt-24">
-              Le vrai prétexte,<br className="hidden md:inline" /> c'est la rencontre.
+              {t("landing.meeting.title_a")}<br className="hidden md:inline" /> {t("landing.meeting.title_b")}
             </h2>
 
             <div className="border-l-4 border-primary pl-6 md:pl-8 max-w-2xl mx-auto">
               <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/80 mb-5">
-                Ce qu'on raconte rarement, c'est ce qui se passe <em>autour</em>.
-                Connaître la mami du coin et son histoire parce qu'on l'a aidée à ramasser
-                ses fruits du jardin. Échanger avec Gerardo pendant qu'il vous donne
-                un coup de main pour bricoler, et lui proposer un repas fait maison en retour.
+                {t("landing.meeting.p1")}
               </p>
               <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/80 mb-5">
-                Pas besoin d'un animal pour qu'une rencontre commence.
-                Demander un coup de main, en proposer un : c'est déjà ouvrir une porte.
-                Garder une maison, c'est en ouvrir une autre, un même geste, deux échelles.
+                {t("landing.meeting.p2")}
               </p>
               <p className="font-heading text-xl md:text-2xl italic text-foreground leading-snug">
-                On apprend, on découvre, on s'attache ,                 sans aller le chercher. Juste en laissant la place à ce qui peut arriver.
+                {t("landing.meeting.p3")}
               </p>
             </div>
           </RevealSection>
