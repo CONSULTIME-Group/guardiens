@@ -874,9 +874,9 @@ const Landing = () => {
                     3
                   </div>
                 </div>
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Partez l'esprit léger</h3>
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">{t("landing.how.step3_title")}</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70">
-                  L'accord de garde signé, votre gardien s'installe. Vous recevez des nouvelles. Vous rentrez chez vous, souvent avec une nouvelle relation.
+                  {t("landing.how.step3_text")}
                 </p>
               </div>
             </RevealSection>
