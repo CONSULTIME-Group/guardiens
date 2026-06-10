@@ -2,6 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useFavorites } from "@/hooks/useFavorites";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Heart, User, Calendar, MapPin, ArrowRight, Loader2, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,13 +14,19 @@ import EmptyState from "@/components/shared/EmptyState";
 import PageMeta from "@/components/PageMeta";
 
 const Favorites = () => {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { data: favorites, isLoading } = useFavorites();
 
   const sitterIds = favorites?.filter(f => f.target_type === "sitter").map(f => f.target_id) || [];
   const sitIds = favorites?.filter(f => f.target_type === "sit").map(f => f.target_id) || [];
 
-  // Fetch sitter profiles
+  const locale = i18n.language?.startsWith("en") ? "en-GB"
+    : i18n.language?.startsWith("es") ? "es-ES"
+    : i18n.language?.startsWith("it") ? "it-IT"
+    : i18n.language?.startsWith("de") ? "de-DE"
+    : "fr-FR";
+
   const { data: sitters } = useQuery({
     queryKey: ["favorite-sitters", sitterIds],
     queryFn: async () => {
@@ -34,7 +41,6 @@ const Favorites = () => {
     enabled: sitterIds.length > 0,
   });
 
-  // Fetch sits
   const { data: sits } = useQuery({
     queryKey: ["favorite-sits", sitIds],
     queryFn: async () => {
@@ -63,19 +69,19 @@ const Favorites = () => {
 
   return (
     <>
-      <PageMeta title="Mes favoris, Guardiens" description="Retrouvez vos gardiens et annonces sauvegardés." />
+      <PageMeta title={t("favorites_page.meta_title")} description={t("favorites_page.meta_description")} />
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-8">
           <Heart className="h-6 w-6 text-red-500 fill-red-500" />
-          <h1 className="text-2xl font-heading font-bold text-foreground">Mes favoris</h1>
+          <h1 className="text-2xl font-heading font-bold text-foreground">{t("favorites_page.title")}</h1>
         </div>
 
         {!hasAny ? (
           <EmptyState
             illustration="heartBookmark"
-            title="Aucun favori pour l'instant"
-            description="Parcourez les profils de gardiens ou les annonces et cliquez sur l'icône cœur pour les retrouver ici."
-            actionLabel="Explorer les gardiens"
+            title={t("favorites_page.empty_title")}
+            description={t("favorites_page.empty_description")}
+            actionLabel={t("favorites_page.explore_sitters")}
             actionTo="/search"
             actionIcon={Search}
           />
@@ -84,17 +90,17 @@ const Favorites = () => {
             <TabsList>
               <TabsTrigger value="sitters" className="gap-2">
                 <User className="h-4 w-4" />
-                Gardiens {hasSitters && <Badge variant="secondary" className="ml-1 text-xs">{sitters!.length}</Badge>}
+                {t("favorites_page.tab_sitters")} {hasSitters && <Badge variant="secondary" className="ml-1 text-xs">{sitters!.length}</Badge>}
               </TabsTrigger>
               <TabsTrigger value="sits" className="gap-2">
                 <Calendar className="h-4 w-4" />
-                Annonces {hasSits && <Badge variant="secondary" className="ml-1 text-xs">{sits!.length}</Badge>}
+                {t("favorites_page.tab_sits")} {hasSits && <Badge variant="secondary" className="ml-1 text-xs">{sits!.length}</Badge>}
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="sitters" className="space-y-3">
               {!hasSitters ? (
-                <EmptyState illustration="walkingDog" title="Aucun gardien en favori" description="Trouvez des gardiens de confiance et sauvegardez-les." actionLabel="Chercher un gardien" actionTo="/search" actionIcon={Search} />
+                <EmptyState illustration="walkingDog" title={t("favorites_page.no_sitter_fav_title")} description={t("favorites_page.no_sitter_fav_desc")} actionLabel={t("favorites_page.search_sitter")} actionTo="/search" actionIcon={Search} />
               ) : (
                 sitters!.map((sitter: any) => (
                   <Card key={sitter.id} className="group hover:shadow-md transition-shadow">
@@ -113,7 +119,7 @@ const Favorites = () => {
                             to={`/gardiens/${sitter.id}`}
                             className="font-medium text-foreground hover:text-primary transition-colors"
                           >
-                            {sitter.first_name || "Membre"}
+                            {sitter.first_name || t("favorites_page.member_fallback")}
                           </Link>
                           {sitter.city && (
                             <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
@@ -131,7 +137,7 @@ const Favorites = () => {
 
             <TabsContent value="sits" className="space-y-3">
               {!hasSits ? (
-                <EmptyState illustration="emptyCalendar" title="Aucune annonce en favori" description="Sauvegardez des annonces pour les retrouver facilement." actionLabel="Voir les annonces" actionTo="/search" actionIcon={Search} />
+                <EmptyState illustration="emptyCalendar" title={t("favorites_page.no_sit_fav_title")} description={t("favorites_page.no_sit_fav_desc")} actionLabel={t("favorites_page.view_listings")} actionTo="/search" actionIcon={Search} />
               ) : (
                 sits!.map((sit: any) => (
                   <Card key={sit.id} className="group hover:shadow-md transition-shadow">
@@ -145,13 +151,13 @@ const Favorites = () => {
                             to={`/annonces/${sit.id}`}
                             className="font-medium text-foreground hover:text-primary transition-colors line-clamp-1"
                           >
-                            {sit.title || "Annonce de garde"}
+                            {sit.title || t("favorites_page.listing_fallback")}
                           </Link>
                           <div className="flex items-center gap-3 mt-0.5 text-sm text-muted-foreground">
                             {sit.start_date && (
                               <span>
-                                {new Date(sit.start_date).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
-                                {sit.end_date && ` → ${new Date(sit.end_date).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}`}
+                                {new Date(sit.start_date).toLocaleDateString(locale, { day: "numeric", month: "short" })}
+                                {sit.end_date && ` → ${new Date(sit.end_date).toLocaleDateString(locale, { day: "numeric", month: "short" })}`}
                               </span>
                             )}
                           </div>
