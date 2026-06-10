@@ -207,7 +207,7 @@ async function main() {
 
   console.log("🗺️  Sitemap incremental build…");
 
-  const [articles, seoCity, guides, depts, breeds, profiles, sits] = await Promise.all([
+  const [articles, seoCity, guides, depts, breeds, profiles, sits, translations] = await Promise.all([
     fetchOrCache(
       "articles", cache,
       () => maxUpdatedAt("articles", "updated_at", q => q.eq("published", true)),
