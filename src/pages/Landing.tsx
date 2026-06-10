@@ -912,17 +912,16 @@ const Landing = () => {
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
-              Pour tous · Sans abonnement · Sans argent
+              {t("landing.aid.eyebrow")}
             </span>
             <h2 id="osez-l-entraide" className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-6 scroll-mt-24">
-              Osez demander. Osez proposer.
+              {t("landing.aid.title")}
             </h2>
             <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-4 text-lg leading-relaxed">
-              Avant, il y avait quelqu'un du coin qui passait arroser le jardin, qui gardait le chien,
-              qui venait fixer un volet. Quelqu'un à qui on offrait une part de gâteau ou un coup de main en retour.
+              {t("landing.aid.p1")}
             </p>
             <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-16 text-lg leading-relaxed">
-              Cette habitude n'a pas disparu, on n'ose simplement plus la première question. Guardiens, c'est le prétexte pour la reposer, et au passage, vivre des expériences qu'aucun voyage organisé ne vous offrira.
+              {t("landing.aid.p2")}
             </p>
           </RevealSection>
 
@@ -930,14 +929,13 @@ const Landing = () => {
             <RevealSection delay={0.1}>
               <div className="bg-card rounded-2xl p-8 shadow-sm h-full">
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">
-                  « J'ai besoin d'un coup de main »
+                  {t("landing.aid.need_title")}
                 </h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  Votre potager pendant les vacances. Vos poules ce week-end. Promener votre chien après une opération.
-                  Le demander, ce n'est pas avouer une faiblesse, c'est faire confiance.
+                  {t("landing.aid.need_text")}
                 </p>
                 <p className="text-sm font-body font-medium text-primary">
-                  Sans argent, sans abonnement. C'est le pari.
+                  {t("landing.aid.need_footer")}
                 </p>
               </div>
             </RevealSection>
@@ -945,14 +943,13 @@ const Landing = () => {
             <RevealSection delay={0.2}>
               <div className="bg-card rounded-2xl p-8 shadow-sm h-full">
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">
-                  « Je peux donner un peu de mon temps »
+                  {t("landing.aid.offer_title")}
                 </h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  Vous savez tailler les rosiers. Vous adorez les chiens. Vous avez deux heures samedi matin.
-                  Proposez, et vivez ce que vous n'auriez jamais vécu sans cette rencontre.
+                  {t("landing.aid.offer_text")}
                 </p>
                 <p className="text-sm font-body font-medium text-primary">
-                  C'est comme ça qu'un tissu local se retisse.
+                  {t("landing.aid.offer_footer")}
                 </p>
               </div>
             </RevealSection>
@@ -960,28 +957,28 @@ const Landing = () => {
 
           <RevealSection delay={0.25} className="mt-16">
             <p className="text-center text-xs tracking-widest uppercase text-primary/60 font-body mb-6">
-              Quelques échanges vus sur Guardiens cette semaine
+              {t("landing.aid.seen_this_week")}
             </p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 max-w-5xl mx-auto">
               {[
-                "Arroser les plantes",
-                "Petit bricolage",
-                "Tailler le jardin",
-                "Cours de pain maison",
-                "Séance de Reiki",
-                "Réceptionner un colis",
-                "Covoiturage rdv",
-                "Bouture, semis",
-                "Café & écoute",
-                "Aide aux courses",
-                "Coup de main déménagement",
-                "Apprendre la couture",
-              ].map((label) => (
+                "water_plants",
+                "small_diy",
+                "garden_pruning",
+                "bread_class",
+                "reiki",
+                "parcel",
+                "carpool",
+                "seedlings",
+                "coffee_listen",
+                "groceries",
+                "moving_help",
+                "sewing",
+              ].map((key) => (
                 <div
-                  key={label}
+                  key={key}
                   className="flex items-center justify-center text-center bg-card rounded-xl px-3 py-4 border border-border/60 hover:border-primary/40 hover:shadow-sm transition-all min-h-[64px]"
                 >
-                  <span className="text-xs font-body text-foreground/80 leading-tight">{label}</span>
+                  <span className="text-xs font-body text-foreground/80 leading-tight">{t(`landing.aid.examples.${key}`)}</span>
                 </div>
               ))}
             </div>
@@ -990,14 +987,14 @@ const Landing = () => {
           <RevealSection delay={0.3} className="text-center mt-12">
             <div className="border-l-4 border-primary pl-6 max-w-xl mx-auto text-left mb-10">
               <p className="text-xl md:text-2xl font-heading font-semibold italic text-foreground leading-snug">
-                La vie de village n'a pas disparu. Elle attendait simplement qu'on ose la première question.
+                {t("landing.aid.quote")}
               </p>
             </div>
             <Link
               to="/petites-missions"
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-full font-body font-medium text-sm hover:bg-primary/90 transition-colors"
             >
-              Découvrir les petites missions <ArrowRight className="h-4 w-4" />
+              {t("landing.aid.cta")} <ArrowRight className="h-4 w-4" />
             </Link>
           </RevealSection>
         </div>
