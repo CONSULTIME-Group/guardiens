@@ -40,15 +40,15 @@ interface GuidePlace {
   tips: string | null;
 }
 
-const CATEGORY_CONFIG: Record<string, { label: string; icon: any; color: string }> = {
-  dog_park: { label: "Parcs & espaces verts", icon: TreePine, color: "hsl(var(--primary))" },
-  general_park: { label: "Parcs publics", icon: Trees, color: "hsl(var(--primary))" },
-  walk_trail: { label: "Balades & sentiers", icon: Footprints, color: "hsl(27, 35%, 59%)" },
-  vet: { label: "Vétérinaires", icon: Stethoscope, color: "hsl(0, 84%, 60%)" },
-  dog_friendly_cafe: { label: "Cafés & restos dog-friendly", icon: Coffee, color: "hsl(27, 35%, 59%)" },
-  dog_friendly_restaurant: { label: "Restaurants dog-friendly", icon: Coffee, color: "hsl(27, 35%, 59%)" },
-  pet_shop: { label: "Animaleries", icon: Store, color: "hsl(270, 50%, 60%)" },
-  water_point: { label: "Points d'eau", icon: Droplets, color: "hsl(200, 70%, 50%)" },
+const CATEGORY_CONFIG: Record<string, { key: string; icon: any; color: string }> = {
+  dog_park: { key: "dog_park", icon: TreePine, color: "hsl(var(--primary))" },
+  general_park: { key: "general_park", icon: Trees, color: "hsl(var(--primary))" },
+  walk_trail: { key: "walk_trail", icon: Footprints, color: "hsl(27, 35%, 59%)" },
+  vet: { key: "vet", icon: Stethoscope, color: "hsl(0, 84%, 60%)" },
+  dog_friendly_cafe: { key: "dog_friendly_cafe", icon: Coffee, color: "hsl(27, 35%, 59%)" },
+  dog_friendly_restaurant: { key: "dog_friendly_restaurant", icon: Coffee, color: "hsl(27, 35%, 59%)" },
+  pet_shop: { key: "pet_shop", icon: Store, color: "hsl(270, 50%, 60%)" },
+  water_point: { key: "water_point", icon: Droplets, color: "hsl(200, 70%, 50%)" },
 };
 
 
