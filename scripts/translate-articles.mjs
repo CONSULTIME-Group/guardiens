@@ -155,6 +155,8 @@ async function main() {
         }, { onConflict: "article_id,lang" });
       if (upErr) { failed++; console.log(`UPSERT FAIL: ${upErr.message}`); }
       else { done++; console.log("ok"); }
+      await new Promise((r) => setTimeout(r, 300));
+    }
   }
   console.log(`\nDone: ${done} translated, ${skipped} skipped, ${failed} failed.`);
 }
