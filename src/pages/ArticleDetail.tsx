@@ -132,7 +132,7 @@ function ArticleSeoLogger({ article }: { article: ArticleFull }) {
 export default function ArticleDetail() {
  const { slug } = useParams<{ slug: string }>();
  const navigate = useNavigate();
- const { i18n } = useTranslation();
+ const { t, i18n } = useTranslation();
  const { user, isAuthenticated } = useAuth();
  const [article, setArticle] = useState<ArticleFull | null>(null);
  const [loading, setLoading] = useState(true);
