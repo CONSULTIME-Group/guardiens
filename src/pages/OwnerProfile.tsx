@@ -1,5 +1,6 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -20,15 +21,15 @@ import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
-const SECTIONS_META = [
-  { id: "identity", num: 1, label: "Identité", subtitle: "Qui vous êtes" },
-  { id: "housing", num: 2, label: "Logement", subtitle: "Votre maison" },
-  { id: "animals", num: 3, label: "Animaux", subtitle: "Vos animaux" },
-  { id: "rules", num: 4, label: "Attentes", subtitle: "Ce que vous cherchez", optional: true },
-  { id: "communication", num: 5, label: "Accueil", subtitle: "Accueil & guide", optional: true },
-  { id: "skills", num: 6, label: "Compétences", subtitle: "Ce que vous pouvez offrir" },
-  { id: "gallery", num: 7, label: "Galerie", subtitle: "Photos de votre maison" },
-];
+const SECTIONS_BASE = [
+  { id: "identity", num: 1 },
+  { id: "housing", num: 2 },
+  { id: "animals", num: 3 },
+  { id: "rules", num: 4, optional: true },
+  { id: "communication", num: 5, optional: true },
+  { id: "skills", num: 6 },
+  { id: "gallery", num: 7 },
+] as const;
 
 /**
  * Critère de score étendu : inclut la section où l'utilisateur peut le compléter.
