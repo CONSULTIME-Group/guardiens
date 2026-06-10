@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { useTranslation, Trans } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
@@ -29,33 +30,27 @@ import {
 
 type Role = "owner" | "sitter" | "both";
 
-const roles: { value: Role; label: string; description: string }[] = [
- { value: "owner", label: "Propriétaire", description: "J'ai des animaux ou une maison à faire garder. Je publie des annonces et je choisis un gardien." },
- { value: "sitter", label: "Gardien", description: "Je veux garder des maisons et m'occuper d'animaux. Je consulte les annonces et je propose mes services." },
- { value: "both", label: "Les deux", description: "Je veux à la fois faire garder et garder. Vous aurez accès aux deux espaces." },
-];
+const STRENGTH_KEYS = ["", "weak", "medium", "good", "strong"] as const;
 
 /* ── Password strength helper ── */
-const getPasswordStrength = (pw: string): { score: 0 | 1 | 2 | 3 | 4; label: string; color: string } => {
- if (!pw) return { score: 0, label: "", color: "" };
+const getPasswordStrength = (pw: string): { score: 0 | 1 | 2 | 3 | 4; key: typeof STRENGTH_KEYS[number]; color: string } => {
+ if (!pw) return { score: 0, key: "", color: "" };
  let score = 0;
  if (pw.length >= 8) score++;
  if (pw.length >= 12) score++;
  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
  if (/\d/.test(pw) || /[^A-Za-z0-9]/.test(pw)) score++;
 
- const map: Record<number, { label: string; color: string }> = {
- 0: { label: "", color: "" },
- 1: { label: "Faible", color: "bg-strength-weak" },
- 2: { label: "Moyen", color: "bg-strength-medium" },
- 3: { label: "Bon", color: "bg-strength-good" },
- 4: { label: "Fort", color: "bg-strength-strong" },
+ const colors: Record<number, string> = {
+  0: "",
+  1: "bg-strength-weak",
+  2: "bg-strength-medium",
+  3: "bg-strength-good",
+  4: "bg-strength-strong",
  };
- return { score: score as 0 | 1 | 2 | 3 | 4,...map[score] };
+ return { score: score as 0 | 1 | 2 | 3 | 4, key: STRENGTH_KEYS[score], color: colors[score] };
 };
 
-/* Common compromised passwords / patterns blocked by Supabase HIBP, we pre-check
- to avoid the very confusing "weak_password" error that costs us many signups. */
 const COMMON_WEAK_PASSWORDS = new Set([
  "12345678", "123456789", "1234567890", "azertyui", "azerty123",
  "password", "password1", "password123", "motdepasse", "motdepasse1",
@@ -67,14 +62,11 @@ const COMMON_WEAK_PASSWORDS = new Set([
 const isObviouslyWeak = (pw: string): boolean => {
  const lower = pw.toLowerCase();
  if (COMMON_WEAK_PASSWORDS.has(lower)) return true;
- // all same character
  if (/^(.)\1+$/.test(pw)) return true;
- // sequential digits like 12345678 / 87654321
  if (/^(?:0123456789|1234567890|9876543210|0987654321)$/.test(pw)) return true;
  return false;
 };
 
-/* ── Random suggestion d'un mot de passe fort, mémorisable et HIBP-safe ── */
 const PW_ADJ = ["Joyeux", "Calme", "Sauvage", "Doux", "Brave", "Curieux", "Vif", "Tendre"];
 const PW_NOUN = ["Chat", "Chien", "Lapin", "Renard", "Loup", "Cheval", "Hibou", "Ours"];
 const PW_VERB = ["adore", "croque", "grimpe", "danse", "veille", "murmure", "explore"];
@@ -86,6 +78,7 @@ const generateSuggestedPassword = (): string => {
 };
 
 const Register = () => {
+ const { t } = useTranslation();
  const [searchParams] = useSearchParams();
  const presetRole = searchParams.get("role") as Role | null;
  const presetEmail = (searchParams.get("email") || "").trim().toLowerCase();
@@ -118,20 +111,21 @@ const Register = () => {
 
  const pwStrength = useMemo(() => getPasswordStrength(password), [password]);
 
- // Capture referral code from URL + track signup_started
+ const roles = useMemo<{ value: Role; label: string; description: string }[]>(() => [
+  { value: "owner", label: t("register_page.roles.owner_label"), description: t("register_page.roles.owner_desc") },
+  { value: "sitter", label: t("register_page.roles.sitter_label"), description: t("register_page.roles.sitter_desc") },
+  { value: "both", label: t("register_page.roles.both_label"), description: t("register_page.roles.both_desc") },
+ ], [t]);
+
  useEffect(() => {
  const ref = searchParams.get("ref");
  if (ref) {
  sessionStorage.setItem("guardiens_ref", ref);
  }
- // Fire-and-forget, fonctionne aussi en anonyme via insertion locale temp
  trackEvent("signup_started", {
  source: "/inscription",
  metadata: { has_ref: !!ref, preset_role: presetRole || null },
  });
- // Si le rôle est pré-sélectionné via ?role= (CTA, Facebook, etc.),
- // l'utilisateur saute l'étape 1 → on émet l'event manuellement pour
- // éviter le sous-comptage de "Rôle choisi" dans le funnel.
  if (presetRole) {
  trackEvent("signup_role_selected", {
  source: "/inscription",
@@ -141,14 +135,12 @@ const Register = () => {
  // eslint-disable-next-line react-hooks/exhaustive-deps
  }, []);
 
- // Cooldown anti-spam pour le bouton "Renvoyer l'email"
  useEffect(() => {
  if (resendCooldown <= 0) return;
- const t = setInterval(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
- return () => clearInterval(t);
+ const tm = setInterval(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
+ return () => clearInterval(tm);
  }, [resendCooldown]);
 
- // Persist email entre étapes / refresh (préserve le brouillon en cas d'abandon)
  useEffect(() => {
   try {
    if (email) sessionStorage.setItem("guardiens_signup_email", email);
@@ -156,15 +148,13 @@ const Register = () => {
   } catch {}
  }, [email]);
 
- // Compteur ETA décroissant à l'étape 2 (rassure : « plus que X secondes »)
  useEffect(() => {
   if (step !== 2) return;
   setEtaSeconds(25);
-  const t = setInterval(() => setEtaSeconds((s) => (s > 0 ? s - 1 : 0)), 1000);
-  return () => clearInterval(t);
+  const tm = setInterval(() => setEtaSeconds((s) => (s > 0 ? s - 1 : 0)), 1000);
+  return () => clearInterval(tm);
  }, [step]);
 
- // Charge le nombre d'inscrits pour preuve sociale
  useEffect(() => {
  let cancelled = false;
  (async () => {
@@ -183,12 +173,12 @@ const Register = () => {
  setFormError(null);
 
  if (password.length < 8) {
- setFormError("Votre mot de passe doit contenir au moins 8 caractères.");
+ setFormError(t("register_page.error_min_length"));
  return;
  }
 
  if (isObviouslyWeak(password)) {
- setFormError("Ce mot de passe est trop courant. Mélangez plusieurs mots, chiffres ou symboles (par exemple une phrase de passe).");
+ setFormError(t("register_page.error_too_common"));
  try {
  trackEvent("signup_failed", {
  source: "/inscription",
@@ -199,12 +189,12 @@ const Register = () => {
  }
 
  if (pwStrength.score < 2) {
- setFormError("Mot de passe trop faible. Ajoutez des majuscules, des chiffres ou un caractère spécial.");
+ setFormError(t("register_page.error_too_weak"));
  return;
  }
 
   if (!acceptedTerms) {
-    setFormError("Veuillez accepter les CGU, les CGS et la politique de confidentialité pour continuer.");
+    setFormError(t("register_page.error_terms"));
     setTermsHighlighted(true);
     setTimeout(() => {
       document.getElementById("accept-terms")?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -218,7 +208,6 @@ const Register = () => {
     return;
   }
 
- // ── signup_form_submitted (après validation client, avant appel Supabase) ──
  try {
  trackEvent("signup_form_submitted", {
  source: "/inscription",
@@ -238,15 +227,8 @@ const Register = () => {
  timeoutPromise,
  ]) as any;
 
- // Pas de vérification client du profil ici : l'utilisateur n'a pas encore
- // confirmé son email, donc aucune session active → toute requête
- // SELECT profiles ou INSERT analytics_events avec user_id renvoie 401
- // (RLS rôle anon). Le trigger handle_new_user crée le profil côté serveur.
- // Le filet de sécurité "profil manquant" est posé sur le Dashboard,
- // au premier login (session active, plus de 401).
  const newUserId = result?.user?.id ?? null;
 
- // Flag pour émettre user_activated lors du premier dashboard
  try {
  if (typeof window !== "undefined") {
  localStorage.setItem("first_dashboard_seen", "pending");
@@ -254,7 +236,6 @@ const Register = () => {
  }
  } catch {}
 
- // Process referral code after successful signup
  const storedRef = sessionStorage.getItem("guardiens_ref");
  if (storedRef && result?.user?.id) {
  try {
@@ -285,9 +266,7 @@ const Register = () => {
  }
  }
 
- // If auto-confirm enabled (session already created), go straight to dashboard
  if (result?.session) {
- // Session active → on peut émettre signup_completed sans 401
  try {
  trackEventWithUserId(newUserId, "signup_completed", {
  source: "/inscription",
@@ -299,13 +278,7 @@ const Register = () => {
  }
 
  setStep("confirmation");
- // NOTE : pas de signup_completed ici. Sans confirmation email, aucune session
- // → INSERT analytics_events avec user_id = 401 (RLS rôle anon). Option A retenue :
- // on s'appuie sur `user_activated` (émis depuis le Dashboard au premier login,
- // session active) comme proxy de l'inscription complétée. Émission best-effort
- // côté serveur reportée à un futur webhook Supabase.
  } catch (error: any) {
- // Track échec signup (normalisé)
  const rawMessage = error?.message || "unknown";
  try {
  trackEvent("signup_failed", {
@@ -319,20 +292,16 @@ const Register = () => {
  });
  } catch {}
  if (error.message === "timeout") {
- setFormError(
- "L'inscription prend plus de temps que prévu. Si vous n'avez pas reçu d'email de confirmation dans 2 minutes, réessayez."
- );
+ setFormError(t("register_page.error_timeout"));
  } else {
  const info = mapAuthError(error);
  if (info.code === "user_already_exists") {
- // Dialog dédié : permet de rebondir vers /login pré-rempli
  setExistingAccountOpen(true);
  } else if (
  info.code === "weak_password" ||
  info.code === "invalid_email" ||
  info.code === "rate_limited"
  ) {
- // Erreur liée à la saisie → inline sous le formulaire (plus visible qu'un toast)
  setFormError(`${info.title}. ${info.description ?? ""}`.trim());
  } else {
  toast({
@@ -368,8 +337,8 @@ const Register = () => {
  setResendCount((n) => n + 1);
  setResendCooldown(45);
  toast({
- title: "Email renvoyé",
- description: `Nouveau lien envoyé à ${email}. Pensez à vérifier vos spams.`,
+ title: t("register_page.confirmation.resend_toast_title"),
+ description: t("register_page.confirmation.resend_toast_body", { email }),
  });
  }
  setIsResending(false);
@@ -386,7 +355,7 @@ const Register = () => {
   const handleGoogleSignUp = async () => {
     if (!acceptedTerms) {
       logOAuthStage("blocked_terms", "/inscription");
-      setFormError("Veuillez accepter les CGU, les CGS et la politique de confidentialité avant de continuer avec Google.");
+      setFormError(t("register_page.error_terms_google"));
       setTermsHighlighted(true);
       setTimeout(() => {
         document.getElementById("accept-terms")?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -431,34 +400,31 @@ const Register = () => {
 
  return (
  <div className="min-h-screen flex bg-background">
- {/* /inscription : noindex (anti-cannibalisation brand, siteRoutes.ts index:false). */}
  <Helmet><meta name="robots" content="noindex, follow" /></Helmet>
 
  <AuthIllustrationPanel
- title="Rejoignez une communauté de confiance"
- description="Faites garder votre maison, prêtez main forte, échangez un service : ici, on retisse les liens de proximité, du cœur du village jusqu'aux hameaux de campagne."
+ title={t("register_page.panel_title")}
+ description={t("register_page.panel_desc")}
  footerSlot={
  totalInscrits !== null && totalInscrits > 0 ? (
  <div className="mt-8 inline-flex items-center gap-3 rounded-full bg-card/85 backdrop-blur-md pl-3 pr-5 py-2 border border-border/60 shadow-sm">
  <span className="inline-flex items-center justify-center min-w-[2.5rem] h-9 px-2 rounded-full bg-primary/10 text-primary font-heading text-lg font-bold tabular-nums">
  {totalInscrits}
  </span>
- <span className="text-sm text-foreground/80">membres déjà inscrits</span>
+ <span className="text-sm text-foreground/80">{t("register_page.members_badge_suffix")}</span>
  </div>
  ) : null
  }
  />
 
- {/* Lien retour : sticky en haut à gauche du viewport, hors grille du formulaire */}
  <Link
  to="/"
  className="absolute top-4 left-4 lg:top-6 lg:left-6 z-20 inline-flex items-center gap-1.5 rounded-full bg-card/85 backdrop-blur-md border border-border/60 px-3 py-1.5 text-xs lg:text-sm text-foreground/80 hover:text-foreground hover:bg-card transition-colors shadow-sm"
  >
  <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
- Retour au site
+ {t("register_page.retour_site")}
  </Link>
 
- {/* Right panel, pb-32 pour éviter masquage par cookie banner sur mobile */}
  <div className="flex-1 flex items-center justify-center px-6 pt-16 pb-24 md:pt-12 md:pb-12">
  <div className="w-full max-w-md">
  <div className="text-center mb-4 lg:mb-8">
@@ -469,10 +435,9 @@ const Register = () => {
  </Link>
  {step !== "confirmation" && (
  <>
- {/* Indicateur de progression mobile-first */}
- <div className="mt-2 lg:mt-3 mb-1 lg:mb-2 flex flex-col items-center gap-1 lg:gap-1.5" aria-label={`Inscription, étape ${step} sur 2`}>
+ <div className="mt-2 lg:mt-3 mb-1 lg:mb-2 flex flex-col items-center gap-1 lg:gap-1.5" aria-label={t("register_page.step_aria", { step })}>
  <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold px-2.5 py-0.5 lg:py-1">
- <span className="tabular-nums">Étape {step}/2</span>
+ <span className="tabular-nums">{t("register_page.step_label", { step })}</span>
  </span>
  <div className="w-32 h-1 rounded-full bg-muted overflow-hidden" role="progressbar" aria-valuenow={step === 1 ? 50 : 100} aria-valuemin={0} aria-valuemax={100}>
  <div
@@ -482,33 +447,26 @@ const Register = () => {
  </div>
  </div>
  <p className="text-foreground font-medium text-sm lg:text-base mt-2 lg:mt-3">
- {step === 1 ? "Bienvenue" : "Plus qu'une étape"}
+ {step === 1 ? t("register_page.welcome") : t("register_page.almost_done")}
  </p>
  <p className="text-xs lg:text-sm text-muted-foreground mt-0.5 lg:mt-1">
- {step === 1
- ? "On commence par votre profil, 30 secondes."
- : "Vos identifiants et c'est terminé. Promis."}
+ {step === 1 ? t("register_page.step_1_sub") : t("register_page.step_2_sub")}
  </p>
  </>
  )}
  </div>
 
- {/* Preuve sociale mobile : visible UNIQUEMENT à l'étape 2 (à l'étape 1, le panel desktop la montre déjà et on gagne de l'espace mobile) */}
  {step === 2 && totalInscrits !== null && totalInscrits > 0 && (
  <div className="lg:hidden flex items-center justify-center gap-2 mb-6 text-sm text-muted-foreground">
  <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-semibold">
  {totalInscrits}
  </span>
- <span>membres déjà inscrits sur Guardiens</span>
+ <span>{t("register_page.members_count")}</span>
  </div>
  )}
 
- {/* Bandeau WebView in-app (FB/IG/TikTok), masqué dans navigateur standard */}
  <InAppBrowserBanner className="mb-4 lg:mb-6" />
 
- {/* Illustration retirée du flux mobile : déjà visible dans le panel desktop gauche, et coûte ~200px précieux sur mobile (la priorité = champs + CTA visibles sans scroller). */}
-
- {/* ── Confirmation screen ── */}
  {step === "confirmation" && (
  <div className="flex flex-col items-center text-center space-y-5 py-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
  <div className="rounded-full bg-primary/10 p-4">
@@ -516,38 +474,39 @@ const Register = () => {
  </div>
  <div className="space-y-2">
  <h2 className="font-heading text-xl font-semibold text-foreground">
- Un seul email vous attend
+ {t("register_page.confirmation.title")}
  </h2>
  <p className="text-muted-foreground text-sm leading-relaxed max-w-sm">
- Nous venons d'envoyer un message à{" "}
- <span className="font-medium text-foreground break-all">{email}</span>.
- Il combine la <strong className="text-foreground">confirmation de votre adresse</strong> et notre <strong className="text-foreground">message de bienvenue</strong>, cliquez sur le bouton à l'intérieur pour activer votre compte.
+ <Trans
+   i18nKey="register_page.confirmation.body"
+   values={{ email }}
+   components={{
+     1: <span className="font-medium text-foreground break-all" />,
+     2: <strong className="text-foreground" />,
+     3: <strong className="text-foreground" />,
+   }}
+ />
  </p>
  </div>
 
- {/* Encadré spam, mis en avant car c'est la cause #1 d'abandon */}
  <div className="w-full max-w-sm rounded-lg bg-warning-soft border border-warning-border px-4 py-3 text-left space-y-2">
  <p className="text-sm font-semibold text-warning-foreground">
- Vous ne voyez rien dans votre boîte de réception ?
+ {t("register_page.confirmation.spam_title")}
  </p>
  <ul className="text-xs text-warning-foreground/85 leading-relaxed space-y-1 list-disc pl-4">
   <li>
- Vérifiez vos <strong>spams / courriers indésirables</strong> et l'onglet <strong>Promotions</strong>.
- </li>
- <li>
- <strong>Hotmail, Outlook ou Live ?</strong> Nos emails y atterrissent
- souvent dans les indésirables, pensez à les marquer « non spam » pour
- recevoir les suivants directement en boîte de réception.
- </li>
- <li>
- L'expéditeur est{" "}
- <span className="font-mono text-[11px]">noreply@notify.guardiens.fr</span>.
- </li>
- <li>L'arrivée peut prendre 1 à 2 minutes.</li>
+   <Trans i18nKey="register_page.confirmation.spam_check" components={{ 1: <strong />, 2: <strong /> }} />
+  </li>
+  <li>
+   <Trans i18nKey="register_page.confirmation.spam_hotmail" components={{ 1: <strong /> }} />
+  </li>
+  <li>
+   <Trans i18nKey="register_page.confirmation.spam_sender" components={{ 1: <span className="font-mono text-[11px]" /> }} />
+  </li>
+  <li>{t("register_page.confirmation.spam_delay")}</li>
  </ul>
  </div>
 
- {/* Bouton de renvoi, proéminent, avec cooldown anti-spam-click */}
  <Button
  type="button"
  variant="outline"
@@ -557,17 +516,16 @@ const Register = () => {
  className="w-full max-w-sm"
  >
  {isResending
- ? "Envoi en cours…"
+ ? t("register_page.confirmation.resend_sending")
  : resendCooldown > 0
- ? `Renvoyer dans ${resendCooldown}s`
+ ? t("register_page.confirmation.resend_cooldown", { s: resendCooldown })
  : resendCount > 0
- ? "Renvoyer l'email à nouveau"
- : "Je n'ai rien reçu, renvoyer l'email"}
+ ? t("register_page.confirmation.resend_again")
+ : t("register_page.confirmation.resend_first")}
  </Button>
 
- {/* Conseil mobile, déplacé en secondaire car moins critique */}
  <p className="text-xs text-muted-foreground/80 leading-relaxed max-w-sm">
- Sur mobile, ouvrez le lien <strong>dans Chrome ou Safari</strong>, pas dans l'application Facebook ou Instagram, sinon votre session sera perdue.
+ <Trans i18nKey="register_page.confirmation.mobile_tip" components={{ 1: <strong /> }} />
  </p>
 
  <div className="flex flex-col items-center gap-2 pt-2">
@@ -576,7 +534,7 @@ const Register = () => {
  onClick={() => { setStep(presetRole ? 2 : 1); setResendCount(0); setResendCooldown(0); }}
  className="text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
  >
- Email incorrect ? Recommencer
+ {t("register_page.confirmation.wrong_email")}
  </button>
  <button
  type="button"
@@ -584,19 +542,18 @@ const Register = () => {
  className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
  >
  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
- Retour à la connexion
+ {t("register_page.confirmation.back_login")}
  </button>
  <Link
  to="/contact"
  className="text-xs text-muted-foreground/70 hover:text-foreground mt-2"
  >
- Toujours bloqué ? Contactez-nous
+ {t("register_page.confirmation.contact")}
  </Link>
  </div>
  </div>
  )}
 
- {/* ── Step 1: role selection ── */}
  {step === 1 && (
  <>
  <div className="space-y-3 lg:space-y-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
@@ -620,7 +577,7 @@ const Register = () => {
  >
  {role.value === "owner" && (
  <span className="absolute -top-2 right-3 inline-flex items-center rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground shadow-sm">
- Le plus populaire
+ {t("register_page.most_popular")}
  </span>
  )}
  <div className="font-semibold text-sm lg:text-base mb-0.5 lg:mb-1">{role.label}</div>
@@ -630,28 +587,26 @@ const Register = () => {
  </div>
 
  <p className="mt-3 text-center text-[11px] lg:text-xs text-muted-foreground/80">
-  Vous changerez d'avis ? Le rôle reste modifiable à tout moment depuis vos paramètres.
+  {t("register_page.role_change_hint")}
  </p>
 
- {/* Trust strip, réassurances clés juste avant la décision */}
  <ul className="mt-5 lg:mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-[11px] lg:text-xs text-muted-foreground">
  <li className="inline-flex items-center gap-1.5">
  <span className="h-1.5 w-1.5 rounded-full bg-primary/60" aria-hidden="true" />
- Gratuit pour les propriétaires
+ {t("register_page.trust_free")}
  </li>
  <li className="inline-flex items-center gap-1.5">
  <span className="h-1.5 w-1.5 rounded-full bg-primary/60" aria-hidden="true" />
- Sans engagement
+ {t("register_page.trust_no_commitment")}
  </li>
  <li className="inline-flex items-center gap-1.5">
  <span className="h-1.5 w-1.5 rounded-full bg-primary/60" aria-hidden="true" />
- Données hébergées en France
+ {t("register_page.trust_france")}
  </li>
  </ul>
  </>
  )}
 
- {/* ── Step 2: form ── */}
  {step === 2 && (
  <form onSubmit={handleSubmit} className="space-y-5 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
  <div className="text-center mb-6">
@@ -659,25 +614,23 @@ const Register = () => {
  {roles.find((r) => r.value === selectedRole)?.label}
  </span>
  <button type="button" onClick={() => setStep(1)} className="block mx-auto mt-2 text-sm text-muted-foreground hover:text-foreground">
- Changer de rôle
+ {t("register_page.change_role")}
  </button>
- {/* Message de réassurance contextualisé selon le rôle */}
  {selectedRole && (
  <p className="mt-3 text-xs text-muted-foreground/90 leading-relaxed max-w-xs mx-auto">
  {selectedRole === "owner" && (
- <>Vous pourrez <strong className="text-foreground/80">publier vos premières annonces</strong> juste après.</>
+ <Trans i18nKey="register_page.after_owner" components={{ 1: <strong className="text-foreground/80" /> }} />
  )}
  {selectedRole === "sitter" && (
- <>Vous pourrez <strong className="text-foreground/80">compléter votre profil et candidater</strong> juste après.</>
+ <Trans i18nKey="register_page.after_sitter" components={{ 1: <strong className="text-foreground/80" /> }} />
  )}
  {selectedRole === "both" && (
- <>Vous pourrez <strong className="text-foreground/80">publier vos annonces ET candidater</strong> juste après.</>
+ <Trans i18nKey="register_page.after_both" components={{ 1: <strong className="text-foreground/80" /> }} />
  )}
  </p>
  )}
  </div>
 
- {/* Google Sign-Up */}
  <Button
  type="button"
  variant="outline"
@@ -692,7 +645,7 @@ const Register = () => {
  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
  </svg>
- {isGoogleLoading ? "Connexion…" : "Continuer avec Google"}
+ {isGoogleLoading ? t("register_page.google_loading") : t("register_page.google_cta")}
  </Button>
 
  <div className="relative" role="separator">
@@ -700,24 +653,23 @@ const Register = () => {
  <span className="w-full border-t border-border" />
  </div>
  <div className="relative flex justify-center text-xs uppercase">
- <span className="bg-background px-2 text-muted-foreground">ou avec votre email</span>
+ <span className="bg-background px-2 text-muted-foreground">{t("register_page.or_email")}</span>
  </div>
  </div>
 
- {/* Bandeau ETA, rassure sur la durée restante */}
  <div className="flex items-center justify-center gap-2 -mt-1 mb-1 text-xs text-muted-foreground">
   <span className="inline-flex items-center justify-center min-w-[1.75rem] h-6 px-2 rounded-full bg-primary/10 text-primary font-semibold tabular-nums">
    {etaSeconds > 0 ? `${etaSeconds}s` : "✓"}
   </span>
-  <span>{etaSeconds > 0 ? "Plus que quelques secondes" : "C'est presque fini !"}</span>
+  <span>{etaSeconds > 0 ? t("register_page.eta_remaining") : t("register_page.eta_done")}</span>
  </div>
 
  <div className="space-y-2">
-  <Label htmlFor="email">Email</Label>
+  <Label htmlFor="email">{t("register_page.email_label")}</Label>
   <Input
    id="email"
    type="email"
-   placeholder="vous@exemple.com"
+   placeholder={t("register_page.email_placeholder")}
    value={email}
    onChange={(e) => setEmail(e.target.value)}
    onFocus={() => { try { trackEvent("signup_form_focused" as any, { source: "/inscription", metadata: { field: "email" } }); } catch {} }}
@@ -726,25 +678,25 @@ const Register = () => {
    className="rounded-lg h-12"
   />
   <p className="text-xs text-muted-foreground">
-   Nous vous enverrons un lien à valider en 1 clic. Pensez à vérifier vos spams (notamment Hotmail / Outlook).
+   {t("register_page.email_hint")}
   </p>
  </div>
  <div className="space-y-2">
   <div className="flex items-center justify-between">
-   <Label htmlFor="password">Mot de passe</Label>
+   <Label htmlFor="password">{t("register_page.password_label")}</Label>
    <button
     type="button"
     onClick={() => { const pw = generateSuggestedPassword(); setPassword(pw); setShowPassword(true); setFormError(null); }}
     className="text-xs text-primary hover:underline"
    >
-    Suggérer un mot de passe fort
+    {t("register_page.suggest_password")}
    </button>
   </div>
   <div className="relative">
    <Input
     id="password"
     type={showPassword ? "text" : "password"}
-    placeholder="Au moins 8 caractères"
+    placeholder={t("register_page.password_placeholder")}
     value={password}
     onChange={(e) => { setPassword(e.target.value); setFormError(null); }}
     onFocus={() => { try { trackEvent("signup_form_focused" as any, { source: "/inscription", metadata: { field: "password" } }); } catch {} }}
@@ -756,7 +708,7 @@ const Register = () => {
    <button
     type="button"
     onClick={() => setShowPassword(!showPassword)}
-    aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+    aria-label={showPassword ? t("register_page.hide_password") : t("register_page.show_password")}
     aria-pressed={showPassword}
     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
    >
@@ -764,17 +716,15 @@ const Register = () => {
    </button>
   </div>
   <p className="text-xs text-muted-foreground">
-   8 caractères min. · majuscules, chiffres ou symboles · évitez les mots de passe courants
+   {t("register_page.password_hint")}
   </p>
 
-  {/* Détection live des mots de passe trop courants, évite l'erreur HIBP au submit */}
   {password.length >= 6 && isObviouslyWeak(password) && (
    <p className="text-xs text-warning-foreground bg-warning-soft border border-warning-border rounded px-2 py-1.5 animate-in fade-in-0">
-    Ce mot de passe est trop courant. Utilisez « Suggérer un mot de passe fort » ou ajoutez chiffres / symboles.
+    {t("register_page.password_weak_live")}
    </p>
   )}
 
- {/* Password strength indicator */}
  {password.length > 0 && (
  <div className="space-y-1.5 animate-in fade-in-0 duration-200">
  <div className="flex gap-1 h-1.5 rounded-full overflow-hidden bg-muted">
@@ -789,7 +739,7 @@ const Register = () => {
  ))}
  </div>
  <p className="text-xs text-muted-foreground">
- Force : <span className="font-medium">{pwStrength.label}</span>
+ {t("register_page.strength_label")} : <span className="font-medium">{pwStrength.key ? t(`register_page.strength.${pwStrength.key}`) : ""}</span>
  </p>
  </div>
  )}
@@ -798,7 +748,6 @@ const Register = () => {
  </div>
 
 
-          {/* Acceptation légale, fusionnée en une seule case (équivalent juridique) */}
           <div
             className={cn(
               "flex items-start gap-3 rounded-lg border p-3 transition-colors",
@@ -822,20 +771,22 @@ const Register = () => {
               className="mt-0.5"
             />
             <label htmlFor="accept-terms" className="text-sm text-foreground/80 leading-snug cursor-pointer">
-              J'accepte les{" "}
-              <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">CGU</Link>,
-              les{" "}
-              <Link to="/cgs" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">CGS</Link>{" "}
-              et la{" "}
-              <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">politique de confidentialité</Link>.
+              <Trans
+                i18nKey="register_page.accept_label"
+                components={{
+                  1: <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
+                  2: <Link to="/cgs" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
+                  3: <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
+                }}
+              />
             </label>
           </div>
 
           <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-            {isLoading ? "Création..." : "Créer mon compte"}
+            {isLoading ? t("register_page.submitting") : t("register_page.submit")}
           </Button>
  <p className="text-center text-xs text-muted-foreground">
- Pas de spam · Désinscription en 1 clic · Vos données restent en France
+ {t("register_page.footer_trust")}
  </p>
  </form>
  )}
@@ -843,8 +794,8 @@ const Register = () => {
   {step !== "confirmation" && (
   <div className="mt-6 space-y-2 text-center text-sm text-muted-foreground">
    <p>
-   Déjà un compte ?{" "}
-   <Link to={`/login${buildRedirectQuery(redirectTarget)}`} className="text-primary font-medium hover:underline">Se connecter</Link>
+   {t("register_page.have_account")}{" "}
+   <Link to={`/login${buildRedirectQuery(redirectTarget)}`} className="text-primary font-medium hover:underline">{t("register_page.sign_in")}</Link>
    </p>
    {step === 2 && (
    <button
@@ -852,7 +803,7 @@ const Register = () => {
    onClick={() => navigate(`/login${buildRedirectQuery(redirectTarget)}`)}
    className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
    >
-  Quitter l'inscription et revenir à la connexion
+  {t("register_page.quit_signup")}
   </button>
   )}
   </div>
@@ -860,21 +811,20 @@ const Register = () => {
  </div>
  </div>
 
- {/* ── Dialog: existing account ── */}
  <Dialog open={existingAccountOpen} onOpenChange={setExistingAccountOpen}>
  <DialogContent className="sm:max-w-md">
  <DialogHeader>
- <DialogTitle>Ce compte existe déjà</DialogTitle>
+ <DialogTitle>{t("register_page.existing.title")}</DialogTitle>
  <DialogDescription>
- Un compte Guardiens existe déjà avec cette adresse. Connectez-vous ou réinitialisez votre mot de passe.
+ {t("register_page.existing.body")}
  </DialogDescription>
  </DialogHeader>
  <div className="flex flex-col gap-3 pt-2">
  <Button onClick={() => { setExistingAccountOpen(false); goToLoginWithEmail(); }}>
- Se connecter
+ {t("register_page.existing.sign_in")}
  </Button>
  <Button variant="ghost" onClick={() => { setExistingAccountOpen(false); navigate("/forgot-password"); }}>
- Mot de passe oublié ?
+ {t("register_page.existing.forgot")}
  </Button>
  </div>
  </DialogContent>
