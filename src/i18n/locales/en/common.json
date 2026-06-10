@@ -7,10 +7,10 @@
   "nav": {
     "listings": "Current listings",
     "small_missions": "Small favours",
-    "pros": "Pet pros",
+    "pros": "Pet professionals",
     "guides": "Local guides",
     "pricing": "Pricing",
-    "news": "The journal",
+    "news": "The Journal",
     "login": "Login",
     "register": "Create my account",
     "menu": "Menu",
@@ -35,16 +35,16 @@
       "contact": "Contact",
       "register": "Registration",
       "small_missions": "Small favours",
-      "emergency_sitter": "Emergency caretaker",
-      "pet_pros": "Pet pros"
+      "emergency_sitter": "Emergency caretaker / pet & home sitter",
+      "pet_pros": "Pet professionals"
     },
     "tagline": "Local house-sitting",
     "version": "Guardiens · Beta version · 2026",
     "legal": {
       "cgu": "T&Cs",
-      "cgs": "ToS",
-      "privacy": "Privacy policy",
-      "legal_notice": "Legal notice",
+      "cgs": "S-T&Cs",
+      "privacy": "Privacy Policy",
+      "legal_notice": "Legal Notice",
       "contact": "Contact"
     }
   },
@@ -52,20 +52,20 @@
     "hero": {
       "eyebrow": "Mutual aid · Pet sitting · Home sitting",
       "title_main": "Pet sitting, small favours,",
-      "title_accent": "the connection.",
-      "lede": "Have your home and pets looked after by a local caretaker / pet & home sitter while you are away. Or request, and return, a small favour near you, with or without animals.",
+      "title_accent": "the meeting.",
+      "lede": "Have your home and pets looked after by a local caretaker / pet & home sitter during your absences. Or ask for, and return, a small favour near you, with or without pets.",
       "lede_italic": "And behind every exchange, a meeting you wouldn't have looked for.",
-      "cta_owner": "Post my listing",
+      "cta_owner": "Publish my listing",
       "cta_sitter": "I want to sit",
-      "kpi_houses": "houses looked after",
-      "kpi_animals": "animals accompanied",
+      "kpi_houses": "houses sat",
+      "kpi_animals": "pets accompanied",
       "kpi_members": "registered",
       "kpi_missions": "mutual aid missions"
     },
     "toc": {
-      "aria": "Page summary",
+      "aria": "Page table of contents",
       "title": "Summary",
-      "care_aid": "Care & aid",
+      "care_aid": "Sitting & Help",
       "how": "How it works",
       "aid": "Local mutual aid",
       "trust": "Trust",
@@ -77,122 +77,122 @@
     "usages": {
       "eyebrow": "What we do together",
       "title": "In-home pet sitting and local mutual aid.",
-      "lede": "Home sitting on one side, mutual aid between locals on the other. You choose: one, the other, or both.",
+      "lede": "Home sitting on one side, mutual aid between locals on the other. You choose, one, the other, or both.",
       "owner": {
         "tag": "Owners",
         "title": "Leave with peace of mind.",
-        "text": "Someone from the local area watches over your home and animals. You meet them before leaving. You choose.",
+        "text": "Someone local watches over your home and your pets. You meet them before leaving. You choose.",
         "badge": "No subscription",
-        "cta": "I'm looking for a caretaker / pet & home sitter →"
+        "cta": "I am looking for a caretaker / pet & home sitter →"
       },
       "sitter": {
-        "tag": "Caretakers",
-        "title": "Care, and discover.",
-        "text": "Live in homes, with animals, in places you would never have explored otherwise. A sit is also a journey.",
+        "tag": "Caretaker / pet & home sitters",
+        "title": "Sit, and discover.",
+        "text": "Live in homes, with pets, in corners you would never have explored otherwise. A sit is also a journey.",
         "cta": "I want to sit →"
       },
       "mutual": {
         "badge": "Free",
-        "tag": "Local mutual aid, independent of house-sitting",
+        "tag": "Local mutual aid, independent of sitting",
         "title": "A small favour, an exchange.",
-        "text": "Watering a vegetable garden, putting up a shelf, sharing a skill, visiting an isolated person. No sitting, no animals required, just locals helping each other.",
+        "text": "Watering a vegetable garden, putting up a shelf, sharing a skill, visiting an isolated person. No sitting, no pet required, just locals helping each other.",
         "cta": "Discover mutual aid →"
       },
       "urgency": {
-        "eyebrow": "Last-minute unforeseen event",
+        "eyebrow": "Last minute unexpected",
         "title": "A sudden departure?",
-        "text": "Hospitalization, last-minute travel, family emergency: a local caretaker / pet & home sitter can take over in a few hours.",
+        "text": "Hospitalisation, last-minute travel, family emergency: a local caretaker / pet & home sitter can take over in a few hours.",
         "cta": "Find an emergency sitter →"
       }
     },
     "meeting": {
-      "eyebrow": "What is never written in an ad",
+      "eyebrow": "What is never written in a listing",
       "title_a": "The real pretext,",
       "title_b": "is the meeting.",
-      "p1": "What is rarely told is what happens around it. Getting to know the local grandmother and her story because you helped her pick fruit from her garden. Exchanging with Gerardo while he gives you a small favour with DIY, and offering him a home-cooked meal in return.",
-      "p2": "You don't need a pet for a connection to begin. Asking for a small favour, or offering one: it is already opening a door. Looking after a house is opening another, the same gesture, two scales.",
-      "p3": "We learn, discover, and grow attached, without looking for it. Just by leaving space for what might happen."
+      "p1": "What we rarely talk about is what happens around it. Getting to know the local grandmother and her story because you helped her pick her garden fruit. Exchanging with Gerardo while he gives you a small favour with DIY, and offering him a home-made meal in return.",
+      "p2": "You don't need a pet for a meeting to begin. Asking for a small favour, offering one: it's already opening a door. Sitting a house is opening another, same gesture, two scales.",
+      "p3": "We learn, we discover, we grow attached, without looking for it. Just by leaving space for what can happen."
     },
     "how": {
       "eyebrow": "Simple and transparent",
-      "title": "How it works?",
-      "step1_title": "Post your listing",
-      "step1_text": "Your dates, your animals, your home. It only takes a few minutes, your listing is online.",
+      "title": "How does it work?",
+      "step1_title": "Publish your listing",
+      "step1_text": "Your dates, your pets, your house. A few minutes are enough, your listing is online.",
       "step2_title": "Choose after a meeting",
-      "step2_text": "Local sitters apply. You read profiles, reviews, and exchange. Then you meet for a coffee, a visit, before deciding.",
+      "step2_text": "Local caretaker / pet & home sitters apply. You read profiles, reviews, you chat. Then you meet, a coffee, a visit, before deciding.",
       "step3_title": "Leave with peace of mind",
-      "step3_text": "With the house-sitting agreement signed, your sitter moves in. You receive news. You return home, often with a new relationship.",
-      "cta_owner": "Post my listing",
+      "step3_text": "Once the sitting agreement is signed, your sitter moves in. You receive news. You return home, often with a new relationship.",
+      "cta_owner": "Publish my listing",
       "cta_secondary": "Or start with a small favour →",
-      "footnote": "Register in 2 minutes · No credit card required"
+      "footnote": "Registration in 2 minutes · No credit card required"
     },
     "aid": {
       "eyebrow": "For everyone · No subscription · No money",
-      "title": "Dare to ask. Dare to offer.",
-      "p1": "Before, there was someone local who would come by to water the garden, look after the dog, or fix a shutter. Someone to whom we would offer a slice of cake or a small favour in return.",
-      "p2": "This habit hasn't disappeared, we simply no longer dare to ask the first question. Guardiens is the pretext to ask it again, and along the way, live experiences that no organized tour will offer you.",
+      "title": "Dare to ask. Dare to propose.",
+      "p1": "Before, there was someone local who would come by to water the garden, who looked after the dog, who came to fix a shutter. Someone to whom we offered a piece of cake or a small favour in return.",
+      "p2": "This habit hasn't disappeared, we simply no longer dare to ask the first question. Guardiens is the pretext to ask it again, and along the way, live experiences that no organised trip could offer you.",
       "need_title": "« I need a small favour »",
-      "need_text": "Your vegetable garden during the holidays. Your chickens this weekend. Walking your dog after an operation. Asking for it isn't admitting a weakness, it's placing trust.",
-      "need_footer": "No money, no subscription. That's the gamble.",
+      "need_text": "Your vegetable garden during holidays. Your chickens this weekend. Walking your dog after an operation. Asking for it isn't admitting a weakness, it's trusting.",
+      "need_footer": "No money, no subscription. That's the bet.",
       "offer_title": "« I can give a little of my time »",
-      "offer_text": "You know how to prune roses. You love dogs. You have two hours on Saturday morning. Make an offer, and live what you would never have experienced without this meeting.",
-      "offer_footer": "This is how a local fabric is re-woven.",
+      "offer_text": "You know how to prune roses. You love dogs. You have two hours on Saturday morning. Propose, and live what you would never have experienced without this meeting.",
+      "offer_footer": "That is how a local fabric reweaves itself.",
       "seen_this_week": "A few exchanges seen on Guardiens this week",
       "examples": {
         "water_plants": "Watering plants",
-        "small_diy": "Small DIY repairs",
+        "small_diy": "Small DIY",
         "garden_pruning": "Garden pruning",
         "bread_class": "Homemade bread class",
         "reiki": "Reiki session",
-        "parcel": "Receiving a parcel",
-        "carpool": "Carpooling for an appt",
+        "parcel": "Collecting a parcel",
+        "carpool": "Appointment carpooling",
         "seedlings": "Cuttings, seedlings",
         "coffee_listen": "Coffee & listening",
-        "groceries": "Help with groceries",
-        "moving_help": "Moving house favour",
-        "sewing": "Learning to sew"
+        "groceries": "Help with shopping",
+        "moving_help": "Help with moving",
+        "sewing": "Learning sewing"
       },
       "quote": "Village life hasn't disappeared. It was simply waiting for someone to dare the first question.",
       "cta": "Discover small favours"
     },
     "trust": {
       "eyebrow": "Trust & perimeter",
-      "title": "Choose with confidence, one mile or a thousand away.",
-      "lede": "Four guideposts to leave peacefully: free for owners, a meeting before every sit, verified profiles, and a perimeter you set yourself.",
+      "title": "Choose with confidence, one mile away or a thousand.",
+      "lede": "Four benchmarks for leaving peacefully: free for owners, a meeting before every sit, verified profiles, and a perimeter you set yourself.",
       "p1_title": "Free for owners",
       "p1_text": "Listing, applications, messaging: everything is free. No credit card requested.",
       "p2_title": "Meeting before every sit",
-      "p2_text": "A coffee, a visit of the home, a walkthrough of instructions. Trust isn't guessed: it is built by looking at each other.",
+      "p2_text": "A coffee, a visit of the accommodation, a tour of the instructions. Trust isn't guessed: it is built, face to face.",
       "p3_title": "Verified profiles, cross-reviews",
-      "p3_text": "ID checked within 24 hours, reviews published by previous owners, history of completed sits. Everything is transparent.",
-      "p4_title": "From your street to the other end of France",
+      "p3_text": "Identity document checked within 24h, reviews published by previous owners, history of completed sits. Everything is transparent.",
+      "p4_title": "From your street to the other side of France",
       "p4_text": "Hyper-local for a quick fix, expanded for a change of scenery: you decide how far you want to go. Every sit becomes an opening door."
     },
     "testimonials": {
-      "title": "They dared. Here is what stayed with them.",
-      "source": "Testimonials collected from Founder program members (January – May 2026). Real first names and cities, stories anonymized at their request.",
+      "title": "They dared. Here is what they kept.",
+      "source": "Testimonials collected from Founder programme members (January – May 2026). Real first names and cities, stories anonymised at their request.",
       "prev_aria": "Previous testimonial",
       "next_aria": "Next testimonial",
       "page_aria": "Go to testimonial page {{n}}",
-      "program_label": "Founder Program"
+      "program_label": "Founder Programme"
     },
     "story": {
       "eyebrow": "Our story",
       "title": "It all started with a visa.",
       "p1": "The habit of opening up to locals has been lost. For lack of a pretext.",
-      "p2": "Elisa, my partner and co-founder of Guardiens, arrived from Argentina with a visa that didn't allow her to work. She looked after animals. She came home with stories: people who opened their doors, their lives, freely. Strangers who ended up inviting us for Christmas.",
+      "p2": "Elisa, my partner and co-founder of Guardiens, arrived from Argentina with a visa that didn't allow her to work. She looked after pets. She would come home with stories: people opening their doors, their lives, freely. Strangers who ended up inviting us for Christmas.",
       "p3": "Elisa and I looked after 37 houses in five years, in villages, cities, and hamlets.",
-      "quote": "We never just looked after houses. We were invited into lives.",
-      "p4": "This is what the village used to do naturally.",
-      "p5": "Guardiens is the pretext that was missing. On one side, small favours of mutual aid between local people: a vegetable garden watered in exchange for a meal, one skill for another, a favour returned in kind. On the other, independently, house-sitting: your keys entrusted to someone you've looked in the eye.",
+      "quote": "We never looked after houses. We were invited into lives.",
+      "p4": "That's what the village used to do naturally.",
+      "p5": "Guardiens is the pretext that was missing. On one side, small favours of mutual aid between local people: a vegetable garden watered in exchange for a meal, one skill for another, a small favour returned in kind. On the other, independently, house-sitting: your keys entrusted to someone you've looked in the eye.",
       "p6": "You will leave with peace of mind. You will return with a story. We didn't expect it to matter so much.",
-      "p7": "That is why we built Guardiens, so that you could live this too.",
+      "p7": "That's why we built Guardiens, so you could live this too.",
       "signature": ", Jérémie & Elisa"
     },
     "cities": {
       "eyebrow": "Guides & cities",
       "title": "House-sitting near you.",
-      "lede": "Practical guides to prepare for your sit, and local hubs for the most active cities, Lyon, Annecy, Grenoble, and all over France.",
+      "lede": "Concrete guides to prepare your sit, and local hubs for the most active cities, Lyon, Annecy, Grenoble, and all over France.",
       "guides_tag": "Guides & advice",
       "guides_title": "Prepare your sit",
       "all_articles": "All articles",
@@ -202,28 +202,192 @@
       "cities_footer": "Whatever your department, you will find a sitter nearby."
     },
     "faq": {
-      "title": "Frequently asked questions",
-      "q1": "What is house-sitting ?",
-      "a1": "House-sitting is an exchange of services: a caretaker / pet & home sitter lives in your home at no cost while you are away and takes care of your pets. The exchange involves no financial transaction between the two parties.",
+      "title": "Frequently Asked Questions",
+      "q1": "What is house-sitting?",
+      "a1": "House-sitting is a service exchange: a caretaker / pet & home sitter lives free of charge in your house during your absence and takes care of your pets. The exchange involves no financial transaction between the two parties.",
       "q2": "Do I have to pay to register as an owner?",
-      "a2": "Registration, posting ads, and communicating with sitters are all available without requiring a subscription for owners. No credit card requested. Caretakers benefit from access without subscription until July 14, 2026, then the subscription is €6.99/month. Local mutual aid remains free of subscription for everyone.",
+      "a2": "Registration, publishing listings, and exchanges with sitters require no subscription for owners. No credit card requested. Caretaker / pet & home sitters benefit from subscription-free access until July 14, 2026, then the subscription is €6.99/month. Mutual aid between locals remains subscription-free for everyone.",
       "q3": "How can I find a pet sitter near me?",
-      "a3": "Register on Guardiens, post your house-sitting ad with dates and animals, and receive applications from sitters living near you. You choose after a meeting.",
-      "q4": "Who are the caretakers on Guardiens?",
-      "a4": "Local people, verified by our team. Each profile undergoes an identity verification (ID + selfie) processed within 24 hours. You can also see their reviews published by previous owners.",
-      "q5": "How does a sit work on Guardiens?",
-      "a5": "You post your ad, local sitters apply, you choose after a meeting, then your sitter moves in. An optional house-sitting agreement outlines the commitments of each party during the stay.",
-      "q6": "Is Guardiens available everywhere in France ?",
-      "a6": "Yes. The Guardiens network extends to all regions of France, from the Basque Country to Brittany, via the Alps and the North. You will find a sitter near you regardless of your department."
+      "a3": "Register on Guardiens, publish your sitting listing with dates and your pets, and receive applications from caretaker / pet & home sitters who live near you. You choose after a meeting.",
+      "q4": "Who are the sitters on Guardiens?",
+      "a4": "Local people, verified by our team. Every profile undergoes an identity check (ID + selfie) processed within 24 hours. You can also see their reviews published by previous owners.",
+      "q5": "How does a sit take place on Guardiens?",
+      "a5": "You publish your listing, local caretaker / pet & home sitters apply, you choose after a meeting, then your sitter moves in. An optional sitting agreement frames the commitments of each party during the sit.",
+      "q6": "Is Guardiens available everywhere in France?",
+      "a6": "Yes. The Guardiens network extends to all regions of France, from the Basque Country to Brittany, through the Alps and the North. You will find a sitter near you regardless of your department."
     },
     "final": {
-      "badge_program": "Founder Program",
-      "badge_offer": "Free badge before July 14, 2026",
+      "badge_program": "Founder Programme",
+      "badge_offer": "Badge offered before July 14, 2026",
       "title": "Your next story begins here.",
-      "lede": "You will leave with peace of mind. You will return with something else: a new place discovered, a meeting, someone you otherwise would never have crossed paths with.",
-      "cta_owner": "Post my listing",
+      "lede": "You will leave with peace of mind. You will return with something else, a discovered corner, a meeting, someone you would never have crossed paths with.",
+      "cta_owner": "Publish my listing",
       "cta_sitter": "I want to sit",
       "footnote": "Registration in 2 minutes, no credit card required."
+    }
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "lede": "Everything you need to know about house-sitting with Guardiens.",
+    "loading": "Loading…",
+    "empty": "No questions yet.",
+    "not_found_question": "Can't find the answer to your question?",
+    "contact_us": "Contact us",
+    "pricing_cta_title": "Everything about our rates",
+    "pricing_cta_text": "Free for owners. €6.99/month for caretaker / pet & home sitters, no commitment.",
+    "pricing_cta_link": "Read the 2026 pricing article",
+    "meta_title": "Guardiens FAQ, All your questions",
+    "meta_description": "All your questions about Guardiens, sitter subscription, free owner space, referral and small favours for mutual aid.",
+    "categories": {
+      "general": "General questions",
+      "owner": "For owners",
+      "sitter": "For caretaker / pet & home sitters",
+      "security": "Security & trust",
+      "pricing": "Pricing & subscriptions",
+      "operation": "How it works",
+      "before_sit": "Before the sit",
+      "during_sit": "During the sit",
+      "trust_safety": "Trust & safety",
+      "emergency_sitter": "Emergency sitter",
+      "small_missions": "Small favours",
+      "my_account": "My account"
+    }
+  },
+  "pricing": {
+    "meta": {
+      "title_before": "Guardiens rates, Offered for all until {{date}}",
+      "title_after": "Guardiens rates, Free for owners · {{price}}",
+      "desc_before": "Access offered until {{date}} for everyone, caretaker / pet & home sitters and owners alike. No credit card, no commission.",
+      "desc_after": "Free for owners. {{price}} for caretaker / pet & home sitters, no commitment. No commission, no hidden fees."
+    },
+    "hero": {
+      "eyebrow": "No commission, no hidden fees",
+      "title_before_a": "Offered.",
+      "title_before_b": "For everyone.",
+      "title_after_a": "One price.",
+      "title_after_b": "Transparent.",
+      "lede_before": "Until {{date}}, full access is offered, for caretaker / pet & home sitters and owners. No credit card requested.",
+      "lede_after": "Free for owners. {{price}} for caretaker / pet & home sitters, no commitment. That's it.",
+      "cta_owner": "Publish my listing, for free",
+      "cta_sitter": "I want to sit"
+    },
+    "founder": {
+      "window": "Founder Programme, registration window in progress",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days",
+      "before_sub": "before sitter subscription",
+      "join_title": "Register now to join the Founders",
+      "join_text": "A permanent honorary seal on your profile, it will never be awarded again once the window closes.",
+      "cta": "Become a Founder"
+    },
+    "grace": {
+      "title": "Founders have until {{date}}",
+      "text": "The first members keep their free access until {{date}}. After this date, the {{price}} subscription will be required for caretaker / pet & home sitters. The Founder badge remains displayed on your profile."
+    },
+    "owner_card": {
+      "badge": "Always free",
+      "label": "Owner",
+      "price": "Free",
+      "subtitle": "No subscription, no credit card.",
+      "cta": "Publish a listing",
+      "features": [
+        "Publish a listing in 5 minutes",
+        "Receive applications from caretaker / pet & home sitters with verified identity",
+        "Exchange with them before choosing",
+        "Your animals stay in their home, their habits, their landmarks",
+        "Leave a review after each sit"
+      ]
+    },
+    "sitter_card": {
+      "badge_offered_months": "Offered {{count}} months",
+      "badge_offered_days_one": "Offered still for {{count}} day",
+      "badge_offered_days_other": "Offered still for {{count}} days",
+      "badge_most_chosen": "Most chosen",
+      "label": "Caretaker / pet & home sitter",
+      "price_free": "Free",
+      "free_until": "Until {{date}}, then {{price}}",
+      "per_year": "/year",
+      "per_month_short": "per month",
+      "from": "from",
+      "per_month": "/month",
+      "note_monthly": "No commitment · Cancel at any time",
+      "note_annual": "Either {{equiv}} €/month equivalent · Cancel at any time",
+      "note_oneshot": "One-time payment · No renewal",
+      "features": [
+        "Apply for sits near you",
+        "Access full listings (pets, house, dates, expectations)",
+        "Direct messaging with owners",
+        "Trust profile with cross-reviews and badges",
+        "« I am available » mode to be found without searching",
+        "Local guides and full breed factsheets"
+      ],
+      "formulas_label": "Sitter plan choice",
+      "three_formulas": "Three plans",
+      "oneshot_title": "One month access",
+      "oneshot_sub": "Immediate payment · No renewal",
+      "monthly_title": "Monthly",
+      "monthly_tag": "Most chosen",
+      "monthly_sub": "No commitment · Cancel at any time",
+      "annual_title": "Annual",
+      "annual_sub": "One payment per year · Annual renewal · Cancel at any time",
+      "annual_equiv": "Either ~{{equiv}} €/month equivalent · Saving of {{savings}} €/year",
+      "cta_become_sitter": "Become a sitter",
+      "cta_oneshot": "Access for one month, €10",
+      "cta_monthly": "Subscribe, €6.99/month",
+      "cta_annual": "Choose annual, €65/year",
+      "opening_checkout": "Opening payment…",
+      "note_before": "No credit card requested.",
+      "note_visitor": "Free registration. No credit card before subscribing to a plan.",
+      "note_after_monthly": "No commitment. Cancel at any time.",
+      "note_after_annual": "Automatic annual renewal. Cancel at any time.",
+      "note_after_oneshot": "One-time payment for one month of access, no renewal."
+    },
+    "mutual": {
+      "title": "Mutual aid, independent of sitting",
+      "free_tag": "Free for everyone",
+      "p1": "Small favours don't need animals to exist. Nadine is looking for a small favour gathering her vegetables. Jacques spends an hour in her garden and leaves with a homemade dish. No sitting, no credit card, no commission, just an exchange between locals.",
+      "p2": "Cooking classes, watering plants, furniture assembly, loaning a drill, shared trip to the station: everything goes through mutual aid, without subscription.",
+      "cta": "Discover small favours →"
+    },
+    "promise": {
+      "title": "Our pricing commitment",
+      "lede": "Six concrete promises, with no asterisks or hidden fees.",
+      "rows": {
+        "commission": "Commission on sitting",
+        "commission_val": "0 %",
+        "verification": "Identity verification",
+        "verification_val": "Included",
+        "mutual": "Mutual aid & small favours",
+        "mutual_val": "Free",
+        "card": "Credit card on registration",
+        "card_val": "Never",
+        "intro": "Connection fees",
+        "intro_val": "None",
+        "commit": "Duration commitment",
+        "commit_val": "None"
+      }
+    },
+    "cities": {
+      "title": "House-sitting by city",
+      "lede_a": "Discover verified caretaker / pet & home sitters available in your city. Something unexpected? Our",
+      "lede_link": "emergency sitters",
+      "lede_b": "can be mobilised in a few hours."
+    },
+    "faq_section": {
+      "title": "Frequently Asked Questions",
+      "lede": "Questions about the model? Here are the direct answers.",
+      "see_all": "See all questions →"
+    },
+    "detail_article": {
+      "intro": "Would you prefer to read everything in detail?",
+      "link": "Discover our rates in detail →"
+    },
+    "final_cta": {
+      "title_before": "Join Guardiens now",
+      "title_after": "Ready to join Guardiens?",
+      "lede": "No credit card on registration. You decide later.",
+      "cta_sitter": "Become a sitter",
+      "cta_owner": "Publish a listing"
     }
   }
 }

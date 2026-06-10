@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import ReactMarkdown from "react-markdown";
@@ -159,6 +160,17 @@ const cityLinks = [
 ];
 
 const Pricing = () => {
+ const { t } = useTranslation();
+ const ownerFeatures = t("pricing.owner_card.features", { returnObjects: true }) as string[];
+ const sitterFeatures = t("pricing.sitter_card.features", { returnObjects: true }) as string[];
+ const promiseRows = [
+  { label: t("pricing.promise.rows.commission"), value: t("pricing.promise.rows.commission_val"), positive: true },
+  { label: t("pricing.promise.rows.verification"), value: t("pricing.promise.rows.verification_val"), positive: true },
+  { label: t("pricing.promise.rows.mutual"), value: t("pricing.promise.rows.mutual_val"), positive: true },
+  { label: t("pricing.promise.rows.card"), value: t("pricing.promise.rows.card_val"), positive: true },
+  { label: t("pricing.promise.rows.intro"), value: t("pricing.promise.rows.intro_val"), positive: true },
+  { label: t("pricing.promise.rows.commit"), value: t("pricing.promise.rows.commit_val"), positive: true },
+ ];
  const before = isBeforeLaunch();
  const grace = isInGracePeriod();
  const [searchParams] = useSearchParams();
@@ -324,13 +336,13 @@ const Pricing = () => {
    <PageMeta
     title={
      before
-      ? `Tarifs Guardiens, Offert pour tous jusqu'au ${SITTER_PRICE_START}`
-      : `Tarifs Guardiens, Offert propriétaires · ${SITTER_PRICE}`
+      ? t("pricing.meta.title_before", { date: SITTER_PRICE_START })
+      : t("pricing.meta.title_after", { price: SITTER_PRICE })
     }
     description={
      before
-      ? `Accès offert jusqu'au ${SITTER_PRICE_START} pour tous, gardiens comme propriétaires. Sans carte bancaire, sans commission.`
-      : `Gratuit pour les propriétaires. ${SITTER_PRICE} pour les gardiens, sans engagement. Sans commission, sans frais cachés.`
+      ? t("pricing.meta.desc_before", { date: SITTER_PRICE_START })
+      : t("pricing.meta.desc_after", { price: SITTER_PRICE })
     }
     path="/tarifs"
    />
@@ -352,32 +364,32 @@ const Pricing = () => {
      {/* ═══ HERO ═══ */}
      <section data-testid="pricing-hero" className="py-10 md:py-14 text-center max-w-2xl mx-auto">
       <p className="inline-block bg-primary/10 text-primary text-xs font-body font-semibold uppercase tracking-wider px-3 py-1.5 rounded-full mb-4">
-       Sans commission, sans frais cachés
+       {t("pricing.hero.eyebrow")}
       </p>
       <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground leading-tight mb-4">
        {before ? (
-        <>Offert. <span className="text-primary">Pour tout le monde.</span></>
+        <>{t("pricing.hero.title_before_a")} <span className="text-primary">{t("pricing.hero.title_before_b")}</span></>
        ) : (
-        <>Un seul prix. <span className="text-primary">Transparent.</span></>
+        <>{t("pricing.hero.title_after_a")} <span className="text-primary">{t("pricing.hero.title_after_b")}</span></>
        )}
       </h1>
       <p className="text-base md:text-lg font-body text-foreground/65 leading-relaxed mb-7">
        {before
-        ? `Jusqu'au ${SITTER_PRICE_START}, l'accès complet est offert, gardiens comme propriétaires. Aucune carte bancaire demandée.`
-        : `Gratuit pour les propriétaires. ${SITTER_PRICE} pour les gardiens, sans engagement. C'est tout.`}
+        ? t("pricing.hero.lede_before", { date: SITTER_PRICE_START })
+        : t("pricing.hero.lede_after", { price: SITTER_PRICE })}
       </p>
       <div data-testid="pricing-hero-cta" className="flex flex-col sm:flex-row gap-3 justify-center">
        <Link
         to={registerLink("owner")}
         className="inline-flex items-center justify-center bg-primary text-primary-foreground font-body font-semibold text-sm px-7 py-3.5 rounded-full hover:bg-primary/90 transition-colors min-h-[44px]"
        >
-        Publier mon annonce, gratuitement
+        {t("pricing.hero.cta_owner")}
        </Link>
        <Link
         to={registerLink("sitter")}
         className="inline-flex items-center justify-center bg-transparent text-foreground border border-foreground/30 font-body font-medium text-sm px-7 py-3.5 rounded-full hover:bg-foreground/5 transition-colors min-h-[44px]"
        >
-        Je veux garder
+        {t("pricing.hero.cta_sitter")}
        </Link>
       </div>
      </section>
@@ -388,7 +400,7 @@ const Pricing = () => {
        <div className="w-full max-w-5xl mx-auto bg-gradient-to-br from-amber-50 to-amber-100/50 border border-amber-200/60 rounded-2xl overflow-hidden">
         <div className="bg-amber-100 px-6 py-2.5 text-center">
          <span className="text-sm font-medium text-amber-800 font-body tracking-wide">
-          Programme Fondateur, fenêtre d'inscription en cours
+          {t("pricing.founder.window")}
          </span>
         </div>
 
@@ -396,19 +408,19 @@ const Pricing = () => {
          <div className="flex flex-col md:flex-row items-center gap-6">
           <div className="text-center md:text-left">
            <p className="font-heading text-3xl font-bold text-amber-700 tabular-nums leading-none">
-            {daysLeft} jour{daysLeft > 1 ? 's' : ''}
+            {daysLeft > 1 ? t("pricing.founder.days_other", { count: daysLeft }) : t("pricing.founder.days_one", { count: daysLeft })}
            </p>
            <p className="text-xs text-amber-600/80 font-body mt-1">
-            avant l'abonnement gardien
+            {t("pricing.founder.before_sub")}
            </p>
           </div>
 
           <div className="flex-1 text-center md:text-left">
            <p className="font-heading text-lg md:text-xl font-semibold text-amber-900 leading-snug mb-1">
-            Inscrivez-vous dès maintenant pour rejoindre les Fondateurs
+            {t("pricing.founder.join_title")}
            </p>
            <p className="text-xs md:text-sm text-amber-800/80 font-body">
-            Un sceau honorifique permanent sur votre profil, il ne sera plus jamais attribué une fois la fenêtre refermée.
+            {t("pricing.founder.join_text")}
            </p>
           </div>
 
@@ -416,7 +428,7 @@ const Pricing = () => {
            to="/inscription"
            className="shrink-0 inline-flex items-center gap-2 bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px] whitespace-nowrap"
           >
-           Devenir Fondateur
+           {t("pricing.founder.cta")}
           </Link>
          </div>
         </div>
@@ -426,10 +438,9 @@ const Pricing = () => {
 
      {grace && (
       <section className="rounded-2xl p-6 md:p-8 text-center space-y-3 border-2 border-amber-300 bg-amber-50 mb-12 max-w-5xl mx-auto">
-       <h2 className="font-heading text-2xl font-bold text-foreground">Les Fondateurs ont jusqu'au {SITTER_PRICE_START}</h2>
+       <h2 className="font-heading text-2xl font-bold text-foreground">{t("pricing.grace.title", { date: SITTER_PRICE_START })}</h2>
        <p className="text-muted-foreground max-w-2xl mx-auto font-body">
-        Les premiers membres conservent leur accès gratuit jusqu'au {SITTER_PRICE_START}.
-        Après cette date, l'abonnement à {SITTER_PRICE} sera nécessaire pour les gardiens. Le badge Fondateur reste affiché sur votre profil.
+        {t("pricing.grace.text", { date: SITTER_PRICE_START, price: SITTER_PRICE })}
        </p>
       </section>
      )}
@@ -445,13 +456,13 @@ const Pricing = () => {
       {/* Owner Card */}
       <Card data-testid="owner-card" className="bg-card border border-border/40 rounded-2xl h-full flex flex-col relative">
        <div data-testid="badge-owner" className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center justify-center bg-foreground/90 text-background text-[11px] sm:text-xs font-body font-medium tracking-wide leading-none px-3.5 py-1.5 rounded-full whitespace-nowrap max-w-[calc(100%-1.5rem)] shadow-sm">
-        Toujours gratuit
+        {t("pricing.owner_card.badge")}
        </div>
        <CardHeader className="text-center pb-2 p-8 pt-10">
-        <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Propriétaire</div>
-        <CardTitle className="font-heading text-5xl font-bold text-foreground">Gratuit</CardTitle>
+        <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">{t("pricing.owner_card.label")}</div>
+        <CardTitle className="font-heading text-5xl font-bold text-foreground">{t("pricing.owner_card.price")}</CardTitle>
         <p className="text-sm font-body text-foreground/60 mt-2">
-         Sans abonnement, sans carte bancaire.
+         {t("pricing.owner_card.subtitle")}
         </p>
        </CardHeader>
        <CardContent className="space-y-5 px-8 pb-8 pt-2 flex-1 flex flex-col">
@@ -470,7 +481,7 @@ const Pricing = () => {
            className="w-full min-h-[44px] font-body"
            size="lg"
           >
-           Publier une annonce
+           {t("pricing.owner_card.cta")}
           </Button>
          </Link>
         </div>
@@ -482,19 +493,21 @@ const Pricing = () => {
        <div data-testid="badge-sitter" className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center justify-center bg-primary text-primary-foreground text-[11px] sm:text-xs font-body font-semibold tracking-wide leading-none px-3.5 py-1.5 rounded-full whitespace-nowrap max-w-[calc(100%-1.5rem)] shadow-sm">
         {before
          ? (daysLeft > 99
-          ? `Offert ${Math.ceil(daysLeft / 30)} mois`
-          : `Offert encore ${daysLeft} jour${daysLeft > 1 ? 's' : ''}`)
-         : 'Le plus choisi'}
+          ? t("pricing.sitter_card.badge_offered_months", { count: Math.ceil(daysLeft / 30) })
+          : daysLeft > 1
+           ? t("pricing.sitter_card.badge_offered_days_other", { count: daysLeft })
+           : t("pricing.sitter_card.badge_offered_days_one", { count: daysLeft }))
+         : t("pricing.sitter_card.badge_most_chosen")}
        </div>
        <CardHeader className="text-center pb-2 p-8 pt-10">
-        <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Gardien</div>
+        <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">{t("pricing.sitter_card.label")}</div>
         {before ? (
          <div className="text-center space-y-1.5 py-2">
           <p className="font-heading text-5xl font-bold text-primary leading-none">
-           Gratuit
+           {t("pricing.sitter_card.price_free")}
           </p>
           <p className="text-xs text-foreground/55 font-body pt-2">
-           Jusqu'au {SITTER_PRICE_START}, puis <span className="font-semibold text-foreground">{SITTER_PRICE}</span>
+           {t("pricing.sitter_card.free_until", { date: SITTER_PRICE_START, price: SITTER_PRICE })}
           </p>
          </div>
         ) : (
@@ -502,26 +515,26 @@ const Pricing = () => {
           {formule === 'annuel' ? (
            <p className="font-heading text-5xl font-bold text-foreground">
             {SITTER_PRICE_ANNUAL_NUMERIC}&nbsp;€
-            <span className="text-lg font-body font-normal text-foreground/60 ml-1">/an</span>
+            <span className="text-lg font-body font-normal text-foreground/60 ml-1">{t("pricing.sitter_card.per_year")}</span>
            </p>
           ) : formule === 'one_shot' ? (
            <p className="font-heading text-5xl font-bold text-foreground">
             {SITTER_PRICE_ONESHOT_NUMERIC}&nbsp;€
-            <span className="text-lg font-body font-normal text-foreground/60 ml-1">le mois</span>
+            <span className="text-lg font-body font-normal text-foreground/60 ml-1">{t("pricing.sitter_card.per_month_short")}</span>
            </p>
           ) : (
            <p className="font-heading text-5xl font-bold text-foreground">
-            <span className="text-lg font-body font-normal text-foreground/60 mr-1">à partir de</span>
+            <span className="text-lg font-body font-normal text-foreground/60 mr-1">{t("pricing.sitter_card.from")}</span>
             6,99&nbsp;€
-            <span className="text-lg font-body font-normal text-foreground/60 ml-1">/mois</span>
+            <span className="text-lg font-body font-normal text-foreground/60 ml-1">{t("pricing.sitter_card.per_month")}</span>
            </p>
           )}
           <p className="text-xs text-foreground/50 font-body">
            {formule === 'mensuel'
-            ? "Sans engagement · Résiliable à tout moment"
+            ? t("pricing.sitter_card.note_monthly")
             : formule === 'annuel'
-             ? `Soit ${ANNUAL_MONTHLY_EQUIV}\u00A0€/mois équivalent · Résiliable à tout moment`
-             : "Paiement unique · Sans renouvellement"}
+             ? t("pricing.sitter_card.note_annual", { equiv: ANNUAL_MONTHLY_EQUIV })
+             : t("pricing.sitter_card.note_oneshot")}
           </p>
          </div>
         )}
@@ -539,9 +552,9 @@ const Pricing = () => {
         {/* Bloc formules, masqué pendant la période gratuite totale.
             Pattern radiogroup accessible (rôle + arrow keys via tabIndex et aria-checked). */}
         {!before && (
-         <div role="radiogroup" aria-label="Choix de la formule gardien" className="bg-background border border-border/50 rounded-xl p-4 space-y-3 text-left">
+         <div role="radiogroup" aria-label={t("pricing.sitter_card.formulas_label")} className="bg-background border border-border/50 rounded-xl p-4 space-y-3 text-left">
           <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
-           Trois formules
+           {t("pricing.sitter_card.three_formulas")}
           </p>
           <div
            role="radio"
@@ -552,8 +565,8 @@ const Pricing = () => {
            className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${formule === 'one_shot' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
           >
            <div className="min-w-0">
-            <p className="text-sm font-medium text-foreground font-body">Accès un mois</p>
-            <p className="text-xs text-foreground/50 font-body">Paiement immédiat · Sans renouvellement</p>
+            <p className="text-sm font-medium text-foreground font-body">{t("pricing.sitter_card.oneshot_title")}</p>
+            <p className="text-xs text-foreground/50 font-body">{t("pricing.sitter_card.oneshot_sub")}</p>
            </div>
            <span className="text-sm font-semibold text-foreground font-body flex-shrink-0">{SITTER_PRICE_ONESHOT_NUMERIC}&nbsp;€</span>
           </div>
@@ -567,10 +580,10 @@ const Pricing = () => {
           >
            <div className="min-w-0">
             <div className="flex items-center gap-2">
-             <p className="text-sm font-medium text-foreground font-body">Mensuel</p>
-             <span className="text-xs font-body text-primary/70">Le plus choisi</span>
+             <p className="text-sm font-medium text-foreground font-body">{t("pricing.sitter_card.monthly_title")}</p>
+             <span className="text-xs font-body text-primary/70">{t("pricing.sitter_card.monthly_tag")}</span>
             </div>
-            <p className="text-xs text-foreground/50 font-body">Sans engagement · Résiliable à tout moment</p>
+            <p className="text-xs text-foreground/50 font-body">{t("pricing.sitter_card.monthly_sub")}</p>
            </div>
            <span className="text-sm font-semibold text-primary font-body flex-shrink-0">{SITTER_PRICE}</span>
           </div>
@@ -584,10 +597,10 @@ const Pricing = () => {
           >
            <div className="min-w-0">
             <div className="flex items-center gap-2">
-             <p className="text-sm font-medium text-foreground font-body">Annuel</p>
+             <p className="text-sm font-medium text-foreground font-body">{t("pricing.sitter_card.annual_title")}</p>
              <span className="text-[10px] font-body font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full leading-none">-{SITTER_PRICE_ANNUAL_DISCOUNT_PCT}%</span>
             </div>
-            <p className="text-xs text-foreground/50 font-body">Un paiement par an · Renouvellement annuel · Résiliable à tout moment</p>
+            <p className="text-xs text-foreground/50 font-body">{t("pricing.sitter_card.annual_sub")}</p>
             <p className="text-xs text-foreground/40 italic font-body">Soit ~{ANNUAL_MONTHLY_EQUIV}&nbsp;€/mois équivalent · Économie de {ANNUAL_SAVINGS_EUR}&nbsp;€/an</p>
            </div>
            <span className="text-sm font-semibold text-primary font-body flex-shrink-0">{SITTER_PRICE_ANNUAL_NUMERIC}&nbsp;€/an</span>
@@ -602,7 +615,7 @@ const Pricing = () => {
            to={registerLink("sitter")}
            className="w-full inline-flex items-center justify-center bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
           >
-           {before ? "Devenir gardien" : ctaLabels[formule]}
+           {before ? t("pricing.sitter_card.cta_become_sitter") : ctaLabels[formule]}
           </Link>
          ) : (
           <Button
@@ -614,7 +627,7 @@ const Pricing = () => {
            {checkoutLoading ? (
             <>
              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
-             Ouverture du paiement…
+             {t("pricing.sitter_card.opening_checkout")}
             </>
            ) : (
             ctaLabels[formule]
@@ -623,14 +636,14 @@ const Pricing = () => {
          )}
          <p className="text-xs font-body text-foreground/50 text-center mt-2">
            {before
-           ? "Aucune carte bancaire demandée."
-           : !user
-            ? "Inscription gratuite. Aucune carte bancaire avant la souscription d'une formule."
-            : formule === "mensuel"
-             ? "Sans engagement. Résiliable à tout moment."
-             : formule === "annuel"
-              ? "Renouvellement annuel automatique. Résiliable à tout moment."
-              : "Paiement unique pour un mois d'accès, sans renouvellement."}
+            ? t("pricing.sitter_card.note_before")
+            : !user
+             ? t("pricing.sitter_card.note_visitor")
+             : formule === "mensuel"
+              ? t("pricing.sitter_card.note_after_monthly")
+              : formule === "annuel"
+               ? t("pricing.sitter_card.note_after_annual")
+               : t("pricing.sitter_card.note_after_oneshot")}
          </p>
         </div>
        </CardContent>
@@ -645,24 +658,20 @@ const Pricing = () => {
          L'entraide, indépendante de la garde
         </h2>
         <span className="text-xs uppercase tracking-wider font-body text-primary">
-         Gratuit pour tous
+         {t("pricing.mutual.free_tag")}
         </span>
        </div>
        <p className="text-sm md:text-base font-body text-foreground/70 leading-relaxed mb-4">
-        Les petites missions n'ont pas besoin d'animaux pour exister. Nadine cherche un
-        coup de main pour ramasser ses légumes. Jacques passe une heure dans son jardin
-        et repart avec un plat maison. Aucune garde, aucune carte bancaire, aucune
-        commission, juste un échange entre gens du coin.
+        {t("pricing.mutual.p1")}
        </p>
        <p className="text-sm font-body text-foreground/55 italic mb-5">
-        Cours de cuisine, arrosage de plantes, montage de meuble, prêt d'une perceuse,
-        trajet partagé jusqu'à la gare : tout passe par l'entraide, sans abonnement.
+        {t("pricing.mutual.p2")}
        </p>
        <Link
         to="/petites-missions"
         className="inline-flex items-center gap-2 text-sm font-body font-medium text-primary hover:underline"
        >
-        Découvrir les petites missions →
+        {t("pricing.mutual.cta")}
        </Link>
       </div>
      </section>
@@ -677,7 +686,7 @@ const Pricing = () => {
         Notre engagement tarifaire
        </h2>
        <p className="text-sm font-body text-foreground/60">
-        Six promesses concrètes, sans astérisque ni frais cachés.
+        {t("pricing.promise.lede")}
        </p>
       </div>
       <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -700,11 +709,11 @@ const Pricing = () => {
 
      {/* ═══ Internal links, villes ═══ */}
      <section className="max-w-3xl mx-auto mb-12 md:mb-16">
-      <h2 className="font-heading text-xl font-bold text-foreground text-center mb-4">House-sitting par ville</h2>
+      <h2 className="font-heading text-xl font-bold text-foreground text-center mb-4">{t("pricing.cities.title")}</h2>
       <p className="text-sm text-muted-foreground text-center font-body mb-6">
-       Découvrez les gardiens vérifiés disponibles dans votre ville. Un imprévu ? Nos{" "}
-       <Link to="/gardien-urgence" className="text-primary hover:underline">gardiens d'urgence</Link>{" "}
-       sont mobilisables en quelques heures.
+       {t("pricing.cities.lede_a")}{" "}
+       <Link to="/gardien-urgence" className="text-primary hover:underline">{t("pricing.cities.lede_link")}</Link>{" "}
+       {t("pricing.cities.lede_b")}
       </p>
       <div className="flex flex-wrap justify-center gap-3">
        {cityLinks.map((city) => (
@@ -721,9 +730,9 @@ const Pricing = () => {
 
      {/* ═══ FAQ ═══ */}
      <section className="max-w-3xl mx-auto mb-12 md:mb-16">
-      <h2 className="text-2xl font-heading font-semibold text-foreground text-center mb-3">Questions fréquentes</h2>
+      <h2 className="text-2xl font-heading font-semibold text-foreground text-center mb-3">{t("pricing.faq_section.title")}</h2>
       <p className="text-sm font-body text-foreground/60 text-center mb-8">
-       Des questions sur le modèle ? Voici les réponses directes.
+       {t("pricing.faq_section.lede")}
       </p>
       <Accordion type="single" collapsible className="w-full list-none">
        {faqItems.map((item, i) => (
@@ -753,16 +762,16 @@ const Pricing = () => {
       </Accordion>
       <div className="text-center mt-6">
        <Link to="/faq#tarifs-abonnements" className="text-sm font-body text-primary hover:underline">
-        Voir toutes les questions →
+        {t("pricing.faq_section.see_all")}
        </Link>
       </div>
      </section>
 
      {/* ═══ Lien article détaillé ═══ */}
      <section className="rounded-xl border border-border bg-accent/30 p-6 text-center mb-12 max-w-3xl mx-auto">
-      <p className="text-sm text-muted-foreground mb-2">Vous préférez tout lire en détail ?</p>
+      <p className="text-sm text-muted-foreground mb-2">{t("pricing.detail_article.intro")}</p>
       <Link to="/actualites/nouveaux-tarifs-2026" className="text-primary font-medium hover:underline text-sm">
-       Découvrir nos tarifs en détail →
+       {t("pricing.detail_article.link")}
       </Link>
      </section>
 
@@ -774,17 +783,17 @@ const Pricing = () => {
         : "Prêt à rejoindre Guardiens ?"}
       </h2>
       <p className="text-sm md:text-base font-body text-primary-foreground/85 text-center mb-8 max-w-xl mx-auto px-4">
-       Sans carte bancaire à l'inscription. Vous décidez ensuite.
+       {t("pricing.final_cta.lede")}
       </p>
       <div className="flex flex-col sm:flex-row gap-3 justify-center px-4">
        <Link to={registerLink("sitter")}>
         <Button className="bg-background text-foreground font-body font-medium px-8 py-4 rounded-xl text-base hover:bg-background/90 transition-colors min-h-[52px] w-full sm:w-auto" size="xl">
-         Devenir gardien
+         {t("pricing.final_cta.cta_sitter")}
         </Button>
        </Link>
        <Link to={registerLink("owner")}>
         <Button variant="outline" className="bg-transparent text-primary-foreground border-2 border-primary-foreground/30 hover:bg-primary-foreground/10 hover:border-primary-foreground/50 font-body font-medium px-8 py-4 rounded-xl text-base min-h-[52px] w-full sm:w-auto" size="xl">
-         Publier une annonce
+         {t("pricing.final_cta.cta_owner")}
         </Button>
        </Link>
       </div>

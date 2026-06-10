@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import { useLocation, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -34,6 +35,7 @@ interface FaqEntry {
 }
 
 const FAQ = () => {
+ const { t } = useTranslation();
  const { data: entries = [], isLoading } = useQuery({
  queryKey: ["faq-entries"],
  queryFn: async () => {
@@ -83,19 +85,19 @@ const FAQ = () => {
  }, [entries, location.hash, slugToEntryId]);
 
  const categoryLabels: Record<string, string> = {
- general: "Questions générales",
- owner: "Pour les propriétaires",
- sitter: "Pour les gardiens",
- security: "Sécurité & confiance",
- pricing: "Tarifs & abonnements",
- "Fonctionnement": "Fonctionnement",
- "Tarifs": "Tarifs & abonnements",
- "Avant la garde": "Avant la garde",
- "Pendant la garde": "Pendant la garde",
- "Confiance et sécurité": "Confiance & sécurité",
- "Gardien d'urgence": "Gardien d'urgence",
- "Petites missions": "Petites missions",
- "Mon compte": "Mon compte",
+ general: t("faq.categories.general"),
+ owner: t("faq.categories.owner"),
+ sitter: t("faq.categories.sitter"),
+ security: t("faq.categories.security"),
+ pricing: t("faq.categories.pricing"),
+ "Fonctionnement": t("faq.categories.operation"),
+ "Tarifs": t("faq.categories.pricing"),
+ "Avant la garde": t("faq.categories.before_sit"),
+ "Pendant la garde": t("faq.categories.during_sit"),
+ "Confiance et sécurité": t("faq.categories.trust_safety"),
+ "Gardien d'urgence": t("faq.categories.emergency_sitter"),
+ "Petites missions": t("faq.categories.small_missions"),
+ "Mon compte": t("faq.categories.my_account"),
  };
 
 	// Convertit le markdown en HTML simple toléré par Schema.org/FAQPage
@@ -143,7 +145,7 @@ const FAQ = () => {
  return (
  <>
  <PageMeta
- title="FAQ Guardiens, Toutes vos questions"
+ title={t("faq.meta_title")}
  description="Toutes vos questions sur Guardiens, abonnement gardien, accès propriétaire à 0 €, parrainage et petites missions d'entraide."
  path="/faq"
  />
@@ -157,17 +159,17 @@ const FAQ = () => {
 
  <div className="min-h-screen bg-background">
  <PublicHeader />
- <PageBreadcrumb items={[{ label: "FAQ" }]} />
+ <PageBreadcrumb items={[{ label: t("faq.title") }]} />
  <header className="bg-primary/5 border-b border-border">
  <div className="max-w-3xl mx-auto px-4 py-12 sm:py-16 text-center">
  <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-6">
  <HelpCircle className="h-7 w-7 text-primary" />
  </div>
  <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground mb-3">
- Questions fréquentes
+ {t("faq.title")}
  </h1>
  <p className="text-muted-foreground text-lg max-w-xl mx-auto">
- Tout ce que vous devez savoir sur le house-sitting avec Guardiens.
+ {t("faq.lede")}
  </p>
  </div>
  </header>
@@ -181,7 +183,7 @@ const FAQ = () => {
  </div>
  ) : entries.length === 0 ? (
  <p className="text-center text-muted-foreground py-12">
- Aucune question pour le moment.
+ {t("faq.empty")}
  </p>
  ) : (
  <div className="space-y-10">
@@ -255,25 +257,25 @@ const FAQ = () => {
  )}
 
  <div className="mt-10 rounded-xl border border-primary/20 bg-primary/5 p-6 text-center">
- <p className="font-heading font-semibold text-foreground mb-1">Tout savoir sur nos tarifs</p>
- <p className="text-sm text-muted-foreground mb-4">À 0 € pour les propriétaires. 6,99 €/mois pour les gardiens, sans engagement.</p>
+ <p className="font-heading font-semibold text-foreground mb-1">{t("faq.pricing_cta_title")}</p>
+ <p className="text-sm text-muted-foreground mb-4">{t("faq.pricing_cta_text")}</p>
  <Link
  to="/actualites/nouveaux-tarifs-2026"
  className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
  >
- Lire l'article tarifs 2026
+ {t("faq.pricing_cta_link")}
  </Link>
  </div>
 
  <div className="mt-14 text-center border-t border-border pt-10">
  <p className="text-muted-foreground mb-4">
- Vous ne trouvez pas la réponse à votre question ?
+ {t("faq.not_found_question")}
  </p>
  <Link
  to="/contact"
  className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
  >
- Contactez-nous
+ {t("faq.contact_us")}
  </Link>
  </div>
  </main>
