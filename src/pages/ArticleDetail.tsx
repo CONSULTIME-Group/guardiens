@@ -11,7 +11,7 @@ import PageMeta from "@/components/PageMeta";
 import { Helmet } from "react-helmet-async";
 import { logSeoSnapshot } from "@/lib/seoDebugLog";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { fr, enUS, es, it as itLocale, de as deLocale } from "date-fns/locale";
 import ArticleRenderer, { resolveImagePath } from "@/components/articles/ArticleRenderer";
 import ArticleAuthorBio from "@/components/articles/ArticleAuthorBio";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
