@@ -1407,57 +1407,19 @@ const Landing = () => {
         <div className="max-w-3xl mx-auto px-[5%] md:px-[8%]">
           <RevealSection>
             <h2 id="faq-heading" className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center mb-10 scroll-mt-24">
-              Questions fréquentes
+              {t("landing.faq.title")}
             </h2>
             <dl className="space-y-6">
-              <div className="bg-card border border-border rounded-2xl p-6">
-                <dt className="font-heading font-semibold text-foreground mb-2">
-                  Qu'est-ce que le house-sitting ?
-                </dt>
-                <dd className="text-sm text-foreground/70 leading-relaxed">
-                  Le house-sitting est un échange de services : un gardien habite sans frais dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties.
-                </dd>
-              </div>
-              <div className="bg-card border border-border rounded-2xl p-6">
-                <dt className="font-heading font-semibold text-foreground mb-2">
-                  Faut-il payer pour s'inscrire en tant que propriétaire ?
-                </dt>
-                <dd className="text-sm text-foreground/70 leading-relaxed">
-                  L'inscription, la publication d'annonces et les échanges avec les gardiens sont sans abonnement requis pour les propriétaires. Aucune carte bancaire demandée. Les gardiens bénéficient d'un accès sans abonnement jusqu'au 14 juillet 2026, puis l'abonnement est à 6,99 €/mois. L'entraide entre gens du coin reste sans abonnement pour tous.
-                </dd>
-              </div>
-              <div className="bg-card border border-border rounded-2xl p-6">
-                <dt className="font-heading font-semibold text-foreground mb-2">
-                  Comment trouver un pet sitter près de chez moi ?
-                </dt>
-                <dd className="text-sm text-foreground/70 leading-relaxed">
-                  Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous. Vous choisissez après une rencontre.
-                </dd>
-              </div>
-              <div className="bg-card border border-border rounded-2xl p-6">
-                <dt className="font-heading font-semibold text-foreground mb-2">
-                  Qui sont les gardiens sur Guardiens ?
-                </dt>
-                <dd className="text-sm text-foreground/70 leading-relaxed">
-                  Des gens du coin, vérifiés par notre équipe. Chaque profil passe une vérification d'identité (pièce d'identité + selfie) traitée sous 24 h. Vous voyez aussi leurs avis publiés par les propriétaires précédents.
-                </dd>
-              </div>
-              <div className="bg-card border border-border rounded-2xl p-6">
-                <dt className="font-heading font-semibold text-foreground mb-2">
-                  Comment se déroule une garde sur Guardiens ?
-                </dt>
-                <dd className="text-sm text-foreground/70 leading-relaxed">
-                  Vous publiez votre annonce, les gardiens du coin postulent, vous choisissez après une rencontre, puis votre gardien s'installe. Un accord de garde optionnel encadre les engagements de chacun pendant la garde.
-                </dd>
-              </div>
-              <div className="bg-card border border-border rounded-2xl p-6">
-                <dt className="font-heading font-semibold text-foreground mb-2">
-                  Guardiens est-il disponible partout en France ?
-                </dt>
-                <dd className="text-sm text-foreground/70 leading-relaxed">
-                  Oui. Le réseau Guardiens s'étend dans toutes les régions de France, du Pays basque à la Bretagne, en passant par les Alpes et le Nord. Vous trouverez un gardien près de chez vous quel que soit votre département.
-                </dd>
-              </div>
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <div key={n} className="bg-card border border-border rounded-2xl p-6">
+                  <dt className="font-heading font-semibold text-foreground mb-2">
+                    {t(`landing.faq.q${n}`)}
+                  </dt>
+                  <dd className="text-sm text-foreground/70 leading-relaxed">
+                    {t(`landing.faq.a${n}`)}
+                  </dd>
+                </div>
+              ))}
             </dl>
           </RevealSection>
         </div>
