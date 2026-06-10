@@ -1,18 +1,51 @@
 {
   "language": {
     "label": "Lingua",
-    "switcher_aria": "Cambia lingua",
+    "switcher_aria": "Cambiare lingua",
     "current": "Lingua attuale: {{lang}}"
   },
   "nav": {
-    "listings": "Annunci aperti",
+    "listings": "Annunci in corso",
     "small_missions": "Piccoli aiuti",
-    "pros": "Pro per animali",
+    "pros": "Professionisti per animali",
     "guides": "Guide locali",
-    "pricing": "Prezzi",
-    "news": "La rivista",
+    "pricing": "Tariffe",
+    "news": "Il giornale",
     "login": "Accedi",
-    "register": "Crea account",
-    "menu": "Menu"
+    "register": "Crei il Suo account",
+    "menu": "Menu",
+    "beta": "Beta"
+  },
+  "footer": {
+    "sections": {
+      "by_city": "House-sitting per città",
+      "by_department": "Per dipartimento",
+      "local_guides": "Guide locali",
+      "resources": "Risorse",
+      "guardiens": "Guardiens"
+    },
+    "links": {
+      "all_guides": "Tutte le guide",
+      "articles": "Articoli",
+      "house_sitting_guide": "Guida al house-sitting",
+      "faq": "FAQ",
+      "pricing": "Tariffe",
+      "what_is_house_sitting": "Cos'è il house-sitting",
+      "about": "Chi siamo",
+      "contact": "Contatti",
+      "register": "Registrazione",
+      "small_missions": "Piccoli aiuti",
+      "emergency_sitter": "Custode d'emergenza",
+      "pet_pros": "Professionisti per animali"
+    },
+    "tagline": "House-sitting di prossimità",
+    "version": "Guardiens · Version Beta · 2026",
+    "legal": {
+      "cgu": "CGU",
+      "cgs": "CGS",
+      "privacy": "Informativa sulla privacy",
+      "legal_notice": "Note legali",
+      "contact": "Contatti"
+    }
   }
 }

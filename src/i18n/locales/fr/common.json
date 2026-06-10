@@ -13,6 +13,39 @@
     "news": "Le journal",
     "login": "Connexion",
     "register": "Créer mon compte",
-    "menu": "Menu"
+    "menu": "Menu",
+    "beta": "Bêta"
+  },
+  "footer": {
+    "sections": {
+      "by_city": "House-sitting par ville",
+      "by_department": "Par département",
+      "local_guides": "Guides locaux",
+      "resources": "Ressources",
+      "guardiens": "Guardiens"
+    },
+    "links": {
+      "all_guides": "Tous les guides",
+      "articles": "Articles",
+      "house_sitting_guide": "Guide du house-sitting",
+      "faq": "FAQ",
+      "pricing": "Tarifs",
+      "what_is_house_sitting": "C'est quoi le house-sitting",
+      "about": "À propos",
+      "contact": "Contact",
+      "register": "Inscription",
+      "small_missions": "Petites missions",
+      "emergency_sitter": "Gardien d'urgence",
+      "pet_pros": "Pros animaliers"
+    },
+    "tagline": "House-sitting de proximité",
+    "version": "Guardiens · Version bêta · 2026",
+    "legal": {
+      "cgu": "CGU",
+      "cgs": "CGS",
+      "privacy": "Politique de confidentialité",
+      "legal_notice": "Mentions légales",
+      "contact": "Contact"
+    }
   }
 }

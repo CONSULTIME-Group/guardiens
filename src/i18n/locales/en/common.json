@@ -5,14 +5,47 @@
     "current": "Current language: {{lang}}"
   },
   "nav": {
-    "listings": "Open listings",
+    "listings": "Current listings",
     "small_missions": "Small favours",
     "pros": "Pet pros",
     "guides": "Local guides",
     "pricing": "Pricing",
     "news": "The journal",
-    "login": "Log in",
-    "register": "Create account",
-    "menu": "Menu"
+    "login": "Login",
+    "register": "Create my account",
+    "menu": "Menu",
+    "beta": "Beta"
+  },
+  "footer": {
+    "sections": {
+      "by_city": "House-sitting by city",
+      "by_department": "By department",
+      "local_guides": "Local guides",
+      "resources": "Resources",
+      "guardiens": "Guardiens"
+    },
+    "links": {
+      "all_guides": "All guides",
+      "articles": "Articles",
+      "house_sitting_guide": "House-sitting guide",
+      "faq": "FAQ",
+      "pricing": "Pricing",
+      "what_is_house_sitting": "What is house-sitting",
+      "about": "About",
+      "contact": "Contact",
+      "register": "Registration",
+      "small_missions": "Small favours",
+      "emergency_sitter": "Emergency caretaker",
+      "pet_pros": "Pet pros"
+    },
+    "tagline": "Local house-sitting",
+    "version": "Guardiens · Beta version · 2026",
+    "legal": {
+      "cgu": "T&Cs",
+      "cgs": "General Terms of Service",
+      "privacy": "Privacy policy",
+      "legal_notice": "Legal notice",
+      "contact": "Contact"
+    }
   }
 }
