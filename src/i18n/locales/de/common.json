@@ -455,5 +455,18 @@
       "guide_pratique": "Praktische Ratgeber",
       "vie_locale": "Lokales Leben & Nachbarschaftshilfe"
     }
+  },
+  "guides": {
+    "meta_title": "Lokale Pet-Sitting-Ratgeber, Parks, Tierärzte, hundefreundliche Cafés | Guardiens",
+    "meta_description": "Praktische Ratgeber für Tiersitter: hundefreundliche Parks, Tierärzte, einladende Cafés, Spazierwege. Alles, was man vor der Ankunft in einer neuen Stadt wissen muss.",
+    "breadcrumb": "Lokale Ratgeber",
+    "title": "Lokale Ratgeber",
+    "subtitle": "Wo spazieren, wo pflegen lassen, wo brunchen, alles, was ein Sitter in einer neuen Stadt wissen sollte.",
+    "search_placeholder": "Stadt suchen...",
+    "all_departments": "Alle Departements",
+    "empty_default": "Noch keine Ratgeber verfügbar.",
+    "empty_search": "Kein Ratgeber passt zu Ihrer Suche.",
+    "places_count": "{{n}} Orte gelistet",
+    "header_alt": "Guardiens lokaler Ratgeber"
   }
 }

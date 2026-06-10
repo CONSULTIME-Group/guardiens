@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
@@ -28,6 +29,7 @@ interface PlaceCount {
 
 
 const GuidesListing = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [selectedDept, setSelectedDept] = useState("all");
@@ -89,25 +91,25 @@ const GuidesListing = () => {
   return (
     <>
       <PageMeta
-        title="Guides locaux pet sitting, Parcs, vétos, cafés dog-friendly | Guardiens"
-        description="Guides pratiques pour gardiens d'animaux : parcs dog-friendly, vétérinaires, cafés accueillants, sentiers de balade. Tout savoir avant d'arriver dans une nouvelle ville."
+        title={t("guides.meta_title")}
+        description={t("guides.meta_description")}
         path="/guides"
       />
 
       <div className="min-h-screen bg-background">
         <PublicHeader />
-        <PageBreadcrumb items={[{ label: "Guides locaux" }]} />
+        <PageBreadcrumb items={[{ label: t("guides.breadcrumb") }]} />
         <header className="relative border-b border-border overflow-hidden">
           <div className="absolute inset-0">
-            <img src={guideHeaderImg} alt="Guide local Guardiens" className="w-full h-full object-cover" />
+            <img src={guideHeaderImg} alt={t("guides.header_alt")} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/70 to-background/40" />
           </div>
           <div className="relative max-w-5xl mx-auto px-4 py-14 sm:py-20 text-left">
             <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground mb-3">
-              Guides locaux
+              {t("guides.title")}
             </h1>
             <p className="text-muted-foreground text-lg max-w-xl">
-              Où promener, où soigner, où bruncher, tout ce qu'un gardien doit savoir en arrivant dans une nouvelle ville.
+              {t("guides.subtitle")}
             </p>
           </div>
         </header>
@@ -118,7 +120,7 @@ const GuidesListing = () => {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Rechercher une ville..."
+                placeholder={t("guides.search_placeholder")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9"
@@ -126,10 +128,10 @@ const GuidesListing = () => {
             </div>
             <Select value={selectedDept} onValueChange={setSelectedDept}>
               <SelectTrigger className="w-full sm:w-56">
-                <SelectValue placeholder="Tous les départements" />
+                <SelectValue placeholder={t("guides.all_departments")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tous les départements</SelectItem>
+                <SelectItem value="all">{t("guides.all_departments")}</SelectItem>
                 {allDepartments.map((dept) => (
                   <SelectItem key={dept} value={dept}>{dept}</SelectItem>
                 ))}
@@ -145,7 +147,7 @@ const GuidesListing = () => {
             </div>
           ) : filteredGuides.length === 0 ? (
             <p className="text-center text-muted-foreground py-12">
-              {guides.length === 0 ? "Aucun guide disponible pour le moment." : "Aucun guide ne correspond à votre recherche."}
+              {guides.length === 0 ? t("guides.empty_default") : t("guides.empty_search")}
             </p>
           ) : (
             <div className="space-y-10">
@@ -169,7 +171,7 @@ const GuidesListing = () => {
                                   </div>
                                   <div>
                                     <h3 className="font-semibold text-foreground">{guide.city}</h3>
-                                    <p className="text-xs text-muted-foreground">{count} lieux référencés</p>
+                                    <p className="text-xs text-muted-foreground">{t("guides.places_count", { n: count })}</p>
                                   </div>
                                 </div>
                                 <p className="text-sm text-muted-foreground italic line-clamp-2">

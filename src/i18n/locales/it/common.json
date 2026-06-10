@@ -455,5 +455,18 @@
       "guide_pratique": "Guide pratiche",
       "vie_locale": "Vita locale e Mutuo aiuto"
     }
+  },
+  "guides": {
+    "meta_title": "Guide locali pet sitting, Parchi, veterinari, caffè dog-friendly | Guardiens",
+    "meta_description": "Guide pratiche per chi accudisce animali: parchi dog-friendly, veterinari, caffè accoglienti, sentieri per passeggiate. Tutto da sapere prima di arrivare in una nuova città.",
+    "breadcrumb": "Guide locali",
+    "title": "Guide locali",
+    "subtitle": "Dove passeggiare, dove curare, dove fare brunch, tutto ciò che un sitter dovrebbe sapere arrivando in una nuova città.",
+    "search_placeholder": "Cerca una città...",
+    "all_departments": "Tutti i dipartimenti",
+    "empty_default": "Nessuna guida disponibile per ora.",
+    "empty_search": "Nessuna guida corrisponde alla tua ricerca.",
+    "places_count": "{{n}} luoghi elencati",
+    "header_alt": "Guida locale Guardiens"
   }
 }
