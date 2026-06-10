@@ -1340,9 +1340,9 @@ const Landing = () => {
             {/* Colonne Villes */}
             <RevealSection delay={0.2}>
               <div className="rounded-2xl bg-card border border-border p-8 h-full">
-                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-2">House-sitting par ville</p>
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-2">{t("landing.cities.cities_tag")}</p>
                 <h3 className="font-heading text-2xl font-semibold text-foreground mb-6">
-                  Près de chez vous
+                  {t("landing.cities.cities_title")}
                 </h3>
                 <ul className="space-y-3">
                   <li>
