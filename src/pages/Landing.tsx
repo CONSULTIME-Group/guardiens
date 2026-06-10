@@ -1177,46 +1177,46 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto px-6 py-24 md:py-32">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
-              Notre histoire
+              {t("landing.story.eyebrow")}
             </span>
             <h2 id="commence-avec-un-visa" className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-12 scroll-mt-24">
-              Tout a commencé avec un visa.
+              {t("landing.story.title")}
             </h2>
           </RevealSection>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-start">
             <RevealSection delay={0.1}>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                L'habitude de s'ouvrir aux gens du coin s'est perdue. Par manque de prétexte.
+                {t("landing.story.p1")}
               </p>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                Elisa, ma compagne et co-fondatrice de Guardiens, est arrivée d'Argentine avec un visa qui ne lui permettait pas de travailler. Elle gardait des animaux. Elle rentrait avec des histoires : des gens qui ouvraient leur porte, leur vie, librement. Des inconnus qui finissaient par nous inviter à Noël.
+                {t("landing.story.p2")}
               </p>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                Elisa et moi avons gardé 37 maisons en cinq ans, dans des villages, des villes, des hameaux.
+                {t("landing.story.p3")}
               </p>
               <div className="border-l-4 border-primary pl-6 my-8">
                 <p className="text-2xl md:text-3xl font-heading font-semibold italic text-foreground leading-snug">
-                  On n'a jamais gardé des maisons. On a été invités dans des vies.
+                  {t("landing.story.quote")}
                 </p>
               </div>
             </RevealSection>
 
             <RevealSection delay={0.2}>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                C'est ça que le village faisait naturellement.
+                {t("landing.story.p4")}
               </p>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                Guardiens, c'est le prétexte qui manquait. D'un côté, les petites missions d'entraide entre gens du coin : un potager arrosé contre un repas, une compétence contre une autre, un coup de main qui se rend en nature. De l'autre, indépendamment, le home sitting : vos clés confiées à quelqu'un que vous avez regardé dans les yeux.
+                {t("landing.story.p5")}
               </p>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous ne nous attendions pas à ce que cela compte autant.
+                {t("landing.story.p6")}
               </p>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                C'est pour cela que nous avons construit Guardiens, pour que vous viviez cela aussi.
+                {t("landing.story.p7")}
               </p>
               <span className="text-sm font-body italic text-foreground/50 mt-10 block">
-               , Jérémie &amp; Elisa
+                {t("landing.story.signature")}
               </span>
             </RevealSection>
           </div>
