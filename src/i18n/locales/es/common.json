@@ -5,9 +5,9 @@
     "current": "Idioma actual: {{lang}}"
   },
   "nav": {
-    "listings": "Anuncios en curso",
+    "listings": "Anuncios actuales",
     "small_missions": "Pequeños favores",
-    "pros": "Profesionales de animales",
+    "pros": "Profesionales animales",
     "guides": "Guías locales",
     "pricing": "Tarifas",
     "news": "El diario",
@@ -35,8 +35,8 @@
       "contact": "Contacto",
       "register": "Registro",
       "small_missions": "Pequeños favores",
-      "emergency_sitter": "Cuidador de emergencia",
-      "pet_pros": "Profesionales de animales"
+      "emergency_sitter": "Cuidador de urgencia",
+      "pet_pros": "Profesionales animales"
     },
     "tagline": "House-sitting de proximidad",
     "version": "Guardiens · Versión Beta · 2026",
@@ -51,9 +51,9 @@
   "landing": {
     "hero": {
       "eyebrow": "Ayuda mutua · Cuidado de animales · Home sitting",
-      "title_main": "El cuidado de animales, los pequeños favores,",
+      "title_main": "El cuidado de animales, el pequeño favor,",
       "title_accent": "el encuentro.",
-      "lede": "Haga que un cuidador local cuide su casa y sus animales durante sus ausencias. O pida, y devuelva, pequeños favores cerca de usted, con o sin animales.",
+      "lede": "Haga que un cuidador local cuide de su casa y de sus mascotas durante sus ausencias. O pida, y devuelva, un pequeño favor cerca de usted, con o sin animales.",
       "lede_italic": "Y detrás de cada intercambio, un encuentro que usted no habría buscado.",
       "cta_owner": "Publicar mi anuncio",
       "cta_sitter": "Quiero ser cuidador",
@@ -61,6 +61,169 @@
       "kpi_animals": "animales acompañados",
       "kpi_members": "inscritos",
       "kpi_missions": "misiones de ayuda mutua"
+    },
+    "toc": {
+      "aria": "Sumario de la página",
+      "title": "Sumario",
+      "care_aid": "Cuidado y ayuda mutua",
+      "how": "Cómo funciona",
+      "aid": "Ayuda mutua local",
+      "trust": "Confianza",
+      "testimonials": "Testimonios",
+      "story": "Nuestra historia",
+      "cities": "Guías y ciudades",
+      "faq": "FAQ"
+    },
+    "usages": {
+      "eyebrow": "Lo que hacemos juntos",
+      "title": "Cuidado de animales a domicilio y ayuda mutua local.",
+      "lede": "El home sitting por un lado, la ayuda mutua entre vecinos por otro. Usted elige: uno, el otro, o ambos.",
+      "owner": {
+        "tag": "Propietarios",
+        "title": "Partir con tranquilidad.",
+        "text": "Alguien de la zona vela por su casa y sus mascotas. Usted lo conoce antes de partir. Usted elige.",
+        "badge": "Sin suscripción",
+        "cta": "Busco un cuidador →"
+      },
+      "sitter": {
+        "tag": "Cuidadores",
+        "title": "Cuidar y descubrir.",
+        "text": "Viva en casas, con animales, en rincones que nunca habría explorado de otra manera. Un cuidado es también un viaje.",
+        "cta": "Quiero cuidar →"
+      },
+      "mutual": {
+        "badge": "Gratis",
+        "tag": "Ayuda mutua local, independiente del cuidado",
+        "title": "Un pequeño favor, un intercambio.",
+        "text": "Regar un huerto, montar una estantería, compartir una habilidad, visitar a una persona aislada. Sin necesidad de cuidado ni de animales, solo personas de la zona que se ayudan entre sí.",
+        "cta": "Descubrir la ayuda mutua →"
+      },
+      "urgency": {
+        "eyebrow": "Imprevisto de última hora",
+        "title": "¿Una salida precipitada?",
+        "text": "Hospitalización, viaje de última hora, urgencia familiar: un cuidador de la zona puede tomar el relevo en pocas horas.",
+        "cta": "Buscar un cuidador de urgencia →"
+      }
+    },
+    "meeting": {
+      "eyebrow": "Lo que nunca se escribe en un anuncio",
+      "title_a": "El verdadero pretexto",
+      "title_b": "es el encuentro.",
+      "p1": "Lo que raramente se cuenta es lo que sucede alrededor. Conocer a la abuela del barrio y su historia porque usted la ayudó a recoger la fruta de su jardín. Conversar con Gerardo mientras él le ayuda con el bricolaje, y ofrecerle una comida casera a cambio.",
+      "p2": "No hace falta un animal para que comience un encuentro. Pedir un pequeño favor, proponer uno: ya es abrir una puerta. Cuidar una casa es abrir otra, un mismo gesto, dos escalas.",
+      "p3": "Se aprende, se descubre, se crean vínculos, sin buscarlo. Solo dejando espacio para lo que pueda suceder."
+    },
+    "how": {
+      "eyebrow": "Simple y transparente",
+      "title": "¿Cómo funciona?",
+      "step1_title": "Publique su anuncio",
+      "step1_text": "Sus fechas, sus animales, su casa. Unos minutos bastan, su anuncio está en línea.",
+      "step2_title": "Elija después de un encuentro",
+      "step2_text": "Cuidadores de la zona se postulan. Usted lee los perfiles, las opiniones, intercambia mensajes. Luego se ven, un café, una visita, antes de decidir.",
+      "step3_title": "Parta con tranquilidad",
+      "step3_text": "Con el acuerdo de cuidado firmado, su cuidador se instala. Usted recibe noticias. Regresa a su casa, a menudo con una nueva relación.",
+      "cta_owner": "Publicar mi anuncio",
+      "cta_secondary": "O comenzar con un pequeño favor →",
+      "footnote": "Registro en 2 minutos · Sin tarjeta bancaria"
+    },
+    "aid": {
+      "eyebrow": "Para todos · Sin suscripción · Sin dinero",
+      "title": "Atrévase a pedir. Atrévase a proponer.",
+      "p1": "Antes, había alguien de la zona que pasaba a regar el jardín, que cuidaba al perro, que venía a arreglar una persiana. Alguien a quien se le ofrecía un trozo de pastel o un favor a cambio.",
+      "p2": "Esa costumbre no ha desaparecido, simplemente ya no nos atrevemos a hacer la primera pregunta. Guardiens es la excusa para volver a hacerla y, de paso, vivir experiencias que ningún viaje organizado le ofrecerá.",
+      "need_title": "«Necesito un pequeño favor»",
+      "need_text": "Su huerto durante las vacaciones. Sus gallinas este fin de semana. Pasear a su perro tras una operación. Pedirlo no es confesar una debilidad, es confiar.",
+      "need_footer": "Sin dinero, sin suscripción. Esa es la apuesta.",
+      "offer_title": "«Puedo dar un poco de mi tiempo»",
+      "offer_text": "Usted sabe podar rosales. Le encantan los perros. Tiene dos horas el sábado por la mañana. Proponga, y viva lo que nunca habría vivido sin ese encuentro.",
+      "offer_footer": "Así es como se vuelve a tejer el lazo local.",
+      "seen_this_week": "Algunos intercambios vistos en Guardiens esta semana",
+      "examples": {
+        "water_plants": "Regar las plantas",
+        "small_diy": "Pequeño bricolaje",
+        "garden_pruning": "Podar el jardín",
+        "bread_class": "Clase de pan casero",
+        "reiki": "Sesión de Reiki",
+        "parcel": "Recibir un paquete",
+        "carpool": "Coche compartido para citas",
+        "seedlings": "Esquejes, siembra",
+        "coffee_listen": "Café y escucha",
+        "groceries": "Ayuda con las compras",
+        "moving_help": "Ayuda con la mudanza",
+        "sewing": "Aprender costura"
+      },
+      "quote": "La vida de pueblo no ha desaparecido. Simplemente esperaba a que alguien se atreviera a hacer la primera pregunta.",
+      "cta": "Descubrir los pequeños favores"
+    },
+    "trust": {
+      "eyebrow": "Confianza y perímetro",
+      "title": "Elegir con confianza, a un kilómetro o a mil.",
+      "lede": "Cuatro pilares para partir tranquilo: gratis para los propietarios, encuentro antes de cada cuidado, perfiles verificados y un perímetro que usted mismo fija.",
+      "p1_title": "Gratis para los propietarios",
+      "p1_text": "Anuncio, candidaturas, mensajería: todo es gratis. No se requiere tarjeta bancaria.",
+      "p2_title": "Encuentro antes de cada cuidado",
+      "p2_text": "Un café, una visita a la vivienda, un repaso de las instrucciones. La confianza no se adivina: se construye mirándose a los ojos.",
+      "p3_title": "Perfiles verificados, opiniones contrastadas",
+      "p3_text": "Documento de identidad controlado en 24 h, opiniones publicadas por propietarios anteriores, historial de cuidados realizados. Todo es transparente.",
+      "p4_title": "Desde su calle hasta el otro extremo de Francia",
+      "p4_text": "Hiperlocal para una ayuda puntual, ampliado para cambiar de aire: usted decide hasta dónde quiere llegar. Cada cuidado se convierte en una puerta que se abre."
+    },
+    "testimonials": {
+      "title": "Se atrevieron. Esto es lo que les queda.",
+      "source": "Testimonios recogidos de los miembros del programa Fundador (enero – mayo 2026). Nombres y ciudades reales, relatos anonimizados a petición suya.",
+      "prev_aria": "Testimonio anterior",
+      "next_aria": "Testimonio siguiente",
+      "page_aria": "Ir a la página de testimonios {{n}}",
+      "program_label": "Programa Fundador"
+    },
+    "story": {
+      "eyebrow": "Nuestra historia",
+      "title": "Todo empezó con una visa.",
+      "p1": "El hábito de abrirse a la gente de la zona se perdió por falta de una excusa.",
+      "p2": "Elisa, mi compañera y cofundadora de Guardiens, llegó de Argentina con una visa que no le permitía trabajar. Cuidaba animales. Regresaba con historias: personas que abrían sus puertas, sus vidas, libremente. Desconocidos que terminaban invitándonos a Navidad.",
+      "p3": "Elisa y yo cuidamos 37 casas en cinco años, en pueblos, ciudades y aldeas.",
+      "quote": "Nunca cuidamos casas. Fuimos invitados a vidas.",
+      "p4": "Eso es lo que la comunidad hacía naturalmente.",
+      "p5": "Guardiens es la excusa que faltaba. Por un lado, los pequeños favores de ayuda mutua entre vecinos: un huerto regado a cambio de una comida, una habilidad por otra, ayuda mutua en especie. Por otro lado, de forma independiente, el home sitting: sus llaves confiadas a alguien a quien usted ha mirado a los ojos.",
+      "p6": "Usted partirá con tranquilidad. Regresará con una historia. No esperábamos que esto importara tanto.",
+      "p7": "Por eso construimos Guardiens, para que usted también viva esto.",
+      "signature": ", Jérémie & Elisa"
+    },
+    "cities": {
+      "eyebrow": "Guías y ciudades",
+      "title": "House-sitting cerca de usted.",
+      "lede": "Guías concretas para preparar su cuidado y centros locales para las ciudades más activas, Lyon, Annecy, Grenoble, y toda Francia.",
+      "guides_tag": "Guías y consejos",
+      "guides_title": "Preparar su cuidado",
+      "all_articles": "Todos los artículos",
+      "all_guides": "Guías locales por ciudad",
+      "cities_tag": "House-sitting por ciudad",
+      "cities_title": "Cerca de usted",
+      "cities_footer": "Sea cual sea su departamento, encontrará un cuidador cercano."
+    },
+    "faq": {
+      "title": "Preguntas frecuentes",
+      "q1": "¿Qué es el house-sitting?",
+      "a1": "El house-sitting es un intercambio de servicios: un cuidador vive sin coste en su casa durante su ausencia y cuida de sus mascotas. El intercambio no implica ninguna transacción financiera entre ambas partes.",
+      "q2": "¿Hay que pagar para inscribirse como propietario?",
+      "a2": "La inscripción, la publicación de anuncios y los intercambios con los cuidadores no requieren suscripción para los propietarios. No se solicita tarjeta bancaria. Los cuidadores disfrutan de acceso sin suscripción hasta el 14 de julio de 2026, después la suscripción es de 6,99 €/mes. La ayuda mutua entre vecinos sigue siendo sin suscripción para todos.",
+      "q3": "¿Cómo encontrar un pet sitter cerca de mí?",
+      "a3": "Inscríbase en Guardiens, publique su anuncio de cuidado con las fechas y sus mascotas, y reciba candidaturas de cuidadores que viven cerca de usted. Usted elige después de conocerse.",
+      "q4": "¿Quiénes son los cuidadores en Guardiens?",
+      "a4": "Personas de la zona, verificadas por nuestro equipo. Cada perfil pasa por una verificación de identidad (documento de identidad + selfie) procesada en 24 h. También puede ver sus opiniones publicadas por propietarios anteriores.",
+      "q5": "¿Cómo se desarrolla un cuidado en Guardiens?",
+      "a5": "Usted publica su anuncio, los cuidadores locales se postulan, usted elige después de un encuentro y luego su cuidador se instala. Un acuerdo de cuidado opcional establece los compromisos de cada uno durante el cuidado.",
+      "q6": "¿Está Guardiens disponible en toda Francia?",
+      "a6": "Sí. La red Guardiens se extiende por todas las regiones de Francia, desde el País Vasco hasta Bretaña, pasando por los Alpes y el Norte. Encontrará un cuidador cerca de usted sea cual sea su departamento."
+    },
+    "final": {
+      "badge_program": "Programa Fundador",
+      "badge_offer": "Insignia gratuita antes del 14 de julio de 2026",
+      "title": "Su próxima historia comienza aquí.",
+      "lede": "Usted partirá con tranquilidad. Regresará con algo más: un rincón descubierto, un encuentro, alguien con quien nunca se habría cruzado.",
+      "cta_owner": "Publicar mi anuncio",
+      "cta_sitter": "Quiero ser cuidador",
+      "footnote": "Registro en 2 minutos, sin tarjeta bancaria."
     }
   }
 }
