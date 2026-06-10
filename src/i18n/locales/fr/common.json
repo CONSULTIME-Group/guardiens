@@ -455,5 +455,18 @@
       "guide_pratique": "Guides pratiques",
       "vie_locale": "Vie locale & Entraide"
     }
+  },
+  "guides": {
+    "meta_title": "Guides locaux pet sitting, Parcs, vétos, cafés dog-friendly | Guardiens",
+    "meta_description": "Guides pratiques pour gardiens d'animaux : parcs dog-friendly, vétérinaires, cafés accueillants, sentiers de balade. Tout savoir avant d'arriver dans une nouvelle ville.",
+    "breadcrumb": "Guides locaux",
+    "title": "Guides locaux",
+    "subtitle": "Où promener, où soigner, où bruncher, tout ce qu'un gardien doit savoir en arrivant dans une nouvelle ville.",
+    "search_placeholder": "Rechercher une ville...",
+    "all_departments": "Tous les départements",
+    "empty_default": "Aucun guide disponible pour le moment.",
+    "empty_search": "Aucun guide ne correspond à votre recherche.",
+    "places_count": "{{n}} lieux référencés",
+    "header_alt": "Guide local Guardiens"
   }
 }
