@@ -61,12 +61,6 @@ export default function PublicHeader() {
           <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
             Connexion
           </Button>
-
-        {/* Mobile: auth + burger */}
-        <div className="flex sm:hidden items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
-            Connexion
-          </Button>
           <Button size="icon" variant="ghost" onClick={() => setOpen(!open)} aria-label="Menu">
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
