@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const NAV_LINKS = [
   { label: "Annonces en cours", to: "/annonces" },
@@ -51,10 +52,12 @@ export default function PublicHeader() {
           <Button size="sm" onClick={() => navigate("/inscription")}>
             Créer mon compte
           </Button>
+          <LanguageSwitcher />
         </nav>
 
         {/* Mobile: auth + burger */}
-        <div className="flex sm:hidden items-center gap-2">
+        <div className="flex sm:hidden items-center gap-1">
+          <LanguageSwitcher compact />
           <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
             Connexion
           </Button>

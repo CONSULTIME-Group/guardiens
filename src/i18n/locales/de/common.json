@@ -1,0 +1,18 @@
+{
+  "language": {
+    "label": "Sprache",
+    "switcher_aria": "Sprache wechseln",
+    "current": "Aktuelle Sprache: {{lang}}"
+  },
+  "nav": {
+    "listings": "Aktuelle Anzeigen",
+    "small_missions": "Kleine Hilfen",
+    "pros": "Tier-Profis",
+    "guides": "Lokale Guides",
+    "pricing": "Preise",
+    "news": "Das Journal",
+    "login": "Anmelden",
+    "register": "Konto erstellen",
+    "menu": "Menü"
+  }
+}

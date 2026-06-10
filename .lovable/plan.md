@@ -1,35 +1,81 @@
-## Périmètre (hors tarifs, gratuité préservée)
+## Objectif
 
-Vous avez raison, on garde la promesse « à 0 € jusqu'au 14 juillet 2026 » partout. Je n'enlève rien à ce sujet, j'ajuste juste les wordings qui parlent encore de prix payant comme si c'était actif aujourd'hui.
+Site disponible en **FR** (défaut), **EN**, **ES**, **IT**, **DE**, avec SEO multilingue complet (URLs `/en/`, `/es/`, `/it/`, `/de/`, `hreflang`, sitemaps par langue).
 
-## Vague 1, quick wins safe (ce tour)
+Traductions générées par **Lovable AI** (Gemini 3 Flash) au build, relues a posteriori. Aucun coût récurrent pour le visiteur.
 
-1. **PremiumGateDialog** : rendre le wording free-period aware via `isInGracePeriod()` / `isBeforeLaunch()`. Affiche « Activer mon espace gardien, à 0 € en ce moment » pendant la gratuité, sinon « 6,99 €/mois sans engagement ». Supprime « essayer sans frais » ambigu.
-2. **Typographie tarifs** : ajouter `font-display tabular-nums` sur les prix dans `PricingCards.tsx` et `PricingCardsCheckout.tsx`.
-3. **Analytics `cta_click`** : helper `trackCtaClick(name, location)` dans `src/lib/analytics.ts`, branché sur 3 CTAs primaires (Hero principal, PremiumGate, RoleActivationBanner).
+## Phase 1 — Infrastructure i18n (1 livraison, base solide)
 
-## Vague 2, UX/UI (tour suivant, après votre OK)
+**Code**
+- Installer `react-i18next` + `i18next` + `i18next-browser-languagedetector`.
+- Routeur : préfixe optionnel `/:lang(en|es|it|de)?/...`. FR reste sans préfixe (canonique). Les URLs existantes ne bougent pas.
+- Sélecteur de langue dans `PublicHeader` + `AppLayout` (mobile inclus), drapeau + nom de langue, persistant en cookie `lang`.
+- Détection auto à la 1re visite (header `Accept-Language`), redirige uniquement les visiteurs anonymes vers `/en/`, `/es/`, etc.
+- `<html lang>` dynamique + `hreflang` alternates dans `PageMeta` pour chaque page.
+- Mise à jour du `sitemap.xml` : 1 sitemap-index, 1 sitemap par langue.
 
-4. Hero : CTA unique primaire, secondaire en `ghost`.
-5. Hero : micro social proof (37 familles, 234 animaux, 4.9/5) avec composant existant si dispo.
-6. Sticky CTA mobile sur `SitDetail` et `SitterProfile`.
-7. Empty states : remplacer Lucide par gouaches existantes (audit ciblé).
-8. Favoris : bouton flottant `SitDetail`.
+**Tests bloquants**
+- Test Vitest : toute clé i18n utilisée dans un composant doit exister dans `fr.json` (sinon build cassé).
+- Test : présence des `hreflang` sur les pages clés.
 
-## Vague 3, SEO (tour suivant)
+**Livrable** : switch FR/EN visible, EN encore vide (clés FR par défaut). Aucun contenu cassé.
 
-9. CityPage : bloc « Villes proches » + JSON-LD `Service` avec `areaServed`.
-10. SitDetail images : `loading="lazy"` + `fetchpriority="low"` sauf cover.
-11. Sitemap : `lastmod` dynamique par article.
-12. Article pilier « Combien coûte un gardien d'animaux à domicile en France en 2026 ? » (rédaction = gros morceau, à confirmer ton/longueur).
+## Phase 2 — Traduction UI (libellés, boutons, menus)
 
-## Hors scope explicite
+- Extraction de tous les libellés en dur dans les composants vers `src/locales/fr/common.json` (~500-800 clés estimées).
+- Génération automatique de `en.json`, `es.json`, `it.json`, `de.json` via Lovable AI (script Node + prompt strict vouvoiement EN/ES/IT/DE équivalent, glossaire de termes : « gardien », « coup de main », « propriétaire »…).
+- Refactor progressif des composants : remplacement des chaînes par `t("key")`. Priorité : header, footer, sidebar, formulaires, toasts, navigation.
 
-- Toute mention « 6,99 € » présentée comme prix actif sans condition de date, KO. On garde la double formulation conditionnelle partout.
-- Renommer « sit/sitter » en « garde/gardien » côté UI : prévu mais en lot dédié (risque de régression i18n / tests), pas mélangé avec le reste.
+**Livrable** : navigation et chrome 100 % traduits dans les 5 langues.
 
-## Validation
+## Phase 3 — Pages marketing (Landing, Tarifs, FAQ, Pros, Guides)
 
-Tests Vitest existants (`no-trial-wording`, `free-period-dates-consistency`, `pricing-oneshot-consistency`) doivent rester verts à chaque vague.
+- Découpage des pages marketing en blocs de copy versionnés par langue.
+- Traduction Lovable AI + relecture humaine recommandée pour Landing + Tarifs (impact conversion).
+- SEO par langue : `title`, `description`, `og:*`, JSON-LD localisés.
+- Pages spécifiques par langue dans `siteRoutes.ts` pour le sitemap.
 
-Je commence par la Vague 1 dès votre feu vert, ou je file direct si vous me dites « go ».
+**Livrable** : `/`, `/tarifs`, `/faq`, `/pros` accessibles en 5 langues, indexables.
+
+## Phase 4 — Articles & guides SEO (le gros morceau)
+
+**Architecture DB**
+- Table `article_translations` (`article_id`, `lang`, `title`, `slug`, `excerpt`, `body`, `meta_title`, `meta_description`, `status`).
+- Migration : copier les 100+ articles existants en `lang = 'fr'`.
+- RLS + grants standards.
+
+**Génération**
+- Script batch `scripts/translate-articles.mjs` : pour chaque article × langue, appel Lovable AI Gemini 3 Flash avec prompt SEO strict (préserve structure markdown, traduit titres H2/H3, génère slugs propres, garde les liens internes français vers leurs équivalents traduits).
+- Coût estimé : ~400 articles × ~2 000 tokens out ≈ raisonnable mais non négligeable.
+- Statut par défaut `pending_review` : aucune publication automatique, vous validez par lot dans `AdminArticles`.
+
+**Routes**
+- `/en/journal/:slug`, `/es/journal/:slug`, etc.
+- Redirections 301 entre langues équivalentes (via `hreflang`).
+- Mise à jour de `sitemap.xml` (1 entrée par article × langue publiée).
+
+**Admin**
+- Onglet « Traductions » dans `AdminArticles` : voir l'état par langue, relancer une traduction, publier/dépublier par langue.
+
+**Livrable** : articles indexables Google EN/ES/IT/DE, traductions modifiables côté admin.
+
+## Hors périmètre (à valider plus tard)
+
+- **Contenus utilisateurs** (annonces, profils, messages) : restent en langue d'origine. Option « traduire » à la demande possible en Phase 5.
+- **Emails transactionnels** multilingues : Phase 5 séparée (~50 templates).
+- **Validation de vocabulaire** (no-aura, no-em-dash, no-voisin) : adapter les tests Vitest pour ignorer les locales non-FR.
+
+## Estimation & risques
+
+| Phase | Effort | Risque |
+|---|---|---|
+| 1 — Infra | Moyen | Faible si pas de refacto routes |
+| 2 — UI | Lourd | Régressions visuelles si clés mal extraites |
+| 3 — Marketing | Moyen | Qualité conversion EN/ES à surveiller |
+| 4 — Articles | Très lourd | Coût IA + qualité SEO à auditer après publication |
+
+**Recommandation forte** : ne pas tout faire d'un coup. Valider Phase 1 en preview, vous testez le switch, puis on enchaîne.
+
+## Démarrage
+
+Si vous validez ce plan, je commence **uniquement par la Phase 1** (infra + switch UI vide en EN), pour que vous puissiez tester avant d'engager le reste.

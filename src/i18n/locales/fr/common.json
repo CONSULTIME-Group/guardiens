@@ -1,0 +1,18 @@
+{
+  "language": {
+    "label": "Langue",
+    "switcher_aria": "Changer de langue",
+    "current": "Langue actuelle : {{lang}}"
+  },
+  "nav": {
+    "listings": "Annonces en cours",
+    "small_missions": "Coups de main",
+    "pros": "Pros animaliers",
+    "guides": "Guides locaux",
+    "pricing": "Tarifs",
+    "news": "Le journal",
+    "login": "Connexion",
+    "register": "Créer mon compte",
+    "menu": "Menu"
+  }
+}

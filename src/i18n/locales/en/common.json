@@ -1,0 +1,18 @@
+{
+  "language": {
+    "label": "Language",
+    "switcher_aria": "Change language",
+    "current": "Current language: {{lang}}"
+  },
+  "nav": {
+    "listings": "Open listings",
+    "small_missions": "Small favours",
+    "pros": "Pet pros",
+    "guides": "Local guides",
+    "pricing": "Pricing",
+    "news": "The journal",
+    "login": "Log in",
+    "register": "Create account",
+    "menu": "Menu"
+  }
+}

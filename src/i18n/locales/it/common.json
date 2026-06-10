@@ -1,0 +1,18 @@
+{
+  "language": {
+    "label": "Lingua",
+    "switcher_aria": "Cambia lingua",
+    "current": "Lingua attuale: {{lang}}"
+  },
+  "nav": {
+    "listings": "Annunci aperti",
+    "small_missions": "Piccoli aiuti",
+    "pros": "Pro per animali",
+    "guides": "Guide locali",
+    "pricing": "Prezzi",
+    "news": "La rivista",
+    "login": "Accedi",
+    "register": "Crea account",
+    "menu": "Menu"
+  }
+}

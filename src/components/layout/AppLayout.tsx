@@ -7,6 +7,7 @@ import Breadcrumbs from "./Breadcrumbs";
 // différé pour ne pas peser sur les pages publiques (login, landing…) qui
 // n'utilisent jamais le shell AppLayout mais partagent l'entry bundle.
 const NotificationBell = lazy(() => import("./NotificationBell"));
+import LanguageSwitcher from "./LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
 // DuplicateAccountGuard est monté globalement dans App.tsx pour s'exécuter
@@ -37,9 +38,12 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
             <span className="text-primary">g</span>
             <span className="text-foreground">uardiens</span>
           </Link>
-          <Suspense fallback={<div className="w-9 h-9" aria-hidden />}>
-            <NotificationBell />
-          </Suspense>
+          <div className="flex items-center gap-1">
+            <LanguageSwitcher compact />
+            <Suspense fallback={<div className="w-9 h-9" aria-hidden />}>
+              <NotificationBell />
+            </Suspense>
+          </div>
         </div>
         {/* Single navigation aid: BackButton on mobile, Breadcrumbs on desktop */}
         <div className="md:hidden">
