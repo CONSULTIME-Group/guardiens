@@ -1,4 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { slugify } from "@/lib/normalize";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,15 +40,15 @@ interface GuidePlace {
   tips: string | null;
 }
 
-const CATEGORY_CONFIG: Record<string, { label: string; icon: any; color: string }> = {
-  dog_park: { label: "Parcs & espaces verts", icon: TreePine, color: "hsl(var(--primary))" },
-  general_park: { label: "Parcs publics", icon: Trees, color: "hsl(var(--primary))" },
-  walk_trail: { label: "Balades & sentiers", icon: Footprints, color: "hsl(27, 35%, 59%)" },
-  vet: { label: "Vétérinaires", icon: Stethoscope, color: "hsl(0, 84%, 60%)" },
-  dog_friendly_cafe: { label: "Cafés & restos dog-friendly", icon: Coffee, color: "hsl(27, 35%, 59%)" },
-  dog_friendly_restaurant: { label: "Restaurants dog-friendly", icon: Coffee, color: "hsl(27, 35%, 59%)" },
-  pet_shop: { label: "Animaleries", icon: Store, color: "hsl(270, 50%, 60%)" },
-  water_point: { label: "Points d'eau", icon: Droplets, color: "hsl(200, 70%, 50%)" },
+const CATEGORY_CONFIG: Record<string, { key: string; icon: any; color: string }> = {
+  dog_park: { key: "dog_park", icon: TreePine, color: "hsl(var(--primary))" },
+  general_park: { key: "general_park", icon: Trees, color: "hsl(var(--primary))" },
+  walk_trail: { key: "walk_trail", icon: Footprints, color: "hsl(27, 35%, 59%)" },
+  vet: { key: "vet", icon: Stethoscope, color: "hsl(0, 84%, 60%)" },
+  dog_friendly_cafe: { key: "dog_friendly_cafe", icon: Coffee, color: "hsl(27, 35%, 59%)" },
+  dog_friendly_restaurant: { key: "dog_friendly_restaurant", icon: Coffee, color: "hsl(27, 35%, 59%)" },
+  pet_shop: { key: "pet_shop", icon: Store, color: "hsl(270, 50%, 60%)" },
+  water_point: { key: "water_point", icon: Droplets, color: "hsl(200, 70%, 50%)" },
 };
 
 
@@ -69,6 +70,7 @@ const StarRating = ({ rating }: { rating: number | null }) => {
 };
 
 const GuideDetail = () => {
+  const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
@@ -155,7 +157,7 @@ const GuideDetail = () => {
   if (guideLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Chargement...</div>
+        <div className="animate-pulse text-muted-foreground">{t("guide_detail.loading")}</div>
       </div>
     );
   }
@@ -163,8 +165,8 @@ const GuideDetail = () => {
   if (!guide) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
-        <p className="text-muted-foreground">Guide introuvable.</p>
-        <Link to="/guides" className="text-primary hover:underline">← Retour aux guides</Link>
+        <p className="text-muted-foreground">{t("guide_detail.not_found")}</p>
+        <Link to="/guides" className="text-primary hover:underline">{t("guide_detail.back_to_guides")}</Link>
       </div>
     );
   }
@@ -172,14 +174,14 @@ const GuideDetail = () => {
   return (
     <>
       <PageMeta
-        title={`Guide pet sitting ${guide.city}, Parcs, vétos, cafés dog-friendly | Guardiens`}
-        description={`Guide pratique pour pet sitters à ${guide.city} : parcs dog-friendly, vétérinaires, cafés accueillants, sentiers de balade. ${guide.ideal_for}`}
+        title={t("guide_detail.meta_title", { city: guide.city })}
+        description={t("guide_detail.meta_description", { city: guide.city, ideal: guide.ideal_for })}
         path={`/guides/${guide.slug}`}
       />
 
       <div className="min-h-screen bg-background">
         <PageBreadcrumb items={[
-          { label: "Guides locaux", href: "/guides" },
+          { label: t("guide_detail.breadcrumb"), href: "/guides" },
           { label: guide.city },
         ]} />
 
@@ -193,19 +195,19 @@ const GuideDetail = () => {
             }}
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
           >
-            <ArrowLeft className="h-4 w-4" /> Retour
+            <ArrowLeft className="h-4 w-4" /> {t("guide_detail.back")}
           </button>
         </div>
 
         {/* Header */}
         <header className="relative overflow-hidden border-b border-border">
           <div className="absolute inset-0">
-            <img src={guideHeaderImg} alt={`Guide pet sitting ${guide.city}`} className="w-full h-full object-cover" />
+            <img src={guideHeaderImg} alt={t("guide_detail.header_alt", { city: guide.city })} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/70 to-background/40" />
           </div>
           <div className="relative max-w-5xl mx-auto px-4 py-10 sm:py-14">
           <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground mb-4">
-            Guide du gardien à {guide.city}
+            {t("guide_detail.title", { city: guide.city })}
           </h1>
           <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl mb-3">
             {guide.intro}
@@ -219,36 +221,37 @@ const GuideDetail = () => {
           <div className="mt-5 relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher un lieu, un parc, un véto..."
+              placeholder={t("guide_detail.search_placeholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
             />
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-4">
-            <Badge variant="secondary">{places.length} lieux référencés</Badge>
+            <Badge variant="secondary">{t("guide_detail.places_count", { count: places.length })}</Badge>
             <Link
               to={`/house-sitting/${guide.slug}`}
               className="text-sm text-primary hover:underline flex items-center gap-1"
             >
-              Voir les gardes à {guide.city} <ArrowRight className="h-3.5 w-3.5" />
+              {t("guide_detail.see_sits", { city: guide.city })} <ArrowRight className="h-3.5 w-3.5" />
             </Link>
             {guide.department && (
               <Link
                 to={`/departement/${slugify(guide.department)}`}
                 className="text-sm text-primary hover:underline flex items-center gap-1"
               >
-                House-sitting dans le {guide.department} <ArrowRight className="h-3.5 w-3.5" />
+                {t("guide_detail.see_department", { department: guide.department })} <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             )}
             <Link
               to="/petites-missions"
               className="text-sm text-primary hover:underline flex items-center gap-1"
             >
-              Petites missions d'entraide <ArrowRight className="h-3.5 w-3.5" />
+              {t("guide_detail.small_missions")} <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
         </div>
+
 
         {/* Map (chargée à la demande, sans bloquer le LCP ni le SEO) */}
         {placesWithCoords.length > 0 && (
@@ -264,15 +267,16 @@ const GuideDetail = () => {
         <main className="max-w-5xl mx-auto px-4 pb-16">
           <div className="space-y-10">
             {categories.map((cat) => {
-              const config = CATEGORY_CONFIG[cat] || { label: cat, icon: MapPin, color: "gray" };
+              const config = CATEGORY_CONFIG[cat] || { key: cat, icon: MapPin, color: "gray" };
               const Icon = config.icon;
               const catPlaces = filteredPlaces.filter((p) => p.category === cat);
+              const catLabel = t(`guide_detail.categories.${config.key}`, cat);
 
               return (
                 <section key={cat}>
                   <h2 className="font-heading text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
                     <Icon className="h-5 w-5" style={{ color: config.color }} />
-                    {config.label}
+                    {catLabel}
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {catPlaces.map((place) => (
@@ -286,18 +290,18 @@ const GuideDetail = () => {
                           <p className="text-sm text-foreground/80 mb-2">{place.description}</p>
                           <div className="flex items-center gap-2 mb-2">
                             {place.dogs_welcome && (
-                              <Badge variant="outline" className="text-xs">Chiens bienvenus</Badge>
+                              <Badge variant="outline" className="text-xs">{t("guide_detail.dogs_welcome")}</Badge>
                             )}
                             {place.leash_required !== null && (
                               <Badge variant="outline" className="text-xs">
-                                {place.leash_required ? "En laisse" : "Chiens libres"}
+                                {place.leash_required ? t("guide_detail.leash") : t("guide_detail.leash_free")}
                               </Badge>
                             )}
                           </div>
                           {place.tips && (
                             <div className="bg-accent/50 rounded-md p-2.5 mt-2">
                               <p className="text-xs italic text-muted-foreground">
-                                Bon à savoir : {place.tips}
+                                {t("guide_detail.good_to_know", { tips: place.tips })}
                               </p>
                             </div>
                           )}
@@ -314,7 +318,7 @@ const GuideDetail = () => {
           {nearbyGuides.length > 0 && (
             <div className="mt-14 border-t border-border pt-10">
               <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
-                Guides proches, {guide.department}
+                {t("guide_detail.nearby_title", { department: guide.department })}
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                 {nearbyGuides.map((ng) => (
@@ -335,7 +339,7 @@ const GuideDetail = () => {
           {relatedArticles.length > 0 && (
             <div className="mt-14 border-t border-border pt-10">
               <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
-                Articles sur {guide.city}
+                {t("guide_detail.related_title", { city: guide.city })}
               </h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {relatedArticles.map((a: any) => (
@@ -347,7 +351,7 @@ const GuideDetail = () => {
                         </h3>
                         <p className="text-xs text-muted-foreground line-clamp-2">{a.excerpt}</p>
                         <span className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary">
-                          Lire <ArrowRight className="h-3 w-3" />
+                          {t("guide_detail.read")} <ArrowRight className="h-3 w-3" />
                         </span>
                       </CardContent>
                     </Card>
@@ -360,13 +364,13 @@ const GuideDetail = () => {
           {/* CTA */}
           <div className="mt-14 text-center border-t border-border pt-10">
             <p className="text-muted-foreground mb-4">
-              Vous allez garder à {guide.city} ?
+              {t("guide_detail.cta_question", { city: guide.city })}
             </p>
             <Link
               to={`/house-sitting/${guide.slug}`}
               className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
             >
-              Voir les gardes à {guide.city}
+              {t("guide_detail.see_sits", { city: guide.city })}
             </Link>
           </div>
         </main>
