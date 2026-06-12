@@ -593,6 +593,21 @@ const PublicSitView = ({
               </div>
             </div>
 
+            {/* Guide maison déjà préparé */}
+            {hasHouseGuide && (
+              <div className="bg-card rounded-[2rem] p-6 border border-border">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+                  Guide de la maison
+                </p>
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <p className="text-sm text-foreground/85 leading-relaxed">
+                    Préparé par {owner?.first_name || "l'hôte"} : wifi, contacts, vétérinaire, consignes. Partagé en intégralité après acceptation.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Réassurance compacte */}
             <div className="bg-card rounded-[2rem] p-6 border border-border space-y-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
