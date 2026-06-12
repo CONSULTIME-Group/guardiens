@@ -10,12 +10,12 @@ interface GeoResult {
  * Geocode a city name to lat/lng coordinates.
  * Uses a backend function with Nominatim + cache.
  */
-export async function geocodeCity(city: string): Promise<GeoResult | null> {
+export async function geocodeCity(city: string, country?: string | null): Promise<GeoResult | null> {
   if (!city || city.trim().length < 2) return null;
 
   try {
     const { data, error } = await supabase.functions.invoke("geocode", {
-      body: { city: city.trim() },
+      body: { city: city.trim(), country: country?.trim() || undefined },
     });
 
     if (error || !data?.lat || !data?.lng) return null;
