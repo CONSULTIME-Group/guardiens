@@ -40,9 +40,9 @@ export default function MobileDashboardTabs({
   const [tab, setTab] = useState<TabId>(defaultTab);
 
   return (
-    <>
-      {/* Mobile : segmented control sticky sous la top bar (top-12 = h de la mobile top bar) */}
-      <div className="md:hidden sticky top-12 z-30 px-4 pt-3 pb-2 bg-background/95 backdrop-blur border-b border-border/40">
+    <div className="md:hidden">
+      {/* segmented control sticky sous la top bar mobile (h-12) */}
+      <div className="sticky top-12 z-30 px-4 pt-3 pb-2 bg-background/95 backdrop-blur border-b border-border/40">
         <div role="tablist" aria-label="Sections du tableau de bord" className="grid grid-cols-3 gap-1 rounded-xl bg-muted/60 p-1">
           {TABS.map((t) => {
             const isActive = tab === t.id;
@@ -76,25 +76,16 @@ export default function MobileDashboardTabs({
         </div>
       </div>
 
-      {/* Mobile : un seul panneau visible (les autres restent montés, juste cachés) */}
-      <div className="md:hidden">
-        <div id="dash-panel-today" role="tabpanel" aria-labelledby="tab-today" hidden={tab !== "today"} className="space-y-5 pt-4">
-          {today}
-        </div>
-        <div id="dash-panel-activity" role="tabpanel" aria-labelledby="tab-activity" hidden={tab !== "activity"} className="space-y-5 pt-4">
-          {activity}
-        </div>
-        <div id="dash-panel-discover" role="tabpanel" aria-labelledby="tab-discover" hidden={tab !== "discover"} className="space-y-5 pt-4">
-          {discover}
-        </div>
-      </div>
-
-      {/* Desktop : tout en flux normal, layout inchangé */}
-      <div className="hidden md:contents">
+      <div id="dash-panel-today" role="tabpanel" hidden={tab !== "today"} className="space-y-5 pt-4">
         {today}
+      </div>
+      <div id="dash-panel-activity" role="tabpanel" hidden={tab !== "activity"} className="space-y-5 pt-4">
         {activity}
+      </div>
+      <div id="dash-panel-discover" role="tabpanel" hidden={tab !== "discover"} className="space-y-5 pt-4">
         {discover}
       </div>
-    </>
+    </div>
   );
 }
+
