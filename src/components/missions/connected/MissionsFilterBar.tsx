@@ -1,4 +1,5 @@
 import { MapPin, Search as SearchIcon, X } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CategoryFilter, FILTER_PILLS } from "./constants";
 
@@ -29,6 +30,8 @@ const MissionsFilterBar = ({
 }: Props) => {
   const { t } = useTranslation();
   const tp = (k: string, opts?: any) => t(k, opts) as string;
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const activeCategoryLabel = tp(`mission_filter_pills.${categoryFilter}`);
   return (
     <div className="space-y-3">
       <div className="flex flex-col sm:flex-row gap-3">
@@ -89,8 +92,40 @@ const MissionsFilterBar = ({
         </div>
       </div>
 
-      <div className="-mx-4 px-4 overflow-x-auto sm:overflow-visible sm:mx-0 sm:px-0">
-        <div className="flex sm:flex-wrap items-center gap-2 sm:justify-center w-max sm:w-auto">
+      {/* Mobile, chips repliées derrière un toggle pour réduire le bruit */}
+      <div className="md:hidden">
+        <button
+          type="button"
+          onClick={() => setMobileFiltersOpen((v) => !v)}
+          className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+          aria-expanded={mobileFiltersOpen}
+        >
+          {mobileFiltersOpen ? "Masquer les catégories" : `Catégories · ${activeCategoryLabel}`}
+        </button>
+        {mobileFiltersOpen && (
+          <div className="mt-2 -mx-4 px-4 overflow-x-auto">
+            <div className="flex items-center gap-2 w-max">
+              {FILTER_PILLS.map(({ key }) => (
+                <button
+                  key={key}
+                  onClick={() => setCategoryFilter(key)}
+                  className={`rounded-full border px-3 py-1.5 text-xs whitespace-nowrap transition-colors ${
+                    categoryFilter === key
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-muted text-foreground border-border"
+                  }`}
+                >
+                  {tp(`mission_filter_pills.${key}`)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Desktop, chips toujours visibles */}
+      <div className="hidden md:block">
+        <div className="flex flex-wrap items-center gap-2 justify-center">
           {FILTER_PILLS.map(({ key }) => (
             <button
               key={key}

@@ -438,7 +438,7 @@ const SmallMissions = () => {
           }}
         />
 
-        <main className="max-w-6xl mx-auto px-4 py-8 md:py-10 pb-28 md:pb-10 space-y-12">
+        <main className="max-w-6xl mx-auto px-4 py-5 md:py-10 pb-28 md:pb-10 space-y-8 md:space-y-12">
           <section className="space-y-6">
             {isAuthenticated && !canApplyMissions && (
               <div className="flex justify-center">
@@ -503,18 +503,18 @@ const SmallMissions = () => {
 
             {/* ═══ Section 1, Demandes ou Propositions visibles (HERO) ═══ */}
             <div className="flex items-center gap-3 mb-2">
-              <span className="h-8 w-1.5 rounded-full bg-primary" aria-hidden />
-              <h2 className="text-xl md:text-2xl font-heading font-bold text-foreground leading-tight">
+              <span className="hidden md:inline-block h-8 w-1.5 rounded-full bg-primary" aria-hidden />
+              <h2 className="text-lg md:text-2xl font-heading font-bold text-foreground leading-tight">
                 {mode === "offer" ? tp("section_offer_title") : tp("section_need_title")}
               </h2>
               {missionCount > 0 && (
-                <span className="text-xs font-semibold bg-primary/10 text-primary px-2.5 py-1 rounded-full">
+                <span className="hidden md:inline-flex text-xs font-semibold bg-primary/10 text-primary px-2.5 py-1 rounded-full">
                   {missionCount} {mode === "offer" ? tp(missionCount > 1 ? "count_proposal_other" : "count_proposal_one") : tp(missionCount > 1 ? "count_demand_other" : "count_demand_one")}
                 </span>
               )}
             </div>
             {missionCount > 0 && (
-              <label className="flex items-center gap-2 mb-4 text-xs text-muted-foreground cursor-pointer select-none">
+              <label className="hidden md:flex items-center gap-2 mb-4 text-xs text-muted-foreground cursor-pointer select-none">
                 <Switch
                   checked={compactBio}
                   onCheckedChange={setCompactBio}
@@ -662,7 +662,7 @@ const SmallMissions = () => {
 
             {/* ═══ Section 2, Membres disponibles (secondaire) ═══ */}
             {(helperCount > 0 || isAuthenticated) && (
-              <div className="mt-12 pt-8 border-t border-border">
+              <div className="mt-8 md:mt-12 pt-6 md:pt-8 md:border-t md:border-border">
                 {isAuthenticated && mode === "offer" && (
                   <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -689,14 +689,14 @@ const SmallMissions = () => {
                     )}
                   </div>
                 )}
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">{tp("and_also")}</p>
+                <p className="hidden md:block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">{tp("and_also")}</p>
                 <h3 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
                   {mode === "need" ? tp("members_for_need") : tp("members_other")}
                   <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
                     {tp(helperCount > 1 ? "people_local_other" : "people_local_one", { count: helperCount })}
                   </span>
                 </h3>
-                <div className="space-y-8">
+                <div className="space-y-6 md:space-y-8">
                   {helpersLoading ? (
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {Array.from({ length: 6 }).map((_, i) => (
@@ -718,7 +718,7 @@ const SmallMissions = () => {
                     <>
                       {visiblePriorityHelpers.length > 0 && (
                         <div className="space-y-3">
-                          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
                             {visiblePriorityHelpers.map(renderHelperCard)}
                           </div>
                         </div>
@@ -726,7 +726,7 @@ const SmallMissions = () => {
 
                       {visibleComplementaryHelpers.length > 0 && (
                         <div className="space-y-3">
-                          <div className="flex items-center gap-3">
+                          <div className="hidden md:flex items-center gap-3">
                             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                               {tp("complementary")}
                             </h3>
@@ -735,7 +735,7 @@ const SmallMissions = () => {
                             </span>
                             <div className="flex-1 h-px bg-border" />
                           </div>
-                          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
                             {visibleComplementaryHelpers.map(renderHelperCard)}
                           </div>
                         </div>
@@ -787,7 +787,7 @@ const SmallMissions = () => {
 
           {missionCount === 0 && helperCount === 0 && <ExamplesSection />}
 
-          <MissionsArticlesStrip />
+          <div className="hidden md:block"><MissionsArticlesStrip /></div>
         </main>
 
         <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
