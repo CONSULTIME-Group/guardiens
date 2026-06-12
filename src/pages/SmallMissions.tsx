@@ -438,7 +438,7 @@ const SmallMissions = () => {
           }}
         />
 
-        <main className="max-w-6xl mx-auto px-4 py-8 md:py-10 pb-28 md:pb-10 space-y-12">
+        <main className="max-w-6xl mx-auto px-4 py-5 md:py-10 pb-28 md:pb-10 space-y-8 md:space-y-12">
           <section className="space-y-6">
             {isAuthenticated && !canApplyMissions && (
               <div className="flex justify-center">
