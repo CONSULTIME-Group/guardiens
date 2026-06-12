@@ -357,16 +357,17 @@ const OwnerDashboard = () => {
 
       {/* Bannière dual-role : déplacée APRÈS le hero (l'utilisateur lit
           d'abord son nom, ensuite l'incitation à activer l'espace gardien). */}
-      <div className="px-5 md:px-8">
+      <div className={`px-5 md:px-8 ${!showAllMobile ? "hidden md:block" : ""}`}>
         <RoleActivationBanner userRole={user?.role || "owner"} />
       </div>
 
       {/* Règle de priorité : on n'affiche LiveSignalStrip que si AccessGateBanner
           n'occupe pas déjà l'espace (max 2 bandeaux contextuels actifs). */}
-      <div className="px-5 md:px-8 space-y-3">
+      <div className={`px-5 md:px-8 space-y-3 ${!showAllMobile ? "hidden md:block" : ""}`}>
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
         {(level === 4 || level === "3B") && <LiveSignalStrip secondarySignal={localSignal} />}
       </div>
+
 
       {/* ═══ Bloc unifié "À faire maintenant" ═══ */}
       {todoItems.length > 0 && (
