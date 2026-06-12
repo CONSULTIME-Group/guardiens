@@ -29,7 +29,7 @@ import { AdvancedFiltersSheet } from "@/components/search/header/AdvancedFilters
 import { SearchEmptyState } from "@/components/search/listing/SearchEmptyState";
 import { OutOfZoneBanner } from "@/components/search/listing/OutOfZoneBanner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, MapPin, Calendar, Star, Lock, Zap, Sparkles } from "lucide-react";
+import { Search, MapPin, Calendar, Star, Lock, Zap, Sparkles, Globe2 } from "lucide-react";
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
