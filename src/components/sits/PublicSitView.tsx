@@ -1,9 +1,11 @@
 // Vue publique éditoriale (Modern Minimal), annonces de garde.
 // Cible : visiteurs anonymes ET connectés (hors propriétaire de l'annonce).
 // Objectif : conversion + clarté. Pattern aligné avec PublicMissionView.
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Share2, CheckCircle2, Star } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
@@ -54,6 +56,15 @@ interface PetLike {
   species: string;
   breed?: string | null;
   photo_url?: string | null;
+  age?: number | null;
+  character?: string | null;
+  alone_duration?: string | null;
+  walk_duration?: string | null;
+  medication?: string | null;
+  food?: string | null;
+  special_needs?: string | null;
+  activity_level?: string | null;
+  owner_breed_note?: string | null;
 }
 
 interface ReviewLike {
@@ -103,6 +114,7 @@ const PublicSitView = ({
   hasApplied = false,
   onApply,
 }: Props) => {
+  const [openPet, setOpenPet] = useState<PetLike | null>(null);
   const photos: string[] = (property?.photos || []).filter(Boolean);
   const petPhotos = pets
     .filter((p) => !!p.photo_url)
@@ -292,9 +304,12 @@ const PublicSitView = ({
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {pets.map((pet) => (
-                      <div
+                      <button
+                        type="button"
                         key={pet.id}
-                        className="flex items-center gap-4 bg-card border border-border rounded-2xl px-5 py-4"
+                        onClick={() => setOpenPet(pet)}
+                        className="flex items-center gap-4 bg-card border border-border rounded-2xl px-5 py-4 text-left hover:border-primary/40 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        aria-label={`Voir la fiche de ${pet.name}`}
                       >
                         {pet.photo_url ? (
                           <img
@@ -308,16 +323,95 @@ const PublicSitView = ({
                             {pet.name.charAt(0).toUpperCase()}
                           </span>
                         )}
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <p className="font-semibold text-base truncate">{pet.name}</p>
                           <p className="text-sm text-muted-foreground truncate">
                             {speciesLabel[pet.species] || pet.species}
                             {pet.breed ? ` · ${pet.breed}` : ""}
+                            {typeof pet.age === "number" && pet.age > 0 ? ` · ${pet.age} an${pet.age > 1 ? "s" : ""}` : ""}
                           </p>
                         </div>
-                      </div>
+                        <span className="text-xs text-primary font-medium shrink-0">Voir</span>
+                      </button>
                     ))}
                   </div>
+
+                  {/* Modale fiche animal */}
+                  <Dialog open={!!openPet} onOpenChange={(o) => !o && setOpenPet(null)}>
+                    <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+                      {openPet && (
+                        <>
+                          <DialogHeader>
+                            <DialogTitle className="font-heading text-2xl">
+                              {openPet.name}
+                            </DialogTitle>
+                          </DialogHeader>
+                          {openPet.photo_url && (
+                            <img
+                              src={openPet.photo_url}
+                              alt={openPet.name}
+                              className="w-full h-64 object-cover rounded-2xl"
+                            />
+                          )}
+                          <div className="space-y-3 text-sm">
+                            <p className="text-muted-foreground">
+                              {speciesLabel[openPet.species] || openPet.species}
+                              {openPet.breed ? ` · ${openPet.breed}` : ""}
+                              {typeof openPet.age === "number" && openPet.age > 0 ? ` · ${openPet.age} an${openPet.age > 1 ? "s" : ""}` : ""}
+                            </p>
+                            {openPet.character && (
+                              <div>
+                                <p className="font-semibold text-foreground mb-1">Caractère</p>
+                                <p className="text-foreground/85 whitespace-pre-line">{openPet.character}</p>
+                              </div>
+                            )}
+                            {openPet.activity_level && (
+                              <div>
+                                <p className="font-semibold text-foreground mb-1">Niveau d'activité</p>
+                                <p className="text-foreground/85">{openPet.activity_level}</p>
+                              </div>
+                            )}
+                            {openPet.walk_duration && (
+                              <div>
+                                <p className="font-semibold text-foreground mb-1">Promenades</p>
+                                <p className="text-foreground/85">{openPet.walk_duration}</p>
+                              </div>
+                            )}
+                            {openPet.alone_duration && (
+                              <div>
+                                <p className="font-semibold text-foreground mb-1">Tolérance à la solitude</p>
+                                <p className="text-foreground/85">{openPet.alone_duration}</p>
+                              </div>
+                            )}
+                            {openPet.food && (
+                              <div>
+                                <p className="font-semibold text-foreground mb-1">Alimentation</p>
+                                <p className="text-foreground/85 whitespace-pre-line">{openPet.food}</p>
+                              </div>
+                            )}
+                            {openPet.medication && (
+                              <div>
+                                <p className="font-semibold text-foreground mb-1">Traitements / soins</p>
+                                <p className="text-foreground/85 whitespace-pre-line">{openPet.medication}</p>
+                              </div>
+                            )}
+                            {openPet.special_needs && (
+                              <div>
+                                <p className="font-semibold text-foreground mb-1">Besoins particuliers</p>
+                                <p className="text-foreground/85 whitespace-pre-line">{openPet.special_needs}</p>
+                              </div>
+                            )}
+                            {openPet.owner_breed_note && (
+                              <div>
+                                <p className="font-semibold text-foreground mb-1">Note du propriétaire</p>
+                                <p className="text-foreground/85 whitespace-pre-line">{openPet.owner_breed_note}</p>
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </DialogContent>
+                  </Dialog>
                 </section>
               )}
 
