@@ -519,7 +519,7 @@ const CityPage = () => {
        {/* Rich editorial body from AI */}
        {dbPage.content && (
          <section className="max-w-3xl mx-auto px-4 py-10">
-           <article className="prose prose-neutral max-w-none prose-headings:font-serif prose-headings:text-foreground prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-p:text-muted-foreground prose-p:leading-relaxed prose-li:text-muted-foreground prose-strong:text-foreground prose-a:text-primary">
+           <article className="prose prose-lg prose-neutral max-w-none prose-headings:font-serif prose-headings:text-foreground prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-5 prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3 prose-h3:text-foreground prose-p:text-foreground/80 prose-p:leading-relaxed prose-li:text-foreground/80 prose-strong:text-foreground prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
              <ReactMarkdown>{dbPage.content}</ReactMarkdown>
            </article>
          </section>
