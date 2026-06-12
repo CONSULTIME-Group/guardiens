@@ -147,9 +147,33 @@ Répondez UNIQUEMENT en JSON valide avec cette structure exacte (chaque champ do
       ideal_for: profile.ideal_for || "",
       rich_content: profile.rich_content || "",
     };
-    if (image_url) record.image_url = image_url;
-    if (image_credit) record.image_credit = image_credit;
-    if (image_alt) record.image_alt = image_alt;
+    // Auto-fetch Wikipedia FR image if not provided
+    let finalImage = image_url, finalCredit = image_credit, finalAlt = image_alt;
+    if (!finalImage) {
+      const cap = (s: string) => s.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+      const queries = [cap(breed), breed, breed.replace(/é/g, "e").replace(/è/g, "e")];
+      for (const q of queries) {
+        try {
+          const wikiUrl = `https://fr.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages&piprop=original&titles=${encodeURIComponent(q)}&redirects=1&pithumbsize=1200`;
+          const wr = await fetch(wikiUrl);
+          const wj: any = await wr.json();
+          const pages = wj?.query?.pages || {};
+          for (const p of Object.values<any>(pages)) {
+            const src = p?.original?.source;
+            if (src && /\.(jpg|jpeg|png|webp)$/i.test(src)) {
+              finalImage = src;
+              finalCredit = `Wikipédia, ${p.title}`;
+              finalAlt = `Photo, ${breed}`;
+              break;
+            }
+          }
+          if (finalImage) break;
+        } catch (e) { console.error("wiki fail", q, e); }
+      }
+    }
+    if (finalImage) record.image_url = finalImage;
+    if (finalCredit) record.image_credit = finalCredit;
+    if (finalAlt) record.image_alt = finalAlt;
 
     const { data: inserted } = await supabase
       .from("breed_profiles")
