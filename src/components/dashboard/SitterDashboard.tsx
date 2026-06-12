@@ -500,14 +500,34 @@ const SitterDashboard = () => {
         {buildEmergencyBlock(false)}
       </div>
 
-      {/* Lien discret "Revoir la présentation", relégué en pied */}
-      <div className="px-4 sm:px-5 md:px-8 mt-2 mb-4 text-center">
+      {/* Toggle « Réduire » mobile : visible uniquement quand l'espace est déployé */}
+      {showAllMobile && (
+        <div className="px-4 sm:px-5 md:hidden mb-4">
+          <button
+            type="button"
+            onClick={() => {
+              setShowAllMobile(false);
+              if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-sm font-semibold text-muted-foreground hover:bg-muted/40 transition-colors"
+            aria-expanded={true}
+            aria-controls="sitter-dash-extra"
+          >
+            Réduire l'espace
+            <ChevronUp className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+      )}
+
+      {/* Lien discret "Revoir la présentation", relégué en pied (masqué mobile en focus) */}
+      <div className={`px-4 sm:px-5 md:px-8 mt-2 mb-4 text-center ${!showAllMobile ? "hidden md:block" : ""}`}>
         <button onClick={() => setSearchParams({ tour: "true" })} className="text-xs text-muted-foreground underline-offset-4 hover:underline">
           Revoir la présentation
         </button>
       </div>
 
       {/* CTA sticky mobile */}
+
       <SitterMobileStickyCTA pendingAppsCount={pendingAppsCount} unreadCount={unreadCount} />
     </div>
   );
