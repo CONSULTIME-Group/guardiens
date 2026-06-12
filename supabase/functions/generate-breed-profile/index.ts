@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { species, breed, force } = await req.json();
+    const { species, breed, force, image_url, image_credit, image_alt } = await req.json();
     if (!species || !breed) {
       return new Response(JSON.stringify({ error: "species and breed required" }), {
         status: 400,
