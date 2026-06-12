@@ -50,8 +50,7 @@ async function geocode(city: string, postalCode?: string | null, country?: strin
 
   // 2) Fallback, edge function geocode (proxy serveur, fiable même en iframe)
   try {
-    const queryCity = isFR ? city : `${city}, ${country}`;
-    const { data } = await supabase.functions.invoke("geocode", { body: { city: queryCity } });
+    const { data } = await supabase.functions.invoke("geocode", { body: { city, country: country || "FR" } });
     if (data && typeof (data as any).lat === "number" && typeof (data as any).lng === "number") {
       const out = { lat: (data as any).lat, lng: (data as any).lng };
       cache.set(key, out);
