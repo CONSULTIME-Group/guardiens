@@ -36,8 +36,8 @@ export const AcquisitionPilotCard = () => {
           supabase.from("indexnow_submissions").select("*", { count: "exact", head: true }).gte("submitted_at", since24h),
           supabase.from("indexnow_submissions").select("*", { count: "exact", head: true }).gte("submitted_at", since7d),
           supabase.from("user_journeys").select("*", { count: "exact", head: true }).eq("status", "active"),
-          supabase.from("journey_step_log").select("*", { count: "exact", head: true }).eq("sent", true).gte("submitted_at", since24h),
-          supabase.from("journey_step_log").select("*", { count: "exact", head: true }).eq("reason", "exit_condition_met").gte("submitted_at", since24h),
+          supabase.from("journey_step_log").select("*", { count: "exact", head: true }).eq("sent", true).gte("created_at", since24h),
+          supabase.from("journey_step_log").select("*", { count: "exact", head: true }).eq("reason", "exit_condition_met").gte("created_at", since24h),
         ]);
 
         if (!mounted) return;
