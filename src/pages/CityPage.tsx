@@ -36,6 +36,7 @@ import CityArticleBody from "@/components/city/CityArticleBody";
 import StickyCTA from "@/components/seo/StickyCTA";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import CityHero, { CITY_HERO_IMAGES } from "@/components/city/CityHero";
+import CitySittersGrid from "@/components/city/CitySittersGrid";
 
 const CityPage = () => {
  const { slug } = useParams<{ slug: string }>();
@@ -328,6 +329,9 @@ const CityPage = () => {
  </section>
  )}
 
+        {/* Gardiens du coin */}
+        <CitySittersGrid city={cityData.name} citySlug={cityData.slug} />
+
  {/* Network */}
  <LocalNetworkGrid current={cityData} allCities={CITIES} />
 
@@ -524,6 +528,9 @@ const CityPage = () => {
            </article>
          </section>
        )}
+
+        {/* Gardiens du coin */}
+        <CitySittersGrid city={dbPage.city} citySlug={dbPage.slug} />
 
  {/* Cross-links */}
  {(cityGuide || departmentPage) && (
