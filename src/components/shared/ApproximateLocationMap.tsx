@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 interface Props {
   city?: string | null;
   postalCode?: string | null;
+  /** Code pays ISO (ex. "FR", "MA"). Détermine le géocodeur utilisé. */
+  country?: string | null;
   /** Coordonnées exactes si dispo (prioritaires sur le géocodage). */
   lat?: number | null;
   lng?: number | null;
@@ -23,8 +25,9 @@ type LatLng = { lat: number; lng: number };
 
 const cache = new Map<string, LatLng | null>();
 
-async function geocode(city: string, postalCode?: string | null): Promise<LatLng | null> {
-  const key = `${city}|${postalCode || ""}`.toLowerCase();
+async function geocode(city: string, postalCode?: string | null, country?: string | null): Promise<LatLng | null> {
+  const isFR = !country || country === "FR" || /france/i.test(country);
+  const key = `${city}|${postalCode || ""}|${country || "FR"}`.toLowerCase();
   if (cache.has(key)) return cache.get(key) ?? null;
 
   // 1) FR, geo.api.gouv.fr (rapide, sans rate-limit)
