@@ -8,6 +8,23 @@ const corsHeaders = {
 
 const LOVABLE_API_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
+function extractJson(raw: string): any | null {
+  if (!raw) return null;
+  let s = raw.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
+  const start = s.search(/[\{\[]/);
+  if (start === -1) return null;
+  const open = s[start];
+  const close = open === "[" ? "]" : "}";
+  const end = s.lastIndexOf(close);
+  if (end === -1 || end < start) return null;
+  s = s.slice(start, end + 1);
+  try { return JSON.parse(s); } catch {}
+  const repaired = s
+    .replace(/,\s*([}\]])/g, "$1")
+    .replace(/[\x00-\x1F\x7F]/g, " ");
+  try { return JSON.parse(repaired); } catch { return null; }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
