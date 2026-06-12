@@ -43,6 +43,8 @@ const PublicSitDetail = () => {
  const [owner, setOwner] = useState<any>(null);
  const [property, setProperty] = useState<any>(null);
  const [pets, setPets] = useState<any[]>([]);
+ const [ownerProfile, setOwnerProfile] = useState<any>(null);
+ const [hasHouseGuide, setHasHouseGuide] = useState(false);
  const [badges, setBadges] = useState<{ badge_key: string; count: number }[]>([]);
  const [avgRating, setAvgRating] = useState<string | null>(null);
  const [reviewCount, setReviewCount] = useState(0);
