@@ -1203,7 +1203,17 @@ const SearchSitter = () => {
  </SelectContent>
  </Select>
  </div>
- {tab === "sits" && user && (
+  {tab === "sits" && intlCount > 0 && (
+   <Link
+     to="/annonces/international"
+     className="hidden sm:inline-flex items-center gap-1.5 shrink-0 rounded-full border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-semibold px-3 py-1.5 mr-2 transition-colors"
+     aria-label={`Voir les ${intlCount} annonces hors France`}
+   >
+     <Globe2 className="h-3.5 w-3.5" />
+     Hors France ({intlCount})
+   </Link>
+  )}
+  {tab === "sits" && user && (
  <TooltipProvider>
  <Tooltip>
  <TooltipTrigger asChild>
