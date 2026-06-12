@@ -1207,16 +1207,18 @@ const SearchSitter = () => {
  </SelectContent>
  </Select>
  </div>
-  {tab === "sits" && intlCount > 0 && (
-   <Link
-     to="/annonces/international"
-     className="hidden sm:inline-flex items-center gap-1.5 shrink-0 rounded-full border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-semibold px-3 py-1.5 mr-2 transition-colors"
-     aria-label={`Voir les ${intlCount} annonces hors France`}
-   >
-     <Globe2 className="h-3.5 w-3.5" />
-     Hors France ({intlCount})
-   </Link>
-  )}
+   {tab === "sits" && intlCount > 0 && (
+    <Link
+      to="/annonces/international"
+      className="inline-flex items-center gap-1.5 shrink-0 rounded-full border border-primary/40 bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-semibold px-3 py-1.5 mr-2 shadow-sm transition-colors"
+      aria-label={`Voir les ${intlCount} annonces hors France`}
+    >
+      <Globe2 className="h-3.5 w-3.5" />
+      <span className="hidden sm:inline">Français à l'étranger</span>
+      <span className="sm:hidden">Étranger</span>
+      <span className="inline-flex items-center justify-center rounded-full bg-primary-foreground/20 px-1.5 py-0.5 text-[10px] font-bold">{intlCount}</span>
+    </Link>
+   )}
   {tab === "sits" && user && (
  <TooltipProvider>
  <Tooltip>
