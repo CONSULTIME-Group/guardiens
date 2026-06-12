@@ -73,11 +73,33 @@ interface ReviewLike {
   created_at: string;
 }
 
+interface OwnerProfileLike {
+  presence_expected?: string | null;
+  visits_allowed?: string | null;
+  overnight_guest?: string | null;
+  space_usage?: string[] | null;
+  smoker_accepted?: string | null;
+  rules_notes?: string | null;
+  meeting_preference?: string[] | null;
+  handover_preference?: string | null;
+  welcome_notes?: string | null;
+  news_frequency?: string | null;
+  news_format?: string[] | null;
+  communication_notes?: string | null;
+  competences?: string[] | null;
+  competences_disponible?: boolean | null;
+  specific_expectations?: string | null;
+  experience_required?: boolean | null;
+  environments?: string[] | null;
+}
+
 interface Props {
   sit: SitLike;
   owner: OwnerLike | null;
   property: PropertyLike | null;
   pets: PetLike[];
+  ownerProfile?: OwnerProfileLike | null;
+  hasHouseGuide?: boolean;
   avgRating: string | null;
   reviewCount: number;
   latestReviews: ReviewLike[];
@@ -100,6 +122,8 @@ const PublicSitView = ({
   owner,
   property,
   pets,
+  ownerProfile,
+  hasHouseGuide,
   avgRating,
   reviewCount,
   latestReviews,
@@ -427,6 +451,11 @@ const PublicSitView = ({
                 </section>
               )}
 
+              {/* Le cadre & la vie sur place (depuis owner_profiles) */}
+              {ownerProfile && (
+                <CadreSection ownerProfile={ownerProfile} ownerName={owner?.first_name || "l'hôte"} />
+              )}
+
               {/* Le gardien idéal */}
               {sit.open_to && sit.open_to.length > 0 && !sit.open_to.every((t) => ["any", "no_preference", "Sans préférence"].includes(t)) && (
                 <section className="bg-muted/60 p-8 md:p-10 rounded-[2rem] border border-border relative overflow-hidden">
@@ -564,6 +593,21 @@ const PublicSitView = ({
               </div>
             </div>
 
+            {/* Guide maison déjà préparé */}
+            {hasHouseGuide && (
+              <div className="bg-card rounded-[2rem] p-6 border border-border">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+                  Guide de la maison
+                </p>
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <p className="text-sm text-foreground/85 leading-relaxed">
+                    Préparé par {owner?.first_name || "l'hôte"} : wifi, contacts, vétérinaire, consignes. Partagé en intégralité après acceptation.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Réassurance compacte */}
             <div className="bg-card rounded-[2rem] p-6 border border-border space-y-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -628,3 +672,93 @@ const PublicSitView = ({
 };
 
 export default PublicSitView;
+
+// ─────────────────────────────────────────────
+// Section "Le cadre & la vie sur place"
+// ─────────────────────────────────────────────
+const CadreSection = ({
+  ownerProfile,
+  ownerName,
+}: {
+  ownerProfile: OwnerProfileLike;
+  ownerName: string;
+}) => {
+  const blocks: { title: string; value: string | string[] | null | undefined }[] = [
+    { title: "Présence prévue", value: ownerProfile.presence_expected },
+    { title: "Accueil & passation", value: ownerProfile.handover_preference },
+    { title: "Mot d'accueil", value: ownerProfile.welcome_notes },
+    { title: "Rencontre préalable", value: ownerProfile.meeting_preference },
+    { title: "Visites pendant la garde", value: ownerProfile.visits_allowed },
+    { title: "Invités à dormir", value: ownerProfile.overnight_guest },
+    { title: "Tabac", value: ownerProfile.smoker_accepted },
+    { title: "Règles de la maison", value: ownerProfile.rules_notes },
+    { title: "Espaces accessibles", value: ownerProfile.space_usage },
+    { title: "Attentes spécifiques", value: ownerProfile.specific_expectations },
+    { title: "Fréquence des nouvelles", value: ownerProfile.news_frequency },
+    { title: "Format des nouvelles", value: ownerProfile.news_format },
+    { title: "Précisions de communication", value: ownerProfile.communication_notes },
+  ];
+
+  const filled = blocks.filter((b) => {
+    if (Array.isArray(b.value)) return b.value.filter(Boolean).length > 0;
+    return typeof b.value === "string" && b.value.trim().length > 0;
+  });
+
+  const competences =
+    ownerProfile.competences_disponible && Array.isArray(ownerProfile.competences)
+      ? ownerProfile.competences.filter(Boolean)
+      : [];
+
+  if (filled.length === 0 && competences.length === 0) return null;
+
+  return (
+    <section>
+      <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">
+        Le cadre proposé par {ownerName}
+      </h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
+        {filled.map((b) => (
+          <div key={b.title}>
+            <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-muted-foreground mb-1.5">
+              {b.title}
+            </p>
+            {Array.isArray(b.value) ? (
+              <div className="flex flex-wrap gap-1.5">
+                {b.value.filter(Boolean).map((v) => (
+                  <span
+                    key={v}
+                    className="px-2.5 py-1 rounded-full bg-muted text-foreground border border-border text-xs"
+                  >
+                    {v}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-foreground/85 leading-relaxed whitespace-pre-line">
+                {b.value}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {competences.length > 0 && (
+        <div className="mt-8 pt-6 border-t border-border">
+          <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-muted-foreground mb-3">
+            Petits coups de main proposés sur place
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {competences.map((c) => (
+              <span
+                key={c}
+                className="px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-sm font-medium"
+              >
+                {c}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+};
