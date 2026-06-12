@@ -586,14 +586,13 @@ const SearchSitter = () => {
   // On inclut les statuts passés (expired / completed / cancelled) pour la
   // transparence et le SEO visiteur : ils sont affichés grisés avec le label
   // « Annonce passée » et ne sont pas actionnables.
-  // On exclut les annonces hors France (sits.country renseigné ET différent de FR).
-  // Les distances et la carte de la grille principale sont calibrées pour la France ;
-  // les annonces internationales ont leur propre page dédiée /annonces/international.
-  let query = supabase
+   // On inclut les annonces internationales : elles apparaissent comme bonus
+   // sur la carte et dans la grille, même quand un filtre géographique français
+   // est actif (rayon / dept / région). Elles bypassent le filtre dans filterByLocation.
+   let query = supabase
 .from("sits")
 .select("*, property:properties!sits_property_id_fkey(type, environment, photos, cover_photo_url)")
 .in("status", ["published", "confirmed", "in_progress", "completed", "cancelled"])
-.or("country.is.null,country.eq.FR")
 .order("created_at", { ascending: false });
   if (startDate) query = query.gte("end_date", startDate);
   if (endDate) query = query.lte("start_date", endDate);
