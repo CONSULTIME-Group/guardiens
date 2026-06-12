@@ -371,10 +371,11 @@ const SitterDashboard = () => {
   return (
     <div className="space-y-0 overflow-hidden pb-24 md:pb-8">
 {/* pb-24 mobile = BottomNav (h-16) + sticky CTA (~32px). h-20 spacer supprimé (doublon). */}
-      {/* Role activation */}
-      <div className="px-4 sm:px-5 md:px-8 mb-4">
+      {/* Role activation, masqué sur mobile en mode Focus */}
+      <div className={`px-4 sm:px-5 md:px-8 mb-4 ${!showAllMobile ? "hidden md:block" : ""}`}>
         <RoleActivationBanner userRole={user?.role || "sitter"} />
       </div>
+
 
       {/* ═══ COCKPIT ═══ (greeting + action prioritaire + signal vivant) */}
       <SitterCockpit
