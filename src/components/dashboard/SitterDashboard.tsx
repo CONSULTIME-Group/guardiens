@@ -416,7 +416,7 @@ const SitterDashboard = () => {
 
       {/* FreePeriodBanner, 1 ligne sous le cockpit, pas un bloc en hero */}
       {!nextGuard && (
-        <div className="px-4 sm:px-5 md:px-8 mt-3">
+        <div className={`px-4 sm:px-5 md:px-8 mt-3 ${!showAllMobile ? "hidden md:block" : ""}`}>
           <FreePeriodBanner />
         </div>
       )}
@@ -425,7 +425,7 @@ const SitterDashboard = () => {
         const isEmpty = !nextGuard && !nextGuardError && nearbyListings.length === 0 && !nearbyError;
         return (
           <>
-            <div className="px-4 sm:px-5 md:px-8 mt-4">
+            <div className={`px-4 sm:px-5 md:px-8 mt-4 ${!showAllMobile ? "hidden md:block" : ""}`}>
               <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
             </div>
 
@@ -437,11 +437,29 @@ const SitterDashboard = () => {
                   est déjà géré par la PriorityActionCard du cockpit). */}
               {ChecklistBlock}
 
-              <div className="px-4 sm:px-5 md:px-8 mb-6">
+              {/* Toggle mobile « Voir tout mon espace » : insère ici, juste après
+                  la checklist d'activation, pour replier les sections découverte
+                  et le bloc badges/réputation/urgence par défaut. */}
+              {!showAllMobile && (
+                <div className="px-4 sm:px-5 md:hidden mb-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowAllMobile(true)}
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-sm font-semibold text-foreground hover:bg-muted/40 transition-colors"
+                    aria-expanded={false}
+                    aria-controls="sitter-dash-extra"
+                  >
+                    Voir tout mon espace
+                    <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </div>
+              )}
+
+              <div id="sitter-dash-extra" className={`px-4 sm:px-5 md:px-8 mb-6 ${!showAllMobile ? "hidden md:block" : ""}`}>
                 {DiscoverySections}
               </div>
 
-              <div className="px-4 sm:px-5 md:px-8 mb-6 space-y-3">
+              <div className={`px-4 sm:px-5 md:px-8 mb-6 space-y-3 ${!showAllMobile ? "hidden md:block" : ""}`}>
                 {SecondaryAccordion}
                 {buildEmergencyBlock(false)}
               </div>
@@ -449,6 +467,7 @@ const SitterDashboard = () => {
           </>
         );
       })()}
+
 
       {/* Version 2 colonnes, visible ≥ xl */}
       <div className="hidden xl:grid xl:grid-cols-12 xl:gap-6 xl:px-8 min-w-0 mt-4">
