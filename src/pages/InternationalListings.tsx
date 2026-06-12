@@ -136,13 +136,16 @@ export default function InternationalListings() {
           </p>
         </section>
 
-        <section className="max-w-6xl mx-auto px-4 md:px-6 pb-16">
+        <section className="max-w-6xl mx-auto px-4 md:px-6 pb-16 space-y-6">
           {sits === null ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {[0, 1, 2].map((i) => (
-                <Skeleton key={i} className="h-64 rounded-2xl" />
-              ))}
-            </div>
+            <>
+              <Skeleton className="h-[320px] md:h-[420px] rounded-2xl" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {[0, 1, 2].map((i) => (
+                  <Skeleton key={i} className="h-64 rounded-2xl" />
+                ))}
+              </div>
+            </>
           ) : sits.length === 0 ? (
             <div className="border border-dashed border-border rounded-2xl p-10 text-center">
               <Globe2 className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
@@ -160,48 +163,51 @@ export default function InternationalListings() {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {sits.map((s) => {
-                const cover = s.cover_photo_url || s.property?.photos?.[0] || null;
-                return (
-                  <Link
-                    key={s.id}
-                    to={`/annonces/${s.id}`}
-                    className="group block rounded-2xl overflow-hidden border border-border bg-card hover:shadow-lg transition-shadow"
-                  >
-                    <div className="aspect-[4/3] bg-muted overflow-hidden">
-                      {cover ? (
-                        <img
-                          src={cover}
-                          alt={s.title || t("intl_listings.cover_alt")}
-                          loading="lazy"
-                          className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                          <Globe2 className="h-10 w-10 opacity-40" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <p className="text-xs text-muted-foreground flex items-center gap-1.5 mb-1.5">
-                        <MapPin className="h-3 w-3" />
-                        {s.city || ","}
-                        {s.country && s.country !== "FR" && (
-                          <span className="font-medium text-foreground/80">({s.country})</span>
+            <>
+              <InternationalMap sits={sits} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {sits.map((s) => {
+                  const cover = s.cover_photo_url || s.property?.photos?.[0] || null;
+                  return (
+                    <Link
+                      key={s.id}
+                      to={`/annonces/${s.id}`}
+                      className="group block rounded-2xl overflow-hidden border border-border bg-card hover:shadow-lg transition-shadow"
+                    >
+                      <div className="aspect-[4/3] bg-muted overflow-hidden">
+                        {cover ? (
+                          <img
+                            src={cover}
+                            alt={s.title || t("intl_listings.cover_alt")}
+                            loading="lazy"
+                            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                            <Globe2 className="h-10 w-10 opacity-40" />
+                          </div>
                         )}
-                      </p>
-                      <h3 className="font-heading text-base font-medium text-foreground line-clamp-2 mb-2">
-                        {s.title || t("intl_listings.default_title")}
-                      </h3>
-                      <p className="text-xs text-muted-foreground">
-                        {formatPeriod(s.start_date, s.end_date)}
-                      </p>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+                      </div>
+                      <div className="p-4">
+                        <p className="text-xs text-muted-foreground flex items-center gap-1.5 mb-1.5">
+                          <MapPin className="h-3 w-3" />
+                          {s.city || ","}
+                          {s.country && s.country !== "FR" && (
+                            <span className="font-medium text-foreground/80">({s.country})</span>
+                          )}
+                        </p>
+                        <h3 className="font-heading text-base font-medium text-foreground line-clamp-2 mb-2">
+                          {s.title || t("intl_listings.default_title")}
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                          {formatPeriod(s.start_date, s.end_date)}
+                        </p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </>
           )}
         </section>
       </main>
