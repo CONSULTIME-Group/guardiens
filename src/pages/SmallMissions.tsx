@@ -689,14 +689,14 @@ const SmallMissions = () => {
                     )}
                   </div>
                 )}
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">{tp("and_also")}</p>
+                <p className="hidden md:block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">{tp("and_also")}</p>
                 <h3 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
                   {mode === "need" ? tp("members_for_need") : tp("members_other")}
                   <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
                     {tp(helperCount > 1 ? "people_local_other" : "people_local_one", { count: helperCount })}
                   </span>
                 </h3>
-                <div className="space-y-8">
+                <div className="space-y-6 md:space-y-8">
                   {helpersLoading ? (
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {Array.from({ length: 6 }).map((_, i) => (
@@ -718,7 +718,7 @@ const SmallMissions = () => {
                     <>
                       {visiblePriorityHelpers.length > 0 && (
                         <div className="space-y-3">
-                          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
                             {visiblePriorityHelpers.map(renderHelperCard)}
                           </div>
                         </div>
@@ -726,7 +726,7 @@ const SmallMissions = () => {
 
                       {visibleComplementaryHelpers.length > 0 && (
                         <div className="space-y-3">
-                          <div className="flex items-center gap-3">
+                          <div className="hidden md:flex items-center gap-3">
                             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                               {tp("complementary")}
                             </h3>
@@ -735,7 +735,7 @@ const SmallMissions = () => {
                             </span>
                             <div className="flex-1 h-px bg-border" />
                           </div>
-                          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
                             {visibleComplementaryHelpers.map(renderHelperCard)}
                           </div>
                         </div>
