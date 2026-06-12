@@ -114,6 +114,7 @@ const PublicSitView = ({
   hasApplied = false,
   onApply,
 }: Props) => {
+  const [openPet, setOpenPet] = useState<PetLike | null>(null);
   const photos: string[] = (property?.photos || []).filter(Boolean);
   const petPhotos = pets
     .filter((p) => !!p.photo_url)
