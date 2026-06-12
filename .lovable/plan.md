@@ -1,81 +1,61 @@
-## Objectif
+# Plan acquisition « pub automatique » (zéro budget média)
 
-Site disponible en **FR** (défaut), **EN**, **ES**, **IT**, **DE**, avec SEO multilingue complet (URLs `/en/`, `/es/`, `/it/`, `/de/`, `hreflang`, sitemaps par langue).
+Objectif : maximiser l'acquisition gratuite et automatisée. 4 chantiers séquencés, livrables concrets, mesurables.
 
-Traductions générées par **Lovable AI** (Gemini 3 Flash) au build, relues a posteriori. Aucun coût récurrent pour le visiteur.
+## Chantier 1 — SEO programmatique massif (priorité #1)
 
-## Phase 1 — Infrastructure i18n (1 livraison, base solide)
+Étendre les silos existants pour multiplier les portes d'entrée Google.
 
-**Code**
-- Installer `react-i18next` + `i18next` + `i18next-browser-languagedetector`.
-- Routeur : préfixe optionnel `/:lang(en|es|it|de)?/...`. FR reste sans préfixe (canonique). Les URLs existantes ne bougent pas.
-- Sélecteur de langue dans `PublicHeader` + `AppLayout` (mobile inclus), drapeau + nom de langue, persistant en cookie `lang`.
-- Détection auto à la 1re visite (header `Accept-Language`), redirige uniquement les visiteurs anonymes vers `/en/`, `/es/`, etc.
-- `<html lang>` dynamique + `hreflang` alternates dans `PageMeta` pour chaque page.
-- Mise à jour du `sitemap.xml` : 1 sitemap-index, 1 sitemap par langue.
+1. **Pages villes** : passer de ~3 hubs à **150 villes France** (top 150 démographique). Génération via `generate-city-page` déjà en place, batch admin déclenchable. Slug, H1, intro, meta, JSON-LD LocalBusiness.
+2. **Pages départements** : 96 départements (table `seo_department_pages` existe). Auto-générées avec liens vers villes du département.
+3. **Pages races** : enrichir `breed_profiles` (déjà 14 colonnes). Cible 40 races chien + 20 races chat avec contenu long (1500 mots) + JSON-LD Article.
+4. **Articles longue traîne** : 20 articles « comment trouver un gardien à [ville] », « partir en vacances avec [race] », générés via `generate-article`.
 
-**Tests bloquants**
-- Test Vitest : toute clé i18n utilisée dans un composant doit exister dans `fr.json` (sinon build cassé).
-- Test : présence des `hreflang` sur les pages clés.
+Maillage interne : chaque page ville link vers département + 3 villes voisines + 3 races populaires. Chaque article link vers ville + race citée.
 
-**Livrable** : switch FR/EN visible, EN encore vide (clés FR par défaut). Aucun contenu cassé.
+## Chantier 2 — Soumission automatique Google (IndexNow + GSC)
 
-## Phase 2 — Traduction UI (libellés, boutons, menus)
+1. **IndexNow** : table `indexnow_submissions` déjà présente. Edge function `auto-submit-indexnow` déclenchée à chaque INSERT/UPDATE sur `sits`, `seo_city_pages`, `articles`, `small_missions`. Soumission Bing+Yandex instantanée.
+2. **Google Search Console** : connecteur GSC déjà disponible. Edge function quotidienne `gsc-submit-sitemap` qui ping le sitemap + remonte les KPIs (impressions/clics) dans une table `gsc_metrics` pour dashboard admin.
+3. **Sitemap dynamique** : ajouter les nouvelles villes/départements/races automatiquement dans `scripts/generate-sitemap.mjs`.
 
-- Extraction de tous les libellés en dur dans les composants vers `src/locales/fr/common.json` (~500-800 clés estimées).
-- Génération automatique de `en.json`, `es.json`, `it.json`, `de.json` via Lovable AI (script Node + prompt strict vouvoiement EN/ES/IT/DE équivalent, glossaire de termes : « gardien », « coup de main », « propriétaire »…).
-- Refactor progressif des composants : remplacement des chaînes par `t("key")`. Priorité : header, footer, sidebar, formulaires, toasts, navigation.
+## Chantier 3 — Partage social optimisé (chaque lien = pub)
 
-**Livrable** : navigation et chrome 100 % traduits dans les 5 langues.
+1. **OG images dynamiques par page** : edge function `og-image` qui génère une image PNG (titre + ville + photo animal) à la volée pour chaque sit, profil gardien, page ville, article. Cache 30 jours.
+2. **Bouton « Partager » 1-clic** sur fiches sit + profils gardien : WhatsApp, SMS, Messenger, Email avec texte pré-rempli + lien parrainage si user connecté.
+3. **JSON-LD enrichi** : Review aggregateRating sur profils gardiens (déjà partiel), Product sur sits, FAQPage sur articles (boost rich snippets Google).
 
-## Phase 3 — Pages marketing (Landing, Tarifs, FAQ, Pros, Guides)
+## Chantier 4 — Réactivation cycle de vie (emails déjà branchés)
 
-- Découpage des pages marketing en blocs de copy versionnés par langue.
-- Traduction Lovable AI + relecture humaine recommandée pour Landing + Tarifs (impact conversion).
-- SEO par langue : `title`, `description`, `og:*`, JSON-LD localisés.
-- Pages spécifiques par langue dans `siteRoutes.ts` pour le sitemap.
+1. **Relance propriétaires sans annonce** : J+3 après inscription si 0 sit publié, J+10 si toujours 0.
+2. **Relance gardiens sans candidature** : J+7 après inscription si 0 application, suggestions 3 sits proches.
+3. **Réveil inactifs 30j** : digest hebdo « 5 nouvelles annonces près de chez vous ».
+4. **Boost parrainage** : email mensuel aux users actifs « partagez et gagnez 1 mois offert » + bouton WhatsApp.
 
-**Livrable** : `/`, `/tarifs`, `/faq`, `/pros` accessibles en 5 langues, indexables.
+## Séquencement recommandé
 
-## Phase 4 — Articles & guides SEO (le gros morceau)
+```text
+Semaine 1  →  Chantier 1 (SEO programmatique villes + départements)
+Semaine 2  →  Chantier 2 (IndexNow + GSC auto)
+Semaine 3  →  Chantier 1 (races + articles longue traîne)
+Semaine 4  →  Chantier 3 (OG dynamique + partage 1-clic)
+Semaine 5  →  Chantier 4 (emails cycle de vie)
+```
 
-**Architecture DB**
-- Table `article_translations` (`article_id`, `lang`, `title`, `slug`, `excerpt`, `body`, `meta_title`, `meta_description`, `status`).
-- Migration : copier les 100+ articles existants en `lang = 'fr'`.
-- RLS + grants standards.
+## Détails techniques
 
-**Génération**
-- Script batch `scripts/translate-articles.mjs` : pour chaque article × langue, appel Lovable AI Gemini 3 Flash avec prompt SEO strict (préserve structure markdown, traduit titres H2/H3, génère slugs propres, garde les liens internes français vers leurs équivalents traduits).
-- Coût estimé : ~400 articles × ~2 000 tokens out ≈ raisonnable mais non négligeable.
-- Statut par défaut `pending_review` : aucune publication automatique, vous validez par lot dans `AdminArticles`.
+- **Stack** : edge functions Deno + Lovable AI Gateway (`google/gemini-2.5-flash`) pour génération contenu. Coût IA : ~0,001 €/page.
+- **Throttling** : génération par batch de 10, queue dans `email_deferred_queue` étendue ou nouvelle table `seo_generation_queue`.
+- **Vocabulaire** : respect strict mémoires projet (pas de « voisin », pas d'« AURA », pas de tiret cadratin, vouvoiement). Guardrails déjà dans `_shared/ai-gateway.ts`.
+- **Tests** : `jsonld-validation.test.ts` + `no-em-dash-guard.test.ts` existants protègent contre les régressions.
+- **Mesure** : dashboard admin `/admin/seo` avec impressions GSC, pages indexées, taux clic, top requêtes.
 
-**Routes**
-- `/en/journal/:slug`, `/es/journal/:slug`, etc.
-- Redirections 301 entre langues équivalentes (via `hreflang`).
-- Mise à jour de `sitemap.xml` (1 entrée par article × langue publiée).
+## Hors scope (volontairement)
 
-**Admin**
-- Onglet « Traductions » dans `AdminArticles` : voir l'état par langue, relancer une traduction, publier/dépublier par langue.
+- Pas de Google/Meta/TikTok Ads (engage votre CB, hors mandat).
+- Pas de posting auto réseaux sociaux (pas de connecteur actif, risque ban).
+- Pas d'envoi cold email à listes externes (RGPD).
 
-**Livrable** : articles indexables Google EN/ES/IT/DE, traductions modifiables côté admin.
+## Décision attendue
 
-## Hors périmètre (à valider plus tard)
-
-- **Contenus utilisateurs** (annonces, profils, messages) : restent en langue d'origine. Option « traduire » à la demande possible en Phase 5.
-- **Emails transactionnels** multilingues : Phase 5 séparée (~50 templates).
-- **Validation de vocabulaire** (no-aura, no-em-dash, no-voisin) : adapter les tests Vitest pour ignorer les locales non-FR.
-
-## Estimation & risques
-
-| Phase | Effort | Risque |
-|---|---|---|
-| 1 — Infra | Moyen | Faible si pas de refacto routes |
-| 2 — UI | Lourd | Régressions visuelles si clés mal extraites |
-| 3 — Marketing | Moyen | Qualité conversion EN/ES à surveiller |
-| 4 — Articles | Très lourd | Coût IA + qualité SEO à auditer après publication |
-
-**Recommandation forte** : ne pas tout faire d'un coup. Valider Phase 1 en preview, vous testez le switch, puis on enchaîne.
-
-## Démarrage
-
-Si vous validez ce plan, je commence **uniquement par la Phase 1** (infra + switch UI vide en EN), pour que vous puissiez tester avant d'engager le reste.
+Je commence par **Chantier 1 étape 1 (150 villes France)** ? Ou vous voulez ajuster le périmètre / l'ordre avant ?

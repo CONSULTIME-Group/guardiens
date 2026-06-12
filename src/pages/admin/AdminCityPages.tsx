@@ -16,12 +16,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, ExternalLink, Loader2, Trash2 } from "lucide-react";
+import { Plus, ExternalLink, Loader2, Trash2, Zap } from "lucide-react";
+import { TOP_CITIES_FRANCE } from "@/data/topCitiesFrance";
 
 const AdminCityPages = () => {
   const [city, setCity] = useState("");
   const [department, setDepartment] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [batchRunning, setBatchRunning] = useState(false);
+  const [batchProgress, setBatchProgress] = useState<{ done: number; total: number; ok: number; skipped: number; failed: number } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; city: string } | null>(null);
 
   const { data: pages, refetch } = useQuery({
@@ -56,6 +59,36 @@ const AdminCityPages = () => {
     } finally {
       setGenerating(false);
     }
+  };
+
+  const handleBatchTop150 = async () => {
+    if (batchRunning) return;
+    const existingSlugs = new Set((pages ?? []).map((p: any) => (p.city as string).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")));
+    const todo = TOP_CITIES_FRANCE.filter((c) => !existingSlugs.has(c.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")));
+    if (todo.length === 0) {
+      toast.success("Les 150 villes sont déjà générées.");
+      return;
+    }
+    setBatchRunning(true);
+    setBatchProgress({ done: 0, total: todo.length, ok: 0, skipped: 0, failed: 0 });
+    let ok = 0, skipped = 0, failed = 0;
+    for (let i = 0; i < todo.length; i++) {
+      const c = todo[i];
+      try {
+        const { error } = await supabase.functions.invoke("generate-city-page", {
+          body: { city: c.name, department: c.department },
+        });
+        if (error) { failed++; } else { ok++; }
+      } catch {
+        failed++;
+      }
+      setBatchProgress({ done: i + 1, total: todo.length, ok, skipped, failed });
+      // throttle pour respecter rate-limit IA (gateway 429)
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+    setBatchRunning(false);
+    toast.success(`Batch terminé : ${ok} créées, ${failed} échecs`);
+    refetch();
   };
 
   const confirmDelete = async () => {
@@ -97,7 +130,7 @@ const AdminCityPages = () => {
         <CardHeader>
           <CardTitle className="text-lg">Générer une nouvelle page ville</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-3">
             <Input
               placeholder="Nom de la ville (ex: Lyon, Annecy...)"
@@ -111,10 +144,30 @@ const AdminCityPages = () => {
               onChange={(e) => setDepartment(e.target.value)}
               className="sm:w-56"
             />
-            <Button onClick={handleGenerate} disabled={generating} className="gap-2">
+            <Button onClick={handleGenerate} disabled={generating || batchRunning} className="gap-2">
               {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               Générer
             </Button>
+          </div>
+
+          <div className="rounded-md border border-dashed p-4 space-y-2">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <p className="font-medium text-sm">Batch SEO programmatique</p>
+                <p className="text-xs text-muted-foreground">
+                  Génère les pages des 150 plus grandes villes de France. Les villes déjà créées sont ignorées. ~4 min pour 150 villes.
+                </p>
+              </div>
+              <Button onClick={handleBatchTop150} disabled={batchRunning || generating} variant="secondary" className="gap-2">
+                {batchRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+                Générer le top 150
+              </Button>
+            </div>
+            {batchProgress && (
+              <div className="text-xs text-muted-foreground">
+                Progression : {batchProgress.done} / {batchProgress.total} · {batchProgress.ok} OK · {batchProgress.failed} échecs
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
