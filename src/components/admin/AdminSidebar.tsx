@@ -91,6 +91,7 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/guides", icon: Compass, label: "Guides locaux", badgeKey: "guideRequests" },
       { to: "/admin/city-pages", icon: MapPin, label: "Pages villes" },
       { to: "/admin/departments", icon: MapPin, label: "Départements" },
+      { to: "/admin/breeds", icon: MapPin, label: "Fiches de race" },
       { to: "/admin/legal", icon: ScrollText, label: "Pages légales" },
       { to: "/admin/emails", icon: Mail, label: "Emails transactionnels" },
       { to: "/admin/nurturing", icon: Sprout, label: "Nurturing" },
