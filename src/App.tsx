@@ -332,6 +332,7 @@ const AppRoutes = () => (
         <Route path="/admin/breeds" element={<AdminBreeds />} />
         <Route path="/admin/articles-longue-traine" element={<AdminLongTailArticles />} />
         <Route path="/parrainage" element={<Parrainage />} />
+        <Route path="/devenir-home-sitter" element={<DevenirHomeSitter />} />
         <Route path="/admin/faq" element={<AdminFAQ />} />
         <Route path="/admin/small-missions" element={<AdminSmallMissions />} />
         <Route path="/admin/legal" element={<AdminLegal />} />
