@@ -24,9 +24,11 @@ import SectionEyebrow from "./shared/SectionEyebrow";
 import DashSection from "./owner/DashSection";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { CheckCircle, Circle, ChevronRight, Newspaper, AlertCircle } from "lucide-react";
+import { CheckCircle, Circle, ChevronRight, Newspaper, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+
+
 
 const SitterDashboard = () => {
   const { user } = useAuth();
@@ -34,6 +36,9 @@ const SitterDashboard = () => {
   const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
   const [searchParams, setSearchParams] = useSearchParams();
   const { hasAccess: hasSubscription } = useSubscriptionAccess();
+  const [showAllMobile, setShowAllMobile] = useState(false);
+
+
 
   const {
     loading, profileCompletion, identityVerified, identityStatus,
@@ -366,10 +371,11 @@ const SitterDashboard = () => {
   return (
     <div className="space-y-0 overflow-hidden pb-24 md:pb-8">
 {/* pb-24 mobile = BottomNav (h-16) + sticky CTA (~32px). h-20 spacer supprimé (doublon). */}
-      {/* Role activation */}
-      <div className="px-4 sm:px-5 md:px-8 mb-4">
+      {/* Role activation, masqué sur mobile en mode Focus */}
+      <div className={`px-4 sm:px-5 md:px-8 mb-4 ${!showAllMobile ? "hidden md:block" : ""}`}>
         <RoleActivationBanner userRole={user?.role || "sitter"} />
       </div>
+
 
       {/* ═══ COCKPIT ═══ (greeting + action prioritaire + signal vivant) */}
       <SitterCockpit
@@ -410,7 +416,7 @@ const SitterDashboard = () => {
 
       {/* FreePeriodBanner, 1 ligne sous le cockpit, pas un bloc en hero */}
       {!nextGuard && (
-        <div className="px-4 sm:px-5 md:px-8 mt-3">
+        <div className={`px-4 sm:px-5 md:px-8 mt-3 ${!showAllMobile ? "hidden md:block" : ""}`}>
           <FreePeriodBanner />
         </div>
       )}
@@ -419,7 +425,7 @@ const SitterDashboard = () => {
         const isEmpty = !nextGuard && !nextGuardError && nearbyListings.length === 0 && !nearbyError;
         return (
           <>
-            <div className="px-4 sm:px-5 md:px-8 mt-4">
+            <div className={`px-4 sm:px-5 md:px-8 mt-4 ${!showAllMobile ? "hidden md:block" : ""}`}>
               <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
             </div>
 
@@ -431,11 +437,29 @@ const SitterDashboard = () => {
                   est déjà géré par la PriorityActionCard du cockpit). */}
               {ChecklistBlock}
 
-              <div className="px-4 sm:px-5 md:px-8 mb-6">
+              {/* Toggle mobile « Voir tout mon espace » : insère ici, juste après
+                  la checklist d'activation, pour replier les sections découverte
+                  et le bloc badges/réputation/urgence par défaut. */}
+              {!showAllMobile && (
+                <div className="px-4 sm:px-5 md:hidden mb-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowAllMobile(true)}
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-sm font-semibold text-foreground hover:bg-muted/40 transition-colors"
+                    aria-expanded={false}
+                    aria-controls="sitter-dash-extra"
+                  >
+                    Voir tout mon espace
+                    <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </div>
+              )}
+
+              <div id="sitter-dash-extra" className={`px-4 sm:px-5 md:px-8 mb-6 ${!showAllMobile ? "hidden md:block" : ""}`}>
                 {DiscoverySections}
               </div>
 
-              <div className="px-4 sm:px-5 md:px-8 mb-6 space-y-3">
+              <div className={`px-4 sm:px-5 md:px-8 mb-6 space-y-3 ${!showAllMobile ? "hidden md:block" : ""}`}>
                 {SecondaryAccordion}
                 {buildEmergencyBlock(false)}
               </div>
@@ -443,6 +467,7 @@ const SitterDashboard = () => {
           </>
         );
       })()}
+
 
       {/* Version 2 colonnes, visible ≥ xl */}
       <div className="hidden xl:grid xl:grid-cols-12 xl:gap-6 xl:px-8 min-w-0 mt-4">
@@ -475,14 +500,34 @@ const SitterDashboard = () => {
         {buildEmergencyBlock(false)}
       </div>
 
-      {/* Lien discret "Revoir la présentation", relégué en pied */}
-      <div className="px-4 sm:px-5 md:px-8 mt-2 mb-4 text-center">
+      {/* Toggle « Réduire » mobile : visible uniquement quand l'espace est déployé */}
+      {showAllMobile && (
+        <div className="px-4 sm:px-5 md:hidden mb-4">
+          <button
+            type="button"
+            onClick={() => {
+              setShowAllMobile(false);
+              if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-sm font-semibold text-muted-foreground hover:bg-muted/40 transition-colors"
+            aria-expanded={true}
+            aria-controls="sitter-dash-extra"
+          >
+            Réduire l'espace
+            <ChevronUp className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+      )}
+
+      {/* Lien discret "Revoir la présentation", relégué en pied (masqué mobile en focus) */}
+      <div className={`px-4 sm:px-5 md:px-8 mt-2 mb-4 text-center ${!showAllMobile ? "hidden md:block" : ""}`}>
         <button onClick={() => setSearchParams({ tour: "true" })} className="text-xs text-muted-foreground underline-offset-4 hover:underline">
           Revoir la présentation
         </button>
       </div>
 
       {/* CTA sticky mobile */}
+
       <SitterMobileStickyCTA pendingAppsCount={pendingAppsCount} unreadCount={unreadCount} />
     </div>
   );

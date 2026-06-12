@@ -12,9 +12,11 @@ import NearbyOwnerSittersCard from "./owner/NearbyOwnerSittersCard";
 import NearbyEmergencySitters from "./NearbyEmergencySitters";
 import NearbyHelpersCarousel from "./shared/NearbyHelpersCarousel";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
-import { Plus, Eye } from "lucide-react";
+import { Plus, Eye, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { differenceInDays } from "date-fns";
+
+
 
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
@@ -61,6 +63,9 @@ const OwnerDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
+  const [showAllMobile, setShowAllMobile] = useState(false);
+
+
   
 
   /* ── Data fetching (extracted hook) ── */
@@ -339,7 +344,7 @@ const OwnerDashboard = () => {
           cible, on suggère les prochaines étapes utiles. La carte
           d'activation s'auto-retire quand 6/6 est atteint. */}
       {(nextActions.length > 1 || !activationScore.allDone) && (
-        <div className="px-5 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className={`px-5 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-4 ${!showAllMobile ? "hidden md:grid" : ""}`}>
           <NextActionsList actions={nextActions} excludeId={priorityAction.variant} />
           <ActivationScoreCard score={activationScore} />
         </div>
@@ -349,18 +354,20 @@ const OwnerDashboard = () => {
 
 
 
+
       {/* Bannière dual-role : déplacée APRÈS le hero (l'utilisateur lit
           d'abord son nom, ensuite l'incitation à activer l'espace gardien). */}
-      <div className="px-5 md:px-8">
+      <div className={`px-5 md:px-8 ${!showAllMobile ? "hidden md:block" : ""}`}>
         <RoleActivationBanner userRole={user?.role || "owner"} />
       </div>
 
       {/* Règle de priorité : on n'affiche LiveSignalStrip que si AccessGateBanner
           n'occupe pas déjà l'espace (max 2 bandeaux contextuels actifs). */}
-      <div className="px-5 md:px-8 space-y-3">
+      <div className={`px-5 md:px-8 space-y-3 ${!showAllMobile ? "hidden md:block" : ""}`}>
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
         {(level === 4 || level === "3B") && <LiveSignalStrip secondarySignal={localSignal} />}
       </div>
+
 
       {/* ═══ Bloc unifié "À faire maintenant" ═══ */}
       {todoItems.length > 0 && (
@@ -380,8 +387,28 @@ const OwnerDashboard = () => {
         </div>
       )}
 
+      {/* ═══ Toggle mobile : « Voir tout mon espace » ═══
+          Réduit le bruit mobile en masquant par défaut les blocs secondaires
+          (annonce détaillée, animaux, candidatures, parrainage, badges, etc.).
+          Desktop : non rendu (classes hidden md:* déjà appliquées en amont). */}
+      {!showAllMobile && (
+        <div className="px-5 md:hidden">
+          <button
+            type="button"
+            onClick={() => setShowAllMobile(true)}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-sm font-semibold text-foreground hover:bg-muted/40 transition-colors"
+            aria-expanded={false}
+            aria-controls="owner-dash-extra"
+          >
+            Voir tout mon espace
+            <ChevronDown className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+      )}
+
       {/* ═══ PILOTAGE (gauche) + CONTEXTE (droite) ═══ */}
-      <div className="px-5 md:px-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div id="owner-dash-extra" className={`px-5 md:px-8 grid grid-cols-1 lg:grid-cols-3 gap-6 ${!showAllMobile ? "hidden md:grid" : ""}`}>
+
         {/* Colonne pilotage : annonce, animaux, avis, candidatures */}
         <div className="lg:col-span-2 space-y-6">
           <MonAnnonceCard
@@ -548,9 +575,10 @@ const OwnerDashboard = () => {
       {/* ═══ Preuve sociale, Highlights remontés et déployés par défaut ═══ */}
       {highlights.length > 0 && (
         <section
-          className="px-5 md:px-8 pt-2 border-t border-border/40"
+          className={`px-5 md:px-8 pt-2 border-t border-border/40 ${!showAllMobile ? "hidden md:block" : ""}`}
           aria-label="Ce que les gardiens disent de votre maison"
         >
+
           <div className="mb-3">
             <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
               Preuve sociale
@@ -581,7 +609,8 @@ const OwnerDashboard = () => {
       )}
 
       {/* ═══ Footer dashboard, badges inline + ressources ═══ */}
-      <div className="px-5 md:px-8 pt-2 border-t border-border/40 space-y-3">
+      <div className={`px-5 md:px-8 pt-2 border-t border-border/40 space-y-3 ${!showAllMobile ? "hidden md:block" : ""}`}>
+
         {user?.id && userBadges && userBadges.length > 0 && (
           <div className="rounded-2xl bg-card border border-border px-4 py-3">
             <div className="flex items-center justify-between gap-3 mb-3">
@@ -625,7 +654,27 @@ const OwnerDashboard = () => {
         </details>
       </div>
 
+      {/* Toggle « Réduire » mobile : visible uniquement quand l'espace est déployé */}
+      {showAllMobile && (
+        <div className="px-5 md:hidden">
+          <button
+            type="button"
+            onClick={() => {
+              setShowAllMobile(false);
+              if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-sm font-semibold text-muted-foreground hover:bg-muted/40 transition-colors"
+            aria-expanded={true}
+            aria-controls="owner-dash-extra"
+          >
+            Réduire l'espace
+            <ChevronUp className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+      )}
+
       {/* ═══ CTA sticky mobile ═══ */}
+
       {/* Empty state mobile : le hero CTA est hidden md:inline-flex → on relaie ici. */}
       {pendingAppCount > 0 ? (
         <MobileStickyCTA
