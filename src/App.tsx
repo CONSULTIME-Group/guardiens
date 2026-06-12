@@ -118,6 +118,7 @@ const GuideDetail = lazy(() => import("./pages/GuideDetail"));
 const AdminGuides = lazy(() => import("./pages/admin/AdminGuides"));
 const AdminDepartments = lazy(() => import("./pages/admin/AdminDepartments"));
 const AdminBreeds = lazy(() => import("./pages/admin/AdminBreeds"));
+const AdminLongTailArticles = lazy(() => import("./pages/admin/AdminLongTailArticles"));
 const DepartmentPage = lazy(() => import("./pages/DepartmentPage"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const SmallMissions = lazy(() => import("./pages/SmallMissions"));
@@ -326,6 +327,7 @@ const AppRoutes = () => (
         <Route path="/admin/guides" element={<AdminGuides />} />
         <Route path="/admin/departments" element={<AdminDepartments />} />
         <Route path="/admin/breeds" element={<AdminBreeds />} />
+        <Route path="/admin/articles-longue-traine" element={<AdminLongTailArticles />} />
         <Route path="/admin/faq" element={<AdminFAQ />} />
         <Route path="/admin/small-missions" element={<AdminSmallMissions />} />
         <Route path="/admin/legal" element={<AdminLegal />} />
