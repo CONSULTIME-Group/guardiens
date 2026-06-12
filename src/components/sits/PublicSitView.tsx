@@ -451,6 +451,11 @@ const PublicSitView = ({
                 </section>
               )}
 
+              {/* Le cadre & la vie sur place (depuis owner_profiles) */}
+              {ownerProfile && (
+                <CadreSection ownerProfile={ownerProfile} ownerName={owner?.first_name || "l'hôte"} />
+              )}
+
               {/* Le gardien idéal */}
               {sit.open_to && sit.open_to.length > 0 && !sit.open_to.every((t) => ["any", "no_preference", "Sans préférence"].includes(t)) && (
                 <section className="bg-muted/60 p-8 md:p-10 rounded-[2rem] border border-border relative overflow-hidden">
