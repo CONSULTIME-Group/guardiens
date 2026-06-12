@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { slugify } from "@/lib/normalize";
 import { CITIES } from "@/data/cities";
+import { buildOgImageUrl } from "@/lib/ogImage";
 
 interface BreedProfile {
   species: string;
@@ -107,6 +108,8 @@ const BreedPage = () => {
       { "@type": "ListItem", position: 3, name: breedCap, item: canonical },
     ],
   };
+
+  const ogImage = buildOgImageUrl({ title: breedCap, subtitle: "Fiche de race, conseils gardien", kind: "race" });
 
   const sections: Array<{ title: string; body: string | null }> = [
     { title: "Tempérament", body: breed.temperament },
