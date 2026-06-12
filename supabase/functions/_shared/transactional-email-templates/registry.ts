@@ -48,6 +48,9 @@ import { template as missionInvitation } from './mission-invitation.tsx'
 import { template as unreadMessagesReminder } from './unread-messages-reminder.tsx'
 import { template as missionProposalAccepted } from './mission-proposal-accepted.tsx'
 import { template as missionProposalDeclined } from './mission-proposal-declined.tsx'
+import { template as ownerNoSitJ3 } from './owner-no-sit-j3.tsx'
+import { template as ownerNoSitJ10 } from './owner-no-sit-j10.tsx'
+import { template as referralBoostMonthly } from './referral-boost-monthly.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'nearby-sit-alert': nearbySitAlert,
@@ -89,4 +92,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'unread-messages-reminder': unreadMessagesReminder,
   'mission-proposal-accepted': missionProposalAccepted,
   'mission-proposal-declined': missionProposalDeclined,
+  'owner-no-sit-j3': ownerNoSitJ3,
+  'owner-no-sit-j10': ownerNoSitJ10,
+  'referral-boost-monthly': referralBoostMonthly,
 }
