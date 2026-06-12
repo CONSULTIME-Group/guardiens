@@ -15,6 +15,25 @@ const AdminBreeds = () => {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState<null | "dog" | "cat">(null);
   const [progress, setProgress] = useState<{ done: number; total: number; ok: number; failed: number } | null>(null);
+  const [regenerating, setRegenerating] = useState<string | null>(null);
+
+  const handleRegenerate = async (species: string, breed: string) => {
+    const key = `${species}-${breed}`;
+    if (regenerating) return;
+    setRegenerating(key);
+    try {
+      const { error } = await supabase.functions.invoke("generate-breed-profile", {
+        body: { species, breed, force: true },
+      });
+      if (error) throw error;
+      toast.success(`Fiche régénérée : ${breed}`);
+      await refresh();
+    } catch (err: any) {
+      toast.error(`Erreur : ${err.message}`);
+    } finally {
+      setRegenerating(null);
+    }
+  };
 
   const refresh = async () => {
     setLoading(true);
