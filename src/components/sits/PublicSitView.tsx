@@ -122,6 +122,8 @@ const PublicSitView = ({
   owner,
   property,
   pets,
+  ownerProfile,
+  hasHouseGuide,
   avgRating,
   reviewCount,
   latestReviews,
