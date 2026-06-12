@@ -1,4 +1,5 @@
 import PageMeta from "@/components/PageMeta";
+import { buildOgImageUrl } from "@/lib/ogImage";
 import type { CityData } from "@/data/cities";
 
 interface Props {
@@ -21,6 +22,11 @@ const CityPageMeta = ({ city }: Props) => {
       title={title}
       description={city.metaDescription}
       path={`/house-sitting/${city.slug}`}
+      image={buildOgImageUrl({
+        title: city.name,
+        subtitle: "Garde d'animaux entre particuliers",
+        kind: "ville",
+      })}
     />
   );
 };

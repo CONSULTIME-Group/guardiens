@@ -33,6 +33,7 @@ export type EventType =
   | "sit_apply_clicked"
   | "sit_apply_blocked"
   | "sit_share_clicked"
+  | "editorial_share_clicked"
   | "referral_link_copied"
   | "page_view_pre_launch"
   | "cta_complete_profile"

@@ -2,6 +2,8 @@ import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
+import { buildOgImageUrl } from "@/lib/ogImage";
+import ShareLink from "@/components/share/ShareLink";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -90,9 +92,10 @@ const DepartmentPage = () => {
  return (
  <>
  <PageMeta
- title={page.meta_title || `Pet sitting & House sitting ${page.department} – Garde d'animaux à 0 € pour les propriétaires | Guardiens`}
- description={page.meta_description || `Trouvez un pet sitter ou house sitter dans le ${page.department}. Garde d'animaux entre particuliers, à 0 € pour les propriétaires. ${cityPages.length} villes couvertes sur Guardiens.`}
+ title={page.meta_title || `Pet sitting & House sitting ${page.department}, garde d'animaux gratuite pour les propriétaires | Guardiens`}
+ description={page.meta_description || `Trouvez un pet sitter ou house sitter dans le ${page.department}. Garde d'animaux entre particuliers, gratuite pour les propriétaires. ${cityPages.length} villes couvertes sur Guardiens.`}
  path={`/departement/${page.slug}`}
+ image={buildOgImageUrl({ title: page.department, subtitle: `${cityPages.length} villes couvertes`, kind: "departement" })}
  />
 
  <div className="min-h-screen bg-background">
@@ -114,6 +117,10 @@ const DepartmentPage = () => {
  {page.highlights}
  </p>
  )}
+ <div className="mb-6">
+ <ShareLink url={`https://guardiens.fr/departement/${page.slug}`} title={page.h1_title} text={page.intro_text} source="department_page" />
+ </div>
+
 
  {/* Stats */}
  <div className="flex flex-wrap gap-4 mb-8">

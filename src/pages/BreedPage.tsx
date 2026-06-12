@@ -4,6 +4,8 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { slugify } from "@/lib/normalize";
 import { CITIES } from "@/data/cities";
+import { buildOgImageUrl } from "@/lib/ogImage";
+import ShareLink from "@/components/share/ShareLink";
 
 interface BreedProfile {
   species: string;
@@ -108,6 +110,8 @@ const BreedPage = () => {
     ],
   };
 
+  const ogImage = buildOgImageUrl({ title: breedCap, subtitle: "Fiche de race, conseils gardien", kind: "race" });
+
   const sections: Array<{ title: string; body: string | null }> = [
     { title: "Tempérament", body: breed.temperament },
     { title: "Besoins d'exercice", body: breed.exercise_needs },
@@ -130,6 +134,9 @@ const BreedPage = () => {
         <meta property="og:description" content={description} />
         <meta property="og:url" content={canonical} />
         <meta property="og:type" content="article" />
+        <meta property="og:image" content={ogImage} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content={ogImage} />
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
         <script type="application/ld+json">{JSON.stringify(breadcrumb)}</script>
       </Helmet>
@@ -155,6 +162,9 @@ const BreedPage = () => {
               Niveau : {breed.difficulty_level}
             </span>
           )}
+          <div className="mt-4">
+            <ShareLink url={canonical} title={title} text={description} source="breed_page" />
+          </div>
         </header>
 
         <article className="prose prose-neutral max-w-none">
