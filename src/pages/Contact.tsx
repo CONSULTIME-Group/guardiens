@@ -72,9 +72,9 @@ const Contact = () => {
       />
       <PublicHeader />
 
-      <main className="px-6 md:px-12 py-16 max-w-3xl mx-auto">
+      <main className="px-6 md:px-12 py-8 md:py-16 max-w-3xl mx-auto">
 
-        <h1 className="font-heading text-3xl md:text-4xl font-bold mb-8">{t("contact.title")}</h1>
+        <h1 className="font-heading text-2xl md:text-4xl font-bold mb-5 md:mb-8">{t("contact.title")}</h1>
 
         <div className="space-y-8 text-muted-foreground">
           <p className="text-lg">

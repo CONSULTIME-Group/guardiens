@@ -90,7 +90,7 @@ export default function DevenirHomeSitter() {
         <PageBreadcrumb items={[{ label: "Devenir home-sitter" }]} />
 
         <article className="prose prose-stone max-w-none font-body">
-          <h1 className="font-heading text-3xl md:text-4xl font-bold text-foreground">
+          <h1 className="font-heading text-2xl md:text-4xl font-bold text-foreground">
             Devenir home-sitter, guide complet
           </h1>
           <p className="text-lg text-muted-foreground">

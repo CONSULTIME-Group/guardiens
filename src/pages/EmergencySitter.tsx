@@ -91,18 +91,18 @@ const EmergencySitter = () => {
 
       <PageBreadcrumb items={[{ label: tp("breadcrumb") }]} />
 
-      <section className="relative overflow-hidden bg-gradient-to-br from-accent via-background to-primary/5 py-16 md:py-24">
+      <section className="relative overflow-hidden bg-gradient-to-br from-accent via-background to-primary/5 py-8 md:py-24">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-accent-foreground/80 to-accent-foreground text-accent shadow-lg mb-6">
             <Zap className="h-8 w-8" fill="currentColor" />
           </div>
-          <h1 className="font-heading text-3xl md:text-5xl font-bold tracking-tight mb-4">{tp("hero_title")}</h1>
+          <h1 className="font-heading text-2xl md:text-5xl font-bold tracking-tight mb-4">{tp("hero_title")}</h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">{tp("hero_lead")}</p>
           <p className="mt-3 text-base text-muted-foreground">{tp("hero_tagline")}</p>
         </div>
       </section>
 
-      <section className="max-w-5xl mx-auto px-4 py-16">
+      <section className="max-w-5xl mx-auto px-4 py-10 md:py-16">
         <h2 className="font-heading text-2xl font-bold text-center mb-10">{tp("how_it_works")}</h2>
         <div className="grid md:grid-cols-3 gap-8">
           {steps.map((step, i) => (
@@ -117,10 +117,10 @@ const EmergencySitter = () => {
         </div>
       </section>
 
-      <section className="bg-background py-16 border-t border-border">
+      <section className="bg-background py-10 md:py-16 border-t border-border">
         <div className="max-w-5xl mx-auto px-4">
           <div className="text-center mb-10">
-            <p className="text-xs text-muted-foreground tracking-[0.2em] uppercase mb-3">{tp("stories_kicker")}</p>
+            <p className="hidden md:block text-xs text-muted-foreground tracking-[0.2em] uppercase mb-3">{tp("stories_kicker")}</p>
             <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4">{tp("stories_title")}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">{tp("stories_lead")}</p>
           </div>
@@ -135,7 +135,7 @@ const EmergencySitter = () => {
         </div>
       </section>
 
-      <section className="bg-muted/30 py-16 border-t border-border">
+      <section className="bg-muted/30 py-10 md:py-16 border-t border-border">
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-10">
             <h2 className="font-heading text-2xl md:text-3xl font-bold mb-3">{tp("compare_title")}</h2>
@@ -164,7 +164,7 @@ const EmergencySitter = () => {
         </div>
       </section>
 
-      <section className="bg-muted/50 py-16">
+      <section className="bg-muted/50 py-10 md:py-16">
         <div className="max-w-5xl mx-auto px-4">
           <h2 className="font-heading text-2xl font-bold text-center mb-3">{tp("owner_title")}</h2>
           <p className="text-center text-muted-foreground mb-10">{tp("owner_subtitle")}</p>
@@ -188,7 +188,7 @@ const EmergencySitter = () => {
         </div>
       </section>
 
-      <section className="max-w-4xl mx-auto px-4 py-16">
+      <section className="max-w-4xl mx-auto px-4 py-10 md:py-16">
         <h2 className="font-heading text-2xl font-bold text-center mb-3">{tp("sitter_title")}</h2>
         <p className="text-center text-muted-foreground mb-10">{tp("sitter_subtitle")}</p>
 
@@ -240,7 +240,7 @@ const EmergencySitter = () => {
         </div>
       </section>
 
-      <section className="bg-muted/50 py-16">
+      <section className="bg-muted/50 py-10 md:py-16">
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="font-heading text-2xl font-bold text-center mb-10">{tp("faq_title")}</h2>
           <Accordion type="single" collapsible className="space-y-2">
@@ -283,7 +283,7 @@ const EmergencySitter = () => {
 
       <section className="py-12 bg-muted/30 border-t border-border">
         <div className="container max-w-4xl mx-auto px-4">
-          <p className="text-xs text-muted-foreground tracking-[0.2em] uppercase mb-6 text-center">{tp("further_kicker")}</p>
+          <p className="hidden md:block text-xs text-muted-foreground tracking-[0.2em] uppercase mb-6 text-center">{tp("further_kicker")}</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Link to="/petites-missions" className="group block bg-card border border-border rounded-lg p-6 hover:border-primary transition">
               <p className="font-semibold mb-2 group-hover:text-primary transition">{tp("further1_title")}</p>

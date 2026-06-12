@@ -18,16 +18,16 @@ const About = () => {
       />
       <PublicHeader />
 
-      <main className="px-6 md:px-12 py-16 max-w-3xl mx-auto">
+      <main className="px-6 md:px-12 py-8 md:py-16 max-w-3xl mx-auto">
 
-        <h1 className="font-heading text-3xl md:text-4xl font-bold mb-8">{t("about.title")}</h1>
+        <h1 className="font-heading text-2xl md:text-4xl font-bold mb-5 md:mb-8">{t("about.title")}</h1>
 
         <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
           <p>
             Guardiens est né entre deux promenades de chiens, dans un appartement lyonnais qui sentait la croquette, avec un chat sur le canapé et un border collie sous la table.
           </p>
 
-          <h2 className="font-heading text-2xl font-bold text-foreground pt-4">Le retour d'Argentine</h2>
+          <h2 className="font-heading text-xl md:text-2xl font-bold text-foreground pt-4">Le retour d'Argentine</h2>
           <p>
             En 2021, nous sommes rentrés d'Argentine. Le Covid n'était pas terminé, les visas étaient compliqués à obtenir, Elisa ne pouvait tout simplement <strong className="text-foreground">pas travailler</strong> en attendant notre mariage et la régularisation de sa situation.
           </p>
@@ -39,7 +39,7 @@ const About = () => {
             « Au début, c'était juste rendre service. Promener le chien d'une personne du quartier le matin. Puis elle en a parlé à une amie, qui en a parlé à sa sœur… », Elisa
           </blockquote>
 
-          <h2 className="font-heading text-2xl font-bold text-foreground pt-4">Des promenades au house-sitting</h2>
+          <h2 className="font-heading text-xl md:text-2xl font-bold text-foreground pt-4">Des promenades au house-sitting</h2>
           <p>
             Très vite, les demandes se sont multipliées. Plus seulement des promenades, mais des <strong className="text-foreground">gardes à la maison</strong>. Puis on a commencé à recevoir des animaux chez nous. Et un jour, une propriétaire nous a proposé de garder ses animaux <strong className="text-foreground">chez elle</strong>, pendant ses vacances.
           </p>
@@ -50,12 +50,12 @@ const About = () => {
             À partir de là, tout s'est enchaîné. D'abord dans le <strong className="text-foreground">département</strong>, puis dans toute la <strong className="text-foreground">région</strong>, puis sur <strong className="text-foreground">toute la France</strong>, chalets en montagne, maisons en bord de mer, fermes avec des poules et des chèvres, pavillons de banlieue avec des labradors trop affectueux.
           </p>
 
-          <h2 className="font-heading text-2xl font-bold text-foreground pt-4">Aujourd'hui</h2>
+          <h2 className="font-heading text-xl md:text-2xl font-bold text-foreground pt-4">Aujourd'hui</h2>
           <p>
             Pour différentes raisons, on n'est plus aussi mobiles qu'avant. Mais chaque semaine, on <strong className="text-foreground">reçoit des animaux chez nous</strong>. C'est devenu un mode de vie, et surtout une communauté informelle qui fonctionne sur un seul principe : la confiance de quartier.
           </p>
 
-          <h2 className="font-heading text-2xl font-bold text-foreground pt-4">Pourquoi Guardiens</h2>
+          <h2 className="font-heading text-xl md:text-2xl font-bold text-foreground pt-4">Pourquoi Guardiens</h2>
           <p>
             Le problème, c'est que cette communauté restait invisible. Les plateformes internationales mettent en relation des gens qui ne se connaissent pas, à des centaines de kilomètres. Guardiens est né d'une frustration simple : permettre aux gens du coin de se faire confiance et de s'entraider, comme Elisa le fait depuis 2021.
           </p>
