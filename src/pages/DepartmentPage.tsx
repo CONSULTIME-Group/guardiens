@@ -91,9 +91,10 @@ const DepartmentPage = () => {
  return (
  <>
  <PageMeta
- title={page.meta_title || `Pet sitting & House sitting ${page.department} – Garde d'animaux à 0 € pour les propriétaires | Guardiens`}
- description={page.meta_description || `Trouvez un pet sitter ou house sitter dans le ${page.department}. Garde d'animaux entre particuliers, à 0 € pour les propriétaires. ${cityPages.length} villes couvertes sur Guardiens.`}
+ title={page.meta_title || `Pet sitting & House sitting ${page.department}, garde d'animaux gratuite pour les propriétaires | Guardiens`}
+ description={page.meta_description || `Trouvez un pet sitter ou house sitter dans le ${page.department}. Garde d'animaux entre particuliers, gratuite pour les propriétaires. ${cityPages.length} villes couvertes sur Guardiens.`}
  path={`/departement/${page.slug}`}
+ image={buildOgImageUrl({ title: page.department, subtitle: `${cityPages.length} villes couvertes`, kind: "departement" })}
  />
 
  <div className="min-h-screen bg-background">
