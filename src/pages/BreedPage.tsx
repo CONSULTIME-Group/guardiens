@@ -212,16 +212,38 @@ const BreedPage = () => {
           </div>
         </header>
 
-        <article className="prose prose-neutral max-w-none">
-          {sections.map((s) => (
-            <section key={s.title} className="mb-6">
-              <h2 className="font-serif text-xl font-semibold text-foreground mb-2">
-                {s.title}
-              </h2>
-              <p className="text-foreground/90 whitespace-pre-line">{s.body}</p>
-            </section>
-          ))}
-        </article>
+        {breed.image_url && (
+          <figure className="mb-10 rounded-xl overflow-hidden border border-border bg-muted">
+            <img
+              src={breed.image_url}
+              alt={breed.image_alt || `Photo d'un ${breedCap}`}
+              className="w-full h-auto max-h-[480px] object-cover"
+              loading="eager"
+            />
+            {breed.image_credit && (
+              <figcaption className="px-4 py-2 text-xs text-muted-foreground bg-muted">
+                {breed.image_credit}
+              </figcaption>
+            )}
+          </figure>
+        )}
+
+        {breed.rich_content && breed.rich_content.trim().length > 200 ? (
+          <article className="prose prose-lg prose-neutral max-w-none prose-headings:font-serif prose-headings:text-foreground prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-2 prose-p:text-foreground/85 prose-p:leading-relaxed prose-li:text-foreground/85 prose-strong:text-foreground prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
+            <ReactMarkdown>{breed.rich_content}</ReactMarkdown>
+          </article>
+        ) : (
+          <article className="prose prose-neutral max-w-none">
+            {sections.map((s) => (
+              <section key={s.title} className="mb-6">
+                <h2 className="font-serif text-xl font-semibold text-foreground mb-2">
+                  {s.title}
+                </h2>
+                <p className="text-foreground/90 whitespace-pre-line">{s.body}</p>
+              </section>
+            ))}
+          </article>
+        )}
 
         <section className="mt-12 pt-8 border-t border-border">
           <h2 className="font-serif text-2xl font-semibold text-foreground mb-4">
