@@ -68,6 +68,33 @@ const AdminDepartments = () => {
     }
   };
 
+  const handleBatchAll = async () => {
+    if (batchRunning) return;
+    const slugify = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const existing = new Set(pages.map((p) => slugify(p.department)));
+    const todo = Object.values(DEPT_NAMES).filter((name) => !existing.has(slugify(name)));
+    if (todo.length === 0) {
+      toast.success("Tous les départements sont déjà générés.");
+      return;
+    }
+    setBatchRunning(true);
+    setBatchProgress({ done: 0, total: todo.length, ok: 0, failed: 0 });
+    let ok = 0, failed = 0;
+    for (let i = 0; i < todo.length; i++) {
+      try {
+        const { error } = await supabase.functions.invoke("generate-department-page", {
+          body: { department: todo[i] },
+        });
+        if (error) failed++; else ok++;
+      } catch { failed++; }
+      setBatchProgress({ done: i + 1, total: todo.length, ok, failed });
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+    setBatchRunning(false);
+    toast.success(`Batch terminé : ${ok} créés, ${failed} échecs`);
+    queryClient.invalidateQueries({ queryKey: ["admin-departments"] });
+  };
+
   const toggleMutation = useMutation({
     mutationFn: async ({ id, published }: { id: string; published: boolean }) => {
       const { error } = await (supabase.from("seo_department_pages" as any) as any).update({ published }).eq("id", id);
