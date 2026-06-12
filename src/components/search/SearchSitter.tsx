@@ -536,6 +536,7 @@ const SearchSitter = () => {
  getCityFn: (item: any) => string | undefined,
  searchCoords: { lat: number; lng: number } | null,
  getPostalCodeFn?: (item: any) => string | undefined,
+ alwaysIncludeFn?: (item: any) => boolean,
  ) => {
  const cityCoords = new Map<string, { lat: number; lng: number }>();
  const uniqueCities = [...new Set(items.map(getCityFn).filter(Boolean))] as string[];
@@ -560,21 +561,25 @@ const SearchSitter = () => {
  }).length : 0;
  setDensityCounts({ radius: radiusCount, dept: deptCount, region: regionCount, france: items.length });
 
- // Apply the selected zone filter
+ // Apply the selected zone filter (international items always pass through)
+ const passThrough = (s: any) => alwaysIncludeFn ? alwaysIncludeFn(s) : false;
  let filtered = items;
  if (zoneMode === "radius") {
  if (!searchCoords) return { items, cityCoords };
  filtered = items.filter((s) => {
+ if (passThrough(s)) return true;
  const ownerCity = getCityFn(s); if (!ownerCity) return false;
  const coords = cityCoords.get(ownerCity); if (!coords) return false;
  return haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) <= radius[0];
  });
  } else if (zoneMode === "dept" && refDept) {
  filtered = items.filter((s) => {
+ if (passThrough(s)) return true;
  const cp = getPostalCodeFn?.(s); return cp ? getDeptCode(cp) === refDept : false;
  });
  } else if (zoneMode === "region" && refRegion) {
  filtered = items.filter((s) => {
+ if (passThrough(s)) return true;
  const cp = getPostalCodeFn?.(s); return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
  });
  }
@@ -586,14 +591,13 @@ const SearchSitter = () => {
   // On inclut les statuts passés (expired / completed / cancelled) pour la
   // transparence et le SEO visiteur : ils sont affichés grisés avec le label
   // « Annonce passée » et ne sont pas actionnables.
-  // On exclut les annonces hors France (sits.country renseigné ET différent de FR).
-  // Les distances et la carte de la grille principale sont calibrées pour la France ;
-  // les annonces internationales ont leur propre page dédiée /annonces/international.
-  let query = supabase
+   // On inclut les annonces internationales : elles apparaissent comme bonus
+   // sur la carte et dans la grille, même quand un filtre géographique français
+   // est actif (rayon / dept / région). Elles bypassent le filtre dans filterByLocation.
+   let query = supabase
 .from("sits")
 .select("*, property:properties!sits_property_id_fkey(type, environment, photos, cover_photo_url)")
 .in("status", ["published", "confirmed", "in_progress", "completed", "cancelled"])
-.or("country.is.null,country.eq.FR")
 .order("created_at", { ascending: false });
   if (startDate) query = query.gte("end_date", startDate);
   if (endDate) query = query.lte("start_date", endDate);
@@ -651,7 +655,7 @@ const SearchSitter = () => {
  });
  }
  if (verifiedOnly) items = items.filter((s: any) => s.owner?.identity_verified);
- const { items: locFiltered, cityCoords } = await filterByLocation(items, (s: any) => s.owner?.city, searchCoords, (s: any) => s.owner?.postal_code);
+ const { items: locFiltered, cityCoords } = await filterByLocation(items, (s: any) => s.owner?.city, searchCoords, (s: any) => s.owner?.postal_code, (s: any) => !!s.country && s.country !== "FR");
  items = locFiltered;
  const enriched = await Promise.all(
  items.map(async (sit: any) => {
@@ -1203,16 +1207,18 @@ const SearchSitter = () => {
  </SelectContent>
  </Select>
  </div>
-  {tab === "sits" && intlCount > 0 && (
-   <Link
-     to="/annonces/international"
-     className="hidden sm:inline-flex items-center gap-1.5 shrink-0 rounded-full border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-semibold px-3 py-1.5 mr-2 transition-colors"
-     aria-label={`Voir les ${intlCount} annonces hors France`}
-   >
-     <Globe2 className="h-3.5 w-3.5" />
-     Hors France ({intlCount})
-   </Link>
-  )}
+   {tab === "sits" && intlCount > 0 && (
+    <Link
+      to="/annonces/international"
+      className="inline-flex items-center gap-1.5 shrink-0 rounded-full border border-primary/40 bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-semibold px-3 py-1.5 mr-2 shadow-sm transition-colors"
+      aria-label={`Voir les ${intlCount} annonces hors France`}
+    >
+      <Globe2 className="h-3.5 w-3.5" />
+      <span className="hidden sm:inline">Français à l'étranger</span>
+      <span className="sm:hidden">Étranger</span>
+      <span className="inline-flex items-center justify-center rounded-full bg-primary-foreground/20 px-1.5 py-0.5 text-[10px] font-bold">{intlCount}</span>
+    </Link>
+   )}
   {tab === "sits" && user && (
  <TooltipProvider>
  <Tooltip>
