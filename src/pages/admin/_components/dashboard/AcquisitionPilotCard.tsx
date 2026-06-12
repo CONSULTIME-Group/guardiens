@@ -32,7 +32,7 @@ export const AcquisitionPilotCard = () => {
           supabase.from("seo_city_pages").select("*", { count: "exact", head: true }),
           supabase.from("seo_department_pages").select("*", { count: "exact", head: true }),
           supabase.from("breed_profiles").select("*", { count: "exact", head: true }),
-          supabase.from("articles").select("*", { count: "exact", head: true }).eq("status", "published"),
+          supabase.from("articles").select("*", { count: "exact", head: true }).eq("published", true),
           supabase.from("indexnow_submissions").select("*", { count: "exact", head: true }).gte("created_at", since24h),
           supabase.from("indexnow_submissions").select("*", { count: "exact", head: true }).gte("created_at", since7d),
           supabase.from("user_journeys").select("*", { count: "exact", head: true }).eq("status", "active"),
