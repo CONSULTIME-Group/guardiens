@@ -117,6 +117,7 @@ const GuidesListing = lazy(() => import("./pages/GuidesListing"));
 const GuideDetail = lazy(() => import("./pages/GuideDetail"));
 const AdminGuides = lazy(() => import("./pages/admin/AdminGuides"));
 const AdminDepartments = lazy(() => import("./pages/admin/AdminDepartments"));
+const AdminBreeds = lazy(() => import("./pages/admin/AdminBreeds"));
 const DepartmentPage = lazy(() => import("./pages/DepartmentPage"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const SmallMissions = lazy(() => import("./pages/SmallMissions"));
