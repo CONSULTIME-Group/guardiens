@@ -503,18 +503,18 @@ const SmallMissions = () => {
 
             {/* ═══ Section 1, Demandes ou Propositions visibles (HERO) ═══ */}
             <div className="flex items-center gap-3 mb-2">
-              <span className="h-8 w-1.5 rounded-full bg-primary" aria-hidden />
-              <h2 className="text-xl md:text-2xl font-heading font-bold text-foreground leading-tight">
+              <span className="hidden md:inline-block h-8 w-1.5 rounded-full bg-primary" aria-hidden />
+              <h2 className="text-lg md:text-2xl font-heading font-bold text-foreground leading-tight">
                 {mode === "offer" ? tp("section_offer_title") : tp("section_need_title")}
               </h2>
               {missionCount > 0 && (
-                <span className="text-xs font-semibold bg-primary/10 text-primary px-2.5 py-1 rounded-full">
+                <span className="hidden md:inline-flex text-xs font-semibold bg-primary/10 text-primary px-2.5 py-1 rounded-full">
                   {missionCount} {mode === "offer" ? tp(missionCount > 1 ? "count_proposal_other" : "count_proposal_one") : tp(missionCount > 1 ? "count_demand_other" : "count_demand_one")}
                 </span>
               )}
             </div>
             {missionCount > 0 && (
-              <label className="flex items-center gap-2 mb-4 text-xs text-muted-foreground cursor-pointer select-none">
+              <label className="hidden md:flex items-center gap-2 mb-4 text-xs text-muted-foreground cursor-pointer select-none">
                 <Switch
                   checked={compactBio}
                   onCheckedChange={setCompactBio}
