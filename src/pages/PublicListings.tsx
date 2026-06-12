@@ -115,7 +115,7 @@ export default function PublicListings() {
       <PublicHeader />
 
       <main id="main-content" className="flex-1 min-w-0" role="main">
-        <section className="max-w-6xl mx-auto px-4 md:px-6 pt-10 pb-6">
+        <section className="max-w-6xl mx-auto px-4 md:px-6 pt-5 md:pt-10 pb-3 md:pb-6">
           <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
             {t("public_listings.eyebrow")}
           </p>
@@ -173,8 +173,8 @@ export default function PublicListings() {
           <SearchSitter />
         </Suspense>
 
-        <section className="border-t border-border/60 mt-12">
-          <div className="max-w-6xl mx-auto px-4 md:px-6 py-10">
+        <section className="border-t border-border/60 mt-8 md:mt-12">
+          <div className="max-w-6xl mx-auto px-4 md:px-6 py-5 md:py-10">
             <h2 className="font-heading text-xl font-medium text-foreground mb-4">
               {t("public_listings.explore_title")}
             </h2>

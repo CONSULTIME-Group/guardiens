@@ -70,8 +70,8 @@ const Favorites = () => {
   return (
     <>
       <PageMeta title={t("favorites_page.meta_title")} description={t("favorites_page.meta_description")} />
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-8">
+      <div className="max-w-3xl mx-auto px-4 py-5 md:py-8">
+        <div className="flex items-center gap-3 mb-5 md:mb-8">
           <Heart className="h-6 w-6 text-red-500 fill-red-500" />
           <h1 className="text-2xl font-heading font-bold text-foreground">{t("favorites_page.title")}</h1>
         </div>
@@ -87,7 +87,7 @@ const Favorites = () => {
           />
         ) : (
           <Tabs defaultValue={hasSitters ? "sitters" : "sits"} className="space-y-6">
-            <TabsList>
+            <TabsList className="w-full md:w-auto">
               <TabsTrigger value="sitters" className="gap-2">
                 <User className="h-4 w-4" />
                 {t("favorites_page.tab_sitters")} {hasSitters && <Badge variant="secondary" className="ml-1 text-xs">{sitters!.length}</Badge>}
