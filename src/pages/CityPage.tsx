@@ -329,6 +329,9 @@ const CityPage = () => {
  </section>
  )}
 
+        {/* Gardiens du coin */}
+        <CitySittersGrid city={cityData.name} citySlug={cityData.slug} />
+
  {/* Network */}
  <LocalNetworkGrid current={cityData} allCities={CITIES} />
 
