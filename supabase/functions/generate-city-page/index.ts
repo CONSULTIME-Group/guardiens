@@ -231,7 +231,9 @@ Structure EXACTE :
     }
 
     // Photo réelle (non IA) depuis Wikipedia FR si dispo
-    const wiki = await fetchWikipediaImage(city);
+    const wiki = coverIn ? null : await fetchWikipediaImage(city);
+    const finalCover = coverIn || wiki?.url || existing?.cover_image_url || null;
+    const finalAlt = altIn || wiki?.alt || existing?.hero_image_alt || (finalCover ? `Vue de ${city}` : null);
 
     const record: Record<string, unknown> = {
       city: city.trim(),
@@ -243,8 +245,8 @@ Structure EXACTE :
       meta_description: generated.meta_description || existing?.meta_description || `Trouvez un gardien de confiance à ${city}. Inscription gratuite, gardiens vérifiés.`,
       excerpt: generated.excerpt || existing?.excerpt || null,
       content: generated.content || existing?.content || null,
-      cover_image_url: wiki?.url || existing?.cover_image_url || null,
-      hero_image_alt: wiki?.alt || existing?.hero_image_alt || null,
+      cover_image_url: finalCover,
+      hero_image_alt: finalAlt,
       published: true,
       updated_at: new Date().toISOString(),
     };
