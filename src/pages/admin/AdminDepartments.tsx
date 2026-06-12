@@ -131,7 +131,7 @@ const AdminDepartments = () => {
         <CardHeader>
           <CardTitle className="text-base">Générer une page département</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="flex gap-3 flex-wrap">
             <Input
               placeholder="Département (ex: Rhône)"
@@ -145,10 +145,30 @@ const AdminDepartments = () => {
               onChange={(e) => setRegion(e.target.value)}
               className="w-56"
             />
-            <Button onClick={generatePage} disabled={!department || generating} className="gap-2">
+            <Button onClick={generatePage} disabled={!department || generating || batchRunning} className="gap-2">
               {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               {generating ? "Génération..." : "Générer"}
             </Button>
+          </div>
+
+          <div className="rounded-md border border-dashed p-4 space-y-2">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <p className="font-medium text-sm">Batch SEO programmatique</p>
+                <p className="text-xs text-muted-foreground">
+                  Génère les pages des 101 départements français (DOM-TOM inclus). Départements déjà créés ignorés. ~3 min.
+                </p>
+              </div>
+              <Button onClick={handleBatchAll} disabled={batchRunning || generating} variant="secondary" className="gap-2">
+                {batchRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+                Générer tous les départements
+              </Button>
+            </div>
+            {batchProgress && (
+              <div className="text-xs text-muted-foreground">
+                Progression : {batchProgress.done} / {batchProgress.total} · {batchProgress.ok} OK · {batchProgress.failed} échecs
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
