@@ -156,6 +156,22 @@ const PublicSitDetail = () => {
             const { data: petsData } = await supabase.from("pets").select("*").eq("property_id", propertyData.id);
             setPets(petsData || []);
           } catch (e) { logger.warn("[PublicSitDetail] pets load failed", { error: (e as any)?.message }); }
+          try {
+            const { data: opRow } = await supabase
+              .from("owner_profiles")
+              .select("presence_expected, visits_allowed, overnight_guest, space_usage, smoker_accepted, rules_notes, meeting_preference, handover_preference, welcome_notes, news_frequency, news_format, communication_notes, competences, competences_disponible, specific_expectations, experience_required, environments")
+              .eq("user_id", sitData.user_id)
+              .maybeSingle();
+            setOwnerProfile(opRow || null);
+          } catch (e) { logger.warn("[PublicSitDetail] owner_profile load failed", { error: (e as any)?.message }); }
+          try {
+            const { data: hgRow } = await supabase
+              .from("house_guides")
+              .select("id")
+              .eq("property_id", propertyData.id)
+              .maybeSingle();
+            setHasHouseGuide(!!hgRow);
+          } catch (e) { logger.warn("[PublicSitDetail] house_guide load failed", { error: (e as any)?.message }); }
         }
 
         if (user) {
