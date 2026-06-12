@@ -536,6 +536,7 @@ const SearchSitter = () => {
  getCityFn: (item: any) => string | undefined,
  searchCoords: { lat: number; lng: number } | null,
  getPostalCodeFn?: (item: any) => string | undefined,
+ alwaysIncludeFn?: (item: any) => boolean,
  ) => {
  const cityCoords = new Map<string, { lat: number; lng: number }>();
  const uniqueCities = [...new Set(items.map(getCityFn).filter(Boolean))] as string[];
@@ -560,21 +561,25 @@ const SearchSitter = () => {
  }).length : 0;
  setDensityCounts({ radius: radiusCount, dept: deptCount, region: regionCount, france: items.length });
 
- // Apply the selected zone filter
+ // Apply the selected zone filter (international items always pass through)
+ const passThrough = (s: any) => alwaysIncludeFn ? alwaysIncludeFn(s) : false;
  let filtered = items;
  if (zoneMode === "radius") {
  if (!searchCoords) return { items, cityCoords };
  filtered = items.filter((s) => {
+ if (passThrough(s)) return true;
  const ownerCity = getCityFn(s); if (!ownerCity) return false;
  const coords = cityCoords.get(ownerCity); if (!coords) return false;
  return haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) <= radius[0];
  });
  } else if (zoneMode === "dept" && refDept) {
  filtered = items.filter((s) => {
+ if (passThrough(s)) return true;
  const cp = getPostalCodeFn?.(s); return cp ? getDeptCode(cp) === refDept : false;
  });
  } else if (zoneMode === "region" && refRegion) {
  filtered = items.filter((s) => {
+ if (passThrough(s)) return true;
  const cp = getPostalCodeFn?.(s); return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
  });
  }
