@@ -221,6 +221,18 @@ const PublicSitView = ({
                 </div>
               )}
 
+              {/* Le mot du propriétaire (présentation libre de la garde) */}
+              {(sit.specific_expectations || sit.owner_message) && (
+                <section>
+                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">
+                    Le mot de {owner?.first_name || "l'hôte"}
+                  </h2>
+                  <div className="space-y-5 text-lg leading-relaxed text-foreground/85 whitespace-pre-line">
+                    {sit.specific_expectations || sit.owner_message}
+                  </div>
+                </section>
+              )}
+
               {/* Le logement */}
               {property && (
                 <section>
@@ -230,10 +242,43 @@ const PublicSitView = ({
                   <p className="text-sm font-medium text-foreground mb-4">
                     {typeLabel}
                     {envLabel && <span className="text-muted-foreground font-normal"> · {envLabel}</span>}
+                    {typeof property.rooms_count === "number" && property.rooms_count > 0 && (
+                      <span className="text-muted-foreground font-normal"> · {property.rooms_count} pièce{property.rooms_count > 1 ? "s" : ""}</span>
+                    )}
+                    {typeof property.bedrooms_count === "number" && property.bedrooms_count > 0 && (
+                      <span className="text-muted-foreground font-normal"> · {property.bedrooms_count} chambre{property.bedrooms_count > 1 ? "s" : ""}</span>
+                    )}
                   </p>
                   {property.description && (
-                    <div className="space-y-5 text-lg leading-relaxed text-foreground/85 whitespace-pre-line">
+                    <div className="space-y-5 text-lg leading-relaxed text-foreground/85 whitespace-pre-line mb-6">
                       {property.description}
+                    </div>
+                  )}
+                  {Array.isArray(property.equipments) && property.equipments.length > 0 && (
+                    <div className="mt-2">
+                      <h3 className="text-xs font-bold tracking-[0.2em] uppercase mb-3 text-muted-foreground">
+                        Équipements
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {property.equipments.map((eq) => (
+                          <span
+                            key={eq}
+                            className="px-3 py-1.5 rounded-full bg-muted text-foreground border border-border text-sm"
+                          >
+                            {eq}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {(property.accessible || property.car_required) && (
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      {property.accessible && (
+                        <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm">Accès PMR</span>
+                      )}
+                      {property.car_required && (
+                        <span className="px-3 py-1.5 rounded-full bg-secondary/20 text-secondary-foreground text-sm">Voiture recommandée</span>
+                      )}
                     </div>
                   )}
                 </section>
