@@ -480,7 +480,8 @@ const CreateSit = () => {
       {profileCompletion < 60 && (
         <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 mb-8 flex items-start gap-3">
           <AlertCircle className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
-          <div>
+        <div id="title-field" className="scroll-mt-24">
+
             <p className="font-medium text-destructive">Profil incomplet ({profileCompletion}%)</p>
             <p className="text-sm text-muted-foreground mt-1">Complétez votre profil à au moins 60% pour publier une annonce.</p>
             <Link to="/owner-profile" className="text-sm text-primary underline mt-2 inline-block">Compléter mon profil →</Link>
