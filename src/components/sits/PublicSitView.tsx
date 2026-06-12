@@ -21,6 +21,8 @@ interface SitLike {
   latitude?: number | null;
   longitude?: number | null;
   accepting_applications?: boolean | null;
+  specific_expectations?: string | null;
+  owner_message?: string | null;
 }
 
 interface OwnerLike {
@@ -39,6 +41,11 @@ interface PropertyLike {
   environment?: string | null;
   description?: string | null;
   photos?: string[] | null;
+  equipments?: string[] | null;
+  rooms_count?: number | null;
+  bedrooms_count?: number | null;
+  accessible?: boolean | null;
+  car_required?: boolean | null;
 }
 
 interface PetLike {
