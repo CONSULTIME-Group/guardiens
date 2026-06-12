@@ -1,9 +1,11 @@
 // Vue publique éditoriale (Modern Minimal), annonces de garde.
 // Cible : visiteurs anonymes ET connectés (hors propriétaire de l'annonce).
 // Objectif : conversion + clarté. Pattern aligné avec PublicMissionView.
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Share2, CheckCircle2, Star } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
