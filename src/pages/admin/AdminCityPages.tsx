@@ -16,12 +16,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, ExternalLink, Loader2, Trash2 } from "lucide-react";
+import { Plus, ExternalLink, Loader2, Trash2, Zap } from "lucide-react";
+import { TOP_CITIES_FRANCE } from "@/data/topCitiesFrance";
 
 const AdminCityPages = () => {
   const [city, setCity] = useState("");
   const [department, setDepartment] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [batchRunning, setBatchRunning] = useState(false);
+  const [batchProgress, setBatchProgress] = useState<{ done: number; total: number; ok: number; skipped: number; failed: number } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; city: string } | null>(null);
 
   const { data: pages, refetch } = useQuery({
