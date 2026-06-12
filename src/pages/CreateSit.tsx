@@ -760,8 +760,13 @@ const CreateSit = () => {
       </div>
 
       {/* Pre-filled summaries */}
-      <div className="mt-10 space-y-6 pb-32">
-        <h2 className="font-heading text-xl font-semibold">Résumé depuis votre profil</h2>
+      <details className="mt-10 group" open>
+      <summary className="cursor-pointer flex items-center justify-between p-3 rounded-xl border border-border bg-card md:hidden mb-3 list-none select-none">
+        <span className="font-heading text-sm font-semibold">Résumé depuis votre profil</span>
+        <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
+      </summary>
+      <div className="space-y-6 pb-32 hidden group-open:block md:!block">
+        <h2 className="font-heading text-xl font-semibold hidden md:block">Résumé depuis votre profil</h2>
 
         {/* Housing */}
         <SummaryCard icon={Home} title="Le logement" editLink="/profile">
@@ -889,6 +894,7 @@ const CreateSit = () => {
           ) : <p className="text-sm text-muted-foreground italic">Non renseigné</p>}
         </SummaryCard>
       </div>
+      </details>
 
       {/* Barre de publication fixée bas d'écran avec checklist explicite des bloquants restants. */}
       <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40">
@@ -922,7 +928,7 @@ const CreateSit = () => {
               }}
               disabled={savingDraft || !property}
             >
-              {savingDraft ? "Sauvegarde…" : "Enregistrer & quitter"}
+              {savingDraft ? "Sauvegarde…" : <><span className="hidden sm:inline">Enregistrer & quitter</span><span className="sm:hidden">Brouillon</span></>}
             </Button>
             <Button
               onClick={onPublishClick}
