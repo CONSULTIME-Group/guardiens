@@ -52,14 +52,16 @@ Deno.serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const prompt = `Tu es un expert SEO et rédacteur pour Guardiens, une plateforme de house-sitting de proximité en Auvergne-Rhône-Alpes. Génère le contenu d'une landing page pour la ville de ${city} dans le département ${department}.
+    const prompt = `Tu es un expert SEO et rédacteur pour Guardiens, une plateforme de house-sitting de proximité couvrant toute la France. Génère le contenu d'une landing page pour la ville de ${city} (département ${department}).
+
+Règles strictes : vouvoiement ; pas de mention de région administrative ; pas du mot « voisin » ni « voisinage » (utiliser « gardien », « gens du coin », « personne de confiance ») ; pas de tiret cadratin « — » (utiliser virgule, deux-points ou parenthèses) ; pas d'emoji ; ton factuel, chaleureux, sans superlatifs commerciaux.
 
 Réponds UNIQUEMENT en JSON valide :
 {
-  "h1_title": "House-sitting à ${city} — Gardiens de confiance près de chez vous",
-  "intro_text": "3-4 phrases qui décrivent pourquoi ${city} est un endroit génial pour le house-sitting. Mentionne l'ambiance, la nature, le cadre de vie. Ton chaleureux et enthousiaste.",
-  "meta_title": "House-sitting ${city} — Garde maison et animaux | Guardiens",
-  "meta_description": "Trouvez un gardien de maison et d'animaux de confiance à ${city}. Gardiens vérifiés, proximité, avis croisés. Inscrivez-vous gratuitement."
+  "h1_title": "House-sitting à ${city}, gardiens de confiance près de chez vous",
+  "intro_text": "3-4 phrases qui décrivent pourquoi ${city} est un cadre agréable pour le house-sitting. Mentionnez l'ambiance, la nature, le cadre de vie local. Ton chaleureux, factuel.",
+  "meta_title": "House-sitting ${city}, garde maison et animaux | Guardiens",
+  "meta_description": "Trouvez un gardien de maison et d'animaux de confiance à ${city}. Gardiens vérifiés, proximité, avis croisés. Inscription gratuite."
 }`;
 
     const aiResponse = await fetch(LOVABLE_API_URL, {
