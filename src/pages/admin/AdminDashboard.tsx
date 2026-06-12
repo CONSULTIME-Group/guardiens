@@ -8,6 +8,7 @@ import { RecentActivity } from "./_components/dashboard/RecentActivity";
 import { KpiCards } from "./_components/dashboard/KpiCards";
 import { DashboardCharts } from "./_components/dashboard/DashboardCharts";
 import { OnboardingReminderCard } from "./_components/dashboard/OnboardingReminderCard";
+import { AcquisitionPilotCard } from "./_components/dashboard/AcquisitionPilotCard";
 
 const AdminDashboard = () => {
   const { loading, stats, actionCards, lateCards, activity, weeklySignups, deptData } = useDashboardData();
@@ -46,6 +47,7 @@ const AdminDashboard = () => {
       <TodoSection actionCards={actionCards} lateCards={lateCards} />
       <RecentActivity activity={activity} />
       <KpiCards stats={stats} />
+      <AcquisitionPilotCard />
       <DashboardCharts weeklySignups={weeklySignups} deptData={deptData} />
       <OnboardingReminderCard />
     </div>
