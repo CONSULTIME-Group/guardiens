@@ -130,7 +130,7 @@ const AdminCityPages = () => {
         <CardHeader>
           <CardTitle className="text-lg">Générer une nouvelle page ville</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-3">
             <Input
               placeholder="Nom de la ville (ex: Lyon, Annecy...)"
@@ -144,10 +144,30 @@ const AdminCityPages = () => {
               onChange={(e) => setDepartment(e.target.value)}
               className="sm:w-56"
             />
-            <Button onClick={handleGenerate} disabled={generating} className="gap-2">
+            <Button onClick={handleGenerate} disabled={generating || batchRunning} className="gap-2">
               {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               Générer
             </Button>
+          </div>
+
+          <div className="rounded-md border border-dashed p-4 space-y-2">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <p className="font-medium text-sm">Batch SEO programmatique</p>
+                <p className="text-xs text-muted-foreground">
+                  Génère les pages des 150 plus grandes villes de France. Les villes déjà créées sont ignorées. ~4 min pour 150 villes.
+                </p>
+              </div>
+              <Button onClick={handleBatchTop150} disabled={batchRunning || generating} variant="secondary" className="gap-2">
+                {batchRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+                Générer le top 150
+              </Button>
+            </div>
+            {batchProgress && (
+              <div className="text-xs text-muted-foreground">
+                Progression : {batchProgress.done} / {batchProgress.total} · {batchProgress.ok} OK · {batchProgress.failed} échecs
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
