@@ -120,6 +120,8 @@ const AdminDepartments = lazy(() => import("./pages/admin/AdminDepartments"));
 const AdminBreeds = lazy(() => import("./pages/admin/AdminBreeds"));
 const AdminLongTailArticles = lazy(() => import("./pages/admin/AdminLongTailArticles"));
 const Parrainage = lazy(() => import("./pages/Parrainage"));
+const DevenirHomeSitter = lazy(() => import("./pages/DevenirHomeSitter"));
+
 const DepartmentPage = lazy(() => import("./pages/DepartmentPage"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const SmallMissions = lazy(() => import("./pages/SmallMissions"));
