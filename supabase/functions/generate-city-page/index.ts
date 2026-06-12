@@ -29,14 +29,17 @@ async function fetchWikipediaImage(city: string): Promise<{ url: string; alt: st
   try {
     const res = await fetch(
       `https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`,
-      { headers: { "User-Agent": "Guardiens/1.0 (contact@guardiens.fr)", Accept: "application/json" } },
+      { headers: { "User-Agent": "GuardiensBot/1.0 (https://guardiens.fr)", Accept: "application/json" } },
     );
+    console.log("wiki", city, res.status);
     if (!res.ok) return null;
     const data = await res.json();
     const url: string | undefined = data.originalimage?.source || data.thumbnail?.source;
+    console.log("wiki url", city, url ? "yes" : "no");
     if (!url) return null;
     return { url, alt: `Vue de ${city}, ville de France` };
-  } catch {
+  } catch (e) {
+    console.error("wiki err", city, String(e));
     return null;
   }
 }
