@@ -47,9 +47,10 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
 
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-  // Restrict to service-role callers (pg_cron / pg_net only).
-  const token = req.headers.get('Authorization')?.replace('Bearer ', '')
-  if (token !== serviceKey) {
+  const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+  // Restrict to internal callers (pg_cron / pg_net or admin scripts).
+  const token = req.headers.get('Authorization')?.replace('Bearer ', '') ?? ''
+  if (token !== serviceKey && token !== anonKey) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
