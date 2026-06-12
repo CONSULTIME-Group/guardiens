@@ -15,7 +15,7 @@ import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
 import { Plus, Eye, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { differenceInDays } from "date-fns";
-import { useIsMobile } from "@/hooks/use-mobile";
+
 
 
 import RoleActivationBanner from "./RoleActivationBanner";
