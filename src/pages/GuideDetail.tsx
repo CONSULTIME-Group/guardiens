@@ -205,11 +205,11 @@ const GuideDetail = () => {
             <img src={guideHeaderImg} alt={t("guide_detail.header_alt", { city: guide.city })} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/70 to-background/40" />
           </div>
-          <div className="relative max-w-5xl mx-auto px-4 py-10 sm:py-14">
-          <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground mb-4">
+          <div className="relative max-w-5xl mx-auto px-4 py-6 sm:py-10 md:py-14">
+          <h1 className="font-heading text-2xl sm:text-4xl font-bold text-foreground mb-3 md:mb-4">
             {t("guide_detail.title", { city: guide.city })}
           </h1>
-          <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl mb-3">
+          <p className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-3xl mb-3">
             {guide.intro}
           </p>
           <p className="text-sm italic text-secondary font-medium">{guide.ideal_for}</p>
@@ -227,7 +227,7 @@ const GuideDetail = () => {
               className="pl-10"
             />
           </div>
-          <div className="mt-4 flex flex-wrap items-center gap-4">
+          <div className="mt-3 flex flex-wrap items-center gap-2 md:gap-4">
             <Badge variant="secondary">{t("guide_detail.places_count", { count: places.length })}</Badge>
             <Link
               to={`/house-sitting/${guide.slug}`}

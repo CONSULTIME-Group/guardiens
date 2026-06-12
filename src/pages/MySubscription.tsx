@@ -360,7 +360,7 @@ const MySubscription = () => {
         {/* Carte principale */}
         <section className="bg-card border border-primary/20 rounded-2xl shadow-sm overflow-hidden">
           <div className="px-6 sm:px-8 pt-7 pb-6 flex flex-col items-center text-center space-y-3 border-b border-border/50">
-            <span className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-[11px] font-medium px-3 py-1.5 rounded-full font-body tracking-widest uppercase select-none">
+            <span className="hidden md:inline-flex items-center gap-1.5 bg-primary/10 text-primary text-[11px] font-medium px-3 py-1.5 rounded-full font-body tracking-widest uppercase select-none">
               Pré-lancement · Bêta
             </span>
             <h2 className="font-heading text-2xl sm:text-3xl font-semibold text-foreground leading-tight">
@@ -421,7 +421,7 @@ const MySubscription = () => {
           <div className="px-6 sm:px-8 py-5 border-b border-border/50 space-y-3">
             <div className="flex items-baseline justify-between gap-4 flex-wrap">
               <p className="text-sm font-medium text-foreground font-body">Il reste encore</p>
-              <p className="font-heading text-3xl font-bold text-founder whitespace-nowrap tabular-nums" aria-live="polite" aria-atomic="true">
+              <p className="font-heading text-2xl md:text-3xl font-bold text-founder whitespace-nowrap tabular-nums" aria-live="polite" aria-atomic="true">
                 {countdown.daysLeft}
                 <span className="text-base font-body font-normal text-muted-foreground ml-1.5">
                   jour{countdown.daysLeft > 1 ? "s" : ""} pour rejoindre les Fondateurs
@@ -460,7 +460,7 @@ const MySubscription = () => {
 
           {/* Avantages */}
           <div className="px-6 sm:px-8 py-6 border-b border-border/50 space-y-4">
-            <p className="text-xs uppercase tracking-widest text-muted-foreground font-body">Tout ce que vous débloquez</p>
+            <p className="hidden md:block text-xs uppercase tracking-widest text-muted-foreground font-body">Tout ce que vous débloquez</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
               {ADVANTAGES.map(({ label, href }) => (
                 <div key={label} className="flex items-center gap-2.5 min-w-0 group">
@@ -528,7 +528,7 @@ const MySubscription = () => {
 
         {/* Pricing preview */}
         <div className="bg-card border border-border rounded-xl p-5 space-y-3">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground font-body">Après le 15 juillet, la formule</p>
+          <p className="hidden md:block text-xs uppercase tracking-widest text-muted-foreground font-body">Après le 15 juillet, la formule</p>
           <div className="flex flex-col items-center text-center space-y-1">
             <p className="font-heading text-3xl font-bold text-primary">
               6,99 €<span className="text-sm font-normal text-muted-foreground">/mois</span>
@@ -681,7 +681,7 @@ const MySubscription = () => {
           </div>
 
           <div className="bg-muted/30 rounded-xl p-5">
-            <p className="text-xs uppercase tracking-widest text-muted-foreground font-body mb-4">Ce que vous débloquez</p>
+            <p className="hidden md:block text-xs uppercase tracking-widest text-muted-foreground font-body mb-4">Ce que vous débloquez</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
               {ADVANTAGES.map((a) => (
                 <div key={a.label} className="flex items-center gap-2">
