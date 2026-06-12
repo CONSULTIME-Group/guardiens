@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { species, breed } = await req.json();
+    const { species, breed, force } = await req.json();
     if (!species || !breed) {
       return new Response(JSON.stringify({ error: "species and breed required" }), {
         status: 400,
@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
       .eq("breed", normalizedBreed)
       .maybeSingle();
 
-    if (cached) {
+    if (cached && !force) {
       return new Response(JSON.stringify(cached), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
