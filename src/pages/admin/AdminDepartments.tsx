@@ -16,7 +16,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, Trash2, Loader2, Building2, ExternalLink } from "lucide-react";
+import { Plus, Trash2, Loader2, Building2, ExternalLink, Zap } from "lucide-react";
+import { DEPT_NAMES } from "@/lib/departments";
 
 interface DepartmentPage {
   id: string;
@@ -32,6 +33,8 @@ const AdminDepartments = () => {
   const [department, setDepartment] = useState("");
   const [region, setRegion] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [batchRunning, setBatchRunning] = useState(false);
+  const [batchProgress, setBatchProgress] = useState<{ done: number; total: number; ok: number; failed: number } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<DepartmentPage | null>(null);
 
   const { data: pages = [], isLoading } = useQuery({
