@@ -370,16 +370,29 @@ const PublicSitDetail = () => {
     return null;
   };
 
- const jsonLd = {
+ const jsonLd: Record<string, any> = {
  "@context": "https://schema.org",
  "@type": "Service",
  name: sit.title || `Garde d'animaux à ${cityForTitle}`,
  description: truncatedSeoDesc,
+ serviceType: ["House Sitting", "Pet Sitting"],
  provider: {
  "@type": "Person",
  name: owner?.first_name || "Membre Guardiens",
+ ...(owner?.identity_verified && {
+   hasCredential: {
+     "@type": "EducationalOccupationalCredential",
+     credentialCategory: "Identity Verified",
+     recognizedBy: { "@type": "Organization", name: "Guardiens" },
+   },
+ }),
  },
- areaServed: cityForTitle,
+ ...(ogImageUrl && { image: ogImageUrl }),
+ areaServed: {
+   "@type": "City",
+   name: cityForTitle,
+   address: { "@type": "PostalAddress", addressLocality: cityForTitle, addressCountry: "FR" },
+ },
  offers: {
  "@type": "Offer",
  price: "0",
@@ -387,10 +400,19 @@ const PublicSitDetail = () => {
  eligibleCustomerType: "Owner",
   description: "Gratuit pour les propriétaires, sans abonnement requis.",
  availability: "https://schema.org/InStock",
- validFrom: sit.start_date,
- validThrough: sit.end_date,
+ ...(sit.start_date && { validFrom: sit.start_date }),
+ ...(sit.end_date && { validThrough: sit.end_date }),
  },
+ ...(owner?.completed_sits_count && owner.completed_sits_count > 0 && {
+   interactionStatistic: {
+     "@type": "InteractionCounter",
+     interactionType: "https://schema.org/PerformAction",
+     userInteractionCount: owner.completed_sits_count,
+     name: "Gardes déjà accueillies par ce membre",
+   },
+ }),
  };
+
 
   // Critère d'indexation (qualité minimum pour éviter le thin content) :
    // - ≥3 photos dont au moins 2 en haute résolution (≥800×600px)
