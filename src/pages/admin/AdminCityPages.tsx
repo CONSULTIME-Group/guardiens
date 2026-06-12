@@ -214,6 +214,19 @@ const AdminCityPages = () => {
                 >
                   {page.published ? "Dépublier" : "Publier"}
                 </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleRegenerate(page)}
+                  disabled={!!regeneratingId}
+                  title="Régénérer le contenu IA"
+                >
+                  {regeneratingId === page.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4" />
+                  )}
+                </Button>
                 <a
                   href={`/house-sitting/${page.slug}`}
                   target="_blank"
