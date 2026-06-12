@@ -63,8 +63,8 @@ const OwnerDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
-  const isMobile = useIsMobile();
   const [showAllMobile, setShowAllMobile] = useState(false);
+
 
   
 
