@@ -30,6 +30,8 @@ const MissionsFilterBar = ({
 }: Props) => {
   const { t } = useTranslation();
   const tp = (k: string, opts?: any) => t(k, opts) as string;
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const activeCategoryLabel = tp(`mission_filter_pills.${categoryFilter}`);
   return (
     <div className="space-y-3">
       <div className="flex flex-col sm:flex-row gap-3">
