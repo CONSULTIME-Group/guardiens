@@ -8,6 +8,23 @@ const corsHeaders = {
 
 const LOVABLE_API_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
+function extractJson(raw: string): any | null {
+  if (!raw) return null;
+  let s = raw.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
+  const start = s.search(/[\{\[]/);
+  if (start === -1) return null;
+  const open = s[start];
+  const close = open === "[" ? "]" : "}";
+  const end = s.lastIndexOf(close);
+  if (end === -1 || end < start) return null;
+  s = s.slice(start, end + 1);
+  try { return JSON.parse(s); } catch {}
+  const repaired = s
+    .replace(/,\s*([}\]])/g, "$1")
+    .replace(/[\x00-\x1F\x7F]/g, " ");
+  try { return JSON.parse(repaired); } catch { return null; }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -73,8 +90,9 @@ Réponds UNIQUEMENT en JSON valide :
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 500,
+        max_tokens: 1200,
         temperature: 0.7,
+        response_format: { type: "json_object" },
       }),
     });
 
@@ -86,12 +104,7 @@ Réponds UNIQUEMENT en JSON valide :
     const aiData = await aiResponse.json();
     const content = aiData.choices?.[0]?.message?.content || "";
 
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error("Could not parse AI response as JSON");
-    }
-
-    const generated = JSON.parse(jsonMatch[0]);
+    const generated = extractJson(content) ?? {};
 
     const record = {
       city: city.trim(),
