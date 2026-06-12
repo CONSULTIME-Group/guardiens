@@ -140,8 +140,22 @@ const SearchSitter = () => {
  const [sitterEligible, setSitterEligible] = useState(false);
  const [userCompletedSits, setUserCompletedSits] = useState(0);
  const [sitterProfile, setSitterProfile] = useState<any>(null);
- const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
  const initialLoadDone = useRef(false);
+ const [intlCount, setIntlCount] = useState<number>(0);
+ useEffect(() => {
+   let cancelled = false;
+   (async () => {
+     const { count } = await supabase
+       .from("sits")
+       .select("id", { count: "exact", head: true })
+       .eq("status", "published")
+       .not("country", "is", null)
+       .neq("country", "FR");
+     if (!cancelled) setIntlCount(count || 0);
+   })();
+   return () => { cancelled = true; };
+ }, []);
 
  // Pill popover states
  const [editingCity, setEditingCity] = useState(false);
