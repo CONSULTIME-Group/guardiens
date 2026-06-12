@@ -325,6 +325,7 @@ const AppRoutes = () => (
         <Route path="/admin/city-pages" element={<AdminCityPages />} />
         <Route path="/admin/guides" element={<AdminGuides />} />
         <Route path="/admin/departments" element={<AdminDepartments />} />
+        <Route path="/admin/breeds" element={<AdminBreeds />} />
         <Route path="/admin/faq" element={<AdminFAQ />} />
         <Route path="/admin/small-missions" element={<AdminSmallMissions />} />
         <Route path="/admin/legal" element={<AdminLegal />} />
