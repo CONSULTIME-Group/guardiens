@@ -13,7 +13,7 @@ import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import { Calendar, Home, PawPrint, ShieldCheck, MessageSquare, Users, ArrowLeft, AlertCircle, Zap } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+// Tooltip retiré : remplacé par checklist visible des bloquants de publication.
 import { cn } from "@/lib/utils";
 import { hasMedication } from "@/lib/medication";
 import { trackFirstAction } from "@/lib/analytics";
