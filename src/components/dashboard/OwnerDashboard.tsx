@@ -609,7 +609,8 @@ const OwnerDashboard = () => {
       )}
 
       {/* ═══ Footer dashboard, badges inline + ressources ═══ */}
-      <div className="px-5 md:px-8 pt-2 border-t border-border/40 space-y-3">
+      <div className={`px-5 md:px-8 pt-2 border-t border-border/40 space-y-3 ${!showAllMobile ? "hidden md:block" : ""}`}>
+
         {user?.id && userBadges && userBadges.length > 0 && (
           <div className="rounded-2xl bg-card border border-border px-4 py-3">
             <div className="flex items-center justify-between gap-3 mb-3">
