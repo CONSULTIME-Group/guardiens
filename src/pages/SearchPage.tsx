@@ -85,7 +85,7 @@ const SearchPage = () => {
           Hiérarchie : libellé "Consultation libre" + bénéfice clair + CTA primaire. */}
       {!user && (
         <div className="bg-primary/5 border-b border-primary/20">
-          <div className="container max-w-6xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-sm">
+          <div className="container max-w-6xl mx-auto px-4 py-2.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-x-4 gap-y-2 text-sm">
             <div className="flex items-center gap-2 min-w-0">
               <span className="inline-flex items-center rounded-full bg-primary/15 text-primary px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide shrink-0">
                 Consultation libre

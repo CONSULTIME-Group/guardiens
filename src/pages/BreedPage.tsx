@@ -70,7 +70,7 @@ const BreedPage = () => {
   if (notFound) return <Navigate to="/races" replace />;
   if (loading || !breed) {
     return (
-      <main className="min-w-0 max-w-3xl mx-auto px-4 py-12">
+      <main className="min-w-0 max-w-3xl mx-auto px-4 py-8 md:py-12">
         <div className="animate-pulse space-y-3">
           <div className="h-8 bg-muted rounded w-1/2" />
           <div className="h-4 bg-muted rounded w-3/4" />
@@ -186,7 +186,7 @@ const BreedPage = () => {
 
       </Helmet>
 
-      <main className="min-w-0 max-w-3xl mx-auto px-4 py-12">
+      <main className="min-w-0 max-w-3xl mx-auto px-4 py-8 md:py-12">
         <nav className="text-sm text-muted-foreground mb-4">
           <Link to="/" className="hover:underline">Accueil</Link>
           <span className="mx-2">/</span>
@@ -196,10 +196,10 @@ const BreedPage = () => {
         </nav>
 
         <header className="mb-8">
-          <p className="text-sm uppercase tracking-wide text-primary font-semibold mb-2">
+          <p className="hidden md:block text-sm uppercase tracking-wide text-primary font-semibold mb-2">
             Guide de garde · {speciesLabel}
           </p>
-          <h1 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-3">
+          <h1 className="font-serif text-2xl md:text-4xl font-bold text-foreground mb-3">
             Garder un {breedCap} à domicile
           </h1>
           {breed.difficulty_level && (

@@ -120,10 +120,10 @@ export default function InternationalListings() {
 
       <main id="main-content" className="flex-1 min-w-0" role="main">
         <section className="max-w-6xl mx-auto px-4 md:px-6 pt-10 pb-6">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-3 flex items-center gap-2">
+          <p className="hidden md:flex text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-3 items-center gap-2">
             <Globe2 className="h-3.5 w-3.5" /> {t("intl_listings.kicker")}
           </p>
-          <h1 className="font-heading text-3xl md:text-4xl lg:text-5xl font-medium leading-tight text-foreground tracking-tight max-w-3xl">
+          <h1 className="font-heading text-2xl md:text-4xl lg:text-5xl font-medium leading-tight text-foreground tracking-tight max-w-3xl">
             {t("intl_listings.title")}
           </h1>
           <p className="mt-4 text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
@@ -136,7 +136,7 @@ export default function InternationalListings() {
           </p>
         </section>
 
-        <section className="max-w-6xl mx-auto px-4 md:px-6 pb-16 space-y-6">
+        <section className="max-w-6xl mx-auto px-4 md:px-6 pb-10 md:pb-16 space-y-6">
           {sits === null ? (
             <>
               <Skeleton className="h-[320px] md:h-[420px] rounded-2xl" />

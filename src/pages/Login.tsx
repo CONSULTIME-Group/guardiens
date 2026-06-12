@@ -148,7 +148,7 @@ const Login = () => {
         description={t("login_page.panel_description")}
       />
 
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
+      <div className="flex-1 flex items-center justify-center px-6 py-6 md:py-12">
         <div className="w-full max-w-md">
           <Link
             to="/"
@@ -157,9 +157,9 @@ const Login = () => {
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             {t("auth_common.back_to_site")}
           </Link>
-          <div className="text-center mb-10">
+          <div className="text-center mb-6 md:mb-10">
             <Link to="/" className="inline-block">
-              <h1 className="font-heading text-3xl font-bold mb-2 hover:opacity-80 transition-opacity">
+              <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2 hover:opacity-80 transition-opacity">
                 <span className="text-primary">g</span>uardiens
               </h1>
             </Link>
