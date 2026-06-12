@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { slugify } from "@/lib/normalize";
 import { CITIES } from "@/data/cities";
 import { buildOgImageUrl } from "@/lib/ogImage";
+import ShareLink from "@/components/share/ShareLink";
 
 interface BreedProfile {
   species: string;
@@ -161,6 +162,9 @@ const BreedPage = () => {
               Niveau : {breed.difficulty_level}
             </span>
           )}
+          <div className="mt-4">
+            <ShareLink url={canonical} title={title} text={description} source="breed_page" />
+          </div>
         </header>
 
         <article className="prose prose-neutral max-w-none">
