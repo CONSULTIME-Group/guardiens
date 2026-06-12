@@ -68,69 +68,122 @@ Deno.serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const prompt = `Vous êtes rédacteur SEO senior pour Guardiens, plateforme française de house-sitting de proximité (garde de maison et d'animaux entre particuliers, sans transaction financière directe). Vous rédigez une landing page locale RICHE et DÉTAILLÉE pour la ville de ${city} (département ${department}).
+    const brandContext = `CONTEXTE MARQUE Guardiens (plateforme de house-sitting de proximité, sans transaction financière directe) :
+- Fondée par Jérémie et Elisa après 5 ans de house-sitting en France (37 maisons gardées, 234 animaux accompagnés).
+- Rencontre physique obligatoire propriétaire/gardien avant chaque garde.
+- Propriétaires sans frais. Gardiens : 6,99 €/mois résiliable, 10 € ponctuel, ou 65 €/an. Aucune commission.
+- Gratuit pour tous jusqu'au 14 juillet 2026.
+- L'animal reste chez lui, la maison reste vivante (courrier, plantes, lumières). Vérification d'identité + avis croisés.
 
-CONTEXTE MARQUE (à intégrer naturellement dans le contenu) :
-- Guardiens a été fondée par Jérémie et Elisa, après 5 ans de house-sitting à travers la France (37 maisons gardées, 234 animaux accompagnés).
-- Principe fondamental : rencontre physique obligatoire entre propriétaire et gardien avant chaque garde.
-- Modèle : propriétaires sans frais. Gardiens : 6,99 €/mois résiliable, ou 10 € en formule ponctuelle, ou 65 €/an.
-- Aucune commission par garde, jamais.
-- Gratuit pour tous (propriétaires ET gardiens) jusqu'au 14 juillet 2026.
-- L'animal reste chez lui, dans ses repères. La maison reste vivante (courrier, plantes, lumières).
-- Vérification d'identité + avis croisés après chaque garde.
-
-RÈGLES STRICTES NON NÉGOCIABLES :
+RÈGLES STRICTES :
 - Vouvoiement systématique.
-- Aucune mention de région administrative ni de « Auvergne-Rhône-Alpes » / « AURA ».
-- Mots PROSCRITS : « voisin », « voisine », « voisinage ». Utilisez : « gardien », « gens du coin », « personne de confiance », « proche ».
+- Mots PROSCRITS : « voisin », « voisine », « voisinage ». Utilisez « gardien », « gens du coin », « personne de confiance », « proche ».
+- Aucune mention de « Auvergne-Rhône-Alpes » / « AURA » ni de région administrative.
 - Tiret cadratin « — » PROSCRIT. Utilisez virgule, deux-points, parenthèses ou point.
-- Pas d'emoji, pas de superlatif commercial, pas de mention de concurrents (Animaute, Holidog, Pet Sitting, etc.).
-- Ton YMYL : factuel, rassurant, utile. Évitez « unique », « révolutionnaire », « le meilleur ».
+- Pas d'emoji, pas de superlatif commercial, pas de concurrents (Animaute, Holidog, etc.).
+- Ton YMYL factuel. Évitez « unique », « révolutionnaire », « le meilleur ».
 - Préférez « gratuit » à « 0 € ». Pas de « à vie » ni « pour toujours ».
-- Ancrage local concret : citez 2 à 4 lieux RÉELS et VÉRIFIABLES de ${city} (parcs, places, quartiers, monuments connus). N'inventez RIEN. Si vous doutez d'un lieu, n'en parlez pas.
-- Liens internes OBLIGATOIRES en markdown, à répartir dans le contenu : [tarifs](/tarifs), [inscription propriétaire](/inscription?role=owner), [devenir gardien](/inscription?role=sitter), [petites missions](/petites-missions), [gardien d'urgence](/gardien-urgence).
+- N'inventez aucun lieu. Si vous doutez, restez générique.`;
 
-Répondez UNIQUEMENT en JSON valide avec EXACTEMENT cette structure :
+    // Appel 1 : métadonnées JSON courtes (fiable)
+    const metaPrompt = `${brandContext}
+
+Vous générez les MÉTADONNÉES SEO d'une landing page Guardiens pour ${city} (département ${department}).
+
+Répondez UNIQUEMENT en JSON strict :
 {
-  "h1_title": "Titre H1 percutant intégrant ${city}, 60-80 caractères, parlant de house-sitting / garde maison animaux",
-  "meta_title": "Titre SEO 50-60 caractères avec ${city} et la marque Guardiens",
-  "meta_description": "Méta-description 140-160 caractères, claire, incite à l'inscription gratuite",
-  "excerpt": "1 à 2 phrases résumant la page (pour aperçu cards), max 200 caractères",
-  "intro_text": "Texte d'introduction de 5 à 7 phrases. Présentez ${city} comme cadre de vie pour les animaux, mentionnez les profils susceptibles d'utiliser Guardiens (familles, retraités actifs, télétravailleurs, voyageurs), évoquez ce que les gardiens y apprécient. Concret, ancré localement.",
-  "content": "Article markdown LONG et RICHE (1000 à 1300 mots) structuré EXACTEMENT comme suit :\\n\\n## Pourquoi ${city} a besoin d'une plateforme de garde de proximité\\n(3 sous-sections en ### : 'Une ville où les animaux font partie de la famille' avec un chiffre estimé de foyers avec chien/chat, 'Les limites des pensions classiques' avec fourchette de prix 25-50€/nuit, 'Le house-sitting, une alternative qui a fait ses preuves'. 4 paragraphes denses au total.)\\n\\n## Comment fonctionne Guardiens à ${city}\\n(4 sous-sections en ### intitulées 'Étape 1, Publiez votre annonce' avec lien [tarifs](/tarifs), 'Étape 2, Rencontrez les gardiens intéressés', 'Étape 3, Confirmez la garde', 'Étape 4, Partez l'esprit libre' avec lien [gardien d'urgence](/gardien-urgence). 1 paragraphe par étape.)\\n\\n## Les quartiers et environs de ${city}\\n(1 paragraphe d'intro puis 3 à 5 paragraphes en **gras** sur des quartiers ou communes limitrophes RÉELS de ${city}, type d'habitat, espaces verts, profils de gardes. Si vous ne connaissez pas finement la ville, restez sur 3 zones génériques bien identifiées, pas plus.)\\n\\n## Propriétaires à ${city}, ce que Guardiens vous offre\\n(5 à 6 bénéfices en **gras** puis 1-2 phrases : animal reste chez lui, maison reste vivante, rencontre préalable obligatoire, aucune commission avec lien [tarifs détaillés](/tarifs), accord de garde clair, gardiens vérifiés.)\\n\\n## Qui sont les gardiens à ${city}\\n(Intro 1 phrase + 4 profils en **gras** : retraités actifs, jeunes actifs en télétravail, familles, étudiants vérifiés. Mentionnez les [petites missions](/petites-missions) pour les gardes courtes.)\\n\\n## Tarifs Guardiens : transparents et sans surprise\\n(3 paragraphes en **gras** : Propriétaires sans frais, Gardiens trois formules au choix avec prix exacts 6,99€/mois et 10€ ponctuel et 65€/an, Aucune commission par garde. Lien [page tarifs complète](/tarifs). Mentionnez la gratuité totale jusqu'au 14 juillet 2026.)\\n\\n## Notre histoire et notre engagement à ${city}\\n(2-3 paragraphes : fondation par Jérémie et Elisa, 37 maisons gardées et 234 animaux accompagnés en 5 ans, ce que cette expérience a apporté à la plateforme, lancement officiel le 14 juillet 2026, ${city} fait partie du déploiement France entière.)\\n\\n## Questions fréquentes des propriétaires à ${city}\\n(5 à 6 questions FAQ au format **Question ?** suivi de la réponse en 2-3 phrases. Couvrez : rencontre préalable, urgence/imprévu, frais cachés, animaux à besoins spécifiques, durée minimum/maximum, vérification d'identité.)"
-}
+  "h1_title": "H1 60-80 caractères avec ${city}, sur house-sitting / garde maison animaux",
+  "meta_title": "50-60 caractères avec ${city} et Guardiens",
+  "meta_description": "140-160 caractères, incite à l'inscription gratuite",
+  "excerpt": "1-2 phrases résumé, max 200 caractères",
+  "intro_text": "5 à 7 phrases : ${city} comme cadre de vie pour les animaux, profils utilisateurs (familles, retraités actifs, télétravailleurs, voyageurs), ancrage local concret."
+}`;
 
-Le champ "content" DOIT être du markdown valide, faire environ 1000 à 1300 mots, contenir les liens internes demandés, et suivre la structure H2/### ci-dessus. Pas de H1 dans le content (le H1 est géré par h1_title).`;
+    // Appel 2 : corps markdown brut (pas d'échappement JSON, beaucoup plus stable)
+    const contentPrompt = `${brandContext}
 
-    const aiResponse = await fetch(LOVABLE_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 16000,
-        temperature: 0.7,
-        response_format: { type: "json_object" },
-      }),
-    });
+Vous rédigez le CORPS markdown (1000 à 1300 mots) d'une landing page Guardiens pour ${city} (${department}).
 
-    if (!aiResponse.ok) {
-      const errText = await aiResponse.text();
-      throw new Error(`AI API call failed [${aiResponse.status}]: ${errText}`);
-    }
+Répondez UNIQUEMENT en markdown brut. PAS de JSON, PAS de \`\`\`, PAS de H1 (réservé au titre de page).
 
-    const aiData = await aiResponse.json();
-    const content = aiData.choices?.[0]?.message?.content || "";
-    const finishReason = aiData.choices?.[0]?.finish_reason;
-    const truncated = finishReason === "length";
-    if (truncated) {
-      console.warn("Response truncated for city", city);
-    }
+Structure EXACTE :
 
-    const generated = extractJson(content) ?? {};
+## Pourquoi ${city} a besoin d'une plateforme de garde de proximité
+### Une ville où les animaux font partie de la famille
+(paragraphe + chiffre estimé de foyers avec chien/chat)
+### Les limites des pensions classiques
+(paragraphe + fourchette 25-50 € la nuit)
+### Le house-sitting, une alternative qui a fait ses preuves
+(paragraphe)
+
+## Comment fonctionne Guardiens à ${city}
+### Étape 1, Publiez votre annonce
+(paragraphe avec lien [tarifs](/tarifs))
+### Étape 2, Rencontrez les gardiens intéressés
+(paragraphe)
+### Étape 3, Confirmez la garde
+(paragraphe)
+### Étape 4, Partez l'esprit libre
+(paragraphe avec lien [gardien d'urgence](/gardien-urgence))
+
+## Les quartiers et environs de ${city}
+(intro + 3 à 5 zones réelles de ${city} en **gras**, type d'habitat, espaces verts. Si doute, restez sur 3 zones génériques.)
+
+## Propriétaires à ${city}, ce que Guardiens vous offre
+(5 à 6 bénéfices en **gras** suivis de 1-2 phrases : animal chez lui, maison vivante, rencontre préalable obligatoire, aucune commission avec lien [tarifs détaillés](/tarifs), accord de garde clair, gardiens vérifiés)
+
+## Qui sont les gardiens à ${city}
+(intro + 4 profils en **gras** : retraités actifs, jeunes actifs en télétravail, familles, étudiants vérifiés. Mentionnez les [petites missions](/petites-missions) pour les gardes courtes.)
+
+## Tarifs Guardiens : transparents et sans surprise
+(3 paragraphes en **gras** : Propriétaires sans frais ; Gardiens 6,99 €/mois ou 10 € ponctuel ou 65 €/an ; Aucune commission par garde. Lien [page tarifs complète](/tarifs). Gratuité totale jusqu'au 14 juillet 2026.)
+
+## Notre histoire et notre engagement à ${city}
+(2-3 paragraphes : fondation Jérémie & Elisa, 37 maisons et 234 animaux en 5 ans, lancement officiel 14 juillet 2026, ${city} dans le déploiement France entière)
+
+## Questions fréquentes des propriétaires à ${city}
+(5 à 6 questions au format **Question ?** + réponse 2-3 phrases : rencontre préalable, urgence, frais cachés, animaux à besoins spécifiques, durée min/max, vérification d'identité)`;
+
+    const callAI = async (p: string, jsonMode: boolean) => {
+      const res = await fetch(LOVABLE_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-pro",
+          messages: [{ role: "user", content: p }],
+          max_tokens: jsonMode ? 2000 : 8000,
+          temperature: 0.7,
+          ...(jsonMode ? { response_format: { type: "json_object" } } : {}),
+        }),
+      });
+      if (!res.ok) {
+        const t = await res.text();
+        throw new Error(`AI API [${res.status}]: ${t}`);
+      }
+      const data = await res.json();
+      return {
+        text: data.choices?.[0]?.message?.content || "",
+        finishReason: data.choices?.[0]?.finish_reason,
+      };
+    };
+
+    const [metaRes, contentRes] = await Promise.all([
+      callAI(metaPrompt, true),
+      callAI(contentPrompt, false),
+    ]);
+
+    const truncated = contentRes.finishReason === "length";
+    if (truncated) console.warn("Content truncated for city", city);
+
+    const generated: any = extractJson(metaRes.text) ?? {};
+    const markdown = (contentRes.text || "")
+      .replace(/^```(?:markdown|md)?\s*/i, "")
+      .replace(/```\s*$/, "")
+      .trim();
+    if (markdown.length > 200) generated.content = markdown;
 
     // Defensive : si l'IA a tronqué ou si le content est vide, on REFUSE
     // d'écraser un contenu existant valide. En cas de création, on échoue
