@@ -25,6 +25,7 @@ const AdminCityPages = () => {
   const [generating, setGenerating] = useState(false);
   const [batchRunning, setBatchRunning] = useState(false);
   const [batchProgress, setBatchProgress] = useState<{ done: number; total: number; ok: number; skipped: number; failed: number } | null>(null);
+  const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; city: string } | null>(null);
 
   const { data: pages, refetch } = useQuery({
