@@ -13,7 +13,7 @@ import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import { Calendar, Home, PawPrint, ShieldCheck, MessageSquare, Users, ArrowLeft, AlertCircle, Zap } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+// Tooltip retiré : remplacé par checklist visible des bloquants de publication.
 import { cn } from "@/lib/utils";
 import { hasMedication } from "@/lib/medication";
 import { trackFirstAction } from "@/lib/analytics";
@@ -316,6 +316,34 @@ const CreateSit = () => {
   const descriptionValid = specificExpectations.length >= 50;
   const canPublish = profileCompletion >= 60 && property && title && startDate && endDate && !dateError && descriptionValid;
 
+  // Liste explicite des bloquants à publier (UX : remplacer le tooltip pauvre par une checklist visible).
+  // Ordre = priorité d'affichage et de scroll lors du clic sur « Publier ».
+  type PublishBlocker = { id: string; label: string; anchor?: string; action?: string };
+  const publishBlockers: PublishBlocker[] = [
+    profileCompletion < 60 ? { id: "profile", label: `Profil complété à ≥ 60 % (actuellement ${profileCompletion} %)`, action: "/owner-profile" } : null,
+    !property ? { id: "property", label: "Logement renseigné", action: "/owner-profile" } : null,
+    !title ? { id: "title", label: "Titre de l'annonce", anchor: "title-field" } : null,
+    !startDate ? { id: "start", label: "Date de début", anchor: "dates-field" } : null,
+    !endDate ? { id: "end", label: "Date de fin", anchor: "dates-field" } : null,
+    dateError ? { id: "date-error", label: dateError, anchor: "dates-field" } : null,
+    !descriptionValid ? { id: "desc", label: `Description d'au moins 50 caractères (actuellement ${specificExpectations.length})`, anchor: "description-field" } : null,
+  ].filter(Boolean) as PublishBlocker[];
+
+  const onPublishClick = () => {
+    if (canPublish) return handlePublish();
+    const first = publishBlockers[0];
+    if (!first) return;
+    if (first.action) {
+      toast({ variant: "destructive", title: "Il manque quelque chose pour publier", description: first.label });
+      navigate(first.action);
+      return;
+    }
+    if (first.anchor && typeof document !== "undefined") {
+      document.getElementById(first.anchor)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    toast({ variant: "destructive", title: "Il manque quelque chose pour publier", description: first.label });
+  };
+
   // Durée réelle en jours (inclusive) entre start_date et end_date
   const nDays = (startDate && endDate && !dateError)
     ? Math.max(1, Math.round((new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000) + 1)
@@ -462,7 +490,7 @@ const CreateSit = () => {
 
       {/* Form fields */}
       <div className="space-y-6">
-        <div>
+        <div id="title-field" className="scroll-mt-24">
           <div className="flex items-center justify-between mb-1.5">
             <Label className="text-sm font-medium">Titre de l'annonce *</Label>
             {nDays > 0 && pets.length > 0 && (
@@ -483,7 +511,7 @@ const CreateSit = () => {
         </div>
 
         {/* Dates obligatoires */}
-        <div className="grid grid-cols-2 gap-4">
+        <div id="dates-field" className="grid grid-cols-2 gap-4 scroll-mt-24">
           <div>
             <Label className="text-sm font-medium">Date de début *</Label>
             <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} min={today} className="mt-1.5" />
@@ -568,7 +596,8 @@ const CreateSit = () => {
           </div>
         )}
 
-        <div>
+        <div id="description-field" className="scroll-mt-24">
+
           <div className="flex items-center justify-between gap-2">
             <Label className="text-sm font-medium">Description de la garde *</Label>
             <ImproveListingButton
@@ -861,46 +890,52 @@ const CreateSit = () => {
         </SummaryCard>
       </div>
 
-      {/* CORRECTION 6, Publish button */}
+      {/* Barre de publication fixée bas d'écran avec checklist explicite des bloquants restants. */}
       <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40">
-        <div className="max-w-3xl mx-auto flex gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            className="h-12 px-4 shrink-0"
-            onClick={async () => {
-              const id = await saveDraft();
-              if (id) {
-                toast({ title: "Brouillon enregistré", description: "Vous pourrez le reprendre depuis « Mes gardes »." });
-                navigate("/sits?tab=drafts");
-              }
-            }}
-            disabled={savingDraft || !property}
-          >
-            {savingDraft ? "Sauvegarde…" : "Enregistrer & quitter"}
-          </Button>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex-1">
-                  <Button
-                    onClick={handlePublish}
-                    disabled={!canPublish || publishing}
-                    className={`w-full h-12 text-base font-semibold ${canPublish ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground cursor-not-allowed"}`}
-                  >
-                    {publishing ? "Publication en cours..." : "Publier l'annonce"}
-                  </Button>
-                </div>
-              </TooltipTrigger>
-              {!canPublish && (
-                <TooltipContent>
-                  <p>Complétez le titre et les dates pour publier</p>
-                </TooltipContent>
-              )}
-            </Tooltip>
-          </TooltipProvider>
+        <div className="max-w-3xl mx-auto space-y-2">
+          {publishBlockers.length > 0 && (
+            <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2">
+              <p className="text-xs font-medium text-destructive mb-1">
+                Il manque {publishBlockers.length} élément{publishBlockers.length > 1 ? "s" : ""} pour publier :
+              </p>
+              <ul className="space-y-0.5">
+                {publishBlockers.map((b) => (
+                  <li key={b.id} className="text-xs text-destructive flex items-start gap-1.5">
+                    <AlertCircle className="h-3 w-3 mt-0.5 shrink-0" />
+                    <span>{b.label}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-12 px-4 shrink-0"
+              onClick={async () => {
+                const id = await saveDraft();
+                if (id) {
+                  toast({ title: "Brouillon enregistré", description: "Vous pourrez le reprendre depuis « Mes gardes »." });
+                  navigate("/sits?tab=drafts");
+                }
+              }}
+              disabled={savingDraft || !property}
+            >
+              {savingDraft ? "Sauvegarde…" : "Enregistrer & quitter"}
+            </Button>
+            <Button
+              onClick={onPublishClick}
+              disabled={publishing}
+              aria-disabled={!canPublish}
+              className={`flex-1 h-12 text-base font-semibold ${canPublish ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground hover:bg-muted"}`}
+            >
+              {publishing ? "Publication en cours..." : canPublish ? "Publier l'annonce" : "Voir ce qui manque"}
+            </Button>
+          </div>
         </div>
       </div>
+
     </div>
   );
 };
