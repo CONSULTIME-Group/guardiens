@@ -84,6 +84,7 @@ async function geocode(city: string, postalCode?: string | null, country?: strin
 const ApproximateLocationMap = ({
   city,
   postalCode,
+  country,
   lat,
   lng,
   radius = 1500,
@@ -107,13 +108,13 @@ const ApproximateLocationMap = ({
       return;
     }
     setLoading(true);
-    geocode(city, postalCode).then((c) => {
+    geocode(city, postalCode, country).then((c) => {
       if (cancelled) return;
       setCoords(c);
       setLoading(false);
     });
     return () => { cancelled = true; };
-  }, [city, postalCode, lat, lng, hasExact]);
+  }, [city, postalCode, country, lat, lng, hasExact]);
 
   if (loading || !coords) {
     return (
