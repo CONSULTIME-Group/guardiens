@@ -255,8 +255,8 @@
   },
   "pricing": {
     "meta": {
-      "title_before": "Guardiens rates, Offered for all until {{date}}",
-      "title_after": "Guardiens rates, Free for owners · {{price}}",
+      "title_before": "Pricing, free for all until {{date}}",
+      "title_after": "Pricing, free for owners · {{price}}",
       "desc_before": "Access offered until {{date}} for everyone, caretaker / pet & home sitters and owners alike. No credit card, no commission.",
       "desc_after": "Free for owners. {{price}} for caretaker / pet & home sitters, no commitment. No commission, no hidden fees."
     },
