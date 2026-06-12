@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { city, department, force } = await req.json();
+    const { city, department, force, cover_image_url: coverIn, hero_image_alt: altIn } = await req.json();
     if (!city || !department) {
       return new Response(JSON.stringify({ error: "city and department required" }), {
         status: 400,
