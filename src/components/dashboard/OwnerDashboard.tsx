@@ -575,9 +575,10 @@ const OwnerDashboard = () => {
       {/* ═══ Preuve sociale, Highlights remontés et déployés par défaut ═══ */}
       {highlights.length > 0 && (
         <section
-          className="px-5 md:px-8 pt-2 border-t border-border/40"
+          className={`px-5 md:px-8 pt-2 border-t border-border/40 ${!showAllMobile ? "hidden md:block" : ""}`}
           aria-label="Ce que les gardiens disent de votre maison"
         >
+
           <div className="mb-3">
             <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
               Preuve sociale
