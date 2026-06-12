@@ -120,6 +120,23 @@ const AdminCityPages = () => {
     }
   };
 
+  const handleRegenerate = async (page: any) => {
+    if (regeneratingId) return;
+    setRegeneratingId(page.id);
+    try {
+      const { error } = await supabase.functions.invoke("generate-city-page", {
+        body: { city: page.city, department: page.department, force: true },
+      });
+      if (error) throw error;
+      toast.success(`Contenu régénéré pour ${page.city}`);
+      refetch();
+    } catch (err: any) {
+      toast.error(`Erreur : ${err.message}`);
+    } finally {
+      setRegeneratingId(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
