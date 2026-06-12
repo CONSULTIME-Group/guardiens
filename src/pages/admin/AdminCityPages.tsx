@@ -61,6 +61,36 @@ const AdminCityPages = () => {
     }
   };
 
+  const handleBatchTop150 = async () => {
+    if (batchRunning) return;
+    const existingSlugs = new Set((pages ?? []).map((p: any) => (p.city as string).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")));
+    const todo = TOP_CITIES_FRANCE.filter((c) => !existingSlugs.has(c.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")));
+    if (todo.length === 0) {
+      toast.success("Les 150 villes sont déjà générées.");
+      return;
+    }
+    setBatchRunning(true);
+    setBatchProgress({ done: 0, total: todo.length, ok: 0, skipped: 0, failed: 0 });
+    let ok = 0, skipped = 0, failed = 0;
+    for (let i = 0; i < todo.length; i++) {
+      const c = todo[i];
+      try {
+        const { error } = await supabase.functions.invoke("generate-city-page", {
+          body: { city: c.name, department: c.department },
+        });
+        if (error) { failed++; } else { ok++; }
+      } catch {
+        failed++;
+      }
+      setBatchProgress({ done: i + 1, total: todo.length, ok, skipped, failed });
+      // throttle pour respecter rate-limit IA (gateway 429)
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+    setBatchRunning(false);
+    toast.success(`Batch terminé : ${ok} créées, ${failed} échecs`);
+    refetch();
+  };
+
   const confirmDelete = async () => {
     if (!pendingDelete) return;
     const { error } = await supabase
