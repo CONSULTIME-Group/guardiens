@@ -68,16 +68,27 @@ Deno.serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const prompt = `Vous êtes rédacteur SEO senior pour Guardiens, plateforme française de house-sitting de proximité (garde de maison et d'animaux entre particuliers, sans transaction financière directe). Vous rédigez une landing page locale riche, factuelle et chaleureuse pour la ville de ${city} (département ${department}).
+    const prompt = `Vous êtes rédacteur SEO senior pour Guardiens, plateforme française de house-sitting de proximité (garde de maison et d'animaux entre particuliers, sans transaction financière directe). Vous rédigez une landing page locale RICHE et DÉTAILLÉE pour la ville de ${city} (département ${department}).
+
+CONTEXTE MARQUE (à intégrer naturellement dans le contenu) :
+- Guardiens a été fondée par Jérémie et Elisa, après 5 ans de house-sitting à travers la France (37 maisons gardées, 234 animaux accompagnés).
+- Principe fondamental : rencontre physique obligatoire entre propriétaire et gardien avant chaque garde.
+- Modèle : propriétaires sans frais. Gardiens : 6,99 €/mois résiliable, ou 10 € en formule ponctuelle, ou 65 €/an.
+- Aucune commission par garde, jamais.
+- Gratuit pour tous (propriétaires ET gardiens) jusqu'au 14 juillet 2026.
+- L'animal reste chez lui, dans ses repères. La maison reste vivante (courrier, plantes, lumières).
+- Vérification d'identité + avis croisés après chaque garde.
 
 RÈGLES STRICTES NON NÉGOCIABLES :
 - Vouvoiement systématique.
 - Aucune mention de région administrative ni de « Auvergne-Rhône-Alpes » / « AURA ».
 - Mots PROSCRITS : « voisin », « voisine », « voisinage ». Utilisez : « gardien », « gens du coin », « personne de confiance », « proche ».
 - Tiret cadratin « — » PROSCRIT. Utilisez virgule, deux-points, parenthèses ou point.
-- Pas d'emoji, pas de superlatif commercial, pas de mention de concurrents.
+- Pas d'emoji, pas de superlatif commercial, pas de mention de concurrents (Animaute, Holidog, Pet Sitting, etc.).
 - Ton YMYL : factuel, rassurant, utile. Évitez « unique », « révolutionnaire », « le meilleur ».
 - Préférez « gratuit » à « 0 € ». Pas de « à vie » ni « pour toujours ».
+- Ancrage local concret : citez 2 à 4 lieux RÉELS et VÉRIFIABLES de ${city} (parcs, places, quartiers, monuments connus). N'inventez RIEN. Si vous doutez d'un lieu, n'en parlez pas.
+- Liens internes OBLIGATOIRES en markdown, à répartir dans le contenu : [tarifs](/tarifs), [inscription propriétaire](/inscription?role=owner), [devenir gardien](/inscription?role=sitter), [petites missions](/petites-missions), [gardien d'urgence](/gardien-urgence).
 
 Répondez UNIQUEMENT en JSON valide avec EXACTEMENT cette structure :
 {
@@ -85,11 +96,11 @@ Répondez UNIQUEMENT en JSON valide avec EXACTEMENT cette structure :
   "meta_title": "Titre SEO 50-60 caractères avec ${city} et la marque Guardiens",
   "meta_description": "Méta-description 140-160 caractères, claire, incite à l'inscription gratuite",
   "excerpt": "1 à 2 phrases résumant la page (pour aperçu cards), max 200 caractères",
-  "intro_text": "Texte d'introduction de 5 à 7 phrases. Présentez ${city} comme cadre de vie, mentionnez le profil des habitants susceptibles d'utiliser Guardiens (familles, retraités actifs, voyageurs), évoquez ce que les gardiens y apprécient. Concret, ancré localement (sans inventer de monuments faux).",
-  "content": "Article markdown long et riche (700 à 900 mots) structuré ainsi :\\n\\n## Pourquoi ${city} est un cadre idéal pour le house-sitting\\n(3-4 paragraphes : cadre de vie, type d'habitat, activités, proximité nature, profils des propriétaires)\\n\\n## Le profil des gardiens à ${city}\\n(2-3 paragraphes : qui sont-ils, leur motivation, ce qu'ils proposent, exemples concrets de besoins)\\n\\n## Comment ça se passe concrètement\\n(2-3 paragraphes : inscription gratuite, mise en relation, échanges sans transaction financière, période de gratuité jusqu'au 14 juillet 2026)\\n\\n## Conseils pratiques pour bien démarrer à ${city}\\n(liste à puces de 4 à 6 conseils concrets pour propriétaires et gardiens)\\n\\n## Questions fréquentes\\n(3 questions FAQ courtes au format : **Question ?** Réponse en 1-2 phrases)"
+  "intro_text": "Texte d'introduction de 5 à 7 phrases. Présentez ${city} comme cadre de vie pour les animaux, mentionnez les profils susceptibles d'utiliser Guardiens (familles, retraités actifs, télétravailleurs, voyageurs), évoquez ce que les gardiens y apprécient. Concret, ancré localement.",
+  "content": "Article markdown LONG et RICHE (1000 à 1300 mots) structuré EXACTEMENT comme suit :\\n\\n## Pourquoi ${city} a besoin d'une plateforme de garde de proximité\\n(3 sous-sections en ### : 'Une ville où les animaux font partie de la famille' avec un chiffre estimé de foyers avec chien/chat, 'Les limites des pensions classiques' avec fourchette de prix 25-50€/nuit, 'Le house-sitting, une alternative qui a fait ses preuves'. 4 paragraphes denses au total.)\\n\\n## Comment fonctionne Guardiens à ${city}\\n(4 sous-sections en ### intitulées 'Étape 1, Publiez votre annonce' avec lien [tarifs](/tarifs), 'Étape 2, Rencontrez les gardiens intéressés', 'Étape 3, Confirmez la garde', 'Étape 4, Partez l'esprit libre' avec lien [gardien d'urgence](/gardien-urgence). 1 paragraphe par étape.)\\n\\n## Les quartiers et environs de ${city}\\n(1 paragraphe d'intro puis 3 à 5 paragraphes en **gras** sur des quartiers ou communes limitrophes RÉELS de ${city}, type d'habitat, espaces verts, profils de gardes. Si vous ne connaissez pas finement la ville, restez sur 3 zones génériques bien identifiées, pas plus.)\\n\\n## Propriétaires à ${city}, ce que Guardiens vous offre\\n(5 à 6 bénéfices en **gras** puis 1-2 phrases : animal reste chez lui, maison reste vivante, rencontre préalable obligatoire, aucune commission avec lien [tarifs détaillés](/tarifs), accord de garde clair, gardiens vérifiés.)\\n\\n## Qui sont les gardiens à ${city}\\n(Intro 1 phrase + 4 profils en **gras** : retraités actifs, jeunes actifs en télétravail, familles, étudiants vérifiés. Mentionnez les [petites missions](/petites-missions) pour les gardes courtes.)\\n\\n## Tarifs Guardiens : transparents et sans surprise\\n(3 paragraphes en **gras** : Propriétaires sans frais, Gardiens trois formules au choix avec prix exacts 6,99€/mois et 10€ ponctuel et 65€/an, Aucune commission par garde. Lien [page tarifs complète](/tarifs). Mentionnez la gratuité totale jusqu'au 14 juillet 2026.)\\n\\n## Notre histoire et notre engagement à ${city}\\n(2-3 paragraphes : fondation par Jérémie et Elisa, 37 maisons gardées et 234 animaux accompagnés en 5 ans, ce que cette expérience a apporté à la plateforme, lancement officiel le 14 juillet 2026, ${city} fait partie du déploiement France entière.)\\n\\n## Questions fréquentes des propriétaires à ${city}\\n(5 à 6 questions FAQ au format **Question ?** suivi de la réponse en 2-3 phrases. Couvrez : rencontre préalable, urgence/imprévu, frais cachés, animaux à besoins spécifiques, durée minimum/maximum, vérification d'identité.)"
 }
 
-Le champ "content" DOIT être du markdown valide avec les sections H2 ci-dessus et entre 700 et 900 mots au total. Pas de H1 dans le content (le H1 est géré par h1_title).`;
+Le champ "content" DOIT être du markdown valide, faire environ 1000 à 1300 mots, contenir les liens internes demandés, et suivre la structure H2/### ci-dessus. Pas de H1 dans le content (le H1 est géré par h1_title).`;
 
     const aiResponse = await fetch(LOVABLE_API_URL, {
       method: "POST",
@@ -100,8 +111,8 @@ Le champ "content" DOIT être du markdown valide avec les sections H2 ci-dessus 
       body: JSON.stringify({
         model: "google/gemini-2.5-pro",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 5000,
-        temperature: 0.75,
+        max_tokens: 16000,
+        temperature: 0.7,
         response_format: { type: "json_object" },
       }),
     });
@@ -114,22 +125,49 @@ Le champ "content" DOIT être du markdown valide avec les sections H2 ci-dessus 
     const aiData = await aiResponse.json();
     const content = aiData.choices?.[0]?.message?.content || "";
     const finishReason = aiData.choices?.[0]?.finish_reason;
-    if (finishReason === "length") {
+    const truncated = finishReason === "length";
+    if (truncated) {
       console.warn("Response truncated for city", city);
     }
 
     const generated = extractJson(content) ?? {};
 
+    // Defensive : si l'IA a tronqué ou si le content est vide, on REFUSE
+    // d'écraser un contenu existant valide. En cas de création, on échoue
+    // proprement avec un 502.
+    const hasValidContent = typeof generated.content === "string" && generated.content.trim().length > 200;
+    if (!hasValidContent) {
+      if (existing && force) {
+        return new Response(
+          JSON.stringify({
+            error: "AI_GENERATION_INCOMPLETE",
+            detail: truncated ? "Response truncated by AI" : "Empty or invalid AI content",
+            preserved: true,
+          }),
+          { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      if (!existing) {
+        return new Response(
+          JSON.stringify({
+            error: "AI_GENERATION_INCOMPLETE",
+            detail: truncated ? "Response truncated by AI" : "Empty or invalid AI content",
+          }),
+          { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+    }
+
     const record: Record<string, unknown> = {
       city: city.trim(),
       department: department.trim(),
       slug,
-      h1_title: generated.h1_title || `House-sitting à ${city}, gardiens de confiance près de chez vous`,
-      intro_text: generated.intro_text || "",
-      meta_title: generated.meta_title || `House-sitting ${city}, garde maison et animaux | Guardiens`,
-      meta_description: generated.meta_description || `Trouvez un gardien de confiance à ${city}. Inscription gratuite, gardiens vérifiés.`,
-      excerpt: generated.excerpt || null,
-      content: generated.content || null,
+      h1_title: generated.h1_title || existing?.h1_title || `House-sitting à ${city}, gardiens de confiance près de chez vous`,
+      intro_text: generated.intro_text || existing?.intro_text || "",
+      meta_title: generated.meta_title || existing?.meta_title || `House-sitting ${city}, garde maison et animaux | Guardiens`,
+      meta_description: generated.meta_description || existing?.meta_description || `Trouvez un gardien de confiance à ${city}. Inscription gratuite, gardiens vérifiés.`,
+      excerpt: generated.excerpt || existing?.excerpt || null,
+      content: generated.content || existing?.content || null,
       published: true,
       updated_at: new Date().toISOString(),
     };
