@@ -16,7 +16,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, Trash2, Loader2, Building2, ExternalLink } from "lucide-react";
+import { Plus, Trash2, Loader2, Building2, ExternalLink, Zap } from "lucide-react";
+import { DEPT_NAMES } from "@/lib/departments";
 
 interface DepartmentPage {
   id: string;
@@ -32,6 +33,8 @@ const AdminDepartments = () => {
   const [department, setDepartment] = useState("");
   const [region, setRegion] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [batchRunning, setBatchRunning] = useState(false);
+  const [batchProgress, setBatchProgress] = useState<{ done: number; total: number; ok: number; failed: number } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<DepartmentPage | null>(null);
 
   const { data: pages = [], isLoading } = useQuery({
@@ -63,6 +66,33 @@ const AdminDepartments = () => {
     } finally {
       setGenerating(false);
     }
+  };
+
+  const handleBatchAll = async () => {
+    if (batchRunning) return;
+    const slugify = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const existing = new Set(pages.map((p) => slugify(p.department)));
+    const todo = Object.values(DEPT_NAMES).filter((name) => !existing.has(slugify(name)));
+    if (todo.length === 0) {
+      toast.success("Tous les départements sont déjà générés.");
+      return;
+    }
+    setBatchRunning(true);
+    setBatchProgress({ done: 0, total: todo.length, ok: 0, failed: 0 });
+    let ok = 0, failed = 0;
+    for (let i = 0; i < todo.length; i++) {
+      try {
+        const { error } = await supabase.functions.invoke("generate-department-page", {
+          body: { department: todo[i] },
+        });
+        if (error) failed++; else ok++;
+      } catch { failed++; }
+      setBatchProgress({ done: i + 1, total: todo.length, ok, failed });
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+    setBatchRunning(false);
+    toast.success(`Batch terminé : ${ok} créés, ${failed} échecs`);
+    queryClient.invalidateQueries({ queryKey: ["admin-departments"] });
   };
 
   const toggleMutation = useMutation({
@@ -101,7 +131,7 @@ const AdminDepartments = () => {
         <CardHeader>
           <CardTitle className="text-base">Générer une page département</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="flex gap-3 flex-wrap">
             <Input
               placeholder="Département (ex: Rhône)"
@@ -115,10 +145,30 @@ const AdminDepartments = () => {
               onChange={(e) => setRegion(e.target.value)}
               className="w-56"
             />
-            <Button onClick={generatePage} disabled={!department || generating} className="gap-2">
+            <Button onClick={generatePage} disabled={!department || generating || batchRunning} className="gap-2">
               {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               {generating ? "Génération..." : "Générer"}
             </Button>
+          </div>
+
+          <div className="rounded-md border border-dashed p-4 space-y-2">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <p className="font-medium text-sm">Batch SEO programmatique</p>
+                <p className="text-xs text-muted-foreground">
+                  Génère les pages des 101 départements français (DOM-TOM inclus). Départements déjà créés ignorés. ~3 min.
+                </p>
+              </div>
+              <Button onClick={handleBatchAll} disabled={batchRunning || generating} variant="secondary" className="gap-2">
+                {batchRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+                Générer tous les départements
+              </Button>
+            </div>
+            {batchProgress && (
+              <div className="text-xs text-muted-foreground">
+                Progression : {batchProgress.done} / {batchProgress.total} · {batchProgress.ok} OK · {batchProgress.failed} échecs
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
