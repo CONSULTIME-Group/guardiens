@@ -25,13 +25,32 @@ function extractJson(raw: string): any | null {
   try { return JSON.parse(repaired); } catch { return null; }
 }
 
+async function fetchWikipediaImage(city: string): Promise<{ url: string; alt: string } | null> {
+  try {
+    const res = await fetch(
+      `https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`,
+      { headers: { "User-Agent": "GuardiensBot/1.0 (https://guardiens.fr)", Accept: "application/json" } },
+    );
+    console.log("wiki", city, res.status);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const url: string | undefined = data.originalimage?.source || data.thumbnail?.source;
+    console.log("wiki url", city, url ? "yes" : "no");
+    if (!url) return null;
+    return { url, alt: `Vue de ${city}, ville de France` };
+  } catch (e) {
+    console.error("wiki err", city, String(e));
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { city, department, force } = await req.json();
+    const { city, department, force, cover_image_url: coverIn, hero_image_alt: altIn } = await req.json();
     if (!city || !department) {
       return new Response(JSON.stringify({ error: "city and department required" }), {
         status: 400,
@@ -211,6 +230,11 @@ Structure EXACTE :
       }
     }
 
+    // Photo réelle (non IA) depuis Wikipedia FR si dispo
+    const wiki = coverIn ? null : await fetchWikipediaImage(city);
+    const finalCover = coverIn || wiki?.url || existing?.cover_image_url || null;
+    const finalAlt = altIn || wiki?.alt || existing?.hero_image_alt || (finalCover ? `Vue de ${city}` : null);
+
     const record: Record<string, unknown> = {
       city: city.trim(),
       department: department.trim(),
@@ -221,12 +245,14 @@ Structure EXACTE :
       meta_description: generated.meta_description || existing?.meta_description || `Trouvez un gardien de confiance à ${city}. Inscription gratuite, gardiens vérifiés.`,
       excerpt: generated.excerpt || existing?.excerpt || null,
       content: generated.content || existing?.content || null,
+      cover_image_url: finalCover,
+      hero_image_alt: finalAlt,
       published: true,
       updated_at: new Date().toISOString(),
     };
 
     let result;
-    if (existing && force) {
+    if (existing) {
       const { data: updated, error } = await supabase
         .from("seo_city_pages")
         .update(record)
