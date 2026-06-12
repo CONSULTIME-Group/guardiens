@@ -387,8 +387,28 @@ const OwnerDashboard = () => {
         </div>
       )}
 
+      {/* ═══ Toggle mobile : « Voir tout mon espace » ═══
+          Réduit le bruit mobile en masquant par défaut les blocs secondaires
+          (annonce détaillée, animaux, candidatures, parrainage, badges, etc.).
+          Desktop : non rendu (classes hidden md:* déjà appliquées en amont). */}
+      {!showAllMobile && (
+        <div className="px-5 md:hidden">
+          <button
+            type="button"
+            onClick={() => setShowAllMobile(true)}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-sm font-semibold text-foreground hover:bg-muted/40 transition-colors"
+            aria-expanded={false}
+            aria-controls="owner-dash-extra"
+          >
+            Voir tout mon espace
+            <ChevronDown className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+      )}
+
       {/* ═══ PILOTAGE (gauche) + CONTEXTE (droite) ═══ */}
-      <div className="px-5 md:px-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div id="owner-dash-extra" className={`px-5 md:px-8 grid grid-cols-1 lg:grid-cols-3 gap-6 ${!showAllMobile ? "hidden md:grid" : ""}`}>
+
         {/* Colonne pilotage : annonce, animaux, avis, candidatures */}
         <div className="lg:col-span-2 space-y-6">
           <MonAnnonceCard
