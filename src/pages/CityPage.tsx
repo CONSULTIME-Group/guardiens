@@ -497,7 +497,7 @@ const CityPage = () => {
  )}
  <Badge variant="outline" className="text-base px-4 py-2 gap-2">
  <Heart className="h-4 w-4" />
- Inscription à 0 €
+ Inscription gratuite
  </Badge>
  </div>
  <div className="flex flex-col sm:flex-row gap-3">
