@@ -73,8 +73,9 @@ Réponds UNIQUEMENT en JSON valide :
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 500,
+        max_tokens: 1200,
         temperature: 0.7,
+        response_format: { type: "json_object" },
       }),
     });
 
