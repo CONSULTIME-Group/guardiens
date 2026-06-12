@@ -49,7 +49,7 @@ const Email = ({ firstName }: Props) => {
 export const template = {
   component: Email,
   subject: 'Publiez votre première annonce en 3 minutes',
-  displayName: 'Propriétaire sans annonce — J+3',
+  displayName: 'Propriétaire sans annonce, J+3',
   previewData: { firstName: 'Marie' },
 } satisfies TemplateEntry
 
