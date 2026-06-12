@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { species, breed } = await req.json();
+    const { species, breed, force } = await req.json();
     if (!species || !breed) {
       return new Response(JSON.stringify({ error: "species and breed required" }), {
         status: 400,
@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
       .eq("breed", normalizedBreed)
       .maybeSingle();
 
-    if (cached) {
+    if (cached && !force) {
       return new Response(JSON.stringify(cached), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -80,24 +80,28 @@ Deno.serve(async (req) => {
       ? `${speciesLabel} croisé / sans race définie`
       : `${speciesLabel} de race ${breed}`;
 
-    const prompt = `Tu es un expert animalier. Génère une fiche descriptive GÉNÉRALE pour : ${breedPrompt}.
+    const prompt = `Vous êtes vétérinaire-comportementaliste expert et rédacteur pour Guardiens (plateforme française de garde d'animaux entre particuliers). Rédigez une fiche descriptive RICHE et FACTUELLE pour : ${breedPrompt}.
 
-IMPORTANT : Cette fiche décrit la RACE en général. Ne mentionne AUCUNE ville, région ou lieu géographique. Le contenu doit être universel.
+RÈGLES :
+- Vouvoiement systématique.
+- Ton chaleureux, pratique, orienté gardien débutant.
+- Pas d'emoji, pas de tiret cadratin « — » (utilisez virgule, deux-points, parenthèses).
+- Pas de superlatif marketing. Soyez concret, donnez des chiffres quand pertinent (poids, durée d'exercice, fréquence de brossage).
+- Aucune mention de race ou pays comme stéréotype négatif. La fiche décrit la race en général, sans lieu géographique.
 
-Réponds UNIQUEMENT en JSON valide avec cette structure exacte :
+Répondez UNIQUEMENT en JSON valide avec cette structure exacte (chaque champ doit être SUBSTANTIEL, 4-6 phrases pleines sauf indication contraire) :
 {
-  "temperament": "Caractère général typique de cette race en 2-3 phrases",
-  "exercise_needs": "Besoins en exercice quotidien : durée, intensité, type d'activités recommandées en 2-3 phrases",
-  "grooming": "Entretien du pelage/plumage, fréquence de toilettage, mue en 1-2 phrases",
-  "alimentation": "Besoins alimentaires spécifiques, quantités indicatives, aliments à éviter en 2-3 phrases",
-  "health_notes": "Points d'attention santé : maladies fréquentes de la race, prédispositions génétiques, signes à surveiller en 2-3 phrases",
-  "stranger_behavior": "Comportement avec les inconnus et réaction face à un gardien qui n'est pas son maître en 1-2 phrases",
-  "compatibility": "Compatibilité avec d'autres animaux (chiens, chats, petits animaux) en 1-2 phrases",
-  "sitter_tips": "Conseils pratiques pour un gardien : ce qu'il doit absolument savoir, les erreurs à éviter, comment gagner la confiance de l'animal en 2-3 phrases",
-  "difficulty_level": "Niveau de difficulté pour un gardien débutant : Facile / Modéré / Exigeant — avec une justification en 1 phrase",
-  "ideal_for": "Idéal pour un gardien qui... (1 phrase décrivant le profil de gardien compatible)"
-}
-Ton : chaleureux et pratique, orienté gardien. En français.`;
+  "temperament": "Caractère général de la race en 4-6 phrases : tempérament dominant, niveau d'énergie, sensibilité, attachement au maître, comportement habituel à la maison.",
+  "exercise_needs": "Besoins en exercice en 4-6 phrases : durée quotidienne précise (ex 1h, 2h), intensité, types d'activités recommandées (balade, course, jeu de pistage, agility…), signes de sous-stimulation.",
+  "grooming": "Entretien en 3-5 phrases : type de poil/pelage, fréquence de brossage, périodes de mue, bains, oreilles/yeux/griffes, toilettage professionnel utile ou non.",
+  "alimentation": "Alimentation en 4-6 phrases : quantité indicative selon poids adulte, qualité de croquettes recommandée, fréquence de repas, sensibilités digestives connues, aliments à éviter spécifiques.",
+  "health_notes": "Santé en 4-6 phrases : maladies fréquentes / prédispositions génétiques de la race, espérance de vie moyenne, signes d'alerte à surveiller chez un gardien, importance des suivis vétérinaires.",
+  "stranger_behavior": "Comportement avec les inconnus en 3-5 phrases : réaction face à un gardien non-maître, méfiance naturelle ou non, temps d'adaptation typique, ce qu'il faut éviter les premiers jours.",
+  "compatibility": "Compatibilité avec d'autres animaux en 3-5 phrases : autres chiens (même sexe / sexe opposé), chats, petits animaux (rongeurs, lapins), enfants en bas âge.",
+  "sitter_tips": "Conseils pratiques pour le gardien en 5-7 phrases : routine à respecter, signaux d'apaisement à reconnaître, erreurs classiques à éviter (laisse trop courte, surstimulation…), comment instaurer la confiance dès la première heure, quoi demander au propriétaire avant la garde.",
+  "difficulty_level": "Niveau de difficulté pour un gardien débutant : Facile, Modéré ou Exigeant, suivi de 2-3 phrases de justification concrète.",
+  "ideal_for": "1 paragraphe de 3-5 phrases décrivant le profil de gardien idéal : niveau d'expérience attendu, mode de vie compatible, contraintes à anticiper."
+}`;
 
     const aiResponse = await fetch(LOVABLE_API_URL, {
       method: "POST",
@@ -106,10 +110,11 @@ Ton : chaleureux et pratique, orienté gardien. En français.`;
         "Authorization": `Bearer ${LOVABLE_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-pro",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 800,
+        max_tokens: 3500,
         temperature: 0.7,
+        response_format: { type: "json_object" },
       }),
     });
 
@@ -121,12 +126,17 @@ Ton : chaleureux et pratique, orienté gardien. En français.`;
     const aiData = await aiResponse.json();
     const content = aiData.choices?.[0]?.message?.content || aiData.content || "";
 
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error("Could not parse AI response as JSON");
+    let profile: any = null;
+    try { profile = JSON.parse(content); } catch {
+      const m = content.match(/\{[\s\S]*\}/);
+      if (m) {
+        try { profile = JSON.parse(m[0]); } catch {
+          const repaired = m[0].replace(/,\s*([}\]])/g, "$1").replace(/[\x00-\x1F\x7F]/g, " ");
+          try { profile = JSON.parse(repaired); } catch {}
+        }
+      }
     }
-
-    const profile = JSON.parse(jsonMatch[0]);
+    if (!profile) throw new Error("Could not parse AI response as JSON");
 
     const record = {
       species: normalizedSpecies,

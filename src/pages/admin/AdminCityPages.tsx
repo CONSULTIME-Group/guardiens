@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, ExternalLink, Loader2, Trash2, Zap } from "lucide-react";
+import { Plus, ExternalLink, Loader2, Trash2, Zap, RefreshCw } from "lucide-react";
 import { TOP_CITIES_FRANCE } from "@/data/topCitiesFrance";
 
 const AdminCityPages = () => {
@@ -25,6 +25,7 @@ const AdminCityPages = () => {
   const [generating, setGenerating] = useState(false);
   const [batchRunning, setBatchRunning] = useState(false);
   const [batchProgress, setBatchProgress] = useState<{ done: number; total: number; ok: number; skipped: number; failed: number } | null>(null);
+  const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; city: string } | null>(null);
 
   const { data: pages, refetch } = useQuery({
@@ -119,6 +120,23 @@ const AdminCityPages = () => {
     }
   };
 
+  const handleRegenerate = async (page: any) => {
+    if (regeneratingId) return;
+    setRegeneratingId(page.id);
+    try {
+      const { error } = await supabase.functions.invoke("generate-city-page", {
+        body: { city: page.city, department: page.department, force: true },
+      });
+      if (error) throw error;
+      toast.success(`Contenu régénéré pour ${page.city}`);
+      refetch();
+    } catch (err: any) {
+      toast.error(`Erreur : ${err.message}`);
+    } finally {
+      setRegeneratingId(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -195,6 +213,19 @@ const AdminCityPages = () => {
                   onClick={() => handleTogglePublish(page.id, page.published)}
                 >
                   {page.published ? "Dépublier" : "Publier"}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleRegenerate(page)}
+                  disabled={!!regeneratingId}
+                  title="Régénérer le contenu IA"
+                >
+                  {regeneratingId === page.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4" />
+                  )}
                 </Button>
                 <a
                   href={`/house-sitting/${page.slug}`}

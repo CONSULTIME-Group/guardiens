@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -513,7 +514,16 @@ const CityPage = () => {
  </Button>
  </Link>
  </div>
- </section>
+       </section>
+
+       {/* Rich editorial body from AI */}
+       {dbPage.content && (
+         <section className="max-w-3xl mx-auto px-4 py-10">
+           <article className="prose prose-neutral max-w-none prose-headings:font-serif prose-headings:text-foreground prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-p:text-muted-foreground prose-p:leading-relaxed prose-li:text-muted-foreground prose-strong:text-foreground prose-a:text-primary">
+             <ReactMarkdown>{dbPage.content}</ReactMarkdown>
+           </article>
+         </section>
+       )}
 
  {/* Cross-links */}
  {(cityGuide || departmentPage) && (

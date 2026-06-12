@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, Zap, ExternalLink } from "lucide-react";
+import { Loader2, Zap, ExternalLink, RefreshCw } from "lucide-react";
 import { TOP_DOG_BREEDS, TOP_CAT_BREEDS } from "@/data/topBreeds";
 import { slugify } from "@/lib/normalize";
 
@@ -15,6 +15,25 @@ const AdminBreeds = () => {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState<null | "dog" | "cat">(null);
   const [progress, setProgress] = useState<{ done: number; total: number; ok: number; failed: number } | null>(null);
+  const [regenerating, setRegenerating] = useState<string | null>(null);
+
+  const handleRegenerate = async (species: string, breed: string) => {
+    const key = `${species}-${breed}`;
+    if (regenerating) return;
+    setRegenerating(key);
+    try {
+      const { error } = await supabase.functions.invoke("generate-breed-profile", {
+        body: { species, breed, force: true },
+      });
+      if (error) throw error;
+      toast.success(`Fiche régénérée : ${breed}`);
+      await refresh();
+    } catch (err: any) {
+      toast.error(`Erreur : ${err.message}`);
+    } finally {
+      setRegenerating(null);
+    }
+  };
 
   const refresh = async () => {
     setLoading(true);
@@ -101,14 +120,32 @@ const AdminBreeds = () => {
               <CardHeader><CardTitle className="text-base capitalize">{sp} ({list.length})</CardTitle></CardHeader>
               <CardContent>
                 <ul className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
-                  {list.map((r) => (
-                    <li key={`${r.species}-${r.breed}`} className="flex items-center justify-between">
-                      <span>{r.breed}</span>
-                      <Link to={`/races/${slugify(r.breed)}`} className="text-primary inline-flex items-center gap-1 text-xs">
-                        Voir <ExternalLink className="w-3 h-3" />
-                      </Link>
-                    </li>
-                  ))}
+                  {list.map((r) => {
+                    const key = `${r.species}-${r.breed}`;
+                    return (
+                      <li key={key} className="flex items-center justify-between gap-2">
+                        <span className="truncate">{r.breed}</span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleRegenerate(r.species, r.breed)}
+                            disabled={!!regenerating}
+                            className="text-muted-foreground hover:text-primary disabled:opacity-50 p-1"
+                            title="Régénérer la fiche IA"
+                          >
+                            {regenerating === key ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <RefreshCw className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                          <Link to={`/races/${slugify(r.breed)}`} className="text-primary inline-flex items-center gap-1 text-xs">
+                            Voir <ExternalLink className="w-3 h-3" />
+                          </Link>
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
               </CardContent>
             </Card>
