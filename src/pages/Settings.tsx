@@ -750,8 +750,8 @@ const NotificationsSection = ({ prefs, savingKey, allNotifsOn, onMasterToggle, o
         </div>
       ))}
 
-      <div className="flex items-center justify-between gap-3">
-        <Label className="text-sm">Délai avant email (messages non-lus)</Label>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <Label className="text-sm shrink-0">Délai avant email (messages non-lus)</Label>
         <Select value={prefs.message_email_delay} onValueChange={(v) => onSave({ message_email_delay: v })}>
           <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -779,10 +779,10 @@ const PrivacySection = ({ prefs, onSave }: any) => (
   <section>
     <SectionHeader icon={EyeOff} title="Confidentialité" description="Qui peut voir votre profil et vos informations." />
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <Label className="text-sm">Qui peut voir mon profil</Label>
         <Select value={prefs.profile_visibility} onValueChange={(v) => onSave({ profile_visibility: v })}>
-          <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-56"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tous les utilisateurs</SelectItem>
             <SelectItem value="verified">Utilisateurs vérifiés</SelectItem>

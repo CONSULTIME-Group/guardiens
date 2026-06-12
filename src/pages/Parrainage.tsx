@@ -97,9 +97,9 @@ const ParrainagePage = () => {
       />
       <PageBreadcrumb items={[{ label: "Parrainage" }]} />
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-2 pb-12 space-y-8">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-2 pb-8 md:pb-12 space-y-5 md:space-y-8">
         <header>
-          <h1 className="font-heading text-3xl sm:text-4xl font-semibold text-foreground">
+          <h1 className="font-heading text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground">
             Faites grandir la communauté
           </h1>
           <p className="text-muted-foreground font-body mt-2">
@@ -112,11 +112,11 @@ const ParrainagePage = () => {
           <CardContent className="py-6">
             <div className="grid grid-cols-2 gap-4 text-center">
               <div>
-                <div className="font-heading text-4xl font-semibold text-primary">{totalCount}</div>
+                <div className="font-heading text-3xl md:text-4xl font-semibold text-primary">{totalCount}</div>
                 <div className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">activations parrainées</div>
               </div>
               <div>
-                <div className="font-heading text-4xl font-semibold text-foreground">{myCount}</div>
+                <div className="font-heading text-3xl md:text-4xl font-semibold text-foreground">{myCount}</div>
                 <div className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">vos filleuls actifs</div>
               </div>
             </div>
