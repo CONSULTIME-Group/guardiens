@@ -139,7 +139,7 @@ Répondez UNIQUEMENT en JSON valide avec cette structure exacte (chaque champ do
     }
     if (!profile) throw new Error("Could not parse AI response as JSON");
 
-    const record = {
+    const record: Record<string, unknown> = {
       species: normalizedSpecies,
       breed: normalizedBreed,
       temperament: profile.temperament || "",
@@ -152,7 +152,11 @@ Répondez UNIQUEMENT en JSON valide avec cette structure exacte (chaque champ do
       sitter_tips: profile.sitter_tips || "",
       difficulty_level: profile.difficulty_level || "",
       ideal_for: profile.ideal_for || "",
+      rich_content: profile.rich_content || "",
     };
+    if (image_url) record.image_url = image_url;
+    if (image_credit) record.image_credit = image_credit;
+    if (image_alt) record.image_alt = image_alt;
 
     const { data: inserted } = await supabase
       .from("breed_profiles")
