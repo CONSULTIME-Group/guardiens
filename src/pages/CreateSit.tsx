@@ -316,6 +316,34 @@ const CreateSit = () => {
   const descriptionValid = specificExpectations.length >= 50;
   const canPublish = profileCompletion >= 60 && property && title && startDate && endDate && !dateError && descriptionValid;
 
+  // Liste explicite des bloquants à publier (UX : remplacer le tooltip pauvre par une checklist visible).
+  // Ordre = priorité d'affichage et de scroll lors du clic sur « Publier ».
+  type PublishBlocker = { id: string; label: string; anchor?: string; action?: string };
+  const publishBlockers: PublishBlocker[] = [
+    profileCompletion < 60 ? { id: "profile", label: `Profil complété à ≥ 60 % (actuellement ${profileCompletion} %)`, action: "/owner-profile" } : null,
+    !property ? { id: "property", label: "Logement renseigné", action: "/owner-profile" } : null,
+    !title ? { id: "title", label: "Titre de l'annonce", anchor: "title-field" } : null,
+    !startDate ? { id: "start", label: "Date de début", anchor: "dates-field" } : null,
+    !endDate ? { id: "end", label: "Date de fin", anchor: "dates-field" } : null,
+    dateError ? { id: "date-error", label: dateError, anchor: "dates-field" } : null,
+    !descriptionValid ? { id: "desc", label: `Description d'au moins 50 caractères (actuellement ${specificExpectations.length})`, anchor: "description-field" } : null,
+  ].filter(Boolean) as PublishBlocker[];
+
+  const onPublishClick = () => {
+    if (canPublish) return handlePublish();
+    const first = publishBlockers[0];
+    if (!first) return;
+    if (first.action) {
+      toast({ variant: "destructive", title: "Il manque quelque chose pour publier", description: first.label });
+      navigate(first.action);
+      return;
+    }
+    if (first.anchor && typeof document !== "undefined") {
+      document.getElementById(first.anchor)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    toast({ variant: "destructive", title: "Il manque quelque chose pour publier", description: first.label });
+  };
+
   // Durée réelle en jours (inclusive) entre start_date et end_date
   const nDays = (startDate && endDate && !dateError)
     ? Math.max(1, Math.round((new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000) + 1)
