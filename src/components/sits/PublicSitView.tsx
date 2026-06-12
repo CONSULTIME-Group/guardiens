@@ -73,11 +73,33 @@ interface ReviewLike {
   created_at: string;
 }
 
+interface OwnerProfileLike {
+  presence_expected?: string | null;
+  visits_allowed?: string | null;
+  overnight_guest?: string | null;
+  space_usage?: string[] | null;
+  smoker_accepted?: string | null;
+  rules_notes?: string | null;
+  meeting_preference?: string[] | null;
+  handover_preference?: string | null;
+  welcome_notes?: string | null;
+  news_frequency?: string | null;
+  news_format?: string[] | null;
+  communication_notes?: string | null;
+  competences?: string[] | null;
+  competences_disponible?: boolean | null;
+  specific_expectations?: string | null;
+  experience_required?: boolean | null;
+  environments?: string[] | null;
+}
+
 interface Props {
   sit: SitLike;
   owner: OwnerLike | null;
   property: PropertyLike | null;
   pets: PetLike[];
+  ownerProfile?: OwnerProfileLike | null;
+  hasHouseGuide?: boolean;
   avgRating: string | null;
   reviewCount: number;
   latestReviews: ReviewLike[];
