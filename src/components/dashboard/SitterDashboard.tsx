@@ -36,8 +36,8 @@ const SitterDashboard = () => {
   const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
   const [searchParams, setSearchParams] = useSearchParams();
   const { hasAccess: hasSubscription } = useSubscriptionAccess();
-  const isMobile = useIsMobile();
   const [showAllMobile, setShowAllMobile] = useState(false);
+
 
 
   const {
