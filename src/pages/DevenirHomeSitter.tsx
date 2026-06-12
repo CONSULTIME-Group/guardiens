@@ -81,8 +81,11 @@ export default function DevenirHomeSitter() {
         title="Devenir home-sitter, guide complet 2026"
         description="Comment devenir home-sitter en France : créer votre profil, décrocher vos premières gardes, gagner la confiance des propriétaires. Guide pratique."
         canonical={URL}
-        jsonLd={jsonLd}
       />
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+      </Helmet>
+
       <div className="mx-auto max-w-3xl px-4 py-8">
         <PageBreadcrumb items={[{ label: "Devenir home-sitter" }]} />
 
