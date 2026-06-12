@@ -596,7 +596,8 @@ const CreateSit = () => {
           </div>
         )}
 
-        <div>
+        <div id="description-field" className="scroll-mt-24">
+
           <div className="flex items-center justify-between gap-2">
             <Label className="text-sm font-medium">Description de la garde *</Label>
             <ImproveListingButton
