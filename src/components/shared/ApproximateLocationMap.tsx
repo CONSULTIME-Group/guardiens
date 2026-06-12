@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 interface Props {
   city?: string | null;
   postalCode?: string | null;
+  /** Code pays ISO (ex. "FR", "MA"). Détermine le géocodeur utilisé. */
+  country?: string | null;
   /** Coordonnées exactes si dispo (prioritaires sur le géocodage). */
   lat?: number | null;
   lng?: number | null;
@@ -23,12 +25,13 @@ type LatLng = { lat: number; lng: number };
 
 const cache = new Map<string, LatLng | null>();
 
-async function geocode(city: string, postalCode?: string | null): Promise<LatLng | null> {
-  const key = `${city}|${postalCode || ""}`.toLowerCase();
+async function geocode(city: string, postalCode?: string | null, country?: string | null): Promise<LatLng | null> {
+  const isFR = !country || country === "FR" || /france/i.test(country);
+  const key = `${city}|${postalCode || ""}|${country || "FR"}`.toLowerCase();
   if (cache.has(key)) return cache.get(key) ?? null;
 
   // 1) FR, geo.api.gouv.fr (rapide, sans rate-limit)
-  if (postalCode && /^\d{5}$/.test(postalCode)) {
+  if (isFR && postalCode && /^\d{5}$/.test(postalCode)) {
     try {
       const res = await fetch(
         `https://geo.api.gouv.fr/communes?codePostal=${postalCode}&fields=centre&format=json&geometry=centre&limit=1`,
@@ -47,7 +50,8 @@ async function geocode(city: string, postalCode?: string | null): Promise<LatLng
 
   // 2) Fallback, edge function geocode (proxy serveur, fiable même en iframe)
   try {
-    const { data } = await supabase.functions.invoke("geocode", { body: { city } });
+    const queryCity = isFR ? city : `${city}, ${country}`;
+    const { data } = await supabase.functions.invoke("geocode", { body: { city: queryCity } });
     if (data && typeof (data as any).lat === "number" && typeof (data as any).lng === "number") {
       const out = { lat: (data as any).lat, lng: (data as any).lng };
       cache.set(key, out);
@@ -57,7 +61,8 @@ async function geocode(city: string, postalCode?: string | null): Promise<LatLng
 
   // 3) Dernier recours, Nominatim public (peut être bloqué en iframe)
   try {
-    const q = encodeURIComponent(`${city}${postalCode ? `, ${postalCode}` : ""}, France`);
+    const countryLabel = isFR ? "France" : (country || "");
+    const q = encodeURIComponent(`${city}${postalCode ? `, ${postalCode}` : ""}${countryLabel ? `, ${countryLabel}` : ""}`);
     const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`, {
       headers: { Accept: "application/json" },
     });
@@ -79,6 +84,7 @@ async function geocode(city: string, postalCode?: string | null): Promise<LatLng
 const ApproximateLocationMap = ({
   city,
   postalCode,
+  country,
   lat,
   lng,
   radius = 1500,
@@ -102,13 +108,13 @@ const ApproximateLocationMap = ({
       return;
     }
     setLoading(true);
-    geocode(city, postalCode).then((c) => {
+    geocode(city, postalCode, country).then((c) => {
       if (cancelled) return;
       setCoords(c);
       setLoading(false);
     });
     return () => { cancelled = true; };
-  }, [city, postalCode, lat, lng, hasExact]);
+  }, [city, postalCode, country, lat, lng, hasExact]);
 
   if (loading || !coords) {
     return (
