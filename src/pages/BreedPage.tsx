@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import { slugify } from "@/lib/normalize";
 import { CITIES } from "@/data/cities";
@@ -20,6 +21,10 @@ interface BreedProfile {
   health_notes: string | null;
   compatibility: string | null;
   difficulty_level: string | null;
+  image_url: string | null;
+  image_credit: string | null;
+  image_alt: string | null;
+  rich_content: string | null;
 }
 
 const SPECIES_LABEL: Record<string, string> = {
