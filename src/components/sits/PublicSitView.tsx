@@ -54,6 +54,15 @@ interface PetLike {
   species: string;
   breed?: string | null;
   photo_url?: string | null;
+  age?: number | null;
+  character?: string | null;
+  alone_duration?: string | null;
+  walk_duration?: string | null;
+  medication?: string | null;
+  food?: string | null;
+  special_needs?: string | null;
+  activity_level?: string | null;
+  owner_breed_note?: string | null;
 }
 
 interface ReviewLike {
