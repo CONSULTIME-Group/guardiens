@@ -1,61 +1,55 @@
-# Plan acquisition « pub automatique » (zéro budget média)
+# Plan acquisition « pub automatique » — bilan + suite
 
-Objectif : maximiser l'acquisition gratuite et automatisée. 4 chantiers séquencés, livrables concrets, mesurables.
+## Déjà livré
 
-## Chantier 1 — SEO programmatique massif (priorité #1)
+### Chantier 1 — SEO programmatique
+- **150 villes France** : `topCitiesFrance.ts` + admin `AdminCityPages` avec batch throttlé, génération via `generate-city-page`.
+- **96 départements** : admin `AdminDepartments` + edge `generate-department-page`.
+- **60 races** (40 chiens + 20 chats) : `topBreeds.ts` + admin `AdminBreeds`, batch via `generate-breed-profile`.
 
-Étendre les silos existants pour multiplier les portes d'entrée Google.
+### Chantier 2 — Soumission Google automatique
+- **IndexNow** : triggers DB sur `sits`, `articles`, `city_guides`, `seo_city_pages`, `seo_department_pages`, `small_missions`.
+- **GSC** : edge `gsc-submit-sitemap` (JWT RS256 via `GOOGLE_SERVICE_ACCOUNT_JSON`) + cron quotidien 5h UTC.
 
-1. **Pages villes** : passer de ~3 hubs à **150 villes France** (top 150 démographique). Génération via `generate-city-page` déjà en place, batch admin déclenchable. Slug, H1, intro, meta, JSON-LD LocalBusiness.
-2. **Pages départements** : 96 départements (table `seo_department_pages` existe). Auto-générées avec liens vers villes du département.
-3. **Pages races** : enrichir `breed_profiles` (déjà 14 colonnes). Cible 40 races chien + 20 races chat avec contenu long (1500 mots) + JSON-LD Article.
-4. **Articles longue traîne** : 20 articles « comment trouver un gardien à [ville] », « partir en vacances avec [race] », générés via `generate-article`.
+### Chantier 3 — Partage social
+- **OG dynamiques** : edge `og-page` (satori + resvg) sur ville, race, département, article.
+- **Bouton partage 1-clic** : `ShareLink` (Facebook, WhatsApp, Email, Clipboard, Web Share) + UTM auto + event `editorial_share_clicked`.
+- **JSON-LD enrichi** :
+  - `FAQPage` ajoutée sur fiches de race (4 questions standards).
+  - `Service` annonce enrichi : `serviceType`, image OG, `areaServed` PostalAddress, credential identité vérifiée, `interactionStatistic` gardes accueillies.
+  - Déjà solide auparavant : Article + FAQPage + HowTo (articles), Service + AggregateRating (gardiens), Service + Offer + FAQPage (villes/départements).
 
-Maillage interne : chaque page ville link vers département + 3 villes voisines + 3 races populaires. Chaque article link vers ville + race citée.
+### Chantier 4 — Emails cycle de vie
+- 3 nouveaux templates : `owner-no-sit-j3`, `owner-no-sit-j10`, `referral-boost-monthly`.
+- 2 séquences : `owner-no-sit-relance` (J+3 puis J+10, exit `has_published_sit`) et `referral-boost-monthly` (mensuel, membres actifs).
+- Évaluateur étendu : nouveau type d'enrôlement `active_referral` + dédup glissante pour campagnes récurrentes.
+- Cron horaire `evaluate-journeys-hourly` (HH:15).
 
-## Chantier 2 — Soumission automatique Google (IndexNow + GSC)
+## Suite proposée (ordre d'impact)
 
-1. **IndexNow** : table `indexnow_submissions` déjà présente. Edge function `auto-submit-indexnow` déclenchée à chaque INSERT/UPDATE sur `sits`, `seo_city_pages`, `articles`, `small_missions`. Soumission Bing+Yandex instantanée.
-2. **Google Search Console** : connecteur GSC déjà disponible. Edge function quotidienne `gsc-submit-sitemap` qui ping le sitemap + remonte les KPIs (impressions/clics) dans une table `gsc_metrics` pour dashboard admin.
-3. **Sitemap dynamique** : ajouter les nouvelles villes/départements/races automatiquement dans `scripts/generate-sitemap.mjs`.
+### A — Pilotage et mesure (1 jour) — RECOMMANDÉ
+Sans dashboard les chantiers 1-4 tournent à l'aveugle.
+- **Dashboard admin `/admin/seo`** : impressions GSC, clics, top requêtes, pages indexées, statut soumissions IndexNow.
+- **Dashboard admin `/admin/lifecycle`** : taux d'envoi/ouverture/clic par séquence (`email_send_log` × `journey_step_log` × `email_engagement_events`), taux de sortie (exit_condition_met).
+- KPIs en haut, tables sortables, filtres 7/30/90 jours.
 
-## Chantier 3 — Partage social optimisé (chaque lien = pub)
+### B — Articles longue traîne (1 jour)
+- 20 articles auto-générés : « comment trouver un gardien à [top 20 villes] » + « partir en vacances avec [top 10 races] ».
+- Edge `generate-article` déjà en place, simple boucle admin.
+- Maillage interne : chaque article link vers ville + race + 2 villes du département.
 
-1. **OG images dynamiques par page** : edge function `og-image` qui génère une image PNG (titre + ville + photo animal) à la volée pour chaque sit, profil gardien, page ville, article. Cache 30 jours.
-2. **Bouton « Partager » 1-clic** sur fiches sit + profils gardien : WhatsApp, SMS, Messenger, Email avec texte pré-rempli + lien parrainage si user connecté.
-3. **JSON-LD enrichi** : Review aggregateRating sur profils gardiens (déjà partiel), Product sur sits, FAQPage sur articles (boost rich snippets Google).
+### C — Programme parrainage gamifié (0,5 jour)
+- Page `/parrainage` enrichie : compteur live de filleuls actifs + barre de progression vers prochain mois offert.
+- Partage 1-clic WhatsApp/SMS avec message pré-rempli + lien tracké.
+- Email transactionnel quand un filleul s'inscrit, puis quand il devient actif.
 
-## Chantier 4 — Réactivation cycle de vie (emails déjà branchés)
+### D — Sitemap dynamique villes/départements/races (0,5 jour)
+- `scripts/generate-sitemap.mjs` lit `seo_city_pages`, `seo_department_pages`, `breed_profiles` au lieu de listes en dur.
+- `<lastmod>` basé sur `updated_at` pour faire revenir Google.
 
-1. **Relance propriétaires sans annonce** : J+3 après inscription si 0 sit publié, J+10 si toujours 0.
-2. **Relance gardiens sans candidature** : J+7 après inscription si 0 application, suggestions 3 sits proches.
-3. **Réveil inactifs 30j** : digest hebdo « 5 nouvelles annonces près de chez vous ».
-4. **Boost parrainage** : email mensuel aux users actifs « partagez et gagnez 1 mois offert » + bouton WhatsApp.
+### E — Schema.org `ItemList` sur landing/listings (0,5 jour)
+- Landing : `ItemList` des 8 sits récents (rich result possible).
+- BreedsListing : `ItemList` des races (CollectionPage).
 
-## Séquencement recommandé
-
-```text
-Semaine 1  →  Chantier 1 (SEO programmatique villes + départements)
-Semaine 2  →  Chantier 2 (IndexNow + GSC auto)
-Semaine 3  →  Chantier 1 (races + articles longue traîne)
-Semaine 4  →  Chantier 3 (OG dynamique + partage 1-clic)
-Semaine 5  →  Chantier 4 (emails cycle de vie)
-```
-
-## Détails techniques
-
-- **Stack** : edge functions Deno + Lovable AI Gateway (`google/gemini-2.5-flash`) pour génération contenu. Coût IA : ~0,001 €/page.
-- **Throttling** : génération par batch de 10, queue dans `email_deferred_queue` étendue ou nouvelle table `seo_generation_queue`.
-- **Vocabulaire** : respect strict mémoires projet (pas de « voisin », pas d'« AURA », pas de tiret cadratin, vouvoiement). Guardrails déjà dans `_shared/ai-gateway.ts`.
-- **Tests** : `jsonld-validation.test.ts` + `no-em-dash-guard.test.ts` existants protègent contre les régressions.
-- **Mesure** : dashboard admin `/admin/seo` avec impressions GSC, pages indexées, taux clic, top requêtes.
-
-## Hors scope (volontairement)
-
-- Pas de Google/Meta/TikTok Ads (engage votre CB, hors mandat).
-- Pas de posting auto réseaux sociaux (pas de connecteur actif, risque ban).
-- Pas d'envoi cold email à listes externes (RGPD).
-
-## Décision attendue
-
-Je commence par **Chantier 1 étape 1 (150 villes France)** ? Ou vous voulez ajuster le périmètre / l'ordre avant ?
+## Recommandation
+Je commence par **A (dashboards de pilotage)** : c'est l'ROI immédiat pour piloter tout ce qui a été déployé. Ou dites une lettre (B/C/D/E) pour rerouter.
