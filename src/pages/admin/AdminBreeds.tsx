@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, Zap, ExternalLink } from "lucide-react";
+import { Loader2, Zap, ExternalLink, RefreshCw } from "lucide-react";
 import { TOP_DOG_BREEDS, TOP_CAT_BREEDS } from "@/data/topBreeds";
 import { slugify } from "@/lib/normalize";
 
