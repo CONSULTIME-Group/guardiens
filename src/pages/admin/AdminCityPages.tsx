@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, ExternalLink, Loader2, Trash2, Zap } from "lucide-react";
+import { Plus, ExternalLink, Loader2, Trash2, Zap, RefreshCw } from "lucide-react";
 import { TOP_CITIES_FRANCE } from "@/data/topCitiesFrance";
 
 const AdminCityPages = () => {
