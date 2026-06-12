@@ -110,6 +110,44 @@ const BreedPage = () => {
     ],
   };
 
+  // FAQPage : 4 questions standards par race, dérivées des données.
+  const faqQuestions: Array<{ q: string; a: string }> = [
+    {
+      q: `Comment bien garder un ${breedCap} à domicile ?`,
+      a:
+        (breed.sitter_tips || breed.temperament || "").slice(0, 500) ||
+        `Un ${breedCap} se garde au mieux dans son environnement habituel, en respectant ses rituels alimentaires, ses sorties et ses besoins de repos. Les gardiens Guardiens reçoivent un guide complet avant chaque garde.`,
+    },
+    {
+      q: `Combien d'exercice quotidien pour un ${breedCap} ?`,
+      a:
+        (breed.exercise_needs || "").slice(0, 400) ||
+        `Les besoins varient selon l'âge et la santé. Indiquez les habitudes précises de votre ${breedCap} dans l'annonce, les gardiens adaptent leurs sorties en conséquence.`,
+    },
+    {
+      q: `Le ${breedCap} s'entend-il avec les enfants et autres animaux ?`,
+      a:
+        (breed.compatibility || breed.temperament || "").slice(0, 400) ||
+        `La compatibilité dépend du caractère individuel et de l'éducation. Précisez les comportements connus de votre ${breedCap} dans le guide de la maison.`,
+    },
+    {
+      q: `Combien coûte la garde d'un ${breedCap} sur Guardiens ?`,
+      a:
+        "Pour les propriétaires, Guardiens est gratuit : aucun frais, aucune commission. Les gardiens accèdent à la plateforme via un abonnement à 6,99 €/mois, et tous les gardiens sont gratuits jusqu'au 14 juillet 2026.",
+    },
+  ];
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqQuestions.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+
+
   const ogImage = buildOgImageUrl({ title: breedCap, subtitle: "Fiche de race, conseils gardien", kind: "race" });
 
   const sections: Array<{ title: string; body: string | null }> = [
@@ -139,6 +177,8 @@ const BreedPage = () => {
         <meta name="twitter:image" content={ogImage} />
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
         <script type="application/ld+json">{JSON.stringify(breadcrumb)}</script>
+        <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
+
       </Helmet>
 
       <main className="min-w-0 max-w-3xl mx-auto px-4 py-12">
