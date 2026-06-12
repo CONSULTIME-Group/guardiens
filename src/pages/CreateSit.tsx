@@ -890,46 +890,52 @@ const CreateSit = () => {
         </SummaryCard>
       </div>
 
-      {/* CORRECTION 6, Publish button */}
+      {/* Barre de publication fixée bas d'écran avec checklist explicite des bloquants restants. */}
       <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40">
-        <div className="max-w-3xl mx-auto flex gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            className="h-12 px-4 shrink-0"
-            onClick={async () => {
-              const id = await saveDraft();
-              if (id) {
-                toast({ title: "Brouillon enregistré", description: "Vous pourrez le reprendre depuis « Mes gardes »." });
-                navigate("/sits?tab=drafts");
-              }
-            }}
-            disabled={savingDraft || !property}
-          >
-            {savingDraft ? "Sauvegarde…" : "Enregistrer & quitter"}
-          </Button>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex-1">
-                  <Button
-                    onClick={handlePublish}
-                    disabled={!canPublish || publishing}
-                    className={`w-full h-12 text-base font-semibold ${canPublish ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground cursor-not-allowed"}`}
-                  >
-                    {publishing ? "Publication en cours..." : "Publier l'annonce"}
-                  </Button>
-                </div>
-              </TooltipTrigger>
-              {!canPublish && (
-                <TooltipContent>
-                  <p>Complétez le titre et les dates pour publier</p>
-                </TooltipContent>
-              )}
-            </Tooltip>
-          </TooltipProvider>
+        <div className="max-w-3xl mx-auto space-y-2">
+          {publishBlockers.length > 0 && (
+            <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2">
+              <p className="text-xs font-medium text-destructive mb-1">
+                Il manque {publishBlockers.length} élément{publishBlockers.length > 1 ? "s" : ""} pour publier :
+              </p>
+              <ul className="space-y-0.5">
+                {publishBlockers.map((b) => (
+                  <li key={b.id} className="text-xs text-destructive flex items-start gap-1.5">
+                    <AlertCircle className="h-3 w-3 mt-0.5 shrink-0" />
+                    <span>{b.label}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-12 px-4 shrink-0"
+              onClick={async () => {
+                const id = await saveDraft();
+                if (id) {
+                  toast({ title: "Brouillon enregistré", description: "Vous pourrez le reprendre depuis « Mes gardes »." });
+                  navigate("/sits?tab=drafts");
+                }
+              }}
+              disabled={savingDraft || !property}
+            >
+              {savingDraft ? "Sauvegarde…" : "Enregistrer & quitter"}
+            </Button>
+            <Button
+              onClick={onPublishClick}
+              disabled={publishing}
+              aria-disabled={!canPublish}
+              className={`flex-1 h-12 text-base font-semibold ${canPublish ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground hover:bg-muted"}`}
+            >
+              {publishing ? "Publication en cours..." : canPublish ? "Publier l'annonce" : "Voir ce qui manque"}
+            </Button>
+          </div>
         </div>
       </div>
+
     </div>
   );
 };
