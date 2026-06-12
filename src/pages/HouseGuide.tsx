@@ -201,7 +201,7 @@ const HouseGuide = () => {
       </Section>
 
       <Section icon={Wifi} title="WiFi">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Nom du réseau" value={guide.wifi_name} onChange={v => update("wifi_name", v)} placeholder="MaisonDupont_5G" />
           <Field label="Mot de passe" value={guide.wifi_password} onChange={v => update("wifi_password", v)} placeholder="••••••••" />
         </div>
@@ -210,26 +210,26 @@ const HouseGuide = () => {
 
       <Section icon={Phone} title="Contacts utiles">
         <p className="text-xs text-muted-foreground -mt-1">Vétérinaire</p>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Nom" value={guide.vet_name} onChange={v => update("vet_name", v)} placeholder="Dr. Martin" />
           <Field label="Téléphone" value={guide.vet_phone} onChange={v => update("vet_phone", v)} placeholder="01 23 45 67 89" />
         </div>
         <Field label="Adresse du vétérinaire" value={guide.vet_address} onChange={v => update("vet_address", v)} placeholder="5 avenue Victor Hugo" />
 
         <p className="text-xs text-muted-foreground mt-3">Contact d'urgence</p>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Nom" value={guide.emergency_contact_name} onChange={v => update("emergency_contact_name", v)} placeholder="Marie (proche)" />
           <Field label="Téléphone" value={guide.emergency_contact_phone} onChange={v => update("emergency_contact_phone", v)} placeholder="06 12 34 56 78" />
         </div>
 
         <p className="text-xs text-muted-foreground mt-3">Personne de confiance</p>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Nom" value={guide.neighbor_name} onChange={v => update("neighbor_name", v)} placeholder="Jean (2ème étage)" />
           <Field label="Téléphone" value={guide.neighbor_phone} onChange={v => update("neighbor_phone", v)} placeholder="06 98 76 54 32" />
         </div>
 
         <p className="text-xs text-muted-foreground mt-3">Artisans</p>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Plombier" value={guide.plumber_phone} onChange={v => update("plumber_phone", v)} placeholder="01 23 45 67 89" />
           <Field label="Électricien" value={guide.electrician_phone} onChange={v => update("electrician_phone", v)} placeholder="01 98 76 54 32" />
         </div>

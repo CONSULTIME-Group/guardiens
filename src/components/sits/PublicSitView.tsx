@@ -150,10 +150,11 @@ const PublicSitView = ({
   const accepting = sit.accepting_applications !== false;
 
   return (
+    <>
     <div className="min-h-screen bg-background text-foreground animate-fade-in">
-      <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 md:py-12">
         {/* Breadcrumb */}
-        <div className="mb-8">
+        <div className="mb-4 md:mb-8">
           <PageBreadcrumb
             items={[
               { label: "Annonces", href: "/search" },
@@ -165,7 +166,7 @@ const PublicSitView = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
           {/* ── COLONNE PRINCIPALE ── */}
           <article className="lg:col-span-8 min-w-0">
-            <header className="mb-10">
+            <header className="mb-6 md:mb-10">
               <div className="flex items-center gap-3 mb-6 flex-wrap">
                 <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-widest uppercase">
                   Garde · Hébergement inclus
@@ -185,7 +186,7 @@ const PublicSitView = ({
                   <Share2 className="h-3.5 w-3.5" /> Partager
                 </Button>
               </div>
-              <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6 text-foreground">
+              <h1 className="font-heading text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-5 md:mb-6 text-foreground">
                 {title}
               </h1>
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-base text-muted-foreground">
@@ -208,7 +209,7 @@ const PublicSitView = ({
 
             {/* Galerie photos, logement + animaux, lightbox plein écran */}
             {(photos.length > 0 || petPhotos.length > 0) && (
-              <div className="mb-12">
+              <div className="mb-7 md:mb-12">
                 <SitHero
                   photos={photos}
                   petPhotos={petPhotos}
@@ -217,7 +218,7 @@ const PublicSitView = ({
               </div>
             )}
 
-            <div className="max-w-2xl space-y-12">
+            <div className="max-w-2xl space-y-8 md:space-y-12">
               {/* Hôte */}
               {owner && (
                 <div className="flex items-start gap-5 pb-10 border-b border-border">
@@ -628,7 +629,7 @@ const PublicSitView = ({
         </div>
 
         {!isAuthenticated && (
-          <section className="mt-24 md:mt-28 bg-primary text-primary-foreground rounded-[2.5rem] p-10 md:p-14 shadow-2xl shadow-primary/20">
+          <section className="mt-12 md:mt-28 bg-primary text-primary-foreground rounded-[2.5rem] p-7 md:p-14 shadow-2xl shadow-primary/20">
             <div className="max-w-3xl mx-auto text-center space-y-6">
               <h2 className="font-heading text-3xl md:text-4xl font-bold">
                 Partir l'esprit léger, c'est confier à quelqu'un de confiance.
@@ -668,6 +669,32 @@ const PublicSitView = ({
         )}
       </div>
     </div>
+
+    {/* ── Sticky CTA mobile (< lg) pour visiteurs non connectés ou abonnés ── */}
+    {accepting && !isAuthenticated && (
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.15)]">
+        <Link
+          to={`/inscription?role=sitter&redirect=${encodeURIComponent(redirect)}`}
+          className="block"
+        >
+          <Button className="w-full rounded-full font-bold text-base shadow-lg shadow-primary/20" size="lg">
+            S'inscrire et postuler
+          </Button>
+        </Link>
+      </div>
+    )}
+    {accepting && isAuthenticated && !hasApplied && hasAccess && onApply && (
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.15)]">
+        <Button
+          onClick={onApply}
+          className="w-full rounded-full font-bold text-base shadow-lg shadow-primary/20"
+          size="lg"
+        >
+          Postuler à cette garde
+        </Button>
+      </div>
+    )}
+    </>
   );
 };
 

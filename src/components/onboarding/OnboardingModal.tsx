@@ -460,7 +460,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
         </div>
 
         {/* Progress indicator */}
-        <div className="mb-6">
+        <div className="pt-5 sm:pt-0 mb-6">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs text-muted-foreground font-medium">
               {slide === 0 ? "Étape 1 sur 3, Faisons connaissance" :

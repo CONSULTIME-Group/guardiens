@@ -114,8 +114,8 @@ export default function CityHero({
 
       {/* Trust signals bar */}
       <section className="border-b border-border bg-card">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex flex-wrap justify-center gap-6 md:gap-10">
+        <div className="max-w-6xl mx-auto px-4 py-3 md:py-4">
+          <div className="flex flex-wrap justify-center gap-3 md:gap-10">
             {trustSignals.map((s) => (
               <div key={s.label} className="flex items-center gap-2 text-sm text-muted-foreground">
                 <s.icon className="h-4.5 w-4.5 text-primary" />

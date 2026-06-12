@@ -589,7 +589,7 @@ const Landing = () => {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/45 to-black/20" />
 
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-24">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-12 md:py-24">
           <div className="max-w-2xl lg:max-w-3xl">
 
             <p className="font-body text-xs text-white/70 tracking-[0.2em] uppercase mb-6 animate-hero-fade-up">
@@ -629,21 +629,21 @@ const Landing = () => {
             </div>
 
             {(kpiMaisons > 0 || kpiAnimaux > 0 || kpiInscrits > 0 || kpiMissions > 0) && (
-              <div className="flex flex-row flex-wrap justify-start gap-x-12 gap-y-6 mt-14 animate-hero-fade-up animation-delay-1100">
+              <div className="flex flex-row flex-wrap justify-start gap-x-6 gap-y-3 mt-8 md:gap-x-12 md:gap-y-6 md:mt-14 animate-hero-fade-up animation-delay-1100">
                 {kpiMaisons > 0 && (
-                  <div className="border-r border-white/20 pr-12 last:border-r-0 last:pr-0">
+                  <div className="border-r border-white/20 pr-6 md:pr-12 last:border-r-0 last:pr-0">
                     <span className="block text-3xl font-heading font-bold text-white">{kpiMaisons}</span>
                     <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_houses")}</span>
                   </div>
                 )}
                 {kpiAnimaux > 0 && (
-                  <div className="border-r border-white/20 pr-12 last:border-r-0 last:pr-0">
+                  <div className="border-r border-white/20 pr-6 md:pr-12 last:border-r-0 last:pr-0">
                     <span className="block text-3xl font-heading font-bold text-white">{kpiAnimaux}</span>
                     <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_animals")}</span>
                   </div>
                 )}
                 {kpiInscrits > 0 && (
-                  <div className="border-r border-white/20 pr-12 last:border-r-0 last:pr-0">
+                  <div className="border-r border-white/20 pr-6 md:pr-12 last:border-r-0 last:pr-0">
                     <span className="block text-3xl font-heading font-bold text-white">{kpiInscrits}</span>
                     <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_members")}</span>
                   </div>
@@ -693,23 +693,23 @@ const Landing = () => {
 
 
       {/* ═══════════════ SECTION 2, CE QU'ON FAIT ENSEMBLE ═══════════════ */}
-      <section id="usages" className="py-24 md:py-32 bg-background scroll-mt-24">
+      <section id="usages" className="py-10 md:py-32 bg-background scroll-mt-24">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
               {t("landing.usages.eyebrow")}
             </span>
-            <h2 id="garde-et-entraide" className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-3 scroll-mt-24">
+            <h2 id="garde-et-entraide" className="text-2xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-3 scroll-mt-24">
               {t("landing.usages.title")}
             </h2>
-            <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16 italic">
+            <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-8 md:mb-16 italic">
               {t("landing.usages.lede")}
             </p>
           </RevealSection>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <RevealSection delay={0.1}>
-              <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full">
+              <div className="bg-card rounded-2xl p-5 md:p-8 shadow-sm text-left h-full">
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">{t("landing.usages.owner.tag")}</p>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">{t("landing.usages.owner.title")}</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
@@ -725,7 +725,7 @@ const Landing = () => {
             </RevealSection>
 
             <RevealSection delay={0.2}>
-              <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full">
+              <div className="bg-card rounded-2xl p-5 md:p-8 shadow-sm text-left h-full">
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">{t("landing.usages.sitter.tag")}</p>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">{t("landing.usages.sitter.title")}</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
@@ -738,7 +738,7 @@ const Landing = () => {
             </RevealSection>
 
             <RevealSection delay={0.3}>
-              <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full border-2 border-primary/20 relative overflow-hidden">
+              <div className="bg-card rounded-2xl p-5 md:p-8 shadow-sm text-left h-full border-2 border-primary/20 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-body font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
                   {t("landing.usages.mutual.badge")}
                 </div>
@@ -775,13 +775,13 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 2bis, CE QUI ARRIVE EN PLUS ═══════════════ */}
-      <section id="rencontre" className="py-24 md:py-32 bg-accent/40 border-y border-accent scroll-mt-24">
+      <section id="rencontre" className="py-10 md:py-32 bg-accent/40 border-y border-accent scroll-mt-24">
         <div className="max-w-3xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/70 font-body mb-6 block text-center">
               {t("landing.meeting.eyebrow")}
             </span>
-            <h2 id="le-vrai-pretexte" className="font-heading text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.15] text-foreground text-center mb-10 scroll-mt-24">
+            <h2 id="le-vrai-pretexte" className="font-heading text-2xl md:text-5xl lg:text-6xl font-semibold leading-[1.15] text-foreground text-center mb-10 scroll-mt-24">
               {t("landing.meeting.title_a")}<br className="hidden md:inline" /> {t("landing.meeting.title_b")}
             </h2>
 
@@ -801,16 +801,16 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 3, COMMENT ÇA MARCHE ═══════════════ */}
-      <section id="comment-ca-marche" className="py-24 md:py-32 bg-muted/30 scroll-mt-24">
+      <section id="comment-ca-marche" className="py-10 md:py-32 bg-muted/30 scroll-mt-24">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
               {t("landing.how.eyebrow")}
             </span>
-            <h2 id="how-it-works" className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-4 scroll-mt-24">
+            <h2 id="how-it-works" className="text-2xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-4 scroll-mt-24">
               {t("landing.how.title")}
             </h2>
-            <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16">
+            <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-8 md:mb-16">
               {seasonal.description}
             </p>
           </RevealSection>
@@ -912,26 +912,26 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 4, OSEZ L'ENTRAIDE ═══════════════ */}
-      <section id="entraide" className="py-24 md:py-32 bg-accent scroll-mt-24">
+      <section id="entraide" className="py-10 md:py-32 bg-accent scroll-mt-24">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
               {t("landing.aid.eyebrow")}
             </span>
-            <h2 id="osez-l-entraide" className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-6 scroll-mt-24">
+            <h2 id="osez-l-entraide" className="text-2xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-6 scroll-mt-24">
               {t("landing.aid.title")}
             </h2>
             <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-4 text-lg leading-relaxed">
               {t("landing.aid.p1")}
             </p>
-            <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-16 text-lg leading-relaxed">
+            <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-8 md:mb-16 text-lg leading-relaxed">
               {t("landing.aid.p2")}
             </p>
           </RevealSection>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <RevealSection delay={0.1}>
-              <div className="bg-card rounded-2xl p-8 shadow-sm h-full">
+              <div className="bg-card rounded-2xl p-5 md:p-8 shadow-sm h-full">
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">
                   {t("landing.aid.need_title")}
                 </h3>
@@ -945,7 +945,7 @@ const Landing = () => {
             </RevealSection>
 
             <RevealSection delay={0.2}>
-              <div className="bg-card rounded-2xl p-8 shadow-sm h-full">
+              <div className="bg-card rounded-2xl p-5 md:p-8 shadow-sm h-full">
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">
                   {t("landing.aid.offer_title")}
                 </h3>
@@ -1016,9 +1016,9 @@ const Landing = () => {
       </RevealSection>
 
       {/* ═══════════════ SECTION 6, CONFIANCE & PÉRIMÈTRE ═══════════════ */}
-      <section id="confiance" className="bg-background py-24 md:py-32 scroll-mt-24" aria-labelledby="trust-heading">
+      <section id="confiance" className="bg-background py-10 md:py-32 scroll-mt-24" aria-labelledby="trust-heading">
         <div className="max-w-6xl mx-auto px-5 sm:px-6">
-          <RevealSection className="text-center max-w-3xl mx-auto mb-16">
+          <RevealSection className="text-center max-w-3xl mx-auto mb-8 md:mb-16">
             <p className="text-xs md:text-[13px] tracking-[0.2em] uppercase text-primary font-body font-medium">
               {t("landing.trust.eyebrow")}
             </p>
@@ -1088,7 +1088,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 7, TÉMOIGNAGES ═══════════════ */}
-      <section id="temoignages" className="py-24 md:py-32 bg-background scroll-mt-24">
+      <section id="temoignages" className="py-10 md:py-32 bg-background scroll-mt-24">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
             <h2 id="ils-ont-ose" className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug scroll-mt-24">
@@ -1178,12 +1178,12 @@ const Landing = () => {
 
       {/* ═══════════════ SECTION 8, NOTRE HISTOIRE ═══════════════ */}
       <section id="notre-histoire" className="bg-muted/30 scroll-mt-24">
-        <div className="max-w-6xl mx-auto px-6 py-24 md:py-32">
+        <div className="max-w-6xl mx-auto px-6 py-10 md:py-32">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
               {t("landing.story.eyebrow")}
             </span>
-            <h2 id="commence-avec-un-visa" className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-12 scroll-mt-24">
+            <h2 id="commence-avec-un-visa" className="text-2xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-12 scroll-mt-24">
               {t("landing.story.title")}
             </h2>
           </RevealSection>
@@ -1240,7 +1240,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 9, GUIDES + VILLES (fusion SEO) ═══════════════ */}
-      <section id="guides-villes" className="py-24 md:py-32 bg-background scroll-mt-24">
+      <section id="guides-villes" className="py-10 md:py-32 bg-background scroll-mt-24">
         <div className="max-w-6xl mx-auto px-6">
           <RevealSection className="text-center mb-14">
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
@@ -1407,7 +1407,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 9bis, FAQ (section dédiée, miroir du JSON-LD FAQPage) ═══════════════ */}
-      <section id="faq" className="py-24 md:py-32 bg-background scroll-mt-24" aria-labelledby="faq-heading">
+      <section id="faq" className="py-10 md:py-32 bg-background scroll-mt-24" aria-labelledby="faq-heading">
         <div className="max-w-3xl mx-auto px-[5%] md:px-[8%]">
           <RevealSection>
             <h2 id="faq-heading" className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center mb-10 scroll-mt-24">
@@ -1430,7 +1430,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 10, CTA FINAL (fusion Fondateur + double CTA) ═══════════════ */}
-      <section id="commencer" className="py-24 md:py-32 bg-primary scroll-mt-24">
+      <section id="commencer" className="py-10 md:py-32 bg-primary scroll-mt-24">
         <RevealSection className="max-w-2xl mx-auto px-6 text-center">
           <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-6 bg-white/15 border border-white/30">
             <span className="font-body text-xs text-white uppercase tracking-widest">{t("landing.final.badge_program")}</span>

@@ -133,9 +133,9 @@ const Notifications = () => {
   if (loading) return <div className="p-6 text-muted-foreground">Chargement...</div>;
 
   return (
-    <div className="p-6 md:p-10 max-w-2xl mx-auto animate-fade-in">
+    <div className="p-4 md:p-10 max-w-2xl mx-auto animate-fade-in">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4 md:mb-6">
         <div>
           <h1 className="font-heading text-2xl md:text-3xl font-bold flex items-center gap-2">
             <Bell className="h-6 w-6" /> Notifications
@@ -152,7 +152,7 @@ const Notifications = () => {
       </div>
 
       {notifications.length === 0 ? (
-        <div className="text-center py-20">
+        <div className="text-center py-12 md:py-20">
           <Bell className="h-12 w-12 mx-auto mb-4 text-muted-foreground/40" />
           <p className="text-muted-foreground">Tout est calme pour le moment.</p>
           <p className="text-sm text-muted-foreground/80 mt-1">

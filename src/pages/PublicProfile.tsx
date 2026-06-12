@@ -257,7 +257,7 @@ const PublicProfile = () => {
           </div>
 
           {/* === METRICS BAR === */}
-          <div className="grid grid-cols-4 divide-x rounded-xl border border-border bg-card p-0 shadow-sm">
+          <div className="grid grid-cols-2 sm:grid-cols-4 divide-x rounded-xl border border-border bg-card p-0 shadow-sm">
             {defaultTab === "owner" ? (
               <MetricCell label="Séjours hébergés" value={String(completedSits)} />
             ) : (
@@ -298,17 +298,17 @@ const PublicProfile = () => {
 
           {/* === TABS === */}
           <Tabs defaultValue={defaultTab} className="w-full">
-            <TabsList className="w-full bg-card border border-border shadow-sm rounded-xl">
-              {isSitter && <TabsTrigger value="sitter" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Gardien</TabsTrigger>}
-              {isOwner && <TabsTrigger value="owner" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Propriétaire</TabsTrigger>}
-              <TabsTrigger value="entraide" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">
+            <div className="overflow-x-auto -mx-1"><TabsList className="w-max sm:w-full bg-card border border-border shadow-sm rounded-xl flex-nowrap">
+              {isSitter && <TabsTrigger value="sitter" className="shrink-0 md:flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Gardien</TabsTrigger>}
+              {isOwner && <TabsTrigger value="owner" className="shrink-0 md:flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Propriétaire</TabsTrigger>}
+              <TabsTrigger value="entraide" className="shrink-0 md:flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">
                 <Handshake className="h-3.5 w-3.5" /> Entraide
               </TabsTrigger>
-              <TabsTrigger value="reviews" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Avis ({reviewStats.count})</TabsTrigger>
+              <TabsTrigger value="reviews" className="shrink-0 md:flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Avis ({reviewStats.count})</TabsTrigger>
               {(galleryPhotos.length > 0 || ownerGalleryPhotos.length > 0) && (
-                <TabsTrigger value="gallery" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Galerie ({galleryPhotos.length + ownerGalleryPhotos.length})</TabsTrigger>
+                <TabsTrigger value="gallery" className="shrink-0 md:flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Galerie ({galleryPhotos.length + ownerGalleryPhotos.length})</TabsTrigger>
               )}
-            </TabsList>
+            </TabsList></div>
 
             {/* --- Sitter tab --- */}
             {isSitter && (

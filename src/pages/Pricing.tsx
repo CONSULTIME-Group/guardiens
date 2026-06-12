@@ -363,7 +363,7 @@ const Pricing = () => {
     <main className="max-w-6xl mx-auto px-4">
      {/* ═══ HERO ═══ */}
      <section data-testid="pricing-hero" className="py-10 md:py-14 text-center max-w-2xl mx-auto">
-      <p className="inline-block bg-primary/10 text-primary text-xs font-body font-semibold uppercase tracking-wider px-3 py-1.5 rounded-full mb-4">
+      <p className="hidden md:inline-block bg-primary/10 text-primary text-xs font-body font-semibold uppercase tracking-wider px-3 py-1.5 rounded-full mb-4">
        {t("pricing.hero.eyebrow")}
       </p>
       <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground leading-tight mb-4">
@@ -460,7 +460,7 @@ const Pricing = () => {
        </div>
        <CardHeader className="text-center pb-2 p-8 pt-10">
         <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">{t("pricing.owner_card.label")}</div>
-        <CardTitle className="font-heading text-5xl font-bold text-foreground">{t("pricing.owner_card.price")}</CardTitle>
+        <CardTitle className="font-heading text-4xl md:text-5xl font-bold text-foreground">{t("pricing.owner_card.price")}</CardTitle>
         <p className="text-sm font-body text-foreground/60 mt-2">
          {t("pricing.owner_card.subtitle")}
         </p>
@@ -503,7 +503,7 @@ const Pricing = () => {
         <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">{t("pricing.sitter_card.label")}</div>
         {before ? (
          <div className="text-center space-y-1.5 py-2">
-          <p className="font-heading text-5xl font-bold text-primary leading-none">
+          <p className="font-heading text-4xl md:text-5xl font-bold text-primary leading-none">
            {t("pricing.sitter_card.price_free")}
           </p>
           <p className="text-xs text-foreground/55 font-body pt-2">
@@ -513,17 +513,17 @@ const Pricing = () => {
         ) : (
          <div className="text-center space-y-1.5 py-2">
           {formule === 'annuel' ? (
-           <p className="font-heading text-5xl font-bold text-foreground">
+           <p className="font-heading text-4xl md:text-5xl font-bold text-foreground">
             {SITTER_PRICE_ANNUAL_NUMERIC}&nbsp;€
             <span className="text-lg font-body font-normal text-foreground/60 ml-1">{t("pricing.sitter_card.per_year")}</span>
            </p>
           ) : formule === 'one_shot' ? (
-           <p className="font-heading text-5xl font-bold text-foreground">
+           <p className="font-heading text-4xl md:text-5xl font-bold text-foreground">
             {SITTER_PRICE_ONESHOT_NUMERIC}&nbsp;€
             <span className="text-lg font-body font-normal text-foreground/60 ml-1">{t("pricing.sitter_card.per_month_short")}</span>
            </p>
           ) : (
-           <p className="font-heading text-5xl font-bold text-foreground">
+           <p className="font-heading text-4xl md:text-5xl font-bold text-foreground">
             <span className="text-lg font-body font-normal text-foreground/60 mr-1">{t("pricing.sitter_card.from")}</span>
             6,99&nbsp;€
             <span className="text-lg font-body font-normal text-foreground/60 ml-1">{t("pricing.sitter_card.per_month")}</span>

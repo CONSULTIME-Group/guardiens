@@ -949,7 +949,7 @@ const SmallMissionDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
           {/* ── COLONNE PRINCIPALE ── */}
           <article className="lg:col-span-8 min-w-0">
-            <header className="mb-10">
+            <header className="mb-6 md:mb-10">
               <div className="flex items-center gap-3 mb-6 flex-wrap">
                 <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-widest uppercase">
                   Entraide · {catMeta.label}
@@ -967,7 +967,7 @@ const SmallMissionDetail = () => {
                   <Share2 className="h-3.5 w-3.5" /> Partager
                 </Button>
               </div>
-              <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6 text-foreground">
+              <h1 className="font-heading text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-5 md:mb-6 text-foreground">
                 {mission.title}
               </h1>
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-base text-muted-foreground">
@@ -1001,7 +1001,7 @@ const SmallMissionDetail = () => {
             </header>
 
             {/* Image principale */}
-            <div className="mb-12 rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
+            <div className="mb-7 md:mb-12 rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
               <img
                 src={heroImage}
                 alt={mission.title}
@@ -1017,7 +1017,7 @@ const SmallMissionDetail = () => {
               </div>
             )}
 
-            <div className="max-w-2xl space-y-10">
+            <div className="max-w-2xl space-y-7 md:space-y-10">
               {/* Auteur */}
               {author && (() => {
                 const AuthorInner = (
@@ -1059,12 +1059,12 @@ const SmallMissionDetail = () => {
                 return author.user_id ? (
                   <Link
                     to={`/gardiens/${author.user_id}`}
-                    className="group flex items-center gap-5 pb-8 border-b border-border hover:opacity-90 transition-opacity"
+                    className="group flex items-center gap-5 pb-5 md:pb-8 border-b border-border hover:opacity-90 transition-opacity"
                   >
                     {AuthorInner}
                   </Link>
                 ) : (
-                  <div className="flex items-center gap-5 pb-8 border-b border-border">
+                  <div className="flex items-center gap-5 pb-5 md:pb-8 border-b border-border">
                     {AuthorInner}
                   </div>
                 );
@@ -1089,7 +1089,7 @@ const SmallMissionDetail = () => {
 
               {/* En échange */}
               {mission.exchange_offer && (
-                <section className="bg-muted/60 p-8 md:p-10 rounded-[2rem] border border-border relative overflow-hidden">
+                <section className="bg-muted/60 p-5 md:p-10 rounded-[2rem] border border-border relative overflow-hidden">
                   <div className="absolute -top-6 -right-6 w-32 h-32 bg-primary/5 rounded-full blur-2xl" aria-hidden />
                   <h3 className="text-xs font-bold tracking-[0.2em] uppercase mb-4 text-muted-foreground">
                     {(mission as any).mission_type === "offre" ? "Ce que je souhaite en échange" : "En échange de votre aide"}
@@ -1276,8 +1276,8 @@ const SmallMissionDetail = () => {
         {/* ── Recommandations ── */}
         {/* ══════════════════════════════════════════════════════ */}
         {relatedMissions.length > 0 && (
-          <section className="mt-24 md:mt-32 pt-16 border-t border-border">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+          <section className="mt-12 md:mt-32 pt-8 md:pt-16 border-t border-border">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-10 gap-4">
               <div>
                 <h2 className="font-heading text-3xl md:text-4xl font-bold mb-2">Près de chez vous</h2>
                 <p className="text-muted-foreground text-lg">

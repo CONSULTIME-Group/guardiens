@@ -11,27 +11,27 @@ const SECTIONS = [
 
 export default function PlancheBadges() {
   return (
-    <div className="min-h-screen bg-background px-4 py-10 md:px-8">
+    <div className="min-h-screen bg-background px-4 py-6 md:py-10 md:px-8">
       <Helmet>
         <title>Planche des badges, Guardiens</title>
         <meta name="robots" content="noindex" />
       </Helmet>
 
-      <h1 className="text-3xl font-heading font-bold text-foreground text-center mb-2">
+      <h1 className="text-2xl md:text-3xl font-heading font-bold text-foreground text-center mb-2">
         Les badges Guardiens
       </h1>
 
-      <p className="text-center text-muted-foreground text-sm mb-10 max-w-md mx-auto">
+      <p className="text-center text-muted-foreground text-sm mb-6 md:mb-10 max-w-md mx-auto">
         Attribués par la communauté après chaque garde ou mission.
       </p>
 
       {SECTIONS.map(section => (
-        <div key={section.title} className="mb-12">
+        <div key={section.title} className="mb-8 md:mb-12">
           <h2 className="text-lg font-heading font-semibold text-foreground mb-4 border-b border-border pb-2">
             {section.title}
           </h2>
 
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-6">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 md:gap-6">
             {section.ids.map(id => {
               const def = BADGE_DEFINITIONS[id]
               if (!def) return null

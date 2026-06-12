@@ -130,7 +130,7 @@ const MesAvis = () => {
 };
 
 const EmptyMessage = ({ title, subtitle }: { title: string; subtitle: string }) => (
-  <div className="rounded-xl border border-border bg-card p-8 text-center">
+  <div className="rounded-xl border border-border bg-card p-5 md:p-8 text-center">
     <Star className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
     <p className="font-heading font-semibold text-foreground mb-1">{title}</p>
     <p className="text-sm text-muted-foreground">{subtitle}</p>
