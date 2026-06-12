@@ -374,7 +374,7 @@ export default function News() {
         {/* Featured "Vie locale & Entraide" section */}
         {activeCategory === "all" && !urlSearch.trim() && vieLocaleArticles.length > 0 && !loading && (
           <div className="mb-6 md:mb-10 p-4 md:p-6 rounded-xl bg-warning-soft/40">
-            <h2 className="font-heading text-lg md:text-xl font-bold mb-1">{t("news.vie_locale_title")</h2>
+            <h2 className="font-heading text-lg md:text-xl font-bold mb-1">{t("news.vie_locale_title")}</h2>
             <p className="text-muted-foreground text-sm mb-5">
               {t("news.vie_locale_subtitle")}
             </p>
