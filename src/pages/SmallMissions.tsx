@@ -787,7 +787,7 @@ const SmallMissions = () => {
 
           {missionCount === 0 && helperCount === 0 && <ExamplesSection />}
 
-          <MissionsArticlesStrip />
+          <div className="hidden md:block"><MissionsArticlesStrip /></div>
         </main>
 
         <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
