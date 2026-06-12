@@ -150,6 +150,7 @@ const PublicSitView = ({
   const accepting = sit.accepting_applications !== false;
 
   return (
+    <>
     <div className="min-h-screen bg-background text-foreground animate-fade-in">
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 md:py-12">
         {/* Breadcrumb */}
