@@ -153,7 +153,7 @@ const BreedPage = () => {
   };
 
 
-  const ogImage = buildOgImageUrl({ title: breedCap, subtitle: "Fiche de race, conseils gardien", kind: "race" });
+  const ogImage = breed.image_url || buildOgImageUrl({ title: breedCap, subtitle: "Fiche de race, conseils gardien", kind: "race" });
 
   const sections: Array<{ title: string; body: string | null }> = [
     { title: "Tempérament", body: breed.temperament },
