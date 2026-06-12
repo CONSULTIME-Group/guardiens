@@ -125,22 +125,49 @@ Le champ "content" DOIT être du markdown valide, faire AU MINIMUM 1500 mots, co
     const aiData = await aiResponse.json();
     const content = aiData.choices?.[0]?.message?.content || "";
     const finishReason = aiData.choices?.[0]?.finish_reason;
-    if (finishReason === "length") {
+    const truncated = finishReason === "length";
+    if (truncated) {
       console.warn("Response truncated for city", city);
     }
 
     const generated = extractJson(content) ?? {};
 
+    // Defensive : si l'IA a tronqué ou si le content est vide, on REFUSE
+    // d'écraser un contenu existant valide. En cas de création, on échoue
+    // proprement avec un 502.
+    const hasValidContent = typeof generated.content === "string" && generated.content.trim().length > 200;
+    if (!hasValidContent) {
+      if (existing && force) {
+        return new Response(
+          JSON.stringify({
+            error: "AI_GENERATION_INCOMPLETE",
+            detail: truncated ? "Response truncated by AI" : "Empty or invalid AI content",
+            preserved: true,
+          }),
+          { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      if (!existing) {
+        return new Response(
+          JSON.stringify({
+            error: "AI_GENERATION_INCOMPLETE",
+            detail: truncated ? "Response truncated by AI" : "Empty or invalid AI content",
+          }),
+          { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+    }
+
     const record: Record<string, unknown> = {
       city: city.trim(),
       department: department.trim(),
       slug,
-      h1_title: generated.h1_title || `House-sitting à ${city}, gardiens de confiance près de chez vous`,
-      intro_text: generated.intro_text || "",
-      meta_title: generated.meta_title || `House-sitting ${city}, garde maison et animaux | Guardiens`,
-      meta_description: generated.meta_description || `Trouvez un gardien de confiance à ${city}. Inscription gratuite, gardiens vérifiés.`,
-      excerpt: generated.excerpt || null,
-      content: generated.content || null,
+      h1_title: generated.h1_title || existing?.h1_title || `House-sitting à ${city}, gardiens de confiance près de chez vous`,
+      intro_text: generated.intro_text || existing?.intro_text || "",
+      meta_title: generated.meta_title || existing?.meta_title || `House-sitting ${city}, garde maison et animaux | Guardiens`,
+      meta_description: generated.meta_description || existing?.meta_description || `Trouvez un gardien de confiance à ${city}. Inscription gratuite, gardiens vérifiés.`,
+      excerpt: generated.excerpt || existing?.excerpt || null,
+      content: generated.content || existing?.content || null,
       published: true,
       updated_at: new Date().toISOString(),
     };
