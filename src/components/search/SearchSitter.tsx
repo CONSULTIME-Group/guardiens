@@ -711,19 +711,30 @@ const SearchSitter = () => {
  const demoCadence = realCount === 0 ? 3 : realCount <= 3 ? 99 : 6;
  const demoLimit = realCount === 0 ? DEMO_SITS.length : realCount <= 3 ? 2 : DEMO_SITS.length;
  final = interleaveDemos(final, DEMO_SITS.slice(0, demoLimit), demoCadence);
- const coordsMap = new Map<string, { lat: number; lng: number }>();
- final.forEach((item: any) => {
- if (!item) return;
- // Use item-level lat/lng first (for demo items), then fall back to geocoded city
- if (item.latitude && item.longitude) {
- coordsMap.set(item.id, { lat: item.latitude, lng: item.longitude });
- } else if (item.owner?.city) {
- const c = cityCoords.get(item.owner.city);
- if (c) coordsMap.set(item.id, c);
- }
- });
- setResultCoords(coordsMap);
- setResults(final);
+  const coordsMap = new Map<string, { lat: number; lng: number }>();
+  // Géocodage des annonces internationales (city + country, hors FR)
+  const intlItems = final.filter((it: any) => it && !it.latitude && it.country && it.country !== "FR" && (it.city || it.owner?.city));
+  const intlKeys = [...new Set(intlItems.map((it: any) => `${it.city || it.owner?.city}, ${it.country}`))];
+  const intlCoords = new Map<string, { lat: number; lng: number }>();
+  await Promise.all(intlKeys.map(async (k) => {
+    const c = await geocodeCity(k);
+    if (c) intlCoords.set(k, { lat: c.lat, lng: c.lng });
+  }));
+  final.forEach((item: any) => {
+    if (!item) return;
+    if (item.latitude && item.longitude) {
+      coordsMap.set(item.id, { lat: item.latitude, lng: item.longitude });
+    } else if (item.country && item.country !== "FR") {
+      const key = `${item.city || item.owner?.city}, ${item.country}`;
+      const c = intlCoords.get(key);
+      if (c) coordsMap.set(item.id, c);
+    } else if (item.owner?.city) {
+      const c = cityCoords.get(item.owner.city);
+      if (c) coordsMap.set(item.id, c);
+    }
+  });
+  setResultCoords(coordsMap);
+  setResults(final);
  };
 
 
