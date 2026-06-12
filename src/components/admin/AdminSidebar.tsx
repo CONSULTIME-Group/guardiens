@@ -87,6 +87,7 @@ const adminNavGroups: NavGroup[] = [
     label: "CONTENU & SYSTÈME",
     items: [
       { to: "/admin/articles", icon: FileText, label: "Articles" },
+      { to: "/admin/articles-longue-traine", icon: FileText, label: "Articles longue traîne" },
       { to: "/admin/faq", icon: HelpCircle, label: "FAQ" },
       { to: "/admin/guides", icon: Compass, label: "Guides locaux", badgeKey: "guideRequests" },
       { to: "/admin/city-pages", icon: MapPin, label: "Pages villes" },
