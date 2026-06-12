@@ -1,4 +1,5 @@
 import { MapPin, Search as SearchIcon, X } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CategoryFilter, FILTER_PILLS } from "./constants";
 
