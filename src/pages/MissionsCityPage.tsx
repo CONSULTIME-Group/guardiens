@@ -104,11 +104,11 @@ const MissionsCityPage = () => {
         />
 
         <section className="bg-background">
-          <div className="max-w-3xl mx-auto px-6 py-16 md:py-24">
-            <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 mb-4">
+          <div className="max-w-3xl mx-auto px-6 py-8 md:py-24">
+            <p className="hidden md:block text-xs font-body font-semibold tracking-widest uppercase text-primary/60 mb-4">
               Entraide à domicile · {c.cityName}
             </p>
-            <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground leading-tight">
+            <h1 className="font-heading text-2xl md:text-5xl font-bold text-foreground leading-tight">
               {c.h1}
             </h1>
             <p className="font-body text-lg text-foreground/75 leading-relaxed mt-6">
@@ -130,10 +130,10 @@ const MissionsCityPage = () => {
         </section>
 
         <section className="bg-muted/30 border-t border-border/40">
-          <div className="max-w-3xl mx-auto px-6 py-16 md:py-20 space-y-10">
+          <div className="max-w-3xl mx-auto px-6 py-8 md:py-20 space-y-10">
             {c.sections.map((s) => (
               <article key={s.heading}>
-                <h2 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-4 leading-snug">
+                <h2 className="font-heading text-xl md:text-3xl font-semibold text-foreground mb-4 leading-snug">
                   {s.heading}
                 </h2>
                 <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed">
@@ -145,8 +145,8 @@ const MissionsCityPage = () => {
         </section>
 
         <section className="bg-background border-t border-border/40">
-          <div className="max-w-3xl mx-auto px-6 py-16 md:py-20">
-            <h2 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-8 leading-snug">
+          <div className="max-w-3xl mx-auto px-6 py-8 md:py-20">
+            <h2 className="font-heading text-xl md:text-3xl font-semibold text-foreground mb-6 md:mb-8 leading-snug">
               Missions ouvertes près de {c.cityName}
             </h2>
 
@@ -200,8 +200,8 @@ const MissionsCityPage = () => {
         </section>
 
         <section className="bg-muted/30 border-t border-border/40">
-          <div className="max-w-3xl mx-auto px-6 py-16 md:py-20">
-            <h2 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-8 leading-snug">
+          <div className="max-w-3xl mx-auto px-6 py-8 md:py-20">
+            <h2 className="font-heading text-xl md:text-3xl font-semibold text-foreground mb-6 md:mb-8 leading-snug">
               Questions fréquentes, Lyon
             </h2>
             <Accordion type="single" collapsible className="space-y-3">

@@ -245,13 +245,13 @@ const CityPage = () => {
 
  {/* Rich editorial content from cityContent */}
  {content && content.articleSections.length > 0 && (
- <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
+ <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
  <CityArticleBody sections={content.articleSections} />
  </section>
  )}
 
  {/* Reassurance */}
- <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
+ <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
  <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
  Pourquoi choisir Guardiens à {cityData.name} ?
  </h2>
@@ -288,7 +288,7 @@ const CityPage = () => {
 
  {/* Nearby towns from cityContent */}
  {content && content.nearbyTowns.length > 0 && (
- <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
+ <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
  <h2 className="font-serif text-2xl font-bold text-foreground mb-4">
  Aussi disponible autour de {cityData.name}
  </h2>
@@ -336,7 +336,7 @@ const CityPage = () => {
  <LocalNetworkGrid current={cityData} allCities={CITIES} />
 
  {/* FAQ */}
- <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
+ <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
  <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
  Questions fréquentes sur le house-sitting à {cityData.name}
  </h2>
@@ -354,11 +354,11 @@ const CityPage = () => {
 
  {/* Related articles */}
  {relatedArticles.length > 0 && (
- <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
+ <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
  <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
  Articles sur {cityData.name}
  </h2>
- <div className="grid gap-4 md:grid-cols-3">
+ <div className="grid gap-2 md:gap-4 md:grid-cols-3">
  {relatedArticles.map((a: any) => (
  <Link
  key={a.slug}
@@ -402,7 +402,7 @@ const CityPage = () => {
  </section>
 
  {/* Final CTA */}
- <section className="max-w-5xl mx-auto px-4 py-16 text-center border-t border-border">
+ <section className="max-w-5xl mx-auto px-4 py-8 md:py-16 text-center border-t border-border">
  <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-4">
  Prêt à partir l'esprit libre ?
  </h2>

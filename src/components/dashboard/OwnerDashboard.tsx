@@ -290,7 +290,7 @@ const OwnerDashboard = () => {
       <header className="px-5 md:px-8 pt-2 animate-fade-in">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-xs uppercase tracking-[2px] text-muted-foreground font-sans mb-1.5">
+            <p className="hidden md:block text-xs uppercase tracking-[2px] text-muted-foreground font-sans mb-1.5">
               Espace propriétaire
             </p>
             <div className="flex items-center gap-3 flex-wrap">

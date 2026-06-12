@@ -161,8 +161,8 @@ const FAQ = () => {
  <PublicHeader />
  <PageBreadcrumb items={[{ label: t("faq.title") }]} />
  <header className="bg-primary/5 border-b border-border">
- <div className="max-w-3xl mx-auto px-4 py-12 sm:py-16 text-center">
- <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-6">
+ <div className="max-w-3xl mx-auto px-4 py-8 sm:py-16 text-center">
+ <div className="hidden md:inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-6">
  <HelpCircle className="h-7 w-7 text-primary" />
  </div>
  <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground mb-3">

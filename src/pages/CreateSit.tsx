@@ -511,7 +511,7 @@ const CreateSit = () => {
         </div>
 
         {/* Dates obligatoires */}
-        <div id="dates-field" className="grid grid-cols-2 gap-4 scroll-mt-24">
+        <div id="dates-field" className="grid grid-cols-1 sm:grid-cols-2 gap-4 scroll-mt-24">
           <div>
             <Label className="text-sm font-medium">Date de début *</Label>
             <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} min={today} className="mt-1.5" />
