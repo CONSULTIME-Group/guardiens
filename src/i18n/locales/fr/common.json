@@ -255,7 +255,7 @@
   },
   "pricing": {
     "meta": {
-      "title_before": "Tarifs, offerts pour tous jusqu'au {{date}}",
+      "title_before": "Tarifs, gratuits jusqu'au {{date}}",
       "title_after": "Tarifs, gratuit propriétaires · {{price}}",
       "desc_before": "Accès offert jusqu'au {{date}} pour tous, gardiens comme propriétaires. Sans carte bancaire, sans commission.",
       "desc_after": "Gratuit pour les propriétaires. {{price}} pour les gardiens, sans engagement. Sans commission, sans frais cachés."
