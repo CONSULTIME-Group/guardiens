@@ -25,6 +25,22 @@ function extractJson(raw: string): any | null {
   try { return JSON.parse(repaired); } catch { return null; }
 }
 
+async function fetchWikipediaImage(city: string): Promise<{ url: string; alt: string } | null> {
+  try {
+    const res = await fetch(
+      `https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`,
+      { headers: { "User-Agent": "Guardiens/1.0 (contact@guardiens.fr)", Accept: "application/json" } },
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const url: string | undefined = data.originalimage?.source || data.thumbnail?.source;
+    if (!url) return null;
+    return { url, alt: `Vue de ${city}, ville de France` };
+  } catch {
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
