@@ -583,6 +583,8 @@ const PublicSitDetail = () => {
         owner={owner}
         property={property}
         pets={pets}
+        ownerProfile={ownerProfile}
+        hasHouseGuide={hasHouseGuide}
         avgRating={avgRating}
         reviewCount={reviewCount}
         latestReviews={latestReviews}
