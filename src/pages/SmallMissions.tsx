@@ -662,7 +662,7 @@ const SmallMissions = () => {
 
             {/* ═══ Section 2, Membres disponibles (secondaire) ═══ */}
             {(helperCount > 0 || isAuthenticated) && (
-              <div className="mt-12 pt-8 border-t border-border">
+              <div className="mt-8 md:mt-12 pt-6 md:pt-8 md:border-t md:border-border">
                 {isAuthenticated && mode === "offer" && (
                   <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
