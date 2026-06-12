@@ -654,7 +654,27 @@ const OwnerDashboard = () => {
         </details>
       </div>
 
+      {/* Toggle « Réduire » mobile : visible uniquement quand l'espace est déployé */}
+      {showAllMobile && (
+        <div className="px-5 md:hidden">
+          <button
+            type="button"
+            onClick={() => {
+              setShowAllMobile(false);
+              if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-sm font-semibold text-muted-foreground hover:bg-muted/40 transition-colors"
+            aria-expanded={true}
+            aria-controls="owner-dash-extra"
+          >
+            Réduire l'espace
+            <ChevronUp className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+      )}
+
       {/* ═══ CTA sticky mobile ═══ */}
+
       {/* Empty state mobile : le hero CTA est hidden md:inline-flex → on relaie ici. */}
       {pendingAppCount > 0 ? (
         <MobileStickyCTA
