@@ -227,6 +227,9 @@ Structure EXACTE :
       }
     }
 
+    // Photo réelle (non IA) depuis Wikipedia FR si dispo
+    const wiki = await fetchWikipediaImage(city);
+
     const record: Record<string, unknown> = {
       city: city.trim(),
       department: department.trim(),
@@ -237,12 +240,14 @@ Structure EXACTE :
       meta_description: generated.meta_description || existing?.meta_description || `Trouvez un gardien de confiance à ${city}. Inscription gratuite, gardiens vérifiés.`,
       excerpt: generated.excerpt || existing?.excerpt || null,
       content: generated.content || existing?.content || null,
+      cover_image_url: wiki?.url || existing?.cover_image_url || null,
+      hero_image_alt: wiki?.alt || existing?.hero_image_alt || null,
       published: true,
       updated_at: new Date().toISOString(),
     };
 
     let result;
-    if (existing && force) {
+    if (existing) {
       const { data: updated, error } = await supabase
         .from("seo_city_pages")
         .update(record)
