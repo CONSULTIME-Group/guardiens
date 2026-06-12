@@ -86,12 +86,7 @@ Réponds UNIQUEMENT en JSON valide :
     const aiData = await aiResponse.json();
     const content = aiData.choices?.[0]?.message?.content || "";
 
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error("Could not parse AI response as JSON");
-    }
-
-    const generated = JSON.parse(jsonMatch[0]);
+    const generated = extractJson(content) ?? {};
 
     const record = {
       city: city.trim(),
