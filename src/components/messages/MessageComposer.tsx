@@ -42,7 +42,7 @@ const MessageComposer = ({ value, onChange, onSend, onPickPhoto, sending }: Mess
   };
 
   return (
-    <div className="border-t border-border bg-card p-3 flex items-end gap-2 mb-16 md:mb-0 shadow-[0_-4px_12px_-8px_hsl(var(--foreground)/0.08)]">
+    <div className="border-t border-border bg-card p-2 md:p-3 flex items-end gap-1.5 md:gap-2 mb-16 md:mb-0 shadow-[0_-4px_12px_-8px_hsl(var(--foreground)/0.08)]">
       <input
         type="file"
         ref={fileInputRef}
@@ -55,7 +55,7 @@ const MessageComposer = ({ value, onChange, onSend, onPickPhoto, sending }: Mess
       <button
         type="button"
         onClick={() => fileInputRef.current?.click()}
-        className="p-2 rounded-lg hover:bg-accent text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
+        className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-accent text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
         aria-label="Joindre une photo"
       >
         <ImageIcon className="h-5 w-5" aria-hidden="true" />

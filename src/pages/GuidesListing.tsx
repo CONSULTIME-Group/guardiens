@@ -104,17 +104,17 @@ const GuidesListing = () => {
             <img src={guideHeaderImg} alt={t("guides.header_alt")} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/70 to-background/40" />
           </div>
-          <div className="relative max-w-5xl mx-auto px-4 py-14 sm:py-20 text-left">
-            <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground mb-3">
+          <div className="relative max-w-5xl mx-auto px-4 py-8 sm:py-14 md:py-20 text-left">
+            <h1 className="font-heading text-2xl sm:text-4xl font-bold text-foreground mb-3">
               {t("guides.title")}
             </h1>
-            <p className="text-muted-foreground text-lg max-w-xl">
+            <p className="text-muted-foreground text-base md:text-lg max-w-xl">
               {t("guides.subtitle")}
             </p>
           </div>
         </header>
 
-        <main className="max-w-5xl mx-auto px-4 py-10">
+        <main className="max-w-5xl mx-auto px-4 py-6 md:py-10">
           {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-3 mb-8">
             <div className="relative flex-1">

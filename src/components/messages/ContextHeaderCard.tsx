@@ -53,7 +53,7 @@ const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCit
     const ownerName = safeName || "ce propriétaire";
     const memberName = safeName || "ce membre";
     return (
-      <div className="px-4 py-3 bg-info-soft border-t border-info-border">
+      <div className="px-3 py-2 md:px-4 md:py-3 bg-info-soft border-t border-info-border">
         <div className="flex items-start gap-2">
           <Compass className="h-4 w-4 text-info shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
@@ -110,7 +110,7 @@ const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCit
     const sitterName = safeName || "Un gardien";
     const ownerName = safeName || "ce propriétaire";
     return (
-      <div className="px-4 py-3 bg-warning-soft border-t border-warning-border">
+      <div className="px-3 py-2 md:px-4 md:py-3 bg-warning-soft border-t border-warning-border">
         <div className="flex items-start gap-2">
           <Sparkles className="h-4 w-4 text-warning shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">

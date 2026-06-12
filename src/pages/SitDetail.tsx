@@ -200,7 +200,7 @@ const SitDetail = () => {
   const isOwner = sit.user_id === user?.id;
 
   return (
-    <div className="p-6 md:p-10 max-w-4xl mx-auto animate-fade-in pb-44 md:pb-40">
+    <div className="px-3 pt-4 pb-44 md:p-10 md:pb-40 max-w-4xl mx-auto animate-fade-in">
       <Helmet>
         <title>{sit.title ? `${sit.title} · Mon annonce` : "Mon annonce"}</title>
         <meta name="robots" content="noindex, nofollow" />

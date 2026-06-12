@@ -278,9 +278,9 @@ const ConversationHeader = ({
         </div>
 
         {/* Right side */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1 md:gap-2 shrink-0">
           {annonceLinkHref && (
-            <Button asChild size="sm" variant="outline" className="gap-1.5 border-primary text-primary hover:bg-primary/5">
+            <Button asChild size="sm" variant="outline" className="hidden md:inline-flex gap-1.5 border-primary text-primary hover:bg-primary/5">
               <Link to={annonceLinkHref}>
                 Voir l'annonce <ExternalLink className="h-3.5 w-3.5" />
               </Link>
@@ -303,13 +303,13 @@ const ConversationHeader = ({
               </Link>
             </Button>
           )}
-          <button type="button" onClick={() => setReportOpen(true)} className="p-2 rounded-lg hover:bg-accent text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`Signaler ${sitterName}`}>
+          <button type="button" onClick={() => setReportOpen(true)} className="p-3 md:p-2 rounded-lg hover:bg-accent text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`Signaler ${sitterName}`}>
             <Flag className="h-4 w-4" aria-hidden="true" />
           </button>
-          <button type="button" onClick={() => setBlockOpen(true)} className="p-2 rounded-lg hover:bg-accent text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`Bloquer ${sitterName}`}>
+          <button type="button" onClick={() => setBlockOpen(true)} className="p-3 md:p-2 rounded-lg hover:bg-accent text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`Bloquer ${sitterName}`}>
             <Ban className="h-4 w-4" aria-hidden="true" />
           </button>
-          <button type="button" onClick={onArchive} className="p-2 rounded-lg hover:bg-accent text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Archiver cette conversation">
+          <button type="button" onClick={onArchive} className="p-3 md:p-2 rounded-lg hover:bg-accent text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Archiver cette conversation">
             <Archive className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>

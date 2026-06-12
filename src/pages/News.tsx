@@ -306,14 +306,14 @@ export default function News() {
         path={metaPath}
       />
       <PublicHeader />
-      <div className="max-w-4xl mx-auto px-4 py-8 animate-fade-in">
+      <div className="max-w-4xl mx-auto px-4 py-4 md:py-8 animate-fade-in">
         <PageBreadcrumb items={[{ label: t("news.breadcrumb") }]} />
 
-        <header className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-2">
+        <header className="mb-4 md:mb-8">
+          <h1 className="text-2xl md:text-4xl font-heading font-bold text-foreground mb-2">
             {t("news.title")}
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-base md:text-lg">
             {t("news.subtitle")}
           </p>
         </header>
@@ -373,8 +373,8 @@ export default function News() {
 
         {/* Featured "Vie locale & Entraide" section */}
         {activeCategory === "all" && !urlSearch.trim() && vieLocaleArticles.length > 0 && !loading && (
-          <div className="mb-10 p-6 rounded-xl bg-warning-soft/40">
-            <h2 className="font-heading text-xl font-bold mb-1">{t("news.vie_locale_title")}</h2>
+          <div className="mb-6 md:mb-10 p-4 md:p-6 rounded-xl bg-warning-soft/40">
+            <h2 className="font-heading text-lg md:text-xl font-bold mb-1">{t("news.vie_locale_title")</h2>
             <p className="text-muted-foreground text-sm mb-5">
               {t("news.vie_locale_subtitle")}
             </p>
@@ -428,7 +428,7 @@ export default function News() {
           </div>
         ) : visibleArticles.length === 0 ? (
           <div className="text-center py-16 space-y-3">
-            <p className="text-muted-foreground text-lg">
+            <p className="text-muted-foreground text-base md:text-lg">
               {urlSearch.trim()
                 ? t("news.empty_search", { q: urlSearch.trim() })
                 : t("news.empty_default")}
