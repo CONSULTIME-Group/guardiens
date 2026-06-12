@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
