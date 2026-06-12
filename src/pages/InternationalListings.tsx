@@ -93,8 +93,16 @@ export default function InternationalListings() {
         .neq("country", "FR")
         .order("created_at", { ascending: false })
         .limit(60);
+      const rows = ((data as IntlSit[]) || []);
+      const enriched = await Promise.all(
+        rows.map(async (sit) => {
+          if (!sit.city) return { ...sit, coords: null };
+          const coords = await geocodeCity(sit.city, sit.country || undefined);
+          return { ...sit, coords: coords ? { lat: coords.lat, lng: coords.lng } : null };
+        }),
+      );
       if (cancelled) return;
-      setSits((data as any[]) || []);
+      setSits(enriched);
     })();
     return () => { cancelled = true; };
   }, []);
