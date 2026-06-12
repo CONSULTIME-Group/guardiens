@@ -33,6 +33,16 @@ const BreedsListing = () => {
   const TITLE = t("breeds_listing.meta_title");
   const DESCRIPTION = t("breeds_listing.meta_description");
 
+  const itemListElement = breeds.slice(0, 60).map((b, i) => {
+    const slug = `${b.species.toLowerCase()}-${slugify(b.breed)}`;
+    return {
+      "@type": "ListItem",
+      position: i + 1,
+      url: `https://guardiens.fr/races/${slug}`,
+      name: b.breed,
+    };
+  });
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -40,6 +50,13 @@ const BreedsListing = () => {
     description: DESCRIPTION,
     url: CANONICAL,
     inLanguage: i18n.language,
+    mainEntity: {
+      "@type": "ItemList",
+      name: "Fiches de race d'animaux",
+      numberOfItems: itemListElement.length,
+      itemListOrder: "https://schema.org/ItemListOrderAscending",
+      itemListElement,
+    },
   };
 
   return (

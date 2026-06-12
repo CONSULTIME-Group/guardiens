@@ -17,6 +17,7 @@ import LiveListingsSection from "@/components/landing/LiveListingsSection";
 import RealMembersStrip from "@/components/landing/RealMembersStrip";
 import PublicHeader from "@/components/layout/PublicHeader";
 import FreePeriodBanner from "@/components/marketing/FreePeriodBanner";
+import RecentSitsItemListJsonLd from "@/components/seo/RecentSitsItemListJsonLd";
 
 import PublicFooter from "@/components/layout/PublicFooter";
 import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
@@ -565,6 +566,9 @@ const Landing = () => {
           }),
         }}
       />
+
+      {/* ItemList Schema.org des annonces récentes (Helmet, séparé du @graph). */}
+      <RecentSitsItemListJsonLd limit={8} />
 
       {/* ═══════════════ NAVBAR + BANDEAU GRATUITÉ ═══════════════ */}
       <PublicHeader />
