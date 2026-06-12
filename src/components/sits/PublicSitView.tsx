@@ -405,6 +405,7 @@ const PublicSitView = ({
               <ApproximateLocationMap
                 city={owner?.city}
                 postalCode={owner?.postal_code}
+                country={(sit as any)?.country || (owner as any)?.country}
                 lat={sit.latitude}
                 lng={sit.longitude}
                 className="h-64"
