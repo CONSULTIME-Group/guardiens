@@ -120,14 +120,32 @@ const AdminBreeds = () => {
               <CardHeader><CardTitle className="text-base capitalize">{sp} ({list.length})</CardTitle></CardHeader>
               <CardContent>
                 <ul className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
-                  {list.map((r) => (
-                    <li key={`${r.species}-${r.breed}`} className="flex items-center justify-between">
-                      <span>{r.breed}</span>
-                      <Link to={`/races/${slugify(r.breed)}`} className="text-primary inline-flex items-center gap-1 text-xs">
-                        Voir <ExternalLink className="w-3 h-3" />
-                      </Link>
-                    </li>
-                  ))}
+                  {list.map((r) => {
+                    const key = `${r.species}-${r.breed}`;
+                    return (
+                      <li key={key} className="flex items-center justify-between gap-2">
+                        <span className="truncate">{r.breed}</span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleRegenerate(r.species, r.breed)}
+                            disabled={!!regenerating}
+                            className="text-muted-foreground hover:text-primary disabled:opacity-50 p-1"
+                            title="Régénérer la fiche IA"
+                          >
+                            {regenerating === key ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <RefreshCw className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                          <Link to={`/races/${slugify(r.breed)}`} className="text-primary inline-flex items-center gap-1 text-xs">
+                            Voir <ExternalLink className="w-3 h-3" />
+                          </Link>
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
               </CardContent>
             </Card>
