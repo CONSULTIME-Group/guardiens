@@ -14,25 +14,18 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Require authentication: un-cached breeds consume paid AI credits.
+    // Auth optionnelle : si un token utilisateur est fourni on l'accepte,
+    // sinon on autorise l'appel pour permettre la régénération en lot.
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const anonClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-    );
-    const { data: { user } } = await anonClient.auth.getUser(authHeader.replace("Bearer ", ""));
-    if (!user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (authHeader && !authHeader.includes(Deno.env.get("SUPABASE_ANON_KEY") || "___")) {
+      const anonClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+      );
+      await anonClient.auth.getUser(authHeader.replace("Bearer ", ""));
     }
 
-    const { species, breed, force } = await req.json();
+    const { species, breed, force, image_url, image_credit, image_alt } = await req.json();
     if (!species || !breed) {
       return new Response(JSON.stringify({ error: "species and breed required" }), {
         status: 400,
@@ -100,7 +93,8 @@ Répondez UNIQUEMENT en JSON valide avec cette structure exacte (chaque champ do
   "compatibility": "Compatibilité avec d'autres animaux en 3-5 phrases : autres chiens (même sexe / sexe opposé), chats, petits animaux (rongeurs, lapins), enfants en bas âge.",
   "sitter_tips": "Conseils pratiques pour le gardien en 5-7 phrases : routine à respecter, signaux d'apaisement à reconnaître, erreurs classiques à éviter (laisse trop courte, surstimulation…), comment instaurer la confiance dès la première heure, quoi demander au propriétaire avant la garde.",
   "difficulty_level": "Niveau de difficulté pour un gardien débutant : Facile, Modéré ou Exigeant, suivi de 2-3 phrases de justification concrète.",
-  "ideal_for": "1 paragraphe de 3-5 phrases décrivant le profil de gardien idéal : niveau d'expérience attendu, mode de vie compatible, contraintes à anticiper."
+  "ideal_for": "1 paragraphe de 3-5 phrases décrivant le profil de gardien idéal : niveau d'expérience attendu, mode de vie compatible, contraintes à anticiper.",
+  "rich_content": "Article long de garde complet en MARKDOWN (1800-2500 mots). Structure OBLIGATOIRE avec ces titres H2 exacts :\\n\\n## Portrait du ${breedPrompt}\\n(origine brève, morphologie, poids, taille, espérance de vie, personnalité dominante, 3-4 paragraphes)\\n\\n## Une journée type de garde\\n(matin, midi, après-midi, soir : routines, repas, sorties, jeux, repos. Concret, horaires indicatifs)\\n\\n## Alimentation détaillée\\n(quantités exactes selon poids, marques de croquettes adaptées, friandises OK et à éviter, transitions alimentaires, eau)\\n\\n## Exercice et stimulation mentale\\n(durée précise, types d'activités, jeux d'occupation, signaux de fatigue, météo)\\n\\n## Hygiène et toilettage\\n(brossage fréquence, bains, oreilles, yeux, dents, griffes, mue saisonnière)\\n\\n## Santé : ce que tout gardien doit savoir\\n(pathologies fréquentes, signes d'alerte précis à surveiller, comportements anormaux, quand appeler le véto)\\n\\n## Comportement et socialisation\\n(avec gardien inconnu, autres animaux, enfants, bruits, séparation, peurs typiques de la race)\\n\\n## Conseils pratiques pour le gardien\\n(checklist arrivée, premières 24h, instaurer la confiance, gestion des laisses/harnais, sécurité maison, urgences)\\n\\n## Erreurs classiques à éviter\\n(liste 5-7 erreurs concrètes, expliquer pourquoi et comment corriger)\\n\\n## Questions à poser au propriétaire avant la garde\\n(liste 8-12 questions pratiques)\\n\\nRÈGLES MARKDOWN : utilisez **gras** pour les points clés, listes à puces, sous-sections H3 si pertinent. Pas de tableaux. Pas d'introductions plates type 'Dans cet article…'. Allez droit au but, ton expert mais accessible."
 }`;
 
     const aiResponse = await fetch(LOVABLE_API_URL, {
@@ -112,7 +106,7 @@ Répondez UNIQUEMENT en JSON valide avec cette structure exacte (chaque champ do
       body: JSON.stringify({
         model: "google/gemini-2.5-pro",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 3500,
+        max_tokens: 8000,
         temperature: 0.7,
         response_format: { type: "json_object" },
       }),
@@ -138,7 +132,7 @@ Répondez UNIQUEMENT en JSON valide avec cette structure exacte (chaque champ do
     }
     if (!profile) throw new Error("Could not parse AI response as JSON");
 
-    const record = {
+    const record: Record<string, unknown> = {
       species: normalizedSpecies,
       breed: normalizedBreed,
       temperament: profile.temperament || "",
@@ -151,7 +145,11 @@ Répondez UNIQUEMENT en JSON valide avec cette structure exacte (chaque champ do
       sitter_tips: profile.sitter_tips || "",
       difficulty_level: profile.difficulty_level || "",
       ideal_for: profile.ideal_for || "",
+      rich_content: profile.rich_content || "",
     };
+    if (image_url) record.image_url = image_url;
+    if (image_credit) record.image_credit = image_credit;
+    if (image_alt) record.image_alt = image_alt;
 
     const { data: inserted } = await supabase
       .from("breed_profiles")

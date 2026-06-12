@@ -1,0 +1,5 @@
+ALTER TABLE public.breed_profiles
+  ADD COLUMN IF NOT EXISTS image_url TEXT,
+  ADD COLUMN IF NOT EXISTS image_credit TEXT,
+  ADD COLUMN IF NOT EXISTS image_alt TEXT,
+  ADD COLUMN IF NOT EXISTS rich_content TEXT;

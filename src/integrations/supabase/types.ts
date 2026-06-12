@@ -589,6 +589,10 @@ export type Database = {
           health_notes: string
           id: string
           ideal_for: string
+          image_alt: string | null
+          image_credit: string | null
+          image_url: string | null
+          rich_content: string | null
           sitter_tips: string
           species: string
           stranger_behavior: string
@@ -605,6 +609,10 @@ export type Database = {
           health_notes?: string
           id?: string
           ideal_for?: string
+          image_alt?: string | null
+          image_credit?: string | null
+          image_url?: string | null
+          rich_content?: string | null
           sitter_tips?: string
           species: string
           stranger_behavior?: string
@@ -621,6 +629,10 @@ export type Database = {
           health_notes?: string
           id?: string
           ideal_for?: string
+          image_alt?: string | null
+          image_credit?: string | null
+          image_url?: string | null
+          rich_content?: string | null
           sitter_tips?: string
           species?: string
           stranger_behavior?: string
