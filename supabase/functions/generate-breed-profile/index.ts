@@ -104,7 +104,7 @@ Répondez UNIQUEMENT en JSON valide avec cette structure exacte (chaque champ do
         "Authorization": `Bearer ${LOVABLE_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: "google/gemini-2.5-flash",
         messages: [{ role: "user", content: prompt }],
         max_tokens: 8000,
         temperature: 0.7,
