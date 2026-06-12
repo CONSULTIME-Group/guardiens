@@ -177,6 +177,8 @@ const BreedPage = () => {
         <meta name="twitter:image" content={ogImage} />
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
         <script type="application/ld+json">{JSON.stringify(breadcrumb)}</script>
+        <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
+
       </Helmet>
 
       <main className="min-w-0 max-w-3xl mx-auto px-4 py-12">
