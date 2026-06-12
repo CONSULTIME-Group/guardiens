@@ -50,16 +50,18 @@ Deno.serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    const regionName = region || "Auvergne-Rhône-Alpes";
+    const regionName = region || "";
 
-    const prompt = `Tu es un expert SEO et rédacteur pour Guardiens, une plateforme de house-sitting de proximité en ${regionName}. Génère le contenu d'une landing page pour le département "${department}".
+    const prompt = `Tu es un expert SEO et rédacteur pour Guardiens, une plateforme de house-sitting de proximité couvrant toute la France. Génère le contenu d'une landing page pour le département "${department}"${regionName ? ` (${regionName})` : ""}.
+
+Règles strictes : vouvoiement ; ne mentionnez aucune région administrative française (interdiction absolue d'écrire « Auvergne-Rhône-Alpes », « AURA », ou n'importe quelle autre région) ; pas du mot « voisin » ni « voisinage » (utiliser « gardien », « gens du coin », « personne de confiance ») ; pas de tiret cadratin « — » (utiliser virgule, deux-points ou parenthèses) ; pas d'emoji ; ton factuel, chaleureux, sans superlatifs commerciaux.
 
 Réponds UNIQUEMENT en JSON valide :
 {
-  "h1_title": "House-sitting dans le ${department} — Gardiens de confiance près de chez vous",
-  "intro_text": "3-4 phrases décrivant pourquoi le ${department} est un territoire idéal pour le house-sitting. Mentionne la géographie, les paysages, le cadre de vie. Ton chaleureux.",
+  "h1_title": "House-sitting dans le ${department}, gardiens de confiance près de chez vous",
+  "intro_text": "3-4 phrases décrivant pourquoi le ${department} est un territoire agréable pour le house-sitting. Mentionnez la géographie, les paysages, le cadre de vie. Ton chaleureux, factuel.",
   "highlights": "3-4 phrases sur les points forts du département : nature, villes principales, activités typiques.",
-  "meta_title": "House-sitting ${department} — Garde maison et animaux | Guardiens",
+  "meta_title": "House-sitting ${department}, garde maison et animaux | Guardiens",
   "meta_description": "Trouvez un gardien de maison et d'animaux de confiance dans le ${department}. Gardiens vérifiés, proximité, avis croisés."
 }`;
 
