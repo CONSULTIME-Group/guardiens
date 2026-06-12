@@ -29,7 +29,7 @@ import { AdvancedFiltersSheet } from "@/components/search/header/AdvancedFilters
 import { SearchEmptyState } from "@/components/search/listing/SearchEmptyState";
 import { OutOfZoneBanner } from "@/components/search/listing/OutOfZoneBanner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, MapPin, Calendar, Star, Lock, Zap, Sparkles } from "lucide-react";
+import { Search, MapPin, Calendar, Star, Lock, Zap, Sparkles, Globe2 } from "lucide-react";
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
@@ -140,8 +140,22 @@ const SearchSitter = () => {
  const [sitterEligible, setSitterEligible] = useState(false);
  const [userCompletedSits, setUserCompletedSits] = useState(0);
  const [sitterProfile, setSitterProfile] = useState<any>(null);
- const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
  const initialLoadDone = useRef(false);
+ const [intlCount, setIntlCount] = useState<number>(0);
+ useEffect(() => {
+   let cancelled = false;
+   (async () => {
+     const { count } = await supabase
+       .from("sits")
+       .select("id", { count: "exact", head: true })
+       .eq("status", "published")
+       .not("country", "is", null)
+       .neq("country", "FR");
+     if (!cancelled) setIntlCount(count || 0);
+   })();
+   return () => { cancelled = true; };
+ }, []);
 
  // Pill popover states
  const [editingCity, setEditingCity] = useState(false);
@@ -1189,7 +1203,17 @@ const SearchSitter = () => {
  </SelectContent>
  </Select>
  </div>
- {tab === "sits" && user && (
+  {tab === "sits" && intlCount > 0 && (
+   <Link
+     to="/annonces/international"
+     className="hidden sm:inline-flex items-center gap-1.5 shrink-0 rounded-full border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-semibold px-3 py-1.5 mr-2 transition-colors"
+     aria-label={`Voir les ${intlCount} annonces hors France`}
+   >
+     <Globe2 className="h-3.5 w-3.5" />
+     Hors France ({intlCount})
+   </Link>
+  )}
+  {tab === "sits" && user && (
  <TooltipProvider>
  <Tooltip>
  <TooltipTrigger asChild>
