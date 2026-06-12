@@ -255,8 +255,8 @@
   },
   "pricing": {
     "meta": {
-      "title_before": "Tariffe Guardiens, offerto per tutti fino al {{date}}",
-      "title_after": "Tariffe Guardiens, gratuito per proprietari · {{price}}",
+      "title_before": "Tariffe, gratis fino al {{date}}",
+      "title_after": "Tariffe, gratuito per proprietari · {{price}}",
       "desc_before": "Accesso offerto fino al {{date}} per tutti, custodi e proprietari. Senza carta di credito, senza commissioni.",
       "desc_after": "Gratuito per i proprietari. {{price}} per i custodi, senza impegno. Senza commissioni, senza costi nascosti."
     },

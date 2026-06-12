@@ -255,8 +255,8 @@
   },
   "pricing": {
     "meta": {
-      "title_before": "Guardiens Tarife, kostenlos für alle bis zum {{date}}",
-      "title_after": "Guardiens Tarife, kostenlos für Eigentümer · {{price}}",
+      "title_before": "Tarife, kostenlos für alle bis {{date}}",
+      "title_after": "Tarife, kostenlos für Eigentümer · {{price}}",
       "desc_before": "Zugang bis zum {{date}} für alle kostenlos, sowohl für Betreuer als auch für Eigentümer. Ohne Kreditkarte, ohne Provision.",
       "desc_after": "Kostenlos für Eigentümer. {{price}} für Betreuer, ohne Bindung. Ohne Provision, ohne versteckte Kosten."
     },

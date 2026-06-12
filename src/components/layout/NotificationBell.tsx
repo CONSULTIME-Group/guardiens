@@ -134,7 +134,11 @@ const NotificationBell = () => {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button className="relative p-2 rounded-lg hover:bg-accent transition-colors">
+        <button
+          type="button"
+          aria-label={unreadCount > 0 ? `Notifications (${unreadCount} non lues)` : "Notifications"}
+          className="relative p-2 rounded-lg hover:bg-accent transition-colors"
+        >
           <Bell className="h-5 w-5 text-muted-foreground" />
           {unreadCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold tabular-nums">
