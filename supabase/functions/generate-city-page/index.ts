@@ -31,9 +31,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const body = await req.json();
-    console.log("generate-city-page body:", JSON.stringify(body));
-    const { city, department, force } = body;
+    const { city, department, force } = await req.json();
     if (!city || !department) {
       return new Response(JSON.stringify({ error: "city and department required" }), {
         status: 400,
