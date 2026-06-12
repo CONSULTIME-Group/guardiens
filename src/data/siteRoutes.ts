@@ -122,7 +122,7 @@ export const staticRoutes: SiteRoute[] = [
  {
  path: "/",
 title: "Garde d'animaux à domicile entre particuliers | Guardiens",
-metaDescription: "Trouvez un gardien du coin pour votre maison et vos animaux. Home sitting et entraide entre particuliers, vérifiés et notés. Partout en France.",
+metaDescription: "Test régression votre région AURA",
  h1: "Guardiens — Comme confier ses clés à quelqu'un du coin",
  sitemapPriority: "1.0",
  changeFreq: "daily",
