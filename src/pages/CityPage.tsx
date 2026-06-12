@@ -529,6 +529,9 @@ const CityPage = () => {
          </section>
        )}
 
+        {/* Gardiens du coin */}
+        <CitySittersGrid city={dbPage.city} citySlug={dbPage.slug} />
+
  {/* Cross-links */}
  {(cityGuide || departmentPage) && (
  <section className="max-w-5xl mx-auto px-4 py-6">
