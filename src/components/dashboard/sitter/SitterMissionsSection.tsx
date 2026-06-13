@@ -111,30 +111,19 @@ const SitterMissionsSection = memo(({
         myMissionsError ? (
           <ErrorState message={myMissionsError} />
         ) : sortedMine.length === 0 ? (
-          <div className="py-1">
-            <p className="text-xs text-muted-foreground font-sans mb-3">
-              <span className="font-semibold text-foreground">Osez !</span> Demandez un coup de main, ou proposez quelque chose en échange, un café, une histoire, un service…
+          <div className="flex items-center justify-between gap-3 py-1">
+            <p className="text-xs text-muted-foreground font-sans flex-1">
+              Demandez un coup de main ou proposez le vôtre.
             </p>
-            <div className="flex flex-col gap-2">
-              <Button
-                variant="outline"
-                onClick={() => navigate("/petites-missions/creer")}
-                className="w-full rounded-xl text-xs font-medium gap-1.5"
-                size="sm"
-              >
-                <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-                Publier un besoin
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => navigate("/petites-missions")}
-                className="w-full rounded-xl text-xs font-medium gap-1.5 text-foreground/80 hover:text-primary"
-                size="sm"
-              >
-                Proposer mon aide
-                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/petites-missions/creer")}
+              className="shrink-0 rounded-xl text-xs font-medium gap-1.5"
+              size="sm"
+            >
+              <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+              Publier
+            </Button>
           </div>
         ) : (
           <>
