@@ -7,6 +7,7 @@ import Breadcrumbs from "./Breadcrumbs";
 // différé pour ne pas peser sur les pages publiques (login, landing…) qui
 // n'utilisent jamais le shell AppLayout mais partagent l'entry bundle.
 const NotificationBell = lazy(() => import("./NotificationBell"));
+const MessageBell = lazy(() => import("./MessageBell"));
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
