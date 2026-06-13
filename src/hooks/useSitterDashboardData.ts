@@ -285,6 +285,43 @@ export function useSitterDashboardData(userId: string | undefined) {
         }
       }
 
+      // Fallback cover photo : si une annonce affichée n'a aucune photo
+      // (ni sit.cover_photo_url, ni properties.cover_photo_url, ni
+      // properties.photos), on récupère la 1re photo de la galerie
+      // propriétaire (owner_gallery) pour éviter la vignette vide.
+      // Cas d'usage : annonces récentes publiées sans photo de couverture
+      // dédiée, mais dont le propriétaire a une galerie remplie (ex: Marrakech).
+      try {
+        const needCover = nearbyListings.filter((s: any) => {
+          const hasCover = s?.cover_photo_url
+            || s?.properties?.cover_photo_url
+            || (Array.isArray(s?.properties?.photos) && s.properties.photos[0]);
+          return !hasCover;
+        });
+        const ownerIds = Array.from(new Set(needCover.map((s: any) => s.user_id)));
+        if (ownerIds.length > 0) {
+          const { data: galleryRows } = await supabase
+            .from("owner_gallery")
+            .select("user_id, photo_url, position")
+            .in("user_id", ownerIds)
+            .order("position", { ascending: true });
+          const firstByOwner = new Map<string, string>();
+          (galleryRows || []).forEach((row: any) => {
+            if (!firstByOwner.has(row.user_id)) firstByOwner.set(row.user_id, row.photo_url);
+          });
+          nearbyListings = nearbyListings.map((s: any) => {
+            const hasCover = s?.cover_photo_url
+              || s?.properties?.cover_photo_url
+              || (Array.isArray(s?.properties?.photos) && s.properties.photos[0]);
+            if (hasCover) return s;
+            const fallback = firstByOwner.get(s.user_id);
+            return fallback ? { ...s, cover_photo_url: fallback } : s;
+          });
+        }
+      } catch {
+        // silencieux : pas critique
+      }
+
       // Nearby missions — conserve la logique département (entraide locale,
       // pas de trajets longs). À migrer séparément si besoin.
       const userDept = profile?.postal_code?.slice(0, 2);
