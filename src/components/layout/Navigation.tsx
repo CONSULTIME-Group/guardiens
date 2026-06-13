@@ -536,7 +536,7 @@ export const BottomNav = () => {
               <div className="space-y-1">
                 {[
                   { to: "/search", icon: Search, label: effectiveRole === "owner" ? "Recherche gardiens" : "Annonces en cours", badge: 0 },
-                  { to: "/sits", icon: Calendar, label: effectiveRole === "owner" ? "Mes annonces" : "Mes gardes", badge: pendingAppsCount },
+                  { to: "/sits", icon: Calendar, label: effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures", badge: pendingAppsCount },
                   { to: "/favoris", icon: Heart, label: "Mes favoris", badge: 0 },
                   { to: "/petites-missions", icon: Handshake, label: "Petites missions", badge: missionBadgeCount },
                   { to: "/actualites", icon: Newspaper, label: "Guides & Conseils", badge: 0 },
