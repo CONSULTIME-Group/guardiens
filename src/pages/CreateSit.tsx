@@ -946,7 +946,7 @@ const CreateSit = () => {
               disabled={!canPublish}
               title={canPublish ? "Voir l'aperçu" : "Complétez les éléments requis pour prévisualiser"}
             >
-              <EyeIcon className="h-4 w-4" />
+              <Eye className="h-4 w-4" />
               <span>Aperçu</span>
             </Button>
             <Button
