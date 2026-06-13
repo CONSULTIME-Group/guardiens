@@ -494,8 +494,8 @@ const SitterDashboard = () => {
 
       {/* Version 2 colonnes, visible ≥ xl */}
       <div className="hidden xl:grid xl:grid-cols-12 xl:gap-6 xl:px-8 min-w-0 mt-4">
-        {/* MAIN COLUMN, 8/12 */}
-        <div className="xl:col-span-8 min-w-0">
+        {/* MAIN COLUMN, 9/12 (audit V2 : sidebar trop large 4/12 pour son contenu) */}
+        <div className="xl:col-span-9 min-w-0">
           <div className="[&>*]:!px-0 [&>*]:!mx-0">
             {ChecklistBlock}
             <section aria-labelledby="nearby-heading-xl">
@@ -505,22 +505,22 @@ const SitterDashboard = () => {
           </div>
         </div>
 
-        {/* SIDE COLUMN, 4/12, ACTIONS UNIQUEMENT (audit #3 : pas de décoration en aside) */}
-        <aside aria-label="Actions rapides" className="xl:col-span-4 min-w-0">
+        {/* SIDE COLUMN, 3/12 : actions rapides + gardien d'urgence (audit V2 : remplir l'aside) */}
+        <aside aria-label="Actions rapides et urgence" className="xl:col-span-3 min-w-0 space-y-3">
           <QuickActionsCard
             pendingAppsCount={pendingAppsCount}
             unreadCount={unreadCount}
             isAvailable={isAvailable}
             onToggleAvailability={toggleAvailability}
           />
+          {buildEmergencyBlock(true)}
         </aside>
       </div>
 
-      {/* Statut / badges / urgence, pleine largeur sous le layout 2 colonnes en xl.
+      {/* Statut / badges réputation, pleine largeur sous le layout 2 colonnes en xl.
           Sur < xl, déjà rendus dans la version pleine largeur ci-dessus. */}
       <div className="hidden xl:block xl:px-8 mt-6 space-y-3">
         {SecondaryAccordion}
-        {buildEmergencyBlock(false)}
       </div>
 
       {/* Toggle « Réduire » mobile : visible uniquement quand l'espace est déployé */}
