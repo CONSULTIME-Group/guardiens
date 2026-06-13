@@ -239,7 +239,7 @@ export const Sidebar = () => {
             <>
               <GroupLabel label="Mon activité" />
               <SidebarItem to="/dashboard" icon={Home} label="Dashboard" />
-              <SidebarItem to="/sits" icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures"} badge={pendingAppsCount} />
+              <SidebarItem to="/sits" icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures"} badge={sitsBadge} />
 
               {/* Messagerie : déplacée dans la cloche du header (MessageBell)
                   pour désencombrer la sidebar et la traiter comme un canal de
