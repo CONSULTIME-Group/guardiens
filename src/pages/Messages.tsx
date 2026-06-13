@@ -82,6 +82,8 @@ const Messages = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConv, setActiveConv] = useState<Conversation | null>(null);
+  const convListRef = useRef<HTMLDivElement | null>(null);
+  const savedScrollRef = useRef<number>(0);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -499,7 +501,13 @@ const Messages = () => {
       <div key={conv.id} className="group relative border-b border-border/50">
         <button
           type="button"
-          onClick={() => setActiveConv(conv)}
+          onClick={() => {
+            // Memorize scroll position before opening the conversation
+            if (convListRef.current) {
+              savedScrollRef.current = convListRef.current.scrollTop;
+            }
+            setActiveConv(conv);
+          }}
           className={`w-full flex items-start gap-3 p-3.5 pl-6 pr-10 text-left hover:bg-accent/50 transition-colors ${activeConv?.id === conv.id ? "bg-accent/50" : ""}`}
         >
           <div className="relative shrink-0">
@@ -641,7 +649,18 @@ const Messages = () => {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto" role="region" aria-label="Liste des conversations">
+          <div
+            ref={(el) => {
+              convListRef.current = el;
+              // Restore scroll position when list is re-shown (mobile back navigation)
+              if (el && savedScrollRef.current > 0) {
+                el.scrollTop = savedScrollRef.current;
+              }
+            }}
+            className="flex-1 overflow-y-auto"
+            role="region"
+            aria-label="Liste des conversations"
+          >
             {displayConversations.length === 0 ? (
               <div className="p-4">
                 {pill === "archived" ? (
