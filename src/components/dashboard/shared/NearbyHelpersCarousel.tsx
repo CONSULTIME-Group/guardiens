@@ -450,25 +450,9 @@ const HelperMiniCard = ({
 
 const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boolean } = {}) => {
   const { user } = useAuth();
-  const [activeSkill, setActiveSkill] = useState<string | null>(null);
-  // Override rayon, bumped via le lien « Élargir le rayon » dans l'empty-state
-  // du filtre. Reset à null quand l'utilisateur change/retire le filtre, pour
-  // ne pas garder un rayon de 100 km collant.
-  const [forcedRadius, setForcedRadius] = useState<number | null>(null);
-  const { data, isLoading, isFetching, refetch } = useNearbyHelpers(user?.id, { forcedRadius });
+  const { data, isLoading } = useNearbyHelpers(user?.id);
 
   const helpers = data?.helpers || [];
-  const filtered = useMemo(() => {
-    if (!activeSkill) return helpers;
-    return helpers.filter((h) =>
-      h.skill_categories.includes(activeSkill) || (activeSkill === "competences" && h.custom_skills.length > 0),
-    );
-  }, [helpers, activeSkill]);
-
-  const handleSkillToggle = (key: string | null) => {
-    setForcedRadius(null);
-    setActiveSkill(key);
-  };
 
   if (isLoading) {
     return (
@@ -484,27 +468,12 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
   }
 
   // Empty-state premium : pas de helpers dans le rayon max (100 km).
-  // On transforme le vide en levier d'acquisition (parrainage) plutôt qu'en trou UX.
   if (!helpers.length) {
     return <EmptyHelpersState hideHeader={hideHeader} userId={user?.id} />;
   }
 
-  const radiusLabel = data?.hasGeo
-    ? data.includesExtendedSkillProfiles
-      ? `dans un rayon de ${data.radiusUsed} km, avec des savoir-faire élargis France entière`
-      : `dans un rayon de ${data.radiusUsed} km`
-    : "dans la communauté";
+  const ctaHref = "/petites-missions/creer";
 
-  // Construit le lien vers la création d'une petite mission, pré-cadré par la
-  // compétence active si l'utilisateur a filtré.
-  const ctaHref = (() => {
-    const intent = activeSkill
-      ? SKILL_CHIPS.find((c) => c.key === activeSkill)?.intent
-      : null;
-    if (!intent) return "/petites-missions/creer";
-    const params = new URLSearchParams({ intent });
-    return `/petites-missions/creer?${params.toString()}`;
-  })();
 
   return (
     <section aria-labelledby="nearby-helpers-heading" className="space-y-3">
