@@ -227,7 +227,7 @@ const LiveListingsStrip: React.FC = () => {
             </Link>
 
             {/* Pile de 3 cartes secondaires */}
-            <div className="lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-3 md:gap-4">
+            <div className="lg:col-span-1 grid grid-cols-1 gap-3 md:gap-4">
               {rest.map((s) => {
                 const photo = resolvePhoto(s);
                 const dates = fmtDates(s);
