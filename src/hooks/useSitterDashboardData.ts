@@ -206,11 +206,16 @@ export function useSitterDashboardData(userId: string | undefined) {
       let nearbyListingsRadius: number | null = null;
       let nearbyError: string | null = null;
       {
+        // Annonces publiées ET non terminées (end_date >= aujourd'hui).
+        // Évite d'afficher dans le dashboard des gardes dont la date de fin
+        // est dépassée mais qui n'ont pas encore été archivées automatiquement.
+        const todayIso = new Date().toISOString().slice(0, 10);
         const { data: allListings, error: listErr } = await supabase
           .from("sits")
           .select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, cover_photo_url, properties:property_id(photos, type, environment, cover_photo_url)")
           .eq("status", "published")
           .neq("user_id", userId)
+          .gte("end_date", todayIso)
           .order("created_at", { ascending: false })
           .limit(500);
         if (listErr) {
