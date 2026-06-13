@@ -45,6 +45,9 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
           <div className="flex items-center gap-1 shrink-0">
             <LanguageSwitcher compact />
             <Suspense fallback={<div className="w-9 h-9" aria-hidden />}>
+              <MessageBell />
+            </Suspense>
+            <Suspense fallback={<div className="w-9 h-9" aria-hidden />}>
               <NotificationBell />
             </Suspense>
           </div>
