@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
 import LiveListingsSection from "@/components/landing/LiveListingsSection";
+import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
 import RealMembersStrip from "@/components/landing/RealMembersStrip";
 import PublicHeader from "@/components/layout/PublicHeader";
 import FreePeriodBanner from "@/components/marketing/FreePeriodBanner";
@@ -659,6 +660,9 @@ const Landing = () => {
           </div>
         </div>
       </section>
+
+      {/* ═══════════════ APERÇU LIVE ANNONCES (sous Hero) ═══════════════ */}
+      <LiveListingsStrip />
 
       {/* ═══════════════ SOMMAIRE DE PAGE, maillage interne ═══════════════ */}
       <nav
