@@ -213,19 +213,17 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
 const SmallMissionsRoute = () => {
   const { isAuthenticated } = useAuth();
   if (isAuthenticated) {
+    // Cohérence mobile : AppLayout fournit la top bar (logo + cloches) et la
+    // bottom nav, identique aux autres hubs (/dashboard, /sits, /messages).
     return (
-      <div className="flex min-h-screen bg-background">
-        <Sidebar />
-        <main className="flex-1 min-w-0 pb-20 md:pb-0">
-          <BackButton />
-          <SmallMissions />
-        </main>
-        <BottomNav />
-      </div>
+      <AppLayout>
+        <SmallMissions />
+      </AppLayout>
     );
   }
   return <SmallMissionsPublic />;
 };
+
 
 const NavigateBlogSlug = () => {
   const { slug } = useParams();
