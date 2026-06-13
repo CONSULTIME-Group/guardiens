@@ -174,7 +174,7 @@ const LiveListingsStrip: React.FC = () => {
         </div>
 
         {featured ? (
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-5">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-5">
             {/* Carte featured surdimensionnée */}
             <Link
               to={`/annonces/${featured.id}`}
