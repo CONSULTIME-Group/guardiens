@@ -995,9 +995,6 @@ const CreateSit = () => {
         environments={sitEnvironments.map(e => envLabels[e] || e)}
         isUrgent={isUrgent}
       />
-          </div>
-        </div>
-      </div>
 
     </div>
   );
