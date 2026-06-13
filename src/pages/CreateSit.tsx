@@ -765,14 +765,14 @@ const CreateSit = () => {
         )}
       </div>
 
-      {/* Pre-filled summaries */}
-      <details className="mt-10 group" open>
-      <summary className="cursor-pointer flex items-center justify-between p-3 rounded-xl border border-border bg-card md:hidden mb-3 list-none select-none">
-        <span className="font-heading text-sm font-semibold">Résumé depuis votre profil</span>
+      {/* Pre-filled summaries, repliés par défaut pour ne pas écraser le formulaire */}
+      <details className="mt-10 group">
+      <summary className="cursor-pointer flex items-center justify-between p-3 rounded-xl border border-border bg-card mb-3 list-none select-none hover:bg-muted/30 transition-colors">
+        <span className="font-heading text-sm md:text-base font-semibold">Résumé depuis votre profil <span className="text-muted-foreground font-normal text-xs">(pré-rempli, modifiable depuis votre profil)</span></span>
         <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
       </summary>
-      <div className="space-y-6 pb-32 hidden group-open:block md:!block">
-        <h2 className="font-heading text-xl font-semibold hidden md:block">Résumé depuis votre profil</h2>
+      <div className="space-y-6 pb-32">
+        <h2 className="sr-only">Résumé depuis votre profil</h2>
 
         {/* Housing */}
         <SummaryCard icon={Home} title="Le logement" editLink="/profile">
