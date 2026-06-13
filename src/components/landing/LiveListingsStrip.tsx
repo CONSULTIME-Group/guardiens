@@ -142,7 +142,7 @@ const LiveListingsStrip: React.FC = () => {
     s.start_date && s.end_date ? `${fmt(s.start_date)} – ${fmt(s.end_date)}` : null;
 
   const featured = sits.find(isHighlighted);
-  const rest = featured ? sits.filter((s) => s.id !== featured.id).slice(0, 3) : sits;
+  const rest = featured ? sits.filter((s) => s.id !== featured.id).slice(0, 1) : sits;
 
   return (
     <section
