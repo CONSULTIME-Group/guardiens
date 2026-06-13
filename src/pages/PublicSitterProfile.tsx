@@ -822,8 +822,7 @@ export default function PublicSitterProfile() {
         const isOwnProfile = !!auth.user?.id && auth.user.id === id;
         return (
           <div
-            className="relative overflow-hidden w-full flex items-end bg-[hsl(var(--hero-paper))] max-h-[420px] md:max-h-[520px]"
-            style={{ aspectRatio: "1536 / 544" }}
+            className="relative overflow-hidden w-full flex items-end bg-[hsl(var(--hero-paper))] md:max-h-[520px] md:[aspect-ratio:1536/544]"
           >
             {/* Illustration de fond, sketchbook style, déterministe par profil.
                 object-contain : on montre le carnet entier (spirales, marges) sans rogner. */}
