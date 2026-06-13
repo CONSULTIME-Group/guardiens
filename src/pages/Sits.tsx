@@ -259,36 +259,69 @@ const Sits = () => {
         });
       }
 
-      // For accepted sits (confirmed/in_progress), load guide + conversation
-      const acceptedSits = (data || []).filter((a: any) =>
-        a.status === "accepted" && ["confirmed", "in_progress"].includes(a.sit?.status)
-      );
-
+      // For all applications: conversation + last message + unread.
+      // Guide only for accepted/active sits.
       const guideMap: Record<string, { id: string; published: boolean } | null> = {};
       const convMap: Record<string, string | null> = {};
+      const lastMsgMap: Record<string, { content: string; created_at: string; from_me: boolean } | null> = {};
+      const unreadMap: Record<string, number> = {};
 
-      await Promise.all(acceptedSits.map(async (a: any) => {
+      await Promise.all((data || []).map(async (a: any) => {
         const sitId = a.sit?.id;
         const ownerId = a.sit?.user_id;
         if (!sitId || !ownerId) return;
 
+        const isAcceptedActive =
+          a.status === "accepted" && ["confirmed", "in_progress"].includes(a.sit?.status);
+
         const [guideRes, convRes] = await Promise.all([
-          supabase
-            .from("house_guides")
-            .select("id, published")
-            .eq("user_id", ownerId)
-            .eq("published", true)
-            .maybeSingle(),
+          isAcceptedActive
+            ? supabase
+                .from("house_guides")
+                .select("id, published")
+                .eq("user_id", ownerId)
+                .eq("published", true)
+                .maybeSingle()
+            : Promise.resolve({ data: null } as any),
           supabase
             .from("conversations")
             .select("id")
             .eq("sit_id", sitId)
-            .or(`owner_id.eq.${ownerId},sitter_id.eq.${user.id}`)
+            .eq("owner_id", ownerId)
+            .eq("sitter_id", user.id)
             .maybeSingle(),
         ]);
 
-        guideMap[sitId] = guideRes.data || null;
-        convMap[sitId] = convRes.data?.id || null;
+        guideMap[sitId] = (guideRes as any).data || null;
+        const convId = convRes.data?.id || null;
+        convMap[sitId] = convId;
+
+        if (convId) {
+          const [lastRes, unreadRes] = await Promise.all([
+            supabase
+              .from("messages")
+              .select("content, created_at, sender_id, is_system")
+              .eq("conversation_id", convId)
+              .eq("is_system", false)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle(),
+            supabase
+              .from("messages")
+              .select("id", { count: "exact", head: true })
+              .eq("conversation_id", convId)
+              .is("read_at", null)
+              .neq("sender_id", user.id),
+          ]);
+          lastMsgMap[sitId] = lastRes.data
+            ? {
+                content: lastRes.data.content,
+                created_at: lastRes.data.created_at,
+                from_me: lastRes.data.sender_id === user.id,
+              }
+            : null;
+          unreadMap[sitId] = unreadRes.count || 0;
+        }
       }));
 
       setSits(
@@ -302,6 +335,8 @@ const Sits = () => {
           pets: petsByProperty[a.sit?.property_id] || [],
           houseGuide: guideMap[a.sit?.id] || null,
           conversationId: convMap[a.sit?.id] || null,
+          lastMessage: lastMsgMap[a.sit?.id] || null,
+          unreadCount: unreadMap[a.sit?.id] || 0,
         })) || []
       );
     }
@@ -1008,10 +1043,37 @@ const SitCard = ({
             </div>
           )}
 
+          {/* Chat preview (sitter side) */}
+          {!isOwner && sit.lastMessage && (
+            <Link
+              to={sit.conversationId ? `/messages?c=${sit.conversationId}` : "/messages"}
+              className="mt-3 flex items-start gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2 hover:bg-muted/60 transition-colors"
+            >
+              <MessageCircle className="h-3.5 w-3.5 mt-0.5 text-muted-foreground shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className={cn(
+                  "text-xs truncate",
+                  sit.unreadCount > 0 ? "text-foreground font-medium" : "text-muted-foreground"
+                )}>
+                  {sit.lastMessage.from_me ? "Vous : " : ""}{sit.lastMessage.content}
+                </p>
+                <p className="text-[10px] text-muted-foreground/70 mt-0.5">
+                  {format(parseISO(sit.lastMessage.created_at), "d MMM, HH:mm", { locale: fr })}
+                </p>
+              </div>
+              {sit.unreadCount > 0 && (
+                <span className="shrink-0 bg-primary text-primary-foreground text-[10px] font-semibold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1.5">
+                  {sit.unreadCount}
+                </span>
+              )}
+            </Link>
+          )}
+
           {/* Quick actions */}
           <div className="flex items-center gap-2 mt-3 flex-wrap">
             <QuickActions sit={sit} isOwner={isOwner} effectiveStatus={effectiveStatus} onRepublish={onRepublish} onOpenGuide={onOpenGuide} />
           </div>
+
         </div>
       </div>
     </div>
