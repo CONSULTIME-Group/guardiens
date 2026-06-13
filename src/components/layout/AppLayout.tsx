@@ -7,6 +7,7 @@ import Breadcrumbs from "./Breadcrumbs";
 // différé pour ne pas peser sur les pages publiques (login, landing…) qui
 // n'utilisent jamais le shell AppLayout mais partagent l'entry bundle.
 const NotificationBell = lazy(() => import("./NotificationBell"));
+const MessageBell = lazy(() => import("./MessageBell"));
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
@@ -43,6 +44,9 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
           </div>
           <div className="flex items-center gap-1 shrink-0">
             <LanguageSwitcher compact />
+            <Suspense fallback={<div className="w-9 h-9" aria-hidden />}>
+              <MessageBell />
+            </Suspense>
             <Suspense fallback={<div className="w-9 h-9" aria-hidden />}>
               <NotificationBell />
             </Suspense>
