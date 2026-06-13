@@ -137,6 +137,7 @@ const CreateSit = () => {
   const [draftId, setDraftId] = useState<string | null>(null);
   const [savingDraft, setSavingDraft] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const hasUserEditedRef = useRef(false);
   const initialLoadedRef = useRef(false);
 
