@@ -1,9 +1,9 @@
-import { memo, useMemo, useState } from "react";
+import { memo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ShieldCheck, ArrowRight, MapPin, MessageSquare, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNearbyHelpers, nextRadiusStep, type NearbyHelper } from "@/hooks/useNearbyHelpers";
+import { useNearbyHelpers, type NearbyHelper } from "@/hooks/useNearbyHelpers";
 import { useHelpersProximityCount } from "@/hooks/useHelpersProximityCount";
 import { useCtaCooldown } from "@/hooks/useCtaCooldown";
 import { capitalize } from "@/components/dashboard/owner/helpers";
@@ -450,25 +450,9 @@ const HelperMiniCard = ({
 
 const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boolean } = {}) => {
   const { user } = useAuth();
-  const [activeSkill, setActiveSkill] = useState<string | null>(null);
-  // Override rayon, bumped via le lien « Élargir le rayon » dans l'empty-state
-  // du filtre. Reset à null quand l'utilisateur change/retire le filtre, pour
-  // ne pas garder un rayon de 100 km collant.
-  const [forcedRadius, setForcedRadius] = useState<number | null>(null);
-  const { data, isLoading, isFetching, refetch } = useNearbyHelpers(user?.id, { forcedRadius });
+  const { data, isLoading } = useNearbyHelpers(user?.id);
 
   const helpers = data?.helpers || [];
-  const filtered = useMemo(() => {
-    if (!activeSkill) return helpers;
-    return helpers.filter((h) =>
-      h.skill_categories.includes(activeSkill) || (activeSkill === "competences" && h.custom_skills.length > 0),
-    );
-  }, [helpers, activeSkill]);
-
-  const handleSkillToggle = (key: string | null) => {
-    setForcedRadius(null);
-    setActiveSkill(key);
-  };
 
   if (isLoading) {
     return (
@@ -484,74 +468,43 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
   }
 
   // Empty-state premium : pas de helpers dans le rayon max (100 km).
-  // On transforme le vide en levier d'acquisition (parrainage) plutôt qu'en trou UX.
   if (!helpers.length) {
     return <EmptyHelpersState hideHeader={hideHeader} userId={user?.id} />;
   }
 
-  const radiusLabel = data?.hasGeo
-    ? data.includesExtendedSkillProfiles
-      ? `dans un rayon de ${data.radiusUsed} km, avec des savoir-faire élargis France entière`
-      : `dans un rayon de ${data.radiusUsed} km`
-    : "dans la communauté";
+  const ctaHref = "/petites-missions/creer";
 
-  // Construit le lien vers la création d'une petite mission, pré-cadré par la
-  // compétence active si l'utilisateur a filtré.
-  const ctaHref = (() => {
-    const intent = activeSkill
-      ? SKILL_CHIPS.find((c) => c.key === activeSkill)?.intent
-      : null;
-    if (!intent) return "/petites-missions/creer";
-    const params = new URLSearchParams({ intent });
-    return `/petites-missions/creer?${params.toString()}`;
-  })();
 
   return (
     <section aria-labelledby="nearby-helpers-heading" className="space-y-3">
       {!hideHeader && (
-        <div className="flex items-end justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent mb-1.5">
-              Coup de main
-            </p>
-            <h3
-              id="nearby-helpers-heading"
-              className="font-heading text-2xl sm:text-3xl font-semibold text-foreground leading-tight"
-            >
-              Entraide près de chez vous
-            </h3>
-            <p className="text-xs text-muted-foreground mt-2 max-w-prose">
-              Savoir-faire particuliers affichés en priorité, puis proximité, {radiusLabel}.
-            </p>
-          </div>
+        <div className="min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent mb-1.5">
+            Coup de main
+          </p>
+          <h3
+            id="nearby-helpers-heading"
+            className="font-heading text-2xl sm:text-3xl font-semibold text-foreground leading-tight"
+          >
+            Entraide près de chez vous
+          </h3>
         </div>
       )}
 
-      {/* Explainer concept, TOUJOURS visible, y compris quand le parent
-          rend déjà un titre via SectionEyebrow. Sans cette ligne,
-          l'utilisateur ne comprend pas ce que la liste suggère de faire. */}
+      {/* Explainer court : une phrase suffit, le reste se découvre en cliquant. */}
       <p className="text-xs sm:text-sm text-foreground/75 leading-relaxed max-w-prose">
-        Des membres prêts à rendre service ponctuellement&nbsp;: promenade,
-        visite, garde d'1&nbsp;h, dépôt de clés, jardinage, bricolage…
-        <span className="text-muted-foreground"> Cliquez sur «&nbsp;Lui écrire&nbsp;» pour proposer un échange, c'est gratuit, sans engagement.</span>
+        Des membres prêts à rendre un service ponctuel près de chez vous. Cliquez sur «&nbsp;Lui écrire&nbsp;» pour proposer un échange, c'est gratuit.
       </p>
-      {data?.hasGeo && (
-        <p className="text-[11px] text-muted-foreground -mt-1">
-          Savoir-faire affichés en priorité, puis proximité, {radiusLabel}.
-        </p>
-      )}
 
       {/* Compteur dual local · national, preuve sociale localisée */}
       <HelpersProximityTicker userId={user?.id} />
 
-
-      {/* Pas de géoloc → impossible de trier par distance. On le dit franchement
-          plutôt que de faire passer 8 profils nationaux pour des « voisins ». */}
+      {/* Pas de géoloc → impossible de trier par distance. */}
       {data && !data.hasGeo && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-warning/10 ring-1 ring-warning/30 px-3 py-2 text-xs">
           <span className="text-foreground/80 font-sans">
             <MapPin className="inline h-3.5 w-3.5 mr-1 text-warning" aria-hidden="true" />
-            Sans votre adresse, impossible de trier par proximité, résultats au hasard.
+            Sans votre adresse, impossible de trier par proximité.
           </span>
           <Button asChild size="sm" variant="outline" className="h-7 rounded-lg text-xs">
             <Link to="/profile">Ajouter mon adresse</Link>
@@ -559,121 +512,22 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
         </div>
       )}
 
-      {/* Chips compétences, scroll horizontal sur mobile avec fondu droit
-          pour signaler qu'il existe d'autres filtres au-delà du bord. */}
+      {/* Carrousel horizontal, sans filtres : la liste est déjà triée
+          savoir-faire d'abord puis proximité. */}
       <div className="relative -mx-1">
-        <div className="flex gap-2 overflow-x-auto pb-1 px-1 scrollbar-hide">
-          <button
-            type="button"
-            onClick={() => handleSkillToggle(null)}
-            className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
-              activeSkill === null
-                ? "bg-foreground text-background border-foreground"
-                : "bg-card text-foreground border-border hover:bg-muted"
-            }`}
-          >
-            Tout
-          </button>
-          {SKILL_CHIPS.map((chip) => {
-            const count = helpers.filter((h) =>
-              h.skill_categories.includes(chip.key) || (chip.key === "competences" && h.custom_skills.length > 0),
-            ).length;
-            if (count === 0) return null;
-            const active = activeSkill === chip.key;
-            return (
-              <button
-                key={chip.key}
-                type="button"
-                onClick={() => handleSkillToggle(active ? null : chip.key)}
-                className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
-                  active
-                    ? "bg-foreground text-background border-foreground"
-                    : "bg-card text-foreground border-border hover:bg-muted"
-                }`}
-                aria-pressed={active}
-              >
-                {chip.label}
-                <span className={`ml-1.5 text-[10px] ${active ? "text-background/70" : "text-muted-foreground"}`}>
-                  {count}
-                </span>
-              </button>
-            );
-          })}
+        <div className="flex gap-3 overflow-x-auto pb-3 px-1 snap-x snap-mandatory scrollbar-hide scroll-smooth">
+          {helpers.map((helper) => (
+            <HelperMiniCard
+              key={helper.id}
+              helper={helper}
+              ctaHref={ctaHref}
+            />
+          ))}
         </div>
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-background to-transparent sm:hidden" aria-hidden="true" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-4 bg-gradient-to-r from-background to-transparent" aria-hidden="true" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-4 bg-gradient-to-l from-background to-transparent" aria-hidden="true" />
       </div>
 
-      {/* Carrousel horizontal premium, partout (hideHeader contrôle seulement le titre). */}
-      {filtered.length === 0 ? (
-        (() => {
-          const activeChip = SKILL_CHIPS.find((c) => c.key === activeSkill);
-          const currentRadius = data?.radiusUsed ?? 0;
-          const nextRadius = data?.hasGeo ? nextRadiusStep(currentRadius) : null;
-          return (
-            <div
-              role="status"
-              className="rounded-2xl border border-dashed border-border bg-muted/30 px-5 py-6 text-center"
-            >
-              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold mb-1.5">
-                0 résultat · Filtre actif{activeChip ? ` · ${activeChip.label}` : ""}
-              </p>
-              <p className="text-sm font-heading font-semibold text-foreground leading-snug mb-1">
-                Aucune personne disponible sur cette compétence
-                {data?.hasGeo ? ` dans un rayon de ${currentRadius} km.` : " près de chez vous."}
-              </p>
-              <p className="text-xs text-muted-foreground font-sans mb-4 max-w-prose mx-auto">
-                {nextRadius
-                  ? `Élargissez le rayon pour garder ${activeChip?.label ?? "ce filtre"} actif, relancez la recherche, ou essayez une autre catégorie.`
-                  : "Relancez la recherche pour vérifier les derniers inscrits, essayez une autre catégorie, ou retirez le filtre."}
-              </p>
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                {nextRadius && (
-                  <Button
-                    size="sm"
-                    className="rounded-xl"
-                    onClick={() => setForcedRadius(nextRadius)}
-                  >
-                    Élargir à {nextRadius}&nbsp;km
-                  </Button>
-                )}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="rounded-xl"
-                  onClick={() => refetch()}
-                  disabled={isFetching}
-                  aria-label="Relancer la recherche pour vérifier les derniers inscrits"
-                >
-                  {isFetching ? "Recherche…" : "Réessayer"}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="rounded-xl"
-                  onClick={() => handleSkillToggle(null)}
-                >
-                  Voir tout le monde
-                </Button>
-              </div>
-            </div>
-          );
-        })()
-      ) : (
-        <div className="relative -mx-1">
-          <div className="flex gap-3 overflow-x-auto pb-3 px-1 snap-x snap-mandatory scrollbar-hide scroll-smooth">
-            {filtered.map((helper) => (
-              <HelperMiniCard
-                key={helper.id}
-                helper={helper}
-                ctaHref={ctaHref}
-              />
-            ))}
-          </div>
-          {/* Fondus latéraux : indication subtile de scroll horizontal */}
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-4 bg-gradient-to-r from-background to-transparent" aria-hidden="true" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-4 bg-gradient-to-l from-background to-transparent" aria-hidden="true" />
-        </div>
-      )}
 
       {/* CTA section : alternative à l'écriture directe, publier une demande
           publique pour atteindre plus de monde que les profils affichés. */}
