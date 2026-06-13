@@ -27,9 +27,10 @@ interface ThreadPreview {
  * Le sitter sans abonnement voit une version cadenassée (gate premium).
  */
 const MessageBell = () => {
-  const { user } = useAuth();
+  const { user, activeRole } = useAuth();
   const { hasAccess } = useSubscriptionAccess();
   const userId = user?.id;
+  const effectiveRole = user?.role === "both" ? activeRole : user?.role;
   const [threads, setThreads] = useState<ThreadPreview[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
@@ -41,6 +42,15 @@ const MessageBell = () => {
       return;
     }
 
+    // Filtre par rôle effectif : un utilisateur "both" en mode propriétaire
+    // ne voit que ses conversations en tant que propriétaire (et inversement).
+    const filter =
+      effectiveRole === "owner"
+        ? `owner_id.eq.${userId}`
+        : effectiveRole === "sitter"
+        ? `sitter_id.eq.${userId}`
+        : `owner_id.eq.${userId},sitter_id.eq.${userId}`;
+
     // Conversations de l'utilisateur (les 5 plus récentes au sens dernier message)
     const { data: convs } = await supabase
       .from("conversations")
@@ -51,9 +61,10 @@ const MessageBell = () => {
         sitter:profiles!conversations_sitter_id_fkey(first_name, avatar_url),
         messages:messages(content, created_at, sender_id, read_at, is_system)
       `)
-      .or(`owner_id.eq.${userId},sitter_id.eq.${userId}`)
+      .or(filter)
       .order("updated_at", { ascending: false })
       .limit(8);
+
 
     if (!convs || convs.length === 0) {
       setThreads([]);
@@ -95,7 +106,7 @@ const MessageBell = () => {
 
     setThreads(previews.slice(0, 5));
     setUnreadCount(totalUnread);
-  }, [userId]);
+  }, [userId, effectiveRole]);
 
   useEffect(() => {
     void load();

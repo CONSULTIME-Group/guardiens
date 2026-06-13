@@ -64,7 +64,8 @@ export const Sidebar = () => {
   const navigate = useNavigate();
   const { hasAccess } = useSubscriptionAccess();
   const [unreadCount, setUnreadCount] = useState(0);
-  const [pendingAppsCount, setPendingAppsCount] = useState(0);
+  const [ownerInboxCount, setOwnerInboxCount] = useState(0);
+  const [sitterActionCount, setSitterActionCount] = useState(0);
   const [missionBadgeCount, setMissionBadgeCount] = useState(0);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
@@ -73,6 +74,9 @@ export const Sidebar = () => {
   const [roleDialogTarget, setRoleDialogTarget] = useState<"gardien" | "proprio">("proprio");
 
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
+  // Badge sidebar/bottom-nav /sits : owner = candidatures reçues à traiter,
+  // sitter = candidatures propres en attente d'action (pending côté gardien).
+  const sitsBadge = effectiveRole === "owner" ? ownerInboxCount : sitterActionCount;
 
   useEffect(() => {
     if (!user) return;
@@ -95,7 +99,7 @@ export const Sidebar = () => {
         setUnreadCount(0);
       }
 
-      // Pending applications on user's sits (owner view)
+      // Owner inbox : candidatures pending reçues sur les annonces de l'utilisateur
       const { data: userSits } = await supabase
         .from("sits")
         .select("id")
@@ -106,10 +110,19 @@ export const Sidebar = () => {
           .select("id", { count: "exact", head: true })
           .in("sit_id", userSits.map((s: any) => s.id))
           .eq("status", "pending");
-        setPendingAppsCount(appCount || 0);
+        setOwnerInboxCount(appCount || 0);
       } else {
-        setPendingAppsCount(0);
+        setOwnerInboxCount(0);
       }
+
+      // Sitter action : candidatures propres en attente (pending) côté gardien
+      const { count: myAppsCount } = await supabase
+        .from("applications")
+        .select("id", { count: "exact", head: true })
+        .eq("sitter_id", user.id)
+        .eq("status", "pending");
+      setSitterActionCount(myAppsCount || 0);
+
 
       // Mission conversations with unread messages
       const { data: missionConvs } = await supabase
@@ -134,6 +147,7 @@ export const Sidebar = () => {
     const interval = setInterval(loadCounts, 15000);
     return () => clearInterval(interval);
   }, [user]);
+
 
   return (
     <aside className="hidden md:flex flex-col w-64 border-r border-border bg-card h-screen sticky top-0">
@@ -225,7 +239,7 @@ export const Sidebar = () => {
             <>
               <GroupLabel label="Mon activité" />
               <SidebarItem to="/dashboard" icon={Home} label="Dashboard" />
-              <SidebarItem to="/sits" icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures"} badge={pendingAppsCount} />
+              <SidebarItem to="/sits" icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures"} badge={sitsBadge} />
 
               {/* Messagerie : déplacée dans la cloche du header (MessageBell)
                   pour désencombrer la sidebar et la traiter comme un canal de
@@ -304,7 +318,8 @@ export const BottomNav = () => {
   const { isAdmin } = useAdmin();
   const { hasAccess } = useSubscriptionAccess();
   const [unreadCount, setUnreadCount] = useState(0);
-  const [pendingAppsCount, setPendingAppsCount] = useState(0);
+  const [ownerInboxCount, setOwnerInboxCount] = useState(0);
+  const [sitterActionCount, setSitterActionCount] = useState(0);
   const [missionBadgeCount, setMissionBadgeCount] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
@@ -314,6 +329,7 @@ export const BottomNav = () => {
   const [roleDialogTarget, setRoleDialogTarget] = useState<"gardien" | "proprio">("proprio");
 
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
+  const sitsBadge = effectiveRole === "owner" ? ownerInboxCount : sitterActionCount;
 
   useEffect(() => {
     if (!user) return;
@@ -345,10 +361,17 @@ export const BottomNav = () => {
           .select("id", { count: "exact", head: true })
           .in("sit_id", userSits.map((s: any) => s.id))
           .eq("status", "pending");
-        setPendingAppsCount(appCount || 0);
+        setOwnerInboxCount(appCount || 0);
       } else {
-        setPendingAppsCount(0);
+        setOwnerInboxCount(0);
       }
+
+      const { count: myAppsCount } = await supabase
+        .from("applications")
+        .select("id", { count: "exact", head: true })
+        .eq("sitter_id", user.id)
+        .eq("status", "pending");
+      setSitterActionCount(myAppsCount || 0);
 
       const { data: missionConvs } = await supabase
         .from("conversations")
@@ -381,13 +404,14 @@ export const BottomNav = () => {
   // en 1 tap via le hamburger / sidebar mobile (cf. ligne 238).
   const isOwnerView = effectiveRole === "owner";
   const tabs = [
-    { to: "/dashboard", icon: Home, label: "Accueil", badge: pendingAppsCount },
+    { to: "/dashboard", icon: Home, label: "Accueil", badge: isOwnerView ? ownerInboxCount : 0 },
     {
       to: isOwnerView ? "/recherche-gardiens" : "/search",
       icon: Search,
       label: isOwnerView ? "Gardiens" : "Recherche",
     },
-    { to: "/sits", icon: Calendar, label: isOwnerView ? "Annonces" : "Candidat.", badge: pendingAppsCount },
+    { to: "/sits", icon: Calendar, label: isOwnerView ? "Annonces" : "Gardes", badge: sitsBadge },
+
     { to: "/petites-missions", icon: Handshake, label: "Coup de main", badge: missionBadgeCount },
   ];
 
@@ -459,7 +483,7 @@ export const BottomNav = () => {
                 <div className="relative">
                   <MoreHorizontal className="h-5 w-5" strokeWidth={1.8} />
                   {(() => {
-                    const moreBadge = pendingAppsCount + missionBadgeCount;
+                    const moreBadge = sitsBadge + missionBadgeCount;
                     return moreBadge > 0 ? (
                       <span className="absolute -top-1 -right-2 bg-destructive text-destructive-foreground text-[8px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 font-bold">
                         {moreBadge > 99 ? "99+" : moreBadge}
@@ -527,7 +551,7 @@ export const BottomNav = () => {
               <div className="space-y-1">
                 {[
                   { to: "/search", icon: Search, label: effectiveRole === "owner" ? "Recherche gardiens" : "Annonces en cours", badge: 0 },
-                  { to: "/sits", icon: Calendar, label: effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures", badge: pendingAppsCount },
+                  { to: "/sits", icon: Calendar, label: effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures", badge: sitsBadge },
                   { to: "/favoris", icon: Heart, label: "Mes favoris", badge: 0 },
                   { to: "/petites-missions", icon: Handshake, label: "Petites missions", badge: missionBadgeCount },
                   { to: "/actualites", icon: Newspaper, label: "Guides & Conseils", badge: 0 },

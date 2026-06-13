@@ -696,6 +696,9 @@ const Sits = () => {
               illustration="sleepingCat"
               title="Aucune garde en cours"
               description="Vos gardes en cours apparaîtront ici dès le jour J."
+              actionLabel="Trouver une garde"
+              actionTo="/search"
+              actionIcon={Eye}
             />
           )}
           {!isOwnerView && activeTab === "completed" && (
@@ -703,6 +706,9 @@ const Sits = () => {
               illustration="emptyCalendar"
               title="Aucune garde passée"
               description="Vos gardes terminées s'afficheront ici, avec les avis reçus."
+              actionLabel="Trouver une garde"
+              actionTo="/search"
+              actionIcon={Eye}
             />
           )}
           {!isOwnerView && activeTab === "cancelled" && (
@@ -710,8 +716,12 @@ const Sits = () => {
               illustration="quietLeaf"
               title="Rien à signaler ici"
               description="Les annonces et candidatures annulées apparaîtraient à cet endroit."
+              actionLabel="Trouver une garde"
+              actionTo="/search"
+              actionIcon={Eye}
             />
           )}
+
         </>
       ) : (
         <div className="space-y-3">
