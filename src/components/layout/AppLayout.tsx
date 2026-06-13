@@ -32,26 +32,26 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
     <div className="flex min-h-screen bg-background">
       <Sidebar />
       <main id="main-content" className="flex-1 min-w-0 pb-20 md:pb-0 overflow-x-clip" role="main">
-        {/* Mobile top bar : logo + notification bell */}
-        <div className="md:hidden sticky top-0 z-40 flex items-center justify-between px-4 py-2 bg-background/95 backdrop-blur border-b border-border">
-          <Link to="/dashboard" className="font-heading text-lg font-bold tracking-tight">
-            <span className="text-primary">g</span>
-            <span className="text-foreground">uardiens</span>
-          </Link>
-          <div className="flex items-center gap-1">
+        {/* Mobile top bar unifiée : back (si applicable) + logo + cloche */}
+        <div className="md:hidden sticky top-0 z-40 flex items-center justify-between gap-2 px-3 py-2 bg-background/95 backdrop-blur border-b border-border">
+          <div className="flex items-center gap-1 min-w-0">
+            <BackButton inline />
+            <Link to="/dashboard" className="font-heading text-lg font-bold tracking-tight truncate">
+              <span className="text-primary">g</span>
+              <span className="text-foreground">uardiens</span>
+            </Link>
+          </div>
+          <div className="flex items-center gap-1 shrink-0">
             <LanguageSwitcher compact />
             <Suspense fallback={<div className="w-9 h-9" aria-hidden />}>
               <NotificationBell />
             </Suspense>
           </div>
         </div>
-        {/* Single navigation aid: BackButton on mobile, Breadcrumbs on desktop */}
-        <div className="md:hidden">
-          <BackButton />
-        </div>
         <div className="hidden md:block">
           <Breadcrumbs />
         </div>
+
         {children ?? <Outlet />}
       </main>
       <BottomNav />
