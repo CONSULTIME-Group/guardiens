@@ -617,19 +617,19 @@ const CreateSit = () => {
             />
           </div>
           <Textarea
-            placeholder="Décrivez ce qui est particulier à cette garde, en plus de ce qui est déjà dans votre profil (min. 50 caractères)"
+            placeholder={`Décrivez ce qui est particulier à cette garde, en plus de ce qui est déjà dans votre profil (min. ${MIN_DESCRIPTION} caractères). Les annonces détaillées reçoivent 3× plus de candidatures.`}
             value={specificExpectations}
             onChange={e => setSpecificExpectations(e.target.value)}
             className="mt-1.5"
-            rows={4}
+            rows={5}
           />
           <p className={cn(
             "text-xs mt-1",
-            specificExpectations.length > 0 && specificExpectations.length < 50
+            specificExpectations.length > 0 && specificExpectations.length < MIN_DESCRIPTION
               ? "text-destructive"
               : "text-muted-foreground"
           )}>
-            {specificExpectations.length}/50 caractères minimum
+            {specificExpectations.length}/{MIN_DESCRIPTION} caractères minimum
           </p>
         </div>
 
