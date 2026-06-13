@@ -63,9 +63,12 @@ const MessageBell = () => {
 
     let totalUnread = 0;
     const previews: ThreadPreview[] = convs.map((c: any) => {
-      const msgs = (c.messages || []).slice().sort(
-        (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
+      const msgs = (c.messages || [])
+        .filter((m: any) => !m.is_system)
+        .slice()
+        .sort(
+          (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
       const last = msgs[0] || null;
       const unread = msgs.filter((m: any) => !m.read_at && m.sender_id !== userId).length;
       totalUnread += unread;
@@ -76,7 +79,7 @@ const MessageBell = () => {
         other_name: other?.first_name || null,
         other_avatar: other?.avatar_url || null,
         sit_title: c.sit?.title || null,
-        last_body: last?.body || null,
+        last_body: last?.content || null,
         last_at: last?.created_at || null,
         unread,
       };
