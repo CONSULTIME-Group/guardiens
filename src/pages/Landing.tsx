@@ -661,6 +661,9 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* ═══════════════ APERÇU LIVE ANNONCES (sous Hero) ═══════════════ */}
+      <LiveListingsStrip />
+
       {/* ═══════════════ SOMMAIRE DE PAGE, maillage interne ═══════════════ */}
       <nav
         aria-label={t("landing.toc.aria")}
