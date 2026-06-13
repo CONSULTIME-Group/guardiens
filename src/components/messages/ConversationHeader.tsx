@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import FounderBadge from "@/components/badges/FounderBadge";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Archive, ExternalLink, CheckCircle2, Star, Home, Handshake, Calendar, MapPin, Flag, CheckCircle, XCircle, Loader2, Ban } from "lucide-react";
+import { ArrowLeft, Archive, ExternalLink, CheckCircle2, Star, Home, Handshake, Calendar, MapPin, Flag, CheckCircle, XCircle, Loader2, Ban, MoreHorizontal } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import HelpButton from "./HelpButton";
@@ -310,15 +311,44 @@ const ConversationHeader = ({
               </Link>
             </Button>
           )}
-          <button type="button" onClick={() => setReportOpen(true)} className="p-3 md:p-2 rounded-lg hover:bg-accent text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`Signaler ${sitterName}`}>
+          {/* Desktop : actions inline */}
+          <button type="button" onClick={() => setReportOpen(true)} className="hidden md:inline-flex p-2 rounded-lg hover:bg-accent text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`Signaler ${sitterName}`}>
             <Flag className="h-4 w-4" aria-hidden="true" />
           </button>
-          <button type="button" onClick={() => setBlockOpen(true)} className="p-3 md:p-2 rounded-lg hover:bg-accent text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`Bloquer ${sitterName}`}>
+          <button type="button" onClick={() => setBlockOpen(true)} className="hidden md:inline-flex p-2 rounded-lg hover:bg-accent text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`Bloquer ${sitterName}`}>
             <Ban className="h-4 w-4" aria-hidden="true" />
           </button>
-          <button type="button" onClick={onArchive} className="p-3 md:p-2 rounded-lg hover:bg-accent text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Archiver cette conversation">
+          <button type="button" onClick={onArchive} className="hidden md:inline-flex p-2 rounded-lg hover:bg-accent text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Archiver cette conversation">
             <Archive className="h-4 w-4" aria-hidden="true" />
           </button>
+
+          {/* Mobile : menu condensé ⋯ */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button type="button" className="md:hidden p-3 rounded-lg hover:bg-accent text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Plus d'actions">
+                <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              {annonceLinkHref && (
+                <>
+                  <DropdownMenuItem onClick={() => navigate(annonceLinkHref)}>
+                    <ExternalLink className="h-4 w-4 mr-2" /> Voir l'annonce
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </>
+              )}
+              <DropdownMenuItem onClick={onArchive}>
+                <Archive className="h-4 w-4 mr-2" /> Archiver
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setReportOpen(true)}>
+                <Flag className="h-4 w-4 mr-2" /> Signaler
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setBlockOpen(true)} className="text-destructive focus:text-destructive">
+                <Ban className="h-4 w-4 mr-2" /> Bloquer
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
