@@ -205,7 +205,7 @@ const SitterDashboard = () => {
   // au lieu de 3 cartes empilées). Toutes fermées par défaut.
   const SecondaryAccordion = (
     <section aria-label="Mon espace gardien, détails" className="rounded-2xl border border-border bg-card overflow-hidden">
-      <Accordion type="single" collapsible>
+      <Accordion type="single" collapsible defaultValue="reputation">
         <AccordionItem value="conseils" className="border-b border-border last:border-0">
           <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
             <div className="flex flex-col items-start text-left">
