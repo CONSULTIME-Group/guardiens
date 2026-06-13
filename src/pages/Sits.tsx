@@ -65,11 +65,12 @@ type Tab = "upcoming" | "in_progress" | "completed" | "cancelled";
 type OwnerTab = "active" | "drafts" | "archived";
 
 const tabs: { value: Tab; label: string; icon: typeof Calendar }[] = [
-  { value: "upcoming", label: "À venir", icon: Calendar },
-  { value: "in_progress", label: "En cours", icon: Clock },
-  { value: "completed", label: "Passées", icon: CheckCircle },
-  { value: "cancelled", label: "Annulées", icon: XCircle },
+  { value: "upcoming", label: "Actives", icon: Calendar },
+  { value: "in_progress", label: "En garde", icon: Clock },
+  { value: "completed", label: "Terminées", icon: CheckCircle },
+  { value: "cancelled", label: "Refusées", icon: XCircle },
 ];
+
 
 const ownerTabs: { value: OwnerTab; label: string; icon: typeof Calendar }[] = [
   { value: "active", label: "Actives", icon: Calendar },
