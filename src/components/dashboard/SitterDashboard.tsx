@@ -144,7 +144,7 @@ const SitterDashboard = () => {
           </div>
 
           <div role="list" className="bg-card border border-border rounded-2xl overflow-hidden">
-            {incompleteItems.map((item: any, i: number) => (
+            {incompleteItems.slice(0, 2).map((item: any, i: number) => (
               <Link key={i} to={item.to} role="listitem" className="group flex items-center justify-between py-3 px-4 border-b border-border last:border-0 cursor-pointer hover:bg-muted/40 transition-all duration-200 ease-out hover:translate-x-0.5">
                 <div className="flex items-center">
                   <Circle className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
@@ -154,6 +154,24 @@ const SitterDashboard = () => {
               </Link>
             ))}
           </div>
+          {incompleteItems.length > 2 && (
+            <details className="mt-2">
+              <summary className="cursor-pointer list-none text-xs text-muted-foreground px-1 py-1.5 hover:text-foreground flex items-center gap-1 select-none">
+                Voir les {incompleteItems.length - 2} étapes restantes <span aria-hidden="true">▾</span>
+              </summary>
+              <div role="list" className="bg-card border border-border rounded-2xl overflow-hidden mt-1">
+                {incompleteItems.slice(2).map((item: any, i: number) => (
+                  <Link key={i} to={item.to} role="listitem" className="group flex items-center justify-between py-3 px-4 border-b border-border last:border-0 cursor-pointer hover:bg-muted/40 transition-all duration-200 ease-out hover:translate-x-0.5">
+                    <div className="flex items-center">
+                      <Circle className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
+                      <span className="text-sm text-foreground ml-3">{item.label}</span>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
+                  </Link>
+                ))}
+              </div>
+            </details>
+          )}
           {completedItems.length > 0 && (
             <Accordion type="single" collapsible className="mt-3">
               <AccordionItem value="done" className="border-none">
@@ -414,10 +432,12 @@ const SitterDashboard = () => {
         </div>
       )}
 
-      {/* FreePeriodBanner, 1 ligne sous le cockpit, pas un bloc en hero */}
+      {/* Bannière contextuelle, une seule : AccessGateBanner si accès limité, sinon FreePeriodBanner */}
       {!nextGuard && (
         <div className={`px-4 sm:px-5 md:px-8 mt-3 ${!showAllMobile ? "hidden md:block" : ""}`}>
-          <FreePeriodBanner />
+          {!(level === 4 || level === "3B")
+            ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+            : <FreePeriodBanner />}
         </div>
       )}
 
@@ -425,9 +445,6 @@ const SitterDashboard = () => {
         const isEmpty = !nextGuard && !nextGuardError && nearbyListings.length === 0 && !nearbyError;
         return (
           <>
-            <div className={`px-4 sm:px-5 md:px-8 mt-4 ${!showAllMobile ? "hidden md:block" : ""}`}>
-              <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
-            </div>
 
             {/* ═══ 2-COLUMN LAYOUT ≥ xl ═══ */}
 

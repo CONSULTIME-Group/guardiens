@@ -219,54 +219,56 @@ const PublicSitView = ({
             )}
 
             <div className="max-w-2xl space-y-8 md:space-y-12">
-              {/* Hôte */}
-              {owner && (
-                <div className="flex items-start gap-5 pb-10 border-b border-border">
-                  <div className="shrink-0">
-                    {owner.avatar_url ? (
-                      <img
-                        src={owner.avatar_url}
-                        alt={owner.first_name || "Hôte"}
-                        className="w-16 h-16 rounded-full object-cover border-2 border-background shadow-sm"
-                      />
-                    ) : (
-                      <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center font-heading text-xl font-bold text-foreground">
-                        {owner.first_name?.charAt(0) || "?"}
+              {/* Hôte + Le mot du propriétaire, fusionnés en une seule section */}
+              {(owner || sit.specific_expectations || sit.owner_message) && (
+                <section className="pb-10 border-b border-border">
+                  {owner && (
+                    <div className="md:grid md:grid-cols-[auto,1fr] md:gap-6 flex flex-col gap-5">
+                      <div className="shrink-0">
+                        {owner.avatar_url ? (
+                          <img
+                            src={owner.avatar_url}
+                            alt={owner.first_name || "Hôte"}
+                            className="w-16 h-16 rounded-full object-cover border-2 border-background shadow-sm"
+                          />
+                        ) : (
+                          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center font-heading text-xl font-bold text-foreground">
+                            {owner.first_name?.charAt(0) || "?"}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-lg font-semibold text-foreground flex items-center gap-2 flex-wrap">
-                      Proposé par {owner.first_name || "un membre"}
-                      {owner.identity_verified && <VerifiedBadge />}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {[
-                        owner.city,
-                        typeof owner.completed_sits_count === "number" && owner.completed_sits_count > 0
-                          ? `${owner.completed_sits_count} garde${owner.completed_sits_count > 1 ? "s" : ""} accomplie${owner.completed_sits_count > 1 ? "s" : ""}`
-                          : null,
-                        avgRating ? `★ ${avgRating} (${reviewCount} avis)` : null,
-                      ].filter(Boolean).join(" · ")}
-                    </p>
-                    {owner.bio && (
-                      <p className="text-sm text-foreground/80 mt-3 leading-relaxed line-clamp-3">
-                        {owner.bio}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Le mot du propriétaire (présentation libre de la garde) */}
-              {(sit.specific_expectations || sit.owner_message) && (
-                <section>
-                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">
-                    Le mot de {owner?.first_name || "l'hôte"}
-                  </h2>
-                  <div className="space-y-5 text-lg leading-relaxed text-foreground/85 whitespace-pre-line">
-                    {sit.specific_expectations || sit.owner_message}
-                  </div>
+                      <div className="min-w-0">
+                        <p className="text-lg font-semibold text-foreground flex items-center gap-2 flex-wrap">
+                          Proposé par {owner.first_name || "un membre"}
+                          {owner.identity_verified && <VerifiedBadge />}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {[
+                            owner.city,
+                            typeof owner.completed_sits_count === "number" && owner.completed_sits_count > 0
+                              ? `${owner.completed_sits_count} garde${owner.completed_sits_count > 1 ? "s" : ""} accomplie${owner.completed_sits_count > 1 ? "s" : ""}`
+                              : null,
+                            avgRating ? `★ ${avgRating} (${reviewCount} avis)` : null,
+                          ].filter(Boolean).join(" · ")}
+                        </p>
+                        {owner.bio && (
+                          <p className="text-sm text-foreground/80 mt-3 leading-relaxed line-clamp-3">
+                            {owner.bio}
+                          </p>
+                        )}
+                        {(sit.specific_expectations || sit.owner_message) && (
+                          <div className="mt-4 space-y-3 text-base leading-relaxed text-foreground/85 whitespace-pre-line">
+                            {sit.specific_expectations || sit.owner_message}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {!owner && (sit.specific_expectations || sit.owner_message) && (
+                    <div className="space-y-3 text-base leading-relaxed text-foreground/85 whitespace-pre-line">
+                      {sit.specific_expectations || sit.owner_message}
+                    </div>
+                  )}
                 </section>
               )}
 
@@ -291,31 +293,25 @@ const PublicSitView = ({
                       {property.description}
                     </div>
                   )}
-                  {Array.isArray(property.equipments) && property.equipments.length > 0 && (
+                  {(Array.isArray(property.equipments) && property.equipments.length > 0 || property.accessible || property.car_required) && (
                     <div className="mt-2">
                       <h3 className="text-xs font-bold tracking-[0.2em] uppercase mb-3 text-muted-foreground">
-                        Équipements
+                        Équipements &amp; accessibilité
                       </h3>
                       <div className="flex flex-wrap gap-2">
-                        {property.equipments.map((eq) => (
-                          <span
-                            key={eq}
-                            className="px-3 py-1.5 rounded-full bg-muted text-foreground border border-border text-sm"
-                          >
-                            {eq}
-                          </span>
+                        {Array.isArray(property.equipments) && property.equipments.map((eq) => (
+                          <span key={eq} className="px-3 py-1.5 rounded-full bg-muted text-foreground border border-border text-sm">{eq}</span>
                         ))}
+                        {(property.accessible || property.car_required) && Array.isArray(property.equipments) && property.equipments.length > 0 && (
+                          <span className="w-px h-6 bg-border self-center" aria-hidden="true" />
+                        )}
+                        {property.accessible && (
+                          <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm">Accès PMR</span>
+                        )}
+                        {property.car_required && (
+                          <span className="px-3 py-1.5 rounded-full bg-secondary/20 text-secondary-foreground text-sm">Voiture recommandée</span>
+                        )}
                       </div>
-                    </div>
-                  )}
-                  {(property.accessible || property.car_required) && (
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      {property.accessible && (
-                        <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm">Accès PMR</span>
-                      )}
-                      {property.car_required && (
-                        <span className="px-3 py-1.5 rounded-full bg-secondary/20 text-secondary-foreground text-sm">Voiture recommandée</span>
-                      )}
                     </div>
                   )}
                 </section>

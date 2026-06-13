@@ -344,10 +344,15 @@ const OwnerDashboard = () => {
           cible, on suggère les prochaines étapes utiles. La carte
           d'activation s'auto-retire quand 6/6 est atteint. */}
       {(nextActions.length > 1 || !activationScore.allDone) && (
-        <div className={`px-5 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-4 ${!showAllMobile ? "hidden md:grid" : ""}`}>
-          <NextActionsList actions={nextActions} excludeId={priorityAction.variant} />
-          <ActivationScoreCard score={activationScore} />
-        </div>
+        <details className={`px-5 md:px-8 ${!showAllMobile ? "hidden md:block" : ""}`}>
+          <summary className="cursor-pointer list-none text-sm text-muted-foreground hover:text-foreground py-1.5 flex items-center gap-1.5 select-none">
+            Voir les étapes suivantes <span aria-hidden="true" className="ml-0.5">▾</span>
+          </summary>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-3">
+            <NextActionsList actions={nextActions} excludeId={priorityAction.variant} />
+            <ActivationScoreCard score={activationScore} />
+          </div>
+        </details>
       )}
 
 
@@ -355,17 +360,9 @@ const OwnerDashboard = () => {
 
 
 
-      {/* Bannière dual-role : déplacée APRÈS le hero (l'utilisateur lit
-          d'abord son nom, ensuite l'incitation à activer l'espace gardien). */}
+      {/* AccessGateBanner seul ici ; RoleActivationBanner + LiveSignalStrip déplacés dans le footer "Ressources". */}
       <div className={`px-5 md:px-8 ${!showAllMobile ? "hidden md:block" : ""}`}>
-        <RoleActivationBanner userRole={user?.role || "owner"} />
-      </div>
-
-      {/* Règle de priorité : on n'affiche LiveSignalStrip que si AccessGateBanner
-          n'occupe pas déjà l'espace (max 2 bandeaux contextuels actifs). */}
-      <div className={`px-5 md:px-8 space-y-3 ${!showAllMobile ? "hidden md:block" : ""}`}>
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
-        {(level === 4 || level === "3B") && <LiveSignalStrip secondarySignal={localSignal} />}
       </div>
 
 
@@ -503,7 +500,9 @@ const OwnerDashboard = () => {
                   id="owner-discovery-missions-heading"
                 />
                 <div className="space-y-4 min-w-0">
-                  <NearbyHelpersCarousel hideHeader />
+                  <div className="xl:hidden">
+                    <NearbyHelpersCarousel hideHeader />
+                  </div>
                   <MissionsTabsCard myMissions={myMissions} nearbyMissions={smallMissions} />
                 </div>
               </div>
@@ -517,9 +516,6 @@ const OwnerDashboard = () => {
         <aside className="space-y-6">
           {showEmergencyHelp && <NearbyEmergencySitters />}
           <NearbyOwnerSittersCard />
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary px-3 py-1 text-[11px] font-semibold">
-            Espace propriétaire, gratuit
-          </div>
           <StatsStrip
             items={[
               {
@@ -648,7 +644,9 @@ const OwnerDashboard = () => {
             </div>
             <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
           </summary>
-          <div className="px-4 pb-4">
+          <div className="px-4 pb-4 space-y-3">
+            <RoleActivationBanner userRole={user?.role || "owner"} />
+            {(level === 4 || level === "3B") && <LiveSignalStrip secondarySignal={localSignal} />}
             <ContextualResources annoncesCount={sits.length} gardesCount={completedSits.length} loading={loading} />
           </div>
         </details>
