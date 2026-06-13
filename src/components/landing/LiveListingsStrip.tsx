@@ -193,10 +193,9 @@ const LiveListingsStrip: React.FC = () => {
                   )}
 
                   {/* Badge géo en bas, plus visible */}
-                  {cityLabel && (
-                    <span className="absolute bottom-2 left-2 inline-flex items-center gap-1.5 bg-background/95 backdrop-blur text-foreground text-[11px] md:text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
-                      {flag && <span aria-hidden>{flag}</span>}
-                      <span className="truncate max-w-[120px]">{cityLabel}</span>
+                  {geoLabel && (
+                    <span className="absolute bottom-2 left-2 inline-flex items-center gap-1.5 bg-background/95 backdrop-blur text-foreground text-[11px] md:text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm max-w-[85%]">
+                      <span className="truncate">{geoLabel}</span>
                     </span>
                   )}
                 </div>
