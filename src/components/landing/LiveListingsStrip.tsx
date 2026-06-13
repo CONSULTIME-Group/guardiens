@@ -77,7 +77,16 @@ const LiveListingsStrip: React.FC = () => {
     };
   }, []);
 
-  if (loading || sits.length < 3) return null;
+  if (loading || sits.length < 1) return null;
+
+  const gridCols =
+    sits.length === 1
+      ? "grid-cols-1 max-w-sm"
+      : sits.length === 2
+      ? "grid-cols-2 max-w-2xl"
+      : sits.length === 3
+      ? "grid-cols-2 md:grid-cols-3"
+      : "grid-cols-2 md:grid-cols-4";
 
   return (
     <section
@@ -103,7 +112,7 @@ const LiveListingsStrip: React.FC = () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <div className={`grid ${gridCols} gap-3 md:gap-4 mx-auto`}>
           {sits.map((s) => {
             const photo = s.cover_photo_url || s.first_photo;
             const dates =
