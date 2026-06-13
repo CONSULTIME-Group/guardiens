@@ -532,41 +532,46 @@ const CreateSit = () => {
           </p>
         ) : null}
 
-        {/* Lieu de la garde, facultatif (override du profil) */}
-        <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
-          <div>
-            <Label className="text-sm font-medium">Lieu de la garde <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Renseignez ces champs si la garde se déroule ailleurs que dans votre ville de profil ({ownerCity || "non renseignée"}), résidence secondaire, garde à l'étranger, etc.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {/* Lieu de la garde, replié par défaut : 90% des cas = ville du profil */}
+        <details className="rounded-lg border border-border bg-muted/30 group">
+          <summary className="cursor-pointer list-none p-4 flex items-center justify-between hover:bg-muted/40 transition-colors rounded-lg">
             <div>
-              <Label htmlFor="sit_city" className="text-xs text-muted-foreground">Ville de la garde</Label>
-              <Input
-                id="sit_city"
-                value={sitCity}
-                onChange={(e) => setSitCity(e.target.value)}
-                placeholder={ownerCity || "Ex : Bruxelles"}
-                className="mt-1"
-                maxLength={100}
-              />
+              <p className="text-sm font-medium">Lieu de la garde <span className="text-muted-foreground font-normal">(optionnel)</span></p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Par défaut : {ownerCity || "votre ville de profil"}. Cliquez pour personnaliser (résidence secondaire, étranger…).
+              </p>
             </div>
-            <div>
-              <Label htmlFor="sit_country" className="text-xs text-muted-foreground">Pays</Label>
-              <Select value={sitCountry || "FR"} onValueChange={(v) => setSitCountry(v)}>
-                <SelectTrigger id="sit_country" className="mt-1">
-                  <SelectValue placeholder="France" />
-                </SelectTrigger>
-                <SelectContent className="max-h-72">
-                  {COUNTRIES.map((c) => (
-                    <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform shrink-0" aria-hidden="true">▾</span>
+          </summary>
+          <div className="px-4 pb-4 space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="sit_city" className="text-xs text-muted-foreground">Ville de la garde</Label>
+                <Input
+                  id="sit_city"
+                  value={sitCity}
+                  onChange={(e) => setSitCity(e.target.value)}
+                  placeholder={ownerCity || "Ex : Bruxelles"}
+                  className="mt-1"
+                  maxLength={100}
+                />
+              </div>
+              <div>
+                <Label htmlFor="sit_country" className="text-xs text-muted-foreground">Pays</Label>
+                <Select value={sitCountry || "FR"} onValueChange={(v) => setSitCountry(v)}>
+                  <SelectTrigger id="sit_country" className="mt-1">
+                    <SelectValue placeholder="France" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    {COUNTRIES.map((c) => (
+                      <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
-        </div>
+        </details>
 
         {/* Option dates flexibles */}
         <div className="flex items-start gap-3">
