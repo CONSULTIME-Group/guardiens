@@ -888,7 +888,7 @@ export default function PublicSitterProfile() {
         />
 
         {/* Contenu header par-dessus */}
-        <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 pb-8 pt-6">
+        <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 pb-5 sm:pb-8 pt-4 sm:pt-6">
           {/* Ligne retour */}
           <div className="flex justify-end mb-4">
             <Link
