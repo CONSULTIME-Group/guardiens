@@ -106,7 +106,7 @@ const MessageBell = () => {
 
     setThreads(previews.slice(0, 5));
     setUnreadCount(totalUnread);
-  }, [userId]);
+  }, [userId, effectiveRole]);
 
   useEffect(() => {
     void load();
