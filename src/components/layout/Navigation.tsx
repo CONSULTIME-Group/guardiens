@@ -402,8 +402,8 @@ export const BottomNav = () => {
             const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + "/");
             // Sitter-locked applies only to actual sitters (not owners viewing search-gardiens)
             const isSitterLocked = effectiveRole === "sitter" && !hasAccess;
-            const isGated = isSitterLocked && (item.to === "/search" || item.to === "/messages");
-            const featureName = item.to === "/search" ? "la recherche d'annonces" : "la messagerie";
+            const isGated = isSitterLocked && item.to === "/search";
+            const featureName = "la recherche d'annonces";
 
             if (isGated) {
               return (
