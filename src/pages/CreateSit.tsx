@@ -22,7 +22,6 @@ import { COUNTRIES } from "@/lib/countries";
 import ImproveListingButton from "@/components/ai/ImproveListingButton";
 import { moderateContent } from "@/lib/moderation";
 import AnnouncementPreviewDialog from "@/components/sits/owner/AnnouncementPreviewDialog";
-import { Eye } from "lucide-react";
 
 interface PropertySummary {
   id: string;
