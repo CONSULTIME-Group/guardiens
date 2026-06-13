@@ -205,7 +205,7 @@ const SitterDashboard = () => {
   // au lieu de 3 cartes empilées). Toutes fermées par défaut.
   const SecondaryAccordion = (
     <section aria-label="Mon espace gardien, détails" className="rounded-2xl border border-border bg-card overflow-hidden">
-      <Accordion type="single" collapsible>
+      <Accordion type="single" collapsible defaultValue="reputation">
         <AccordionItem value="conseils" className="border-b border-border last:border-0">
           <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
             <div className="flex flex-col items-start text-left">
@@ -328,6 +328,12 @@ const SitterDashboard = () => {
   const missionsEmpty =
     !myMissionsError && !nearbyMissionsError &&
     myMissions.length === 0 && nearbyMissions.length === 0;
+  const hasBeyondListings = nearbyListings.some((s: any) => s?.is_beyond);
+  const annoncesTitle = annoncesEmpty
+    ? "Aucune annonce à proximité"
+    : hasBeyondListings
+      ? "Annonces ailleurs en France"
+      : "Près de chez vous";
 
   const DiscoverySections = (
     <div className="space-y-6 min-w-0">
@@ -340,7 +346,7 @@ const SitterDashboard = () => {
         <div className="pl-2 sm:pl-3 min-w-0">
           <SectionEyebrow
             eyebrow="Annonces · Garde"
-            title="Près de chez vous"
+            title={annoncesTitle}
             accent="primary"
             id="discovery-annonces-heading"
           />
@@ -363,7 +369,7 @@ const SitterDashboard = () => {
         <div className="pl-2 sm:pl-3 min-w-0">
           <SectionEyebrow
             eyebrow="Coup de main · Entraide"
-            title="Près de chez vous"
+            title="Échanges dans votre coin"
             accent="warning"
             id="discovery-missions-heading"
           />
