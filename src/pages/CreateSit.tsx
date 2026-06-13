@@ -313,7 +313,8 @@ const CreateSit = () => {
     ? "La date de début ne peut pas être dans le passé."
     : null;
 
-  const descriptionValid = specificExpectations.length >= 50;
+  const MIN_DESCRIPTION = 150;
+  const descriptionValid = specificExpectations.length >= MIN_DESCRIPTION;
   const canPublish = profileCompletion >= 60 && property && title && startDate && endDate && !dateError && descriptionValid;
 
   // Liste explicite des bloquants à publier (UX : remplacer le tooltip pauvre par une checklist visible).
