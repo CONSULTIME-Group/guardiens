@@ -1175,29 +1175,31 @@ const SearchSitter = () => {
      aria-disabled={!user}
      title={!user ? "Connectez-vous pour affiner par type de logement et environnement" : undefined}
    >
-     <AdvancedFiltersSheet
-       open={filterSheetOpen}
-       onOpenChange={setFilterSheetOpen}
-       pillClass={pillClass}
-       hasActiveFilters={hasActiveFilters}
-       resetFilters={resetFilters}
-       housingTypes={housingTypes}
-       toggleHousingType={toggleHousingType}
-       envOptions={envOptions}
-       environments={environments}
-       toggleEnv={toggleEnv}
-       verifiedOnly={verifiedOnly}
-       setVerifiedOnly={setVerifiedOnly}
-       withPhotosOnly={withPhotosOnly}
-       setWithPhotosOnly={setWithPhotosOnly}
-       minExperience={minExperience}
-       setMinExperience={setMinExperience}
-       onApply={() => {
-         doSearch();
-         setFilterSheetOpen(false);
-       }}
-     />
-   </div>
+      <AdvancedFiltersSheet
+        open={filterSheetOpen}
+        onOpenChange={setFilterSheetOpen}
+        pillClass={pillClass}
+        hasActiveFilters={hasActiveFilters}
+        resetFilters={resetFilters}
+        housingTypes={housingTypes}
+        toggleHousingType={toggleHousingType}
+        envOptions={envOptions}
+        environments={environments}
+        toggleEnv={toggleEnv}
+        verifiedOnly={verifiedOnly}
+        setVerifiedOnly={setVerifiedOnly}
+        withPhotosOnly={withPhotosOnly}
+        setWithPhotosOnly={setWithPhotosOnly}
+        minExperience={minExperience}
+        setMinExperience={setMinExperience}
+        currentResultsCount={results.length}
+        loading={loading}
+        onApply={() => {
+          doSearch();
+          setFilterSheetOpen(false);
+        }}
+      />
+    </div>
    <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:hidden" />
    </div>
    </div>
