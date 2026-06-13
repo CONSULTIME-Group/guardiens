@@ -318,7 +318,8 @@ export const BottomNav = () => {
   const { isAdmin } = useAdmin();
   const { hasAccess } = useSubscriptionAccess();
   const [unreadCount, setUnreadCount] = useState(0);
-  const [pendingAppsCount, setPendingAppsCount] = useState(0);
+  const [ownerInboxCount, setOwnerInboxCount] = useState(0);
+  const [sitterActionCount, setSitterActionCount] = useState(0);
   const [missionBadgeCount, setMissionBadgeCount] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
@@ -328,6 +329,7 @@ export const BottomNav = () => {
   const [roleDialogTarget, setRoleDialogTarget] = useState<"gardien" | "proprio">("proprio");
 
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
+  const sitsBadge = effectiveRole === "owner" ? ownerInboxCount : sitterActionCount;
 
   useEffect(() => {
     if (!user) return;
@@ -359,10 +361,17 @@ export const BottomNav = () => {
           .select("id", { count: "exact", head: true })
           .in("sit_id", userSits.map((s: any) => s.id))
           .eq("status", "pending");
-        setPendingAppsCount(appCount || 0);
+        setOwnerInboxCount(appCount || 0);
       } else {
-        setPendingAppsCount(0);
+        setOwnerInboxCount(0);
       }
+
+      const { count: myAppsCount } = await supabase
+        .from("applications")
+        .select("id", { count: "exact", head: true })
+        .eq("sitter_id", user.id)
+        .eq("status", "pending");
+      setSitterActionCount(myAppsCount || 0);
 
       const { data: missionConvs } = await supabase
         .from("conversations")
@@ -395,13 +404,14 @@ export const BottomNav = () => {
   // en 1 tap via le hamburger / sidebar mobile (cf. ligne 238).
   const isOwnerView = effectiveRole === "owner";
   const tabs = [
-    { to: "/dashboard", icon: Home, label: "Accueil", badge: pendingAppsCount },
+    { to: "/dashboard", icon: Home, label: "Accueil", badge: isOwnerView ? ownerInboxCount : 0 },
     {
       to: isOwnerView ? "/recherche-gardiens" : "/search",
       icon: Search,
       label: isOwnerView ? "Gardiens" : "Recherche",
     },
-    { to: "/sits", icon: Calendar, label: isOwnerView ? "Annonces" : "Candidat.", badge: pendingAppsCount },
+    { to: "/sits", icon: Calendar, label: isOwnerView ? "Annonces" : "Gardes", badge: sitsBadge },
+
     { to: "/petites-missions", icon: Handshake, label: "Coup de main", badge: missionBadgeCount },
   ];
 
