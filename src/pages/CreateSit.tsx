@@ -313,7 +313,8 @@ const CreateSit = () => {
     ? "La date de début ne peut pas être dans le passé."
     : null;
 
-  const descriptionValid = specificExpectations.length >= 50;
+  const MIN_DESCRIPTION = 150;
+  const descriptionValid = specificExpectations.length >= MIN_DESCRIPTION;
   const canPublish = profileCompletion >= 60 && property && title && startDate && endDate && !dateError && descriptionValid;
 
   // Liste explicite des bloquants à publier (UX : remplacer le tooltip pauvre par une checklist visible).
@@ -326,7 +327,7 @@ const CreateSit = () => {
     !startDate ? { id: "start", label: "Date de début", anchor: "dates-field" } : null,
     !endDate ? { id: "end", label: "Date de fin", anchor: "dates-field" } : null,
     dateError ? { id: "date-error", label: dateError, anchor: "dates-field" } : null,
-    !descriptionValid ? { id: "desc", label: `Description d'au moins 50 caractères (actuellement ${specificExpectations.length})`, anchor: "description-field" } : null,
+    !descriptionValid ? { id: "desc", label: `Description d'au moins ${MIN_DESCRIPTION} caractères (actuellement ${specificExpectations.length})`, anchor: "description-field" } : null,
   ].filter(Boolean) as PublishBlocker[];
 
   const onPublishClick = () => {
@@ -531,41 +532,46 @@ const CreateSit = () => {
           </p>
         ) : null}
 
-        {/* Lieu de la garde, facultatif (override du profil) */}
-        <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
-          <div>
-            <Label className="text-sm font-medium">Lieu de la garde <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Renseignez ces champs si la garde se déroule ailleurs que dans votre ville de profil ({ownerCity || "non renseignée"}), résidence secondaire, garde à l'étranger, etc.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {/* Lieu de la garde, replié par défaut : 90% des cas = ville du profil */}
+        <details className="rounded-lg border border-border bg-muted/30 group">
+          <summary className="cursor-pointer list-none p-4 flex items-center justify-between hover:bg-muted/40 transition-colors rounded-lg">
             <div>
-              <Label htmlFor="sit_city" className="text-xs text-muted-foreground">Ville de la garde</Label>
-              <Input
-                id="sit_city"
-                value={sitCity}
-                onChange={(e) => setSitCity(e.target.value)}
-                placeholder={ownerCity || "Ex : Bruxelles"}
-                className="mt-1"
-                maxLength={100}
-              />
+              <p className="text-sm font-medium">Lieu de la garde <span className="text-muted-foreground font-normal">(optionnel)</span></p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Par défaut : {ownerCity || "votre ville de profil"}. Cliquez pour personnaliser (résidence secondaire, étranger…).
+              </p>
             </div>
-            <div>
-              <Label htmlFor="sit_country" className="text-xs text-muted-foreground">Pays</Label>
-              <Select value={sitCountry || "FR"} onValueChange={(v) => setSitCountry(v)}>
-                <SelectTrigger id="sit_country" className="mt-1">
-                  <SelectValue placeholder="France" />
-                </SelectTrigger>
-                <SelectContent className="max-h-72">
-                  {COUNTRIES.map((c) => (
-                    <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform shrink-0" aria-hidden="true">▾</span>
+          </summary>
+          <div className="px-4 pb-4 space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="sit_city" className="text-xs text-muted-foreground">Ville de la garde</Label>
+                <Input
+                  id="sit_city"
+                  value={sitCity}
+                  onChange={(e) => setSitCity(e.target.value)}
+                  placeholder={ownerCity || "Ex : Bruxelles"}
+                  className="mt-1"
+                  maxLength={100}
+                />
+              </div>
+              <div>
+                <Label htmlFor="sit_country" className="text-xs text-muted-foreground">Pays</Label>
+                <Select value={sitCountry || "FR"} onValueChange={(v) => setSitCountry(v)}>
+                  <SelectTrigger id="sit_country" className="mt-1">
+                    <SelectValue placeholder="France" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    {COUNTRIES.map((c) => (
+                      <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
-        </div>
+        </details>
 
         {/* Option dates flexibles */}
         <div className="flex items-start gap-3">
@@ -616,19 +622,19 @@ const CreateSit = () => {
             />
           </div>
           <Textarea
-            placeholder="Décrivez ce qui est particulier à cette garde, en plus de ce qui est déjà dans votre profil (min. 50 caractères)"
+            placeholder={`Décrivez ce qui est particulier à cette garde, en plus de ce qui est déjà dans votre profil (min. ${MIN_DESCRIPTION} caractères). Les annonces détaillées reçoivent 3× plus de candidatures.`}
             value={specificExpectations}
             onChange={e => setSpecificExpectations(e.target.value)}
             className="mt-1.5"
-            rows={4}
+            rows={5}
           />
           <p className={cn(
             "text-xs mt-1",
-            specificExpectations.length > 0 && specificExpectations.length < 50
+            specificExpectations.length > 0 && specificExpectations.length < MIN_DESCRIPTION
               ? "text-destructive"
               : "text-muted-foreground"
           )}>
-            {specificExpectations.length}/50 caractères minimum
+            {specificExpectations.length}/{MIN_DESCRIPTION} caractères minimum
           </p>
         </div>
 
@@ -759,14 +765,14 @@ const CreateSit = () => {
         )}
       </div>
 
-      {/* Pre-filled summaries */}
-      <details className="mt-10 group" open>
-      <summary className="cursor-pointer flex items-center justify-between p-3 rounded-xl border border-border bg-card md:hidden mb-3 list-none select-none">
-        <span className="font-heading text-sm font-semibold">Résumé depuis votre profil</span>
+      {/* Pre-filled summaries, repliés par défaut pour ne pas écraser le formulaire */}
+      <details className="mt-10 group">
+      <summary className="cursor-pointer flex items-center justify-between p-3 rounded-xl border border-border bg-card mb-3 list-none select-none hover:bg-muted/30 transition-colors">
+        <span className="font-heading text-sm md:text-base font-semibold">Résumé depuis votre profil <span className="text-muted-foreground font-normal text-xs">(pré-rempli, modifiable depuis votre profil)</span></span>
         <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
       </summary>
-      <div className="space-y-6 pb-32 hidden group-open:block md:!block">
-        <h2 className="font-heading text-xl font-semibold hidden md:block">Résumé depuis votre profil</h2>
+      <div className="space-y-6 pb-32">
+        <h2 className="sr-only">Résumé depuis votre profil</h2>
 
         {/* Housing */}
         <SummaryCard icon={Home} title="Le logement" editLink="/profile">

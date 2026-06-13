@@ -172,17 +172,14 @@ export function useOwnerPriorityAction(input: Input): OwnerPriorityAction {
       };
     }
 
-    // 8. Fallback : découvrir les gardiens proches
+    // 8. Fallback : préparer la prochaine garde (CTA distinct de l'aside qui montre déjà les gardiens proches)
     return {
       variant: "explore",
       eyebrow: "Tout est en ordre",
-      title:
-        nearbySittersCount && nearbySittersCount > 0
-          ? `${nearbySittersCount} gardien${nearbySittersCount > 1 ? "s" : ""} ${nearbySittersRadius ? `dans un rayon de ${nearbySittersRadius} km` : "près de chez vous"}.`
-          : "Découvrez les gardiens près de chez vous.",
-      description: "Constituez votre cercle de confiance pour vos prochaines absences.",
-      ctaLabel: "Voir les gardiens",
-      ctaTo: "/search",
+      title: "Préparez votre prochaine garde.",
+      description: "Republiez votre dernière annonce ou créez-en une nouvelle pour anticiper vos absences. Les gardiens près de chez vous sont listés à droite.",
+      ctaLabel: "Nouvelle annonce",
+      ctaTo: "/sits/create",
       urgency: "low",
     };
   }, [
