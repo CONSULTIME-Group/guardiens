@@ -483,7 +483,7 @@ export const BottomNav = () => {
                 <div className="relative">
                   <MoreHorizontal className="h-5 w-5" strokeWidth={1.8} />
                   {(() => {
-                    const moreBadge = pendingAppsCount + missionBadgeCount;
+                    const moreBadge = sitsBadge + missionBadgeCount;
                     return moreBadge > 0 ? (
                       <span className="absolute -top-1 -right-2 bg-destructive text-destructive-foreground text-[8px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 font-bold">
                         {moreBadge > 99 ? "99+" : moreBadge}
