@@ -219,7 +219,7 @@ export const Sidebar = () => {
             <>
               <GroupLabel label="Mon activité" />
               <SidebarItem to="/dashboard" icon={Home} label="Dashboard" />
-              <SidebarItem to="/sits" icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes gardes"} badge={pendingAppsCount} />
+              <SidebarItem to="/sits" icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures"} badge={pendingAppsCount} />
 
               {isSitterLocked ? (
                 <button
