@@ -157,10 +157,13 @@ const LiveListingsStrip: React.FC = () => {
               s.start_date && s.end_date
                 ? `${fmt(s.start_date)} – ${fmt(s.end_date)}`
                 : null;
-            const flag = flagFor(s.country);
+            const countryLabel = isForeign(s.country)
+              ? (s.country || "").trim().replace(/\b\w/g, (l) => l.toUpperCase())
+              : null;
             const cityLabel = s.sit_city
               ? `${s.sit_city.charAt(0).toUpperCase()}${s.sit_city.slice(1).toLowerCase()}`
               : s.city;
+            const geoLabel = cityLabel && countryLabel ? `${cityLabel}, ${countryLabel}` : cityLabel;
             return (
               <Link
                 key={s.id}
