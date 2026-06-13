@@ -11,8 +11,18 @@ export const BackButton = ({ inline = false }: BackButtonProps) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Pas de bouton retour sur les hubs (dashboard / messages portent leur propre nav).
-  if (location.pathname === "/dashboard" || location.pathname === "/messages") return null;
+  // Pas de bouton retour sur les destinations primaires de la bottom nav,
+  // qui sont des hubs accessibles en 1 tap et portent leur propre navigation.
+  const PRIMARY_HUBS = [
+    "/dashboard",
+    "/messages",
+    "/sits",
+    "/search",
+    "/recherche-gardiens",
+    "/petites-missions",
+  ];
+  if (PRIMARY_HUBS.includes(location.pathname)) return null;
+
 
   const btn = (
     <Button
