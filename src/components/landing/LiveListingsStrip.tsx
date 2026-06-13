@@ -15,16 +15,14 @@ interface LiveSit {
   is_urgent: boolean;
   cover_photo_url: string | null;
   first_photo: string | null;
+  gallery_photo: string | null;
   sit_city: string | null;
+  user_id: string;
 }
 
 const fmt = (d: string | null) =>
   d ? format(new Date(d), "d MMM", { locale: fr }) : "";
 
-// Pas d'emoji (contrainte projet) : on affiche ville, pays en toutes lettres.
-
-
-// Fallback image curée selon ville/pays quand l'annonce n'a aucune photo.
 const fallbackImageFor = (city: string | null, country: string | null): string | null => {
   const c = (city || "").toUpperCase();
   const co = (country || "").toUpperCase();
@@ -40,10 +38,12 @@ const isForeign = (country: string | null) => {
   return c !== "FRANCE" && c !== "FR" && c !== "";
 };
 
+const isHighlighted = (s: LiveSit) => s.is_urgent && isForeign(s.country);
+
 /**
- * Aperçu compact des annonces de garde dispo, affiché directement
- * sous le Hero de la home. Cible : conversion visiteur anon.
- * Met en avant urgences + destinations étrangères.
+ * Aperçu live des annonces sous le Hero.
+ * Carte "Super opportunité" (urgent + étranger) en grand format à gauche,
+ * 3 autres en pile à droite.
  */
 const LiveListingsStrip: React.FC = () => {
   const [sits, setSits] = useState<LiveSit[]>([]);
@@ -68,13 +68,22 @@ const LiveListingsStrip: React.FC = () => {
       const ownerIds = Array.from(new Set(rawSits.map((s: any) => s.user_id).filter(Boolean)));
       const propIds = Array.from(new Set(rawSits.map((s: any) => s.property_id).filter(Boolean)));
 
-      const [{ data: owners }, { data: props }] = await Promise.all([
+      const [{ data: owners }, { data: props }, { data: gallery }] = await Promise.all([
         supabase.from("public_profiles").select("id, city").in("id", ownerIds),
         supabase.from("properties").select("id, cover_photo_url, photos").in("id", propIds),
+        supabase
+          .from("owner_gallery")
+          .select("user_id, photo_url, position")
+          .in("user_id", ownerIds)
+          .order("position", { ascending: true }),
       ]);
 
       const ownerMap = new Map((owners || []).map((o: any) => [o.id, o]));
       const propMap = new Map((props || []).map((p: any) => [p.id, p]));
+      const galleryMap = new Map<string, string>();
+      (gallery || []).forEach((g: any) => {
+        if (!galleryMap.has(g.user_id) && g.photo_url) galleryMap.set(g.user_id, g.photo_url);
+      });
 
       const enriched: LiveSit[] = rawSits.map((s: any) => {
         const o = ownerMap.get(s.user_id);
@@ -90,10 +99,12 @@ const LiveListingsStrip: React.FC = () => {
           city: s.city ?? o?.city ?? null,
           cover_photo_url: s.cover_photo_url ?? p?.cover_photo_url ?? null,
           first_photo: p?.photos?.[0] ?? null,
+          gallery_photo: galleryMap.get(s.user_id) ?? null,
+          user_id: s.user_id,
         };
       });
 
-      // Priorisation : urgent d'abord, puis étranger, puis récents.
+      // Priorisation : urgent+étranger d'abord, puis urgent, puis étranger, puis récents.
       enriched.sort((a, b) => {
         const sa = (a.is_urgent ? 2 : 0) + (isForeign(a.country) ? 1 : 0);
         const sb = (b.is_urgent ? 2 : 0) + (isForeign(b.country) ? 1 : 0);
@@ -112,14 +123,24 @@ const LiveListingsStrip: React.FC = () => {
 
   if (loading || sits.length < 1) return null;
 
-  const gridCols =
-    sits.length === 1
-      ? "grid-cols-1 max-w-sm"
-      : sits.length === 2
-      ? "grid-cols-1 sm:grid-cols-2 max-w-3xl"
-      : sits.length === 3
-      ? "grid-cols-2 md:grid-cols-3"
-      : "grid-cols-2 md:grid-cols-4";
+  const resolvePhoto = (s: LiveSit) =>
+    s.cover_photo_url || s.first_photo || s.gallery_photo || fallbackImageFor(s.sit_city, s.country);
+
+  const labelGeo = (s: LiveSit) => {
+    const countryLabel = isForeign(s.country)
+      ? (s.country || "").trim().toLowerCase().replace(/\b\w/g, (l) => l.toUpperCase())
+      : null;
+    const cityLabel = s.sit_city
+      ? `${s.sit_city.charAt(0).toUpperCase()}${s.sit_city.slice(1).toLowerCase()}`
+      : s.city;
+    return cityLabel && countryLabel ? `${cityLabel}, ${countryLabel}` : cityLabel;
+  };
+
+  const fmtDates = (s: LiveSit) =>
+    s.start_date && s.end_date ? `${fmt(s.start_date)} – ${fmt(s.end_date)}` : null;
+
+  const featured = sits.find(isHighlighted);
+  const rest = featured ? sits.filter((s) => s.id !== featured.id).slice(0, 3) : sits;
 
   return (
     <section
@@ -150,69 +171,149 @@ const LiveListingsStrip: React.FC = () => {
           </Link>
         </div>
 
-        <div className={`grid ${gridCols} gap-3 md:gap-4 mx-auto`}>
-          {sits.map((s) => {
-            const photo = s.cover_photo_url || s.first_photo || fallbackImageFor(s.sit_city, s.country);
-            const dates =
-              s.start_date && s.end_date
-                ? `${fmt(s.start_date)} – ${fmt(s.end_date)}`
-                : null;
-            const countryLabel = isForeign(s.country)
-              ? (s.country || "").trim().replace(/\b\w/g, (l) => l.toUpperCase())
-              : null;
-            const cityLabel = s.sit_city
-              ? `${s.sit_city.charAt(0).toUpperCase()}${s.sit_city.slice(1).toLowerCase()}`
-              : s.city;
-            const geoLabel = cityLabel && countryLabel ? `${cityLabel}, ${countryLabel}` : cityLabel;
-            return (
-              <Link
-                key={s.id}
-                to={`/annonces/${s.id}`}
-                className="group bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/50 hover:shadow-lg transition-all"
-              >
-                <div className="aspect-[4/3] bg-muted relative overflow-hidden">
-                  {photo ? (
-                    <img
-                      src={photo}
-                      alt={s.title}
-                      loading="lazy"
-                      width={800}
-                      height={608}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-accent/60 to-muted" />
-                  )}
+        {featured ? (
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-5">
+            {/* Carte featured surdimensionnée */}
+            <Link
+              to={`/annonces/${featured.id}`}
+              className="group lg:col-span-3 relative overflow-hidden rounded-3xl border-2 border-destructive/40 bg-card shadow-lg hover:shadow-2xl hover:border-destructive/70 transition-all"
+            >
+              <div className="aspect-[16/10] md:aspect-[16/9] relative overflow-hidden">
+                {resolvePhoto(featured) ? (
+                  <img
+                    src={resolvePhoto(featured) as string}
+                    alt={featured.title}
+                    loading="lazy"
+                    width={960}
+                    height={540}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-accent/60 to-muted" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
-                  {/* Badge urgence en haut à gauche */}
-                  {s.is_urgent && (
-                    <span className="absolute top-2 left-2 inline-flex items-center gap-1 bg-destructive text-destructive-foreground text-[10px] md:text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-full shadow-md">
-                      <span className="h-1.5 w-1.5 rounded-full bg-destructive-foreground animate-pulse" aria-hidden />
-                      Urgent
-                    </span>
-                  )}
-
-                  {/* Badge géo en bas, plus visible */}
-                  {geoLabel && (
-                    <span className="absolute bottom-2 left-2 inline-flex items-center gap-1.5 bg-background/95 backdrop-blur text-foreground text-[11px] md:text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm max-w-[85%]">
-                      <span className="truncate">{geoLabel}</span>
-                    </span>
-                  )}
+                {/* Bandeau Super opportunité */}
+                <div className="absolute top-3 left-3 flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 bg-destructive text-destructive-foreground text-[11px] md:text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg">
+                    <span className="h-1.5 w-1.5 rounded-full bg-destructive-foreground animate-pulse" aria-hidden />
+                    Urgent
+                  </span>
+                  <span className="inline-flex items-center bg-amber-500 text-white text-[11px] md:text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg">
+                    Super opportunité
+                  </span>
                 </div>
-                <div className="p-3 md:p-3.5">
-                  <h3 className="font-heading text-xs md:text-sm font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors leading-snug">
-                    {s.title}
+
+                {/* Contenu en bas */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 text-white">
+                  <p className="text-[11px] md:text-xs uppercase tracking-[0.18em] font-semibold opacity-90 mb-2">
+                    {labelGeo(featured)}
+                  </p>
+                  <h3 className="font-heading text-xl md:text-3xl font-bold leading-tight mb-2 line-clamp-2">
+                    {featured.title}
                   </h3>
-                  {dates && (
-                    <p className="text-[10px] md:text-xs text-muted-foreground mt-1.5 font-medium">
-                      {dates}
+                  {fmtDates(featured) && (
+                    <p className="text-sm md:text-base font-medium opacity-90">
+                      {fmtDates(featured)}
                     </p>
                   )}
+                  <span className="mt-3 inline-flex items-center gap-1.5 bg-white/95 text-foreground text-xs md:text-sm font-semibold px-3 py-1.5 rounded-full">
+                    Découvrir l'annonce <span aria-hidden>→</span>
+                  </span>
                 </div>
-              </Link>
-            );
-          })}
-        </div>
+              </div>
+            </Link>
+
+            {/* Pile de 3 cartes secondaires */}
+            <div className="lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-3 md:gap-4">
+              {rest.map((s) => {
+                const photo = resolvePhoto(s);
+                const dates = fmtDates(s);
+                const geo = labelGeo(s);
+                return (
+                  <Link
+                    key={s.id}
+                    to={`/annonces/${s.id}`}
+                    className="group bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/50 hover:shadow-md transition-all flex lg:flex-row flex-col"
+                  >
+                    <div className="lg:w-2/5 aspect-[4/3] lg:aspect-auto bg-muted relative overflow-hidden shrink-0">
+                      {photo ? (
+                        <img
+                          src={photo}
+                          alt={s.title}
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-accent/60 to-muted" />
+                      )}
+                      {s.is_urgent && (
+                        <span className="absolute top-1.5 left-1.5 bg-destructive text-destructive-foreground text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full">
+                          Urgent
+                        </span>
+                      )}
+                    </div>
+                    <div className="p-2.5 md:p-3 flex-1 min-w-0 flex flex-col justify-center">
+                      {geo && (
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1 truncate">
+                          {geo}
+                        </p>
+                      )}
+                      <h3 className="font-heading text-xs md:text-sm font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors leading-snug">
+                        {s.title}
+                      </h3>
+                      {dates && (
+                        <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-medium">
+                          {dates}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          // Pas d'opportunité phare : grille uniforme
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            {rest.map((s) => {
+              const photo = resolvePhoto(s);
+              const dates = fmtDates(s);
+              const geo = labelGeo(s);
+              return (
+                <Link
+                  key={s.id}
+                  to={`/annonces/${s.id}`}
+                  className="group bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/50 hover:shadow-lg transition-all"
+                >
+                  <div className="aspect-[4/3] bg-muted relative overflow-hidden">
+                    {photo ? (
+                      <img src={photo} alt={s.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-accent/60 to-muted" />
+                    )}
+                    {s.is_urgent && (
+                      <span className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">
+                        Urgent
+                      </span>
+                    )}
+                    {geo && (
+                      <span className="absolute bottom-2 left-2 bg-background/95 backdrop-blur text-foreground text-[11px] md:text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm max-w-[85%]">
+                        <span className="truncate">{geo}</span>
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <h3 className="font-heading text-xs md:text-sm font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors leading-snug">
+                      {s.title}
+                    </h3>
+                    {dates && <p className="text-[10px] md:text-xs text-muted-foreground mt-1.5 font-medium">{dates}</p>}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );
