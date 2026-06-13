@@ -1043,10 +1043,37 @@ const SitCard = ({
             </div>
           )}
 
+          {/* Chat preview (sitter side) */}
+          {!isOwner && sit.lastMessage && (
+            <Link
+              to={sit.conversationId ? `/messages?c=${sit.conversationId}` : "/messages"}
+              className="mt-3 flex items-start gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2 hover:bg-muted/60 transition-colors"
+            >
+              <MessageCircle className="h-3.5 w-3.5 mt-0.5 text-muted-foreground shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className={cn(
+                  "text-xs truncate",
+                  sit.unreadCount > 0 ? "text-foreground font-medium" : "text-muted-foreground"
+                )}>
+                  {sit.lastMessage.from_me ? "Vous : " : ""}{sit.lastMessage.content}
+                </p>
+                <p className="text-[10px] text-muted-foreground/70 mt-0.5">
+                  {format(parseISO(sit.lastMessage.created_at), "d MMM, HH:mm", { locale: fr })}
+                </p>
+              </div>
+              {sit.unreadCount > 0 && (
+                <span className="shrink-0 bg-primary text-primary-foreground text-[10px] font-semibold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1.5">
+                  {sit.unreadCount}
+                </span>
+              )}
+            </Link>
+          )}
+
           {/* Quick actions */}
           <div className="flex items-center gap-2 mt-3 flex-wrap">
             <QuickActions sit={sit} isOwner={isOwner} effectiveStatus={effectiveStatus} onRepublish={onRepublish} onOpenGuide={onOpenGuide} />
           </div>
+
         </div>
       </div>
     </div>
