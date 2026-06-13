@@ -1,9 +1,9 @@
-import { memo, useMemo, useState } from "react";
+import { memo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ShieldCheck, ArrowRight, MapPin, MessageSquare, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNearbyHelpers, nextRadiusStep, type NearbyHelper } from "@/hooks/useNearbyHelpers";
+import { useNearbyHelpers, type NearbyHelper } from "@/hooks/useNearbyHelpers";
 import { useHelpersProximityCount } from "@/hooks/useHelpersProximityCount";
 import { useCtaCooldown } from "@/hooks/useCtaCooldown";
 import { capitalize } from "@/components/dashboard/owner/helpers";
