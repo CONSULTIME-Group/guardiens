@@ -65,11 +65,12 @@ type Tab = "upcoming" | "in_progress" | "completed" | "cancelled";
 type OwnerTab = "active" | "drafts" | "archived";
 
 const tabs: { value: Tab; label: string; icon: typeof Calendar }[] = [
-  { value: "upcoming", label: "À venir", icon: Calendar },
-  { value: "in_progress", label: "En cours", icon: Clock },
-  { value: "completed", label: "Passées", icon: CheckCircle },
-  { value: "cancelled", label: "Annulées", icon: XCircle },
+  { value: "upcoming", label: "Actives", icon: Calendar },
+  { value: "in_progress", label: "En garde", icon: Clock },
+  { value: "completed", label: "Terminées", icon: CheckCircle },
+  { value: "cancelled", label: "Refusées", icon: XCircle },
 ];
+
 
 const ownerTabs: { value: OwnerTab; label: string; icon: typeof Calendar }[] = [
   { value: "active", label: "Actives", icon: Calendar },
@@ -479,7 +480,7 @@ const Sits = () => {
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <h1 className="font-heading text-2xl md:text-3xl font-bold mb-1">
-            {activeRole === "owner" ? "Mes annonces" : "Mes gardes"}
+            {activeRole === "owner" ? "Mes annonces" : "Mes candidatures"}
           </h1>
           <p className="text-muted-foreground text-sm">
             {headerSubtitle}
