@@ -177,7 +177,7 @@ export function useOwnerPriorityAction(input: Input): OwnerPriorityAction {
       variant: "explore",
       eyebrow: "Tout est en ordre",
       title: "Préparez votre prochaine garde.",
-      description: "Republiez votre dernière annonce ou créez,en une nouvelle pour anticiper vos absences. Les gardiens près de chez vous sont listés à droite.",
+      description: "Republiez votre dernière annonce ou créez-en une nouvelle pour anticiper vos absences. Les gardiens près de chez vous sont listés à droite.",
       ctaLabel: "Nouvelle annonce",
       ctaTo: "/sits/create",
       urgency: "low",
