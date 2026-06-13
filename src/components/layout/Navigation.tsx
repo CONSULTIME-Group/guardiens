@@ -119,9 +119,10 @@ export const Sidebar = () => {
       const { count: myAppsCount } = await supabase
         .from("applications")
         .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id)
+        .eq("sitter_id", user.id)
         .eq("status", "pending");
       setSitterActionCount(myAppsCount || 0);
+
 
       // Mission conversations with unread messages
       const { data: missionConvs } = await supabase
