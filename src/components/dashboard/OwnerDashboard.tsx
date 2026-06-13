@@ -492,12 +492,12 @@ const OwnerDashboard = () => {
               Les gardiens « près de chez vous » sont remontés dans l'aside à droite. */}
           <div className="space-y-6 min-w-0">
 
-            {/* 2. Coup de main, zone WARNING (ambre) : entraide bidirectionnelle */}
+            {/* 2. Coup de main, ton apaisé : border discrète, plus de teinte de fond agressive */}
             <section
               aria-labelledby="owner-discovery-missions-heading"
-              className="relative rounded-2xl bg-warning/[0.06] ring-1 ring-warning/20 p-3 sm:p-5 min-w-0 overflow-hidden"
+              className="relative rounded-2xl border border-border bg-card p-3 sm:p-5 min-w-0 overflow-hidden"
             >
-              <span aria-hidden className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-warning" />
+              <span aria-hidden className="absolute left-0 top-4 bottom-4 w-0.5 rounded-r-full bg-warning/60" />
               <div className="pl-2 sm:pl-3 min-w-0">
                 <SectionEyebrow
                   eyebrow="Entraide locale"
