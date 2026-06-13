@@ -21,21 +21,8 @@ interface LiveSit {
 const fmt = (d: string | null) =>
   d ? format(new Date(d), "d MMM", { locale: fr }) : "";
 
-// Mapping pays → emoji drapeau (basique, étendre au besoin)
-const flagFor = (country: string | null): string | null => {
-  if (!country) return null;
-  const c = country.trim().toUpperCase();
-  const map: Record<string, string> = {
-    MAROC: "🇲🇦", MOROCCO: "🇲🇦", MA: "🇲🇦",
-    FRANCE: "🇫🇷", FR: "🇫🇷",
-    ESPAGNE: "🇪🇸", SPAIN: "🇪🇸", ES: "🇪🇸",
-    PORTUGAL: "🇵🇹", PT: "🇵🇹",
-    ITALIE: "🇮🇹", ITALY: "🇮🇹", IT: "🇮🇹",
-    BELGIQUE: "🇧🇪", BELGIUM: "🇧🇪", BE: "🇧🇪",
-    SUISSE: "🇨🇭", SWITZERLAND: "🇨🇭", CH: "🇨🇭",
-  };
-  return map[c] ?? null;
-};
+// Pas d'emoji (contrainte projet) : on affiche ville, pays en toutes lettres.
+
 
 // Fallback image curée selon ville/pays quand l'annonce n'a aucune photo.
 const fallbackImageFor = (city: string | null, country: string | null): string | null => {
