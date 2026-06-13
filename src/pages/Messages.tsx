@@ -12,7 +12,6 @@ import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import HouseGuideBlock from "@/components/messages/HouseGuideBlock";
 import ConversationHeader from "@/components/messages/ConversationHeader";
-import ContextHeaderCard from "@/components/messages/ContextHeaderCard";
 import PresenceBadge from "@/components/messages/PresenceBadge";
 import DaySeparator from "@/components/messages/DaySeparator";
 import MessageBubble from "@/components/messages/MessageBubble";
@@ -691,15 +690,6 @@ const Messages = () => {
               <PresenceBadge lastSeenAt={activeConv.other_user.last_seen_at} />
             </div>
           )}
-          <ContextHeaderCard
-            key={activeConv.id}
-            contextType={activeConv.context_type}
-            isOwner={activeConv.owner_id === user?.id}
-            sit={activeConv.sit ? { ...activeConv.sit, id: activeConv.sit_id || undefined } : null}
-            otherFirstName={activeConv.other_user?.first_name}
-            otherCity={activeConv.other_user?.city}
-            otherUserId={activeConv.other_user?.id ?? null}
-          />
 
           {/* Messages with day separators */}
           <div

@@ -279,6 +279,25 @@ const HouseGuide = () => {
         />
       </div>
 
+      {/* Sticky emergency bar */}
+      {(guide.emergency_contact_name || guide.emergency_contact_phone) && (
+        <div className="sticky bottom-0 z-30 bg-background/95 backdrop-blur border-t border-border px-4 py-3 flex items-center justify-between gap-3 mt-8">
+          <p className="text-sm font-medium text-foreground truncate">
+            Contact urgence : {guide.emergency_contact_name || guide.emergency_contact_phone}
+          </p>
+          {guide.emergency_contact_phone && (
+            <Button asChild size="sm" variant="outline" className="shrink-0">
+              <a
+                href={`tel:${guide.emergency_contact_phone.replace(/\s/g, '')}`}
+                aria-label={`Appeler ${guide.emergency_contact_name || guide.emergency_contact_phone}`}
+              >
+                Appeler
+              </a>
+            </Button>
+          )}
+        </div>
+      )}
+
       <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
         <div className="max-w-2xl mx-auto">
           <Button className="w-full h-12 text-base font-semibold gap-2" onClick={handleSave} disabled={saving}>

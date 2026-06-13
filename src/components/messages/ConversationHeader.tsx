@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { format, isPast } from "date-fns";
 import { fr } from "date-fns/locale";
 import { appStatusBadge } from "@/lib/messageStatus";
+import ContextHeaderCard from "./ContextHeaderCard";
 
 interface ConversationHeaderProps {
   conv: any;
@@ -26,6 +27,11 @@ interface ConversationHeaderProps {
   otherUserRating?: number;
   isFounder?: boolean;
   isEmergencySitter?: boolean;
+  // Context card props (merged from ContextHeaderCard)
+  contextType?: string | null;
+  contextSit?: { id?: string; title?: string | null; start_date?: string | null; end_date?: string | null; status?: string } | null;
+  otherCity?: string | null;
+  otherUserId?: string | null;
 }
 
 
@@ -41,6 +47,7 @@ const formatShortDate = (d: string) => {
 const ConversationHeader = ({
   conv, userId, userRole, isMobile, onBack, onArchive, onActionDone, onBlock,
   otherUserRating, isFounder, isEmergencySitter,
+  contextType, contextSit, otherCity, otherUserId,
 }: ConversationHeaderProps) => {
   const navigate = useNavigate();
   const [reportOpen, setReportOpen] = useState(false);
@@ -342,6 +349,16 @@ const ConversationHeader = ({
           )}
         </div>
       )}
+
+      {/* Inline context card (sitter_inquiry / helper_inquiry / owner_pitch) */}
+      <ContextHeaderCard
+        contextType={conv.context_type ?? null}
+        isOwner={isOwner}
+        sit={conv.sit ? { ...conv.sit, id: conv.sit_id || undefined } : null}
+        otherFirstName={conv.other_user?.first_name}
+        otherCity={conv.other_user?.city ?? null}
+        otherUserId={conv.other_user?.id ?? null}
+      />
 
       {/* Small mission contextual banners */}
       {isSmallMission && missionData && responseData && responseData.status === "pending" && (
