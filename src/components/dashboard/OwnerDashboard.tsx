@@ -300,28 +300,34 @@ const OwnerDashboard = () => {
               {user?.isFounder && <FounderBadge size="sm" />}
             </div>
             <p className="text-sm text-muted-foreground font-sans mt-1">{subtitle}</p>
-            {user?.id && (
-              <Link
-                to={`/gardiens/${user.id}?tab=proprio`}
-                // Mobile : in-app (les WebView Instagram/Gmail/FB cassent target="_blank").
-                // Desktop : nouvel onglet pour préserver le contexte dashboard.
-                target={typeof window !== "undefined" && window.innerWidth >= 768 ? "_blank" : undefined}
-                rel="noopener noreferrer"
-                aria-label="Voir mon profil public"
-                className="inline-flex items-center gap-1.5 mt-2 text-xs font-sans text-muted-foreground hover:text-primary transition-colors"
-              >
-                <Eye className="w-3.5 h-3.5" aria-hidden="true" /> Mon profil public
-              </Link>
-            )}
           </div>
-          {/* Desktop : CTA inline dans le hero. Mobile : porté par MobileStickyCTA. */}
-          <Button
-            size="lg"
-            onClick={() => navigate("/sits/create")}
-            className="hidden md:inline-flex shrink-0 rounded-xl"
-          >
-            <Plus className="h-4 w-4 mr-1.5" /> Publier une annonce
-          </Button>
+          {/* Desktop : CTA inline + bouton profil public visible. Mobile : sticky CTA en bas. */}
+          <div className="hidden md:flex items-center gap-2 shrink-0">
+            {user?.id && (
+              <Button
+                variant="outline"
+                size="lg"
+                asChild
+                className="rounded-xl"
+              >
+                <Link
+                  to={`/gardiens/${user.id}?tab=proprio`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Voir mon profil public (nouvel onglet)"
+                >
+                  <Eye className="h-4 w-4 mr-1.5" /> Mon profil public
+                </Link>
+              </Button>
+            )}
+            <Button
+              size="lg"
+              onClick={() => navigate("/sits/create")}
+              className="rounded-xl"
+            >
+              <Plus className="h-4 w-4 mr-1.5" /> Publier une annonce
+            </Button>
+          </div>
         </div>
       </header>
 
