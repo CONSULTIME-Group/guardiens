@@ -45,14 +45,14 @@ const EmailPreferences = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background py-10 px-4">
+    <div className="min-h-screen bg-background py-6 md:py-10 px-4">
       <Helmet>
         <title>Préférences email, Guardiens</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <div className="mx-auto max-w-2xl space-y-6">
         <header>
-          <h1 className="font-heading text-3xl mb-2">Préférences email</h1>
+          <h1 className="font-heading text-2xl md:text-3xl mb-2">Préférences email</h1>
           <p className="text-muted-foreground">
             Choisissez les types d'emails que vous souhaitez recevoir. Les emails essentiels
             (confirmations de garde, identité, sécurité) restent toujours envoyés.
@@ -122,7 +122,7 @@ const EmailPreferences = () => {
             </Card>
 
             <div className="flex justify-end">
-              <Button onClick={save} disabled={saving}>
+              <Button onClick={save} disabled={saving} className="h-11 md:h-auto">
                 {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Enregistrer mes préférences
               </Button>

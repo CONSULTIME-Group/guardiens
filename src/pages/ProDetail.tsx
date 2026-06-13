@@ -94,23 +94,23 @@ export default function ProDetail() {
       )}
 
       <main className="container mx-auto px-4 py-10 max-w-4xl min-w-0">
-        <div className="flex items-start gap-5 mb-8">
+        <div className="flex items-start gap-3 md:gap-5 mb-4 md:mb-8">
           {pro.logo_url ? (
             <img
               src={pro.logo_url}
               alt={`Logo ${pro.raison_sociale}`}
-              className="w-24 h-24 rounded-xl object-contain bg-muted"
+              className="w-16 h-16 md:w-24 md:h-24 rounded-xl object-contain bg-muted"
             />
           ) : (
             <div
-              className={`w-24 h-24 rounded-xl flex items-center justify-center font-semibold text-2xl ${cat?.placeholderClass ?? "bg-muted text-muted-foreground"}`}
+              className={`w-16 h-16 md:w-24 md:h-24 rounded-xl flex items-center justify-center font-semibold text-xl md:text-2xl ${cat?.placeholderClass ?? "bg-muted text-muted-foreground"}`}
               aria-hidden="true"
             >
               {getProInitials(pro.raison_sociale)}
             </div>
           )}
           <div className="min-w-0">
-            <h1 className="text-3xl font-display font-bold">{pro.raison_sociale}</h1>
+            <h1 className="text-2xl md:text-3xl font-display font-bold">{pro.raison_sociale}</h1>
             <p className="text-muted-foreground mt-1">
               {cat?.label}
               {pro.city ? ` · ${pro.city}` : ""}

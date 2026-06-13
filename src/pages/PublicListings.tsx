@@ -116,7 +116,7 @@ export default function PublicListings() {
 
       <main id="main-content" className="flex-1 min-w-0" role="main">
         <section className="max-w-6xl mx-auto px-4 md:px-6 pt-5 md:pt-10 pb-3 md:pb-6">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
+          <p className="hidden md:block text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
             {t("public_listings.eyebrow")}
           </p>
           <h1 className="font-heading text-3xl md:text-4xl lg:text-5xl font-medium leading-tight text-foreground tracking-tight max-w-3xl">

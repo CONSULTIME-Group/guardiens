@@ -95,8 +95,8 @@ export default function AuthorPage() {
           ]}
         />
 
-        <div className="max-w-4xl mx-auto px-4 py-10">
-          <header className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-12">
+        <div className="max-w-4xl mx-auto px-4 py-6 md:py-10">
+          <header className="flex flex-col sm:flex-row items-center sm:items-start gap-4 md:gap-6 mb-6 md:mb-12">
             <img
               src={author.photo}
               alt={t("author_page.portrait_alt", { name: author.firstName })}

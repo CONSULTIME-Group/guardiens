@@ -77,10 +77,10 @@ export default function ProsListing() {
         <link rel="canonical" href="https://guardiens.fr/pros" />
       </Helmet>
 
-      <main className="container mx-auto px-4 py-10 max-w-6xl min-w-0">
-        <header className="mb-10">
+      <main className="container mx-auto px-4 py-6 md:py-10 max-w-6xl min-w-0">
+        <header className="mb-6 md:mb-10">
           <div className="flex items-center gap-3 flex-wrap mb-3">
-            <h1 className="text-4xl font-display font-bold">
+            <h1 className="text-2xl md:text-4xl font-display font-bold">
               {t("pros_listing.h1")}
             </h1>
             <span className="text-[10px] uppercase tracking-wider font-bold bg-amber-100 text-amber-800 px-2 py-1 rounded">
