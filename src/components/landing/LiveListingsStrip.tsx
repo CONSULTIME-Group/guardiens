@@ -112,7 +112,7 @@ const LiveListingsStrip: React.FC = () => {
           </Link>
         </div>
 
-        <div className={`grid ${gridCols} gap-3 md:gap-4 mx-auto`}>;
+        <div className={`grid ${gridCols} gap-3 md:gap-4 mx-auto`}>
           {sits.map((s) => {
             const photo = s.cover_photo_url || s.first_photo;
             const dates =
