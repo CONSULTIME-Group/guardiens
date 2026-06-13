@@ -49,7 +49,7 @@ const MessageBell = () => {
         sit:sits(title),
         owner:profiles!conversations_owner_id_fkey(first_name, avatar_url),
         sitter:profiles!conversations_sitter_id_fkey(first_name, avatar_url),
-        messages:messages(body, created_at, sender_id, read_at)
+        messages:messages(content, created_at, sender_id, read_at, is_system)
       `)
       .or(`owner_id.eq.${userId},sitter_id.eq.${userId}`)
       .order("updated_at", { ascending: false })
