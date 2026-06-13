@@ -387,7 +387,7 @@ export const BottomNav = () => {
       icon: Search,
       label: isOwnerView ? "Gardiens" : "Recherche",
     },
-    { to: "/messages", icon: MessageSquare, label: "Messages", badge: unreadCount },
+    { to: "/sits", icon: Calendar, label: isOwnerView ? "Annonces" : "Candidat.", badge: pendingAppsCount },
     { to: "/petites-missions", icon: Handshake, label: "Coup de main", badge: missionBadgeCount },
   ];
 
