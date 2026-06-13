@@ -11,41 +11,18 @@ interface QuickActionsCardProps {
 
 /**
  * Carte d'actions rapides, placée en tête de l'aside ≥ xl.
- * Centralise : disponibilité + raccourcis candidatures/messages + CTA explorer.
- * Remplace l'aside décorative ; donne une vraie utilité actionnable.
+ * V3 : on retire le doublon « Mode disponible » (déjà porté par le toggle
+ * du Cockpit, source de vérité unique). La carte se concentre sur les
+ * raccourcis actionnables : candidatures, messages, explorer.
  */
 const QuickActionsCard = ({
   pendingAppsCount,
   unreadCount,
-  isAvailable,
-  onToggleAvailability,
 }: QuickActionsCardProps) => (
-  <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 mb-6">
+  <div className="bg-card border border-border rounded-2xl p-4 sm:p-5">
     <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">
       Actions rapides
     </p>
-
-    {/* Indicateur de statut (lecture seule). Le toggle réel reste dans le Hero
-       , source de vérité unique pour éviter les états divergents. */}
-    <div className="flex items-center justify-between py-2 border-b border-border">
-      <div>
-        <p className="text-sm font-medium text-foreground">Mode disponible</p>
-        <p className="text-xs text-muted-foreground">
-          {isAvailable ? "Visible auprès des propriétaires" : "Vous n'apparaissez pas dans les résultats"}
-        </p>
-      </div>
-      <span
-        className={`inline-flex items-center gap-1.5 text-xs font-medium rounded-full px-2.5 py-1 ${
-          isAvailable
-            ? "bg-success/15 text-success border border-success/30"
-            : "bg-muted text-muted-foreground border border-border"
-        }`}
-        aria-live="polite"
-      >
-        <span className={`w-1.5 h-1.5 rounded-full ${isAvailable ? "bg-success" : "bg-muted-foreground/50"}`} />
-        {isAvailable ? "Actif" : "Inactif"}
-      </span>
-    </div>
 
     {/* Candidatures */}
     <Link
@@ -83,8 +60,7 @@ const QuickActionsCard = ({
       )}
     </Link>
 
-    {/* CTA secondaire, le CTA primaire de la page est porté par le Cockpit (PriorityActionCard).
-        On reste en ghost pour ne pas concurrencer. */}
+    {/* CTA secondaire, le CTA primaire de la page est porté par le Cockpit. */}
     <Button asChild variant="ghost" className="w-full mt-4 text-foreground/80 hover:text-primary" size="sm">
       <Link to="/search" className="gap-2">
         <Search className="h-4 w-4" aria-hidden="true" />
