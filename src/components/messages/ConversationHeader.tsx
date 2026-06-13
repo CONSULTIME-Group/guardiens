@@ -350,6 +350,16 @@ const ConversationHeader = ({
         </div>
       )}
 
+      {/* Inline context card (sitter_inquiry / helper_inquiry / owner_pitch) */}
+      <ContextHeaderCard
+        contextType={conv.context_type ?? null}
+        isOwner={isOwner}
+        sit={conv.sit ? { ...conv.sit, id: conv.sit_id || undefined } : null}
+        otherFirstName={conv.other_user?.first_name}
+        otherCity={conv.other_user?.city ?? null}
+        otherUserId={conv.other_user?.id ?? null}
+      />
+
       {/* Small mission contextual banners */}
       {isSmallMission && missionData && responseData && responseData.status === "pending" && (
         <div className="px-4 py-3 bg-muted/50 border-t border-border">
