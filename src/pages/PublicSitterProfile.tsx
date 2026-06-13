@@ -822,8 +822,7 @@ export default function PublicSitterProfile() {
         const isOwnProfile = !!auth.user?.id && auth.user.id === id;
         return (
           <div
-            className="relative overflow-hidden w-full flex items-end bg-[hsl(var(--hero-paper))] max-h-[420px] md:max-h-[520px]"
-            style={{ aspectRatio: "1536 / 544" }}
+            className="relative overflow-hidden w-full flex items-end bg-[hsl(var(--hero-paper))] md:max-h-[520px] md:[aspect-ratio:1536/544]"
           >
             {/* Illustration de fond, sketchbook style, déterministe par profil.
                 object-contain : on montre le carnet entier (spirales, marges) sans rogner. */}
@@ -889,7 +888,7 @@ export default function PublicSitterProfile() {
         />
 
         {/* Contenu header par-dessus */}
-        <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 pb-8 pt-6">
+        <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 pb-5 sm:pb-8 pt-4 sm:pt-6">
           {/* Ligne retour */}
           <div className="flex justify-end mb-4">
             <Link
@@ -901,7 +900,7 @@ export default function PublicSitterProfile() {
           </div>
 
           {/* Flex photo + infos */}
-          <div className="flex items-end gap-3 sm:gap-6 min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-6 min-w-0">
             {/* Photo grande */}
             <div className="shrink-0 relative">
               <img
