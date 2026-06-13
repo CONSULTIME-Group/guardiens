@@ -64,7 +64,8 @@ export const Sidebar = () => {
   const navigate = useNavigate();
   const { hasAccess } = useSubscriptionAccess();
   const [unreadCount, setUnreadCount] = useState(0);
-  const [pendingAppsCount, setPendingAppsCount] = useState(0);
+  const [ownerInboxCount, setOwnerInboxCount] = useState(0);
+  const [sitterActionCount, setSitterActionCount] = useState(0);
   const [missionBadgeCount, setMissionBadgeCount] = useState(0);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
@@ -73,6 +74,9 @@ export const Sidebar = () => {
   const [roleDialogTarget, setRoleDialogTarget] = useState<"gardien" | "proprio">("proprio");
 
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
+  // Badge sidebar/bottom-nav /sits : owner = candidatures reçues à traiter,
+  // sitter = candidatures propres en attente d'action (pending côté gardien).
+  const sitsBadge = effectiveRole === "owner" ? ownerInboxCount : sitterActionCount;
 
   useEffect(() => {
     if (!user) return;
@@ -95,7 +99,7 @@ export const Sidebar = () => {
         setUnreadCount(0);
       }
 
-      // Pending applications on user's sits (owner view)
+      // Owner inbox : candidatures pending reçues sur les annonces de l'utilisateur
       const { data: userSits } = await supabase
         .from("sits")
         .select("id")
@@ -106,10 +110,18 @@ export const Sidebar = () => {
           .select("id", { count: "exact", head: true })
           .in("sit_id", userSits.map((s: any) => s.id))
           .eq("status", "pending");
-        setPendingAppsCount(appCount || 0);
+        setOwnerInboxCount(appCount || 0);
       } else {
-        setPendingAppsCount(0);
+        setOwnerInboxCount(0);
       }
+
+      // Sitter action : candidatures propres en attente (pending) côté gardien
+      const { count: myAppsCount } = await supabase
+        .from("applications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("status", "pending");
+      setSitterActionCount(myAppsCount || 0);
 
       // Mission conversations with unread messages
       const { data: missionConvs } = await supabase
@@ -134,6 +146,7 @@ export const Sidebar = () => {
     const interval = setInterval(loadCounts, 15000);
     return () => clearInterval(interval);
   }, [user]);
+
 
   return (
     <aside className="hidden md:flex flex-col w-64 border-r border-border bg-card h-screen sticky top-0">
