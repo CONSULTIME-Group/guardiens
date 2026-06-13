@@ -939,13 +939,62 @@ const CreateSit = () => {
               {savingDraft ? "Sauvegarde…" : <><span className="hidden sm:inline">Enregistrer & quitter</span><span className="sm:hidden">Brouillon</span></>}
             </Button>
             <Button
-              onClick={onPublishClick}
+              type="button"
+              variant="outline"
+              className="h-12 px-4 shrink-0 gap-2 hidden sm:inline-flex"
+              onClick={() => setPreviewOpen(true)}
+              disabled={!canPublish}
+              title={canPublish ? "Voir l'aperçu" : "Complétez les éléments requis pour prévisualiser"}
+            >
+              <EyeIcon className="h-4 w-4" />
+              <span>Aperçu</span>
+            </Button>
+            <Button
+              onClick={() => {
+                if (canPublish) {
+                  setPreviewOpen(true);
+                } else {
+                  onPublishClick();
+                }
+              }}
               disabled={publishing}
               aria-disabled={!canPublish}
               className={`flex-1 h-12 text-base font-semibold ${canPublish ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground hover:bg-muted"}`}
             >
-              {publishing ? "Publication en cours..." : canPublish ? "Publier l'annonce" : "Voir ce qui manque"}
+              {publishing ? "Publication en cours..." : canPublish ? "Aperçu & publier" : "Voir ce qui manque"}
             </Button>
+          </div>
+        </div>
+      </div>
+
+      <AnnouncementPreviewDialog
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        onConfirmPublish={async () => {
+          await handlePublish();
+        }}
+        publishing={publishing}
+        canPublish={!!canPublish}
+        title={title}
+        startDate={startDate}
+        endDate={endDate}
+        flexibleDates={flexibleDates}
+        city={(sitCity || ownerCity || "").trim()}
+        country={sitCountry}
+        specificExpectations={
+          flexibleDates && flexibleNotes
+            ? `${specificExpectations}\n\nDates flexibles : ${flexibleNotes}`.trim()
+            : specificExpectations
+        }
+        ownerMessage={ownerMessage}
+        dailyRoutine={dailyRoutine}
+        coverPhotoUrl={coverPhotoUrl}
+        ownerPhotos={ownerPhotos}
+        pets={pets.map(p => ({ name: p.name, species: p.species, photo_url: p.photo_url }))}
+        propertyType={property?.type ?? null}
+        environments={sitEnvironments.map(e => envLabels[e] || e)}
+        isUrgent={isUrgent}
+      />
           </div>
         </div>
       </div>
