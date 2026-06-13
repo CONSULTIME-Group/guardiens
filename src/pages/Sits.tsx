@@ -480,7 +480,7 @@ const Sits = () => {
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <h1 className="font-heading text-2xl md:text-3xl font-bold mb-1">
-            {activeRole === "owner" ? "Mes annonces" : "Mes gardes"}
+            {activeRole === "owner" ? "Mes annonces" : "Mes candidatures"}
           </h1>
           <p className="text-muted-foreground text-sm">
             {headerSubtitle}
