@@ -67,7 +67,7 @@ const DepartmentPage = () => {
  <div className="max-w-5xl mx-auto px-4 py-16">
  <Skeleton className="h-10 w-3/4 mb-4" />
  <Skeleton className="h-24 w-full mb-8" />
- <div className="grid grid-cols-3 gap-4">
+ <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
  <Skeleton className="h-32" />
  <Skeleton className="h-32" />
  <Skeleton className="h-32" />
@@ -105,7 +105,7 @@ const DepartmentPage = () => {
  ]} />
 
  {/* Hero */}
- <section className="max-w-5xl mx-auto px-4 py-12">
+ <section className="max-w-5xl mx-auto px-4 py-8 md:py-12">
  <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground mb-6">
  {page.h1_title}
  </h1>
@@ -157,7 +157,7 @@ const DepartmentPage = () => {
 
  {/* Cities in this department */}
  {cityPages.length > 0 && (
- <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
+ <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
  <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
  Villes du {page.department} sur Guardiens
  </h2>
@@ -190,7 +190,7 @@ const DepartmentPage = () => {
 
  {/* Guides in this department */}
  {guides.length > 0 && (
- <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
+ <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
  <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
  Guides locaux, {page.department}
  </h2>
@@ -213,13 +213,13 @@ const DepartmentPage = () => {
  )}
 
  {/* Why Guardiens */}
- <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
+ <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
  <h2 className="font-serif text-2xl font-bold text-foreground mb-8">
  Pourquoi Guardiens dans le {page.department} ?
  </h2>
- <div className="grid md:grid-cols-3 gap-6">
+ <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
  <Card>
- <CardContent className="p-6">
+ <CardContent className="p-4 md:p-6">
  <MapPin className="h-8 w-8 text-primary mb-3" />
  <h3 className="font-semibold text-foreground mb-2">Proximité</h3>
  <p className="text-sm text-muted-foreground">
@@ -228,7 +228,7 @@ const DepartmentPage = () => {
  </CardContent>
  </Card>
  <Card>
- <CardContent className="p-6">
+ <CardContent className="p-4 md:p-6">
  <ShieldCheck className="h-8 w-8 text-primary mb-3" />
  <h3 className="font-semibold text-foreground mb-2">Confiance</h3>
  <p className="text-sm text-muted-foreground">
@@ -237,7 +237,7 @@ const DepartmentPage = () => {
  </CardContent>
  </Card>
  <Card>
- <CardContent className="p-6">
+ <CardContent className="p-4 md:p-6">
  <Heart className="h-8 w-8 text-primary mb-3" />
  <h3 className="font-semibold text-foreground mb-2">À 0 € pour les propriétaires</h3>
  <p className="text-sm text-muted-foreground">
@@ -249,7 +249,7 @@ const DepartmentPage = () => {
  </section>
 
  {/* Final CTA */}
- <section className="max-w-5xl mx-auto px-4 py-16 text-center">
+ <section className="max-w-5xl mx-auto px-4 py-8 md:py-16 text-center">
  <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-4">
  Rejoignez Guardiens dans le {page.department}
  </h2>

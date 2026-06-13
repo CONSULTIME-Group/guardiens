@@ -322,7 +322,7 @@ const LeaveReview = () => {
   }
 
   return (
-    <div className="p-6 md:p-10 max-w-2xl mx-auto animate-fade-in pb-32">
+    <div className="p-4 md:p-10 max-w-2xl mx-auto animate-fade-in pb-32">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
 
       <Link to={`/sits/${sitId}`} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
@@ -381,7 +381,7 @@ const LeaveReview = () => {
           <button
             type="button"
             onClick={() => setWouldRecommend(true)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors ${
+            className={`flex items-center gap-2 px-4 py-3 min-h-[44px] rounded-lg border text-sm font-medium transition-colors ${
               wouldRecommend === true
                 ? "bg-accent text-primary border-primary/30"
                 : "border-border text-muted-foreground hover:bg-accent"
@@ -392,7 +392,7 @@ const LeaveReview = () => {
           <button
             type="button"
             onClick={() => setWouldRecommend(false)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors ${
+            className={`flex items-center gap-2 px-4 py-3 min-h-[44px] rounded-lg border text-sm font-medium transition-colors ${
               wouldRecommend === false
                 ? "bg-destructive/10 border-destructive/30 text-destructive"
                 : "border-border text-muted-foreground hover:bg-accent"

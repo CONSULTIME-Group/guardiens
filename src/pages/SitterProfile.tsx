@@ -314,7 +314,7 @@ const SitterProfile = () => {
       <PageMeta title={tp("sitter_meta_title")} description={tp("sitter_meta_description")} noindex />
 
       <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto animate-fade-in">
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-4 md:gap-8">
           {/* Left sidebar */}
           <ProfileSidebar
             firstName={mergedData.first_name}

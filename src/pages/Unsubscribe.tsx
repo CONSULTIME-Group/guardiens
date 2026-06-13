@@ -135,7 +135,7 @@ const Unsubscribe = () => {
                 <Button
                   onClick={handleSavePartial}
                   disabled={submitting !== null}
-                  className="flex-1"
+                  className="flex-1 h-11"
                 >
                   {submitting === "partial" && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                   {t("unsubscribe.save")}
@@ -144,7 +144,7 @@ const Unsubscribe = () => {
                   variant="outline"
                   onClick={handleUnsubscribeAll}
                   disabled={submitting !== null}
-                  className="flex-1"
+                  className="flex-1 h-11"
                 >
                   {submitting === "all" && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                   {t("unsubscribe.disable_all")}
