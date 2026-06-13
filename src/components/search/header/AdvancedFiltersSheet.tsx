@@ -29,6 +29,8 @@ interface AdvancedFiltersSheetProps {
   minExperience: ExperienceFilter;
   setMinExperience: (v: ExperienceFilter) => void;
   onApply: () => void;
+  currentResultsCount?: number;
+  loading?: boolean;
 }
 
 export const AdvancedFiltersSheet = ({
@@ -49,7 +51,14 @@ export const AdvancedFiltersSheet = ({
   minExperience,
   setMinExperience,
   onApply,
+  currentResultsCount,
+  loading,
 }: AdvancedFiltersSheetProps) => {
+  const countLabel = loading
+    ? "Recherche…"
+    : typeof currentResultsCount === "number"
+      ? `Voir ${currentResultsCount} résultat${currentResultsCount > 1 ? "s" : ""}`
+      : "Appliquer les filtres";
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
@@ -155,8 +164,8 @@ export const AdvancedFiltersSheet = ({
           </div>
 
           {/* Apply button */}
-          <Button className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-medium" onClick={onApply}>
-            Appliquer les filtres
+          <Button className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-medium" onClick={onApply} disabled={loading}>
+            {countLabel}
           </Button>
         </div>
       </SheetContent>
