@@ -173,14 +173,7 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
                   );
                 })}
               </div>
-              <div className="flex flex-wrap items-center justify-between gap-2 pt-3 mt-2 border-t border-border/60">
-                <Link
-                  to="/search"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
-                >
-                  <Compass className="h-3.5 w-3.5" aria-hidden="true" />
-                  Voir toutes les annonces plus loin
-                </Link>
+              <div className="flex items-center justify-end gap-2 pt-3 mt-2 border-t border-border/60">
                 <Link
                   to="/mon-abonnement#parrainage"
                   className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-primary"
