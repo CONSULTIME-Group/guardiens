@@ -20,6 +20,7 @@ import SitterEmergencyCardCompact from "./sitter/SitterEmergencyCardCompact";
 import SitterMissionsSection from "./sitter/SitterMissionsSection";
 import NearbyAnnoncesCard from "./sitter/NearbyAnnoncesCard";
 import QuickActionsCard from "./sitter/QuickActionsCard";
+import AsideArticlesCard from "./sitter/AsideArticlesCard";
 import SectionEyebrow from "./shared/SectionEyebrow";
 import DashSection from "./owner/DashSection";
 
@@ -106,28 +107,7 @@ const SitterDashboard = () => {
         </div>
       )}
 
-      {allChecklistDone ? (
-        <Accordion type="single" collapsible>
-          <AccordionItem value="done" className="border-none">
-            <AccordionTrigger className="flex items-center justify-between bg-primary/5 border border-primary/20 rounded-xl px-4 py-2.5 cursor-pointer hover:no-underline hover:bg-primary/10 transition-colors [&[data-state=open]>svg]:rotate-180">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-primary" aria-hidden="true" />
-                <span className="text-sm font-medium text-primary">
-                  Profil prêt, {allItems.length}/{allItems.length} étapes complétées
-                </span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="pt-2 pb-0">
-              {completedItems.map((item: any, i: number) => (
-                <div key={i} className="flex items-center gap-3 py-2 border-b border-border last:border-0 px-2">
-                  <CheckCircle className="h-4 w-4 text-primary" aria-hidden="true" />
-                  <span className="text-sm line-through text-foreground/60">{item.label}</span>
-                </div>
-              ))}
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      ) : (
+      {allChecklistDone ? null : (
         <DashSection
           eyebrow="Activation"
           title="Finalisez votre profil"
@@ -506,7 +486,7 @@ const SitterDashboard = () => {
         </div>
 
         {/* SIDE COLUMN, 3/12 : actions rapides + gardien d'urgence (audit V2 : remplir l'aside) */}
-        <aside aria-label="Actions rapides et urgence" className="xl:col-span-3 min-w-0 space-y-3">
+        <aside aria-label="Actions rapides, conseils et urgence" className="xl:col-span-3 min-w-0 space-y-3">
           <QuickActionsCard
             pendingAppsCount={pendingAppsCount}
             unreadCount={unreadCount}
@@ -514,6 +494,7 @@ const SitterDashboard = () => {
             onToggleAvailability={toggleAvailability}
           />
           {buildEmergencyBlock(true)}
+          <AsideArticlesCard articles={articles} />
         </aside>
       </div>
 
