@@ -227,24 +227,9 @@ export const Sidebar = () => {
               <SidebarItem to="/dashboard" icon={Home} label="Dashboard" />
               <SidebarItem to="/sits" icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures"} badge={pendingAppsCount} />
 
-              {isSitterLocked ? (
-                <button
-                  type="button"
-                  onClick={() => handlePremiumClick("la messagerie")}
-                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:bg-accent hover:text-foreground w-full text-left relative"
-                >
-                  <MessageSquare className="h-[18px] w-[18px]" strokeWidth={1.8} />
-                  Messagerie
-                  <Crown className="h-[11px] w-[11px] text-amber-500 ml-1" />
-                  {unreadCount > 0 && (
-                    <span className="absolute right-3 bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold tabular-nums">
-                      {unreadCount > 99 ? "99+" : unreadCount}
-                    </span>
-                  )}
-                </button>
-              ) : (
-                <SidebarItem to="/messages" icon={MessageSquare} label="Messagerie" badge={unreadCount} />
-              )}
+              {/* Messagerie : déplacée dans la cloche du header (MessageBell)
+                  pour désencombrer la sidebar et la traiter comme un canal de
+                  notifications (popover) plutôt que comme une destination. */}
 
               <SidebarItem to={effectiveRole === "owner" ? "/owner-profile" : "/profile"} icon={User} label="Mon profil" />
               <SidebarItem to="/mes-avis" icon={Star} label="Mes avis" />
