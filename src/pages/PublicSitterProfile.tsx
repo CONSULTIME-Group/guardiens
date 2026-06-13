@@ -900,7 +900,7 @@ export default function PublicSitterProfile() {
           </div>
 
           {/* Flex photo + infos */}
-          <div className="flex items-end gap-3 sm:gap-6 min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-6 min-w-0">
             {/* Photo grande */}
             <div className="shrink-0 relative">
               <img
