@@ -52,11 +52,13 @@ const LiveListingsStrip: React.FC = () => {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      const todayIso = new Date().toISOString().slice(0, 10);
       const { data: rawSits } = await supabase
         .from("sits")
         .select("id, title, start_date, end_date, user_id, property_id, cover_photo_url, city, country, is_urgent")
         .eq("status", "published")
         .eq("accepting_applications", true)
+        .or(`end_date.is.null,end_date.gte.${todayIso}`)
         .order("created_at", { ascending: false })
         .limit(12);
 
@@ -140,7 +142,7 @@ const LiveListingsStrip: React.FC = () => {
     s.start_date && s.end_date ? `${fmt(s.start_date)} – ${fmt(s.end_date)}` : null;
 
   const featured = sits.find(isHighlighted);
-  const rest = featured ? sits.filter((s) => s.id !== featured.id).slice(0, 3) : sits;
+  const rest = featured ? sits.filter((s) => s.id !== featured.id).slice(0, 1) : sits;
 
   return (
     <section
@@ -172,7 +174,7 @@ const LiveListingsStrip: React.FC = () => {
         </div>
 
         {featured ? (
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-5">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-5">
             {/* Carte featured surdimensionnée */}
             <Link
               to={`/annonces/${featured.id}`}
@@ -225,7 +227,7 @@ const LiveListingsStrip: React.FC = () => {
             </Link>
 
             {/* Pile de 3 cartes secondaires */}
-            <div className="lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-3 md:gap-4">
+            <div className="lg:col-span-1 grid grid-cols-1 gap-3 md:gap-4">
               {rest.map((s) => {
                 const photo = resolvePhoto(s);
                 const dates = fmtDates(s);
