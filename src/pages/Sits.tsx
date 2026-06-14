@@ -380,11 +380,17 @@ const Sits = () => {
   // Une annonce est considérée « archivée » si :
   //  - elle a été annulée avec une raison archived/expired (auto-archivage)
   //  - OU elle a été dépubliée par le propriétaire (status=draft + unpublished_at)
+  //  - OU elle est terminée (completed) : la garde est passée, sort des Actives
   const wasUnpublished = (s: any) =>
     s.status === "draft" && !!s.unpublished_at;
-  const isArchived = (s: any) =>
-    (s.status === "cancelled" && (s.cancellation_reason === "archived" || s.cancellation_reason === "expired"))
-    || wasUnpublished(s);
+  const isArchived = (s: any) => {
+    const es = s.effectiveStatus || s.status;
+    return (
+      es === "completed"
+      || (s.status === "cancelled" && (s.cancellation_reason === "archived" || s.cancellation_reason === "expired"))
+      || wasUnpublished(s)
+    );
+  };
   const isExpired = (s: any) => s.cancellation_reason === "expired";
 
   const activeSits = useMemo(() => sits.filter(s => !isArchived(s)), [sits]);
