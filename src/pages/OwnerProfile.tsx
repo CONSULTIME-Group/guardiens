@@ -273,6 +273,16 @@ const OwnerProfilePage = () => {
                 bonuses={ownerBonuses}
               />
             }
+            trustSlot={
+              <TrustProfile
+                emailVerified={true}
+                identityVerified={!!user?.identityVerified}
+                hasAvatar={!!(mergedData.avatar_url || user?.avatarUrl)}
+                profileCompletion={liveScore}
+                hasFirstActivity={false}
+                role="owner"
+              />
+            }
           />
 
           {/* Right content */}
