@@ -468,6 +468,7 @@ const SitterProfile = () => {
               </TooltipContent>
             )}
           </Tooltip>
+          </div>
         </div>
       </TooltipProvider>
     </div>
