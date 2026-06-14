@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, Check, Loader2 } from "lucide-react";
@@ -75,6 +76,27 @@ const OwnerProfilePage = () => {
   const [localData, setLocalData] = useState<Partial<OwnerProfileData>>({});
   const [activeSection, setActiveSection] = useState("identity");
   const [galleryCount, setGalleryCount] = useState(0);
+  const [searchParams] = useSearchParams();
+  const lastAppliedSectionRef = useRef<string | null>(null);
+
+  // Ouvre directement la section ciblée par ?section= (CTA dashboard, emails).
+  // Bornée aux ids déclarés dans SECTIONS_BASE pour éviter tout setState invalide.
+  useEffect(() => {
+    if (loading) return;
+    const section = searchParams.get("section");
+    if (!section) {
+      lastAppliedSectionRef.current = null;
+      return;
+    }
+    const valid = SECTIONS_BASE.some(s => s.id === section);
+    if (valid && lastAppliedSectionRef.current !== section) {
+      lastAppliedSectionRef.current = section;
+      setActiveSection(section);
+      requestAnimationFrame(() => {
+        document.getElementById("profile-section-content")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }, [loading, searchParams]);
 
   // Compte les photos dans owner_gallery (source de vérité unique).
   useEffect(() => {
