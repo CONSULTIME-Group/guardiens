@@ -1,0 +1,1 @@
+UPDATE public.notifications SET title = replace(title, '—', ','), body = replace(body, '—', ',') WHERE title LIKE '%—%' OR body LIKE '%—%';
