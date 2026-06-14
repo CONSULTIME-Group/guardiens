@@ -89,7 +89,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
 
   // ── Slide 2: compétences + lifestyle ──
   const [lifestyle, setLifestyle] = useState<string[]>([]);
-  const [skillCategories, setSkillCategories] = useState<string[]>([]);
+  const [pickedCompetences, setPickedCompetences] = useState<string[]>([]);
 
   // ── Live completion ──
   const [liveCompletion, setLiveCompletion] = useState(0);
@@ -107,15 +107,15 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     if (usesSitterScoring) {
       // Sitter/Both scoring: bio=15, compétences=10, lifestyle=10 (max here = 65)
       if (bio.length >= 50) score += 15;
-      if (skillCategories.length > 0) score += 10;
+      if (pickedCompetences.length > 0) score += 10;
       if (lifestyle.length > 0) score += 10;
     } else {
       // Owner-only scoring: bio=10, compétences=10 (max here = 50)
       if (bio.length >= 50) score += 10;
-      if (skillCategories.length > 0) score += 10;
+      if (pickedCompetences.length > 0) score += 10;
     }
     setLiveCompletion(score);
-  }, [firstName, postalCode, avatarUrl, bio, skillCategories, lifestyle, usesSitterScoring]);
+  }, [firstName, postalCode, avatarUrl, bio, pickedCompetences, lifestyle, usesSitterScoring]);
 
   // Load profile data on mount
   useEffect(() => {
@@ -142,7 +142,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
         if (p.bio) setBio(p.bio);
         if (p.onboarding_minimal_completed) setMinimalSaved(true);
         if (Array.isArray((p as any).skill_categories)) {
-          setSkillCategories((p as any).skill_categories as string[]);
+          setPickedCompetences((p as any).skill_categories as string[]);
         }
       }
       // Lifestyle reste propre au profil gardien
@@ -236,7 +236,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     const ALLOWED_CATEGORIES = SKILL_CATEGORIES.map(c => c.key);
     const safeCategories = Array.from(
       new Set(
-        (skillCategories || []).filter(
+        (pickedCompetences || []).filter(
           (k): k is string => typeof k === "string" && ALLOWED_CATEGORIES.includes(k)
         )
       )
@@ -381,7 +381,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
       } catch {}
     }
     onClose();
-  }, [user, onClose, canDismiss, refreshProfile, slide, bio, lifestyle, skillCategories, avatarUrl, liveCompletion]);
+  }, [user, onClose, canDismiss, refreshProfile, slide, bio, lifestyle, pickedCompetences, avatarUrl, liveCompletion]);
 
   const completeOnboarding = async (destination: string) => {
     if (user) {
@@ -710,13 +710,13 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                 <Label>Ce que je sais faire</Label>
                 <div className="flex flex-wrap gap-2">
                   {SKILL_CATEGORIES.map(({ key, label }) => {
-                    const selected = skillCategories.includes(key);
+                    const selected = pickedCompetences.includes(key);
                     return (
                       <button
                         key={key}
                         type="button"
                         onClick={() =>
-                          setSkillCategories((prev) =>
+                          setPickedCompetences((prev) =>
                             prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
                           )
                         }
@@ -748,10 +748,10 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
               <div className="bg-muted/50 rounded-xl p-4 border border-border">
                 <p className="text-xs text-muted-foreground uppercase tracking-widest mb-3">Sur votre profil public</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {skillCategories.length === 0 && (usesSitterScoring ? lifestyle.length === 0 : true) && (
+                  {pickedCompetences.length === 0 && (usesSitterScoring ? lifestyle.length === 0 : true) && (
                     <p className="text-xs text-muted-foreground italic">Sélectionnez pour voir l'aperçu…</p>
                   )}
-                  {skillCategories.map((key) => {
+                  {pickedCompetences.map((key) => {
                     const cat = SKILL_CATEGORIES.find((c) => c.key === key);
                     return (
                       <span key={key} className="bg-primary text-primary-foreground text-xs px-2.5 py-1 rounded-full">
@@ -808,8 +808,8 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                     <span className={bio.length >= 50 ? "text-foreground" : "text-muted-foreground"}>Bio</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    {skillCategories.length > 0 ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
-                    <span className={skillCategories.length > 0 ? "text-foreground" : "text-muted-foreground"}>Compétences</span>
+                    {pickedCompetences.length > 0 ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
+                    <span className={pickedCompetences.length > 0 ? "text-foreground" : "text-muted-foreground"}>Compétences</span>
                   </div>
                   {usesSitterScoring && (
                     <div className="flex items-center gap-1.5">
