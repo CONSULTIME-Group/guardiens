@@ -2,16 +2,17 @@
  * Hero photos d'une annonce, version mosaïque moderne (style Airbnb).
  *
  * - Desktop : mosaïque 2 colonnes (1 grande à gauche + 2x2 vignettes à droite),
- *   hauteur compacte h-[320px] (réduit de moitié vs ancien layout).
- * - Mobile : carrousel single-image h-[220px] avec swipe + dots.
- * - Bandeau ville/titre sous la mosaïque (sortie de l'overlay sombre).
+ *   hauteur compacte h-[320px].
+ * - Mobile : carrousel full-bleed h-[56vw] min-h-[240px] avec swipe + overlay chips
+ *   (ville · dates · animaux) → above-the-fold complet sans scroll.
  * - Bouton "Voir les N photos" en bas-droite ouvre la lightbox.
- * - Clic sur n'importe quelle tuile → lightbox plein écran sur cette image.
  * - Lightbox : navigation clavier (← / → / Esc) + swipe tactile.
  */
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, X, Grid3x3 } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface PetPhotoItem {
   url: string;
@@ -25,9 +26,36 @@ interface SitHeroProps {
   title?: string | null;
   cityName?: string;
   department?: string;
+  /** Données overlay mobile : dates + animaux */
+  startDate?: string | null;
+  endDate?: string | null;
+  petsCount?: number;
+  speciesSummary?: string;
+  /** Micro-confiance : card propriétaire dans le hero */
+  ownerAvatarUrl?: string | null;
+  ownerName?: string | null;
+  ownerVerified?: boolean;
+  ownerCompletedSitsCount?: number | null;
 }
 
-const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHeroProps) => {
+const fmtDate = (d: string) =>
+  format(new Date(d), "d MMM", { locale: fr });
+
+const SitHero = ({
+  photos,
+  petPhotos = [],
+  title,
+  cityName,
+  department,
+  startDate,
+  endDate,
+  petsCount,
+  speciesSummary,
+  ownerAvatarUrl,
+  ownerName,
+  ownerVerified,
+  ownerCompletedSitsCount,
+}: SitHeroProps) => {
   const [index, setIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
@@ -49,8 +77,8 @@ const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHer
       const url = pet.url.trim();
       if (!url || seen.has(url)) continue;
       seen.add(url);
-      const speciesLabel = pet.species ? ` (${pet.species})` : "";
-      const caption = pet.name ? `${pet.name}${speciesLabel}` : `Animal de la garde${speciesLabel}`;
+      const speciesLbl = pet.species ? ` (${pet.species})` : "";
+      const caption = pet.name ? `${pet.name}${speciesLbl}` : `Animal de la garde${speciesLbl}`;
       all.push({ url, caption, kind: "animal" });
     }
     return all;
@@ -115,24 +143,39 @@ const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHer
 
   const mosaic = slides.slice(0, 5);
   const main = mosaic[0];
-  const sides = mosaic.slice(1, 5); // jusqu'à 4 vignettes
+  const sides = mosaic.slice(1, 5);
 
   const current = slides[index];
+
+  // Chips overlay : ville, dates, animaux
+  const dateChip =
+    startDate && endDate
+      ? `${fmtDate(startDate)} → ${fmtDate(endDate)}`
+      : startDate
+        ? `À partir du ${fmtDate(startDate)}`
+        : null;
+
+  const petsChip =
+    petsCount && petsCount > 0
+      ? `${petsCount} ${petsCount === 1 ? "animal" : "animaux"}${speciesSummary ? ` · ${speciesSummary}` : ""}`
+      : null;
 
   return (
     <>
       <section className="mb-6" aria-label="Galerie photos de la garde">
-        {/* ============== MOBILE : carrousel single-image compact ============== */}
+        {/* ====== MOBILE : carrousel full-bleed + overlay chips ====== */}
         <div className="md:hidden">
+          {/* Négatif margin pour annuler le px-3 du parent SitDetail */}
           <div
-            className="relative rounded-2xl overflow-hidden bg-muted"
+            className="relative overflow-hidden bg-muted -mx-3"
+            style={{ minHeight: 240, height: "56vw", maxHeight: 340 }}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
             <button
               type="button"
               onClick={() => setLightboxOpen(true)}
-              className="block w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="block w-full h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               aria-label={`Agrandir la photo ${index + 1} sur ${total}`}
             >
               <img
@@ -141,17 +184,75 @@ const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHer
                 loading="eager"
                 fetchPriority="high"
                 decoding="async"
-                className="w-full h-[220px] object-cover"
+                className="w-full h-full object-cover"
               />
             </button>
 
+            {/* Gradient overlay bas → chips contextuels */}
+            <div
+              className="absolute inset-x-0 bottom-0 h-28 pointer-events-none"
+              style={{
+                background:
+                  "linear-gradient(to top, hsl(var(--foreground)/0.72) 0%, transparent 100%)",
+              }}
+              aria-hidden="true"
+            />
+
+            {/* Chips : ville · dates · animaux */}
+            <div className="absolute bottom-3 left-3 right-14 flex flex-col gap-1 pointer-events-none">
+              {cityName && (
+                <p className="text-xs font-semibold text-primary-foreground/90 leading-none">
+                  {cityName}{department ? ` · ${department}` : ""}
+                </p>
+              )}
+              {(dateChip || petsChip) && (
+                <div className="flex flex-wrap gap-1.5 mt-0.5">
+                  {dateChip && (
+                    <span className="inline-block rounded-full bg-background/25 backdrop-blur-sm border border-background/20 px-2.5 py-1 text-[11px] font-semibold text-primary-foreground leading-none">
+                      {dateChip}
+                    </span>
+                  )}
+                  {petsChip && (
+                    <span className="inline-block rounded-full bg-background/25 backdrop-blur-sm border border-background/20 px-2.5 py-1 text-[11px] font-semibold text-primary-foreground leading-none">
+                      {petsChip}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Micro-confiance : mini owner card en haut-droite */}
+            {ownerName && (
+              <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-background/30 backdrop-blur-sm rounded-full pl-0.5 pr-2.5 py-0.5 pointer-events-none">
+                {ownerAvatarUrl ? (
+                  <img
+                    src={ownerAvatarUrl}
+                    alt={ownerName}
+                    loading="lazy"
+                    className="w-6 h-6 rounded-full object-cover border border-background/40"
+                  />
+                ) : (
+                  <span className="w-6 h-6 rounded-full bg-primary/80 flex items-center justify-center text-[10px] font-bold text-primary-foreground">
+                    {ownerName.charAt(0).toUpperCase()}
+                  </span>
+                )}
+                <span className="text-[10px] font-semibold text-primary-foreground leading-none">
+                  {ownerName}
+                  {ownerVerified && (
+                    <span className="ml-1 text-[9px] font-bold bg-primary/60 rounded-full px-1 py-px">✓</span>
+                  )}
+                </span>
+              </div>
+            )}
+
+            {/* Nav prev/next (44px tactile) */}
             {total > 1 && (
               <>
                 <button
                   type="button"
                   onClick={prev}
                   aria-label="Photo précédente"
-                  className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-background/90 backdrop-blur-sm shadow flex items-center justify-center"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-background/80 backdrop-blur-sm shadow flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   <ChevronLeft className="h-5 w-5 text-foreground" aria-hidden="true" />
                 </button>
@@ -159,28 +260,34 @@ const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHer
                   type="button"
                   onClick={next}
                   aria-label="Photo suivante"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-background/90 backdrop-blur-sm shadow flex items-center justify-center"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-background/80 backdrop-blur-sm shadow flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   <ChevronRight className="h-5 w-5 text-foreground" aria-hidden="true" />
                 </button>
-                <div className="absolute bottom-2 right-2 bg-background/90 backdrop-blur-sm rounded-full px-2.5 py-1 text-xs font-medium text-foreground shadow">
+                <div className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm rounded-full px-2.5 py-1 text-xs font-medium text-foreground shadow">
                   {index + 1} / {total}
                 </div>
               </>
             )}
           </div>
+
+          {/* Titre sous le hero mobile (si présent) */}
+          {title && (
+            <h1 className="mt-4 text-2xl font-bold text-foreground leading-tight px-0">
+              {title}
+            </h1>
+          )}
         </div>
 
-        {/* ============== DESKTOP : mosaïque compacte 2 colonnes ============== */}
+        {/* ====== DESKTOP : mosaïque compacte 2 colonnes ====== */}
         <div className="hidden md:block">
           <div className="relative rounded-2xl overflow-hidden">
             <div className="grid grid-cols-4 grid-rows-2 gap-1.5 h-[320px]">
-              {/* Image principale, col-span 2, row-span 2 */}
               <button
                 type="button"
                 onClick={() => openAt(0)}
                 className="col-span-2 row-span-2 group relative overflow-hidden bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                aria-label={`Agrandir la photo principale`}
+                aria-label="Agrandir la photo principale"
               >
                 <img
                   src={main.url}
@@ -192,16 +299,11 @@ const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHer
                 />
               </button>
 
-              {/* Vignettes 2x2, fallback gris si moins de 4 */}
               {Array.from({ length: 4 }).map((_, i) => {
                 const s = sides[i];
                 if (!s) {
                   return (
-                    <div
-                      key={`empty-${i}`}
-                      aria-hidden="true"
-                      className="bg-muted/60"
-                    />
+                    <div key={`empty-${i}`} aria-hidden="true" className="bg-muted/60" />
                   );
                 }
                 return (
@@ -224,7 +326,6 @@ const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHer
               })}
             </div>
 
-            {/* Bouton "Voir les N photos" */}
             {total > 1 && (
               <button
                 type="button"
@@ -238,9 +339,9 @@ const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHer
           </div>
         </div>
 
-        {/* Bandeau ville/titre sous la galerie, plus moderne et lisible */}
+        {/* Bandeau ville/titre desktop sous la galerie */}
         {(title || cityName || department) && (
-          <div className="mt-4">
+          <div className="hidden md:block mt-4">
             {(cityName || department) && (
               <p className="text-sm font-medium text-muted-foreground">
                 {cityName}
@@ -256,7 +357,7 @@ const SitHero = ({ photos, petPhotos = [], title, cityName, department }: SitHer
         )}
       </section>
 
-      {/* ============== LIGHTBOX ============== */}
+      {/* ====== LIGHTBOX ====== */}
       {lightboxOpen && typeof document !== "undefined" &&
         createPortal(
           <div

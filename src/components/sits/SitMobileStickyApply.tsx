@@ -1,27 +1,34 @@
 /**
  * Barre d'action sticky mobile pour la vue gardien d'une annonce.
  * Visible uniquement < md, fixée en bas de l'écran, respecte safe-area iOS.
- * Combine favori + CTA principal pour maximiser la conversion sur mobile.
+ * Se masque discrètement au scroll-down et réapparaît au scroll-up (pattern 2026).
  */
 import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import { trackEvent, trackCtaClick } from "@/lib/analytics";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
 
 interface SitMobileStickyApplyProps {
   sitId: string;
-  /** Statut bouton, derive du même code que l'apply bar du haut */
   state: "apply" | "applied" | "closed" | "blocked";
   onApply: () => void;
 }
 
 const SitMobileStickyApply = ({ sitId, state, onApply }: SitMobileStickyApplyProps) => {
+  const scrollDir = useScrollDirection(12);
+
   if (state === "blocked") return null;
 
   return (
     <div
-      // Posé au-dessus de la BottomNav (h-16 = 64px) pour ne pas être masqué.
-      className="md:hidden fixed bottom-16 left-0 right-0 z-40 bg-background border-t border-border px-3 py-2.5 shadow-[0_-4px_12px_-4px_hsl(var(--foreground)/0.08)]"
+      className={[
+        "md:hidden fixed bottom-16 left-0 right-0 z-40",
+        "bg-background border-t border-border px-3 py-2.5",
+        "shadow-[0_-4px_12px_-4px_hsl(var(--foreground)/0.08)]",
+        "transition-transform duration-300 ease-in-out",
+        scrollDir === "down" ? "translate-y-full" : "translate-y-0",
+      ].join(" ")}
       role="region"
       aria-label="Actions rapides sur cette garde"
     >

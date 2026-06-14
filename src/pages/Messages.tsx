@@ -12,7 +12,6 @@ import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import HouseGuideBlock from "@/components/messages/HouseGuideBlock";
 import ConversationHeader from "@/components/messages/ConversationHeader";
-import PresenceBadge from "@/components/messages/PresenceBadge";
 import DaySeparator from "@/components/messages/DaySeparator";
 import MessageBubble from "@/components/messages/MessageBubble";
 import MessageComposer from "@/components/messages/MessageComposer";
@@ -92,6 +91,18 @@ const Messages = () => {
   const [searchFilter, setSearchFilter] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesScrollRef = useRef<HTMLDivElement>(null);
+  const [showScrollBtn, setShowScrollBtn] = useState(false);
+
+  const handleMessagesScroll = useCallback(() => {
+    const el = messagesScrollRef.current;
+    if (!el) return;
+    const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    setShowScrollBtn(distFromBottom > 200);
+  }, []);
+
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
   // Pagination des messages
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
@@ -685,7 +696,7 @@ const Messages = () => {
 
       {/* ═══ MESSAGE THREAD ═══ */}
       {showThread ? (
-        <div className={`${isMobile ? "w-full" : "flex-1"} flex flex-col bg-background`}>
+        <div className={`${isMobile ? "w-full" : "flex-1"} flex flex-col bg-background relative`}>
           <ConversationHeader
             conv={activeConv}
             userId={user?.id}
@@ -703,17 +714,11 @@ const Messages = () => {
             }}
           />
 
-          {/* Presence + Context card, RGPD: respect show_last_seen */}
-          {activeConv.other_user?.last_seen_at && activeConv.other_user?.show_last_seen !== false && (
-            <div className="px-4 py-1 border-b border-border/50 bg-card/50">
-              <PresenceBadge lastSeenAt={activeConv.other_user.last_seen_at} />
-            </div>
-          )}
-
           {/* Messages with day separators */}
           <div
             ref={messagesScrollRef}
-            className="flex-1 overflow-y-auto space-y-0 pb-20 md:pb-4 bg-background"
+            onScroll={handleMessagesScroll}
+            className="flex-1 overflow-y-auto space-y-0 pb-4 bg-background"
             role="log"
             aria-live="polite"
             aria-relevant="additions"
@@ -724,6 +729,17 @@ const Messages = () => {
             )}
 
             <div className="p-4 space-y-1">
+              {messages.length === 0 && !hasMoreMessages && (
+                <div className="flex flex-col items-center justify-center py-16 px-6 text-center gap-3">
+                  <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary/50"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  </div>
+                  <p className="text-sm font-medium text-foreground">Démarrez la conversation</p>
+                  <p className="text-xs text-muted-foreground max-w-[220px] leading-relaxed">
+                    Présentez-vous et dites en quelques mots ce qui vous a amené à contacter {capitalize(activeConv.other_user?.first_name) || "cette personne"}.
+                  </p>
+                </div>
+              )}
               {hasMoreMessages && (
                 <div className="flex justify-center py-2">
                   <Button
@@ -743,11 +759,15 @@ const Messages = () => {
                 const showDaySep = !prevMsg || !isSameDay(new Date(msg.created_at), new Date(prevMsg.created_at));
                 const isMe = msg.sender_id === user?.id;
 
+                const nextMsg = idx < messages.length - 1 ? messages[idx + 1] : null;
+                // Dernière bulle du groupe : expéditeur différent ou dernier message ou day sep suivant
+                const isLastInGroup = !nextMsg || nextMsg.sender_id !== msg.sender_id || !isSameDay(new Date(msg.created_at), new Date(nextMsg.created_at));
+
                 return (
                   <div key={msg.id}>
                     {showDaySep && <DaySeparator date={msg.created_at} />}
-                    <div className="py-1">
-                      <MessageBubble msg={msg} isMe={isMe} readerRole={activeConv.owner_id === user?.id ? "proprio" : "gardien"} />
+                    <div className={isLastInGroup ? "pb-2" : "pb-0.5"}>
+                      <MessageBubble msg={msg} isMe={isMe} isLastInGroup={isLastInGroup} readerRole={activeConv.owner_id === user?.id ? "proprio" : "gardien"} />
                     </div>
                   </div>
                 );
@@ -755,6 +775,18 @@ const Messages = () => {
               <div ref={messagesEndRef} />
             </div>
           </div>
+
+          {/* Scroll-to-bottom FAB */}
+          {showScrollBtn && (
+            <button
+              type="button"
+              onClick={scrollToBottom}
+              aria-label="Défiler jusqu'aux derniers messages"
+              className="absolute bottom-24 right-4 z-20 bg-card border border-border shadow-md rounded-full w-10 h-10 flex items-center justify-center text-muted-foreground hover:bg-accent transition-all"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          )}
 
           {/* Input or Paywall, only gate sit conversations for non-subscribed sitters */}
           {effectiveRole === "sitter" && !hasAccess && !activeConv.small_mission_id ? (
