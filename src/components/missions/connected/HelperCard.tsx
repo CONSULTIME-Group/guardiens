@@ -50,8 +50,12 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile, matchesMyNeed = false
         <div className="min-w-0 flex-1">
           <p className="text-sm font-heading font-semibold text-foreground truncate">{memberName}</p>
           {h.city && <p className="text-xs text-muted-foreground truncate">{h.city}</p>}
+          {bioTeaser && (
+            <p className="text-[11px] text-foreground/60 truncate italic mt-0.5">« {bioTeaser} »</p>
+          )}
         </div>
         <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" aria-hidden />
+
       </button>
 
       {/* Desktop, carte riche inchangée */}
