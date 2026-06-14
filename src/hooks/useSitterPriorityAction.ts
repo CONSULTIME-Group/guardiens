@@ -19,7 +19,7 @@ import { useMemo } from "react";
  */
 
 export type SitterPriorityAction = {
-  variant: "next-guard" | "profile" | "postal" | "nearby" | "availability" | "explore";
+  variant: "next-guard" | "profile" | "skills" | "postal" | "nearby" | "availability" | "explore";
   eyebrow: string;
   title: string;
   description: string;
@@ -34,11 +34,12 @@ interface Input {
   postalCode: string | null;
   nearbyListings: any[];
   isAvailable: boolean;
+  competencesCount?: number;
 }
 
 export function useSitterPriorityAction(input: Input): SitterPriorityAction {
   return useMemo(() => {
-    const { nextGuard, profileCompletion, postalCode, nearbyListings, isAvailable } = input;
+    const { nextGuard, profileCompletion, postalCode, nearbyListings, isAvailable, competencesCount = 0 } = input;
 
     // 1. Prochaine garde imminente — toujours prioritaire
     if (nextGuard) {
@@ -78,6 +79,19 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
         ctaLabel: "Ajouter mon code postal",
         ctaTo: "/profile?focus=postal_code",
         urgency: "high",
+      };
+    }
+
+    // 3b. Compétences absentes — débloque le feed d'entraide et qualifie le profil
+    if (competencesCount === 0) {
+      return {
+        variant: "skills",
+        eyebrow: "Dernière étape",
+        title: "Déclarez au moins une compétence pour apparaître dans le feed d'entraide.",
+        description: "Bricolage, jardin, courses, garde d'enfants : ce que vous savez faire devient un atout pour les gens du coin.",
+        ctaLabel: "Ajouter mes compétences",
+        ctaTo: "/profile?focus=skills",
+        urgency: "medium",
       };
     }
 
