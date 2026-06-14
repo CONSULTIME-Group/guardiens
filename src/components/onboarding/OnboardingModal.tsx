@@ -728,30 +728,46 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                 </p>
               </div>
 
-              <div className="space-y-2">
-                <Label>Ce que je sais faire</Label>
-                <div className="flex flex-wrap gap-2">
-                  {SKILL_CATEGORIES.map(({ key, label }) => {
-                    const selected = pickedCompetences.includes(key);
-                    return (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() =>
-                          setPickedCompetences((prev) =>
-                            prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-                          )
-                        }
-                        className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors ${
-                          selected
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-background text-foreground border-border hover:border-primary/40"
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
+              <div className="space-y-3">
+                <Label>Ce que vous savez faire</Label>
+                <p className="text-xs text-muted-foreground -mt-1">
+                  Piochez ce qui vous correspond. Vous pourrez en ajouter
+                  d'autres plus tard depuis votre profil.
+                </p>
+                <div className="space-y-3">
+                  {SPECIFIC_SKILL_CATEGORIES.map((cat) => (
+                    <div key={cat.key}>
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                        {cat.label}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {cat.suggestions.map((label) => {
+                          const selected = pickedCompetences.includes(label);
+                          return (
+                            <button
+                              key={label}
+                              type="button"
+                              onClick={() =>
+                                setPickedCompetences((prev) =>
+                                  prev.includes(label)
+                                    ? prev.filter((k) => k !== label)
+                                    : [...prev, label],
+                                )
+                              }
+                              className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
+                                selected
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "bg-background text-foreground border-border hover:border-primary/40"
+                              }`}
+                            >
+                              {selected ? "✓ " : "+ "}
+                              {label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -773,14 +789,11 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                   {pickedCompetences.length === 0 && (usesSitterScoring ? lifestyle.length === 0 : true) && (
                     <p className="text-xs text-muted-foreground italic">Sélectionnez pour voir l'aperçu…</p>
                   )}
-                  {pickedCompetences.map((key) => {
-                    const cat = SKILL_CATEGORIES.find((c) => c.key === key);
-                    return (
-                      <span key={key} className="bg-primary text-primary-foreground text-xs px-2.5 py-1 rounded-full">
-                        {cat?.label || key}
-                      </span>
-                    );
-                  })}
+                  {pickedCompetences.map((label) => (
+                    <span key={label} className="bg-primary text-primary-foreground text-xs px-2.5 py-1 rounded-full">
+                      {label}
+                    </span>
+                  ))}
                   {usesSitterScoring && lifestyle.map((l) => (
                     <span key={l} className="bg-primary/10 text-primary text-xs px-2.5 py-1 rounded-full">
                       {l}
@@ -788,6 +801,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                   ))}
                 </div>
               </div>
+
             </div>
           )}
 
