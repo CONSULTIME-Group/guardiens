@@ -41,7 +41,7 @@ const OwnerStepIdentity = ({ data, onChange, onUploadPhoto }: Props) => {
           {data.avatar_url ? <img src={data.avatar_url} alt="Avatar" className="w-full h-full object-cover" /> : <Camera className="w-8 h-8 text-muted-foreground" />}
         </button>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
-        <span className="text-sm text-muted-foreground">{uploading ? "Envoi..." : "Cliquez pour ajouter une photo"}</span>
+        <span className="text-sm text-muted-foreground">{uploading ? "Envoi..." : data.avatar_url ? "Cliquez pour changer la photo" : "Cliquez pour ajouter une photo"}</span>
         <HintBubble>Les propriétaires avec une photo inspirent davantage confiance aux gardiens.</HintBubble>
       </div>
 
