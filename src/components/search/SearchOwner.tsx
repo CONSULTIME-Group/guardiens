@@ -553,7 +553,7 @@ const SearchOwner = () => {
     <div className="animate-fade-in">
       {/* Title */}
       <div className="px-6 pt-6 pb-2 md:pt-8 space-y-1.5">
-        <h1 className="font-heading text-3xl font-bold">Trouver un gardien</h1>
+        <h2 className="font-heading text-3xl font-bold">Trouver un gardien</h2>
         <p className="text-sm text-muted-foreground">Le gardien idéal pour votre maison et vos animaux, du coin par défaut, élargissez à toute la France à tout moment.</p>
         {/* KPI preuve sociale, visible mobile + desktop, compact */}
         {(activeSittersCount || activeOwnersCount) && (
