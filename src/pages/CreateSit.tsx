@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,10 +10,9 @@ import { Label } from "@/components/ui/label";
 import ChipSelect from "@/components/profile/ChipSelect";
 import { Helmet } from "react-helmet-async";
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
-import { Calendar, Home, PawPrint, ShieldCheck, MessageSquare, Users, ArrowLeft, AlertCircle, Zap, Eye } from "lucide-react";
+import { Calendar, Home, PawPrint, ShieldCheck, MessageSquare, Users, ArrowLeft, AlertCircle, Zap, Eye, ChevronRight, ChevronLeft, Check } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
-// Tooltip retiré : remplacé par checklist visible des bloquants de publication.
 import { cn } from "@/lib/utils";
 import { hasMedication } from "@/lib/medication";
 import { trackFirstAction } from "@/lib/analytics";
@@ -22,6 +21,12 @@ import { COUNTRIES } from "@/lib/countries";
 import ImproveListingButton from "@/components/ai/ImproveListingButton";
 import { moderateContent } from "@/lib/moderation";
 import AnnouncementPreviewDialog from "@/components/sits/owner/AnnouncementPreviewDialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 interface PropertySummary {
   id: string;
@@ -85,20 +90,105 @@ const MIN_SITS_OPTIONS = [
   { label: "5 gardes+", value: 5 },
 ];
 
+const STEPS = [
+  { id: "essentiel", label: "L'essentiel" },
+  { id: "garde", label: "La garde" },
+  { id: "preferences", label: "Préférences" },
+];
+
+// Relative time helper
+function relativeTime(date: Date): string {
+  const seconds = Math.round((Date.now() - date.getTime()) / 1000);
+  if (seconds < 5) return "à l'instant";
+  if (seconds < 60) return `il y a ${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `il y a ${minutes} min`;
+  return `il y a ${Math.floor(minutes / 60)} h`;
+}
+
 const FirstAnnonceTip = () => {
   const [dismissed, setDismissed] = useState(false);
   if (dismissed) return null;
   return (
-    <div className="flex items-start gap-3 rounded-lg border-l-4 border-amber-400 bg-amber-50/60 p-3 mb-8">
+    <div className="flex items-start gap-3 rounded-lg border-l-4 border-amber-400 bg-amber-50/60 p-3 mb-6">
       <div className="flex-1">
         <p className="text-sm text-amber-900">
           Première annonce ? <a href="/actualites/rediger-bonne-annonce-house-sitting" className="text-primary underline font-medium">Lisez nos conseils pour attirer les meilleurs gardiens →</a>
         </p>
       </div>
-      <button onClick={() => setDismissed(true)} className="text-amber-500 hover:text-amber-700 text-lg leading-none shrink-0">×</button>
+      <button onClick={() => setDismissed(true)} className="text-amber-500 hover:text-amber-700 text-lg leading-none shrink-0" aria-label="Fermer">×</button>
     </div>
   );
 };
+
+// Step progress indicator
+const StepperBar = ({ currentStep, onStepClick }: { currentStep: number; onStepClick: (i: number) => void }) => (
+  <div className="sticky top-0 z-30 bg-background border-b border-border pt-safe">
+    <div className="max-w-3xl mx-auto px-4 py-3">
+      <div className="flex items-center justify-between gap-1 mb-2">
+        {STEPS.map((step, i) => (
+          <button
+            key={step.id}
+            type="button"
+            onClick={() => { if (i < currentStep) onStepClick(i); }}
+            className={cn(
+              "flex-1 text-center text-xs font-medium transition-colors truncate",
+              i === currentStep ? "text-primary" : i < currentStep ? "text-foreground cursor-pointer" : "text-muted-foreground cursor-default"
+            )}
+          >
+            {i < currentStep ? (
+              <span className="inline-flex items-center justify-center gap-1">
+                <Check className="h-3 w-3 text-primary shrink-0" />
+                <span className="hidden sm:inline">{step.label}</span>
+              </span>
+            ) : (
+              <span>{i + 1}. {step.label}</span>
+            )}
+          </button>
+        ))}
+      </div>
+      {/* Progress bar */}
+      <div className="h-1 bg-muted rounded-full overflow-hidden">
+        <div
+          className="h-full bg-primary rounded-full transition-all duration-500"
+          style={{ width: `${((currentStep + 1) / STEPS.length) * 100}%` }}
+        />
+      </div>
+    </div>
+  </div>
+);
+
+// Date sheet for mobile
+const DateSheet = ({
+  open, onOpenChange, label, value, onChange, min
+}: {
+  open: boolean; onOpenChange: (v: boolean) => void;
+  label: string; value: string; onChange: (v: string) => void; min?: string;
+}) => (
+  <Sheet open={open} onOpenChange={onOpenChange}>
+    <SheetContent side="bottom" className="rounded-t-2xl pb-safe">
+      <SheetHeader>
+        <SheetTitle className="text-left">{label}</SheetTitle>
+      </SheetHeader>
+      <div className="mt-4 pb-4">
+        <Input
+          type="date"
+          value={value}
+          min={min}
+          onChange={e => onChange(e.target.value)}
+          className="h-12 text-base w-full"
+          autoFocus
+        />
+        <Button
+          className="w-full mt-4 h-12 text-base"
+          onClick={() => onOpenChange(false)}
+        >
+          Confirmer
+        </Button>
+      </div>
+    </SheetContent>
+  </Sheet>
+);
 
 const CreateSit = () => {
   const { user } = useAuth();
@@ -107,6 +197,8 @@ const CreateSit = () => {
   const [searchParams] = useSearchParams();
   const fromSitId = searchParams.get("from");
   const draftIdParam = searchParams.get("draftId");
+
+  const [currentStep, setCurrentStep] = useState(0);
 
   const [title, setTitle] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -124,6 +216,21 @@ const CreateSit = () => {
   const [coverPhotoUrl, setCoverPhotoUrl] = useState<string | null>(null);
   const [sitCity, setSitCity] = useState<string>("");
   const [sitCountry, setSitCountry] = useState<string>("FR");
+
+  // Touched state for blur validation
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const touch = (field: string) => setTouched(prev => ({ ...prev, [field]: true }));
+
+  // Date sheets
+  const [startSheetOpen, setStartSheetOpen] = useState(false);
+  const [endSheetOpen, setEndSheetOpen] = useState(false);
+
+  // Relative time ticker
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => setTick(t => t + 1), 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const [property, setProperty] = useState<PropertySummary | null>(null);
   const [pets, setPets] = useState<PetSummary[]>([]);
@@ -151,7 +258,6 @@ const CreateSit = () => {
         supabase.from("owner_gallery").select("photo_url").eq("user_id", user.id).limit(4),
       ]);
 
-      // If republishing, fetch the source sit in parallel
       let sourceSitRes: { data: any } | null = null;
       if (fromSitId) {
         sourceSitRes = await supabase.from("sits").select("title, specific_expectations, open_to, environments, min_gardien_sits, flexible_dates, max_applications, owner_message, daily_routine, city, country").eq("id", fromSitId).single();
@@ -161,7 +267,6 @@ const CreateSit = () => {
       setOwnerCity(profileRes.data?.city || "");
       setOwnerPhotos((galleryRes.data || []).map((g: any) => g.photo_url));
 
-      // Pre-fill from previous sit if republishing
       if (sourceSitRes?.data) {
         const s = sourceSitRes.data;
         setTitle(s.title || "");
@@ -178,7 +283,6 @@ const CreateSit = () => {
         setIsRepublish(true);
       }
 
-      // Load draft (explicit ?draftId or auto-resume most recent draft)
       if (!sourceSitRes?.data) {
         let draftRes: { data: any } | null = null;
         if (draftIdParam) {
@@ -234,22 +338,19 @@ const CreateSit = () => {
           communication_notes: o.communication_notes,
           environments: (o as any).environments || [],
         });
-        // Only set environments from owner profile if NOT republishing AND no draft loaded
         if (!fromSitId && !draftIdParam) {
           setSitEnvironments(prev => (prev.length > 0 ? prev : ((o as any).environments || [])));
         }
       }
       setLoading(false);
-      // Mark initial load done so autosave only fires for genuine user edits
       setTimeout(() => { initialLoadedRef.current = true; }, 300);
     };
     load();
   }, [user, fromSitId, draftIdParam]);
 
-  // Auto-save draft (debounced), fires after first user edit
+  // Auto-save draft (debounced)
   useEffect(() => {
     if (!user || !property || !initialLoadedRef.current) return;
-    // Mark as edited on first state change after initial load
     hasUserEditedRef.current = true;
     const t = setTimeout(async () => {
       await saveDraft({ silent: true });
@@ -319,11 +420,9 @@ const CreateSit = () => {
   const descriptionValid = specificExpectations.length >= MIN_DESCRIPTION;
   const canPublish = profileCompletion >= 60 && property && title && startDate && endDate && !dateError && descriptionValid;
 
-  // Liste explicite des bloquants à publier (UX : remplacer le tooltip pauvre par une checklist visible).
-  // Ordre = priorité d'affichage et de scroll lors du clic sur « Publier ».
   type PublishBlocker = { id: string; label: string; anchor?: string; action?: string };
   const publishBlockers: PublishBlocker[] = [
-    profileCompletion < 60 ? { id: "profile", label: `Profil complété à ≥ 60 % (actuellement ${profileCompletion} %)`, action: "/owner-profile" } : null,
+    profileCompletion < 60 ? { id: "profile", label: `Profil complété à 60 % minimum (actuellement ${profileCompletion} %)`, action: "/owner-profile" } : null,
     !property ? { id: "property", label: "Logement renseigné", action: "/owner-profile" } : null,
     !title ? { id: "title", label: "Titre de l'annonce", anchor: "title-field" } : null,
     !startDate ? { id: "start", label: "Date de début", anchor: "dates-field" } : null,
@@ -347,12 +446,10 @@ const CreateSit = () => {
     toast({ variant: "destructive", title: "Il manque quelque chose pour publier", description: first.label });
   };
 
-  // Durée réelle en jours (inclusive) entre start_date et end_date
   const nDays = (startDate && endDate && !dateError)
     ? Math.max(1, Math.round((new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000) + 1)
     : 0;
 
-  // Suggestion de titre basée sur les vraies données (animaux + ville + durée)
   const buildSuggestedTitle = () => {
     if (!startDate || !endDate || dateError) return "";
     const speciesCount: Record<string, number> = {};
@@ -372,14 +469,12 @@ const CreateSit = () => {
     return `Garde de ${animals}${cityPart}, ${nDays} ${dayWord}`;
   };
 
-  // Show urgent option: not confirmed, start < 7 days or flexible
   const showUrgent = flexibleDates || (startDate && new Date(startDate).getTime() - Date.now() < 7 * 86400000);
 
   const handlePublish = async () => {
     if (!user || !property || !canPublish) return;
     setPublishing(true);
     try {
-      // Modération pré-publication (fail-open en cas d'IA indispo).
       const verdict = await moderateContent("sit", `${title}\n\n${specificExpectations}\n\n${ownerMessage}\n\n${dailyRoutine}`);
       if (verdict.status === "block") {
         toast({
@@ -391,10 +486,7 @@ const CreateSit = () => {
         return;
       }
       if (verdict.status === "warning") {
-        toast({
-          title: "Annonce publiée avec une réserve",
-          description: verdict.reasons.join(" · "),
-        });
+        toast({ title: "Annonce publiée avec une réserve", description: verdict.reasons.join(" · ") });
       }
 
       let expectations = specificExpectations;
@@ -448,466 +540,567 @@ const CreateSit = () => {
     }
   };
 
+  // Validation helpers
+  const fieldState = (field: string, invalid: boolean) => {
+    if (!touched[field]) return "";
+    return invalid ? "border-destructive focus-visible:ring-destructive" : "border-green-500 focus-visible:ring-green-500";
+  };
+
   if (loading) {
     return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Chargement...</div>;
   }
 
+  // Draft label
+  const draftLabel = savingDraft
+    ? "Brouillon en cours d'enregistrement…"
+    : lastSavedAt
+      ? `Brouillon enregistré · ${relativeTime(lastSavedAt)}`
+      : draftId ? "Brouillon en cours" : null;
+
   return (
-    <div className="p-6 md:p-10 max-w-3xl mx-auto animate-fade-in pb-40">
+    <div className="animate-fade-in pb-40">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
-      <Link to="/sits" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
-        <ArrowLeft className="h-4 w-4" /> Retour à mes gardes
-      </Link>
 
-      <h1 className="font-heading text-3xl font-bold mb-2">
-        {isRepublish ? "Republier une garde" : "Publier une garde"}
-      </h1>
-      <p className="text-muted-foreground mb-4">
-        {isRepublish
-          ? "Les informations de votre précédente annonce sont pré-remplies. Ajustez les dates et détails si besoin."
-          : "Les informations de votre profil sont pré-remplies. Ajoutez les détails spécifiques à cette garde."}
-      </p>
+      {/* Stepper sticky */}
+      <StepperBar currentStep={currentStep} onStepClick={setCurrentStep} />
 
-      {(draftId || savingDraft || lastSavedAt) && (
-        <p className="text-xs text-muted-foreground mb-4">
-          {savingDraft
-            ? "Sauvegarde du brouillon…"
-            : lastSavedAt
-              ? `Brouillon enregistré automatiquement à ${lastSavedAt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`
-              : "Brouillon en cours"}
+      <div className="px-4 pt-5 pb-2 max-w-3xl mx-auto">
+        <Link to="/sits" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
+          <ArrowLeft className="h-4 w-4" /> Retour à mes gardes
+        </Link>
+
+        <h1 className="font-heading text-2xl md:text-3xl font-bold mb-1">
+          {isRepublish ? "Republier une garde" : "Publier une garde"}
+        </h1>
+        <p className="text-sm text-muted-foreground mb-4">
+          {isRepublish
+            ? "Les informations de votre précédente annonce sont pré-remplies. Ajustez les dates et détails si besoin."
+            : "Les informations de votre profil sont pré-remplies. Ajoutez les détails spécifiques à cette garde."}
         </p>
-      )}
 
-      {!isRepublish && <FirstAnnonceTip />}
-
-      {profileCompletion < 60 && (
-        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 mb-8 flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
-          <div>
-            <p className="font-medium text-destructive">Profil incomplet ({profileCompletion}%)</p>
-            <p className="text-sm text-muted-foreground mt-1">Complétez votre profil à au moins 60% pour publier une annonce.</p>
-            <Link to="/owner-profile" className="text-sm text-primary underline mt-2 inline-block">Compléter mon profil →</Link>
+        {/* Draft indicator */}
+        {draftLabel && (
+          <div className={cn(
+            "inline-flex items-center gap-1.5 text-xs rounded-full px-2.5 py-1 mb-4",
+            savingDraft
+              ? "bg-muted text-muted-foreground"
+              : lastSavedAt ? "bg-green-50 text-green-700 border border-green-200" : "bg-muted text-muted-foreground"
+          )}>
+            {lastSavedAt && !savingDraft && <Check className="h-3 w-3 shrink-0" />}
+            {draftLabel}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Form fields */}
-      <div className="space-y-6">
-        <div id="title-field" className="scroll-mt-24">
-          <div className="flex items-center justify-between mb-1.5">
-            <Label className="text-sm font-medium">Titre de l'annonce *</Label>
-            {nDays > 0 && pets.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setTitle(buildSuggestedTitle())}
-                className="text-xs text-primary hover:underline"
-              >
-                Suggérer un titre
-              </button>
+        {!isRepublish && <FirstAnnonceTip />}
+
+        {profileCompletion < 60 && (
+          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 mb-6 flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
+            <div>
+              <p className="font-medium text-destructive">Profil incomplet ({profileCompletion} %)</p>
+              <p className="text-sm text-muted-foreground mt-1">Complétez votre profil à au moins 60 % pour publier une annonce.</p>
+              <Link to="/owner-profile" className="text-sm text-primary underline mt-2 inline-block">Compléter mon profil →</Link>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ===================== STEP 0 : L'ESSENTIEL ===================== */}
+      {currentStep === 0 && (
+        <div className="px-4 max-w-3xl mx-auto space-y-6">
+          {/* Titre */}
+          <div id="title-field" className="scroll-mt-24">
+            <div className="flex items-center justify-between mb-1.5">
+              <Label htmlFor="title-input" className="text-sm font-medium">Titre de l'annonce *</Label>
+              {nDays > 0 && pets.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setTitle(buildSuggestedTitle())}
+                  className="text-xs text-primary hover:underline"
+                >
+                  Suggérer un titre
+                </button>
+              )}
+            </div>
+            <Input
+              id="title-input"
+              placeholder={nDays > 0 ? buildSuggestedTitle() : "Ex : Garde de 2 chats à Écully, 10 jours en août"}
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              onBlur={() => touch("title")}
+              className={cn("h-12 text-base", fieldState("title", !title))}
+            />
+            {touched.title && !title && (
+              <p className="text-xs text-destructive mt-1">Le titre est requis pour publier.</p>
             )}
           </div>
-          <Input
-            placeholder={nDays > 0 ? buildSuggestedTitle() : "Ex : Garde de 2 chats à Écully, 10 jours en août"}
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-          />
-        </div>
 
-        {/* Dates obligatoires */}
-        <div id="dates-field" className="grid grid-cols-1 sm:grid-cols-2 gap-4 scroll-mt-24">
-          <div>
-            <Label className="text-sm font-medium">Date de début *</Label>
-            <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} min={today} className="mt-1.5" />
-          </div>
-          <div>
-            <Label className="text-sm font-medium">Date de fin *</Label>
-            <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} min={startDate || today} className="mt-1.5" />
-          </div>
-        </div>
-        {dateError ? (
-          <p className="text-sm text-destructive flex items-center gap-1.5 -mt-2">
-            <AlertCircle className="h-3.5 w-3.5" /> {dateError}
-          </p>
-        ) : nDays > 0 ? (
-          <p className="text-xs text-muted-foreground -mt-2">
-            Durée : <span className="font-medium text-foreground">{nDays} {nDays > 1 ? "jours" : "jour"}</span>
-          </p>
-        ) : null}
-
-        {/* Lieu de la garde, replié par défaut : 90% des cas = ville du profil */}
-        <details className="rounded-lg border border-border bg-muted/30 group">
-          <summary className="cursor-pointer list-none p-4 flex items-center justify-between hover:bg-muted/40 transition-colors rounded-lg">
-            <div>
-              <p className="text-sm font-medium">Lieu de la garde <span className="text-muted-foreground font-normal">(optionnel)</span></p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Par défaut : {ownerCity || "votre ville de profil"}. Cliquez pour personnaliser (résidence secondaire, étranger…).
+          {/* Dates */}
+          <div id="dates-field" className="scroll-mt-24">
+            <Label className="text-sm font-medium block mb-2">Dates de la garde *</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="start-date" className="text-xs text-muted-foreground mb-1 block">Début</Label>
+                {/* Native date input, tappable to open sheet on mobile */}
+                <button
+                  type="button"
+                  onClick={() => setStartSheetOpen(true)}
+                  className={cn(
+                    "w-full h-12 text-base rounded-md border px-3 text-left flex items-center justify-between transition-colors",
+                    !startDate ? "text-muted-foreground border-input" : "text-foreground border-input",
+                    touched.startDate && !startDate ? "border-destructive" : "",
+                  )}
+                  onBlur={() => touch("startDate")}
+                >
+                  <span>{startDate ? new Date(startDate + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : "JJ/MM/AAAA"}</span>
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                </button>
+              </div>
+              <div>
+                <Label htmlFor="end-date" className="text-xs text-muted-foreground mb-1 block">Fin</Label>
+                <button
+                  type="button"
+                  onClick={() => setEndSheetOpen(true)}
+                  className={cn(
+                    "w-full h-12 text-base rounded-md border px-3 text-left flex items-center justify-between transition-colors",
+                    !endDate ? "text-muted-foreground border-input" : "text-foreground border-input",
+                    touched.endDate && !endDate ? "border-destructive" : "",
+                  )}
+                  onBlur={() => touch("endDate")}
+                >
+                  <span>{endDate ? new Date(endDate + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : "JJ/MM/AAAA"}</span>
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                </button>
+              </div>
+            </div>
+            {dateError ? (
+              <p className="text-sm text-destructive flex items-center gap-1.5 mt-2">
+                <AlertCircle className="h-3.5 w-3.5" /> {dateError}
               </p>
-            </div>
-            <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform shrink-0" aria-hidden="true">▾</span>
-          </summary>
-          <div className="px-4 pb-4 space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <Label htmlFor="sit_city" className="text-xs text-muted-foreground">Ville de la garde</Label>
-                <Input
-                  id="sit_city"
-                  value={sitCity}
-                  onChange={(e) => setSitCity(e.target.value)}
-                  placeholder={ownerCity || "Ex : Bruxelles"}
-                  className="mt-1"
-                  maxLength={100}
-                />
-              </div>
-              <div>
-                <Label htmlFor="sit_country" className="text-xs text-muted-foreground">Pays</Label>
-                <Select value={sitCountry || "FR"} onValueChange={(v) => setSitCountry(v)}>
-                  <SelectTrigger id="sit_country" className="mt-1">
-                    <SelectValue placeholder="France" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-72">
-                    {COUNTRIES.map((c) => (
-                      <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+            ) : nDays > 0 ? (
+              <p className="text-xs text-muted-foreground mt-2">
+                Durée : <span className="font-medium text-foreground">{nDays} {nDays > 1 ? "jours" : "jour"}</span>
+              </p>
+            ) : null}
           </div>
-        </details>
 
-        {/* Option dates flexibles */}
-        <div className="flex items-start gap-3">
-          <Checkbox
-            id="flexible-dates"
-            checked={flexibleDates}
-            onCheckedChange={(v) => setFlexibleDates(v === true)}
-            className="mt-0.5"
+          {/* Date sheets */}
+          <DateSheet
+            open={startSheetOpen}
+            onOpenChange={setStartSheetOpen}
+            label="Date de début"
+            value={startDate}
+            onChange={v => { setStartDate(v); touch("startDate"); }}
+            min={today}
           />
-          <div className="flex-1">
-            <label htmlFor="flexible-dates" className="text-sm font-medium cursor-pointer">
-              Dates flexibles
-            </label>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Les dates ci-dessus restent obligatoires pour les rappels automatiques, mais vous indiquez aux gardiens que vous êtes flexible.
+          <DateSheet
+            open={endSheetOpen}
+            onOpenChange={setEndSheetOpen}
+            label="Date de fin"
+            value={endDate}
+            onChange={v => { setEndDate(v); touch("endDate"); }}
+            min={startDate || today}
+          />
+
+          {/* Description */}
+          <div id="description-field" className="scroll-mt-24">
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <Label htmlFor="description-textarea" className="text-sm font-medium">Description de la garde *</Label>
+              <ImproveListingButton
+                title={title}
+                description={specificExpectations}
+                context={{
+                  animaux: pets?.map(p => `${p.species}${p.breed ? ` (${p.breed})` : ""}`).join(", "),
+                  logement: property?.type,
+                  ville: sitCity || ownerCity || undefined,
+                  dates: startDate && endDate ? `${startDate} – ${endDate}` : undefined,
+                }}
+                onApply={(patch) => {
+                  if (patch.title) setTitle(patch.title);
+                  if (patch.description) setSpecificExpectations(patch.description);
+                }}
+              />
+            </div>
+            <Textarea
+              id="description-textarea"
+              placeholder={`Décrivez ce qui est particulier à cette garde, en plus de ce qui est déjà dans votre profil (min. ${MIN_DESCRIPTION} caractères). Les annonces détaillées reçoivent 3 fois plus de candidatures.`}
+              value={specificExpectations}
+              onChange={e => setSpecificExpectations(e.target.value)}
+              onBlur={() => touch("description")}
+              className={cn(
+                "text-base min-h-[140px]",
+                touched.description && !descriptionValid
+                  ? "border-destructive focus-visible:ring-destructive"
+                  : touched.description && descriptionValid
+                    ? "border-green-500 focus-visible:ring-green-500"
+                    : ""
+              )}
+              rows={5}
+            />
+            <p className={cn(
+              "text-xs mt-1 flex justify-between",
+              touched.description && specificExpectations.length > 0 && specificExpectations.length < MIN_DESCRIPTION
+                ? "text-destructive"
+                : specificExpectations.length >= MIN_DESCRIPTION
+                  ? "text-green-600"
+                  : "text-muted-foreground"
+            )}>
+              <span>
+                {touched.description && !descriptionValid && specificExpectations.length > 0
+                  ? `Encore ${MIN_DESCRIPTION - specificExpectations.length} caractères`
+                  : specificExpectations.length >= MIN_DESCRIPTION
+                    ? "Longueur suffisante"
+                    : `Min. ${MIN_DESCRIPTION} caractères`}
+              </span>
+              <span>{specificExpectations.length}/{MIN_DESCRIPTION}</span>
             </p>
           </div>
-        </div>
-        {flexibleDates && (
-          <div className="-mt-2">
-            <Label className="text-sm font-medium">Précisez vos dates approximatives</Label>
-            <Input
-              placeholder="Ex : autour du 15 juillet, flexible d'une semaine"
-              value={flexibleNotes}
-              onChange={e => setFlexibleNotes(e.target.value)}
-              className="mt-1.5"
+
+          {/* Journée type */}
+          <div>
+            <Label htmlFor="daily-routine" className="text-sm font-medium">Une journée type <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
+            <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">
+              Décrivez le déroulé d'une journée, matin, midi, soir. Les gardiens adorent ce niveau de détail.
+            </p>
+            <Textarea
+              id="daily-routine"
+              placeholder={"Ex :\nMatin, Sortie du chien 30 min, gamelles, ouverture du jardin.\nMidi, Visite rapide, fontaine à recharger.\nSoir, Promenade 30 min, repas, câlins obligatoires 🥰"}
+              value={dailyRoutine}
+              onChange={e => setDailyRoutine(e.target.value.slice(0, 1500))}
+              className="text-base font-mono text-[13px] min-h-[120px]"
+              rows={5}
             />
+            <p className="text-[11px] text-muted-foreground mt-1 text-right">{dailyRoutine.length}/1500</p>
           </div>
-        )}
 
-        <div id="description-field" className="scroll-mt-24">
-
-          <div className="flex items-center justify-between gap-2">
-            <Label className="text-sm font-medium">Description de la garde *</Label>
-            <ImproveListingButton
-              title={title}
-              description={specificExpectations}
-              context={{
-                animaux: pets?.map(p => `${p.species}${p.breed ? ` (${p.breed})` : ""}`).join(", "),
-                logement: property?.type,
-                ville: sitCity || ownerCity || undefined,
-                dates: startDate && endDate ? `${startDate} – ${endDate}` : undefined,
-              }}
-              onApply={(patch) => {
-                if (patch.title) setTitle(patch.title);
-                if (patch.description) setSpecificExpectations(patch.description);
-              }}
+          {/* Mot de l'hôte */}
+          <div>
+            <Label htmlFor="owner-message" className="text-sm font-medium">Un mot de vous <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
+            <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">
+              Un message personnel aux futurs gardiens, ce qu'ils trouveront en arrivant, ce que vous appréciez, une touche humaine.
+            </p>
+            <Textarea
+              id="owner-message"
+              placeholder="Ex : On confie nos animaux à un membre de confiance plutôt qu'à une pension. Vous repartirez sûrement avec des cookies maison et une connaissance fine du quartier !"
+              value={ownerMessage}
+              onChange={e => setOwnerMessage(e.target.value.slice(0, 800))}
+              className="text-base"
+              rows={4}
             />
-          </div>
-          <Textarea
-            placeholder={`Décrivez ce qui est particulier à cette garde, en plus de ce qui est déjà dans votre profil (min. ${MIN_DESCRIPTION} caractères). Les annonces détaillées reçoivent 3× plus de candidatures.`}
-            value={specificExpectations}
-            onChange={e => setSpecificExpectations(e.target.value)}
-            className="mt-1.5"
-            rows={5}
-          />
-          <p className={cn(
-            "text-xs mt-1",
-            specificExpectations.length > 0 && specificExpectations.length < MIN_DESCRIPTION
-              ? "text-destructive"
-              : "text-muted-foreground"
-          )}>
-            {specificExpectations.length}/{MIN_DESCRIPTION} caractères minimum
-          </p>
-        </div>
-
-        {/* Journée type, facultatif */}
-        <div>
-          <Label className="text-sm font-medium">Une journée type <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
-          <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">
-            Décrivez le déroulé d'une journée, matin, midi, soir. Les gardiens adorent ce niveau de détail.
-          </p>
-          <Textarea
-            placeholder={"Ex :\nMatin, Sortie du chien 30 min, gamelles, ouverture du jardin.\nMidi, Visite rapide, fontaine à recharger.\nSoir, Promenade 30 min, repas, câlins obligatoires 🥰"}
-            value={dailyRoutine}
-            onChange={e => setDailyRoutine(e.target.value.slice(0, 1500))}
-            className="mt-1 font-mono text-[13px]"
-            rows={6}
-          />
-          <p className="text-[11px] text-muted-foreground mt-1 text-right">{dailyRoutine.length}/1500</p>
-        </div>
-
-        {/* Mot de l'hôte, facultatif */}
-        <div>
-          <Label className="text-sm font-medium">Un mot de vous <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
-          <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">
-            Un message personnel aux futurs gardiens : ce qu'ils trouveront en arrivant, ce que vous appréciez, une touche humaine.
-          </p>
-          <Textarea
-            placeholder="Ex : On confie nos animaux à un membre du coin de confiance plutôt qu'à une pension. Vous repartirez sûrement avec des cookies maison et une connaissance fine du quartier !"
-            value={ownerMessage}
-            onChange={e => setOwnerMessage(e.target.value.slice(0, 800))}
-            className="mt-1"
-            rows={4}
-          />
-          <p className="text-[11px] text-muted-foreground mt-1 text-right">{ownerMessage.length}/800</p>
-        </div>
-
-        {/* CORRECTION 1, "Idéale pour" */}
-        <div>
-          <Label className="text-sm font-medium mb-1 block">Idéale pour (optionnel)</Label>
-          <p className="text-xs text-muted-foreground mb-3">Une indication pour les gardiens, tout le monde peut postuler.</p>
-          <ChipSelect options={openToOptions} selected={openTo} onChange={setOpenTo} />
-        </div>
-
-        {/* CORRECTION 4, Gardes minimum gardien souhaité */}
-        <div>
-          <Label className="text-sm font-medium text-foreground mb-1 block">Expérience souhaitée du gardien</Label>
-          <p className="text-xs text-muted-foreground mb-3">Une préférence, les gardiens avec moins d'expérience peuvent aussi postuler.</p>
-          <div className="flex flex-wrap gap-2">
-            {MIN_SITS_OPTIONS.map(opt => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setMinGardienSits(opt.value)}
-                className={minGardienSits === opt.value
-                  ? "bg-primary text-primary-foreground rounded-full px-3 py-1.5 text-xs font-medium"
-                  : "border border-border rounded-full px-3 py-1.5 text-xs text-muted-foreground hover:border-primary transition-colors"
-                }
-              >
-                {opt.label}
-              </button>
-            ))}
+            <p className="text-[11px] text-muted-foreground mt-1 text-right">{ownerMessage.length}/800</p>
           </div>
         </div>
+      )}
 
-        {/* Max candidatures */}
-        <div>
-          <Label className="text-sm font-medium text-foreground mb-1 block">Nombre max de candidatures</Label>
-          <p className="text-xs text-muted-foreground mb-3">
-            Une fois le max atteint, l'annonce cesse d'accepter de nouvelles candidatures.
-          </p>
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="h-9 w-9 shrink-0"
-              onClick={() => setMaxApplications(prev => Math.max(1, (prev ?? 10) - 1))}
-              disabled={maxApplications !== null && maxApplications <= 1}
-            >
-              −
-            </Button>
-            <Input
-              type="number"
-              min={1}
-              max={50}
-              value={maxApplications ?? ""}
-              onChange={e => {
-                const v = e.target.value;
-                setMaxApplications(v ? Math.max(1, Math.min(50, parseInt(v))) : null);
-              }}
-              className="w-20 text-center"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="h-9 w-9 shrink-0"
-              onClick={() => setMaxApplications(prev => Math.min(50, (prev ?? 10) + 1))}
-              disabled={maxApplications !== null && maxApplications >= 50}
-            >
-              +
-            </Button>
-          </div>
-        </div>
+      {/* ===================== STEP 1 : LA GARDE ===================== */}
+      {currentStep === 1 && (
+        <div className="px-4 max-w-3xl mx-auto space-y-6">
+          {/* Lieu de la garde */}
+          <details className="rounded-lg border border-border bg-muted/30 group" open={!!(sitCity)}>
+            <summary className="cursor-pointer list-none p-4 flex items-center justify-between hover:bg-muted/40 transition-colors rounded-lg">
+              <div>
+                <p className="text-sm font-medium">Lieu de la garde <span className="text-muted-foreground font-normal">(optionnel)</span></p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Par défaut : {ownerCity || "votre ville de profil"}. Personnalisez si besoin (résidence secondaire, étranger…).
+                </p>
+              </div>
+              <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform shrink-0" aria-hidden="true">▾</span>
+            </summary>
+            <div className="px-4 pb-4 space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="sit_city" className="text-xs text-muted-foreground">Ville de la garde</Label>
+                  <Input
+                    id="sit_city"
+                    value={sitCity}
+                    onChange={(e) => setSitCity(e.target.value)}
+                    placeholder={ownerCity || "Ex : Bruxelles"}
+                    className="mt-1 h-12 text-base"
+                    maxLength={100}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="sit_country" className="text-xs text-muted-foreground">Pays</Label>
+                  <Select value={sitCountry || "FR"} onValueChange={(v) => setSitCountry(v)}>
+                    <SelectTrigger id="sit_country" className="mt-1 h-12 text-base">
+                      <SelectValue placeholder="France" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-72">
+                      {COUNTRIES.map((c) => (
+                        <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          </details>
 
-        <div>
-          <Label className="text-sm font-medium text-foreground mb-1 block">Environnement (optionnel)</Label>
-          <p className="text-xs text-muted-foreground mb-3">Par défaut, on utilise l'environnement de votre profil. Vous pouvez le personnaliser pour cette annonce.</p>
-          <EnvironmentPills selected={sitEnvironments} onChange={setSitEnvironments} />
-        </div>
-
-        {/* CORRECTION 3, Urgent */}
-        {showUrgent && (
-          <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+          {/* Dates flexibles */}
+          <div className="flex items-start gap-3">
             <Checkbox
-              checked={isUrgent}
-              onCheckedChange={(v) => setIsUrgent(v === true)}
+              id="flexible-dates"
+              checked={flexibleDates}
+              onCheckedChange={(v) => setFlexibleDates(v === true)}
               className="mt-0.5"
             />
-            <div>
-              <label className="text-sm font-medium flex items-center gap-1.5 cursor-pointer text-amber-800" onClick={() => setIsUrgent(!isUrgent)}>
-                <Zap className="h-4 w-4" /> Urgent, garde dans moins de 48h
+            <div className="flex-1">
+              <label htmlFor="flexible-dates" className="text-sm font-medium cursor-pointer">
+                Dates flexibles
               </label>
-              <p className="text-xs text-amber-600 mt-0.5">
-                Les gardiens d'urgence seront alertés en priorité
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Les dates saisies restent obligatoires pour les rappels automatiques, mais vous indiquez aux gardiens que vous êtes flexible.
               </p>
             </div>
           </div>
-        )}
-      </div>
+          {flexibleDates && (
+            <div>
+              <Label htmlFor="flexible-notes" className="text-sm font-medium">Précisez vos dates approximatives</Label>
+              <Input
+                id="flexible-notes"
+                placeholder="Ex : autour du 15 juillet, flexible d'une semaine"
+                value={flexibleNotes}
+                onChange={e => setFlexibleNotes(e.target.value)}
+                className="mt-1.5 h-12 text-base"
+              />
+            </div>
+          )}
 
-      {/* Pre-filled summaries, repliés par défaut pour ne pas écraser le formulaire */}
-      <details className="mt-10 group">
-      <summary className="cursor-pointer flex items-center justify-between p-3 rounded-xl border border-border bg-card mb-3 list-none select-none hover:bg-muted/30 transition-colors">
-        <span className="font-heading text-sm md:text-base font-semibold">Résumé depuis votre profil <span className="text-muted-foreground font-normal text-xs">(pré-rempli, modifiable depuis votre profil)</span></span>
-        <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
-      </summary>
-      <div className="space-y-6 pb-32">
-        <h2 className="sr-only">Résumé depuis votre profil</h2>
+          {/* Environnement */}
+          <div>
+            <Label className="text-sm font-medium text-foreground mb-1 block">Environnement <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
+            <p className="text-xs text-muted-foreground mb-3">Par défaut, on utilise l'environnement de votre profil. Vous pouvez le personnaliser pour cette annonce.</p>
+            <EnvironmentPills selected={sitEnvironments} onChange={setSitEnvironments} />
+          </div>
 
-        {/* Housing */}
-        <SummaryCard icon={Home} title="Le logement" editLink="/profile">
-          {property ? (
-            <div className="space-y-2">
-              <p className="text-sm">{typeLabels[property.type] || property.type} · {envLabels[property.environment || ""] || property.environment}</p>
-              {property.rooms_count ? <p className="text-sm text-muted-foreground">{property.rooms_count} pièces · {property.bedrooms_count} chambres</p> : null}
-              {property.equipments.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-1">
-                  {property.equipments.slice(0, 6).map(eq => (
-                    <span key={eq} className="px-2 py-0.5 rounded-full bg-accent text-xs">{eq}</span>
-                  ))}
-                </div>
-              )}
+          {/* Idéale pour */}
+          <div>
+            <Label className="text-sm font-medium mb-1 block">Idéale pour <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
+            <p className="text-xs text-muted-foreground mb-3">Une indication pour les gardiens, tout le monde peut postuler.</p>
+            <ChipSelect options={openToOptions} selected={openTo} onChange={setOpenTo} />
+          </div>
 
-              {/* CORRECTION 5, Aperçu photos + sélection couverture */}
-              <div className="mt-3">
-                <p className="text-sm font-medium text-foreground mb-1">Photos affichées sur l'annonce</p>
-                {ownerPhotos.length > 0 ? (
-                  <>
-                    <p className="text-xs text-muted-foreground mb-2">
-                      Cliquez sur une photo pour la définir comme photo de couverture de cette annonce.
-                    </p>
-                    <div className="grid grid-cols-4 gap-2">
-                      {ownerPhotos.slice(0, 8).map((url, i) => {
-                        const isCover = coverPhotoUrl === url || (!coverPhotoUrl && i === 0);
-                        return (
-                          <button
-                            key={i}
-                            type="button"
-                            onClick={() => setCoverPhotoUrl(url)}
-                            className={cn(
-                              "relative rounded-lg overflow-hidden h-16 w-full border-2 transition-all",
-                              isCover ? "border-primary ring-2 ring-primary/30" : "border-transparent hover:border-primary/50"
-                            )}
-                            aria-label={`Définir la photo ${i + 1} comme couverture`}
-                          >
-                            <img src={url} alt={`Photo ${i + 1}`} className="object-cover h-full w-full" />
-                            {isCover && (
-                              <span className="absolute bottom-0 inset-x-0 bg-primary text-primary-foreground text-[10px] font-medium py-0.5 text-center">
-                                Couverture
-                              </span>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </>
-                ) : (
-                  <div className="bg-muted rounded-xl p-3">
-                    <p className="text-xs text-muted-foreground">Aucune photo, les annonces avec photos reçoivent davantage de candidatures.</p>
-                  </div>
-                )}
-                <Link to="/owner-profile#galerie" className="text-xs text-primary hover:underline mt-2 inline-block">
-                  Gérer mes photos dans mon profil →
-                </Link>
+          {/* Urgent */}
+          {showUrgent && (
+            <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+              <Checkbox
+                checked={isUrgent}
+                onCheckedChange={(v) => setIsUrgent(v === true)}
+                className="mt-0.5"
+              />
+              <div>
+                <label className="text-sm font-medium flex items-center gap-1.5 cursor-pointer text-amber-800" onClick={() => setIsUrgent(!isUrgent)}>
+                  <Zap className="h-4 w-4" /> Urgent – garde dans moins de 48 h
+                </label>
+                <p className="text-xs text-amber-600 mt-0.5">
+                  Les gardiens d'urgence seront alertés en priorité.
+                </p>
               </div>
             </div>
-          ) : <p className="text-sm text-muted-foreground italic">Aucun logement renseigné</p>}
-        </SummaryCard>
+          )}
+        </div>
+      )}
 
-        {/* Animals */}
-        <SummaryCard icon={PawPrint} title="Les animaux" editLink="/profile">
-          {pets.length > 0 ? (
-            <div className="space-y-3">
-              {pets.map((pet, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  {pet.photo_url && <img src={pet.photo_url} alt={pet.name} className="w-10 h-10 rounded-full object-cover" />}
-                  <div>
-                    <p className="text-sm font-medium">{speciesLabels[pet.species]?.split(" ")[0]} {pet.name}{pet.breed ? `, ${pet.breed}` : ""}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {[
-                        pet.walk_duration && pet.walk_duration !== "none" ? walkLabels[pet.walk_duration] + " de balade" : null,
-                        pet.alone_duration ? aloneLabels[pet.alone_duration] : null,
-                        hasMedication(pet.medication) ? "Médication" : null,
-                      ].filter(Boolean).join(" · ")}
-                    </p>
-                  </div>
-                </div>
+      {/* ===================== STEP 2 : PRÉFÉRENCES ===================== */}
+      {currentStep === 2 && (
+        <div className="px-4 max-w-3xl mx-auto space-y-6">
+          {/* Expérience souhaitée */}
+          <div>
+            <Label className="text-sm font-medium text-foreground mb-1 block">Expérience souhaitée du gardien</Label>
+            <p className="text-xs text-muted-foreground mb-3">Une préférence, les gardiens avec moins d'expérience peuvent aussi postuler.</p>
+            <div className="flex flex-wrap gap-2">
+              {MIN_SITS_OPTIONS.map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setMinGardienSits(opt.value)}
+                  className={minGardienSits === opt.value
+                    ? "bg-primary text-primary-foreground rounded-full px-3 py-2 text-sm font-medium"
+                    : "border border-border rounded-full px-3 py-2 text-sm text-muted-foreground hover:border-primary transition-colors"
+                  }
+                >
+                  {opt.label}
+                </button>
               ))}
             </div>
-          ) : <p className="text-sm text-muted-foreground italic">Aucun animal renseigné</p>}
-        </SummaryCard>
+          </div>
 
-        {/* Rules */}
-        <SummaryCard icon={ShieldCheck} title="Règles de la maison" editLink="/profile">
-          {ownerProfile ? (
-            <div className="text-sm space-y-1">
-              {ownerProfile.presence_expected && <p>Présence : {ownerProfile.presence_expected}</p>}
-              {ownerProfile.visits_allowed && <p>Visites : {ownerProfile.visits_allowed}</p>}
-              {ownerProfile.overnight_guest && <p>Invités : {ownerProfile.overnight_guest}</p>}
-              {ownerProfile.rules_notes && <p className="text-muted-foreground">{ownerProfile.rules_notes}</p>}
-              {!ownerProfile.presence_expected && !ownerProfile.visits_allowed && (
-                <p className="text-muted-foreground italic">Aucune règle renseignée</p>
-              )}
+          {/* Max candidatures */}
+          <div>
+            <Label className="text-sm font-medium text-foreground mb-1 block">Nombre max de candidatures</Label>
+            <p className="text-xs text-muted-foreground mb-3">
+              Une fois le maximum atteint, l'annonce cesse d'accepter de nouvelles candidatures.
+            </p>
+            <div className="flex items-center gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-12 w-12 shrink-0 text-lg"
+                onClick={() => setMaxApplications(prev => Math.max(1, (prev ?? 10) - 1))}
+                disabled={maxApplications !== null && maxApplications <= 1}
+              >
+                −
+              </Button>
+              <Input
+                type="number"
+                min={1}
+                max={50}
+                value={maxApplications ?? ""}
+                onChange={e => {
+                  const v = e.target.value;
+                  setMaxApplications(v ? Math.max(1, Math.min(50, parseInt(v))) : null);
+                }}
+                className="w-24 text-center h-12 text-base"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-12 w-12 shrink-0 text-lg"
+                onClick={() => setMaxApplications(prev => Math.min(50, (prev ?? 10) + 1))}
+                disabled={maxApplications !== null && maxApplications >= 50}
+              >
+                +
+              </Button>
             </div>
-          ) : <p className="text-sm text-muted-foreground italic">Aucune règle renseignée</p>}
-        </SummaryCard>
+          </div>
 
-        {/* Sitter profile wanted */}
-        <SummaryCard icon={Users} title="Profil gardien souhaité" editLink="/profile">
-          {ownerProfile ? (
-            <div className="text-sm space-y-1">
-              {ownerProfile.preferred_sitter_types.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {ownerProfile.preferred_sitter_types.map(t => (
-                    <span key={t} className="px-2 py-0.5 rounded-full bg-accent text-xs">{t}</span>
-                  ))}
-                </div>
-              )}
-              {ownerProfile.experience_required && <p>Expérience requise</p>}
+          {/* Profile summaries */}
+          <details className="group">
+            <summary className="cursor-pointer flex items-center justify-between p-3 rounded-xl border border-border bg-card mb-3 list-none select-none hover:bg-muted/30 transition-colors">
+              <span className="font-heading text-sm font-semibold">Résumé depuis votre profil <span className="text-muted-foreground font-normal text-xs">(pré-rempli, modifiable depuis votre profil)</span></span>
+              <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
+            </summary>
+            <div className="space-y-4">
+              <SummaryCard icon={Home} title="Le logement" editLink="/profile">
+                {property ? (
+                  <div className="space-y-2">
+                    <p className="text-sm">{typeLabels[property.type] || property.type} · {envLabels[property.environment || ""] || property.environment}</p>
+                    {property.rooms_count ? <p className="text-sm text-muted-foreground">{property.rooms_count} pièces · {property.bedrooms_count} chambres</p> : null}
+                    {property.equipments.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {property.equipments.slice(0, 6).map(eq => (
+                          <span key={eq} className="px-2 py-0.5 rounded-full bg-accent text-xs">{eq}</span>
+                        ))}
+                      </div>
+                    )}
+                    <div className="mt-3">
+                      <p className="text-sm font-medium text-foreground mb-1">Photos affichées sur l'annonce</p>
+                      {ownerPhotos.length > 0 ? (
+                        <>
+                          <p className="text-xs text-muted-foreground mb-2">
+                            Sélectionnez une photo de couverture pour cette annonce.
+                          </p>
+                          <div className="grid grid-cols-4 gap-2">
+                            {ownerPhotos.slice(0, 8).map((url, i) => {
+                              const isCover = coverPhotoUrl === url || (!coverPhotoUrl && i === 0);
+                              return (
+                                <button
+                                  key={i}
+                                  type="button"
+                                  onClick={() => setCoverPhotoUrl(url)}
+                                  className={cn(
+                                    "relative rounded-lg overflow-hidden h-16 w-full border-2 transition-all",
+                                    isCover ? "border-primary ring-2 ring-primary/30" : "border-transparent hover:border-primary/50"
+                                  )}
+                                  aria-label={`Définir la photo ${i + 1} comme couverture`}
+                                >
+                                  <img src={url} alt={`Photo ${i + 1}`} className="object-cover h-full w-full" />
+                                  {isCover && (
+                                    <span className="absolute bottom-0 inset-x-0 bg-primary text-primary-foreground text-[10px] font-medium py-0.5 text-center">
+                                      Couverture
+                                    </span>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="bg-muted rounded-xl p-3">
+                          <p className="text-xs text-muted-foreground">Aucune photo – les annonces avec photos reçoivent davantage de candidatures.</p>
+                        </div>
+                      )}
+                      <Link to="/owner-profile#galerie" className="text-xs text-primary hover:underline mt-2 inline-block">
+                        Gérer mes photos dans mon profil →
+                      </Link>
+                    </div>
+                  </div>
+                ) : <p className="text-sm text-muted-foreground italic">Aucun logement renseigné</p>}
+              </SummaryCard>
+
+              <SummaryCard icon={PawPrint} title="Les animaux" editLink="/profile">
+                {pets.length > 0 ? (
+                  <div className="space-y-3">
+                    {pets.map((pet, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        {pet.photo_url && <img src={pet.photo_url} alt={pet.name} className="w-10 h-10 rounded-full object-cover" />}
+                        <div>
+                          <p className="text-sm font-medium">{speciesLabels[pet.species]?.split(" ")[0]} {pet.name}{pet.breed ? `, ${pet.breed}` : ""}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {[
+                              pet.walk_duration && pet.walk_duration !== "none" ? walkLabels[pet.walk_duration] + " de balade" : null,
+                              pet.alone_duration ? aloneLabels[pet.alone_duration] : null,
+                              hasMedication(pet.medication) ? "Médication" : null,
+                            ].filter(Boolean).join(" · ")}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : <p className="text-sm text-muted-foreground italic">Aucun animal renseigné</p>}
+              </SummaryCard>
+
+              <SummaryCard icon={ShieldCheck} title="Règles de la maison" editLink="/profile">
+                {ownerProfile ? (
+                  <div className="text-sm space-y-1">
+                    {ownerProfile.presence_expected && <p>Présence : {ownerProfile.presence_expected}</p>}
+                    {ownerProfile.visits_allowed && <p>Visites : {ownerProfile.visits_allowed}</p>}
+                    {ownerProfile.overnight_guest && <p>Invités : {ownerProfile.overnight_guest}</p>}
+                    {ownerProfile.rules_notes && <p className="text-muted-foreground">{ownerProfile.rules_notes}</p>}
+                    {!ownerProfile.presence_expected && !ownerProfile.visits_allowed && (
+                      <p className="text-muted-foreground italic">Aucune règle renseignée</p>
+                    )}
+                  </div>
+                ) : <p className="text-sm text-muted-foreground italic">Aucune règle renseignée</p>}
+              </SummaryCard>
+
+              <SummaryCard icon={Users} title="Profil gardien souhaité" editLink="/profile">
+                {ownerProfile ? (
+                  <div className="text-sm space-y-1">
+                    {ownerProfile.preferred_sitter_types.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {ownerProfile.preferred_sitter_types.map(t => (
+                          <span key={t} className="px-2 py-0.5 rounded-full bg-accent text-xs">{t}</span>
+                        ))}
+                      </div>
+                    )}
+                    {ownerProfile.experience_required && <p>Expérience requise</p>}
+                  </div>
+                ) : <p className="text-sm text-muted-foreground italic">Non renseigné</p>}
+              </SummaryCard>
+
+              <SummaryCard icon={MessageSquare} title="Communication" editLink="/profile">
+                {ownerProfile ? (
+                  <div className="text-sm space-y-1">
+                    {ownerProfile.meeting_preference.length > 0 && <p>Rencontre : {ownerProfile.meeting_preference.join(", ")}</p>}
+                    {ownerProfile.handover_preference && <p>Passage de relais : {ownerProfile.handover_preference}</p>}
+                    {ownerProfile.news_frequency && <p>Fréquence des nouvelles : {ownerProfile.news_frequency}</p>}
+                    {ownerProfile.news_format.length > 0 && <p>Format : {ownerProfile.news_format.join(", ")}</p>}
+                  </div>
+                ) : <p className="text-sm text-muted-foreground italic">Non renseigné</p>}
+              </SummaryCard>
             </div>
-          ) : <p className="text-sm text-muted-foreground italic">Non renseigné</p>}
-        </SummaryCard>
+          </details>
+        </div>
+      )}
 
-        {/* Communication */}
-        <SummaryCard icon={MessageSquare} title="Communication" editLink="/profile">
-          {ownerProfile ? (
-            <div className="text-sm space-y-1">
-              {ownerProfile.meeting_preference.length > 0 && <p>Rencontre : {ownerProfile.meeting_preference.join(", ")}</p>}
-              {ownerProfile.handover_preference && <p>Passage de relais : {ownerProfile.handover_preference}</p>}
-              {ownerProfile.news_frequency && <p>Fréquence des nouvelles : {ownerProfile.news_frequency}</p>}
-              {ownerProfile.news_format.length > 0 && <p>Format : {ownerProfile.news_format.join(", ")}</p>}
-            </div>
-          ) : <p className="text-sm text-muted-foreground italic">Non renseigné</p>}
-        </SummaryCard>
-      </div>
-      </details>
-
-      {/* Barre de publication fixée bas d'écran avec checklist explicite des bloquants restants. */}
-      <div className="fixed bottom-20 md:bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <div className="max-w-3xl mx-auto space-y-2">
-          {publishBlockers.length > 0 && (
+      {/* ===================== CTA STICKY BOTTOM ===================== */}
+      <div className="fixed bottom-16 inset-x-0 bg-card border-t border-border z-40" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
+        <div className="max-w-3xl mx-auto px-4 pt-3 space-y-2">
+          {/* Blockers on last step only */}
+          {currentStep === 2 && publishBlockers.length > 0 && (
             <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2">
               <p className="text-xs font-medium text-destructive mb-1">
                 Il manque {publishBlockers.length} élément{publishBlockers.length > 1 ? "s" : ""} pour publier :
@@ -922,47 +1115,82 @@ const CreateSit = () => {
               </ul>
             </div>
           )}
+
           <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="h-12 px-4 shrink-0"
-              onClick={async () => {
-                const id = await saveDraft();
-                if (id) {
-                  toast({ title: "Brouillon enregistré", description: "Vous pourrez le reprendre depuis « Mes gardes »." });
-                  navigate("/sits?tab=drafts");
-                }
-              }}
-              disabled={savingDraft || !property}
-            >
-              {savingDraft ? "Sauvegarde…" : <><span className="hidden sm:inline">Enregistrer & quitter</span><span className="sm:hidden">Brouillon</span></>}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="h-12 px-4 shrink-0 gap-2 hidden sm:inline-flex"
-              onClick={() => setPreviewOpen(true)}
-              disabled={!canPublish}
-              title={canPublish ? "Voir l'aperçu" : "Complétez les éléments requis pour prévisualiser"}
-            >
-              <Eye className="h-4 w-4" />
-              <span>Aperçu</span>
-            </Button>
-            <Button
-              onClick={() => {
-                if (canPublish) {
-                  setPreviewOpen(true);
-                } else {
-                  onPublishClick();
-                }
-              }}
-              disabled={publishing}
-              aria-disabled={!canPublish}
-              className={`flex-1 h-12 text-base font-semibold ${canPublish ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground hover:bg-muted"}`}
-            >
-              {publishing ? "Publication en cours..." : canPublish ? "Aperçu & publier" : "Voir ce qui manque"}
-            </Button>
+            {/* Back / Save draft */}
+            {currentStep === 0 ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="h-12 px-4 shrink-0 text-base"
+                onClick={async () => {
+                  const id = await saveDraft();
+                  if (id) {
+                    toast({ title: "Brouillon enregistré", description: "Vous pourrez le reprendre depuis « Mes gardes »." });
+                    navigate("/sits?tab=drafts");
+                  }
+                }}
+                disabled={savingDraft || !property}
+              >
+                {savingDraft ? "Sauvegarde…" : <><span className="hidden sm:inline">Enregistrer & quitter</span><span className="sm:hidden">Brouillon</span></>}
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                className="h-12 px-4 shrink-0 gap-1.5 text-base"
+                onClick={() => setCurrentStep(s => s - 1)}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">Précédent</span>
+              </Button>
+            )}
+
+            {/* Preview (last step, desktop) */}
+            {currentStep === 2 && (
+              <Button
+                type="button"
+                variant="outline"
+                className="h-12 px-4 shrink-0 gap-2 hidden sm:inline-flex text-base"
+                onClick={() => setPreviewOpen(true)}
+                disabled={!canPublish}
+              >
+                <Eye className="h-4 w-4" />
+                Aperçu
+              </Button>
+            )}
+
+            {/* Next / Publish */}
+            {currentStep < 2 ? (
+              <Button
+                type="button"
+                className="flex-1 h-12 text-base font-semibold gap-1.5"
+                onClick={() => setCurrentStep(s => s + 1)}
+              >
+                Suivant
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                onClick={() => {
+                  if (canPublish) {
+                    setPreviewOpen(true);
+                  } else {
+                    onPublishClick();
+                  }
+                }}
+                disabled={publishing}
+                aria-disabled={!canPublish}
+                className={cn(
+                  "flex-1 h-12 text-base font-semibold",
+                  canPublish
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                    : "bg-muted text-muted-foreground hover:bg-muted"
+                )}
+              >
+                {publishing ? "Publication en cours…" : canPublish ? "Aperçu & publier" : "Voir ce qui manque"}
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -970,9 +1198,7 @@ const CreateSit = () => {
       <AnnouncementPreviewDialog
         open={previewOpen}
         onOpenChange={setPreviewOpen}
-        onConfirmPublish={async () => {
-          await handlePublish();
-        }}
+        onConfirmPublish={async () => { await handlePublish(); }}
         publishing={publishing}
         canPublish={!!canPublish}
         title={title}
@@ -995,7 +1221,6 @@ const CreateSit = () => {
         environments={sitEnvironments.map(e => envLabels[e] || e)}
         isUrgent={isUrgent}
       />
-
     </div>
   );
 };
