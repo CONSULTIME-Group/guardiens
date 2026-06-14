@@ -511,7 +511,11 @@ const Messages = () => {
     const appInfo = conv.application_status ? appStatusLabels[conv.application_status] : null;
     const isOwner = conv.owner_id === user?.id;
     const isMission = !!conv.small_mission_id;
-    const roleLabel = isMission ? null : isOwner ? "Votre annonce" : "Vous avez postulé";
+    // Affiche le titre réel de l'annonce/mission (plus utile que « Votre annonce »).
+    const contextTitle = isMission
+      ? (conv.small_mission?.title || "Coup de main")
+      : (conv.sit?.title || (isOwner ? "Votre annonce" : "Vous avez postulé"));
+    const roleLabel = contextTitle;
 
     return (
       <div key={conv.id} className="group relative border-b border-border/50">
@@ -552,7 +556,7 @@ const Messages = () => {
               </span>
             </div>
             {roleLabel && (
-              <p className="text-xs text-muted-foreground">{roleLabel}</p>
+              <p className="text-xs text-muted-foreground truncate">{roleLabel}</p>
             )}
             <div className="flex items-center justify-between gap-2 mt-0.5">
               <p className={`text-xs truncate ${hasUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
