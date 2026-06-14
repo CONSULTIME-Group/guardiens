@@ -17,37 +17,12 @@ interface MobileStickyCTAProps {
  * Améliore l'ergonomie tactile en gardant l'action principale toujours accessible
  * sans scroll. Caché en md+ (le bouton du hero header prend le relais).
  */
-const MobileStickyCTA = memo(({ label = "Publier une annonce", to = "/sits/create", badge }: MobileStickyCTAProps) => {
-  const navigate = useNavigate();
-
-  return (
-    <div
-      // Posé EXACTEMENT au-dessus de la BottomNav (h-16 = 64px). La BottomNav
-      // n'a pas de safe-area-inset → on garde bottom-16 pour rester collé
-      // visuellement à son bord supérieur sur tous les iPhones (SE → 15 Pro Max).
-      className="md:hidden fixed bottom-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border px-4 py-3 shadow-[0_-4px_12px_-4px_hsl(var(--foreground)/0.08)]"
-      role="region"
-      aria-label="Action principale"
-    >
-      <Button
-        size="lg"
-        onClick={() => navigate(to)}
-        className="w-full rounded-xl relative"
-      >
-        <Plus className="h-4 w-4 mr-1.5" />
-        {label}
-        {badge !== undefined && badge > 0 && (
-          <span
-            className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-[11px] font-bold flex items-center justify-center"
-            aria-label={`${badge} en attente`}
-          >
-            {badge > 9 ? "9+" : badge}
-          </span>
-        )}
-      </Button>
-    </div>
-  );
+const MobileStickyCTA = memo((_props: MobileStickyCTAProps) => {
+  // Désactivé depuis la refonte "Signature Dock" : le FAB central de la BottomNav
+  // assure désormais l'action "Publier une annonce" en 1 tap. Évite la double-barre.
+  return null;
 });
+
 
 MobileStickyCTA.displayName = "MobileStickyCTA";
 export default MobileStickyCTA;
