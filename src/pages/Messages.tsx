@@ -556,7 +556,7 @@ const Messages = () => {
               </span>
             </div>
             {roleLabel && (
-              <p className="text-xs text-muted-foreground">{roleLabel}</p>
+              <p className="text-xs text-muted-foreground truncate">{roleLabel}</p>
             )}
             <div className="flex items-center justify-between gap-2 mt-0.5">
               <p className={`text-xs truncate ${hasUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
