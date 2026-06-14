@@ -65,7 +65,7 @@ const SearchPage = () => {
       <Helmet>
         <title>{TITLE}</title>
         <meta name="description" content={DESCRIPTION} />
-        <meta name="robots" content="noindex,follow" />
+        <meta name="robots" content="index,follow" />
         <link rel="canonical" href={CANONICAL} />
         <meta property="og:title" content={TITLE} />
         <meta property="og:description" content={DESCRIPTION} />
