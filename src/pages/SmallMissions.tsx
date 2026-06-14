@@ -460,7 +460,7 @@ const SmallMissions = () => {
               </div>
             )}
 
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center gap-2 flex-wrap">
               <div className="inline-flex items-center gap-1 bg-muted rounded-lg p-1" role="tablist" aria-label={tp("tabs_aria")}>
                 <button
                   role="tab"
@@ -479,6 +479,23 @@ const SmallMissions = () => {
                   {tp("tab_offer")}
                 </button>
               </div>
+              {isAuthenticated && canApplyMissions && (
+                <Button
+                  size="sm"
+                  variant="default"
+                  className="rounded-full h-9 px-4 text-sm font-semibold"
+                  onClick={() => {
+                    if (mode === "need") {
+                      navigate("/missions/new");
+                    } else {
+                      openOfferDialog();
+                    }
+                  }}
+                  aria-label={mode === "need" ? "Publier une demande" : "Publier une offre"}
+                >
+                  + {mode === "need" ? "Publier une demande" : "Publier une offre"}
+                </Button>
+              )}
             </div>
             {isAuthenticated && accessLevel === 1 && (
               <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="mission" />
