@@ -117,6 +117,7 @@ export default function PublicSitterProfile() {
   const [missionsPublished, setMissionsPublished] = useState<any[]>([]);
   const [missionsHelped, setMissionsHelped] = useState<any[]>([]);
   const [externalExperiences, setExternalExperiences] = useState<any[]>([]);
+  const [ownerGalleryPhotos, setOwnerGalleryPhotos] = useState<any[]>([]);
 
   // Show-more states for list truncation
   const [showAllGardeReviews, setShowAllGardeReviews] = useState(false);
@@ -525,6 +526,13 @@ export default function PublicSitterProfile() {
           .order('created_at', { ascending: false });
         if (fbErr && fbErr.code !== 'PGRST116') console.error('[missionFeedbacks]', fbErr);
         setMissionFeedbacks(fbData ?? []);
+
+        const { data: ownerGalData } = await supabase
+          .from('owner_gallery')
+          .select('id, photo_url, caption, category, season')
+          .eq('user_id', id)
+          .order('created_at', { ascending: false });
+        setOwnerGalleryPhotos(ownerGalData ?? []);
       } finally {
         setOwnerDataLoading(false);
       }
@@ -1047,22 +1055,34 @@ export default function PublicSitterProfile() {
         );
       })()}
 
-      {/* ── STATS STRIP MOBILE (preuve sociale immédiate) ── */}
+      {/* ── STATS STRIP MOBILE (tab-aware) ── */}
       {profile && (
         <div className="md:hidden overflow-x-auto scrollbar-none bg-background/95 backdrop-blur-sm border-b border-border">
           <div className="flex divide-x divide-border/60 min-w-max">
-            {([
-              reviewCount > 0 ? { label: 'Note', value: `${avgRating.toFixed(1)}★` } : null,
-              { label: 'Gardes', value: String(completedSits) },
-              profile?.created_at ? { label: 'Membre depuis', value: anciennete(profile.created_at) } : null,
-              totalBadgeCount > 0 ? { label: 'Écussons', value: String(totalBadgeCount) } : null,
-              externalExperiences.length > 0 ? { label: 'Expé. vérif.', value: String(externalExperiences.length) } : null,
-            ] as Array<{ label: string; value: string } | null>).filter((s): s is { label: string; value: string } => s !== null).map((s) => (
-              <div key={s.label} className="flex flex-col items-center justify-center px-4 py-2.5 shrink-0">
-                <span className="text-sm font-bold text-foreground font-heading leading-tight tabular-nums">{s.value}</span>
-                <span className="text-[10px] uppercase tracking-wide text-muted-foreground font-body mt-0.5 whitespace-nowrap">{s.label}</span>
-              </div>
-            ))}
+            {(() => {
+              const ownerAvgStrip = ownerReviews.length > 0 ? ownerReviews.reduce((s, r) => s + (Number(r.overall_rating) || 0), 0) / ownerReviews.length : 0;
+              const stripItems: Array<{ label: string; value: string }> = activeTab === 'proprio'
+                ? ([
+                    ownerAvgStrip > 0 ? { label: 'Note', value: `${ownerAvgStrip.toFixed(1)}★` } : null,
+                    ownerSitsTotal > 0 ? { label: 'Gardes publiées', value: String(ownerSitsTotal) } : null,
+                    profile?.created_at ? { label: 'Membre depuis', value: anciennete(profile.created_at) } : null,
+                    totalBadgeCount > 0 ? { label: 'Écussons', value: String(totalBadgeCount) } : null,
+                    pets.length > 0 ? { label: pets.length > 1 ? 'Animaux' : 'Animal', value: String(pets.length) } : null,
+                  ] as Array<{ label: string; value: string } | null>).filter((s): s is { label: string; value: string } => s !== null)
+                : ([
+                    reviewCount > 0 ? { label: 'Note', value: `${avgRating.toFixed(1)}★` } : null,
+                    { label: 'Gardes', value: String(completedSits) },
+                    profile?.created_at ? { label: 'Membre depuis', value: anciennete(profile.created_at) } : null,
+                    totalBadgeCount > 0 ? { label: 'Écussons', value: String(totalBadgeCount) } : null,
+                    externalExperiences.length > 0 ? { label: 'Expé. vérif.', value: String(externalExperiences.length) } : null,
+                  ] as Array<{ label: string; value: string } | null>).filter((s): s is { label: string; value: string } => s !== null);
+              return stripItems.map((s) => (
+                <div key={s.label} className="flex flex-col items-center justify-center px-4 py-2.5 shrink-0">
+                  <span className="text-sm font-bold text-foreground font-heading leading-tight tabular-nums">{s.value}</span>
+                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground font-body mt-0.5 whitespace-nowrap">{s.label}</span>
+                </div>
+              ));
+            })()}
           </div>
         </div>
       )}
@@ -1657,271 +1677,414 @@ export default function PublicSitterProfile() {
 
       {/* ── ONGLET PROPRIO ── */}
       {activeTab === 'proprio' && (
-        <div className="max-w-4xl mx-auto px-4 py-8 space-y-10">
+        <div className="max-w-4xl mx-auto pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
 
-          {/* ── MINI RÉSUMÉ PROPRIÉTAIRE ── */}
-          {(() => {
-            const ownerAvg =
-              ownerReviews.length > 0
-                ? ownerReviews.reduce((s, r) => s + (Number(r.overall_rating) || 0), 0) / ownerReviews.length
-                : 0;
-            return (
-              <div className="grid grid-cols-3 gap-3 bg-card border border-border rounded-2xl p-4">
-                <div className="text-center">
-                  <p className="text-2xl font-display text-foreground">{ownerSitsTotal}</p>
-                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-body mt-1">
-                    Annonce{ownerSitsTotal > 1 ? 's' : ''}
-                  </p>
-                </div>
-                <div className="text-center border-x border-border">
-                  <p className="text-2xl font-display text-foreground">{ownerReviews.length}</p>
-                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-body mt-1">
-                    Avis reçu{ownerReviews.length > 1 ? 's' : ''}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-display text-foreground">
-                    {ownerAvg > 0 ? (
-                      <>
-                        {ownerAvg.toFixed(1)}
-                        <span className="text-primary text-base ml-0.5">★</span>
-                      </>
-                    ) : (
-                      <span className="text-muted-foreground">,</span>
-                    )}
-                  </p>
-                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-body mt-1">
-                    Note moyenne
-                  </p>
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* ── DESCRIPTION + ENVIRONNEMENTS ── */}
-          {(ownerProfile?.environments?.length ?? 0) > 0 && (
-            <div className="space-y-4">
-              <div className="flex flex-wrap gap-2">
-                {ownerProfile?.environments?.map((env: string) => (
-                  <span key={env} className="text-sm bg-muted text-foreground/70 px-3 py-1 rounded-full font-body">
-                    {ENV_LABELS[env] || env}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ── ANIMAUX ── */}
-          <div className="space-y-3">
-            <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
-              {pets.length > 0 ? `Ses animaux (${pets.length})` : 'Ses animaux'}
-            </p>
-            {pets.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {pets.map((pet) => {
-                  const ageNum = parseInt(String(pet.age ?? ''));
-                  const ageLabel = !isNaN(ageNum) ? `${ageNum} an${ageNum > 1 ? 's' : ''}` : null;
-                  return (
-                    <div key={pet.id} className="flex items-center gap-3 bg-card border border-border rounded-xl p-4">
-                      {pet.photo_url ? (
-                        <img src={pet.photo_url} alt={pet.name} className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
-                      ) : (
-                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                          <PawPrint className="w-5 h-5 text-foreground/30" aria-hidden="true" />
-                        </div>
-                      )}
-                      <div className="min-w-0">
-                        <p className="font-heading font-semibold text-foreground text-sm truncate">{pet.name}</p>
-                        <p className="text-xs text-foreground/60 font-body truncate">
-                          {[pet.species, pet.breed, ageLabel].filter(Boolean).join(' · ')}
-                        </p>
-                        {pet.character && (
-                          <p className="text-xs text-foreground/50 font-body mt-0.5 truncate italic">{pet.character}</p>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="text-sm text-foreground/50 font-body italic">Aucun animal renseigné pour l'instant.</p>
-            )}
-          </div>
-
-          {/* ── ANNONCES ── */}
-          <div className="space-y-3">
-            <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
-              Gardes publiées{ownerSitsTotal > 0 && ` (${ownerSitsTotal})`}
-            </p>
-            {ownerDataLoading ? (
-              <div className="space-y-2" aria-busy="true" aria-label="Chargement des annonces">
-                {[0, 1, 2].map((i) => (
-                  <div key={i} className="flex items-center justify-between gap-4 bg-card border border-border rounded-xl px-4 py-3">
-                    <div className="min-w-0 flex-1 space-y-2">
-                      <Skeleton className="h-4 w-2/3" />
-                      <Skeleton className="h-3 w-1/2" />
-                    </div>
-                    <Skeleton className="h-6 w-20 rounded-full" />
-                  </div>
-                ))}
-              </div>
-            ) : ownerSits.length > 0 ? (
-              <div className="space-y-2">
-                {(showAllOwnerSits ? ownerSits : ownerSits.slice(0, VISIBLE_COUNT)).map((sit) => {
-                  const statusMap: Record<string, { label: string; style: string }> = {
-                    published: { label: 'Publiée', style: 'bg-primary/10 text-primary' },
-                    active: { label: 'Active', style: 'bg-primary/10 text-primary' },
-                    confirmed: { label: 'Confirmée', style: 'bg-primary/10 text-primary' },
-                    completed: { label: 'Terminée', style: 'bg-muted text-foreground/60' },
-                    finished: { label: 'Terminée', style: 'bg-muted text-foreground/60' },
-                    cancelled: { label: 'Annulée', style: 'bg-destructive/10 text-destructive' },
-                    draft: { label: 'Brouillon', style: 'bg-muted text-foreground/40' },
-                    archived: { label: 'Archivée', style: 'bg-muted text-foreground/40' },
-                    pending: { label: 'En attente', style: 'bg-muted text-foreground/60' },
-                  };
-                  const s = statusMap[sit.status] ?? { label: ',', style: 'bg-muted text-foreground/40' };
-                  const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-                  const isPast = ['completed', 'finished', 'cancelled', 'archived'].includes(sit.status);
-                  return (
-                    <div
-                      key={sit.id}
-                      className={`flex items-center justify-between gap-4 bg-card border border-border rounded-xl px-4 py-3 ${isPast ? 'opacity-60' : ''}`}
-                    >
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-foreground font-body truncate">{sit.title || 'Garde'}</p>
-                        {(sit.start_date || sit.end_date) && (
-                          <p className="text-xs text-foreground/50 font-body mt-0.5">
-                            {sit.start_date && fmt(sit.start_date)}{sit.end_date && ` → ${fmt(sit.end_date)}`}
-                          </p>
-                        )}
-                      </div>
-                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full flex-shrink-0 font-body whitespace-nowrap ${s.style}`}>
-                        {s.label}
-                      </span>
-                    </div>
-                  );
-                })}
-                <div className="flex flex-col items-start gap-2 mt-2">
-                  <ShowMoreBtn items={ownerSits} showAll={showAllOwnerSits} setShowAll={setShowAllOwnerSits} />
-                  {showAllOwnerSits && ownerSits.length < ownerSitsTotal && (
-                    <button
-                      type="button"
-                      onClick={loadMoreOwnerSits}
-                      disabled={ownerSitsLoadingMore}
-                      className="text-sm text-primary hover:underline font-body disabled:opacity-50"
-                      aria-label={`Charger ${Math.min(OWNER_SITS_PAGE_SIZE, ownerSitsTotal - ownerSits.length)} annonces supplémentaires`}
-                    >
-                      {ownerSitsLoadingMore
-                        ? 'Chargement…'
-                        : `Charger ${Math.min(OWNER_SITS_PAGE_SIZE, ownerSitsTotal - ownerSits.length)} annonces de plus (${ownerSits.length}/${ownerSitsTotal})`}
-                    </button>
+          {/* Hero compact propriétaire */}
+          <div className="px-4 pt-5 pb-4 border-b border-border/60">
+            <div className="flex items-center gap-3 max-w-xl">
+              <img
+                src={profile?.avatar_url || '/placeholder.svg'}
+                alt={firstName}
+                className="w-14 h-14 rounded-full object-cover border-2 border-background shadow-sm ring-2 ring-primary/30 shrink-0"
+              />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="font-heading text-lg font-bold text-foreground capitalize leading-tight">{firstName}</h2>
+                  {profile?.identity_verified && (
+                    <span className="inline-flex items-center gap-1 text-[11px] text-primary border border-primary/30 rounded-full px-2 py-0.5 bg-primary/5 font-body">
+                      <Shield size={10} aria-hidden="true" /> ID vérifiée
+                    </span>
+                  )}
+                  {profile?.is_founder && (
+                    <span className="inline-flex items-center gap-1 text-[11px] text-foreground/70 border border-border rounded-full px-2 py-0.5 bg-card font-body">
+                      <Star size={10} aria-hidden="true" /> Fondateur
+                    </span>
                   )}
                 </div>
+                {city && (
+                  <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5 font-body">
+                    <MapPin className="w-3 h-3 shrink-0" aria-hidden="true" />
+                    Propriétaire à {city}
+                  </p>
+                )}
+                {(() => {
+                  const ownerAvgHero = ownerReviews.length > 0
+                    ? ownerReviews.reduce((s, r) => s + (Number(r.overall_rating) || 0), 0) / ownerReviews.length
+                    : 0;
+                  return ownerAvgHero > 0 && (
+                    <p className="text-xs text-foreground/70 font-body mt-0.5">
+                      <span className="font-semibold">{ownerAvgHero.toFixed(1)}</span>
+                      <span className="text-primary ml-0.5">★</span>
+                      <span className="text-muted-foreground ml-1">({ownerReviews.length} avis)</span>
+                    </p>
+                  );
+                })()}
               </div>
-            ) : (
-              <p className="text-sm text-foreground/50 font-body italic">Aucune garde publiée pour l'instant.</p>
-            )}
+            </div>
           </div>
 
-          {/* ── AVIS GARDES ── */}
-          <div className="space-y-3">
-            <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
-              Avis des gardiens{ownerReviews.length > 0 && ` (${ownerReviews.length})`}
-            </p>
-            {ownerDataLoading ? (
-              <div className="space-y-3" aria-busy="true" aria-label="Chargement des avis">
-                {[0, 1].map((i) => (
-                  <div key={i} className="bg-card border border-border rounded-xl p-4 space-y-2">
-                    <div className="flex items-center gap-2.5">
-                      <Skeleton className="h-8 w-8 rounded-full" />
-                      <Skeleton className="h-3 w-24" />
-                      <Skeleton className="h-3 w-16 ml-auto" />
-                    </div>
-                    <Skeleton className="h-3 w-full" />
-                    <Skeleton className="h-3 w-4/5" />
+          {/* Sous-onglets sticky scrollables (forceMount SEO) */}
+          <Tabs defaultValue="apropos" className="w-full">
+            <TabsList className="sticky top-[49px] z-10 w-full flex overflow-x-auto scrollbar-none justify-start rounded-none border-b border-border bg-background/95 backdrop-blur-sm h-auto p-0 gap-0 [&>*]:rounded-none [&>*]:border-b-2 [&>*]:border-transparent [&>*[data-state=active]]:border-primary [&>*[data-state=active]]:text-primary [&>*[data-state=active]]:bg-transparent [&>*[data-state=active]]:shadow-none">
+              <TabsTrigger value="apropos" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
+                À propos
+              </TabsTrigger>
+              <TabsTrigger value="avis" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
+                Avis{ownerReviews.length > 0 ? ` (${ownerReviews.length})` : ''}
+              </TabsTrigger>
+              <TabsTrigger value="animaux" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
+                Animaux{pets.length > 0 ? ` (${pets.length})` : ''}
+              </TabsTrigger>
+              <TabsTrigger value="annonces" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
+                Gardes{ownerSitsTotal > 0 ? ` (${ownerSitsTotal})` : ''}
+              </TabsTrigger>
+              {ownerGalleryPhotos.length > 0 && (
+                <TabsTrigger value="galerie" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
+                  Galerie ({ownerGalleryPhotos.length})
+                </TabsTrigger>
+              )}
+            </TabsList>
+
+            {/* Onglet À propos */}
+            <TabsContent value="apropos" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 pb-4 space-y-5">
+              {/* Description propriétaire */}
+              {ownerProfile?.description ? (
+                <div>
+                  <p className="text-sm text-foreground leading-relaxed font-body whitespace-pre-line">{ownerProfile.description}</p>
+                </div>
+              ) : bio ? (
+                <p className="text-sm text-foreground/75 leading-relaxed font-body whitespace-pre-line">{bio}</p>
+              ) : (
+                <p className="text-sm text-muted-foreground italic font-body">Pas encore de présentation.</p>
+              )}
+
+              {/* Environnements */}
+              {(ownerProfile?.environments?.length ?? 0) > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">Environnements</p>
+                  <div className="flex flex-wrap gap-2">
+                    {ownerProfile?.environments?.map((env: string) => (
+                      <span key={env} className="text-sm bg-muted text-foreground/70 px-3 py-1 rounded-full font-body">
+                        {ENV_LABELS[env] || env}
+                      </span>
+                    ))}
                   </div>
-                ))}
-              </div>
-            ) : ownerReviews.length > 0 ? (
+                </div>
+              )}
+
+              {/* Compétences propriétaire */}
+              {(ownerProfile?.competences?.length ?? 0) > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">Savoir-faire</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {ownerProfile?.competences?.map((c: string) => (
+                      <span key={c} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground/80 font-body">{c}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Badges confiance */}
+              {userBadges && userBadges.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">Écussons de confiance</p>
+                  <BadgeRow badges={userBadges} size="compact" />
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Onglet Avis */}
+            <TabsContent value="avis" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 pb-4 space-y-6">
+              {/* Avis gardes */}
               <div className="space-y-3">
-                {(showAllOwnerReviews ? ownerReviews : ownerReviews.slice(0, VISIBLE_COUNT)).map((review) => {
-                  const stars = Math.min(5, Math.max(0, Number(review.overall_rating) || 0));
-                  return (
-                    <div key={review.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
-                      <div className="flex items-center gap-2.5 flex-wrap">
-                        {review.reviewer?.avatar_url ? (
-                          <img src={review.reviewer.avatar_url} alt={review.reviewer.first_name} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
+                  Avis des gardiens{ownerReviews.length > 0 ? ` (${ownerReviews.length})` : ''}
+                </p>
+                {ownerDataLoading ? (
+                  <div className="space-y-3" aria-busy="true">
+                    {[0, 1, 2].map((i) => (
+                      <div key={i} className="bg-card border border-border rounded-xl p-4 space-y-2">
+                        <div className="flex items-center gap-2.5">
+                          <Skeleton className="h-8 w-8 rounded-full" />
+                          <Skeleton className="h-3 w-24" />
+                          <Skeleton className="h-3 w-16 ml-auto" />
+                        </div>
+                        <Skeleton className="h-3 w-full" />
+                        <Skeleton className="h-3 w-4/5" />
+                      </div>
+                    ))}
+                  </div>
+                ) : ownerReviews.length > 0 ? (
+                  <div className="space-y-3">
+                    {(showAllOwnerReviews ? ownerReviews : ownerReviews.slice(0, VISIBLE_COUNT)).map((review) => {
+                      const stars = Math.min(5, Math.max(0, Number(review.overall_rating) || 0));
+                      return (
+                        <article key={review.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
+                          <div className="flex items-center gap-2.5 flex-wrap">
+                            {review.reviewer?.avatar_url ? (
+                              <img src={review.reviewer.avatar_url} alt={review.reviewer.first_name} className="w-8 h-8 rounded-full object-cover shrink-0" />
+                            ) : (
+                              <div className="w-8 h-8 rounded-full bg-muted shrink-0 flex items-center justify-center text-xs font-bold text-foreground/40">
+                                {(review.reviewer?.first_name || '?').charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                            <span className="text-sm font-medium text-foreground font-body">{review.reviewer?.first_name || 'Gardien'}</span>
+                            {stars > 0 && (
+                              <span className="text-xs text-amber-500 font-body tracking-wider" aria-label={`${stars} étoiles sur 5`}>
+                                {'★'.repeat(stars)}{'☆'.repeat(5 - stars)}
+                              </span>
+                            )}
+                            <span className="text-xs text-foreground/40 font-body ml-auto">
+                              {new Date(review.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+                            </span>
+                          </div>
+                          {review.comment && (
+                            <p className="text-sm text-foreground/70 font-body leading-relaxed">{review.comment}</p>
+                          )}
+                        </article>
+                      );
+                    })}
+                    <ShowMoreBtn items={ownerReviews} showAll={showAllOwnerReviews} setShowAll={setShowAllOwnerReviews} />
+                  </div>
+                ) : (
+                  <p className="text-sm text-foreground/50 font-body italic">Les avis des gardiens apparaîtront ici après la première garde.</p>
+                )}
+              </div>
+
+              {/* Avis entraide */}
+              {(ownerDataLoading || missionFeedbacks.length > 0) && (
+                <div className="space-y-3 border-t border-border/50 pt-5">
+                  <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
+                    Avis d'entraide{missionFeedbacks.length > 0 ? ` (${missionFeedbacks.length})` : ''}
+                  </p>
+                  {ownerDataLoading ? (
+                    <div className="space-y-3" aria-busy="true">
+                      {[0, 1].map((i) => (
+                        <div key={i} className="bg-card border border-border rounded-xl p-4 space-y-2">
+                          <div className="flex items-center gap-2.5">
+                            <Skeleton className="h-8 w-8 rounded-full" />
+                            <Skeleton className="h-5 w-20 rounded-full" />
+                            <Skeleton className="h-3 w-16 ml-auto" />
+                          </div>
+                          <Skeleton className="h-3 w-3/4" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {(showAllOwnerFeedbacks ? missionFeedbacks : missionFeedbacks.slice(0, VISIBLE_COUNT)).map((fb) => (
+                        <article key={fb.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
+                          <div className="flex items-center gap-2.5 flex-wrap">
+                            <div className="w-8 h-8 rounded-full bg-muted shrink-0" />
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-body shrink-0 ${fb.positive ? 'bg-primary/10 text-primary' : 'bg-muted text-foreground/50'}`}>
+                              {fb.positive ? 'Recommande' : 'Mitigé'}
+                            </span>
+                            <span className="text-xs text-foreground/40 font-body ml-auto">
+                              {new Date(fb.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+                            </span>
+                          </div>
+                          {fb.comment && (
+                            <p className="text-sm text-foreground/70 font-body leading-relaxed">{fb.comment}</p>
+                          )}
+                        </article>
+                      ))}
+                      <ShowMoreBtn items={missionFeedbacks} showAll={showAllOwnerFeedbacks} setShowAll={setShowAllOwnerFeedbacks} />
+                    </div>
+                  )}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Onglet Animaux */}
+            <TabsContent value="animaux" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 pb-4">
+              {ownerDataLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" aria-busy="true">
+                  {[0, 1].map((i) => (
+                    <div key={i} className="flex items-center gap-3 bg-card border border-border rounded-xl p-4">
+                      <Skeleton className="w-12 h-12 rounded-full shrink-0" />
+                      <div className="space-y-2 flex-1">
+                        <Skeleton className="h-3 w-24" />
+                        <Skeleton className="h-3 w-16" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : pets.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {pets.map((pet) => {
+                    const ageNum = parseInt(String(pet.age ?? ''));
+                    const ageLabel = !isNaN(ageNum) ? `${ageNum} an${ageNum > 1 ? 's' : ''}` : null;
+                    return (
+                      <div key={pet.id} className="flex items-center gap-3 bg-card border border-border rounded-xl p-4">
+                        {pet.photo_url ? (
+                          <img src={pet.photo_url} alt={pet.name} className="w-12 h-12 rounded-full object-cover shrink-0" />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-muted flex-shrink-0" />
+                          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0">
+                            <PawPrint className="w-5 h-5 text-foreground/30" aria-hidden="true" />
+                          </div>
                         )}
-                        <span className="text-sm font-medium text-foreground font-body">{review.reviewer?.first_name}</span>
-                        {stars > 0 && (
-                          <span className="text-xs text-amber-500 font-body tracking-wider" aria-label={`${stars} étoiles sur 5`}>
-                            {'★'.repeat(stars)}{'☆'.repeat(5 - stars)}
-                          </span>
-                        )}
-                        <span className="text-xs text-foreground/40 font-body ml-auto">
-                          {new Date(review.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+                        <div className="min-w-0">
+                          <p className="font-heading font-semibold text-foreground text-sm truncate">{pet.name}</p>
+                          <p className="text-xs text-foreground/60 font-body truncate">
+                            {[pet.species, pet.breed, ageLabel].filter(Boolean).join(' · ')}
+                          </p>
+                          {pet.character && (
+                            <p className="text-xs text-foreground/50 font-body mt-0.5 truncate italic">{pet.character}</p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-foreground/50 font-body italic">Aucun animal renseigné pour l'instant.</p>
+              )}
+            </TabsContent>
+
+            {/* Onglet Annonces/Gardes */}
+            <TabsContent value="annonces" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 pb-4 space-y-3">
+              {ownerDataLoading ? (
+                <div className="space-y-2" aria-busy="true">
+                  {[0, 1, 2].map((i) => (
+                    <div key={i} className="flex items-center justify-between gap-4 bg-card border border-border rounded-xl px-4 py-3">
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <Skeleton className="h-4 w-2/3" />
+                        <Skeleton className="h-3 w-1/2" />
+                      </div>
+                      <Skeleton className="h-6 w-20 rounded-full" />
+                    </div>
+                  ))}
+                </div>
+              ) : ownerSits.length > 0 ? (
+                <div className="space-y-2">
+                  {(showAllOwnerSits ? ownerSits : ownerSits.slice(0, VISIBLE_COUNT)).map((sit) => {
+                    const statusMap: Record<string, { label: string; style: string }> = {
+                      published: { label: 'Publiée', style: 'bg-primary/10 text-primary' },
+                      active: { label: 'Active', style: 'bg-primary/10 text-primary' },
+                      confirmed: { label: 'Confirmée', style: 'bg-primary/10 text-primary' },
+                      completed: { label: 'Terminée', style: 'bg-muted text-foreground/60' },
+                      finished: { label: 'Terminée', style: 'bg-muted text-foreground/60' },
+                      cancelled: { label: 'Annulée', style: 'bg-destructive/10 text-destructive' },
+                      draft: { label: 'Brouillon', style: 'bg-muted text-foreground/40' },
+                      archived: { label: 'Archivée', style: 'bg-muted text-foreground/40' },
+                      pending: { label: 'En attente', style: 'bg-muted text-foreground/60' },
+                    };
+                    const s = statusMap[sit.status] ?? { label: sit.status, style: 'bg-muted text-foreground/40' };
+                    const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+                    const isPast = ['completed', 'finished', 'cancelled', 'archived'].includes(sit.status);
+                    return (
+                      <div
+                        key={sit.id}
+                        className={`flex items-center justify-between gap-4 bg-card border border-border rounded-xl px-4 py-3 ${isPast ? 'opacity-60' : ''}`}
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-foreground font-body truncate">{sit.title || 'Garde'}</p>
+                          {(sit.start_date || sit.end_date) && (
+                            <p className="text-xs text-foreground/50 font-body mt-0.5">
+                              {sit.start_date && fmt(sit.start_date)}{sit.end_date && ` → ${fmt(sit.end_date)}`}
+                            </p>
+                          )}
+                        </div>
+                        <span className={`text-xs font-medium px-2.5 py-1 rounded-full shrink-0 font-body whitespace-nowrap ${s.style}`}>
+                          {s.label}
                         </span>
                       </div>
-                      {review.comment && (
-                        <p className="text-sm text-foreground/70 font-body leading-relaxed">{review.comment}</p>
-                      )}
-                    </div>
-                  );
-                })}
-                <ShowMoreBtn items={ownerReviews} showAll={showAllOwnerReviews} setShowAll={setShowAllOwnerReviews} />
-              </div>
-            ) : (
-              <p className="text-sm text-foreground/50 font-body italic">Les avis des gardiens apparaîtront ici après la première garde.</p>
-            )}
-          </div>
-
-          {/* ── AVIS MISSIONS ── */}
-          <div className="space-y-3 border-t border-border/50 pt-8">
-            <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
-              Avis d'entraide{missionFeedbacks.length > 0 && ` (${missionFeedbacks.length})`}
-            </p>
-            {ownerDataLoading ? (
-              <div className="space-y-3" aria-busy="true" aria-label="Chargement des avis d'entraide">
-                {[0, 1].map((i) => (
-                  <div key={i} className="bg-card border border-border rounded-xl p-4 space-y-2">
-                    <div className="flex items-center gap-2.5">
-                      <Skeleton className="h-8 w-8 rounded-full" />
-                      <Skeleton className="h-5 w-20 rounded-full" />
-                      <Skeleton className="h-3 w-16 ml-auto" />
-                    </div>
-                    <Skeleton className="h-3 w-3/4" />
-                  </div>
-                ))}
-              </div>
-            ) : missionFeedbacks.length > 0 ? (
-              <div className="space-y-3">
-                {(showAllOwnerFeedbacks ? missionFeedbacks : missionFeedbacks.slice(0, VISIBLE_COUNT)).map((fb) => (
-                  <div key={fb.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
-                    <div className="flex items-center gap-2.5 flex-wrap">
-                      <div className="w-8 h-8 rounded-full bg-muted flex-shrink-0" />
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-body flex-shrink-0 ${fb.positive ? 'bg-primary/10 text-primary' : 'bg-muted text-foreground/50'}`}>
-                        {fb.positive ? 'Recommande' : 'Mitigé'}
-                      </span>
-                      <span className="text-xs text-foreground/40 font-body ml-auto">
-                        {new Date(fb.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
-                      </span>
-                    </div>
-                    {fb.comment && (
-                      <p className="text-sm text-foreground/70 font-body leading-relaxed">{fb.comment}</p>
+                    );
+                  })}
+                  <div className="flex flex-col items-start gap-2 mt-2">
+                    <ShowMoreBtn items={ownerSits} showAll={showAllOwnerSits} setShowAll={setShowAllOwnerSits} />
+                    {showAllOwnerSits && ownerSits.length < ownerSitsTotal && (
+                      <button
+                        type="button"
+                        onClick={loadMoreOwnerSits}
+                        disabled={ownerSitsLoadingMore}
+                        className="text-sm text-primary hover:underline font-body disabled:opacity-50"
+                      >
+                        {ownerSitsLoadingMore
+                          ? 'Chargement...'
+                          : `Charger ${Math.min(OWNER_SITS_PAGE_SIZE, ownerSitsTotal - ownerSits.length)} de plus`}
+                      </button>
                     )}
                   </div>
-                ))}
-                <ShowMoreBtn items={missionFeedbacks} showAll={showAllOwnerFeedbacks} setShowAll={setShowAllOwnerFeedbacks} />
-              </div>
-            ) : (
-              <p className="text-sm text-foreground/50 font-body italic">Les avis d'entraide apparaîtront ici après la première mission.</p>
-            )}
-          </div>
+                </div>
+              ) : (
+                <p className="text-sm text-foreground/50 font-body italic">Aucune garde publiée pour l'instant.</p>
+              )}
+            </TabsContent>
 
+            {/* Onglet Galerie */}
+            {ownerGalleryPhotos.length > 0 && (
+              <TabsContent value="galerie" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 pb-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {ownerGalleryPhotos.map((photo, i) => (
+                    <div key={photo.id} className="group relative rounded-xl overflow-hidden aspect-square">
+                      <img
+                        src={photo.photo_url}
+                        alt={photo.caption || `Photo ${i + 1} de ${firstName}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                      />
+                      {photo.caption && (
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-end">
+                          <p className="p-2 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity line-clamp-2">{photo.caption}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+            )}
+          </Tabs>
+
+          {/* CTA sticky bottom-16, au-dessus de la BottomNav h-16 */}
+          {showCTA && (
+            <div className="md:hidden fixed bottom-16 left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] shadow-lg">
+              {isOwn ? (
+                <button
+                  type="button"
+                  disabled
+                  aria-disabled="true"
+                  className="flex items-center justify-center bg-muted text-muted-foreground rounded-lg px-4 py-3 text-sm font-medium w-full opacity-70 cursor-not-allowed"
+                >
+                  Aperçu de votre profil propriétaire
+                </button>
+              ) : !isAuthenticated ? (
+                <Link
+                  to={`/inscription?redirect=/gardiens/${id}?tab=proprio`}
+                  className="flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-4 py-3 text-sm font-medium w-full"
+                >
+                  S'inscrire pour contacter {firstName}
+                </Link>
+              ) : isSitter ? (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!auth?.user?.id || !id) return;
+                    const { startConversation } = await import('@/lib/conversation');
+                    const { conversationId, error } = await startConversation({
+                      otherUserId: id,
+                      context: 'owner_pitch',
+                    });
+                    if (conversationId) {
+                      navigate(`/messages?c=${conversationId}`);
+                    } else if (error?.includes('propositions spontanées')) {
+                      const { toast } = await import('sonner');
+                      toast.error('Ce propriétaire ne reçoit pas de propositions spontanées.');
+                    } else {
+                      const { toast } = await import('sonner');
+                      toast.error("Impossible d'ouvrir la conversation.");
+                    }
+                  }}
+                  className="flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-4 py-3 text-sm font-medium w-full"
+                >
+                  Contacter {firstName}
+                </button>
+              ) : null}
+            </div>
+          )}
         </div>
       )}
+
 
       {/* ── ONGLET ENTRAIDE ── */}
       {activeTab === 'entraide' && (
