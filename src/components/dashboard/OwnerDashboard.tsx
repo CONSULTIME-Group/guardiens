@@ -258,15 +258,10 @@ const OwnerDashboard = () => {
       tone: "warning",
     });
   }
-  if (pendingAppCount > 0) {
-    todoItems.push({
-      key: "applications",
-      label: `${pendingAppCount} candidature${pendingAppCount > 1 ? "s" : ""} à examiner`,
-      hint: "Répondez sous 48 h pour garder vos chances",
-      to: "/sits",
-      tone: "primary",
-    });
-  }
+  // P2 — Décongestion : les candidatures sont déjà rendues dominantes dans
+  // PriorityActionCard ET listées dans MonAnnonceCard, on ne les répète plus
+  // ici (le précepte 2026 = 1 NBA card visible, pas 3 surfaces concurrentes).
+  // Cf. mem://ux/dashboard-2026-precepts.
   if (pendingReviews.length > 0) {
     todoItems.push({
       key: "reviews",
@@ -390,10 +385,12 @@ const OwnerDashboard = () => {
         </div>
       )}
 
-      {/* ═══ Toggle mobile : « Voir tout mon espace » ═══
-          Réduit le bruit mobile en masquant par défaut les blocs secondaires
-          (annonce détaillée, animaux, candidatures, parrainage, badges, etc.).
-          Desktop : non rendu (classes hidden md:* déjà appliquées en amont). */}
+      {/* ═══ Toggle mobile : « Voir mes stats et bonus » ═══
+          P1 2026 mobile reveal : on AFFICHE par défaut le cœur opérationnel
+          (annonce, animaux, candidatures, coups de main). Le toggle ne masque
+          plus QUE l'aside contextuelle (stats, parrainage, gardiens d'urgence)
+          + la preuve sociale + badges + ressources. Cf. mem://ux/dashboard-2026-precepts.
+          Desktop : non rendu. */}
       {!showAllMobile && (
         <div className="px-5 md:hidden">
           <button
@@ -403,14 +400,16 @@ const OwnerDashboard = () => {
             aria-expanded={false}
             aria-controls="owner-dash-extra"
           >
-            Voir tout mon espace
+            Voir mes stats et bonus
             <ChevronDown className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
       )}
 
-      {/* ═══ PILOTAGE (gauche) + CONTEXTE (droite) ═══ */}
-      <div id="owner-dash-extra" className={`px-5 md:px-8 grid grid-cols-1 lg:grid-cols-3 gap-6 ${!showAllMobile ? "hidden md:grid" : ""}`}>
+      {/* ═══ PILOTAGE (gauche) + CONTEXTE (droite) ═══
+          Mobile : la grille est TOUJOURS rendue (pilotage visible par défaut).
+          L'aside reste masquée derrière le toggle via classe propre. */}
+      <div id="owner-dash-extra" className="px-5 md:px-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* Colonne pilotage : annonce, animaux, avis, candidatures */}
         <div className="lg:col-span-2 space-y-6">
@@ -517,9 +516,11 @@ const OwnerDashboard = () => {
         </div>
 
         {/* Colonne contexte : stats compactes + parrainage uniquement.
-            Les blocs « gardiens » et « entraide » remontent dans la colonne
-            principale pour matcher le dashboard gardien. */}
-        <aside className="space-y-6">
+            Mobile : masquée par défaut (hidden) → révélée par le toggle
+            « Voir mes stats et bonus » via showAllMobile. Aligne sur précepte
+            2026 « aside contextuelle, pas opérationnelle ».
+            Desktop : toujours visible en colonne lg:col-span-1. */}
+        <aside className={`space-y-6 ${!showAllMobile ? "hidden lg:block" : ""}`}>
           {/* Preuve sociale rapide : stats en haut de colonne pour une lecture immédiate */}
           <StatsStrip
             items={[
