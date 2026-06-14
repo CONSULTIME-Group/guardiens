@@ -803,7 +803,7 @@ const SmallMissions = () => {
         {/* Sticky CTA mobile, masqué quand l'empty-state expose déjà sa CTA
             (item 8 : éviter 4 boutons verts empilés sur mobile). */}
         {(missionCount > 0 || helperCount > 0) && (
-          <div className="md:hidden fixed bottom-16 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <div className="md:hidden fixed bottom-20 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
             <Button
               variant="hero"
               size="lg"
