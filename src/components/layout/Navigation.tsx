@@ -396,104 +396,124 @@ export const BottomNav = () => {
     return () => clearInterval(interval);
   }, [user]);
 
-  
+  const navigate = useNavigate();
 
-  // Adapt tabs to active role
-  // NB : "Profil" retiré du bottom nav mobile au profit de "Coup de main"
-  // (entraide gratuite, pilier de la promesse). Profil reste accessible
-  // en 1 tap via le hamburger / sidebar mobile (cf. ligne 238).
+  // Signature Dock 2026 — 4 tabs role-aware + FAB central + Plus sheet
   const isOwnerView = effectiveRole === "owner";
-  const tabs = [
-    { to: "/dashboard", icon: Home, label: "Accueil", badge: isOwnerView ? ownerInboxCount : 0 },
-    {
-      to: isOwnerView ? "/recherche-gardiens" : "/search",
-      icon: Search,
-      label: isOwnerView ? "Gardiens" : "Recherche",
-    },
-    { to: "/sits", icon: Calendar, label: isOwnerView ? "Annonces" : "Gardes", badge: sitsBadge },
 
+  // FAB central : action de création contextuelle au rôle
+  const fab = isOwnerView
+    ? { to: "/sits/create", label: "Publier" }
+    : { to: "/petites-missions/creer", label: "Demander" };
+
+  // 2 onglets à gauche du FAB
+  const leftTabs = [
+    { to: "/dashboard", icon: Home, label: "Accueil", badge: isOwnerView ? ownerInboxCount : 0 },
+    isOwnerView
+      ? { to: "/sits", icon: Calendar, label: "Annonces", badge: ownerInboxCount }
+      : { to: "/search", icon: Search, label: "Recherche", badge: 0 },
+  ];
+
+  // 1 onglet à droite du FAB (Plus sheet est le 4e slot)
+  const rightTabs = [
     { to: "/petites-missions", icon: Handshake, label: "Coup de main", badge: missionBadgeCount },
   ];
+
+  const moreBadge = sitterActionCount + (isOwnerView ? 0 : sitsBadge);
+
+  const renderTab = (item: { to: string; icon: typeof Home; label: string; badge?: number }) => {
+    const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + "/");
+    const isSitterLocked = effectiveRole === "sitter" && !hasAccess;
+    const isGated = isSitterLocked && item.to === "/search";
+
+    if (isGated) {
+      return (
+        <button
+          key={item.to}
+          type="button"
+          onClick={() => { setGateFeature("la recherche d'annonces"); setGateOpen(true); }}
+          className="flex flex-col items-center justify-center flex-1 gap-1 transition-colors text-muted-foreground relative min-w-0"
+        >
+          <div className="relative">
+            <item.icon className="h-5 w-5" strokeWidth={1.8} />
+            <Crown className="h-[9px] w-[9px] text-amber-500 absolute -top-1 -right-1.5" />
+          </div>
+          <span className="text-[10px] font-medium tracking-wide uppercase truncate max-w-full px-1">{item.label}</span>
+        </button>
+      );
+    }
+
+    return (
+      <NavLink
+        key={item.to}
+        to={item.to}
+        className={cn(
+          "flex flex-col items-center justify-center flex-1 gap-1 transition-colors relative min-w-0",
+          isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        <div className="relative">
+          <item.icon className="h-5 w-5" strokeWidth={isActive ? 2.2 : 1.8} />
+          {item.badge !== undefined && item.badge > 0 && (
+            <span className="absolute -top-1.5 -right-2 bg-destructive text-destructive-foreground text-[9px] rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1 font-bold tabular-nums border-2 border-card">
+              {item.badge > 99 ? "99+" : item.badge}
+            </span>
+          )}
+        </div>
+        <span className="text-[10px] font-medium tracking-wide uppercase truncate max-w-full px-1">{item.label}</span>
+      </NavLink>
+    );
+  };
 
   return (
     <>
       <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
       <PremiumGateDialog open={gateOpen} onClose={() => setGateOpen(false)} featureName={gateFeature} />
       <ActivateRoleDialog open={roleDialogOpen} onClose={() => setRoleDialogOpen(false)} targetRole={roleDialogTarget} />
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50" aria-label="Navigation mobile">
-        <div className="flex justify-around items-center h-16 px-1">
-          {tabs.map((item) => {
-            const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + "/");
-            // Sitter-locked applies only to actual sitters (not owners viewing search-gardiens)
-            const isSitterLocked = effectiveRole === "sitter" && !hasAccess;
-            const isGated = isSitterLocked && item.to === "/search";
-            const featureName = "la recherche d'annonces";
 
-            if (isGated) {
-              return (
-                <button
-                  key={item.to}
-                  type="button"
-                  onClick={() => { setGateFeature(featureName); setGateOpen(true); }}
-                  className={cn(
-                    "flex flex-col items-center gap-0.5 px-2 py-1 text-[10px] transition-colors relative min-w-[56px]",
-                    "text-muted-foreground"
-                  )}
-                >
-                  <div className="relative">
-                    <item.icon className="h-5 w-5" strokeWidth={1.8} />
-                    <Crown className="h-[9px] w-[9px] text-amber-500 absolute -top-1 -right-1.5" />
-                    {item.badge !== undefined && item.badge > 0 && (
-                      <span className="absolute -top-1 -right-2 bg-destructive text-destructive-foreground text-[8px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 font-bold tabular-nums">
-                        {item.badge > 99 ? "99+" : item.badge}
-                      </span>
-                    )}
-                  </div>
-                  <span className="font-medium">{item.label}</span>
-                </button>
-              );
-            }
+      <nav
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+        aria-label="Navigation mobile"
+      >
+        <div className="pointer-events-auto mx-auto max-w-md bg-card border border-border/60 shadow-[0_20px_50px_-12px_hsl(var(--primary)/0.18)] rounded-3xl h-16 flex items-center justify-between px-1.5 relative">
 
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={cn(
-                  "flex flex-col items-center gap-0.5 px-2 py-1 text-[10px] transition-colors relative min-w-[56px]",
-                  isActive ? "text-primary" : "text-muted-foreground"
-                )}
-              >
+          {leftTabs.map(renderTab)}
+
+          {/* FAB central — action de création role-aware */}
+          <div className="relative flex-1 flex justify-center -mt-7">
+            <button
+              type="button"
+              onClick={() => navigate(fab.to)}
+              aria-label={fab.label}
+              className="group flex flex-col items-center justify-center"
+            >
+              <div className="w-14 h-14 bg-primary rounded-2xl shadow-lg shadow-primary/30 flex items-center justify-center text-primary-foreground transition-transform active:scale-95">
+                <Plus className="h-7 w-7" strokeWidth={2} />
+              </div>
+              <span className="mt-1.5 text-primary font-serif italic text-[12px] font-semibold tracking-tight leading-none">
+                {fab.label}
+              </span>
+            </button>
+          </div>
+
+          {rightTabs.map(renderTab)}
+
+          {/* Plus sheet */}
+          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+            <SheetTrigger asChild>
+              <button className="flex flex-col items-center justify-center flex-1 gap-1 text-muted-foreground hover:text-foreground transition-colors min-w-0 relative">
                 <div className="relative">
-                  <item.icon className="h-5 w-5" strokeWidth={isActive ? 2.2 : 1.8} />
-                  {item.badge !== undefined && item.badge > 0 && (
-                    <span className="absolute -top-1 -right-2 bg-destructive text-destructive-foreground text-[8px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 font-bold tabular-nums">
-                      {item.badge > 99 ? "99+" : item.badge}
+                  <MoreHorizontal className="h-5 w-5" strokeWidth={1.8} />
+                  {moreBadge > 0 && (
+                    <span className="absolute -top-1.5 -right-2 bg-destructive text-destructive-foreground text-[9px] rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1 font-bold tabular-nums border-2 border-card">
+                      {moreBadge > 99 ? "99+" : moreBadge}
                     </span>
                   )}
                 </div>
-                <span className="font-medium">{item.label}</span>
-              </NavLink>
-            );
-          })}
-
-          {/* More */}
-          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-            <SheetTrigger asChild>
-              <button className="flex flex-col items-center gap-0.5 px-2 py-1 text-[10px] text-muted-foreground transition-colors min-w-[56px] relative">
-                <div className="relative">
-                  <MoreHorizontal className="h-5 w-5" strokeWidth={1.8} />
-                  {(() => {
-                    const moreBadge = sitsBadge + missionBadgeCount;
-                    return moreBadge > 0 ? (
-                      <span className="absolute -top-1 -right-2 bg-destructive text-destructive-foreground text-[8px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 font-bold">
-                        {moreBadge > 99 ? "99+" : moreBadge}
-                      </span>
-                    ) : null;
-                  })()}
-                </div>
-                <span className="font-medium">Plus</span>
+                <span className="text-[10px] font-medium tracking-wide uppercase">Plus</span>
               </button>
             </SheetTrigger>
+
             <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh] overflow-y-auto">
               <SheetTitle className="sr-only">Menu</SheetTitle>
               <SheetDescription className="sr-only">Accès rapide aux profils, raccourcis et paramètres.</SheetDescription>
