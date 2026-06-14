@@ -86,11 +86,11 @@ const SearchPage = () => {
       {!user && (
         <div className="bg-primary/5 border-b border-primary/20">
           <div className="container max-w-6xl mx-auto px-4 py-2.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-x-4 gap-y-2 text-sm">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="inline-flex items-center rounded-full bg-primary/15 text-primary px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide shrink-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 min-w-0">
+              <span className="inline-flex items-center rounded-full bg-primary/15 text-primary px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide self-start shrink-0">
                 Consultation libre
               </span>
-              <p className="text-foreground/90 truncate">
+              <p className="text-foreground/90 sm:truncate">
                 Inscrivez-vous pour postuler, échanger et sauvegarder vos favoris.
               </p>
             </div>
