@@ -438,7 +438,7 @@ export const BottomNav = () => {
 
   // 1 onglet à droite du FAB (Plus sheet est le 4e slot)
   const rightTabs = [
-    { to: "/petites-missions", icon: Handshake, label: "Entraide", badge: missionBadgeCount },
+    { to: "/petites-missions", icon: Handshake, label: "Coup de main", badge: missionBadgeCount },
   ];
 
   const moreBadge = sitterActionCount + (isOwnerView ? 0 : sitsBadge);

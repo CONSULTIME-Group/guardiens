@@ -983,10 +983,10 @@ const SearchSitter = () => {
  {/* ─── Tabs ─── */}
  <div className="px-6 pt-4 border-b border-border">
  <div className="flex gap-6">
- {([
- { key: "sits" as SearchTab, label: "Gardes" },
- { key: "missions" as SearchTab, label: "Petites missions" },
- ]).map(({ key, label }) => (
+					{([
+					{ key: "sits" as SearchTab, label: "Gardes" },
+					{ key: "missions" as SearchTab, label: "Coup de main" },
+					]).map(({ key, label }) => (
  <button
  key={key}
  onClick={() => setTab(key)}
