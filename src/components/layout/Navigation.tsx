@@ -549,7 +549,7 @@ export const BottomNav = () => {
                     </span>
                   )}
                 </div>
-                <span className="text-[10px] font-medium tracking-wide uppercase">Plus</span>
+                <span className="text-[10px] font-medium tracking-tight leading-tight">Plus</span>
               </button>
             </SheetTrigger>
 
