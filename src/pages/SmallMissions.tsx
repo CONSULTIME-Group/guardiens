@@ -441,6 +441,7 @@ const SmallMissions = () => {
 
       <div className="min-h-screen bg-background">
         <MissionsHero
+          mode={mode}
           needCount={(allMissions || []).filter((m: any) => (m.status === "open" || m.status === "in_progress") && (m.mission_type ?? "besoin") === "besoin").length}
           offerCount={(allMissions || []).filter((m: any) => (m.status === "open" || m.status === "in_progress") && m.mission_type === "offre").length}
           helperCount={(availableHelpers || []).length}
@@ -449,6 +450,7 @@ const SmallMissions = () => {
             openOfferDialog();
           }}
         />
+
 
         <main className="max-w-6xl mx-auto px-4 py-5 md:py-10 pb-28 md:pb-10 space-y-8 md:space-y-12">
           <section className="space-y-6">
@@ -483,7 +485,7 @@ const SmallMissions = () => {
                 <Button
                   size="sm"
                   variant="default"
-                  className="rounded-full h-9 px-4 text-sm font-semibold"
+                  className="hidden md:inline-flex rounded-full h-9 px-4 text-sm font-semibold"
                   onClick={() => {
                     if (mode === "need") {
                       navigate("/missions/new");
@@ -496,6 +498,7 @@ const SmallMissions = () => {
                   + {mode === "need" ? "Publier une demande" : "Publier une offre"}
                 </Button>
               )}
+
             </div>
             {isAuthenticated && accessLevel === 1 && (
               <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="mission" />
@@ -829,26 +832,10 @@ const SmallMissions = () => {
           </div>
         </footer>
 
-        {/* Sticky CTA mobile, masqué quand l'empty-state expose déjà sa CTA
-            (item 8 : éviter 4 boutons verts empilés sur mobile). */}
-        {(missionCount > 0 || helperCount > 0) && (
-          <div className="md:hidden fixed bottom-20 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-            <Button
-              variant="hero"
-              size="lg"
-              className="w-full"
-              onClick={() => {
-                if (!isAuthenticated) { navigate("/inscription?redirect=/petites-missions/creer"); return; }
-                if (!canApplyMissions) return;
-                navigate("/petites-missions/creer");
-              }}
-              disabled={isAuthenticated && !canApplyMissions}
-            >
-              {mode === "offer" ? tp("sticky_offer") : tp("sticky_need")}
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-        )}
+        {/* Sticky CTA mobile supprimée : le FAB du bottom nav (Navigation.tsx)
+            est déjà contextuel (Demander / Proposer selon rôle + section).
+            Doublon visuel et conflit z-index avec la tabbar éliminés. */}
+
       </div>
 
       {dialogMission && dialogTarget && (
