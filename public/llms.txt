@@ -15,6 +15,7 @@ Guardiens est gratuit pour les propriétaires. Les gardiens accèdent au service
 - [Petites missions](/petites-missions): Coups de main entre membres (promenade, visite, dépannage), gratuits, sans nuitée.
 - [Petites missions à Lyon](/petites-missions/lyon): Hub local des coups de main entre membres à Lyon.
 - [Gardien d'urgence](/gardien-urgence): Trouver un gardien rapidement en cas d'imprévu.
+- [Devenir home-sitter](/devenir-home-sitter): Guide pour devenir gardien à domicile sur Guardiens.
 - [Guides de villes](/guides): Guides locaux indépendants des annonces de garde.
 - [Annonces de garde](/annonces): Toutes les annonces de garde à domicile, partout en France.
 - [Pros animaliers](/pros): Annuaire de vétérinaires, éducateurs, toiletteurs, ostéopathes, transporteurs vérifiés.
