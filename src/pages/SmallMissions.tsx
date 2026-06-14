@@ -150,8 +150,19 @@ const SmallMissions = () => {
     if (!user || offerSkills.length === 0) return;
     setOfferSaving(true);
     try {
+      // 2026 : on dérive skill_categories des compétences SPÉCIFIQUES saisies.
+      // Si l'utilisateur n'a pas (encore) saisi de compétence précise, on
+      // retombe sur offerSkills (sélection contextuelle de la mission) pour
+      // ne pas casser le flux d'offre, mais c'est un fallback transitoire.
+      const { deriveCategoriesFromCompetences } = await import(
+        "@/lib/skills/categories"
+      );
+      const derived =
+        offerCompetences.length > 0
+          ? deriveCategoriesFromCompetences(offerCompetences)
+          : offerSkills;
       const updates: Record<string, any> = {
-        skill_categories: offerSkills,
+        skill_categories: derived,
         available_for_help: true,
       };
       updates.custom_skills = offerText.trim() ? [offerText.trim()] : [];
@@ -178,6 +189,7 @@ const SmallMissions = () => {
       setOfferSaving(false);
     }
   }, [user, offerSkills, offerText, offerCompetences, refetchProfile, queryClient]);
+
 
   const handleWithdrawOffer = useCallback(async () => {
     if (!user) return;
