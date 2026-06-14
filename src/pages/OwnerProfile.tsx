@@ -17,6 +17,7 @@ import ProfileSidebar, { type SidebarSection } from "@/components/profile/Profil
 import ProfileSkeleton from "@/components/profile/ProfileSkeleton";
 import ScoreBreakdown, { type ScoreCriterion } from "@/components/profile/ScoreBreakdown";
 import ProfileProgressStrip from "@/components/profile/ProfileProgressStrip";
+import TrustProfile from "@/components/profile/TrustProfile";
 import { useOwnerProfile, type OwnerProfileData } from "@/hooks/useOwnerProfile";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useAuth } from "@/contexts/AuthContext";
@@ -270,6 +271,16 @@ const OwnerProfilePage = () => {
                 }}
                 essentials={ownerEssentials}
                 bonuses={ownerBonuses}
+              />
+            }
+            trustSlot={
+              <TrustProfile
+                emailVerified={true}
+                identityVerified={!!user?.identityVerified}
+                hasAvatar={!!(mergedData.avatar_url || user?.avatarUrl)}
+                profileCompletion={liveScore}
+                hasFirstActivity={false}
+                role="owner"
               />
             }
           />

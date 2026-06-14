@@ -24,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import FillSavoirFaireBanner from "@/components/profile/FillSavoirFaireBanner";
 import ProfileProgressStrip from "@/components/profile/ProfileProgressStrip";
+import TrustProfile from "@/components/profile/TrustProfile";
 
 const SECTIONS_BASE: Array<{ id: string; num: number; optional?: boolean }> = [
   { id: "identity", num: 1 },
@@ -352,6 +353,16 @@ const SitterProfile = () => {
                 }}
                 essentials={sitterEssentials}
                 bonuses={sitterBonuses}
+              />
+            }
+            trustSlot={
+              <TrustProfile
+                emailVerified={true}
+                identityVerified={!!user?.identityVerified}
+                hasAvatar={!!(mergedData.avatar_url || user?.avatarUrl)}
+                profileCompletion={liveScore}
+                hasFirstActivity={false}
+                role="sitter"
               />
             }
           />
