@@ -279,9 +279,9 @@ const HouseGuide = () => {
         />
       </div>
 
-      {/* Sticky emergency bar */}
+      {/* Bloc urgence inline (pas sticky pour éviter le chevauchement avec la barre de sauvegarde) */}
       {(guide.emergency_contact_name || guide.emergency_contact_phone) && (
-        <div className="sticky bottom-0 z-30 bg-background/95 backdrop-blur border-t border-border px-4 py-3 flex items-center justify-between gap-3 mt-8">
+        <div className="mt-6 rounded-2xl border border-border bg-card px-4 py-3 flex items-center justify-between gap-3">
           <p className="text-sm font-medium text-foreground truncate">
             Contact urgence : {guide.emergency_contact_name || guide.emergency_contact_phone}
           </p>
