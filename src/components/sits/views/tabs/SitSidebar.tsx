@@ -159,7 +159,7 @@ const SitSidebar = ({
 
       <div className="rounded-2xl bg-muted/50 p-5 text-xs text-muted-foreground space-y-2">
         <p className="font-semibold text-[13px] text-foreground">
-          Sur Guardiens, c'est à 0 €, entre gens du coin
+          Sur Guardiens, c'est gratuit, entre gens du coin
         </p>
         <p className="leading-relaxed">
           Aucun paiement entre membres. Profils vérifiés, avis croisés, accord de garde
