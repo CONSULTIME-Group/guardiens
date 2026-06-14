@@ -1,16 +1,14 @@
-import { useState, useEffect } from "react";
-import { Sprout, PawPrint, GraduationCap, Handshake, Check } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import ProposeHelperExchangeDialog from "@/components/missions/ProposeHelperExchangeDialog";
-
-const SKILL_META: Record<string, { label: string; icon: typeof Sprout }> = {
-  jardin: { label: "Jardin", icon: Sprout },
-  animaux: { label: "Animaux", icon: PawPrint },
-  competences: { label: "Compétences & Savoirs", icon: GraduationCap },
-  coups_de_main: { label: "Coups de main", icon: Handshake },
-};
+import {
+  SKILL_CATEGORIES,
+  groupByCategory,
+  type SkillCategoryKey,
+} from "@/lib/skills/categories";
 
 interface CustomSkill {
   label: string;
@@ -19,13 +17,18 @@ interface CustomSkill {
 }
 
 interface Props {
-  skillCategories: string[];
+  skillCategories: string[]; // legacy, conservé pour compat de signature
   userId: string;
   firstName?: string;
   city?: string;
 }
 
-const PublicSkills = ({ skillCategories, userId, firstName, city }: Props) => {
+/**
+ * Mécanique 2026 : on n'affiche QUE les compétences spécifiques,
+ * regroupées par catégorie dérivée. Les 4 chips génériques ont
+ * disparu : elles n'apportaient aucune information différenciante.
+ */
+const PublicSkills = ({ userId, firstName, city }: Props) => {
   const { user } = useAuth();
   const [approvedCustomSkills, setApprovedCustomSkills] = useState<CustomSkill[]>([]);
   const [specificCompetences, setSpecificCompetences] = useState<string[]>([]);
@@ -33,14 +36,8 @@ const PublicSkills = ({ skillCategories, userId, firstName, city }: Props) => {
 
   useEffect(() => {
     if (!userId) return;
-
-    // Fetch custom_skills from profiles + competences from sitter_profiles in parallel
     Promise.all([
-      supabase
-        .from("profiles")
-        .select("custom_skills")
-        .eq("id", userId)
-        .single(),
+      supabase.from("profiles").select("custom_skills").eq("id", userId).single(),
       supabase
         .from("sitter_profiles")
         .select("competences")
@@ -48,69 +45,51 @@ const PublicSkills = ({ skillCategories, userId, firstName, city }: Props) => {
         .maybeSingle(),
     ]).then(([profileRes, sitterRes]) => {
       const skills = (profileRes.data?.custom_skills as unknown as CustomSkill[]) || [];
-      setApprovedCustomSkills(skills.filter(s => s.status === "approved"));
-
+      setApprovedCustomSkills(skills.filter((s) => s.status === "approved"));
       const comps = (sitterRes.data?.competences as string[]) || [];
       setSpecificCompetences(comps);
     });
   }, [userId]);
 
-  const hasCategories = skillCategories && skillCategories.length > 0;
-  const hasCustom = approvedCustomSkills.length > 0;
-  const hasCompetences = specificCompetences.length > 0;
+  const allLabels = useMemo(
+    () => [...specificCompetences, ...approvedCustomSkills.map((s) => s.label)],
+    [specificCompetences, approvedCustomSkills],
+  );
 
-  if (!hasCategories && !hasCustom && !hasCompetences) return null;
+  const grouped = useMemo(() => groupByCategory(allLabels), [allLabels]);
+
+  if (allLabels.length === 0) return null;
 
   const isOwnProfile = user?.id === userId;
-
-  const allCompetenceLabels = [
-    ...specificCompetences,
-    ...approvedCustomSkills.map(s => s.label),
-  ];
+  const visibleCategories = SKILL_CATEGORIES.filter(
+    (c) => grouped[c.key as SkillCategoryKey].length > 0,
+  );
 
   return (
     <>
       <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 mt-6">
-        <h3 className="text-sm font-heading font-semibold text-primary/80 uppercase tracking-widest mb-3">
+        <h3 className="text-sm font-heading font-semibold text-primary/80 uppercase tracking-widest mb-4">
           Disponible pour aider
         </h3>
-        <div className="flex flex-wrap gap-2">
-          {/* Predefined categories */}
-          {skillCategories.map(key => {
-            const meta = SKILL_META[key];
-            if (!meta) return null;
-            const Icon = meta.icon;
-            return (
-              <span
-                key={key}
-                className="flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 text-primary px-3 py-1 text-sm"
-              >
-                <Icon className="h-3.5 w-3.5" />
-                {meta.label}
-              </span>
-            );
-          })}
 
-          {/* Specific competences from sitter_profiles */}
-          {specificCompetences.map(comp => (
-            <span
-              key={comp}
-              className="flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 text-primary px-3 py-1 text-sm"
-            >
-              <Check className="h-3.5 w-3.5" />
-              {comp}
-            </span>
-          ))}
-
-          {/* Approved custom skills */}
-          {approvedCustomSkills.map(skill => (
-            <span
-              key={skill.skill_id}
-              className="flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 text-primary px-3 py-1 text-sm"
-            >
-              <Check className="h-3.5 w-3.5" />
-              {skill.label}
-            </span>
+        <div className="space-y-4">
+          {visibleCategories.map((cat) => (
+            <div key={cat.key}>
+              <p className="text-xs font-semibold text-foreground/70 mb-1.5">
+                {cat.label}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {grouped[cat.key as SkillCategoryKey].map((label) => (
+                  <span
+                    key={label}
+                    className="flex items-center gap-1 rounded-full border border-primary/20 bg-card text-foreground px-3 py-1 text-sm"
+                  >
+                    <Check className="h-3 w-3 text-primary" aria-hidden="true" />
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
 
@@ -134,7 +113,7 @@ const PublicSkills = ({ skillCategories, userId, firstName, city }: Props) => {
             first_name: firstName || "Ce membre",
             city: city,
             competences: specificCompetences,
-            custom_skills: approvedCustomSkills.map(s => s.label),
+            custom_skills: approvedCustomSkills.map((s) => s.label),
           }}
         />
       )}
