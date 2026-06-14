@@ -5,14 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger, DrawerClose } from "@/components/ui/drawer";
 import { Calendar } from "@/components/ui/calendar";
 import { format, parseISO, startOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dog, Flower2, Home, Handshake, ChevronLeft, CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,8 +24,31 @@ import { geocodeCity } from "@/lib/geocode";
 import { trackFirstAction } from "@/lib/analytics";
 import { recordMissionCreatedAttribution } from "@/lib/campaignAttribution";
 import { templatesFor, MISSION_TEMPLATES, type MissionTemplate } from "@/data/missionTemplates";
+import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
 
 const EURO_REGEX = /\d+\s*[€]|[€]\s*\d+|\d+\s*euro/i;
+
+/* ── Stepper progress bar ── */
+const StepperBar = ({ current, total }: { current: number; total: number }) => (
+  <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border px-4 py-3">
+    <div className="max-w-2xl mx-auto">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-medium text-muted-foreground">
+          Étape {current} / {total}
+        </span>
+        <span className="text-xs text-muted-foreground">
+          {current === 1 ? "Votre annonce" : "Lieu et date"}
+        </span>
+      </div>
+      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+        <div
+          className="h-full bg-primary rounded-full transition-all duration-300"
+          style={{ width: `${(current / total) * 100}%` }}
+        />
+      </div>
+    </div>
+  </div>
+);
 
 const CreateSmallMission = () => {
   const { user } = useAuth();
@@ -40,10 +61,10 @@ const CreateSmallMission = () => {
   const { level: accessLevel, profileCompletion, canApplyMissions, loading: accessLoading } = useAccessLevel();
 
   const CATEGORIES = useMemo(() => [
-    { value: "animals", label: tp("cat_animals"), icon: Dog },
-    { value: "garden", label: tp("cat_garden"), icon: Flower2 },
-    { value: "house", label: tp("cat_house"), icon: Home },
-    { value: "skills", label: tp("cat_skills"), icon: Handshake },
+    { value: "animals", label: tp("cat_animals") },
+    { value: "garden", label: tp("cat_garden") },
+    { value: "house", label: tp("cat_house") },
+    { value: "skills", label: tp("cat_skills") },
   ], [t]);
 
   const DURATIONS = useMemo(() => [
@@ -54,15 +75,20 @@ const CreateSmallMission = () => {
   ], [t]);
 
   const typeParam = searchParams.get("type");
+  const [step, setStep] = useState(1);
   const [missionType, setMissionType] = useState<"besoin" | "offre">(typeParam === "offre" ? "offre" : "besoin");
   const [category, setCategory] = useState("animals");
   const [title, setTitle] = useState("");
+  const [titleTouched, setTitleTouched] = useState(false);
   const [description, setDescription] = useState("");
+  const [descTouched, setDescTouched] = useState(false);
   const [exchangeOffer, setExchangeOffer] = useState("");
+  const [exchangeTouched, setExchangeTouched] = useState(false);
   const [exchangeError, setExchangeError] = useState("");
   const [city, setCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [dateNeeded, setDateNeeded] = useState("");
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const [duration, setDuration] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [photos, setPhotos] = useState<string[]>([]);
@@ -81,10 +107,7 @@ const CreateSmallMission = () => {
 
   const clearTemplate = () => {
     setAppliedTemplateId(null);
-    setTitle("");
-    setDescription("");
-    setExchangeOffer("");
-    setDuration("");
+    setTitle(""); setDescription(""); setExchangeOffer(""); setDuration("");
   };
 
   const visibleTemplates = templatesFor(missionType);
@@ -92,7 +115,6 @@ const CreateSmallMission = () => {
   useEffect(() => {
     const tParam = searchParams.get("type");
     if (tParam === "besoin" || tParam === "offre") setMissionType(tParam);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -101,16 +123,21 @@ const CreateSmallMission = () => {
     if (title.trim() || description.trim()) return;
     const tpl = MISSION_TEMPLATES.find((x) => x.id === templateId);
     if (tpl) applyTemplate(tpl);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleExchangeChange = (val: string) => {
     setExchangeOffer(val);
-    if (EURO_REGEX.test(val)) {
-      setExchangeError(tp("exchange_error_euros"));
-    } else {
-      setExchangeError("");
-    }
+    setExchangeError(EURO_REGEX.test(val) ? tp("exchange_error_euros") : "");
+  };
+
+  /* Step 1 validation */
+  const step1Valid = title.trim().length >= 3 && description.trim().length >= 10 && exchangeOffer.trim().length >= 2 && !exchangeError;
+
+  const handleNextStep = () => {
+    setTitleTouched(true);
+    setDescTouched(true);
+    setExchangeTouched(true);
+    if (step1Valid) setStep(2);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -122,15 +149,9 @@ const CreateSmallMission = () => {
       toast({ title: tp("toast_required_title"), description: tp("toast_required_desc"), variant: "destructive" });
       return;
     }
-
     setSubmitting(true);
-
     let coords: { lat: number; lng: number } | null = null;
-    try {
-      coords = await geocodeCity(city.trim());
-    } catch {
-      coords = null;
-    }
+    try { coords = await geocodeCity(city.trim()); } catch { coords = null; }
 
     const { data: inserted, error } = await supabase.from("small_missions").insert({
       user_id: user.id,
@@ -153,20 +174,11 @@ const CreateSmallMission = () => {
       toast({ title: tp("toast_error_title"), description: error.message, variant: "destructive" });
       return;
     }
-
     try { await trackFirstAction("mission_created", { category, mission_type: missionType }); } catch {}
     if (inserted?.id) { try { await recordMissionCreatedAttribution(inserted.id); } catch {} }
     await queryClient.invalidateQueries({ queryKey: ["small-missions-all"] });
-
-    const insertedId = inserted?.id;
-    if (!insertedId) {
-      toast({ title: tp("toast_published_title"), description: tp("toast_published_desc"), duration: 3000 });
-      navigate("/petites-missions");
-      return;
-    }
-
     toast({ title: tp("toast_published_title"), description: tp("toast_published_desc"), duration: 3000 });
-    navigate(`/petites-missions/${insertedId}?published=1`);
+    navigate(inserted?.id ? `/petites-missions/${inserted.id}?published=1` : "/petites-missions");
   };
 
   return (
@@ -176,101 +188,111 @@ const CreateSmallMission = () => {
         description={tp("meta_description")}
       />
 
-      <div className="max-w-2xl mx-auto px-4 py-8 space-y-6 pb-40">
+      {(accessLoading || canApplyMissions) && (
+        <StepperBar current={step} total={2} />
+      )}
+
+      <div className="max-w-2xl mx-auto px-4 py-6 space-y-5 pb-36">
         <button
-          onClick={() => navigate("/petites-missions")}
-          className="flex items-center gap-1 text-sm text-foreground/60 hover:text-foreground transition-colors -ml-2"
+          onClick={() => step === 1 ? navigate("/petites-missions") : setStep(1)}
+          className="flex items-center gap-1 text-sm text-foreground/60 hover:text-foreground transition-colors -ml-1"
         >
           <ChevronLeft className="h-4 w-4" />
-          {tp("back")}
+          {step === 1 ? tp("back") : "Étape précédente"}
         </button>
+
         {!accessLoading && !canApplyMissions && (
           <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="mission" />
         )}
 
-        {(accessLoading || canApplyMissions) && <>
-          <div className="rounded-xl p-5 border border-primary/20 bg-primary/5 space-y-2">
-            <h2 className="font-heading font-bold text-foreground">
-              {tp("encouragement_title")}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {missionType === "offre" ? tp("encouragement_offer") : tp("encouragement_need")}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              <span className="font-medium text-foreground">{tp("note_label")}</span> {tp("note_text")}
-            </p>
-            <p className="inline-block text-xs font-medium bg-badge-success text-badge-success-foreground px-3 py-1 rounded-full mt-1">
-              {tp("free_badge")}
-            </p>
-          </div>
+        {(accessLoading || canApplyMissions) && (
+          <form onSubmit={handleSubmit} className="space-y-5">
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-heading">
-                {missionType === "offre" ? tp("card_title_offer") : tp("card_title_need")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-5 pb-32">
+            {/* ── ÉTAPE 1 : Votre annonce ── */}
+            {step === 1 && (
+              <>
+                <div className="rounded-xl p-4 border border-primary/20 bg-primary/5 space-y-1">
+                  <h2 className="font-heading font-bold text-foreground text-base">
+                    {tp("encouragement_title")}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {missionType === "offre" ? tp("encouragement_offer") : tp("encouragement_need")}
+                  </p>
+                  <p className="inline-block text-xs font-medium bg-badge-success text-badge-success-foreground px-3 py-1 rounded-full mt-1">
+                    {tp("free_badge")}
+                  </p>
+                </div>
+
+                {/* Type besoin / offre */}
                 <div className="space-y-2">
-                  <Label>{tp("publishing_label")}</Label>
-                  <div className="flex gap-2">
-                    <Button type="button" variant={missionType === "besoin" ? "default" : "outline"} size="sm" className="flex-1"
-                      onClick={() => setMissionType("besoin")}>
+                  <Label className="text-sm font-medium">{tp("publishing_label")}</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setMissionType("besoin")}
+                      className={cn(
+                        "h-12 rounded-xl border text-sm font-medium transition-colors",
+                        missionType === "besoin"
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background border-border text-foreground hover:border-primary/40"
+                      )}
+                    >
                       {tp("type_need")}
-                    </Button>
-                    <Button type="button" variant={missionType === "offre" ? "default" : "outline"} size="sm" className="flex-1"
-                      onClick={() => setMissionType("offre")}>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMissionType("offre")}
+                      className={cn(
+                        "h-12 rounded-xl border text-sm font-medium transition-colors",
+                        missionType === "offre"
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background border-border text-foreground hover:border-primary/40"
+                      )}
+                    >
                       {tp("type_offer")}
-                    </Button>
+                    </button>
                   </div>
                 </div>
 
-                <div className="space-y-2 rounded-xl border border-primary/20 bg-primary/5 p-4">
+                {/* Templates */}
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <div>
-                      <p className="text-sm font-semibold text-foreground">
+                      <p className="text-sm font-semibold">
                         {missionType === "offre" ? tp("templates_title_offer") : tp("templates_title_need")}
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        {tp("templates_subtitle")}
-                      </p>
+                      <p className="text-xs text-muted-foreground">{tp("templates_subtitle")}</p>
                     </div>
                     {appliedTemplateId && (
-                      <button
-                        type="button"
-                        onClick={clearTemplate}
-                        className="text-xs text-primary hover:underline whitespace-nowrap"
-                      >
+                      <button type="button" onClick={clearTemplate} className="text-xs text-primary hover:underline whitespace-nowrap">
                         {tp("templates_reset")}
                       </button>
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {visibleTemplates.map((tpl) => {
-                      const isActive = appliedTemplateId === tpl.id;
-                      return (
-                        <button
-                          key={tpl.id}
-                          type="button"
-                          onClick={() => applyTemplate(tpl)}
-                          className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
-                            isActive
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : "bg-background text-foreground border-border hover:border-primary/40"
-                          }`}
-                        >
-                          {tpl.label}
-                        </button>
-                      );
-                    })}
+                    {visibleTemplates.map((tpl) => (
+                      <button
+                        key={tpl.id}
+                        type="button"
+                        onClick={() => applyTemplate(tpl)}
+                        className={cn(
+                          "rounded-full border px-3 py-1.5 text-xs transition-colors",
+                          appliedTemplateId === tpl.id
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-background text-foreground border-border hover:border-primary/40"
+                        )}
+                      >
+                        {tpl.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
+                {/* Catégorie */}
                 <div className="space-y-2">
-                  <Label>{tp("category_label")}</Label>
+                  <Label className="text-sm font-medium">{tp("category_label")}</Label>
                   <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-12 text-base"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {CATEGORIES.map((c) => (
                         <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
@@ -279,39 +301,74 @@ const CreateSmallMission = () => {
                   </Select>
                 </div>
 
+                {/* Titre */}
                 <div className="space-y-2">
-                  <Label>{tp("title_label")}</Label>
+                  <Label className="text-sm font-medium">{tp("title_label")}</Label>
                   <Input
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
+                    onBlur={() => setTitleTouched(true)}
                     placeholder={missionType === "offre" ? tp("title_ph_offer") : tp("title_ph_need")}
                     maxLength={120}
+                    className="h-12 text-base"
                   />
+                  {titleTouched && title.trim().length < 3 && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3 shrink-0" /> Au moins 3 caractères requis.
+                    </p>
+                  )}
                 </div>
 
+                {/* Description */}
                 <div className="space-y-2">
-                  <Label>{missionType === "offre" ? tp("desc_label_offer") : tp("desc_label_need")}</Label>
+                  <Label className="text-sm font-medium">
+                    {missionType === "offre" ? tp("desc_label_offer") : tp("desc_label_need")}
+                  </Label>
                   <Textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
+                    onBlur={() => setDescTouched(true)}
                     placeholder={missionType === "offre" ? tp("desc_ph_offer") : tp("desc_ph_need")}
                     rows={4}
+                    className="text-base resize-none"
                   />
+                  {descTouched && description.trim().length < 10 && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3 shrink-0" /> Description trop courte.
+                    </p>
+                  )}
                 </div>
 
+                {/* Échange proposé */}
                 <div className="space-y-2">
-                  <Label>{missionType === "offre" ? tp("exchange_label_offer") : tp("exchange_label_need")}</Label>
+                  <Label className="text-sm font-medium">
+                    {missionType === "offre" ? tp("exchange_label_offer") : tp("exchange_label_need")}
+                  </Label>
                   <Input
                     value={exchangeOffer}
                     onChange={(e) => handleExchangeChange(e.target.value)}
+                    onBlur={() => setExchangeTouched(true)}
                     placeholder={missionType === "offre" ? tp("exchange_ph_offer") : tp("exchange_ph_need")}
+                    className="h-12 text-base"
                   />
                   {exchangeError && (
                     <p className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">
                       {exchangeError}
                     </p>
                   )}
+                  {exchangeTouched && !exchangeError && exchangeOffer.trim().length < 2 && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3 shrink-0" /> Précisez votre contrepartie.
+                    </p>
+                  )}
                 </div>
+              </>
+            )}
+
+            {/* ── ÉTAPE 2 : Lieu et date ── */}
+            {step === 2 && (
+              <>
+                <h2 className="font-heading font-semibold text-lg">Où et quand ?</h2>
 
                 <PostalCodeCityFields
                   city={city}
@@ -321,45 +378,71 @@ const CreateSmallMission = () => {
                     if (partial.postal_code !== undefined) setPostalCode(partial.postal_code);
                   }}
                   required
-                  inputClassName=""
+                  inputClassName="h-12 text-base"
                 />
 
+                {/* Date — Drawer full-screen mobile */}
                 <div className="space-y-2">
-                  <Label>{tp("date_label")}</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
+                  <Label className="text-sm font-medium">{tp("date_label")}</Label>
+                  <Drawer open={calendarOpen} onOpenChange={setCalendarOpen}>
+                    <DrawerTrigger asChild>
+                      <button
                         type="button"
-                        variant="outline"
-                        className={cn("w-full justify-start text-left font-normal", !dateNeeded && "text-muted-foreground")}
+                        className={cn(
+                          "w-full h-12 flex items-center gap-3 px-4 rounded-xl border border-border bg-background text-left text-base transition-colors hover:border-primary/40",
+                          !dateNeeded && "text-muted-foreground"
+                        )}
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateNeeded ? format(parseISO(dateNeeded), "EEEE d MMMM yyyy", { locale: fr }) : <span>{tp("date_placeholder")}</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        locale={fr}
-                        selected={dateNeeded ? parseISO(dateNeeded) : undefined}
-                        onSelect={(d) => setDateNeeded(d ? format(d, "yyyy-MM-dd") : "")}
-                        disabled={(d) => d < startOfDay(new Date())}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                      {dateNeeded && (
-                        <div className="border-t border-border p-2">
-                          <Button type="button" variant="ghost" size="sm" className="w-full" onClick={() => setDateNeeded("")}>{tp("date_clear")}</Button>
-                        </div>
-                      )}
-                    </PopoverContent>
-                  </Popover>
+                        <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        {dateNeeded
+                          ? format(parseISO(dateNeeded), "EEEE d MMMM yyyy", { locale: fr })
+                          : tp("date_placeholder")}
+                      </button>
+                    </DrawerTrigger>
+                    <DrawerContent className="max-h-[85vh]">
+                      <DrawerHeader>
+                        <DrawerTitle>{tp("date_label")}</DrawerTitle>
+                      </DrawerHeader>
+                      <div className="flex flex-col items-center pb-6 px-4 gap-4">
+                        <Calendar
+                          mode="single"
+                          locale={fr}
+                          selected={dateNeeded ? parseISO(dateNeeded) : undefined}
+                          onSelect={(d) => {
+                            setDateNeeded(d ? format(d, "yyyy-MM-dd") : "");
+                            setCalendarOpen(false);
+                          }}
+                          disabled={(d) => d < startOfDay(new Date())}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                        {dateNeeded && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="w-full"
+                            onClick={() => { setDateNeeded(""); setCalendarOpen(false); }}
+                          >
+                            {tp("date_clear")}
+                          </Button>
+                        )}
+                        <DrawerClose asChild>
+                          <Button variant="outline" className="w-full h-12">Fermer</Button>
+                        </DrawerClose>
+                      </div>
+                    </DrawerContent>
+                  </Drawer>
+                  <p className="text-xs text-muted-foreground">Optionnel si la date n'est pas encore fixée.</p>
                 </div>
 
+                {/* Durée */}
                 <div className="space-y-2">
-                  <Label>{tp("duration_label")}</Label>
+                  <Label className="text-sm font-medium">{tp("duration_label")}</Label>
                   <Select value={duration} onValueChange={setDuration}>
-                    <SelectTrigger><SelectValue placeholder={tp("duration_placeholder")} /></SelectTrigger>
+                    <SelectTrigger className="h-12 text-base">
+                      <SelectValue placeholder={tp("duration_placeholder")} />
+                    </SelectTrigger>
                     <SelectContent>
                       {DURATIONS.map((d) => (
                         <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
@@ -368,21 +451,45 @@ const CreateSmallMission = () => {
                   </Select>
                 </div>
 
+                {/* Photos */}
                 <div className="space-y-2">
-                  <Label>{tp("photos_label")}</Label>
+                  <Label className="text-sm font-medium">{tp("photos_label")}</Label>
                   <MissionPhotoUpload userId={user!.id} photos={photos} onChange={setPhotos} />
                 </div>
-
-                <Button type="submit" className="w-full" size="lg" disabled={submitting || !!exchangeError}>
-                  {submitting
-                    ? tp("submit_publishing")
-                    : missionType === "offre" ? tp("submit_offer") : tp("submit_need")}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </>}
+              </>
+            )}
+          </form>
+        )}
       </div>
+
+      {/* CTA sticky au-dessus de la BottomNav */}
+      {(accessLoading || canApplyMissions) && (
+        <div className="fixed bottom-16 inset-x-0 bg-card/95 backdrop-blur border-t border-border px-4 py-3 z-40 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <div className="max-w-2xl mx-auto">
+            {step === 1 ? (
+              <Button
+                type="button"
+                onClick={handleNextStep}
+                className="w-full h-12 text-base font-semibold"
+              >
+                Continuer
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                form=""
+                onClick={handleSubmit as any}
+                disabled={submitting || !!exchangeError}
+                className="w-full h-12 text-base font-semibold"
+              >
+                {submitting
+                  ? tp("submit_publishing")
+                  : missionType === "offre" ? tp("submit_offer") : tp("submit_need")}
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 };
