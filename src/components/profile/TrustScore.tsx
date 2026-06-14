@@ -96,7 +96,7 @@ const TrustScore = ({
         <div className="space-y-1.5">
           {factors.map((f, i) => (
             <div key={i} className="flex items-center gap-2 text-xs">
-              <CheckCircle2 className={`h-3 w-3 shrink-0 ${f.earned ? "text-green-600" : "text-muted-foreground/30"}`} />
+              <CheckCircle2 className={`h-3 w-3 shrink-0 ${f.earned ? "text-success" : "text-muted-foreground/30"}`} />
               <span className={f.earned ? "text-foreground" : "text-muted-foreground"}>
                 {f.label}
               </span>
