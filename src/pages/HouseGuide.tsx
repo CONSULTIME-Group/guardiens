@@ -72,13 +72,13 @@ const emptyGuide = (propertyId: string, userId: string): GuideData => ({
 });
 
 const Section = ({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) => (
-  <div className="mt-6">
+  <section className="mt-6">
     <div className="flex items-center gap-2 mb-3">
-      <Icon className="h-4 w-4 text-primary" />
-      <h3 className="font-heading text-base font-semibold">{title}</h3>
+      <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
+      <h2 className="font-heading text-base font-semibold">{title}</h2>
     </div>
     <div className="space-y-3">{children}</div>
-  </div>
+  </section>
 );
 
 const Field = ({ label, value, onChange, placeholder, type = "text" }: {
