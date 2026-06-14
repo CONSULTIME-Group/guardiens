@@ -1047,8 +1047,7 @@ const SmallMissionsPublic = () => {
    })}</script>
    </Helmet>
 
-   {/* QW#6, Sticky CTA mobile : apparaît après dépassement du hero, masqué en desktop */}
-   <StickyMobileCta onPropose={goToHelp} onAsk={goToCreate} />
+   {/* Sticky CTA mobile retiré, les CTA du hero suffisent, évite la superposition sur les cartes */}
    </div>
   </>
  );
