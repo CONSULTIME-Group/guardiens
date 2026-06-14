@@ -440,7 +440,7 @@ const LeaveReview = () => {
         </p>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
+      <div className="fixed bottom-16 md:bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="max-w-2xl mx-auto">
           <Button className="w-full h-12 text-base font-semibold" onClick={handleSubmit} disabled={!canSubmit || submitting}>
             {submitting ? "Envoi..." : "Envoyer mon avis"}
