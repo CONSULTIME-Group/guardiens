@@ -23,6 +23,7 @@ import QuickActionsCard from "./sitter/QuickActionsCard";
 import AsideArticlesCard from "./sitter/AsideArticlesCard";
 import SectionEyebrow from "./shared/SectionEyebrow";
 import DashSection from "./owner/DashSection";
+import SitterDashboardSkeleton from "./sitter/SitterDashboardSkeleton";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { CheckCircle, Circle, ChevronRight, Newspaper, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
@@ -53,19 +54,7 @@ const SitterDashboard = () => {
     reputation, groupedBadges,
   } = useSitterDashboardData(user?.id);
 
-  if (loading) return (
-    <div className="p-8 flex items-center justify-center">
-      <div className="animate-pulse space-y-4 w-full max-w-lg">
-        <div className="h-8 bg-muted rounded-lg w-2/3" />
-        <div className="grid grid-cols-3 gap-3">
-          <div className="h-24 bg-muted rounded-xl" />
-          <div className="h-24 bg-muted rounded-xl" />
-          <div className="h-24 bg-muted rounded-xl" />
-        </div>
-        <div className="h-32 bg-muted rounded-xl" />
-      </div>
-    </div>
-  );
+  if (loading) return <SitterDashboardSkeleton />;
 
   // Dynamic subtitle
   const subtitle = nextGuard
