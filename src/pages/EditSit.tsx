@@ -681,7 +681,7 @@ const EditSit = () => {
       </fieldset>
 
       {/* Save bar */}
-      <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40">
+      <div className="fixed bottom-16 md:bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="max-w-3xl mx-auto flex items-center gap-3">
           {isDirty && !isLocked && (
             <span className="text-xs text-muted-foreground hidden sm:inline">
