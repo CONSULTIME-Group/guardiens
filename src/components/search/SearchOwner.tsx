@@ -32,6 +32,8 @@ import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 import ReachReassuranceBanner from "@/components/marketing/ReachReassuranceBanner";
 import PresenceBadge from "@/components/messages/PresenceBadge";
 import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
+import { useActiveSittersCount } from "@/hooks/useActiveSittersCount";
+import { useActiveOwnersCount } from "@/hooks/useActiveOwnersCount";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 
