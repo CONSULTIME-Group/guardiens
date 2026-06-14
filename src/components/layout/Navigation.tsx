@@ -406,23 +406,27 @@ export const BottomNav = () => {
   const isOwnerView = effectiveRole === "owner";
   const path = location.pathname;
 
-  // PASS 3 — FAB contextuel : son label/destination s'adapte à la section
-  // pour que l'action soit toujours pertinente sur la page courante.
+  // PASS 3 — FAB contextuel : label & destination s'adaptent à la section ET au rôle.
+  // Propriétaire : action = publier une garde / demander un coup de main.
+  // Gardien : action = proposer son aide (mission type=offre).
   let fab: { to: string; label: string };
   if (path.startsWith("/petites-missions")) {
-    fab = { to: "/petites-missions/creer", label: "Demander" };
+    fab = isOwnerView
+      ? { to: "/petites-missions/creer?type=besoin", label: "Demander" }
+      : { to: "/petites-missions/creer?type=offre", label: "Proposer" };
   } else if (path.startsWith("/sits") || path.startsWith("/recherche-gardiens")) {
-    fab = { to: "/sits/create", label: "Publier" };
-  } else if (path.startsWith("/search") || path.startsWith("/favoris")) {
+    // Sur les pages "annonces de garde", seul un propriétaire peut publier.
+    // Pour un gardien, on bascule sur l'action principale de son rôle (proposer entraide).
     fab = isOwnerView
       ? { to: "/sits/create", label: "Publier" }
-      : { to: "/petites-missions/creer", label: "Demander" };
+      : { to: "/petites-missions/creer?type=offre", label: "Proposer" };
   } else {
-    // Dashboard, profil, settings, etc. → action principale du rôle actif
+    // Dashboard, recherche, favoris, profil, settings : action principale du rôle actif.
     fab = isOwnerView
       ? { to: "/sits/create", label: "Publier" }
-      : { to: "/petites-missions/creer", label: "Demander" };
+      : { to: "/petites-missions/creer?type=offre", label: "Proposer" };
   }
+
 
   // 2 onglets à gauche du FAB
   const leftTabs = [
