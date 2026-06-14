@@ -23,7 +23,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import FillSavoirFaireBanner from "@/components/profile/FillSavoirFaireBanner";
-import MobileProfileProgressBar from "@/components/profile/MobileProfileProgressBar";
+import ProfileProgressStrip from "@/components/profile/ProfileProgressStrip";
 
 const SECTIONS_BASE: Array<{ id: string; num: number; optional?: boolean }> = [
   { id: "identity", num: 1 },
