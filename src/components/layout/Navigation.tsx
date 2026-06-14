@@ -399,14 +399,30 @@ export const BottomNav = () => {
   }, [user]);
 
   const navigate = useNavigate();
+  const scrollDir = useScrollDirection();
+  const hideNav = scrollDir === "down";
 
-  // Signature Dock 2026 — 4 tabs role-aware + FAB central + Plus sheet
+  // Signature Dock 2026 — 4 tabs role-aware + FAB contextuel + Plus sheet
   const isOwnerView = effectiveRole === "owner";
+  const path = location.pathname;
 
-  // FAB central : action de création contextuelle au rôle
-  const fab = isOwnerView
-    ? { to: "/sits/create", label: "Publier" }
-    : { to: "/petites-missions/creer", label: "Demander" };
+  // PASS 3 — FAB contextuel : son label/destination s'adapte à la section
+  // pour que l'action soit toujours pertinente sur la page courante.
+  let fab: { to: string; label: string };
+  if (path.startsWith("/petites-missions")) {
+    fab = { to: "/petites-missions/creer", label: "Demander" };
+  } else if (path.startsWith("/sits") || path.startsWith("/recherche-gardiens")) {
+    fab = { to: "/sits/create", label: "Publier" };
+  } else if (path.startsWith("/search") || path.startsWith("/favoris")) {
+    fab = isOwnerView
+      ? { to: "/sits/create", label: "Publier" }
+      : { to: "/petites-missions/creer", label: "Demander" };
+  } else {
+    // Dashboard, profil, settings, etc. → action principale du rôle actif
+    fab = isOwnerView
+      ? { to: "/sits/create", label: "Publier" }
+      : { to: "/petites-missions/creer", label: "Demander" };
+  }
 
   // 2 onglets à gauche du FAB
   const leftTabs = [
@@ -421,42 +437,26 @@ export const BottomNav = () => {
     { to: "/petites-missions", icon: Handshake, label: "Entraide", badge: missionBadgeCount },
   ];
 
-
   const moreBadge = sitterActionCount + (isOwnerView ? 0 : sitsBadge);
 
   const renderTab = (item: { to: string; icon: typeof Home; label: string; badge?: number }) => {
-    const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + "/");
+    const isActive = path === item.to || path.startsWith(item.to + "/");
     const isSitterLocked = effectiveRole === "sitter" && !hasAccess;
     const isGated = isSitterLocked && item.to === "/search";
 
-    if (isGated) {
-      return (
-        <button
-          key={item.to}
-          type="button"
-          onClick={() => { setGateFeature("la recherche d'annonces"); setGateOpen(true); }}
-          className="flex flex-col items-center justify-center flex-1 gap-1 transition-colors text-muted-foreground relative min-w-0"
-        >
-          <div className="relative">
-            <item.icon className="h-5 w-5" strokeWidth={1.8} />
-            <Crown className="h-[9px] w-[9px] text-amber-500 absolute -top-1 -right-1.5" />
-          </div>
-          <span className="text-[10px] font-medium tracking-wide uppercase truncate max-w-full px-1">{item.label}</span>
-        </button>
-      );
-    }
-
-    return (
-      <NavLink
-        key={item.to}
-        to={item.to}
-        className={cn(
-          "flex flex-col items-center justify-center flex-1 gap-1 transition-colors relative min-w-0",
-          isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
-        )}
-      >
+    const inner = (
+      <>
+        {/* PASS 1 — Active indicator : barre fine en haut du slot actif */}
+        <span
+          className={cn(
+            "absolute top-0 left-1/2 -translate-x-1/2 h-[3px] w-7 rounded-b-full bg-primary transition-all duration-300",
+            isActive ? "opacity-100 scale-x-100" : "opacity-0 scale-x-50"
+          )}
+          aria-hidden="true"
+        />
         <div className="relative">
-          <item.icon className="h-5 w-5" strokeWidth={isActive ? 2.2 : 1.8} />
+          <item.icon className="h-5 w-5 transition-transform duration-200" strokeWidth={isActive ? 2.2 : 1.8} />
+          {isGated && <Crown className="h-[9px] w-[9px] text-amber-500 absolute -top-1 -right-1.5" />}
           {item.badge !== undefined && item.badge > 0 && (
             <span className="absolute -top-1.5 -right-2 bg-destructive text-destructive-foreground text-[9px] rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1 font-bold tabular-nums border-2 border-card">
               {item.badge > 99 ? "99+" : item.badge}
@@ -464,6 +464,30 @@ export const BottomNav = () => {
           )}
         </div>
         <span className="text-[10px] font-medium tracking-wide uppercase truncate max-w-full px-1">{item.label}</span>
+      </>
+    );
+
+    const baseCls = cn(
+      "flex flex-col items-center justify-center flex-1 gap-1 relative min-w-0 pt-1.5 transition-colors active:scale-95 duration-150",
+      isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+    );
+
+    if (isGated) {
+      return (
+        <button
+          key={item.to}
+          type="button"
+          onClick={() => { setGateFeature("la recherche d'annonces"); setGateOpen(true); }}
+          className={baseCls}
+        >
+          {inner}
+        </button>
+      );
+    }
+
+    return (
+      <NavLink key={item.to} to={item.to} className={baseCls}>
+        {inner}
       </NavLink>
     );
   };
@@ -475,14 +499,19 @@ export const BottomNav = () => {
       <ActivateRoleDialog open={roleDialogOpen} onClose={() => setRoleDialogOpen(false)} targetRole={roleDialogTarget} />
 
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+        className={cn(
+          "md:hidden fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))]",
+          // PASS 2 — Hide-on-scroll : libère 80px d'écran utile au scroll bas
+          "transition-transform duration-300 ease-out",
+          hideNav ? "translate-y-[150%]" : "translate-y-0"
+        )}
         aria-label="Navigation mobile"
       >
         <div className="pointer-events-auto mx-auto max-w-md bg-card border border-border/60 shadow-[0_20px_50px_-12px_hsl(var(--primary)/0.18)] rounded-3xl h-16 flex items-center justify-between px-1.5 relative">
 
           {leftTabs.map(renderTab)}
 
-          {/* FAB central — action de création role-aware */}
+          {/* FAB central — action contextuelle */}
           <div className="relative flex-1 flex justify-center -mt-7">
             <button
               type="button"
@@ -490,10 +519,13 @@ export const BottomNav = () => {
               aria-label={fab.label}
               className="group flex flex-col items-center justify-center"
             >
-              <div className="w-14 h-14 bg-primary rounded-2xl shadow-lg shadow-primary/30 flex items-center justify-center text-primary-foreground transition-transform active:scale-95">
-                <Plus className="h-7 w-7" strokeWidth={2} />
+              <div className="w-14 h-14 bg-primary rounded-2xl shadow-lg shadow-primary/30 flex items-center justify-center text-primary-foreground transition-all duration-200 active:scale-90 group-hover:shadow-xl group-hover:shadow-primary/40 group-hover:-translate-y-0.5">
+                <Plus className="h-7 w-7 transition-transform duration-300 group-active:rotate-90" strokeWidth={2} />
               </div>
-              <span className="mt-1.5 text-primary font-serif italic text-[12px] font-semibold tracking-tight leading-none">
+              <span
+                key={fab.label}
+                className="mt-1.5 text-primary font-serif italic text-[12px] font-semibold tracking-tight leading-none animate-in fade-in slide-in-from-bottom-1 duration-300"
+              >
                 {fab.label}
               </span>
             </button>
@@ -504,7 +536,7 @@ export const BottomNav = () => {
           {/* Plus sheet */}
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
-              <button className="flex flex-col items-center justify-center flex-1 gap-1 text-muted-foreground hover:text-foreground transition-colors min-w-0 relative">
+              <button className="flex flex-col items-center justify-center flex-1 gap-1 text-muted-foreground hover:text-foreground transition-colors min-w-0 relative pt-1.5 active:scale-95 duration-150">
                 <div className="relative">
                   <MoreHorizontal className="h-5 w-5" strokeWidth={1.8} />
                   {moreBadge > 0 && (
@@ -516,6 +548,7 @@ export const BottomNav = () => {
                 <span className="text-[10px] font-medium tracking-wide uppercase">Plus</span>
               </button>
             </SheetTrigger>
+
 
             <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh] overflow-y-auto">
               <SheetTitle className="sr-only">Menu</SheetTitle>
