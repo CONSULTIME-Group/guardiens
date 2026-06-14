@@ -528,8 +528,9 @@ const Sits = () => {
           </p>
         </div>
         {activeRole === "owner" ? (
-          <Link to="/sits/create" className="shrink-0 self-start sm:self-auto">
-            <Button className="gap-2 w-full sm:w-auto">
+          // Sur mobile, le FAB MobileStickyCTA porte le CTA "Publier", on évite le doublon.
+          <Link to="/sits/create" className="hidden sm:inline-flex shrink-0 self-auto">
+            <Button className="gap-2">
               <Plus className="h-4 w-4" /> Publier
             </Button>
           </Link>
