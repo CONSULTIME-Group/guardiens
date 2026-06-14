@@ -455,7 +455,12 @@ const Messages = () => {
 
   // ─── Filtering ───
   const filteredConversations = conversations.filter(conv => {
-    const isArchived = conv.archived_by.includes(user?.id || "");
+    // Une conversation est archivée si l'utilisateur l'a archivée manuellement
+    // OU si la garde associée est terminée/annulée (auto-archive cohérent avec Sits.tsx).
+    const isManuallyArchived = conv.archived_by.includes(user?.id || "");
+    const sitStatus = conv.sit?.status;
+    const isAutoArchived = sitStatus === "completed" || sitStatus === "cancelled";
+    const isArchived = isManuallyArchived || isAutoArchived;
     if (pill === "archived") return isArchived;
     if (isArchived) return false;
 
