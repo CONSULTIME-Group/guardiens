@@ -135,12 +135,34 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, lo
       : undefined;
 
   // Si aucune candidature non lue mais des consultées : on n'affiche pas le doublon
-  // d'empty state (déjà couvert par MonAnnonceCard) et on titre directement
-  // « Candidatures déjà consultées ».
+  // d'empty state (déjà couvert par MonAnnonceCard) ni un DashSection avec titre
+  // redondant. On rend un accordéon compact autonome.
   const onlyRead = !loading && unread.length === 0 && read.length > 0;
-  const sectionTitle = onlyRead
-    ? "Candidatures déjà consultées"
-    : "Candidatures reçues non lues";
+
+  if (onlyRead) {
+    return (
+      <Accordion type="single" collapsible className="rounded-2xl border border-border bg-card overflow-hidden">
+        <AccordionItem value="read" className="border-0">
+          <AccordionTrigger className="px-4 py-3 text-sm font-medium text-foreground hover:no-underline">
+            <span className="flex items-center gap-2">
+              <span className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
+                Historique
+              </span>
+              <span className="text-muted-foreground">·</span>
+              {read.length} candidature{read.length > 1 ? "s" : ""} déjà consultée{read.length > 1 ? "s" : ""}
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4">
+            <div className="space-y-3">
+              {read.map(a => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} />)}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    );
+  }
+
+  const sectionTitle = "Candidatures reçues non lues";
 
   return (
     <DashSection title={sectionTitle} action={seeAllAction}>
@@ -182,12 +204,10 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, lo
           </AccordionItem>
         </Accordion>
       ) : read.length > 0 ? (
-        <Accordion type="single" collapsible className={onlyRead ? "" : "mt-4"}>
+        <Accordion type="single" collapsible className="mt-4">
           <AccordionItem value="read" className="border rounded-xl">
             <AccordionTrigger className="px-4 py-3 text-sm text-muted-foreground hover:no-underline">
-              {onlyRead
-                ? `Voir les ${read.length} candidature${read.length > 1 ? "s" : ""} consultée${read.length > 1 ? "s" : ""}`
-                : `Candidatures déjà consultées (${read.length})`}
+              Candidatures déjà consultées ({read.length})
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4">
               <div className="space-y-3">
@@ -200,6 +220,7 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, lo
     </DashSection>
   );
 });
+
 
 ApplicationsSection.displayName = "ApplicationsSection";
 export default ApplicationsSection;
