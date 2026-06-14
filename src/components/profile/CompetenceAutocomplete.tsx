@@ -3,11 +3,13 @@ import { Check, Clock, X, Plus, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { SKILL_CATEGORIES } from "@/lib/skills/categories";
 
 interface Suggestion {
   label: string;
   source: "validated" | "community" | "free";
 }
+
 
 interface CompetenceAutocompleteProps {
   competences: string[];
