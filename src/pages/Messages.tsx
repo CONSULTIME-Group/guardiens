@@ -511,10 +511,14 @@ const Messages = () => {
     const appInfo = conv.application_status ? appStatusLabels[conv.application_status] : null;
     const isOwner = conv.owner_id === user?.id;
     const isMission = !!conv.small_mission_id;
+    const hasSitContext = !!conv.sit_id;
     // Affiche le titre réel de l'annonce/mission (plus utile que « Votre annonce »).
+    // Pour un échange privé (ni sit ni mission), pas de subtitle trompeur.
     const contextTitle = isMission
       ? (conv.small_mission?.title || "Coup de main")
-      : (conv.sit?.title || (isOwner ? "Votre annonce" : "Vous avez postulé"));
+      : hasSitContext
+        ? (conv.sit?.title || (isOwner ? "Votre annonce" : "Vous avez postulé"))
+        : null;
     const roleLabel = contextTitle;
 
     return (
