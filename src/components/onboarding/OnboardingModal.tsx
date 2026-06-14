@@ -246,46 +246,53 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
   const saveCompetencesAndLifestyle = async () => {
     if (!user) return;
 
-    // Whitelist stricte des catégories d'entraide pour éviter qu'une valeur
-    // étrangère (ex: une compétence précise) ne soit classée par erreur ici.
-    const ALLOWED_CATEGORIES = SKILL_CATEGORIES.map(c => c.key);
-    const safeCategories = Array.from(
+    // 2026 : on stocke des compétences SPÉCIFIQUES (« promenade chiens »…),
+    // pas les 4 catégories génériques. Les catégories DB sont DÉRIVÉES
+    // automatiquement pour que le filtre de recherche reste opérant.
+    const safeCompetences = Array.from(
       new Set(
         (pickedCompetences || []).filter(
-          (k): k is string => typeof k === "string" && ALLOWED_CATEGORIES.includes(k)
-        )
-      )
+          (c): c is string => typeof c === "string" && c.trim().length > 0,
+        ),
+      ),
     );
+    const derivedCategories = deriveCategoriesFromCompetences(safeCompetences);
 
-    // Fallback : relire l'existant en base et fusionner pour ne rien écraser
-    // si profiles.skill_categories est absent / null côté state local.
+    // Met à jour profiles.skill_categories (dérivé) + active la visibilité
+    // dans le feed d'entraide à la 1ère compétence ajoutée.
     const { data: existing } = await supabase
       .from("profiles")
-      .select("skill_categories, available_for_help")
+      .select("available_for_help")
       .eq("id", user.id)
       .maybeSingle();
-
-    const existingCategories = Array.isArray((existing as any)?.skill_categories)
-      ? ((existing as any).skill_categories as string[]).filter(c => ALLOWED_CATEGORIES.includes(c))
-      : [];
-
-    const mergedCategories = Array.from(new Set([...existingCategories, ...safeCategories]));
-
     const profileUpdates: Record<string, any> = {
-      skill_categories: mergedCategories,
+      skill_categories: derivedCategories,
     };
-    if (mergedCategories.length > 0 && !(existing as any)?.available_for_help) {
+    if (safeCompetences.length > 0 && !(existing as any)?.available_for_help) {
       profileUpdates.available_for_help = true;
     }
     await supabase.from("profiles").update(profileUpdates).eq("id", user.id);
 
-    // Lifestyle reste sur sitter_profiles (gardien / both uniquement).
-    if ((userRole === "both" || userRole === "sitter") && lifestyle.length > 0) {
+    // Persiste les compétences spécifiques sur la table métier du rôle.
+    if (userRole === "sitter" || userRole === "both") {
       await supabase
         .from("sitter_profiles")
-        .upsert({ user_id: user.id, lifestyle }, { onConflict: "user_id" });
+        .upsert(
+          { user_id: user.id, competences: safeCompetences, ...(lifestyle.length > 0 ? { lifestyle } : {}) },
+          { onConflict: "user_id" },
+        );
+    }
+    if (userRole === "owner" || userRole === "both") {
+      await supabase
+        .from("owner_profiles")
+        .upsert(
+          { user_id: user.id, competences: safeCompetences, competences_disponible: safeCompetences.length > 0 },
+          { onConflict: "user_id" },
+        );
     }
   };
+
+
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.currentTarget.files?.[0];
