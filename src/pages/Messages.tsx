@@ -630,7 +630,7 @@ const Messages = () => {
       {/* ═══ CONVERSATION LIST ═══ */}
       {showList && (
         <div className={`${isMobile && activeConv ? "hidden" : ""} ${isMobile ? "w-full" : "w-80 border-r border-border"} flex flex-col bg-card`}>
-          <div className="sticky top-0 z-10 bg-card border-b border-border px-3 pt-3 pb-2 space-y-2">
+          <div className="sticky top-12 md:top-0 z-10 bg-card border-b border-border px-3 pt-3 pb-2 space-y-2">
             {/* Row 1, title alone (lisible mobile) + role à droite */}
             <div className="flex items-center justify-between gap-2">
               <h1 className="font-heading text-base font-bold truncate">Messagerie</h1>
