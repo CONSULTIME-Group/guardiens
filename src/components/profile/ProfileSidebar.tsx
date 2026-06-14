@@ -36,12 +36,14 @@ interface ProfileSidebarProps {
   role: "sitter" | "owner";
   isFounder?: boolean;
   scoreBreakdown?: ReactNode;
+  /** Slot optionnel rendu uniquement sur desktop (lg+), sous le lien profil public. */
+  trustSlot?: ReactNode;
 }
 
 const ProfileSidebar = ({
   firstName, city, avatarUrl, completion, sections,
   activeSection, dirtySection, onSectionClick, publicProfileUrl, role, isFounder,
-  scoreBreakdown,
+  scoreBreakdown, trustSlot,
 }: ProfileSidebarProps) => {
   const [expandedMissing, setExpandedMissing] = useState<Record<string, boolean>>({});
   const [scoreOpen, setScoreOpen] = useState(false);
