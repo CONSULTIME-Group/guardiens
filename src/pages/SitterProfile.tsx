@@ -23,6 +23,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import FillSavoirFaireBanner from "@/components/profile/FillSavoirFaireBanner";
+import ProfileProgressStrip from "@/components/profile/ProfileProgressStrip";
 
 const SECTIONS_BASE: Array<{ id: string; num: number; optional?: boolean }> = [
   { id: "identity", num: 1 },
@@ -416,7 +417,21 @@ const SitterProfile = () => {
 
       {/* Sticky save bar */}
       <TooltipProvider delayDuration={200}>
-        <div className="fixed left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border py-3 px-4 md:py-4 md:px-6 flex items-center justify-between gap-3 bottom-16 md:bottom-0 before:pointer-events-none before:content-[''] before:absolute before:left-0 before:right-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-background before:to-transparent" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
+        <div className="fixed left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border bottom-16 md:bottom-0 before:pointer-events-none before:content-[''] before:absolute before:left-0 before:right-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-background before:to-transparent">
+          <ProfileProgressStrip
+            completion={liveScore}
+            nextIncomplete={(() => {
+              const next = sidebarSections.find(s => !s.optional && !s.complete);
+              return next ? { id: next.id, label: next.label, missingCount: next.missingCount } : undefined;
+            })()}
+            onJumpToSection={(id) => {
+              setActiveSection(id);
+              requestAnimationFrame(() => {
+                document.getElementById("profile-section-content")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              });
+            }}
+          />
+          <div className="py-3 px-4 md:py-4 md:px-6 flex items-center justify-between gap-3" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
           <p className="text-xs text-muted-foreground" aria-live="polite">
             {saved && !dirty ? (
               <span className="inline-flex items-center gap-1 text-primary">
@@ -453,6 +468,7 @@ const SitterProfile = () => {
               </TooltipContent>
             )}
           </Tooltip>
+          </div>
         </div>
       </TooltipProvider>
     </div>
