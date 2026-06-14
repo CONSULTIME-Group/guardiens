@@ -35,8 +35,8 @@ const MissionsFilterBar = ({
   return (
     <div className="space-y-3">
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="relative min-w-0 w-[170px] shrink-0">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1 min-w-0">
+          <div className="relative min-w-0 w-full sm:w-[170px] sm:shrink-0">
             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
@@ -48,7 +48,7 @@ const MissionsFilterBar = ({
               className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
-          <div className="flex items-center gap-2 flex-1 min-w-0 max-w-[300px]">
+          <div className="flex items-center gap-2 flex-1 min-w-0 sm:max-w-[300px]">
             <span className="text-xs font-medium text-muted-foreground whitespace-nowrap shrink-0">{tp("mission_filters.radius_label")}</span>
             <input
               type="range"
@@ -61,15 +61,15 @@ const MissionsFilterBar = ({
                 setRadiusKm(v >= 100 ? 0 : v);
               }}
               aria-label={tp("mission_filters.radius_aria")}
-              className="flex-1 h-2 accent-[hsl(var(--primary))] cursor-pointer"
+              className="flex-1 min-w-0 h-2 accent-[hsl(var(--primary))] cursor-pointer"
             />
-            <span className="text-xs font-semibold text-foreground whitespace-nowrap min-w-[70px] text-right tabular-nums">
+            <span className="text-xs font-semibold text-foreground whitespace-nowrap shrink-0 min-w-[60px] text-right tabular-nums">
               {radiusKm === 0 ? tp("mission_filters.radius_all") : tp("mission_filters.radius_km", { km: radiusKm })}
             </span>
+            {geocodingOrigin && (
+              <span className="text-xs text-muted-foreground animate-pulse shrink-0">…</span>
+            )}
           </div>
-          {geocodingOrigin && (
-            <span className="text-xs text-muted-foreground animate-pulse">…</span>
-          )}
         </div>
 
         <div className="relative flex-1 min-w-0 max-w-[300px]">
