@@ -729,6 +729,15 @@ export default function PublicSitterProfile() {
   statsItems.push(`${totalBadgeCount} écusson${totalBadgeCount !== 1 ? "s" : ""}`);
 
   // Relative date helper
+  const anciennete = (dateStr: string) => {
+    const months = Math.floor((Date.now() - new Date(dateStr).getTime()) / (30 * 86400000));
+    if (months < 1) return 'Ce mois';
+    if (months < 12) return `${months} mois`;
+    const y = Math.floor(months / 12);
+    return `${y} an${y > 1 ? 's' : ''}`;
+  };
+
+  // Relative date helper
   const relativeDate = (dateStr: string) => {
     const diff = Date.now() - new Date(dateStr).getTime();
     const days = Math.floor(diff / 86400000);
@@ -1037,6 +1046,26 @@ export default function PublicSitterProfile() {
           </div>
         );
       })()}
+
+      {/* ── STATS STRIP MOBILE (preuve sociale immédiate) ── */}
+      {profile && (
+        <div className="md:hidden overflow-x-auto scrollbar-none bg-background/95 backdrop-blur-sm border-b border-border">
+          <div className="flex divide-x divide-border/60 min-w-max">
+            {([
+              reviewCount > 0 ? { label: 'Note', value: `${avgRating.toFixed(1)}★` } : null,
+              { label: 'Gardes', value: String(completedSits) },
+              profile?.created_at ? { label: 'Membre depuis', value: anciennete(profile.created_at) } : null,
+              totalBadgeCount > 0 ? { label: 'Écussons', value: String(totalBadgeCount) } : null,
+              externalExperiences.length > 0 ? { label: 'Expé. vérif.', value: String(externalExperiences.length) } : null,
+            ] as Array<{ label: string; value: string } | null>).filter((s): s is { label: string; value: string } => s !== null).map((s) => (
+              <div key={s.label} className="flex flex-col items-center justify-center px-4 py-2.5 shrink-0">
+                <span className="text-sm font-bold text-foreground font-heading leading-tight tabular-nums">{s.value}</span>
+                <span className="text-[10px] uppercase tracking-wide text-muted-foreground font-body mt-0.5 whitespace-nowrap">{s.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── BARRE D'ONGLETS, visible si ≥ 2 onglets ── */}
       {availableTabs > 1 && (
@@ -1453,107 +1482,115 @@ export default function PublicSitterProfile() {
             </Tabs>
           </div>
 
-          {/*, MOBILE : flux vertical avec ancres, */}
-          <div className="md:hidden space-y-10">
-            {/* À propos */}
-            <section id="apropos" aria-label={`À propos de ${firstName}`} className="scroll-mt-24">
-              <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
-                À propos
-              </h2>
-              {(motivation || bio) ? (
-                <div className="space-y-3">
-                  {motivation && (
-                    <p className="text-base text-foreground leading-relaxed font-body">{motivation}</p>
-                  )}
-                  {bio && (
-                    <p className="text-sm text-foreground/75 leading-relaxed font-body whitespace-pre-line">{bio}</p>
-                  )}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground italic font-body">
-                  Pas encore de présentation.
-                </p>
+          {/* MOBILE : onglets sticky scrollables (forceMount pour SEO) */}
+          <div className="md:hidden">
+            <Tabs defaultValue="apropos" className="w-full">
+              <TabsList className="sticky top-[49px] z-10 w-full flex overflow-x-auto scrollbar-none justify-start rounded-none border-b border-border bg-background/95 backdrop-blur-sm h-auto p-0 gap-0 [&>*]:rounded-none [&>*]:border-b-2 [&>*]:border-transparent [&>*[data-state=active]]:border-primary [&>*[data-state=active]]:text-primary [&>*[data-state=active]]:bg-transparent [&>*[data-state=active]]:shadow-none">
+                <TabsTrigger value="apropos" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
+                  À propos
+                </TabsTrigger>
+                {reviewCount > 0 && (
+                  <TabsTrigger value="avis" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
+                    Avis&nbsp;({reviewCount})
+                  </TabsTrigger>
+                )}
+                <TabsTrigger value="pratique" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
+                  Pratique
+                </TabsTrigger>
+                {gallery.length > 0 && (
+                  <TabsTrigger value="galerie" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
+                    Galerie
+                  </TabsTrigger>
+                )}
+                {((userBadges && userBadges.length > 0) || profile?.created_at) && (
+                  <TabsTrigger value="confiance" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
+                    Confiance
+                  </TabsTrigger>
+                )}
+              </TabsList>
+
+              {/* Onglet À propos */}
+              <TabsContent value="apropos" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 space-y-5">
+                {(motivation || bio) ? (
+                  <div className="space-y-3">
+                    {motivation && (
+                      <p className="text-base text-foreground leading-relaxed font-body">{motivation}</p>
+                    )}
+                    {bio && (
+                      <p className="text-sm text-foreground/75 leading-relaxed font-body whitespace-pre-line">{bio}</p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground italic font-body">
+                    Pas encore de présentation.
+                  </p>
+                )}
+                <PublicExperiences experiences={externalExperiences} />
+              </TabsContent>
+
+              {/* Onglet Avis */}
+              {reviewCount > 0 && (
+                <TabsContent value="avis" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5">
+                  <Tabs defaultValue={gardeReviews.length > 0 ? "gardes" : "missions"} className="w-full">
+                    <TabsList className="mb-3">
+                      <TabsTrigger value="gardes">Gardes{gardeReviews.length > 0 ? ` (${gardeReviews.length})` : ''}</TabsTrigger>
+                      <TabsTrigger value="missions">Missions{missionReviews.length > 0 ? ` (${missionReviews.length})` : ''}</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="gardes" forceMount>
+                      {gardeReviews.length === 0 ? (
+                        <p className="text-sm text-muted-foreground italic py-2 font-body">Pas encore d'avis de garde.</p>
+                      ) : (
+                        <ReviewGrid
+                          reviews={gardeReviews}
+                          showAll={showAllGardeReviews}
+                          setShowAll={setShowAllGardeReviews}
+                          badgesBySitId={badgesBySitId}
+                        />
+                      )}
+                    </TabsContent>
+                    <TabsContent value="missions" forceMount>
+                      {missionReviews.length === 0 ? (
+                        <p className="text-sm text-muted-foreground italic py-2 font-body">Pas encore d'avis de mission.</p>
+                      ) : (
+                        <ReviewGrid
+                          reviews={missionReviews}
+                          showAll={showAllMissionReviewsTab}
+                          setShowAll={setShowAllMissionReviewsTab}
+                        />
+                      )}
+                    </TabsContent>
+                  </Tabs>
+                </TabsContent>
               )}
-            </section>
 
-            <PublicExperiences experiences={externalExperiences} />
+              {/* Onglet Pratique */}
+              <TabsContent value="pratique" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5">
+                <PracticalGrid
+                  animalTypes={animalTypes}
+                  sitterProfile={sitterProfile}
+                  hasVehicle={hasVehicle}
+                  radius={radius}
+                  city={city}
+                  competences={competences}
+                  lifestyle={lifestyle}
+                  preferredEnvironments={preferredEnvironments}
+                  typeLine={typeLine}
+                  durationLabel={durationLabel}
+                  frequencyLabel={frequencyLabel}
+                  noticeLabel={noticeLabel}
+                />
+              </TabsContent>
 
-            {/* Avis */}
-            {reviewCount > 0 && (
-              <section id="avis" aria-label="Avis reçus" className="scroll-mt-24">
-                <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
-                  Avis ({reviewCount})
-                </h2>
-                <Tabs defaultValue={gardeReviews.length > 0 ? "gardes" : "missions"} className="w-full">
-                  <TabsList className="mb-3">
-                    <TabsTrigger value="gardes">Gardes{gardeReviews.length > 0 ? ` (${gardeReviews.length})` : ''}</TabsTrigger>
-                    <TabsTrigger value="missions">Missions{missionReviews.length > 0 ? ` (${missionReviews.length})` : ''}</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="gardes" forceMount>
-                    {gardeReviews.length === 0 ? (
-                      <p className="text-sm text-muted-foreground italic py-2 font-body">Pas encore d'avis de garde.</p>
-                    ) : (
-                      <ReviewGrid
-                        reviews={gardeReviews}
-                        showAll={showAllGardeReviews}
-                        setShowAll={setShowAllGardeReviews}
-                        badgesBySitId={badgesBySitId}
-                      />
-                    )}
-                  </TabsContent>
-                  <TabsContent value="missions" forceMount>
-                    {missionReviews.length === 0 ? (
-                      <p className="text-sm text-muted-foreground italic py-2 font-body">Pas encore d'avis de mission.</p>
-                    ) : (
-                      <ReviewGrid
-                        reviews={missionReviews}
-                        showAll={showAllMissionReviewsTab}
-                        setShowAll={setShowAllMissionReviewsTab}
-                      />
-                    )}
-                  </TabsContent>
-                </Tabs>
-              </section>
-            )}
+              {/* Onglet Galerie */}
+              {gallery.length > 0 && (
+                <TabsContent value="galerie" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5">
+                  <GallerySimple visibleGallery={visibleGallery} setLightboxIdx={setLightboxIdx} />
+                </TabsContent>
+              )}
 
-            {/* Pratique */}
-            <section id="infos-pratiques" aria-label="Infos pratiques" className="scroll-mt-24">
-              <h2 className="text-lg font-semibold text-foreground font-display mb-3">
-                Infos pratiques
-              </h2>
-              <PracticalGrid
-                animalTypes={animalTypes}
-                sitterProfile={sitterProfile}
-                hasVehicle={hasVehicle}
-                radius={radius}
-                city={city}
-                competences={competences}
-                lifestyle={lifestyle}
-                preferredEnvironments={preferredEnvironments}
-                typeLine={typeLine}
-                durationLabel={durationLabel}
-                frequencyLabel={frequencyLabel}
-                noticeLabel={noticeLabel}
-              />
-            </section>
-
-            {/* Galerie */}
-            {gallery.length > 0 && (
-              <section id="galerie" aria-label="Galerie" className="scroll-mt-24">
-                <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
-                  Galerie ({gallery.length})
-                </h2>
-                <GallerySimple visibleGallery={visibleGallery} setLightboxIdx={setLightboxIdx} />
-              </section>
-            )}
-
-            {/* Confiance */}
-            {((userBadges && userBadges.length > 0) || profile?.created_at) && (
-              <section id="confiance" aria-label="Confiance et vérifications" className="scroll-mt-24">
-                <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
-                  Confiance & vérifications
-                </h2>
-                <div className="space-y-4">
+              {/* Onglet Confiance */}
+              {((userBadges && userBadges.length > 0) || profile?.created_at) && (
+                <TabsContent value="confiance" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 space-y-5" id="confiance">
                   {userBadges && userBadges.length > 0 && (
                     <>
                       <SpecialBadgeHighlight userBadges={userBadges} />
@@ -1572,14 +1609,14 @@ export default function PublicSitterProfile() {
                     lastActivity={sitterProfile?.last_seen_at ?? null}
                     firstName={firstName}
                   />
-                </div>
-              </section>
-            )}
+                </TabsContent>
+              )}
+            </Tabs>
           </div>
 
           {/* CTA sticky bottom mobile */}
           {showCTA && (
-            <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-lg">
+            <div className="md:hidden fixed bottom-16 left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] shadow-lg">
               {!isAuthenticated && (
                 <Link
                   to={`/inscription?redirect=/gardiens/${id}`}
