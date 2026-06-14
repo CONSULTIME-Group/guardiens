@@ -305,19 +305,21 @@ const SitImmersiveContent = ({
           </Tabs>
         </div>
 
-        <SitSidebar
-          hasOwnerCard={hasOwnerCard}
-          owner={owner}
-          ownerName={ownerName}
-          cityName={cityName}
-          ownerBio={ownerBio}
-          hasLocalGuide={hasLocalGuide}
-          citySlug={citySlug}
-          showSittersLink={showSittersLink}
-          sittersLink={sittersLink}
-          sittersScope={sittersScope ?? null}
-          deptCode={deptCode}
-        />
+        <div className="lg:sticky lg:top-32 lg:self-start">
+          <SitSidebar
+            hasOwnerCard={hasOwnerCard}
+            owner={owner}
+            ownerName={ownerName}
+            cityName={cityName}
+            ownerBio={ownerBio}
+            hasLocalGuide={hasLocalGuide}
+            citySlug={citySlug}
+            showSittersLink={showSittersLink}
+            sittersLink={sittersLink}
+            sittersScope={sittersScope ?? null}
+            deptCode={deptCode}
+          />
+        </div>
       </div>
     </div>
   );
