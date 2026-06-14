@@ -329,6 +329,7 @@ const OwnerProfilePage = () => {
         <div className="fixed bottom-16 md:bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border before:pointer-events-none before:content-[''] before:absolute before:left-0 before:right-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-background before:to-transparent">
           <ProfileProgressStrip
             completion={liveScore}
+            publicProfileUrl={user ? `/gardiens/${user.id}?tab=proprio` : undefined}
             nextIncomplete={(() => {
               const next = sidebarSections.find(s => !s.optional && !s.complete);
               return next ? { id: next.id, label: next.label, missingCount: next.missingCount } : undefined;
