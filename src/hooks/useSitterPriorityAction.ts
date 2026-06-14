@@ -90,7 +90,7 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
         title: "Déclarez au moins une compétence pour apparaître dans le feed d'entraide.",
         description: "Bricolage, jardin, courses, garde d'enfants : ce que vous savez faire devient un atout pour les gens du coin.",
         ctaLabel: "Ajouter mes compétences",
-        ctaTo: "/profile?focus=skills",
+        ctaTo: "/profile?section=competences",
         urgency: "medium",
       };
     }
