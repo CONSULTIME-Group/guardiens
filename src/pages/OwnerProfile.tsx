@@ -326,7 +326,21 @@ const OwnerProfilePage = () => {
 
       {/* Sticky save bar */}
       <TooltipProvider delayDuration={200}>
-        <div style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }} className="fixed bottom-16 md:bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border py-3 px-4 md:py-4 md:px-6 flex items-center justify-between gap-3 before:pointer-events-none before:content-[''] before:absolute before:left-0 before:right-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-background before:to-transparent">
+        <div className="fixed bottom-16 md:bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border before:pointer-events-none before:content-[''] before:absolute before:left-0 before:right-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-background before:to-transparent">
+          <ProfileProgressStrip
+            completion={liveScore}
+            nextIncomplete={(() => {
+              const next = sidebarSections.find(s => !s.optional && !s.complete);
+              return next ? { id: next.id, label: next.label, missingCount: next.missingCount } : undefined;
+            })()}
+            onJumpToSection={(id) => {
+              setActiveSection(id);
+              requestAnimationFrame(() => {
+                document.getElementById("profile-section-content")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              });
+            }}
+          />
+          <div style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }} className="py-3 px-4 md:py-4 md:px-6 flex items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground" aria-live="polite">
             {saved && !dirty ? (
               <span className="inline-flex items-center gap-1 text-primary">
