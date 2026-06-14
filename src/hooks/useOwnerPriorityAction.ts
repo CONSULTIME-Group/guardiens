@@ -26,6 +26,7 @@ export type OwnerPriorityAction = {
     | "review"
     | "stalled"
     | "verify"
+    | "pets"
     | "publish"
     | "explore";
   eyebrow: string;
@@ -43,11 +44,12 @@ interface Input {
   verificationStatus: string | null;
   nearbySittersCount?: number;
   nearbySittersRadius?: number | null;
+  petsCount?: number;
 }
 
 export function useOwnerPriorityAction(input: Input): OwnerPriorityAction {
   return useMemo(() => {
-    const { sits, pendingAppCount, pendingReviews, verificationStatus, nearbySittersCount, nearbySittersRadius } = input;
+    const { sits, pendingAppCount, pendingReviews, verificationStatus, nearbySittersCount, nearbySittersRadius, petsCount = 0 } = input;
     const now = new Date();
 
     // 1. Garde en cours
@@ -159,7 +161,20 @@ export function useOwnerPriorityAction(input: Input): OwnerPriorityAction {
       };
     }
 
-    // 7. Aucune annonce du tout
+    // 7. Aucun animal déclaré, bloque la qualité des candidatures
+    if (petsCount === 0) {
+      return {
+        variant: "pets",
+        eyebrow: "Présentez vos animaux",
+        title: "Ajoutez vos animaux pour recevoir des candidatures qualifiées.",
+        description: "Les gardiens choisissent en fonction de l'espèce, du caractère et des soins attendus. Sans animaux, votre annonce reste abstraite.",
+        ctaLabel: "Ajouter mes animaux",
+        ctaTo: "/owner-profile?section=animals",
+        urgency: "high",
+      };
+    }
+
+    // 8. Aucune annonce du tout
     if (sits.length === 0) {
       return {
         variant: "publish",
@@ -189,5 +204,6 @@ export function useOwnerPriorityAction(input: Input): OwnerPriorityAction {
     input.verificationStatus,
     input.nearbySittersCount,
     input.nearbySittersRadius,
+    input.petsCount,
   ]);
 }
