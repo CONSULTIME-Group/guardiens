@@ -30,7 +30,8 @@ import { SearchEmptyState } from "@/components/search/listing/SearchEmptyState";
 import { SitterDiscoveryBanner } from "@/components/search/SitterDiscoveryBanner";
 import { OutOfZoneBanner } from "@/components/search/listing/OutOfZoneBanner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, MapPin, Calendar, Star, Lock, Zap, Sparkles, Globe2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Search, MapPin, Calendar, Star, Lock, Zap, Sparkles, Globe2, X } from "lucide-react";
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
@@ -982,20 +983,16 @@ const SearchSitter = () => {
  </div>
  )}
  {/* ─── Tabs ─── */}
- <div className="px-6 pt-4 border-b border-border">
- <div className="flex gap-6">
+  <div className="px-4 sm:px-6 pt-3 sm:pt-4 border-b border-border">
+  <div className="flex gap-1 sm:gap-6">
 					{([
-					{ key: "sits" as SearchTab, label: "Gardes" },
+				{ key: "sits" as SearchTab, label: "Annonces" },
 					{ key: "missions" as SearchTab, label: "Coup de main" },
 					]).map(({ key, label }) => (
  <button
  key={key}
  onClick={() => setTab(key)}
- className={`pb-2 text-sm transition-colors ${
- tab === key
- ? "font-medium text-foreground border-b-2 border-primary"
- : "text-muted-foreground hover:text-foreground"
- }`}
+  className={`flex-1 sm:flex-none min-h-[44px] px-3 sm:px-0 pb-2 text-sm font-medium transition-colors ${tab === key ? "text-foreground border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"}`}
  >
  {label}
  </button>
@@ -1201,6 +1198,27 @@ const SearchSitter = () => {
         }}
       />
     </div>
+   {/* ─── Chips filtres actifs avec dismiss X ─── */}
+   {animalTypes.map((animal) => (
+     <span key={animal} className="snap-start inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-full bg-primary/10 border border-primary text-primary text-xs font-semibold shrink-0 whitespace-nowrap">
+       {animal}
+       <button
+         aria-label={`Retirer ${animal}`}
+         onClick={() => toggleAnimalFilter(animal)}
+         className="rounded-full hover:bg-primary/20 p-0.5"
+       >
+         <X className="h-3 w-3" />
+       </button>
+     </span>
+   ))}
+   {verifiedOnly && (
+     <span className="snap-start inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-full bg-primary/10 border border-primary text-primary text-xs font-semibold shrink-0 whitespace-nowrap">
+       Vérifié
+       <button aria-label="Retirer filtre Vérifié" onClick={() => setVerifiedOnly(false)} className="rounded-full hover:bg-primary/20 p-0.5">
+         <X className="h-3 w-3" />
+       </button>
+     </span>
+   )}
    <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:hidden" />
    </div>
    </div>
@@ -1282,7 +1300,7 @@ const SearchSitter = () => {
  </Tooltip>
  </TooltipProvider>
  )}
- <div className="flex border border-border rounded-lg overflow-hidden shrink-0">
+  <div className="hidden sm:flex border border-border rounded-lg overflow-hidden shrink-0">
  <button
  onClick={() => setViewMode("list")}
  aria-label="Vue grille"
@@ -1612,7 +1630,15 @@ const SearchSitter = () => {
  {viewMode === "list" ? (
  <div className="p-6">
  {loading ? (
- <p className="text-muted-foreground py-10 text-center">Recherche en cours...</p>
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-6 sm:gap-y-10">
+    {Array.from({ length: 6 }).map((_, i) => (
+      <div key={i} className="space-y-3">
+        <Skeleton className="aspect-[4/3] w-full rounded-xl" />
+        <Skeleton className="h-4 w-3/4 rounded" />
+        <Skeleton className="h-3 w-1/2 rounded" />
+      </div>
+    ))}
+  </div>
  ) : tab === "missions" && missionSubTab === "members" ? (
  availableMembers.length === 0 ? (
  <div className="text-center py-16 space-y-3">
@@ -1764,7 +1790,7 @@ const SearchSitter = () => {
     )}
     <div className={tab === "missions"
       ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4"
-      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 lg:gap-x-8 gap-y-10 lg:gap-y-12"}>
+      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 lg:gap-x-8 gap-y-6 sm:gap-y-10 lg:gap-y-12"}>
     {results.map((item, idx) => renderCard(item, idx))}
     </div>
   </>
@@ -1785,6 +1811,23 @@ const SearchSitter = () => {
  />
  </Suspense>
  )}
+
+  {/* ─── FAB mobile toggle carte/liste ─── */}
+  {isMobile && tab === "sits" && (
+    <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[1200] sm:hidden">
+      <button
+        onClick={() => setViewMode(viewMode === "list" ? "map" : "list")}
+        className="inline-flex items-center gap-2 rounded-full bg-foreground text-background shadow-xl px-5 py-3 text-sm font-semibold transition-transform active:scale-95"
+        aria-label={viewMode === "list" ? "Voir la carte" : "Voir la liste"}
+      >
+        {viewMode === "list" ? (
+          <><MapIcon className="h-4 w-4" />Carte</>
+        ) : (
+          <><LayoutGrid className="h-4 w-4" />Liste</>
+        )}
+      </button>
+    </div>
+  )}
  </div>
  );
 };

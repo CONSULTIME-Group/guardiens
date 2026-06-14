@@ -15,6 +15,7 @@ import { format, isPast } from "date-fns";
 import { fr } from "date-fns/locale";
 import { appStatusBadge } from "@/lib/messageStatus";
 import ContextHeaderCard from "./ContextHeaderCard";
+import PresenceBadge from "./PresenceBadge";
 
 interface ConversationHeaderProps {
   conv: any;
@@ -244,9 +245,9 @@ const ConversationHeader = ({
           {conv.other_user?.id ? (
             <Link to={`/gardiens/${conv.other_user.id}`} className="shrink-0">
               {conv.other_user?.avatar_url ? (
-                <img src={conv.other_user.avatar_url} alt={`Photo de ${conv.other_user.first_name || 'utilisateur'}`} className="w-10 h-10 rounded-full object-cover hover:ring-2 hover:ring-primary/50 transition-all" />
+                <img src={conv.other_user.avatar_url} alt={`Photo de ${conv.other_user.first_name || 'utilisateur'}`} className="w-11 h-11 rounded-full object-cover hover:ring-2 hover:ring-primary/50 transition-all" />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm hover:ring-2 hover:ring-primary/50 transition-all">
+                <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm hover:ring-2 hover:ring-primary/50 transition-all">
                   {conv.other_user?.first_name?.charAt(0)?.toUpperCase() || "?"}
                 </div>
               )}
@@ -254,7 +255,7 @@ const ConversationHeader = ({
           ) : conv.other_user?.avatar_url ? (
             <img src={conv.other_user.avatar_url} alt={`Photo de ${conv.other_user.first_name || 'utilisateur'}`} className="w-10 h-10 rounded-full object-cover" />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm">
+            <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm">
               {conv.other_user?.first_name?.charAt(0)?.toUpperCase() || "?"}
             </div>
           )}
@@ -282,6 +283,13 @@ const ConversationHeader = ({
                 </span>
               )}
             </div>
+            {/* Présence inline sous le nom — RGPD : show_last_seen géré côté appelant */}
+            {conv.other_user?.last_seen_at && conv.other_user?.show_last_seen !== false && (
+              <PresenceBadge
+                lastSeenAt={conv.other_user.last_seen_at}
+                variant="inline"
+              />
+            )}
           </div>
         </div>
 

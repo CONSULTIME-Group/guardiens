@@ -17,6 +17,8 @@ interface MessageBubbleProps {
   };
   isMe: boolean;
   readerRole?: "proprio" | "gardien";
+  /** N'afficher le timestamp que sur la dernière bulle d'une séquence consécutive */
+  isLastInGroup?: boolean;
 }
 
 const systemMessageText = (
@@ -64,7 +66,7 @@ const systemMessageText = (
   return map[metadata.action]?.[readerRole] || fallback;
 };
 
-const MessageBubble = ({ msg, isMe, readerRole = "gardien" }: MessageBubbleProps) => {
+const MessageBubble = ({ msg, isMe, readerRole = "gardien", isLastInGroup = true }: MessageBubbleProps) => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
   if (msg.is_system) {
@@ -84,7 +86,14 @@ const MessageBubble = ({ msg, isMe, readerRole = "gardien" }: MessageBubbleProps
     <>
       <div className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
         <div
-          className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${isMe ? "rounded-br-md bg-primary/15" : "rounded-bl-md bg-muted"}`}
+          className={[
+            "max-w-[78%] px-4 py-2.5",
+            "rounded-2xl",
+            // Asymétrie 2026 : coin 4 px côté origine
+            isMe
+              ? "rounded-br-[4px] bg-primary text-primary-foreground"
+              : "rounded-bl-[4px] bg-muted text-foreground",
+          ].join(" ")}
         >
           {msg.photo_url && (
             <button
@@ -93,18 +102,32 @@ const MessageBubble = ({ msg, isMe, readerRole = "gardien" }: MessageBubbleProps
               className="block mb-1 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="Agrandir la photo partagée"
             >
-              <img src={msg.photo_url} alt="Photo partagée dans la conversation" loading="lazy" className="max-w-full max-h-48 rounded-lg object-cover hover:opacity-90 transition-opacity cursor-zoom-in" />
+              <img
+                src={msg.photo_url}
+                alt="Photo partagée dans la conversation"
+                loading="lazy"
+                className="max-w-full max-h-52 rounded-lg object-cover hover:opacity-90 transition-opacity cursor-zoom-in"
+              />
             </button>
           )}
-          {msg.content && <p className="text-sm whitespace-pre-line break-words text-foreground">{msg.content}</p>}
-          <div className={`flex items-center gap-1 mt-1 ${isMe ? "justify-end" : "justify-start"}`}>
-            <span className="text-[10px] text-muted-foreground">{format(new Date(msg.created_at), "HH:mm")}</span>
-            {isMe && (
-              msg.read_at
-                ? <CheckCheck className="h-3 w-3 text-primary" />
-                : <Check className="h-3 w-3 text-muted-foreground" />
-            )}
-          </div>
+          {msg.content && (
+            <p className={`text-sm whitespace-pre-line break-words leading-[1.5] ${isMe ? "text-primary-foreground" : "text-foreground"}`}>
+              {msg.content}
+            </p>
+          )}
+          {/* Timestamp + statut lecture : uniquement sur la dernière bulle du groupe */}
+          {isLastInGroup && (
+            <div className={`flex items-center gap-1 mt-1 ${isMe ? "justify-end" : "justify-start"}`}>
+              <span className={`text-[10px] ${isMe ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                {format(new Date(msg.created_at), "HH:mm")}
+              </span>
+              {isMe && (
+                msg.read_at
+                  ? <CheckCheck className="h-3 w-3 text-primary-foreground/70" />
+                  : <Check className="h-3 w-3 text-primary-foreground/50" />
+              )}
+            </div>
+          )}
         </div>
       </div>
 

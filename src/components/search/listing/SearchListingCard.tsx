@@ -272,15 +272,15 @@ const SearchListingCard = ({
       </div>
 
       {/* ─── Body, editorial ─── */}
-      <div className="mt-6 px-1">
+      <div className="mt-3 sm:mt-6 px-1">
         <div className="flex items-start justify-between gap-3">
-          <h3 className="font-heading text-2xl md:text-[26px] font-medium leading-[1.15] text-foreground tracking-tight line-clamp-2">
+          <h3 className="font-heading text-[17px] sm:text-xl md:text-[26px] font-medium leading-[1.2] text-foreground tracking-tight line-clamp-2">
             {item.title || "Sans titre"}
           </h3>
           {item.owner?.is_founder && <div className="shrink-0 pt-1"><FounderBadge size="sm" /></div>}
         </div>
 
-        <div className="mt-3 flex items-center justify-between gap-3">
+        <div className="mt-2 sm:mt-3 flex items-center justify-between gap-3">
           <p className={`text-[11px] uppercase tracking-[0.18em] font-light truncate ${isOutOfZone ? "text-foreground" : "text-muted-foreground"}`}>
             <span className="truncate">{item.owner?.city || ""}</span>
             {item.distance != null && (

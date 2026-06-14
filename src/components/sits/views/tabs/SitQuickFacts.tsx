@@ -1,9 +1,11 @@
 /**
  * Cartes "quick facts" : Dates, Logement, Animaux, Cadre.
- * Chaque carte ne s'affiche que si la donnée existe.
- * Aucune icône Lucide décorative, texte pur (mem://constraints/no-icons-in-content).
+ * Mobile-first 2026 : dates sur une ligne avec durée mise en valeur,
+ * texte hiérarchisé, cibles tactiles généreuses.
  */
-import { formatDate, getEnvMeta } from "./sitMeta";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { getEnvMeta } from "./sitMeta";
 
 interface SitQuickFactsProps {
   sit: any;
@@ -14,6 +16,8 @@ interface SitQuickFactsProps {
   durationDays: number | null;
 }
 
+const fmtShort = (d: string) => format(new Date(d), "d MMM yyyy", { locale: fr });
+
 const Card = ({
   label,
   children,
@@ -21,8 +25,8 @@ const Card = ({
   label: string;
   children: React.ReactNode;
 }) => (
-  <div className="rounded-2xl border border-border bg-card p-4">
-    <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1.5">
+  <div className="rounded-2xl border border-border bg-card px-4 py-3.5 min-h-[72px] flex flex-col justify-center">
+    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
       {label}
     </p>
     {children}
@@ -40,16 +44,24 @@ const SitQuickFacts = ({
   const cards: React.ReactNode[] = [];
 
   if (sit?.start_date || sit?.end_date) {
+    const sameLine =
+      sit?.start_date && sit?.end_date
+        ? `${fmtShort(sit.start_date)} → ${fmtShort(sit.end_date)}`
+        : sit?.start_date
+          ? `À partir du ${fmtShort(sit.start_date)}`
+          : sit?.end_date
+            ? `Jusqu'au ${fmtShort(sit.end_date)}`
+            : null;
+
     cards.push(
       <Card key="dates" label="Dates">
-        {sit?.start_date && (
-          <p className="text-sm font-medium leading-tight">{formatDate(sit.start_date)}</p>
-        )}
-        {sit?.end_date && (
-          <p className="text-sm font-medium leading-tight">→ {formatDate(sit.end_date)}</p>
+        {sameLine && (
+          <p className="text-sm font-semibold text-foreground leading-snug">{sameLine}</p>
         )}
         {durationDays && (
-          <p className="text-xs text-muted-foreground mt-1">{durationDays} jours</p>
+          <p className="text-xs font-medium text-primary mt-0.5">
+            {durationDays} {durationDays === 1 ? "jour" : "jours"}
+          </p>
         )}
       </Card>,
     );
@@ -59,7 +71,7 @@ const SitQuickFacts = ({
     cards.push(
       <Card key="housing" label="Logement">
         {property?.type && (
-          <p className="text-sm font-medium leading-tight capitalize">
+          <p className="text-sm font-semibold text-foreground leading-snug capitalize">
             {property.type === "house"
               ? "Maison"
               : property.type === "apartment"
@@ -68,7 +80,7 @@ const SitQuickFacts = ({
           </p>
         )}
         {(property?.surface_m2 || property?.rooms_count) && (
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground mt-0.5">
             {[
               property?.surface_m2 && `${property.surface_m2} m²`,
               property?.rooms_count && `${property.rooms_count} pièces`,
@@ -84,11 +96,11 @@ const SitQuickFacts = ({
   if (petsCount > 0) {
     cards.push(
       <Card key="pets" label="Animaux">
-        <p className="text-sm font-medium leading-tight">
+        <p className="text-sm font-semibold text-foreground leading-snug">
           {petsCount} pensionnaire{petsCount > 1 ? "s" : ""}
         </p>
         {speciesSummary && (
-          <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{speciesSummary}</p>
+          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{speciesSummary}</p>
         )}
       </Card>,
     );
