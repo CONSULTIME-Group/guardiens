@@ -467,7 +467,7 @@ export const BottomNav = () => {
             </span>
           )}
         </div>
-        <span className="text-[10px] font-medium tracking-tight truncate max-w-full px-1 leading-tight">{item.label}</span>
+        <span className="text-[10px] font-medium tracking-tight truncate max-w-full px-0.5 leading-tight">{item.label}</span>
       </>
     );
 
