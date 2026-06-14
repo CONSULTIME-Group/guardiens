@@ -9,6 +9,8 @@ import { useAdmin } from "@/hooks/useAdmin";
 import { cn } from "@/lib/utils";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
+
 // Lazy : NotificationBell tire date-fns. On évite vendor-date dans l'entry.
 const NotificationBell = lazy(() => import("./NotificationBell"));
 const MessageBell = lazy(() => import("./MessageBell"));
