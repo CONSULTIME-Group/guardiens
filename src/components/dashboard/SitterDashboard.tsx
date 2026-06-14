@@ -440,11 +440,12 @@ const SitterDashboard = () => {
                   est déjà géré par la PriorityActionCard du cockpit). */}
               {ChecklistBlock}
 
-              {/* Toggle mobile « Voir tout mon espace » : insère ici, juste après
-                  la checklist d'activation, pour replier les sections découverte
-                  et le bloc badges/réputation/urgence par défaut. */}
+              {/* Toggle mobile « Voir mes badges et ressources » : on AFFICHE
+                  par défaut la zone Découverte (annonces + coup de main), le
+                  toggle ne masque plus QUE le SecondaryAccordion (conseils /
+                  réputation / badges) + le bloc urgence. Cf. mem://ux/dashboard-2026-precepts. */}
               {!showAllMobile && (
-                <div className="px-4 sm:px-5 md:hidden mb-6">
+                <div className="px-4 sm:px-5 md:hidden mb-6 mt-6">
                   <button
                     type="button"
                     onClick={() => setShowAllMobile(true)}
@@ -452,17 +453,19 @@ const SitterDashboard = () => {
                     aria-expanded={false}
                     aria-controls="sitter-dash-extra"
                   >
-                    Voir tout mon espace
+                    Voir mes badges et ressources
                     <ChevronDown className="h-4 w-4" aria-hidden="true" />
                   </button>
                 </div>
               )}
 
-              <div id="sitter-dash-extra" className={`px-4 sm:px-5 md:px-8 mb-6 ${!showAllMobile ? "hidden md:block" : ""}`}>
+              {/* DiscoverySections : visible mobile par défaut (cœur de valeur sitter). */}
+              <div className="px-4 sm:px-5 md:px-8 mb-6">
                 {DiscoverySections}
               </div>
 
-              <div className={`px-4 sm:px-5 md:px-8 mb-6 space-y-3 ${!showAllMobile ? "hidden md:block" : ""}`}>
+              {/* SecondaryAccordion + urgence : masqués mobile derrière toggle. */}
+              <div id="sitter-dash-extra" className={`px-4 sm:px-5 md:px-8 mb-6 space-y-3 ${!showAllMobile ? "hidden md:block" : ""}`}>
                 {SecondaryAccordion}
                 {buildEmergencyBlock(false)}
               </div>
