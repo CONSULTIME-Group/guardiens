@@ -50,12 +50,11 @@ const LIFESTYLE_OPTIONS = [
   "Lève-tôt", "Couche-tard", "En télétravail", "Famille",
 ];
 
-const SKILL_CATEGORIES = [
-  { key: "jardin", label: "Jardin" },
-  { key: "animaux", label: "Animaux" },
-  { key: "competences", label: "Compétences & Savoirs" },
-  { key: "coups_de_main", label: "Coups de main" },
-];
+// 2026 : on n'utilise plus les 4 catégories génériques comme cases à cocher.
+// On présente une short list de compétences SPÉCIFIQUES groupées par
+// catégorie. Les catégories DB sont dérivées automatiquement au save.
+import { SKILL_CATEGORIES as SPECIFIC_SKILL_CATEGORIES, deriveCategoriesFromCompetences } from "@/lib/skills/categories";
+
 
 const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalProps) => {
   const { user, activeRole, refreshProfile, logout } = useAuth();
@@ -90,7 +89,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
 
   // ── Slide 2: compétences + lifestyle ──
   const [lifestyle, setLifestyle] = useState<string[]>([]);
-  const [skillCategories, setSkillCategories] = useState<string[]>([]);
+  const [pickedCompetences, setPickedCompetences] = useState<string[]>([]);
 
   // ── Live completion ──
   const [liveCompletion, setLiveCompletion] = useState(0);
@@ -108,15 +107,15 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     if (usesSitterScoring) {
       // Sitter/Both scoring: bio=15, compétences=10, lifestyle=10 (max here = 65)
       if (bio.length >= 50) score += 15;
-      if (skillCategories.length > 0) score += 10;
+      if (pickedCompetences.length > 0) score += 10;
       if (lifestyle.length > 0) score += 10;
     } else {
       // Owner-only scoring: bio=10, compétences=10 (max here = 50)
       if (bio.length >= 50) score += 10;
-      if (skillCategories.length > 0) score += 10;
+      if (pickedCompetences.length > 0) score += 10;
     }
     setLiveCompletion(score);
-  }, [firstName, postalCode, avatarUrl, bio, skillCategories, lifestyle, usesSitterScoring]);
+  }, [firstName, postalCode, avatarUrl, bio, pickedCompetences, lifestyle, usesSitterScoring]);
 
   // Load profile data on mount
   useEffect(() => {
@@ -142,21 +141,36 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
         if (p.avatar_url) setAvatarUrl(p.avatar_url);
         if (p.bio) setBio(p.bio);
         if (p.onboarding_minimal_completed) setMinimalSaved(true);
-        if (Array.isArray((p as any).skill_categories)) {
-          setSkillCategories((p as any).skill_categories as string[]);
-        }
+        // Note : on n'hydrate plus depuis p.skill_categories (legacy générique).
+        // Les vraies compétences vivent dans sitter_profiles.competences ou
+        // owner_profiles.competences, hydratées ci-dessous selon le rôle.
       }
-      // Lifestyle reste propre au profil gardien
+
+      // Lifestyle + compétences spécifiques (sitter ou both)
       if (usesSitterScoring) {
         const { data: sp } = await supabase
           .from("sitter_profiles")
-          .select("lifestyle")
+          .select("lifestyle, competences")
           .eq("user_id", user.id)
           .maybeSingle();
         if (sp?.lifestyle && Array.isArray(sp.lifestyle)) {
           setLifestyle(sp.lifestyle as string[]);
         }
+        if ((sp as any)?.competences && Array.isArray((sp as any).competences)) {
+          setPickedCompetences((sp as any).competences as string[]);
+        }
+      } else {
+        // Owner-only : compétences éventuelles côté owner_profiles
+        const { data: op } = await supabase
+          .from("owner_profiles")
+          .select("competences")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if ((op as any)?.competences && Array.isArray((op as any).competences)) {
+          setPickedCompetences((op as any).competences as string[]);
+        }
       }
+
     };
     load();
   }, [user, open]);
@@ -232,46 +246,53 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
   const saveCompetencesAndLifestyle = async () => {
     if (!user) return;
 
-    // Whitelist stricte des catégories d'entraide pour éviter qu'une valeur
-    // étrangère (ex: une compétence précise) ne soit classée par erreur ici.
-    const ALLOWED_CATEGORIES = SKILL_CATEGORIES.map(c => c.key);
-    const safeCategories = Array.from(
+    // 2026 : on stocke des compétences SPÉCIFIQUES (« promenade chiens »…),
+    // pas les 4 catégories génériques. Les catégories DB sont DÉRIVÉES
+    // automatiquement pour que le filtre de recherche reste opérant.
+    const safeCompetences = Array.from(
       new Set(
-        (skillCategories || []).filter(
-          (k): k is string => typeof k === "string" && ALLOWED_CATEGORIES.includes(k)
-        )
-      )
+        (pickedCompetences || []).filter(
+          (c): c is string => typeof c === "string" && c.trim().length > 0,
+        ),
+      ),
     );
+    const derivedCategories = deriveCategoriesFromCompetences(safeCompetences);
 
-    // Fallback : relire l'existant en base et fusionner pour ne rien écraser
-    // si profiles.skill_categories est absent / null côté state local.
+    // Met à jour profiles.skill_categories (dérivé) + active la visibilité
+    // dans le feed d'entraide à la 1ère compétence ajoutée.
     const { data: existing } = await supabase
       .from("profiles")
-      .select("skill_categories, available_for_help")
+      .select("available_for_help")
       .eq("id", user.id)
       .maybeSingle();
-
-    const existingCategories = Array.isArray((existing as any)?.skill_categories)
-      ? ((existing as any).skill_categories as string[]).filter(c => ALLOWED_CATEGORIES.includes(c))
-      : [];
-
-    const mergedCategories = Array.from(new Set([...existingCategories, ...safeCategories]));
-
     const profileUpdates: Record<string, any> = {
-      skill_categories: mergedCategories,
+      skill_categories: derivedCategories,
     };
-    if (mergedCategories.length > 0 && !(existing as any)?.available_for_help) {
+    if (safeCompetences.length > 0 && !(existing as any)?.available_for_help) {
       profileUpdates.available_for_help = true;
     }
     await supabase.from("profiles").update(profileUpdates).eq("id", user.id);
 
-    // Lifestyle reste sur sitter_profiles (gardien / both uniquement).
-    if ((userRole === "both" || userRole === "sitter") && lifestyle.length > 0) {
+    // Persiste les compétences spécifiques sur la table métier du rôle.
+    if (userRole === "sitter" || userRole === "both") {
       await supabase
         .from("sitter_profiles")
-        .upsert({ user_id: user.id, lifestyle }, { onConflict: "user_id" });
+        .upsert(
+          { user_id: user.id, competences: safeCompetences, ...(lifestyle.length > 0 ? { lifestyle } : {}) },
+          { onConflict: "user_id" },
+        );
+    }
+    if (userRole === "owner" || userRole === "both") {
+      await supabase
+        .from("owner_profiles")
+        .upsert(
+          { user_id: user.id, competences: safeCompetences, competences_disponible: safeCompetences.length > 0 },
+          { onConflict: "user_id" },
+        );
     }
   };
+
+
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.currentTarget.files?.[0];
@@ -382,7 +403,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
       } catch {}
     }
     onClose();
-  }, [user, onClose, canDismiss, refreshProfile, slide, bio, lifestyle, skillCategories, avatarUrl, liveCompletion]);
+  }, [user, onClose, canDismiss, refreshProfile, slide, bio, lifestyle, pickedCompetences, avatarUrl, liveCompletion]);
 
   const completeOnboarding = async (destination: string) => {
     if (user) {
@@ -707,30 +728,46 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                 </p>
               </div>
 
-              <div className="space-y-2">
-                <Label>Ce que je sais faire</Label>
-                <div className="flex flex-wrap gap-2">
-                  {SKILL_CATEGORIES.map(({ key, label }) => {
-                    const selected = skillCategories.includes(key);
-                    return (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() =>
-                          setSkillCategories((prev) =>
-                            prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-                          )
-                        }
-                        className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors ${
-                          selected
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-background text-foreground border-border hover:border-primary/40"
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
+              <div className="space-y-3">
+                <Label>Ce que vous savez faire</Label>
+                <p className="text-xs text-muted-foreground -mt-1">
+                  Piochez ce qui vous correspond. Vous pourrez en ajouter
+                  d'autres plus tard depuis votre profil.
+                </p>
+                <div className="space-y-3">
+                  {SPECIFIC_SKILL_CATEGORIES.map((cat) => (
+                    <div key={cat.key}>
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                        {cat.label}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {cat.suggestions.map((label) => {
+                          const selected = pickedCompetences.includes(label);
+                          return (
+                            <button
+                              key={label}
+                              type="button"
+                              onClick={() =>
+                                setPickedCompetences((prev) =>
+                                  prev.includes(label)
+                                    ? prev.filter((k) => k !== label)
+                                    : [...prev, label],
+                                )
+                              }
+                              className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
+                                selected
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "bg-background text-foreground border-border hover:border-primary/40"
+                              }`}
+                            >
+                              {selected ? "✓ " : "+ "}
+                              {label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -749,17 +786,14 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
               <div className="bg-muted/50 rounded-xl p-4 border border-border">
                 <p className="text-xs text-muted-foreground uppercase tracking-widest mb-3">Sur votre profil public</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {skillCategories.length === 0 && (usesSitterScoring ? lifestyle.length === 0 : true) && (
+                  {pickedCompetences.length === 0 && (usesSitterScoring ? lifestyle.length === 0 : true) && (
                     <p className="text-xs text-muted-foreground italic">Sélectionnez pour voir l'aperçu…</p>
                   )}
-                  {skillCategories.map((key) => {
-                    const cat = SKILL_CATEGORIES.find((c) => c.key === key);
-                    return (
-                      <span key={key} className="bg-primary text-primary-foreground text-xs px-2.5 py-1 rounded-full">
-                        {cat?.label || key}
-                      </span>
-                    );
-                  })}
+                  {pickedCompetences.map((label) => (
+                    <span key={label} className="bg-primary text-primary-foreground text-xs px-2.5 py-1 rounded-full">
+                      {label}
+                    </span>
+                  ))}
                   {usesSitterScoring && lifestyle.map((l) => (
                     <span key={l} className="bg-primary/10 text-primary text-xs px-2.5 py-1 rounded-full">
                       {l}
@@ -767,6 +801,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                   ))}
                 </div>
               </div>
+
             </div>
           )}
 
@@ -809,8 +844,8 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                     <span className={bio.length >= 50 ? "text-foreground" : "text-muted-foreground"}>Bio</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    {skillCategories.length > 0 ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
-                    <span className={skillCategories.length > 0 ? "text-foreground" : "text-muted-foreground"}>Compétences</span>
+                    {pickedCompetences.length > 0 ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
+                    <span className={pickedCompetences.length > 0 ? "text-foreground" : "text-muted-foreground"}>Compétences</span>
                   </div>
                   {usesSitterScoring && (
                     <div className="flex items-center gap-1.5">
