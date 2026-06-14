@@ -248,9 +248,45 @@ const CompetenceAutocomplete = ({
               Une compétence plus précise ?
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Jusqu'à {maxItems} compétences. Les compétences validées apparaissent immédiatement.
+              Jusqu'à {maxItems} compétences. Tapez la vôtre ou piochez parmi
+              les suggestions ci-dessous.
             </p>
           </div>
+
+          {/* Suggestions cataloguées par catégorie, toujours visibles. */}
+          <div className="space-y-3">
+            {SKILL_CATEGORIES.map((cat) => {
+              const remaining = cat.suggestions.filter(
+                (s) => !competences.includes(s),
+              );
+              if (remaining.length === 0) return null;
+              return (
+                <div key={cat.key}>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                    {cat.label}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {remaining.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => {
+                          if (competences.length >= maxItems) return;
+                          onAdd(s);
+                        }}
+                        disabled={competences.length >= maxItems}
+                        className="rounded-full border border-border bg-card hover:border-primary/40 hover:bg-primary/5 text-foreground text-xs px-3 py-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        + {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+
 
           {/* Input with autocomplete */}
           <div ref={wrapperRef} className="relative">
