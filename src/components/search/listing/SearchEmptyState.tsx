@@ -234,20 +234,24 @@ export const SearchEmptyState = ({
         </div>
       )}
 
-      {/* Action 3, Cross-sell vers l'autre onglet */}
-      {crossTabCount !== null && crossTabCount > 0 && (
+      {/* Action 3, Cross-sell vers l'autre onglet
+          On NE pousse PAS vers les coups de main quand il reste des gardes
+          ailleurs en France (densityCounts.france > 0) : l'utilisateur cherche
+          une garde, on l'invite d'abord à élargir sa zone, pas à changer de
+          contexte. Cross-sell réservé aux vraies impasses. */}
+      {crossTabCount !== null && crossTabCount > 0 && !(tab === "sits" && densityCounts.france > 0) && (
         <div className="rounded-xl border border-border bg-card p-4 space-y-2">
           <div className="flex items-start gap-3">
             <HandshakeIcon className="h-5 w-5 text-foreground mt-0.5 shrink-0" />
             <div className="flex-1">
               <p className="font-medium text-sm text-foreground">
                 {tab === "sits"
-                  ? `${crossTabCount} mission${crossTabCount > 1 ? "s" : ""} d'entraide ${crossTabCount > 1 ? "disponibles" : "disponible"}`
+                  ? `${crossTabCount} coup${crossTabCount > 1 ? "s" : ""} de main ${crossTabCount > 1 ? "disponibles" : "disponible"}`
                   : `${crossTabCount} annonce${crossTabCount > 1 ? "s" : ""} de garde ${crossTabCount > 1 ? "disponibles" : "disponible"}`}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 {tab === "sits"
-                  ? "L'entraide entre gens du coin reste libre pour tous : promener un chien, nourrir un chat, arroser des plantes…"
+                  ? "Les coups de main entre gens du coin restent libres pour tous : promener un chien, nourrir un chat, arroser des plantes…"
                   : "Découvrez les annonces de garde près de chez vous."}
               </p>
               <Button
@@ -259,7 +263,7 @@ export const SearchEmptyState = ({
                   setTab(tab === "sits" ? "missions" : "sits");
                 }}
               >
-                {tab === "sits" ? "Voir les petites missions" : "Voir les annonces de garde"}
+                {tab === "sits" ? "Voir les coups de main" : "Voir les annonces de garde"}
               </Button>
             </div>
           </div>
