@@ -27,6 +27,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { AdvancedFiltersSheet } from "@/components/search/header/AdvancedFiltersSheet";
 import { SearchEmptyState } from "@/components/search/listing/SearchEmptyState";
+import { SitterDiscoveryBanner } from "@/components/search/SitterDiscoveryBanner";
 import { OutOfZoneBanner } from "@/components/search/listing/OutOfZoneBanner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, MapPin, Calendar, Star, Lock, Zap, Sparkles, Globe2 } from "lucide-react";
@@ -1742,13 +1743,32 @@ const SearchSitter = () => {
       handleActivateAvailable={handleActivateAvailable}
       trackEvent={trackEvent}
     />
- ) : (
- <div className={tab === "missions"
-   ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4"
-   : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 lg:gap-x-8 gap-y-10 lg:gap-y-12"}>
- {results.map((item, idx) => renderCard(item, idx))}
- </div>
- )}
+  ) : (
+  <>
+    {tab === "sits" && (
+      <SitterDiscoveryBanner
+        totalFrance={densityCounts.france}
+        totalRadius={densityCounts.radius}
+        zoneMode={zoneMode}
+        city={city}
+        alertCreated={alertCreated}
+        isCreatingAlert={isCreatingAlert}
+        onCreateAlert={handleCreateAlert}
+        isAvailable={!!sitterProfile?.is_available}
+        onActivateAvailable={handleActivateAvailable}
+        onExpandToFrance={() => {
+          trackEvent("search_expand_to_france", { source: "discovery_banner", metadata: { from: zoneMode, radius_count: densityCounts.radius, france_count: densityCounts.france } });
+          setZoneMode("france");
+        }}
+      />
+    )}
+    <div className={tab === "missions"
+      ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4"
+      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 lg:gap-x-8 gap-y-10 lg:gap-y-12"}>
+    {results.map((item, idx) => renderCard(item, idx))}
+    </div>
+  </>
+  )}
  </div>
  ) : (
  /* ─── Map view ─── */
