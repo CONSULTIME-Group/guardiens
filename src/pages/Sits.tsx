@@ -668,8 +668,12 @@ const Sits = () => {
             <EmptyState
               illustration="emptyCalendar"
               title="Aucune annonce active"
-              description="Publiez votre première annonce pour trouver un gardien de confiance près de chez vous."
-              actionLabel="Publier une annonce"
+              description={
+                sits.length > 0
+                  ? `Vous avez ${sits.length} annonce${sits.length > 1 ? "s" : ""} dans votre historique. Republiez une garde pour retrouver un gardien de confiance près de chez vous.`
+                  : "Publiez votre première annonce pour trouver un gardien de confiance près de chez vous."
+              }
+              actionLabel={sits.length > 0 ? "Publier une nouvelle annonce" : "Publier une annonce"}
               actionTo="/sits/create"
               actionIcon={Plus}
             />
