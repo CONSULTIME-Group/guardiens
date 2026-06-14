@@ -101,7 +101,7 @@ const Favorites = () => {
 
         {/* ── Tabs sticky 44 px ────────────────────────────────────────── */}
         <Tabs defaultValue={defaultTab} className="w-full">
-          <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border px-4">
+          <div className="sticky top-12 md:top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border px-4">
             <TabsList className="w-full h-[44px] grid grid-cols-2 bg-transparent gap-1 p-0 border-0">
               <TabsTrigger
                 value="sitters"
