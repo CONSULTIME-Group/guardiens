@@ -443,7 +443,7 @@ const SitterProfile = () => {
               });
             }}
           />
-          <div className="py-3 px-4 md:py-4 md:px-6 flex items-center justify-between gap-3" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
+          <div className={`py-3 px-4 md:py-4 md:px-6 flex items-center justify-between gap-3 ${(!dirty && !saving && !saved) ? "hidden md:flex" : ""}`} style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
           <p className="text-xs text-muted-foreground" aria-live="polite">
             {saved && !dirty ? (
               <span className="inline-flex items-center gap-1 text-primary">
