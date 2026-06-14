@@ -39,7 +39,7 @@ export function BadgeRow({ badges, size = 'normal', maxVisible = 6 }: BadgeRowPr
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="grid grid-cols-4 sm:flex sm:flex-wrap items-center gap-2">
         {visible.map(b => (
           <BadgeSceau
             key={b.badge_id}
