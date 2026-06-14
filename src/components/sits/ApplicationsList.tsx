@@ -606,13 +606,9 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   };
 
   return (
-    <div className="mt-8">
-      <div className="flex items-center gap-2 mb-4">
-        <Users className="h-4 w-4 text-primary" />
-        <h2 className="font-heading text-lg font-semibold">
-          Candidatures reçues ({applications.length})
-        </h2>
-      </div>
+    <div>
+      {/* Header retiré : OwnerSitView encadre déjà la section avec son propre h2 "Candidatures reçues (N)". */}
+
 
       {applications.length === 0 ? (
         <p className="text-sm text-muted-foreground italic">Aucune candidature pour le moment.</p>
