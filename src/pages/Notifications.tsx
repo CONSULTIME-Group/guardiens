@@ -109,7 +109,7 @@ const Notifications = () => {
   const groups = groupByDay(notifications);
 
   return (
-    <div className="relative max-w-2xl mx-auto px-4 pb-12 pt-4 md:px-6 md:pt-8 md:pb-16 animate-fade-in">
+    <div className="relative max-w-2xl mx-auto px-4 pb-24 pt-4 md:px-6 md:pt-8 md:pb-16 animate-fade-in">
       <Helmet>
         <title>Notifications</title>
         <meta name="robots" content="noindex, nofollow" />
