@@ -7,22 +7,81 @@ interface GeoResult {
 }
 
 /**
+ * Session-level in-memory cache for geocoding lookups.
+ * Avoids re-hitting the edge function on every re-render / re-filter pass
+ * (SearchOwner peut géocoder 100+ villes uniques par recherche).
+ * Le edge `geocode` a déjà son propre cache DB ; ce cache évite le round-trip.
+ */
+const memoryCache = new Map<string, GeoResult | null>();
+const inflight = new Map<string, Promise<GeoResult | null>>();
+
+function cacheKey(city: string, country?: string | null) {
+  return `${city.trim().toLowerCase()}::${(country || "").trim().toLowerCase()}`;
+}
+
+/**
+ * Simple concurrency limiter shared across all geocode calls.
+ * Empêche de saturer l'edge function quand on Promise.all sur 200 villes.
+ */
+const MAX_CONCURRENT = 8;
+let active = 0;
+const queue: Array<() => void> = [];
+
+function acquire(): Promise<void> {
+  if (active < MAX_CONCURRENT) {
+    active++;
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => {
+    queue.push(() => {
+      active++;
+      resolve();
+    });
+  });
+}
+
+function release() {
+  active--;
+  const next = queue.shift();
+  if (next) next();
+}
+
+/**
  * Geocode a city name to lat/lng coordinates.
- * Uses a backend function with Nominatim + cache.
+ * Uses a backend function with Nominatim + cache, plus an in-memory layer.
  */
 export async function geocodeCity(city: string, country?: string | null): Promise<GeoResult | null> {
   if (!city || city.trim().length < 2) return null;
 
-  try {
-    const { data, error } = await supabase.functions.invoke("geocode", {
-      body: { city: city.trim(), country: country?.trim() || undefined },
-    });
+  const key = cacheKey(city, country);
+  if (memoryCache.has(key)) return memoryCache.get(key)!;
+  const pending = inflight.get(key);
+  if (pending) return pending;
 
-    if (error || !data?.lat || !data?.lng) return null;
-    return { lat: data.lat, lng: data.lng, city: data.city };
-  } catch {
-    return null;
-  }
+  const promise = (async () => {
+    await acquire();
+    try {
+      const { data, error } = await supabase.functions.invoke("geocode", {
+        body: { city: city.trim(), country: country?.trim() || undefined },
+      });
+      if (error || !data?.lat || !data?.lng) {
+        memoryCache.set(key, null);
+        return null;
+      }
+      const result: GeoResult = { lat: data.lat, lng: data.lng, city: data.city };
+      memoryCache.set(key, result);
+      return result;
+    } catch {
+      memoryCache.set(key, null);
+      return null;
+    } finally {
+      release();
+      inflight.delete(key);
+    }
+  })();
+
+  inflight.set(key, promise);
+  return promise;
 }
 
 /**
