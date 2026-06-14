@@ -375,7 +375,7 @@ const OwnerProfilePage = () => {
               });
             }}
           />
-          <div style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }} className="py-3 px-4 md:py-4 md:px-6 flex items-center justify-between gap-3">
+          <div style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }} className={`py-3 px-4 md:py-4 md:px-6 items-center justify-between gap-3 ${(!dirty && !saving && !saved) ? "hidden md:flex" : "flex"}`}>
           <p className="text-xs text-muted-foreground" aria-live="polite">
             {saved && !dirty ? (
               <span className="inline-flex items-center gap-1 text-primary">
