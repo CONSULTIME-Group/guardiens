@@ -61,27 +61,45 @@ const ParrainagePage = () => {
   }, [user?.id]);
 
   const url = code ? `https://guardiens.fr/inscription?ref=${code}` : "";
-  const shareText = `Je vous invite à rejoindre Guardiens, la communauté de garde d'animaux entre gens du coin. Inscription gratuite jusqu'au ${SITTER_PRICE_START} : ${url}`;
+
+  // UTM auto par canal pour mesurer la traction de chaque vecteur de partage
+  // sans modifier le `ref` (qui pilote la logique métier de parrainage).
+  const trackedUrl = (channel: string) => {
+    if (!url) return url;
+    try {
+      const u = new URL(url);
+      u.searchParams.set("utm_source", channel);
+      u.searchParams.set("utm_medium", "referral");
+      u.searchParams.set("utm_campaign", "parrainage");
+      return u.toString();
+    } catch {
+      return url;
+    }
+  };
+
+  const shareTextFor = (channel: string) =>
+    `Je vous invite à rejoindre Guardiens, la communauté de garde d'animaux entre gens du coin. Inscription gratuite jusqu'au ${SITTER_PRICE_START} : ${trackedUrl(channel)}`;
 
   const copy = () => {
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(trackedUrl("copy"));
     toast.success("Lien copié");
   };
 
   const shareWhatsApp = () => {
-    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank", "noopener");
+    window.open(`https://wa.me/?text=${encodeURIComponent(shareTextFor("whatsapp"))}`, "_blank", "noopener");
   };
   const shareSMS = () => {
-    window.location.href = `sms:?&body=${encodeURIComponent(shareText)}`;
+    window.location.href = `sms:?&body=${encodeURIComponent(shareTextFor("sms"))}`;
   };
   const shareEmail = () => {
-    window.location.href = `mailto:?subject=${encodeURIComponent("Rejoignez Guardiens")}&body=${encodeURIComponent(shareText)}`;
+    window.location.href = `mailto:?subject=${encodeURIComponent("Rejoignez Guardiens")}&body=${encodeURIComponent(shareTextFor("email"))}`;
   };
   const shareNative = async () => {
     if (navigator.share) {
-      try { await navigator.share({ title: "Guardiens", text: shareText, url }); } catch {}
+      try { await navigator.share({ title: "Guardiens", text: shareTextFor("native"), url: trackedUrl("native") }); } catch {}
     } else copy();
   };
+
 
   const tiers = [
     { count: 1, label: "Premier filleul", reward: "1 mois d'accès offert dès qu'il deviendra payant" },
