@@ -35,7 +35,10 @@ void i18n
       de: { common: deCommon },
     },
     detection: {
-      order: ["querystring", "cookie", "localStorage", "navigator", "htmlTag"],
+      // FR par défaut (marché cible). On respecte un choix explicite
+      // (querystring `?lang=`, cookie, localStorage) mais on n'écoute pas
+      // `navigator` pour éviter qu'un browser en-US bascule tout le site en EN.
+      order: ["querystring", "cookie", "localStorage", "htmlTag"],
       caches: ["cookie", "localStorage"],
       lookupQuerystring: "lang",
       lookupCookie: "lang",
