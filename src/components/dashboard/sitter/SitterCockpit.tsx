@@ -33,16 +33,17 @@ interface SitterCockpitProps {
   profileCompletion: number;
   postalCode: string | null;
   nearbyListings: any[];
+  competencesCount?: number;
 }
 
 const SitterCockpit = ({
   userId, firstName, avatarUrl, isFounder,
   isAvailable, onToggleAvailability,
-  nextGuard, profileCompletion, postalCode, nearbyListings,
+  nextGuard, profileCompletion, postalCode, nearbyListings, competencesCount,
 }: SitterCockpitProps) => {
   const initial = firstName ? capitalize(firstName).charAt(0) : "?";
   const priority = useSitterPriorityAction({
-    nextGuard, profileCompletion, postalCode, nearbyListings, isAvailable,
+    nextGuard, profileCompletion, postalCode, nearbyListings, isAvailable, competencesCount,
   });
 
   // Pour les CTA d'ancre vers le toggle dispo, scroll smooth + focus.
