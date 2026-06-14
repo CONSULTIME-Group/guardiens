@@ -426,9 +426,9 @@ const SitterProfile = () => {
         </div>
       </div>
 
-      {/* Sticky save bar */}
+      {/* Sticky save bar — desktop : ne s'affiche que si modifications en cours, et démarre après la sidebar (256px). */}
       <TooltipProvider delayDuration={200}>
-        <div className="fixed left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border bottom-16 md:bottom-0 before:pointer-events-none before:content-[''] before:absolute before:left-0 before:right-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-background before:to-transparent">
+        <div className={`fixed left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border bottom-16 md:bottom-0 md:left-64 before:pointer-events-none before:content-[''] before:absolute before:left-0 before:right-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-background before:to-transparent ${(!dirty && !saving && !saved) ? "md:hidden" : ""}`}>
           <ProfileProgressStrip
             completion={liveScore}
             publicProfileUrl={user ? `/gardiens/${user.id}` : undefined}
