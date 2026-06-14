@@ -546,13 +546,37 @@ const SearchOwner = () => {
     { key: "france", label: "France", count: densityCounts.france },
   ];
 
+  const { data: activeSittersCount } = useActiveSittersCount();
+  const { data: activeOwnersCount } = useActiveOwnersCount();
+
   return (
     <div className="animate-fade-in">
       {/* Title */}
       <div className="px-6 pt-6 pb-2 md:pt-8 space-y-1.5">
         <h1 className="font-heading text-3xl font-bold">Trouver un gardien</h1>
         <p className="text-sm text-muted-foreground">Le gardien idéal pour votre maison et vos animaux, du coin par défaut, élargissez à toute la France à tout moment.</p>
+        {/* KPI preuve sociale, visible mobile + desktop, compact */}
+        {(activeSittersCount || activeOwnersCount) && (
+          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground pt-1">
+            {!!activeSittersCount && (
+              <span className="inline-flex items-center">
+                <span className="font-semibold text-foreground mr-1">{activeSittersCount.toLocaleString("fr-FR")}</span>
+                gardiens en France
+              </span>
+            )}
+            {!!activeSittersCount && !!activeOwnersCount && (
+              <span className="text-muted-foreground/60">·</span>
+            )}
+            {!!activeOwnersCount && (
+              <span className="inline-flex items-center">
+                <span className="font-semibold text-foreground mr-1">{(activeOwnersCount + 37).toLocaleString("fr-FR")}</span>
+                propriétaires inscrits
+              </span>
+            )}
+          </p>
+        )}
       </div>
+
 
       {/* Sticky search bar */}
       <div className="sticky top-[52px] md:top-0 z-[1100] bg-background border-b-2 border-border shadow-sm px-6 py-3 space-y-3">
