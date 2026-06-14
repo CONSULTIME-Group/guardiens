@@ -50,12 +50,11 @@ const LIFESTYLE_OPTIONS = [
   "Lève-tôt", "Couche-tard", "En télétravail", "Famille",
 ];
 
-const SKILL_CATEGORIES = [
-  { key: "jardin", label: "Jardin" },
-  { key: "animaux", label: "Animaux" },
-  { key: "competences", label: "Compétences & Savoirs" },
-  { key: "coups_de_main", label: "Coups de main" },
-];
+// 2026 : on n'utilise plus les 4 catégories génériques comme cases à cocher.
+// On présente une short list de compétences SPÉCIFIQUES groupées par
+// catégorie. Les catégories DB sont dérivées automatiquement au save.
+import { SKILL_CATEGORIES as SPECIFIC_SKILL_CATEGORIES, deriveCategoriesFromCompetences } from "@/lib/skills/categories";
+
 
 const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalProps) => {
   const { user, activeRole, refreshProfile, logout } = useAuth();
