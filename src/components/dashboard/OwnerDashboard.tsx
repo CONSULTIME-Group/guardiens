@@ -169,7 +169,13 @@ const OwnerDashboard = () => {
     }
     const anyPublished = sits.some(s => s.status === "published");
     if (anyPublished) return "Votre annonce est en ligne, les candidatures arrivent.";
+    // Historique présent mais plus rien d'actif : on évite le message « première annonce » trompeur.
+    if (sits.length > 0) {
+      return `${sits.length} annonce${sits.length > 1 ? "s" : ""} dans votre historique, aucune en cours.`;
+    }
     return "Publiez votre première annonce pour trouver un gardien.";
+
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ongoingSit, sits, pendingAppCount]);
 
