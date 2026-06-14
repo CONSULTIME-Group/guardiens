@@ -136,6 +136,7 @@ const AdminLegal = lazy(() => import("./pages/admin/AdminLegal"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const AdminContactMessages = lazy(() => import("./pages/admin/AdminContactMessages"));
 const AdminSEO = lazy(() => import("./pages/admin/AdminSEO"));
+const AdminLifecycle = lazy(() => import("./pages/admin/AdminLifecycle"));
 const AdminSkills = lazy(() => import("./pages/admin/AdminSkills"));
 const AdminMassEmails = lazy(() => import("./pages/admin/AdminMassEmails"));
 const AdminMassEmailsStats = lazy(() => import("./pages/admin/AdminMassEmailsStats"));
@@ -337,6 +338,7 @@ const AppRoutes = () => (
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/contact-messages" element={<AdminContactMessages />} />
         <Route path="/admin/seo" element={<AdminSEO />} />
+        <Route path="/admin/lifecycle" element={<AdminLifecycle />} />
         <Route path="/admin/skills" element={<AdminSkills />} />
         <Route path="/admin/envois-groupes" element={<AdminMassEmails />} />
         <Route path="/admin/envois-groupes/stats" element={<AdminMassEmailsStats />} />
