@@ -527,7 +527,7 @@ const OwnerDashboard = () => {
             items={[
               {
                 value: completedSits.length,
-                label: "Gardes",
+                label: completedSits.length > 1 ? "Gardes" : "Garde",
               },
               {
                 value: avgRating > 0 ? `${avgRating} ★` : null,
@@ -539,7 +539,7 @@ const OwnerDashboard = () => {
               ...(activeSits.length > 0
                 ? [{
                     value: activeSits.length,
-                    label: "Annonces",
+                    label: activeSits.length > 1 ? "Annonces" : "Annonce",
                     to: "/sits",
                   }]
                 : []),
