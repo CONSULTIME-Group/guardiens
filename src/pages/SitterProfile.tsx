@@ -355,6 +355,16 @@ const SitterProfile = () => {
                 bonuses={sitterBonuses}
               />
             }
+            trustSlot={
+              <TrustProfile
+                emailVerified={true}
+                identityVerified={!!user?.identityVerified}
+                hasAvatar={!!(mergedData.avatar_url || user?.avatarUrl)}
+                profileCompletion={liveScore}
+                hasFirstActivity={false}
+                role="sitter"
+              />
+            }
           />
 
           {/* Right content */}
