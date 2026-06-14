@@ -1757,7 +1757,7 @@ const SearchSitter = () => {
         isAvailable={!!sitterProfile?.is_available}
         onActivateAvailable={handleActivateAvailable}
         onExpandToFrance={() => {
-          trackEvent("search_expand_to_france", { source: "discovery_banner", metadata: { from: zoneMode, radius_count: densityCounts.radius, france_count: densityCounts.france } });
+          trackEvent("search_empty_action", { source: "discovery_banner", metadata: { action: "expand_to_france", from: zoneMode, radius_count: densityCounts.radius, france_count: densityCounts.france } });
           setZoneMode("france");
         }}
       />
