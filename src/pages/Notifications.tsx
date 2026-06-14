@@ -130,7 +130,7 @@ const Notifications = () => {
         </div>
       </header>
 
-      {/* CTA bulk sticky — visible mobile si non-lus */}
+      {/* CTA bulk sticky, visible mobile si non-lus */}
       {!loading && unreadCount > 0 && (
         <div className="sticky top-0 z-20 -mx-4 md:mx-0 mb-4 md:mb-6 px-4 md:px-0 py-2 md:py-0 bg-background/95 backdrop-blur-sm border-b border-border/50 md:bg-transparent md:backdrop-blur-none md:border-none">
           <Button

@@ -1,5 +1,5 @@
 /**
- * Page Favoris — UX mobile 2026
+ * Page Favoris, UX mobile 2026
  *
  * Passe 1 · Loading : skeleton structuré (2 tabs + cartes) remplace le spinner.
  * Passe 2 · Density : tabs sticky 44 px, cartes compactes tactiles, pas d'icônes décoratives.
