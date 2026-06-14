@@ -141,10 +141,11 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
         if (p.avatar_url) setAvatarUrl(p.avatar_url);
         if (p.bio) setBio(p.bio);
         if (p.onboarding_minimal_completed) setMinimalSaved(true);
-        if (Array.isArray((p as any).skill_categories)) {
-          setPickedCompetences((p as any).skill_categories as string[]);
-        }
+        // Note : on n'hydrate plus depuis p.skill_categories (legacy générique).
+        // Les vraies compétences vivent dans sitter_profiles.competences ou
+        // owner_profiles.competences, hydratées ci-dessous selon le rôle.
       }
+
       // Lifestyle reste propre au profil gardien
       if (usesSitterScoring) {
         const { data: sp } = await supabase
