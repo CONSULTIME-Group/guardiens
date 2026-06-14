@@ -373,6 +373,7 @@ const OwnerProfilePage = () => {
               </TooltipContent>
             )}
           </Tooltip>
+          </div>
         </div>
       </TooltipProvider>
     </div>
