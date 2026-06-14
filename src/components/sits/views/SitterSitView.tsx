@@ -246,7 +246,7 @@ const SitterSitView = ({
           >
             <div className="px-4 md:px-6 py-3 md:py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-6">
               {showRecap ? (
-                <div className="flex items-center gap-x-5 gap-y-1 text-xs md:text-sm text-muted-foreground flex-wrap min-w-0">
+                <div className="flex flex-col md:flex-row md:items-center gap-y-1.5 md:gap-x-5 text-xs md:text-sm text-muted-foreground min-w-0">
                   {owner?.city && (
                     <span className="inline-flex items-center gap-1.5">
                       <MapPin className="h-3.5 w-3.5 text-primary/70" aria-hidden="true" />
