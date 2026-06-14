@@ -1,0 +1,1 @@
+UPDATE public.sits SET title = btrim(regexp_replace(title, ',\s*\d+\s*jours?\s*$', '')) WHERE id IN ('3ebd34d3-fced-4939-b4f3-e0c38c9cc152','fddf8f90-706c-4d7d-9d59-4cb6044945e0');
