@@ -668,7 +668,7 @@ const Messages = () => {
                 el.scrollTop = savedScrollRef.current;
               }
             }}
-            className="flex-1 overflow-y-auto"
+            className="flex-1 overflow-y-auto pb-24 md:pb-0"
             role="region"
             aria-label="Liste des conversations"
           >
