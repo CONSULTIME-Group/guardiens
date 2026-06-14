@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Copy, Share2, MessageCircle, Mail, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
@@ -182,6 +183,41 @@ const ParrainagePage = () => {
         <Card>
           <CardHeader><CardTitle className="text-lg">Paliers de récompense</CardTitle></CardHeader>
           <CardContent>
+            {(() => {
+              // Barre de progression vers le prochain palier non atteint.
+              // Quand tous les paliers sont franchis, on affiche un état final
+              // valorisant plutôt que masquer la barre (preuve sociale durable).
+              const nextTier = tiers.find((tt) => myCount < tt.count);
+              const prevCount = nextTier
+                ? [...tiers].reverse().find((tt) => myCount >= tt.count)?.count ?? 0
+                : tiers[tiers.length - 1].count;
+              const target = nextTier?.count ?? prevCount;
+              const pct = nextTier
+                ? Math.round(((myCount - prevCount) / (target - prevCount)) * 100)
+                : 100;
+              const remaining = nextTier ? nextTier.count - myCount : 0;
+              return (
+                <div className="mb-5 rounded-xl bg-muted/40 p-4 border border-border">
+                  <div className="flex items-baseline justify-between gap-2 mb-2">
+                    <span className="text-sm font-medium text-foreground">
+                      {nextTier
+                        ? `Plus que ${remaining} filleul${remaining > 1 ? "s" : ""} avant : ${nextTier.label}`
+                        : "Tous les paliers atteints, merci de faire grandir la communauté."}
+                    </span>
+                    <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+                      {myCount}/{target}
+                    </span>
+                  </div>
+                  <Progress value={pct} className="h-2" />
+                  {nextTier && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Récompense au palier suivant : {nextTier.reward.toLowerCase()}.
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
+
             <ul className="space-y-3">
               {tiers.map((t) => {
                 const reached = myCount >= t.count;
