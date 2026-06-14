@@ -77,7 +77,7 @@ const TrustProfile = ({ emailVerified, identityVerified, hasAvatar, profileCompl
               <CollapsibleContent className="mt-2 space-y-2">
                 {doneSteps.map((step, i) => (
                   <div key={i} className="flex items-center gap-2.5 text-sm">
-                    <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
                     <span className="text-foreground">{step.label}</span>
                   </div>
                 ))}
