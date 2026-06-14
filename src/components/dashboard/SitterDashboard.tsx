@@ -44,7 +44,7 @@ const SitterDashboard = () => {
   const {
     loading, profileCompletion, identityVerified, identityStatus,
     completedSits, avgRating, reviewsCount, badgeCount, totalApps,
-    pendingAppsCount, unreadCount, isAvailable,
+    pendingAppsCount, unreadCount, isAvailable, competencesCount,
     postalCode, avatarUrl, bio, hasAnimalExperience,
     hasEmergencyProfile, hasAcceptedRecent, nextGuard, nextGuardError,
     nearbyListings, nearbyListingsRadius, nearbyError, articles, nearbyMissions, nearbyMissionsError,
@@ -393,6 +393,7 @@ const SitterDashboard = () => {
         profileCompletion={profileCompletion}
         postalCode={postalCode}
         nearbyListings={nearbyListings}
+        competencesCount={competencesCount}
       />
 
       {/* Erreurs de fetch, affichées discrètement sous le cockpit pour ne pas
