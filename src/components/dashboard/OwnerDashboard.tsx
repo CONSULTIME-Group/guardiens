@@ -199,6 +199,7 @@ const OwnerDashboard = () => {
     verificationStatus,
     nearbySittersCount: nearbyOwnerSittersData?.totalCount,
     nearbySittersRadius: nearbyOwnerSittersData?.radiusUsed,
+    petsCount: pets.length,
   });
 
   // Liste complète d'actions séquentielles + score d'activation 0/6,
