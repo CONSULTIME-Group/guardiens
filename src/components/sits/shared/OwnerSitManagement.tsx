@@ -48,17 +48,19 @@ const OwnerSitManagement = ({
       </p>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          asChild
-          className="justify-start gap-2"
-        >
-          <Link to={`/sits/${sitId}/edit`}>
-            <Pencil className="h-3.5 w-3.5" />
-            Modifier
-          </Link>
-        </Button>
+        {status !== "completed" && status !== "cancelled" && (
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            className="justify-start gap-2"
+          >
+            <Link to={`/sits/${sitId}/edit`}>
+              <Pencil className="h-3.5 w-3.5" />
+              Modifier
+            </Link>
+          </Button>
+        )}
 
         <Button
           variant="outline"
