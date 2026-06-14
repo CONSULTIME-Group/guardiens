@@ -350,6 +350,9 @@ const ProfileSidebar = ({
         <Eye className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
         Voir mon profil public
       </Link>
+
+      {/* Trust checklist (desktop uniquement) */}
+      {trustSlot && <div className="hidden lg:block">{trustSlot}</div>}
     </aside>
     </TooltipProvider>
   );
