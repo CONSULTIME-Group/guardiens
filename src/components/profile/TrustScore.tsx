@@ -61,16 +61,16 @@ const TrustScore = ({
   let bgColor: string;
   if (score >= 80) {
     level = "Très fiable";
-    color = "text-green-700";
-    bgColor = "bg-green-50 border-green-200";
+    color = "text-success";
+    bgColor = "bg-success-soft border-success-border";
   } else if (score >= 50) {
     level = "Fiable";
     color = "text-primary";
     bgColor = "bg-primary/5 border-primary/20";
   } else if (score >= 25) {
     level = "En progression";
-    color = "text-amber-600";
-    bgColor = "bg-amber-50 border-amber-200";
+    color = "text-warning-foreground";
+    bgColor = "bg-warning-soft border-warning-border";
   } else {
     level = "Nouveau";
     color = "text-muted-foreground";
@@ -96,7 +96,7 @@ const TrustScore = ({
         <div className="space-y-1.5">
           {factors.map((f, i) => (
             <div key={i} className="flex items-center gap-2 text-xs">
-              <CheckCircle2 className={`h-3 w-3 shrink-0 ${f.earned ? "text-green-600" : "text-muted-foreground/30"}`} />
+              <CheckCircle2 className={`h-3 w-3 shrink-0 ${f.earned ? "text-success" : "text-muted-foreground/30"}`} />
               <span className={f.earned ? "text-foreground" : "text-muted-foreground"}>
                 {f.label}
               </span>
