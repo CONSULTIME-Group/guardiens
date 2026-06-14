@@ -196,6 +196,13 @@ const SitImmersiveContent = ({
         title={sit?.title}
         cityName={cityName}
         department={department}
+        startDate={sit?.start_date}
+        endDate={sit?.end_date}
+        petsCount={safePets.length}
+        speciesSummary={speciesSummary}
+        ownerAvatarUrl={owner?.avatar_url}
+        ownerName={ownerName}
+        ownerVerified={owner?.verified}
       />
 
       <SitQuickFacts
