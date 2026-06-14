@@ -146,17 +146,31 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
         // owner_profiles.competences, hydratées ci-dessous selon le rôle.
       }
 
-      // Lifestyle reste propre au profil gardien
+      // Lifestyle + compétences spécifiques (sitter ou both)
       if (usesSitterScoring) {
         const { data: sp } = await supabase
           .from("sitter_profiles")
-          .select("lifestyle")
+          .select("lifestyle, competences")
           .eq("user_id", user.id)
           .maybeSingle();
         if (sp?.lifestyle && Array.isArray(sp.lifestyle)) {
           setLifestyle(sp.lifestyle as string[]);
         }
+        if ((sp as any)?.competences && Array.isArray((sp as any).competences)) {
+          setPickedCompetences((sp as any).competences as string[]);
+        }
+      } else {
+        // Owner-only : compétences éventuelles côté owner_profiles
+        const { data: op } = await supabase
+          .from("owner_profiles")
+          .select("competences")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if ((op as any)?.competences && Array.isArray((op as any).competences)) {
+          setPickedCompetences((op as any).competences as string[]);
+        }
       }
+
     };
     load();
   }, [user, open]);
