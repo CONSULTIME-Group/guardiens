@@ -822,15 +822,17 @@ const SmallMissions = () => {
           <div className="hidden md:block"><MissionsArticlesStrip /></div>
         </main>
 
-        <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
-          <div className="max-w-6xl mx-auto px-4 flex flex-wrap justify-center gap-4">
-            <Link to="/a-propos" className="hover:text-foreground">{tp("footer_about")}</Link>
-            <Link to="/contact" className="hover:text-foreground">{tp("footer_contact")}</Link>
-            <Link to="/cgu" className="hover:text-foreground">{tp("footer_cgu")}</Link>
-            <Link to="/confidentialite" className="hover:text-foreground">{tp("footer_privacy")}</Link>
-            <Link to="/mentions-legales" className="hover:text-foreground">{tp("footer_legal")}</Link>
-          </div>
-        </footer>
+        {!isAuthenticated && (
+          <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
+            <div className="max-w-6xl mx-auto px-4 flex flex-wrap justify-center gap-4">
+              <Link to="/a-propos" className="hover:text-foreground">{tp("footer_about")}</Link>
+              <Link to="/contact" className="hover:text-foreground">{tp("footer_contact")}</Link>
+              <Link to="/cgu" className="hover:text-foreground">{tp("footer_cgu")}</Link>
+              <Link to="/confidentialite" className="hover:text-foreground">{tp("footer_privacy")}</Link>
+              <Link to="/mentions-legales" className="hover:text-foreground">{tp("footer_legal")}</Link>
+            </div>
+          </footer>
+        )}
 
         {/* Sticky CTA mobile supprimée : le FAB du bottom nav (Navigation.tsx)
             est déjà contextuel (Demander / Proposer selon rôle + section).
