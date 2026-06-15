@@ -287,6 +287,19 @@ const AdminSitsManagement = () => {
             <SelectItem value="all">Tous statuts</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={filterCountry} onValueChange={setFilterCountry}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Pays" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous pays {intlSitsCount > 0 ? `(${intlSitsCount} hors FR)` : ""}</SelectItem>
+            <SelectItem value="fr">France uniquement</SelectItem>
+            <SelectItem value="intl">Hors France</SelectItem>
+            {availableCountries.filter(c => c !== "FR").map(c => (
+              <SelectItem key={c} value={c}>{getCountryName(c)}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="rounded-lg border bg-card overflow-x-auto">
