@@ -207,10 +207,16 @@ const AdminSitsManagement = () => {
   const cancelledThisWeek = sits.filter(s => s.status === "cancelled" && differenceInDays(new Date(), new Date(s.created_at)) <= 7);
 
   const filtered = sits.filter(s => {
+    if (filterCountry === "fr" && (s.country || "FR") !== "FR") return false;
+    if (filterCountry === "intl" && (s.country || "FR") === "FR") return false;
+    if (filterCountry !== "all" && filterCountry !== "fr" && filterCountry !== "intl" && (s.country || "FR") !== filterCountry) return false;
     if (!search) return true;
     const q = search.toLowerCase();
     return s.title?.toLowerCase().includes(q) || s.owner?.first_name?.toLowerCase().includes(q) || s.owner?.city?.toLowerCase().includes(q) || sitters[s.id]?.name?.toLowerCase().includes(q);
   });
+
+  const availableCountries = Array.from(new Set(sits.map(s => s.country || "FR").filter(Boolean))).sort();
+  const intlSitsCount = sits.filter(s => (s.country || "FR") !== "FR").length;
 
   const visibleApps = showAllApps ? sheetApplications : sheetApplications.slice(0, 3);
 
