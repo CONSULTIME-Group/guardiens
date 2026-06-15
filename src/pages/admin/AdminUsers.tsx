@@ -40,6 +40,7 @@ const statusLabels: Record<string, { label: string; variant: "default" | "second
 };
 
 import { DEPT_NAMES, getDeptCode, getDeptLabel } from "@/lib/departments";
+import { getCountryName } from "@/lib/countries";
 
 const PAGE_SIZE = 50;
 
