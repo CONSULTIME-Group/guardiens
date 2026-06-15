@@ -79,15 +79,20 @@ const PostalCodeCityFields = ({
             <Label htmlFor={`${postalId}_country`}>
               Pays{required && " *"}
             </Label>
-            <Input
-              id={`${postalId}_country`}
-              value={country ?? ""}
-              onChange={(e) => onChange({ country: e.target.value })}
-              className={inputClassName}
-              maxLength={56}
+            <Select
+              value={country && country !== "FR" ? country : ""}
+              onValueChange={(v) => onChange({ country: v })}
               disabled={disabled}
-              placeholder="Ex : Belgique"
-            />
+            >
+              <SelectTrigger id={`${postalId}_country`} className={inputClassName}>
+                <SelectValue placeholder="Sélectionner un pays" />
+              </SelectTrigger>
+              <SelectContent className="max-h-72">
+                {COUNTRIES.filter((c) => c.code !== "FR").map((c) => (
+                  <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
         {showAbroadToggle && (
