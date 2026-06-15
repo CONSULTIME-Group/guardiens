@@ -141,6 +141,7 @@ export function useDashboardData(): DashboardData {
         totalReviews,
         avgRating: Math.round(avgRating * 10) / 10,
         monthRevenue,
+        intlMembers: intlMembers || 0,
       });
 
       // À traiter
