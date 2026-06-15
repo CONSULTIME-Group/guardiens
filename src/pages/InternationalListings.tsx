@@ -134,15 +134,26 @@ export default function InternationalListings() {
               {t("intl_listings.back_link")}
             </Link>
           </p>
-          <div className="mt-6 rounded-2xl border border-border bg-card/60 p-5 md:p-6 max-w-3xl">
-            <p className="text-sm md:text-base text-foreground">
-              Vous vivez à l'étranger et votre maison en France reste vide plusieurs mois&nbsp;? Découvrez le guide complet&nbsp;:
-              <Link to="/actualites/francais-etranger-garde-maison-france" className="ml-1 text-primary font-semibold hover:underline underline-offset-4">
-                faire garder sa maison en France pendant son absence
-              </Link>.
-            </p>
+          <div className="mt-6 grid gap-4 md:grid-cols-2 max-w-4xl">
+            <div className="rounded-2xl border border-border bg-card/60 p-5">
+              <p className="text-sm md:text-base text-foreground">
+                Vous vivez à l'étranger et votre maison en France reste vide plusieurs mois&nbsp;?
+                <Link to="/actualites/francais-etranger-garde-maison-france" className="ml-1 text-primary font-semibold hover:underline underline-offset-4">
+                  Faire garder sa maison en France pendant son absence
+                </Link>.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-border bg-card/60 p-5">
+              <p className="text-sm md:text-base text-foreground">
+                Vous vivez à Bali, Marrakech, Lisbonne ou Miami et cherchez un gardien francophone&nbsp;?
+                <Link to="/actualites/expat-proprietaire-faire-garder-maison-etranger" className="ml-1 text-primary font-semibold hover:underline underline-offset-4">
+                  Faire garder sa maison à l'étranger par un Français
+                </Link>.
+              </p>
+            </div>
           </div>
         </section>
+
 
         <section className="max-w-6xl mx-auto px-4 md:px-6 pb-10 md:pb-16 space-y-6">
           {sits === null ? (
