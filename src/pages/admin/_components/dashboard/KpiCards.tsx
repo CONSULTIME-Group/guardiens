@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Users, UserPlus, Megaphone, CalendarCheck, Star, CreditCard,
+  Users, UserPlus, Megaphone, CalendarCheck, Star, CreditCard, Globe,
 } from "lucide-react";
 import type { Stats } from "./types";
 import { MONTHLY_SUBSCRIPTION_EUR } from "./types";
@@ -53,6 +53,13 @@ export const KpiCards = ({ stats }: Props) => {
       subtitle: `Abonnements actifs × ${MONTHLY_SUBSCRIPTION_EUR.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}`,
       icon: CreditCard,
       link: "/admin/subscriptions",
+    },
+    {
+      title: "Membres hors France",
+      value: stats.intlMembers,
+      subtitle: stats.intlMembers > 0 ? "Filtrer par pays dans Membres" : "Aucun pour l'instant",
+      icon: Globe,
+      link: "/admin/users",
     },
   ];
 

@@ -71,6 +71,7 @@ export function useDashboardData(): DashboardData {
         { data: recentStatusChanges },
         { data: recentDeletions },
         { data: pendingDeletionsCount },
+        { count: intlMembers },
       ] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "owner"),
@@ -98,6 +99,7 @@ export function useDashboardData(): DashboardData {
         supabase.rpc("admin_get_recent_sit_status_changes" as any, { p_limit: 8 }),
         supabase.rpc("admin_get_recent_account_deletions" as any, { p_limit: 5 }),
         supabase.rpc("admin_get_pending_deletions_count" as any),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).not("country", "is", null).neq("country", "FR"),
       ]);
 
       // Compétences saisies dans les profils mais pas encore validées
@@ -139,6 +141,7 @@ export function useDashboardData(): DashboardData {
         totalReviews,
         avgRating: Math.round(avgRating * 10) / 10,
         monthRevenue,
+        intlMembers: intlMembers || 0,
       });
 
       // À traiter
