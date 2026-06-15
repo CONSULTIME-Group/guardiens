@@ -225,6 +225,19 @@ const SmallMissionsRoute = () => {
   return <SmallMissionsPublic />;
 };
 
+const ParrainageRoute = () => {
+  const { isAuthenticated } = useAuth();
+  if (isAuthenticated) {
+    return (
+      <AppLayout>
+        <Parrainage />
+      </AppLayout>
+    );
+  }
+  return <Parrainage />;
+};
+
+
 
 const NavigateBlogSlug = () => {
   const { slug } = useParams();
@@ -330,8 +343,7 @@ const AppRoutes = () => (
         <Route path="/admin/departments" element={<AdminDepartments />} />
         <Route path="/admin/breeds" element={<AdminBreeds />} />
         <Route path="/admin/articles-longue-traine" element={<AdminLongTailArticles />} />
-        <Route path="/parrainage" element={<Parrainage />} />
-        <Route path="/devenir-home-sitter" element={<DevenirHomeSitter />} />
+
         <Route path="/admin/faq" element={<AdminFAQ />} />
         <Route path="/admin/small-missions" element={<AdminSmallMissions />} />
         <Route path="/admin/legal" element={<AdminLegal />} />
@@ -384,7 +396,10 @@ const AppRoutes = () => (
       <Route path="/dev/preview/ongoing-sit-hero" element={<PreviewOngoingSitHero />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />
       <Route path="/email-preferences" element={<EmailPreferences />} />
+      <Route path="/parrainage" element={<ParrainageRoute />} />
+      <Route path="/devenir-home-sitter" element={<DevenirHomeSitter />} />
       <Route path="*" element={<NotFound />} />
+
     </Routes>
   </Suspense>
 );
