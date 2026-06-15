@@ -134,6 +134,14 @@ export default function InternationalListings() {
               {t("intl_listings.back_link")}
             </Link>
           </p>
+          <div className="mt-6 rounded-2xl border border-border bg-card/60 p-5 md:p-6 max-w-3xl">
+            <p className="text-sm md:text-base text-foreground">
+              Vous vivez à l'étranger et votre maison en France reste vide plusieurs mois&nbsp;? Découvrez le guide complet&nbsp;:
+              <Link to="/actualites/francais-etranger-garde-maison-france" className="ml-1 text-primary font-semibold hover:underline underline-offset-4">
+                faire garder sa maison en France pendant son absence
+              </Link>.
+            </p>
+          </div>
         </section>
 
         <section className="max-w-6xl mx-auto px-4 md:px-6 pb-10 md:pb-16 space-y-6">
