@@ -590,7 +590,7 @@ const Messages = () => {
 
   const renderGroup = (key: string, title: string, convs: Conversation[], unreadCount: number, icon: React.ReactNode) => (
     <section key={key} aria-label={title}>
-      <h2 className="bg-muted/50 px-4 py-2 sticky top-0 z-10 flex items-center gap-2 text-xs font-medium text-foreground m-0">
+      <h2 className="bg-muted/50 px-4 py-2 flex items-center gap-2 text-xs font-medium text-foreground m-0">
         <span aria-hidden="true">{icon}</span>
         <span className="truncate flex-1">{title}</span>
         {unreadCount > 0 && (
