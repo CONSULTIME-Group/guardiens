@@ -225,6 +225,19 @@ const SmallMissionsRoute = () => {
   return <SmallMissionsPublic />;
 };
 
+const ParrainageRoute = () => {
+  const { isAuthenticated } = useAuth();
+  if (isAuthenticated) {
+    return (
+      <AppLayout>
+        <Parrainage />
+      </AppLayout>
+    );
+  }
+  return <Parrainage />;
+};
+
+
 
 const NavigateBlogSlug = () => {
   const { slug } = useParams();
