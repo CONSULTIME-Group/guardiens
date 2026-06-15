@@ -16,6 +16,7 @@ import { format, isPast, isFuture, differenceInDays, formatDistanceToNow } from 
 import { fr } from "date-fns/locale";
 import { AlertTriangle, Search, Eye, XCircle, Star, StickyNote, RotateCcw, User, Calendar, MapPin, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getCountryName } from "@/lib/countries";
 
 const AdminSitsManagement = () => {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ const AdminSitsManagement = () => {
   const [filterStatus, setFilterStatus] = useState("operational");
   // filterType supprimé : "garde longue durée" n'existe plus
   const [search, setSearch] = useState("");
+  const [filterCountry, setFilterCountry] = useState<string>("all");
   const [sitters, setSitters] = useState<Record<string, { name: string; avatar: string | null }>>({});
   const [reviews, setReviews] = useState<Record<string, { owner: boolean; sitter: boolean }>>({});
   const [statsBySit, setStatsBySit] = useState<Record<string, { views: number; messages: number }>>({});
@@ -205,10 +207,16 @@ const AdminSitsManagement = () => {
   const cancelledThisWeek = sits.filter(s => s.status === "cancelled" && differenceInDays(new Date(), new Date(s.created_at)) <= 7);
 
   const filtered = sits.filter(s => {
+    if (filterCountry === "fr" && (s.country || "FR") !== "FR") return false;
+    if (filterCountry === "intl" && (s.country || "FR") === "FR") return false;
+    if (filterCountry !== "all" && filterCountry !== "fr" && filterCountry !== "intl" && (s.country || "FR") !== filterCountry) return false;
     if (!search) return true;
     const q = search.toLowerCase();
     return s.title?.toLowerCase().includes(q) || s.owner?.first_name?.toLowerCase().includes(q) || s.owner?.city?.toLowerCase().includes(q) || sitters[s.id]?.name?.toLowerCase().includes(q);
   });
+
+  const availableCountries = Array.from(new Set(sits.map(s => s.country || "FR").filter(Boolean))).sort();
+  const intlSitsCount = sits.filter(s => (s.country || "FR") !== "FR").length;
 
   const visibleApps = showAllApps ? sheetApplications : sheetApplications.slice(0, 3);
 
@@ -279,6 +287,19 @@ const AdminSitsManagement = () => {
             <SelectItem value="all">Tous statuts</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={filterCountry} onValueChange={setFilterCountry}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Pays" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous pays {intlSitsCount > 0 ? `(${intlSitsCount} hors FR)` : ""}</SelectItem>
+            <SelectItem value="fr">France uniquement</SelectItem>
+            <SelectItem value="intl">Hors France</SelectItem>
+            {availableCountries.filter(c => c !== "FR").map(c => (
+              <SelectItem key={c} value={c}>{getCountryName(c)}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="rounded-lg border bg-card overflow-x-auto">
@@ -328,7 +349,14 @@ const AdminSitsManagement = () => {
                       </div>
                     ) : ","}
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{sit.owner?.city || ","}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1.5">
+                      <span>{sit.owner?.city || ","}</span>
+                      {sit.country && sit.country !== "FR" && (
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">{getCountryName(sit.country)}</Badge>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                     {sit.start_date ? format(new Date(sit.start_date), "d MMM", { locale: fr }) : ","}
                     {" → "}
