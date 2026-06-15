@@ -183,7 +183,10 @@ export default function InternationalListings() {
               <InternationalMap sits={sits} />
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {sits.map((s) => {
-                  const cover = s.cover_photo_url || s.property?.photos?.[0] || null;
+                  const city = (s.city || "").toUpperCase();
+                  const country = (s.country || "").toUpperCase();
+                  const isMarrakech = city.includes("MARRAKECH") || city.includes("MARRAKESH") || country === "MAROC" || country === "MOROCCO";
+                  const cover = s.cover_photo_url || s.property?.photos?.[0] || (isMarrakech ? fallbackMarrakech : null);
                   return (
                     <Link
                       key={s.id}
