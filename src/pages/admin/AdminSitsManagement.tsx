@@ -25,6 +25,7 @@ const AdminSitsManagement = () => {
   const [filterStatus, setFilterStatus] = useState("operational");
   // filterType supprimé : "garde longue durée" n'existe plus
   const [search, setSearch] = useState("");
+  const [filterCountry, setFilterCountry] = useState<string>("all");
   const [sitters, setSitters] = useState<Record<string, { name: string; avatar: string | null }>>({});
   const [reviews, setReviews] = useState<Record<string, { owner: boolean; sitter: boolean }>>({});
   const [statsBySit, setStatsBySit] = useState<Record<string, { views: number; messages: number }>>({});
