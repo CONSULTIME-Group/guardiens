@@ -71,6 +71,7 @@ export function useDashboardData(): DashboardData {
         { data: recentStatusChanges },
         { data: recentDeletions },
         { data: pendingDeletionsCount },
+        { count: intlMembers },
       ] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "owner"),
