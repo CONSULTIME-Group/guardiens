@@ -38,7 +38,7 @@ const SitterCard = ({ sitter, fallbackLabel }: SitterCardProps) => {
           to={`/gardiens/${sitter.id}`}
           className="block text-sm font-medium text-foreground hover:text-primary transition-colors truncate leading-snug"
         >
-          {sitter.first_name ?? fallbackLabel}
+          <span className="capitalize">{sitter.first_name ?? fallbackLabel}</span>
         </Link>
         {sitter.city && (
           <p className="text-xs text-muted-foreground truncate mt-0.5">{sitter.city}</p>
