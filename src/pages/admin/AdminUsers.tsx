@@ -402,6 +402,24 @@ const AdminUsers = () => {
             ))}
           </SelectContent>
         </Select>
+        <Select value={filterCountry} onValueChange={setFilterCountry}>
+          <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
+          <SelectContent className="max-h-60">
+            <SelectItem value="all">Tous pays</SelectItem>
+            <SelectItem value="FR">France uniquement</SelectItem>
+            <SelectItem value="INTL">Hors France</SelectItem>
+            {availableCountries.length > 0 && (
+              <>
+                <div className="px-2 py-1 text-xs text-muted-foreground border-t mt-1 pt-2">Pays présents</div>
+                {availableCountries.map((code) => (
+                  <SelectItem key={code} value={code}>
+                    {getCountryName(code)}
+                  </SelectItem>
+                ))}
+              </>
+            )}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="rounded-lg border bg-card">
