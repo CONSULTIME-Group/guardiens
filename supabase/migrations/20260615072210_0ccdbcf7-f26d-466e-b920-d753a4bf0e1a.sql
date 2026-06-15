@@ -1,0 +1,10 @@
+UPDATE public.articles SET cover_image_url = 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=1200&q=80&auto=format&fit=crop' WHERE slug = 'expat-proprietaire-faire-garder-maison-etranger';
+UPDATE public.articles SET cover_image_url = 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=1200&q=80&auto=format&fit=crop' WHERE slug = 'francais-etranger-garde-maison-france';
+UPDATE public.articles SET cover_image_url = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=1200&q=80&auto=format&fit=crop' WHERE slug = 'devenir-gardien-pro-animalier';
+UPDATE public.articles SET cover_image_url = 'https://images.unsplash.com/photo-1583511655826-05700d52f4d9?w=1200&q=80&auto=format&fit=crop' WHERE slug = 'comment-devenir-home-sitter-france-guide-debutant';
+UPDATE public.articles SET cover_image_url = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1200&q=80&auto=format&fit=crop' WHERE slug = 'petites-missions-entraide-guardiens';
+UPDATE public.articles SET cover_image_url = 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1200&q=80&auto=format&fit=crop' WHERE slug = 'house-sitting-cadre-juridique-france';
+UPDATE public.articles SET cover_image_url = 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1200&q=80&auto=format&fit=crop' WHERE slug = 'reseau-entraide-quartier-lyon-aura';
+UPDATE public.articles SET cover_image_url = 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=1200&q=80&auto=format&fit=crop' WHERE slug = 'jardinage-entraide-quartier-lyon';
+UPDATE public.articles SET cover_image_url = 'https://images.unsplash.com/photo-1559523182-a284c3fb7cff?w=1200&q=80&auto=format&fit=crop' WHERE slug = 'courses-aide-domicile-entraide-senior-lyon';
+UPDATE public.articles SET cover_image_url = 'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=1200&q=80&auto=format&fit=crop' WHERE slug = 'bricolage-montage-meubles-entraide-grenoble-lyon';
