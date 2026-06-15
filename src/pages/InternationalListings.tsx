@@ -9,11 +9,10 @@ import { useTranslation } from "react-i18next";
 import "leaflet/dist/leaflet.css";
 import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
-import PublicHeader from "@/components/layout/PublicHeader";
-import PublicFooter from "@/components/layout/PublicFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { geocodeCity } from "@/lib/geocode";
+import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 
 const CANONICAL = "https://guardiens.fr/annonces/international";
 
@@ -108,7 +107,7 @@ export default function InternationalListings() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="bg-background text-foreground">
       <Helmet>
         <title>{t("intl_listings.meta_title")}</title>
         <meta name="description" content={t("intl_listings.meta_description")} />
@@ -116,9 +115,7 @@ export default function InternationalListings() {
         <link rel="canonical" href={CANONICAL} />
       </Helmet>
 
-      <PublicHeader />
-
-      <main id="main-content" className="flex-1 min-w-0" role="main">
+      <main id="main-content" className="min-w-0" role="main">
         <section className="max-w-6xl mx-auto px-4 md:px-6 pt-10 pb-6">
           <p className="hidden md:flex text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-3 items-center gap-2">
             <Globe2 className="h-3.5 w-3.5" /> {t("intl_listings.kicker")}
@@ -186,7 +183,10 @@ export default function InternationalListings() {
               <InternationalMap sits={sits} />
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {sits.map((s) => {
-                  const cover = s.cover_photo_url || s.property?.photos?.[0] || null;
+                  const city = (s.city || "").toUpperCase();
+                  const country = (s.country || "").toUpperCase();
+                  const isMarrakech = city.includes("MARRAKECH") || city.includes("MARRAKESH") || country === "MAROC" || country === "MOROCCO";
+                  const cover = s.cover_photo_url || s.property?.photos?.[0] || (isMarrakech ? fallbackMarrakech : null);
                   return (
                     <Link
                       key={s.id}
@@ -230,8 +230,6 @@ export default function InternationalListings() {
           )}
         </section>
       </main>
-
-      <PublicFooter />
     </div>
   );
 }
