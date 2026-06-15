@@ -976,7 +976,7 @@ const SearchOwner = () => {
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted/40 px-4 py-2.5">
                   <p className="text-xs text-muted-foreground flex items-center gap-2">
                     <Bell className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden="true" />
-                    Soyez prévenu·e dès qu'un nouveau gardien rejoint la zone autour de {city}.
+                    Recevez une alerte e-mail dès qu'un nouveau gardien rejoint la zone autour de {city}.
                   </p>
                   <button
                     onClick={handleCreateAlert}
