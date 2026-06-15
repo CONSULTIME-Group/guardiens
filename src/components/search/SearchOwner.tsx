@@ -268,7 +268,7 @@ const SearchOwner = () => {
     } else {
       toastUi({
         title: "Alerte créée",
-        description: `Vous serez prévenu·e dès qu'un nouveau gardien rejoint la zone autour de ${city} (rayon ${usedRadius} km).`,
+        description: `Vous recevrez un e-mail dès qu'un nouveau gardien rejoint la zone autour de ${city} (rayon ${usedRadius} km).`,
         action: <ToastAction altText="Personnaliser" onClick={() => navigate("/settings")}>Personnaliser</ToastAction>,
       });
       setAlertCreated(true);
