@@ -354,10 +354,15 @@ const AdminUsers = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3">
         <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Utilisateurs</h1>
-        <Button variant="outline" size="sm" onClick={openHistory}>
-          <MessageSquare className="h-4 w-4 mr-2" />
-          Historique de mes envois
-        </Button>
+        <div className="flex items-center gap-3">
+          <Badge variant="secondary" className="text-xs">
+            {intlCount} membre{intlCount > 1 ? "s" : ""} hors France
+          </Badge>
+          <Button variant="outline" size="sm" onClick={openHistory}>
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Historique de mes envois
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
