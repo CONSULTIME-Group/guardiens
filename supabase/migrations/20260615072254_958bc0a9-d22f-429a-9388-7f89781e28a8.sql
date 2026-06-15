@@ -1,0 +1,1 @@
+UPDATE public.articles SET category = 'guide_central' WHERE slug = 'comment-devenir-home-sitter-france-guide-debutant';
