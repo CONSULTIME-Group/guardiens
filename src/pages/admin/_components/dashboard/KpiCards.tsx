@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Users, UserPlus, Megaphone, CalendarCheck, Star, CreditCard,
+  Users, UserPlus, Megaphone, CalendarCheck, Star, CreditCard, Globe,
 } from "lucide-react";
 import type { Stats } from "./types";
 import { MONTHLY_SUBSCRIPTION_EUR } from "./types";
