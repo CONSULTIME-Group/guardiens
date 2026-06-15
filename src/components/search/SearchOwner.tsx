@@ -990,7 +990,7 @@ const SearchOwner = () => {
               {city && alertCreated && (
                 <div className="mb-4 flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-2.5 text-xs text-primary">
                   <BellRing className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                  Alerte créée, vous serez prévenu·e par e-mail.
+                  Alerte créée, l'e-mail partira automatiquement.
                 </div>
               )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
