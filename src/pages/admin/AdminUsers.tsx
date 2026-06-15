@@ -51,6 +51,7 @@ const AdminUsers = () => {
   const [filterRole, setFilterRole] = useState("all");
   const [filterVerification, setFilterVerification] = useState("all");
   const [filterDept, setFilterDept] = useState("all");
+  const [filterCountry, setFilterCountry] = useState("all");
   const [page, setPage] = useState(0);
   // Modal states
   const [noteModal, setNoteModal] = useState<{ open: boolean; userId: string; currentNote: string }>({
