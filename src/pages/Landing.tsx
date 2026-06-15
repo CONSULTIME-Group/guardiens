@@ -1333,6 +1333,29 @@ const Landing = () => {
                       </span>
                     </Link>
                   </li>
+                  <li>
+                    <Link
+                      to="/actualites/francais-etranger-garde-maison-france"
+                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
+                    >
+                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
+                      <span className="text-sm leading-relaxed">
+                        Français de l'étranger : faire garder sa maison en France pendant son absence
+                      </span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/actualites/expat-proprietaire-faire-garder-maison-etranger"
+                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
+                    >
+                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
+                      <span className="text-sm leading-relaxed">
+                        Expatriés : faire garder sa maison à l'étranger (Bali, Lisbonne, Marrakech...) par un Français
+                      </span>
+                    </Link>
+                  </li>
+
                 </ul>
                 <div className="mt-6 pt-6 border-t border-border flex flex-col sm:flex-row gap-3">
                   <Button asChild variant="outline" size="sm" className="rounded-full">
