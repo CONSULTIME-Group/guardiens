@@ -321,7 +321,14 @@ const AdminListings = () => {
                       <span>{listing.owner?.first_name} {listing.owner?.last_name}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{listing.owner?.city || ","}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1.5">
+                      <span>{listing.owner?.city || ","}</span>
+                      {listing.country && listing.country !== "FR" && (
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">{getCountryName(listing.country)}</Badge>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                     {listing.start_date ? format(new Date(listing.start_date), "d MMM", { locale: fr }) : ","}
                     {" → "}
