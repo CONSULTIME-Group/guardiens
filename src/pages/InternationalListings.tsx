@@ -227,8 +227,6 @@ export default function InternationalListings() {
           )}
         </section>
       </main>
-
-      <PublicFooter />
     </div>
   );
 }
