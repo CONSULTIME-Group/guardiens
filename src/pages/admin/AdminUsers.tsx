@@ -430,6 +430,7 @@ const AdminUsers = () => {
               <TableHead>Rôle</TableHead>
               <TableHead>Code postal</TableHead>
               <TableHead>Département</TableHead>
+              <TableHead>Pays</TableHead>
               <TableHead>Inscription</TableHead>
               <TableHead>Dernière activité</TableHead>
               <TableHead>Profil</TableHead>
@@ -441,13 +442,13 @@ const AdminUsers = () => {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
                   Chargement…
                 </TableCell>
               </TableRow>
             ) : filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
                   Aucun utilisateur trouvé
                 </TableCell>
               </TableRow>
