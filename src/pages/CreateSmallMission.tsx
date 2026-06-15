@@ -30,7 +30,7 @@ const EURO_REGEX = /\d+\s*[€]|[€]\s*\d+|\d+\s*euro/i;
 
 /* ── Stepper progress bar ── */
 const StepperBar = ({ current, total }: { current: number; total: number }) => (
-  <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border px-4 py-3">
+  <div className="sticky top-12 md:top-0 z-30 bg-background/95 backdrop-blur border-b border-border px-4 py-3">
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs font-medium text-muted-foreground">
