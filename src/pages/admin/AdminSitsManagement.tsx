@@ -16,6 +16,7 @@ import { format, isPast, isFuture, differenceInDays, formatDistanceToNow } from 
 import { fr } from "date-fns/locale";
 import { AlertTriangle, Search, Eye, XCircle, Star, StickyNote, RotateCcw, User, Calendar, MapPin, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getCountryName } from "@/lib/countries";
 
 const AdminSitsManagement = () => {
   const navigate = useNavigate();
