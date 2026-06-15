@@ -203,11 +203,17 @@ const AdminUsers = () => {
       const code = getDeptCode(u.postal_code);
       if (code !== filterDept) return false;
     }
+    if (filterCountry !== "all") {
+      const c = (u.country || "FR").toUpperCase();
+      if (filterCountry === "FR" && c !== "FR") return false;
+      if (filterCountry === "INTL" && c === "FR") return false;
+      if (filterCountry !== "FR" && filterCountry !== "INTL" && c !== filterCountry) return false;
+    }
     return true;
   });
 
   // Reset page when filters change
-  useEffect(() => { setPage(0); }, [search, filterRole, filterVerification, filterDept]);
+  useEffect(() => { setPage(0); }, [search, filterRole, filterVerification, filterDept, filterCountry]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
@@ -216,6 +222,18 @@ const AdminUsers = () => {
   const availableDepts = Array.from(
     new Set(users.map((u) => getDeptCode(u.postal_code)).filter(Boolean) as string[])
   ).sort((a, b) => a.localeCompare(b, "fr"));
+
+  // Compute available countries from loaded users (excluding FR/empty)
+  const availableCountries = Array.from(
+    new Set(
+      users
+        .map((u) => (u.country || "").toUpperCase())
+        .filter((c) => c && c !== "FR")
+    )
+  ).sort((a, b) => getCountryName(a).localeCompare(getCountryName(b), "fr"));
+
+  // KPI international
+  const intlCount = users.filter((u) => (u.country || "FR").toUpperCase() !== "FR").length;
 
   const handleSuspend = async () => {
     const { error } = await supabase
