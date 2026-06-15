@@ -925,7 +925,7 @@ const SearchOwner = () => {
                     {!city
                       ? "Renseignez une ville pour activer l'alerte."
                       : alertCreated
-                        ? `Vous serez alerté·e dès qu'un gardien rejoint la zone autour de ${city}.`
+                        ? `Alerte active : un e-mail partira dès qu'un gardien rejoint la zone autour de ${city}.`
                         : `Recevez un e-mail dès qu'un gardien s'inscrit près de ${city}.`}
                   </p>
                 </button>
