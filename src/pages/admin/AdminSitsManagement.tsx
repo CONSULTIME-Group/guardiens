@@ -349,7 +349,14 @@ const AdminSitsManagement = () => {
                       </div>
                     ) : ","}
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{sit.owner?.city || ","}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1.5">
+                      <span>{sit.owner?.city || ","}</span>
+                      {sit.country && sit.country !== "FR" && (
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">{getCountryName(sit.country)}</Badge>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                     {sit.start_date ? format(new Date(sit.start_date), "d MMM", { locale: fr }) : ","}
                     {" → "}
