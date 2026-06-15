@@ -396,7 +396,10 @@ const AppRoutes = () => (
       <Route path="/dev/preview/ongoing-sit-hero" element={<PreviewOngoingSitHero />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />
       <Route path="/email-preferences" element={<EmailPreferences />} />
+      <Route path="/parrainage" element={<ParrainageRoute />} />
+      <Route path="/devenir-home-sitter" element={<DevenirHomeSitter />} />
       <Route path="*" element={<NotFound />} />
+
     </Routes>
   </Suspense>
 );
