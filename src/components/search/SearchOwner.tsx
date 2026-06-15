@@ -268,7 +268,7 @@ const SearchOwner = () => {
     } else {
       toastUi({
         title: "Alerte créée",
-        description: `Vous serez prévenu·e dès qu'un nouveau gardien rejoint la zone autour de ${city} (rayon ${usedRadius} km).`,
+        description: `Vous recevrez un e-mail dès qu'un nouveau gardien rejoint la zone autour de ${city} (rayon ${usedRadius} km).`,
         action: <ToastAction altText="Personnaliser" onClick={() => navigate("/settings")}>Personnaliser</ToastAction>,
       });
       setAlertCreated(true);
@@ -884,7 +884,7 @@ const SearchOwner = () => {
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
                   {isLaunchMode
-                    ? "La communauté de gardiens se construit. Créez une alerte pour être prévenu·e dès qu'un gardien rejoint votre zone."
+                    ? "La communauté de gardiens se construit. Créez une alerte pour recevoir un e-mail dès qu'un gardien rejoint votre zone."
                     : "Voici comment trouver le bon gardien quand même."}
                 </p>
               </div>
@@ -925,7 +925,7 @@ const SearchOwner = () => {
                     {!city
                       ? "Renseignez une ville pour activer l'alerte."
                       : alertCreated
-                        ? `Vous serez alerté·e dès qu'un gardien rejoint la zone autour de ${city}.`
+                        ? `Alerte active : un e-mail partira dès qu'un gardien rejoint la zone autour de ${city}.`
                         : `Recevez un e-mail dès qu'un gardien s'inscrit près de ${city}.`}
                   </p>
                 </button>
@@ -976,7 +976,7 @@ const SearchOwner = () => {
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted/40 px-4 py-2.5">
                   <p className="text-xs text-muted-foreground flex items-center gap-2">
                     <Bell className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden="true" />
-                    Soyez prévenu·e dès qu'un nouveau gardien rejoint la zone autour de {city}.
+                    Recevez une alerte e-mail dès qu'un nouveau gardien rejoint la zone autour de {city}.
                   </p>
                   <button
                     onClick={handleCreateAlert}
@@ -990,7 +990,7 @@ const SearchOwner = () => {
               {city && alertCreated && (
                 <div className="mb-4 flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-2.5 text-xs text-primary">
                   <BellRing className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                  Alerte créée, vous serez prévenu·e par e-mail.
+                  Alerte créée, l'e-mail partira automatiquement.
                 </div>
               )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
