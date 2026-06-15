@@ -40,6 +40,7 @@ const statusLabels: Record<string, { label: string; variant: "default" | "second
 };
 
 import { DEPT_NAMES, getDeptCode, getDeptLabel } from "@/lib/departments";
+import { getCountryName } from "@/lib/countries";
 
 const PAGE_SIZE = 50;
 
@@ -50,6 +51,7 @@ const AdminUsers = () => {
   const [filterRole, setFilterRole] = useState("all");
   const [filterVerification, setFilterVerification] = useState("all");
   const [filterDept, setFilterDept] = useState("all");
+  const [filterCountry, setFilterCountry] = useState("all");
   const [page, setPage] = useState(0);
   // Modal states
   const [noteModal, setNoteModal] = useState<{ open: boolean; userId: string; currentNote: string }>({
@@ -145,7 +147,7 @@ const AdminUsers = () => {
     setLoading(true);
     let query = supabase
       .from("profiles")
-      .select("id, first_name, last_name, role, city, postal_code, avatar_url, bio, profile_completion, created_at, updated_at, cancellation_count, identity_verified, identity_verification_status, account_status, is_founder, skill_categories, available_for_help, custom_skills, completed_sits_count, cancellations_as_proprio")
+      .select("id, first_name, last_name, role, city, postal_code, country, avatar_url, bio, profile_completion, created_at, updated_at, cancellation_count, identity_verified, identity_verification_status, account_status, is_founder, skill_categories, available_for_help, custom_skills, completed_sits_count, cancellations_as_proprio")
       .order("created_at", { ascending: false })
       // Évite le cap silencieux Supabase à 1000. Au-delà de 2000 utilisateurs,
       // basculer en pagination server-side avec .range() (le filtrage client devra
@@ -201,11 +203,17 @@ const AdminUsers = () => {
       const code = getDeptCode(u.postal_code);
       if (code !== filterDept) return false;
     }
+    if (filterCountry !== "all") {
+      const c = (u.country || "FR").toUpperCase();
+      if (filterCountry === "FR" && c !== "FR") return false;
+      if (filterCountry === "INTL" && c === "FR") return false;
+      if (filterCountry !== "FR" && filterCountry !== "INTL" && c !== filterCountry) return false;
+    }
     return true;
   });
 
   // Reset page when filters change
-  useEffect(() => { setPage(0); }, [search, filterRole, filterVerification, filterDept]);
+  useEffect(() => { setPage(0); }, [search, filterRole, filterVerification, filterDept, filterCountry]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
@@ -214,6 +222,18 @@ const AdminUsers = () => {
   const availableDepts = Array.from(
     new Set(users.map((u) => getDeptCode(u.postal_code)).filter(Boolean) as string[])
   ).sort((a, b) => a.localeCompare(b, "fr"));
+
+  // Compute available countries from loaded users (excluding FR/empty)
+  const availableCountries = Array.from(
+    new Set(
+      users
+        .map((u) => (u.country || "").toUpperCase())
+        .filter((c) => c && c !== "FR")
+    )
+  ).sort((a, b) => getCountryName(a).localeCompare(getCountryName(b), "fr"));
+
+  // KPI international
+  const intlCount = users.filter((u) => (u.country || "FR").toUpperCase() !== "FR").length;
 
   const handleSuspend = async () => {
     const { error } = await supabase
@@ -334,10 +354,15 @@ const AdminUsers = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3">
         <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Utilisateurs</h1>
-        <Button variant="outline" size="sm" onClick={openHistory}>
-          <MessageSquare className="h-4 w-4 mr-2" />
-          Historique de mes envois
-        </Button>
+        <div className="flex items-center gap-3">
+          <Badge variant="secondary" className="text-xs">
+            {intlCount} membre{intlCount > 1 ? "s" : ""} hors France
+          </Badge>
+          <Button variant="outline" size="sm" onClick={openHistory}>
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Historique de mes envois
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
@@ -377,6 +402,24 @@ const AdminUsers = () => {
             ))}
           </SelectContent>
         </Select>
+        <Select value={filterCountry} onValueChange={setFilterCountry}>
+          <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
+          <SelectContent className="max-h-60">
+            <SelectItem value="all">Tous pays</SelectItem>
+            <SelectItem value="FR">France uniquement</SelectItem>
+            <SelectItem value="INTL">Hors France</SelectItem>
+            {availableCountries.length > 0 && (
+              <>
+                <div className="px-2 py-1 text-xs text-muted-foreground border-t mt-1 pt-2">Pays présents</div>
+                {availableCountries.map((code) => (
+                  <SelectItem key={code} value={code}>
+                    {getCountryName(code)}
+                  </SelectItem>
+                ))}
+              </>
+            )}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="rounded-lg border bg-card">
@@ -387,6 +430,7 @@ const AdminUsers = () => {
               <TableHead>Rôle</TableHead>
               <TableHead>Code postal</TableHead>
               <TableHead>Département</TableHead>
+              <TableHead>Pays</TableHead>
               <TableHead>Inscription</TableHead>
               <TableHead>Dernière activité</TableHead>
               <TableHead>Profil</TableHead>
@@ -398,13 +442,13 @@ const AdminUsers = () => {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
                   Chargement…
                 </TableCell>
               </TableRow>
             ) : filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
                   Aucun utilisateur trouvé
                 </TableCell>
               </TableRow>
@@ -456,6 +500,13 @@ const AdminUsers = () => {
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {getDeptLabel(user.postal_code)}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {(() => {
+                        const c = (user.country || "FR").toUpperCase();
+                        if (c === "FR") return <span className="text-muted-foreground">France</span>;
+                        return <Badge variant="secondary" className="text-xs">{getCountryName(c)}</Badge>;
+                      })()}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {format(new Date(user.created_at), "d MMM yyyy", { locale: fr })}
