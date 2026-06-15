@@ -796,7 +796,7 @@ const CreateSit = () => {
       {currentStep === 1 && (
         <div className="px-4 max-w-3xl mx-auto space-y-6">
           {/* Lieu de la garde */}
-          <details className="rounded-lg border border-border bg-muted/30 group" open={!!(sitCity)}>
+          <details className="rounded-lg border border-border bg-muted/30 group" open={!!(sitCity) || (sitCountry && sitCountry !== "FR")}>
             <summary className="cursor-pointer list-none p-4 flex items-center justify-between hover:bg-muted/40 transition-colors rounded-lg">
               <div>
                 <p className="text-sm font-medium">Lieu de la garde <span className="text-muted-foreground font-normal">(optionnel)</span></p>
