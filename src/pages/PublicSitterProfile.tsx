@@ -1089,7 +1089,7 @@ export default function PublicSitterProfile() {
 
       {/* ── BARRE D'ONGLETS, visible si ≥ 2 onglets ── */}
       {availableTabs > 1 && (
-        <div className="flex border-b border-border bg-card sticky top-0 z-10 max-w-5xl mx-auto">
+        <div className="flex border-b border-border bg-card sticky top-12 md:top-0 z-10 max-w-5xl mx-auto">
           {hasSitterProfile && (
             <button
               type="button"

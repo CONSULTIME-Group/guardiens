@@ -123,7 +123,7 @@ const FirstAnnonceTip = () => {
 
 // Step progress indicator
 const StepperBar = ({ currentStep, onStepClick }: { currentStep: number; onStepClick: (i: number) => void }) => (
-  <div className="sticky top-0 z-30 bg-background border-b border-border pt-safe">
+  <div className="sticky top-12 md:top-0 z-30 bg-background border-b border-border pt-safe">
     <div className="max-w-3xl mx-auto px-4 py-3">
       <div className="flex items-center justify-between gap-1 mb-2">
         {STEPS.map((step, i) => (
