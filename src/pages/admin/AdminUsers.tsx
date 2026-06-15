@@ -501,6 +501,13 @@ const AdminUsers = () => {
                     <TableCell className="text-sm text-muted-foreground">
                       {getDeptLabel(user.postal_code)}
                     </TableCell>
+                    <TableCell className="text-sm">
+                      {(() => {
+                        const c = (user.country || "FR").toUpperCase();
+                        if (c === "FR") return <span className="text-muted-foreground">France</span>;
+                        return <Badge variant="secondary" className="text-xs">{getCountryName(c)}</Badge>;
+                      })()}
+                    </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {format(new Date(user.created_at), "d MMM yyyy", { locale: fr })}
                     </TableCell>
