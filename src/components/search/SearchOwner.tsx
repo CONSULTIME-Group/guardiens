@@ -884,7 +884,7 @@ const SearchOwner = () => {
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
                   {isLaunchMode
-                    ? "La communauté de gardiens se construit. Créez une alerte pour être prévenu·e dès qu'un gardien rejoint votre zone."
+                    ? "La communauté de gardiens se construit. Créez une alerte pour recevoir un e-mail dès qu'un gardien rejoint votre zone."
                     : "Voici comment trouver le bon gardien quand même."}
                 </p>
               </div>
