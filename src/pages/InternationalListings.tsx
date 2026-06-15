@@ -107,7 +107,7 @@ export default function InternationalListings() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="bg-background text-foreground">
       <Helmet>
         <title>{t("intl_listings.meta_title")}</title>
         <meta name="description" content={t("intl_listings.meta_description")} />
@@ -115,9 +115,7 @@ export default function InternationalListings() {
         <link rel="canonical" href={CANONICAL} />
       </Helmet>
 
-      <PublicHeader />
-
-      <main id="main-content" className="flex-1 min-w-0" role="main">
+      <main id="main-content" className="min-w-0" role="main">
         <section className="max-w-6xl mx-auto px-4 md:px-6 pt-10 pb-6">
           <p className="hidden md:flex text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-3 items-center gap-2">
             <Globe2 className="h-3.5 w-3.5" /> {t("intl_listings.kicker")}
