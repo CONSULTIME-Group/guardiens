@@ -54,6 +54,13 @@ export const KpiCards = ({ stats }: Props) => {
       icon: CreditCard,
       link: "/admin/subscriptions",
     },
+    {
+      title: "Membres hors France",
+      value: stats.intlMembers,
+      subtitle: stats.intlMembers > 0 ? "Filtrer par pays dans Membres" : "Aucun pour l'instant",
+      icon: Globe,
+      link: "/admin/users",
+    },
   ];
 
   return (
