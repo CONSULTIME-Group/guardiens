@@ -34,6 +34,7 @@ import PresenceBadge from "@/components/messages/PresenceBadge";
 import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
 import { useActiveSittersCount } from "@/hooks/useActiveSittersCount";
 import { useActiveOwnersCount } from "@/hooks/useActiveOwnersCount";
+import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -1081,6 +1082,17 @@ const SearchOwner = () => {
                         {(profile?.completed_sits_count || 0) > 0 && (
                           <span className="text-xs text-muted-foreground">{profile.completed_sits_count} garde{profile.completed_sits_count > 1 ? "s" : ""}</span>
                         )}
+                      </div>
+
+                      {/* Affinité (badge compact, masqué si non calculable) */}
+                      <div className="mt-1">
+                        <OwnerToSitterAffinity
+                          sitterProfile={s}
+                          context="search_owner_listing"
+                          targetId={s.user_id}
+                          size="sm"
+                          showCta={false}
+                        />
                       </div>
 
                       {/* Animal pills, zone réservée pour aligner */}
