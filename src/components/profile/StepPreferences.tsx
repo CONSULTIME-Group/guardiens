@@ -4,15 +4,19 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ChipSelect from "./ChipSelect";
 import type { SitterProfileData } from "@/hooks/useSitterProfile";
+import {
+  LANGUAGE_OPTIONS,
+  INTEREST_OPTIONS,
+  LIFE_PACE_OPTIONS,
+  HOUSEHOLD_COMPOSITION_OPTIONS,
+} from "@/lib/profileMatchingOptions";
 
 const MEETING_OPTIONS = [
   "Dîner/apéro avant", "Visite la veille", "Passage le jour même",
   "Visio avant", "Échange messagerie suffit", "S'adapte au propriétaire"
 ];
 const HANDOVER_OPTIONS = ["La veille avec nuit commune", "Le jour du départ", "À distance OK", "S'adapte"];
-const LANGUAGE_OPTIONS = ["Français", "Anglais", "Espagnol", "Autre"];
 const SKILL_OPTIONS = ["Jardinage", "Bricolage", "Ménage", "Cuisine", "Premiers secours animaux"];
-const INTEREST_OPTIONS = ["Rando", "Lecture", "Cuisine", "Photo", "Musique", "Yoga", "Vélo", "Autre"];
 
 interface Props {
   data: SitterProfileData;
@@ -67,7 +71,33 @@ const StepPreferences = ({ data, onChange }: Props) => (
       </Select>
     </div>
 
-    <h3 className="font-heading text-lg font-semibold mt-4">Bonus profil</h3>
+    <h3 className="font-heading text-lg font-semibold mt-4">À propos de moi</h3>
+    <p className="text-sm text-muted-foreground -mt-3">
+      Aide les propriétaires à voir si vous matchez avec eux et leurs animaux.
+    </p>
+
+    <div className="space-y-2">
+      <Label>Rythme de vie</Label>
+      <Select value={data.life_pace} onValueChange={v => onChange({ life_pace: v })}>
+        <SelectTrigger className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
+        <SelectContent>
+          {LIFE_PACE_OPTIONS.map(o => (
+            <SelectItem key={o.value} value={o.value}>
+              {o.label} · {o.description}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+
+    <div className="space-y-2">
+      <Label>Composition du foyer pendant la garde</Label>
+      <ChipSelect
+        options={HOUSEHOLD_COMPOSITION_OPTIONS}
+        selected={data.household_composition}
+        onChange={v => onChange({ household_composition: v })}
+      />
+    </div>
 
     <div className="space-y-2">
       <Label>Langues parlées</Label>
@@ -75,13 +105,13 @@ const StepPreferences = ({ data, onChange }: Props) => (
     </div>
 
     <div className="space-y-2">
-      <Label>Compétences bonus</Label>
-      <ChipSelect options={SKILL_OPTIONS} selected={data.bonus_skills} onChange={v => onChange({ bonus_skills: v })} />
+      <Label>Centres d'intérêt</Label>
+      <ChipSelect options={INTEREST_OPTIONS} selected={data.interests} onChange={v => onChange({ interests: v })} />
     </div>
 
     <div className="space-y-2">
-      <Label>Centres d'intérêt</Label>
-      <ChipSelect options={INTEREST_OPTIONS} selected={data.interests} onChange={v => onChange({ interests: v })} />
+      <Label>Compétences bonus</Label>
+      <ChipSelect options={SKILL_OPTIONS} selected={data.bonus_skills} onChange={v => onChange({ bonus_skills: v })} />
     </div>
   </div>
 );
