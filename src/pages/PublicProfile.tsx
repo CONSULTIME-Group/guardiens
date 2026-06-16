@@ -340,6 +340,35 @@ const PublicProfile = () => {
                       </Card>
                     )}
 
+                    {/* Centres d'intérêt */}
+                    {sitterProfile.interests?.length > 0 && (
+                      <Card>
+                        <h3 className="font-heading font-semibold text-sm mb-2 text-foreground">Centres d'intérêt</h3>
+                        <div className="flex flex-wrap gap-1.5">
+                          {sitterProfile.interests.map((i: string) => (
+                            <span key={i} className="px-2.5 py-1 rounded-full text-xs bg-muted text-foreground">{i}</span>
+                          ))}
+                        </div>
+                      </Card>
+                    )}
+
+                    {/* Rythme de vie + foyer */}
+                    {(sitterProfile.life_pace || sitterProfile.household_composition?.length > 0) && (
+                      <Card>
+                        <h3 className="font-heading font-semibold text-sm mb-2 text-foreground">Au quotidien</h3>
+                        <div className="space-y-2 text-sm text-muted-foreground">
+                          {sitterProfile.life_pace && (
+                            <p><span className="font-medium text-foreground">Rythme : </span>{
+                              ({ calme: "Calme", equilibre: "Équilibré", actif: "Actif" } as Record<string, string>)[sitterProfile.life_pace] || sitterProfile.life_pace
+                            }</p>
+                          )}
+                          {sitterProfile.household_composition?.length > 0 && (
+                            <p><span className="font-medium text-foreground">Foyer : </span>{sitterProfile.household_composition.join(", ")}</p>
+                          )}
+                        </div>
+                      </Card>
+                    )}
+
                     {/* Bonus skills */}
                     {sitterProfile.bonus_skills?.length > 0 && (
                       <Card>
@@ -472,6 +501,34 @@ const PublicProfile = () => {
                       <Card>
                         <h3 className="font-heading font-semibold text-sm mb-1 text-foreground">Règles de la maison</h3>
                         <p className="text-sm whitespace-pre-line text-muted-foreground">{ownerProfile.rules_notes}</p>
+                      </Card>
+                    )}
+                    {(ownerProfile.life_pace || ownerProfile.household_composition?.length > 0 || ownerProfile.languages?.length > 0 || ownerProfile.interests?.length > 0) && (
+                      <Card>
+                        <h3 className="font-heading font-semibold text-sm mb-2 text-foreground">À propos de moi</h3>
+                        <div className="space-y-2 text-sm text-muted-foreground">
+                          {ownerProfile.life_pace && (
+                            <p><span className="font-medium text-foreground">Rythme : </span>{
+                              ({ calme: "Calme", equilibre: "Équilibré", actif: "Actif" } as Record<string, string>)[ownerProfile.life_pace] || ownerProfile.life_pace
+                            }</p>
+                          )}
+                          {ownerProfile.household_composition?.length > 0 && (
+                            <p><span className="font-medium text-foreground">Foyer : </span>{ownerProfile.household_composition.join(", ")}</p>
+                          )}
+                          {ownerProfile.languages?.length > 0 && (
+                            <p><span className="font-medium text-foreground">Langues : </span>{ownerProfile.languages.join(", ")}</p>
+                          )}
+                          {ownerProfile.interests?.length > 0 && (
+                            <div className="pt-1">
+                              <span className="font-medium text-foreground">Centres d'intérêt : </span>
+                              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                {ownerProfile.interests.map((i: string) => (
+                                  <span key={i} className="px-2.5 py-1 rounded-full text-xs bg-muted text-foreground">{i}</span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </Card>
                     )}
                   </>

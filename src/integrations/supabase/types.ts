@@ -2734,7 +2734,11 @@ export type Database = {
           environments: string[]
           experience_required: boolean | null
           handover_preference: string | null
+          household_composition: string[] | null
           id: string
+          interests: string[] | null
+          languages: string[] | null
+          life_pace: string | null
           meeting_preference: string[] | null
           news_format: string[] | null
           news_frequency: string | null
@@ -2760,7 +2764,11 @@ export type Database = {
           environments?: string[]
           experience_required?: boolean | null
           handover_preference?: string | null
+          household_composition?: string[] | null
           id?: string
+          interests?: string[] | null
+          languages?: string[] | null
+          life_pace?: string | null
           meeting_preference?: string[] | null
           news_format?: string[] | null
           news_frequency?: string | null
@@ -2786,7 +2794,11 @@ export type Database = {
           environments?: string[]
           experience_required?: boolean | null
           handover_preference?: string | null
+          household_composition?: string[] | null
           id?: string
+          interests?: string[] | null
+          languages?: string[] | null
+          life_pace?: string | null
           meeting_preference?: string[] | null
           news_format?: string[] | null
           news_frequency?: string | null
@@ -4276,11 +4288,13 @@ export type Database = {
           handover_preference: string | null
           has_license: boolean | null
           has_vehicle: boolean | null
+          household_composition: string[] | null
           id: string
           indoor_cats_only: boolean
           interests: string[] | null
           is_available: boolean
           languages: string[] | null
+          life_pace: string | null
           lifestyle: string[] | null
           max_duration: number | null
           meeting_preference: string[] | null
@@ -4320,11 +4334,13 @@ export type Database = {
           handover_preference?: string | null
           has_license?: boolean | null
           has_vehicle?: boolean | null
+          household_composition?: string[] | null
           id?: string
           indoor_cats_only?: boolean
           interests?: string[] | null
           is_available?: boolean
           languages?: string[] | null
+          life_pace?: string | null
           lifestyle?: string[] | null
           max_duration?: number | null
           meeting_preference?: string[] | null
@@ -4364,11 +4380,13 @@ export type Database = {
           handover_preference?: string | null
           has_license?: boolean | null
           has_vehicle?: boolean | null
+          household_composition?: string[] | null
           id?: string
           indoor_cats_only?: boolean
           interests?: string[] | null
           is_available?: boolean
           languages?: string[] | null
+          life_pace?: string | null
           lifestyle?: string[] | null
           max_duration?: number | null
           meeting_preference?: string[] | null

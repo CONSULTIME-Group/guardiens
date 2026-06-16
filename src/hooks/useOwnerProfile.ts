@@ -73,6 +73,11 @@ export interface OwnerProfileData {
   owner_competences: string[];
   owner_competences_disponible: boolean;
   owner_skill_categories: string[];
+  // À propos de moi (matching) — owner_profiles
+  languages: string[];
+  interests: string[];
+  life_pace: string;
+  household_composition: string[];
 }
 
 export interface Pet {
@@ -105,6 +110,7 @@ const defaultData: OwnerProfileData = {
   news_frequency: "", news_format: [], preferred_time: "", communication_notes: "",
   skill_categories: [], available_for_help: false,
   owner_competences: [], owner_competences_disponible: false, owner_skill_categories: [],
+  languages: [], interests: [], life_pace: "", household_composition: [],
 };
 
 export function useOwnerProfile() {
@@ -171,6 +177,10 @@ export function useOwnerProfile() {
       owner_competences: ownerCompetences,
       owner_competences_disponible: (o as any)?.competences_disponible ?? (sitter as any)?.competences_disponible ?? false,
       owner_skill_categories: (p as any)?.skill_categories || [],
+      languages: (o as any)?.languages || [],
+      interests: (o as any)?.interests || [],
+      life_pace: (o as any)?.life_pace || "",
+      household_composition: (o as any)?.household_composition || [],
     });
     setLastSyncedAt(
       [p?.updated_at, o?.updated_at]
@@ -272,6 +282,7 @@ export function useOwnerProfile() {
         "smoker_accepted", "rules_notes", "meeting_preference", "handover_preference",
         "welcome_notes", "news_frequency", "news_format", "preferred_time", "communication_notes",
         "environments",
+        "languages", "interests", "life_pace", "household_composition",
       ] as const;
       const ownerUpdate: any = {};
       ownerFields.forEach(f => { if (f in stepData) ownerUpdate[f] = (stepData as any)[f]; });
