@@ -110,6 +110,7 @@ const defaultData: OwnerProfileData = {
   news_frequency: "", news_format: [], preferred_time: "", communication_notes: "",
   skill_categories: [], available_for_help: false,
   owner_competences: [], owner_competences_disponible: false, owner_skill_categories: [],
+  languages: [], interests: [], life_pace: "", household_composition: [],
 };
 
 export function useOwnerProfile() {
