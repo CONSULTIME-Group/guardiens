@@ -63,13 +63,6 @@ const SearchListingCard = ({
     );
   }, [isMission, isDemo, isInactive, viewerSitterProfile, item.ownerMatch, item.pets]);
 
-  useEffect(() => {
-    if (affinity) {
-      void trackEvent("affinity_badge_seen", {
-        metadata: { context: "search_listing", score: affinity.score, total: affinity.total },
-      });
-    }
-  }, [affinity]);
 
   const location = useLocation();
   const isPublicContext = location.pathname.startsWith("/annonces") || location.pathname.startsWith("/petites-missions") || location.pathname.startsWith("/search");
