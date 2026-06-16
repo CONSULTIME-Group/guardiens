@@ -60,6 +60,7 @@ const PublicProfile = () => {
   const [activeSit, setActiveSit] = useState<any>(null);
   const [trustedSittersCount, setTrustedSittersCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [affinity, setAffinity] = useState<AffinityResult | null>(null);
 
   useEffect(() => {
     if (!id) return;
