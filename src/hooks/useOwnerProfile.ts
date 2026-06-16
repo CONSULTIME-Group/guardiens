@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/lib/logger";
+import { clearViewerOwnerCache } from "@/hooks/useViewerOwnerForAffinity";
 
 // Exported so the page can recompute missing fields against the LIVE preview state
 // (mergedData = data + localData) instead of the stale server snapshot.
