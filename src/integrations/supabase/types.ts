@@ -4311,11 +4311,14 @@ export type Database = {
           references_text: string | null
           reply_median_minutes: number | null
           reply_stats_updated_at: string | null
+          sensitivities: string[]
           sitter_type: string | null
           smoker: boolean | null
+          special_animal_skills: string[]
           strict_rules_ok: boolean | null
           updated_at: string
           user_id: string
+          work_during_sit: string | null
         }
         Insert: {
           accompanied_by?: string | null
@@ -4357,11 +4360,14 @@ export type Database = {
           references_text?: string | null
           reply_median_minutes?: number | null
           reply_stats_updated_at?: string | null
+          sensitivities?: string[]
           sitter_type?: string | null
           smoker?: boolean | null
+          special_animal_skills?: string[]
           strict_rules_ok?: boolean | null
           updated_at?: string
           user_id: string
+          work_during_sit?: string | null
         }
         Update: {
           accompanied_by?: string | null
@@ -4403,11 +4409,14 @@ export type Database = {
           references_text?: string | null
           reply_median_minutes?: number | null
           reply_stats_updated_at?: string | null
+          sensitivities?: string[]
           sitter_type?: string | null
           smoker?: boolean | null
+          special_animal_skills?: string[]
           strict_rules_ok?: boolean | null
           updated_at?: string
           user_id?: string
+          work_during_sit?: string | null
         }
         Relationships: [
           {

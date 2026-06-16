@@ -369,6 +369,46 @@ const PublicProfile = () => {
                       </Card>
                     )}
 
+                    {/* Compétences pointues */}
+                    {sitterProfile.special_animal_skills?.length > 0 && (
+                      <Card>
+                        <h3 className="font-heading font-semibold text-sm mb-2 text-foreground">Compétences spéciales animaux</h3>
+                        <div className="flex flex-wrap gap-1.5">
+                          {sitterProfile.special_animal_skills.map((s: string) => (
+                            <span key={s} className="px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">{s}</span>
+                          ))}
+                        </div>
+                      </Card>
+                    )}
+
+                    {/* Présence pendant la garde */}
+                    {sitterProfile.work_during_sit && (
+                      <Card>
+                        <h3 className="font-heading font-semibold text-sm mb-1 text-foreground">Présence pendant la garde</h3>
+                        <p className="text-sm text-muted-foreground">{
+                          ({
+                            full_remote: "Télétravail 100 %, présent toute la journée",
+                            partial_remote: "Télétravail partiel, quelques sorties",
+                            on_site: "Sur place, congés ou retraite",
+                            out_daytime: "Absences en journée (travail extérieur)",
+                            flexible: "Variable selon la garde",
+                          } as Record<string, string>)[sitterProfile.work_during_sit] || sitterProfile.work_during_sit
+                        }</p>
+                      </Card>
+                    )}
+
+                    {/* Sensibilités */}
+                    {sitterProfile.sensitivities?.length > 0 && (
+                      <Card>
+                        <h3 className="font-heading font-semibold text-sm mb-2 text-foreground">À savoir</h3>
+                        <div className="flex flex-wrap gap-1.5">
+                          {sitterProfile.sensitivities.map((s: string) => (
+                            <span key={s} className="px-2.5 py-1 rounded-full text-xs bg-muted text-foreground">{s}</span>
+                          ))}
+                        </div>
+                      </Card>
+                    )}
+
                     {/* Bonus skills */}
                     {sitterProfile.bonus_skills?.length > 0 && (
                       <Card>
