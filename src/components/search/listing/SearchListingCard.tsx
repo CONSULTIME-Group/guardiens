@@ -1,7 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
+import { useMemo } from "react";
 import FounderBadge from "@/components/badges/FounderBadge";
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import FavoriteButton from "@/components/shared/FavoriteButton";
+import AffinityBadge from "@/components/matching/AffinityBadge";
+import { computeAffinityScore } from "@/lib/affinityScore";
 import { PawPrint, Cat, Bird } from "lucide-react";
 
 const speciesIcon: Record<string, typeof PawPrint> = {
@@ -17,7 +20,9 @@ export interface SearchListingCardProps {
   hasAccess: boolean;
   testDemoMode: boolean;
   formatDate: (d: string | null) => string;
+  viewerSitterProfile?: any;
 }
+
 
 const SearchListingCard = ({
   item,
