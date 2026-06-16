@@ -35,6 +35,9 @@ import SitterStatusBanner from "./SitterStatusBanner";
 import { useSitDerived } from "./useSitDerived";
 import ReviewsTab from "./tabs/ReviewsTab";
 import SitImmersiveContent from "./SitImmersiveContent";
+import AffinityBadge from "@/components/matching/AffinityBadge";
+import { computeAffinityScore } from "@/lib/affinityScore";
+import { useMemo } from "react";
 import type { SitData } from "./types";
 
 interface SitterSitViewProps {
@@ -218,6 +221,34 @@ const SitterSitView = ({
         avgRating={avgRating}
         compact
       />
+
+      {/* Score d'affinité réciproque (vue gardien sur annonce propriétaire) */}
+      {(() => {
+        const affinity = useMemo(() => {
+          if (!sitterProfile || !ownerProfile) return null;
+          return computeAffinityScore(
+            { ...ownerProfile, pets: pets || [] },
+            sitterProfile,
+          );
+        }, [sitterProfile, ownerProfile, pets]);
+        useEffect(() => {
+          if (affinity) {
+            void trackEvent("affinity_badge_seen", {
+              metadata: { context: "sit_detail", score: affinity.score, total: affinity.total },
+            });
+          }
+        }, [affinity]);
+        if (!affinity) return null;
+        return (
+          <div className="mt-3 flex items-center gap-2">
+            <AffinityBadge result={affinity} size="md" />
+            <span className="text-xs text-muted-foreground">
+              Votre affinité avec ce propriétaire
+            </span>
+          </div>
+        );
+      })()}
+
 
       {/* Apply bar, affichée tout en haut, juste sous le header,
           pour que le CTA "Postuler" soit visible immédiatement sans scroll. */}
