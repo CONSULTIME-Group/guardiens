@@ -5,64 +5,101 @@ import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/lib/analytics";
 
 /**
- * CTA contextuel affiché quand le score d'affinité n'a pas pu être calculé
- * (moins de 3 critères communs renseignés).
+ * CTA contextuel affiché quand le score d'affinité n'a pas pu être calculé.
+ * Liste les champs manquants côté visiteur pour orienter vers l'édition de son profil.
  *
- * Affiché uniquement côté gardien sur son propre parcours, jamais à l'autre
- * partie. Liste les champs manquants pour orienter vers l'édition du profil.
+ * Affiché uniquement sur le parcours du visiteur (jamais à l'autre partie).
  */
 
-export interface AffinityMissingCTAProps {
-  /** Profil gardien courant (vue depuis SES yeux). */
-  sitterProfile: {
-    animal_types?: string[] | null;
-    life_pace?: string | null;
-    languages?: string[] | null;
-    interests?: string[] | null;
-  } | null;
-  /** Surface (sit_detail | search | favorites | public_profile). Tracking. */
-  context: string;
-  /** Lien d'édition du profil. */
-  editHref?: string;
-  className?: string;
+interface SitterProfileLike {
+  animal_types?: string[] | null;
+  life_pace?: string | null;
+  languages?: string[] | null;
+  interests?: string[] | null;
 }
 
-const FIELD_LABELS: Record<string, string> = {
+interface OwnerProfileLike {
+  life_pace?: string | null;
+  languages?: string[] | null;
+  interests?: string[] | null;
+  presence_expected?: string | null;
+  home_ambiance?: string[] | null;
+  preferred_sitter_types?: string[] | null;
+}
+
+type Props =
+  | {
+      side: "sitter";
+      profile: SitterProfileLike | null;
+      context: string;
+      editHref?: string;
+      className?: string;
+    }
+  | {
+      side: "owner";
+      profile: OwnerProfileLike | null;
+      context: string;
+      editHref?: string;
+      className?: string;
+    };
+
+const SITTER_LABELS: Record<string, string> = {
   animal_types: "vos animaux",
   life_pace: "votre rythme de vie",
   languages: "vos langues",
   interests: "vos centres d'intérêt",
 };
 
-const AffinityMissingCTA = ({
-  sitterProfile,
-  context,
-  editHref = "/profil",
-  className,
-}: AffinityMissingCTAProps) => {
+const OWNER_LABELS: Record<string, string> = {
+  life_pace: "votre rythme de vie",
+  languages: "vos langues",
+  interests: "vos centres d'intérêt",
+  presence_expected: "votre présence attendue",
+  home_ambiance: "l'ambiance du foyer",
+  preferred_sitter_types: "votre gardien idéal",
+};
+
+const AffinityMissingCTA = (props: Props) => {
+  const { side, profile, context, editHref, className } = props;
+
   const missing = useMemo(() => {
+    if (!profile) return [];
     const out: string[] = [];
-    if (!sitterProfile?.animal_types?.length) out.push("animal_types");
-    if (!sitterProfile?.life_pace) out.push("life_pace");
-    if (!sitterProfile?.languages?.length) out.push("languages");
-    if (!sitterProfile?.interests?.length) out.push("interests");
+    if (side === "sitter") {
+      const p = profile as SitterProfileLike;
+      if (!p.animal_types?.length) out.push("animal_types");
+      if (!p.life_pace) out.push("life_pace");
+      if (!p.languages?.length) out.push("languages");
+      if (!p.interests?.length) out.push("interests");
+    } else {
+      const p = profile as OwnerProfileLike;
+      if (!p.life_pace) out.push("life_pace");
+      if (!p.languages?.length) out.push("languages");
+      if (!p.interests?.length) out.push("interests");
+      if (!p.presence_expected) out.push("presence_expected");
+      if (!p.home_ambiance?.length) out.push("home_ambiance");
+      if (!p.preferred_sitter_types?.length) out.push("preferred_sitter_types");
+    }
     return out;
-  }, [sitterProfile]);
+  }, [profile, side]);
 
   useEffect(() => {
     if (missing.length === 0) return;
     void trackEvent("affinity_badge_seen", {
-      metadata: { context: `${context}_missing`, score: null, total: 0, missing },
+      metadata: { context: `${context}_missing`, score: null, total: 0, missing, side },
     });
-  }, [missing, context]);
+  }, [missing, context, side]);
 
   if (missing.length === 0) return null;
 
-  const labels = missing.map((m) => FIELD_LABELS[m]).filter(Boolean);
+  const labels = side === "sitter" ? SITTER_LABELS : OWNER_LABELS;
+  const href = editHref ?? (side === "sitter" ? "/profil" : "/proprietaire");
+  // On limite à 3 items pour ne pas surcharger le message.
+  const shown = missing.slice(0, 3).map((m) => labels[m]).filter(Boolean);
   const list =
-    labels.length === 1
-      ? labels[0]
-      : `${labels.slice(0, -1).join(", ")} et ${labels[labels.length - 1]}`;
+    shown.length === 1
+      ? shown[0]
+      : `${shown.slice(0, -1).join(", ")} et ${shown[shown.length - 1]}`;
 
   return (
     <aside
@@ -79,7 +116,7 @@ const AffinityMissingCTA = ({
         </p>
       </div>
       <Button asChild size="sm" variant="outline" className="shrink-0">
-        <Link to={editHref}>Compléter</Link>
+        <Link to={href}>Compléter</Link>
       </Button>
     </aside>
   );

@@ -25,6 +25,7 @@ import CancellationReviewsSection from "@/components/reviews/CancellationReviews
 import ProfileSkeleton from "@/components/skeletons/ProfileSkeleton";
 import ProfileSchemaOrg from "@/components/seo/ProfileSchemaOrg";
 import AffinityBadge from "@/components/matching/AffinityBadge";
+import AffinityMissingCTA from "@/components/matching/AffinityMissingCTA";
 import { computeAffinityScore, type AffinityResult } from "@/lib/affinityScore";
 import { trackEvent } from "@/lib/analytics";
 
@@ -62,6 +63,8 @@ const PublicProfile = () => {
   const [trustedSittersCount, setTrustedSittersCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [affinity, setAffinity] = useState<AffinityResult | null>(null);
+  const [viewerSide, setViewerSide] = useState<"owner" | "sitter" | null>(null);
+  const [viewerProfile, setViewerProfile] = useState<any>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -130,6 +133,8 @@ const PublicProfile = () => {
   useEffect(() => {
     if (!user || !id || user.id === id) {
       setAffinity(null);
+      setViewerSide(null);
+      setViewerProfile(null);
       return;
     }
     const displayedIsSitter = profile?.role === "sitter" || profile?.role === "both";
@@ -144,12 +149,18 @@ const PublicProfile = () => {
           supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
           supabase.from("properties").select("pets(species, special_needs)").eq("user_id", user.id),
         ]);
-        if (cancelled || !viewerOwnerRes.data) return;
+        if (cancelled) return;
         const viewerPets = (viewerPropsRes.data ?? []).flatMap((p: any) => p.pets ?? []);
-        const r = computeAffinityScore(
-          { ...viewerOwnerRes.data, pets: viewerPets },
-          sitterProfile,
-        );
+        const ownerWithPets = viewerOwnerRes.data
+          ? { ...viewerOwnerRes.data, pets: viewerPets }
+          : null;
+        setViewerSide("owner");
+        setViewerProfile(ownerWithPets);
+        if (!ownerWithPets) {
+          setAffinity(null);
+          return;
+        }
+        const r = computeAffinityScore(ownerWithPets, sitterProfile);
         if (!cancelled) setAffinity(r);
         return;
       }
@@ -160,7 +171,13 @@ const PublicProfile = () => {
           .select("*")
           .eq("user_id", user.id)
           .maybeSingle();
-        if (cancelled || !viewerSitter) return;
+        if (cancelled) return;
+        setViewerSide("sitter");
+        setViewerProfile(viewerSitter ?? null);
+        if (!viewerSitter) {
+          setAffinity(null);
+          return;
+        }
         const r = computeAffinityScore({ ...ownerProfile, pets }, viewerSitter);
         if (!cancelled) setAffinity(r);
       }
@@ -307,6 +324,15 @@ const PublicProfile = () => {
                 {isOwner && <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700">🐾 Propriétaire</span>}
                 {affinity && <AffinityBadge result={affinity} size="sm" />}
               </div>
+              {!affinity && !isOwnProfile && viewerSide && (
+                <div className="mt-3">
+                  <AffinityMissingCTA
+                    side={viewerSide}
+                    profile={viewerProfile}
+                    context="public_profile"
+                  />
+                </div>
+              )}
             </div>
 
             {!isOwnProfile && (
