@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import { useEffect, useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/lib/analytics";
+import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 
 /**
  * CTA contextuel affiché quand le score d'affinité n'a pas pu être calculé.
