@@ -257,7 +257,7 @@ const SearchListingCard = ({
         {/* Top-right favorite + affinity */}
         {!isDemo && !isMission && !isInactive && (
           <div className="absolute top-4 right-4 flex items-center gap-2" onClick={(e) => e.preventDefault()}>
-            {affinity && (
+            {affinity && affinityDisplayed && (
               <div className="rounded-full bg-white/95 backdrop-blur-md shadow-sm">
                 <AffinityBadge
                   result={affinity}
@@ -269,6 +269,7 @@ const SearchListingCard = ({
             )}
             <FavoriteButton targetType="sit" targetId={item.id} size="sm" />
           </div>
+
         )}
 
 
