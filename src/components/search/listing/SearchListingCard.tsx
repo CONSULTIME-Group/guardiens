@@ -54,6 +54,14 @@ const SearchListingCard = ({
     !isDemo &&
     typeof item.distance === "number" &&
     item.distance > radius;
+  const affinity = useMemo(() => {
+    if (isMission || isDemo || isInactive || !viewerSitterProfile || !item.ownerMatch) return null;
+    return computeAffinityScore(
+      { ...item.ownerMatch, pets: item.pets || [] },
+      viewerSitterProfile,
+    );
+  }, [isMission, isDemo, isInactive, viewerSitterProfile, item.ownerMatch, item.pets]);
+
   const location = useLocation();
   const isPublicContext = location.pathname.startsWith("/annonces") || location.pathname.startsWith("/petites-missions") || location.pathname.startsWith("/search");
   const linkTo = isMission
