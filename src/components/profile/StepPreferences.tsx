@@ -13,6 +13,7 @@ import {
   WORK_DURING_SIT_OPTIONS,
   SENSITIVITIES_OPTIONS,
 } from "@/lib/profileMatchingOptions";
+import MatchingExplainer from "@/components/matching/MatchingExplainer";
 
 const MEETING_OPTIONS = [
   "Dîner/apéro avant", "Visite la veille", "Passage le jour même",
@@ -30,6 +31,9 @@ const StepPreferences = ({ data, onChange }: Props) => (
   <div className="space-y-6">
 
     <h3 className="font-heading text-lg font-semibold mt-2">Préférences de garde</h3>
+
+    <MatchingExplainer role="sitter" variant="inline" />
+
 
     <div className="flex items-center justify-between py-2">
       <Label className="flex-1 pr-4">J'accepte les maisons où les visites et invités ne sont pas autorisés</Label>

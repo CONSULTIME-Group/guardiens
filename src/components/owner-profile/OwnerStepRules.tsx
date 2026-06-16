@@ -7,6 +7,7 @@ import HintBubble from "../profile/HintBubble";
 import AiSuggestButton from "../profile/AiSuggestButton";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
 import { IDEAL_SITTER_PROFILE_OPTIONS, HOME_AMBIANCE_OPTIONS } from "@/lib/profileMatchingOptions";
+import MatchingExplainer from "@/components/matching/MatchingExplainer";
 
 const SITTER_TYPES = IDEAL_SITTER_PROFILE_OPTIONS;
 
@@ -26,6 +27,10 @@ interface Props {
 const OwnerStepRules = ({ data, onChange }: Props) => (
   <div className="space-y-6">
     <h2 className="font-heading text-2xl font-bold">Attentes & règles</h2>
+
+    <MatchingExplainer role="owner" variant="inline" />
+
+
 
     {/* Rencontre avant la garde */}
     <div className="space-y-1">

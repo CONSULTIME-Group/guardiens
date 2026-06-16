@@ -6,6 +6,7 @@ import {
   ChevronRight, CheckCircle2, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import MatchingExplainer from "@/components/matching/MatchingExplainer";
 
 interface OnboardingStep {
   key: string;
@@ -181,6 +182,10 @@ const OnboardingWelcome = ({ role, checks, onDismiss }: OnboardingWelcomeProps) 
             : "À 60 %, vous pourrez postuler aux annonces."}
         </p>
       </div>
+
+      {/* Pédagogie matching */}
+      <MatchingExplainer role={role} />
+
 
       {/* Steps */}
       <div className="space-y-2">
