@@ -165,6 +165,8 @@ export function useSitterProfile() {
       languages: s?.languages || [],
       bonus_skills: s?.bonus_skills || [],
       interests: s?.interests || [],
+      life_pace: (s as any)?.life_pace || "",
+      household_composition: (s as any)?.household_composition || [],
       skill_categories: (p as any)?.skill_categories || [],
       available_for_help: (p as any)?.available_for_help || false,
       competences: (s as any)?.competences || [],
