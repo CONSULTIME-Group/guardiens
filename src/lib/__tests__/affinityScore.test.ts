@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeAffinityScore } from "../affinityScore";
+import { computeAffinityScore, computeAffinityResultFull } from "../affinityScore";
 
 describe("computeAffinityScore", () => {
   it("renvoie null si moins de 3 critères communs", () => {
