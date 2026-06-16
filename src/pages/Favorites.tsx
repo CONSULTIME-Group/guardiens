@@ -175,13 +175,20 @@ const Favorites = () => {
               />
             ) : (
               <div className="space-y-2">
-                {sitters!.map((sitter: any) => (
-                  <SitterCard
-                    key={sitter.id}
-                    sitter={sitter}
-                    fallbackLabel={t("favorites_page.member_fallback")}
-                  />
-                ))}
+                {sitters!.map((sitter: any) => {
+                  const affinity = viewerOwnerContext && sitter.sitter_profile
+                    ? computeAffinityScore(viewerOwnerContext, sitter.sitter_profile)
+                    : null;
+                  return (
+                    <SitterCard
+                      key={sitter.id}
+                      sitter={sitter}
+                      fallbackLabel={t("favorites_page.member_fallback")}
+                      affinity={affinity}
+                    />
+                  );
+                })}
+
               </div>
             )}
           </TabsContent>
