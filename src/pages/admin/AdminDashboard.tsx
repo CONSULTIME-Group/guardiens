@@ -9,6 +9,7 @@ import { KpiCards } from "./_components/dashboard/KpiCards";
 import { DashboardCharts } from "./_components/dashboard/DashboardCharts";
 import { OnboardingReminderCard } from "./_components/dashboard/OnboardingReminderCard";
 import { AcquisitionPilotCard } from "./_components/dashboard/AcquisitionPilotCard";
+import AffinityPilotCard from "./_components/dashboard/AffinityPilotCard";
 
 const AdminDashboard = () => {
   const { loading, stats, actionCards, lateCards, activity, weeklySignups, deptData } = useDashboardData();
@@ -48,6 +49,7 @@ const AdminDashboard = () => {
       <RecentActivity activity={activity} />
       <KpiCards stats={stats} />
       <AcquisitionPilotCard />
+      <AffinityPilotCard />
       <DashboardCharts weeklySignups={weeklySignups} deptData={deptData} />
       <OnboardingReminderCard />
     </div>

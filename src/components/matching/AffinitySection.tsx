@@ -5,24 +5,27 @@
  *  - le calcul du score (memoizé),
  *  - le rendu du badge (auto-tracking via IntersectionObserver),
  *  - le CTA contextuel quand le score n'est pas calculable et que le profil
- *    du visiteur peut être complété.
- *
- * Extrait de SitterSitView pour éviter une IIFE + Hooks-in-IIFE.
+ *    du visiteur peut être complété,
+ *  - le tracking « shadow » d'une impression masquée (displayed: false) pour
+ *    piloter le seuil d'affichage via les analytics.
  */
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import AffinityBadge from "./AffinityBadge";
 import AffinityMissingCTA from "./AffinityMissingCTA";
-import { computeAffinityScore, type AffinitySitterInput, type AffinityOwnerInput } from "@/lib/affinityScore";
+import {
+  computeAffinityResultFull,
+  type AffinitySitterInput,
+  type AffinityOwnerInput,
+} from "@/lib/affinityScore";
+import { trackEvent } from "@/lib/analytics";
+import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 
 interface AffinitySectionProps {
   sitterProfile: AffinitySitterInput | null;
   ownerProfile: AffinityOwnerInput | null;
   pets: AffinityOwnerInput["pets"];
-  /** Surface d'affichage pour le tracking (ex: "sit_detail"). */
   context: string;
-  /** Id de la cible (annonce / profil) pour la dédup d'impression. */
   targetId?: string;
-  /** Le visiteur courant agit-il en tant que gardien ? CTA affiché si oui. */
   showCtaForSitter?: boolean;
 }
 
@@ -34,12 +37,39 @@ const AffinitySection = ({
   targetId,
   showCtaForSitter = true,
 }: AffinitySectionProps) => {
-  const affinity = useMemo(() => {
+  const full = useMemo(() => {
     if (!sitterProfile || !ownerProfile) return null;
-    return computeAffinityScore({ ...ownerProfile, pets: pets || [] }, sitterProfile);
+    return computeAffinityResultFull({ ...ownerProfile, pets: pets || [] }, sitterProfile);
   }, [sitterProfile, ownerProfile, pets]);
 
-  if (!affinity) {
+  // Tracking « shadow » des impressions masquées : on émet un event marqué
+  // displayed:false avec la raison, hors du DOM (pas d'IntersectionObserver
+  // nécessaire car il n'y a rien à observer).
+  const shadowSentRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!full || full.displayed) return;
+    const key = `affinity:${context}:${targetId ?? "anon"}:hidden:${full.hiddenReason}:${full.score}`;
+    if (shadowSentRef.current === key) return;
+    shadowSentRef.current = key;
+    try {
+      if (sessionStorage.getItem(`impr:${key}`)) return;
+      sessionStorage.setItem(`impr:${key}`, "1");
+    } catch {
+      // ignore
+    }
+    void trackEvent("affinity_badge_seen", {
+      metadata: {
+        context,
+        score: full.score,
+        total: full.total,
+        target_id: targetId ?? null,
+        displayed: false,
+        hidden_reason: full.hiddenReason,
+      },
+    });
+  }, [full, context, targetId]);
+
+  if (!full || !full.displayed) {
     if (showCtaForSitter && sitterProfile) {
       return (
         <div className="mt-3">
@@ -53,7 +83,7 @@ const AffinitySection = ({
   return (
     <div className="mt-3 flex items-center gap-2">
       <AffinityBadge
-        result={affinity}
+        result={full}
         size="md"
         trackingContext={context}
         trackingId={targetId}
