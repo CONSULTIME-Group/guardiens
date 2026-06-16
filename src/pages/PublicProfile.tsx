@@ -187,14 +187,7 @@ const PublicProfile = () => {
     };
   }, [user, id, profile, sitterProfile, ownerProfile, pets]);
 
-  // Tracking impression badge d'affinité
-  useEffect(() => {
-    if (affinity) {
-      void trackEvent("affinity_badge_seen", {
-        metadata: { context: "public_profile", score: affinity.score, total: affinity.total },
-      });
-    }
-  }, [affinity]);
+  // L'impression du badge est trackée par AffinityBadge (IntersectionObserver + dédup session).
 
 
 
