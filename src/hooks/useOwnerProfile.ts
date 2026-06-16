@@ -184,7 +184,9 @@ export function useOwnerProfile() {
       interests: (o as any)?.interests || [],
       life_pace: (o as any)?.life_pace || "",
       household_composition: (o as any)?.household_composition || [],
+      home_ambiance: (o as any)?.home_ambiance || [],
     });
+
     setLastSyncedAt(
       [p?.updated_at, o?.updated_at]
         .filter((value): value is string => Boolean(value))
