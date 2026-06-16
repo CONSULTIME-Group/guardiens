@@ -216,7 +216,7 @@ export function computeAffinityResultFull(
   if (species.length > 0 && (sitter.animal_types?.length ?? 0) > 0) {
     total++;
     weightSum += W.animals;
-    const inter = intersectionCount(species, sitter.animal_types ?? []);
+    const inter = speciesIntersects(species, sitter.animal_types ?? []);
     if (inter > 0) {
       const ratio = Math.min(1, inter / species.length);
       points += ratio * W.animals;
