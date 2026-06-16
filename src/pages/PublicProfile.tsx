@@ -27,7 +27,7 @@ import ProfileSchemaOrg from "@/components/seo/ProfileSchemaOrg";
 import AffinityBadge from "@/components/matching/AffinityBadge";
 import AffinityMissingCTA from "@/components/matching/AffinityMissingCTA";
 import { computeAffinityScore, type AffinityResult } from "@/lib/affinityScore";
-import { trackEvent } from "@/lib/analytics";
+
 
 const speciesLabels: Record<string, string> = {
   dog: "🐕 Chiens", cat: "🐱 Chats", horse: "🐴 Chevaux", bird: "🐦 Oiseaux",
