@@ -9,6 +9,9 @@ import {
   INTEREST_OPTIONS,
   LIFE_PACE_OPTIONS,
   HOUSEHOLD_COMPOSITION_OPTIONS,
+  SPECIAL_ANIMAL_SKILLS_OPTIONS,
+  WORK_DURING_SIT_OPTIONS,
+  SENSITIVITIES_OPTIONS,
 } from "@/lib/profileMatchingOptions";
 
 const MEETING_OPTIONS = [
@@ -112,6 +115,41 @@ const StepPreferences = ({ data, onChange }: Props) => (
     <div className="space-y-2">
       <Label>Compétences bonus</Label>
       <ChipSelect options={SKILL_OPTIONS} selected={data.bonus_skills} onChange={v => onChange({ bonus_skills: v })} />
+    </div>
+
+    <h3 className="font-heading text-lg font-semibold mt-4">Compétences pointues & disponibilité</h3>
+    <p className="text-sm text-muted-foreground -mt-3">
+      Optionnel. Aide à matcher avec des animaux à besoins particuliers et rassure les propriétaires les plus exigeants.
+    </p>
+
+    <div className="space-y-2">
+      <Label>Compétences spéciales animaux</Label>
+      <ChipSelect
+        options={SPECIAL_ANIMAL_SKILLS_OPTIONS}
+        selected={data.special_animal_skills}
+        onChange={v => onChange({ special_animal_skills: v })}
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Présence pendant la garde</Label>
+      <Select value={data.work_during_sit} onValueChange={v => onChange({ work_during_sit: v })}>
+        <SelectTrigger className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
+        <SelectContent>
+          {WORK_DURING_SIT_OPTIONS.map(o => (
+            <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+
+    <div className="space-y-2">
+      <Label>Sensibilités ou gardes que je n'accepte pas</Label>
+      <ChipSelect
+        options={SENSITIVITIES_OPTIONS}
+        selected={data.sensitivities}
+        onChange={v => onChange({ sensitivities: v })}
+      />
     </div>
   </div>
 );
