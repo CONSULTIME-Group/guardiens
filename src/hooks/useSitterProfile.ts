@@ -72,6 +72,9 @@ export interface SitterProfileData {
   languages: string[];
   bonus_skills: string[];
   interests: string[];
+  // À propos de moi (matching)
+  life_pace: string;
+  household_composition: string[];
   // Skills
   skill_categories: string[];
   available_for_help: boolean;
