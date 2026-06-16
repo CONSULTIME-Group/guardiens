@@ -35,6 +35,7 @@ import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
 import { useActiveSittersCount } from "@/hooks/useActiveSittersCount";
 import { useActiveOwnersCount } from "@/hooks/useActiveOwnersCount";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
+import OwnerAffinityBanner from "@/components/matching/OwnerAffinityBanner";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -994,6 +995,7 @@ const SearchOwner = () => {
                   Alerte créée, l'e-mail partira automatiquement.
                 </div>
               )}
+            <OwnerAffinityBanner className="mb-4" />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
               {results.map((s: any) => {
                 const profile = s.profile;
