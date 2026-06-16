@@ -119,3 +119,40 @@ export const SENSITIVITIES_OPTIONS = [
   "Pas de garde sans jardin",
 ];
 
+/**
+ * Profil de gardien idéal vu côté propriétaire (multi).
+ * Liste enrichie pour mieux nourrir le matching (présence, expérience, situation de vie).
+ * Stockée dans `owner_profiles.preferred_sitter_types`.
+ */
+export const IDEAL_SITTER_PROFILE_OPTIONS = [
+  "Sans préférence",
+  "Couple",
+  "Famille",
+  "Retraité·e",
+  "Actif·ve solo",
+  "Télétravailleur·euse",
+  "Étudiant·e",
+  "Indépendant·e",
+  "Gardien·ne expérimenté·e",
+  "Débutant·e motivé·e",
+];
+
+/**
+ * Tags d'ambiance du foyer côté propriétaire (multi).
+ * Aide le gardien à se projeter et alimente le futur score d'affinité.
+ * Stockés dans `owner_profiles.home_ambiance`.
+ */
+export const HOME_AMBIANCE_OPTIONS = [
+  "Calme et posé",
+  "Famille animée",
+  "Campagne",
+  "Bord de mer",
+  "Montagne",
+  "Urbain",
+  "Invités fréquents",
+  "Sportif outdoor",
+  "Cocon casanier",
+  "Maison de vacances",
+];
+
+

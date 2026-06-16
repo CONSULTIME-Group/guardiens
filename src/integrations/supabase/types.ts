@@ -2734,6 +2734,7 @@ export type Database = {
           environments: string[]
           experience_required: boolean | null
           handover_preference: string | null
+          home_ambiance: string[]
           household_composition: string[] | null
           id: string
           interests: string[] | null
@@ -2764,6 +2765,7 @@ export type Database = {
           environments?: string[]
           experience_required?: boolean | null
           handover_preference?: string | null
+          home_ambiance?: string[]
           household_composition?: string[] | null
           id?: string
           interests?: string[] | null
@@ -2794,6 +2796,7 @@ export type Database = {
           environments?: string[]
           experience_required?: boolean | null
           handover_preference?: string | null
+          home_ambiance?: string[]
           household_composition?: string[] | null
           id?: string
           interests?: string[] | null

@@ -78,7 +78,10 @@ export interface OwnerProfileData {
   interests: string[];
   life_pace: string;
   household_composition: string[];
+  // Matching côté propriétaire
+  home_ambiance: string[];
 }
+
 
 export interface Pet {
   id?: string;
@@ -110,7 +113,7 @@ const defaultData: OwnerProfileData = {
   news_frequency: "", news_format: [], preferred_time: "", communication_notes: "",
   skill_categories: [], available_for_help: false,
   owner_competences: [], owner_competences_disponible: false, owner_skill_categories: [],
-  languages: [], interests: [], life_pace: "", household_composition: [],
+  languages: [], interests: [], life_pace: "", household_composition: [], home_ambiance: [],
 };
 
 export function useOwnerProfile() {
@@ -181,7 +184,9 @@ export function useOwnerProfile() {
       interests: (o as any)?.interests || [],
       life_pace: (o as any)?.life_pace || "",
       household_composition: (o as any)?.household_composition || [],
+      home_ambiance: (o as any)?.home_ambiance || [],
     });
+
     setLastSyncedAt(
       [p?.updated_at, o?.updated_at]
         .filter((value): value is string => Boolean(value))
@@ -282,8 +287,9 @@ export function useOwnerProfile() {
         "smoker_accepted", "rules_notes", "meeting_preference", "handover_preference",
         "welcome_notes", "news_frequency", "news_format", "preferred_time", "communication_notes",
         "environments",
-        "languages", "interests", "life_pace", "household_composition",
+        "languages", "interests", "life_pace", "household_composition", "home_ambiance",
       ] as const;
+
       const ownerUpdate: any = {};
       ownerFields.forEach(f => { if (f in stepData) ownerUpdate[f] = (stepData as any)[f]; });
       // Map owner-specific competence fields
