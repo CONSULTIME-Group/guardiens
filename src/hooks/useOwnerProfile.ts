@@ -287,8 +287,9 @@ export function useOwnerProfile() {
         "smoker_accepted", "rules_notes", "meeting_preference", "handover_preference",
         "welcome_notes", "news_frequency", "news_format", "preferred_time", "communication_notes",
         "environments",
-        "languages", "interests", "life_pace", "household_composition",
+        "languages", "interests", "life_pace", "household_composition", "home_ambiance",
       ] as const;
+
       const ownerUpdate: any = {};
       ownerFields.forEach(f => { if (f in stepData) ownerUpdate[f] = (stepData as any)[f]; });
       // Map owner-specific competence fields
