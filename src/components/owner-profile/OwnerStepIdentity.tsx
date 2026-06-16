@@ -83,6 +83,50 @@ const OwnerStepIdentity = ({ data, onChange, onUploadPhoto }: Props) => {
           className="rounded-lg min-h-[120px]" maxLength={2000} />
         <HintBubble>Racontez votre quotidien : les gardiens veulent savoir dans quel univers ils vont s'installer.</HintBubble>
       </div>
+
+      <h3 className="font-heading text-lg font-semibold mt-6">À propos de vous</h3>
+      <p className="text-sm text-muted-foreground -mt-3">
+        Aide les gardiens à voir s'ils matchent avec votre univers.
+      </p>
+
+      <div className="space-y-2">
+        <Label>Rythme de vie</Label>
+        <Select value={data.life_pace} onValueChange={v => onChange({ life_pace: v })}>
+          <SelectTrigger className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
+          <SelectContent>
+            {LIFE_PACE_OPTIONS.map(o => (
+              <SelectItem key={o.value} value={o.value}>{o.label} · {o.description}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Composition du foyer</Label>
+        <ChipSelect
+          options={HOUSEHOLD_COMPOSITION_OPTIONS}
+          selected={data.household_composition}
+          onChange={v => onChange({ household_composition: v })}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Langues parlées</Label>
+        <ChipSelect
+          options={LANGUAGE_OPTIONS}
+          selected={data.languages}
+          onChange={v => onChange({ languages: v })}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Centres d'intérêt</Label>
+        <ChipSelect
+          options={INTEREST_OPTIONS}
+          selected={data.interests}
+          onChange={v => onChange({ interests: v })}
+        />
+      </div>
     </div>
   );
 };
