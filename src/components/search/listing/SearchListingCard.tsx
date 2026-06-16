@@ -5,7 +5,7 @@ import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import AffinityBadge from "@/components/matching/AffinityBadge";
 import { computeAffinityScore } from "@/lib/affinityScore";
-import { trackEvent } from "@/lib/analytics";
+
 import { PawPrint, Cat, Bird } from "lucide-react";
 
 const speciesIcon: Record<string, typeof PawPrint> = {
