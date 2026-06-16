@@ -6,8 +6,10 @@ import ChipSelect from "../profile/ChipSelect";
 import HintBubble from "../profile/HintBubble";
 import AiSuggestButton from "../profile/AiSuggestButton";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
+import { IDEAL_SITTER_PROFILE_OPTIONS, HOME_AMBIANCE_OPTIONS } from "@/lib/profileMatchingOptions";
 
-const SITTER_TYPES = ["Sans préférence", "Couple", "Famille", "Retraité", "Actif solo"];
+const SITTER_TYPES = IDEAL_SITTER_PROFILE_OPTIONS;
+
 const PRESENCE = ["100% sur place", "Télétravail OK", "Absences courtes OK"];
 const VISITS = ["Oui librement", "Oui ponctuellement", "Non"];
 const OVERNIGHT = ["Oui conjoint/ami", "À discuter", "Non"];
