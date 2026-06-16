@@ -249,12 +249,18 @@ const SearchListingCard = ({
           )}
         </div>
 
-        {/* Top-right favorite */}
+        {/* Top-right favorite + affinity */}
         {!isDemo && !isMission && !isInactive && (
-          <div className="absolute top-4 right-4" onClick={(e) => e.preventDefault()}>
+          <div className="absolute top-4 right-4 flex items-center gap-2" onClick={(e) => e.preventDefault()}>
+            {affinity && (
+              <div className="rounded-full bg-white/95 backdrop-blur-md shadow-sm">
+                <AffinityBadge result={affinity} size="sm" />
+              </div>
+            )}
             <FavoriteButton targetType="sit" targetId={item.id} size="sm" />
           </div>
         )}
+
 
         {/* Bottom-left glassy chips: pets + dates */}
         <div className="absolute bottom-5 left-5 right-5 flex flex-wrap items-end gap-1.5">
