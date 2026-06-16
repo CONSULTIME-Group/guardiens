@@ -78,7 +78,10 @@ export interface OwnerProfileData {
   interests: string[];
   life_pace: string;
   household_composition: string[];
+  // Matching côté propriétaire
+  home_ambiance: string[];
 }
+
 
 export interface Pet {
   id?: string;
