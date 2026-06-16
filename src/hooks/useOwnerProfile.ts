@@ -310,6 +310,8 @@ export function useOwnerProfile() {
 
       // Recompute canonical completion server-side and refresh local + global state
       await supabase.rpc("calculate_profile_completion", { p_user_id: user.id });
+      // Invalide le cache d'affinité (owner profile + pets ont pu changer).
+      clearViewerOwnerCache(user.id);
       // Re-fetch fresh data from DB so the sidebar reflects committed state immediately.
       await fetchData({ silent: true });
       await refreshCompletion();
@@ -391,6 +393,7 @@ export function useOwnerProfile() {
       return;
     }
     setPets(prev => [...prev, { ...pet, ...sanitizePet(pet), id: created.id, property_id: currentPropId! }]);
+    if (user) clearViewerOwnerCache(user.id);
   }, [propertyId, user, toast]);
 
   const updatePet = useCallback(async (pet: Pet) => {
@@ -407,7 +410,8 @@ export function useOwnerProfile() {
       return;
     }
     setPets(prev => prev.map(p => p.id === pet.id ? { ...pet, ...payload } : p));
-  }, [toast]);
+    if (user) clearViewerOwnerCache(user.id);
+  }, [toast, user]);
 
   const removePet = useCallback(async (id: string) => {
     const { error } = await supabase.from("pets").delete().eq("id", id);
@@ -421,7 +425,9 @@ export function useOwnerProfile() {
       return;
     }
     setPets(prev => prev.filter(p => p.id !== id));
-  }, [toast]);
+    if (user) clearViewerOwnerCache(user.id);
+  }, [toast, user]);
+
 
   const uploadPhoto = useCallback(async (file: File, bucket: string): Promise<string | null> => {
     if (!user) return null;
