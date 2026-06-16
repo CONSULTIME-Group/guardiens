@@ -133,6 +133,8 @@ const PublicProfile = () => {
   useEffect(() => {
     if (!user || !id || user.id === id) {
       setAffinity(null);
+      setViewerSide(null);
+      setViewerProfile(null);
       return;
     }
     const displayedIsSitter = profile?.role === "sitter" || profile?.role === "both";
@@ -147,12 +149,18 @@ const PublicProfile = () => {
           supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
           supabase.from("properties").select("pets(species, special_needs)").eq("user_id", user.id),
         ]);
-        if (cancelled || !viewerOwnerRes.data) return;
+        if (cancelled) return;
         const viewerPets = (viewerPropsRes.data ?? []).flatMap((p: any) => p.pets ?? []);
-        const r = computeAffinityScore(
-          { ...viewerOwnerRes.data, pets: viewerPets },
-          sitterProfile,
-        );
+        const ownerWithPets = viewerOwnerRes.data
+          ? { ...viewerOwnerRes.data, pets: viewerPets }
+          : null;
+        setViewerSide("owner");
+        setViewerProfile(ownerWithPets);
+        if (!ownerWithPets) {
+          setAffinity(null);
+          return;
+        }
+        const r = computeAffinityScore(ownerWithPets, sitterProfile);
         if (!cancelled) setAffinity(r);
         return;
       }
@@ -163,7 +171,13 @@ const PublicProfile = () => {
           .select("*")
           .eq("user_id", user.id)
           .maybeSingle();
-        if (cancelled || !viewerSitter) return;
+        if (cancelled) return;
+        setViewerSide("sitter");
+        setViewerProfile(viewerSitter ?? null);
+        if (!viewerSitter) {
+          setAffinity(null);
+          return;
+        }
         const r = computeAffinityScore({ ...ownerProfile, pets }, viewerSitter);
         if (!cancelled) setAffinity(r);
       }
