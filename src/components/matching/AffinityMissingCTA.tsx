@@ -84,12 +84,15 @@ const AffinityMissingCTA = (props: Props) => {
     return out;
   }, [profile, side]);
 
-  useEffect(() => {
-    if (missing.length === 0) return;
+  const wrapRef = useRef<HTMLElement>(null);
+  const dedupeKey =
+    missing.length > 0 ? `affinity:${context}_missing:${side}:${missing.join(",")}` : null;
+  const onSeen = useCallback(() => {
     void trackEvent("affinity_badge_seen", {
       metadata: { context: `${context}_missing`, score: null, total: 0, missing, side },
     });
   }, [missing, context, side]);
+  useImpressionOnce(wrapRef, dedupeKey, onSeen);
 
   if (missing.length === 0) return null;
 
@@ -104,6 +107,7 @@ const AffinityMissingCTA = (props: Props) => {
 
   return (
     <aside
+      ref={wrapRef as React.RefObject<HTMLElement>}
       className={`rounded-xl border border-dashed border-primary/40 bg-primary/5 px-4 py-3 flex items-start gap-3 ${className ?? ""}`}
       aria-label="Compléter votre profil pour voir l'affinité"
     >
