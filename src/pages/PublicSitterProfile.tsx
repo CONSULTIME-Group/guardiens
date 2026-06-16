@@ -30,6 +30,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import PublicExperiences from "@/components/profile/PublicExperiences";
 import TrustScore from "@/components/profile/TrustScore";
 import FavoriteButton from "@/components/shared/FavoriteButton";
+import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 import ProfileSchemaOrg from "@/components/seo/ProfileSchemaOrg";
 import TrustTimeline from "@/components/profile/TrustTimeline";
 import { buildTrustTimeline } from "@/lib/trustTimeline";
@@ -1039,6 +1040,20 @@ export default function PublicSitterProfile() {
                   isFounder={profile?.is_founder || false}
                 />
               </div>
+
+              {/* Affinité côté propriétaire visitant un gardien */}
+              {activeTab === 'gardien' && auth.user?.id && id && auth.user.id !== id && sitterProfile && (
+                <div className="self-start mt-2">
+                  <OwnerToSitterAffinity
+                    sitterProfile={sitterProfile}
+                    context="public_sitter_profile"
+                    targetId={id}
+                    size="md"
+                    scope="single"
+                    caption="Votre affinité avec ce gardien"
+                  />
+                </div>
+              )}
 
               <div className="flex items-center gap-2 sm:gap-4 text-sm text-foreground/80 mt-1 flex-wrap font-medium drop-shadow-sm">
                 {statsItems.map((s, i) => (
