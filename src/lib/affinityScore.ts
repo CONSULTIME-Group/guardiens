@@ -4,21 +4,23 @@
  * Principes (dégradation gracieuse) :
  * - Chaque critère absent côté propriétaire OU gardien est NEUTRE (ni bonus, ni pénalité).
  * - Le score est calculé uniquement sur les critères communs renseignés des deux côtés.
- * - Seuil minimum : 3 critères communs. En dessous → renvoie `null` (pas de badge affiché).
+ * - Seuil minimum : 3 critères communs. En dessous → renvoie `null` (pas de badge).
+ * - Seuil de confiance : score < 40 % → renvoie `null` (un score faible n'a pas de
+ *   valeur informative, mieux vaut masquer que décourager).
  * - Disqualification : si le gardien a une sensibilité incompatible avec une espèce
  *   présente chez le propriétaire (allergie, refus d'espèce…), le score est `null`.
  *
- * Critères évalués (poids égaux, 1 point chacun, sauf adjacence rythme = 0.5) :
- *  1. Animaux : intersection pets.species ↔ sitter.animal_types
- *  2. Rythme de vie : exact = 1, adjacent (calme↔équilibré, équilibré↔actif) = 0.5
- *  3. Langues : au moins 1 commune
- *  4. Intérêts : ≥2 communs = 1, ≥1 = 0.5
- *  5. Présence ↔ travail pendant la garde (table de compatibilité)
- *  6. Profil idéal : sitter matche un des owner.preferred_sitter_types
- *  7. Ambiance foyer ↔ intérêts/rythme du sitter
+ * Critères évalués (pondération différenciée) :
+ *  1. Animaux (poids 2) : intersection pets.species ↔ sitter.animal_types
+ *  2. Présence ↔ travail pendant la garde (poids 2)
+ *  3. Rythme de vie (poids 1) : exact = 1, adjacent = 0.5
+ *  4. Langues (poids 1) : au moins 1 commune
+ *  5. Intérêts (poids 1) : ≥2 communs = 1, ≥1 = 0.5
+ *  6. Profil idéal (poids 1) : sitter matche un des owner.preferred_sitter_types
+ *  7. Ambiance foyer (poids 1) : ↔ intérêts/rythme du sitter
  *
- * Bonus (non comptés dans le total mais ajoutent au score) :
- *  - Compétence spéciale matchant un besoin spécifique d'un animal.
+ * Rationnel : animaux et présence sont des critères "durs" (incompatibilité = échec
+ * de garde). Langues/intérêts/ambiance sont des "nice-to-have" qui affinent.
  */
 
 export interface AffinityOwnerInput {
@@ -53,6 +55,20 @@ export interface AffinityResult {
 }
 
 const PACE_ORDER = ["calme", "equilibre", "actif"];
+
+/** Seuil sous lequel on n'affiche pas le badge (signal trop faible). */
+const MIN_DISPLAY_SCORE = 40;
+
+/** Pondération par critère (poids supérieur = critère "dur"). */
+const W = {
+  animals: 2,
+  presence: 2,
+  pace: 1,
+  languages: 1,
+  interests: 1,
+  ideal: 1,
+  ambiance: 1,
+} as const;
 
 const SENSITIVITY_BY_SPECIES: Record<string, string[]> = {
   cat: ["Allergie aux chats"],
@@ -90,7 +106,6 @@ function isDisqualified(owner: AffinityOwnerInput, sitter: AffinitySitterInput):
 
 function presenceCompatibility(presence?: string | null, work?: string | null): number | null {
   if (!presence || !work) return null;
-  // Propriétaire 100% sur place : peu importe la dispo du sitter (il prend juste le relais)
   if (presence === "100% sur place") return 1;
   if (presence === "Télétravail OK") {
     if (work === "full_remote" || work === "partial_remote" || work === "on_site") return 1;
@@ -109,11 +124,9 @@ function ambianceMatch(owner: AffinityOwnerInput, sitter: AffinitySitterInput): 
   const tags = owner.home_ambiance ?? [];
   if (tags.length === 0) return 0;
   let score = 0;
-  // Calme ↔ cocon casanier
   if (tags.includes("Cocon casanier") && sitter.life_pace === "calme") score = Math.max(score, 1);
   if (tags.includes("Calme et posé") && (sitter.life_pace === "calme" || sitter.life_pace === "equilibre"))
     score = Math.max(score, 1);
-  // Sportif outdoor ↔ actif / randonnée / course
   if (tags.includes("Sportif outdoor")) {
     if (sitter.life_pace === "actif") score = Math.max(score, 1);
     if (hasIntersection(sitter.interests, ["Randonnée", "Course à pied", "Vélo", "Ski", "Sports nautiques"]))
@@ -133,7 +146,6 @@ function idealProfileMatch(owner: AffinityOwnerInput, sitter: AffinitySitterInpu
   for (const p of prefs) {
     if (st && st.toLowerCase().includes(p.toLowerCase().split("·")[0])) return 1;
   }
-  // Expérience : si owner demande "Gardien·ne expérimenté·e" ou "Débutant·e motivé·e"
   if (prefs.includes("Gardien·ne expérimenté·e") && sitter.experience_years && sitter.experience_years !== "0")
     return 1;
   return 0;
@@ -147,102 +159,114 @@ export function computeAffinityScore(
   if (isDisqualified(owner, sitter)) return null;
 
   let points = 0;
+  let weightSum = 0;
   let total = 0;
   const matched: string[] = [];
 
-  // 1. Animaux
+  // 1. Animaux (poids 2)
   const species = (owner.pets ?? []).map((p) => p?.species).filter(Boolean) as string[];
   if (species.length > 0 && (sitter.animal_types?.length ?? 0) > 0) {
     total++;
+    weightSum += W.animals;
     const inter = intersectionCount(species, sitter.animal_types ?? []);
     if (inter > 0) {
       const ratio = Math.min(1, inter / species.length);
-      points += ratio;
+      points += ratio * W.animals;
       if (ratio >= 1) matched.push("Tous vos animaux dans son expérience");
       else matched.push("Expérience avec une partie de vos animaux");
     }
   }
 
-  // 2. Rythme
+  // 2. Présence (poids 2)
+  const presScore = presenceCompatibility(owner.presence_expected, sitter.work_during_sit);
+  if (presScore !== null) {
+    total++;
+    weightSum += W.presence;
+    points += presScore * W.presence;
+    if (presScore >= 1) matched.push("Présence compatible");
+    else if (presScore >= 0.5) matched.push("Présence plutôt compatible");
+  }
+
+  // 3. Rythme (poids 1)
   if (owner.life_pace && sitter.life_pace) {
     total++;
+    weightSum += W.pace;
     if (owner.life_pace === sitter.life_pace) {
-      points += 1;
+      points += W.pace;
       matched.push("Même rythme de vie");
     } else {
       const oi = PACE_ORDER.indexOf(owner.life_pace);
       const si = PACE_ORDER.indexOf(sitter.life_pace);
       if (oi >= 0 && si >= 0 && Math.abs(oi - si) === 1) {
-        points += 0.5;
+        points += 0.5 * W.pace;
         matched.push("Rythme de vie proche");
       }
     }
   }
 
-  // 3. Langues
+  // 4. Langues (poids 1)
   if ((owner.languages?.length ?? 0) > 0 && (sitter.languages?.length ?? 0) > 0) {
     total++;
+    weightSum += W.languages;
     if (hasIntersection(owner.languages, sitter.languages)) {
-      points += 1;
+      points += W.languages;
       matched.push("Langue commune");
     }
   }
 
-  // 4. Intérêts
+  // 5. Intérêts (poids 1)
   if ((owner.interests?.length ?? 0) > 0 && (sitter.interests?.length ?? 0) > 0) {
     total++;
+    weightSum += W.interests;
     const c = intersectionCount(owner.interests, sitter.interests);
     if (c >= 2) {
-      points += 1;
+      points += W.interests;
       matched.push("Plusieurs intérêts partagés");
     } else if (c === 1) {
-      points += 0.5;
+      points += 0.5 * W.interests;
       matched.push("Un intérêt partagé");
     }
   }
 
-  // 5. Présence
-  const presScore = presenceCompatibility(owner.presence_expected, sitter.work_during_sit);
-  if (presScore !== null) {
-    total++;
-    points += presScore;
-    if (presScore >= 1) matched.push("Présence compatible");
-    else if (presScore >= 0.5) matched.push("Présence plutôt compatible");
-  }
-
-  // 6. Profil idéal
+  // 6. Profil idéal (poids 1)
   if ((owner.preferred_sitter_types?.length ?? 0) > 0 && sitter.sitter_type) {
     total++;
+    weightSum += W.ideal;
     const m = idealProfileMatch(owner, sitter);
     if (m > 0) {
-      points += m;
+      points += m * W.ideal;
       matched.push("Correspond à votre profil idéal");
     }
   }
 
-  // 7. Ambiance foyer
+  // 7. Ambiance foyer (poids 1)
   if ((owner.home_ambiance?.length ?? 0) > 0 && (sitter.life_pace || (sitter.interests?.length ?? 0) > 0)) {
     total++;
+    weightSum += W.ambiance;
     const a = ambianceMatch(owner, sitter);
     if (a > 0) {
-      points += a;
+      points += a * W.ambiance;
       if (a >= 1) matched.push("Ambiance du foyer en phase");
       else matched.push("Ambiance du foyer plutôt en phase");
     }
   }
 
-  if (total < 3) return null;
+  if (total < 3 || weightSum === 0) return null;
 
   // Bonus compétences spéciales (hors comptage)
   const specialNeeds = (owner.pets ?? [])
     .map((p) => p?.special_needs?.trim())
     .filter(Boolean) as string[];
   if (specialNeeds.length > 0 && (sitter.special_animal_skills?.length ?? 0) > 0) {
-    points += 0.25;
+    points += 0.25 * W.animals;
     matched.push("Compétence spéciale utile pour vos animaux");
   }
 
-  const raw = (points / total) * 100;
+  const raw = (points / weightSum) * 100;
   const score = Math.max(0, Math.min(100, Math.round(raw)));
+
+  // Seuil de confiance : un score faible n'a pas de valeur informative.
+  if (score < MIN_DISPLAY_SCORE) return null;
+
   return { score, matched, total };
 }
