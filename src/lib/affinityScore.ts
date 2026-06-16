@@ -52,9 +52,9 @@ export interface AffinityResult {
   matched: string[];
   /** Nombre de critères communs évalués. */
   total: number;
-  /** Faut-il afficher le badge ? false si score < seuil ou < 3 critères ou disqualifié. */
-  displayed: boolean;
-  /** Si !displayed, raison ("below_threshold" | "too_few_criteria" | "disqualified"). */
+  /** Faut-il afficher le badge ? Optionnel pour rétro-compat. */
+  displayed?: boolean;
+  /** Si displayed === false, raison du masquage. */
   hiddenReason?: "below_threshold" | "too_few_criteria" | "disqualified";
 }
 
