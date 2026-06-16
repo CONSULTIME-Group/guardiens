@@ -52,6 +52,10 @@ export interface AffinityResult {
   matched: string[];
   /** Nombre de critères communs évalués. */
   total: number;
+  /** Faut-il afficher le badge ? false si score < seuil ou < 3 critères ou disqualifié. */
+  displayed: boolean;
+  /** Si !displayed, raison ("below_threshold" | "too_few_criteria" | "disqualified"). */
+  hiddenReason?: "below_threshold" | "too_few_criteria" | "disqualified";
 }
 
 const PACE_ORDER = ["calme", "equilibre", "actif"];
