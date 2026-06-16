@@ -995,7 +995,7 @@ const SearchOwner = () => {
                   Alerte créée, l'e-mail partira automatiquement.
                 </div>
               )}
-            <OwnerAffinityBanner className="mb-4" />
+            {results.length > 0 && <OwnerAffinityBanner className="mb-4" />}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
               {results.map((s: any) => {
                 const profile = s.profile;
