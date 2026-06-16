@@ -26,6 +26,7 @@ import ProfileSkeleton from "@/components/skeletons/ProfileSkeleton";
 import ProfileSchemaOrg from "@/components/seo/ProfileSchemaOrg";
 import AffinityBadge from "@/components/matching/AffinityBadge";
 import { computeAffinityScore, type AffinityResult } from "@/lib/affinityScore";
+import { trackEvent } from "@/lib/analytics";
 
 const speciesLabels: Record<string, string> = {
   dog: "🐕 Chiens", cat: "🐱 Chats", horse: "🐴 Chevaux", bird: "🐦 Oiseaux",
@@ -168,6 +169,17 @@ const PublicProfile = () => {
       cancelled = true;
     };
   }, [user, id, profile, sitterProfile, ownerProfile, pets]);
+
+  // Tracking impression badge d'affinité
+  useEffect(() => {
+    if (affinity) {
+      void trackEvent("affinity_badge_seen", {
+        metadata: { context: "public_profile", score: affinity.score, total: affinity.total },
+      });
+    }
+  }, [affinity]);
+
+
 
   if (loading) return <ProfileSkeleton />;
   if (!profile) return <div className="p-6 md:p-10 text-muted-foreground">Profil introuvable.</div>;

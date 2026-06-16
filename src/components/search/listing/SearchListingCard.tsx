@@ -1,10 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import FounderBadge from "@/components/badges/FounderBadge";
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import AffinityBadge from "@/components/matching/AffinityBadge";
 import { computeAffinityScore } from "@/lib/affinityScore";
+import { trackEvent } from "@/lib/analytics";
 import { PawPrint, Cat, Bird } from "lucide-react";
 
 const speciesIcon: Record<string, typeof PawPrint> = {
@@ -61,6 +62,14 @@ const SearchListingCard = ({
       viewerSitterProfile,
     );
   }, [isMission, isDemo, isInactive, viewerSitterProfile, item.ownerMatch, item.pets]);
+
+  useEffect(() => {
+    if (affinity) {
+      void trackEvent("affinity_badge_seen", {
+        metadata: { context: "search_listing", score: affinity.score, total: affinity.total },
+      });
+    }
+  }, [affinity]);
 
   const location = useLocation();
   const isPublicContext = location.pathname.startsWith("/annonces") || location.pathname.startsWith("/petites-missions") || location.pathname.startsWith("/search");
