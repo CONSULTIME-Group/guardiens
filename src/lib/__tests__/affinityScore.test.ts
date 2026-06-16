@@ -162,5 +162,88 @@ describe("computeAffinityScore", () => {
     expect(r).not.toBeNull();
     expect(r!.matched.some((m) => /compétence/i.test(m))).toBe(false);
   });
+
+  it("masque le badge sous le seuil de confiance (40 %)", () => {
+    // 4 critères communs, presque rien ne matche → score < 40
+    const r = computeAffinityResultFull(
+      {
+        life_pace: "calme",
+        languages: ["Français"],
+        interests: ["Lecture"],
+        presence_expected: "Absences courtes OK",
+      },
+      {
+        life_pace: "actif",
+        languages: ["Allemand"],
+        interests: ["Vélo"],
+        work_during_sit: "out_daytime",
+      },
+    );
+    expect(r).not.toBeNull();
+    expect(r!.displayed).toBe(false);
+    expect(r!.hiddenReason).toBe("below_threshold");
+    expect(computeAffinityScore(
+      {
+        life_pace: "calme",
+        languages: ["Français"],
+        interests: ["Lecture"],
+        presence_expected: "Absences courtes OK",
+      },
+      {
+        life_pace: "actif",
+        languages: ["Allemand"],
+        interests: ["Vélo"],
+        work_during_sit: "out_daytime",
+      },
+    )).toBeNull();
+  });
+
+  it("pondération : animaux + présence pèsent plus que langues + intérêts", () => {
+    // Cas A : animaux + présence matchent, langues + intérêts NON
+    const a = computeAffinityResultFull(
+      {
+        pets: [{ species: "cat" }],
+        presence_expected: "Télétravail OK",
+        languages: ["Français"],
+        interests: ["Lecture"],
+      },
+      {
+        animal_types: ["cat"],
+        work_during_sit: "full_remote",
+        languages: ["Allemand"],
+        interests: ["Vélo"],
+      },
+    );
+    // Cas B : inverse, langues + intérêts matchent, animaux + présence NON
+    const b = computeAffinityResultFull(
+      {
+        pets: [{ species: "cat" }],
+        presence_expected: "Absences courtes OK",
+        languages: ["Français"],
+        interests: ["Lecture"],
+      },
+      {
+        animal_types: ["dog"],
+        work_during_sit: "out_daytime",
+        languages: ["Français"],
+        interests: ["Lecture", "Jardinage"],
+      },
+    );
+    expect(a).not.toBeNull();
+    expect(b).not.toBeNull();
+    // Critères durs matchés > nice-to-have matchés
+    expect(a!.score).toBeGreaterThan(b!.score);
+  });
+
+  it("signale displayed:false avec raison too_few_criteria sous 3 critères communs", () => {
+    const r = computeAffinityResultFull(
+      { life_pace: "calme", languages: ["Français"] },
+      { life_pace: "calme", languages: ["Français"] },
+    );
+    expect(r).not.toBeNull();
+    expect(r!.displayed).toBe(false);
+    expect(r!.hiddenReason).toBe("too_few_criteria");
+  });
 });
+
 
