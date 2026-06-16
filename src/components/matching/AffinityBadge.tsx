@@ -71,32 +71,44 @@ const AffinityBadge = ({
   if (!result) return null;
   const sizing = size === "sm" ? "text-[11px] px-2 py-0.5" : "text-xs px-2.5 py-1";
 
-  // Empêche les Link parents de naviguer quand on tape le badge.
-  const stop = (e: MouseEvent) => {
+  // Empêche la navigation du Link parent SANS bloquer l'ouverture du Popover.
+  // - preventDefault sur le span parent neutralise le défaut natif du <a>
+  // - stopPropagation empêche le onClick de Link de se déclencher
+  // - le bouton interne reçoit le clic normalement → Radix ouvre le Popover
+  const blockLink = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
   };
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <button
-          ref={wrapRef}
-          type="button"
-          onClick={stop}
-          className={cn(
-            "inline-flex items-center gap-1 rounded-full border font-semibold leading-none cursor-pointer",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
-            sizing,
-            tone(result.score),
-            className,
-          )}
-          aria-label={`Affinité ${result.score}% sur ${result.total} critères, voir le détail`}
-        >
-          {result.score}% d'affinité
-        </button>
-      </PopoverTrigger>
-      <PopoverContent side="top" align="center" className="w-[260px] p-3" onClick={stop}>
+      <span onClick={blockLink} className="inline-flex">
+        <PopoverTrigger asChild>
+          <button
+            ref={wrapRef}
+            type="button"
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full border font-semibold leading-none cursor-pointer",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+              sizing,
+              tone(result.score),
+              className,
+            )}
+            aria-label={`Affinité ${result.score}% sur ${result.total} critères, voir le détail`}
+          >
+            {result.score}% d'affinité
+          </button>
+        </PopoverTrigger>
+      </span>
+      <PopoverContent
+        side="bottom"
+        align="center"
+        sideOffset={6}
+        avoidCollisions
+        collisionPadding={12}
+        className="w-[260px] p-3 z-50"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <p className="text-xs font-semibold mb-1.5 text-foreground">
           {result.score}% sur {result.total} critères communs
         </p>
