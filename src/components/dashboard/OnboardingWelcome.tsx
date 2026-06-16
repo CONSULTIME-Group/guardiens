@@ -185,7 +185,7 @@ const OnboardingWelcome = ({ role, checks, onDismiss }: OnboardingWelcomeProps) 
 
       {/* Pédagogie matching */}
       <MatchingExplainer role={role} />
-      </div>
+
 
       {/* Steps */}
       <div className="space-y-2">
