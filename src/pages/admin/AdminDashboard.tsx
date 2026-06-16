@@ -49,6 +49,7 @@ const AdminDashboard = () => {
       <RecentActivity activity={activity} />
       <KpiCards stats={stats} />
       <AcquisitionPilotCard />
+      <AffinityPilotCard />
       <DashboardCharts weeklySignups={weeklySignups} deptData={deptData} />
       <OnboardingReminderCard />
     </div>
