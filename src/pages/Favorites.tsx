@@ -18,6 +18,8 @@ import PageMeta from "@/components/PageMeta";
 import FavoritesSkeleton from "@/components/favorites/FavoritesSkeleton";
 import SitterCard from "@/components/favorites/SitterCard";
 import SitCard from "@/components/favorites/SitCard";
+import { computeAffinityScore } from "@/lib/affinityScore";
+
 
 /* ─── skeleton page entière ─────────────────────────────────────────────── */
 const PageSkeleton = () => (
