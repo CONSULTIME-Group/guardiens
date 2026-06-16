@@ -324,6 +324,15 @@ const PublicProfile = () => {
                 {isOwner && <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700">🐾 Propriétaire</span>}
                 {affinity && <AffinityBadge result={affinity} size="sm" />}
               </div>
+              {!affinity && !isOwnProfile && viewerSide && (
+                <div className="mt-3">
+                  <AffinityMissingCTA
+                    side={viewerSide}
+                    profile={viewerProfile}
+                    context="public_profile"
+                  />
+                </div>
+              )}
             </div>
 
             {!isOwnProfile && (
