@@ -233,10 +233,8 @@ const SitterSitView = ({
         }, [sitterProfile, ownerProfile, pets]);
         useEffect(() => {
           if (affinity) {
-            trackEvent("affinity_badge_seen", {
-              context: "sit_detail",
-              score: affinity.score,
-              total: affinity.total,
+            void trackEvent("affinity_badge_seen", {
+              metadata: { context: "sit_detail", score: affinity.score, total: affinity.total },
             });
           }
         }, [affinity]);

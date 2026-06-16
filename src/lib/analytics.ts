@@ -45,7 +45,8 @@ export type EventType =
   // Tag de cohorte dans metadata.release (ex: "mission_card_bio_v1_2026_05_17").
   | "exp_mission_bio_exposure" // 1ère impression de la liste missions (release, mission_count)
   | "exp_mission_bio_click"    // Clic sur une MissionCard (release, has_bio, position)
-  | "exp_mission_bio_scroll";  // Scroll max atteint sur la liste (release, max_scroll_pct, is_mobile)
+  | "exp_mission_bio_scroll"  // Scroll max atteint sur la liste (release, max_scroll_pct, is_mobile)
+  | "affinity_badge_seen";    // Badge d'affinité affiché (context: sit_detail|public_profile|search|favorites, score, total)
 
 interface TrackOptions {
   source?: string;
