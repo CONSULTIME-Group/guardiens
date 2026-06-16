@@ -221,40 +221,14 @@ const SitterSitView = ({
       />
 
       {/* Score d'affinité réciproque (vue gardien sur annonce propriétaire) */}
-      {(() => {
-        const affinity = useMemo(() => {
-          if (!sitterProfile || !ownerProfile) return null;
-          return computeAffinityScore(
-            { ...ownerProfile, pets: pets || [] },
-            sitterProfile,
-          );
-        }, [sitterProfile, ownerProfile, pets]);
-        useEffect(() => {
-          if (affinity) {
-            void trackEvent("affinity_badge_seen", {
-              metadata: { context: "sit_detail", score: affinity.score, total: affinity.total },
-            });
-          }
-        }, [affinity]);
-        if (!affinity) {
-          if (activeRole === "sitter" && sitterProfile) {
-            return (
-              <div className="mt-3">
-                <AffinityMissingCTA side="sitter" profile={sitterProfile} context="sit_detail" />
-              </div>
-            );
-          }
-          return null;
-        }
-        return (
-          <div className="mt-3 flex items-center gap-2">
-            <AffinityBadge result={affinity} size="md" />
-            <span className="text-xs text-muted-foreground">
-              Votre affinité avec ce propriétaire
-            </span>
-          </div>
-        );
-      })()}
+      <AffinitySection
+        sitterProfile={sitterProfile}
+        ownerProfile={ownerProfile}
+        pets={pets}
+        context="sit_detail"
+        targetId={sit.id}
+        showCtaForSitter={activeRole === "sitter"}
+      />
 
 
       {/* Apply bar, affichée tout en haut, juste sous le header,
