@@ -256,7 +256,12 @@ const SearchListingCard = ({
           <div className="absolute top-4 right-4 flex items-center gap-2" onClick={(e) => e.preventDefault()}>
             {affinity && (
               <div className="rounded-full bg-white/95 backdrop-blur-md shadow-sm">
-                <AffinityBadge result={affinity} size="sm" />
+                <AffinityBadge
+                  result={affinity}
+                  size="sm"
+                  trackingContext="search_listing"
+                  trackingId={item.id}
+                />
               </div>
             )}
             <FavoriteButton targetType="sit" targetId={item.id} size="sm" />
