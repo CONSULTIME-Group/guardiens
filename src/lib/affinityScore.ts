@@ -155,12 +155,20 @@ function idealProfileMatch(owner: AffinityOwnerInput, sitter: AffinitySitterInpu
   return 0;
 }
 
-export function computeAffinityScore(
+/**
+ * Calcule le résultat complet (affiché OU masqué).
+ * Utile pour piloter le seuil via les analytics : on track aussi les
+ * impressions « théoriques » des scores faibles pour décider plus tard
+ * de relever ou abaisser le seuil.
+ */
+export function computeAffinityResultFull(
   owner: AffinityOwnerInput,
   sitter: AffinitySitterInput,
 ): AffinityResult | null {
   if (!owner || !sitter) return null;
-  if (isDisqualified(owner, sitter)) return null;
+  if (isDisqualified(owner, sitter)) {
+    return { score: 0, matched: [], total: 0, displayed: false, hiddenReason: "disqualified" };
+  }
 
   let points = 0;
   let weightSum = 0;
@@ -255,19 +263,30 @@ export function computeAffinityScore(
     }
   }
 
-  if (total < 3 || weightSum === 0) return null;
-
-  // Note : ancien bonus `special_needs` ↔ `special_animal_skills` retiré.
-  // Le champ `special_needs` est un texte libre côté propriétaire, donc le
-  // matching string-based produisait trop de faux négatifs. À réintroduire
-  // quand `special_needs` sera structuré (tags), avec un poids dédié.
-
+  if (weightSum === 0) return null;
 
   const raw = (points / weightSum) * 100;
   const score = Math.max(0, Math.min(100, Math.round(raw)));
 
-  // Seuil de confiance : un score faible n'a pas de valeur informative.
-  if (score < MIN_DISPLAY_SCORE) return null;
-
-  return { score, matched, total };
+  if (total < 3) {
+    return { score, matched, total, displayed: false, hiddenReason: "too_few_criteria" };
+  }
+  if (score < MIN_DISPLAY_SCORE) {
+    return { score, matched, total, displayed: false, hiddenReason: "below_threshold" };
+  }
+  return { score, matched, total, displayed: true };
 }
+
+/**
+ * API legacy : ne renvoie que les résultats affichables (rétro-compat).
+ * Préférer `computeAffinityResultFull` quand on veut piloter le tracking.
+ */
+export function computeAffinityScore(
+  owner: AffinityOwnerInput,
+  sitter: AffinitySitterInput,
+): AffinityResult | null {
+  const r = computeAffinityResultFull(owner, sitter);
+  if (!r || r.displayed === false) return null;
+  return r;
+}
+
