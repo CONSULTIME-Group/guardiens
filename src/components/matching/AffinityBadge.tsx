@@ -96,7 +96,15 @@ const AffinityBadge = ({
           {result.score}% d'affinité
         </button>
       </PopoverTrigger>
-      <PopoverContent side="top" align="center" className="w-[260px] p-3" onClick={stop}>
+      <PopoverContent
+        side="bottom"
+        align="center"
+        sideOffset={6}
+        avoidCollisions
+        collisionPadding={12}
+        className="w-[260px] p-3 z-50"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <p className="text-xs font-semibold mb-1.5 text-foreground">
           {result.score}% sur {result.total} critères communs
         </p>
