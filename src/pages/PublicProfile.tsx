@@ -26,7 +26,9 @@ import ProfileSkeleton from "@/components/skeletons/ProfileSkeleton";
 import ProfileSchemaOrg from "@/components/seo/ProfileSchemaOrg";
 import AffinityBadge from "@/components/matching/AffinityBadge";
 import AffinityMissingCTA from "@/components/matching/AffinityMissingCTA";
-import { computeAffinityScore, type AffinityResult } from "@/lib/affinityScore";
+import { computeAffinityResultFull, type AffinityResult } from "@/lib/affinityScore";
+import { trackEvent } from "@/lib/analytics";
+
 
 
 const speciesLabels: Record<string, string> = {
@@ -160,7 +162,7 @@ const PublicProfile = () => {
           setAffinity(null);
           return;
         }
-        const r = computeAffinityScore(ownerWithPets, sitterProfile);
+        const r = computeAffinityResultFull(ownerWithPets, sitterProfile);
         if (!cancelled) setAffinity(r);
         return;
       }
@@ -178,7 +180,7 @@ const PublicProfile = () => {
           setAffinity(null);
           return;
         }
-        const r = computeAffinityScore({ ...ownerProfile, pets }, viewerSitter);
+        const r = computeAffinityResultFull({ ...ownerProfile, pets }, viewerSitter);
         if (!cancelled) setAffinity(r);
       }
     })();
@@ -186,6 +188,30 @@ const PublicProfile = () => {
       cancelled = true;
     };
   }, [user, id, profile, sitterProfile, ownerProfile, pets]);
+
+  // Shadow tracking : si le score est calculé mais masqué (seuil ou critères),
+  // on émet quand même un event pour piloter le seuil via AffinityPilotCard.
+  useEffect(() => {
+    if (!affinity || affinity.displayed) return;
+    const key = `affinity:public_profile:${id ?? "anon"}:hidden:${affinity.hiddenReason}:${affinity.score}`;
+    try {
+      if (sessionStorage.getItem(`impr:${key}`)) return;
+      sessionStorage.setItem(`impr:${key}`, "1");
+    } catch {
+      // ignore
+    }
+    void trackEvent("affinity_badge_seen", {
+      metadata: {
+        context: "public_profile",
+        score: affinity.score,
+        total: affinity.total,
+        target_id: id ?? null,
+        displayed: false,
+        hidden_reason: affinity.hiddenReason,
+      },
+    });
+  }, [affinity, id]);
+
 
   // L'impression du badge est trackée par AffinityBadge (IntersectionObserver + dédup session).
 
@@ -315,7 +341,7 @@ const PublicProfile = () => {
               <div className="flex gap-2 mt-2 flex-wrap items-center">
                 {isSitter && <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">🏡 Gardien</span>}
                 {isOwner && <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700">🐾 Propriétaire</span>}
-                {affinity && (
+                {affinity?.displayed && (
                   <AffinityBadge
                     result={affinity}
                     size="sm"
@@ -324,7 +350,7 @@ const PublicProfile = () => {
                   />
                 )}
               </div>
-              {!affinity && !isOwnProfile && viewerSide && (
+              {!affinity?.displayed && !isOwnProfile && viewerSide && (
                 <div className="mt-3">
                   <AffinityMissingCTA
                     side={viewerSide}
@@ -332,6 +358,7 @@ const PublicProfile = () => {
                     context="public_profile"
                   />
                 </div>
+
               )}
             </div>
 
