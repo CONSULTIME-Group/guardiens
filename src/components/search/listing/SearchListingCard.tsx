@@ -1,10 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
-import { useMemo } from "react";
 import FounderBadge from "@/components/badges/FounderBadge";
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import AffinityBadge from "@/components/matching/AffinityBadge";
-import { computeAffinityScore } from "@/lib/affinityScore";
+import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
+
 
 import { PawPrint, Cat, Bird } from "lucide-react";
 
@@ -55,13 +55,16 @@ const SearchListingCard = ({
     !isDemo &&
     typeof item.distance === "number" &&
     item.distance > radius;
-  const affinity = useMemo(() => {
-    if (isMission || isDemo || isInactive || !viewerSitterProfile || !item.ownerMatch) return null;
-    return computeAffinityScore(
-      { ...item.ownerMatch, pets: item.pets || [] },
-      viewerSitterProfile,
-    );
-  }, [isMission, isDemo, isInactive, viewerSitterProfile, item.ownerMatch, item.pets]);
+  const { full: affinity, displayed: affinityDisplayed } = useAffinityWithShadow(
+    item.ownerMatch ? { ...item.ownerMatch, pets: item.pets || [] } : null,
+    viewerSitterProfile ?? null,
+    {
+      context: "search_listing",
+      targetId: item.id,
+      enabled: !isMission && !isDemo && !isInactive,
+    },
+  );
+
 
 
   const location = useLocation();
