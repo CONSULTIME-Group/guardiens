@@ -1,10 +1,8 @@
 import { Link } from "react-router-dom";
-import { useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import AffinityBadge from "@/components/matching/AffinityBadge";
 import type { AffinityResult } from "@/lib/affinityScore";
-import { trackEvent } from "@/lib/analytics";
 
 interface Sitter {
   id: string;
@@ -22,13 +20,6 @@ interface SitterCardProps {
 const SitterCard = ({ sitter, fallbackLabel, affinity }: SitterCardProps) => {
   const initials = (sitter.first_name ?? fallbackLabel)[0]?.toUpperCase() ?? "?";
 
-  useEffect(() => {
-    if (affinity) {
-      void trackEvent("affinity_badge_seen", {
-        metadata: { context: "favorites", score: affinity.score, total: affinity.total },
-      });
-    }
-  }, [affinity]);
 
 
   return (
