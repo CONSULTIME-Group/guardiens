@@ -75,6 +75,10 @@ export interface SitterProfileData {
   // À propos de moi (matching)
   life_pace: string;
   household_composition: string[];
+  // Matching avancé
+  special_animal_skills: string[];
+  work_during_sit: string;
+  sensitivities: string[];
   // Skills
   skill_categories: string[];
   available_for_help: boolean;
@@ -100,6 +104,7 @@ const defaultData: SitterProfileData = {
   strict_rules_ok: false, prefer_visitors: false, farm_animals_ok: false, preferences_notes: "",
   meeting_preference: [], handover_preference: "", languages: [], bonus_skills: [], interests: [],
   life_pace: "", household_composition: [],
+  special_animal_skills: [], work_during_sit: "", sensitivities: [],
   skill_categories: [], available_for_help: false,
   competences: [],
 };
@@ -167,6 +172,9 @@ export function useSitterProfile() {
       interests: s?.interests || [],
       life_pace: (s as any)?.life_pace || "",
       household_composition: (s as any)?.household_composition || [],
+      special_animal_skills: (s as any)?.special_animal_skills || [],
+      work_during_sit: (s as any)?.work_during_sit || "",
+      sensitivities: (s as any)?.sensitivities || [],
       skill_categories: (p as any)?.skill_categories || [],
       available_for_help: (p as any)?.available_for_help || false,
       competences: (s as any)?.competences || [],
@@ -296,6 +304,7 @@ export function useSitterProfile() {
         "preferences_notes", "meeting_preference", "handover_preference",
         "languages", "bonus_skills", "interests", "competences",
         "life_pace", "household_composition",
+        "special_animal_skills", "work_during_sit", "sensitivities",
         "min_stay_duration", "preferred_frequency", "min_notice", "preferred_periods", "preferred_environments",
         // Step 3 — Animaux (étaient dans le formulaire mais perdus à la sauvegarde)
         "dog_sizes_accepted", "demanding_breeds_ok", "indoor_cats_only", "own_animals", "guard_experience",
