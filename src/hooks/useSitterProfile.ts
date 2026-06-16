@@ -99,6 +99,7 @@ const defaultData: SitterProfileData = {
   min_stay_duration: "flexible", preferred_frequency: "flexible", min_notice: "asap", preferred_periods: [], preferred_environments: [],
   strict_rules_ok: false, prefer_visitors: false, farm_animals_ok: false, preferences_notes: "",
   meeting_preference: [], handover_preference: "", languages: [], bonus_skills: [], interests: [],
+  life_pace: "", household_composition: [],
   skill_categories: [], available_for_help: false,
   competences: [],
 };
