@@ -290,9 +290,10 @@ const PublicProfile = () => {
 
               {/* Skills shown in Entraide tab only */}
 
-              <div className="flex gap-2 mt-2">
+              <div className="flex gap-2 mt-2 flex-wrap items-center">
                 {isSitter && <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">🏡 Gardien</span>}
                 {isOwner && <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700">🐾 Propriétaire</span>}
+                {affinity && <AffinityBadge result={affinity} size="sm" />}
               </div>
             </div>
 
