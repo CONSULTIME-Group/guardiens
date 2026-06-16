@@ -72,8 +72,8 @@ const AffinityBadge = ({
   const sizing = size === "sm" ? "text-[11px] px-2 py-0.5" : "text-xs px-2.5 py-1";
 
   // Empêche les Link parents de naviguer quand on tape le badge.
+  // NB : ne pas appeler preventDefault, sinon Radix annule l'ouverture du Popover.
   const stop = (e: MouseEvent) => {
-    e.preventDefault();
     e.stopPropagation();
   };
 
