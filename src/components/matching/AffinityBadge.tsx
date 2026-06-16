@@ -1,19 +1,22 @@
 /**
  * Badge d'affinité propriétaire ↔ gardien.
- * Affiche un pourcentage et la liste des critères matchés en tooltip.
+ * Affiche un pourcentage et la liste des critères matchés.
  * Aucune icône Lucide ni emoji.
+ *
+ * Interaction : Popover (clic), pour fonctionner aussi bien tactile que
+ * desktop. Un Tooltip Radix classique ne s'ouvre pas au tap mobile, ce qui
+ * rendait le badge purement décoratif sur petit écran.
  *
  * Tracking : si `trackingContext` est fourni, le badge déclenche un event
  * `affinity_badge_seen` UNE seule fois par session (dédup via
  * `useImpressionOnce`) quand il devient visible à l'écran.
  */
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, type MouseEvent } from "react";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import type { AffinityResult } from "@/lib/affinityScore";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
@@ -43,7 +46,7 @@ const AffinityBadge = ({
   trackingContext,
   trackingId,
 }: AffinityBadgeProps) => {
-  const wrapRef = useRef<HTMLSpanElement>(null);
+  const wrapRef = useRef<HTMLButtonElement>(null);
 
   const dedupeKey =
     trackingContext && result
@@ -58,6 +61,7 @@ const AffinityBadge = ({
         score: result.score,
         total: result.total,
         target_id: trackingId ?? null,
+        displayed: true,
       },
     });
   }, [trackingContext, trackingId, result]);
@@ -66,41 +70,49 @@ const AffinityBadge = ({
 
   if (!result) return null;
   const sizing = size === "sm" ? "text-[11px] px-2 py-0.5" : "text-xs px-2.5 py-1";
+
+  // Empêche les Link parents de naviguer quand on tape le badge.
+  const stop = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   return (
-    <TooltipProvider delayDuration={150}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span
-            ref={wrapRef}
-            className={cn(
-              "inline-flex items-center gap-1 rounded-full border font-semibold leading-none",
-              sizing,
-              tone(result.score),
-              className,
-            )}
-            aria-label={`Affinité ${result.score}% sur ${result.total} critères`}
-          >
-            {result.score}% d'affinité
-          </span>
-        </TooltipTrigger>
-        <TooltipContent side="top" className="max-w-[260px]">
-          <p className="text-xs font-semibold mb-1">
-            {result.score}% sur {result.total} critères communs
-          </p>
-          {result.matched.length > 0 ? (
-            <ul className="space-y-0.5">
-              {result.matched.map((m) => (
-                <li key={m} className="text-xs text-muted-foreground">
-                  · {m}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-xs text-muted-foreground">Profils compatibles</p>
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          ref={wrapRef}
+          type="button"
+          onClick={stop}
+          className={cn(
+            "inline-flex items-center gap-1 rounded-full border font-semibold leading-none cursor-pointer",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+            sizing,
+            tone(result.score),
+            className,
           )}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+          aria-label={`Affinité ${result.score}% sur ${result.total} critères, voir le détail`}
+        >
+          {result.score}% d'affinité
+        </button>
+      </PopoverTrigger>
+      <PopoverContent side="top" align="center" className="w-[260px] p-3" onClick={stop}>
+        <p className="text-xs font-semibold mb-1.5 text-foreground">
+          {result.score}% sur {result.total} critères communs
+        </p>
+        {result.matched.length > 0 ? (
+          <ul className="space-y-0.5">
+            {result.matched.map((m) => (
+              <li key={m} className="text-xs text-muted-foreground leading-snug">
+                · {m}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-xs text-muted-foreground">Profils compatibles</p>
+        )}
+      </PopoverContent>
+    </Popover>
   );
 };
 
