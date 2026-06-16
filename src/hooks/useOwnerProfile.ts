@@ -177,6 +177,10 @@ export function useOwnerProfile() {
       owner_competences: ownerCompetences,
       owner_competences_disponible: (o as any)?.competences_disponible ?? (sitter as any)?.competences_disponible ?? false,
       owner_skill_categories: (p as any)?.skill_categories || [],
+      languages: (o as any)?.languages || [],
+      interests: (o as any)?.interests || [],
+      life_pace: (o as any)?.life_pace || "",
+      household_composition: (o as any)?.household_composition || [],
     });
     setLastSyncedAt(
       [p?.updated_at, o?.updated_at]
