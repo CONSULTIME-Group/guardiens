@@ -239,7 +239,18 @@ const SitterSitView = ({
             });
           }
         }, [affinity]);
-        if (!affinity) return null;
+        if (!affinity) {
+          // Si le gardien consulte une annonce et que SON profil manque
+          // de critères, on l'incite à compléter pour activer le matching.
+          if (activeRole === "sitter" && sitterProfile) {
+            return (
+              <div className="mt-3">
+                <AffinityMissingCTA sitterProfile={sitterProfile} context="sit_detail" />
+              </div>
+            );
+          }
+          return null;
+        }
         return (
           <div className="mt-3 flex items-center gap-2">
             <AffinityBadge result={affinity} size="md" />
