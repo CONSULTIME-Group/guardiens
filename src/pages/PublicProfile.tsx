@@ -170,6 +170,17 @@ const PublicProfile = () => {
     };
   }, [user, id, profile, sitterProfile, ownerProfile, pets]);
 
+  // Tracking impression badge d'affinité
+  useEffect(() => {
+    if (affinity) {
+      void trackEvent("affinity_badge_seen", {
+        metadata: { context: "public_profile", score: affinity.score, total: affinity.total },
+      });
+    }
+  }, [affinity]);
+
+
+
   if (loading) return <ProfileSkeleton />;
   if (!profile) return <div className="p-6 md:p-10 text-muted-foreground">Profil introuvable.</div>;
 
