@@ -35,6 +35,8 @@ type Props =
       context: string;
       editHref?: string;
       className?: string;
+      /** Adapte le wording : 'single' (profil/annonce) ou 'list' (page de liste). */
+      scope?: "single" | "list";
     }
   | {
       side: "owner";
@@ -42,7 +44,9 @@ type Props =
       context: string;
       editHref?: string;
       className?: string;
+      scope?: "single" | "list";
     };
+
 
 const SITTER_LABELS: Record<string, string> = {
   animal_types: "vos animaux",
@@ -61,7 +65,8 @@ const OWNER_LABELS: Record<string, string> = {
 };
 
 const AffinityMissingCTA = (props: Props) => {
-  const { side, profile, context, editHref, className } = props;
+  const { side, profile, context, editHref, className, scope = "single" } = props;
+
 
   const missing = useMemo(() => {
     if (!profile) return [];
@@ -117,8 +122,9 @@ const AffinityMissingCTA = (props: Props) => {
           Activez votre score d'affinité
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Renseignez {list} pour voir votre compatibilité avec ce profil.
+          Renseignez {list} pour voir votre compatibilité {scope === "list" ? "sur chaque annonce" : "avec ce profil"}.
         </p>
+
       </div>
       <Button asChild size="sm" variant="outline" className="shrink-0">
         <Link to={href}>Compléter</Link>
