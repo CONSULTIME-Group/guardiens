@@ -18,6 +18,8 @@ import PageMeta from "@/components/PageMeta";
 import FavoritesSkeleton from "@/components/favorites/FavoritesSkeleton";
 import SitterCard from "@/components/favorites/SitterCard";
 import SitCard from "@/components/favorites/SitCard";
+import { computeAffinityScore } from "@/lib/affinityScore";
+
 
 /* ─── skeleton page entière ─────────────────────────────────────────────── */
 const PageSkeleton = () => (
@@ -53,15 +55,45 @@ const Favorites = () => {
     queryKey: ["favorite-sitters", sitterIds],
     queryFn: async () => {
       if (!sitterIds.length) return [];
-      const { data, error } = await supabase
-        .from("public_profiles")
-        .select("id, first_name, avatar_url, city")
-        .in("id", sitterIds);
+      const [{ data: profiles, error }, { data: sitterProfs }] = await Promise.all([
+        supabase
+          .from("public_profiles")
+          .select("id, first_name, avatar_url, city")
+          .in("id", sitterIds),
+        supabase
+          .from("sitter_profiles")
+          .select("user_id, animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type, experience_years")
+          .in("user_id", sitterIds),
+      ]);
       if (error) throw error;
-      return data ?? [];
+      const spMap = new Map((sitterProfs || []).map((s: any) => [s.user_id, s]));
+      return (profiles ?? []).map((p: any) => ({ ...p, sitter_profile: spMap.get(p.id) || null }));
     },
     enabled: sitterIds.length > 0,
   });
+
+  const { data: viewerOwnerContext } = useQuery({
+    queryKey: ["favorites-viewer-owner", user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const [{ data: owner }, { data: props }] = await Promise.all([
+        supabase
+          .from("owner_profiles")
+          .select("preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("properties")
+          .select("id, pets:pets(species, special_needs)")
+          .eq("user_id", user.id),
+      ]);
+      if (!owner) return null;
+      const pets = (props || []).flatMap((p: any) => p.pets || []);
+      return { ...owner, pets };
+    },
+    enabled: !!user && sitterIds.length > 0,
+  });
+
 
   const { data: sits, isLoading: isLoadingSits } = useQuery({
     queryKey: ["favorite-sits", sitIds],
@@ -143,13 +175,20 @@ const Favorites = () => {
               />
             ) : (
               <div className="space-y-2">
-                {sitters!.map((sitter: any) => (
-                  <SitterCard
-                    key={sitter.id}
-                    sitter={sitter}
-                    fallbackLabel={t("favorites_page.member_fallback")}
-                  />
-                ))}
+                {sitters!.map((sitter: any) => {
+                  const affinity = viewerOwnerContext && sitter.sitter_profile
+                    ? computeAffinityScore(viewerOwnerContext, sitter.sitter_profile)
+                    : null;
+                  return (
+                    <SitterCard
+                      key={sitter.id}
+                      sitter={sitter}
+                      fallbackLabel={t("favorites_page.member_fallback")}
+                      affinity={affinity}
+                    />
+                  );
+                })}
+
               </div>
             )}
           </TabsContent>

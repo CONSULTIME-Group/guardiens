@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import FavoriteButton from "@/components/shared/FavoriteButton";
+import AffinityBadge from "@/components/matching/AffinityBadge";
+import type { AffinityResult } from "@/lib/affinityScore";
 
 interface Sitter {
   id: string;
@@ -12,9 +14,10 @@ interface Sitter {
 interface SitterCardProps {
   sitter: Sitter;
   fallbackLabel: string;
+  affinity?: AffinityResult | null;
 }
 
-const SitterCard = ({ sitter, fallbackLabel }: SitterCardProps) => {
+const SitterCard = ({ sitter, fallbackLabel, affinity }: SitterCardProps) => {
   const initials = (sitter.first_name ?? fallbackLabel)[0]?.toUpperCase() ?? "?";
 
   return (
@@ -45,9 +48,11 @@ const SitterCard = ({ sitter, fallbackLabel }: SitterCardProps) => {
         )}
       </div>
 
+      {affinity && <AffinityBadge result={affinity} size="sm" className="shrink-0" />}
       <FavoriteButton targetType="sitter" targetId={sitter.id} size="md" className="shrink-0" />
     </article>
   );
 };
 
 export default SitterCard;
+
