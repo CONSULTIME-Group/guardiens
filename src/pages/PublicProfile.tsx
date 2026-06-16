@@ -340,6 +340,35 @@ const PublicProfile = () => {
                       </Card>
                     )}
 
+                    {/* Centres d'intérêt */}
+                    {sitterProfile.interests?.length > 0 && (
+                      <Card>
+                        <h3 className="font-heading font-semibold text-sm mb-2 text-foreground">Centres d'intérêt</h3>
+                        <div className="flex flex-wrap gap-1.5">
+                          {sitterProfile.interests.map((i: string) => (
+                            <span key={i} className="px-2.5 py-1 rounded-full text-xs bg-muted text-foreground">{i}</span>
+                          ))}
+                        </div>
+                      </Card>
+                    )}
+
+                    {/* Rythme de vie + foyer */}
+                    {(sitterProfile.life_pace || sitterProfile.household_composition?.length > 0) && (
+                      <Card>
+                        <h3 className="font-heading font-semibold text-sm mb-2 text-foreground">Au quotidien</h3>
+                        <div className="space-y-2 text-sm text-muted-foreground">
+                          {sitterProfile.life_pace && (
+                            <p><span className="font-medium text-foreground">Rythme : </span>{
+                              ({ calme: "Calme", equilibre: "Équilibré", actif: "Actif" } as Record<string, string>)[sitterProfile.life_pace] || sitterProfile.life_pace
+                            }</p>
+                          )}
+                          {sitterProfile.household_composition?.length > 0 && (
+                            <p><span className="font-medium text-foreground">Foyer : </span>{sitterProfile.household_composition.join(", ")}</p>
+                          )}
+                        </div>
+                      </Card>
+                    )}
+
                     {/* Bonus skills */}
                     {sitterProfile.bonus_skills?.length > 0 && (
                       <Card>
