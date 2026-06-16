@@ -74,6 +74,40 @@ const W = {
   ambiance: 1,
 } as const;
 
+/**
+ * Normalise une espèce vers un code canonique en anglais.
+ * pets.species utilise des codes EN (dog, cat, …) ; sitter_profiles.animal_types
+ * utilise des libellés FR pluriels ("Chiens", "Chats", "NAC"…). On ramène
+ * tout au code EN pour pouvoir intersecter.
+ */
+const SPECIES_NORMALIZE: Record<string, string> = {
+  dog: "dog", chien: "dog", chiens: "dog",
+  cat: "cat", chat: "cat", chats: "cat",
+  bird: "bird", oiseau: "bird", oiseaux: "bird",
+  rodent: "rodent", rongeur: "rodent", rongeurs: "rodent",
+  reptile: "reptile", reptiles: "reptile",
+  nac: "nac",
+  horse: "horse", cheval: "horse", chevaux: "horse",
+  farm_animal: "farm_animal",
+  "animal de ferme": "farm_animal",
+  "animaux de ferme": "farm_animal",
+  tous: "all", all: "all",
+};
+
+function normalizeSpecies(value?: string | null): string | null {
+  if (!value) return null;
+  const k = value.trim().toLowerCase();
+  return SPECIES_NORMALIZE[k] ?? k;
+}
+
+function speciesIntersects(ownerSpecies: string[], sitterTypes: string[]): number {
+  const owners = ownerSpecies.map(normalizeSpecies).filter(Boolean) as string[];
+  const sitters = sitterTypes.map(normalizeSpecies).filter(Boolean) as string[];
+  if (sitters.includes("all")) return owners.length;
+  const set = new Set(sitters);
+  return owners.reduce((acc, s) => acc + (set.has(s) ? 1 : 0), 0);
+}
+
 const SENSITIVITY_BY_SPECIES: Record<string, string[]> = {
   cat: ["Allergie aux chats"],
   dog: ["Allergie aux chiens", "Pas de très grands chiens", "Pas de chiens catégorisés"],
@@ -100,7 +134,9 @@ function intersectionCount<T>(a?: T[] | null, b?: T[] | null): number {
 function isDisqualified(owner: AffinityOwnerInput, sitter: AffinitySitterInput): boolean {
   const sens = sitter.sensitivities ?? [];
   if (sens.length === 0) return false;
-  const species = (owner.pets ?? []).map((p) => p?.species).filter(Boolean) as string[];
+  const species = (owner.pets ?? [])
+    .map((p) => normalizeSpecies(p?.species))
+    .filter(Boolean) as string[];
   for (const sp of species) {
     const blockers = SENSITIVITY_BY_SPECIES[sp] ?? [];
     if (blockers.some((b) => sens.includes(b))) return true;
@@ -180,7 +216,7 @@ export function computeAffinityResultFull(
   if (species.length > 0 && (sitter.animal_types?.length ?? 0) > 0) {
     total++;
     weightSum += W.animals;
-    const inter = intersectionCount(species, sitter.animal_types ?? []);
+    const inter = speciesIntersects(species, sitter.animal_types ?? []);
     if (inter > 0) {
       const ratio = Math.min(1, inter / species.length);
       points += ratio * W.animals;
