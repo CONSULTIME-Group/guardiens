@@ -50,7 +50,15 @@ const SitterCard = ({ sitter, fallbackLabel, affinity }: SitterCardProps) => {
         )}
       </div>
 
-      {affinity && <AffinityBadge result={affinity} size="sm" className="shrink-0" />}
+      {affinity && (
+        <AffinityBadge
+          result={affinity}
+          size="sm"
+          className="shrink-0"
+          trackingContext="favorites"
+          trackingId={sitter.id}
+        />
+      )}
       <FavoriteButton targetType="sitter" targetId={sitter.id} size="md" className="shrink-0" />
     </article>
   );
