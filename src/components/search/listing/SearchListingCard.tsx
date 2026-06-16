@@ -32,7 +32,9 @@ const SearchListingCard = ({
   hasAccess,
   testDemoMode,
   formatDate,
+  viewerSitterProfile,
 }: SearchListingCardProps) => {
+
   const missionPhotos = Array.isArray((item as any).photos) ? (item as any).photos.filter(Boolean) : [];
   const photos: string[] = item.property?.photos || missionPhotos;
   const coverPhoto = (item as any).cover_photo_url || item.property?.cover_photo_url || photos[0] || (item as any).ownerGalleryFirstPhoto || null;
