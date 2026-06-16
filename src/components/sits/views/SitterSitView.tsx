@@ -35,10 +35,7 @@ import SitterStatusBanner from "./SitterStatusBanner";
 import { useSitDerived } from "./useSitDerived";
 import ReviewsTab from "./tabs/ReviewsTab";
 import SitImmersiveContent from "./SitImmersiveContent";
-import AffinityBadge from "@/components/matching/AffinityBadge";
-import AffinityMissingCTA from "@/components/matching/AffinityMissingCTA";
-import { computeAffinityScore } from "@/lib/affinityScore";
-import { useMemo } from "react";
+import AffinitySection from "@/components/matching/AffinitySection";
 import type { SitData } from "./types";
 
 interface SitterSitViewProps {
