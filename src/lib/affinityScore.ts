@@ -134,7 +134,9 @@ function intersectionCount<T>(a?: T[] | null, b?: T[] | null): number {
 function isDisqualified(owner: AffinityOwnerInput, sitter: AffinitySitterInput): boolean {
   const sens = sitter.sensitivities ?? [];
   if (sens.length === 0) return false;
-  const species = (owner.pets ?? []).map((p) => p?.species).filter(Boolean) as string[];
+  const species = (owner.pets ?? [])
+    .map((p) => normalizeSpecies(p?.species))
+    .filter(Boolean) as string[];
   for (const sp of species) {
     const blockers = SENSITIVITY_BY_SPECIES[sp] ?? [];
     if (blockers.some((b) => sens.includes(b))) return true;
