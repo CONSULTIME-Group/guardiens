@@ -1,7 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
+import { useMemo } from "react";
 import FounderBadge from "@/components/badges/FounderBadge";
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import FavoriteButton from "@/components/shared/FavoriteButton";
+import AffinityBadge from "@/components/matching/AffinityBadge";
+import { computeAffinityScore } from "@/lib/affinityScore";
 import { PawPrint, Cat, Bird } from "lucide-react";
 
 const speciesIcon: Record<string, typeof PawPrint> = {
@@ -17,7 +20,9 @@ export interface SearchListingCardProps {
   hasAccess: boolean;
   testDemoMode: boolean;
   formatDate: (d: string | null) => string;
+  viewerSitterProfile?: any;
 }
+
 
 const SearchListingCard = ({
   item,
@@ -27,7 +32,9 @@ const SearchListingCard = ({
   hasAccess,
   testDemoMode,
   formatDate,
+  viewerSitterProfile,
 }: SearchListingCardProps) => {
+
   const missionPhotos = Array.isArray((item as any).photos) ? (item as any).photos.filter(Boolean) : [];
   const photos: string[] = item.property?.photos || missionPhotos;
   const coverPhoto = (item as any).cover_photo_url || item.property?.cover_photo_url || photos[0] || (item as any).ownerGalleryFirstPhoto || null;
@@ -47,6 +54,14 @@ const SearchListingCard = ({
     !isDemo &&
     typeof item.distance === "number" &&
     item.distance > radius;
+  const affinity = useMemo(() => {
+    if (isMission || isDemo || isInactive || !viewerSitterProfile || !item.ownerMatch) return null;
+    return computeAffinityScore(
+      { ...item.ownerMatch, pets: item.pets || [] },
+      viewerSitterProfile,
+    );
+  }, [isMission, isDemo, isInactive, viewerSitterProfile, item.ownerMatch, item.pets]);
+
   const location = useLocation();
   const isPublicContext = location.pathname.startsWith("/annonces") || location.pathname.startsWith("/petites-missions") || location.pathname.startsWith("/search");
   const linkTo = isMission
@@ -234,12 +249,18 @@ const SearchListingCard = ({
           )}
         </div>
 
-        {/* Top-right favorite */}
+        {/* Top-right favorite + affinity */}
         {!isDemo && !isMission && !isInactive && (
-          <div className="absolute top-4 right-4" onClick={(e) => e.preventDefault()}>
+          <div className="absolute top-4 right-4 flex items-center gap-2" onClick={(e) => e.preventDefault()}>
+            {affinity && (
+              <div className="rounded-full bg-white/95 backdrop-blur-md shadow-sm">
+                <AffinityBadge result={affinity} size="sm" />
+              </div>
+            )}
             <FavoriteButton targetType="sit" targetId={item.id} size="sm" />
           </div>
         )}
+
 
         {/* Bottom-left glassy chips: pets + dates */}
         <div className="absolute bottom-5 left-5 right-5 flex flex-wrap items-end gap-1.5">

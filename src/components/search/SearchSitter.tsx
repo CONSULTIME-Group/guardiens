@@ -662,10 +662,10 @@ const SearchSitter = () => {
  const enriched = await Promise.all(
  items.map(async (sit: any) => {
  const [{ data: pets }, { data: reviews }, { data: ownerBadges }, { data: ownerProf }] = await Promise.all([
- supabase.from("pets").select("species, name").eq("property_id", sit.property_id),
+ supabase.from("pets").select("species, name, special_needs").eq("property_id", sit.property_id),
  supabase.from("reviews").select("overall_rating").eq("reviewee_id", sit.user_id).eq("published", true),
  supabase.from("badge_attributions").select("badge_id").eq("user_id", sit.user_id),
- supabase.from("owner_profiles").select("environments").eq("user_id", sit.user_id).maybeSingle(),
+ supabase.from("owner_profiles").select("environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").eq("user_id", sit.user_id).maybeSingle(),
  ]);
  const avgRating = reviews && reviews.length > 0
  ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1) : null;
@@ -691,9 +691,10 @@ const SearchSitter = () => {
  const sitEnvs: string[] = (sit as any).environments || [];
  const ownerEnvs: string[] = (ownerProf as any)?.environments || [];
  const resolvedEnvs = sitEnvs.length > 0 ? sitEnvs : ownerEnvs;
- return {...sit, pets: pets || [], avgRating, reviewCount: reviews?.length || 0, topBadges, distance: dist, isNew, durationDays: days, environments: resolvedEnvs, ownerEnvironments: ownerEnvs };
+ return {...sit, pets: pets || [], avgRating, reviewCount: reviews?.length || 0, topBadges, distance: dist, isNew, durationDays: days, environments: resolvedEnvs, ownerEnvironments: ownerEnvs, ownerMatch: ownerProf || null };
  })
  );
+
  let final = enriched.filter(Boolean);
  // Environment filter (using resolved environments with fallback)
  if (environments.length > 0) {
@@ -948,7 +949,7 @@ const SearchSitter = () => {
  // ─── Pill style ───
  const pillClass = "snap-start flex items-center gap-2 px-4 py-2 min-h-11 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap shrink-0";
 
-  // ─── Card renderer ───
+   // ─── Card renderer ───
   const renderCard = (item: any, listIndex?: number) => (
     <SearchListingCard
       key={item.id}
@@ -959,8 +960,10 @@ const SearchSitter = () => {
       hasAccess={hasAccess}
       testDemoMode={testDemoMode}
       formatDate={formatDate}
+      viewerSitterProfile={sitterProfile}
     />
   );
+
 
  // ─── Render ───
   // Visiteurs non connectés : annonces visibles (consultation libre pour conversion).
