@@ -341,7 +341,7 @@ const PublicProfile = () => {
               <div className="flex gap-2 mt-2 flex-wrap items-center">
                 {isSitter && <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">🏡 Gardien</span>}
                 {isOwner && <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700">🐾 Propriétaire</span>}
-                {affinity && (
+                {affinity?.displayed && (
                   <AffinityBadge
                     result={affinity}
                     size="sm"
@@ -350,7 +350,7 @@ const PublicProfile = () => {
                   />
                 )}
               </div>
-              {!affinity && !isOwnProfile && viewerSide && (
+              {!affinity?.displayed && !isOwnProfile && viewerSide && (
                 <div className="mt-3">
                   <AffinityMissingCTA
                     side={viewerSide}
@@ -358,6 +358,7 @@ const PublicProfile = () => {
                     context="public_profile"
                   />
                 </div>
+
               )}
             </div>
 
