@@ -27,7 +27,7 @@ import ProfileSchemaOrg from "@/components/seo/ProfileSchemaOrg";
 import AffinityBadge from "@/components/matching/AffinityBadge";
 import AffinityMissingCTA from "@/components/matching/AffinityMissingCTA";
 import { computeAffinityScore, type AffinityResult } from "@/lib/affinityScore";
-import { trackEvent } from "@/lib/analytics";
+
 
 const speciesLabels: Record<string, string> = {
   dog: "🐕 Chiens", cat: "🐱 Chats", horse: "🐴 Chevaux", bird: "🐦 Oiseaux",
@@ -187,14 +187,7 @@ const PublicProfile = () => {
     };
   }, [user, id, profile, sitterProfile, ownerProfile, pets]);
 
-  // Tracking impression badge d'affinité
-  useEffect(() => {
-    if (affinity) {
-      void trackEvent("affinity_badge_seen", {
-        metadata: { context: "public_profile", score: affinity.score, total: affinity.total },
-      });
-    }
-  }, [affinity]);
+  // L'impression du badge est trackée par AffinityBadge (IntersectionObserver + dédup session).
 
 
 
@@ -322,7 +315,14 @@ const PublicProfile = () => {
               <div className="flex gap-2 mt-2 flex-wrap items-center">
                 {isSitter && <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">🏡 Gardien</span>}
                 {isOwner && <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700">🐾 Propriétaire</span>}
-                {affinity && <AffinityBadge result={affinity} size="sm" />}
+                {affinity && (
+                  <AffinityBadge
+                    result={affinity}
+                    size="sm"
+                    trackingContext="public_profile"
+                    trackingId={id}
+                  />
+                )}
               </div>
               {!affinity && !isOwnProfile && viewerSide && (
                 <div className="mt-3">

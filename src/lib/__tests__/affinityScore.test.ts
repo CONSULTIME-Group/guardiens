@@ -144,29 +144,23 @@ describe("computeAffinityScore", () => {
     expect(r!.matched.some((m) => /ambiance/i.test(m))).toBe(true);
   });
 
-  it("ajoute un bonus quand le sitter a une compétence pour un besoin spécial", () => {
-    const baseOwner = {
-      life_pace: "calme",
-      languages: ["Français"],
-      interests: ["Lecture"],
-    };
-    const baseSitter = {
-      life_pace: "calme",
-      languages: ["Français"],
-      interests: ["Lecture"],
-    };
-    const without = computeAffinityScore(
-      { ...baseOwner, pets: [{ species: "dog", special_needs: "" }] },
-      baseSitter,
+  it("ne plante pas si special_needs est fourni (bonus retiré)", () => {
+    const r = computeAffinityScore(
+      {
+        life_pace: "calme",
+        languages: ["Français"],
+        interests: ["Lecture"],
+        pets: [{ species: "dog", special_needs: "Injections quotidiennes" }],
+      },
+      {
+        life_pace: "calme",
+        languages: ["Français"],
+        interests: ["Lecture"],
+        special_animal_skills: ["Injections"],
+      },
     );
-    const withBonus = computeAffinityScore(
-      { ...baseOwner, pets: [{ species: "dog", special_needs: "Injections quotidiennes" }] },
-      { ...baseSitter, special_animal_skills: ["Injections"] },
-    );
-    expect(withBonus).not.toBeNull();
-    expect(without).not.toBeNull();
-    expect(withBonus!.score).toBeGreaterThan(without!.score);
-    expect(withBonus!.matched.some((m) => /compétence/i.test(m))).toBe(true);
+    expect(r).not.toBeNull();
+    expect(r!.matched.some((m) => /compétence/i.test(m))).toBe(false);
   });
 });
 

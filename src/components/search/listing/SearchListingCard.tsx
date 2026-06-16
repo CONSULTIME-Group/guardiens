@@ -1,11 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { useMemo, useEffect } from "react";
+import { useMemo } from "react";
 import FounderBadge from "@/components/badges/FounderBadge";
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import AffinityBadge from "@/components/matching/AffinityBadge";
 import { computeAffinityScore } from "@/lib/affinityScore";
-import { trackEvent } from "@/lib/analytics";
+
 import { PawPrint, Cat, Bird } from "lucide-react";
 
 const speciesIcon: Record<string, typeof PawPrint> = {
@@ -63,13 +63,6 @@ const SearchListingCard = ({
     );
   }, [isMission, isDemo, isInactive, viewerSitterProfile, item.ownerMatch, item.pets]);
 
-  useEffect(() => {
-    if (affinity) {
-      void trackEvent("affinity_badge_seen", {
-        metadata: { context: "search_listing", score: affinity.score, total: affinity.total },
-      });
-    }
-  }, [affinity]);
 
   const location = useLocation();
   const isPublicContext = location.pathname.startsWith("/annonces") || location.pathname.startsWith("/petites-missions") || location.pathname.startsWith("/search");
@@ -263,7 +256,12 @@ const SearchListingCard = ({
           <div className="absolute top-4 right-4 flex items-center gap-2" onClick={(e) => e.preventDefault()}>
             {affinity && (
               <div className="rounded-full bg-white/95 backdrop-blur-md shadow-sm">
-                <AffinityBadge result={affinity} size="sm" />
+                <AffinityBadge
+                  result={affinity}
+                  size="sm"
+                  trackingContext="search_listing"
+                  trackingId={item.id}
+                />
               </div>
             )}
             <FavoriteButton targetType="sit" targetId={item.id} size="sm" />

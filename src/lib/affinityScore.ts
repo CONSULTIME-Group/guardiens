@@ -253,14 +253,11 @@ export function computeAffinityScore(
 
   if (total < 3 || weightSum === 0) return null;
 
-  // Bonus compétences spéciales (hors comptage)
-  const specialNeeds = (owner.pets ?? [])
-    .map((p) => p?.special_needs?.trim())
-    .filter(Boolean) as string[];
-  if (specialNeeds.length > 0 && (sitter.special_animal_skills?.length ?? 0) > 0) {
-    points += 0.25 * W.animals;
-    matched.push("Compétence spéciale utile pour vos animaux");
-  }
+  // Note : ancien bonus `special_needs` ↔ `special_animal_skills` retiré.
+  // Le champ `special_needs` est un texte libre côté propriétaire, donc le
+  // matching string-based produisait trop de faux négatifs. À réintroduire
+  // quand `special_needs` sera structuré (tags), avec un poids dédié.
+
 
   const raw = (points / weightSum) * 100;
   const score = Math.max(0, Math.min(100, Math.round(raw)));
