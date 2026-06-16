@@ -18,7 +18,7 @@ import PageMeta from "@/components/PageMeta";
 import FavoritesSkeleton from "@/components/favorites/FavoritesSkeleton";
 import SitterCard from "@/components/favorites/SitterCard";
 import SitCard from "@/components/favorites/SitCard";
-import { computeAffinityScore } from "@/lib/affinityScore";
+
 
 
 /* ─── skeleton page entière ─────────────────────────────────────────────── */
@@ -175,21 +175,17 @@ const Favorites = () => {
               />
             ) : (
               <div className="space-y-2">
-                {sitters!.map((sitter: any) => {
-                  const affinity = viewerOwnerContext && sitter.sitter_profile
-                    ? computeAffinityScore(viewerOwnerContext, sitter.sitter_profile)
-                    : null;
-                  return (
-                    <SitterCard
-                      key={sitter.id}
-                      sitter={sitter}
-                      fallbackLabel={t("favorites_page.member_fallback")}
-                      affinity={affinity}
-                    />
-                  );
-                })}
+                {sitters!.map((sitter: any) => (
+                  <SitterCard
+                    key={sitter.id}
+                    sitter={sitter}
+                    fallbackLabel={t("favorites_page.member_fallback")}
+                    viewerOwnerContext={viewerOwnerContext ?? null}
+                  />
+                ))}
 
               </div>
+
             )}
           </TabsContent>
 

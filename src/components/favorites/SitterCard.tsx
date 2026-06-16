@@ -2,25 +2,38 @@ import { Link } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import AffinityBadge from "@/components/matching/AffinityBadge";
-import type { AffinityResult } from "@/lib/affinityScore";
+import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
+import type {
+  AffinityOwnerInput,
+  AffinitySitterInput,
+} from "@/lib/affinityScore";
 
 interface Sitter {
   id: string;
   first_name?: string | null;
   avatar_url?: string | null;
   city?: string | null;
+  sitter_profile?: AffinitySitterInput | null;
 }
 
 interface SitterCardProps {
   sitter: Sitter;
   fallbackLabel: string;
-  affinity?: AffinityResult | null;
+  viewerOwnerContext?: AffinityOwnerInput | null;
 }
 
-const SitterCard = ({ sitter, fallbackLabel, affinity }: SitterCardProps) => {
+const SitterCard = ({ sitter, fallbackLabel, viewerOwnerContext }: SitterCardProps) => {
   const initials = (sitter.first_name ?? fallbackLabel)[0]?.toUpperCase() ?? "?";
 
-
+  const { full: affinity, displayed: affinityDisplayed } = useAffinityWithShadow(
+    viewerOwnerContext ?? null,
+    sitter.sitter_profile ?? null,
+    {
+      context: "favorites",
+      targetId: sitter.id,
+      enabled: !!viewerOwnerContext && !!sitter.sitter_profile,
+    },
+  );
 
   return (
     <article className="flex items-center gap-3 px-3 py-3 min-h-[60px] rounded-xl border border-border bg-card hover:bg-accent/40 transition-colors">
@@ -50,7 +63,7 @@ const SitterCard = ({ sitter, fallbackLabel, affinity }: SitterCardProps) => {
         )}
       </div>
 
-      {affinity && (
+      {affinity && affinityDisplayed && (
         <AffinityBadge
           result={affinity}
           size="sm"
@@ -65,4 +78,3 @@ const SitterCard = ({ sitter, fallbackLabel, affinity }: SitterCardProps) => {
 };
 
 export default SitterCard;
-
