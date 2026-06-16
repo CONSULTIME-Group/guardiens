@@ -543,7 +543,7 @@ const PublicProfile = () => {
                         <p className="text-sm whitespace-pre-line text-muted-foreground">{ownerProfile.rules_notes}</p>
                       </Card>
                     )}
-                    {(ownerProfile.life_pace || ownerProfile.household_composition?.length > 0 || ownerProfile.languages?.length > 0 || ownerProfile.interests?.length > 0) && (
+                    {(ownerProfile.life_pace || ownerProfile.household_composition?.length > 0 || ownerProfile.languages?.length > 0 || ownerProfile.interests?.length > 0 || ownerProfile.home_ambiance?.length > 0 || ownerProfile.preferred_sitter_types?.length > 0) && (
                       <Card>
                         <h3 className="font-heading font-semibold text-sm mb-2 text-foreground">À propos de moi</h3>
                         <div className="space-y-2 text-sm text-muted-foreground">
@@ -558,6 +558,26 @@ const PublicProfile = () => {
                           {ownerProfile.languages?.length > 0 && (
                             <p><span className="font-medium text-foreground">Langues : </span>{ownerProfile.languages.join(", ")}</p>
                           )}
+                          {ownerProfile.home_ambiance?.length > 0 && (
+                            <div className="pt-1">
+                              <span className="font-medium text-foreground">Ambiance : </span>
+                              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                {ownerProfile.home_ambiance.map((a: string) => (
+                                  <span key={a} className="px-2.5 py-1 rounded-full text-xs bg-muted text-foreground">{a}</span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {ownerProfile.preferred_sitter_types?.length > 0 && (
+                            <div className="pt-1">
+                              <span className="font-medium text-foreground">Gardien idéal : </span>
+                              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                {ownerProfile.preferred_sitter_types.map((t: string) => (
+                                  <span key={t} className="px-2.5 py-1 rounded-full text-xs bg-muted text-foreground">{t}</span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                           {ownerProfile.interests?.length > 0 && (
                             <div className="pt-1">
                               <span className="font-medium text-foreground">Centres d'intérêt : </span>
@@ -571,6 +591,7 @@ const PublicProfile = () => {
                         </div>
                       </Card>
                     )}
+
                   </>
                 )}
 
