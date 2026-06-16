@@ -63,6 +63,8 @@ const PublicProfile = () => {
   const [trustedSittersCount, setTrustedSittersCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [affinity, setAffinity] = useState<AffinityResult | null>(null);
+  const [viewerSide, setViewerSide] = useState<"owner" | "sitter" | null>(null);
+  const [viewerProfile, setViewerProfile] = useState<any>(null);
 
   useEffect(() => {
     if (!id) return;
