@@ -295,6 +295,7 @@ export function useSitterProfile() {
         "availability_dates", "is_available", "strict_rules_ok", "prefer_visitors", "farm_animals_ok",
         "preferences_notes", "meeting_preference", "handover_preference",
         "languages", "bonus_skills", "interests", "competences",
+        "life_pace", "household_composition",
         "min_stay_duration", "preferred_frequency", "min_notice", "preferred_periods", "preferred_environments",
         // Step 3 — Animaux (étaient dans le formulaire mais perdus à la sauvegarde)
         "dog_sizes_accepted", "demanding_breeds_ok", "indoor_cats_only", "own_animals", "guard_experience",
