@@ -117,8 +117,9 @@ export default function PublicListings() {
 
   const jsonld = itemListLd ? [...BASE_JSONLD, itemListLd] : BASE_JSONLD;
   const intlLabel = t("public_listings.intl_count", { count: intlCount, defaultValue: `${intlCount} listings outside France` });
+  const cityWord = citiesCount > 1 ? "villes" : "ville";
   const eyebrowDynamic = openCount > 0 && citiesCount > 0
-    ? t("public_listings.eyebrow_stats", { count: openCount, cities: citiesCount, defaultValue: `${openCount} annonces ouvertes · ${citiesCount} villes` })
+    ? t("public_listings.eyebrow_stats", { count: openCount, cities: `${citiesCount} ${cityWord}`, defaultValue: `${openCount} annonces ouvertes · ${citiesCount} ${cityWord}` })
     : t("public_listings.eyebrow");
 
   return (
