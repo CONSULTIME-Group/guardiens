@@ -5,6 +5,14 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
+
+const fallbackImageFor = (city: string | null): string | null => {
+  if (!city) return null;
+  const c = city.toUpperCase();
+  if (c.includes("MARRAKECH") || c.includes("MARRAKESH")) return fallbackMarrakech;
+  return null;
+};
 
 interface LiveSit {
   id: string;
@@ -117,7 +125,7 @@ const LiveListingsSection: React.FC = () => {
 
         <div className={`grid grid-cols-1 sm:grid-cols-2 gap-5 ${sits.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3 max-w-5xl mx-auto"}`}>
           {sits.map((s) => {
-            const photo = s.cover_photo_url || s.first_photo;
+            const photo = s.cover_photo_url || s.first_photo || fallbackImageFor(s.city);
             const dates =
               s.start_date && s.end_date
                 ? `${formatDateShort(s.start_date)} → ${formatDateShort(s.end_date)}`
