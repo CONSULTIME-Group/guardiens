@@ -189,24 +189,6 @@ const SitDetail = () => {
     backfillOwnerGalleryDimensions(user.id);
   }, [user, sit]);
 
-  // Enregistre une vue par annonce dans analytics_events (event_type='sit_view').
-  // Dédup par session : 1 vue par sit / session. Skip propriétaire (non comptabilisé).
-  // Alimente get_sit_views_count (owner dashboard) + admin_get_listings_stats.
-  useEffect(() => {
-    if (!id || !sit) return;
-    if (user && user.id === (sit as any).user_id) return;
-    try {
-      const key = `sit_view_${id}`;
-      if (sessionStorage.getItem(key)) return;
-      sessionStorage.setItem(key, "1");
-      trackEvent("sit_view", {
-        source: "/annonces/" + id,
-        metadata: { sit_id: id },
-      });
-    } catch {
-      // best-effort, jamais bloquant
-    }
-  }, [id, sit, user]);
 
 
   if (loading) return <SitDetailSkeleton />;
