@@ -697,7 +697,7 @@ const Landing = () => {
 
 
       {/* ═══════════════ SECTION 2, CE QU'ON FAIT ENSEMBLE ═══════════════ */}
-      <section id="usages" className="py-10 md:py-32 bg-background scroll-mt-24">
+      <section id="usages" className="py-10 md:py-20 bg-background scroll-mt-24">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
@@ -779,7 +779,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 2bis, CE QUI ARRIVE EN PLUS ═══════════════ */}
-      <section id="rencontre" className="py-10 md:py-32 bg-accent/40 border-y border-accent scroll-mt-24">
+      <section id="rencontre" className="py-10 md:py-20 bg-accent/40 border-y border-accent scroll-mt-24">
         <div className="max-w-3xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/70 font-body mb-6 block text-center">
@@ -805,7 +805,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 3, COMMENT ÇA MARCHE ═══════════════ */}
-      <section id="comment-ca-marche" className="py-10 md:py-32 bg-muted/30 scroll-mt-24">
+      <section id="comment-ca-marche" className="py-10 md:py-20 bg-muted/30 scroll-mt-24">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
@@ -916,7 +916,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 4, OSEZ L'ENTRAIDE ═══════════════ */}
-      <section id="entraide" className="py-10 md:py-32 bg-accent scroll-mt-24">
+      <section id="entraide" className="py-10 md:py-20 bg-accent scroll-mt-24">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
@@ -1020,7 +1020,7 @@ const Landing = () => {
       </RevealSection>
 
       {/* ═══════════════ SECTION 6, CONFIANCE & PÉRIMÈTRE ═══════════════ */}
-      <section id="confiance" className="bg-background py-10 md:py-32 scroll-mt-24" aria-labelledby="trust-heading">
+      <section id="confiance" className="bg-background py-10 md:py-20 scroll-mt-24" aria-labelledby="trust-heading">
         <div className="max-w-6xl mx-auto px-5 sm:px-6">
           <RevealSection className="text-center max-w-3xl mx-auto mb-8 md:mb-16">
             <p className="text-xs md:text-[13px] tracking-[0.2em] uppercase text-primary font-body font-medium">
@@ -1092,7 +1092,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 7, TÉMOIGNAGES ═══════════════ */}
-      <section id="temoignages" className="py-10 md:py-32 bg-background scroll-mt-24">
+      <section id="temoignages" className="py-10 md:py-20 bg-background scroll-mt-24">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
             <h2 id="ils-ont-ose" className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug scroll-mt-24">
@@ -1182,7 +1182,7 @@ const Landing = () => {
 
       {/* ═══════════════ SECTION 8, NOTRE HISTOIRE ═══════════════ */}
       <section id="notre-histoire" className="bg-muted/30 scroll-mt-24">
-        <div className="max-w-6xl mx-auto px-6 py-10 md:py-32">
+        <div className="max-w-6xl mx-auto px-6 py-10 md:py-20">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
               {t("landing.story.eyebrow")}
@@ -1244,7 +1244,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 9, GUIDES + VILLES (fusion SEO) ═══════════════ */}
-      <section id="guides-villes" className="py-10 md:py-32 bg-background scroll-mt-24">
+      <section id="guides-villes" className="py-10 md:py-20 bg-background scroll-mt-24">
         <div className="max-w-6xl mx-auto px-6">
           <RevealSection className="text-center mb-14">
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
@@ -1434,7 +1434,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 9bis, FAQ (section dédiée, miroir du JSON-LD FAQPage) ═══════════════ */}
-      <section id="faq" className="py-10 md:py-32 bg-background scroll-mt-24" aria-labelledby="faq-heading">
+      <section id="faq" className="py-10 md:py-20 bg-background scroll-mt-24" aria-labelledby="faq-heading">
         <div className="max-w-3xl mx-auto px-[5%] md:px-[8%]">
           <RevealSection>
             <h2 id="faq-heading" className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center mb-10 scroll-mt-24">
@@ -1457,7 +1457,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 10, CTA FINAL (fusion Fondateur + double CTA) ═══════════════ */}
-      <section id="commencer" className="py-10 md:py-32 bg-primary scroll-mt-24">
+      <section id="commencer" className="py-10 md:py-20 bg-primary scroll-mt-24">
         <RevealSection className="max-w-2xl mx-auto px-6 text-center">
           <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-6 bg-white/15 border border-white/30">
             <span className="font-body text-xs text-white uppercase tracking-widest">{t("landing.final.badge_program")}</span>
