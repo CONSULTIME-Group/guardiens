@@ -19,7 +19,6 @@ import OwnerSitView from "@/components/sits/views/OwnerSitView";
 import SitterSitView from "@/components/sits/views/SitterSitView";
 import { useSitRealtime } from "@/components/sits/views/useSitRealtime";
 import { backfillOwnerGalleryDimensions } from "@/lib/backfillGalleryDimensions";
-import { trackEvent } from "@/lib/analytics";
 import type { SitData } from "@/components/sits/views/types";
 
 const SitDetail = () => {
