@@ -188,31 +188,6 @@ const SitDetail = () => {
     backfillOwnerGalleryDimensions(user.id);
   }, [user, sit]);
 
-  // Enregistre une vue par annonce (dédup par session : 1 vue par sit / session).
-  // Skip si propriétaire (pas comptabilisé), si pas d'id, ou si déjà compté
-  // dans cette session.
-  useEffect(() => {
-    if (!id || !sit) return;
-    if (user && user.id === (sit as any).user_id) return;
-    try {
-      const key = `sit_view_${id}`;
-      if (sessionStorage.getItem(key)) return;
-      sessionStorage.setItem(key, "1");
-      let sessionId = localStorage.getItem("sv_session_id");
-      if (!sessionId) {
-        sessionId = crypto.randomUUID();
-        localStorage.setItem("sv_session_id", sessionId);
-      }
-      void (supabase.rpc as any)("record_sit_view", {
-        p_sit_id: id,
-        p_session_id: sessionId,
-        p_referrer: document.referrer || null,
-        p_user_agent: navigator.userAgent || null,
-      });
-    } catch {
-      // best-effort, jamais bloquant
-    }
-  }, [id, sit, user]);
 
 
   if (loading) return <SitDetailSkeleton />;

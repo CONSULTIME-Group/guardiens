@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, Globe2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 
 interface IntlSit {
   id: string;
@@ -65,7 +66,12 @@ const InternationalShowcase = () => {
       <div className="-mx-4 md:mx-0 overflow-x-auto md:overflow-visible pb-2 md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <ul className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 md:px-0">
           {sits.slice(0, 3).map((s) => {
-            const cover = s.cover_photo_url || s.property?.photos?.[0] || null;
+            const city = (s.city || "").toUpperCase();
+            const country = (s.country || "").toUpperCase();
+            const isMarrakech =
+              city.includes("MARRAKECH") || city.includes("MARRAKESH") ||
+              country === "MAROC" || country === "MOROCCO";
+            const cover = s.cover_photo_url || s.property?.photos?.[0] || (isMarrakech ? fallbackMarrakech : null);
             return (
               <li key={s.id} className="shrink-0 w-[78vw] sm:w-[60vw] md:w-auto">
                 <Link
