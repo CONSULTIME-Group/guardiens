@@ -142,17 +142,17 @@ export default function PublicListings() {
       <PublicHeader />
 
       <main id="main-content" className="flex-1 min-w-0" role="main">
-        <section className="max-w-6xl mx-auto px-4 md:px-6 pt-5 md:pt-10 pb-3 md:pb-6">
-          <p className="hidden md:block text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
-            {t("public_listings.eyebrow")}
+        <section className="max-w-6xl mx-auto px-4 md:px-6 pt-4 md:pt-7 pb-3 md:pb-5">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-2 md:mb-3">
+            {eyebrowDynamic}
           </p>
           <h1 className="font-heading text-3xl md:text-4xl lg:text-5xl font-medium leading-tight text-foreground tracking-tight max-w-3xl">
             {t("public_listings.h1")}
           </h1>
-          <p className="mt-4 text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
-            {t("public_listings.subtitle")}
+          <p className="mt-3 text-sm md:text-base text-muted-foreground max-w-2xl leading-relaxed">
+            {t("public_listings.subtitle_short")}
           </p>
-          <nav aria-label={t("public_listings.see_also_missions")} className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+          <nav aria-label="Liens annexes" className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
             <Link
               to="/petites-missions"
               className="inline-flex items-center gap-1.5 text-primary font-semibold hover:underline underline-offset-4"
@@ -176,11 +176,13 @@ export default function PublicListings() {
           {intlCount > 0 && (
             <Link
               to="/annonces/international"
-              className="mt-5 inline-flex items-center gap-2.5 rounded-full bg-accent/40 hover:bg-accent/60 border border-border px-4 py-2 text-sm transition-colors group"
+              className="mt-4 inline-flex items-center gap-2.5 rounded-full bg-accent/40 hover:bg-accent/60 border border-border px-4 py-2 text-sm transition-colors group"
               aria-label={intlLabel}
             >
               <span className="relative flex h-2.5 w-2.5 shrink-0" aria-hidden="true">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping" />
+                {intlCount >= 3 && (
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping" />
+                )}
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary" />
               </span>
               <span className="text-foreground">{intlLabel}</span>
@@ -188,8 +190,6 @@ export default function PublicListings() {
             </Link>
           )}
         </section>
-
-        <InternationalShowcase />
 
         <Suspense
           fallback={
@@ -201,6 +201,27 @@ export default function PublicListings() {
         >
           <SearchSitter />
         </Suspense>
+
+        <InternationalShowcase />
+
+        <section aria-labelledby="become-sitter-title" className="max-w-6xl mx-auto px-4 md:px-6 mt-6 md:mt-10">
+          <div className="rounded-2xl border border-border bg-accent/30 px-5 py-5 md:px-7 md:py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="min-w-0">
+              <h2 id="become-sitter-title" className="font-heading text-lg md:text-xl font-medium text-foreground">
+                {t("public_listings.become_sitter_title")}
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {t("public_listings.become_sitter_body")}
+              </p>
+            </div>
+            <Link
+              to="/devenir-gardien"
+              className="shrink-0 inline-flex items-center justify-center gap-1.5 rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity"
+            >
+              {t("public_listings.become_sitter_cta")} <span aria-hidden>→</span>
+            </Link>
+          </div>
+        </section>
 
         <section className="border-t border-border/60 mt-8 md:mt-12">
           <div className="max-w-6xl mx-auto px-4 md:px-6 py-5 md:py-10">
