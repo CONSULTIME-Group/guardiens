@@ -966,7 +966,11 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  ? `${resultCount} membre${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""}`
  : resultCount === 0 && demoCount > 0
  ? "Aucune annonce réelle pour le moment"
- : `${resultCount} annonce${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""} près de vous`;
+ : resultCount === 0
+ ? (city ? `Aucune annonce ouverte près de ${city}` : "Aucune annonce ouverte sur ce périmètre")
+ : city
+ ? `${resultCount} annonce${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""} près de vous`
+ : `${resultCount} annonce${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""} en France`;
 
  // ─── Pill style ───
  const pillClass = "snap-start flex items-center gap-2 px-4 py-2 min-h-11 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap shrink-0";
