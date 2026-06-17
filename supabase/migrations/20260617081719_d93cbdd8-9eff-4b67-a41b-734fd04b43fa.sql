@@ -1,0 +1,1 @@
+UPDATE articles SET cover_image_url = '/__l5e/assets-v1/54b0f501-2f50-4efc-8217-97618a8e6d0c/devenir-gardien-pro-guide-complet.jpg' WHERE id = 'db4b6975-6eec-45aa-9bab-2083780faa0e';
