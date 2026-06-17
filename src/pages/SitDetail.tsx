@@ -19,7 +19,22 @@ import OwnerSitView from "@/components/sits/views/OwnerSitView";
 import SitterSitView from "@/components/sits/views/SitterSitView";
 import { useSitRealtime } from "@/components/sits/views/useSitRealtime";
 import { backfillOwnerGalleryDimensions } from "@/lib/backfillGalleryDimensions";
+import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 import type { SitData } from "@/components/sits/views/types";
+
+/**
+ * Photo d'ambiance par défaut quand la propriété n'a aucune photo en base.
+ * Évite que la fiche détail soit visuellement vide (cohérent avec
+ * LiveListingsStrip côté landing).
+ */
+const fallbackImageForGeo = (city: string | null, country: string | null): string | null => {
+  const c = (city || "").toUpperCase();
+  const co = (country || "").toUpperCase();
+  if (c.includes("MARRAKECH") || c.includes("MARRAKESH") || co === "MAROC" || co === "MOROCCO") {
+    return fallbackMarrakech;
+  }
+  return null;
+};
 
 const SitDetail = () => {
   const { id } = useParams<{ id: string }>();
