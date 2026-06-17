@@ -19,7 +19,22 @@ import OwnerSitView from "@/components/sits/views/OwnerSitView";
 import SitterSitView from "@/components/sits/views/SitterSitView";
 import { useSitRealtime } from "@/components/sits/views/useSitRealtime";
 import { backfillOwnerGalleryDimensions } from "@/lib/backfillGalleryDimensions";
+import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 import type { SitData } from "@/components/sits/views/types";
+
+/**
+ * Photo d'ambiance par défaut quand la propriété n'a aucune photo en base.
+ * Évite que la fiche détail soit visuellement vide (cohérent avec
+ * LiveListingsStrip côté landing).
+ */
+const fallbackImageForGeo = (city: string | null, country: string | null): string | null => {
+  const c = (city || "").toUpperCase();
+  const co = (country || "").toUpperCase();
+  if (c.includes("MARRAKECH") || c.includes("MARRAKESH") || co === "MAROC" || co === "MOROCCO") {
+    return fallbackMarrakech;
+  }
+  return null;
+};
 
 const SitDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -97,9 +112,23 @@ const SitDetail = () => {
       const ownerProfileData = ownerProfRes.data?.[0] ?? null;
 
       // Injecter les photos owner_gallery dans property pour le hero.
+      // Fallback géo : si aucune photo (owner_gallery + property.photos vides),
+      // on injecte une photo d'ambiance par ville/pays (ex: Marrakech) pour
+      // ne pas afficher une fiche détail vide. Symétrique au LiveListingsStrip.
       const galleryUrls = (galleryRes.data || []).map((g: any) => g.photo_url).filter(Boolean);
+      const existingPhotos = (propertyData as any)?.photos || [];
+      const mergedPhotos = galleryUrls.length > 0 ? galleryUrls : existingPhotos;
+      const sitCityRaw = (sitData as any)?.city || null;
+      const sitCountryRaw = (sitData as any)?.country || null;
+      const fallbackPhoto = mergedPhotos.length === 0 && !propertyData?.cover_photo_url
+        ? fallbackImageForGeo(sitCityRaw, sitCountryRaw)
+        : null;
       const enrichedProperty = propertyData
-        ? { ...propertyData, photos: galleryUrls.length > 0 ? galleryUrls : (propertyData as any).photos }
+        ? {
+            ...propertyData,
+            photos: mergedPhotos.length > 0 ? mergedPhotos : (fallbackPhoto ? [fallbackPhoto] : existingPhotos),
+            cover_photo_url: propertyData.cover_photo_url || fallbackPhoto || null,
+          }
         : propertyData;
 
       // Override : la ville/pays de l'annonce priment sur le profil (résidence secondaire, étranger).
