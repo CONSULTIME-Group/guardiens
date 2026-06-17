@@ -1051,7 +1051,11 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  </div>
  )}
 
- {/* Catégories partagées (Gardes + Missions) */}
+ {/* Catégories partagées (Gardes + Missions)
+     Masquées en mode public sur l'onglet sits : ces catégories
+     ("Maison / Jardins / Bricolage / Animaux") sont pensées pour les
+     missions, pas pour les annonces de garde où elles induisent en erreur. */}
+ {!(isPublic && tab === "sits") && (
  <div className="px-6 pt-3">
  <div className="flex flex-wrap gap-2">
 				{([
@@ -1098,9 +1102,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  ))}
  </div>
  </div>
-
-
- {/* Réassurance périmètre, visible avant la barre de recherche */}
+ )}
  <div className="px-6 pt-4">
  <ReachReassuranceBanner
  variant="inline"
