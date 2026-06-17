@@ -4062,44 +4062,6 @@ export type Database = {
           },
         ]
       }
-      sit_views: {
-        Row: {
-          created_at: string
-          id: string
-          referrer: string | null
-          session_id: string | null
-          sit_id: string
-          user_agent: string | null
-          viewer_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          referrer?: string | null
-          session_id?: string | null
-          sit_id: string
-          user_agent?: string | null
-          viewer_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          referrer?: string | null
-          session_id?: string | null
-          sit_id?: string
-          user_agent?: string | null
-          viewer_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sit_views_sit_id_fkey"
-            columns: ["sit_id"]
-            isOneToOne: false
-            referencedRelation: "sits"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       sits: {
         Row: {
           accepting_applications: boolean
@@ -5091,23 +5053,6 @@ export type Database = {
         }
         Relationships: []
       }
-      sit_view_counts: {
-        Row: {
-          sit_id: string | null
-          views_30d: number | null
-          views_7d: number | null
-          views_total: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sit_views_sit_id_fkey"
-            columns: ["sit_id"]
-            isOneToOne: false
-            referencedRelation: "sits"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Functions: {
       accept_garde_accord: {
@@ -5642,15 +5587,6 @@ export type Database = {
       }
       recalculate_completed_sits: {
         Args: { p_user_id: string }
-        Returns: undefined
-      }
-      record_sit_view: {
-        Args: {
-          p_referrer?: string
-          p_session_id?: string
-          p_sit_id: string
-          p_user_agent?: string
-        }
         Returns: undefined
       }
       refresh_all_sitter_reply_stats: { Args: never; Returns: number }
