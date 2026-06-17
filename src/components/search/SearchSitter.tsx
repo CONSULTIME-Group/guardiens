@@ -711,6 +711,11 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  );
 
  let final = enriched.filter(Boolean);
+ // Public /annonces : on masque les annonces passées/attribuées/terminées
+ // pour ne montrer QUE les annonces réellement ouvertes à candidature.
+ if (isPublic) {
+  final = final.filter((item: any) => !item.isPast && !item.isAssigned && !item.isCompleted);
+ }
  // Environment filter (using resolved environments with fallback)
  if (environments.length > 0) {
  final = final.filter((item: any) => {
