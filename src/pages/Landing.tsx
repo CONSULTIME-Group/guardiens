@@ -1502,8 +1502,8 @@ const Landing = () => {
       {/* Hero animation keyframes */}
       <style>{`
         @keyframes heroFadeUp {
-          from { opacity: 0; transform: translateY(16px); }
-          to { opacity: 1; transform: translateY(0); }
+          from { opacity: 0; transform: translate3d(0, 6px, 0); }
+          to { opacity: 1; transform: translate3d(0, 0, 0); }
         }
         .animate-hero-fade-up { animation: heroFadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
         .animation-delay-400 { animation-delay: 0.08s; }
