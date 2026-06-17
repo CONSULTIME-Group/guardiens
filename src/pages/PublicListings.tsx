@@ -121,10 +121,14 @@ export default function PublicListings() {
 
   const jsonld = itemListLd ? [...BASE_JSONLD, itemListLd] : BASE_JSONLD;
   const intlLabel = t("public_listings.intl_count", { count: intlCount, defaultValue: `${intlCount} listings outside France` });
-  const cityWord = citiesCount > 1 ? "villes" : "ville";
-  const eyebrowDynamic = openCount > 0 && citiesCount > 0
-    ? t("public_listings.eyebrow_stats", { count: openCount, cities: `${citiesCount} ${cityWord}`, defaultValue: `${openCount} annonces ouvertes · ${citiesCount} ${cityWord}` })
+  // Eyebrow : on n'affiche le compteur de villes que s'il a un signal réel
+  // (>= 2). « 1 ville » est un faux signal qui décrédibilise la promesse.
+  const eyebrowDynamic = openCount > 0
+    ? citiesCount >= 2
+      ? `${openCount} annonces ouvertes · ${citiesCount} villes · mise à jour quotidienne`
+      : `${openCount} annonce${openCount > 1 ? "s" : ""} ouverte${openCount > 1 ? "s" : ""} · mise à jour quotidienne`
     : t("public_listings.eyebrow");
+
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -244,56 +248,10 @@ export default function PublicListings() {
           </div>
         </section>
 
-        <section aria-labelledby="explore-title" className="border-t border-border/60 mt-8 md:mt-12">
-          <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-10">
-            <h2 id="explore-title" className="font-heading text-xl font-medium text-foreground mb-5">
-              Explorer les annonces autrement
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 text-sm">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mb-3">Par ville</p>
-                <ul className="space-y-1.5">
-                  <li><Link to="/house-sitting/lyon" className="text-foreground hover:text-primary transition-colors">House-sitting à Lyon</Link></li>
-                  <li><Link to="/house-sitting/annecy" className="text-foreground hover:text-primary transition-colors">House-sitting à Annecy</Link></li>
-                  <li><Link to="/house-sitting/grenoble" className="text-foreground hover:text-primary transition-colors">House-sitting à Grenoble</Link></li>
-                  <li><Link to="/house-sitting/chambery" className="text-foreground hover:text-primary transition-colors">House-sitting à Chambéry</Link></li>
-                  <li><Link to="/annonces/international" className="text-muted-foreground hover:text-foreground transition-colors">Annonces hors France →</Link></li>
-                </ul>
-              </div>
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mb-3">À découvrir</p>
-                <ul className="space-y-1.5">
-                  <li>
-                    <Link to="/petites-missions" className="text-foreground hover:text-primary transition-colors">
-                      {t("public_listings.explore_missions")}
-                    </Link>
-                    <span className="text-muted-foreground">{t("public_listings.explore_missions_desc")}</span>
-                  </li>
-                  <li>
-                    <Link to="/guides-locaux" className="text-foreground hover:text-primary transition-colors">
-                      {t("public_listings.local_guides")}
-                    </Link>
-                    <span className="text-muted-foreground">{t("public_listings.explore_guides_desc")}</span>
-                  </li>
-                  <li>
-                    <Link to="/tarifs" className="text-foreground hover:text-primary transition-colors">
-                      {t("public_listings.explore_pricing")}
-                    </Link>
-                    <span className="text-muted-foreground">, gratuit jusqu'au 14 juillet 2026</span>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mb-3">Côté gardien</p>
-                <ul className="space-y-1.5">
-                  <li><Link to="/devenir-home-sitter" className="text-foreground hover:text-primary transition-colors">Devenir gardien</Link></li>
-                  <li><Link to="/c-est-quoi-le-house-sitting" className="text-foreground hover:text-primary transition-colors">C'est quoi le house-sitting ?</Link></li>
-                  <li><Link to="/articles" className="text-foreground hover:text-primary transition-colors">Le journal</Link></li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Section « Explorer » supprimée : ses 3 colonnes étaient l'exact
+            doublon du footer (House-sitting par ville, Ressources, Guides).
+            Le footer fait déjà tout le maillage SEO. */}
+
       </main>
 
       <PublicFooter />
