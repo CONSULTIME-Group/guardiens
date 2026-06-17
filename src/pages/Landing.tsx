@@ -1466,7 +1466,7 @@ const Landing = () => {
                 </ul>
                 <div className="mt-6 pt-6 border-t border-border flex flex-col sm:flex-row gap-3 items-start">
                   <Button asChild variant="outline" size="sm" className="rounded-full">
-                    <Link to="/house-sitting">Toutes les villes</Link>
+                    <Link to="/annonces">Voir toutes les annonces</Link>
                   </Button>
                   <p className="text-xs text-foreground/60 leading-relaxed flex-1">
                     {t("landing.cities.cities_footer")}
