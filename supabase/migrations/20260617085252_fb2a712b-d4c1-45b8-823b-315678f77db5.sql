@@ -1,0 +1,1 @@
+ALTER VIEW public.sit_view_counts SET (security_invoker = true);
