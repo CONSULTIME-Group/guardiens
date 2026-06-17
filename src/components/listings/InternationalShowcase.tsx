@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, Globe2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 
 interface IntlSit {
   id: string;
