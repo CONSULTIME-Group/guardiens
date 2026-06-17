@@ -1,0 +1,1 @@
+UPDATE articles SET cover_image_url = '/__l5e/assets-v1/fbd97ce3-5a8b-421c-8b85-889efefcd654/petites-missions-entraide-comment-ca-marche.jpg' WHERE id = '6ea0dd2c-64f5-48e2-ab78-ce8ab20b8e4f';
