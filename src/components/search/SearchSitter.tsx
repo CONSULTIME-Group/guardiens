@@ -68,7 +68,20 @@ type HousingFilter = "all" | "house" | "apartment" | "farm";
 type ExperienceFilter = "all" | "1" | "3";
 type ZoneMode = "radius" | "dept" | "region" | "france";
 
-const SearchSitter = () => {
+interface SearchSitterProps {
+  /**
+   * "internal" (par défaut) = expérience dashboard sitter complète (onglets
+   * Annonces/Coup de main, catégories partagées, démos, bandeaux découverte,
+   * affichage des annonces passées en grisé).
+   * "public" = page /annonces : un seul onglet Annonces, pas de catégories
+   * missions, pas de démos, pas de SitterDiscoveryBanner (redondant avec
+   * OutOfZoneBanner), annonces passées masquées.
+   */
+  mode?: "internal" | "public";
+}
+
+const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
+  const isPublic = mode === "public";
  const { user } = useAuth();
  const { hasAccess } = useSubscriptionAccess();
  const isMobile = useIsMobile();
