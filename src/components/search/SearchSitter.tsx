@@ -1807,7 +1807,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     />
   ) : (
   <>
-    {tab === "sits" && (
+    {!isPublic && tab === "sits" && (
       <SitterDiscoveryBanner
         totalFrance={densityCounts.france}
         totalRadius={densityCounts.radius}
