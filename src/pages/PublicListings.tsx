@@ -10,6 +10,7 @@ import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { supabase } from "@/integrations/supabase/client";
+import InternationalShowcase from "@/components/listings/InternationalShowcase";
 
 const SearchSitter = lazyWithRetry(
   () => import("@/components/search/SearchSitter"),
@@ -161,6 +162,8 @@ export default function PublicListings() {
             </Link>
           )}
         </section>
+
+        <InternationalShowcase />
 
         <Suspense
           fallback={
