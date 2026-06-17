@@ -150,10 +150,10 @@ export default function PublicListings() {
           <h1 className="font-heading text-3xl md:text-4xl lg:text-5xl font-medium leading-tight text-foreground tracking-tight max-w-3xl">
             {t("public_listings.h1")}
           </h1>
-          <p className="mt-3 text-sm md:text-base text-muted-foreground max-w-2xl leading-relaxed">
+          <p className="hidden md:block mt-3 text-sm md:text-base text-muted-foreground max-w-2xl leading-relaxed">
             {t("public_listings.subtitle_short")}
           </p>
-          <nav aria-label="Liens annexes" className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+          <nav aria-label="Liens annexes" className="hidden md:flex mt-4 flex-wrap items-center gap-x-5 gap-y-2 text-sm">
             <Link
               to="/petites-missions"
               className="inline-flex items-center gap-1.5 text-primary font-semibold hover:underline underline-offset-4"
