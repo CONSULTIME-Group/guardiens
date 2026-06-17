@@ -252,24 +252,26 @@ const SmallMissionsPublic = () => {
 
 
  {/* ── Social proof KPIs ── */}
- {(kpiMissions > 0 || kpiHelpers > 0) && (
- <Reveal delay={0.4}>
- <div className="flex justify-center gap-12 mt-10 pt-8 border-t border-border">
- {kpiMissions > 0 && (
- <div className="text-center">
- <span className="block text-3xl font-heading font-bold text-foreground">{kpiMissions}</span>
- <span className="text-xs text-muted-foreground tracking-wide uppercase">missions réalisées</span>
- </div>
- )}
- {kpiHelpers > 0 && (
- <div className="text-center">
- <span className="block text-3xl font-heading font-bold text-foreground">{kpiHelpers}</span>
- <span className="text-xs text-muted-foreground tracking-wide uppercase">membres actifs</span>
- </div>
- )}
- </div>
- </Reveal>
- )}
+  {/* KPI : on masque "missions réalisées" tant que < 20 (signal de vide sinon).
+       Le seuil applique le pattern offsets fondateurs sans surinterprétation. */}
+  {(kpiMissions >= 20 || kpiHelpers > 0) && (
+  <Reveal delay={0.4}>
+  <div className="flex justify-center gap-12 mt-10 pt-8 border-t border-border">
+  {kpiMissions >= 20 && (
+  <div className="text-center">
+  <span className="block text-3xl font-heading font-bold text-foreground">{kpiMissions}</span>
+  <span className="text-xs text-muted-foreground tracking-wide uppercase">missions réalisées</span>
+  </div>
+  )}
+  {kpiHelpers > 0 && (
+  <div className="text-center">
+  <span className="block text-3xl font-heading font-bold text-foreground">{kpiHelpers}</span>
+  <span className="text-xs text-muted-foreground tracking-wide uppercase">membres actifs</span>
+  </div>
+  )}
+  </div>
+  </Reveal>
+  )}
 
  {/* Réassurance périmètre, promesse mondiale, pas régionale */}
  <Reveal delay={0.45}>
