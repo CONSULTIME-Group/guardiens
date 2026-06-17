@@ -200,7 +200,7 @@ export default function PublicListings() {
             </div>
           }
         >
-          <SearchSitter />
+          <SearchSitter mode="public" />
         </Suspense>
 
         <InternationalShowcase />
