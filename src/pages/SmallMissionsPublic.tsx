@@ -214,7 +214,7 @@ const SmallMissionsPublic = () => {
   <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground leading-tight max-w-2xl mx-auto">
  Un coup de main, près de chez vous.
  </h1>
- <p className="font-heading text-lg md:text-xl italic text-foreground/70 mt-4 max-w-lg mx-auto">
+ <p className="font-body text-base md:text-lg text-foreground/70 mt-4 max-w-lg mx-auto leading-relaxed">
  Gratuit, sans engagement. Publiez une demande ou proposez votre aide.
  </p>
  </Reveal>
