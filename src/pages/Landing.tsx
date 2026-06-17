@@ -671,7 +671,6 @@ const Landing = () => {
         className="border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
       >
         <div className="max-w-6xl mx-auto px-6">
-          <h2 className="sr-only">{t("landing.toc.title")}</h2>
           <ul className="flex items-center gap-1 overflow-x-auto scrollbar-none py-2.5 -mx-2 px-2">
             {[
               { href: "#usages", label: t("landing.toc.care_aid") },
