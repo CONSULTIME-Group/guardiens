@@ -23,6 +23,8 @@ export default function PublicListings() {
   const { t, i18n } = useTranslation();
   const [itemListLd, setItemListLd] = useState<any | null>(null);
   const [intlCount, setIntlCount] = useState<number>(0);
+  const [openCount, setOpenCount] = useState<number>(0);
+  const [citiesCount, setCitiesCount] = useState<number>(0);
 
   const TITLE = t("public_listings.meta_title");
   const DESCRIPTION = t("public_listings.meta_description");
@@ -64,6 +66,27 @@ export default function PublicListings() {
     return () => { cancelled = true; };
   }, []);
 
+  // Proof number hero : nombre d'annonces ouvertes + nombre de villes distinctes.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, count } = await supabase
+        .from("sits")
+        .select("city", { count: "exact" })
+        .eq("status", "published")
+        .eq("accepting_applications", true);
+      if (cancelled) return;
+      setOpenCount(count || 0);
+      const cities = new Set(
+        (data || [])
+          .map((r: any) => (r.city || "").trim().toLowerCase())
+          .filter(Boolean),
+      );
+      setCitiesCount(cities.size);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   // ItemList JSON-LD pour Google
   useEffect(() => {
     let cancelled = false;
@@ -94,6 +117,9 @@ export default function PublicListings() {
 
   const jsonld = itemListLd ? [...BASE_JSONLD, itemListLd] : BASE_JSONLD;
   const intlLabel = t("public_listings.intl_count", { count: intlCount, defaultValue: `${intlCount} listings outside France` });
+  const eyebrowDynamic = openCount > 0 && citiesCount > 0
+    ? t("public_listings.eyebrow_stats", { count: openCount, cities: citiesCount, defaultValue: `${openCount} annonces ouvertes · ${citiesCount} villes` })
+    : t("public_listings.eyebrow");
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
