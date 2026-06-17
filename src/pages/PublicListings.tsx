@@ -147,51 +147,67 @@ export default function PublicListings() {
       <PublicHeader />
 
       <main id="main-content" className="flex-1 min-w-0" role="main">
-        <section className="max-w-6xl mx-auto px-4 md:px-6 pt-4 md:pt-7 pb-3 md:pb-5">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-2 md:mb-3">
+        <section className="max-w-6xl mx-auto px-4 md:px-6 pt-3 md:pt-5 pb-2 md:pb-3">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-1.5 md:mb-2">
             {eyebrowDynamic}
           </p>
-          <h1 className="font-heading text-3xl md:text-4xl lg:text-5xl font-medium leading-tight text-foreground tracking-tight max-w-3xl">
-            {t("public_listings.h1")}
-          </h1>
-          <p className="hidden md:block mt-3 text-sm md:text-base text-muted-foreground max-w-2xl leading-relaxed">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 md:gap-6">
+            <h1 className="font-heading text-2xl md:text-3xl lg:text-4xl font-medium leading-tight text-foreground tracking-tight max-w-3xl">
+              {t("public_listings.h1")}
+            </h1>
+            <nav aria-label="Liens annexes" className="hidden md:flex flex-wrap items-center gap-x-4 gap-y-1 text-sm shrink-0">
+              <Link
+                to="/petites-missions"
+                className="inline-flex items-center gap-1.5 text-primary font-semibold hover:underline underline-offset-4"
+              >
+                {t("public_listings.see_also_missions")} <span aria-hidden>→</span>
+              </Link>
+              <Link
+                to="/guides-locaux"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {t("public_listings.local_guides")}
+              </Link>
+              <Link
+                to="/tarifs"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {t("public_listings.pricing")}
+              </Link>
+              {intlCount > 0 && (
+                <Link
+                  to="/annonces/international"
+                  className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={intlLabel}
+                >
+                  <span className="relative flex h-2 w-2 shrink-0" aria-hidden="true">
+                    {intlCount >= 3 && (
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping" />
+                    )}
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+                  </span>
+                  {intlLabel}
+                </Link>
+              )}
+            </nav>
+          </div>
+          <p className="hidden md:block mt-2 text-sm text-muted-foreground max-w-2xl leading-relaxed">
             {t("public_listings.subtitle_short")}
           </p>
-          <nav aria-label="Liens annexes" className="hidden md:flex mt-4 flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-            <Link
-              to="/petites-missions"
-              className="inline-flex items-center gap-1.5 text-primary font-semibold hover:underline underline-offset-4"
-            >
-              {t("public_listings.see_also_missions")} <span aria-hidden>→</span>
-            </Link>
-            <Link
-              to="/guides-locaux"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {t("public_listings.local_guides")}
-            </Link>
-            <Link
-              to="/tarifs"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {t("public_listings.pricing")}
-            </Link>
-          </nav>
-
           {intlCount > 0 && (
             <Link
               to="/annonces/international"
-              className="mt-4 inline-flex items-center gap-2.5 rounded-full bg-accent/40 hover:bg-accent/60 border border-border px-4 py-2 text-sm transition-colors group"
+              className="md:hidden mt-3 inline-flex items-center gap-2 rounded-full bg-accent/40 hover:bg-accent/60 border border-border px-3 py-1.5 text-xs transition-colors"
               aria-label={intlLabel}
             >
-              <span className="relative flex h-2.5 w-2.5 shrink-0" aria-hidden="true">
+              <span className="relative flex h-2 w-2 shrink-0" aria-hidden="true">
                 {intlCount >= 3 && (
                   <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping" />
                 )}
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
               </span>
               <span className="text-foreground">{intlLabel}</span>
-              <span className="text-muted-foreground group-hover:text-foreground transition-colors" aria-hidden>→</span>
+              <span className="text-muted-foreground" aria-hidden>→</span>
             </Link>
           )}
         </section>
