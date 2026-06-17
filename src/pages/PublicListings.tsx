@@ -151,15 +151,15 @@ export default function PublicListings() {
       <PublicHeader />
 
       <main id="main-content" className="flex-1 min-w-0" role="main">
-        <section className="max-w-6xl mx-auto px-4 md:px-6 pt-3 md:pt-5 pb-2 md:pb-3">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-1.5 md:mb-2">
+        <section className="max-w-6xl mx-auto px-4 md:px-6 pt-8 md:pt-14 pb-5 md:pb-8">
+          <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 mb-4 md:mb-5">
             {eyebrowDynamic}
           </p>
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 md:gap-6">
-            <h1 className="font-heading text-2xl md:text-3xl lg:text-4xl font-medium leading-tight text-foreground tracking-tight max-w-3xl">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 md:gap-8">
+            <h1 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-foreground tracking-tight max-w-3xl">
               {t("public_listings.h1")}
             </h1>
-            <nav aria-label="Liens annexes" className="hidden md:flex flex-wrap items-center gap-x-4 gap-y-1 text-sm shrink-0">
+            <nav aria-label="Liens annexes" className="hidden md:flex flex-wrap items-center gap-x-5 gap-y-1 text-sm shrink-0">
               <Link
                 to="/petites-missions"
                 className="inline-flex items-center gap-1.5 text-primary font-semibold hover:underline underline-offset-4"
@@ -195,13 +195,13 @@ export default function PublicListings() {
               )}
             </nav>
           </div>
-          <p className="hidden md:block mt-2 text-sm text-muted-foreground max-w-2xl leading-relaxed">
+          <p className="mt-4 md:mt-5 text-sm md:text-base text-muted-foreground max-w-2xl leading-relaxed">
             {t("public_listings.subtitle_short")}
           </p>
           {intlCount > 0 && (
             <Link
               to="/annonces/international"
-              className="md:hidden mt-3 inline-flex items-center gap-2 rounded-full bg-accent/40 hover:bg-accent/60 border border-border px-3 py-1.5 text-xs transition-colors"
+              className="md:hidden mt-4 inline-flex items-center gap-2 rounded-full bg-accent/40 hover:bg-accent/60 border border-border px-3.5 py-2 text-xs transition-colors"
               aria-label={intlLabel}
             >
               <span className="relative flex h-2 w-2 shrink-0" aria-hidden="true">
@@ -214,6 +214,7 @@ export default function PublicListings() {
               <span className="text-muted-foreground" aria-hidden>→</span>
             </Link>
           )}
+          <div className="mt-7 md:mt-10 h-px bg-border/60" aria-hidden />
         </section>
 
         <Suspense
