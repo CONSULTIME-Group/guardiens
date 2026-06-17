@@ -231,18 +231,22 @@ export default function PublicListings() {
         <InternationalShowcase />
 
         <section aria-labelledby="become-sitter-title" className="max-w-6xl mx-auto px-4 md:px-6 mt-6 md:mt-10">
-          <div className="rounded-2xl border border-border bg-accent/30 px-5 py-5 md:px-7 md:py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="min-w-0">
-              <h2 id="become-sitter-title" className="font-heading text-lg md:text-xl font-medium text-foreground">
+        <section aria-labelledby="become-sitter-title" className="max-w-6xl mx-auto px-4 md:px-6 mt-10 md:mt-16 mb-10 md:mb-16">
+          <div className="rounded-3xl border border-border bg-accent/30 px-6 py-8 md:px-10 md:py-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div className="min-w-0 max-w-xl">
+              <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 mb-3">
+                {t("public_listings.become_sitter_eyebrow", { defaultValue: "Devenir gardien" })}
+              </p>
+              <h2 id="become-sitter-title" className="font-heading text-2xl md:text-3xl font-semibold leading-snug text-foreground">
                 {t("public_listings.become_sitter_title")}
               </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-3 text-sm md:text-base text-muted-foreground leading-relaxed">
                 {t("public_listings.become_sitter_body")}
               </p>
             </div>
             <Link
               to="/devenir-home-sitter"
-              className="shrink-0 inline-flex items-center justify-center gap-1.5 rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity"
+              className="shrink-0 inline-flex items-center justify-center gap-1.5 rounded-full bg-primary text-primary-foreground px-8 py-3.5 text-sm font-semibold tracking-wide hover:bg-primary/90 transition-all"
             >
               {t("public_listings.become_sitter_cta")} <span aria-hidden>→</span>
             </Link>
