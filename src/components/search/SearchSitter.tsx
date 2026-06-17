@@ -1011,9 +1011,10 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  </div>
  </div>
  )}
- {/* ─── Tabs ─── */}
-  <div className="px-4 sm:px-6 pt-3 sm:pt-4 border-b border-border">
-  <div className="flex gap-1 sm:gap-6">
+ {/* ─── Tabs ─── (masqués en mode public : la page /annonces est dédiée gardes) */}
+ {!isPublic && (
+   <div className="px-4 sm:px-6 pt-3 sm:pt-4 border-b border-border">
+   <div className="flex gap-1 sm:gap-6">
 					{([
 				{ key: "sits" as SearchTab, label: "Annonces" },
 					{ key: "missions" as SearchTab, label: "Coup de main" },
@@ -1028,9 +1029,10 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  ))}
  </div>
  </div>
- 
+ )}
+
  {/* Mission sub-tabs */}
- {tab === "missions" && (
+ {!isPublic && tab === "missions" && (
  <div className="px-6 pt-3">
  <div className="flex gap-2">
  <button
