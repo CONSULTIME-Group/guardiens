@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Pets readable via published sits (anon)" ON public.pets;
