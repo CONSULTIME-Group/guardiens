@@ -66,15 +66,19 @@ export default function PublicListings() {
     return () => { cancelled = true; };
   }, []);
 
-  // Proof number hero : nombre d'annonces ouvertes + nombre de villes distinctes.
+  // Proof number hero : nombre d'annonces RÉELLEMENT ouvertes (publiées,
+  // acceptant des candidatures, non expirées) + nombre de villes distinctes.
+  // Doit rester aligné avec ce que voit le visiteur dans la liste.
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      const todayIso = new Date().toISOString().slice(0, 10);
       const { data, count } = await supabase
         .from("sits")
         .select("city", { count: "exact" })
         .eq("status", "published")
-        .eq("accepting_applications", true);
+        .eq("accepting_applications", true)
+        .gte("end_date", todayIso);
       if (cancelled) return;
       setOpenCount(count || 0);
       const cities = new Set(
