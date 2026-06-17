@@ -588,7 +588,8 @@ const Landing = () => {
           sizes="100vw"
           decoding="async"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/45 to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/30" />
+        <div className="absolute inset-0 bg-foreground/10" aria-hidden />
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-12 md:py-24">
           <div className="max-w-2xl lg:max-w-3xl">
