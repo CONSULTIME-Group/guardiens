@@ -263,7 +263,7 @@ export default function PublicListings() {
                     <Link to="/tarifs" className="text-foreground hover:text-primary transition-colors">
                       {t("public_listings.explore_pricing")}
                     </Link>
-                    <span className="text-muted-foreground">{t("public_listings.explore_pricing_desc")}</span>
+                    <span className="text-muted-foreground">, gratuit jusqu'au 14 juillet 2026</span>
                   </li>
                 </ul>
               </div>
