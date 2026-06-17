@@ -214,7 +214,7 @@ const SmallMissionsPublic = () => {
   <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground leading-tight max-w-2xl mx-auto">
  Un coup de main, près de chez vous.
  </h1>
- <p className="font-heading text-lg md:text-xl italic text-foreground/70 mt-4 max-w-lg mx-auto">
+ <p className="font-body text-base md:text-lg text-foreground/70 mt-4 max-w-lg mx-auto leading-relaxed">
  Gratuit, sans engagement. Publiez une demande ou proposez votre aide.
  </p>
  </Reveal>
@@ -252,24 +252,26 @@ const SmallMissionsPublic = () => {
 
 
  {/* ── Social proof KPIs ── */}
- {(kpiMissions > 0 || kpiHelpers > 0) && (
- <Reveal delay={0.4}>
- <div className="flex justify-center gap-12 mt-10 pt-8 border-t border-border">
- {kpiMissions > 0 && (
- <div className="text-center">
- <span className="block text-3xl font-heading font-bold text-foreground">{kpiMissions}</span>
- <span className="text-xs text-muted-foreground tracking-wide uppercase">missions réalisées</span>
- </div>
- )}
- {kpiHelpers > 0 && (
- <div className="text-center">
- <span className="block text-3xl font-heading font-bold text-foreground">{kpiHelpers}</span>
- <span className="text-xs text-muted-foreground tracking-wide uppercase">membres actifs</span>
- </div>
- )}
- </div>
- </Reveal>
- )}
+  {/* KPI : on masque "missions réalisées" tant que < 20 (signal de vide sinon).
+       Le seuil applique le pattern offsets fondateurs sans surinterprétation. */}
+  {(kpiMissions >= 20 || kpiHelpers > 0) && (
+  <Reveal delay={0.4}>
+  <div className="flex justify-center gap-12 mt-10 pt-8 border-t border-border">
+  {kpiMissions >= 20 && (
+  <div className="text-center">
+  <span className="block text-3xl font-heading font-bold text-foreground">{kpiMissions}</span>
+  <span className="text-xs text-muted-foreground tracking-wide uppercase">missions réalisées</span>
+  </div>
+  )}
+  {kpiHelpers > 0 && (
+  <div className="text-center">
+  <span className="block text-3xl font-heading font-bold text-foreground">{kpiHelpers}</span>
+  <span className="text-xs text-muted-foreground tracking-wide uppercase">membres actifs</span>
+  </div>
+  )}
+  </div>
+  </Reveal>
+  )}
 
  {/* Réassurance périmètre, promesse mondiale, pas régionale */}
  <Reveal delay={0.45}>
@@ -477,41 +479,43 @@ const SmallMissionsPublic = () => {
  </h2>
  </Reveal>
 
- <div className="space-y-10">
- {[
- {
- fear: "« Je ne veux pas déranger. »",
- answer: "Personne ne reçoit votre demande de force. Les gens du coin la voient, et seuls ceux qui ont envie d'aider répondent. Vous ne dérangez personne, vous offrez une opportunité.",
- },
- {
- fear: "« Je n'ai rien à offrir en échange. »",
- answer: "Un café, un sourire, une conversation, un panier de tomates l'été prochain. L'échange n'a pas besoin d'être à la hauteur. Il a juste besoin d'être sincère.",
- },
- {
- fear: "« C'est trop petit comme demande. »",
- answer: "Justement. Les petites missions sont faites pour les petites choses, celles qu'on n'ose pas demander parce qu'on a peur de paraître faible ou exigeant. C'est exactement pour ça qu'on a créé cet espace.",
- },
- {
- fear: "« Je ne connais personne ici. »",
- answer: "C'est précisément le bon moment pour publier. Chaque mission est une porte ouverte sur une rencontre. La première est toujours la plus difficile à oser, la suivante devient évidente.",
- },
- {
- fear: "« Et si personne ne répond ? »",
- answer: "Ça peut arriver. Reformulez, relancez, ou proposez vous-même votre aide ailleurs. La communauté grandit chaque semaine. Votre demande n'est jamais perdue, elle peut trouver quelqu'un demain.",
- },
- ].map((item, i) => (
- <Reveal key={i} delay={0.05 * i}>
- <div className="grid md:grid-cols-[1fr_2fr] gap-4 md:gap-10 items-start border-b border-border/40 pb-10 last:border-0 last:pb-0">
- <p className="font-heading text-lg md:text-xl italic text-foreground/50 leading-snug">
- {item.fear}
- </p>
- <p className="font-body text-base md:text-lg text-foreground/85 leading-relaxed">
- {item.answer}
- </p>
- </div>
- </Reveal>
- ))}
- </div>
+  <Accordion type="single" collapsible className="space-y-3">
+  {[
+  {
+  fear: "« Je ne veux pas déranger. »",
+  answer: "Personne ne reçoit votre demande de force. Les gens du coin la voient, et seuls ceux qui ont envie d'aider répondent. Vous ne dérangez personne, vous offrez une opportunité.",
+  },
+  {
+  fear: "« Je n'ai rien à offrir en échange. »",
+  answer: "Un café, un sourire, une conversation, un panier de tomates l'été prochain. L'échange n'a pas besoin d'être à la hauteur. Il a juste besoin d'être sincère.",
+  },
+  {
+  fear: "« C'est trop petit comme demande. »",
+  answer: "Justement. Les petites missions sont faites pour les petites choses, celles qu'on n'ose pas demander parce qu'on a peur de paraître faible ou exigeant. C'est exactement pour ça qu'on a créé cet espace.",
+  },
+  {
+  fear: "« Je ne connais personne ici. »",
+  answer: "C'est précisément le bon moment pour publier. Chaque mission est une porte ouverte sur une rencontre. La première est toujours la plus difficile à oser, la suivante devient évidente.",
+  },
+  {
+  fear: "« Et si personne ne répond ? »",
+  answer: "Ça peut arriver. Reformulez, relancez, ou proposez vous-même votre aide ailleurs. La communauté grandit chaque semaine. Votre demande n'est jamais perdue, elle peut trouver quelqu'un demain.",
+  },
+  ].map((item, i) => (
+  <AccordionItem
+  key={i}
+  value={`fear-${i}`}
+  className="border border-border/50 rounded-xl px-5 bg-card data-[state=open]:border-primary/40 transition-colors"
+  >
+  <AccordionTrigger className="font-heading text-base md:text-lg text-foreground/85 hover:no-underline py-4 text-left">
+  {item.fear}
+  </AccordionTrigger>
+  <AccordionContent className="font-body text-base text-foreground/75 leading-relaxed pb-5">
+  {item.answer}
+  </AccordionContent>
+  </AccordionItem>
+  ))}
+  </Accordion>
 
  <Reveal delay={0.3}>
  <div className="mt-16 text-center">
