@@ -68,7 +68,20 @@ type HousingFilter = "all" | "house" | "apartment" | "farm";
 type ExperienceFilter = "all" | "1" | "3";
 type ZoneMode = "radius" | "dept" | "region" | "france";
 
-const SearchSitter = () => {
+interface SearchSitterProps {
+  /**
+   * "internal" (par défaut) = expérience dashboard sitter complète (onglets
+   * Annonces/Coup de main, catégories partagées, démos, bandeaux découverte,
+   * affichage des annonces passées en grisé).
+   * "public" = page /annonces : un seul onglet Annonces, pas de catégories
+   * missions, pas de démos, pas de SitterDiscoveryBanner (redondant avec
+   * OutOfZoneBanner), annonces passées masquées.
+   */
+  mode?: "internal" | "public";
+}
+
+const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
+  const isPublic = mode === "public";
  const { user } = useAuth();
  const { hasAccess } = useSubscriptionAccess();
  const isMobile = useIsMobile();
@@ -698,6 +711,11 @@ const SearchSitter = () => {
  );
 
  let final = enriched.filter(Boolean);
+ // Public /annonces : on masque les annonces passées/attribuées/terminées
+ // pour ne montrer QUE les annonces réellement ouvertes à candidature.
+ if (isPublic) {
+  final = final.filter((item: any) => !item.isPast && !item.isAssigned && !item.isCompleted);
+ }
  // Environment filter (using resolved environments with fallback)
  if (environments.length > 0) {
  final = final.filter((item: any) => {
@@ -708,13 +726,15 @@ const SearchSitter = () => {
  // `min_gardien_sits` est une préférence propriétaire, pas un critère bloquant :
  // l'annonce doit rester visible dans la recherche, comme indiqué dans le formulaire.
  final = sortResults(final, sort);
- // Démos toujours visibles, mais densité adaptée à l'offre réelle :
- //  • 0 vraie annonce         → on garde la cadence 1/3 (page sinon vide)
- //  • 1-3 vraies annonces     → 1 démo après la dernière, max 2 démos
- //  • 4+ vraies annonces      → 1 démo tous les 6 résultats
+ // Démos : visibles uniquement en interne, jamais sur la page publique
+ // /annonces (pollue le flux quand de vraies annonces existent).
+ //  • public                      → 0 démo
+ //  • internal, 0 vraie annonce   → cadence 1/3 (page sinon vide)
+ //  • internal, 1-3 vraies        → 1 démo en fin, max 2 démos
+ //  • internal, 4+ vraies         → 1 démo tous les 6 résultats
  const realCount = final.length;
  const demoCadence = realCount === 0 ? 3 : realCount <= 3 ? 99 : 6;
- const demoLimit = realCount === 0 ? DEMO_SITS.length : realCount <= 3 ? 2 : DEMO_SITS.length;
+ const demoLimit = isPublic ? 0 : (realCount === 0 ? DEMO_SITS.length : realCount <= 3 ? 2 : DEMO_SITS.length);
  final = interleaveDemos(final, DEMO_SITS.slice(0, demoLimit), demoCadence);
   const coordsMap = new Map<string, { lat: number; lng: number }>();
   // Géocodage des annonces internationales (city + country, hors FR)
@@ -946,7 +966,11 @@ const SearchSitter = () => {
  ? `${resultCount} membre${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""}`
  : resultCount === 0 && demoCount > 0
  ? "Aucune annonce réelle pour le moment"
- : `${resultCount} annonce${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""} près de vous`;
+ : resultCount === 0
+ ? (city ? `Aucune annonce ouverte près de ${city}` : "Aucune annonce ouverte sur ce périmètre")
+ : city
+ ? `${resultCount} annonce${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""} près de vous`
+ : `${resultCount} annonce${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""} en France`;
 
  // ─── Pill style ───
  const pillClass = "snap-start flex items-center gap-2 px-4 py-2 min-h-11 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap shrink-0";
@@ -987,9 +1011,10 @@ const SearchSitter = () => {
  </div>
  </div>
  )}
- {/* ─── Tabs ─── */}
-  <div className="px-4 sm:px-6 pt-3 sm:pt-4 border-b border-border">
-  <div className="flex gap-1 sm:gap-6">
+ {/* ─── Tabs ─── (masqués en mode public : la page /annonces est dédiée gardes) */}
+ {!isPublic && (
+   <div className="px-4 sm:px-6 pt-3 sm:pt-4 border-b border-border">
+   <div className="flex gap-1 sm:gap-6">
 					{([
 				{ key: "sits" as SearchTab, label: "Annonces" },
 					{ key: "missions" as SearchTab, label: "Coup de main" },
@@ -1004,9 +1029,10 @@ const SearchSitter = () => {
  ))}
  </div>
  </div>
- 
+ )}
+
  {/* Mission sub-tabs */}
- {tab === "missions" && (
+ {!isPublic && tab === "missions" && (
  <div className="px-6 pt-3">
  <div className="flex gap-2">
  <button
@@ -1025,7 +1051,11 @@ const SearchSitter = () => {
  </div>
  )}
 
- {/* Catégories partagées (Gardes + Missions) */}
+ {/* Catégories partagées (Gardes + Missions)
+     Masquées en mode public sur l'onglet sits : ces catégories
+     ("Maison / Jardins / Bricolage / Animaux") sont pensées pour les
+     missions, pas pour les annonces de garde où elles induisent en erreur. */}
+ {!(isPublic && tab === "sits") && (
  <div className="px-6 pt-3">
  <div className="flex flex-wrap gap-2">
 				{([
@@ -1072,15 +1102,16 @@ const SearchSitter = () => {
  ))}
  </div>
  </div>
-
-
- {/* Réassurance périmètre, visible avant la barre de recherche */}
+ )}
+ {/* Réassurance périmètre. En public on raccourcit (la promesse est déjà dans le hero). */}
+ {!isPublic && (
  <div className="px-6 pt-4">
  <ReachReassuranceBanner
  variant="inline"
  inlineText="Du coin par défaut, élargissez à toute la France quand vous le voulez."
  />
  </div>
+ )}
 
   {/* ─── Sticky search bar ─── */}
   <div className="sticky top-[52px] md:top-0 z-[1100] bg-background border-b-2 border-border shadow-sm">
@@ -1776,7 +1807,7 @@ const SearchSitter = () => {
     />
   ) : (
   <>
-    {tab === "sits" && (
+    {!isPublic && tab === "sits" && (
       <SitterDiscoveryBanner
         totalFrance={densityCounts.france}
         totalRadius={densityCounts.radius}

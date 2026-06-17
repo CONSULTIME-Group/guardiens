@@ -66,15 +66,19 @@ export default function PublicListings() {
     return () => { cancelled = true; };
   }, []);
 
-  // Proof number hero : nombre d'annonces ouvertes + nombre de villes distinctes.
+  // Proof number hero : nombre d'annonces RÉELLEMENT ouvertes (publiées,
+  // acceptant des candidatures, non expirées) + nombre de villes distinctes.
+  // Doit rester aligné avec ce que voit le visiteur dans la liste.
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      const todayIso = new Date().toISOString().slice(0, 10);
       const { data, count } = await supabase
         .from("sits")
         .select("city", { count: "exact" })
         .eq("status", "published")
-        .eq("accepting_applications", true);
+        .eq("accepting_applications", true)
+        .gte("end_date", todayIso);
       if (cancelled) return;
       setOpenCount(count || 0);
       const cities = new Set(
@@ -200,7 +204,7 @@ export default function PublicListings() {
             </div>
           }
         >
-          <SearchSitter />
+          <SearchSitter mode="public" />
         </Suspense>
 
         <InternationalShowcase />
@@ -259,7 +263,7 @@ export default function PublicListings() {
                     <Link to="/tarifs" className="text-foreground hover:text-primary transition-colors">
                       {t("public_listings.explore_pricing")}
                     </Link>
-                    <span className="text-muted-foreground">{t("public_listings.explore_pricing_desc")}</span>
+                    <span className="text-muted-foreground">, gratuit jusqu'au 14 juillet 2026</span>
                   </li>
                 </ul>
               </div>
