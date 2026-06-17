@@ -1,0 +1,1 @@
+UPDATE public.articles SET cover_image_url='/__l5e/assets-v1/6f078def-0d9d-4145-b9ad-3e1d262d6d30/francais-etranger-garder-maison-france.jpg' WHERE id='396a1800-2617-4cdb-b47f-5cf055b02169';
