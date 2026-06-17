@@ -215,7 +215,7 @@ export default function PublicListings() {
               </p>
             </div>
             <Link
-              to="/devenir-gardien"
+              to="/devenir-home-sitter"
               className="shrink-0 inline-flex items-center justify-center gap-1.5 rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity"
             >
               {t("public_listings.become_sitter_cta")} <span aria-hidden>→</span>
