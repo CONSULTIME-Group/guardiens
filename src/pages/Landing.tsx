@@ -1410,6 +1410,50 @@ const Landing = () => {
                   </li>
                   <li>
                     <Link
+                      to="/house-sitting/villeurbanne"
+                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
+                    >
+                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
+                      <span className="text-sm leading-relaxed">
+                        <strong>House-sitting à Villeurbanne</strong>, Aux portes de Lyon, Gratte-Ciel, Charpennes, Cusset. Des gardiens qui circulent facilement entre les deux villes.
+                      </span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/house-sitting/chambery"
+                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
+                    >
+                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
+                      <span className="text-sm leading-relaxed">
+                        <strong>House-sitting à Chambéry</strong>, Capitale de la Savoie, entre lac du Bourget et massif des Bauges. Des gardiens à l'aise avec la montagne et l'hiver.
+                      </span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/house-sitting/valence"
+                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
+                    >
+                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
+                      <span className="text-sm leading-relaxed">
+                        <strong>House-sitting à Valence</strong>, Porte du sud, entre Rhône et Vercors. Des gardiens proches des trajets vacances et des résidences secondaires drômoises.
+                      </span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/house-sitting/ecully"
+                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
+                    >
+                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
+                      <span className="text-sm leading-relaxed">
+                        <strong>House-sitting à Écully</strong>, Ouest lyonnais résidentiel, maisons avec jardin et animaux. Des gardiens habitués aux propriétés calmes et familiales.
+                      </span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
                       to="/inscription"
                       className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
                     >
@@ -1420,8 +1464,11 @@ const Landing = () => {
                     </Link>
                   </li>
                 </ul>
-                <div className="mt-6 pt-6 border-t border-border">
-                  <p className="text-xs text-foreground/60 leading-relaxed">
+                <div className="mt-6 pt-6 border-t border-border flex flex-col sm:flex-row gap-3 items-start">
+                  <Button asChild variant="outline" size="sm" className="rounded-full">
+                    <Link to="/house-sitting">Toutes les villes</Link>
+                  </Button>
+                  <p className="text-xs text-foreground/60 leading-relaxed flex-1">
                     {t("landing.cities.cities_footer")}
                   </p>
                 </div>
