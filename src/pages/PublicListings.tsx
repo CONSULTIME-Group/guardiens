@@ -162,6 +162,8 @@ export default function PublicListings() {
           )}
         </section>
 
+        <InternationalShowcase />
+
         <Suspense
           fallback={
             <div className="max-w-6xl mx-auto px-4 py-12 animate-pulse space-y-6">
