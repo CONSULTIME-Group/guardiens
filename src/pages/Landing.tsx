@@ -1013,11 +1013,9 @@ const Landing = () => {
         <LiveListingsSection />
       </RevealSection>
 
-      {/* ═══════════════ SECTION 5bis, VITRINE DÉMO (anatomie d'une annonce) ═══════════════ */}
-      <RevealSection>
-        <p className="sr-only">Et voici l'anatomie détaillée d'une annonce.</p>
-        <DemoListingShowcase />
-      </RevealSection>
+      {/* Vitrine démo désactivée : doublonnait LiveListingsSection avec des cards
+          « Bientôt disponible » qui envoyaient un signal anti-vente juste après
+          les vraies annonces live. */}
 
       {/* ═══════════════ SECTION 6, CONFIANCE & PÉRIMÈTRE ═══════════════ */}
       <section id="confiance" className="bg-background py-10 md:py-20 scroll-mt-24" aria-labelledby="trust-heading">
