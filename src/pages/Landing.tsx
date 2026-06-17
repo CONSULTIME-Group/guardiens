@@ -634,19 +634,19 @@ const Landing = () => {
               <div className="flex flex-row flex-wrap justify-start gap-x-6 gap-y-3 mt-8 md:gap-x-12 md:gap-y-6 md:mt-14 animate-hero-fade-up animation-delay-1100">
                 {kpiMaisons > 0 && (
                   <div className="border-r border-white/20 pr-6 md:pr-12 last:border-r-0 last:pr-0">
-                    <span className="block text-3xl font-heading font-bold text-white">{kpiMaisons}</span>
+                    <span className="block text-3xl font-heading font-bold text-white tabular-nums">{kpiMaisons}</span>
                     <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_houses")}</span>
                   </div>
                 )}
                 {kpiAnimaux > 0 && (
                   <div className="border-r border-white/20 pr-6 md:pr-12 last:border-r-0 last:pr-0">
-                    <span className="block text-3xl font-heading font-bold text-white">{kpiAnimaux}</span>
+                    <span className="block text-3xl font-heading font-bold text-white tabular-nums">{kpiAnimaux}</span>
                     <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_animals")}</span>
                   </div>
                 )}
                 {kpiInscrits > 0 && (
                   <div className="border-r border-white/20 pr-6 md:pr-12 last:border-r-0 last:pr-0">
-                    <span className="block text-3xl font-heading font-bold text-white">{kpiInscrits}</span>
+                    <span className="block text-3xl font-heading font-bold text-white tabular-nums">{kpiInscrits}</span>
                     <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_members")}</span>
                   </div>
                 )}
