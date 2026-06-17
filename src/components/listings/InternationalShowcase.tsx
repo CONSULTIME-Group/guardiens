@@ -39,7 +39,9 @@ const InternationalShowcase = () => {
     return () => { cancelled = true; };
   }, []);
 
-  if (loading || sits.length === 0) return null;
+  // Tant que l'offre internationale est < 3 annonces, on masque le carousel
+  // (la pastille radar du hero reste, suffisante pour signaler une seule annonce).
+  if (loading || sits.length < 3) return null;
 
   return (
     <section
