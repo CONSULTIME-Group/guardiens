@@ -230,7 +230,6 @@ export default function PublicListings() {
 
         <InternationalShowcase />
 
-        <section aria-labelledby="become-sitter-title" className="max-w-6xl mx-auto px-4 md:px-6 mt-6 md:mt-10">
         <section aria-labelledby="become-sitter-title" className="max-w-6xl mx-auto px-4 md:px-6 mt-10 md:mt-16 mb-10 md:mb-16">
           <div className="rounded-3xl border border-border bg-accent/30 px-6 py-8 md:px-10 md:py-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div className="min-w-0 max-w-xl">
