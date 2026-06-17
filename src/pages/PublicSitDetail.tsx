@@ -62,6 +62,23 @@ const PublicSitDetail = () => {
     }
   }, [loading, loadError, sit]);
 
+  // Tracking : 1 vue par annonce / session, propriétaire exclu.
+  // Alimente analytics_events (event_type='sit_view') consommé par
+  // get_sit_views_count (owner) et admin_get_listings_stats (admin).
+  useEffect(() => {
+    if (!id || !sit) return;
+    if (user && user.id === (sit as any).user_id) return;
+    try {
+      const key = `sit_view_${id}`;
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+      trackEvent("sit_view", {
+        source: "/annonces/" + id,
+        metadata: { sit_id: id },
+      });
+    } catch { /* best-effort */ }
+  }, [id, sit, user]);
+
   useEffect(() => {
     if (!id) return;
     const load = async () => {
