@@ -121,10 +121,14 @@ export default function PublicListings() {
 
   const jsonld = itemListLd ? [...BASE_JSONLD, itemListLd] : BASE_JSONLD;
   const intlLabel = t("public_listings.intl_count", { count: intlCount, defaultValue: `${intlCount} listings outside France` });
-  const cityWord = citiesCount > 1 ? "villes" : "ville";
-  const eyebrowDynamic = openCount > 0 && citiesCount > 0
-    ? t("public_listings.eyebrow_stats", { count: openCount, cities: `${citiesCount} ${cityWord}`, defaultValue: `${openCount} annonces ouvertes · ${citiesCount} ${cityWord}` })
+  // Eyebrow : on n'affiche le compteur de villes que s'il a un signal réel
+  // (>= 2). « 1 ville » est un faux signal qui décrédibilise la promesse.
+  const eyebrowDynamic = openCount > 0
+    ? citiesCount >= 2
+      ? `${openCount} annonces ouvertes · ${citiesCount} villes · mise à jour quotidienne`
+      : `${openCount} annonce${openCount > 1 ? "s" : ""} ouverte${openCount > 1 ? "s" : ""} · mise à jour quotidienne`
     : t("public_listings.eyebrow");
+
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
