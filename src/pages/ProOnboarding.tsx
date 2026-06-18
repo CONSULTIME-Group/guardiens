@@ -103,11 +103,13 @@ export default function ProOnboarding() {
     (async () => {
       const { data: existing } = await supabase
         .from("pro_profiles")
-        .select("id")
+        .select("id, raison_sociale")
         .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
       if (existing) {
-        toast.info("Vous avez déjà une fiche pro. Redirection vers votre espace.");
+        toast.info("Une fiche pro existe déjà pour ce compte. Redirection vers votre espace.");
         navigate("/pros/mon-espace", { replace: true });
       }
     })();
