@@ -28,7 +28,7 @@ import {
  DialogDescription,
 } from "@/components/ui/dialog";
 
-type Role = "owner" | "sitter" | "both";
+type Role = "owner" | "sitter" | "both" | "pro";
 
 const STRENGTH_KEYS = ["", "weak", "medium", "good", "strong"] as const;
 
