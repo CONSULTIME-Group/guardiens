@@ -142,7 +142,7 @@ export default function ProCategoryListing() {
           <p className="text-lg text-muted-foreground max-w-2xl">{category.shortDesc}</p>
           <div className="mt-6 flex flex-wrap gap-2">
             <Button asChild>
-              <Link to="/pros/inscription">Inscrire mon activité (gratuit)</Link>
+              <Link to="/pros/inscription">Inscrire mon activité</Link>
             </Button>
             <Button asChild variant="outline">
               <Link to="/pros">Toutes les catégories</Link>
