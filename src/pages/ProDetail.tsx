@@ -212,6 +212,9 @@ export default function ProDetail() {
                   <span className="text-muted-foreground">({pro.rating_count})</span>
                 </a>
               )}
+              {pro.google_place_id && (
+                <GoogleRatingInline proId={pro.id} placeId={pro.google_place_id} />
+              )}
               {pro.urgences_24_7 && <Badge variant="secondary">Urgences 24/7</Badge>}
               {pro.siret_verified && <Badge variant="secondary">SIRET vérifié</Badge>}
             </div>
