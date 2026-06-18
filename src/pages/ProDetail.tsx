@@ -18,6 +18,7 @@ export default function ProDetail() {
   const isPreview = searchParams.get("preview") === "1" && isAdmin;
   const [pro, setPro] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     if (!slug) return;
