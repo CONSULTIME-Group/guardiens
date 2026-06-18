@@ -147,6 +147,53 @@ Deno.serve(async (req) => {
   // Create Supabase client with service role (bypasses RLS)
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+  // === Caller authorization ===
+  // verify_jwt = true ensures a valid JWT, but without this check ANY
+  // authenticated user could spam arbitrary recipients with platform-branded
+  // templates. Trusted callers bypass: service_role and admin users.
+  // Non-admin authenticated callers may ONLY target their own email address.
+  const authHeader = req.headers.get('Authorization') ?? ''
+  const callerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : ''
+  const isServiceRole = callerToken && callerToken === supabaseServiceKey
+
+  if (!isServiceRole) {
+    let callerUserId: string | null = null
+    let callerEmail: string | null = null
+    let callerIsAdmin = false
+    if (callerToken) {
+      const { data: userData } = await supabase.auth.getUser(callerToken)
+      if (userData?.user) {
+        callerUserId = userData.user.id
+        callerEmail = (userData.user.email ?? '').toLowerCase() || null
+        const { data: adminCheck } = await supabase.rpc('has_role', {
+          _user_id: callerUserId,
+          _role: 'admin',
+        })
+        callerIsAdmin = adminCheck === true
+      }
+    }
+
+    if (!callerUserId) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    if (!callerIsAdmin) {
+      if (!callerEmail || effectiveRecipient.toLowerCase() !== callerEmail) {
+        console.warn('[security] Non-admin caller attempted to email a different recipient', {
+          callerUserId,
+          templateName,
+        })
+        return new Response(
+          JSON.stringify({ error: 'Forbidden: you can only send templates to your own account' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    }
+  }
+
   // 1b. Idempotency check — prevent duplicate sends for the same key
   if (idempotencyKey && idempotencyKey !== messageId) {
     const { data: existingSend } = await supabase
