@@ -5,9 +5,11 @@ import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
 import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import SitterDashboard from "@/components/dashboard/SitterDashboard";
+import ProSpaceBanner from "@/components/dashboard/ProSpaceBanner";
 import { DashboardErrorBoundary } from "@/components/dashboard/DashboardErrorBoundary";
 import { trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
+
 
 const Dashboard = () => {
   const { activeRole, user } = useAuth();
@@ -197,10 +199,15 @@ const Dashboard = () => {
     <div className="overflow-x-hidden">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
 
+      <div className="container mx-auto px-4 pt-4">
+        <ProSpaceBanner />
+      </div>
+
       <div
         key={displayedRole}
         className={transitioning ? "animate-fade-out" : "animate-fade-in"}
       >
+
         <DashboardErrorBoundary
           section={displayedRole === "owner" ? "OwnerDashboard" : "SitterDashboard"}
           label={

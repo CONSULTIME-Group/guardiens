@@ -200,39 +200,42 @@ export default function MyProProfile() {
 
 
 
-        {profile.status === "approved" && profile.slug && (
+        {profile.slug && (
           <div className="flex items-center gap-2 flex-wrap mb-6">
             <Button asChild variant="outline" size="sm">
               <a href={`/pros/${profile.slug}`} target="_blank" rel="noopener noreferrer">
-                Voir ma fiche publique
+                {profile.status === "approved" ? "Voir ma fiche publique" : "Aperçu de ma fiche"}
               </a>
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={async () => {
-                const url = `https://guardiens.fr/pros/${profile.slug}`;
-                const shareData = {
-                  title: profile.raison_sociale,
-                  text: `Découvrez ${profile.raison_sociale} sur Guardiens`,
-                  url,
-                };
-                try {
-                  if (navigator.share) {
-                    await navigator.share(shareData);
-                  } else {
-                    await navigator.clipboard.writeText(url);
-                    toast.success("Lien copié dans le presse-papier");
+            {profile.status === "approved" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  const url = `https://guardiens.fr/pros/${profile.slug}`;
+                  const shareData = {
+                    title: profile.raison_sociale,
+                    text: `Découvrez ${profile.raison_sociale} sur Guardiens`,
+                    url,
+                  };
+                  try {
+                    if (navigator.share) {
+                      await navigator.share(shareData);
+                    } else {
+                      await navigator.clipboard.writeText(url);
+                      toast.success("Lien copié dans le presse-papier");
+                    }
+                  } catch {
+                    /* user cancelled */
                   }
-                } catch {
-                  /* user cancelled */
-                }
-              }}
-            >
-              Partager
-            </Button>
+                }}
+              >
+                Partager
+              </Button>
+            )}
           </div>
         )}
+
 
         {profile.status === "rejected" && profile.rejection_reason && (
           <Card className="mb-5 border-destructive/40">
