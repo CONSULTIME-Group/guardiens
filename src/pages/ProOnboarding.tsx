@@ -222,200 +222,274 @@ export default function ProOnboarding() {
           </CardContent>
         </Card>
 
+        {/* Stepper */}
+        <div className="flex items-center justify-between mb-6" aria-label="Progression de l'inscription">
+          {[
+            { n: 1, label: "Identité" },
+            { n: 2, label: "Présentation" },
+            { n: 3, label: "Contact & tarifs" },
+          ].map((s, i) => (
+            <div key={s.n} className="flex items-center flex-1">
+              <div
+                className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold shrink-0 ${
+                  step >= s.n
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
+                }`}
+                aria-current={step === s.n ? "step" : undefined}
+              >
+                {s.n}
+              </div>
+              <span className={`ml-2 text-sm ${step === s.n ? "font-semibold" : "text-muted-foreground"} hidden sm:inline`}>
+                {s.label}
+              </span>
+              {i < 2 && <div className={`h-px flex-1 mx-2 ${step > s.n ? "bg-primary" : "bg-border"}`} />}
+            </div>
+          ))}
+        </div>
+
         <Card>
           <CardContent className="p-6">
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <Label htmlFor="raison">Raison sociale ou nom commercial *</Label>
-                <Input
-                  id="raison"
-                  value={form.raison_sociale}
-                  onChange={(e) => update("raison_sociale", e.target.value)}
-                  required
-                />
-              </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (step < 3) {
+                  if (step === 1) {
+                    if (!form.raison_sociale || !form.category || !form.city) {
+                      toast.error("Raison sociale, catégorie et ville sont obligatoires.");
+                      return;
+                    }
+                  }
+                  setStep((s) => (s + 1) as 1 | 2 | 3);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                } else {
+                  handleSubmit(e);
+                }
+              }}
+              className="space-y-5"
+            >
+              {step === 1 && (
+                <>
+                  <div>
+                    <Label htmlFor="raison">Raison sociale ou nom commercial *</Label>
+                    <Input
+                      id="raison"
+                      value={form.raison_sociale}
+                      onChange={(e) => update("raison_sociale", e.target.value)}
+                      required
+                    />
+                  </div>
 
-              <div>
-                <Label>Catégorie principale *</Label>
-                <Select value={form.category} onValueChange={(v) => update("category", v)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choisir une catégorie" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PRO_CATEGORIES.map((c) => (
-                      <SelectItem key={c.value} value={c.value}>
-                        {c.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                  <div>
+                    <Label>Catégorie principale *</Label>
+                    <Select value={form.category} onValueChange={(v) => update("category", v)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choisir une catégorie" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PRO_CATEGORIES.map((c) => (
+                          <SelectItem key={c.value} value={c.value}>
+                            {c.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              <div>
-                <Label htmlFor="siret">SIRET</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="siret"
-                    value={form.siret}
-                    onChange={(e) => update("siret", e.target.value.replace(/\D/g, ""))}
-                    placeholder="14 chiffres"
-                    maxLength={14}
-                  />
+                  <div>
+                    <Label htmlFor="siret">SIRET</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="siret"
+                        value={form.siret}
+                        onChange={(e) => update("siret", e.target.value.replace(/\D/g, ""))}
+                        placeholder="14 chiffres"
+                        maxLength={14}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleSiretLookup}
+                        disabled={siretLookup || form.siret.length !== 14}
+                      >
+                        {siretLookup ? "Recherche…" : "Pré-remplir"}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Récupère automatiquement raison sociale, ville et code postal depuis la base officielle entreprises.
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="logo">Logo (optionnel, 2 Mo max)</Label>
+                    <Input
+                      id="logo"
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0] ?? null;
+                        if (f && f.size > 2 * 1024 * 1024) {
+                          toast.error("Le logo dépasse 2 Mo.");
+                          return;
+                        }
+                        setLogoFile(f);
+                      }}
+                    />
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="city">Ville *</Label>
+                      <Input
+                        id="city"
+                        value={form.city}
+                        onChange={(e) => update("city", e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="cp">Code postal</Label>
+                      <Input
+                        id="cp"
+                        value={form.postal_code}
+                        onChange={(e) => update("postal_code", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {step === 2 && (
+                <>
+                  <div>
+                    <Label htmlFor="desc">Présentation de votre activité</Label>
+                    <Textarea
+                      id="desc"
+                      rows={6}
+                      value={form.description}
+                      onChange={(e) => update("description", e.target.value)}
+                      placeholder="Spécialités, parcours, ce qui vous distingue…"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="hor">Horaires d'ouverture</Label>
+                    <Textarea id="hor" rows={3} value={form.horaires_text}
+                      onChange={(e) => update("horaires_text", e.target.value)}
+                      placeholder="Ex : Lun-Ven 9h-19h, Sam 9h-13h" />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="dipl">Diplômes et certifications (1 par ligne)</Label>
+                    <Textarea id="dipl" rows={3} value={form.diplomes}
+                      onChange={(e) => update("diplomes", e.target.value)}
+                      placeholder={"ACACED\nDocteur vétérinaire (Maisons-Alfort, 2015)"} />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="ord">N° d'inscription à l'Ordre (vétérinaires)</Label>
+                    <Input id="ord" value={form.ordre_number}
+                      onChange={(e) => update("ordre_number", e.target.value)}
+                      placeholder="Ex : 12345" />
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="urg"
+                      checked={form.urgences_24_7}
+                      onCheckedChange={(v) => update("urgences_24_7", !!v)}
+                    />
+                    <Label htmlFor="urg" className="cursor-pointer">
+                      Je propose des urgences 24/7
+                    </Label>
+                  </div>
+                </>
+              )}
+
+              {step === 3 && (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    Au moins un moyen de contact public est obligatoire.
+                  </p>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="phone">Téléphone pro</Label>
+                      <Input
+                        id="phone"
+                        value={form.phone}
+                        onChange={(e) => update("phone", e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">Email contact</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={form.email_contact}
+                        onChange={(e) => update("email_contact", e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="web">Site web</Label>
+                    <Input
+                      id="web"
+                      type="url"
+                      value={form.website}
+                      onChange={(e) => update("website", e.target.value)}
+                      placeholder="https://"
+                    />
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="tmin">Tarif min (€)</Label>
+                      <Input id="tmin" type="number" min={0}
+                        value={form.tarif_min}
+                        onChange={(e) => update("tarif_min", e.target.value)} />
+                    </div>
+                    <div>
+                      <Label htmlFor="tmax">Tarif max (€)</Label>
+                      <Input id="tmax" type="number" min={0}
+                        value={form.tarif_max}
+                        onChange={(e) => update("tarif_max", e.target.value)} />
+                    </div>
+                    <div>
+                      <Label htmlFor="zone">Rayon (km)</Label>
+                      <Input id="zone" type="number" min={1} max={300}
+                        value={form.zone_radius_km}
+                        onChange={(e) => update("zone_radius_km", e.target.value)} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="tnote">Précisions tarifs</Label>
+                    <Input id="tnote" value={form.tarif_note}
+                      onChange={(e) => update("tarif_note", e.target.value)}
+                      placeholder="Ex : forfait consultation, sur devis…" />
+                  </div>
+                </>
+              )}
+
+              <div className="flex gap-2 pt-2">
+                {step > 1 && (
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={handleSiretLookup}
-                    disabled={siretLookup || form.siret.length !== 14}
+                    onClick={() => {
+                      setStep((s) => (s - 1) as 1 | 2 | 3);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    className="flex-1"
                   >
-                    {siretLookup ? "Recherche…" : "Pré-remplir"}
+                    Retour
                   </Button>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Récupère automatiquement raison sociale, ville et code postal depuis la base officielle entreprises.
-                </p>
+                )}
+                <Button type="submit" disabled={loading} className="flex-1">
+                  {step < 3 ? "Continuer" : loading ? "Envoi…" : "Envoyer pour validation"}
+                </Button>
               </div>
-
-              <div>
-                <Label htmlFor="logo">Logo (optionnel, 2 Mo max)</Label>
-                <Input
-                  id="logo"
-                  type="file"
-                  accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0] ?? null;
-                    if (f && f.size > 2 * 1024 * 1024) {
-                      toast.error("Le logo dépasse 2 Mo.");
-                      return;
-                    }
-                    setLogoFile(f);
-                  }}
-                />
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="city">Ville</Label>
-                  <Input
-                    id="city"
-                    value={form.city}
-                    onChange={(e) => update("city", e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="cp">Code postal</Label>
-                  <Input
-                    id="cp"
-                    value={form.postal_code}
-                    onChange={(e) => update("postal_code", e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="desc">Présentation de votre activité</Label>
-                <Textarea
-                  id="desc"
-                  rows={5}
-                  value={form.description}
-                  onChange={(e) => update("description", e.target.value)}
-                  placeholder="Spécialités, parcours, ce qui vous distingue…"
-                />
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="phone">Téléphone pro</Label>
-                  <Input
-                    id="phone"
-                    value={form.phone}
-                    onChange={(e) => update("phone", e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email">Email contact</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={form.email_contact}
-                    onChange={(e) => update("email_contact", e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="tmin">Tarif min (€)</Label>
-                  <Input id="tmin" type="number" min={0}
-                    value={form.tarif_min}
-                    onChange={(e) => update("tarif_min", e.target.value)} />
-                </div>
-                <div>
-                  <Label htmlFor="tmax">Tarif max (€)</Label>
-                  <Input id="tmax" type="number" min={0}
-                    value={form.tarif_max}
-                    onChange={(e) => update("tarif_max", e.target.value)} />
-                </div>
-                <div>
-                  <Label htmlFor="zone">Rayon (km)</Label>
-                  <Input id="zone" type="number" min={1} max={300}
-                    value={form.zone_radius_km}
-                    onChange={(e) => update("zone_radius_km", e.target.value)} />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="tnote">Précisions tarifs</Label>
-                <Input id="tnote" value={form.tarif_note}
-                  onChange={(e) => update("tarif_note", e.target.value)}
-                  placeholder="Ex : forfait consultation, sur devis…" />
-              </div>
-
-              <div>
-                <Label htmlFor="hor">Horaires d'ouverture</Label>
-                <Textarea id="hor" rows={3} value={form.horaires_text}
-                  onChange={(e) => update("horaires_text", e.target.value)}
-                  placeholder="Ex : Lun-Ven 9h-19h, Sam 9h-13h" />
-              </div>
-
-              <div>
-                <Label htmlFor="dipl">Diplômes et certifications (1 par ligne)</Label>
-                <Textarea id="dipl" rows={3} value={form.diplomes}
-                  onChange={(e) => update("diplomes", e.target.value)}
-                  placeholder={"ACACED\nDocteur vétérinaire (Maisons-Alfort, 2015)"} />
-              </div>
-
-              <div>
-                <Label htmlFor="ord">N° d'inscription à l'Ordre (vétérinaires)</Label>
-                <Input id="ord" value={form.ordre_number}
-                  onChange={(e) => update("ordre_number", e.target.value)}
-                  placeholder="Ex : 12345" />
-              </div>
-
-              <div>
-                <Label htmlFor="web">Site web</Label>
-                <Input
-                  id="web"
-                  type="url"
-                  value={form.website}
-                  onChange={(e) => update("website", e.target.value)}
-                  placeholder="https://"
-                />
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="urg"
-                  checked={form.urgences_24_7}
-                  onCheckedChange={(v) => update("urgences_24_7", !!v)}
-                />
-                <Label htmlFor="urg" className="cursor-pointer">
-                  Je propose des urgences 24/7
-                </Label>
-              </div>
-
-              <Button type="submit" disabled={loading} className="w-full">
-                {loading ? "Envoi…" : "Envoyer ma fiche pour validation"}
-              </Button>
             </form>
           </CardContent>
         </Card>
