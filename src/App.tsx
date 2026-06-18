@@ -322,6 +322,8 @@ const AppRoutes = () => (
       <Route path="/pros" element={<ProsListing />} />
       <Route path="/pros/inscription" element={<ProOnboarding />} />
       <Route path="/pros/mon-espace" element={<MyProProfile />} />
+      <Route path="/pros/categorie/:catSlug" element={<ProCategoryListing />} />
+      <Route path="/pros/categorie/:catSlug/:villeSlug" element={<ProCategoryListing />} />
       <Route path="/pros/:slug" element={<ProDetail />} />
       <Route element={<AdminLayout />}>
         <Route path="/admin" element={<AdminDashboard />} />
