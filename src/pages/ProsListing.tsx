@@ -31,6 +31,7 @@ export default function ProsListing() {
   const [category, setCategory] = useState<string | "all">("all");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("recent");
+  const [view, setView] = useState<"list" | "map">("list");
 
   useEffect(() => {
     (async () => {
