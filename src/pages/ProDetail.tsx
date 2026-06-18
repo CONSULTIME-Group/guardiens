@@ -91,6 +91,17 @@ export default function ProDetail() {
         }
       : {}),
     ...(pro.horaires?.text ? { openingHours: pro.horaires.text } : {}),
+    ...(pro.rating_count > 0 && pro.rating_avg
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: Number(pro.rating_avg).toFixed(1),
+            reviewCount: pro.rating_count,
+            bestRating: 5,
+            worstRating: 1,
+          },
+        }
+      : {}),
   };
 
   const breadcrumbJsonLd = {
