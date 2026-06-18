@@ -153,12 +153,6 @@ const Register = () => {
   } catch {}
  }, [email]);
 
- useEffect(() => {
-  if (step !== 2) return;
-  setEtaSeconds(25);
-  const tm = setInterval(() => setEtaSeconds((s) => (s > 0 ? s - 1 : 0)), 1000);
-  return () => clearInterval(tm);
- }, [step]);
 
  useEffect(() => {
  let cancelled = false;
