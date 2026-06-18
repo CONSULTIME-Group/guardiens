@@ -80,7 +80,10 @@ const generateSuggestedPassword = (): string => {
 const Register = () => {
  const { t } = useTranslation();
  const [searchParams] = useSearchParams();
- const presetRole = searchParams.get("role") as Role | null;
+ const asPro = searchParams.get("as") === "pro";
+ const presetRoleRaw = searchParams.get("role") as Role | null;
+ // Si on arrive avec ?as=pro, on force le rôle "pro" même si role=owner est dans l'URL (héritage des anciens liens).
+ const presetRole: Role | null = asPro ? "pro" : presetRoleRaw;
  const presetEmail = (searchParams.get("email") || "").trim().toLowerCase();
 
  const [step, setStep] = useState<1 | 2 | "confirmation">(presetRole ? 2 : 1);
