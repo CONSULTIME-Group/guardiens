@@ -32,6 +32,7 @@ export default function ProOnboarding() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [siretLookup, setSiretLookup] = useState(false);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     raison_sociale: "",
