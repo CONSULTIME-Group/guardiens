@@ -138,13 +138,39 @@ export default function MyProProfile() {
       <main className="container mx-auto px-4 py-10 max-w-2xl min-w-0">
         <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
           <h1 className="text-3xl font-display font-bold">Mon espace pro</h1>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {profile.status === "approved" && profile.slug && (
-              <Button asChild variant="outline" size="sm">
-                <a href={`/pros/${profile.slug}`} target="_blank" rel="noopener noreferrer">
-                  Voir ma fiche publique
-                </a>
-              </Button>
+              <>
+                <Button asChild variant="outline" size="sm">
+                  <a href={`/pros/${profile.slug}`} target="_blank" rel="noopener noreferrer">
+                    Voir ma fiche publique
+                  </a>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    const url = `https://guardiens.fr/pros/${profile.slug}`;
+                    const shareData = {
+                      title: profile.raison_sociale,
+                      text: `Découvrez ${profile.raison_sociale} sur Guardiens`,
+                      url,
+                    };
+                    try {
+                      if (navigator.share) {
+                        await navigator.share(shareData);
+                      } else {
+                        await navigator.clipboard.writeText(url);
+                        toast.success("Lien copié dans le presse-papier");
+                      }
+                    } catch {
+                      /* user cancelled */
+                    }
+                  }}
+                >
+                  Partager ma fiche
+                </Button>
+              </>
             )}
             {statusBadge}
           </div>
