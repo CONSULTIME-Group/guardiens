@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import ProsMap from "@/components/pros/ProsMap";
 
 type ProRow = {
   id: string;
@@ -30,6 +31,7 @@ export default function ProsListing() {
   const [category, setCategory] = useState<string | "all">("all");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("recent");
+  const [view, setView] = useState<"list" | "map">("list");
 
   useEffect(() => {
     (async () => {
@@ -119,7 +121,7 @@ export default function ProsListing() {
           </div>
         </header>
 
-        <div className="flex flex-col md:flex-row gap-3 mb-6">
+        <div className="flex flex-col md:flex-row gap-3 mb-4">
           <Input
             placeholder={t("pros_listing.search_placeholder")}
             value={query}
@@ -157,7 +159,36 @@ export default function ProsListing() {
           </div>
         </div>
 
-        {/* Maillage SEO : silos par catégorie */}
+        <div className="inline-flex rounded-md border border-border overflow-hidden mb-6" role="tablist" aria-label="Mode d'affichage">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={view === "list"}
+            onClick={() => setView("list")}
+            className={`px-4 py-2 text-sm font-medium transition ${view === "list" ? "bg-primary text-primary-foreground" : "bg-background hover:bg-muted"}`}
+          >
+            Liste
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={view === "map"}
+            onClick={() => setView("map")}
+            className={`px-4 py-2 text-sm font-medium transition border-l border-border ${view === "map" ? "bg-primary text-primary-foreground" : "bg-background hover:bg-muted"}`}
+          >
+            Carte
+          </button>
+        </div>
+
+        {view === "map" && (
+          <div className="mb-8">
+            <ProsMap categoryFilter={category} />
+            <p className="text-xs text-muted-foreground mt-2">
+              Positions arrondies au quartier pour préserver la vie privée des pros.
+            </p>
+          </div>
+        )}
+
         <section className="mb-8 rounded-lg border border-border bg-muted/30 p-4">
           <h2 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wider">
             Parcourir par spécialité
@@ -175,7 +206,7 @@ export default function ProsListing() {
           </div>
         </section>
 
-        {loading ? (
+        {view === "list" && (loading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.from({ length: 6 }).map((_, i) => (
               <Skeleton key={i} className="h-48" />
@@ -241,7 +272,7 @@ export default function ProsListing() {
               );
             })}
           </div>
-        )}
+        ))}
       </main>
     </div>
   );
