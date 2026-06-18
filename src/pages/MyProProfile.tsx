@@ -165,29 +165,39 @@ export default function MyProProfile() {
     rejected: <Badge variant="destructive">Refusée</Badge>,
   }[profile.status as "pending" | "approved" | "rejected"];
 
+  const handleDelete = async () => {
+    if (deleteConfirm.trim().toUpperCase() !== "SUPPRIMER") return;
+    setDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("pro_profiles")
+        .delete()
+        .eq("id", profile.id);
+      if (error) throw error;
+      toast.success("Espace pro supprimé.");
+      navigate("/dashboard", { replace: true });
+    } catch (err: any) {
+      toast.error(err?.message ?? "Suppression impossible.");
+      setDeleting(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="container mx-auto px-4 py-8 max-w-3xl min-w-0">
       <Helmet>
         <title>Mon espace pro | Guardiens</title>
         <meta name="robots" content="noindex" />
       </Helmet>
 
-      <main className="container mx-auto px-4 py-10 max-w-3xl min-w-0">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mb-4 -ml-2"
-          onClick={() => navigate("/dashboard")}
-        >
-          ← Tableau de bord
-        </Button>
-        <div className="flex items-start justify-between mb-2 gap-3 flex-wrap">
-          <div>
-            <h1 className="text-3xl font-display font-bold">Mon espace pro</h1>
-            <p className="text-sm text-muted-foreground mt-1">{profile.raison_sociale}</p>
-          </div>
-          {statusBadge}
+      <div className="flex items-start justify-between mb-2 gap-3 flex-wrap">
+        <div>
+          <h1 className="text-3xl font-display font-bold">Mon espace pro</h1>
+          <p className="text-sm text-muted-foreground mt-1">{profile.raison_sociale}</p>
         </div>
+        {statusBadge}
+      </div>
+
+
 
 
         {profile.status === "approved" && profile.slug && (
