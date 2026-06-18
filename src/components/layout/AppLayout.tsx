@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState, type ReactNode } from "react";
-import { Outlet, useSearchParams, Link } from "react-router-dom";
+import { Outlet, useSearchParams, useLocation, Link } from "react-router-dom";
 import { Sidebar, BottomNav } from "./Navigation";
 import { BackButton } from "./BackButton";
 import Breadcrumbs from "./Breadcrumbs";
