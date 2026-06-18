@@ -80,8 +80,8 @@ export default function ProReviews({
     // récupère les profils (nom + avatar) en lot
     const ids = Array.from(new Set(list.map((r) => r.user_id)));
     if (ids.length > 0) {
-      const { data: profs } = await supabase
-        .from("profiles")
+      const { data: profs } = await (supabase
+        .from("profiles") as any)
         .select("user_id, first_name, last_name, avatar_url")
         .in("user_id", ids);
       const map = new Map((profs ?? []).map((p: any) => [p.user_id, p]));
