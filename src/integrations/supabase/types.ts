@@ -2975,6 +2975,7 @@ export type Database = {
           updated_at: string
           urgences_24_7: boolean
           user_id: string
+          view_count: number
           website: string | null
           zone_cities: string[]
           zone_radius_km: number | null
@@ -3011,6 +3012,7 @@ export type Database = {
           updated_at?: string
           urgences_24_7?: boolean
           user_id: string
+          view_count?: number
           website?: string | null
           zone_cities?: string[]
           zone_radius_km?: number | null
@@ -3047,6 +3049,7 @@ export type Database = {
           updated_at?: string
           urgences_24_7?: boolean
           user_id?: string
+          view_count?: number
           website?: string | null
           zone_cities?: string[]
           zone_radius_km?: number | null
@@ -5513,6 +5516,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: number
       }
+      increment_pro_view: { Args: { _slug: string }; Returns: undefined }
       increment_redirect_hit: {
         Args: { p_slug_from: string }
         Returns: undefined

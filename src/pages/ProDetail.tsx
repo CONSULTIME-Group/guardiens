@@ -34,6 +34,10 @@ export default function ProDetail() {
       const { data } = await req.maybeSingle();
       setPro(data);
       setLoading(false);
+      // Incrémente le compteur de vues uniquement pour les fiches publiques
+      if (data && (data as any).status === "approved" && !isPreview) {
+        supabase.rpc("increment_pro_view" as any, { _slug: slug }).then(() => {});
+      }
     })();
   }, [slug, isPreview]);
 
