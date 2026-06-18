@@ -92,6 +92,30 @@ export default function ProOnboarding() {
   };
 
 
+  // Auto-save du brouillon dans localStorage (survit aux refresh / retour OAuth).
+  const DRAFT_KEY = "pro_onboarding_draft";
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const draft = JSON.parse(raw);
+      if (draft?.form && typeof draft.form === "object") setForm((f) => ({ ...f, ...draft.form }));
+      if (draft?.step === 1 || draft?.step === 2 || draft?.step === 3) setStep(draft.step);
+    } catch {
+      /* draft corrompu : on l'ignore */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, step, savedAt: Date.now() }));
+    } catch {
+      /* quota plein ou navigateur privé : silencieux */
+    }
+  }, [form, step]);
+
   useEffect(() => {
     if (!user) {
       // Pas connecté : on envoie vers /inscription avec le contexte "pro"
@@ -109,11 +133,13 @@ export default function ProOnboarding() {
         .limit(1)
         .maybeSingle();
       if (existing) {
+        try { localStorage.removeItem(DRAFT_KEY); } catch {}
         toast.info("Une fiche pro existe déjà pour ce compte. Redirection vers votre espace.");
         navigate("/pros/mon-espace", { replace: true });
       }
     })();
   }, [user, navigate]);
+
 
   const update = (k: string, v: any) => setForm((f) => ({ ...f, [k]: v }));
 
