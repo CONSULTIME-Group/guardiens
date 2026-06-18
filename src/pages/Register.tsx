@@ -110,7 +110,8 @@ const Register = () => {
  const navigate = useNavigate();
  const { toast } = useToast();
  const redirectTarget = sanitizeRedirect(searchParams.get("redirect"));
- const postAuthTarget = redirectTarget ?? "/dashboard";
+ // Si l'utilisateur sélectionne le rôle « pro », on l'envoie systématiquement vers le formulaire fiche pro.
+ const postAuthTarget = selectedRole === "pro" ? "/pros/inscription" : (redirectTarget ?? "/dashboard");
 
  const pwStrength = useMemo(() => getPasswordStrength(password), [password]);
 
