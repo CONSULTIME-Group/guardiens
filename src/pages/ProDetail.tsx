@@ -26,11 +26,15 @@ function formatPriceRange(min: number | null, max: number | null): string | null
 export default function ProDetail() {
   const { slug } = useParams<{ slug: string }>();
   const [searchParams] = useSearchParams();
+  const { user } = useAuth();
   const { isAdmin } = useAdmin();
-  const isPreview = searchParams.get("preview") === "1" && isAdmin;
+  const isAdminPreview = searchParams.get("preview") === "1" && isAdmin;
   const [pro, setPro] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [reloadKey, setReloadKey] = useState(0);
+
+  const isOwner = !!user && !!pro && pro.user_id === user.id;
+  const isPreview = isAdminPreview || (isOwner && pro?.status !== "approved");
 
   useEffect(() => {
     if (!slug) return;
@@ -39,18 +43,21 @@ export default function ProDetail() {
       let req = supabase
         .from("pro_profiles")
         .select(
-          "id, slug, raison_sociale, category, sub_categories, city, postal_code, description, phone, website, email_contact, urgences_24_7, siret_verified, logo_url, cover_url, tarif_min, tarif_max, tarif_note, horaires, diplomes, ordre_number, zone_radius_km, zone_cities, status, rating_avg, rating_count, google_place_id"
+          "id, user_id, slug, raison_sociale, category, sub_categories, city, postal_code, description, phone, website, email_contact, urgences_24_7, siret_verified, logo_url, cover_url, tarif_min, tarif_max, tarif_note, horaires, diplomes, ordre_number, zone_radius_km, zone_cities, status, rating_avg, rating_count, google_place_id"
         )
         .eq("slug", slug);
-      if (!isPreview) req = req.eq("status", "approved");
+      // Anon: restreint aux fiches approuvées. Connecté: la RLS expose aussi
+      // sa propre fiche (auto-preview) et toutes les fiches pour l'admin.
+      if (!user && !isAdminPreview) req = req.eq("status", "approved");
       const { data } = await req.maybeSingle();
       setPro(data);
       setLoading(false);
-      if (data && (data as any).status === "approved" && !isPreview) {
+      if (data && (data as any).status === "approved" && !isAdminPreview && (!user || (data as any).user_id !== user.id)) {
         supabase.rpc("increment_pro_view" as any, { _slug: slug }).then(() => {});
       }
     })();
-  }, [slug, isPreview, reloadKey]);
+  }, [slug, isAdminPreview, user?.id, reloadKey]);
+
 
   if (loading) {
     return (
