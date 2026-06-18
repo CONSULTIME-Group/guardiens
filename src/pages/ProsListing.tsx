@@ -206,7 +206,7 @@ export default function ProsListing() {
           </div>
         </section>
 
-        {loading ? (
+        {view === "list" && (loading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.from({ length: 6 }).map((_, i) => (
               <Skeleton key={i} className="h-48" />
