@@ -244,12 +244,14 @@ export default function MyProProfile() {
           </Card>
         )}
 
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs value={currentTab} onValueChange={(v) => setTab(v as TabId)} className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
             <TabsTrigger value="edit">Ma fiche</TabsTrigger>
             <TabsTrigger value="stats">Statistiques</TabsTrigger>
+            <TabsTrigger value="settings">Réglages</TabsTrigger>
           </TabsList>
+
 
           <TabsContent value="overview" className="mt-6 space-y-6">
             {/* Programme Fondateurs — la pièce signature */}
