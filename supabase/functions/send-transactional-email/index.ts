@@ -151,10 +151,29 @@ Deno.serve(async (req) => {
   // verify_jwt = true ensures a valid JWT, but without this check ANY
   // authenticated user could spam arbitrary recipients with platform-branded
   // templates. Trusted callers bypass: service_role and admin users.
-  // Non-admin authenticated callers may ONLY target their own email address.
+  //
+  // For non-admin authenticated callers, we apply a two-tier policy:
+  //   - SENSITIVE_TEMPLATES (account / identity / platform-branded messages
+  //     that could be used for phishing): must be sent to the caller's OWN
+  //     email address.
+  //   - All other templates (cross-user notifications: application-accepted,
+  //     new-message, mission-response, etc.): allowed — abuse is constrained
+  //     by per-recipient frequency caps and by business validation upstream.
+  const SENSITIVE_TEMPLATES = new Set([
+    'identity-verified',
+    'identity-rejected',
+    'pro-profile-approved',
+    'pro-profile-rejected',
+    'contact-reply',
+    'subscription-expired',
+    'dispute-resolved',
+    'report-resolved',
+    'relance-piece-identite',
+  ])
+
   const authHeader = req.headers.get('Authorization') ?? ''
   const callerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : ''
-  const isServiceRole = callerToken && callerToken === supabaseServiceKey
+  const isServiceRole = !!callerToken && callerToken === supabaseServiceKey
 
   if (!isServiceRole) {
     let callerUserId: string | null = null
@@ -180,14 +199,14 @@ Deno.serve(async (req) => {
       )
     }
 
-    if (!callerIsAdmin) {
+    if (!callerIsAdmin && SENSITIVE_TEMPLATES.has(templateName)) {
       if (!callerEmail || effectiveRecipient.toLowerCase() !== callerEmail) {
-        console.warn('[security] Non-admin caller attempted to email a different recipient', {
+        console.warn('[security] Non-admin caller attempted to send sensitive template to another recipient', {
           callerUserId,
           templateName,
         })
         return new Response(
-          JSON.stringify({ error: 'Forbidden: you can only send templates to your own account' }),
+          JSON.stringify({ error: 'Forbidden: this template can only be sent to your own account' }),
           { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
