@@ -102,7 +102,7 @@ const Register = () => {
  const [existingAccountOpen, setExistingAccountOpen] = useState(false);
  const [acceptedTerms, setAcceptedTerms] = useState(false);
  const [termsHighlighted, setTermsHighlighted] = useState(false);
- const [etaSeconds, setEtaSeconds] = useState<number>(25);
+ 
  const [totalInscrits, setTotalInscrits] = useState<number | null>(null);
  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
@@ -153,12 +153,6 @@ const Register = () => {
   } catch {}
  }, [email]);
 
- useEffect(() => {
-  if (step !== 2) return;
-  setEtaSeconds(25);
-  const tm = setInterval(() => setEtaSeconds((s) => (s > 0 ? s - 1 : 0)), 1000);
-  return () => clearInterval(tm);
- }, [step]);
 
  useEffect(() => {
  let cancelled = false;
@@ -559,268 +553,202 @@ const Register = () => {
  </div>
  )}
 
- {step === 1 && (
- <>
- <div className="space-y-3 lg:space-y-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
- {roles.map((role) => (
- <button
- key={role.value}
- onClick={() => {
- setSelectedRole(role.value);
- setStep(2);
- trackEvent("signup_role_selected", {
- source: "/inscription",
- metadata: { role: role.value },
- });
- }}
- className={cn(
- "group relative w-full text-left p-3.5 lg:p-5 rounded-lg border-2 transition-all duration-200",
- "hover:border-primary hover:bg-primary/5 hover:-translate-y-0.5 hover:shadow-md",
- "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
- selectedRole === role.value ? "border-primary bg-primary/5" : "border-border"
- )}
- >
- {role.value === "owner" && (
- <span className="absolute -top-2 right-3 inline-flex items-center rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground shadow-sm">
- {t("register_page.most_popular")}
- </span>
- )}
- {role.value === "pro" && (
- <span className="absolute -top-2 right-3 inline-flex items-center rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-foreground shadow-sm">
- Pro
- </span>
- )}
- <div className="font-semibold text-sm lg:text-base mb-0.5 lg:mb-1">{role.label}</div>
- <div className="text-xs lg:text-sm text-muted-foreground leading-snug">{role.description}</div>
- </button>
-  ))}
- </div>
-
-  <p className="mt-3 text-center text-[11px] lg:text-xs text-muted-foreground/80">
-    {t("register_page.role_change_hint")}
-  </p>
-
- <ul className="mt-5 lg:mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-[11px] lg:text-xs text-muted-foreground">
- <li className="inline-flex items-center gap-1.5">
- <span className="h-1.5 w-1.5 rounded-full bg-primary/60" aria-hidden="true" />
- {t("register_page.trust_no_spam")}
- </li>
- <li className="inline-flex items-center gap-1.5">
- <span className="h-1.5 w-1.5 rounded-full bg-primary/60" aria-hidden="true" />
- {t("register_page.trust_no_commitment")}
- </li>
- <li className="inline-flex items-center gap-1.5">
- <span className="h-1.5 w-1.5 rounded-full bg-primary/60" aria-hidden="true" />
- {t("register_page.trust_france")}
- </li>
- </ul>
- </>
- )}
-
- {step === 2 && (
- <form onSubmit={handleSubmit} className="space-y-5 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
- <div className="text-center mb-6">
- <span className="inline-block px-4 py-1.5 rounded-pill bg-primary/10 text-primary text-sm font-medium">
- {roles.find((r) => r.value === selectedRole)?.label}
- </span>
- <button type="button" onClick={() => setStep(1)} className="block mx-auto mt-2 text-sm text-muted-foreground hover:text-foreground">
- {t("register_page.change_role")}
- </button>
- {selectedRole && (
- <p className="mt-3 text-xs text-muted-foreground/90 leading-relaxed max-w-xs mx-auto">
- {selectedRole === "owner" && (
- <Trans i18nKey="register_page.after_owner" components={{ 1: <strong className="text-foreground/80" /> }} />
- )}
- {selectedRole === "sitter" && (
- <Trans i18nKey="register_page.after_sitter" components={{ 1: <strong className="text-foreground/80" /> }} />
- )}
-  {selectedRole === "both" && (
-  <Trans i18nKey="register_page.after_both" components={{ 1: <strong className="text-foreground/80" /> }} />
+  {step === 1 && (
+  <>
+  <div className="space-y-3 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
+  {roles.map((role) => (
+  <button
+  key={role.value}
+  onClick={() => {
+  setSelectedRole(role.value);
+  setStep(2);
+  trackEvent("signup_role_selected", {
+  source: "/inscription",
+  metadata: { role: role.value },
+  });
+  }}
+  className={cn(
+  "group relative w-full text-left p-3.5 lg:p-4 rounded-lg border-2 transition-all duration-200",
+  "hover:border-primary hover:bg-primary/5",
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+  selectedRole === role.value ? "border-primary bg-primary/5" : "border-border"
   )}
-  {selectedRole === "pro" && (
-  <Trans i18nKey="register_page.after_pro" components={{ 1: <strong className="text-foreground/80" /> }} />
-  )}
- </p>
- )}
- </div>
-
- <Button
- type="button"
- variant="outline"
- size="lg"
- className="w-full"
- onClick={handleGoogleSignUp}
- disabled={isGoogleLoading || isLoading}
- >
- <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" aria-hidden="true">
- <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
- <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
- <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
- <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
- </svg>
- {isGoogleLoading ? t("register_page.google_loading") : t("register_page.google_cta")}
- </Button>
-
- <div className="relative" role="separator">
- <div className="absolute inset-0 flex items-center">
- <span className="w-full border-t border-border" />
- </div>
- <div className="relative flex justify-center text-xs uppercase">
- <span className="bg-background px-2 text-muted-foreground">{t("register_page.or_email")}</span>
- </div>
- </div>
-
- <div className="flex items-center justify-center gap-2 -mt-1 mb-1 text-xs text-muted-foreground">
-  <span className="inline-flex items-center justify-center min-w-[1.75rem] h-6 px-2 rounded-full bg-primary/10 text-primary font-semibold tabular-nums">
-   {etaSeconds > 0 ? `${etaSeconds}s` : "✓"}
+  >
+  {role.value === "pro" && (
+  <span className="absolute -top-2 right-3 inline-flex items-center rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-foreground shadow-sm">
+  Pro
   </span>
-  <span>{etaSeconds > 0 ? t("register_page.eta_remaining") : t("register_page.eta_done")}</span>
- </div>
-
- <div className="space-y-2">
-  <Label htmlFor="email">{t("register_page.email_label")}</Label>
-  <Input
-   id="email"
-   type="email"
-   placeholder={t("register_page.email_placeholder")}
-   value={email}
-   onChange={(e) => setEmail(e.target.value)}
-   onFocus={() => { try { trackEvent("signup_form_focused" as any, { source: "/inscription", metadata: { field: "email" } }); } catch {} }}
-   required
-   autoComplete="email"
-   className="rounded-lg h-12"
-  />
-  <p className="text-xs text-muted-foreground">
-   {t("register_page.email_hint")}
-  </p>
- </div>
- <div className="space-y-2">
-  <div className="flex items-center justify-between">
-   <Label htmlFor="password">{t("register_page.password_label")}</Label>
-   <button
-    type="button"
-    onClick={() => { const pw = generateSuggestedPassword(); setPassword(pw); setShowPassword(true); setFormError(null); }}
-    className="text-xs text-primary hover:underline"
-   >
-    {t("register_page.suggest_password")}
-   </button>
-  </div>
-  <div className="relative">
-   <Input
-    id="password"
-    type={showPassword ? "text" : "password"}
-    placeholder={t("register_page.password_placeholder")}
-    value={password}
-    onChange={(e) => { setPassword(e.target.value); setFormError(null); }}
-    onFocus={() => { try { trackEvent("signup_form_focused" as any, { source: "/inscription", metadata: { field: "password" } }); } catch {} }}
-    required
-    minLength={8}
-    autoComplete="new-password"
-    className="rounded-lg h-12 pr-12"
-   />
-   <button
-    type="button"
-    onClick={() => setShowPassword(!showPassword)}
-    aria-label={showPassword ? t("register_page.hide_password") : t("register_page.show_password")}
-    aria-pressed={showPassword}
-    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-   >
-    {showPassword ? <EyeOff className="h-5 w-5" aria-hidden="true" /> : <Eye className="h-5 w-5" aria-hidden="true" />}
-   </button>
-  </div>
-  <p className="text-xs text-muted-foreground">
-   {t("register_page.password_hint")}
-  </p>
-
-  {password.length >= 6 && isObviouslyWeak(password) && (
-   <p className="text-xs text-warning-foreground bg-warning-soft border border-warning-border rounded px-2 py-1.5 animate-in fade-in-0">
-    {t("register_page.password_weak_live")}
-   </p>
   )}
-
- {password.length > 0 && (
- <div className="space-y-1.5 animate-in fade-in-0 duration-200">
- <div className="flex gap-1 h-1.5 rounded-full overflow-hidden bg-muted">
- {[1, 2, 3, 4].map((i) => (
- <div
- key={i}
- className={cn(
- "flex-1 rounded-full transition-all duration-300",
- i <= pwStrength.score ? pwStrength.color : "bg-transparent"
- )}
- />
- ))}
- </div>
- <p className="text-xs text-muted-foreground">
- {t("register_page.strength_label")} : <span className="font-medium">{pwStrength.key ? t(`register_page.strength.${pwStrength.key}`) : ""}</span>
- </p>
- </div>
- )}
-
- {formError && <p className="text-sm text-destructive">{formError}</p>}
- </div>
-
-
-          <div
-            className={cn(
-              "flex items-start gap-3 rounded-lg border p-3 transition-colors",
-              termsHighlighted && !acceptedTerms
-                ? "border-destructive bg-destructive/5 animate-in fade-in-0"
-                : "border-border bg-muted/30"
-            )}
-          >
-            <Checkbox
-              id="accept-terms"
-              checked={acceptedTerms}
-              onCheckedChange={(v) => {
-                const checked = v === true;
-                setAcceptedTerms(checked);
-                if (checked) {
-                  setTermsHighlighted(false);
-                  setFormError(null);
-                  try { trackEvent("signup_terms_checked" as any, { source: "/inscription" }); } catch {}
-                }
-              }}
-              className="mt-0.5"
-            />
-            <label htmlFor="accept-terms" className="text-sm text-foreground/80 leading-snug cursor-pointer">
-              <Trans
-                i18nKey="register_page.accept_label"
-                components={{
-                  1: <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
-                  2: <Link to="/cgs" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
-                  3: <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
-                }}
-              />
-            </label>
-          </div>
-
-          <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-            {isLoading ? t("register_page.submitting") : t("register_page.submit")}
-          </Button>
- <p className="text-center text-xs text-muted-foreground">
- {t("register_page.footer_trust")}
- </p>
- </form>
- )}
-
-  {step !== "confirmation" && (
-  <div className="mt-6 space-y-2 text-center text-sm text-muted-foreground">
-   <p>
-   {t("register_page.have_account")}{" "}
-   <Link to={`/login${buildRedirectQuery(redirectTarget)}`} className="text-primary font-medium hover:underline">{t("register_page.sign_in")}</Link>
-   </p>
-   {step === 2 && (
-   <button
-   type="button"
-   onClick={() => navigate(`/login${buildRedirectQuery(redirectTarget)}`)}
-   className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-   >
-  {t("register_page.quit_signup")}
+  <div className="font-semibold text-sm lg:text-base mb-0.5">{role.label}</div>
+  <div className="text-xs lg:text-sm text-muted-foreground leading-snug">{role.description}</div>
   </button>
+   ))}
+  </div>
+
+   <p className="mt-4 text-center text-[11px] lg:text-xs text-muted-foreground/80">
+     {t("register_page.role_change_hint")}
+   </p>
+  </>
   )}
+
+  {step === 2 && (
+  <form onSubmit={handleSubmit} className="space-y-5 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
+  <div className="text-center mb-4">
+  <span className="inline-block px-4 py-1.5 rounded-pill bg-primary/10 text-primary text-sm font-medium">
+  {roles.find((r) => r.value === selectedRole)?.label}
+  </span>
+  <button type="button" onClick={() => setStep(1)} className="block mx-auto mt-2 text-xs text-muted-foreground hover:text-foreground">
+  {t("register_page.change_role")}
+  </button>
+  </div>
+
+  <Button
+  type="button"
+  variant="outline"
+  size="lg"
+  className="w-full"
+  onClick={handleGoogleSignUp}
+  disabled={isGoogleLoading || isLoading}
+  >
+  <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" aria-hidden="true">
+  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+  </svg>
+  {isGoogleLoading ? t("register_page.google_loading") : t("register_page.google_cta")}
+  </Button>
+
+  <div className="relative" role="separator">
+  <div className="absolute inset-0 flex items-center">
+  <span className="w-full border-t border-border" />
+  </div>
+  <div className="relative flex justify-center text-xs uppercase">
+  <span className="bg-background px-2 text-muted-foreground">{t("register_page.or_email")}</span>
+  </div>
+  </div>
+
+  <div className="space-y-2">
+   <Label htmlFor="email">{t("register_page.email_label")}</Label>
+   <Input
+    id="email"
+    type="email"
+    placeholder={t("register_page.email_placeholder")}
+    value={email}
+    onChange={(e) => setEmail(e.target.value)}
+    onFocus={() => { try { trackEvent("signup_form_focused" as any, { source: "/inscription", metadata: { field: "email" } }); } catch {} }}
+    required
+    autoComplete="email"
+    className="rounded-lg h-12"
+   />
+  </div>
+  <div className="space-y-2">
+   <div className="flex items-center justify-between">
+    <Label htmlFor="password">{t("register_page.password_label")}</Label>
+    <button
+     type="button"
+     onClick={() => { const pw = generateSuggestedPassword(); setPassword(pw); setShowPassword(true); setFormError(null); }}
+     className="text-xs text-primary hover:underline"
+    >
+     {t("register_page.suggest_password")}
+    </button>
+   </div>
+   <div className="relative">
+    <Input
+     id="password"
+     type={showPassword ? "text" : "password"}
+     placeholder={t("register_page.password_placeholder")}
+     value={password}
+     onChange={(e) => { setPassword(e.target.value); setFormError(null); }}
+     onFocus={() => { try { trackEvent("signup_form_focused" as any, { source: "/inscription", metadata: { field: "password" } }); } catch {} }}
+     required
+     minLength={8}
+     autoComplete="new-password"
+     className="rounded-lg h-12 pr-12"
+    />
+    <button
+     type="button"
+     onClick={() => setShowPassword(!showPassword)}
+     aria-label={showPassword ? t("register_page.hide_password") : t("register_page.show_password")}
+     aria-pressed={showPassword}
+     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+    >
+     {showPassword ? <EyeOff className="h-5 w-5" aria-hidden="true" /> : <Eye className="h-5 w-5" aria-hidden="true" />}
+    </button>
+   </div>
+
+   {password.length >= 6 && isObviouslyWeak(password) && (
+    <p className="text-xs text-warning-foreground bg-warning-soft border border-warning-border rounded px-2 py-1.5 animate-in fade-in-0">
+     {t("register_page.password_weak_live")}
+    </p>
+   )}
+
+  {password.length > 0 && (
+  <div className="flex gap-1 h-1.5 rounded-full overflow-hidden bg-muted animate-in fade-in-0 duration-200">
+  {[1, 2, 3, 4].map((i) => (
+  <div
+  key={i}
+  className={cn(
+  "flex-1 rounded-full transition-all duration-300",
+  i <= pwStrength.score ? pwStrength.color : "bg-transparent"
+  )}
+  />
+  ))}
   </div>
   )}
+
+  {formError && <p className="text-sm text-destructive">{formError}</p>}
+  </div>
+
+
+           <div
+             className={cn(
+               "flex items-start gap-3 rounded-lg border p-3 transition-colors",
+               termsHighlighted && !acceptedTerms
+                 ? "border-destructive bg-destructive/5 animate-in fade-in-0"
+                 : "border-border bg-muted/30"
+             )}
+           >
+             <Checkbox
+               id="accept-terms"
+               checked={acceptedTerms}
+               onCheckedChange={(v) => {
+                 const checked = v === true;
+                 setAcceptedTerms(checked);
+                 if (checked) {
+                   setTermsHighlighted(false);
+                   setFormError(null);
+                   try { trackEvent("signup_terms_checked" as any, { source: "/inscription" }); } catch {}
+                 }
+               }}
+               className="mt-0.5"
+             />
+             <label htmlFor="accept-terms" className="text-sm text-foreground/80 leading-snug cursor-pointer">
+               <Trans
+                 i18nKey="register_page.accept_label"
+                 components={{
+                   1: <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
+                   2: <Link to="/cgs" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
+                   3: <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
+                 }}
+               />
+             </label>
+           </div>
+
+           <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+             {isLoading ? t("register_page.submitting") : t("register_page.submit")}
+           </Button>
+  </form>
+  )}
+
+   {step !== "confirmation" && (
+   <div className="mt-6 text-center text-sm text-muted-foreground">
+    <p>
+    {t("register_page.have_account")}{" "}
+    <Link to={`/login${buildRedirectQuery(redirectTarget)}`} className="text-primary font-medium hover:underline">{t("register_page.sign_in")}</Link>
+    </p>
+   </div>
+   )}
  </div>
  </div>
 
