@@ -3,7 +3,7 @@ import { useParams, Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/hooks/useAdmin";
-import { getCategoryByValue, getProInitials, getCategoryBySlug } from "@/lib/proCategories";
+import { getCategoryByValue, getProInitials } from "@/lib/proCategories";
 import ObfuscatedEmail from "@/components/pros/ObfuscatedEmail";
 import ProReviews from "@/components/pros/ProReviews";
 import ProContactCTA from "@/components/pros/ProContactCTA";
