@@ -36,10 +36,26 @@ import { toast } from "sonner";
 export default function MyProProfile() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
   const [profile, setProfile] = useState<any | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
+
+  const allowedTabs = ["overview", "edit", "stats", "settings"] as const;
+  type TabId = (typeof allowedTabs)[number];
+  const currentTab: TabId = (allowedTabs as readonly string[]).includes(searchParams.get("tab") ?? "")
+    ? (searchParams.get("tab") as TabId)
+    : "overview";
+  const setTab = (t: TabId) => {
+    const next = new URLSearchParams(searchParams);
+    if (t === "overview") next.delete("tab");
+    else next.set("tab", t);
+    setSearchParams(next, { replace: true });
+  };
+
 
   useEffect(() => {
     if (!user) {
