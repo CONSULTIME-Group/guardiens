@@ -559,63 +559,43 @@ const Register = () => {
  </div>
  )}
 
- {step === 1 && (
- <>
- <div className="space-y-3 lg:space-y-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
- {roles.map((role) => (
- <button
- key={role.value}
- onClick={() => {
- setSelectedRole(role.value);
- setStep(2);
- trackEvent("signup_role_selected", {
- source: "/inscription",
- metadata: { role: role.value },
- });
- }}
- className={cn(
- "group relative w-full text-left p-3.5 lg:p-5 rounded-lg border-2 transition-all duration-200",
- "hover:border-primary hover:bg-primary/5 hover:-translate-y-0.5 hover:shadow-md",
- "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
- selectedRole === role.value ? "border-primary bg-primary/5" : "border-border"
- )}
- >
- {role.value === "owner" && (
- <span className="absolute -top-2 right-3 inline-flex items-center rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground shadow-sm">
- {t("register_page.most_popular")}
- </span>
- )}
- {role.value === "pro" && (
- <span className="absolute -top-2 right-3 inline-flex items-center rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-foreground shadow-sm">
- Pro
- </span>
- )}
- <div className="font-semibold text-sm lg:text-base mb-0.5 lg:mb-1">{role.label}</div>
- <div className="text-xs lg:text-sm text-muted-foreground leading-snug">{role.description}</div>
- </button>
-  ))}
- </div>
+  {step === 1 && (
+  <>
+  <div className="space-y-3 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
+  {roles.map((role) => (
+  <button
+  key={role.value}
+  onClick={() => {
+  setSelectedRole(role.value);
+  setStep(2);
+  trackEvent("signup_role_selected", {
+  source: "/inscription",
+  metadata: { role: role.value },
+  });
+  }}
+  className={cn(
+  "group relative w-full text-left p-3.5 lg:p-4 rounded-lg border-2 transition-all duration-200",
+  "hover:border-primary hover:bg-primary/5",
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+  selectedRole === role.value ? "border-primary bg-primary/5" : "border-border"
+  )}
+  >
+  {role.value === "pro" && (
+  <span className="absolute -top-2 right-3 inline-flex items-center rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-foreground shadow-sm">
+  Pro
+  </span>
+  )}
+  <div className="font-semibold text-sm lg:text-base mb-0.5">{role.label}</div>
+  <div className="text-xs lg:text-sm text-muted-foreground leading-snug">{role.description}</div>
+  </button>
+   ))}
+  </div>
 
-  <p className="mt-3 text-center text-[11px] lg:text-xs text-muted-foreground/80">
-    {t("register_page.role_change_hint")}
-  </p>
-
- <ul className="mt-5 lg:mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-[11px] lg:text-xs text-muted-foreground">
- <li className="inline-flex items-center gap-1.5">
- <span className="h-1.5 w-1.5 rounded-full bg-primary/60" aria-hidden="true" />
- {t("register_page.trust_no_spam")}
- </li>
- <li className="inline-flex items-center gap-1.5">
- <span className="h-1.5 w-1.5 rounded-full bg-primary/60" aria-hidden="true" />
- {t("register_page.trust_no_commitment")}
- </li>
- <li className="inline-flex items-center gap-1.5">
- <span className="h-1.5 w-1.5 rounded-full bg-primary/60" aria-hidden="true" />
- {t("register_page.trust_france")}
- </li>
- </ul>
- </>
- )}
+   <p className="mt-4 text-center text-[11px] lg:text-xs text-muted-foreground/80">
+     {t("register_page.role_change_hint")}
+   </p>
+  </>
+  )}
 
  {step === 2 && (
  <form onSubmit={handleSubmit} className="space-y-5 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
