@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/hooks/useAdmin";
 import { getCategoryByValue, getProInitials } from "@/lib/proCategories";
 import ObfuscatedEmail from "@/components/pros/ObfuscatedEmail";
+import ProReviews from "@/components/pros/ProReviews";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ export default function ProDetail() {
   const isPreview = searchParams.get("preview") === "1" && isAdmin;
   const [pro, setPro] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     if (!slug) return;
@@ -27,7 +29,7 @@ export default function ProDetail() {
       let req = supabase
         .from("pro_profiles")
         .select(
-          "id, slug, raison_sociale, category, sub_categories, city, postal_code, description, phone, website, email_contact, urgences_24_7, siret_verified, logo_url, cover_url, tarif_min, tarif_max, tarif_note, horaires, diplomes, ordre_number, zone_radius_km, zone_cities, status"
+          "id, slug, raison_sociale, category, sub_categories, city, postal_code, description, phone, website, email_contact, urgences_24_7, siret_verified, logo_url, cover_url, tarif_min, tarif_max, tarif_note, horaires, diplomes, ordre_number, zone_radius_km, zone_cities, status, rating_avg, rating_count"
         )
         .eq("slug", slug);
       if (!isPreview) req = req.eq("status", "approved");
@@ -39,7 +41,7 @@ export default function ProDetail() {
         supabase.rpc("increment_pro_view" as any, { _slug: slug }).then(() => {});
       }
     })();
-  }, [slug, isPreview]);
+  }, [slug, isPreview, reloadKey]);
 
   if (loading) {
     return (
@@ -89,6 +91,17 @@ export default function ProDetail() {
         }
       : {}),
     ...(pro.horaires?.text ? { openingHours: pro.horaires.text } : {}),
+    ...(pro.rating_count > 0 && pro.rating_avg
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: Number(pro.rating_avg).toFixed(1),
+            reviewCount: pro.rating_count,
+            bestRating: 5,
+            worstRating: 1,
+          },
+        }
+      : {}),
   };
 
   const breadcrumbJsonLd = {
@@ -164,7 +177,14 @@ export default function ProDetail() {
               {cat?.label}
               {pro.city ? ` · ${pro.city}` : ""}
             </p>
-            <div className="flex flex-wrap gap-2 mt-3">
+            <div className="flex flex-wrap items-center gap-2 mt-3">
+              {pro.rating_count > 0 && (
+                <a href="#pro-reviews-heading" className="inline-flex items-center gap-1 text-sm hover:underline">
+                  <span className="text-amber-500" aria-hidden>★</span>
+                  <span className="font-medium">{Number(pro.rating_avg ?? 0).toFixed(1)}</span>
+                  <span className="text-muted-foreground">({pro.rating_count})</span>
+                </a>
+              )}
               {pro.urgences_24_7 && <Badge variant="secondary">Urgences 24/7</Badge>}
               {pro.siret_verified && <Badge variant="secondary">SIRET vérifié</Badge>}
             </div>
@@ -248,6 +268,16 @@ export default function ProDetail() {
             </Card>
           )}
         </div>
+
+        {pro.status === "approved" && (
+          <ProReviews
+            proId={pro.id}
+            proName={pro.raison_sociale}
+            ratingAvg={pro.rating_avg}
+            ratingCount={pro.rating_count ?? 0}
+            onRefresh={() => setReloadKey((k) => k + 1)}
+          />
+        )}
       </main>
     </div>
   );

@@ -2962,6 +2962,8 @@ export type Database = {
           phone: string | null
           postal_code: string | null
           raison_sociale: string
+          rating_avg: number | null
+          rating_count: number
           rejection_reason: string | null
           siret: string | null
           siret_verified: boolean
@@ -2999,6 +3001,8 @@ export type Database = {
           phone?: string | null
           postal_code?: string | null
           raison_sociale: string
+          rating_avg?: number | null
+          rating_count?: number
           rejection_reason?: string | null
           siret?: string | null
           siret_verified?: boolean
@@ -3036,6 +3040,8 @@ export type Database = {
           phone?: string | null
           postal_code?: string | null
           raison_sociale?: string
+          rating_avg?: number | null
+          rating_count?: number
           rejection_reason?: string | null
           siret?: string | null
           siret_verified?: boolean
@@ -3055,6 +3061,47 @@ export type Database = {
           zone_radius_km?: number | null
         }
         Relationships: []
+      }
+      pro_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          pro_id: string
+          rating: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          pro_id: string
+          rating: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          pro_id?: string
+          rating?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pro_reviews_pro_id_fkey"
+            columns: ["pro_id"]
+            isOneToOne: false
+            referencedRelation: "pro_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pro_verifications: {
         Row: {
@@ -5594,6 +5641,7 @@ export type Database = {
         Returns: undefined
       }
       refresh_all_sitter_reply_stats: { Args: never; Returns: number }
+      refresh_pro_rating: { Args: { _pro_id: string }; Returns: undefined }
       refresh_sitter_reply_stats: {
         Args: { p_user_id: string }
         Returns: undefined
