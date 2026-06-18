@@ -2942,6 +2942,50 @@ export type Database = {
           },
         ]
       }
+      pro_google_reviews_cache: {
+        Row: {
+          created_at: string
+          fetched_at: string
+          id: string
+          place_id: string
+          pro_id: string
+          rating_avg: number | null
+          rating_count: number | null
+          reviews: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          fetched_at?: string
+          id?: string
+          place_id: string
+          pro_id: string
+          rating_avg?: number | null
+          rating_count?: number | null
+          reviews?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          fetched_at?: string
+          id?: string
+          place_id?: string
+          pro_id?: string
+          rating_avg?: number | null
+          rating_count?: number | null
+          reviews?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pro_google_reviews_cache_pro_id_fkey"
+            columns: ["pro_id"]
+            isOneToOne: true
+            referencedRelation: "pro_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pro_profiles: {
         Row: {
           approved_at: string | null
@@ -2953,6 +2997,7 @@ export type Database = {
           description: string | null
           diplomes: string[]
           email_contact: string | null
+          google_place_id: string | null
           horaires: Json
           id: string
           latitude: number | null
@@ -2992,6 +3037,7 @@ export type Database = {
           description?: string | null
           diplomes?: string[]
           email_contact?: string | null
+          google_place_id?: string | null
           horaires?: Json
           id?: string
           latitude?: number | null
@@ -3031,6 +3077,7 @@ export type Database = {
           description?: string | null
           diplomes?: string[]
           email_contact?: string | null
+          google_place_id?: string | null
           horaires?: Json
           id?: string
           latitude?: number | null
