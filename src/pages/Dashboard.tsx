@@ -199,10 +199,15 @@ const Dashboard = () => {
     <div className="overflow-x-hidden">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
 
+      <div className="container mx-auto px-4 pt-4">
+        <ProSpaceBanner />
+      </div>
+
       <div
         key={displayedRole}
         className={transitioning ? "animate-fade-out" : "animate-fade-in"}
       >
+
         <DashboardErrorBoundary
           section={displayedRole === "owner" ? "OwnerDashboard" : "SitterDashboard"}
           label={
