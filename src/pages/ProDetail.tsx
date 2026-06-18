@@ -8,7 +8,7 @@ import ObfuscatedEmail from "@/components/pros/ObfuscatedEmail";
 import ProReviews from "@/components/pros/ProReviews";
 import ProContactCTA from "@/components/pros/ProContactCTA";
 import SimilarPros from "@/components/pros/SimilarPros";
-import GoogleReviewsBlock from "@/components/pros/GoogleReviewsBlock";
+import GoogleRatingInline from "@/components/pros/GoogleRatingInline";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -212,6 +212,9 @@ export default function ProDetail() {
                   <span className="text-muted-foreground">({pro.rating_count})</span>
                 </a>
               )}
+              {pro.google_place_id && (
+                <GoogleRatingInline proId={pro.id} placeId={pro.google_place_id} />
+              )}
               {pro.urgences_24_7 && <Badge variant="secondary">Urgences 24/7</Badge>}
               {pro.siret_verified && <Badge variant="secondary">SIRET vérifié</Badge>}
             </div>
@@ -305,9 +308,8 @@ export default function ProDetail() {
           )}
         </div>
 
-        {pro.status === "approved" && pro.google_place_id && (
-          <GoogleReviewsBlock proId={pro.id} placeId={pro.google_place_id} />
-        )}
+
+
 
         {pro.status === "approved" && (
           <ProReviews
