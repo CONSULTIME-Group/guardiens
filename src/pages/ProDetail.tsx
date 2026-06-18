@@ -41,7 +41,7 @@ export default function ProDetail() {
         supabase.rpc("increment_pro_view" as any, { _slug: slug }).then(() => {});
       }
     })();
-  }, [slug, isPreview]);
+  }, [slug, isPreview, reloadKey]);
 
   if (loading) {
     return (
