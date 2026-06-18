@@ -177,7 +177,14 @@ export default function ProDetail() {
               {cat?.label}
               {pro.city ? ` · ${pro.city}` : ""}
             </p>
-            <div className="flex flex-wrap gap-2 mt-3">
+            <div className="flex flex-wrap items-center gap-2 mt-3">
+              {pro.rating_count > 0 && (
+                <a href="#pro-reviews-heading" className="inline-flex items-center gap-1 text-sm hover:underline">
+                  <span className="text-amber-500" aria-hidden>★</span>
+                  <span className="font-medium">{Number(pro.rating_avg ?? 0).toFixed(1)}</span>
+                  <span className="text-muted-foreground">({pro.rating_count})</span>
+                </a>
+              )}
               {pro.urgences_24_7 && <Badge variant="secondary">Urgences 24/7</Badge>}
               {pro.siret_verified && <Badge variant="secondary">SIRET vérifié</Badge>}
             </div>
