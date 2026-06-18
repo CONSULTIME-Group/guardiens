@@ -1,6 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useRef, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
 import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 const Dashboard = () => {
   const { activeRole, user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [displayedRole, setDisplayedRole] = useState(activeRole);
   const [transitioning, setTransitioning] = useState(false);
@@ -19,6 +20,39 @@ const Dashboard = () => {
   const welcomeShown = useRef(false);
   const activationFired = useRef(false);
   const profileCheckFired = useRef(false);
+  const proRedirectFired = useRef(false);
+
+  // Filet de sécurité parcours pro : si l'utilisateur s'est inscrit avec
+  // role=pro mais a atterri sur /dashboard (retour OAuth Google, lien de
+  // confirmation email, refresh…), on le renvoie une seule fois vers son
+  // espace pro pour qu'il finisse la configuration de sa fiche.
+  useEffect(() => {
+    if (proRedirectFired.current) return;
+    if (!user?.id) return;
+    let cancelled = false;
+    try {
+      const flag = typeof window !== "undefined"
+        ? localStorage.getItem("pending_pro_onboarding")
+        : null;
+      if (flag !== "1") return;
+      proRedirectFired.current = true;
+      (async () => {
+        const { data } = await supabase
+          .from("pro_profiles")
+          .select("id")
+          .eq("user_id", user.id)
+          .limit(1)
+          .maybeSingle();
+        if (cancelled) return;
+        try { localStorage.removeItem("pending_pro_onboarding"); } catch {}
+        navigate(data ? "/pros/mon-espace" : "/pros/inscription", { replace: true });
+      })();
+    } catch {
+      // silencieux
+    }
+    return () => { cancelled = true; };
+  }, [user?.id, navigate]);
+
 
   // Émettre user_activated UNE fois lors du premier affichage du dashboard
   // après inscription (flag posé dans Register.tsx).
