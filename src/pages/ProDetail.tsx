@@ -8,7 +8,7 @@ import ObfuscatedEmail from "@/components/pros/ObfuscatedEmail";
 import ProReviews from "@/components/pros/ProReviews";
 import ProContactCTA from "@/components/pros/ProContactCTA";
 import SimilarPros from "@/components/pros/SimilarPros";
-import GoogleReviewsBlock from "@/components/pros/GoogleReviewsBlock";
+import GoogleRatingInline from "@/components/pros/GoogleRatingInline";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
