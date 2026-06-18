@@ -86,7 +86,7 @@ export default function ProReviews({
         .in("user_id", ids);
       const map = new Map((profs ?? []).map((p: any) => [p.user_id, p]));
       list.forEach((r) => {
-        const p = map.get(r.user_id);
+        const p = map.get(r.user_id) as any;
         if (p) {
           r.author_name = [p.first_name, p.last_name].filter(Boolean).join(" ") || null;
           r.author_avatar = p.avatar_url ?? null;
