@@ -60,7 +60,42 @@ export default function ProDetail() {
   }
 
   const cat = getCategoryByValue(pro.category);
-  const title = `${pro.raison_sociale} – ${cat?.label}${pro.city ? `, ${pro.city}` : ""}`;
+  const title = `${pro.raison_sociale}, ${cat?.label}${pro.city ? `, ${pro.city}` : ""}`;
+  const canonical = `https://guardiens.fr/pros/${pro.slug}`;
+
+  const localBusinessJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: pro.raison_sociale,
+    description: pro.description ?? cat?.label,
+    url: canonical,
+    ...(pro.phone ? { telephone: pro.phone } : {}),
+    ...(pro.email_contact ? { email: pro.email_contact } : {}),
+    ...(pro.logo_url ? { image: pro.logo_url, logo: pro.logo_url } : {}),
+    ...(pro.website ? { sameAs: [pro.website] } : {}),
+    address: {
+      "@type": "PostalAddress",
+      ...(pro.city ? { addressLocality: pro.city } : {}),
+      ...(pro.postal_code ? { postalCode: pro.postal_code } : {}),
+      addressCountry: "FR",
+    },
+    ...(pro.tarif_min || pro.tarif_max
+      ? {
+          priceRange: `${pro.tarif_min ?? ""}€ – ${pro.tarif_max ?? ""}€`.replace(/^€ – /, "≤ "),
+        }
+      : {}),
+    ...(pro.horaires?.text ? { openingHours: pro.horaires.text } : {}),
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: "https://guardiens.fr/" },
+      { "@type": "ListItem", position: 2, name: "Pros animaliers", item: "https://guardiens.fr/pros" },
+      { "@type": "ListItem", position: 3, name: pro.raison_sociale, item: canonical },
+    ],
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -73,7 +108,17 @@ export default function ProDetail() {
         {isPreview || pro.status !== "approved" ? (
           <meta name="robots" content="noindex,nofollow" />
         ) : null}
-        <link rel="canonical" href={`https://guardiens.fr/pros/${pro.slug}`} />
+        <link rel="canonical" href={canonical} />
+        <meta property="og:title" content={title} />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:type" content="profile" />
+        {pro.logo_url && <meta property="og:image" content={pro.logo_url} />}
+        {pro.status === "approved" && !isPreview && (
+          <>
+            <script type="application/ld+json">{JSON.stringify(localBusinessJsonLd)}</script>
+            <script type="application/ld+json">{JSON.stringify(breadcrumbJsonLd)}</script>
+          </>
+        )}
       </Helmet>
 
       {isPreview && pro.status !== "approved" && (

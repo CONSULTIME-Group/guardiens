@@ -31,6 +31,7 @@ export default function ProOnboarding() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [siretLookup, setSiretLookup] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     raison_sociale: "",
@@ -51,6 +52,44 @@ export default function ProOnboarding() {
     zone_radius_km: "20",
     horaires_text: "",
   });
+
+  const handleSiretLookup = async () => {
+    const siret = form.siret.replace(/\s/g, "");
+    if (siret.length !== 14 || !/^\d{14}$/.test(siret)) {
+      toast.error("Le SIRET doit contenir 14 chiffres.");
+      return;
+    }
+    setSiretLookup(true);
+    try {
+      const res = await fetch(
+        `https://recherche-entreprises.api.gouv.fr/search?q=${siret}&page=1&per_page=1`
+      );
+      if (!res.ok) throw new Error("API indisponible");
+      const json = await res.json();
+      const entreprise = json?.results?.[0];
+      if (!entreprise) {
+        toast.error("Aucune entreprise trouvée pour ce SIRET.");
+        return;
+      }
+      const siege = entreprise.siege ?? {};
+      setForm((f) => ({
+        ...f,
+        raison_sociale:
+          f.raison_sociale ||
+          entreprise.nom_complet ||
+          entreprise.nom_raison_sociale ||
+          "",
+        city: f.city || siege.libelle_commune || "",
+        postal_code: f.postal_code || siege.code_postal || "",
+      }));
+      toast.success("Informations entreprise pré-remplies.");
+    } catch (err: any) {
+      toast.error("Recherche SIRET impossible. Saisissez les infos manuellement.");
+    } finally {
+      setSiretLookup(false);
+    }
+  };
+
 
   useEffect(() => {
     if (!user) {
@@ -213,13 +252,26 @@ export default function ProOnboarding() {
 
               <div>
                 <Label htmlFor="siret">SIRET</Label>
-                <Input
-                  id="siret"
-                  value={form.siret}
-                  onChange={(e) => update("siret", e.target.value)}
-                  placeholder="14 chiffres"
-                  maxLength={14}
-                />
+                <div className="flex gap-2">
+                  <Input
+                    id="siret"
+                    value={form.siret}
+                    onChange={(e) => update("siret", e.target.value.replace(/\D/g, ""))}
+                    placeholder="14 chiffres"
+                    maxLength={14}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleSiretLookup}
+                    disabled={siretLookup || form.siret.length !== 14}
+                  >
+                    {siretLookup ? "Recherche…" : "Pré-remplir"}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Récupère automatiquement raison sociale, ville et code postal depuis la base officielle entreprises.
+                </p>
               </div>
 
               <div>
