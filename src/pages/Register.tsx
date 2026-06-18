@@ -228,12 +228,14 @@ const Register = () => {
 
  const newUserId = result?.user?.id ?? null;
 
- try {
- if (typeof window !== "undefined") {
- localStorage.setItem("first_dashboard_seen", "pending");
- if (newUserId) localStorage.setItem("first_dashboard_role", selectedRole);
- }
- } catch {}
+  try {
+  if (typeof window !== "undefined") {
+  localStorage.setItem("first_dashboard_seen", "pending");
+  if (newUserId) localStorage.setItem("first_dashboard_role", selectedRole);
+  if (selectedRole === "pro") localStorage.setItem("pending_pro_onboarding", "1");
+  }
+  } catch {}
+
 
  const storedRef = sessionStorage.getItem("guardiens_ref");
  if (storedRef && result?.user?.id) {
