@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState, type ReactNode } from "react";
-import { Outlet, useSearchParams, Link } from "react-router-dom";
+import { Outlet, useSearchParams, useLocation, Link } from "react-router-dom";
 import { Sidebar, BottomNav } from "./Navigation";
 import { BackButton } from "./BackButton";
 import Breadcrumbs from "./Breadcrumbs";
@@ -20,6 +20,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
   const { user, refreshProfile } = useAuth();
   usePresenceHeartbeat();
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const [dismissed, setDismissed] = useState(false);
 
   // Determine if onboarding modal should show
@@ -27,7 +28,12 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
   const needsMinimal = user && !user.onboardingMinimalCompleted;
   const needsOnboarding = user && !user.onboardingCompleted && !user.onboardingDismissedAt;
 
-  const showOnboarding = !dismissed && (isTour || needsMinimal || needsOnboarding);
+  // Le parcours pro a son propre formulaire dédié : on n'affiche pas
+  // la modale d'onboarding propriétaire/gardien sur /pros/*.
+  const isProContext = location.pathname.startsWith("/pros/");
+
+  const showOnboarding = !dismissed && !isProContext && (isTour || needsMinimal || needsOnboarding);
+
 
   return (
     <div className="flex min-h-screen bg-background">

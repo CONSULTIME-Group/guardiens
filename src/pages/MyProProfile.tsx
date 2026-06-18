@@ -145,6 +145,14 @@ export default function MyProProfile() {
       </Helmet>
 
       <main className="container mx-auto px-4 py-10 max-w-3xl min-w-0">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mb-4 -ml-2"
+          onClick={() => navigate("/dashboard")}
+        >
+          ← Tableau de bord
+        </Button>
         <div className="flex items-start justify-between mb-2 gap-3 flex-wrap">
           <div>
             <h1 className="text-3xl font-display font-bold">Mon espace pro</h1>
@@ -152,6 +160,7 @@ export default function MyProProfile() {
           </div>
           {statusBadge}
         </div>
+
 
         {profile.status === "approved" && profile.slug && (
           <div className="flex items-center gap-2 flex-wrap mb-6">
