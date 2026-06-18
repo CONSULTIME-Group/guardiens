@@ -634,9 +634,12 @@ const Register = () => {
  {selectedRole === "sitter" && (
  <Trans i18nKey="register_page.after_sitter" components={{ 1: <strong className="text-foreground/80" /> }} />
  )}
- {selectedRole === "both" && (
- <Trans i18nKey="register_page.after_both" components={{ 1: <strong className="text-foreground/80" /> }} />
- )}
+  {selectedRole === "both" && (
+  <Trans i18nKey="register_page.after_both" components={{ 1: <strong className="text-foreground/80" /> }} />
+  )}
+  {selectedRole === "pro" && (
+  <Trans i18nKey="register_page.after_pro" components={{ 1: <strong className="text-foreground/80" /> }} />
+  )}
  </p>
  )}
  </div>
