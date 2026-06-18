@@ -3,13 +3,23 @@ import { useParams, Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/hooks/useAdmin";
-import { getCategoryByValue, getProInitials } from "@/lib/proCategories";
+import { getCategoryByValue, getProInitials, getCategoryBySlug } from "@/lib/proCategories";
 import ObfuscatedEmail from "@/components/pros/ObfuscatedEmail";
 import ProReviews from "@/components/pros/ProReviews";
+import ProContactCTA from "@/components/pros/ProContactCTA";
+import SimilarPros from "@/components/pros/SimilarPros";
+import GoogleReviewsBlock from "@/components/pros/GoogleReviewsBlock";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+
+function formatPriceRange(min: number | null, max: number | null): string | null {
+  if (min != null && max != null) return `${min} € à ${max} €`;
+  if (min != null) return `À partir de ${min} €`;
+  if (max != null) return `Jusqu'à ${max} €`;
+  return null;
+}
 
 export default function ProDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -24,19 +34,16 @@ export default function ProDetail() {
     if (!slug) return;
     (async () => {
       setLoading(true);
-      // F-07: ne sélectionner que les colonnes publiques
-      // F-25: en mode preview admin, on ignore le filtre status
       let req = supabase
         .from("pro_profiles")
         .select(
-          "id, slug, raison_sociale, category, sub_categories, city, postal_code, description, phone, website, email_contact, urgences_24_7, siret_verified, logo_url, cover_url, tarif_min, tarif_max, tarif_note, horaires, diplomes, ordre_number, zone_radius_km, zone_cities, status, rating_avg, rating_count"
+          "id, slug, raison_sociale, category, sub_categories, city, postal_code, description, phone, website, email_contact, urgences_24_7, siret_verified, logo_url, cover_url, tarif_min, tarif_max, tarif_note, horaires, diplomes, ordre_number, zone_radius_km, zone_cities, status, rating_avg, rating_count, google_place_id"
         )
         .eq("slug", slug);
       if (!isPreview) req = req.eq("status", "approved");
       const { data } = await req.maybeSingle();
       setPro(data);
       setLoading(false);
-      // Incrémente le compteur de vues uniquement pour les fiches publiques
       if (data && (data as any).status === "approved" && !isPreview) {
         supabase.rpc("increment_pro_view" as any, { _slug: slug }).then(() => {});
       }
@@ -68,8 +75,12 @@ export default function ProDetail() {
   const cat = getCategoryByValue(pro.category);
   const title = `${pro.raison_sociale}, ${cat?.label}${pro.city ? `, ${pro.city}` : ""}`;
   const canonical = `https://guardiens.fr/pros/${pro.slug}`;
+  const priceRangeDisplay = formatPriceRange(
+    pro.tarif_min != null ? Number(pro.tarif_min) : null,
+    pro.tarif_max != null ? Number(pro.tarif_max) : null,
+  );
 
-  const localBusinessJsonLd = {
+  const localBusinessJsonLd: any = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: pro.raison_sociale,
@@ -85,11 +96,7 @@ export default function ProDetail() {
       ...(pro.postal_code ? { postalCode: pro.postal_code } : {}),
       addressCountry: "FR",
     },
-    ...(pro.tarif_min || pro.tarif_max
-      ? {
-          priceRange: `${pro.tarif_min ?? ""}€ – ${pro.tarif_max ?? ""}€`.replace(/^€ – /, "≤ "),
-        }
-      : {}),
+    ...(priceRangeDisplay ? { priceRange: priceRangeDisplay } : {}),
     ...(pro.horaires?.text ? { openingHours: pro.horaires.text } : {}),
     ...(pro.rating_count > 0 && pro.rating_avg
       ? {
@@ -110,12 +117,15 @@ export default function ProDetail() {
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Accueil", item: "https://guardiens.fr/" },
       { "@type": "ListItem", position: 2, name: "Pros animaliers", item: "https://guardiens.fr/pros" },
-      { "@type": "ListItem", position: 3, name: pro.raison_sociale, item: canonical },
+      ...(cat?.slug
+        ? [{ "@type": "ListItem", position: 3, name: cat.label, item: `https://guardiens.fr/pros/categorie/${cat.slug}` }]
+        : []),
+      { "@type": "ListItem", position: cat?.slug ? 4 : 3, name: pro.raison_sociale, item: canonical },
     ],
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24 md:pb-10">
       <Helmet>
         <title>{title} | Guardiens</title>
         <meta
@@ -155,8 +165,25 @@ export default function ProDetail() {
         </div>
       )}
 
-      <main className="container mx-auto px-4 py-10 max-w-4xl min-w-0">
-        <div className="flex items-start gap-3 md:gap-5 mb-4 md:mb-8">
+      <main className="container mx-auto px-4 py-6 md:py-10 max-w-4xl min-w-0">
+        {/* Fil d'Ariane visible */}
+        <nav aria-label="Fil d'Ariane" className="text-xs text-muted-foreground mb-4">
+          <ol className="flex flex-wrap items-center gap-1">
+            <li><Link to="/" className="hover:underline">Accueil</Link></li>
+            <li aria-hidden>›</li>
+            <li><Link to="/pros" className="hover:underline">Pros</Link></li>
+            {cat?.slug && (
+              <>
+                <li aria-hidden>›</li>
+                <li><Link to={`/pros/categorie/${cat.slug}`} className="hover:underline">{cat.label}</Link></li>
+              </>
+            )}
+            <li aria-hidden>›</li>
+            <li className="text-foreground truncate max-w-[200px]" aria-current="page">{pro.raison_sociale}</li>
+          </ol>
+        </nav>
+
+        <div className="flex items-start gap-3 md:gap-5 mb-4">
           {pro.logo_url ? (
             <img
               src={pro.logo_url}
@@ -171,7 +198,7 @@ export default function ProDetail() {
               {getProInitials(pro.raison_sociale)}
             </div>
           )}
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h1 className="text-2xl md:text-3xl font-display font-bold">{pro.raison_sociale}</h1>
             <p className="text-muted-foreground mt-1">
               {cat?.label}
@@ -188,6 +215,12 @@ export default function ProDetail() {
               {pro.urgences_24_7 && <Badge variant="secondary">Urgences 24/7</Badge>}
               {pro.siret_verified && <Badge variant="secondary">SIRET vérifié</Badge>}
             </div>
+            <ProContactCTA
+              phone={pro.phone}
+              email={pro.email_contact}
+              website={pro.website}
+              urgences24_7={pro.urgences_24_7}
+            />
           </div>
         </div>
 
@@ -202,7 +235,14 @@ export default function ProDetail() {
             <Card>
               <CardContent className="p-6 space-y-2">
                 <h2 className="font-semibold mb-2">Contact</h2>
-                {pro.phone && <p>Téléphone : {pro.phone}</p>}
+                {pro.phone && (
+                  <p>
+                    Téléphone :{" "}
+                    <a href={`tel:${pro.phone.replace(/\s+/g, "")}`} className="underline">
+                      {pro.phone}
+                    </a>
+                  </p>
+                )}
                 {pro.email_contact && <ObfuscatedEmail email={pro.email_contact} />}
                 {pro.website && (
                   <p>
@@ -211,7 +251,7 @@ export default function ProDetail() {
                       href={pro.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="underline"
+                      className="underline break-all"
                     >
                       {pro.website}
                     </a>
@@ -221,15 +261,11 @@ export default function ProDetail() {
             </Card>
           )}
 
-          {(pro.tarif_min || pro.tarif_max || pro.tarif_note) && (
+          {(priceRangeDisplay || pro.tarif_note) && (
             <Card>
               <CardContent className="p-6 space-y-2">
                 <h2 className="font-semibold mb-2">Tarifs indicatifs</h2>
-                {(pro.tarif_min || pro.tarif_max) && (
-                  <p>
-                    {pro.tarif_min ?? "?"} € à {pro.tarif_max ?? "?"} €
-                  </p>
-                )}
+                {priceRangeDisplay && <p>{priceRangeDisplay}</p>}
                 {pro.tarif_note && (
                   <p className="text-sm text-muted-foreground">{pro.tarif_note}</p>
                 )}
@@ -269,6 +305,10 @@ export default function ProDetail() {
           )}
         </div>
 
+        {pro.status === "approved" && pro.google_place_id && (
+          <GoogleReviewsBlock proId={pro.id} placeId={pro.google_place_id} />
+        )}
+
         {pro.status === "approved" && (
           <ProReviews
             proId={pro.id}
@@ -277,6 +317,10 @@ export default function ProDetail() {
             ratingCount={pro.rating_count ?? 0}
             onRefresh={() => setReloadKey((k) => k + 1)}
           />
+        )}
+
+        {pro.status === "approved" && (
+          <SimilarPros currentId={pro.id} category={pro.category} city={pro.city} />
         )}
       </main>
     </div>
