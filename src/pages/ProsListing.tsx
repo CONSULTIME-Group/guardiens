@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
 import ProsMap from "@/components/pros/ProsMap";
 
 type ProRow = {
@@ -32,6 +33,7 @@ export default function ProsListing() {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("recent");
   const [view, setView] = useState<"list" | "map">("list");
+  const [only247, setOnly247] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -49,6 +51,7 @@ export default function ProsListing() {
   const filtered = useMemo(() => {
     const list = pros.filter((p) => {
       if (category !== "all" && p.category !== category) return false;
+      if (only247 && !p.urgences_24_7) return false;
       if (query) {
         const q = query.toLowerCase();
         if (
@@ -61,27 +64,25 @@ export default function ProsListing() {
       return true;
     });
     const sorter: Record<SortKey, (a: ProRow, b: ProRow) => number> = {
-      recent: () => 0, // déjà trié desc par created_at côté SQL
+      recent: () => 0,
       alpha: (a, b) => a.raison_sociale.localeCompare(b.raison_sociale, "fr"),
       city: (a, b) => (a.city ?? "").localeCompare(b.city ?? "", "fr"),
     };
     return [...list].sort(sorter[sort]);
-  }, [pros, category, query, sort]);
+  }, [pros, category, query, sort, only247]);
 
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
         <title>{t("pros_listing.meta_title")}</title>
-        <meta
-          name="description"
-          content={t("pros_listing.meta_description")}
-        />
+        <meta name="description" content={t("pros_listing.meta_description")} />
         <link rel="canonical" href="https://guardiens.fr/pros" />
       </Helmet>
 
       <main className="container mx-auto px-4 py-6 md:py-10 max-w-6xl min-w-0">
-        <header className="mb-6 md:mb-10">
-          <div className="flex items-center gap-3 flex-wrap mb-3">
+        {/* En-tête épuré */}
+        <header className="mb-6 md:mb-8">
+          <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-2xl md:text-4xl font-display font-bold">
               {t("pros_listing.h1")}
             </h1>
@@ -89,95 +90,77 @@ export default function ProsListing() {
               {t("pros_listing.beta")}
             </span>
           </div>
-          <p className="text-lg text-muted-foreground max-w-2xl">
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl mt-2">
             {t("pros_listing.intro")}
           </p>
-          <p className="text-sm text-muted-foreground mt-2">
-            {t("pros_listing.beta_note")}
-          </p>
-          <div className="mt-6 flex flex-wrap gap-2">
-            <Button asChild>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button asChild size="sm">
               <Link to="/pros/inscription">{t("pros_listing.register_cta")}</Link>
             </Button>
-            <Button asChild variant="outline">
+            <Button asChild size="sm" variant="outline">
               <Link to="/pros/mon-espace">{t("pros_listing.my_space")}</Link>
             </Button>
           </div>
-
-          <div className="mt-8 rounded-lg border border-border bg-muted/40 p-4 text-sm">
-            <p className="font-medium mb-1">{t("pros_listing.sitter_box_title")}</p>
-            <p className="text-muted-foreground">
-              {t("pros_listing.sitter_box_body_before")}
-              <strong>{t("pros_listing.sitter_box_badge")}</strong>
-              {t("pros_listing.sitter_box_body_after")}
-              <Link
-                to="/settings?section=security&focus=pro"
-                className="underline font-medium"
-              >
-                {t("pros_listing.sitter_box_link")}
-              </Link>
-              {t("pros_listing.sitter_box_body_end")}
-            </p>
-          </div>
         </header>
 
-        <div className="flex flex-col md:flex-row gap-3 mb-4">
-          <Input
-            placeholder={t("pros_listing.search_placeholder")}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="md:max-w-sm"
-          />
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as SortKey)}
-            className="h-10 rounded-md border border-input bg-background px-3 text-sm md:max-w-[180px]"
-            aria-label={t("pros_listing.sort_aria")}
-          >
-            <option value="recent">{t("pros_listing.sort_recent")}</option>
-            <option value="alpha">{t("pros_listing.sort_alpha")}</option>
-            <option value="city">{t("pros_listing.sort_city")}</option>
-          </select>
-          <div className="flex flex-wrap gap-2">
-            <Badge
-              variant={category === "all" ? "default" : "outline"}
-              className="cursor-pointer"
-              onClick={() => setCategory("all")}
+        {/* Barre de filtres unique : recherche + catégorie + tri + 24/7 + vue */}
+        <div className="space-y-3 mb-6">
+          <div className="flex flex-col md:flex-row gap-2">
+            <Input
+              placeholder={t("pros_listing.search_placeholder")}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="md:max-w-sm"
+            />
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value as any)}
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm md:max-w-[220px]"
+              aria-label="Catégorie"
             >
-              {t("pros_listing.all")}
-            </Badge>
-            {PRO_CATEGORIES.map((c) => (
-              <Badge
-                key={c.value}
-                variant={category === c.value ? "default" : "outline"}
-                className="cursor-pointer"
-                onClick={() => setCategory(c.value)}
-              >
-                {c.label}
-              </Badge>
-            ))}
+              <option value="all">{t("pros_listing.all")}</option>
+              {PRO_CATEGORIES.map((c) => (
+                <option key={c.value} value={c.value}>{c.label}</option>
+              ))}
+            </select>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortKey)}
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm md:max-w-[180px]"
+              aria-label={t("pros_listing.sort_aria")}
+            >
+              <option value="recent">{t("pros_listing.sort_recent")}</option>
+              <option value="alpha">{t("pros_listing.sort_alpha")}</option>
+              <option value="city">{t("pros_listing.sort_city")}</option>
+            </select>
           </div>
-        </div>
 
-        <div className="inline-flex rounded-md border border-border overflow-hidden mb-6" role="tablist" aria-label="Mode d'affichage">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={view === "list"}
-            onClick={() => setView("list")}
-            className={`px-4 py-2 text-sm font-medium transition ${view === "list" ? "bg-primary text-primary-foreground" : "bg-background hover:bg-muted"}`}
-          >
-            Liste
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={view === "map"}
-            onClick={() => setView("map")}
-            className={`px-4 py-2 text-sm font-medium transition border-l border-border ${view === "map" ? "bg-primary text-primary-foreground" : "bg-background hover:bg-muted"}`}
-          >
-            Carte
-          </button>
+          <div className="flex flex-wrap items-center gap-4">
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <Checkbox checked={only247} onCheckedChange={(v) => setOnly247(!!v)} />
+              Urgences 24/7 uniquement
+            </label>
+            <div className="inline-flex rounded-md border border-border overflow-hidden ml-auto" role="tablist" aria-label="Mode d'affichage">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={view === "list"}
+                onClick={() => setView("list")}
+                className={`px-3 py-1.5 text-sm font-medium transition ${view === "list" ? "bg-primary text-primary-foreground" : "bg-background hover:bg-muted"}`}
+              >
+                Liste
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={view === "map"}
+                onClick={() => setView("map")}
+                className={`px-3 py-1.5 text-sm font-medium transition border-l border-border ${view === "map" ? "bg-primary text-primary-foreground" : "bg-background hover:bg-muted"}`}
+              >
+                Carte
+              </button>
+            </div>
+          </div>
         </div>
 
         {view === "map" && (
@@ -188,23 +171,6 @@ export default function ProsListing() {
             </p>
           </div>
         )}
-
-        <section className="mb-8 rounded-lg border border-border bg-muted/30 p-4">
-          <h2 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wider">
-            Parcourir par spécialité
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {PRO_CATEGORIES.map((c) => (
-              <Link
-                key={c.slug}
-                to={`/pros/categorie/${c.slug}`}
-                className="inline-flex items-center px-3 py-1 rounded-full border border-border bg-background text-sm hover:bg-muted transition"
-              >
-                {c.label}
-              </Link>
-            ))}
-          </div>
-        </section>
 
         {view === "list" && (loading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -237,6 +203,7 @@ export default function ProsListing() {
                             src={p.logo_url}
                             alt={t("pros_listing.logo_alt", { name: p.raison_sociale })}
                             className="w-14 h-14 rounded-lg object-contain bg-muted"
+                            loading="lazy"
                           />
                         ) : (
                           <div
@@ -273,6 +240,24 @@ export default function ProsListing() {
             })}
           </div>
         ))}
+
+        {/* SEO : silo catégories en bas de page, après le contenu utile */}
+        <section className="mt-12 pt-8 border-t border-border" aria-labelledby="browse-by-cat">
+          <h2 id="browse-by-cat" className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wider">
+            Parcourir par spécialité
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {PRO_CATEGORIES.map((c) => (
+              <Link
+                key={c.slug}
+                to={`/pros/categorie/${c.slug}`}
+                className="inline-flex items-center px-3 py-1 rounded-full border border-border bg-background text-sm hover:bg-muted transition"
+              >
+                {c.label}
+              </Link>
+            ))}
+          </div>
+        </section>
       </main>
     </div>
   );
