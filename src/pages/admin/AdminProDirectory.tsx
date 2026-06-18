@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { getCategoryByValue } from "@/lib/proCategories";
+import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 
 type ProRow = {
   id: string;
@@ -64,7 +65,20 @@ export default function AdminProDirectory() {
       toast.error(error.message);
       return;
     }
-    toast.success(decision === "approved" ? "Fiche approuvée" : "Fiche refusée");
+
+    // Notification email au pro (non bloquant)
+    sendTransactionalEmail({
+      templateName: decision === "approved" ? "pro-profile-approved" : "pro-profile-rejected",
+      recipientUserId: row.user_id,
+      idempotencyKey: `pro-${decision}-${row.id}-${Date.now()}`,
+      templateData: {
+        raisonSociale: row.raison_sociale,
+        slug: row.slug,
+        reason: decision === "rejected" ? patch.rejection_reason : undefined,
+      },
+    }).catch(() => {});
+
+    toast.success(decision === "approved" ? "Fiche approuvée, email envoyé" : "Fiche refusée, email envoyé");
     load(tab);
   };
 

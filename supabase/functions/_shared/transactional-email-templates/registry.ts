@@ -51,6 +51,8 @@ import { template as missionProposalDeclined } from './mission-proposal-declined
 import { template as ownerNoSitJ3 } from './owner-no-sit-j3.tsx'
 import { template as ownerNoSitJ10 } from './owner-no-sit-j10.tsx'
 import { template as referralBoostMonthly } from './referral-boost-monthly.tsx'
+import { template as proProfileApproved } from './pro-profile-approved.tsx'
+import { template as proProfileRejected } from './pro-profile-rejected.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'nearby-sit-alert': nearbySitAlert,
@@ -95,4 +97,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'owner-no-sit-j3': ownerNoSitJ3,
   'owner-no-sit-j10': ownerNoSitJ10,
   'referral-boost-monthly': referralBoostMonthly,
+  'pro-profile-approved': proProfileApproved,
+  'pro-profile-rejected': proProfileRejected,
 }
