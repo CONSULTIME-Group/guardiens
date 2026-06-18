@@ -96,8 +96,8 @@ export default function ProCategoryListing() {
     ? `${category.label} à ${cityLabel} : annuaire des pros animaliers`
     : `${category.label} : annuaire des pros animaliers`;
   const metaDesc = villeSlug
-    ? `Trouvez un ${category.label.toLowerCase()} à ${cityLabel}. ${category.shortDesc}. Annuaire gratuit Guardiens.`
-    : `Annuaire gratuit des ${category.label.toLowerCase()}s en France. ${category.shortDesc}.`;
+    ? `Trouvez un ${category.label.toLowerCase()} à ${cityLabel}. ${category.shortDesc}. Annuaire Guardiens.`
+    : `Annuaire des ${category.label.toLowerCase()}s en France. ${category.shortDesc}.`;
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
