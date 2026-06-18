@@ -5515,6 +5515,21 @@ export type Database = {
         Returns: string
       }
       get_own_email: { Args: never; Returns: string }
+      get_pro_map_points: {
+        Args: never
+        Returns: {
+          category: string
+          city: string
+          id: string
+          lat: number
+          lng: number
+          raison_sociale: string
+          rating_avg: number
+          rating_count: number
+          slug: string
+          urgences_24_7: boolean
+        }[]
+      }
       get_public_stats: {
         Args: never
         Returns: {
