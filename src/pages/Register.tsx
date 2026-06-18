@@ -28,7 +28,7 @@ import {
  DialogDescription,
 } from "@/components/ui/dialog";
 
-type Role = "owner" | "sitter" | "both";
+type Role = "owner" | "sitter" | "both" | "pro";
 
 const STRENGTH_KEYS = ["", "weak", "medium", "good", "strong"] as const;
 
@@ -80,7 +80,10 @@ const generateSuggestedPassword = (): string => {
 const Register = () => {
  const { t } = useTranslation();
  const [searchParams] = useSearchParams();
- const presetRole = searchParams.get("role") as Role | null;
+ const asPro = searchParams.get("as") === "pro";
+ const presetRoleRaw = searchParams.get("role") as Role | null;
+ // Si on arrive avec ?as=pro, on force le rôle "pro" même si role=owner est dans l'URL (héritage des anciens liens).
+ const presetRole: Role | null = asPro ? "pro" : presetRoleRaw;
  const presetEmail = (searchParams.get("email") || "").trim().toLowerCase();
 
  const [step, setStep] = useState<1 | 2 | "confirmation">(presetRole ? 2 : 1);
@@ -107,7 +110,8 @@ const Register = () => {
  const navigate = useNavigate();
  const { toast } = useToast();
  const redirectTarget = sanitizeRedirect(searchParams.get("redirect"));
- const postAuthTarget = redirectTarget ?? "/dashboard";
+ // Si l'utilisateur sélectionne le rôle « pro », on l'envoie systématiquement vers le formulaire fiche pro.
+ const postAuthTarget = selectedRole === "pro" ? "/pros/inscription" : (redirectTarget ?? "/dashboard");
 
  const pwStrength = useMemo(() => getPasswordStrength(password), [password]);
 
@@ -115,6 +119,7 @@ const Register = () => {
   { value: "owner", label: t("register_page.roles.owner_label"), description: t("register_page.roles.owner_desc") },
   { value: "sitter", label: t("register_page.roles.sitter_label"), description: t("register_page.roles.sitter_desc") },
   { value: "both", label: t("register_page.roles.both_label"), description: t("register_page.roles.both_desc") },
+  { value: "pro", label: t("register_page.roles.pro_label"), description: t("register_page.roles.pro_desc") },
  ], [t]);
 
  useEffect(() => {
@@ -223,7 +228,7 @@ const Register = () => {
 
  try {
  const result = await Promise.race([
- register(cleanEmail, password, selectedRole),
+ register(cleanEmail, password, selectedRole === "pro" ? "owner" : selectedRole),
  timeoutPromise,
  ]) as any;
 
@@ -580,6 +585,11 @@ const Register = () => {
  {t("register_page.most_popular")}
  </span>
  )}
+ {role.value === "pro" && (
+ <span className="absolute -top-2 right-3 inline-flex items-center rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-foreground shadow-sm">
+ Pro
+ </span>
+ )}
  <div className="font-semibold text-sm lg:text-base mb-0.5 lg:mb-1">{role.label}</div>
  <div className="text-xs lg:text-sm text-muted-foreground leading-snug">{role.description}</div>
  </button>
@@ -587,26 +597,13 @@ const Register = () => {
  </div>
 
   <p className="mt-3 text-center text-[11px] lg:text-xs text-muted-foreground/80">
-   {t("register_page.role_change_hint")}
+    {t("register_page.role_change_hint")}
   </p>
-
-  <div className="mt-5 lg:mt-6 rounded-lg border border-border bg-muted/40 p-3.5 text-center">
-   <p className="text-xs lg:text-sm text-muted-foreground">
-    Vous êtes un pro animalier (vétérinaire, éducateur, toiletteur, ostéopathe, transporteur…) ?
-   </p>
-   <Link
-    to="/inscription?role=owner&redirect=/pros/inscription&as=pro"
-    className="mt-1.5 inline-block text-xs lg:text-sm font-semibold text-primary hover:underline"
-    onClick={() => trackEvent("signup_role_selected", { source: "/inscription", metadata: { role: "pro" } })}
-   >
-    Créer un compte pro et publier ma fiche →
-   </Link>
-  </div>
 
  <ul className="mt-5 lg:mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-[11px] lg:text-xs text-muted-foreground">
  <li className="inline-flex items-center gap-1.5">
  <span className="h-1.5 w-1.5 rounded-full bg-primary/60" aria-hidden="true" />
- {t("register_page.trust_free")}
+ {t("register_page.trust_no_spam")}
  </li>
  <li className="inline-flex items-center gap-1.5">
  <span className="h-1.5 w-1.5 rounded-full bg-primary/60" aria-hidden="true" />
@@ -637,9 +634,12 @@ const Register = () => {
  {selectedRole === "sitter" && (
  <Trans i18nKey="register_page.after_sitter" components={{ 1: <strong className="text-foreground/80" /> }} />
  )}
- {selectedRole === "both" && (
- <Trans i18nKey="register_page.after_both" components={{ 1: <strong className="text-foreground/80" /> }} />
- )}
+  {selectedRole === "both" && (
+  <Trans i18nKey="register_page.after_both" components={{ 1: <strong className="text-foreground/80" /> }} />
+  )}
+  {selectedRole === "pro" && (
+  <Trans i18nKey="register_page.after_pro" components={{ 1: <strong className="text-foreground/80" /> }} />
+  )}
  </p>
  )}
  </div>

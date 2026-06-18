@@ -96,8 +96,8 @@ export default function ProCategoryListing() {
     ? `${category.label} à ${cityLabel} : annuaire des pros animaliers`
     : `${category.label} : annuaire des pros animaliers`;
   const metaDesc = villeSlug
-    ? `Trouvez un ${category.label.toLowerCase()} à ${cityLabel}. ${category.shortDesc}. Annuaire gratuit Guardiens.`
-    : `Annuaire gratuit des ${category.label.toLowerCase()}s en France. ${category.shortDesc}.`;
+    ? `Trouvez un ${category.label.toLowerCase()} à ${cityLabel}. ${category.shortDesc}. Annuaire Guardiens.`
+    : `Annuaire des ${category.label.toLowerCase()}s en France. ${category.shortDesc}.`;
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -142,7 +142,7 @@ export default function ProCategoryListing() {
           <p className="text-lg text-muted-foreground max-w-2xl">{category.shortDesc}</p>
           <div className="mt-6 flex flex-wrap gap-2">
             <Button asChild>
-              <Link to="/pros/inscription">Inscrire mon activité (gratuit)</Link>
+              <Link to="/pros/inscription">Inscrire mon activité</Link>
             </Button>
             <Button asChild variant="outline">
               <Link to="/pros">Toutes les catégories</Link>

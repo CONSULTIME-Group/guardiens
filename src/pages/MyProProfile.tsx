@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
 export default function MyProProfile() {
@@ -135,252 +136,332 @@ export default function MyProProfile() {
         <meta name="robots" content="noindex" />
       </Helmet>
 
-      <main className="container mx-auto px-4 py-10 max-w-2xl min-w-0">
-        <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
-          <h1 className="text-3xl font-display font-bold">Mon espace pro</h1>
-          <div className="flex items-center gap-2 flex-wrap">
-            {profile.status === "approved" && profile.slug && (
-              <>
-                <Button asChild variant="outline" size="sm">
-                  <a href={`/pros/${profile.slug}`} target="_blank" rel="noopener noreferrer">
-                    Voir ma fiche publique
-                  </a>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={async () => {
-                    const url = `https://guardiens.fr/pros/${profile.slug}`;
-                    const shareData = {
-                      title: profile.raison_sociale,
-                      text: `Découvrez ${profile.raison_sociale} sur Guardiens`,
-                      url,
-                    };
-                    try {
-                      if (navigator.share) {
-                        await navigator.share(shareData);
-                      } else {
-                        await navigator.clipboard.writeText(url);
-                        toast.success("Lien copié dans le presse-papier");
-                      }
-                    } catch {
-                      /* user cancelled */
-                    }
-                  }}
-                >
-                  Partager ma fiche
-                </Button>
-              </>
-            )}
-            {statusBadge}
+      <main className="container mx-auto px-4 py-10 max-w-3xl min-w-0">
+        <div className="flex items-start justify-between mb-2 gap-3 flex-wrap">
+          <div>
+            <h1 className="text-3xl font-display font-bold">Mon espace pro</h1>
+            <p className="text-sm text-muted-foreground mt-1">{profile.raison_sociale}</p>
           </div>
+          {statusBadge}
         </div>
 
-        {profile.status === "approved" && (
-          <div className="grid grid-cols-2 gap-3 mb-5">
-            <Card className="border-border/60">
-              <CardContent className="p-4">
-                <p className="text-xs uppercase tracking-wider text-muted-foreground">Vues de la fiche</p>
-                <p className="text-3xl font-display font-bold mt-1">{profile.view_count ?? 0}</p>
-                <p className="text-xs text-muted-foreground mt-1">depuis la publication</p>
-              </CardContent>
-            </Card>
-            <Card className="border-border/60">
-              <CardContent className="p-4">
-                <p className="text-xs uppercase tracking-wider text-muted-foreground">Statut</p>
-                <p className="text-base font-semibold mt-2">Publiée</p>
-                <p className="text-xs text-muted-foreground mt-1">visible dans l'annuaire</p>
-              </CardContent>
-            </Card>
+        {profile.status === "approved" && profile.slug && (
+          <div className="flex items-center gap-2 flex-wrap mb-6">
+            <Button asChild variant="outline" size="sm">
+              <a href={`/pros/${profile.slug}`} target="_blank" rel="noopener noreferrer">
+                Voir ma fiche publique
+              </a>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                const url = `https://guardiens.fr/pros/${profile.slug}`;
+                const shareData = {
+                  title: profile.raison_sociale,
+                  text: `Découvrez ${profile.raison_sociale} sur Guardiens`,
+                  url,
+                };
+                try {
+                  if (navigator.share) {
+                    await navigator.share(shareData);
+                  } else {
+                    await navigator.clipboard.writeText(url);
+                    toast.success("Lien copié dans le presse-papier");
+                  }
+                } catch {
+                  /* user cancelled */
+                }
+              }}
+            >
+              Partager
+            </Button>
           </div>
         )}
-
-        <Card className="mb-5 border-border/60">
-          <CardContent className="p-4 text-sm text-muted-foreground">
-            Cette fiche apparaît dans <strong>l'annuaire public des pros animaliers</strong>. Si vous êtes par ailleurs gardien sur la plateforme et que vous souhaitez obtenir la pastille <strong>« Pro vérifié »</strong> sur votre profil gardien, complétez la section dédiée dans{" "}
-            <a href="/settings#pro" className="underline">vos paramètres</a>.
-          </CardContent>
-        </Card>
-
-
 
         {profile.status === "rejected" && profile.rejection_reason && (
           <Card className="mb-5 border-destructive/40">
             <CardContent className="p-4 text-sm">
               <strong>Motif du refus :</strong> {profile.rejection_reason}
               <br />
-              Corrigez les éléments puis sauvegardez pour renvoyer en validation.
+              Corrigez votre fiche puis sauvegardez pour renvoyer en validation.
             </CardContent>
           </Card>
         )}
 
-        <Card>
-          <CardContent className="p-6 space-y-5">
-            <div>
-              <Label>Raison sociale *</Label>
-              <Input
-                value={profile.raison_sociale ?? ""}
-                onChange={(e) => update("raison_sociale", e.target.value)}
-              />
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
+            <TabsTrigger value="edit">Ma fiche</TabsTrigger>
+            <TabsTrigger value="stats">Statistiques</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="mt-6 space-y-4">
+            <Card className="border-accent/30 bg-accent/5">
+              <CardContent className="p-5">
+                <p className="text-xs uppercase tracking-wider font-semibold text-accent-foreground/80 mb-2">
+                  Programme fondateurs
+                </p>
+                <p className="text-sm leading-relaxed">
+                  Vous faites partie des premiers pros référencés sur Guardiens. Profitez d'un accès privilégié à l'annuaire pendant la phase bêta. Les conditions d'abonnement seront annoncées avant tout changement, avec un tarif fondateur réservé.
+                </p>
+              </CardContent>
+            </Card>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Card>
+                <CardContent className="p-5">
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground">État de la fiche</p>
+                  <p className="text-lg font-semibold mt-1">
+                    {profile.status === "approved" ? "Publiée" : profile.status === "pending" ? "En attente" : "À corriger"}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {profile.status === "approved" && "Visible dans l'annuaire public."}
+                    {profile.status === "pending" && "Validation manuelle sous 48 h."}
+                    {profile.status === "rejected" && "Voyez le motif au-dessus."}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-5">
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground">Catégorie</p>
+                  <p className="text-lg font-semibold mt-1">
+                    {PRO_CATEGORIES.find((c) => c.value === profile.category)?.label ?? profile.category}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {profile.city ?? "Ville non renseignée"}
+                  </p>
+                </CardContent>
+              </Card>
             </div>
 
-            <div>
-              <Label>Catégorie principale</Label>
-              <Select value={profile.category} onValueChange={(v) => update("category", v as ProCategory)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PRO_CATEGORIES.map((c) => (
-                    <SelectItem key={c.value} value={c.value}>
-                      {c.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <Card>
+              <CardContent className="p-5 text-sm">
+                <p className="font-semibold mb-2">Vous êtes aussi gardien d'animaux ?</p>
+                <p className="text-muted-foreground leading-relaxed">
+                  Cette fiche apparaît dans l'annuaire pro. Pour obtenir la pastille{" "}
+                  <strong>Pro vérifié</strong> sur votre profil gardien, complétez la section dédiée dans{" "}
+                  <a href="/settings#pro" className="underline">vos paramètres</a>.
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-            <div>
-              <Label>SIRET</Label>
-              <Input
-                value={profile.siret ?? ""}
-                maxLength={14}
-                onChange={(e) => update("siret", e.target.value)}
-              />
-            </div>
-
-            <div>
-              <Label>Logo</Label>
-              {profile.logo_url && !logoFile && (
-                <img
-                  src={profile.logo_url}
-                  alt="Logo actuel"
-                  className="w-20 h-20 rounded-lg object-contain bg-muted mb-2"
-                />
-              )}
-              <Input
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                onChange={(e) => {
-                  const f = e.target.files?.[0] ?? null;
-                  if (f && f.size > 2 * 1024 * 1024) {
-                    toast.error("Le logo dépasse 2 Mo.");
-                    return;
-                  }
-                  setLogoFile(f);
-                }}
-              />
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <Label>Ville</Label>
-                <Input value={profile.city ?? ""} onChange={(e) => update("city", e.target.value)} />
+          <TabsContent value="stats" className="mt-6 space-y-4">
+            {profile.status === "approved" ? (
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Card>
+                  <CardContent className="p-5">
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground">Vues de la fiche</p>
+                    <p className="text-3xl font-display font-bold mt-1 tabular-nums">
+                      {profile.view_count ?? 0}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">depuis la publication</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-5">
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground">Note moyenne</p>
+                    <p className="text-3xl font-display font-bold mt-1 tabular-nums">
+                      {profile.rating_avg ? Number(profile.rating_avg).toFixed(1) : "–"}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {profile.rating_count ?? 0} avis publié{(profile.rating_count ?? 0) > 1 ? "s" : ""}
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
-              <div>
-                <Label>Code postal</Label>
-                <Input
-                  value={profile.postal_code ?? ""}
-                  onChange={(e) => update("postal_code", e.target.value)}
-                />
-              </div>
-            </div>
+            ) : (
+              <Card>
+                <CardContent className="p-6 text-sm text-muted-foreground text-center">
+                  Les statistiques seront disponibles dès la publication de votre fiche.
+                </CardContent>
+              </Card>
+            )}
 
-            <div>
-              <Label>Présentation</Label>
-              <Textarea
-                rows={6}
-                value={profile.description ?? ""}
-                onChange={(e) => update("description", e.target.value)}
-              />
-            </div>
+            <Card className="border-dashed">
+              <CardContent className="p-5 text-sm">
+                <p className="font-semibold mb-1">À venir</p>
+                <ul className="text-muted-foreground list-disc list-inside space-y-1">
+                  <li>Détail des sources de trafic et villes</li>
+                  <li>Demandes de contact reçues via la fiche</li>
+                  <li>Mise en avant catégorie / ville</li>
+                </ul>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <Label>Téléphone</Label>
-                <Input value={profile.phone ?? ""} onChange={(e) => update("phone", e.target.value)} />
-              </div>
-              <div>
-                <Label>Email contact</Label>
-                <Input
-                  type="email"
-                  value={profile.email_contact ?? ""}
-                  onChange={(e) => update("email_contact", e.target.value)}
-                />
-              </div>
-            </div>
+          <TabsContent value="edit" className="mt-6">
+            <Card>
+              <CardContent className="p-6 space-y-5">
+                <div>
+                  <Label>Raison sociale *</Label>
+                  <Input
+                    value={profile.raison_sociale ?? ""}
+                    onChange={(e) => update("raison_sociale", e.target.value)}
+                  />
+                </div>
 
-            <div>
-              <Label>Site web</Label>
-              <Input
-                type="url"
-                value={profile.website ?? ""}
-                onChange={(e) => update("website", e.target.value)}
-              />
-            </div>
+                <div>
+                  <Label>Catégorie principale</Label>
+                  <Select value={profile.category} onValueChange={(v) => update("category", v as ProCategory)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PRO_CATEGORIES.map((c) => (
+                        <SelectItem key={c.value} value={c.value}>
+                          {c.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="grid md:grid-cols-3 gap-4">
-              <div>
-                <Label>Tarif min (€)</Label>
-                <Input type="number" min={0}
-                  value={profile.tarif_min ?? ""}
-                  onChange={(e) => update("tarif_min", e.target.value)} />
-              </div>
-              <div>
-                <Label>Tarif max (€)</Label>
-                <Input type="number" min={0}
-                  value={profile.tarif_max ?? ""}
-                  onChange={(e) => update("tarif_max", e.target.value)} />
-              </div>
-              <div>
-                <Label>Rayon (km)</Label>
-                <Input type="number" min={1} max={300}
-                  value={profile.zone_radius_km ?? ""}
-                  onChange={(e) => update("zone_radius_km", e.target.value)} />
-              </div>
-            </div>
+                <div>
+                  <Label>SIRET</Label>
+                  <Input
+                    value={profile.siret ?? ""}
+                    maxLength={14}
+                    onChange={(e) => update("siret", e.target.value)}
+                  />
+                </div>
 
-            <div>
-              <Label>Précisions tarifs</Label>
-              <Input value={profile.tarif_note ?? ""}
-                onChange={(e) => update("tarif_note", e.target.value)} />
-            </div>
+                <div>
+                  <Label>Logo</Label>
+                  {profile.logo_url && !logoFile && (
+                    <img
+                      src={profile.logo_url}
+                      alt="Logo actuel"
+                      className="w-20 h-20 rounded-lg object-contain bg-muted mb-2"
+                    />
+                  )}
+                  <Input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0] ?? null;
+                      if (f && f.size > 2 * 1024 * 1024) {
+                        toast.error("Le logo dépasse 2 Mo.");
+                        return;
+                      }
+                      setLogoFile(f);
+                    }}
+                  />
+                </div>
 
-            <div>
-              <Label>Horaires d'ouverture</Label>
-              <Textarea rows={3} value={profile.horaires_text ?? ""}
-                onChange={(e) => update("horaires_text", e.target.value)}
-                placeholder="Ex : Lun-Ven 9h-19h, Sam 9h-13h" />
-            </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Ville</Label>
+                    <Input value={profile.city ?? ""} onChange={(e) => update("city", e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>Code postal</Label>
+                    <Input
+                      value={profile.postal_code ?? ""}
+                      onChange={(e) => update("postal_code", e.target.value)}
+                    />
+                  </div>
+                </div>
 
-            <div>
-              <Label>Diplômes et certifications (1 par ligne)</Label>
-              <Textarea rows={3} value={profile.diplomes ?? ""}
-                onChange={(e) => update("diplomes", e.target.value)} />
-            </div>
+                <div>
+                  <Label>Présentation</Label>
+                  <Textarea
+                    rows={6}
+                    value={profile.description ?? ""}
+                    onChange={(e) => update("description", e.target.value)}
+                  />
+                </div>
 
-            <div>
-              <Label>N° d'inscription à l'Ordre</Label>
-              <Input value={profile.ordre_number ?? ""}
-                onChange={(e) => update("ordre_number", e.target.value)} />
-            </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Téléphone</Label>
+                    <Input value={profile.phone ?? ""} onChange={(e) => update("phone", e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>Email contact</Label>
+                    <Input
+                      type="email"
+                      value={profile.email_contact ?? ""}
+                      onChange={(e) => update("email_contact", e.target.value)}
+                    />
+                  </div>
+                </div>
 
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="urg"
-                checked={!!profile.urgences_24_7}
-                onCheckedChange={(v) => update("urgences_24_7", !!v)}
-              />
-              <Label htmlFor="urg" className="cursor-pointer">
-                Je propose des urgences 24/7
-              </Label>
-            </div>
+                <div>
+                  <Label>Site web</Label>
+                  <Input
+                    type="url"
+                    value={profile.website ?? ""}
+                    onChange={(e) => update("website", e.target.value)}
+                  />
+                </div>
 
-            <Button onClick={handleSave} disabled={saving} className="w-full">
-              {saving ? "Enregistrement…" : "Enregistrer"}
-            </Button>
-          </CardContent>
-        </Card>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <Label>Tarif min (€)</Label>
+                    <Input type="number" min={0}
+                      value={profile.tarif_min ?? ""}
+                      onChange={(e) => update("tarif_min", e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>Tarif max (€)</Label>
+                    <Input type="number" min={0}
+                      value={profile.tarif_max ?? ""}
+                      onChange={(e) => update("tarif_max", e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>Rayon (km)</Label>
+                    <Input type="number" min={1} max={300}
+                      value={profile.zone_radius_km ?? ""}
+                      onChange={(e) => update("zone_radius_km", e.target.value)} />
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Précisions tarifs</Label>
+                  <Input value={profile.tarif_note ?? ""}
+                    onChange={(e) => update("tarif_note", e.target.value)} />
+                </div>
+
+                <div>
+                  <Label>Horaires d'ouverture</Label>
+                  <Textarea rows={3} value={profile.horaires_text ?? ""}
+                    onChange={(e) => update("horaires_text", e.target.value)}
+                    placeholder="Ex : Lun-Ven 9h-19h, Sam 9h-13h" />
+                </div>
+
+                <div>
+                  <Label>Diplômes et certifications (1 par ligne)</Label>
+                  <Textarea rows={3} value={profile.diplomes ?? ""}
+                    onChange={(e) => update("diplomes", e.target.value)} />
+                </div>
+
+                <div>
+                  <Label>N° d'inscription à l'Ordre</Label>
+                  <Input value={profile.ordre_number ?? ""}
+                    onChange={(e) => update("ordre_number", e.target.value)} />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="urg"
+                    checked={!!profile.urgences_24_7}
+                    onCheckedChange={(v) => update("urgences_24_7", !!v)}
+                  />
+                  <Label htmlFor="urg" className="cursor-pointer">
+                    Je propose des urgences 24/7
+                  </Label>
+                </div>
+
+                <Button onClick={handleSave} disabled={saving} className="w-full">
+                  {saving ? "Enregistrement…" : "Enregistrer"}
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
