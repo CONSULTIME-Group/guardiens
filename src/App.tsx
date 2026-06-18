@@ -322,6 +322,10 @@ const AppRoutes = () => (
       <Route path="/pros/categorie/:catSlug/:villeSlug" element={<ProCategoryListing />} />
       <Route path="/pros/:slug" element={<ProDetail />} />
       <Route element={<AdminLayout />}>
+        <Route path="/admin/seo-debug" element={<SeoDebug />} />
+        <Route path="/admin/build-info" element={<BuildInfo />} />
+        <Route path="/admin/audit-tarifs" element={<AuditTarifs />} />
+        <Route path="/admin/prerender" element={<AdminPrerender />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
         <Route path="/admin/users" element={<AdminUsers />} />
