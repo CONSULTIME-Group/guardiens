@@ -613,8 +613,61 @@ export default function MyProProfile() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="settings" className="mt-6 space-y-6">
+            <Card>
+              <CardContent className="p-6 space-y-3">
+                <h2 className="font-heading text-lg text-foreground">Visibilité de la fiche</h2>
+                <p className="text-sm text-muted-foreground">
+                  Le statut actuel de votre fiche est géré par la modération. Pour la masquer temporairement,
+                  contactez notre équipe via la page contact.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-destructive/40">
+              <CardContent className="p-6 space-y-4">
+                <div>
+                  <h2 className="font-heading text-lg text-destructive">Zone dangereuse</h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    La suppression de votre espace pro est définitive. Votre fiche publique, vos statistiques
+                    et vos avis Google liés seront retirés. Votre compte personnel (gardien / propriétaire) n'est pas affecté.
+                  </p>
+                </div>
+
+                <AlertDialog onOpenChange={(o) => { if (!o) setDeleteConfirm(""); }}>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive">Supprimer mon espace pro</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Supprimer définitivement votre espace pro ?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Cette action est irréversible. Pour confirmer, tapez <strong>SUPPRIMER</strong> ci-dessous.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <Input
+                      value={deleteConfirm}
+                      onChange={(e) => setDeleteConfirm(e.target.value)}
+                      placeholder="SUPPRIMER"
+                      autoComplete="off"
+                    />
+                    <AlertDialogFooter>
+                      <AlertDialogCancel disabled={deleting}>Annuler</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDelete}
+                        disabled={deleting || deleteConfirm.trim().toUpperCase() !== "SUPPRIMER"}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {deleting ? "Suppression…" : "Supprimer définitivement"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
-      </main>
     </div>
   );
 }
