@@ -343,8 +343,19 @@ export default function MyProProfile() {
                     </svg>
                     {profile.city ?? "Ville non renseignée"}
                   </p>
-                </div>
               </div>
+            </div>
+
+            {/* CTA principal : éditer la fiche */}
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-5">
+              <div className="min-w-0">
+                <p className="font-heading text-base text-foreground">Modifier les informations de votre fiche</p>
+                <p className="text-sm text-muted-foreground">Présentation, coordonnées, tarifs, horaires, diplômes…</p>
+              </div>
+              <Button onClick={() => setTab("edit")} className="shrink-0">Modifier ma fiche</Button>
+            </div>
+
+
             </div>
 
             {/* Cross-promo gardien — éditorial sage */}
