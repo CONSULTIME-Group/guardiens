@@ -268,6 +268,16 @@ export default function ProDetail() {
             </Card>
           )}
         </div>
+
+        {pro.status === "approved" && (
+          <ProReviews
+            proId={pro.id}
+            proName={pro.raison_sociale}
+            ratingAvg={pro.rating_avg}
+            ratingCount={pro.rating_count ?? 0}
+            onRefresh={() => setReloadKey((k) => k + 1)}
+          />
+        )}
       </main>
     </div>
   );
