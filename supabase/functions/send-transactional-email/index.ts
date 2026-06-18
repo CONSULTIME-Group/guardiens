@@ -147,6 +147,72 @@ Deno.serve(async (req) => {
   // Create Supabase client with service role (bypasses RLS)
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+  // === Caller authorization ===
+  // verify_jwt = true ensures a valid JWT, but without this check ANY
+  // authenticated user could spam arbitrary recipients with platform-branded
+  // templates. Trusted callers bypass: service_role and admin users.
+  //
+  // For non-admin authenticated callers, we apply a two-tier policy:
+  //   - SENSITIVE_TEMPLATES (account / identity / platform-branded messages
+  //     that could be used for phishing): must be sent to the caller's OWN
+  //     email address.
+  //   - All other templates (cross-user notifications: application-accepted,
+  //     new-message, mission-response, etc.): allowed — abuse is constrained
+  //     by per-recipient frequency caps and by business validation upstream.
+  const SENSITIVE_TEMPLATES = new Set([
+    'identity-verified',
+    'identity-rejected',
+    'pro-profile-approved',
+    'pro-profile-rejected',
+    'contact-reply',
+    'subscription-expired',
+    'dispute-resolved',
+    'report-resolved',
+    'relance-piece-identite',
+  ])
+
+  const authHeader = req.headers.get('Authorization') ?? ''
+  const callerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : ''
+  const isServiceRole = !!callerToken && callerToken === supabaseServiceKey
+
+  if (!isServiceRole) {
+    let callerUserId: string | null = null
+    let callerEmail: string | null = null
+    let callerIsAdmin = false
+    if (callerToken) {
+      const { data: userData } = await supabase.auth.getUser(callerToken)
+      if (userData?.user) {
+        callerUserId = userData.user.id
+        callerEmail = (userData.user.email ?? '').toLowerCase() || null
+        const { data: adminCheck } = await supabase.rpc('has_role', {
+          _user_id: callerUserId,
+          _role: 'admin',
+        })
+        callerIsAdmin = adminCheck === true
+      }
+    }
+
+    if (!callerUserId) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    if (!callerIsAdmin && SENSITIVE_TEMPLATES.has(templateName)) {
+      if (!callerEmail || effectiveRecipient.toLowerCase() !== callerEmail) {
+        console.warn('[security] Non-admin caller attempted to send sensitive template to another recipient', {
+          callerUserId,
+          templateName,
+        })
+        return new Response(
+          JSON.stringify({ error: 'Forbidden: this template can only be sent to your own account' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    }
+  }
+
   // 1b. Idempotency check — prevent duplicate sends for the same key
   if (idempotencyKey && idempotencyKey !== messageId) {
     const { data: existingSend } = await supabase
