@@ -371,7 +371,13 @@ const Register = () => {
  metadata: { role: selectedRole, method: "google" },
  });
  } catch {}
+  try {
+    if (typeof window !== "undefined" && selectedRole === "pro") {
+      localStorage.setItem("pending_pro_onboarding", "1");
+    }
+  } catch {}
   const googleRedirectUrl = `${window.location.origin}${postAuthTarget}`;
+
   logOAuthStage("sdk_called", "/inscription", {
  role: selectedRole,
  redirect_uri: googleRedirectUrl,
