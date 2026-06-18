@@ -585,6 +585,11 @@ const Register = () => {
  {t("register_page.most_popular")}
  </span>
  )}
+ {role.value === "pro" && (
+ <span className="absolute -top-2 right-3 inline-flex items-center rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-foreground shadow-sm">
+ Pro
+ </span>
+ )}
  <div className="font-semibold text-sm lg:text-base mb-0.5 lg:mb-1">{role.label}</div>
  <div className="text-xs lg:text-sm text-muted-foreground leading-snug">{role.description}</div>
  </button>
