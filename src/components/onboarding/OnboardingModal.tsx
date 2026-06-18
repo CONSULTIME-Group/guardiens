@@ -572,7 +572,9 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                     className="grid grid-cols-1 sm:grid-cols-2 gap-4"
                     inputClassName="rounded-lg h-12"
                     disabled={minimalSaved}
+                    showAbroadToggle={false}
                   />
+
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
