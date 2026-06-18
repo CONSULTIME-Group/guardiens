@@ -221,10 +221,19 @@ export default function ProOnboarding() {
       </Helmet>
 
       <main className="container mx-auto px-4 py-10 max-w-2xl min-w-0">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mb-4 -ml-2"
+          onClick={() => navigate("/dashboard")}
+        >
+          ← Tableau de bord
+        </Button>
         <h1 className="text-3xl font-display font-bold mb-2">Inscrire mon activité pro</h1>
         <p className="text-muted-foreground mb-6">
           Annuaire en phase bêta. Validation manuelle sous 48 h pour garantir la qualité.
         </p>
+
 
         <Card className="mb-6 border-accent/30 bg-accent/5">
           <CardContent className="p-4 text-sm space-y-1">
