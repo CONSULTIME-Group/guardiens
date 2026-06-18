@@ -176,12 +176,32 @@ export default function MyProProfile() {
           </div>
         </div>
 
+        {profile.status === "approved" && (
+          <div className="grid grid-cols-2 gap-3 mb-5">
+            <Card className="border-border/60">
+              <CardContent className="p-4">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">Vues de la fiche</p>
+                <p className="text-3xl font-display font-bold mt-1">{profile.view_count ?? 0}</p>
+                <p className="text-xs text-muted-foreground mt-1">depuis la publication</p>
+              </CardContent>
+            </Card>
+            <Card className="border-border/60">
+              <CardContent className="p-4">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">Statut</p>
+                <p className="text-base font-semibold mt-2">Publiée</p>
+                <p className="text-xs text-muted-foreground mt-1">visible dans l'annuaire</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         <Card className="mb-5 border-border/60">
           <CardContent className="p-4 text-sm text-muted-foreground">
             Cette fiche apparaît dans <strong>l'annuaire public des pros animaliers</strong>. Si vous êtes par ailleurs gardien sur la plateforme et que vous souhaitez obtenir la pastille <strong>« Pro vérifié »</strong> sur votre profil gardien, complétez la section dédiée dans{" "}
             <a href="/settings#pro" className="underline">vos paramètres</a>.
           </CardContent>
         </Card>
+
 
 
         {profile.status === "rejected" && profile.rejection_reason && (
