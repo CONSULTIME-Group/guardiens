@@ -231,8 +231,10 @@ export default function ProOnboarding() {
       }
 
       toast.success("Fiche envoyée. Modération sous 48h.");
+      try { localStorage.removeItem(DRAFT_KEY); } catch {}
       navigate("/pros/mon-espace");
     } catch (err: any) {
+
       toast.error(err?.message ?? "Une erreur est survenue.");
     } finally {
       setLoading(false);
