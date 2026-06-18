@@ -102,7 +102,7 @@ const Register = () => {
  const [existingAccountOpen, setExistingAccountOpen] = useState(false);
  const [acceptedTerms, setAcceptedTerms] = useState(false);
  const [termsHighlighted, setTermsHighlighted] = useState(false);
- const [etaSeconds, setEtaSeconds] = useState<number>(25);
+ 
  const [totalInscrits, setTotalInscrits] = useState<number | null>(null);
  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
