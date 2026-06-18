@@ -34,6 +34,9 @@ const SEGMENT_LABELS: Record<string, string> = {
   settings: "Paramètres",
   "house-guide": "Guide de la maison",
   review: "Laisser un avis",
+  pros: "Pros animaliers",
+  inscription: "Inscription",
+  "mon-espace": "Mon espace pro",
 };
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
