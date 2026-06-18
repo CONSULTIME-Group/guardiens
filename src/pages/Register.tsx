@@ -226,7 +226,7 @@ const Register = () => {
 
  try {
  const result = await Promise.race([
- register(cleanEmail, password, selectedRole),
+ register(cleanEmail, password, selectedRole === "pro" ? "owner" : selectedRole),
  timeoutPromise,
  ]) as any;
 
