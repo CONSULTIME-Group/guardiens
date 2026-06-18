@@ -85,6 +85,7 @@ const ProsListing = lazy(() => import("./pages/ProsListing"));
 const ProDetail = lazy(() => import("./pages/ProDetail"));
 const ProOnboarding = lazy(() => import("./pages/ProOnboarding"));
 const MyProProfile = lazy(() => import("./pages/MyProProfile"));
+const ProCategoryListing = lazy(() => import("./pages/ProCategoryListing"));
 const AdminProDirectory = lazy(() => import("./pages/admin/AdminProDirectory"));
 const ArticleEditor = lazy(() => import("./pages/ArticleEditor"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
