@@ -159,9 +159,10 @@ export default function ProDetail() {
 
       {isPreview && pro.status !== "approved" && (
         <div className="bg-amber-100 text-amber-900 text-sm py-2 px-4 text-center">
-          Prévisualisation admin : fiche en statut <strong>{pro.status}</strong> (non publiée).
+          {isAdminPreview ? "Prévisualisation admin" : "Aperçu de votre fiche"} : statut <strong>{pro.status}</strong> (non publiée).
         </div>
       )}
+
 
       {pro.cover_url && (
         <div className="w-full h-48 md:h-64 bg-muted overflow-hidden">
