@@ -31,6 +31,7 @@ export default function ProOnboarding() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [siretLookup, setSiretLookup] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     raison_sociale: "",
@@ -51,6 +52,44 @@ export default function ProOnboarding() {
     zone_radius_km: "20",
     horaires_text: "",
   });
+
+  const handleSiretLookup = async () => {
+    const siret = form.siret.replace(/\s/g, "");
+    if (siret.length !== 14 || !/^\d{14}$/.test(siret)) {
+      toast.error("Le SIRET doit contenir 14 chiffres.");
+      return;
+    }
+    setSiretLookup(true);
+    try {
+      const res = await fetch(
+        `https://recherche-entreprises.api.gouv.fr/search?q=${siret}&page=1&per_page=1`
+      );
+      if (!res.ok) throw new Error("API indisponible");
+      const json = await res.json();
+      const entreprise = json?.results?.[0];
+      if (!entreprise) {
+        toast.error("Aucune entreprise trouvée pour ce SIRET.");
+        return;
+      }
+      const siege = entreprise.siege ?? {};
+      setForm((f) => ({
+        ...f,
+        raison_sociale:
+          f.raison_sociale ||
+          entreprise.nom_complet ||
+          entreprise.nom_raison_sociale ||
+          "",
+        city: f.city || siege.libelle_commune || "",
+        postal_code: f.postal_code || siege.code_postal || "",
+      }));
+      toast.success("Informations entreprise pré-remplies.");
+    } catch (err: any) {
+      toast.error("Recherche SIRET impossible. Saisissez les infos manuellement.");
+    } finally {
+      setSiretLookup(false);
+    }
+  };
+
 
   useEffect(() => {
     if (!user) {
