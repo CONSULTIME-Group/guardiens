@@ -99,6 +99,7 @@ export default function MyProProfile() {
         ordre_number: profile.ordre_number ?? null,
         zone_radius_km: profile.zone_radius_km ? Number(profile.zone_radius_km) : 20,
         horaires: profile.horaires_text ? { text: profile.horaires_text } : (profile.horaires ?? {}),
+        google_place_id: profile.google_place_id?.trim() || null,
         logo_url,
       };
 
@@ -442,6 +443,27 @@ export default function MyProProfile() {
                   <Label>N° d'inscription à l'Ordre</Label>
                   <Input value={profile.ordre_number ?? ""}
                     onChange={(e) => update("ordre_number", e.target.value)} />
+                </div>
+
+                <div>
+                  <Label>Google Place ID (avis Google)</Label>
+                  <Input
+                    value={profile.google_place_id ?? ""}
+                    onChange={(e) => update("google_place_id", e.target.value)}
+                    placeholder="Ex : ChIJN1t_tDeuEmsRUsoyG83frY4"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Trouvez votre Place ID via{" "}
+                    <a
+                      href="https://developers.google.com/maps/documentation/places/web-service/place-id"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline"
+                    >
+                      l'outil officiel Google
+                    </a>
+                    . Permet d'afficher vos avis Google sur votre fiche (5 max, rafraîchis quotidiennement).
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-2">
