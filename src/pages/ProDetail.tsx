@@ -308,9 +308,8 @@ export default function ProDetail() {
           )}
         </div>
 
-        {pro.status === "approved" && pro.google_place_id && (
-          <GoogleReviewsBlock proId={pro.id} placeId={pro.google_place_id} />
-        )}
+
+
 
         {pro.status === "approved" && (
           <ProReviews
