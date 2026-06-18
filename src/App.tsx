@@ -316,8 +316,9 @@ const AppRoutes = () => (
       <Route path="/annonces/:id" element={<PublicSitDetail />} />
       <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
       <Route path="/pros" element={<ProsListing />} />
-      <Route path="/pros/inscription" element={<ProOnboarding />} />
-      <Route path="/pros/mon-espace" element={<MyProProfile />} />
+      <Route path="/pros/inscription" element={<AppLayout><ProOnboarding /></AppLayout>} />
+      <Route path="/pros/mon-espace" element={<AppLayout><MyProProfile /></AppLayout>} />
+
       <Route path="/pros/categorie/:catSlug" element={<ProCategoryListing />} />
       <Route path="/pros/categorie/:catSlug/:villeSlug" element={<ProCategoryListing />} />
       <Route path="/pros/:slug" element={<ProDetail />} />
