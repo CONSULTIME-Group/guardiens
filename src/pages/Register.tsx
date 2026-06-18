@@ -586,9 +586,22 @@ const Register = () => {
   ))}
  </div>
 
- <p className="mt-3 text-center text-[11px] lg:text-xs text-muted-foreground/80">
-  {t("register_page.role_change_hint")}
- </p>
+  <p className="mt-3 text-center text-[11px] lg:text-xs text-muted-foreground/80">
+   {t("register_page.role_change_hint")}
+  </p>
+
+  <div className="mt-5 lg:mt-6 rounded-lg border border-border bg-muted/40 p-3.5 text-center">
+   <p className="text-xs lg:text-sm text-muted-foreground">
+    Vous êtes un pro animalier (vétérinaire, éducateur, toiletteur, ostéopathe, transporteur…) ?
+   </p>
+   <Link
+    to="/inscription?role=owner&redirect=/pros/inscription&as=pro"
+    className="mt-1.5 inline-block text-xs lg:text-sm font-semibold text-primary hover:underline"
+    onClick={() => trackEvent("signup_role_selected", { source: "/inscription", metadata: { role: "pro" } })}
+   >
+    Créer un compte pro et publier ma fiche →
+   </Link>
+  </div>
 
  <ul className="mt-5 lg:mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-[11px] lg:text-xs text-muted-foreground">
  <li className="inline-flex items-center gap-1.5">

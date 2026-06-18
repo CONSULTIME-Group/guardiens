@@ -54,7 +54,9 @@ export default function ProOnboarding() {
 
   useEffect(() => {
     if (!user) {
-      navigate("/login?redirect=/pros/inscription");
+      // Inscription dédiée pro : on envoie vers /inscription (création de compte)
+      // avec redirection automatique vers le formulaire pro après signup.
+      navigate("/inscription?role=owner&redirect=/pros/inscription&as=pro");
       return;
     }
     // F-09: empêche la création d'une 2e fiche pro
@@ -167,9 +169,18 @@ export default function ProOnboarding() {
 
       <main className="container mx-auto px-4 py-10 max-w-2xl min-w-0">
         <h1 className="text-3xl font-display font-bold mb-2">Inscrire mon activité pro</h1>
-        <p className="text-muted-foreground mb-8">
+        <p className="text-muted-foreground mb-6">
           Fiche gratuite. Validation manuelle sous 48h pour garantir la qualité de l'annuaire.
         </p>
+
+        <Card className="mb-6 border-primary/20 bg-primary/5">
+          <CardContent className="p-4 text-sm space-y-2">
+            <p className="font-semibold text-foreground">Pourquoi un compte Guardiens ?</p>
+            <p className="text-muted-foreground leading-relaxed">
+              Votre compte sert uniquement à gérer votre fiche pro : modifications, statistiques de vues, réponses aux contacts. Aucune obligation d’être par ailleurs gardien d’animaux ou propriétaire sur la plateforme. Vous gardez la main sur vos infos à tout moment.
+            </p>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardContent className="p-6">
