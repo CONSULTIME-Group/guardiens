@@ -94,9 +94,9 @@ export default function ProOnboarding() {
 
   useEffect(() => {
     if (!user) {
-      // Inscription dédiée pro : on envoie vers /inscription (création de compte)
-      // avec redirection automatique vers le formulaire pro après signup.
-      navigate("/inscription?role=owner&redirect=/pros/inscription&as=pro");
+      // Pas connecté : on envoie vers /inscription avec le contexte "pro"
+      // pour que la page d'inscription bascule en mode dédié.
+      navigate("/inscription?as=pro&redirect=/pros/inscription");
       return;
     }
     // F-09: empêche la création d'une 2e fiche pro
