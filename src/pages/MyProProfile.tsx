@@ -213,56 +213,119 @@ export default function MyProProfile() {
             <TabsTrigger value="stats">Statistiques</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="mt-6 space-y-4">
-            <Card className="border-accent/30 bg-accent/5">
-              <CardContent className="p-5">
-                <p className="text-xs uppercase tracking-wider font-semibold text-accent-foreground/80 mb-2">
-                  Programme fondateurs
-                </p>
-                <p className="text-sm leading-relaxed">
-                  Vous faites partie des premiers pros référencés sur Guardiens. Profitez d'un accès privilégié à l'annuaire pendant la phase bêta. Les conditions d'abonnement seront annoncées avant tout changement, avec un tarif fondateur réservé.
-                </p>
-              </CardContent>
-            </Card>
-
-            <div className="grid sm:grid-cols-2 gap-4">
-              <Card>
-                <CardContent className="p-5">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">État de la fiche</p>
-                  <p className="text-lg font-semibold mt-1">
-                    {profile.status === "approved" ? "Publiée" : profile.status === "pending" ? "En attente" : "À corriger"}
+          <TabsContent value="overview" className="mt-6 space-y-6">
+            {/* Programme Fondateurs — la pièce signature */}
+            <div className="relative overflow-hidden rounded-2xl border border-founder-border/60 bg-founder-soft p-6 sm:p-8 shadow-sm">
+              <div className="absolute -right-8 -top-8 opacity-[0.08] pointer-events-none">
+                <svg className="w-48 h-48 text-founder" fill="currentColor" viewBox="0 0 100 100">
+                  <path d="M50 5 L55 15 L65 10 L68 22 L80 20 L78 32 L90 35 L85 45 L95 50 L85 55 L90 65 L78 68 L80 80 L68 78 L65 90 L55 85 L50 95 L45 85 L35 90 L32 78 L20 80 L22 68 L10 65 L15 55 L5 50 L15 45 L10 35 L22 32 L20 20 L32 22 L35 10 L45 15 Z" />
+                </svg>
+              </div>
+              <div className="relative flex flex-col sm:flex-row gap-6 items-start">
+                <div className="flex-shrink-0">
+                  <div
+                    className="w-16 h-16 rounded-full bg-founder border-2 border-founder-border flex items-center justify-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.12),0_4px_14px_hsl(var(--founder)/0.35)]"
+                    aria-hidden
+                  >
+                    <span className="text-founder-foreground font-heading italic text-2xl select-none">G</span>
+                  </div>
+                </div>
+                <div className="space-y-3 min-w-0">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-[11px] uppercase tracking-[0.2em] text-founder font-semibold">
+                      Programme fondateurs
+                    </h2>
+                    <span className="h-px w-12 bg-founder-border" />
+                  </div>
+                  <p className="font-heading text-lg leading-relaxed text-foreground">
+                    Vous faites partie des premiers pros référencés sur Guardiens.{" "}
+                    <span className="text-foreground/90">Vous bénéficiez d'un accès privilégié à l'annuaire</span> pendant la phase bêta.
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {profile.status === "approved" && "Visible dans l'annuaire public."}
-                    {profile.status === "pending" && "Validation manuelle sous 48 h."}
-                    {profile.status === "rejected" && "Voyez le motif au-dessus."}
+                  <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl">
+                    Les conditions d'abonnement vous seront communiquées avant tout changement, avec un tarif fondateur réservé en reconnaissance de votre confiance initiale.
                   </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-5">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">Catégorie</p>
-                  <p className="text-lg font-semibold mt-1">
-                    {PRO_CATEGORIES.find((c) => c.value === profile.category)?.label ?? profile.category}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {profile.city ?? "Ville non renseignée"}
-                  </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
 
-            <Card>
-              <CardContent className="p-5 text-sm">
-                <p className="font-semibold mb-2">Vous êtes aussi gardien d'animaux ?</p>
-                <p className="text-muted-foreground leading-relaxed">
-                  Cette fiche apparaît dans l'annuaire pro. Pour obtenir la pastille{" "}
-                  <strong>Pro vérifié</strong> sur votre profil gardien, complétez la section dédiée dans{" "}
-                  <a href="/settings#pro" className="underline">vos paramètres</a>.
+            {/* Cockpit : État + Catégorie */}
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="bg-card rounded-xl border border-border p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start mb-5 gap-3">
+                  <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
+                    État de la fiche
+                  </span>
+                  {profile.status === "pending" && (
+                    <span className="px-2.5 py-1 rounded-full bg-founder-soft border border-founder-border/60 text-founder text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
+                      En attente
+                    </span>
+                  )}
+                  {profile.status === "approved" && (
+                    <span className="px-2.5 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
+                      Publiée
+                    </span>
+                  )}
+                  {profile.status === "rejected" && (
+                    <span className="px-2.5 py-1 rounded-full bg-destructive/10 border border-destructive/30 text-destructive text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
+                      À corriger
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <div className="font-heading text-2xl text-foreground">
+                    {profile.status === "approved" ? "Publiée" : profile.status === "pending" ? "En attente" : "À corriger"}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {profile.status === "approved" && "Visible dans l'annuaire public."}
+                    {profile.status === "pending" && "Validation manuelle en cours sous 48 h."}
+                    {profile.status === "rejected" && "Voyez le motif au-dessus, puis renvoyez en validation."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-card rounded-xl border border-border p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start mb-5 gap-3">
+                  <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
+                    Catégorie principale
+                  </span>
+                  <svg className="w-5 h-5 text-primary/50 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+                <div className="space-y-1">
+                  <div className="font-heading text-2xl text-foreground">
+                    {PRO_CATEGORIES.find((c) => c.value === profile.category)?.label ?? profile.category}
+                  </div>
+                  <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    {profile.city ?? "Ville non renseignée"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Cross-promo gardien — éditorial sage */}
+            <div className="rounded-xl bg-primary text-primary-foreground p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center gap-6">
+              <div className="flex-1 space-y-3 min-w-0">
+                <h3 className="font-heading text-xl">Vous êtes aussi gardien d'animaux ?</h3>
+                <p className="text-sm text-primary-foreground/85 leading-relaxed">
+                  Cette fiche professionnelle apparaît dans l'annuaire métier. Pour obtenir la pastille{" "}
+                  <strong className="font-medium italic text-primary-foreground">Pro vérifié</strong> sur votre profil personnel de gardien, complétez la section dédiée dans vos paramètres.
                 </p>
-              </CardContent>
-            </Card>
+                <a
+                  href="/settings#pro"
+                  className="inline-flex items-center gap-2 text-sm font-medium text-primary-foreground border-b border-primary-foreground/40 pb-0.5 hover:border-primary-foreground transition-all"
+                >
+                  Accéder aux paramètres
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </a>
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="stats" className="mt-6 space-y-4">
