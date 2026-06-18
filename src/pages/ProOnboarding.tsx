@@ -252,13 +252,26 @@ export default function ProOnboarding() {
 
               <div>
                 <Label htmlFor="siret">SIRET</Label>
-                <Input
-                  id="siret"
-                  value={form.siret}
-                  onChange={(e) => update("siret", e.target.value)}
-                  placeholder="14 chiffres"
-                  maxLength={14}
-                />
+                <div className="flex gap-2">
+                  <Input
+                    id="siret"
+                    value={form.siret}
+                    onChange={(e) => update("siret", e.target.value.replace(/\D/g, ""))}
+                    placeholder="14 chiffres"
+                    maxLength={14}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleSiretLookup}
+                    disabled={siretLookup || form.siret.length !== 14}
+                  >
+                    {siretLookup ? "Recherche…" : "Pré-remplir"}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Récupère automatiquement raison sociale, ville et code postal depuis la base officielle entreprises.
+                </p>
               </div>
 
               <div>
