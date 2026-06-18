@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useParams, Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
 import { getCategoryByValue, getProInitials } from "@/lib/proCategories";
+
 import ObfuscatedEmail from "@/components/pros/ObfuscatedEmail";
 import ProReviews from "@/components/pros/ProReviews";
 import ProContactCTA from "@/components/pros/ProContactCTA";
