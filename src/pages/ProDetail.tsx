@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/hooks/useAdmin";
 import { getCategoryByValue, getProInitials } from "@/lib/proCategories";
 import ObfuscatedEmail from "@/components/pros/ObfuscatedEmail";
+import ProReviews from "@/components/pros/ProReviews";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
