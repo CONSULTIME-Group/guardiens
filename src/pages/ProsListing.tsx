@@ -121,7 +121,7 @@ export default function ProsListing() {
           </div>
         </header>
 
-        <div className="flex flex-col md:flex-row gap-3 mb-6">
+        <div className="flex flex-col md:flex-row gap-3 mb-4">
           <Input
             placeholder={t("pros_listing.search_placeholder")}
             value={query}
