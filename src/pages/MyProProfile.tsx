@@ -36,11 +36,18 @@ export default function MyProProfile() {
     }
     (async () => {
       setLoading(true);
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("pro_profiles")
         .select("*")
         .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
+      if (error) {
+        toast.error("Impossible de charger votre espace pro.");
+        setLoading(false);
+        return;
+      }
       if (!data) {
         navigate("/pros/inscription");
         return;
