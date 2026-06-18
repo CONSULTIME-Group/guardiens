@@ -189,7 +189,18 @@ export default function ProOnboarding() {
         attempt++;
         lastError = error;
       }
-      if (lastError) throw lastError;
+      if (lastError) {
+        // 23505 sur (user_id, category) : fiche déjà existante pour cette catégorie
+        if (
+          (lastError as any).code === "23505" &&
+          ((lastError as any).message ?? "").includes("user_id_category")
+        ) {
+          toast.info("Vous avez déjà une fiche pour cette catégorie. Redirection vers votre espace.");
+          navigate("/pros/mon-espace", { replace: true });
+          return;
+        }
+        throw lastError;
+      }
 
       toast.success("Fiche envoyée. Modération sous 48h.");
       navigate("/pros/mon-espace");
