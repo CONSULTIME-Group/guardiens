@@ -272,7 +272,7 @@ export default function ProsListing() {
               );
             })}
           </div>
-        )}
+        ))}
       </main>
     </div>
   );
