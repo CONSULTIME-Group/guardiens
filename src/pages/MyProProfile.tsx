@@ -1,6 +1,18 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { PRO_CATEGORIES, type ProCategory } from "@/lib/proCategories";
@@ -24,10 +36,26 @@ import { toast } from "sonner";
 export default function MyProProfile() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
   const [profile, setProfile] = useState<any | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
+
+  const allowedTabs = ["overview", "edit", "stats", "settings"] as const;
+  type TabId = (typeof allowedTabs)[number];
+  const currentTab: TabId = (allowedTabs as readonly string[]).includes(searchParams.get("tab") ?? "")
+    ? (searchParams.get("tab") as TabId)
+    : "overview";
+  const setTab = (t: TabId) => {
+    const next = new URLSearchParams(searchParams);
+    if (t === "overview") next.delete("tab");
+    else next.set("tab", t);
+    setSearchParams(next, { replace: true });
+  };
+
 
   useEffect(() => {
     if (!user) {
@@ -137,29 +165,39 @@ export default function MyProProfile() {
     rejected: <Badge variant="destructive">Refusée</Badge>,
   }[profile.status as "pending" | "approved" | "rejected"];
 
+  const handleDelete = async () => {
+    if (deleteConfirm.trim().toUpperCase() !== "SUPPRIMER") return;
+    setDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("pro_profiles")
+        .delete()
+        .eq("id", profile.id);
+      if (error) throw error;
+      toast.success("Espace pro supprimé.");
+      navigate("/dashboard", { replace: true });
+    } catch (err: any) {
+      toast.error(err?.message ?? "Suppression impossible.");
+      setDeleting(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="container mx-auto px-4 py-8 max-w-3xl min-w-0">
       <Helmet>
         <title>Mon espace pro | Guardiens</title>
         <meta name="robots" content="noindex" />
       </Helmet>
 
-      <main className="container mx-auto px-4 py-10 max-w-3xl min-w-0">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mb-4 -ml-2"
-          onClick={() => navigate("/dashboard")}
-        >
-          ← Tableau de bord
-        </Button>
-        <div className="flex items-start justify-between mb-2 gap-3 flex-wrap">
-          <div>
-            <h1 className="text-3xl font-display font-bold">Mon espace pro</h1>
-            <p className="text-sm text-muted-foreground mt-1">{profile.raison_sociale}</p>
-          </div>
-          {statusBadge}
+      <div className="flex items-start justify-between mb-2 gap-3 flex-wrap">
+        <div>
+          <h1 className="text-3xl font-display font-bold">Mon espace pro</h1>
+          <p className="text-sm text-muted-foreground mt-1">{profile.raison_sociale}</p>
         </div>
+        {statusBadge}
+      </div>
+
+
 
 
         {profile.status === "approved" && profile.slug && (
@@ -206,12 +244,14 @@ export default function MyProProfile() {
           </Card>
         )}
 
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs value={currentTab} onValueChange={(v) => setTab(v as TabId)} className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
             <TabsTrigger value="edit">Ma fiche</TabsTrigger>
             <TabsTrigger value="stats">Statistiques</TabsTrigger>
+            <TabsTrigger value="settings">Réglages</TabsTrigger>
           </TabsList>
+
 
           <TabsContent value="overview" className="mt-6 space-y-6">
             {/* Programme Fondateurs — la pièce signature */}
@@ -303,8 +343,19 @@ export default function MyProProfile() {
                     </svg>
                     {profile.city ?? "Ville non renseignée"}
                   </p>
-                </div>
               </div>
+            </div>
+
+            {/* CTA principal : éditer la fiche */}
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-5">
+              <div className="min-w-0">
+                <p className="font-heading text-base text-foreground">Modifier les informations de votre fiche</p>
+                <p className="text-sm text-muted-foreground">Présentation, coordonnées, tarifs, horaires, diplômes…</p>
+              </div>
+              <Button onClick={() => setTab("edit")} className="shrink-0">Modifier ma fiche</Button>
+            </div>
+
+
             </div>
 
             {/* Cross-promo gardien — éditorial sage */}
@@ -562,8 +613,61 @@ export default function MyProProfile() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="settings" className="mt-6 space-y-6">
+            <Card>
+              <CardContent className="p-6 space-y-3">
+                <h2 className="font-heading text-lg text-foreground">Visibilité de la fiche</h2>
+                <p className="text-sm text-muted-foreground">
+                  Le statut actuel de votre fiche est géré par la modération. Pour la masquer temporairement,
+                  contactez notre équipe via la page contact.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-destructive/40">
+              <CardContent className="p-6 space-y-4">
+                <div>
+                  <h2 className="font-heading text-lg text-destructive">Zone dangereuse</h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    La suppression de votre espace pro est définitive. Votre fiche publique, vos statistiques
+                    et vos avis Google liés seront retirés. Votre compte personnel (gardien / propriétaire) n'est pas affecté.
+                  </p>
+                </div>
+
+                <AlertDialog onOpenChange={(o) => { if (!o) setDeleteConfirm(""); }}>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive">Supprimer mon espace pro</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Supprimer définitivement votre espace pro ?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Cette action est irréversible. Pour confirmer, tapez <strong>SUPPRIMER</strong> ci-dessous.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <Input
+                      value={deleteConfirm}
+                      onChange={(e) => setDeleteConfirm(e.target.value)}
+                      placeholder="SUPPRIMER"
+                      autoComplete="off"
+                    />
+                    <AlertDialogFooter>
+                      <AlertDialogCancel disabled={deleting}>Annuler</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDelete}
+                        disabled={deleting || deleteConfirm.trim().toUpperCase() !== "SUPPRIMER"}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {deleting ? "Suppression…" : "Supprimer définitivement"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
-      </main>
     </div>
   );
 }
