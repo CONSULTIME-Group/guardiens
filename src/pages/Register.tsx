@@ -118,6 +118,7 @@ const Register = () => {
   { value: "owner", label: t("register_page.roles.owner_label"), description: t("register_page.roles.owner_desc") },
   { value: "sitter", label: t("register_page.roles.sitter_label"), description: t("register_page.roles.sitter_desc") },
   { value: "both", label: t("register_page.roles.both_label"), description: t("register_page.roles.both_desc") },
+  { value: "pro", label: t("register_page.roles.pro_label"), description: t("register_page.roles.pro_desc") },
  ], [t]);
 
  useEffect(() => {
