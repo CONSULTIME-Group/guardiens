@@ -157,6 +157,24 @@ export default function ProsListing() {
           </div>
         </div>
 
+        {/* Maillage SEO : silos par catégorie */}
+        <section className="mb-8 rounded-lg border border-border bg-muted/30 p-4">
+          <h2 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wider">
+            Parcourir par spécialité
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {PRO_CATEGORIES.map((c) => (
+              <Link
+                key={c.slug}
+                to={`/pros/categorie/${c.slug}`}
+                className="inline-flex items-center px-3 py-1 rounded-full border border-border bg-background text-sm hover:bg-muted transition"
+              >
+                {c.label}
+              </Link>
+            ))}
+          </div>
+        </section>
+
         {loading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.from({ length: 6 }).map((_, i) => (

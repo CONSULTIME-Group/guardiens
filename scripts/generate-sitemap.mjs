@@ -207,7 +207,7 @@ async function main() {
 
   console.log("🗺️  Sitemap incremental build…");
 
-  const [articles, seoCity, guides, depts, breeds, profiles, sits] = await Promise.all([
+  const [articles, seoCity, guides, depts, breeds, profiles, sits, profiles_pros] = await Promise.all([
     fetchOrCache(
       "articles", cache,
       () => maxUpdatedAt("articles", "updated_at", q => q.eq("published", true)),
@@ -298,7 +298,64 @@ async function main() {
           priority: "0.7",
         }))
     ),
+    // Fiches pros animaliers approuvées : /pros/:slug
+    fetchOrCache(
+      "pro_profiles", cache,
+      () => maxUpdatedAt("pro_profiles", "updated_at", q => q.eq("status", "approved")),
+      async () => (await supabase.from("pro_profiles").select("slug, category, city, updated_at").eq("status", "approved")).data,
+      rows => rows.map(p => ({
+        loc: `/pros/${p.slug}`,
+        lastmod: (p.updated_at || today).split("T")[0],
+        changefreq: "monthly",
+        priority: "0.7",
+        _category: p.category,
+        _city: p.city,
+      }))
+    ),
   ]);
+
+  // Slugs des catégories pros (alignés sur src/lib/proCategories.ts)
+  const PRO_CATEGORY_SLUGS = {
+    veterinaire: "veterinaires",
+    pet_sitter_pro: "pet-sitters-pro",
+    educateur: "educateurs-canins",
+    toiletteur: "toiletteurs",
+    osteopathe: "osteopathes",
+    dresseur_sportif: "dresseurs-sportifs",
+    transporteur: "transporteurs",
+    photographe: "photographes",
+  };
+  const slugifyCity = (s) =>
+    s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
+  // Pages silos catégorie + (catégorie, ville) dérivées des fiches pros existantes
+  const proSiloEntries = [];
+  // Index par catégorie (toujours, même si vide)
+  for (const catSlug of Object.values(PRO_CATEGORY_SLUGS)) {
+    proSiloEntries.push({
+      loc: `/pros/categorie/${catSlug}`,
+      lastmod: today,
+      changefreq: "weekly",
+      priority: "0.7",
+    });
+  }
+  // Combinaisons (catégorie, ville) effectivement peuplées
+  const siloSeen = new Set();
+  for (const p of profiles_pros || []) {
+    const catSlug = PRO_CATEGORY_SLUGS[p._category];
+    if (!catSlug || !p._city) continue;
+    const key = `${catSlug}/${slugifyCity(p._city)}`;
+    if (siloSeen.has(key)) continue;
+    siloSeen.add(key);
+    proSiloEntries.push({
+      loc: `/pros/categorie/${key}`,
+      lastmod: p.lastmod,
+      changefreq: "weekly",
+      priority: "0.7",
+    });
+  }
+
 
   // Map slug → langs disponibles (article_translations join articles)
   const articleLangs = new Map();
@@ -336,6 +393,8 @@ async function main() {
   for (const e of breeds) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of profiles) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of sits) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
+  for (const e of profiles_pros || []) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
+  for (const e of proSiloEntries) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   // Pages légales (/cgu, /confidentialite, /mentions-legales) déjà incluses
   // dans staticPages via staticRoutes — ne pas les ré-ajouter ici.
 
