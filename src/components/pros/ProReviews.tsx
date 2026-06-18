@@ -119,7 +119,7 @@ export default function ProReviews({
     const payload = { pro_id: proId, user_id: user.id, rating, comment: comment.trim() || null };
     const { error } = await supabase
       .from("pro_reviews" as any)
-      .upsert(payload, { onConflict: "pro_id,user_id" });
+      .upsert(payload as any, { onConflict: "pro_id,user_id" });
     setSubmitting(false);
     if (error) {
       toast.error("Impossible d'enregistrer votre avis");
