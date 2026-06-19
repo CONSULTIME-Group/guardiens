@@ -20,6 +20,7 @@ import SitterMissionsSection from "./sitter/SitterMissionsSection";
 import NearbyAnnoncesCard from "./sitter/NearbyAnnoncesCard";
 import DashSection from "./owner/DashSection";
 import SitterDashboardSkeleton from "./sitter/SitterDashboardSkeleton";
+import SitterActivityPanel from "./sitter/SitterActivityPanel";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { CheckCircle, Circle, ChevronRight, Newspaper, AlertCircle } from "lucide-react";
@@ -376,6 +377,19 @@ const SitterDashboard = () => {
           Desktop ≥ xl : 2 colonnes (main 9/12, aside sticky TOC simple 3/12). */}
       <div className="mt-4 xl:grid xl:grid-cols-12 xl:gap-6 xl:px-8 min-w-0">
         <div className="xl:col-span-9 min-w-0">
+          {/* Mobile/tablet : panneau d'activité inline, juste sous le cockpit */}
+          <div className="xl:hidden px-4 sm:px-5 md:px-8 mb-6">
+            <SitterActivityPanel
+              variant="inline"
+              isAvailable={isAvailable}
+              profileCompletion={profileCompletion}
+              nextGuard={nextGuard}
+              unreadCount={unreadCount}
+              pendingAppsCount={pendingAppsCount}
+              nearbyListings={nearbyListings}
+            />
+          </div>
+
           {ChecklistBlock}
           <div className="px-4 sm:px-5 md:px-8 xl:!px-0 mb-6">
             {DiscoverySections}
@@ -385,34 +399,20 @@ const SitterDashboard = () => {
           </div>
         </div>
 
-        <aside aria-label="Sommaire" className="hidden xl:block xl:col-span-3 min-w-0">
-          <nav className="sticky top-24 rounded-2xl border border-border bg-card p-4 text-sm space-y-4">
-            {/* KPI courts */}
-            <div className="grid grid-cols-3 gap-2">
-              <div className="text-center">
-                <p className="font-heading text-lg font-bold text-foreground tabular-nums">{nearbyListings.length}</p>
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-tight">Annonces</p>
-              </div>
-              <div className="text-center">
-                <p className="font-heading text-lg font-bold text-foreground tabular-nums">{unreadCount}</p>
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-tight">Messages</p>
-              </div>
-              <div className="text-center">
-                <p className="font-heading text-lg font-bold text-foreground tabular-nums">{badgeCount}</p>
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-tight">Badges</p>
-              </div>
-            </div>
-            <div className="border-t border-border pt-3">
-              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-semibold mb-2">Sur cette page</p>
-              <ul className="space-y-1.5">
-                <li><a href="#discovery-annonces-heading" className="text-foreground/80 hover:text-primary transition-colors">Annonces près de chez vous</a></li>
-                <li><a href="#discovery-missions-heading" className="text-foreground/80 hover:text-primary transition-colors">Coup de main</a></li>
-              </ul>
-            </div>
-          </nav>
+        <aside aria-label="Mon activité" className="hidden xl:block xl:col-span-3 min-w-0">
+          <SitterActivityPanel
+            variant="aside"
+            isAvailable={isAvailable}
+            profileCompletion={profileCompletion}
+            nextGuard={nextGuard}
+            unreadCount={unreadCount}
+            pendingAppsCount={pendingAppsCount}
+            nearbyListings={nearbyListings}
+          />
         </aside>
 
       </div>
+
 
       {/* Lien discret "Revoir la présentation" */}
       <div className="px-4 sm:px-5 md:px-8 mt-2 mb-4 text-center">
