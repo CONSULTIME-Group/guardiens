@@ -111,7 +111,7 @@ const SitterStatusBar = ({
         {[
           { label: `3 gardes réalisées (${reputation?.completed_sits ?? 0}/3)`, ok: (reputation?.completed_sits ?? 0) >= 3 },
           { label: `5 badges actifs différents (${reputation?.active_badges ?? 0}/5)`, ok: (reputation?.active_badges ?? 0) >= 5 },
-          { label: `Note ≥ 4.8 (${reputation?.note_moyenne ? Number(reputation.note_moyenne).toFixed(1) : ","}/4.8)`, ok: (reputation?.note_moyenne ?? 0) >= 4.8 },
+          { label: `Note ≥ 4.8 (${(reputation?.completed_sits ?? 0) > 0 && reputation?.note_moyenne ? Number(reputation.note_moyenne).toFixed(1) : "—"}/4.8)`, ok: (reputation?.completed_sits ?? 0) > 0 && (reputation?.note_moyenne ?? 0) >= 4.8 },
         ].map((c) => (
           <div key={c.label} className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full shrink-0 ${c.ok ? "bg-primary" : "bg-muted-foreground/30"}`} />
