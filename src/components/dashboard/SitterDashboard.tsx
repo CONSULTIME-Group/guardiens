@@ -229,23 +229,26 @@ const SitterDashboard = () => {
             <SitterBadgesSection groupedBadges={groupedBadges} />
           </AccordionContent>
         </AccordionItem>
+
+        <AccordionItem value="emergency" className="border-b border-border last:border-0">
+          <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
+            <div className="flex flex-col items-start text-left">
+              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
+                Gardien d'urgence
+              </p>
+              <p className="text-sm font-medium text-foreground">
+                {hasEmergencyProfile ? "Profil actif" : "Non configuré"}
+              </p>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4 pt-1">
+            <SitterEmergencyCardCompact hasEmergencyProfile={hasEmergencyProfile} />
+          </AccordionContent>
+        </AccordionItem>
       </Accordion>
     </section>
   );
 
-  // Emergency en version compacte (1 ligne), l'ancienne carte ~200px était
-  // disproportionnée pour une fonction conditionnelle.
-  const buildEmergencyBlock = (sidebar: boolean) => (
-    <section
-      aria-labelledby={sidebar ? "emergency-heading-side" : "emergency-heading"}
-      className={sidebar ? "" : "px-4 sm:px-5 md:px-8"}
-    >
-      <h2 id={sidebar ? "emergency-heading-side" : "emergency-heading"} className="sr-only">
-        Gardien d'urgence
-      </h2>
-      <SitterEmergencyCardCompact hasEmergencyProfile={hasEmergencyProfile} />
-    </section>
-  );
 
   // ── Zone Découverte, sections indépendantes (plus d'onglets).
   // Ordre validé : Annonces → Coup de main → Conseils (replié).
