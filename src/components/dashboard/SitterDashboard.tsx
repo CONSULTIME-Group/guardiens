@@ -399,80 +399,33 @@ const SitterDashboard = () => {
         </div>
       )}
 
-      {(() => {
-        const isEmpty = !nextGuard && !nextGuardError && nearbyListings.length === 0 && !nearbyError;
-        return (
-          <>
-
-            {/* ═══ 2-COLUMN LAYOUT ≥ xl ═══ */}
-
-            {/* Version pleine largeur, visible < xl */}
-            <div className="xl:hidden mt-4">
-              {/* Checklist, toujours rendue sous le cockpit en mobile (l'empty-state
-                  est déjà géré par la PriorityActionCard du cockpit). */}
-              {ChecklistBlock}
-
-              {/* Toggle mobile « Voir mes badges et ressources » : on AFFICHE
-                  par défaut la zone Découverte (annonces + coup de main), le
-                  toggle ne masque plus QUE le SecondaryAccordion (conseils /
-                  réputation / badges) + le bloc urgence. Cf. mem://ux/dashboard-2026-precepts. */}
-              {!showAllMobile && (
-                <div className="px-4 sm:px-5 md:hidden mb-6 mt-6">
-                  <button
-                    type="button"
-                    onClick={() => setShowAllMobile(true)}
-                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-sm font-semibold text-foreground hover:bg-muted/40 transition-colors"
-                    aria-expanded={false}
-                    aria-controls="sitter-dash-extra"
-                  >
-                    Réputation, badges, urgence
-                    <ChevronDown className="h-4 w-4" aria-hidden="true" />
-                  </button>
-                </div>
-              )}
-
-              {/* DiscoverySections : visible mobile par défaut (cœur de valeur sitter). */}
-              <div className="px-4 sm:px-5 md:px-8 mb-6">
-                {DiscoverySections}
-              </div>
-
-              {/* SecondaryAccordion + urgence : masqués mobile derrière toggle. */}
-              <div id="sitter-dash-extra" className={`px-4 sm:px-5 md:px-8 mb-6 space-y-3 ${!showAllMobile ? "hidden md:block" : ""}`}>
-                {buildSecondaryAccordion({ withConseils: true })}
-                {buildEmergencyBlock(false)}
-              </div>
-            </div>
-          </>
-        );
-      })()}
-
-
-      {/* Version 2 colonnes, visible ≥ xl */}
-      <div className="hidden xl:grid xl:grid-cols-12 xl:gap-6 xl:px-8 min-w-0 mt-4">
-        {/* MAIN COLUMN, 9/12 (audit V2 : sidebar trop large 4/12 pour son contenu) */}
+      {/* ═══ CONTENU UNIFIÉ mobile + desktop ═══
+          Hiérarchie unique : Checklist → Annonces → Coup de main → Accordéon secondaire (réputation/badges/conseils/urgence).
+          Desktop ≥ xl : 2 colonnes (main 9/12, aside sticky TOC simple 3/12). */}
+      <div className="mt-4 xl:grid xl:grid-cols-12 xl:gap-6 xl:px-8 min-w-0">
         <div className="xl:col-span-9 min-w-0">
-          <div className="[&>*]:!px-0 [&>*]:!mx-0">
-            {ChecklistBlock}
-            <section aria-labelledby="nearby-heading-xl">
-              <h2 id="nearby-heading-xl" className="sr-only">Près de chez vous</h2>
-              {DiscoverySections}
-            </section>
+          {ChecklistBlock}
+          <div className="px-4 sm:px-5 md:px-8 xl:!px-0 mb-6">
+            {DiscoverySections}
+          </div>
+          <div className="px-4 sm:px-5 md:px-8 xl:!px-0 mb-6 space-y-3">
+            {buildSecondaryAccordion({ withConseils: true })}
+            {buildEmergencyBlock(false)}
           </div>
         </div>
 
-        {/* SIDE COLUMN, 3/12 : actions rapides + gardien d'urgence (audit V2 : remplir l'aside) */}
-        <aside aria-label="Actions rapides, conseils et urgence" className="xl:col-span-3 min-w-0 space-y-3">
-          <QuickActionsCard
-            pendingAppsCount={pendingAppsCount}
-            unreadCount={unreadCount}
-            isAvailable={isAvailable}
-            onToggleAvailability={toggleAvailability}
-          />
-          {buildEmergencyBlock(true)}
-          {buildSecondaryAccordion({ withConseils: false })}
-          <AsideArticlesCard articles={articles} />
+        <aside aria-label="Sommaire" className="hidden xl:block xl:col-span-3 min-w-0">
+          <nav className="sticky top-24 rounded-2xl border border-border bg-card p-4 text-sm">
+            <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-semibold mb-2">Sur cette page</p>
+            <ul className="space-y-1.5">
+              <li><a href="#discovery-annonces-heading" className="text-foreground/80 hover:text-primary transition-colors">Annonces près de chez vous</a></li>
+              <li><a href="#discovery-missions-heading" className="text-foreground/80 hover:text-primary transition-colors">Coup de main</a></li>
+              <li><a href="#emergency-heading" className="text-foreground/80 hover:text-primary transition-colors">Gardien d'urgence</a></li>
+            </ul>
+          </nav>
         </aside>
       </div>
+
 
 
       {/* Toggle « Réduire » mobile : visible uniquement quand l'espace est déployé */}
