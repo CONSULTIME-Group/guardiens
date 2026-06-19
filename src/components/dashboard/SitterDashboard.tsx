@@ -172,9 +172,10 @@ const SitterDashboard = () => {
   // 3 strates secondaires regroupées dans UN seul Accordion pour densifier
   // le bas de dashboard et clarifier la hiérarchie (1 zone "à explorer"
   // au lieu de 3 cartes empilées). Toutes fermées par défaut.
-  const SecondaryAccordion = (
+  const buildSecondaryAccordion = (opts: { withConseils: boolean }) => (
     <section aria-label="Mon espace gardien, détails" className="rounded-2xl border border-border bg-card overflow-hidden">
       <Accordion type="single" collapsible defaultValue="reputation">
+        {opts.withConseils && (
         <AccordionItem value="conseils" className="border-b border-border last:border-0">
           <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
             <div className="flex flex-col items-start text-left">
@@ -218,6 +219,7 @@ const SitterDashboard = () => {
             )}
           </AccordionContent>
         </AccordionItem>
+        )}
 
         <AccordionItem value="reputation" className="border-b border-border last:border-0">
           <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
@@ -228,9 +230,6 @@ const SitterDashboard = () => {
               <p className="text-sm font-medium text-foreground">
                 {completedSits} garde{completedSits > 1 ? "s" : ""}
                 {" · "}
-                {/* On affiche la note UNIQUEMENT si elle s'appuie sur des gardes réelles.
-                    Avec 0 garde, une note (ex. 5,0 issue d'une expérience externe vérifiée)
-                    crée un faux signal de réputation. */}
                 {completedSits > 0 && reviewsCount > 0
                   ? `note ${avgRating.toFixed(1).replace(".", ",")}/5`
                   : "pas encore noté"}
