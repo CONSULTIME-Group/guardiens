@@ -482,15 +482,11 @@ const SitterDashboard = () => {
             onToggleAvailability={toggleAvailability}
           />
           {buildEmergencyBlock(true)}
+          {buildSecondaryAccordion({ withConseils: false })}
           <AsideArticlesCard articles={articles} />
         </aside>
       </div>
 
-      {/* Statut / badges réputation, pleine largeur sous le layout 2 colonnes en xl.
-          Sur < xl, déjà rendus dans la version pleine largeur ci-dessus. */}
-      <div className="hidden xl:block xl:px-8 mt-6 space-y-3">
-        {buildSecondaryAccordion({ withConseils: false })}
-      </div>
 
       {/* Toggle « Réduire » mobile : visible uniquement quand l'espace est déployé */}
       {showAllMobile && (

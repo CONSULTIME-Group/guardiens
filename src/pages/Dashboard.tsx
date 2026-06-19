@@ -199,15 +199,10 @@ const Dashboard = () => {
     <div className="overflow-x-hidden">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
 
-      <div className="container mx-auto px-4 pt-4">
-        <ProSpaceBanner />
-      </div>
-
       <div
         key={displayedRole}
         className={transitioning ? "animate-fade-out" : "animate-fade-in"}
       >
-
         <DashboardErrorBoundary
           section={displayedRole === "owner" ? "OwnerDashboard" : "SitterDashboard"}
           label={
@@ -216,6 +211,11 @@ const Dashboard = () => {
         >
           {displayedRole === "owner" ? <OwnerDashboard /> : <SitterDashboard />}
         </DashboardErrorBoundary>
+
+        {/* Bandeau pro déplacé sous le cockpit, libère le haut du pli mobile. */}
+        <div className="container mx-auto px-4 mt-4">
+          <ProSpaceBanner />
+        </div>
       </div>
     </div>
   );
