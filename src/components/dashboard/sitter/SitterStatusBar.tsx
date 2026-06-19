@@ -60,7 +60,7 @@ const SitterStatusBar = ({
           « Mes candidatures » a été retirée : un compteur brut d'envois ne
           dit rien (ni statut, ni issue) et démotive en cas de no-reply.
           La bascule Gardien↔Propriétaire reste accessible via la sidebar. */}
-      {(completedSits > 0 || reviewsCount > 0 || badgeCount > 0) ? (
+      {(completedSits > 0 || badgeCount > 0) ? (
       <div className="grid grid-cols-2 gap-3">
         {completedSits > 0 && (
         <div className="text-center">
@@ -68,7 +68,10 @@ const SitterStatusBar = ({
           <p className="text-xs text-muted-foreground font-sans">Gardes</p>
         </div>
         )}
-        {reviewsCount > 0 && (
+        {/* Note affichée UNIQUEMENT si elle s'appuie sur des gardes réelles.
+            Avec 0 garde, un avis externe vérifié crée un faux signal de
+            réputation incohérent avec le résumé "pas encore noté" ci-dessus. */}
+        {completedSits > 0 && reviewsCount > 0 && (
         <div className="text-center">
           <p className="text-2xl font-heading font-bold text-foreground">
             {avgRating.toFixed(1)}
