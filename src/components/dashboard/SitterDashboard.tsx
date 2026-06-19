@@ -380,22 +380,38 @@ const SitterDashboard = () => {
           <div className="px-4 sm:px-5 md:px-8 xl:!px-0 mb-6">
             {DiscoverySections}
           </div>
-          <div className="px-4 sm:px-5 md:px-8 xl:!px-0 mb-6 space-y-3">
+          <div className="px-4 sm:px-5 md:px-8 xl:!px-0 mb-6">
             {buildSecondaryAccordion({ withConseils: true })}
-            {buildEmergencyBlock(false)}
           </div>
         </div>
 
         <aside aria-label="Sommaire" className="hidden xl:block xl:col-span-3 min-w-0">
-          <nav className="sticky top-24 rounded-2xl border border-border bg-card p-4 text-sm">
-            <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-semibold mb-2">Sur cette page</p>
-            <ul className="space-y-1.5">
-              <li><a href="#discovery-annonces-heading" className="text-foreground/80 hover:text-primary transition-colors">Annonces près de chez vous</a></li>
-              <li><a href="#discovery-missions-heading" className="text-foreground/80 hover:text-primary transition-colors">Coup de main</a></li>
-              <li><a href="#emergency-heading" className="text-foreground/80 hover:text-primary transition-colors">Gardien d'urgence</a></li>
-            </ul>
+          <nav className="sticky top-24 rounded-2xl border border-border bg-card p-4 text-sm space-y-4">
+            {/* KPI courts */}
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-center">
+                <p className="font-heading text-lg font-bold text-foreground tabular-nums">{nearbyListings.length}</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-tight">Annonces</p>
+              </div>
+              <div className="text-center">
+                <p className="font-heading text-lg font-bold text-foreground tabular-nums">{unreadCount}</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-tight">Messages</p>
+              </div>
+              <div className="text-center">
+                <p className="font-heading text-lg font-bold text-foreground tabular-nums">{badgeCount}</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-tight">Badges</p>
+              </div>
+            </div>
+            <div className="border-t border-border pt-3">
+              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-semibold mb-2">Sur cette page</p>
+              <ul className="space-y-1.5">
+                <li><a href="#discovery-annonces-heading" className="text-foreground/80 hover:text-primary transition-colors">Annonces près de chez vous</a></li>
+                <li><a href="#discovery-missions-heading" className="text-foreground/80 hover:text-primary transition-colors">Coup de main</a></li>
+              </ul>
+            </div>
           </nav>
         </aside>
+
       </div>
 
       {/* Lien discret "Revoir la présentation" */}
