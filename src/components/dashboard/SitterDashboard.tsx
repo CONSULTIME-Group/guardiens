@@ -93,71 +93,40 @@ const SitterDashboard = () => {
         <DashSection
           eyebrow="Activation"
           title="Finalisez votre profil"
-          description={`${incompleteItems.length} étape${incompleteItems.length > 1 ? "s" : ""} pour devenir pleinement visible auprès des propriétaires.`}
+          description={`${completedItems.length}/${allItems.length} étapes, ${progressPct}%`}
         >
-          {/* Progression globale visible */}
-          <div className="mb-3">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs text-muted-foreground">
-                {completedItems.length}/{allItems.length} étapes, {progressPct}%
-              </span>
-            </div>
-            <Progress value={progressPct} />
-          </div>
+          <Progress value={progressPct} className="mb-3" />
 
           <div role="list" className="bg-card border border-border rounded-2xl overflow-hidden">
-            {incompleteItems.slice(0, 2).map((item: any, i: number) => (
-              <Link key={i} to={item.to} role="listitem" className="group flex items-center justify-between py-3 px-4 border-b border-border last:border-0 cursor-pointer hover:bg-muted/40 transition-all duration-200 ease-out hover:translate-x-0.5">
+            {allItems.map((item: any, i: number) => (
+              <Link
+                key={i}
+                to={item.to}
+                role="listitem"
+                aria-disabled={item.done}
+                className={`group flex items-center justify-between py-3 px-4 border-b border-border last:border-0 transition-all duration-200 ease-out ${
+                  item.done ? "pointer-events-none" : "cursor-pointer hover:bg-muted/40 hover:translate-x-0.5"
+                }`}
+              >
                 <div className="flex items-center">
-                  <Circle className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
-                  <span className="text-sm text-foreground ml-3">{item.label}</span>
+                  {item.done ? (
+                    <CheckCircle className="h-4 w-4 text-primary" aria-hidden="true" />
+                  ) : (
+                    <Circle className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
+                  )}
+                  <span className={`text-sm ml-3 ${item.done ? "line-through text-foreground/50" : "text-foreground"}`}>
+                    {item.label}
+                  </span>
                 </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
+                {!item.done && (
+                  <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
+                )}
               </Link>
             ))}
           </div>
-          {incompleteItems.length > 2 && (
-            <details className="mt-2">
-              <summary className="cursor-pointer list-none text-xs text-muted-foreground px-1 py-1.5 hover:text-foreground flex items-center gap-1 select-none">
-                Voir les {incompleteItems.length - 2} étapes restantes <span aria-hidden="true">▾</span>
-              </summary>
-              <div role="list" className="bg-card border border-border rounded-2xl overflow-hidden mt-1">
-                {incompleteItems.slice(2).map((item: any, i: number) => (
-                  <Link key={i} to={item.to} role="listitem" className="group flex items-center justify-between py-3 px-4 border-b border-border last:border-0 cursor-pointer hover:bg-muted/40 transition-all duration-200 ease-out hover:translate-x-0.5">
-                    <div className="flex items-center">
-                      <Circle className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
-                      <span className="text-sm text-foreground ml-3">{item.label}</span>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
-                  </Link>
-                ))}
-              </div>
-            </details>
-          )}
-          {completedItems.length > 0 && (
-            <Accordion type="single" collapsible className="mt-3">
-              <AccordionItem value="done" className="border-none">
-                <AccordionTrigger className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-2.5 cursor-pointer hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-primary" aria-hidden="true" />
-                    <span className="text-sm font-medium text-primary">
-                      {completedItems.length} étape{completedItems.length > 1 ? "s" : ""} déjà complétée{completedItems.length > 1 ? "s" : ""}
-                    </span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="pt-2 pb-0">
-                  {completedItems.map((item: any, i: number) => (
-                    <div key={i} className="flex items-center gap-3 py-2 border-b border-border last:border-0 px-2">
-                      <CheckCircle className="h-4 w-4 text-primary" aria-hidden="true" />
-                      <span className="text-sm line-through text-foreground/60">{item.label}</span>
-                    </div>
-                  ))}
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          )}
         </DashSection>
       )}
+
     </section>
   );
 
@@ -260,23 +229,26 @@ const SitterDashboard = () => {
             <SitterBadgesSection groupedBadges={groupedBadges} />
           </AccordionContent>
         </AccordionItem>
+
+        <AccordionItem value="emergency" className="border-b border-border last:border-0">
+          <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
+            <div className="flex flex-col items-start text-left">
+              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
+                Gardien d'urgence
+              </p>
+              <p className="text-sm font-medium text-foreground">
+                {hasEmergencyProfile ? "Profil actif" : "Non configuré"}
+              </p>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4 pt-1">
+            <SitterEmergencyCardCompact hasEmergencyProfile={hasEmergencyProfile} />
+          </AccordionContent>
+        </AccordionItem>
       </Accordion>
     </section>
   );
 
-  // Emergency en version compacte (1 ligne), l'ancienne carte ~200px était
-  // disproportionnée pour une fonction conditionnelle.
-  const buildEmergencyBlock = (sidebar: boolean) => (
-    <section
-      aria-labelledby={sidebar ? "emergency-heading-side" : "emergency-heading"}
-      className={sidebar ? "" : "px-4 sm:px-5 md:px-8"}
-    >
-      <h2 id={sidebar ? "emergency-heading-side" : "emergency-heading"} className="sr-only">
-        Gardien d'urgence
-      </h2>
-      <SitterEmergencyCardCompact hasEmergencyProfile={hasEmergencyProfile} />
-    </section>
-  );
 
   // ── Zone Découverte, sections indépendantes (plus d'onglets).
   // Ordre validé : Annonces → Coup de main → Conseils (replié).
@@ -297,10 +269,10 @@ const SitterDashboard = () => {
       : "Près de chez vous";
 
   const DiscoverySections = (
-    <div className="space-y-4 min-w-0">
-      {/* 1. Annonces — carte neutre, chip catégorie */}
-      <section aria-labelledby="discovery-annonces-heading" className="rounded-2xl border border-border bg-card p-4 sm:p-5 min-w-0">
-        <div className="flex items-center gap-2 mb-3">
+    <div className="space-y-6 min-w-0">
+      {/* 1. Annonces — pas de cadre wrapper (cartes internes en portent déjà) */}
+      <section aria-labelledby="discovery-annonces-heading" className="min-w-0">
+        <div className="flex items-center gap-2 mb-2">
           <span className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5">Garde</span>
         </div>
         <h2 id="discovery-annonces-heading" className="font-heading text-lg sm:text-xl font-bold text-foreground leading-tight mb-3">
@@ -315,9 +287,9 @@ const SitterDashboard = () => {
         />
       </section>
 
-      {/* 2. Coup de main — carte neutre, chip catégorie */}
-      <section aria-labelledby="discovery-missions-heading" className="rounded-2xl border border-border bg-card p-4 sm:p-5 min-w-0">
-        <div className="flex items-center gap-2 mb-3">
+      {/* 2. Coup de main — idem, pas de wrapper */}
+      <section aria-labelledby="discovery-missions-heading" className="min-w-0">
+        <div className="flex items-center gap-2 mb-2">
           <span className="inline-flex items-center rounded-full bg-warning/10 text-warning text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5">Entraide</span>
         </div>
         <h2 id="discovery-missions-heading" className="font-heading text-lg sm:text-xl font-bold text-foreground leading-tight mb-3">
@@ -338,6 +310,7 @@ const SitterDashboard = () => {
       </section>
     </div>
   );
+
 
 
   return (
@@ -407,22 +380,38 @@ const SitterDashboard = () => {
           <div className="px-4 sm:px-5 md:px-8 xl:!px-0 mb-6">
             {DiscoverySections}
           </div>
-          <div className="px-4 sm:px-5 md:px-8 xl:!px-0 mb-6 space-y-3">
+          <div className="px-4 sm:px-5 md:px-8 xl:!px-0 mb-6">
             {buildSecondaryAccordion({ withConseils: true })}
-            {buildEmergencyBlock(false)}
           </div>
         </div>
 
         <aside aria-label="Sommaire" className="hidden xl:block xl:col-span-3 min-w-0">
-          <nav className="sticky top-24 rounded-2xl border border-border bg-card p-4 text-sm">
-            <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-semibold mb-2">Sur cette page</p>
-            <ul className="space-y-1.5">
-              <li><a href="#discovery-annonces-heading" className="text-foreground/80 hover:text-primary transition-colors">Annonces près de chez vous</a></li>
-              <li><a href="#discovery-missions-heading" className="text-foreground/80 hover:text-primary transition-colors">Coup de main</a></li>
-              <li><a href="#emergency-heading" className="text-foreground/80 hover:text-primary transition-colors">Gardien d'urgence</a></li>
-            </ul>
+          <nav className="sticky top-24 rounded-2xl border border-border bg-card p-4 text-sm space-y-4">
+            {/* KPI courts */}
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-center">
+                <p className="font-heading text-lg font-bold text-foreground tabular-nums">{nearbyListings.length}</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-tight">Annonces</p>
+              </div>
+              <div className="text-center">
+                <p className="font-heading text-lg font-bold text-foreground tabular-nums">{unreadCount}</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-tight">Messages</p>
+              </div>
+              <div className="text-center">
+                <p className="font-heading text-lg font-bold text-foreground tabular-nums">{badgeCount}</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-tight">Badges</p>
+              </div>
+            </div>
+            <div className="border-t border-border pt-3">
+              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-semibold mb-2">Sur cette page</p>
+              <ul className="space-y-1.5">
+                <li><a href="#discovery-annonces-heading" className="text-foreground/80 hover:text-primary transition-colors">Annonces près de chez vous</a></li>
+                <li><a href="#discovery-missions-heading" className="text-foreground/80 hover:text-primary transition-colors">Coup de main</a></li>
+              </ul>
+            </div>
           </nav>
         </aside>
+
       </div>
 
       {/* Lien discret "Revoir la présentation" */}
