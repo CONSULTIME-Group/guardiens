@@ -346,10 +346,11 @@ const SitterDashboard = () => {
   return (
     <div className="space-y-0 overflow-hidden pb-24 md:pb-8">
 {/* pb-24 mobile = BottomNav (h-16) + sticky CTA (~32px). h-20 spacer supprimé (doublon). */}
-      {/* Role activation, masqué sur mobile en mode Focus */}
-      <div className={`px-4 sm:px-5 md:px-8 mb-4 ${!showAllMobile ? "hidden md:block" : ""}`}>
+      {/* Role activation */}
+      <div className="px-4 sm:px-5 md:px-8 mb-4">
         <RoleActivationBanner userRole={user?.role || "sitter"} />
       </div>
+
 
 
       {/* ═══ COCKPIT ═══ (greeting + action prioritaire + signal vivant) */}
@@ -392,12 +393,13 @@ const SitterDashboard = () => {
 
       {/* Bannière contextuelle, une seule : AccessGateBanner si accès limité, sinon FreePeriodBanner */}
       {!nextGuard && (
-        <div className={`px-4 sm:px-5 md:px-8 mt-3 ${!showAllMobile ? "hidden md:block" : ""}`}>
+        <div className="px-4 sm:px-5 md:px-8 mt-3">
           {!(level === 4 || level === "3B")
             ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
             : <FreePeriodBanner />}
         </div>
       )}
+
 
       {/* ═══ CONTENU UNIFIÉ mobile + desktop ═══
           Hiérarchie unique : Checklist → Annonces → Coup de main → Accordéon secondaire (réputation/badges/conseils/urgence).
@@ -426,33 +428,13 @@ const SitterDashboard = () => {
         </aside>
       </div>
 
-
-
-      {/* Toggle « Réduire » mobile : visible uniquement quand l'espace est déployé */}
-      {showAllMobile && (
-        <div className="px-4 sm:px-5 md:hidden mb-4">
-          <button
-            type="button"
-            onClick={() => {
-              setShowAllMobile(false);
-              if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
-            }}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-sm font-semibold text-muted-foreground hover:bg-muted/40 transition-colors"
-            aria-expanded={true}
-            aria-controls="sitter-dash-extra"
-          >
-            Réduire l'espace
-            <ChevronUp className="h-4 w-4" aria-hidden="true" />
-          </button>
-        </div>
-      )}
-
-      {/* Lien discret "Revoir la présentation", relégué en pied (masqué mobile en focus) */}
-      <div className={`px-4 sm:px-5 md:px-8 mt-2 mb-4 text-center ${!showAllMobile ? "hidden md:block" : ""}`}>
+      {/* Lien discret "Revoir la présentation" */}
+      <div className="px-4 sm:px-5 md:px-8 mt-2 mb-4 text-center">
         <button onClick={() => setSearchParams({ tour: "true" })} className="text-xs text-muted-foreground underline-offset-4 hover:underline">
           Revoir la présentation
         </button>
       </div>
+
 
       {/* CTA sticky mobile */}
 
