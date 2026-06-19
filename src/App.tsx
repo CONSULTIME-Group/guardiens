@@ -315,13 +315,13 @@ const AppRoutes = () => (
       <Route path="/annonces/demo/:slug" element={<DemoSitDetail />} />
       <Route path="/annonces/:id" element={<PublicSitDetail />} />
       <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
-      <Route path="/pros" element={<ProsListing />} />
+      <Route path="/pros" element={<AppLayout><ProsListing /></AppLayout>} />
       <Route path="/pros/inscription" element={<AppLayout><ProOnboarding /></AppLayout>} />
       <Route path="/pros/mon-espace" element={<AppLayout><MyProProfile /></AppLayout>} />
 
-      <Route path="/pros/categorie/:catSlug" element={<ProCategoryListing />} />
-      <Route path="/pros/categorie/:catSlug/:villeSlug" element={<ProCategoryListing />} />
-      <Route path="/pros/:slug" element={<ProDetail />} />
+      <Route path="/pros/categorie/:catSlug" element={<AppLayout><ProCategoryListing /></AppLayout>} />
+      <Route path="/pros/categorie/:catSlug/:villeSlug" element={<AppLayout><ProCategoryListing /></AppLayout>} />
+      <Route path="/pros/:slug" element={<AppLayout><ProDetail /></AppLayout>} />
       <Route element={<AdminLayout />}>
         <Route path="/admin/seo-debug" element={<SeoDebug />} />
         <Route path="/admin/build-info" element={<BuildInfo />} />
