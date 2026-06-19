@@ -56,12 +56,8 @@ const SitterDashboard = () => {
 
   if (loading) return <SitterDashboardSkeleton />;
 
-  // Dynamic subtitle
-  const subtitle = nextGuard
-    ? `Votre prochaine garde est dans ${nextGuard.daysUntil} jour${nextGuard.daysUntil > 1 ? "s" : ""}.`
-    : hasAcceptedRecent
-    ? "Félicitations, votre candidature a été acceptée."
-    : "Explorez les annonces près de chez vous.";
+  // (Sous-titre dynamique supprimé : redondant avec le titre de la
+  // PriorityActionCard du cockpit. Cf. audit dashboard 2026.)
 
   // ── Checklist UNIFIÉE, fusion onboarding + profile completion ──
   // Items atomiques actionnables (pas l'agrégat profile_completion).
@@ -174,7 +170,7 @@ const SitterDashboard = () => {
   // au lieu de 3 cartes empilées). Toutes fermées par défaut.
   const buildSecondaryAccordion = (opts: { withConseils: boolean }) => (
     <section aria-label="Mon espace gardien, détails" className="rounded-2xl border border-border bg-card overflow-hidden">
-      <Accordion type="single" collapsible defaultValue="reputation">
+      <Accordion type="single" collapsible defaultValue={completedSits > 0 ? "reputation" : undefined}>
         {opts.withConseils && (
         <AccordionItem value="conseils" className="border-b border-border last:border-0">
           <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
@@ -184,7 +180,7 @@ const SitterDashboard = () => {
               </p>
               <p className="text-sm font-medium text-foreground">
                 {articles.length > 0
-                  ? `${articles.length} article${articles.length > 1 ? "s" : ""} de la communauté`
+                  ? "Lectures choisies pour vos premières gardes"
                   : "Bientôt de nouveaux conseils"}
               </p>
             </div>
@@ -442,7 +438,7 @@ const SitterDashboard = () => {
                     aria-expanded={false}
                     aria-controls="sitter-dash-extra"
                   >
-                    Voir mes badges et ressources
+                    Réputation, badges, urgence
                     <ChevronDown className="h-4 w-4" aria-hidden="true" />
                   </button>
                 </div>
@@ -486,15 +482,11 @@ const SitterDashboard = () => {
             onToggleAvailability={toggleAvailability}
           />
           {buildEmergencyBlock(true)}
+          {buildSecondaryAccordion({ withConseils: false })}
           <AsideArticlesCard articles={articles} />
         </aside>
       </div>
 
-      {/* Statut / badges réputation, pleine largeur sous le layout 2 colonnes en xl.
-          Sur < xl, déjà rendus dans la version pleine largeur ci-dessus. */}
-      <div className="hidden xl:block xl:px-8 mt-6 space-y-3">
-        {buildSecondaryAccordion({ withConseils: false })}
-      </div>
 
       {/* Toggle « Réduire » mobile : visible uniquement quand l'espace est déployé */}
       {showAllMobile && (

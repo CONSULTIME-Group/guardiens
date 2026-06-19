@@ -119,9 +119,11 @@ const SitterStatusBar = ({
           </div>
         ))}
       </div>
-      <p className="text-[11px] text-muted-foreground font-sans italic mt-3 leading-snug">
-        Le statut Gardien d'urgence est distinct (note ≥ 4.7), voir l'éligibilité plus bas.
-      </p>
+      {completedSits > 0 && (
+        <p className="text-[11px] text-muted-foreground font-sans italic mt-3 leading-snug">
+          Le statut Gardien d'urgence est distinct (note ≥ 4.7), voir l'éligibilité plus bas.
+        </p>
+      )}
     </div>
   </div>
   );
