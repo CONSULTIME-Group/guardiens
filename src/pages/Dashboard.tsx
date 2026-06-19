@@ -5,7 +5,7 @@ import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
 import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import SitterDashboard from "@/components/dashboard/SitterDashboard";
-import ProSpaceBanner from "@/components/dashboard/ProSpaceBanner";
+
 import { DashboardErrorBoundary } from "@/components/dashboard/DashboardErrorBoundary";
 import { trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
@@ -212,10 +212,6 @@ const Dashboard = () => {
           {displayedRole === "owner" ? <OwnerDashboard /> : <SitterDashboard />}
         </DashboardErrorBoundary>
 
-        {/* Bandeau pro déplacé sous le cockpit, libère le haut du pli mobile. */}
-        <div className="container mx-auto px-4 mt-4">
-          <ProSpaceBanner />
-        </div>
       </div>
     </div>
   );

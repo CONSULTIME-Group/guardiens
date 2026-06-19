@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
@@ -19,14 +18,11 @@ import NearbyHelpersCarousel from "./shared/NearbyHelpersCarousel";
 import SitterEmergencyCardCompact from "./sitter/SitterEmergencyCardCompact";
 import SitterMissionsSection from "./sitter/SitterMissionsSection";
 import NearbyAnnoncesCard from "./sitter/NearbyAnnoncesCard";
-import QuickActionsCard from "./sitter/QuickActionsCard";
-import AsideArticlesCard from "./sitter/AsideArticlesCard";
-import SectionEyebrow from "./shared/SectionEyebrow";
 import DashSection from "./owner/DashSection";
 import SitterDashboardSkeleton from "./sitter/SitterDashboardSkeleton";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { CheckCircle, Circle, ChevronRight, Newspaper, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { CheckCircle, Circle, ChevronRight, Newspaper, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 
@@ -38,7 +34,8 @@ const SitterDashboard = () => {
   const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
   const [searchParams, setSearchParams] = useSearchParams();
   const { hasAccess: hasSubscription } = useSubscriptionAccess();
-  const [showAllMobile, setShowAllMobile] = useState(false);
+
+
 
 
 
@@ -300,69 +297,57 @@ const SitterDashboard = () => {
       : "Près de chez vous";
 
   const DiscoverySections = (
-    <div className="space-y-6 min-w-0">
-      {/* 1. Annonces, zone PRIMARY (vert sapin) : garde rémunérée */}
-      <section
-        aria-labelledby="discovery-annonces-heading"
-        className="relative rounded-2xl bg-primary/[0.04] ring-1 ring-primary/15 p-3 sm:p-5 min-w-0 overflow-hidden"
-      >
-        <span aria-hidden className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-primary" />
-        <div className="pl-2 sm:pl-3 min-w-0">
-          <SectionEyebrow
-            eyebrow="Annonces · Garde"
-            title={annoncesTitle}
-            accent="primary"
-            id="discovery-annonces-heading"
-          />
-          <NearbyAnnoncesCard
-            nearbyListings={nearbyListings}
-            nearbyListingsRadius={nearbyListingsRadius}
-            nearbyError={nearbyError}
-            isAvailable={isAvailable}
-            hideHeader
-          />
+    <div className="space-y-4 min-w-0">
+      {/* 1. Annonces — carte neutre, chip catégorie */}
+      <section aria-labelledby="discovery-annonces-heading" className="rounded-2xl border border-border bg-card p-4 sm:p-5 min-w-0">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5">Garde</span>
         </div>
+        <h2 id="discovery-annonces-heading" className="font-heading text-lg sm:text-xl font-bold text-foreground leading-tight mb-3">
+          {annoncesTitle}
+        </h2>
+        <NearbyAnnoncesCard
+          nearbyListings={nearbyListings}
+          nearbyListingsRadius={nearbyListingsRadius}
+          nearbyError={nearbyError}
+          isAvailable={isAvailable}
+          hideHeader
+        />
       </section>
 
-      {/* 2. Coup de main, zone WARNING (ambre) : entraide */}
-      <section
-        aria-labelledby="discovery-missions-heading"
-        className="relative rounded-2xl bg-warning/[0.06] ring-1 ring-warning/20 p-3 sm:p-5 min-w-0 overflow-hidden"
-      >
-        <span aria-hidden className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-warning" />
-        <div className="pl-2 sm:pl-3 min-w-0">
-          <SectionEyebrow
-            eyebrow="Coup de main · Entraide"
-            title="Échanges dans votre coin"
-            accent="warning"
-            id="discovery-missions-heading"
-          />
-          <div className="space-y-4 min-w-0">
-            <NearbyHelpersCarousel hideHeader />
-            {!missionsEmpty && (
-              <SitterMissionsSection
-                myMissions={myMissions}
-                nearbyMissions={nearbyMissions}
-                postalCode={postalCode}
-                myMissionsError={myMissionsError}
-                nearbyMissionsError={nearbyMissionsError}
-              />
-            )}
-          </div>
+      {/* 2. Coup de main — carte neutre, chip catégorie */}
+      <section aria-labelledby="discovery-missions-heading" className="rounded-2xl border border-border bg-card p-4 sm:p-5 min-w-0">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="inline-flex items-center rounded-full bg-warning/10 text-warning text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5">Entraide</span>
+        </div>
+        <h2 id="discovery-missions-heading" className="font-heading text-lg sm:text-xl font-bold text-foreground leading-tight mb-3">
+          Échanges dans votre coin
+        </h2>
+        <div className="space-y-4 min-w-0">
+          <NearbyHelpersCarousel hideHeader />
+          {!missionsEmpty && (
+            <SitterMissionsSection
+              myMissions={myMissions}
+              nearbyMissions={nearbyMissions}
+              postalCode={postalCode}
+              myMissionsError={myMissionsError}
+              nearbyMissionsError={nearbyMissionsError}
+            />
+          )}
         </div>
       </section>
-
-      {/* Conseils reste neutre dans l'accordéon secondaire en bas. */}
     </div>
   );
+
 
   return (
     <div className="space-y-0 overflow-hidden pb-24 md:pb-8">
 {/* pb-24 mobile = BottomNav (h-16) + sticky CTA (~32px). h-20 spacer supprimé (doublon). */}
-      {/* Role activation, masqué sur mobile en mode Focus */}
-      <div className={`px-4 sm:px-5 md:px-8 mb-4 ${!showAllMobile ? "hidden md:block" : ""}`}>
+      {/* Role activation */}
+      <div className="px-4 sm:px-5 md:px-8 mb-4">
         <RoleActivationBanner userRole={user?.role || "sitter"} />
       </div>
+
 
 
       {/* ═══ COCKPIT ═══ (greeting + action prioritaire + signal vivant) */}
@@ -405,114 +390,48 @@ const SitterDashboard = () => {
 
       {/* Bannière contextuelle, une seule : AccessGateBanner si accès limité, sinon FreePeriodBanner */}
       {!nextGuard && (
-        <div className={`px-4 sm:px-5 md:px-8 mt-3 ${!showAllMobile ? "hidden md:block" : ""}`}>
+        <div className="px-4 sm:px-5 md:px-8 mt-3">
           {!(level === 4 || level === "3B")
             ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
             : <FreePeriodBanner />}
         </div>
       )}
 
-      {(() => {
-        const isEmpty = !nextGuard && !nextGuardError && nearbyListings.length === 0 && !nearbyError;
-        return (
-          <>
 
-            {/* ═══ 2-COLUMN LAYOUT ≥ xl ═══ */}
-
-            {/* Version pleine largeur, visible < xl */}
-            <div className="xl:hidden mt-4">
-              {/* Checklist, toujours rendue sous le cockpit en mobile (l'empty-state
-                  est déjà géré par la PriorityActionCard du cockpit). */}
-              {ChecklistBlock}
-
-              {/* Toggle mobile « Voir mes badges et ressources » : on AFFICHE
-                  par défaut la zone Découverte (annonces + coup de main), le
-                  toggle ne masque plus QUE le SecondaryAccordion (conseils /
-                  réputation / badges) + le bloc urgence. Cf. mem://ux/dashboard-2026-precepts. */}
-              {!showAllMobile && (
-                <div className="px-4 sm:px-5 md:hidden mb-6 mt-6">
-                  <button
-                    type="button"
-                    onClick={() => setShowAllMobile(true)}
-                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-sm font-semibold text-foreground hover:bg-muted/40 transition-colors"
-                    aria-expanded={false}
-                    aria-controls="sitter-dash-extra"
-                  >
-                    Réputation, badges, urgence
-                    <ChevronDown className="h-4 w-4" aria-hidden="true" />
-                  </button>
-                </div>
-              )}
-
-              {/* DiscoverySections : visible mobile par défaut (cœur de valeur sitter). */}
-              <div className="px-4 sm:px-5 md:px-8 mb-6">
-                {DiscoverySections}
-              </div>
-
-              {/* SecondaryAccordion + urgence : masqués mobile derrière toggle. */}
-              <div id="sitter-dash-extra" className={`px-4 sm:px-5 md:px-8 mb-6 space-y-3 ${!showAllMobile ? "hidden md:block" : ""}`}>
-                {buildSecondaryAccordion({ withConseils: true })}
-                {buildEmergencyBlock(false)}
-              </div>
-            </div>
-          </>
-        );
-      })()}
-
-
-      {/* Version 2 colonnes, visible ≥ xl */}
-      <div className="hidden xl:grid xl:grid-cols-12 xl:gap-6 xl:px-8 min-w-0 mt-4">
-        {/* MAIN COLUMN, 9/12 (audit V2 : sidebar trop large 4/12 pour son contenu) */}
+      {/* ═══ CONTENU UNIFIÉ mobile + desktop ═══
+          Hiérarchie unique : Checklist → Annonces → Coup de main → Accordéon secondaire (réputation/badges/conseils/urgence).
+          Desktop ≥ xl : 2 colonnes (main 9/12, aside sticky TOC simple 3/12). */}
+      <div className="mt-4 xl:grid xl:grid-cols-12 xl:gap-6 xl:px-8 min-w-0">
         <div className="xl:col-span-9 min-w-0">
-          <div className="[&>*]:!px-0 [&>*]:!mx-0">
-            {ChecklistBlock}
-            <section aria-labelledby="nearby-heading-xl">
-              <h2 id="nearby-heading-xl" className="sr-only">Près de chez vous</h2>
-              {DiscoverySections}
-            </section>
+          {ChecklistBlock}
+          <div className="px-4 sm:px-5 md:px-8 xl:!px-0 mb-6">
+            {DiscoverySections}
+          </div>
+          <div className="px-4 sm:px-5 md:px-8 xl:!px-0 mb-6 space-y-3">
+            {buildSecondaryAccordion({ withConseils: true })}
+            {buildEmergencyBlock(false)}
           </div>
         </div>
 
-        {/* SIDE COLUMN, 3/12 : actions rapides + gardien d'urgence (audit V2 : remplir l'aside) */}
-        <aside aria-label="Actions rapides, conseils et urgence" className="xl:col-span-3 min-w-0 space-y-3">
-          <QuickActionsCard
-            pendingAppsCount={pendingAppsCount}
-            unreadCount={unreadCount}
-            isAvailable={isAvailable}
-            onToggleAvailability={toggleAvailability}
-          />
-          {buildEmergencyBlock(true)}
-          {buildSecondaryAccordion({ withConseils: false })}
-          <AsideArticlesCard articles={articles} />
+        <aside aria-label="Sommaire" className="hidden xl:block xl:col-span-3 min-w-0">
+          <nav className="sticky top-24 rounded-2xl border border-border bg-card p-4 text-sm">
+            <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-semibold mb-2">Sur cette page</p>
+            <ul className="space-y-1.5">
+              <li><a href="#discovery-annonces-heading" className="text-foreground/80 hover:text-primary transition-colors">Annonces près de chez vous</a></li>
+              <li><a href="#discovery-missions-heading" className="text-foreground/80 hover:text-primary transition-colors">Coup de main</a></li>
+              <li><a href="#emergency-heading" className="text-foreground/80 hover:text-primary transition-colors">Gardien d'urgence</a></li>
+            </ul>
+          </nav>
         </aside>
       </div>
 
-
-      {/* Toggle « Réduire » mobile : visible uniquement quand l'espace est déployé */}
-      {showAllMobile && (
-        <div className="px-4 sm:px-5 md:hidden mb-4">
-          <button
-            type="button"
-            onClick={() => {
-              setShowAllMobile(false);
-              if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
-            }}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-sm font-semibold text-muted-foreground hover:bg-muted/40 transition-colors"
-            aria-expanded={true}
-            aria-controls="sitter-dash-extra"
-          >
-            Réduire l'espace
-            <ChevronUp className="h-4 w-4" aria-hidden="true" />
-          </button>
-        </div>
-      )}
-
-      {/* Lien discret "Revoir la présentation", relégué en pied (masqué mobile en focus) */}
-      <div className={`px-4 sm:px-5 md:px-8 mt-2 mb-4 text-center ${!showAllMobile ? "hidden md:block" : ""}`}>
+      {/* Lien discret "Revoir la présentation" */}
+      <div className="px-4 sm:px-5 md:px-8 mt-2 mb-4 text-center">
         <button onClick={() => setSearchParams({ tour: "true" })} className="text-xs text-muted-foreground underline-offset-4 hover:underline">
           Revoir la présentation
         </button>
       </div>
+
 
       {/* CTA sticky mobile */}
 
