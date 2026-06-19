@@ -300,61 +300,48 @@ const SitterDashboard = () => {
       : "Près de chez vous";
 
   const DiscoverySections = (
-    <div className="space-y-6 min-w-0">
-      {/* 1. Annonces, zone PRIMARY (vert sapin) : garde rémunérée */}
-      <section
-        aria-labelledby="discovery-annonces-heading"
-        className="relative rounded-2xl bg-primary/[0.04] ring-1 ring-primary/15 p-3 sm:p-5 min-w-0 overflow-hidden"
-      >
-        <span aria-hidden className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-primary" />
-        <div className="pl-2 sm:pl-3 min-w-0">
-          <SectionEyebrow
-            eyebrow="Annonces · Garde"
-            title={annoncesTitle}
-            accent="primary"
-            id="discovery-annonces-heading"
-          />
-          <NearbyAnnoncesCard
-            nearbyListings={nearbyListings}
-            nearbyListingsRadius={nearbyListingsRadius}
-            nearbyError={nearbyError}
-            isAvailable={isAvailable}
-            hideHeader
-          />
+    <div className="space-y-4 min-w-0">
+      {/* 1. Annonces — carte neutre, chip catégorie */}
+      <section aria-labelledby="discovery-annonces-heading" className="rounded-2xl border border-border bg-card p-4 sm:p-5 min-w-0">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5">Garde</span>
         </div>
+        <h2 id="discovery-annonces-heading" className="font-heading text-lg sm:text-xl font-bold text-foreground leading-tight mb-3">
+          {annoncesTitle}
+        </h2>
+        <NearbyAnnoncesCard
+          nearbyListings={nearbyListings}
+          nearbyListingsRadius={nearbyListingsRadius}
+          nearbyError={nearbyError}
+          isAvailable={isAvailable}
+          hideHeader
+        />
       </section>
 
-      {/* 2. Coup de main, zone WARNING (ambre) : entraide */}
-      <section
-        aria-labelledby="discovery-missions-heading"
-        className="relative rounded-2xl bg-warning/[0.06] ring-1 ring-warning/20 p-3 sm:p-5 min-w-0 overflow-hidden"
-      >
-        <span aria-hidden className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-warning" />
-        <div className="pl-2 sm:pl-3 min-w-0">
-          <SectionEyebrow
-            eyebrow="Coup de main · Entraide"
-            title="Échanges dans votre coin"
-            accent="warning"
-            id="discovery-missions-heading"
-          />
-          <div className="space-y-4 min-w-0">
-            <NearbyHelpersCarousel hideHeader />
-            {!missionsEmpty && (
-              <SitterMissionsSection
-                myMissions={myMissions}
-                nearbyMissions={nearbyMissions}
-                postalCode={postalCode}
-                myMissionsError={myMissionsError}
-                nearbyMissionsError={nearbyMissionsError}
-              />
-            )}
-          </div>
+      {/* 2. Coup de main — carte neutre, chip catégorie */}
+      <section aria-labelledby="discovery-missions-heading" className="rounded-2xl border border-border bg-card p-4 sm:p-5 min-w-0">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="inline-flex items-center rounded-full bg-warning/10 text-warning text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5">Entraide</span>
+        </div>
+        <h2 id="discovery-missions-heading" className="font-heading text-lg sm:text-xl font-bold text-foreground leading-tight mb-3">
+          Échanges dans votre coin
+        </h2>
+        <div className="space-y-4 min-w-0">
+          <NearbyHelpersCarousel hideHeader />
+          {!missionsEmpty && (
+            <SitterMissionsSection
+              myMissions={myMissions}
+              nearbyMissions={nearbyMissions}
+              postalCode={postalCode}
+              myMissionsError={myMissionsError}
+              nearbyMissionsError={nearbyMissionsError}
+            />
+          )}
         </div>
       </section>
-
-      {/* Conseils reste neutre dans l'accordéon secondaire en bas. */}
     </div>
   );
+
 
   return (
     <div className="space-y-0 overflow-hidden pb-24 md:pb-8">
