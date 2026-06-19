@@ -322,63 +322,60 @@ const SitterDashboard = () => {
         <RoleActivationBanner userRole={user?.role || "sitter"} />
       </div>
 
-
-
-      {/* ═══ COCKPIT ═══ (greeting + action prioritaire + signal vivant) */}
-      <SitterCockpit
-        userId={user?.id}
-        firstName={user?.firstName}
-        avatarUrl={avatarUrl}
-        isFounder={user?.isFounder}
-        isAvailable={isAvailable}
-        onToggleAvailability={toggleAvailability}
-        nextGuard={nextGuard}
-        profileCompletion={profileCompletion}
-        postalCode={postalCode}
-        nearbyListings={nearbyListings}
-        competencesCount={competencesCount}
-      />
-
-      {/* Erreurs de fetch, affichées discrètement sous le cockpit pour ne pas
-          polluer le pli, mais restent visibles pour debug utilisateur. */}
-      {(nextGuardError || nearbyError) && (
-        <div className="px-4 sm:px-5 md:px-8 mt-2 space-y-2">
-          {nextGuardError && (
-            <DashboardSectionState
-              variant="error"
-              eyebrow="Prochaine garde"
-              description={nextGuardError}
-              onRetry={() => window.location.reload()}
-            />
-          )}
-          {nearbyError && (
-            <DashboardSectionState
-              variant="error"
-              eyebrow="Annonces à proximité"
-              description={nearbyError}
-              onRetry={() => window.location.reload()}
-            />
-          )}
-        </div>
-      )}
-
-      {/* Bannière contextuelle, une seule : AccessGateBanner si accès limité, sinon FreePeriodBanner */}
-      {!nextGuard && (
-        <div className="px-4 sm:px-5 md:px-8 mt-3">
-          {!(level === 4 || level === "3B")
-            ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
-            : <FreePeriodBanner />}
-        </div>
-      )}
-
-
-      {/* ═══ CONTENU UNIFIÉ mobile + desktop ═══
-          Hiérarchie unique : Checklist → Annonces → Coup de main → Accordéon secondaire (réputation/badges/conseils/urgence).
-          Desktop ≥ xl : 2 colonnes (main 9/12, aside sticky TOC simple 3/12). */}
-      <div className="mt-4 xl:grid xl:grid-cols-12 xl:gap-6 xl:px-8 min-w-0">
+      {/* ═══ GRILLE PRINCIPALE — cockpit + aside alignés dès le haut ═══
+          Le cockpit, les bannières, la checklist, la discovery et l'accordéon
+          vivent dans la colonne 9/12. L'aside « Mon activité » s'aligne
+          verticalement avec le cockpit sur ≥ xl, plus de carte orpheline. */}
+      <div className="xl:grid xl:grid-cols-12 xl:gap-6 xl:px-8 min-w-0">
         <div className="xl:col-span-9 min-w-0">
-          {/* Mobile/tablet : panneau d'activité inline, juste sous le cockpit */}
-          <div className="xl:hidden px-4 sm:px-5 md:px-8 mb-6">
+          {/* COCKPIT */}
+          <SitterCockpit
+            userId={user?.id}
+            firstName={user?.firstName}
+            avatarUrl={avatarUrl}
+            isFounder={user?.isFounder}
+            isAvailable={isAvailable}
+            onToggleAvailability={toggleAvailability}
+            nextGuard={nextGuard}
+            profileCompletion={profileCompletion}
+            postalCode={postalCode}
+            nearbyListings={nearbyListings}
+            competencesCount={competencesCount}
+          />
+
+          {/* Erreurs de fetch, affichées discrètement sous le cockpit */}
+          {(nextGuardError || nearbyError) && (
+            <div className="px-4 sm:px-5 md:px-8 xl:!px-0 mt-2 space-y-2">
+              {nextGuardError && (
+                <DashboardSectionState
+                  variant="error"
+                  eyebrow="Prochaine garde"
+                  description={nextGuardError}
+                  onRetry={() => window.location.reload()}
+                />
+              )}
+              {nearbyError && (
+                <DashboardSectionState
+                  variant="error"
+                  eyebrow="Annonces à proximité"
+                  description={nearbyError}
+                  onRetry={() => window.location.reload()}
+                />
+              )}
+            </div>
+          )}
+
+          {/* Bannière contextuelle, une seule */}
+          {!nextGuard && (
+            <div className="px-4 sm:px-5 md:px-8 xl:!px-0 mt-3">
+              {!(level === 4 || level === "3B")
+                ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+                : <FreePeriodBanner />}
+            </div>
+          )}
+
+          {/* Mobile/tablet : panneau d'activité inline */}
+          <div className="xl:hidden px-4 sm:px-5 md:px-8 mt-6">
             <SitterActivityPanel
               variant="inline"
               isAvailable={isAvailable}
@@ -390,7 +387,9 @@ const SitterDashboard = () => {
             />
           </div>
 
-          {ChecklistBlock}
+          <div className="mt-6">
+            {ChecklistBlock}
+          </div>
           <div className="px-4 sm:px-5 md:px-8 xl:!px-0 mb-6">
             {DiscoverySections}
           </div>
@@ -399,7 +398,7 @@ const SitterDashboard = () => {
           </div>
         </div>
 
-        <aside aria-label="Mon activité" className="hidden xl:block xl:col-span-3 min-w-0">
+        <aside aria-label="Mon activité" className="hidden xl:block xl:col-span-3 min-w-0 pt-4 sm:pt-6">
           <SitterActivityPanel
             variant="aside"
             isAvailable={isAvailable}
@@ -412,6 +411,7 @@ const SitterDashboard = () => {
         </aside>
 
       </div>
+
 
 
       {/* Lien discret "Revoir la présentation" */}
