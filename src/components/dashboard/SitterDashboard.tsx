@@ -455,7 +455,7 @@ const SitterDashboard = () => {
 
               {/* SecondaryAccordion + urgence : masqués mobile derrière toggle. */}
               <div id="sitter-dash-extra" className={`px-4 sm:px-5 md:px-8 mb-6 space-y-3 ${!showAllMobile ? "hidden md:block" : ""}`}>
-                {SecondaryAccordion}
+                {buildSecondaryAccordion({ withConseils: true })}
                 {buildEmergencyBlock(false)}
               </div>
             </div>
@@ -493,7 +493,7 @@ const SitterDashboard = () => {
       {/* Statut / badges réputation, pleine largeur sous le layout 2 colonnes en xl.
           Sur < xl, déjà rendus dans la version pleine largeur ci-dessus. */}
       <div className="hidden xl:block xl:px-8 mt-6 space-y-3">
-        {SecondaryAccordion}
+        {buildSecondaryAccordion({ withConseils: false })}
       </div>
 
       {/* Toggle « Réduire » mobile : visible uniquement quand l'espace est déployé */}
