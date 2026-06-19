@@ -322,85 +322,50 @@ const SitterDashboard = () => {
         <RoleActivationBanner userRole={user?.role || "sitter"} />
       </div>
 
-      {/* ═══ GRILLE PRINCIPALE — cockpit + aside alignés dès le haut ═══
-          Le cockpit, les bannières, la checklist, la discovery et l'accordéon
-          vivent dans la colonne 9/12. L'aside « Mon activité » s'aligne
-          verticalement avec le cockpit sur ≥ xl, plus de carte orpheline. */}
-      <div className="xl:grid xl:grid-cols-12 xl:gap-6 xl:px-8 min-w-0">
-        <div className="xl:col-span-9 min-w-0">
-          {/* COCKPIT */}
-          <SitterCockpit
-            userId={user?.id}
-            firstName={user?.firstName}
-            avatarUrl={avatarUrl}
-            isFounder={user?.isFounder}
-            isAvailable={isAvailable}
-            onToggleAvailability={toggleAvailability}
-            nextGuard={nextGuard}
-            profileCompletion={profileCompletion}
-            postalCode={postalCode}
-            nearbyListings={nearbyListings}
-            competencesCount={competencesCount}
-          />
+      {/* ═══ FLUX VERTICAL UNIQUE — plus de colonne aside isolée ═══
+          Ordre cockpit : Header + Action prioritaire → KPI strip Mon activité
+          → Activation → Opportunités → Profil (accordéon). */}
+      <div className="min-w-0">
+        {/* COCKPIT */}
+        <SitterCockpit
+          userId={user?.id}
+          firstName={user?.firstName}
+          avatarUrl={avatarUrl}
+          isFounder={user?.isFounder}
+          isAvailable={isAvailable}
+          onToggleAvailability={toggleAvailability}
+          nextGuard={nextGuard}
+          profileCompletion={profileCompletion}
+          postalCode={postalCode}
+          nearbyListings={nearbyListings}
+          competencesCount={competencesCount}
+        />
 
-          {/* Erreurs de fetch, affichées discrètement sous le cockpit */}
-          {(nextGuardError || nearbyError) && (
-            <div className="px-4 sm:px-5 md:px-8 xl:!px-0 mt-2 space-y-2">
-              {nextGuardError && (
-                <DashboardSectionState
-                  variant="error"
-                  eyebrow="Prochaine garde"
-                  description={nextGuardError}
-                  onRetry={() => window.location.reload()}
-                />
-              )}
-              {nearbyError && (
-                <DashboardSectionState
-                  variant="error"
-                  eyebrow="Annonces à proximité"
-                  description={nearbyError}
-                  onRetry={() => window.location.reload()}
-                />
-              )}
-            </div>
-          )}
-
-          {/* Bannière contextuelle, une seule */}
-          {!nextGuard && (
-            <div className="px-4 sm:px-5 md:px-8 xl:!px-0 mt-3">
-              {!(level === 4 || level === "3B")
-                ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
-                : <FreePeriodBanner />}
-            </div>
-          )}
-
-          {/* Mobile/tablet : panneau d'activité inline */}
-          <div className="xl:hidden px-4 sm:px-5 md:px-8 mt-6">
-            <SitterActivityPanel
-              variant="inline"
-              isAvailable={isAvailable}
-              profileCompletion={profileCompletion}
-              nextGuard={nextGuard}
-              unreadCount={unreadCount}
-              pendingAppsCount={pendingAppsCount}
-              nearbyListings={nearbyListings}
-            />
+        {/* Erreurs de fetch, affichées discrètement sous le cockpit */}
+        {(nextGuardError || nearbyError) && (
+          <div className="px-4 sm:px-5 md:px-8 mt-2 space-y-2">
+            {nextGuardError && (
+              <DashboardSectionState
+                variant="error"
+                eyebrow="Prochaine garde"
+                description={nextGuardError}
+                onRetry={() => window.location.reload()}
+              />
+            )}
+            {nearbyError && (
+              <DashboardSectionState
+                variant="error"
+                eyebrow="Annonces à proximité"
+                description={nearbyError}
+                onRetry={() => window.location.reload()}
+              />
+            )}
           </div>
+        )}
 
-          <div className="mt-6">
-            {ChecklistBlock}
-          </div>
-          <div className="px-4 sm:px-5 md:px-8 xl:!px-0 mb-6">
-            {DiscoverySections}
-          </div>
-          <div className="px-4 sm:px-5 md:px-8 xl:!px-0 mb-6">
-            {buildSecondaryAccordion({ withConseils: true })}
-          </div>
-        </div>
-
-        <aside aria-label="Mon activité" className="hidden xl:block xl:col-span-3 min-w-0 pt-4 sm:pt-6">
+        {/* KPI strip Mon activité, pleine largeur, juste sous l'action prioritaire */}
+        <div className="px-4 sm:px-5 md:px-8 mt-4">
           <SitterActivityPanel
-            variant="aside"
             isAvailable={isAvailable}
             profileCompletion={profileCompletion}
             nextGuard={nextGuard}
@@ -408,8 +373,26 @@ const SitterDashboard = () => {
             pendingAppsCount={pendingAppsCount}
             nearbyListings={nearbyListings}
           />
-        </aside>
+        </div>
 
+        {/* Bannière contextuelle, une seule */}
+        {!nextGuard && (
+          <div className="px-4 sm:px-5 md:px-8 mt-4">
+            {!(level === 4 || level === "3B")
+              ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+              : <FreePeriodBanner />}
+          </div>
+        )}
+
+        <div className="mt-6">
+          {ChecklistBlock}
+        </div>
+        <div className="px-4 sm:px-5 md:px-8 mb-6">
+          {DiscoverySections}
+        </div>
+        <div className="px-4 sm:px-5 md:px-8 mb-6">
+          {buildSecondaryAccordion({ withConseils: true })}
+        </div>
       </div>
 
 
