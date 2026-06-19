@@ -114,19 +114,9 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
       };
     }
 
-    // 4b. Annonces hors rayon — opportunité élargie, ton honnête
-    if (nearbyListings.length > 0) {
-      const count = nearbyListings.length;
-      return {
-        variant: "explore",
-        eyebrow: "Annonces plus loin",
-        title: `${count} annonce${count > 1 ? "s" : ""} disponible${count > 1 ? "s" : ""} hors de votre rayon habituel.`,
-        description: "Rien à proximité immédiate. Élargissez à la France entière pour découvrir ces gardes.",
-        ctaLabel: "Voir toute la France",
-        ctaTo: "/search?zone=france",
-        urgency: "low",
-      };
-    }
+    // 4b. Annonces hors rayon : NE PAS dupliquer le message,
+    // la section Découverte plus bas porte déjà « Annonces ailleurs en France ».
+    // On laisse le cockpit basculer sur disponibilité ou explore.
 
     // 5. Mode dispo OFF — sans ça aucune sollicitation directe
     if (!isAvailable) {

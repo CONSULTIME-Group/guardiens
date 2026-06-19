@@ -75,7 +75,7 @@ const SitterActivityPanel = ({
               {format(new Date(nextGuard.end_date), "d MMM", { locale: fr })}
             </p>
           ) : (
-            <p className="text-sm text-foreground/70">Aucune prévue</p>
+            <p className="text-sm text-foreground/70">Première garde à venir</p>
           )}
         </div>
       </Link>
