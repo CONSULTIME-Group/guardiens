@@ -93,71 +93,40 @@ const SitterDashboard = () => {
         <DashSection
           eyebrow="Activation"
           title="Finalisez votre profil"
-          description={`${incompleteItems.length} étape${incompleteItems.length > 1 ? "s" : ""} pour devenir pleinement visible auprès des propriétaires.`}
+          description={`${completedItems.length}/${allItems.length} étapes, ${progressPct}%`}
         >
-          {/* Progression globale visible */}
-          <div className="mb-3">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs text-muted-foreground">
-                {completedItems.length}/{allItems.length} étapes, {progressPct}%
-              </span>
-            </div>
-            <Progress value={progressPct} />
-          </div>
+          <Progress value={progressPct} className="mb-3" />
 
           <div role="list" className="bg-card border border-border rounded-2xl overflow-hidden">
-            {incompleteItems.slice(0, 2).map((item: any, i: number) => (
-              <Link key={i} to={item.to} role="listitem" className="group flex items-center justify-between py-3 px-4 border-b border-border last:border-0 cursor-pointer hover:bg-muted/40 transition-all duration-200 ease-out hover:translate-x-0.5">
+            {allItems.map((item: any, i: number) => (
+              <Link
+                key={i}
+                to={item.to}
+                role="listitem"
+                aria-disabled={item.done}
+                className={`group flex items-center justify-between py-3 px-4 border-b border-border last:border-0 transition-all duration-200 ease-out ${
+                  item.done ? "pointer-events-none" : "cursor-pointer hover:bg-muted/40 hover:translate-x-0.5"
+                }`}
+              >
                 <div className="flex items-center">
-                  <Circle className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
-                  <span className="text-sm text-foreground ml-3">{item.label}</span>
+                  {item.done ? (
+                    <CheckCircle className="h-4 w-4 text-primary" aria-hidden="true" />
+                  ) : (
+                    <Circle className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
+                  )}
+                  <span className={`text-sm ml-3 ${item.done ? "line-through text-foreground/50" : "text-foreground"}`}>
+                    {item.label}
+                  </span>
                 </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
+                {!item.done && (
+                  <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
+                )}
               </Link>
             ))}
           </div>
-          {incompleteItems.length > 2 && (
-            <details className="mt-2">
-              <summary className="cursor-pointer list-none text-xs text-muted-foreground px-1 py-1.5 hover:text-foreground flex items-center gap-1 select-none">
-                Voir les {incompleteItems.length - 2} étapes restantes <span aria-hidden="true">▾</span>
-              </summary>
-              <div role="list" className="bg-card border border-border rounded-2xl overflow-hidden mt-1">
-                {incompleteItems.slice(2).map((item: any, i: number) => (
-                  <Link key={i} to={item.to} role="listitem" className="group flex items-center justify-between py-3 px-4 border-b border-border last:border-0 cursor-pointer hover:bg-muted/40 transition-all duration-200 ease-out hover:translate-x-0.5">
-                    <div className="flex items-center">
-                      <Circle className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
-                      <span className="text-sm text-foreground ml-3">{item.label}</span>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
-                  </Link>
-                ))}
-              </div>
-            </details>
-          )}
-          {completedItems.length > 0 && (
-            <Accordion type="single" collapsible className="mt-3">
-              <AccordionItem value="done" className="border-none">
-                <AccordionTrigger className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-2.5 cursor-pointer hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-primary" aria-hidden="true" />
-                    <span className="text-sm font-medium text-primary">
-                      {completedItems.length} étape{completedItems.length > 1 ? "s" : ""} déjà complétée{completedItems.length > 1 ? "s" : ""}
-                    </span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="pt-2 pb-0">
-                  {completedItems.map((item: any, i: number) => (
-                    <div key={i} className="flex items-center gap-3 py-2 border-b border-border last:border-0 px-2">
-                      <CheckCircle className="h-4 w-4 text-primary" aria-hidden="true" />
-                      <span className="text-sm line-through text-foreground/60">{item.label}</span>
-                    </div>
-                  ))}
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          )}
         </DashSection>
       )}
+
     </section>
   );
 
