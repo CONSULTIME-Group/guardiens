@@ -7,6 +7,7 @@ import CategoryPills from "@/components/community/CategoryPills";
 import QuestionCard from "@/components/community/QuestionCard";
 import { useCommunityQuestions } from "@/hooks/useCommunityQuestions";
 import type { CommunityCategory } from "@/lib/communityCategories";
+import { DEPT_NAMES, getDeptCode } from "@/lib/departments";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
