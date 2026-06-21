@@ -191,31 +191,31 @@ const SmallMissionsPublic = () => {
  return (
  <>
  <PageMeta
- title="Petites missions d'entraide locale, Guardiens"
- description="Échangez des coups de main entre gens du coin. Jardinage, animaux, bricolage, sans argent. Gratuit pour tous."
+ title="Conseils & petites missions, entraide locale, Guardiens"
+ description="Posez une question ou échangez des coups de main entre gens du coin. Conseils, jardinage, animaux, bricolage. Gratuit pour tous."
  />
 
  <div className="min-h-screen bg-background font-body">
  {/* ═══ HEADER ═══ */}
   <PublicHeader />
   <FreePeriodBanner />
- <PageBreadcrumb items={[{ label: "Petites missions" }]} />
+ <PageBreadcrumb items={[{ label: "Conseils & petites missions" }]} />
 
  {/* ═══ SECTION 1, HERO ═══ */}
  <section className="bg-background">
  <div className="max-w-2xl mx-auto px-6 py-20 md:py-28 text-center">
  <Reveal>
  <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 mb-6">
- Petites missions · Entraide
+ Conseils & petites missions · Entraide
  </p>
  </Reveal>
 
  <Reveal delay={0.1}>
   <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground leading-tight max-w-2xl mx-auto">
- Un coup de main, près de chez vous.
+ Un conseil ou un coup de main, près de chez vous.
  </h1>
  <p className="font-body text-base md:text-lg text-foreground/70 mt-4 max-w-lg mx-auto leading-relaxed">
- Gratuit, sans engagement. Publiez une demande ou proposez votre aide.
+ Gratuit, sans engagement. Posez une question à la communauté ou échangez un service en nature.
  </p>
  </Reveal>
 
@@ -228,6 +228,11 @@ const SmallMissionsPublic = () => {
  <Button onClick={goToCreate} variant="outline" className="border-2 border-primary text-primary rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200">
  J'ai besoin d'un coup de main
  </Button>
+ </div>
+ <div className="mt-4">
+  <Link to="/questions" className="text-sm text-primary font-semibold hover:underline">
+   Plutôt poser une question à la communauté →
+  </Link>
  </div>
   <p className="text-xs text-foreground/50 mt-4">
  Gratuit pour tous. Aucun engagement, aucun jugement.

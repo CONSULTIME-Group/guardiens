@@ -13,7 +13,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   edit: "Modifier",
   messages: "Messages",
   notifications: "Notifications",
-  "petites-missions": "Petites missions",
+  "petites-missions": "Conseils & petites missions",
   creer: "Créer",
   "gardien-urgence": "Gardien d'urgence",
   actualites: "Actualités",
