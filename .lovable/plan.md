@@ -1,55 +1,108 @@
-# Plan acquisition « pub automatique » — bilan + suite
+# Module « Questions & conseils »
 
-## Déjà livré
+Forum communautaire léger pour poser une question (comportement animal, jardin, maison, garde…) et recevoir plusieurs réponses publiques. **Séparé** des petites missions (qui restent transactionnelles : Besoin / Offre).
 
-### Chantier 1 — SEO programmatique
-- **150 villes France** : `topCitiesFrance.ts` + admin `AdminCityPages` avec batch throttlé, génération via `generate-city-page`.
-- **96 départements** : admin `AdminDepartments` + edge `generate-department-page`.
-- **60 races** (40 chiens + 20 chats) : `topBreeds.ts` + admin `AdminBreeds`, batch via `generate-breed-profile`.
+## Périmètre
 
-### Chantier 2 — Soumission Google automatique
-- **IndexNow** : triggers DB sur `sits`, `articles`, `city_guides`, `seo_city_pages`, `seo_department_pages`, `small_missions`.
-- **GSC** : edge `gsc-submit-sitemap` (JWT RS256 via `GOOGLE_SERVICE_ACCOUNT_JSON`) + cron quotidien 5h UTC.
+- Route dédiée : `/questions` (liste + filtres) et `/questions/:id` (détail + fil de réponses).
+- Entrée depuis le dashboard : remplacer le bloc actuel « Échanges autour de vous » par 2 cartes côte à côte : « Petites missions » (existant) + « Questions & conseils » (nouveau).
+- Cohabite avec `/petites-missions`, aucune fusion DB.
 
-### Chantier 3 — Partage social
-- **OG dynamiques** : edge `og-page` (satori + resvg) sur ville, race, département, article.
-- **Bouton partage 1-clic** : `ShareLink` (Facebook, WhatsApp, Email, Clipboard, Web Share) + UTM auto + event `editorial_share_clicked`.
-- **JSON-LD enrichi** :
-  - `FAQPage` ajoutée sur fiches de race (4 questions standards).
-  - `Service` annonce enrichi : `serviceType`, image OG, `areaServed` PostalAddress, credential identité vérifiée, `interactionStatistic` gardes accueillies.
-  - Déjà solide auparavant : Article + FAQPage + HowTo (articles), Service + AggregateRating (gardiens), Service + Offer + FAQPage (villes/départements).
+## Modèle de données
 
-### Chantier 4 — Emails cycle de vie
-- 3 nouveaux templates : `owner-no-sit-j3`, `owner-no-sit-j10`, `referral-boost-monthly`.
-- 2 séquences : `owner-no-sit-relance` (J+3 puis J+10, exit `has_published_sit`) et `referral-boost-monthly` (mensuel, membres actifs).
-- Évaluateur étendu : nouveau type d'enrôlement `active_referral` + dédup glissante pour campagnes récurrentes.
-- Cron horaire `evaluate-journeys-hourly` (HH:15).
+Deux nouvelles tables publiques.
 
-## Suite proposée (ordre d'impact)
+### `community_questions`
+- `category` : `animaux | jardin | maison | garde | autre`
+- `title` (5–120), `body` (20–4000), `tags text[]`, `city` (optionnel)
+- `status` : `open | resolved | closed` (auteur peut marquer « résolu »)
+- `accepted_answer_id` (nullable, FK community_answers)
+- `views_count`, `answers_count`, `helpful_count` (compteurs)
+- `is_pinned`, `is_hidden` (modération)
 
-### A — Pilotage et mesure (1 jour) — RECOMMANDÉ
-Sans dashboard les chantiers 1-4 tournent à l'aveugle.
-- **Dashboard admin `/admin/seo`** : impressions GSC, clics, top requêtes, pages indexées, statut soumissions IndexNow.
-- **Dashboard admin `/admin/lifecycle`** : taux d'envoi/ouverture/clic par séquence (`email_send_log` × `journey_step_log` × `email_engagement_events`), taux de sortie (exit_condition_met).
-- KPIs en haut, tables sortables, filtres 7/30/90 jours.
+### `community_answers`
+- `question_id` FK, `parent_answer_id` (1 niveau de réponse imbriquée)
+- `body` (10–4000), `helpful_count`
+- `is_author_pick` (épinglé par l'auteur de la question)
+- `is_hidden`
 
-### B — Articles longue traîne (1 jour)
-- 20 articles auto-générés : « comment trouver un gardien à [top 20 villes] » + « partir en vacances avec [top 10 races] ».
-- Edge `generate-article` déjà en place, simple boucle admin.
-- Maillage interne : chaque article link vers ville + race + 2 villes du département.
+### `community_answer_votes`
+- `(answer_id, user_id)` unique, type `helpful`.
 
-### C — Programme parrainage gamifié (0,5 jour)
-- Page `/parrainage` enrichie : compteur live de filleuls actifs + barre de progression vers prochain mois offert.
-- Partage 1-clic WhatsApp/SMS avec message pré-rempli + lien tracké.
-- Email transactionnel quand un filleul s'inscrit, puis quand il devient actif.
+### RLS
+- Lecture publique (`anon` + `authenticated`) sur questions/answers non masquées.
+- Écriture : `authenticated` uniquement, scoping `auth.uid()`.
+- Admin : peut tout modérer via `has_role(auth.uid(), 'admin')`.
+- Triggers pour incrémenter `answers_count` / `helpful_count`.
+- `GRANT` complets (anon SELECT, authenticated CRUD scoped, service_role ALL).
 
-### D — Sitemap dynamique villes/départements/races (0,5 jour)
-- `scripts/generate-sitemap.mjs` lit `seo_city_pages`, `seo_department_pages`, `breed_profiles` au lieu de listes en dur.
-- `<lastmod>` basé sur `updated_at` pour faire revenir Google.
+### Modération
+- Réutilise `reports` (table existante) avec `target_type = 'question' | 'answer'`.
+- Réutilise `blocked_users` : un user bloqué n'apparaît pas dans les fils.
+- Auto-masquage à 3 signalements (trigger).
 
-### E — Schema.org `ItemList` sur landing/listings (0,5 jour)
-- Landing : `ItemList` des 8 sits récents (rich result possible).
-- BreedsListing : `ItemList` des races (CollectionPage).
+## UI / composants
 
-## Recommandation
-Je commence par **A (dashboards de pilotage)** : c'est l'ROI immédiat pour piloter tout ce qui a été déployé. Ou dites une lettre (B/C/D/E) pour rerouter.
+```
+src/pages/Questions.tsx                 # liste + filtres catégorie/statut/ville
+src/pages/QuestionDetail.tsx            # question + fil de réponses
+src/pages/QuestionCreate.tsx            # formulaire création
+src/components/community/
+  QuestionCard.tsx
+  AnswerThread.tsx
+  AnswerComposer.tsx
+  HelpfulButton.tsx
+  CategoryPills.tsx
+src/components/dashboard/CommunityQuestionsSection.tsx  # bloc dashboard
+src/hooks/useCommunityQuestions.ts
+src/hooks/useQuestionDetail.ts
+```
+
+## Dashboard
+
+Remplace `MissionsNearbySection` par un layout 2 colonnes :
+
+```text
++----------------------------+----------------------------+
+| Petites missions           | Questions & conseils       |
+| (Besoin / Offre — actuel)  | (NOUVEAU)                  |
+| 3 missions proches         | 3 questions actives proches|
+| → /petites-missions        | → /questions               |
++----------------------------+----------------------------+
+```
+
+Sur mobile : stack vertical, Questions en 2ᵉ.
+
+## SEO
+
+- `/questions` : title « Questions & conseils entre gardiens et propriétaires »
+- `/questions/:id` : title dynamique = `{title} — Questions & conseils`, JSON-LD `QAPage` avec `mainEntity: Question + suggestedAnswer[] + acceptedAnswer`.
+- Sitemap : ajouter questions `status = 'open' OR 'resolved'`, exclure `closed/hidden`.
+
+## Analytics
+
+- `question_create_submit` { category }
+- `question_view` { id }
+- `answer_submit` { question_id, is_first_answer }
+- `answer_helpful_click` { answer_id }
+- `question_mark_resolved` { id, answers_count }
+
+## Garde-fous
+
+- Vouvoiement, aucune icône Lucide dans le contenu éditorial (titres/cartes ok pour actions/nav).
+- Pas de « voisin », pas de tiret cadratin, pas d'AURA.
+- Aucune mention concurrent.
+- Light mode par défaut.
+
+## Livraison (3 étapes séquentielles)
+
+1. **Migration DB** (tables + RLS + triggers + GRANTs + realtime sur `community_answers`).
+2. **Pages + hooks + composants** + intégration dashboard 2 colonnes.
+3. **SEO** : sitemap + JSON-LD QAPage + `PageMeta`.
+
+## Hors scope (volontairement)
+
+- Notifications push/email sur nouvelle réponse → V2.
+- Tag « expert vétérinaire » → V2 (nécessite badge dédié).
+- Upload photos dans questions → V2.
+- Recherche full-text → V2 (filtres catégorie/ville suffisent au lancement).
