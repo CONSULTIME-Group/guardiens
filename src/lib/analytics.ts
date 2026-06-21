@@ -46,7 +46,8 @@ export type EventType =
   | "exp_mission_bio_exposure" // 1ère impression de la liste missions (release, mission_count)
   | "exp_mission_bio_click"    // Clic sur une MissionCard (release, has_bio, position)
   | "exp_mission_bio_scroll"  // Scroll max atteint sur la liste (release, max_scroll_pct, is_mobile)
-  | "affinity_badge_seen";    // Badge d'affinité affiché (context: sit_detail|public_profile|search|favorites, score, total)
+  | "affinity_badge_seen"     // Badge d'affinité affiché (context: sit_detail|public_profile|search|favorites, score, total)
+  | "interests_focus_click";  // Clic sur l'indicateur de progression OU le CTA cockpit menant au champ Centres d'intérêt (source: indicator|cockpit_cta, count actuel)
 
 interface TrackOptions {
   source?: string;
