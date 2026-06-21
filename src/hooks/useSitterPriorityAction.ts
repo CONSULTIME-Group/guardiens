@@ -107,6 +107,9 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
         ctaTo: "/profile?section=profil",
         urgency: "low",
       };
+    }
+
+
 
     // 4. Annonce à proximité — opportunité fraîche
     //    On EXCLUT les annonces flaggées `is_beyond` : sinon le cockpit
