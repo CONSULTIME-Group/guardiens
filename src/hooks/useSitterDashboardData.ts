@@ -34,6 +34,7 @@ export interface SitterDashboardData {
   unreadError: string | null;
   isAvailable: boolean;
   competencesCount: number;
+  interestsCount: number;
   isFounder: boolean;
   postalCode: string | null;
   avatarUrl: string | null;
