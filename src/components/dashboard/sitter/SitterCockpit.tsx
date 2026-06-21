@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Eye } from "lucide-react";
+import { Eye, Pencil } from "lucide-react";
 import FounderBadge from "@/components/badges/FounderBadge";
 import PriorityActionCard from "@/components/dashboard/shared/PriorityActionCard";
 import { useSitterPriorityAction } from "@/hooks/useSitterPriorityAction";
