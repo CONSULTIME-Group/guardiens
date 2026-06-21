@@ -4,6 +4,14 @@ import { ChevronDown } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import CategoryPills from "@/components/community/CategoryPills";
@@ -16,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 type Tab = "questions" | "besoins" | "offres";
 type MissionStatus = "all" | "open" | "in_progress" | "completed";
+type MissionSort = "recent" | "date_needed";
 
 const MISSION_CATEGORY_LABEL: Record<string, string> = {
   animals: "Animaux",
@@ -28,6 +37,7 @@ const MISSION_CATEGORY_LABEL: Record<string, string> = {
 };
 
 const MISSION_CATEGORIES = ["all", "animals", "garden", "house", "errand", "tech", "company", "other"] as const;
+const PAGE_SIZE = 20;
 
 interface MissionRow {
   id: string;
@@ -42,6 +52,7 @@ interface MissionRow {
   status: string;
   mission_type: "besoin" | "offre" | null;
   user_id: string;
+  profiles?: { first_name: string | null; avatar_url: string | null } | null;
 }
 
 const TAB_META: Record<
@@ -100,12 +111,18 @@ const VALID_TABS: Tab[] = ["questions", "besoins", "offres"];
 const VALID_Q_CATS = ["all", "animaux", "jardin", "maison", "garde", "autre"] as const;
 const VALID_Q_STATUS = ["all", "open", "resolved"] as const;
 const VALID_M_STATUS: MissionStatus[] = ["all", "open", "in_progress", "completed"];
+const VALID_M_SORT: MissionSort[] = ["recent", "date_needed"];
 
 const M_STATUS_LABEL: Record<MissionStatus, string> = {
-  all: "Toutes",
+  all: "Tous statuts",
   open: "Ouvertes",
   in_progress: "En cours",
   completed: "Terminées",
+};
+
+const M_SORT_LABEL: Record<MissionSort, string> = {
+  recent: "Plus récentes",
+  date_needed: "Date la plus proche",
 };
 
 const formatDateNeeded = (d: string | null) => {
@@ -157,6 +174,11 @@ const EntraideHub = () => {
   const [mStatus, setMStatus] = useState<MissionStatus>(
     VALID_M_STATUS.includes(initialMStatus) ? initialMStatus : "open",
   );
+  const initialSort = (params.get("sort") as MissionSort) || "recent";
+  const [mSort, setMSort] = useState<MissionSort>(
+    VALID_M_SORT.includes(initialSort) ? initialSort : "recent",
+  );
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   /* Sync querystring */
   useEffect(() => {
@@ -166,16 +188,19 @@ const EntraideHub = () => {
 
     next.delete("cat");
     next.delete("status");
+    next.delete("sort");
     if (tab === "questions") {
       if (qCategory !== "all") next.set("cat", qCategory);
       if (qStatus !== "all") next.set("status", qStatus);
     } else {
       if (mCategory !== "all") next.set("cat", mCategory);
       if (mStatus !== "open") next.set("status", mStatus);
+      if (mSort !== "recent") next.set("sort", mSort);
     }
     setParams(next, { replace: true });
+    setVisibleCount(PAGE_SIZE);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab, qCategory, qStatus, mCategory, mStatus]);
+  }, [tab, qCategory, qStatus, mCategory, mStatus, mSort]);
 
   /* Toggle "Mes publications" */
   const initialMine = params.get("mine") === "1";
@@ -195,7 +220,7 @@ const EntraideHub = () => {
       const { data } = await supabase
         .from("small_missions")
         .select(
-          "id, title, description, category, city, postal_code, created_at, date_needed, duration_estimate, status, mission_type, user_id",
+          "id, title, description, category, city, postal_code, created_at, date_needed, duration_estimate, status, mission_type, user_id, profiles:user_id(first_name, avatar_url)",
         )
         .in("status", ["open", "in_progress", "completed"] as any)
         .order("created_at", { ascending: false })
@@ -211,37 +236,58 @@ const EntraideHub = () => {
     supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null));
   }, []);
 
-  const visibleMissions = useMemo(() => {
+  const sortMissions = (arr: MissionRow[]): MissionRow[] => {
+    if (mSort === "date_needed") {
+      return [...arr].sort((a, b) => {
+        if (!a.date_needed && !b.date_needed) return 0;
+        if (!a.date_needed) return 1;
+        if (!b.date_needed) return -1;
+        return a.date_needed.localeCompare(b.date_needed);
+      });
+    }
+    return arr;
+  };
+
+  const filteredMissions = useMemo(() => {
     const wantType: "besoin" | "offre" = tab === "offres" ? "offre" : "besoin";
-    return missions.filter((m) => {
+    const filtered = missions.filter((m) => {
       if ((m.mission_type ?? "besoin") !== wantType) return false;
       if (mStatus !== "all" && m.status !== mStatus) return false;
       if (mCategory !== "all" && m.category !== mCategory) return false;
       if (mineOnly && currentUserId && m.user_id !== currentUserId) return false;
       return true;
     });
-  }, [missions, tab, mCategory, mStatus, mineOnly, currentUserId]);
+    return sortMissions(filtered);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [missions, tab, mCategory, mStatus, mineOnly, currentUserId, mSort]);
+
+  const visibleMissions = filteredMissions.slice(0, visibleCount);
 
   const visibleQuestions = useMemo(() => {
     if (!mineOnly || !currentUserId) return questions;
     return questions.filter((q: any) => q.author_id === currentUserId);
   }, [questions, mineOnly, currentUserId]);
 
-  // Compteurs cohérents avec ce qui s'affiche réellement (filtres appliqués)
-  const tabCounts: Record<Tab, number> = useMemo(() => {
-    const filterMissions = (type: "besoin" | "offre") =>
+  // Totaux (mine-only seulement, sans filtres) pour afficher "filtré / total"
+  const tabTotals: Record<Tab, number> = useMemo(() => {
+    const filterByType = (type: "besoin" | "offre") =>
       missions.filter((m) => {
         if ((m.mission_type ?? "besoin") !== type) return false;
-        if (mStatus !== "all" && m.status !== mStatus) return false;
         if (mineOnly && currentUserId && m.user_id !== currentUserId) return false;
         return true;
       }).length;
     return {
       questions: visibleQuestions.length,
-      besoins: filterMissions("besoin"),
-      offres: filterMissions("offre"),
+      besoins: filterByType("besoin"),
+      offres: filterByType("offre"),
     };
-  }, [missions, mStatus, mineOnly, currentUserId, visibleQuestions.length]);
+  }, [missions, mineOnly, currentUserId, visibleQuestions.length]);
+
+  const tabFiltered: Record<Tab, number> = {
+    questions: visibleQuestions.length,
+    besoins: tab === "besoins" ? filteredMissions.length : tabTotals.besoins,
+    offres: tab === "offres" ? filteredMissions.length : tabTotals.offres,
+  };
 
   const goAsk = () =>
     navigate(isAuthenticated ? "/questions/nouvelle" : "/inscription?redirect=/questions/nouvelle");
@@ -258,13 +304,31 @@ const EntraideHub = () => {
         : "/inscription?redirect=/petites-missions/creer?type=offre",
     );
 
-  const primaryCta = tab === "questions" ? { label: "Poser une question", action: goAsk } : tab === "besoins" ? { label: "Publier une demande", action: goNeed } : { label: "Proposer mon aide", action: goOffer };
+  const primaryCta =
+    tab === "questions"
+      ? { label: "Poser une question", action: goAsk }
+      : tab === "besoins"
+        ? { label: "Publier une demande", action: goNeed }
+        : { label: "Proposer mon aide", action: goOffer };
 
   const meta = TAB_META[tab];
   const accentClasses: Record<Tab, { border: string; text: string; pill: string }> = {
     questions: { border: "border-primary", text: "text-primary", pill: "bg-primary/15 text-primary" },
     besoins: { border: "border-secondary", text: "text-secondary-foreground", pill: "bg-secondary/40 text-foreground" },
     offres: { border: "border-accent", text: "text-foreground", pill: "bg-accent/60 text-foreground" },
+  };
+
+  const hasMissionFilters = mCategory !== "all" || mStatus !== "open" || mSort !== "recent";
+  const hasQuestionFilters = qCategory !== "all" || qStatus !== "all";
+
+  const resetMissionFilters = () => {
+    setMCategory("all");
+    setMStatus("open");
+    setMSort("recent");
+  };
+  const resetQuestionFilters = () => {
+    setQCategory("all");
+    setQStatus("all");
   };
 
   return (
@@ -295,74 +359,77 @@ const EntraideHub = () => {
               <Button onClick={primaryCta.action} className="w-full sm:w-auto">
                 {primaryCta.label}
               </Button>
-              <div className="flex flex-wrap gap-2 text-xs">
+              <div className="flex flex-wrap gap-1">
                 {tab !== "questions" && (
-                  <button onClick={goAsk} className="text-foreground/60 hover:text-foreground underline underline-offset-2">
+                  <Button variant="ghost" size="sm" onClick={goAsk} className="text-foreground/70">
                     Poser une question
-                  </button>
+                  </Button>
                 )}
                 {tab !== "besoins" && (
-                  <button onClick={goNeed} className="text-foreground/60 hover:text-foreground underline underline-offset-2">
+                  <Button variant="ghost" size="sm" onClick={goNeed} className="text-foreground/70">
                     Demander un coup de main
-                  </button>
+                  </Button>
                 )}
                 {tab !== "offres" && (
-                  <button onClick={goOffer} className="text-foreground/60 hover:text-foreground underline underline-offset-2">
+                  <Button variant="ghost" size="sm" onClick={goOffer} className="text-foreground/70">
                     Proposer mon aide
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
-
-            {isAuthenticated && (
-              <div className="mt-4 flex items-center justify-end">
-                <button
-                  type="button"
-                  onClick={() => setMineOnly((v) => !v)}
-                  aria-pressed={mineOnly}
-                  className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
-                    mineOnly
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-card text-foreground/70 border-border hover:bg-accent"
-                  }`}
-                >
-                  {mineOnly ? "Mes publications (actif)" : "Voir mes publications"}
-                </button>
-              </div>
-            )}
           </div>
 
-          {/* Onglets */}
-          <div role="tablist" aria-label="Catégorie de contenu" className="flex gap-1 sm:gap-2 mb-5 border-b border-border overflow-x-auto">
-            {(Object.keys(TAB_META) as Tab[]).map((t) => {
-              const isActive = tab === t;
-              const a = accentClasses[t];
-              return (
-                <button
-                  key={t}
-                  role="tab"
-                  id={`tab-${t}`}
-                  aria-selected={isActive}
-                  aria-controls={`panel-${t}`}
-                  tabIndex={isActive ? 0 : -1}
-                  onClick={() => setTab(t)}
-                  className={`shrink-0 px-3 sm:px-4 py-2 -mb-px border-b-2 text-sm font-semibold transition-colors flex items-center gap-2 ${
-                    isActive
-                      ? `${a.border} ${a.text}`
-                      : "border-transparent text-foreground/60 hover:text-foreground"
-                  }`}
-                >
-                  <span>{TAB_META[t].short}</span>
-                  <span
-                    className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
-                      isActive ? a.pill : "bg-muted text-foreground/60"
+          {/* Onglets + toggle Mes publications */}
+          <div className="flex items-end justify-between gap-3 mb-5 border-b border-border">
+            <div role="tablist" aria-label="Catégorie de contenu" className="flex gap-1 sm:gap-2 overflow-x-auto min-w-0">
+              {(Object.keys(TAB_META) as Tab[]).map((t) => {
+                const isActive = tab === t;
+                const a = accentClasses[t];
+                const filtered = tabFiltered[t];
+                const total = tabTotals[t];
+                const showRatio = filtered !== total;
+                return (
+                  <button
+                    key={t}
+                    role="tab"
+                    id={`tab-${t}`}
+                    aria-selected={isActive}
+                    aria-controls={`panel-${t}`}
+                    tabIndex={isActive ? 0 : -1}
+                    onClick={() => setTab(t)}
+                    className={`shrink-0 px-3 sm:px-4 py-2 -mb-px border-b-2 text-sm font-semibold transition-colors flex items-center gap-2 ${
+                      isActive
+                        ? `${a.border} ${a.text}`
+                        : "border-transparent text-foreground/60 hover:text-foreground"
                     }`}
                   >
-                    {tabCounts[t]}
-                  </span>
-                </button>
-              );
-            })}
+                    <span>{TAB_META[t].short}</span>
+                    <span
+                      className={`text-xs px-1.5 py-0.5 rounded-full font-medium tabular-nums ${
+                        isActive ? a.pill : "bg-muted text-foreground/60"
+                      }`}
+                      aria-label={showRatio ? `${filtered} sur ${total}` : `${total} éléments`}
+                    >
+                      {showRatio ? `${filtered}/${total}` : total}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            {isAuthenticated && (
+              <button
+                type="button"
+                onClick={() => setMineOnly((v) => !v)}
+                aria-pressed={mineOnly}
+                className={`shrink-0 mb-1 text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
+                  mineOnly
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-card text-foreground/70 border-border hover:bg-accent"
+                }`}
+              >
+                {mineOnly ? "Mes publications ✓" : "Mes publications"}
+              </button>
+            )}
           </div>
 
           <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
@@ -371,8 +438,8 @@ const EntraideHub = () => {
               <p className="text-sm text-foreground/65 mt-1">{meta.description}</p>
             </div>
 
-            {/* Comment ça marche, ouvert par défaut */}
-            <details open className="mb-6 rounded-xl border border-border bg-card group">
+            {/* Comment ça marche */}
+            <details className="mb-6 rounded-xl border border-border bg-card group">
               <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between text-sm font-semibold text-foreground">
                 <span>Comment ça marche ?</span>
                 <ChevronDown
@@ -392,7 +459,7 @@ const EntraideHub = () => {
               <>
                 <div className="space-y-3 mb-6">
                   <CategoryPills value={qCategory} onChange={setQCategory} />
-                  <div className="flex gap-2" role="group" aria-label="Filtrer par statut">
+                  <div className="flex items-center gap-2 flex-wrap" role="group" aria-label="Filtrer par statut">
                     {(["all", "open", "resolved"] as const).map((s) => (
                       <button
                         key={s}
@@ -408,6 +475,15 @@ const EntraideHub = () => {
                         {s === "all" ? "Toutes" : s === "open" ? "Ouvertes" : "Résolues"}
                       </button>
                     ))}
+                    {hasQuestionFilters && (
+                      <button
+                        type="button"
+                        onClick={resetQuestionFilters}
+                        className="ml-auto text-xs text-foreground/60 hover:text-foreground underline underline-offset-2"
+                      >
+                        Réinitialiser
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -430,17 +506,18 @@ const EntraideHub = () => {
                     title={
                       mineOnly
                         ? "Vous n'avez pas encore posé de question."
-                        : qCategory !== "all" || qStatus !== "all"
+                        : hasQuestionFilters
                           ? "Aucune question avec ces filtres."
                           : "Aucune question pour le moment."
                     }
                     hint={
-                      qCategory !== "all" || qStatus !== "all"
+                      hasQuestionFilters
                         ? "Élargissez les filtres ou posez la première question de cette catégorie."
                         : "Soyez la première personne à lancer le sujet."
                     }
                     ctaLabel="Poser une question"
                     onCta={goAsk}
+                    onReset={hasQuestionFilters ? resetQuestionFilters : undefined}
                   />
                 )}
               </>
@@ -449,40 +526,61 @@ const EntraideHub = () => {
             {/* Onglets Besoins / Offres */}
             {(tab === "besoins" || tab === "offres") && (
               <>
+                {/* Barre de filtres compacte */}
                 <div className="space-y-3 mb-6">
-                  <div className="flex flex-wrap gap-2">
-                    {MISSION_CATEGORIES.map((c) => (
-                      <button
-                        key={c}
-                        type="button"
-                        onClick={() => setMCategory(c)}
-                        aria-pressed={mCategory === c}
-                        className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
-                          mCategory === c
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-card text-foreground/70 border-border hover:bg-accent"
-                        }`}
-                      >
-                        {c === "all" ? "Toutes" : MISSION_CATEGORY_LABEL[c]}
-                      </button>
-                    ))}
+                  <div className="-mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto">
+                    <div className="flex gap-2 w-max sm:w-auto sm:flex-wrap">
+                      {MISSION_CATEGORIES.map((c) => (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => setMCategory(c)}
+                          aria-pressed={mCategory === c}
+                          className={`shrink-0 px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
+                            mCategory === c
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-card text-foreground/70 border-border hover:bg-accent"
+                          }`}
+                        >
+                          {c === "all" ? "Toutes catégories" : MISSION_CATEGORY_LABEL[c]}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrer par statut">
-                    {VALID_M_STATUS.map((s) => (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Select value={mStatus} onValueChange={(v) => setMStatus(v as MissionStatus)}>
+                      <SelectTrigger className="h-8 w-auto min-w-[140px] text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {VALID_M_STATUS.map((s) => (
+                          <SelectItem key={s} value={s} className="text-xs">
+                            {M_STATUS_LABEL[s]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={mSort} onValueChange={(v) => setMSort(v as MissionSort)}>
+                      <SelectTrigger className="h-8 w-auto min-w-[160px] text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {VALID_M_SORT.map((s) => (
+                          <SelectItem key={s} value={s} className="text-xs">
+                            {M_SORT_LABEL[s]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {hasMissionFilters && (
                       <button
-                        key={s}
                         type="button"
-                        onClick={() => setMStatus(s)}
-                        aria-pressed={mStatus === s}
-                        className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
-                          mStatus === s
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-card text-foreground/70 border-border hover:bg-accent"
-                        }`}
+                        onClick={resetMissionFilters}
+                        className="ml-auto text-xs text-foreground/60 hover:text-foreground underline underline-offset-2"
                       >
-                        {M_STATUS_LABEL[s]}
+                        Réinitialiser
                       </button>
-                    ))}
+                    )}
                   </div>
                 </div>
 
@@ -493,57 +591,87 @@ const EntraideHub = () => {
                     ))}
                   </div>
                 ) : visibleMissions.length > 0 ? (
-                  <ul className="space-y-3">
-                    {visibleMissions.map((m) => {
-                      const code = getDeptCode(m.postal_code);
-                      const dept = code ? DEPT_NAMES[code] : null;
-                      const dateLabel = formatDateNeeded(m.date_needed);
-                      const isMine = currentUserId && m.user_id === currentUserId;
-                      return (
-                        <li key={m.id}>
-                          <Link
-                            to={`/petites-missions/${m.id}`}
-                            className="block p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all"
-                          >
-                            <div className="flex items-center gap-2 mb-2 flex-wrap">
-                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase tracking-wide">
-                                {MISSION_CATEGORY_LABEL[m.category] || "Autre"}
-                              </span>
-                              {m.status !== "open" && (
-                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted text-foreground/60 uppercase tracking-wide">
-                                  {m.status === "in_progress" ? "En cours" : "Terminée"}
+                  <>
+                    <ul className="space-y-3">
+                      {visibleMissions.map((m) => {
+                        const code = getDeptCode(m.postal_code);
+                        const dept = code ? DEPT_NAMES[code] : null;
+                        const dateLabel = formatDateNeeded(m.date_needed);
+                        const isMine = currentUserId && m.user_id === currentUserId;
+                        const authorName = m.profiles?.first_name || "Membre";
+                        const initial = authorName.charAt(0).toUpperCase();
+                        const statusBadge =
+                          m.status === "in_progress"
+                            ? { label: "En cours", aria: "Statut : en cours" }
+                            : m.status === "completed"
+                              ? { label: "Terminée", aria: "Statut : terminée" }
+                              : null;
+                        return (
+                          <li key={m.id}>
+                            <Link
+                              to={`/petites-missions/${m.id}`}
+                              className="block p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all"
+                            >
+                              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase tracking-wide">
+                                  {MISSION_CATEGORY_LABEL[m.category] || "Autre"}
                                 </span>
-                              )}
-                              {isMine && (
-                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-secondary/40 text-foreground uppercase tracking-wide">
-                                  Vous
-                                </span>
-                              )}
-                            </div>
-                            <p className="font-heading text-base font-semibold text-foreground line-clamp-2">
-                              {m.title}
-                            </p>
-                            {m.description && (
-                              <p className="text-sm text-foreground/65 mt-1 line-clamp-2">
-                                {m.description}
+                                {statusBadge && (
+                                  <span
+                                    className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted text-foreground/60 uppercase tracking-wide"
+                                    aria-label={statusBadge.aria}
+                                  >
+                                    {statusBadge.label}
+                                  </span>
+                                )}
+                                {isMine && (
+                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-secondary/40 text-foreground uppercase tracking-wide">
+                                    Vous
+                                  </span>
+                                )}
+                              </div>
+                              <p className="font-heading text-base font-semibold text-foreground line-clamp-2">
+                                {m.title}
                               </p>
-                            )}
-                            <div className="flex items-center gap-x-3 gap-y-1 mt-3 text-xs text-foreground/55 flex-wrap">
-                              {m.city && (
-                                <span>
-                                  {m.city}
-                                  {dept ? `, ${dept}` : ""}
-                                </span>
+                              {m.description && (
+                                <p className="text-sm text-foreground/65 mt-1 line-clamp-2">
+                                  {m.description}
+                                </p>
                               )}
-                              {dateLabel && <span>Pour le {dateLabel}</span>}
-                              {m.duration_estimate && <span>{m.duration_estimate}</span>}
-                              <span className="ml-auto">{formatRelative(m.created_at)}</span>
-                            </div>
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
+                              <div className="flex items-center gap-2 mt-3">
+                                <Avatar className="h-6 w-6 shrink-0">
+                                  <AvatarImage src={m.profiles?.avatar_url || undefined} alt="" />
+                                  <AvatarFallback className="text-[10px]">{initial}</AvatarFallback>
+                                </Avatar>
+                                <span className="text-xs text-foreground/70 truncate">{authorName}</span>
+                              </div>
+                              <div className="flex items-center gap-x-3 gap-y-1 mt-2 text-xs text-foreground/55 flex-wrap">
+                                {m.city && (
+                                  <span>
+                                    {m.city}
+                                    {dept ? `, ${dept}` : ""}
+                                  </span>
+                                )}
+                                {dateLabel && <span>Pour le {dateLabel}</span>}
+                                {m.duration_estimate && <span>{m.duration_estimate}</span>}
+                                <span className="ml-auto">{formatRelative(m.created_at)}</span>
+                              </div>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                    {filteredMissions.length > visibleCount && (
+                      <div className="mt-4 flex justify-center">
+                        <Button
+                          variant="outline"
+                          onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                        >
+                          Charger plus ({filteredMissions.length - visibleCount} restantes)
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <EmptyState
                     title={
@@ -551,25 +679,39 @@ const EntraideHub = () => {
                         ? tab === "besoins"
                           ? "Vous n'avez pas encore publié de demande."
                           : "Vous n'avez pas encore publié d'offre."
-                        : mCategory !== "all" || mStatus !== "open"
+                        : hasMissionFilters
                           ? "Aucun résultat avec ces filtres."
                           : tab === "besoins"
                             ? "Aucune demande ouverte pour le moment."
                             : "Aucune proposition d'aide pour le moment."
                     }
                     hint={
-                      mCategory !== "all" || mStatus !== "open"
+                      hasMissionFilters
                         ? "Essayez « Toutes » pour élargir, ou publiez la première."
                         : "Lancez le mouvement, votre publication apparaît immédiatement."
                     }
                     ctaLabel={tab === "besoins" ? "Publier une demande" : "Proposer mon aide"}
                     onCta={tab === "besoins" ? goNeed : goOffer}
+                    onReset={hasMissionFilters ? resetMissionFilters : undefined}
                   />
                 )}
               </>
             )}
           </div>
         </section>
+
+        {/* CTA flottant mobile au-dessus de la bottom nav */}
+        <div className="md:hidden fixed left-0 right-0 bottom-20 z-30 px-4 pointer-events-none">
+          <div className="max-w-3xl mx-auto flex justify-end">
+            <Button
+              onClick={primaryCta.action}
+              size="lg"
+              className="pointer-events-auto shadow-lg"
+            >
+              {primaryCta.label}
+            </Button>
+          </div>
+        </div>
       </div>
     </>
   );
@@ -580,18 +722,25 @@ const EmptyState = ({
   hint,
   ctaLabel,
   onCta,
+  onReset,
 }: {
   title: string;
   hint?: string;
   ctaLabel: string;
   onCta: () => void;
+  onReset?: () => void;
 }) => (
   <div className="p-8 rounded-2xl border border-dashed border-border bg-accent/20 text-center">
     <p className="font-heading text-lg text-foreground/85">{title}</p>
     {hint && <p className="text-sm text-foreground/60 mt-2">{hint}</p>}
-    <Button onClick={onCta} className="mt-4">
-      {ctaLabel}
-    </Button>
+    <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+      <Button onClick={onCta}>{ctaLabel}</Button>
+      {onReset && (
+        <Button variant="ghost" onClick={onReset}>
+          Réinitialiser les filtres
+        </Button>
+      )}
+    </div>
   </div>
 );
 
