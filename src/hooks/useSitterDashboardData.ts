@@ -437,6 +437,7 @@ export function useSitterDashboardData(userId: string | undefined) {
           : null,
         isAvailable: sitter?.is_available || false,
         competencesCount: Array.isArray((sitter as any)?.competences) ? (sitter as any).competences.length : 0,
+        interestsCount: Array.isArray((sitter as any)?.interests) ? (sitter as any).interests.length : 0,
         isFounder: profile?.is_founder || false,
         postalCode: profile?.postal_code || null,
         avatarUrl: profile?.avatar_url || null,
