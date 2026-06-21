@@ -147,7 +147,7 @@ const EntraideHub = () => {
     void load();
   }, []);
 
-  const userId = (isAuthenticated as any) && (window as any) ? undefined : undefined; // placeholder, on lit via supabase auth ci-dessous
+  
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null));
