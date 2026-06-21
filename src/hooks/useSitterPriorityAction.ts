@@ -104,7 +104,7 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
         title: "Ajoutez vos centres d'intérêt pour mieux matcher avec les propriétaires.",
         description: "Randonnée, jardinage, lecture, sport… On s'en sert pour pondérer l'affinité avec chaque foyer.",
         ctaLabel: "Ajouter mes centres d'intérêt",
-        ctaTo: "/profile?section=profil",
+        ctaTo: "/profile?focus=interests",
         urgency: "low",
       };
     }

@@ -117,6 +117,17 @@ const SitterProfile = () => {
           setTimeout(() => el.classList.remove("ring-2", "ring-primary"), 3000);
         }
       }, 500);
+    } else if (focus === "interests" && lastAppliedFocusRef.current !== focus) {
+      lastAppliedFocusRef.current = focus;
+      setActiveSection("sitter");
+      setTimeout(() => {
+        const el = document.querySelector<HTMLElement>('[data-field="interests"]');
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          el.classList.add("ring-2", "ring-primary", "rounded-xl");
+          setTimeout(() => el.classList.remove("ring-2", "ring-primary", "rounded-xl"), 3000);
+        }
+      }, 500);
     } else if (section && SECTION_PARAM_MAP[section] && lastAppliedSectionRef.current !== section) {
       lastAppliedSectionRef.current = section;
       const mapped = SECTION_PARAM_MAP[section];

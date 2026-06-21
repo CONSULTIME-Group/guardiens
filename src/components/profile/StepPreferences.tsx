@@ -154,12 +154,14 @@ const StepPreferences = ({ data, onChange }: Props) => (
       <ChipSelect options={LANGUAGE_OPTIONS} selected={data.languages} onChange={v => onChange({ languages: v })} />
     </div>
 
-    <div className="space-y-2">
+    <div className="space-y-2 scroll-mt-24 p-2 -m-2 transition-shadow" data-field="interests">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <Label>Centres d'intérêt</Label>
+        <Label htmlFor="interests-chips">Centres d'intérêt</Label>
         <InterestsProgress count={data.interests?.length ?? 0} />
       </div>
-      <ChipSelect options={INTEREST_OPTIONS} selected={data.interests} onChange={v => onChange({ interests: v })} />
+      <div id="interests-chips">
+        <ChipSelect options={INTEREST_OPTIONS} selected={data.interests} onChange={v => onChange({ interests: v })} />
+      </div>
     </div>
 
     <div className="space-y-2">
