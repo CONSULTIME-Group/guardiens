@@ -22,6 +22,49 @@ const MEETING_OPTIONS = [
 const HANDOVER_OPTIONS = ["La veille avec nuit commune", "Le jour du départ", "À distance OK", "S'adapte"];
 const SKILL_OPTIONS = ["Jardinage", "Bricolage", "Ménage", "Cuisine", "Premiers secours animaux"];
 
+/**
+ * Indicateur de progression pour les centres d'intérêt.
+ * 0 = vide (rouge doux), 1-2 = en cours (ambre), >=3 = complet (success).
+ * Cible : 3 centres d'intérêt minimum pour un matching d'affinité utile.
+ */
+const INTERESTS_TARGET = 3;
+const InterestsProgress = ({ count }: { count: number }) => {
+  const pct = Math.min(100, Math.round((count / INTERESTS_TARGET) * 100));
+  const status = count >= INTERESTS_TARGET ? "complete" : count > 0 ? "partial" : "empty";
+  const tone = status === "complete"
+    ? "text-success border-success/30 bg-success/10"
+    : status === "partial"
+    ? "text-warning border-warning/30 bg-warning/10"
+    : "text-muted-foreground border-border bg-muted/40";
+  const label = status === "complete"
+    ? `Complet · ${count}/${INTERESTS_TARGET}+`
+    : status === "partial"
+    ? `${count}/${INTERESTS_TARGET} pour un bon matching`
+    : `Aucun · visez ${INTERESTS_TARGET}+`;
+  return (
+    <div className="flex items-center gap-2">
+      <div
+        role="progressbar"
+        aria-valuenow={count}
+        aria-valuemin={0}
+        aria-valuemax={INTERESTS_TARGET}
+        aria-label={`Centres d'intérêt renseignés : ${count} sur ${INTERESTS_TARGET}`}
+        className="hidden sm:block h-1.5 w-20 rounded-full bg-muted overflow-hidden"
+      >
+        <div
+          className={`h-full transition-[width] duration-300 ${
+            status === "complete" ? "bg-success" : status === "partial" ? "bg-warning" : "bg-muted-foreground/30"
+          }`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <span className={`text-[11px] font-medium rounded-full border px-2 py-0.5 ${tone}`}>
+        {label}
+      </span>
+    </div>
+  );
+};
+
 interface Props {
   data: SitterProfileData;
   onChange: (partial: Partial<SitterProfileData>) => void;
