@@ -34,6 +34,7 @@ export interface SitterDashboardData {
   unreadError: string | null;
   isAvailable: boolean;
   competencesCount: number;
+  interestsCount: number;
   isFounder: boolean;
   postalCode: string | null;
   avatarUrl: string | null;
@@ -76,6 +77,7 @@ const INITIAL_STATE: SitterDashboardData = {
   unreadError: null,
   isAvailable: false,
   competencesCount: 0,
+  interestsCount: 0,
   isFounder: false,
   postalCode: null,
   avatarUrl: null,
@@ -127,7 +129,7 @@ export function useSitterDashboardData(userId: string | undefined) {
           .select("*, sit:sits(id, title, start_date, end_date, status, user_id, property_id, properties:property_id(photos))")
           .eq("sitter_id", userId).order("created_at", { ascending: false }),
         supabase.from("sitter_profiles")
-          .select("is_available, experience_years, animal_types, competences")
+          .select("is_available, experience_years, animal_types, competences, interests")
           .eq("user_id", userId).single(),
         supabase.from("profiles")
           .select("identity_verification_status, profile_completion, identity_verified, cancellation_count, is_founder, postal_code, avatar_url, bio, onboarding_completed, onboarding_dismissed_at, onboarding_minimal_completed, latitude, longitude")
@@ -435,6 +437,7 @@ export function useSitterDashboardData(userId: string | undefined) {
           : null,
         isAvailable: sitter?.is_available || false,
         competencesCount: Array.isArray((sitter as any)?.competences) ? (sitter as any).competences.length : 0,
+        interestsCount: Array.isArray((sitter as any)?.interests) ? (sitter as any).interests.length : 0,
         isFounder: profile?.is_founder || false,
         postalCode: profile?.postal_code || null,
         avatarUrl: profile?.avatar_url || null,

@@ -25,16 +25,17 @@ interface SitterCockpitProps {
   postalCode: string | null;
   nearbyListings: any[];
   competencesCount?: number;
+  interestsCount?: number;
 }
 
 const SitterCockpit = ({
   userId, firstName, avatarUrl, isFounder,
   isAvailable, onToggleAvailability,
-  nextGuard, profileCompletion, postalCode, nearbyListings, competencesCount,
+  nextGuard, profileCompletion, postalCode, nearbyListings, competencesCount, interestsCount,
 }: SitterCockpitProps) => {
   const initial = firstName ? capitalize(firstName).charAt(0) : "?";
   const priority = useSitterPriorityAction({
-    nextGuard, profileCompletion, postalCode, nearbyListings, isAvailable, competencesCount,
+    nextGuard, profileCompletion, postalCode, nearbyListings, isAvailable, competencesCount, interestsCount,
   });
 
   const handlePriorityCta = () => {

@@ -19,7 +19,7 @@ import { useMemo } from "react";
  */
 
 export type SitterPriorityAction = {
-  variant: "next-guard" | "profile" | "skills" | "postal" | "nearby" | "availability" | "explore";
+  variant: "next-guard" | "profile" | "skills" | "interests" | "postal" | "nearby" | "availability" | "explore";
   eyebrow: string;
   title: string;
   description: string;
@@ -35,11 +35,12 @@ interface Input {
   nearbyListings: any[];
   isAvailable: boolean;
   competencesCount?: number;
+  interestsCount?: number;
 }
 
 export function useSitterPriorityAction(input: Input): SitterPriorityAction {
   return useMemo(() => {
-    const { nextGuard, profileCompletion, postalCode, nearbyListings, isAvailable, competencesCount = 0 } = input;
+    const { nextGuard, profileCompletion, postalCode, nearbyListings, isAvailable, competencesCount = 0, interestsCount = 0 } = input;
 
     // 1. Prochaine garde imminente — toujours prioritaire
     if (nextGuard) {
@@ -94,6 +95,21 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
         urgency: "medium",
       };
     }
+
+    // 3c. Centres d'intérêt absents — affine le matching d'affinité
+    if (interestsCount === 0) {
+      return {
+        variant: "interests",
+        eyebrow: "Affinez votre matching",
+        title: "Ajoutez vos centres d'intérêt pour mieux matcher avec les propriétaires.",
+        description: "Randonnée, jardinage, lecture, sport… On s'en sert pour pondérer l'affinité avec chaque foyer.",
+        ctaLabel: "Ajouter mes centres d'intérêt",
+        ctaTo: "/profile?section=profil",
+        urgency: "low",
+      };
+    }
+
+
 
     // 4. Annonce à proximité — opportunité fraîche
     //    On EXCLUT les annonces flaggées `is_beyond` : sinon le cockpit
