@@ -31,25 +31,42 @@ interface MissionRow {
   city: string | null;
   created_at: string;
   mission_type: "besoin" | "offre" | null;
+  user_id: string;
 }
 
-const TAB_META: Record<Tab, { label: string; title: string; description: string }> = {
+const TAB_META: Record<Tab, { label: string; title: string; description: string; how: string[] }> = {
   questions: {
     label: "Questions",
     title: "Questions à la communauté",
     description: "Comportement animal, jardin, garde, bricolage. Posez votre question, recevez plusieurs avis.",
+    how: [
+      "Vous posez une question publique, courte et précise.",
+      "Plusieurs membres répondent en commentaire, sans engagement.",
+      "Vous marquez la meilleure réponse quand le sujet est résolu.",
+    ],
   },
   besoins: {
     label: "Besoins",
     title: "Demandes de coups de main",
     description: "Les gens du coin qui cherchent un peu d'aide ponctuelle, près de chez vous.",
+    how: [
+      "Vous publiez votre besoin (catégorie, ville, créneau).",
+      "Une personne du coin se propose en message privé.",
+      "Vous convenez ensemble du jour et de la contrepartie éventuelle.",
+    ],
   },
   offres: {
     label: "Offres",
     title: "Propositions d'aide",
     description: "Celles et ceux qui proposent leur temps ou leurs compétences gratuitement.",
+    how: [
+      "Vous décrivez ce que vous savez faire et vos disponibilités.",
+      "Les personnes intéressées vous contactent en privé.",
+      "Vous validez ensemble la date et le cadre de l'aide.",
+    ],
   },
 };
+
 
 const VALID_TABS: Tab[] = ["questions", "besoins", "offres"];
 const VALID_Q_CATS = ["all", "animaux", "jardin", "maison", "garde", "autre"] as const;
