@@ -40,6 +40,9 @@ const SitterCockpit = ({
   });
 
   const handlePriorityCta = () => {
+    if (priority.variant === "interests") {
+      trackEvent("interests_focus_click", { source: "cockpit_cta", metadata: { count: interestsCount ?? 0 } });
+    }
     if (priority.ctaTo === "#sitter-availability-toggle") {
       const el = document.getElementById("sitter-availability-toggle");
       el?.scrollIntoView({ behavior: "smooth", block: "center" });
