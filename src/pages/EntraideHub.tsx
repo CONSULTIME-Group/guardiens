@@ -277,7 +277,7 @@ const EntraideHub = () => {
       <div className="min-h-screen bg-background">
         <PageBreadcrumb items={[{ label: "Conseils & coups de main" }]} />
 
-        <section className="max-w-3xl mx-auto px-4 sm:px-6 py-8 min-w-0">
+        <section className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-28 sm:py-8 min-w-0">
           {/* Header */}
           <div className="mb-6">
             <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">
