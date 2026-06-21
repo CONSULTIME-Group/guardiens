@@ -339,6 +339,7 @@ const SitterDashboard = () => {
           postalCode={postalCode}
           nearbyListings={nearbyListings}
           competencesCount={competencesCount}
+          interestsCount={interestsCount}
         />
 
         {/* Erreurs de fetch, affichées discrètement sous le cockpit */}
