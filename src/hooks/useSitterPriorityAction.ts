@@ -35,11 +35,12 @@ interface Input {
   nearbyListings: any[];
   isAvailable: boolean;
   competencesCount?: number;
+  interestsCount?: number;
 }
 
 export function useSitterPriorityAction(input: Input): SitterPriorityAction {
   return useMemo(() => {
-    const { nextGuard, profileCompletion, postalCode, nearbyListings, isAvailable, competencesCount = 0 } = input;
+    const { nextGuard, profileCompletion, postalCode, nearbyListings, isAvailable, competencesCount = 0, interestsCount = 0 } = input;
 
     // 1. Prochaine garde imminente — toujours prioritaire
     if (nextGuard) {
