@@ -7,6 +7,7 @@ import CategoryPills from "@/components/community/CategoryPills";
 import QuestionCard from "@/components/community/QuestionCard";
 import { useCommunityQuestions } from "@/hooks/useCommunityQuestions";
 import type { CommunityCategory } from "@/lib/communityCategories";
+import { DEPT_NAMES, getDeptCode } from "@/lib/departments";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -29,10 +30,12 @@ interface MissionRow {
   title: string;
   category: string;
   city: string | null;
+  postal_code: string | null;
   created_at: string;
   mission_type: "besoin" | "offre" | null;
   user_id: string;
 }
+
 
 const TAB_META: Record<Tab, { label: string; title: string; description: string; how: string[] }> = {
   questions: {
@@ -137,7 +140,7 @@ const EntraideHub = () => {
       setMLoading(true);
       const { data } = await supabase
         .from("small_missions")
-        .select("id, title, category, city, created_at, mission_type, user_id")
+        .select("id, title, category, city, postal_code, created_at, mission_type, user_id")
         .eq("status", "open")
         .order("created_at", { ascending: false })
         .limit(60);
@@ -365,9 +368,15 @@ const EntraideHub = () => {
                           <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                             {MISSION_CATEGORY_LABEL[m.category] || "Autre"}
                           </span>
-                          {m.city && (
-                            <span className="text-xs text-foreground/50">{m.city}</span>
-                          )}
+                          {m.city && (() => {
+                            const code = getDeptCode(m.postal_code);
+                            const dept = code ? DEPT_NAMES[code] : null;
+                            return (
+                              <span className="text-xs text-foreground/50">
+                                {m.city}{dept ? `, ${dept}` : ""}
+                              </span>
+                            );
+                          })()}
                         </div>
                         <p className="font-heading text-base font-semibold text-foreground line-clamp-2">
                           {m.title}
