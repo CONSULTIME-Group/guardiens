@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Eye } from "lucide-react";
+import { Eye, Pencil } from "lucide-react";
 import FounderBadge from "@/components/badges/FounderBadge";
 import PriorityActionCard from "@/components/dashboard/shared/PriorityActionCard";
 import { useSitterPriorityAction } from "@/hooks/useSitterPriorityAction";
@@ -53,13 +53,17 @@ const SitterCockpit = ({
       {/* Header minimal */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="shrink-0 w-11 h-11 rounded-full overflow-hidden bg-muted flex items-center justify-center">
+          <Link
+            to="/profile"
+            aria-label="Modifier mon profil"
+            className="shrink-0 w-11 h-11 rounded-full overflow-hidden bg-muted flex items-center justify-center ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          >
             {avatarUrl ? (
               <img src={avatarUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
             ) : (
               <span className="font-heading font-bold text-base text-foreground/70">{initial}</span>
             )}
-          </div>
+          </Link>
           <div className="min-w-0 flex items-center gap-2 flex-wrap">
             <h1 className="text-xl sm:text-2xl font-heading font-bold text-foreground leading-tight truncate">
               Bonjour{firstName ? `, ${capitalize(firstName)}` : ""}
@@ -69,6 +73,14 @@ const SitterCockpit = ({
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          <Link
+            to="/profile"
+            aria-label="Modifier mon profil"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card hover:bg-muted/40 text-foreground text-xs font-medium px-2.5 py-1.5 transition-colors"
+          >
+            <Pencil className="w-3.5 h-3.5" aria-hidden="true" />
+            <span className="hidden sm:inline">Modifier</span>
+          </Link>
           {userId && (
             <Link
               to={`/gardiens/${userId}`}
