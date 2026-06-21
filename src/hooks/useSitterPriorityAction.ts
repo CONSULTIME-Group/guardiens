@@ -96,6 +96,18 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
       };
     }
 
+    // 3c. Centres d'intérêt absents — affine le matching d'affinité
+    if (interestsCount === 0) {
+      return {
+        variant: "interests",
+        eyebrow: "Affinez votre matching",
+        title: "Ajoutez vos centres d'intérêt pour mieux matcher avec les propriétaires.",
+        description: "Randonnée, jardinage, lecture, sport… On s'en sert pour pondérer l'affinité avec chaque foyer.",
+        ctaLabel: "Ajouter mes centres d'intérêt",
+        ctaTo: "/profile?section=profil",
+        urgency: "low",
+      };
+
     // 4. Annonce à proximité — opportunité fraîche
     //    On EXCLUT les annonces flaggées `is_beyond` : sinon le cockpit
     //    annonce « 2 annonces près de chez vous » alors que la carte
