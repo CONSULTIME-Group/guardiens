@@ -127,7 +127,7 @@ export function useSitterDashboardData(userId: string | undefined) {
           .select("*, sit:sits(id, title, start_date, end_date, status, user_id, property_id, properties:property_id(photos))")
           .eq("sitter_id", userId).order("created_at", { ascending: false }),
         supabase.from("sitter_profiles")
-          .select("is_available, experience_years, animal_types, competences")
+          .select("is_available, experience_years, animal_types, competences, interests")
           .eq("user_id", userId).single(),
         supabase.from("profiles")
           .select("identity_verification_status, profile_completion, identity_verified, cancellation_count, is_founder, postal_code, avatar_url, bio, onboarding_completed, onboarding_dismissed_at, onboarding_minimal_completed, latitude, longitude")
