@@ -140,7 +140,7 @@ const EntraideHub = () => {
       setMLoading(true);
       const { data } = await supabase
         .from("small_missions")
-        .select("id, title, category, city, created_at, mission_type, user_id")
+        .select("id, title, category, city, postal_code, created_at, mission_type, user_id")
         .eq("status", "open")
         .order("created_at", { ascending: false })
         .limit(60);
