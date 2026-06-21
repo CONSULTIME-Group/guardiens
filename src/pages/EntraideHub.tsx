@@ -120,12 +120,24 @@ const EntraideHub = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, qCategory, qStatus, mCategory]);
 
+  /* Toggle "Mes publications" (auth requis) */
+  const initialMine = params.get("mine") === "1";
+  const [mineOnly, setMineOnly] = useState<boolean>(initialMine && isAuthenticated);
+
+  useEffect(() => {
+    const next = new URLSearchParams(params);
+    if (mineOnly) next.set("mine", "1");
+    else next.delete("mine");
+    setParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mineOnly]);
+
   useEffect(() => {
     const load = async () => {
       setMLoading(true);
       const { data } = await supabase
         .from("small_missions")
-        .select("id, title, category, city, created_at, mission_type")
+        .select("id, title, category, city, created_at, mission_type, user_id")
         .eq("status", "open")
         .order("created_at", { ascending: false })
         .limit(60);
@@ -135,15 +147,35 @@ const EntraideHub = () => {
     void load();
   }, []);
 
+  const userId = (isAuthenticated as any) && (window as any) ? undefined : undefined; // placeholder, on lit via supabase auth ci-dessous
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null));
+  }, []);
 
-  const filteredMissions = useMemo(() => {
+  const visibleMissions = useMemo(() => {
     const wantType: "besoin" | "offre" = tab === "offres" ? "offre" : "besoin";
     return missions.filter((m) => {
       if ((m.mission_type ?? "besoin") !== wantType) return false;
       if (mCategory !== "all" && m.category !== mCategory) return false;
+      if (mineOnly && currentUserId && m.user_id !== currentUserId) return false;
       return true;
     });
-  }, [missions, tab, mCategory]);
+  }, [missions, tab, mCategory, mineOnly, currentUserId]);
+
+  const visibleQuestions = useMemo(() => {
+    if (!mineOnly || !currentUserId) return questions;
+    return questions.filter((q: any) => q.user_id === currentUserId);
+  }, [questions, mineOnly, currentUserId]);
+
+  const besoinsTotal = missions.filter((m) => (m.mission_type ?? "besoin") === "besoin").length;
+  const offresTotal = missions.filter((m) => (m.mission_type ?? "besoin") === "offre").length;
+  const tabCounts: Record<Tab, number> = {
+    questions: questions.length,
+    besoins: besoinsTotal,
+    offres: offresTotal,
+  };
+
 
   const goAsk = () =>
     navigate(isAuthenticated ? "/questions/nouvelle" : "/inscription?redirect=/questions/nouvelle");
