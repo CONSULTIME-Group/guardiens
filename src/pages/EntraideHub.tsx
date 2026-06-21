@@ -308,9 +308,9 @@ const EntraideHub = () => {
                     <div key={i} className="h-28 rounded-xl bg-muted/40 animate-pulse" />
                   ))}
                 </div>
-              ) : questions.length > 0 ? (
+              ) : visibleQuestions.length > 0 ? (
                 <ul className="space-y-3">
-                  {questions.map((q) => (
+                  {visibleQuestions.map((q) => (
                     <li key={q.id}>
                       <QuestionCard q={q} />
                     </li>
@@ -353,9 +353,9 @@ const EntraideHub = () => {
                     <div key={i} className="h-28 rounded-xl bg-muted/40 animate-pulse" />
                   ))}
                 </div>
-              ) : filteredMissions.length > 0 ? (
+              ) : visibleMissions.length > 0 ? (
                 <ul className="space-y-3">
-                  {filteredMissions.map((m) => (
+                  {visibleMissions.map((m) => (
                     <li key={m.id}>
                       <Link
                         to={`/petites-missions/${m.id}`}
