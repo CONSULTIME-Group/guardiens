@@ -4,6 +4,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ChipSelect from "./ChipSelect";
 import type { SitterProfileData } from "@/hooks/useSitterProfile";
+import { trackEvent } from "@/lib/analytics";
 import {
   LANGUAGE_OPTIONS,
   INTEREST_OPTIONS,
