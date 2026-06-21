@@ -88,7 +88,7 @@ const FillSavoirFaireBanner = () => {
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
           <Link
-            to="/petites-missions"
+            to="/profile?section=competences"
             className="inline-flex items-center gap-1.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium px-3.5 py-1.5 hover:bg-primary/90 transition-colors"
           >
             Ajouter mes savoir-faire
