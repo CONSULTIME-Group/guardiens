@@ -42,14 +42,27 @@ const InterestsProgress = ({ count }: { count: number }) => {
     : status === "partial"
     ? `${count}/${INTERESTS_TARGET} pour un bon matching`
     : `Aucun · visez ${INTERESTS_TARGET}+`;
+  const handleClick = () => {
+    trackEvent("interests_focus_click", { source: "indicator", metadata: { count, status } });
+    const el = document.getElementById("interests-chips");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      const firstChip = el.querySelector<HTMLElement>("button, [role='button']");
+      firstChip?.focus();
+    }
+  };
   return (
-    <div className="flex items-center gap-2">
+    <button
+      type="button"
+      onClick={handleClick}
+      aria-label={`Centres d'intérêt : ${label}. Cliquez pour modifier.`}
+      className="flex items-center gap-2 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 hover:opacity-80 transition-opacity"
+    >
       <div
         role="progressbar"
         aria-valuenow={count}
         aria-valuemin={0}
         aria-valuemax={INTERESTS_TARGET}
-        aria-label={`Centres d'intérêt renseignés : ${count} sur ${INTERESTS_TARGET}`}
         className="hidden sm:block h-1.5 w-20 rounded-full bg-muted overflow-hidden"
       >
         <div
@@ -62,7 +75,7 @@ const InterestsProgress = ({ count }: { count: number }) => {
       <span className={`text-[11px] font-medium rounded-full border px-2 py-0.5 ${tone}`}>
         {label}
       </span>
-    </div>
+    </button>
   );
 };
 
