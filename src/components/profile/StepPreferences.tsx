@@ -112,7 +112,10 @@ const StepPreferences = ({ data, onChange }: Props) => (
     </div>
 
     <div className="space-y-2">
-      <Label>Centres d'intérêt</Label>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <Label>Centres d'intérêt</Label>
+        <InterestsProgress count={data.interests?.length ?? 0} />
+      </div>
       <ChipSelect options={INTEREST_OPTIONS} selected={data.interests} onChange={v => onChange({ interests: v })} />
     </div>
 
