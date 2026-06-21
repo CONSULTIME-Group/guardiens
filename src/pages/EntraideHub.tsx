@@ -31,25 +31,42 @@ interface MissionRow {
   city: string | null;
   created_at: string;
   mission_type: "besoin" | "offre" | null;
+  user_id: string;
 }
 
-const TAB_META: Record<Tab, { label: string; title: string; description: string }> = {
+const TAB_META: Record<Tab, { label: string; title: string; description: string; how: string[] }> = {
   questions: {
     label: "Questions",
     title: "Questions à la communauté",
     description: "Comportement animal, jardin, garde, bricolage. Posez votre question, recevez plusieurs avis.",
+    how: [
+      "Vous posez une question publique, courte et précise.",
+      "Plusieurs membres répondent en commentaire, sans engagement.",
+      "Vous marquez la meilleure réponse quand le sujet est résolu.",
+    ],
   },
   besoins: {
     label: "Besoins",
     title: "Demandes de coups de main",
     description: "Les gens du coin qui cherchent un peu d'aide ponctuelle, près de chez vous.",
+    how: [
+      "Vous publiez votre besoin (catégorie, ville, créneau).",
+      "Une personne du coin se propose en message privé.",
+      "Vous convenez ensemble du jour et de la contrepartie éventuelle.",
+    ],
   },
   offres: {
     label: "Offres",
     title: "Propositions d'aide",
     description: "Celles et ceux qui proposent leur temps ou leurs compétences gratuitement.",
+    how: [
+      "Vous décrivez ce que vous savez faire et vos disponibilités.",
+      "Les personnes intéressées vous contactent en privé.",
+      "Vous validez ensemble la date et le cadre de l'aide.",
+    ],
   },
 };
+
 
 const VALID_TABS: Tab[] = ["questions", "besoins", "offres"];
 const VALID_Q_CATS = ["all", "animaux", "jardin", "maison", "garde", "autre"] as const;
@@ -103,12 +120,24 @@ const EntraideHub = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, qCategory, qStatus, mCategory]);
 
+  /* Toggle "Mes publications" (auth requis) */
+  const initialMine = params.get("mine") === "1";
+  const [mineOnly, setMineOnly] = useState<boolean>(initialMine && isAuthenticated);
+
+  useEffect(() => {
+    const next = new URLSearchParams(params);
+    if (mineOnly) next.set("mine", "1");
+    else next.delete("mine");
+    setParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mineOnly]);
+
   useEffect(() => {
     const load = async () => {
       setMLoading(true);
       const { data } = await supabase
         .from("small_missions")
-        .select("id, title, category, city, created_at, mission_type")
+        .select("id, title, category, city, created_at, mission_type, user_id")
         .eq("status", "open")
         .order("created_at", { ascending: false })
         .limit(60);
@@ -118,15 +147,36 @@ const EntraideHub = () => {
     void load();
   }, []);
 
+  
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null));
+  }, []);
 
-  const filteredMissions = useMemo(() => {
+  const visibleMissions = useMemo(() => {
     const wantType: "besoin" | "offre" = tab === "offres" ? "offre" : "besoin";
     return missions.filter((m) => {
       if ((m.mission_type ?? "besoin") !== wantType) return false;
       if (mCategory !== "all" && m.category !== mCategory) return false;
+      if (mineOnly && currentUserId && m.user_id !== currentUserId) return false;
       return true;
     });
-  }, [missions, tab, mCategory]);
+  }, [missions, tab, mCategory, mineOnly, currentUserId]);
+
+  const visibleQuestions = useMemo(() => {
+    if (!mineOnly || !currentUserId) return questions;
+    return questions.filter((q: any) => q.author_id === currentUserId);
+  }, [questions, mineOnly, currentUserId]);
+
+
+  const besoinsTotal = missions.filter((m) => (m.mission_type ?? "besoin") === "besoin").length;
+  const offresTotal = missions.filter((m) => (m.mission_type ?? "besoin") === "offre").length;
+  const tabCounts: Record<Tab, number> = {
+    questions: questions.length,
+    besoins: besoinsTotal,
+    offres: offresTotal,
+  };
+
 
   const goAsk = () =>
     navigate(isAuthenticated ? "/questions/nouvelle" : "/inscription?redirect=/questions/nouvelle");
@@ -169,9 +219,24 @@ const EntraideHub = () => {
               <Button onClick={goNeed} variant="outline" className="w-full">Demander un coup de main</Button>
               <Button onClick={goOffer} variant="outline" className="w-full">Proposer mon aide</Button>
             </div>
+            {isAuthenticated && (
+              <div className="mt-3 flex items-center justify-end">
+                <button
+                  type="button"
+                  onClick={() => setMineOnly((v) => !v)}
+                  className={`text-xs font-semibold px-3 py-1 rounded-full border transition-colors ${
+                    mineOnly
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-card text-foreground/70 border-border hover:bg-accent"
+                  }`}
+                >
+                  {mineOnly ? "✓ Mes publications" : "Mes publications"}
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Onglets */}
+          {/* Onglets avec compteurs */}
           <div role="tablist" aria-label="Catégorie de contenu" className="flex gap-2 mb-5 border-b border-border">
             {(Object.keys(TAB_META) as Tab[]).map((t) => (
               <button
@@ -179,13 +244,18 @@ const EntraideHub = () => {
                 role="tab"
                 aria-selected={tab === t}
                 onClick={() => setTab(t)}
-                className={`px-4 py-2 -mb-px border-b-2 text-sm font-semibold transition-colors ${
+                className={`px-4 py-2 -mb-px border-b-2 text-sm font-semibold transition-colors flex items-center gap-1.5 ${
                   tab === t
                     ? "border-primary text-primary"
                     : "border-transparent text-foreground/60 hover:text-foreground"
                 }`}
               >
-                {TAB_META[t].label}
+                <span>{TAB_META[t].label}</span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                  tab === t ? "bg-primary/15 text-primary" : "bg-muted text-foreground/50"
+                }`}>
+                  {tabCounts[t]}
+                </span>
               </button>
             ))}
           </div>
@@ -194,6 +264,20 @@ const EntraideHub = () => {
             <h2 className="font-heading text-lg font-semibold text-foreground">{meta.title}</h2>
             <p className="text-sm text-foreground/65 mt-1">{meta.description}</p>
           </div>
+
+          {/* Comment ça marche, par onglet */}
+          <details className="mb-6 rounded-xl border border-border bg-card group">
+            <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between text-sm font-semibold text-foreground">
+              <span>Comment ça marche ?</span>
+              <span className="text-foreground/50 group-open:rotate-180 transition-transform">▾</span>
+            </summary>
+            <ol className="px-4 pb-4 space-y-2 text-sm text-foreground/75 list-decimal list-inside">
+              {meta.how.map((step, i) => (
+                <li key={i}>{step}</li>
+              ))}
+            </ol>
+          </details>
+
 
           {/* Onglet Questions */}
           {tab === "questions" && (
@@ -224,9 +308,9 @@ const EntraideHub = () => {
                     <div key={i} className="h-28 rounded-xl bg-muted/40 animate-pulse" />
                   ))}
                 </div>
-              ) : questions.length > 0 ? (
+              ) : visibleQuestions.length > 0 ? (
                 <ul className="space-y-3">
-                  {questions.map((q) => (
+                  {visibleQuestions.map((q) => (
                     <li key={q.id}>
                       <QuestionCard q={q} />
                     </li>
@@ -269,9 +353,9 @@ const EntraideHub = () => {
                     <div key={i} className="h-28 rounded-xl bg-muted/40 animate-pulse" />
                   ))}
                 </div>
-              ) : filteredMissions.length > 0 ? (
+              ) : visibleMissions.length > 0 ? (
                 <ul className="space-y-3">
-                  {filteredMissions.map((m) => (
+                  {visibleMissions.map((m) => (
                     <li key={m.id}>
                       <Link
                         to={`/petites-missions/${m.id}`}
