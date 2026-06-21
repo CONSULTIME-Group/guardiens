@@ -219,9 +219,24 @@ const EntraideHub = () => {
               <Button onClick={goNeed} variant="outline" className="w-full">Demander un coup de main</Button>
               <Button onClick={goOffer} variant="outline" className="w-full">Proposer mon aide</Button>
             </div>
+            {isAuthenticated && (
+              <div className="mt-3 flex items-center justify-end">
+                <button
+                  type="button"
+                  onClick={() => setMineOnly((v) => !v)}
+                  className={`text-xs font-semibold px-3 py-1 rounded-full border transition-colors ${
+                    mineOnly
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-card text-foreground/70 border-border hover:bg-accent"
+                  }`}
+                >
+                  {mineOnly ? "✓ Mes publications" : "Mes publications"}
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Onglets */}
+          {/* Onglets avec compteurs */}
           <div role="tablist" aria-label="Catégorie de contenu" className="flex gap-2 mb-5 border-b border-border">
             {(Object.keys(TAB_META) as Tab[]).map((t) => (
               <button
@@ -229,13 +244,18 @@ const EntraideHub = () => {
                 role="tab"
                 aria-selected={tab === t}
                 onClick={() => setTab(t)}
-                className={`px-4 py-2 -mb-px border-b-2 text-sm font-semibold transition-colors ${
+                className={`px-4 py-2 -mb-px border-b-2 text-sm font-semibold transition-colors flex items-center gap-1.5 ${
                   tab === t
                     ? "border-primary text-primary"
                     : "border-transparent text-foreground/60 hover:text-foreground"
                 }`}
               >
-                {TAB_META[t].label}
+                <span>{TAB_META[t].label}</span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                  tab === t ? "bg-primary/15 text-primary" : "bg-muted text-foreground/50"
+                }`}>
+                  {tabCounts[t]}
+                </span>
               </button>
             ))}
           </div>
@@ -244,6 +264,20 @@ const EntraideHub = () => {
             <h2 className="font-heading text-lg font-semibold text-foreground">{meta.title}</h2>
             <p className="text-sm text-foreground/65 mt-1">{meta.description}</p>
           </div>
+
+          {/* Comment ça marche, par onglet */}
+          <details className="mb-6 rounded-xl border border-border bg-card group">
+            <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between text-sm font-semibold text-foreground">
+              <span>Comment ça marche ?</span>
+              <span className="text-foreground/50 group-open:rotate-180 transition-transform">▾</span>
+            </summary>
+            <ol className="px-4 pb-4 space-y-2 text-sm text-foreground/75 list-decimal list-inside">
+              {meta.how.map((step, i) => (
+                <li key={i}>{step}</li>
+              ))}
+            </ol>
+          </details>
+
 
           {/* Onglet Questions */}
           {tab === "questions" && (
