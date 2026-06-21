@@ -77,6 +77,7 @@ const INITIAL_STATE: SitterDashboardData = {
   unreadError: null,
   isAvailable: false,
   competencesCount: 0,
+  interestsCount: 0,
   isFounder: false,
   postalCode: null,
   avatarUrl: null,
