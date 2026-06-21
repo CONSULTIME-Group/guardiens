@@ -25,6 +25,7 @@ interface SitterCockpitProps {
   postalCode: string | null;
   nearbyListings: any[];
   competencesCount?: number;
+  interestsCount?: number;
 }
 
 const SitterCockpit = ({
