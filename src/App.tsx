@@ -133,6 +133,7 @@ const CreateSmallMission = lazy(() => import("./pages/CreateSmallMission"));
 const MentionsLegales = lazy(() => import("./pages/MentionsLegales"));
 const AdminSmallMissions = lazy(() => import("./pages/admin/AdminSmallMissions"));
 const Questions = lazy(() => import("./pages/Questions"));
+const EntraideHub = lazy(() => import("./pages/EntraideHub"));
 const QuestionDetail = lazy(() => import("./pages/QuestionDetail"));
 const QuestionCreate = lazy(() => import("./pages/QuestionCreate"));
 const AdminSubscriptions = lazy(() => import("./pages/admin/AdminSubscriptions"));
@@ -303,12 +304,12 @@ const AppRoutes = () => (
       <Route path="/tarifs" element={<Pricing />} />
       <Route path="/test-accord" element={<div className="p-6 bg-background min-h-screen"><TestAccordLazy /></div>} />
       <Route path="/gardien-urgence" element={<EmergencySitter />} />
-      <Route path="/petites-missions" element={<AppLayout><Questions /></AppLayout>} />
+      <Route path="/petites-missions" element={<AppLayout><EntraideHub /></AppLayout>} />
       <Route path="/petites-missions/creer" element={<ProtectedRoute><CreateSmallMission /></ProtectedRoute>} />
       <Route path="/petites-missions/nouveau" element={<Navigate to="/petites-missions/creer" replace />} />
       <Route path="/petites-missions/lyon" element={<MissionsCityPage />} />
       <Route path="/petites-missions/:id" element={<SmallMissionDetail />} />
-      <Route path="/questions" element={<AppLayout><Questions /></AppLayout>} />
+      <Route path="/questions" element={<Navigate to="/petites-missions?tab=questions" replace />} />
       <Route path="/questions/nouvelle" element={<ProtectedRoute><AppLayout><QuestionCreate /></AppLayout></ProtectedRoute>} />
       <Route path="/questions/:id" element={<AppLayout><QuestionDetail /></AppLayout>} />
       {/* Legacy: garde longue durée supprimée — redirige vers la home publique */}
