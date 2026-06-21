@@ -610,6 +610,7 @@ export const BottomNav = () => {
 
               <div className="space-y-1">
                 {[
+                  { to: "/profile", icon: UserCircle2, label: "Mon profil", badge: 0 },
                   { to: "/search", icon: Search, label: effectiveRole === "owner" ? "Recherche gardiens" : "Annonces en cours", badge: 0 },
                   { to: "/sits", icon: Calendar, label: effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures", badge: sitsBadge },
                   { to: "/favoris", icon: Heart, label: "Mes favoris", badge: 0 },
