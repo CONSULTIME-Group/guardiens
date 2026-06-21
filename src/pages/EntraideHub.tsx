@@ -165,8 +165,9 @@ const EntraideHub = () => {
 
   const visibleQuestions = useMemo(() => {
     if (!mineOnly || !currentUserId) return questions;
-    return questions.filter((q: any) => q.user_id === currentUserId);
+    return questions.filter((q: any) => q.author_id === currentUserId);
   }, [questions, mineOnly, currentUserId]);
+
 
   const besoinsTotal = missions.filter((m) => (m.mission_type ?? "besoin") === "besoin").length;
   const offresTotal = missions.filter((m) => (m.mission_type ?? "besoin") === "offre").length;
