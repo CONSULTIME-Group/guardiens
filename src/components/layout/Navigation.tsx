@@ -268,7 +268,7 @@ export const Sidebar = () => {
               )}
 
               <SidebarItem to="/pros" icon={Briefcase} label="Pros animaliers" beta />
-              <SidebarItem to="/petites-missions" icon={Handshake} label="Conseils & petites missions" badge={missionBadgeCount} />
+              <SidebarItem to="/petites-missions" icon={Handshake} label="Conseils & coups de main" badge={missionBadgeCount} />
 
               <GroupLabel label="Ressources" />
               <SidebarItem to="/actualites" icon={Newspaper} label="Guides & Conseils" />
@@ -614,7 +614,7 @@ export const BottomNav = () => {
                   { to: "/search", icon: Search, label: effectiveRole === "owner" ? "Recherche gardiens" : "Annonces en cours", badge: 0 },
                   { to: "/sits", icon: Calendar, label: effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures", badge: sitsBadge },
                   { to: "/favoris", icon: Heart, label: "Mes favoris", badge: 0 },
-                  { to: "/petites-missions", icon: Handshake, label: "Conseils & petites missions", badge: missionBadgeCount },
+                  { to: "/petites-missions", icon: Handshake, label: "Conseils & coups de main", badge: missionBadgeCount },
                   { to: "/actualites", icon: Newspaper, label: "Guides & Conseils", badge: 0 },
                   { to: "/guides", icon: Compass, label: "Guides locaux", badge: 0 },
                   ...(effectiveRole === "sitter" ? [{ to: "/mon-abonnement", icon: Star, label: "Mon abonnement", badge: 0 }] : []),
