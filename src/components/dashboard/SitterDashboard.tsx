@@ -17,6 +17,7 @@ import SitterBadgesSection from "./sitter/SitterBadgesSection";
 import NearbyHelpersCarousel from "./shared/NearbyHelpersCarousel";
 import SitterEmergencyCardCompact from "./sitter/SitterEmergencyCardCompact";
 import SitterMissionsSection from "./sitter/SitterMissionsSection";
+import CommunityQuestionsSection from "./CommunityQuestionsSection";
 import NearbyAnnoncesCard from "./sitter/NearbyAnnoncesCard";
 import DashSection from "./owner/DashSection";
 import SitterDashboardSkeleton from "./sitter/SitterDashboardSkeleton";
@@ -307,6 +308,7 @@ const SitterDashboard = () => {
               nearbyMissionsError={nearbyMissionsError}
             />
           )}
+          <CommunityQuestionsSection />
         </div>
       </section>
     </div>
