@@ -747,6 +747,166 @@ export type Database = {
         }
         Relationships: []
       }
+      community_answer_votes: {
+        Row: {
+          answer_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          answer_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          answer_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_answer_votes_answer_id_fkey"
+            columns: ["answer_id"]
+            isOneToOne: false
+            referencedRelation: "community_answers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_answers: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          helpful_count: number
+          id: string
+          is_author_pick: boolean
+          is_hidden: boolean
+          parent_answer_id: string | null
+          question_id: string
+          reports_count: number
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          helpful_count?: number
+          id?: string
+          is_author_pick?: boolean
+          is_hidden?: boolean
+          parent_answer_id?: string | null
+          question_id: string
+          reports_count?: number
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          helpful_count?: number
+          id?: string
+          is_author_pick?: boolean
+          is_hidden?: boolean
+          parent_answer_id?: string | null
+          question_id?: string
+          reports_count?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_answers_parent_answer_id_fkey"
+            columns: ["parent_answer_id"]
+            isOneToOne: false
+            referencedRelation: "community_answers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "community_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_questions: {
+        Row: {
+          accepted_answer_id: string | null
+          answers_count: number
+          author_id: string
+          body: string
+          category: Database["public"]["Enums"]["community_question_category"]
+          city: string | null
+          created_at: string
+          helpful_count: number
+          id: string
+          is_hidden: boolean
+          is_pinned: boolean
+          latitude: number | null
+          longitude: number | null
+          reports_count: number
+          status: Database["public"]["Enums"]["community_question_status"]
+          tags: string[]
+          title: string
+          updated_at: string
+          views_count: number
+        }
+        Insert: {
+          accepted_answer_id?: string | null
+          answers_count?: number
+          author_id: string
+          body: string
+          category: Database["public"]["Enums"]["community_question_category"]
+          city?: string | null
+          created_at?: string
+          helpful_count?: number
+          id?: string
+          is_hidden?: boolean
+          is_pinned?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          reports_count?: number
+          status?: Database["public"]["Enums"]["community_question_status"]
+          tags?: string[]
+          title: string
+          updated_at?: string
+          views_count?: number
+        }
+        Update: {
+          accepted_answer_id?: string | null
+          answers_count?: number
+          author_id?: string
+          body?: string
+          category?: Database["public"]["Enums"]["community_question_category"]
+          city?: string | null
+          created_at?: string
+          helpful_count?: number
+          id?: string
+          is_hidden?: boolean
+          is_pinned?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          reports_count?: number
+          status?: Database["public"]["Enums"]["community_question_status"]
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          views_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_accepted_answer"
+            columns: ["accepted_answer_id"]
+            isOneToOne: false
+            referencedRelation: "community_answers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competences_validees: {
         Row: {
           categorie: string
@@ -5765,6 +5925,13 @@ export type Database = {
         | "accepted"
         | "rejected"
         | "cancelled"
+      community_question_category:
+        | "animaux"
+        | "jardin"
+        | "maison"
+        | "garde"
+        | "autre"
+      community_question_status: "open" | "resolved" | "closed"
       conversation_context:
         | "sit_application"
         | "sitter_inquiry"
@@ -6005,6 +6172,14 @@ export const Constants = {
         "rejected",
         "cancelled",
       ],
+      community_question_category: [
+        "animaux",
+        "jardin",
+        "maison",
+        "garde",
+        "autre",
+      ],
+      community_question_status: ["open", "resolved", "closed"],
       conversation_context: [
         "sit_application",
         "sitter_inquiry",

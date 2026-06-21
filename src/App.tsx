@@ -132,6 +132,9 @@ const MissionsCityPage = lazy(() => import("./pages/MissionsCityPage"));
 const CreateSmallMission = lazy(() => import("./pages/CreateSmallMission"));
 const MentionsLegales = lazy(() => import("./pages/MentionsLegales"));
 const AdminSmallMissions = lazy(() => import("./pages/admin/AdminSmallMissions"));
+const Questions = lazy(() => import("./pages/Questions"));
+const QuestionDetail = lazy(() => import("./pages/QuestionDetail"));
+const QuestionCreate = lazy(() => import("./pages/QuestionCreate"));
 const AdminSubscriptions = lazy(() => import("./pages/admin/AdminSubscriptions"));
 const AdminLegal = lazy(() => import("./pages/admin/AdminLegal"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
@@ -305,6 +308,9 @@ const AppRoutes = () => (
       <Route path="/petites-missions/nouveau" element={<Navigate to="/petites-missions/creer" replace />} />
       <Route path="/petites-missions/lyon" element={<MissionsCityPage />} />
       <Route path="/petites-missions/:id" element={<SmallMissionDetail />} />
+      <Route path="/questions" element={<AppLayout><Questions /></AppLayout>} />
+      <Route path="/questions/nouvelle" element={<ProtectedRoute><AppLayout><QuestionCreate /></AppLayout></ProtectedRoute>} />
+      <Route path="/questions/:id" element={<AppLayout><QuestionDetail /></AppLayout>} />
       {/* Legacy: garde longue durée supprimée — redirige vers la home publique */}
       <Route path="/long-stays/:id" element={<Navigate to="/" replace />} />
       <Route path="/actualites/gardes-longue-duree-guide" element={<Navigate to="/actualites" replace />} />

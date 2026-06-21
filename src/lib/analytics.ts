@@ -47,7 +47,13 @@ export type EventType =
   | "exp_mission_bio_click"    // Clic sur une MissionCard (release, has_bio, position)
   | "exp_mission_bio_scroll"  // Scroll max atteint sur la liste (release, max_scroll_pct, is_mobile)
   | "affinity_badge_seen"     // Badge d'affinité affiché (context: sit_detail|public_profile|search|favorites, score, total)
-  | "interests_focus_click";  // Clic sur l'indicateur de progression OU le CTA cockpit menant au champ Centres d'intérêt (source: indicator|cockpit_cta, count actuel)
+  | "interests_focus_click"  // Clic sur l'indicateur de progression OU le CTA cockpit menant au champ Centres d'intérêt (source: indicator|cockpit_cta, count actuel)
+  // Module Questions & conseils -----------------------------------------------
+  | "question_create_submit"   // Question publiée (metadata.category)
+  | "question_view"            // Vue d'une question (metadata.id)
+  | "answer_submit"            // Réponse publiée (metadata.question_id, is_first_answer, is_reply)
+  | "answer_helpful_click"     // Vote utile sur une réponse (metadata.answer_id)
+  | "question_mark_resolved";  // Auteur marque la question comme résolue
 
 interface TrackOptions {
   source?: string;
