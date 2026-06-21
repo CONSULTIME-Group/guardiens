@@ -368,9 +368,15 @@ const EntraideHub = () => {
                           <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                             {MISSION_CATEGORY_LABEL[m.category] || "Autre"}
                           </span>
-                          {m.city && (
-                            <span className="text-xs text-foreground/50">{m.city}</span>
-                          )}
+                          {m.city && (() => {
+                            const code = getDeptCode(m.postal_code);
+                            const dept = code ? DEPT_NAMES[code] : null;
+                            return (
+                              <span className="text-xs text-foreground/50">
+                                {m.city}{dept ? `, ${dept}` : ""}
+                              </span>
+                            );
+                          })()}
                         </div>
                         <p className="font-heading text-base font-semibold text-foreground line-clamp-2">
                           {m.title}
