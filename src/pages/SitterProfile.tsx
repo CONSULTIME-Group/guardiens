@@ -375,7 +375,12 @@ const SitterProfile = () => {
                 <StepIdentity data={mergedData} onChange={handleChange} onUploadAvatar={handleUploadAvatar} />
               )}
               {activeSection === "sitter" && (
-                <StepSitterProfile data={mergedData} onChange={handleChange} />
+                <>
+                  <StepSitterProfile data={mergedData} onChange={handleChange} />
+                  <div className="mt-8 pt-8 border-t border-border">
+                    <StepPreferences data={mergedData} onChange={handleChange} />
+                  </div>
+                </>
               )}
               {activeSection === "experience" && (
                 <StepExperience
