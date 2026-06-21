@@ -51,27 +51,27 @@ const TAB_META: Record<Tab, { label: string; title: string; description: string 
   },
 };
 
+const VALID_TABS: Tab[] = ["questions", "besoins", "offres"];
+const VALID_Q_CATS = ["all", "animaux", "jardin", "maison", "garde", "autre"] as const;
+const VALID_Q_STATUS = ["all", "open", "resolved"] as const;
+
 const EntraideHub = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [params, setParams] = useSearchParams();
 
   const initialTab = (params.get("tab") as Tab) || "questions";
-  const [tab, setTab] = useState<Tab>(
-    (["questions", "besoins", "offres"] as Tab[]).includes(initialTab) ? initialTab : "questions",
-  );
-
-  useEffect(() => {
-    const next = new URLSearchParams(params);
-    if (tab === "questions") next.delete("tab");
-    else next.set("tab", tab);
-    setParams(next, { replace: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab]);
+  const [tab, setTab] = useState<Tab>(VALID_TABS.includes(initialTab) ? initialTab : "questions");
 
   /* ─── Onglet Questions ─── */
-  const [qCategory, setQCategory] = useState<CommunityCategory | "all">("all");
-  const [qStatus, setQStatus] = useState<"all" | "open" | "resolved">("all");
+  const initialQCat = params.get("cat") as CommunityCategory | "all" | null;
+  const initialQStatus = params.get("status") as "all" | "open" | "resolved" | null;
+  const [qCategory, setQCategory] = useState<CommunityCategory | "all">(
+    initialQCat && (VALID_Q_CATS as readonly string[]).includes(initialQCat) ? initialQCat : "all",
+  );
+  const [qStatus, setQStatus] = useState<"all" | "open" | "resolved">(
+    initialQStatus && (VALID_Q_STATUS as readonly string[]).includes(initialQStatus) ? initialQStatus : "all",
+  );
   const { items: questions, loading: qLoading } = useCommunityQuestions({
     category: qCategory,
     status: qStatus,
@@ -81,7 +81,27 @@ const EntraideHub = () => {
   /* ─── Onglets Besoins / Offres ─── */
   const [missions, setMissions] = useState<MissionRow[]>([]);
   const [mLoading, setMLoading] = useState(true);
-  const [mCategory, setMCategory] = useState<string>("all");
+  const initialMCat = params.get("cat") || "all";
+  const [mCategory, setMCategory] = useState<string>(initialMCat);
+
+  /* ─── Sync querystring (tab + filtres contextuels) ─── */
+  useEffect(() => {
+    const next = new URLSearchParams(params);
+    if (tab === "questions") next.delete("tab");
+    else next.set("tab", tab);
+
+    // Reset puis pose des filtres du tab actif
+    next.delete("cat");
+    next.delete("status");
+    if (tab === "questions") {
+      if (qCategory !== "all") next.set("cat", qCategory);
+      if (qStatus !== "all") next.set("status", qStatus);
+    } else {
+      if (mCategory !== "all") next.set("cat", mCategory);
+    }
+    setParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, qCategory, qStatus, mCategory]);
 
   useEffect(() => {
     const load = async () => {
@@ -97,6 +117,7 @@ const EntraideHub = () => {
     };
     void load();
   }, []);
+
 
   const filteredMissions = useMemo(() => {
     const wantType: "besoin" | "offre" = tab === "offres" ? "offre" : "besoin";
