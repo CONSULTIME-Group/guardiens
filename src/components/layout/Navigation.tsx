@@ -2,7 +2,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, Search, Calendar, MessageSquare, User, LogOut, Settings,
   PawPrint, Newspaper, Shield, Compass, Handshake, Menu, Star,
-  MoreHorizontal, Crown, Plus, Heart, LifeBuoy, Briefcase,
+  MoreHorizontal, Crown, Plus, Heart, LifeBuoy, Briefcase, UserCircle2,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
