@@ -29,10 +29,12 @@ interface MissionRow {
   title: string;
   category: string;
   city: string | null;
+  postal_code: string | null;
   created_at: string;
   mission_type: "besoin" | "offre" | null;
   user_id: string;
 }
+
 
 const TAB_META: Record<Tab, { label: string; title: string; description: string; how: string[] }> = {
   questions: {
