@@ -8,6 +8,8 @@ import { formatSitPeriod } from "@/lib/dateRange";
 
 interface ShareButtonsProps {
   sitId: string;
+  /** Slug SEO de l'annonce ; si fourni, il est utilisé à la place de l'UUID dans l'URL partagée */
+  sitSlug?: string | null;
   title: string;
   city?: string | null;
   /** Date de début (ISO), affichée en récap pour confirmer ce qui sera partagé */
