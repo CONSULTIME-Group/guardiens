@@ -93,6 +93,7 @@ const LiveListingsStrip: React.FC = () => {
         const p = propMap.get(s.property_id);
         return {
           id: s.id,
+          slug: s.slug ?? null,
           title: s.title,
           start_date: s.start_date,
           end_date: s.end_date,
