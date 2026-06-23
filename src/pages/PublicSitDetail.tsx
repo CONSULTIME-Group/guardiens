@@ -386,7 +386,8 @@ const PublicSitDetail = () => {
   // Canonical TOUJOURS sur le domaine de prod : sur preview/lovableproject,
   // le partage social (FB/LinkedIn/WhatsApp) doit pointer vers guardiens.fr
   // où le prerender sert les meta OG. Sinon, aperçu vide / URL moche.
-  const canonicalUrl = `https://guardiens.fr/annonces/${sit.id}`;
+  const sitSeg = (sit.slug && sit.slug.trim().length > 0) ? sit.slug : sit.id;
+  const canonicalUrl = `https://guardiens.fr/annonces/${sitSeg}`;
 
  // og:image, visuel personnalisé généré à la volée (photo de couverture réelle
  // de l'annonce + titre + ville + dates + animaux + propriétaire). Servi par
