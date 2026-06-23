@@ -13,6 +13,7 @@ import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import SitHero from "@/components/sits/views/tabs/SitHero";
 
 interface SitLike {
+  slug?: string | null;
   id: string;
   title?: string | null;
   start_date?: string | null;

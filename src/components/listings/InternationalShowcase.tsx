@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 
 interface IntlSit {
+  slug?: string | null;
   id: string;
   title: string | null;
   city: string | null;

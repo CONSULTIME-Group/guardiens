@@ -15,6 +15,7 @@ const fallbackImageFor = (city: string | null): string | null => {
 };
 
 interface LiveSit {
+  slug?: string | null;
   id: string;
   title: string;
   start_date: string | null;

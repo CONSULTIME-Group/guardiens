@@ -17,6 +17,7 @@ import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 const CANONICAL = "https://guardiens.fr/annonces/international";
 
 type IntlSit = {
+  slug?: string | null;
   id: string;
   title: string | null;
   city: string | null;
