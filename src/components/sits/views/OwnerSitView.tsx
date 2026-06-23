@@ -474,6 +474,7 @@ const OwnerSitView = ({
           Le partage est désormais une icône dans le header (plus de gros bloc). */}
       <SitDetailHeader
         sitId={sit.id}
+        sitSlug={sit.slug}
         sitTitle={sit.title}
         sitStatus={sit.status}
         startDate={sit.start_date}

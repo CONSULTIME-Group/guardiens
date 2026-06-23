@@ -201,6 +201,7 @@ const SitterSitView = ({
       {/* Header partagé */}
       <SitDetailHeader
         sitId={sit.id}
+        sitSlug={sit.slug}
         sitTitle={sit.title}
         sitStatus={sit.status}
         startDate={sit.start_date}
