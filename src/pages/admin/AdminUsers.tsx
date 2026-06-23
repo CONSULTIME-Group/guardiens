@@ -167,12 +167,20 @@ const AdminUsers = () => {
       let emailMap = new Map<string, string>();
       let modMap = new Map<string, { admin_notes: string | null; is_manual_super: boolean }>();
       if (userIds.length > 0) {
-        const [emailRes, modRes] = await Promise.all([
+        // Chunk les requêtes .in() pour éviter de dépasser la longueur d'URL
+        // que PostgREST/Cloudflare accepte (400 Bad Request au-delà ~150 UUIDs).
+        const CHUNK = 150;
+        const chunks: string[][] = [];
+        for (let i = 0; i < userIds.length; i += CHUNK) chunks.push(userIds.slice(i, i + CHUNK));
+        const [emailRes, ...modResAll] = await Promise.all([
           supabase.rpc("get_user_emails_admin", { p_user_ids: userIds }),
-          supabase.from("profile_moderation").select("profile_id, admin_notes, is_manual_super").in("profile_id", userIds),
+          ...chunks.map((ids) =>
+            supabase.from("profile_moderation").select("profile_id, admin_notes, is_manual_super").in("profile_id", ids)
+          ),
         ]);
         emailMap = new Map((emailRes.data || []).map((e: any) => [e.id, e.email]));
-        modMap = new Map((modRes.data || []).map((m: any) => [m.profile_id, { admin_notes: m.admin_notes, is_manual_super: m.is_manual_super }]));
+        const modRows = modResAll.flatMap((r: any) => r.data || []);
+        modMap = new Map(modRows.map((m: any) => [m.profile_id, { admin_notes: m.admin_notes, is_manual_super: m.is_manual_super }]));
       }
       const enriched = (data || []).map((u: any) => {
         const mod = modMap.get(u.id);
