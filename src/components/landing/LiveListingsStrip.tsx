@@ -56,7 +56,7 @@ const LiveListingsStrip: React.FC = () => {
       const todayIso = new Date().toISOString().slice(0, 10);
       const { data: rawSits } = await supabase
         .from("sits")
-        .select("id, title, start_date, end_date, user_id, property_id, cover_photo_url, city, country, is_urgent")
+        .select("id, slug, title, start_date, end_date, user_id, property_id, cover_photo_url, city, country, is_urgent")
         .eq("status", "published")
         .eq("accepting_applications", true)
         .or(`end_date.is.null,end_date.gte.${todayIso}`)
