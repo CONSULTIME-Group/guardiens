@@ -348,6 +348,7 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
             {currentSit.status === "published" && (
               <ShareButtons
                 sitId={currentSit.id}
+                sitSlug={(currentSit as any).slug}
                 title={currentSit.title || "Garde"}
                 startDate={currentSit.start_date}
                 endDate={currentSit.end_date}
