@@ -144,7 +144,7 @@ const PublicSitView = ({
     .filter((p) => !!p.photo_url)
     .map((p) => ({ url: p.photo_url as string, name: p.name, species: speciesLabel[p.species] || p.species }));
   const cityLabel = owner?.city || "France";
-  const redirect = `/annonces/${sit.id}`;
+  const redirect = `/annonces/${sit.slug || sit.id}`;
   const title = sit.title ? sanitizeUserTitle(sit.title) : `Une mission de garde à ${cityLabel}`;
   const description = property?.description || "";
   const accepting = sit.accepting_applications !== false;
