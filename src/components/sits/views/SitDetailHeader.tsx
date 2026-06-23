@@ -38,6 +38,7 @@ import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 
 interface SitDetailHeaderProps {
   sitId: string;
+  sitSlug?: string | null;
   sitTitle: string | null;
   sitStatus: string;
   startDate: string | null;
