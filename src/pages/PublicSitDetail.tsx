@@ -534,7 +534,7 @@ const PublicSitDetail = () => {
       <PageMeta
         title={truncatedTitle}
         description={truncatedDesc}
-        path={`/annonces/${sit.id}`}
+        path={`/annonces/${sitSeg}`}
         image={ogImageUrl}
         type="article"
         canonical={canonicalUrl}
