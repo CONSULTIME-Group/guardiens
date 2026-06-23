@@ -97,7 +97,7 @@ export default function PublicListings() {
     (async () => {
       const { data } = await supabase
         .from("sits")
-        .select("id, title")
+        .select("id, slug, title")
         .eq("status", "published")
         .order("created_at", { ascending: false })
         .limit(20);
@@ -111,7 +111,7 @@ export default function PublicListings() {
         itemListElement: data.map((s: any, i: number) => ({
           "@type": "ListItem",
           position: i + 1,
-          url: `https://guardiens.fr/annonces/${s.id}`,
+          url: `https://guardiens.fr/annonces/${s.slug || s.id}`,
           name: s.title || BREADCRUMB_LISTINGS,
         })),
       });
