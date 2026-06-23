@@ -34,8 +34,8 @@ import {
 type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
 
 const PublicSitDetail = () => {
- const { id: rawId } = useParams<{ id: string }>();
- const id = rawId?.replace(/[\s\u00A0\u200B-\u200D\uFEFF]+/g, "") || undefined;
+ const { id: rawParam } = useParams<{ id: string }>();
+ const param = rawParam?.replace(/[\s\u00A0\u200B-\u200D\uFEFF]+/g, "") || undefined;
  const navigate = useNavigate();
  const { user, isAuthenticated } = useAuth();
  const { hasAccess } = useSubscriptionAccess();
@@ -63,10 +63,14 @@ const PublicSitDetail = () => {
   }, [loading, loadError, sit]);
 
   useEffect(() => {
-    if (!id) return;
+    if (!param) return;
     const load = async () => {
       try {
-        const { data: sitRows, error: sitErr } = await supabase.from("sits").select("*").eq("id", id).limit(1);
+        // Param peut être un UUID (URL legacy) ou un slug SEO.
+        const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        const isUuid = UUID_RE.test(param);
+        const query = supabase.from("sits").select("*").limit(1);
+        const { data: sitRows, error: sitErr } = await (isUuid ? query.eq("id", param) : query.eq("slug", param));
         if (sitErr) throw sitErr;
         const sitData = sitRows?.[0];
         if (!sitData) {
@@ -74,6 +78,14 @@ const PublicSitDetail = () => {
           return;
         }
         setSit(sitData);
+
+        // 301-like : si on est arrivés via UUID mais qu'un slug existe, on
+        // remplace l'URL par la version slug (mieux pour SEO, partages, CTR).
+        if (isUuid && sitData.slug && sitData.slug !== param) {
+          navigate(`/annonces/${sitData.slug}${window.location.search}${window.location.hash}`, { replace: true });
+        }
+        const id = sitData.id;
+
 
         const [ownerRes, propRes, reviewsRes, badgeRes, galleryRes] = await Promise.all([
           supabase.from("public_profiles").select("id, first_name, city, postal_code, avatar_url, identity_verified, bio, completed_sits_count, is_founder").eq("id", sitData.user_id).limit(1),
