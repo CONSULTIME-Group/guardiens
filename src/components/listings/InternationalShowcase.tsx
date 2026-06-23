@@ -77,7 +77,7 @@ const InternationalShowcase = () => {
             return (
               <li key={s.id} className="shrink-0 w-[78vw] sm:w-[60vw] md:w-auto">
                 <Link
-                  to={`/annonces/${s.id}`}
+                  to={`/annonces/${s.slug || s.id}`}
                   className="group block rounded-2xl overflow-hidden border border-border bg-card hover:shadow-lg transition-shadow h-full"
                 >
                   <div className="aspect-[4/3] bg-muted overflow-hidden">

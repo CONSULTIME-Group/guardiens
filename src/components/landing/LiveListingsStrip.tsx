@@ -179,7 +179,7 @@ const LiveListingsStrip: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-5">
             {/* Carte featured surdimensionnée */}
             <Link
-              to={`/annonces/${featured.id}`}
+              to={`/annonces/${featured.slug || featured.id}`}
               className="group lg:col-span-3 relative overflow-hidden rounded-3xl border-2 border-destructive/40 bg-card shadow-lg hover:shadow-2xl hover:border-destructive/70 transition-all"
             >
               <div className="aspect-[16/10] md:aspect-[16/9] relative overflow-hidden">
@@ -237,7 +237,7 @@ const LiveListingsStrip: React.FC = () => {
                 return (
                   <Link
                     key={s.id}
-                    to={`/annonces/${s.id}`}
+                    to={`/annonces/${s.slug || s.id}`}
                     className="group bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/50 hover:shadow-md transition-all flex lg:flex-row flex-col"
                   >
                     <div className="lg:w-2/5 aspect-[4/3] lg:aspect-auto bg-muted relative overflow-hidden shrink-0">
@@ -287,7 +287,7 @@ const LiveListingsStrip: React.FC = () => {
               return (
                 <Link
                   key={s.id}
-                  to={`/annonces/${s.id}`}
+                  to={`/annonces/${s.slug || s.id}`}
                   className="group bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/50 hover:shadow-lg transition-all"
                 >
                   <div className="aspect-[4/3] bg-muted relative overflow-hidden">

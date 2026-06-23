@@ -133,7 +133,7 @@ const LiveListingsSection: React.FC = () => {
             return (
               <Link
                 key={s.id}
-                to={`/annonces/${s.id}`}
+                to={`/annonces/${s.slug || s.id}`}
                 className="group bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/40 hover:shadow-lg transition-all"
               >
                 <div className="aspect-[4/3] bg-muted relative overflow-hidden">
