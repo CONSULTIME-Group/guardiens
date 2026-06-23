@@ -235,14 +235,15 @@ const PublicSitDetail = () => {
           } catch {}
         }
       } catch (e: any) {
-        logger.warn("[PublicSitDetail] load failed", { sit_id: id, error: e?.message });
+        logger.warn("[PublicSitDetail] load failed", { sit_param: param, error: e?.message });
         setLoadError("error");
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, [id, user, navigate]);
+  }, [param, user, navigate]);
+
 
  if (loading) {
  return (
