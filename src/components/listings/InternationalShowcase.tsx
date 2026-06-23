@@ -25,7 +25,7 @@ const InternationalShowcase = () => {
     (async () => {
       const { data } = await supabase
         .from("sits")
-        .select("id, title, city, country, cover_photo_url, property:properties(photos)")
+        .select("id, slug, title, city, country, cover_photo_url, property:properties(photos)")
         .eq("status", "published")
         .eq("accepting_applications", true)
         .not("country", "is", null)

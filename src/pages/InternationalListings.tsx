@@ -86,7 +86,7 @@ export default function InternationalListings() {
     (async () => {
       const { data } = await supabase
         .from("sits")
-        .select("id, title, city, country, start_date, end_date, cover_photo_url, property:properties(photos)")
+        .select("id, slug, title, city, country, start_date, end_date, cover_photo_url, property:properties(photos)")
         .eq("status", "published")
         .not("country", "is", null)
         .neq("country", "FR")
