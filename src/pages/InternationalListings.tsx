@@ -17,6 +17,7 @@ import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 const CANONICAL = "https://guardiens.fr/annonces/international";
 
 type IntlSit = {
+  slug?: string | null;
   id: string;
   title: string | null;
   city: string | null;
@@ -86,7 +87,7 @@ export default function InternationalListings() {
     (async () => {
       const { data } = await supabase
         .from("sits")
-        .select("id, title, city, country, start_date, end_date, cover_photo_url, property:properties(photos)")
+        .select("id, slug, title, city, country, start_date, end_date, cover_photo_url, property:properties(photos)")
         .eq("status", "published")
         .not("country", "is", null)
         .neq("country", "FR")
@@ -190,7 +191,7 @@ export default function InternationalListings() {
                   return (
                     <Link
                       key={s.id}
-                      to={`/annonces/${s.id}`}
+                      to={`/annonces/${s.slug || s.id}`}
                       className="group block rounded-2xl overflow-hidden border border-border bg-card hover:shadow-lg transition-shadow"
                     >
                       <div className="aspect-[4/3] bg-muted overflow-hidden">

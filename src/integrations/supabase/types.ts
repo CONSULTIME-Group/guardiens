@@ -4349,6 +4349,7 @@ export type Database = {
           reminder_j7_sent: boolean | null
           review_j1_sent: boolean | null
           review_j5_sent: boolean | null
+          slug: string | null
           specific_expectations: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["sit_status"]
@@ -4385,6 +4386,7 @@ export type Database = {
           reminder_j7_sent?: boolean | null
           review_j1_sent?: boolean | null
           review_j5_sent?: boolean | null
+          slug?: string | null
           specific_expectations?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["sit_status"]
@@ -4421,6 +4423,7 @@ export type Database = {
           reminder_j7_sent?: boolean | null
           review_j1_sent?: boolean | null
           review_j5_sent?: boolean | null
+          slug?: string | null
           specific_expectations?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["sit_status"]
@@ -5685,6 +5688,10 @@ export type Database = {
           canonical_email: string
           canonical_user_id: string
         }[]
+      }
+      generate_sit_slug: {
+        Args: { p_city: string; p_id: string; p_title: string }
+        Returns: string
       }
       get_email_preferences_by_email: {
         Args: { p_email: string }

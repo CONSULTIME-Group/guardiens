@@ -15,6 +15,7 @@ const fallbackImageFor = (city: string | null): string | null => {
 };
 
 interface LiveSit {
+  slug?: string | null;
   id: string;
   title: string;
   start_date: string | null;
@@ -42,7 +43,7 @@ const LiveListingsSection: React.FC = () => {
     (async () => {
       const { data: rawSits } = await supabase
         .from("sits")
-        .select("id, title, start_date, end_date, user_id, property_id, cover_photo_url")
+        .select("id, slug, title, start_date, end_date, user_id, property_id, cover_photo_url")
         .eq("status", "published")
         .eq("accepting_applications", true)
         .order("created_at", { ascending: false })
@@ -133,7 +134,7 @@ const LiveListingsSection: React.FC = () => {
             return (
               <Link
                 key={s.id}
-                to={`/annonces/${s.id}`}
+                to={`/annonces/${s.slug || s.id}`}
                 className="group bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/40 hover:shadow-lg transition-all"
               >
                 <div className="aspect-[4/3] bg-muted relative overflow-hidden">

@@ -3,6 +3,7 @@
  */
 export interface SitData {
   id: string;
+  slug?: string | null;
   title: string;
   start_date: string | null;
   end_date: string | null;

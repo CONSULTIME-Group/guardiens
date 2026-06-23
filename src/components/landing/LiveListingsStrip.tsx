@@ -7,6 +7,7 @@ import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 
 interface LiveSit {
   id: string;
+  slug: string | null;
   title: string;
   start_date: string | null;
   end_date: string | null;
@@ -55,7 +56,7 @@ const LiveListingsStrip: React.FC = () => {
       const todayIso = new Date().toISOString().slice(0, 10);
       const { data: rawSits } = await supabase
         .from("sits")
-        .select("id, title, start_date, end_date, user_id, property_id, cover_photo_url, city, country, is_urgent")
+        .select("id, slug, title, start_date, end_date, user_id, property_id, cover_photo_url, city, country, is_urgent")
         .eq("status", "published")
         .eq("accepting_applications", true)
         .or(`end_date.is.null,end_date.gte.${todayIso}`)
@@ -92,6 +93,7 @@ const LiveListingsStrip: React.FC = () => {
         const p = propMap.get(s.property_id);
         return {
           id: s.id,
+          slug: s.slug ?? null,
           title: s.title,
           start_date: s.start_date,
           end_date: s.end_date,
@@ -177,7 +179,7 @@ const LiveListingsStrip: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-5">
             {/* Carte featured surdimensionnée */}
             <Link
-              to={`/annonces/${featured.id}`}
+              to={`/annonces/${featured.slug || featured.id}`}
               className="group lg:col-span-3 relative overflow-hidden rounded-3xl border-2 border-destructive/40 bg-card shadow-lg hover:shadow-2xl hover:border-destructive/70 transition-all"
             >
               <div className="aspect-[16/10] md:aspect-[16/9] relative overflow-hidden">
@@ -235,7 +237,7 @@ const LiveListingsStrip: React.FC = () => {
                 return (
                   <Link
                     key={s.id}
-                    to={`/annonces/${s.id}`}
+                    to={`/annonces/${s.slug || s.id}`}
                     className="group bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/50 hover:shadow-md transition-all flex lg:flex-row flex-col"
                   >
                     <div className="lg:w-2/5 aspect-[4/3] lg:aspect-auto bg-muted relative overflow-hidden shrink-0">
@@ -285,7 +287,7 @@ const LiveListingsStrip: React.FC = () => {
               return (
                 <Link
                   key={s.id}
-                  to={`/annonces/${s.id}`}
+                  to={`/annonces/${s.slug || s.id}`}
                   className="group bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/50 hover:shadow-lg transition-all"
                 >
                   <div className="aspect-[4/3] bg-muted relative overflow-hidden">

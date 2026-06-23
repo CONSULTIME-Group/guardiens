@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 
 interface IntlSit {
+  slug?: string | null;
   id: string;
   title: string | null;
   city: string | null;
@@ -25,7 +26,7 @@ const InternationalShowcase = () => {
     (async () => {
       const { data } = await supabase
         .from("sits")
-        .select("id, title, city, country, cover_photo_url, property:properties(photos)")
+        .select("id, slug, title, city, country, cover_photo_url, property:properties(photos)")
         .eq("status", "published")
         .eq("accepting_applications", true)
         .not("country", "is", null)
@@ -77,7 +78,7 @@ const InternationalShowcase = () => {
             return (
               <li key={s.id} className="shrink-0 w-[78vw] sm:w-[60vw] md:w-auto">
                 <Link
-                  to={`/annonces/${s.id}`}
+                  to={`/annonces/${s.slug || s.id}`}
                   className="group block rounded-2xl overflow-hidden border border-border bg-card hover:shadow-lg transition-shadow h-full"
                 >
                   <div className="aspect-[4/3] bg-muted overflow-hidden">

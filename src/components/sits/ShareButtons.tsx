@@ -8,6 +8,8 @@ import { formatSitPeriod } from "@/lib/dateRange";
 
 interface ShareButtonsProps {
   sitId: string;
+  /** Slug SEO de l'annonce ; si fourni, il est utilisé à la place de l'UUID dans l'URL partagée */
+  sitSlug?: string | null;
   title: string;
   city?: string | null;
   /** Date de début (ISO), affichée en récap pour confirmer ce qui sera partagé */
@@ -33,7 +35,7 @@ type ShareChannel = "facebook" | "whatsapp" | "x" | "email" | "copy" | "native";
  * - Copier le lien
  * - Web Share API native (mobile)
  */
-const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_detail", compact = false, viewerType = "anonymous" }: ShareButtonsProps) => {
+const ShareButtons = ({ sitId, sitSlug, title, city, startDate, endDate, source = "sit_detail", compact = false, viewerType = "anonymous" }: ShareButtonsProps) => {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -41,7 +43,8 @@ const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_de
   // Toujours partager l'URL publique de production, jamais /sits/:id ni la preview.
   // Paramètre volontairement neutre : il contourne le cache social déjà pollué de l'URL nue,
   // sans impacter la canonical SEO servie par PageMeta.
-  const shareUrl = `https://guardiens.fr/annonces/${sitId}?share=cover-photo-20260522`;
+  const seg = (sitSlug && sitSlug.trim().length > 0) ? sitSlug : sitId;
+  const shareUrl = `https://guardiens.fr/annonces/${seg}?share=cover-photo-20260522`;
   const trackedShareUrl = (channel: Exclude<ShareChannel, "copy" | "native">) => {
     const url = new URL(shareUrl);
     url.searchParams.set("utm_source", channel === "x" ? "twitter" : channel);

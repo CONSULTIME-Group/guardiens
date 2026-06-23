@@ -13,6 +13,7 @@ import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import SitHero from "@/components/sits/views/tabs/SitHero";
 
 interface SitLike {
+  slug?: string | null;
   id: string;
   title?: string | null;
   start_date?: string | null;
@@ -144,7 +145,7 @@ const PublicSitView = ({
     .filter((p) => !!p.photo_url)
     .map((p) => ({ url: p.photo_url as string, name: p.name, species: speciesLabel[p.species] || p.species }));
   const cityLabel = owner?.city || "France";
-  const redirect = `/annonces/${sit.id}`;
+  const redirect = `/annonces/${sit.slug || sit.id}`;
   const title = sit.title ? sanitizeUserTitle(sit.title) : `Une mission de garde à ${cityLabel}`;
   const description = property?.description || "";
   const accepting = sit.accepting_applications !== false;
