@@ -166,7 +166,7 @@ const SitterSitView = ({
             Vous consultez cette annonce <span className="font-medium text-foreground">comme gardien</span>.
           </p>
           <Button asChild size="sm" variant="outline" className="h-8 text-xs">
-            <Link to={`/annonces/${sit.id}`} className="inline-flex items-center gap-1.5">
+            <Link to={`/annonces/${sit.slug || sit.id}`} className="inline-flex items-center gap-1.5">
               <ArrowLeft className="h-3.5 w-3.5" /> Retour à l'aperçu public
             </Link>
           </Button>
