@@ -7,6 +7,7 @@ import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 
 interface LiveSit {
   id: string;
+  slug: string | null;
   title: string;
   start_date: string | null;
   end_date: string | null;
