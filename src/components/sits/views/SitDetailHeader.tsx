@@ -66,6 +66,7 @@ const formatDate = (d: string | null) =>
 
 const SitDetailHeader = ({
   sitId,
+  sitSlug,
   sitTitle,
   sitStatus,
   startDate,
@@ -130,6 +131,7 @@ const SitDetailHeader = ({
                     </DialogHeader>
                     <ShareButtons
                       sitId={sitId}
+                      sitSlug={sitSlug}
                       title={sitTitle || `Garde à ${ownerCity || owner?.city || "France"}`}
                       city={ownerCity ?? owner?.city ?? null}
                       startDate={startDate}
@@ -152,7 +154,7 @@ const SitDetailHeader = ({
                 </Button>
               )}
               <a
-                href={`/annonces/${sitId}`}
+                href={`/annonces/${sitSlug || sitId}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm text-primary hover:underline cursor-pointer flex items-center gap-1"
