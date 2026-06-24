@@ -8,6 +8,8 @@ interface ProfileProgressStripProps {
   onJumpToSection?: (id: string) => void;
   /** URL du profil public, ouverte dans un nouvel onglet. */
   publicProfileUrl?: string;
+  /** Nombre total d'items restants à compléter dans tout le profil. */
+  totalRemaining?: number;
 }
 
 /**
