@@ -151,11 +151,20 @@ const SitDetail = () => {
       }
 
       if (propertyData) {
-        const { data: petsData } = await supabase
+        // Try full pets first (owner / admin / accepted sitter); fall back to public_pets view for general viewers
+        const { data: fullPets } = await supabase
           .from("pets")
           .select("*")
           .eq("property_id", propertyData.id);
-        setPets(petsData || []);
+        if (fullPets && fullPets.length > 0) {
+          setPets(fullPets);
+        } else {
+          const { data: safePets } = await supabase
+            .from("public_pets" as any)
+            .select("*")
+            .eq("property_id", propertyData.id);
+          setPets((safePets as any) || []);
+        }
       }
 
       const { data: countRows } = await supabase.rpc("get_sit_application_counts", {
