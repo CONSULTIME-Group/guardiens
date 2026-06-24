@@ -54,8 +54,10 @@ describe("computeAffinityScore", () => {
     expect(r).toBeNull();
   });
 
-  it("ignore les champs absents sans pénaliser", () => {
-    const r = computeAffinityScore(
+  it("baisse le score quand peu de critères sont comparables (dénominateur fixe sur 9)", () => {
+    // 3 critères matchés à fond = pace(1) + langue(1) + intérêts(1) = 3 / 9 ≈ 33%
+    // Sous le seuil d'affichage (40%) → computeAffinityScore renvoie null.
+    const full = computeAffinityResultFull(
       {
         life_pace: "actif",
         languages: ["Français"],
@@ -67,13 +69,15 @@ describe("computeAffinityScore", () => {
         interests: ["Randonnée", "Vélo"],
       },
     );
-    expect(r).not.toBeNull();
-    expect(r!.total).toBe(3);
-    expect(r!.score).toBeGreaterThanOrEqual(80);
+    expect(full).not.toBeNull();
+    expect(full!.total).toBe(3);
+    expect(full!.score).toBeLessThan(40);
+    expect(full!.displayed).toBe(false);
+    expect(full!.hiddenReason).toBe("below_threshold");
   });
 
-  it("rythme adjacent donne demi-point", () => {
-    const r = computeAffinityScore(
+  it("rythme adjacent + langue + intérêt commun reste sous le seuil (dénominateur fixe)", () => {
+    const r = computeAffinityResultFull(
       {
         life_pace: "calme",
         languages: ["Français"],
@@ -86,10 +90,10 @@ describe("computeAffinityScore", () => {
       },
     );
     expect(r).not.toBeNull();
-    // 3 critères : rythme 0.5, langue 1, intérêts 0.5 = 2/3 ≈ 67
-    expect(r!.score).toBeGreaterThanOrEqual(60);
-    expect(r!.score).toBeLessThanOrEqual(75);
+    // pace 0.5 + langue 1 + intérêts 0.5 = 2 / 9 ≈ 22%
+    expect(r!.score).toBeLessThan(40);
   });
+
 
   it("disqualifie un sitter qui refuse les chiens si l'owner a un chien", () => {
     const r = computeAffinityScore(
