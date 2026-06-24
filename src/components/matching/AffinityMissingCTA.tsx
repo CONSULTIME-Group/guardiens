@@ -102,7 +102,7 @@ const AffinityMissingCTA = (props: Props) => {
   if (missing.length === 0) return null;
 
   const labels = side === "sitter" ? SITTER_LABELS : OWNER_LABELS;
-  const href = editHref ?? (side === "sitter" ? "/profil" : "/proprietaire");
+  const href = editHref ?? (side === "sitter" ? "/profile" : "/owner-profile");
   // On limite à 3 items pour ne pas surcharger le message.
   const shown = missing.slice(0, 3).map((m) => labels[m]).filter(Boolean);
   const list =
