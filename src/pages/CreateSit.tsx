@@ -636,7 +636,14 @@ const CreateSit = () => {
               </button>
               <button
                 type="button"
-                onClick={() => setSitLocation("away")}
+                onClick={() => {
+                  setSitLocation("away");
+                  toast({
+                    title: "Redirection vers Coup de main",
+                    description: "Visite, balade, pension ou garde chez la personne se publient dans Coup de main.",
+                  });
+                  setTimeout(() => navigate("/petites-missions/creer"), 1200);
+                }}
                 className={cn(
                   "text-left rounded-lg border p-3 transition-colors",
                   sitLocation === "away"
@@ -652,10 +659,10 @@ const CreateSit = () => {
             {sitLocation === "away" && (
               <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4">
                 <p className="text-sm font-medium text-amber-900 mb-1">
-                  Ce type de besoin se publie dans Coup de main.
+                  Redirection en cours vers Coup de main…
                 </p>
                 <p className="text-sm text-amber-900/80 mb-3">
-                  Pour une visite à domicile, une balade, une pension ou une garde chez la personne, l'espace adapté est Coup de main&nbsp;: gratuit, sans engagement, et pensé pour ce type d'échanges ponctuels.
+                  Si rien ne se passe, cliquez ci-dessous.
                 </p>
                 <Button asChild size="sm">
                   <Link to="/petites-missions/creer">Publier dans Coup de main</Link>
