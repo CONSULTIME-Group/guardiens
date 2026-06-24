@@ -456,6 +456,7 @@ const SitterProfile = () => {
               const next = sidebarSections.find(s => !s.optional && !s.complete);
               return next ? { id: next.id, label: next.label, missingCount: next.missingCount } : undefined;
             })()}
+            totalRemaining={totalRemaining}
             onJumpToSection={(id) => {
               setActiveSection(id);
               requestAnimationFrame(() => {
