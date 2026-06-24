@@ -206,16 +206,21 @@ export function computeAffinityResultFull(
     return { score: 0, matched: [], total: 0, displayed: false, hiddenReason: "disqualified" };
   }
 
+  // Dénominateur FIXE : poids max théorique de TOUS les critères (9).
+  // Les critères non renseignés des deux côtés = 0 point, donc un profil incomplet
+  // tombe naturellement à un score plus bas. Évite le biais "80% partout" lié
+  // à un dénominateur dynamique sur 3-4 critères seulement.
+  const MAX_WEIGHT = W.animals + W.presence + W.pace + W.languages + W.interests + W.ideal + W.ambiance;
+  const TOTAL_CRITERIA = 7;
+
   let points = 0;
-  let weightSum = 0;
-  let total = 0;
+  let evaluated = 0; // nombre de critères réellement comparables (X / 7)
   const matched: string[] = [];
 
   // 1. Animaux (poids 2)
   const species = (owner.pets ?? []).map((p) => p?.species).filter(Boolean) as string[];
   if (species.length > 0 && (sitter.animal_types?.length ?? 0) > 0) {
-    total++;
-    weightSum += W.animals;
+    evaluated++;
     const inter = speciesIntersects(species, sitter.animal_types ?? []);
     if (inter > 0) {
       const ratio = Math.min(1, inter / species.length);
@@ -228,8 +233,7 @@ export function computeAffinityResultFull(
   // 2. Présence (poids 2)
   const presScore = presenceCompatibility(owner.presence_expected, sitter.work_during_sit);
   if (presScore !== null) {
-    total++;
-    weightSum += W.presence;
+    evaluated++;
     points += presScore * W.presence;
     if (presScore >= 1) matched.push("Présence compatible");
     else if (presScore >= 0.5) matched.push("Présence plutôt compatible");
@@ -237,8 +241,7 @@ export function computeAffinityResultFull(
 
   // 3. Rythme (poids 1)
   if (owner.life_pace && sitter.life_pace) {
-    total++;
-    weightSum += W.pace;
+    evaluated++;
     if (owner.life_pace === sitter.life_pace) {
       points += W.pace;
       matched.push("Même rythme de vie");
@@ -254,8 +257,7 @@ export function computeAffinityResultFull(
 
   // 4. Langues (poids 1)
   if ((owner.languages?.length ?? 0) > 0 && (sitter.languages?.length ?? 0) > 0) {
-    total++;
-    weightSum += W.languages;
+    evaluated++;
     if (hasIntersection(owner.languages, sitter.languages)) {
       points += W.languages;
       matched.push("Langue commune");
@@ -264,8 +266,7 @@ export function computeAffinityResultFull(
 
   // 5. Intérêts (poids 1)
   if ((owner.interests?.length ?? 0) > 0 && (sitter.interests?.length ?? 0) > 0) {
-    total++;
-    weightSum += W.interests;
+    evaluated++;
     const c = intersectionCount(owner.interests, sitter.interests);
     if (c >= 2) {
       points += W.interests;
@@ -278,8 +279,7 @@ export function computeAffinityResultFull(
 
   // 6. Profil idéal (poids 1)
   if ((owner.preferred_sitter_types?.length ?? 0) > 0 && sitter.sitter_type) {
-    total++;
-    weightSum += W.ideal;
+    evaluated++;
     const m = idealProfileMatch(owner, sitter);
     if (m > 0) {
       points += m * W.ideal;
@@ -289,8 +289,7 @@ export function computeAffinityResultFull(
 
   // 7. Ambiance foyer (poids 1)
   if ((owner.home_ambiance?.length ?? 0) > 0 && (sitter.life_pace || (sitter.interests?.length ?? 0) > 0)) {
-    total++;
-    weightSum += W.ambiance;
+    evaluated++;
     const a = ambianceMatch(owner, sitter);
     if (a > 0) {
       points += a * W.ambiance;
@@ -299,12 +298,12 @@ export function computeAffinityResultFull(
     }
   }
 
-  if (weightSum === 0) return null;
-
-  const raw = (points / weightSum) * 100;
+  // Score = points obtenus / poids max théorique (pas le poids des seuls critères évalués).
+  const raw = (points / MAX_WEIGHT) * 100;
   const score = Math.max(0, Math.min(100, Math.round(raw)));
+  const total = evaluated;
 
-  if (total < 3) {
+  if (evaluated < 3) {
     return { score, matched, total, displayed: false, hiddenReason: "too_few_criteria" };
   }
   if (score < MIN_DISPLAY_SCORE) {
@@ -312,6 +311,7 @@ export function computeAffinityResultFull(
   }
   return { score, matched, total, displayed: true };
 }
+
 
 /**
  * API legacy : ne renvoie que les résultats affichables (rétro-compat).

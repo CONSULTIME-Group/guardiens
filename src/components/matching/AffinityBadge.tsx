@@ -94,9 +94,9 @@ const AffinityBadge = ({
               tone(result.score),
               className,
             )}
-            aria-label={`Affinité ${result.score}% sur ${result.total} critères, voir le détail`}
+            aria-label={`Affinité ${result.score}% sur ${result.total} critères évalués sur 7, voir le détail`}
           >
-            {result.score}% d'affinité
+            {result.score}% · {result.total}/7
           </button>
         </PopoverTrigger>
       </span>
@@ -106,11 +106,11 @@ const AffinityBadge = ({
         sideOffset={6}
         avoidCollisions
         collisionPadding={12}
-        className="w-[260px] p-3 z-50"
+        className="w-[280px] p-3 z-50"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <p className="text-xs font-semibold mb-1.5 text-foreground">
-          {result.score}% sur {result.total} critères communs
+          {result.score}% d'affinité · {result.total}/7 critères comparables
         </p>
         {result.matched.length > 0 ? (
           <ul className="space-y-0.5">
@@ -122,6 +122,11 @@ const AffinityBadge = ({
           </ul>
         ) : (
           <p className="text-xs text-muted-foreground">Profils compatibles</p>
+        )}
+        {result.total < 7 && (
+          <p className="text-[11px] text-muted-foreground/80 mt-2 pt-2 border-t border-border">
+            {7 - result.total} critère{7 - result.total > 1 ? "s" : ""} non comparé{7 - result.total > 1 ? "s" : ""} (profil incomplet d'un côté ou de l'autre). Le score augmente quand les profils se complètent.
+          </p>
         )}
       </PopoverContent>
     </Popover>

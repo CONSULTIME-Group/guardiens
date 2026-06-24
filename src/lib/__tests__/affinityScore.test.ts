@@ -54,8 +54,10 @@ describe("computeAffinityScore", () => {
     expect(r).toBeNull();
   });
 
-  it("ignore les champs absents sans pénaliser", () => {
-    const r = computeAffinityScore(
+  it("baisse le score quand peu de critères sont comparables (dénominateur fixe sur 9)", () => {
+    // 3 critères matchés à fond = pace(1) + langue(1) + intérêts(1) = 3 / 9 ≈ 33%
+    // Sous le seuil d'affichage (40%) → computeAffinityScore renvoie null.
+    const full = computeAffinityResultFull(
       {
         life_pace: "actif",
         languages: ["Français"],
@@ -67,13 +69,15 @@ describe("computeAffinityScore", () => {
         interests: ["Randonnée", "Vélo"],
       },
     );
-    expect(r).not.toBeNull();
-    expect(r!.total).toBe(3);
-    expect(r!.score).toBeGreaterThanOrEqual(80);
+    expect(full).not.toBeNull();
+    expect(full!.total).toBe(3);
+    expect(full!.score).toBeLessThan(40);
+    expect(full!.displayed).toBe(false);
+    expect(full!.hiddenReason).toBe("below_threshold");
   });
 
-  it("rythme adjacent donne demi-point", () => {
-    const r = computeAffinityScore(
+  it("rythme adjacent + langue + intérêt commun reste sous le seuil (dénominateur fixe)", () => {
+    const r = computeAffinityResultFull(
       {
         life_pace: "calme",
         languages: ["Français"],
@@ -86,10 +90,10 @@ describe("computeAffinityScore", () => {
       },
     );
     expect(r).not.toBeNull();
-    // 3 critères : rythme 0.5, langue 1, intérêts 0.5 = 2/3 ≈ 67
-    expect(r!.score).toBeGreaterThanOrEqual(60);
-    expect(r!.score).toBeLessThanOrEqual(75);
+    // pace 0.5 + langue 1 + intérêts 0.5 = 2 / 9 ≈ 22%
+    expect(r!.score).toBeLessThan(40);
   });
+
 
   it("disqualifie un sitter qui refuse les chiens si l'owner a un chien", () => {
     const r = computeAffinityScore(
@@ -110,7 +114,7 @@ describe("computeAffinityScore", () => {
   });
 
   it("présence 100% sur place est compatible avec n'importe quel rythme de travail", () => {
-    const r = computeAffinityScore(
+    const r = computeAffinityResultFull(
       {
         presence_expected: "100% sur place",
         life_pace: "calme",
@@ -123,11 +127,14 @@ describe("computeAffinityScore", () => {
       },
     );
     expect(r).not.toBeNull();
-    expect(r!.score).toBeGreaterThanOrEqual(90);
+    // présence(2) + pace(1) + langue(1) = 4 / 9 ≈ 44%
+    expect(r!.score).toBeGreaterThanOrEqual(40);
+    expect(r!.matched).toContain("Présence compatible");
   });
 
+
   it("ambiance sportif outdoor match avec intérêts sportifs", () => {
-    const r = computeAffinityScore(
+    const r = computeAffinityResultFull(
       {
         home_ambiance: ["Sportif outdoor"],
         life_pace: "actif",
@@ -145,7 +152,7 @@ describe("computeAffinityScore", () => {
   });
 
   it("ne plante pas si special_needs est fourni (bonus retiré)", () => {
-    const r = computeAffinityScore(
+    const r = computeAffinityResultFull(
       {
         life_pace: "calme",
         languages: ["Français"],
@@ -162,6 +169,7 @@ describe("computeAffinityScore", () => {
     expect(r).not.toBeNull();
     expect(r!.matched.some((m) => /compétence/i.test(m))).toBe(false);
   });
+
 
   it("masque le badge sous le seuil de confiance (40 %)", () => {
     // 4 critères communs, presque rien ne matche → score < 40

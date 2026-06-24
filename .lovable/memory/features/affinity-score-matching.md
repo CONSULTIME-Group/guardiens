@@ -1,6 +1,6 @@
 ---
 name: Affinity Score Matching
-description: Score d'affinité réciproque propriétaire ↔ gardien, badge visible dans PublicProfile, SearchListingCard et SitterCard favoris
+description: Score d'affinité réciproque propriétaire ↔ gardien, dénominateur fixe sur 9 (X/7 critères), badge dans PublicProfile, SearchListingCard, Favorites
 type: feature
 ---
 
@@ -8,31 +8,40 @@ type: feature
 
 `src/lib/affinityScore.ts` → `computeAffinityScore(owner, sitter) → AffinityResult | null`
 
-Critères (poids 1, sauf rythme adjacent = 0.5) :
-1. Animaux : intersection `pets.species` × `sitter.animal_types` (ratio)
-2. Rythme de vie : exact = 1, adjacent (calme↔équilibré, équilibré↔actif) = 0.5
-3. Langues : ≥1 commune
-4. Intérêts : ≥2 = 1, ≥1 = 0.5
-5. Présence ↔ work_during_sit (table de compatibilité)
-6. Profil idéal : sitter matche un `owner.preferred_sitter_types`
-7. Ambiance foyer ↔ life_pace/interests du sitter
+7 critères, pondérés :
+1. Animaux (poids 2) : intersection `pets.species` × `sitter.animal_types`
+2. Présence ↔ work_during_sit (poids 2)
+3. Rythme de vie (poids 1) : exact = 1, adjacent = 0.5
+4. Langues (poids 1) : ≥1 commune
+5. Intérêts (poids 1) : ≥2 = 1, ≥1 = 0.5
+6. Profil idéal (poids 1) : sitter matche `owner.preferred_sitter_types`
+7. Ambiance foyer (poids 1) : ↔ life_pace / interests sitter
 
-Bonus +0.25 : sitter.special_animal_skills × pet.special_needs.
+## Normalisation (depuis juin 2026)
 
-**Dégradation gracieuse** : <3 critères communs renseignés des deux côtés → `null` (badge masqué).
-**Disqualification** : `sitter.sensitivities` exclut une espèce du propriétaire → `null`.
+**Dénominateur FIXE = MAX_WEIGHT = 9** (poids cumulé des 7 critères).
+Les critères non comparables (info manquante d'un côté) valent 0 point et tirent le score vers le bas. Fini les "80% partout" mécaniques liés à un dénominateur dynamique sur 3-4 critères.
+
+Conséquence : un profil incomplet affiche un score modeste, ce qui incite à compléter. Un score élevé devient un vrai signal.
+
+**Seuils d'affichage** :
+- < 3 critères comparables → `null` (badge masqué, `hiddenReason: "too_few_criteria"`)
+- score < 40 % → `null` (`hiddenReason: "below_threshold"`)
+- `sitter.sensitivities` incompatible avec une espèce de l'owner → `null` (`disqualified`)
 
 ## UI
 
-- `src/components/matching/AffinityBadge.tsx` : chip pourcentage + tooltip critères matchés.
-  Tones : ≥80 success, ≥60 primary, ≥40 warning. Aucune icône Lucide ni emoji.
+- `src/components/matching/AffinityBadge.tsx` : chip `XX% · N/7` + popover.
+  Tones : ≥80 success, ≥60 primary, ≥40 warning.
+  Popover affiche les critères matchés + ligne explicative quand `total < 7` ("Le score augmente quand les profils se complètent").
+  Aucune icône Lucide ni emoji.
 
 ## Intégrations
 
-- **PublicProfile** : calcul réciproque (owner→sitter ET sitter→owner) selon le rôle du viewer, affiché à côté des chips de rôle.
-- **SearchListingCard** (tab sits) : `viewerSitterProfile` passé par `SearchSitter`, `ownerMatch` enrichi dans `fetchSits` (owner_profiles : preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected + pets.special_needs). Badge en haut à droite à côté du favori.
-- **Favorites > onglet Gardiens** : `viewerOwnerContext` (owner_profile + pets agrégés des properties) calculé une fois, comparé à chaque `sitter_profile` favori. Badge à droite avant le bouton favori.
+- **PublicProfile** : calcul réciproque selon le rôle du viewer.
+- **SearchListingCard** (tab sits) : `viewerSitterProfile` + `ownerMatch` enrichi dans `fetchSits`.
+- **Favorites > Gardiens** : `viewerOwnerContext` comparé à chaque sitter favori.
 
 ## Tests
 
-`src/lib/__tests__/affinityScore.test.ts` : 5 cas (null si <3 critères, score haut, disqualification allergie, dégradation, rythme adjacent).
+`src/lib/__tests__/affinityScore.test.ts` : 12 cas (null si <3 critères, score complet 100%, disqualification allergie, dénominateur fixe pénalise les profils incomplets, rythme adjacent sous seuil, pondération animaux>nice-to-have…).
