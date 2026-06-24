@@ -134,7 +134,7 @@ describe("computeAffinityScore", () => {
 
 
   it("ambiance sportif outdoor match avec intérêts sportifs", () => {
-    const r = computeAffinityScore(
+    const r = computeAffinityResultFull(
       {
         home_ambiance: ["Sportif outdoor"],
         life_pace: "actif",
@@ -152,7 +152,7 @@ describe("computeAffinityScore", () => {
   });
 
   it("ne plante pas si special_needs est fourni (bonus retiré)", () => {
-    const r = computeAffinityScore(
+    const r = computeAffinityResultFull(
       {
         life_pace: "calme",
         languages: ["Français"],
@@ -169,6 +169,7 @@ describe("computeAffinityScore", () => {
     expect(r).not.toBeNull();
     expect(r!.matched.some((m) => /compétence/i.test(m))).toBe(false);
   });
+
 
   it("masque le badge sous le seuil de confiance (40 %)", () => {
     // 4 critères communs, presque rien ne matche → score < 40
