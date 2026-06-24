@@ -771,6 +771,9 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 .order("created_at", { ascending: false });
   const { data } = await query;
   let items = data || [];
+  // Les « offres » sont des disponibilités de membres : elles doivent vivre dans
+  // l'onglet Membres disponibles, pas dans le flux des demandes publiées.
+  items = items.filter((m: any) => (m.mission_type ?? "besoin") !== "offre");
   // Hydrate owner via public_profiles (anon n'a pas accès à la table profiles
   // utilisée par le FK embed PostgREST).
   const ownerIds = Array.from(new Set(items.map((m: any) => m.user_id).filter(Boolean)));
@@ -841,7 +844,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  // 1) Profils opt-in « available_for_help »
  const { data: optInData } = await supabase
 .from("public_profiles")
-.select("id, first_name, avatar_url, city, bio, skill_categories, custom_skills, available_for_help, is_founder")
+.select("id, first_name, avatar_url, city, postal_code, bio, skill_categories, custom_skills, available_for_help, is_founder")
 .eq("available_for_help", true)
 .not("skill_categories", "eq", "{}");
 
@@ -849,29 +852,44 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  //    -> considérés disponibles de fait, même sans opt-in available_for_help
  const { data: offreMissions } = await supabase
    .from("small_missions")
-   .select("user_id, category")
+    .select("id, user_id, title, category, city, postal_code, created_at")
    .eq("mission_type", "offre")
    .eq("status", "open");
  const offreAuthorIds = Array.from(new Set((offreMissions || []).map((m: any) => m.user_id))).filter(Boolean);
  const offreCatsByUser = new Map<string, Set<string>>();
+  const offresByUser = new Map<string, any[]>();
  (offreMissions || []).forEach((m: any) => {
    if (!m.user_id) return;
    const set = offreCatsByUser.get(m.user_id) || new Set<string>();
    if (m.category) set.add(m.category);
    offreCatsByUser.set(m.user_id, set);
+    const rows = offresByUser.get(m.user_id) || [];
+    rows.push(m);
+    rows.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    offresByUser.set(m.user_id, rows);
  });
  let offreProfiles: any[] = [];
  if (offreAuthorIds.length > 0) {
    const { data } = await supabase
      .from("public_profiles")
-     .select("id, first_name, avatar_url, city, bio, skill_categories, custom_skills, available_for_help, is_founder")
+      .select("id, first_name, avatar_url, city, postal_code, bio, skill_categories, custom_skills, available_for_help, is_founder")
      .in("id", offreAuthorIds);
    const catToSkillKey: Record<string, string> = { garden: "jardin", animals: "animaux", skills: "competences", house: "coups_de_main" };
    offreProfiles = (data || []).map((p: any) => {
      const cats = offreCatsByUser.get(p.id);
+      const publishedOffres = offresByUser.get(p.id) || [];
+      const primaryOffre = publishedOffres[0] || null;
      const mergedCats = new Set<string>(p.skill_categories || []);
      cats?.forEach((c) => { const k = catToSkillKey[c]; if (k) mergedCats.add(k); });
-     return { ...p, skill_categories: Array.from(mergedCats), has_published_offre: true };
+      return {
+        ...p,
+        city: p.city || primaryOffre?.city,
+        postal_code: p.postal_code || primaryOffre?.postal_code,
+        skill_categories: Array.from(mergedCats),
+        has_published_offre: true,
+        primary_offre: primaryOffre,
+        published_offres: publishedOffres,
+      };
    });
  }
 
@@ -888,24 +906,18 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const skillKey = catToSkill[missionCategoryFilter];
  items = items.filter((m: any) => m.skill_categories?.includes(skillKey));
  }
- if (searchCoords) {
- const uniqueCities = [...new Set(items.map((m: any) => m.city).filter(Boolean))] as string[];
- const cityCoords = new Map<string, { lat: number; lng: number }>();
- await Promise.all(uniqueCities.map(async (c) => {
- const coords = await geocodeCity(c);
- if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
- }));
- items = items.filter((m: any) => {
- if (!m.city) return false;
- const coords = cityCoords.get(m.city);
- if (!coords) return false;
- return haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) <= radius[0];
- }).map((m: any) => {
- const coords = cityCoords.get(m.city);
- const dist = coords ? haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) : null;
- return {...m, distance: dist };
- });
- }
+  const { items: locFiltered, cityCoords } = await filterByLocation(
+    items,
+    (m: any) => m.city || m.primary_offre?.city,
+    searchCoords,
+    (m: any) => m.postal_code || m.primary_offre?.postal_code,
+  );
+  items = locFiltered.map((m: any) => {
+    const cityName = m.city || m.primary_offre?.city;
+    const coords = cityName ? cityCoords.get(cityName) : null;
+    const dist = searchCoords && coords ? haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) : null;
+    return { ...m, distance: dist };
+  });
  const memberIds = items.map((m: any) => m.id);
  if (memberIds.length > 0) {
   const { data: sitterProfiles } = await supabase
