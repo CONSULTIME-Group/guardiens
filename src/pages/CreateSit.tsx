@@ -199,6 +199,7 @@ const CreateSit = () => {
   const draftIdParam = searchParams.get("draftId");
 
   const [currentStep, setCurrentStep] = useState(0);
+  const [sitLocation, setSitLocation] = useState<"home" | "away" | null>(null);
 
   const [title, setTitle] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -611,21 +612,61 @@ const CreateSit = () => {
       {/* ===================== STEP 0 : L'ESSENTIEL ===================== */}
       {currentStep === 0 && (
         <div className="px-4 max-w-3xl mx-auto space-y-6">
-          {/* Clarification d'usage : garde à domicile uniquement */}
-          <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
-            <p className="font-medium text-foreground mb-1">
-              Une annonce de garde concerne uniquement une garde à votre domicile.
+          {/* ===== Filtre d'usage bloquant : garde à domicile uniquement ===== */}
+          <div className="rounded-xl border border-primary/30 bg-primary/5 p-5">
+            <p className="font-heading text-base font-semibold text-foreground mb-1">
+              Où se déroulera la garde&nbsp;?
             </p>
-            <p className="text-muted-foreground">
-              Le gardien vient s'installer chez vous pour s'occuper de votre animal et de votre logement pendant votre absence.
-              Si vous cherchez quelqu'un pour garder votre animal ailleurs (chez la personne, en visite, en balade, en pension),
-              publiez plutôt votre besoin dans{" "}
-              <Link to="/petites-missions/creer" className="text-primary underline underline-offset-2 font-medium">
-                Coup de main
-              </Link>
-              .
+            <p className="text-sm text-muted-foreground mb-4">
+              Les annonces de garde concernent uniquement les gardes à votre domicile (le gardien s'installe chez vous).
             </p>
+            <div className="grid sm:grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setSitLocation("home")}
+                className={cn(
+                  "text-left rounded-lg border p-3 transition-colors",
+                  sitLocation === "home"
+                    ? "border-primary bg-primary/10 ring-2 ring-primary/30"
+                    : "border-input bg-card hover:bg-accent/40"
+                )}
+              >
+                <p className="font-medium text-sm text-foreground">À mon domicile</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Le gardien vient chez moi</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSitLocation("away")}
+                className={cn(
+                  "text-left rounded-lg border p-3 transition-colors",
+                  sitLocation === "away"
+                    ? "border-primary bg-primary/10 ring-2 ring-primary/30"
+                    : "border-input bg-card hover:bg-accent/40"
+                )}
+              >
+                <p className="font-medium text-sm text-foreground">Ailleurs</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Visite, balade, pension, chez la personne…</p>
+              </button>
+            </div>
+
+            {sitLocation === "away" && (
+              <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4">
+                <p className="text-sm font-medium text-amber-900 mb-1">
+                  Ce type de besoin se publie dans Coup de main.
+                </p>
+                <p className="text-sm text-amber-900/80 mb-3">
+                  Pour une visite à domicile, une balade, une pension ou une garde chez la personne, l'espace adapté est Coup de main&nbsp;: gratuit, sans engagement, et pensé pour ce type d'échanges ponctuels.
+                </p>
+                <Button asChild size="sm">
+                  <Link to="/petites-missions/creer">Publier dans Coup de main</Link>
+                </Button>
+              </div>
+            )}
           </div>
+
+          {sitLocation !== "home" ? null : (
+          <>
+
 
           {/* Titre */}
           <div id="title-field" className="scroll-mt-24">
@@ -808,8 +849,11 @@ const CreateSit = () => {
             />
             <p className="text-[11px] text-muted-foreground mt-1 text-right">{ownerMessage.length}/800</p>
           </div>
+          </>
+          )}
         </div>
       )}
+
 
       {/* ===================== STEP 1 : LA GARDE ===================== */}
       {currentStep === 1 && (
@@ -1185,10 +1229,12 @@ const CreateSit = () => {
                 type="button"
                 className="flex-1 h-12 text-base font-semibold gap-1.5"
                 onClick={() => setCurrentStep(s => s + 1)}
+                disabled={currentStep === 0 && sitLocation !== "home"}
               >
                 Suivant
                 <ChevronRight className="h-4 w-4" />
               </Button>
+
             ) : (
               <Button
                 onClick={() => {
