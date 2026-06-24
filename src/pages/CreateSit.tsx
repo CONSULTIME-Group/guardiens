@@ -849,8 +849,11 @@ const CreateSit = () => {
             />
             <p className="text-[11px] text-muted-foreground mt-1 text-right">{ownerMessage.length}/800</p>
           </div>
+          </>
+          )}
         </div>
       )}
+
 
       {/* ===================== STEP 1 : LA GARDE ===================== */}
       {currentStep === 1 && (
