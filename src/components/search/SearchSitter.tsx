@@ -1760,9 +1760,10 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  <p className="font-heading font-semibold text-lg text-foreground">Aucun membre disponible dans ce rayon</p>
  <p className="text-sm text-muted-foreground">Élargissez votre rayon de recherche.</p>
  </div>
- ) : (
- <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
- {availableMembers.map((member: any) => {
+ ) : (() => {
+ const activePublishers = availableMembers.filter((m: any) => m.has_published_offre && !m.is_demo);
+ const complementary = availableMembers.filter((m: any) => !m.has_published_offre || m.is_demo);
+ const renderCard = (member: any) => {
  const skillMeta: Record<string, { label: string; icon: typeof Sprout }> = {
  jardin: { label: "Jardin", icon: Sprout },
  animaux: { label: "Animaux", icon: PawPrint },
@@ -1772,19 +1773,19 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const skills: string[] = member.skill_categories || [];
  const visibleSkills = skills.slice(0, 2);
  const extraCount = skills.length - 2;
-  const seenSpecialSkills = new Set<string>();
-  const specialSkills = [
-    ...(member.specialty_label ? [member.specialty_label] : []),
-    ...tokenizeSkillPhrases(member.custom_skills || []),
-    ...tokenizeSkillPhrases(member.competences || []),
-  ].filter((label: string) => {
-    const key = normalizeSkillKey(label);
-    if (!key || seenSpecialSkills.has(key)) return false;
-    seenSpecialSkills.add(key);
-    return true;
-  });
+ const seenSpecialSkills = new Set<string>();
+ const specialSkills = [
+ ...(member.specialty_label ? [member.specialty_label] : []),
+ ...tokenizeSkillPhrases(member.custom_skills || []),
+ ...tokenizeSkillPhrases(member.competences || []),
+ ].filter((label: string) => {
+ const key = normalizeSkillKey(label);
+ if (!key || seenSpecialSkills.has(key)) return false;
+ seenSpecialSkills.add(key);
+ return true;
+ });
  return (
- <div key={member.id} className={`bg-card rounded-2xl border p-4 flex items-center gap-4 ${member.is_demo ? "border-amber-300/70 border-dashed" : "border-border"}`}>
+ <div key={member.id} className={`bg-card rounded-2xl border p-4 flex items-center gap-4 ${member.is_demo ? "border-amber-300/70 border-dashed" : member.has_published_offre ? "border-primary/40 ring-1 ring-primary/20" : "border-border"}`}>
  {member.avatar_url ? (
  <img src={member.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover shrink-0" loading="lazy" />
  ) : (
@@ -1793,20 +1794,25 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  </div>
  )}
  <div className="flex-1 min-w-0">
- <div className="flex items-center gap-2">
+ <div className="flex items-center gap-2 flex-wrap">
  <p className="text-base font-heading font-semibold text-foreground">{member.first_name || "Membre"}</p>
  {member.is_founder && <FounderBadge size="sm" />}
+ {member.has_published_offre && (
+ <span className="text-[10px] font-semibold uppercase tracking-wider bg-primary/15 text-primary rounded-full px-2 py-0.5">
+ A publié une offre
+ </span>
+ )}
  </div>
  {member.city && <p className="text-xs text-muted-foreground">{member.city}{member.distance != null ? ` · à ${Math.round(member.distance)} km` : ""}</p>}
  {member.specialty_label && (
-   <p className="text-[13px] font-semibold text-amber-700 mt-1">{member.specialty_label}</p>
+ <p className="text-[13px] font-semibold text-amber-700 mt-1">{member.specialty_label}</p>
  )}
-  {member.specialty_description && (
-    <p className="text-xs text-muted-foreground italic line-clamp-2 mt-0.5">{member.specialty_description}</p>
-  )}
-  {!member.specialty_description && member.bio && (
-    <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{member.bio}</p>
-  )}
+ {member.specialty_description && (
+ <p className="text-xs text-muted-foreground italic line-clamp-2 mt-0.5">{member.specialty_description}</p>
+ )}
+ {!member.specialty_description && member.bio && (
+ <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{member.bio}</p>
+ )}
  <div className="flex flex-wrap gap-1.5 mt-1.5">
  {visibleSkills.map((s: string) => {
  const meta = skillMeta[s];
@@ -1820,16 +1826,16 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  })}
  {extraCount > 0 && <span className="text-xs text-muted-foreground self-center">+{extraCount}</span>}
  </div>
-  {specialSkills.length > 0 && (
-  <div className="flex flex-wrap gap-1.5 mt-1.5">
-  {specialSkills.slice(0, 3).map((skill: string) => (
-  <span key={skill} className="rounded-full border border-accent bg-accent/50 text-accent-foreground text-xs px-2.5 py-0.5">
-  {skill}
-  </span>
-  ))}
-  {specialSkills.length > 3 && <span className="text-xs text-muted-foreground self-center">+{specialSkills.length - 3}</span>}
-  </div>
-  )}
+ {specialSkills.length > 0 && (
+ <div className="flex flex-wrap gap-1.5 mt-1.5">
+ {specialSkills.slice(0, 3).map((skill: string) => (
+ <span key={skill} className="rounded-full border border-accent bg-accent/50 text-accent-foreground text-xs px-2.5 py-0.5">
+ {skill}
+ </span>
+ ))}
+ {specialSkills.length > 3 && <span className="text-xs text-muted-foreground self-center">+{specialSkills.length - 3}</span>}
+ </div>
+ )}
  {(member.avgRating || member.sitsCount > 0) && (
  <p className="text-xs text-muted-foreground mt-1">
  {member.avgRating && <>★ {member.avgRating}</>}
@@ -1837,33 +1843,68 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  </p>
  )}
  </div>
-  <div className="flex flex-col items-end gap-2 shrink-0">
-  {member.is_demo ? (
-    <span className="text-[10px] font-semibold uppercase tracking-wider bg-amber-100 text-amber-800 rounded-full px-2 py-1">
-      Exemple
-    </span>
-  ) : (
-    <>
-      <span onClick={(e) => e.stopPropagation()}>
-        <FavoriteButton targetType="sitter" targetId={member.id} size="sm" />
-      </span>
-      <span onClick={(e) => e.stopPropagation()}>
-        <InviteToMySitButton sitter={{ id: member.id, first_name: member.first_name }} />
-      </span>
-      <Link
-        to={`/gardiens/${member.id}`}
-        className="text-sm text-primary font-semibold hover:underline"
-      >
-        Voir le profil →
-      </Link>
-    </>
-  )}
-  </div>
+ <div className="flex flex-col items-end gap-2 shrink-0">
+ {member.is_demo ? (
+ <span className="text-[10px] font-semibold uppercase tracking-wider bg-amber-100 text-amber-800 rounded-full px-2 py-1">
+ Exemple
+ </span>
+ ) : (
+ <>
+ <span onClick={(e) => e.stopPropagation()}>
+ <FavoriteButton targetType="sitter" targetId={member.id} size="sm" />
+ </span>
+ <span onClick={(e) => e.stopPropagation()}>
+ <InviteToMySitButton sitter={{ id: member.id, first_name: member.first_name }} />
+ </span>
+ <Link
+ to={`/gardiens/${member.id}`}
+ className="text-sm text-primary font-semibold hover:underline"
+ >
+ Voir le profil →
+ </Link>
+ </>
+ )}
+ </div>
  </div>
  );
- })}
+ };
+ return (
+ <div className="space-y-6">
+ {activePublishers.length > 0 && (
+ <div className="space-y-3">
+ <div className="flex items-baseline justify-between gap-3">
+ <h3 className="font-heading font-semibold text-foreground text-base">
+ Membres avec une offre publiée
+ <span className="ml-2 text-xs font-normal text-muted-foreground">({activePublishers.length})</span>
+ </h3>
+ <p className="text-xs text-muted-foreground italic">Annonces actives de coup de main</p>
  </div>
- )
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+ {activePublishers.map(renderCard)}
+ </div>
+ </div>
+ )}
+ {complementary.length > 0 && (
+ <details className="group rounded-2xl border border-border bg-muted/30 open:bg-transparent">
+ <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between gap-3">
+ <div>
+ <p className="font-heading font-semibold text-foreground text-sm">
+ {activePublishers.length > 0 ? "Autres membres déclarés disponibles" : "Membres déclarés disponibles"}
+ <span className="ml-2 text-xs font-normal text-muted-foreground">({complementary.length})</span>
+ </p>
+ <p className="text-xs text-muted-foreground">Pas d'annonce active, mais ouverts à être contactés.</p>
+ </div>
+ <span className="text-xs text-primary font-semibold group-open:hidden">Afficher ▾</span>
+ <span className="text-xs text-primary font-semibold hidden group-open:inline">Masquer ▴</span>
+ </summary>
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 pt-2">
+ {complementary.map(renderCard)}
+ </div>
+ </details>
+ )}
+ </div>
+ );
+ })()
   ) : results.length === 0 ? (
     <SearchEmptyState
       tab={tab}
