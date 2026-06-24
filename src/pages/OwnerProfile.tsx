@@ -245,6 +245,10 @@ const OwnerProfilePage = () => {
     };
   });
 
+  const totalRemaining = sidebarSections
+    .filter(s => !s.optional && !s.complete)
+    .reduce((sum, s) => sum + s.missingCount, 0);
+
   // Avertit l'utilisateur s'il quitte la page avec des modifications non sauvegardées.
   useUnsavedChanges(dirty);
 
@@ -368,6 +372,7 @@ const OwnerProfilePage = () => {
               const next = sidebarSections.find(s => !s.optional && !s.complete);
               return next ? { id: next.id, label: next.label, missingCount: next.missingCount } : undefined;
             })()}
+            totalRemaining={totalRemaining}
             onJumpToSection={(id) => {
               setActiveSection(id);
               requestAnimationFrame(() => {

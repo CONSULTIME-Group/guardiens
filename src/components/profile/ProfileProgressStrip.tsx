@@ -8,6 +8,8 @@ interface ProfileProgressStripProps {
   onJumpToSection?: (id: string) => void;
   /** URL du profil public, ouverte dans un nouvel onglet. */
   publicProfileUrl?: string;
+  /** Nombre total d'items restants à compléter dans tout le profil. */
+  totalRemaining?: number;
 }
 
 /**
@@ -18,9 +20,11 @@ interface ProfileProgressStripProps {
  * Caché sur desktop (sidebar déjà visible avec ScoreBreakdown + lien public).
  */
 const ProfileProgressStrip = memo(
-  ({ completion, nextIncomplete, onJumpToSection, publicProfileUrl }: ProfileProgressStripProps) => {
+  ({ completion, nextIncomplete, onJumpToSection, publicProfileUrl, totalRemaining }: ProfileProgressStripProps) => {
     const pct = Math.max(0, Math.min(100, completion));
     const isComplete = pct >= 100 || !nextIncomplete;
+
+    if (totalRemaining !== undefined && totalRemaining < 2) return null;
 
     return (
       <div className="lg:hidden border-b border-border bg-muted/30">
@@ -46,7 +50,9 @@ const ProfileProgressStrip = memo(
               <span className="text-xs text-muted-foreground truncate">
                 {isComplete
                   ? "Profil complet, visibilité maximale"
-                  : `Suivant : ${nextIncomplete!.label}`}
+                  : totalRemaining !== undefined
+                    ? `${totalRemaining} item${totalRemaining > 1 ? "s" : ""} à compléter`
+                    : `Suivant : ${nextIncomplete!.label}`}
               </span>
             </div>
           </div>
