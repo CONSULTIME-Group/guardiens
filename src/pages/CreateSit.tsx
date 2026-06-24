@@ -611,6 +611,22 @@ const CreateSit = () => {
       {/* ===================== STEP 0 : L'ESSENTIEL ===================== */}
       {currentStep === 0 && (
         <div className="px-4 max-w-3xl mx-auto space-y-6">
+          {/* Clarification d'usage : garde à domicile uniquement */}
+          <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
+            <p className="font-medium text-foreground mb-1">
+              Une annonce de garde concerne uniquement une garde à votre domicile.
+            </p>
+            <p className="text-muted-foreground">
+              Le gardien vient s'installer chez vous pour s'occuper de votre animal et de votre logement pendant votre absence.
+              Si vous cherchez quelqu'un pour garder votre animal ailleurs (chez la personne, en visite, en balade, en pension),
+              publiez plutôt votre besoin dans{" "}
+              <Link to="/petites-missions/creer" className="text-primary underline underline-offset-2 font-medium">
+                Coup de main
+              </Link>
+              .
+            </p>
+          </div>
+
           {/* Titre */}
           <div id="title-field" className="scroll-mt-24">
             <div className="flex items-center justify-between mb-1.5">
