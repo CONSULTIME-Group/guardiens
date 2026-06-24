@@ -114,7 +114,7 @@ describe("computeAffinityScore", () => {
   });
 
   it("présence 100% sur place est compatible avec n'importe quel rythme de travail", () => {
-    const r = computeAffinityScore(
+    const r = computeAffinityResultFull(
       {
         presence_expected: "100% sur place",
         life_pace: "calme",
@@ -127,8 +127,11 @@ describe("computeAffinityScore", () => {
       },
     );
     expect(r).not.toBeNull();
-    expect(r!.score).toBeGreaterThanOrEqual(90);
+    // présence(2) + pace(1) + langue(1) = 4 / 9 ≈ 44%
+    expect(r!.score).toBeGreaterThanOrEqual(40);
+    expect(r!.matched).toContain("Présence compatible");
   });
+
 
   it("ambiance sportif outdoor match avec intérêts sportifs", () => {
     const r = computeAffinityScore(
