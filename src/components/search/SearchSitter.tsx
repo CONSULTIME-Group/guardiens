@@ -913,7 +913,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   let cityCoords = new Map<string, { lat: number; lng: number }>();
   let radiusCount = items.length;
 
-  if ((zoneMode === "radius" || sort === "closest") && searchCoords) {
+  if (zoneMode !== "france" && (zoneMode === "radius" || sort === "closest") && searchCoords) {
     const uniqueCities = [...new Set(items.map(getMemberCity).filter(Boolean))] as string[];
     await Promise.all(uniqueCities.map(async (c) => {
       const coords = await geocodeCity(c);
