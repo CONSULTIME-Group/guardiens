@@ -906,14 +906,44 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const skillKey = catToSkill[missionCategoryFilter];
  items = items.filter((m: any) => m.skill_categories?.includes(skillKey));
  }
-  const { items: locFiltered, cityCoords } = await filterByLocation(
-    items,
-    (m: any) => m.city || m.primary_offre?.city,
-    searchCoords,
-    (m: any) => m.postal_code || m.primary_offre?.postal_code,
-  );
-  items = locFiltered.map((m: any) => {
-    const cityName = m.city || m.primary_offre?.city;
+  const getMemberCity = (m: any) => m.city || m.primary_offre?.city;
+  const getMemberPostalCode = (m: any) => m.postal_code || m.primary_offre?.postal_code;
+  const refDept = getDeptCode(getZoneRefPostalCode());
+  const refRegion = getRegionCode(refDept);
+  let cityCoords = new Map<string, { lat: number; lng: number }>();
+  let radiusCount = items.length;
+
+  if ((zoneMode === "radius" || sort === "closest") && searchCoords) {
+    const uniqueCities = [...new Set(items.map(getMemberCity).filter(Boolean))] as string[];
+    await Promise.all(uniqueCities.map(async (c) => {
+      const coords = await geocodeCity(c);
+      if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
+    }));
+    radiusCount = items.filter((m: any) => {
+      const cityName = getMemberCity(m);
+      const coords = cityName ? cityCoords.get(cityName) : null;
+      return coords ? haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) <= radius[0] : false;
+    }).length;
+  }
+
+  const deptCount = refDept ? items.filter((m: any) => getDeptCode(getMemberPostalCode(m)) === refDept).length : 0;
+  const regionCount = refRegion ? items.filter((m: any) => getRegionCode(getDeptCode(getMemberPostalCode(m))) === refRegion).length : 0;
+  setDensityCounts({ radius: radiusCount, dept: deptCount, region: regionCount, france: items.length });
+
+  if (zoneMode === "radius" && searchCoords) {
+    items = items.filter((m: any) => {
+      const cityName = getMemberCity(m);
+      const coords = cityName ? cityCoords.get(cityName) : null;
+      return coords ? haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) <= radius[0] : false;
+    });
+  } else if (zoneMode === "dept" && refDept) {
+    items = items.filter((m: any) => getDeptCode(getMemberPostalCode(m)) === refDept);
+  } else if (zoneMode === "region" && refRegion) {
+    items = items.filter((m: any) => getRegionCode(getDeptCode(getMemberPostalCode(m))) === refRegion);
+  }
+
+  items = items.map((m: any) => {
+    const cityName = getMemberCity(m);
     const coords = cityName ? cityCoords.get(cityName) : null;
     const dist = searchCoords && coords ? haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) : null;
     return { ...m, distance: dist };
