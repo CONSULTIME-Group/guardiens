@@ -86,7 +86,7 @@ const SmallMissionsPublic = () => {
         <PageBreadcrumb items={[{ label: "Conseils & petites missions" }]} />
 
         <section className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
-          <div className="flex items-start justify-between gap-4 mb-6">
+          <div className="flex items-start justify-between gap-4 mb-4">
             <div>
               <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">
                 Conseils & petites missions
@@ -101,6 +101,41 @@ const SmallMissionsPublic = () => {
             </div>
             <Button onClick={goCreate} className="shrink-0">Publier une mission</Button>
           </div>
+
+          {/* Bloc pédagogique : à quoi sert Coup de main */}
+          <div className="rounded-xl border border-border bg-card p-5 mb-6">
+            <h2 className="font-heading text-lg font-semibold text-foreground mb-3">
+              À quoi sert Coup de main&nbsp;?
+            </h2>
+            <p className="text-sm text-foreground/80 mb-3">
+              Coup de main, ce sont des échanges ponctuels et gratuits entre gens du coin. Vous publiez un besoin (ou une offre d'aide) ; une personne de confiance proche répond. Aucune transaction financière, aucun engagement.
+            </p>
+            <div className="grid sm:grid-cols-2 gap-3 mb-3">
+              <div className="rounded-lg bg-accent/30 p-3">
+                <p className="text-xs font-semibold text-foreground mb-1">Exemples de demandes</p>
+                <ul className="text-xs text-foreground/75 space-y-0.5 list-disc list-inside">
+                  <li>Visite ou balade pour mon chien</li>
+                  <li>Garde de mon chat chez la personne</li>
+                  <li>Arrosage de plantes pendant 3 jours</li>
+                  <li>Aide pour monter un meuble, faire des courses</li>
+                </ul>
+              </div>
+              <div className="rounded-lg bg-accent/30 p-3">
+                <p className="text-xs font-semibold text-foreground mb-1">Exemples d'offres d'aide</p>
+                <ul className="text-xs text-foreground/75 space-y-0.5 list-disc list-inside">
+                  <li>Je peux promener un chien le matin</li>
+                  <li>Je tiens compagnie aux seniors</li>
+                  <li>Je donne un coup de main au jardin</li>
+                  <li>Je dépanne en informatique</li>
+                </ul>
+              </div>
+            </div>
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs text-foreground/80">
+              <span className="font-semibold text-foreground">Différence avec une garde&nbsp;:</span>{" "}
+              une <Link to="/maisons-a-garder" className="text-primary underline underline-offset-2">annonce de garde</Link> concerne uniquement les gardes <strong>à votre domicile</strong> (le gardien s'installe chez vous). Toute autre forme de garde (visite, balade, chez la personne, pension) se publie ici, dans Coup de main.
+            </div>
+          </div>
+
 
           <div className="space-y-3 mb-6">
             <div className="flex flex-wrap gap-2">
