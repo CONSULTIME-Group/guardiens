@@ -763,63 +763,79 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  };
 
 
- const searchMissions = async (searchCoords: { lat: number; lng: number } | null) => {
- let query = supabase
+  const searchMissions = async (searchCoords: { lat: number; lng: number } | null) => {
+  let query = supabase
 .from("small_missions")
 .select("*")
 .eq("status", "open")
 .order("created_at", { ascending: false });
- const { data } = await query;
- let items = data || [];
- // Hydrate owner via public_profiles (anon n'a pas accès à la table profiles
- // utilisée par le FK embed PostgREST).
- const ownerIds = Array.from(new Set(items.map((m: any) => m.user_id).filter(Boolean)));
- if (ownerIds.length > 0) {
-   const { data: owners } = await supabase
-     .from("public_profiles")
-     .select("id, first_name, avatar_url, city, identity_verified, is_founder")
-     .in("id", ownerIds);
-   const ownerMap = new Map<string, any>((owners || []).map((o: any) => [o.id, o]));
-   items = items.map((m: any) => ({ ...m, owner: ownerMap.get(m.user_id) || null }));
- }
- if (verifiedOnly) items = items.filter((s: any) => s.owner?.identity_verified);
- if (searchCoords) {
- const uniqueCities = [...new Set(items.filter((m: any) => !m.latitude && m.owner?.city).map((m: any) => m.owner.city))] as string[];
- const cityCoords = new Map<string, { lat: number; lng: number }>();
- await Promise.all(uniqueCities.map(async (c) => {
- const coords = await geocodeCity(c);
- if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
- }));
- items = items.filter((m: any) => {
- if (m.latitude && m.longitude) {
- return haversineDistance(searchCoords.lat, searchCoords.lng, m.latitude, m.longitude) <= radius[0];
- }
- const ownerCity = m.owner?.city;
- if (!ownerCity) return false;
- const coords = cityCoords.get(ownerCity);
- if (!coords) return false;
- return haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) <= radius[0];
- });
- items = items.map((m: any) => {
- let dist: number | null = null;
- if (m.latitude && m.longitude) {
- dist = haversineDistance(searchCoords!.lat, searchCoords!.lng, m.latitude, m.longitude);
- } else if (m.owner?.city) {
- const coords = cityCoords.get(m.owner.city);
- if (coords) dist = haversineDistance(searchCoords!.lat, searchCoords!.lng, coords.lat, coords.lng);
- }
- return {...m, distance: dist, isNew: differenceInHours(new Date(), new Date(m.created_at)) < 48 } as any;
- });
- } else {
- items = items.map((m: any) => ({...m, distance: null, isNew: differenceInHours(new Date(), new Date(m.created_at)) < 48 }) as any);
- }
- let final: any[] = [...items];
- if (sort === "closest") final.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
- else if (sort === "recent") final.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
- // Démos toujours visibles, intercalées
- final = interleaveDemos(final, DEMO_MISSIONS, 3);
- setResults(final);
- };
+  const { data } = await query;
+  let items = data || [];
+  // Hydrate owner via public_profiles (anon n'a pas accès à la table profiles
+  // utilisée par le FK embed PostgREST).
+  const ownerIds = Array.from(new Set(items.map((m: any) => m.user_id).filter(Boolean)));
+  if (ownerIds.length > 0) {
+    const { data: owners } = await supabase
+      .from("public_profiles")
+      .select("id, first_name, avatar_url, city, postal_code, identity_verified, is_founder")
+      .in("id", ownerIds);
+    const ownerMap = new Map<string, any>((owners || []).map((o: any) => [o.id, o]));
+    items = items.map((m: any) => ({ ...m, owner: ownerMap.get(m.user_id) || null }));
+  }
+  if (missionTypeFilter !== "all") {
+    items = items.filter((m: any) => (m.mission_type ?? "besoin") === missionTypeFilter);
+  }
+  if (missionCategoryFilter !== "all") {
+    items = items.filter((m: any) => m.category === missionCategoryFilter);
+  }
+  if (verifiedOnly) items = items.filter((s: any) => s.owner?.identity_verified);
+
+  const getMissionCity = (m: any) => m.city || m.owner?.city;
+  const getMissionPostalCode = (m: any) => m.postal_code || m.owner?.postal_code;
+  const cityCoords = new Map<string, { lat: number; lng: number }>();
+  const uniqueCities = [...new Set(items.filter((m: any) => !(m.latitude && m.longitude)).map(getMissionCity).filter(Boolean))] as string[];
+  await Promise.all(uniqueCities.map(async (c) => {
+    const coords = await geocodeCity(c);
+    if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
+  }));
+  const getMissionCoords = (m: any): { lat: number; lng: number } | null => {
+    if (m.latitude && m.longitude) return { lat: m.latitude, lng: m.longitude };
+    const cityName = getMissionCity(m);
+    return cityName ? cityCoords.get(cityName) || null : null;
+  };
+  const refDept = getDeptCode(getZoneRefPostalCode());
+  const refRegion = getRegionCode(refDept);
+  const radiusCount = searchCoords ? items.filter((m: any) => {
+    const coords = getMissionCoords(m);
+    return coords ? haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) <= radius[0] : false;
+  }).length : items.length;
+  const deptCount = refDept ? items.filter((m: any) => getDeptCode(getMissionPostalCode(m)) === refDept).length : 0;
+  const regionCount = refRegion ? items.filter((m: any) => getRegionCode(getDeptCode(getMissionPostalCode(m))) === refRegion).length : 0;
+  setDensityCounts({ radius: radiusCount, dept: deptCount, region: regionCount, france: items.length });
+
+  if (zoneMode === "radius" && searchCoords) {
+    items = items.filter((m: any) => {
+      const coords = getMissionCoords(m);
+      return coords ? haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) <= radius[0] : false;
+    });
+  } else if (zoneMode === "dept" && refDept) {
+    items = items.filter((m: any) => getDeptCode(getMissionPostalCode(m)) === refDept);
+  } else if (zoneMode === "region" && refRegion) {
+    items = items.filter((m: any) => getRegionCode(getDeptCode(getMissionPostalCode(m))) === refRegion);
+  }
+
+  items = items.map((m: any) => {
+    const coords = searchCoords ? getMissionCoords(m) : null;
+    const dist = searchCoords && coords ? haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) : null;
+    return { ...m, distance: dist, isNew: differenceInHours(new Date(), new Date(m.created_at)) < 48 } as any;
+  });
+  let final: any[] = [...items];
+  if (sort === "closest") final.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
+  else if (sort === "recent") final.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  // Démos toujours visibles, intercalées
+  final = interleaveDemos(final, DEMO_MISSIONS, 3);
+  setResults(final);
+  };
 
  const searchAvailableMembers = async (searchCoords: { lat: number; lng: number } | null) => {
  const { data } = await supabase
