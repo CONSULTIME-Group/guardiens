@@ -1229,10 +1229,12 @@ const CreateSit = () => {
                 type="button"
                 className="flex-1 h-12 text-base font-semibold gap-1.5"
                 onClick={() => setCurrentStep(s => s + 1)}
+                disabled={currentStep === 0 && sitLocation !== "home"}
               >
                 Suivant
                 <ChevronRight className="h-4 w-4" />
               </Button>
+
             ) : (
               <Button
                 onClick={() => {
