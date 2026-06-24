@@ -5247,6 +5247,56 @@ export type Database = {
         }
         Relationships: []
       }
+      public_pets: {
+        Row: {
+          activity_level: Database["public"]["Enums"]["activity_level"] | null
+          age: number | null
+          alone_duration: Database["public"]["Enums"]["alone_duration"] | null
+          breed: string | null
+          character: string | null
+          id: string | null
+          name: string | null
+          photo_url: string | null
+          property_id: string | null
+          species: Database["public"]["Enums"]["pet_species"] | null
+          walk_duration: Database["public"]["Enums"]["walk_duration"] | null
+        }
+        Insert: {
+          activity_level?: Database["public"]["Enums"]["activity_level"] | null
+          age?: number | null
+          alone_duration?: Database["public"]["Enums"]["alone_duration"] | null
+          breed?: string | null
+          character?: string | null
+          id?: string | null
+          name?: string | null
+          photo_url?: string | null
+          property_id?: string | null
+          species?: Database["public"]["Enums"]["pet_species"] | null
+          walk_duration?: Database["public"]["Enums"]["walk_duration"] | null
+        }
+        Update: {
+          activity_level?: Database["public"]["Enums"]["activity_level"] | null
+          age?: number | null
+          alone_duration?: Database["public"]["Enums"]["alone_duration"] | null
+          breed?: string | null
+          character?: string | null
+          id?: string | null
+          name?: string | null
+          photo_url?: string | null
+          property_id?: string | null
+          species?: Database["public"]["Enums"]["pet_species"] | null
+          walk_duration?: Database["public"]["Enums"]["walk_duration"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pets_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       public_profiles: {
         Row: {
           available_for_help: boolean | null
