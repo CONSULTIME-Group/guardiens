@@ -167,7 +167,7 @@ const PublicSitDetail = () => {
 
         if (propertyData) {
           try {
-            const { data: petsData } = await supabase.from("pets").select("*").eq("property_id", propertyData.id);
+            const { data: petsData } = await supabase.from("public_pets" as any).select("*").eq("property_id", propertyData.id);
             setPets(petsData || []);
           } catch (e) { logger.warn("[PublicSitDetail] pets load failed", { error: (e as any)?.message }); }
           try {
