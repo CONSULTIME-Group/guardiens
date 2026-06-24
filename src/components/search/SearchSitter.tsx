@@ -1815,6 +1815,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const skills: string[] = member.skill_categories || [];
  const visibleSkills = skills.slice(0, 2);
  const extraCount = skills.length - 2;
+  const activeOfferTitle = member.primary_offre?.title;
  const seenSpecialSkills = new Set<string>();
  const specialSkills = [
  ...(member.specialty_label ? [member.specialty_label] : []),
@@ -1841,11 +1842,14 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  {member.is_founder && <FounderBadge size="sm" />}
  {member.has_published_offre && (
  <span className="text-[10px] font-semibold uppercase tracking-wider bg-primary/15 text-primary rounded-full px-2 py-0.5">
- A publié une offre
+  Offre active
  </span>
  )}
  </div>
  {member.city && <p className="text-xs text-muted-foreground">{member.city}{member.distance != null ? ` · à ${Math.round(member.distance)} km` : ""}</p>}
+  {activeOfferTitle && (
+  <p className="text-[13px] font-semibold text-foreground mt-1 line-clamp-2">{activeOfferTitle}</p>
+  )}
  {member.specialty_label && (
  <p className="text-[13px] font-semibold text-amber-700 mt-1">{member.specialty_label}</p>
  )}
