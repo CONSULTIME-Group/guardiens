@@ -418,7 +418,8 @@ const CreateSit = () => {
 
   const MIN_DESCRIPTION = 150;
   const descriptionValid = specificExpectations.length >= MIN_DESCRIPTION;
-  const canPublish = profileCompletion >= 60 && property && title && startDate && endDate && !dateError && descriptionValid;
+  const hasPhoto = !!coverPhotoUrl || ownerPhotos.length > 0;
+  const canPublish = profileCompletion >= 60 && property && title && startDate && endDate && !dateError && descriptionValid && hasPhoto;
 
   type PublishBlocker = { id: string; label: string; anchor?: string; action?: string };
   const publishBlockers: PublishBlocker[] = [
@@ -429,7 +430,9 @@ const CreateSit = () => {
     !endDate ? { id: "end", label: "Date de fin", anchor: "dates-field" } : null,
     dateError ? { id: "date-error", label: dateError, anchor: "dates-field" } : null,
     !descriptionValid ? { id: "desc", label: `Description d'au moins ${MIN_DESCRIPTION} caractères (actuellement ${specificExpectations.length})`, anchor: "description-field" } : null,
+    !hasPhoto ? { id: "photo", label: "Au moins 1 photo de votre logement ou galerie", action: "/owner-profile" } : null,
   ].filter(Boolean) as PublishBlocker[];
+
 
   const onPublishClick = () => {
     if (canPublish) return handlePublish();
