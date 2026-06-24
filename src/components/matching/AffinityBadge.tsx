@@ -123,6 +123,11 @@ const AffinityBadge = ({
         ) : (
           <p className="text-xs text-muted-foreground">Profils compatibles</p>
         )}
+        {result.total < 7 && (
+          <p className="text-[11px] text-muted-foreground/80 mt-2 pt-2 border-t border-border">
+            {7 - result.total} critère{7 - result.total > 1 ? "s" : ""} non comparé{7 - result.total > 1 ? "s" : ""} (profil incomplet d'un côté ou de l'autre). Le score augmente quand les profils se complètent.
+          </p>
+        )}
       </PopoverContent>
     </Popover>
   );
