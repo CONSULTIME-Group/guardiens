@@ -838,12 +838,51 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   };
 
  const searchAvailableMembers = async (searchCoords: { lat: number; lng: number } | null) => {
- const { data } = await supabase
+ // 1) Profils opt-in « available_for_help »
+ const { data: optInData } = await supabase
 .from("public_profiles")
 .select("id, first_name, avatar_url, city, bio, skill_categories, custom_skills, available_for_help, is_founder")
 .eq("available_for_help", true)
 .not("skill_categories", "eq", "{}");
- let items = (data || []).filter((m: any) => m.id !== user?.id);
+
+ // 2) Auteurs ayant publié une « offre » de coup de main encore ouverte
+ //    -> considérés disponibles de fait, même sans opt-in available_for_help
+ const { data: offreMissions } = await supabase
+   .from("small_missions")
+   .select("user_id, category")
+   .eq("mission_type", "offre")
+   .eq("status", "open");
+ const offreAuthorIds = Array.from(new Set((offreMissions || []).map((m: any) => m.user_id))).filter(Boolean);
+ const offreCatsByUser = new Map<string, Set<string>>();
+ (offreMissions || []).forEach((m: any) => {
+   if (!m.user_id) return;
+   const set = offreCatsByUser.get(m.user_id) || new Set<string>();
+   if (m.category) set.add(m.category);
+   offreCatsByUser.set(m.user_id, set);
+ });
+ let offreProfiles: any[] = [];
+ if (offreAuthorIds.length > 0) {
+   const { data } = await supabase
+     .from("public_profiles")
+     .select("id, first_name, avatar_url, city, bio, skill_categories, custom_skills, available_for_help, is_founder")
+     .in("id", offreAuthorIds);
+   const catToSkillKey: Record<string, string> = { garden: "jardin", animals: "animaux", skills: "competences", house: "coups_de_main" };
+   offreProfiles = (data || []).map((p: any) => {
+     const cats = offreCatsByUser.get(p.id);
+     const mergedCats = new Set<string>(p.skill_categories || []);
+     cats?.forEach((c) => { const k = catToSkillKey[c]; if (k) mergedCats.add(k); });
+     return { ...p, skill_categories: Array.from(mergedCats), has_published_offre: true };
+   });
+ }
+
+ // Fusion (dédoublonnée), en excluant l'utilisateur courant
+ const mergedMap = new Map<string, any>();
+ [...(optInData || []), ...offreProfiles].forEach((p: any) => {
+   if (!p?.id || p.id === user?.id) return;
+   const existing = mergedMap.get(p.id);
+   mergedMap.set(p.id, existing ? { ...existing, ...p, has_published_offre: existing.has_published_offre || p.has_published_offre } : p);
+ });
+ let items = Array.from(mergedMap.values());
  const catToSkill: Record<string, string> = { garden: "jardin", animals: "animaux", skills: "competences", house: "coups_de_main" };
  if (missionCategoryFilter !== "all") {
  const skillKey = catToSkill[missionCategoryFilter];
