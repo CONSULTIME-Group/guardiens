@@ -486,7 +486,7 @@ export default function PublicSitterProfile() {
         const propertyIds = (userProperties || []).map((p: any) => p.id);
         if (propertyIds.length > 0) {
           const { data: petsData, error: petsErr } = await supabase
-            .from('pets')
+            .from('public_pets' as any)
             .select('id, name, species, breed, age, photo_url, character')
             .in('property_id', propertyIds);
           if (petsErr) console.error('[pets]', petsErr);
