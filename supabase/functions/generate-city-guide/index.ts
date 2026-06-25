@@ -52,6 +52,8 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const authFail = await requireAdminOrServiceRole(req, corsHeaders);
+    if (authFail) return authFail;
     const { city, postal_code, department } = await req.json();
     if (!city) {
       return new Response(JSON.stringify({ error: "city required" }), {
