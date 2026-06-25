@@ -98,14 +98,14 @@ Ne mets jamais de guillemets autour du texte. Réponds uniquement avec le texte 
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Trop de requêtes, réessayez dans quelques secondes." }), {
-          status: 429,
+        return new Response(JSON.stringify({ error: "Suggestion IA momentanément indisponible (trop de requêtes). Réessayez dans quelques secondes.", code: "AI_RATE_LIMITED" }), {
+          status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Crédits IA épuisés." }), {
-          status: 402,
+        return new Response(JSON.stringify({ error: "Suggestion IA temporairement indisponible. Rédigez librement, votre texte sera tout aussi efficace.", code: "AI_OUT_OF_CREDITS" }), {
+          status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
