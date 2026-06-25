@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,16 +15,8 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Auth optionnelle : si un token utilisateur est fourni on l'accepte,
-    // sinon on autorise l'appel pour permettre la régénération en lot.
-    const authHeader = req.headers.get("Authorization");
-    if (authHeader && !authHeader.includes(Deno.env.get("SUPABASE_ANON_KEY") || "___")) {
-      const anonClient = createClient(
-        Deno.env.get("SUPABASE_URL")!,
-        Deno.env.get("SUPABASE_ANON_KEY")!,
-      );
-      await anonClient.auth.getUser(authHeader.replace("Bearer ", ""));
-    }
+    const authFail = await requireAdminOrServiceRole(req, corsHeaders);
+    if (authFail) return authFail;
 
     const { species, breed, force, image_url, image_credit, image_alt } = await req.json();
     if (!species || !breed) {
