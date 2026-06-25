@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -51,6 +52,8 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const authFail = await requireAdminOrServiceRole(req, corsHeaders);
+    if (authFail) return authFail;
     const { city, postal_code, department } = await req.json();
     if (!city) {
       return new Response(JSON.stringify({ error: "city required" }), {

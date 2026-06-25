@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
 
   try {
     const secret = Deno.env.get("GEOCODE_PROFILE_SECRET");
-    if (secret && req.headers.get("x-geocode-secret") !== secret) {
+    if (!secret || req.headers.get("x-geocode-secret") !== secret) {
       return json({ error: "forbidden" }, 403);
     }
 
