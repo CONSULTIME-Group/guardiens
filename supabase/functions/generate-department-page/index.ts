@@ -15,6 +15,8 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const authFail = await requireAdminOrServiceRole(req, corsHeaders);
+    if (authFail) return authFail;
     const { department, region } = await req.json();
     if (!department) {
       return new Response(JSON.stringify({ error: "department required" }), {
