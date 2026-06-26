@@ -239,7 +239,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     const updates: Record<string, any> = {};
     if (bio.trim().length > 0) updates.bio = bio.trim();
     if (Object.keys(updates).length > 0) {
-      await supabase.from("profiles").update(updates).eq("id", user.id);
+      await supabase.from("profiles").update(updates as any).eq("id", user.id);
     }
   };
 
@@ -271,7 +271,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     if (safeCompetences.length > 0 && !(existing as any)?.available_for_help) {
       profileUpdates.available_for_help = true;
     }
-    await supabase.from("profiles").update(profileUpdates).eq("id", user.id);
+    await supabase.from("profiles").update(profileUpdates as any).eq("id", user.id);
 
     // Persiste les compétences spécifiques sur la table métier du rôle.
     if (userRole === "sitter" || userRole === "both") {
@@ -388,7 +388,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
       if (dontShowRef.current) {
         updates.onboarding_completed = true;
       }
-      await supabase.from("profiles").update(updates).eq("id", user.id);
+      await supabase.from("profiles").update(updates as any).eq("id", user.id);
       refreshProfile();
       try {
         trackEvent(dontShowRef.current ? "onboarding_completed" : "onboarding_dismissed", {
