@@ -290,7 +290,7 @@ const Landing = () => {
  return (
  <div className="min-h-screen bg-background text-foreground">
   <PageMeta
-        title="Home sitting et garde d'animaux près de chez vous | Guardiens"
+        title="Garde d'animaux à domicile près de chez vous | Guardiens"
         description="Confiez votre maison et vos animaux à un gardien vérifié près de chez vous. Rencontre avant chaque garde, sans commission, partout en France."
   path="/"
   image={HOME_OG_IMAGE}
