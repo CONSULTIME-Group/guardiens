@@ -166,7 +166,7 @@ const SmallMissions = () => {
         available_for_help: true,
       };
       updates.custom_skills = offerText.trim() ? [offerText.trim()] : [];
-      await supabase.from("profiles").update(updates).eq("id", user.id);
+      await supabase.from("profiles").update(updates as any).eq("id", user.id);
       if (offerCompetences.length > 0) {
         const { data: existing } = await supabase
           .from("sitter_profiles")
