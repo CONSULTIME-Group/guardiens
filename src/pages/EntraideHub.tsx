@@ -147,8 +147,8 @@ const EntraideHub = () => {
   const { isAuthenticated } = useAuth();
   const [params, setParams] = useSearchParams();
 
-  const initialTab = (params.get("tab") as Tab) || "questions";
-  const [tab, setTab] = useState<Tab>(VALID_TABS.includes(initialTab) ? initialTab : "questions");
+  const initialTab = (params.get("tab") as Tab) || "besoins";
+  const [tab, setTab] = useState<Tab>(VALID_TABS.includes(initialTab) ? initialTab : "besoins");
 
   /* Onglet Questions */
   const initialQCat = params.get("cat") as CommunityCategory | "all" | null;
@@ -183,7 +183,7 @@ const EntraideHub = () => {
   /* Sync querystring */
   useEffect(() => {
     const next = new URLSearchParams(params);
-    if (tab === "questions") next.delete("tab");
+    if (tab === "besoins") next.delete("tab");
     else next.set("tab", tab);
 
     next.delete("cat");
@@ -334,8 +334,8 @@ const EntraideHub = () => {
   return (
     <>
       <PageMeta
-        title="Conseils & coups de main, entraide locale, Guardiens"
-        description="Posez une question à la communauté, demandez un coup de main, ou proposez votre aide près de chez vous. Gratuit pour tous."
+        title="Entraide locale : conseils & coups de main près de chez vous, Guardiens"
+        description="Entraide locale entre gens du coin : posez une question, demandez un coup de main ponctuel ou proposez votre aide. Gratuit, sans engagement, partout en France."
         path="/petites-missions"
       />
       <div className="min-h-screen bg-background">
@@ -345,37 +345,20 @@ const EntraideHub = () => {
           {/* Header */}
           <div className="mb-6">
             <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">
-              Conseils & coups de main
+              Entraide locale : conseils & coups de main près de chez vous
             </h1>
             <p className="text-foreground/70 mt-2">
-              Une question, un besoin ponctuel, ou l'envie de rendre service ? Choisissez ce qui vous correspond.
+              Posez une question à la communauté, demandez un coup de main ponctuel ou proposez le vôtre, entre gens du coin.
             </p>
             <p className="text-xs text-foreground/55 mt-1">
               Gratuit pour tous, sans engagement.
             </p>
 
-            {/* CTA primaire (création) selon onglet actif + secondaires repliés */}
-            <div className="mt-5 space-y-2">
+            {/* CTA primaire (création) selon onglet actif */}
+            <div className="mt-5">
               <Button onClick={primaryCta.action} className="w-full sm:w-auto">
                 {primaryCta.label}
               </Button>
-              <div className="flex flex-wrap gap-1">
-                {tab !== "questions" && (
-                  <Button variant="ghost" size="sm" onClick={goAsk} className="text-foreground/70">
-                    Poser une question
-                  </Button>
-                )}
-                {tab !== "besoins" && (
-                  <Button variant="ghost" size="sm" onClick={goNeed} className="text-foreground/70">
-                    Demander un coup de main
-                  </Button>
-                )}
-                {tab !== "offres" && (
-                  <Button variant="ghost" size="sm" onClick={goOffer} className="text-foreground/70">
-                    Proposer mon aide
-                  </Button>
-                )}
-              </div>
             </div>
           </div>
 
@@ -433,13 +416,10 @@ const EntraideHub = () => {
           </div>
 
           <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
-            <div className="mb-4">
-              <h2 className="font-heading text-lg font-semibold text-foreground">{meta.title}</h2>
-              <p className="text-sm text-foreground/65 mt-1">{meta.description}</p>
-            </div>
+            <p className="text-sm text-foreground/65 mb-4">{meta.description}</p>
 
             {/* Comment ça marche */}
-            <details className="mb-6 rounded-xl border border-border bg-card group">
+            <details open className="mb-6 rounded-xl border border-border bg-card group">
               <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between text-sm font-semibold text-foreground">
                 <span>Comment ça marche ?</span>
                 <ChevronDown
@@ -513,11 +493,27 @@ const EntraideHub = () => {
                     hint={
                       hasQuestionFilters
                         ? "Élargissez les filtres ou posez la première question de cette catégorie."
-                        : "Soyez la première personne à lancer le sujet."
+                        : "Soyez la première personne à lancer le sujet, ou inspirez-vous d'un exemple ci-dessous."
                     }
                     ctaLabel="Poser une question"
                     onCta={goAsk}
                     onReset={hasQuestionFilters ? resetQuestionFilters : undefined}
+                    examples={
+                      !mineOnly && !hasQuestionFilters
+                        ? [
+                            { label: "Mon chat ne mange plus depuis 2 jours, dois-je m'inquiéter ?", cat: "animaux" },
+                            { label: "Quelle plante d'intérieur non-toxique pour un chien ?", cat: "animaux" },
+                            { label: "Comment occuper mon chien pendant mes journées de travail ?", cat: "animaux" },
+                          ]
+                        : undefined
+                    }
+                    onExample={(ex) =>
+                      navigate(
+                        isAuthenticated
+                          ? `/questions/nouvelle?cat=${ex.cat}&title=${encodeURIComponent(ex.label)}`
+                          : `/inscription?redirect=${encodeURIComponent(`/questions/nouvelle?cat=${ex.cat}&title=${encodeURIComponent(ex.label)}`)}`,
+                      )
+                    }
                   />
                 )}
               </>
@@ -723,12 +719,16 @@ const EmptyState = ({
   ctaLabel,
   onCta,
   onReset,
+  examples,
+  onExample,
 }: {
   title: string;
   hint?: string;
   ctaLabel: string;
   onCta: () => void;
   onReset?: () => void;
+  examples?: { label: string; cat: string }[];
+  onExample?: (ex: { label: string; cat: string }) => void;
 }) => (
   <div className="p-8 rounded-2xl border border-dashed border-border bg-accent/20 text-center">
     <p className="font-heading text-lg text-foreground/85">{title}</p>
@@ -741,6 +741,25 @@ const EmptyState = ({
         </Button>
       )}
     </div>
+    {examples && examples.length > 0 && onExample && (
+      <div className="mt-6 pt-5 border-t border-border/60">
+        <p className="text-xs font-semibold uppercase tracking-wide text-foreground/55 mb-3">
+          Exemples pour démarrer
+        </p>
+        <div className="flex flex-col gap-2">
+          {examples.map((ex) => (
+            <button
+              key={ex.label}
+              type="button"
+              onClick={() => onExample(ex)}
+              className="text-left text-sm px-3 py-2 rounded-lg bg-card border border-border hover:border-primary hover:bg-accent/40 transition-colors text-foreground/80"
+            >
+              « {ex.label} »
+            </button>
+          ))}
+        </div>
+      </div>
+    )}
   </div>
 );
 

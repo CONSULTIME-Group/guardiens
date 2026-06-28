@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -24,8 +24,15 @@ const schema = z.object({
 const QuestionCreate = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [category, setCategory] = useState<CommunityCategory>("animaux");
-  const [title, setTitle] = useState("");
+  const [params] = useSearchParams();
+  const prefillCat = params.get("cat") as CommunityCategory | null;
+  const prefillTitle = params.get("title") || "";
+  const [category, setCategory] = useState<CommunityCategory>(
+    prefillCat && (["animaux", "jardin", "maison", "garde", "autre"] as const).includes(prefillCat as any)
+      ? prefillCat
+      : "animaux",
+  );
+  const [title, setTitle] = useState(prefillTitle);
   const [body, setBody] = useState("");
   const [city, setCity] = useState("");
   const [submitting, setSubmitting] = useState(false);
