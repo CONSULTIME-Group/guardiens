@@ -28,6 +28,7 @@ type SortKey = "recent" | "alpha" | "city";
 
 export default function ProsListing() {
   const { t } = useTranslation();
+  const { isAuthenticated } = useAuth();
   const [pros, setPros] = useState<ProRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<string | "all">("all");
