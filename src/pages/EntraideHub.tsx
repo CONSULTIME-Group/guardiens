@@ -521,8 +521,8 @@ const EntraideHub = () => {
                       !mineOnly && !hasQuestionFilters
                         ? [
                             { label: "Mon chat ne mange plus depuis 2 jours, dois-je m'inquiéter ?", cat: "animaux" },
-                            { label: "Quelle plante d'intérieur non-toxique pour un chien ?", cat: "animaux" },
-                            { label: "Comment occuper mon chien pendant mes journées de travail ?", cat: "animaux" },
+                            { label: "Quel arrosage pour mes tomates pendant 10 jours d'absence ?", cat: "jardin" },
+                            { label: "Comment réinitialiser le disjoncteur principal de la maison ?", cat: "maison" },
                           ]
                         : undefined
                     }
