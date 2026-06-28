@@ -564,7 +564,7 @@ const EntraideHub = () => {
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <Select value={mStatus} onValueChange={(v) => setMStatus(v as MissionStatus)}>
-                      <SelectTrigger className="h-8 w-auto min-w-[140px] text-xs">
+                      <SelectTrigger className="h-8 w-auto min-w-[140px] text-xs" aria-label="Filtrer par statut">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -576,7 +576,7 @@ const EntraideHub = () => {
                       </SelectContent>
                     </Select>
                     <Select value={mSort} onValueChange={(v) => setMSort(v as MissionSort)}>
-                      <SelectTrigger className="h-8 w-auto min-w-[160px] text-xs">
+                      <SelectTrigger className="h-8 w-auto min-w-[160px] text-xs" aria-label="Trier les publications">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
