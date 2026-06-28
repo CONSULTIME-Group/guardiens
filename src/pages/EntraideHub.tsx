@@ -715,18 +715,7 @@ const EntraideHub = () => {
           </div>
         </section>
 
-        {/* CTA flottant mobile au-dessus de la bottom nav */}
-        <div className="md:hidden fixed left-0 right-0 bottom-20 z-30 px-4 pointer-events-none">
-          <div className="max-w-3xl mx-auto flex justify-end">
-            <Button
-              onClick={primaryCta.action}
-              size="lg"
-              className="pointer-events-auto shadow-lg"
-            >
-              {primaryCta.label}
-            </Button>
-          </div>
-        </div>
+        {/* FAB mobile retiré : le CTA primaire du header (full-width) et la bottom nav suffisent */}
       </div>
     </>
   );
