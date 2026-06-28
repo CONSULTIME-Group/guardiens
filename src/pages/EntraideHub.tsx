@@ -434,8 +434,11 @@ const EntraideHub = () => {
           <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
             <p className="text-sm text-foreground/65 mb-4">{meta.description}</p>
 
-            {/* Comment ça marche */}
-            <details open className="mb-6 rounded-xl border border-border bg-card group">
+            {/* Comment ça marche, replié dès qu'il y a du contenu */}
+            <details
+              open={tabTotals[tab] === 0}
+              className="mb-6 rounded-xl border border-border bg-card group"
+            >
               <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between text-sm font-semibold text-foreground">
                 <span>Comment ça marche ?</span>
                 <ChevronDown
