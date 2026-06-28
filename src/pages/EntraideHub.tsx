@@ -313,8 +313,8 @@ const EntraideHub = () => {
 
   const meta = TAB_META[tab];
   const accentClasses: Record<Tab, { border: string; text: string; pill: string }> = {
-    questions: { border: "border-primary", text: "text-primary", pill: "bg-primary/15 text-primary" },
-    besoins: { border: "border-secondary", text: "text-secondary-foreground", pill: "bg-secondary/40 text-foreground" },
+    questions: { border: "border-primary", text: "text-foreground", pill: "bg-primary/15 text-primary" },
+    besoins: { border: "border-secondary", text: "text-foreground", pill: "bg-secondary/40 text-foreground" },
     offres: { border: "border-accent", text: "text-foreground", pill: "bg-accent/60 text-foreground" },
   };
 
