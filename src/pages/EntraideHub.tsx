@@ -493,11 +493,27 @@ const EntraideHub = () => {
                     hint={
                       hasQuestionFilters
                         ? "Élargissez les filtres ou posez la première question de cette catégorie."
-                        : "Soyez la première personne à lancer le sujet."
+                        : "Soyez la première personne à lancer le sujet, ou inspirez-vous d'un exemple ci-dessous."
                     }
                     ctaLabel="Poser une question"
                     onCta={goAsk}
                     onReset={hasQuestionFilters ? resetQuestionFilters : undefined}
+                    examples={
+                      !mineOnly && !hasQuestionFilters
+                        ? [
+                            { label: "Mon chat ne mange plus depuis 2 jours, dois-je m'inquiéter ?", cat: "animaux" },
+                            { label: "Quelle plante d'intérieur non-toxique pour un chien ?", cat: "animaux" },
+                            { label: "Comment occuper mon chien pendant mes journées de travail ?", cat: "animaux" },
+                          ]
+                        : undefined
+                    }
+                    onExample={(ex) =>
+                      navigate(
+                        isAuthenticated
+                          ? `/questions/nouvelle?cat=${ex.cat}&title=${encodeURIComponent(ex.label)}`
+                          : `/inscription?redirect=${encodeURIComponent(`/questions/nouvelle?cat=${ex.cat}&title=${encodeURIComponent(ex.label)}`)}`,
+                      )
+                    }
                   />
                 )}
               </>
