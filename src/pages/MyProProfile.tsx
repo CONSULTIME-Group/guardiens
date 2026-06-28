@@ -349,6 +349,30 @@ export default function MyProProfile() {
               </div>
             </div>
 
+            {/* KPI activité — visibles dès la publication */}
+            {profile.status === "approved" && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div className="bg-card rounded-xl border border-border p-4">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">Vues fiche</p>
+                  <p className="text-2xl font-display font-bold mt-1 tabular-nums text-foreground">
+                    {profile.view_count ?? 0}
+                  </p>
+                </div>
+                <div className="bg-card rounded-xl border border-border p-4">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">Note moyenne</p>
+                  <p className="text-2xl font-display font-bold mt-1 tabular-nums text-foreground">
+                    {profile.rating_avg ? Number(profile.rating_avg).toFixed(1) : "–"}
+                  </p>
+                </div>
+                <div className="bg-card rounded-xl border border-border p-4 col-span-2 sm:col-span-1">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">Avis publiés</p>
+                  <p className="text-2xl font-display font-bold mt-1 tabular-nums text-foreground">
+                    {profile.rating_count ?? 0}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* CTA principal : éditer la fiche */}
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-5">
               <div className="min-w-0">
