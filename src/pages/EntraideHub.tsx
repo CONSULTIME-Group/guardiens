@@ -334,8 +334,8 @@ const EntraideHub = () => {
   return (
     <>
       <PageMeta
-        title="Conseils & coups de main, entraide locale, Guardiens"
-        description="Posez une question à la communauté, demandez un coup de main, ou proposez votre aide près de chez vous. Gratuit pour tous."
+        title="Entraide locale : conseils & coups de main près de chez vous, Guardiens"
+        description="Entraide locale entre gens du coin : posez une question, demandez un coup de main ponctuel ou proposez votre aide. Gratuit, sans engagement, partout en France."
         path="/petites-missions"
       />
       <div className="min-h-screen bg-background">
@@ -345,37 +345,20 @@ const EntraideHub = () => {
           {/* Header */}
           <div className="mb-6">
             <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">
-              Conseils & coups de main
+              Entraide locale : conseils & coups de main près de chez vous
             </h1>
             <p className="text-foreground/70 mt-2">
-              Une question, un besoin ponctuel, ou l'envie de rendre service ? Choisissez ce qui vous correspond.
+              Posez une question à la communauté, demandez un coup de main ponctuel ou proposez le vôtre, entre gens du coin.
             </p>
             <p className="text-xs text-foreground/55 mt-1">
               Gratuit pour tous, sans engagement.
             </p>
 
-            {/* CTA primaire (création) selon onglet actif + secondaires repliés */}
-            <div className="mt-5 space-y-2">
+            {/* CTA primaire (création) selon onglet actif */}
+            <div className="mt-5">
               <Button onClick={primaryCta.action} className="w-full sm:w-auto">
                 {primaryCta.label}
               </Button>
-              <div className="flex flex-wrap gap-1">
-                {tab !== "questions" && (
-                  <Button variant="ghost" size="sm" onClick={goAsk} className="text-foreground/70">
-                    Poser une question
-                  </Button>
-                )}
-                {tab !== "besoins" && (
-                  <Button variant="ghost" size="sm" onClick={goNeed} className="text-foreground/70">
-                    Demander un coup de main
-                  </Button>
-                )}
-                {tab !== "offres" && (
-                  <Button variant="ghost" size="sm" onClick={goOffer} className="text-foreground/70">
-                    Proposer mon aide
-                  </Button>
-                )}
-              </div>
             </div>
           </div>
 
