@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
 import ProsMap from "@/components/pros/ProsMap";
+import { useAuth } from "@/contexts/AuthContext";
 
 type ProRow = {
   id: string;
@@ -27,6 +28,7 @@ type SortKey = "recent" | "alpha" | "city";
 
 export default function ProsListing() {
   const { t } = useTranslation();
+  const { isAuthenticated } = useAuth();
   const [pros, setPros] = useState<ProRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<string | "all">("all");
@@ -97,9 +99,11 @@ export default function ProsListing() {
             <Button asChild size="sm">
               <Link to="/pros/inscription">{t("pros_listing.register_cta")}</Link>
             </Button>
-            <Button asChild size="sm" variant="outline">
-              <Link to="/pros/mon-espace">{t("pros_listing.my_space")}</Link>
-            </Button>
+            {isAuthenticated && (
+              <Button asChild size="sm" variant="outline">
+                <Link to="/pros/mon-espace">{t("pros_listing.my_space")}</Link>
+              </Button>
+            )}
           </div>
         </header>
 
@@ -194,8 +198,8 @@ export default function ProsListing() {
             {filtered.map((p) => {
               const cat = getCategoryByValue(p.category);
               return (
-                <Link key={p.id} to={`/pros/${p.slug}`} className="group">
-                  <Card className="h-full hover:shadow-md transition">
+                <Link key={p.id} to={`/pros/${p.slug}`} className="group min-w-0">
+                  <Card className="h-full hover:shadow-md transition overflow-hidden">
                     <CardContent className="p-5">
                       <div className="flex items-center gap-3 mb-3">
                         {p.logo_url ? (
