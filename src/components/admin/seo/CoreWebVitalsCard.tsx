@@ -45,7 +45,9 @@ const ratingLabel: Record<string, string> = {
 };
 
 function MetricLine({ name, code, bucket }: { name: string; code: keyof typeof THRESHOLDS; bucket: MetricBucket }) {
-  if (!bucket || bucket.p75 === null) {
+  const raw = bucket?.p75;
+  const p75 = raw === null || raw === undefined ? null : Number(raw);
+  if (p75 === null || !Number.isFinite(p75)) {
     return (
       <div className="flex items-center justify-between text-xs py-1 border-b border-border/40">
         <span className="font-medium">{name}</span>
@@ -53,12 +55,12 @@ function MetricLine({ name, code, bucket }: { name: string; code: keyof typeof T
       </div>
     );
   }
-  const r = rating(code, bucket.p75);
+  const r = rating(code, p75);
   return (
     <div className="flex items-center justify-between text-xs py-1 border-b border-border/40">
       <span className="font-medium">{name}</span>
       <div className="flex items-center gap-2">
-        <span className="font-mono">{THRESHOLDS[code].fmt(bucket.p75)}</span>
+        <span className="font-mono">{THRESHOLDS[code].fmt(p75)}</span>
         {r && <Badge variant={ratingBadge[r]} className="text-[10px] py-0">{ratingLabel[r]}</Badge>}
       </div>
     </div>
