@@ -655,7 +655,7 @@ const EntraideHub = () => {
                               )}
                               <div className="flex items-center gap-2 mt-3">
                                 <Avatar className="h-6 w-6 shrink-0">
-                                  <AvatarImage src={m.profiles?.avatar_url || undefined} alt="" />
+                                  <AvatarImage src={m.profiles?.avatar_url || undefined} alt="" loading="lazy" />
                                   <AvatarFallback className="text-[10px]">{initial}</AvatarFallback>
                                 </Avatar>
                                 <span className="text-xs text-foreground/70 truncate">{authorName}</span>
