@@ -147,8 +147,8 @@ const EntraideHub = () => {
   const { isAuthenticated } = useAuth();
   const [params, setParams] = useSearchParams();
 
-  const initialTab = (params.get("tab") as Tab) || "questions";
-  const [tab, setTab] = useState<Tab>(VALID_TABS.includes(initialTab) ? initialTab : "questions");
+  const initialTab = (params.get("tab") as Tab) || "besoins";
+  const [tab, setTab] = useState<Tab>(VALID_TABS.includes(initialTab) ? initialTab : "besoins");
 
   /* Onglet Questions */
   const initialQCat = params.get("cat") as CommunityCategory | "all" | null;
