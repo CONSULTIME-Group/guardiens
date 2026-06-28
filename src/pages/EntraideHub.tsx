@@ -231,6 +231,18 @@ const EntraideHub = () => {
     void load();
   }, []);
 
+  // P1 — Si aucun paramètre tab dans l'URL et aucune mission ouverte, bascule par défaut sur Questions.
+  useEffect(() => {
+    if (mLoading) return;
+    if (params.get("tab")) return;
+    const openBesoins = missions.filter((m) => (m.mission_type ?? "besoin") === "besoin" && m.status === "open").length;
+    const openOffres = missions.filter((m) => m.mission_type === "offre" && m.status === "open").length;
+    if (openBesoins === 0 && openOffres === 0) {
+      setTab("questions");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mLoading]);
+
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null));
