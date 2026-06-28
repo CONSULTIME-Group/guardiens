@@ -99,9 +99,11 @@ export default function ProsListing() {
             <Button asChild size="sm">
               <Link to="/pros/inscription">{t("pros_listing.register_cta")}</Link>
             </Button>
-            <Button asChild size="sm" variant="outline">
-              <Link to="/pros/mon-espace">{t("pros_listing.my_space")}</Link>
-            </Button>
+            {isAuthenticated && (
+              <Button asChild size="sm" variant="outline">
+                <Link to="/pros/mon-espace">{t("pros_listing.my_space")}</Link>
+              </Button>
+            )}
           </div>
         </header>
 
