@@ -84,7 +84,7 @@ const TAB_META: Record<
     short: "Demandes",
     title: "Coups de main demandés",
     description:
-      "Les gens du coin qui cherchent un peu d'aide ponctuelle, près de chez vous. Couverture France entière.",
+      "Les gens du coin qui cherchent un peu d'aide ponctuelle.",
     how: [
       "Vous publiez votre demande (catégorie, ville, créneau).",
       "Une personne du coin se propose en message privé.",
