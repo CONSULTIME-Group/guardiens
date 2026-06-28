@@ -201,7 +201,7 @@ export default function MyProProfile() {
 
 
         {profile.slug && (
-          <div className="flex items-center gap-2 flex-wrap mb-6">
+          <div className="sticky top-2 z-20 mb-6 flex items-center gap-2 flex-wrap rounded-lg border border-border bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70 px-2 py-2 shadow-sm">
             <Button asChild variant="outline" size="sm">
               <a href={`/pros/${profile.slug}`} target="_blank" rel="noopener noreferrer">
                 {profile.status === "approved" ? "Voir ma fiche publique" : "Aperçu de ma fiche"}

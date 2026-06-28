@@ -84,11 +84,11 @@ export default function ProsListing() {
       <main className="container mx-auto px-4 py-6 md:py-10 max-w-6xl min-w-0">
         {/* En-tête épuré */}
         <header className="mb-6 md:mb-8">
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-baseline gap-2 flex-wrap">
             <h1 className="text-2xl md:text-4xl font-display font-bold">
               {t("pros_listing.h1")}
             </h1>
-            <span className="text-[10px] uppercase tracking-wider font-bold bg-amber-100 text-amber-800 px-2 py-1 rounded">
+            <span className="text-[9px] md:text-[10px] uppercase tracking-wider font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 md:px-2 md:py-1 rounded align-middle">
               {t("pros_listing.beta")}
             </span>
           </div>
