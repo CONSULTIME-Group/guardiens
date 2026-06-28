@@ -249,13 +249,15 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     // 2026 : on stocke des compétences SPÉCIFIQUES (« promenade chiens »…),
     // pas les 4 catégories génériques. Les catégories DB sont DÉRIVÉES
     // automatiquement pour que le filtre de recherche reste opérant.
+    // Cap à 10 pour respecter le CHECK constraint `max_competences` côté DB
+    // (sitter_profiles.competences). Au-delà, l'upsert renvoyait un 400 silencieux.
     const safeCompetences = Array.from(
       new Set(
         (pickedCompetences || []).filter(
           (c): c is string => typeof c === "string" && c.trim().length > 0,
         ),
       ),
-    );
+    ).slice(0, 10);
     const derivedCategories = deriveCategoriesFromCompetences(safeCompetences);
 
     // Met à jour profiles.skill_categories (dérivé) + active la visibilité

@@ -168,15 +168,17 @@ const SmallMissions = () => {
       updates.custom_skills = offerText.trim() ? [offerText.trim()] : [];
       await supabase.from("profiles").update(updates as any).eq("id", user.id);
       if (offerCompetences.length > 0) {
+        // CHECK constraint `max_competences` (≤ 10) côté DB.
+        const cappedCompetences = offerCompetences.slice(0, 10);
         const { data: existing } = await supabase
           .from("sitter_profiles")
           .select("id")
           .eq("user_id", user.id)
           .maybeSingle();
         if (existing) {
-          await supabase.from("sitter_profiles").update({ competences: offerCompetences }).eq("user_id", user.id);
+          await supabase.from("sitter_profiles").update({ competences: cappedCompetences }).eq("user_id", user.id);
         } else {
-          await supabase.from("sitter_profiles").insert({ user_id: user.id, competences: offerCompetences });
+          await supabase.from("sitter_profiles").insert({ user_id: user.id, competences: cappedCompetences });
         }
       }
       await refetchProfile();
