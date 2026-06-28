@@ -416,13 +416,10 @@ const EntraideHub = () => {
           </div>
 
           <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
-            <div className="mb-4">
-              <h2 className="font-heading text-lg font-semibold text-foreground">{meta.title}</h2>
-              <p className="text-sm text-foreground/65 mt-1">{meta.description}</p>
-            </div>
+            <p className="text-sm text-foreground/65 mb-4">{meta.description}</p>
 
             {/* Comment ça marche */}
-            <details className="mb-6 rounded-xl border border-border bg-card group">
+            <details open className="mb-6 rounded-xl border border-border bg-card group">
               <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between text-sm font-semibold text-foreground">
                 <span>Comment ça marche ?</span>
                 <ChevronDown
