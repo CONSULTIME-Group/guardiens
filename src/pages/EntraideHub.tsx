@@ -719,12 +719,16 @@ const EmptyState = ({
   ctaLabel,
   onCta,
   onReset,
+  examples,
+  onExample,
 }: {
   title: string;
   hint?: string;
   ctaLabel: string;
   onCta: () => void;
   onReset?: () => void;
+  examples?: { label: string; cat: string }[];
+  onExample?: (ex: { label: string; cat: string }) => void;
 }) => (
   <div className="p-8 rounded-2xl border border-dashed border-border bg-accent/20 text-center">
     <p className="font-heading text-lg text-foreground/85">{title}</p>
@@ -737,6 +741,25 @@ const EmptyState = ({
         </Button>
       )}
     </div>
+    {examples && examples.length > 0 && onExample && (
+      <div className="mt-6 pt-5 border-t border-border/60">
+        <p className="text-xs font-semibold uppercase tracking-wide text-foreground/55 mb-3">
+          Exemples pour démarrer
+        </p>
+        <div className="flex flex-col gap-2">
+          {examples.map((ex) => (
+            <button
+              key={ex.label}
+              type="button"
+              onClick={() => onExample(ex)}
+              className="text-left text-sm px-3 py-2 rounded-lg bg-card border border-border hover:border-primary hover:bg-accent/40 transition-colors text-foreground/80"
+            >
+              « {ex.label} »
+            </button>
+          ))}
+        </div>
+      </div>
+    )}
   </div>
 );
 
