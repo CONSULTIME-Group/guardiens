@@ -198,8 +198,8 @@ export default function ProsListing() {
             {filtered.map((p) => {
               const cat = getCategoryByValue(p.category);
               return (
-                <Link key={p.id} to={`/pros/${p.slug}`} className="group">
-                  <Card className="h-full hover:shadow-md transition">
+                <Link key={p.id} to={`/pros/${p.slug}`} className="group min-w-0">
+                  <Card className="h-full hover:shadow-md transition overflow-hidden">
                     <CardContent className="p-5">
                       <div className="flex items-center gap-3 mb-3">
                         {p.logo_url ? (
