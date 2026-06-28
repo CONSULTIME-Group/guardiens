@@ -334,8 +334,8 @@ const EntraideHub = () => {
   return (
     <>
       <PageMeta
-        title="Entraide locale : conseils & coups de main près de chez vous, Guardiens"
-        description="Entraide locale entre gens du coin : posez une question, demandez un coup de main ponctuel ou proposez votre aide. Gratuit, sans engagement, partout en France."
+        title="Entraide locale : conseils & coups de main, Guardiens"
+        description="Posez une question, demandez un coup de main (garde animaux, jardin, promenade) ou proposez votre aide près de chez vous. Gratuit."
         path="/petites-missions"
       />
       <div className="min-h-screen bg-background">
