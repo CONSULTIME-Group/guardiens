@@ -84,7 +84,7 @@ const TAB_META: Record<
     short: "Demandes",
     title: "Coups de main demandés",
     description:
-      "Les gens du coin qui cherchent un peu d'aide ponctuelle, près de chez vous. Couverture France entière.",
+      "Les gens du coin qui cherchent un peu d'aide ponctuelle.",
     how: [
       "Vous publiez votre demande (catégorie, ville, créneau).",
       "Une personne du coin se propose en message privé.",
@@ -313,8 +313,8 @@ const EntraideHub = () => {
 
   const meta = TAB_META[tab];
   const accentClasses: Record<Tab, { border: string; text: string; pill: string }> = {
-    questions: { border: "border-primary", text: "text-primary", pill: "bg-primary/15 text-primary" },
-    besoins: { border: "border-secondary", text: "text-secondary-foreground", pill: "bg-secondary/40 text-foreground" },
+    questions: { border: "border-primary", text: "text-foreground", pill: "bg-primary/15 text-primary" },
+    besoins: { border: "border-secondary", text: "text-foreground", pill: "bg-secondary/40 text-foreground" },
     offres: { border: "border-accent", text: "text-foreground", pill: "bg-accent/60 text-foreground" },
   };
 
@@ -334,8 +334,8 @@ const EntraideHub = () => {
   return (
     <>
       <PageMeta
-        title="Entraide locale : conseils & coups de main près de chez vous, Guardiens"
-        description="Entraide locale entre gens du coin : posez une question, demandez un coup de main ponctuel ou proposez votre aide. Gratuit, sans engagement, partout en France."
+        title="Entraide locale : conseils & coups de main, Guardiens"
+        description="Posez une question, demandez un coup de main (garde animaux, jardin, promenade) ou proposez votre aide près de chez vous. Gratuit."
         path="/petites-missions"
       />
       <div className="min-h-screen bg-background">
@@ -345,14 +345,19 @@ const EntraideHub = () => {
           {/* Header */}
           <div className="mb-6">
             <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">
-              Entraide locale : conseils & coups de main près de chez vous
+              Entraide locale, près de chez vous
             </h1>
             <p className="text-foreground/70 mt-2">
-              Posez une question à la communauté, demandez un coup de main ponctuel ou proposez le vôtre, entre gens du coin.
+              Posez une question, demandez un coup de main ponctuel ou proposez le vôtre, entre gens du coin.
             </p>
-            <p className="text-xs text-foreground/55 mt-1">
-              Gratuit pour tous, sans engagement.
-            </p>
+            <div className="flex flex-wrap items-center gap-2 mt-3">
+              <span className="text-[11px] font-semibold uppercase tracking-wide px-2 py-1 rounded-full bg-accent/50 text-foreground/80">
+                Gratuit, sans engagement
+              </span>
+              <span className="text-[11px] font-semibold uppercase tracking-wide px-2 py-1 rounded-full bg-primary/10 text-primary">
+                Couverture France entière
+              </span>
+            </div>
 
             {/* CTA primaire (création) selon onglet actif */}
             <div className="mt-5">
@@ -362,9 +367,14 @@ const EntraideHub = () => {
             </div>
           </div>
 
-          {/* Onglets + toggle Mes publications */}
-          <div className="flex items-end justify-between gap-3 mb-5 border-b border-border">
-            <div role="tablist" aria-label="Catégorie de contenu" className="flex gap-1 sm:gap-2 overflow-x-auto min-w-0">
+          {/* Onglets pleine largeur, avec fade-mask sur overflow */}
+          <div className="mb-4 border-b border-border relative">
+            <div
+              role="tablist"
+              aria-label="Catégorie de contenu"
+              className="flex gap-1 sm:gap-2 overflow-x-auto min-w-0 scrollbar-none"
+              style={{ scrollbarWidth: "none" }}
+            >
               {(Object.keys(TAB_META) as Tab[]).map((t) => {
                 const isActive = tab === t;
                 const a = accentClasses[t];
@@ -391,7 +401,7 @@ const EntraideHub = () => {
                       className={`text-xs px-1.5 py-0.5 rounded-full font-medium tabular-nums ${
                         isActive ? a.pill : "bg-muted text-foreground/60"
                       }`}
-                      aria-label={showRatio ? `${filtered} sur ${total}` : `${total} éléments`}
+                      aria-label={showRatio ? `${filtered} affichés sur ${total} au total` : `${total} au total`}
                     >
                       {showRatio ? `${filtered}/${total}` : total}
                     </span>
@@ -399,12 +409,18 @@ const EntraideHub = () => {
                 );
               })}
             </div>
-            {isAuthenticated && (
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent sm:hidden" aria-hidden="true" />
+          </div>
+
+          {/* Toggle Mes publications, hors barre d'onglets */}
+          {isAuthenticated && (
+            <div className="mb-5 flex justify-end">
               <button
                 type="button"
                 onClick={() => setMineOnly((v) => !v)}
                 aria-pressed={mineOnly}
-                className={`shrink-0 mb-1 text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
+                aria-label={mineOnly ? "Afficher toutes les publications" : "N'afficher que mes publications"}
+                className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
                   mineOnly
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-card text-foreground/70 border-border hover:bg-accent"
@@ -412,14 +428,17 @@ const EntraideHub = () => {
               >
                 {mineOnly ? "Mes publications ✓" : "Mes publications"}
               </button>
-            )}
-          </div>
+            </div>
+          )}
 
           <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
             <p className="text-sm text-foreground/65 mb-4">{meta.description}</p>
 
-            {/* Comment ça marche */}
-            <details open className="mb-6 rounded-xl border border-border bg-card group">
+            {/* Comment ça marche, replié dès qu'il y a du contenu */}
+            <details
+              open={tabTotals[tab] === 0}
+              className="mb-6 rounded-xl border border-border bg-card group"
+            >
               <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between text-sm font-semibold text-foreground">
                 <span>Comment ça marche ?</span>
                 <ChevronDown
@@ -502,8 +521,8 @@ const EntraideHub = () => {
                       !mineOnly && !hasQuestionFilters
                         ? [
                             { label: "Mon chat ne mange plus depuis 2 jours, dois-je m'inquiéter ?", cat: "animaux" },
-                            { label: "Quelle plante d'intérieur non-toxique pour un chien ?", cat: "animaux" },
-                            { label: "Comment occuper mon chien pendant mes journées de travail ?", cat: "animaux" },
+                            { label: "Quel arrosage pour mes tomates pendant 10 jours d'absence ?", cat: "jardin" },
+                            { label: "Comment réinitialiser le disjoncteur principal de la maison ?", cat: "maison" },
                           ]
                         : undefined
                     }
@@ -545,7 +564,7 @@ const EntraideHub = () => {
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <Select value={mStatus} onValueChange={(v) => setMStatus(v as MissionStatus)}>
-                      <SelectTrigger className="h-8 w-auto min-w-[140px] text-xs">
+                      <SelectTrigger className="h-8 w-auto min-w-[140px] text-xs" aria-label="Filtrer par statut">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -557,7 +576,7 @@ const EntraideHub = () => {
                       </SelectContent>
                     </Select>
                     <Select value={mSort} onValueChange={(v) => setMSort(v as MissionSort)}>
-                      <SelectTrigger className="h-8 w-auto min-w-[160px] text-xs">
+                      <SelectTrigger className="h-8 w-auto min-w-[160px] text-xs" aria-label="Trier les publications">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -636,7 +655,7 @@ const EntraideHub = () => {
                               )}
                               <div className="flex items-center gap-2 mt-3">
                                 <Avatar className="h-6 w-6 shrink-0">
-                                  <AvatarImage src={m.profiles?.avatar_url || undefined} alt="" />
+                                  <AvatarImage src={m.profiles?.avatar_url || undefined} alt="" loading="lazy" />
                                   <AvatarFallback className="text-[10px]">{initial}</AvatarFallback>
                                 </Avatar>
                                 <span className="text-xs text-foreground/70 truncate">{authorName}</span>
@@ -696,18 +715,7 @@ const EntraideHub = () => {
           </div>
         </section>
 
-        {/* CTA flottant mobile au-dessus de la bottom nav */}
-        <div className="md:hidden fixed left-0 right-0 bottom-20 z-30 px-4 pointer-events-none">
-          <div className="max-w-3xl mx-auto flex justify-end">
-            <Button
-              onClick={primaryCta.action}
-              size="lg"
-              className="pointer-events-auto shadow-lg"
-            >
-              {primaryCta.label}
-            </Button>
-          </div>
-        </div>
+        {/* FAB mobile retiré : le CTA primaire du header (full-width) et la bottom nav suffisent */}
       </div>
     </>
   );
