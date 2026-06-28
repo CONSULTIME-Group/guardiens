@@ -345,14 +345,19 @@ const EntraideHub = () => {
           {/* Header */}
           <div className="mb-6">
             <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">
-              Entraide locale : conseils & coups de main près de chez vous
+              Entraide locale, près de chez vous
             </h1>
             <p className="text-foreground/70 mt-2">
-              Posez une question à la communauté, demandez un coup de main ponctuel ou proposez le vôtre, entre gens du coin.
+              Posez une question, demandez un coup de main ponctuel ou proposez le vôtre, entre gens du coin.
             </p>
-            <p className="text-xs text-foreground/55 mt-1">
-              Gratuit pour tous, sans engagement.
-            </p>
+            <div className="flex flex-wrap items-center gap-2 mt-3">
+              <span className="text-[11px] font-semibold uppercase tracking-wide px-2 py-1 rounded-full bg-accent/50 text-foreground/80">
+                Gratuit, sans engagement
+              </span>
+              <span className="text-[11px] font-semibold uppercase tracking-wide px-2 py-1 rounded-full bg-primary/10 text-primary">
+                Couverture France entière
+              </span>
+            </div>
 
             {/* CTA primaire (création) selon onglet actif */}
             <div className="mt-5">
@@ -362,9 +367,14 @@ const EntraideHub = () => {
             </div>
           </div>
 
-          {/* Onglets + toggle Mes publications */}
-          <div className="flex items-end justify-between gap-3 mb-5 border-b border-border">
-            <div role="tablist" aria-label="Catégorie de contenu" className="flex gap-1 sm:gap-2 overflow-x-auto min-w-0">
+          {/* Onglets pleine largeur, avec fade-mask sur overflow */}
+          <div className="mb-4 border-b border-border relative">
+            <div
+              role="tablist"
+              aria-label="Catégorie de contenu"
+              className="flex gap-1 sm:gap-2 overflow-x-auto min-w-0 scrollbar-none"
+              style={{ scrollbarWidth: "none" }}
+            >
               {(Object.keys(TAB_META) as Tab[]).map((t) => {
                 const isActive = tab === t;
                 const a = accentClasses[t];
@@ -391,7 +401,7 @@ const EntraideHub = () => {
                       className={`text-xs px-1.5 py-0.5 rounded-full font-medium tabular-nums ${
                         isActive ? a.pill : "bg-muted text-foreground/60"
                       }`}
-                      aria-label={showRatio ? `${filtered} sur ${total}` : `${total} éléments`}
+                      aria-label={showRatio ? `${filtered} affichés sur ${total} au total` : `${total} au total`}
                     >
                       {showRatio ? `${filtered}/${total}` : total}
                     </span>
@@ -399,12 +409,18 @@ const EntraideHub = () => {
                 );
               })}
             </div>
-            {isAuthenticated && (
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent sm:hidden" aria-hidden="true" />
+          </div>
+
+          {/* Toggle Mes publications, hors barre d'onglets */}
+          {isAuthenticated && (
+            <div className="mb-5 flex justify-end">
               <button
                 type="button"
                 onClick={() => setMineOnly((v) => !v)}
                 aria-pressed={mineOnly}
-                className={`shrink-0 mb-1 text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
+                aria-label={mineOnly ? "Afficher toutes les publications" : "N'afficher que mes publications"}
+                className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
                   mineOnly
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-card text-foreground/70 border-border hover:bg-accent"
@@ -412,8 +428,8 @@ const EntraideHub = () => {
               >
                 {mineOnly ? "Mes publications ✓" : "Mes publications"}
               </button>
-            )}
-          </div>
+            </div>
+          )}
 
           <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
             <p className="text-sm text-foreground/65 mb-4">{meta.description}</p>
