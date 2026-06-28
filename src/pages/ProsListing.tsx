@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
 import ProsMap from "@/components/pros/ProsMap";
+import { useAuth } from "@/contexts/AuthContext";
 
 type ProRow = {
   id: string;
