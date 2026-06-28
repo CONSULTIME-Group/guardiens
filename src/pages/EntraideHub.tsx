@@ -183,7 +183,7 @@ const EntraideHub = () => {
   /* Sync querystring */
   useEffect(() => {
     const next = new URLSearchParams(params);
-    if (tab === "questions") next.delete("tab");
+    if (tab === "besoins") next.delete("tab");
     else next.set("tab", tab);
 
     next.delete("cat");
