@@ -32,14 +32,14 @@ describe("pricing constants", () => {
   });
 
   it("PRICING_LONG contains required mentions", () => {
-    expect(PRICING_LONG).toContain("30 septembre 2026");
+    expect(PRICING_LONG).toContain("1er octobre 2026");
     expect(PRICING_LONG).toContain("6,99");
     expect(PRICING_LONG).toContain("30 septembre 2026");
     expect(PRICING_LONG).toContain("Fondateur");
   });
 
   it("PRICING_SHORT contains required mentions", () => {
-    expect(PRICING_SHORT).toContain("30 septembre 2026");
+    expect(PRICING_SHORT).toContain("1er octobre 2026");
     expect(PRICING_SHORT).toContain("6,99");
   });
 
