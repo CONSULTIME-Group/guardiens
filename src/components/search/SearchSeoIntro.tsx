@@ -1,27 +1,22 @@
 /**
- * H1 SEO unique de /recherche, compact et sobre pour ne pas alourdir la
- * hiérarchie visuelle au-dessus de la barre de recherche.
- *
- * Le H1 reste dans le DOM au premier paint pour Googlebot, mais la copie
- * est resserrée : une ligne titre + une ligne descriptive courte.
+ * H1 SEO unique de /recherche, réduit à un eyebrow d'une ligne pour se
+ * fondre dans le hero de recherche juste en dessous (pas de bordure, pas
+ * de bloc autonome). Le H1 reste dans le DOM pour Googlebot mais n'occupe
+ * plus de hauteur visuelle significative.
  */
 const SearchSeoIntro = ({ resultsCount }: { resultsCount?: number }) => {
   return (
-    <header className="border-b border-border bg-background">
-      <div className="container max-w-6xl mx-auto px-4 py-3 md:py-4">
-        <h1 className="font-display text-lg md:text-xl font-semibold text-foreground leading-tight">
-          Annonces de garde d'animaux à domicile en France
-        </h1>
-        <p className="mt-1 text-xs md:text-sm text-muted-foreground max-w-3xl">
-          {typeof resultsCount === "number" && resultsCount > 0 ? (
-            <>
-              <span className="font-medium text-foreground">{resultsCount} annonce{resultsCount > 1 ? "s" : ""}</span>{" "}
-              de garde de chats, chiens et NAC. Consultation libre.
-            </>
-          ) : (
-            <>Chats, chiens, NAC. Consultation libre, inscription gratuite pour postuler.</>
-          )}
+    <header className="bg-background">
+      <div className="container max-w-6xl mx-auto px-4 pt-3 md:pt-4 pb-1">
+        <p className="text-[10px] md:text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          Recherche · Annonces de garde
         </p>
+        <h1 className="sr-only">
+          Annonces de garde d'animaux à domicile en France
+          {typeof resultsCount === "number" && resultsCount > 0
+            ? ` — ${resultsCount} annonce${resultsCount > 1 ? "s" : ""}`
+            : ""}
+        </h1>
       </div>
     </header>
   );
