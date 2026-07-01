@@ -344,14 +344,14 @@ const MySubscription = () => {
   // ══════════════════════════════════════════════════════════
   if (view === "pre_launch") {
     return (
-      <PageShell subtitle="Tout est offert pendant la bêta, aucun paiement avant le 15 juillet 2026.">
+      <PageShell subtitle="Tout est offert pendant la bêta, aucun paiement avant le 1er octobre 2026.">
         {isNewMember && (
           <div className="bg-primary/10 border border-primary/20 rounded-xl px-5 py-4 flex items-start gap-3" role="status" aria-live="polite">
             <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
             <div>
               <p className="text-sm font-semibold text-primary font-body">Bienvenue chez Guardiens.</p>
               <p className="text-sm text-muted-foreground font-body mt-0.5">
-                Votre compte est actif. Toutes les fonctionnalités sont disponibles jusqu'au 15 juillet 2026.
+                Votre compte est actif. Toutes les fonctionnalités sont disponibles jusqu'au 1er octobre 2026.
               </p>
             </div>
           </div>
@@ -364,7 +364,7 @@ const MySubscription = () => {
               Pré-lancement · Bêta
             </span>
             <h2 className="font-heading text-2xl sm:text-3xl font-semibold text-foreground leading-tight">
-              Tout est offert jusqu'au 14 juillet 2026.
+              Tout est offert jusqu'au 30 septembre 2026.
             </h2>
             <p className="text-base text-muted-foreground font-body max-w-sm leading-relaxed">
               Guardiens est en version bêta. Toutes les fonctionnalités sont ouvertes, sans restriction.
@@ -431,7 +431,7 @@ const MySubscription = () => {
             <div className="w-full bg-founder-soft rounded-full h-2 overflow-hidden" role="progressbar" aria-valuenow={countdown.progressPct} aria-valuemin={0} aria-valuemax={100} aria-label="Progression vers le lancement">
               <div className="bg-founder h-2 rounded-full transition-all duration-700" style={{ width: `${countdown.progressPct}%` }} />
             </div>
-            <p className="text-xs text-muted-foreground font-body">Lancement officiel le 14 juillet 2026.</p>
+            <p className="text-xs text-muted-foreground font-body">Lancement officiel le 30 septembre 2026.</p>
           </div>
 
           {/* Profile nudge */}
@@ -491,7 +491,7 @@ const MySubscription = () => {
                     Vous devenez Fondateur le 14 juillet.
                   </p>
                   <p className="text-sm text-founder-foreground/80 font-body leading-relaxed">
-                    Chaque membre inscrit avant le 14 juillet 2026 reçoit le badge Fondateur, visible sur son profil public. L'accès offert, lui, est étendu à tous les inscrits jusqu'au 14 juillet 2026.
+                    Chaque membre inscrit avant le 30 septembre 2026 reçoit le badge Fondateur, visible sur son profil public. L'accès offert, lui, est étendu à tous les inscrits jusqu'au 30 septembre 2026.
                   </p>
                 </div>
               </div>
@@ -521,7 +521,7 @@ const MySubscription = () => {
               Explorer les annonces
             </Link>
             <p className="text-xs text-muted-foreground font-body text-center">
-              Revenez ici à partir du 15 juillet 2026 pour choisir votre formule.
+              Revenez ici à partir du 1er octobre 2026 pour choisir votre formule.
             </p>
           </div>
         </section>
@@ -666,7 +666,7 @@ const MySubscription = () => {
             <BadgeSceauLarge id="fondateur" size={52} />
             <h2 className="font-heading text-2xl font-semibold text-foreground">Vous êtes Fondateur Guardiens.</h2>
             <p className="text-base text-muted-foreground font-body">
-              Votre accès complet est offert jusqu'au 15 juillet 2026.
+              Votre accès complet est offert jusqu'au 1er octobre 2026.
             </p>
           </div>
 
@@ -677,7 +677,7 @@ const MySubscription = () => {
             <div className="w-full bg-founder-border/40 rounded-full h-2 overflow-hidden">
               <div className="bg-founder h-2 rounded-full transition-all duration-500" style={{ width: `${progressPct}%` }} />
             </div>
-            <p className="text-xs text-founder-foreground/70 font-body">Accès offert jusqu'au 15 juillet 2026.</p>
+            <p className="text-xs text-founder-foreground/70 font-body">Accès offert jusqu'au 1er octobre 2026.</p>
           </div>
 
           <div className="bg-muted/30 rounded-xl p-5">
@@ -715,7 +715,7 @@ const MySubscription = () => {
               <DialogTitle className="font-heading text-xl">Choisissez votre formule</DialogTitle>
             </DialogHeader>
             <div className="bg-founder-soft border border-founder-border rounded-lg p-3 text-sm text-founder-foreground font-body mb-4">
-              En choisissant maintenant, votre abonnement démarrera le 15 juillet 2026. Votre accès fondateur reste intact jusqu'à cette date.
+              En choisissant maintenant, votre abonnement démarrera le 1er octobre 2026. Votre accès fondateur reste intact jusqu'à cette date.
             </div>
             <PricingCardsCheckout />
           </DialogContent>

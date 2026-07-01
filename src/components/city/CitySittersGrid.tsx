@@ -56,7 +56,7 @@ const CitySittersGrid = ({ city, citySlug }: Props) => {
         <p className="text-muted-foreground">
           {list.length > 0
             ? "Profils publics, identités vérifiées manuellement par l'équipe Guardiens."
-            : "Le réseau se construit. Rejoignez les membres fondateurs et profitez de la gratuité jusqu'au 14 juillet 2026."}
+            : "Le réseau se construit. Rejoignez les membres fondateurs et profitez de la gratuité jusqu'au 30 septembre 2026."}
         </p>
       </div>
 

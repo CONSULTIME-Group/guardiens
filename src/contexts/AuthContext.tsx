@@ -78,7 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const checkFounderExpiry = useCallback(async (userId: string, isFounder: boolean) => {
     if (!isFounder) return;
-    const FOUNDER_DEADLINE = new Date("2026-07-14T23:59:59Z");
+    const FOUNDER_DEADLINE = new Date("2026-09-30T23:59:59Z");
     if (new Date() <= FOUNDER_DEADLINE) return;
 
     const { data: subs } = await supabase

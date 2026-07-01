@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
       const html = `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px;">
           <p>Bonjour ${founder.first_name || ''},</p>
-          <p>Dans 7 jours, le <strong>13 juillet 2026</strong>, votre période d'accès fondateur se termine.</p>
+          <p>Dans 7 jours, le <strong>30 septembre 2026</strong>, votre période d'accès fondateur se termine.</p>
           <p>Sans abonnement, vous ne pourrez plus postuler aux gardes ni apparaître dans les recherches des propriétaires.</p>
           <p>Vos données et votre badge Fondateur restent à vie.</p>
           <p>Il est encore temps de choisir votre formule :</p>

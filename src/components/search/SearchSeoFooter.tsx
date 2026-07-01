@@ -25,7 +25,7 @@ export const SEARCH_FAQ = [
   },
   {
     q: "Combien coûte la consultation des annonces ?",
-    a: "La consultation est libre et gratuite, même sans compte. L'inscription est gratuite pour postuler à une annonce. L'espace propriétaire reste gratuit. L'espace gardien est gratuit jusqu'au 14 juillet 2026, puis 6,99 € par mois sans engagement.",
+    a: "La consultation est libre et gratuite, même sans compte. L'inscription est gratuite pour postuler à une annonce. L'espace propriétaire reste gratuit. L'espace gardien est gratuit jusqu'au 30 septembre 2026, puis 6,99 € par mois sans engagement.",
   },
   {
     q: "Quels animaux peut-on faire garder ?",

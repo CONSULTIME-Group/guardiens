@@ -75,7 +75,7 @@ Aucune carte bancaire n'est demandée à l'inscription. Vous accédez à toutes 
 
 Cet accès gratuit ne dépend pas du programme Fondateur : que vous vous inscriviez le 1ᵉʳ février ou le 12 juin 2026, vous ne payez rien jusqu'au ${SITTER_PRICE_START}.
 
-À partir du 15 juillet 2026, l'abonnement gardien à ${SITTER_PRICE} devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit.`,
+À partir du 1er octobre 2026, l'abonnement gardien à ${SITTER_PRICE} devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit.`,
  },
  {
   q: `Qu'est-ce que le programme Fondateur ?`,
@@ -109,7 +109,7 @@ La formule **annuelle (65 €/an)** est résiliable à tout moment ; le renouvel
   q: `Pourquoi le 14 juillet ?`,
   a: `Il fallait une date après plusieurs semaines d'accès gratuit, un repère simple, partagé par toutes et tous. Le **${SITTER_PRICE_START}, fête nationale**, s'est imposé naturellement.
 
-C'est ce jour-là que l'accès gratuit prend fin pour les gardiens. À partir du **15 juillet 2026**, l'abonnement gardien à ${SITTER_PRICE} devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit en permanence.`,
+C'est ce jour-là que l'accès gratuit prend fin pour les gardiens. À partir du **1er octobre 2026**, l'abonnement gardien à ${SITTER_PRICE} devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit en permanence.`,
  },
  {
   q: "Y a-t-il des frais cachés ?",
@@ -278,7 +278,7 @@ const Pricing = () => {
    {
     "@type": "Offer",
     name: "Abonnement Gardien, Mensuel",
-    description: `Abonnement gardien à 6,99 €/mois à partir du 14 juillet 2026. Sans engagement, résiliable à tout moment.`,
+    description: `Abonnement gardien à 6,99 €/mois à partir du 30 septembre 2026. Sans engagement, résiliable à tout moment.`,
     price: String(SITTER_PRICE_NUMERIC),
     priceCurrency: SITTER_PRICE_CURRENCY,
     eligibleCustomerType: "Sitter",

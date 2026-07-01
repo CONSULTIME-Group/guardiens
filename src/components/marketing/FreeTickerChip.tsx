@@ -9,7 +9,7 @@ interface FreeTickerChipProps {
 }
 
 /**
- * Petit "ticker" discret rappelant la accès à 0 € en cours jusqu'au 14 juillet 2026.
+ * Petit "ticker" discret rappelant la accès à 0 € en cours jusqu'au 30 septembre 2026.
  * - Pendant la période : pastille pulsée + texte daté.
  * - Hors période : optionnel fallback (ex. "À 0 € pour les propriétaires").
  */

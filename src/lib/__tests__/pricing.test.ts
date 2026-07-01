@@ -25,21 +25,21 @@ describe("pricing constants", () => {
   it("exposes correct atomic values", () => {
     expect(SITTER_PRICE_NUMERIC).toBe(6.99);
     expect(SITTER_PRICE_CURRENCY).toBe("EUR");
-    expect(SITTER_PRICE_START).toBe("14 juillet 2026");
-    expect(SITTER_PRICE_START_ISO).toBe("2026-07-14");
-    expect(FOUNDER_DEADLINE).toBe("14 juillet 2026");
-    expect(FOUNDER_DEADLINE_ISO).toBe("2026-07-14");
+    expect(SITTER_PRICE_START).toBe("30 septembre 2026");
+    expect(SITTER_PRICE_START_ISO).toBe("2026-09-30");
+    expect(FOUNDER_DEADLINE).toBe("30 septembre 2026");
+    expect(FOUNDER_DEADLINE_ISO).toBe("2026-09-30");
   });
 
   it("PRICING_LONG contains required mentions", () => {
-    expect(PRICING_LONG).toContain("14 juillet 2026");
+    expect(PRICING_LONG).toContain("30 septembre 2026");
     expect(PRICING_LONG).toContain("6,99");
-    expect(PRICING_LONG).toContain("14 juillet 2026");
+    expect(PRICING_LONG).toContain("30 septembre 2026");
     expect(PRICING_LONG).toContain("Fondateur");
   });
 
   it("PRICING_SHORT contains required mentions", () => {
-    expect(PRICING_SHORT).toContain("14 juillet 2026");
+    expect(PRICING_SHORT).toContain("30 septembre 2026");
     expect(PRICING_SHORT).toContain("6,99");
   });
 

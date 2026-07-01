@@ -6,7 +6,7 @@ interface FreePeriodBannerProps {
 
 /**
  * Bandeau d'information sur la période de accès à 0 € en cours.
- * Affiché uniquement entre le lancement (14 juin 2026) et le 14 juillet 2026 inclus.
+ * Affiché uniquement entre le lancement (14 juin 2026) et le 30 septembre 2026 inclus.
  * Indique les dates exactes pour rassurer les visiteurs.
  */
 export const FreePeriodBanner = ({ className = "" }: FreePeriodBannerProps) => {

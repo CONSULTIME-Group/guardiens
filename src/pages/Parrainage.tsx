@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { safeUUID } from "@/lib/uuid";
 
-const SITTER_PRICE_START = "14 juillet 2026";
+const SITTER_PRICE_START = "30 septembre 2026";
 
 const ParrainagePage = () => {
   const { user } = useAuth();

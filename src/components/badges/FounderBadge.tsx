@@ -26,7 +26,7 @@ export default function FounderBadge({ size = 'md', className = '' }: FounderBad
  className={`${sizeClasses[size]} ${className}`}
  />
  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-foreground text-background text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
- Membre Fondateur, inscrit avant le 14 juillet 2026
+ Membre Fondateur, inscrit avant le 30 septembre 2026
  </div>
  </div>
 
@@ -46,7 +46,7 @@ export default function FounderBadge({ size = 'md', className = '' }: FounderBad
  Ce badge restera affiché sur votre profil.
  </p>
  <p className="text-xs text-muted-foreground/60 italic">
- Inscrit avant le 14 juillet 2026
+ Inscrit avant le 30 septembre 2026
  </p>
  </DialogContent>
  </Dialog>

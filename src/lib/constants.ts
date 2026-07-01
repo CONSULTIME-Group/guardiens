@@ -4,10 +4,10 @@
  */
 
 // ── Dates clés du lancement ──
-export const LAUNCH_DATE = new Date("2026-07-14T00:00:00Z");
+export const LAUNCH_DATE = new Date("2026-09-30T00:00:00Z");
 export const LAUNCH_START = new Date("2026-05-07T00:00:00Z");
-export const FOUNDER_START = new Date("2026-07-13T00:00:00Z");
-export const GRACE_END = new Date("2026-07-15T00:00:00Z");
+export const FOUNDER_START = new Date("2026-09-30T00:00:00Z");
+export const GRACE_END = new Date("2026-10-01T00:00:00Z");
 
 // ── Helpers temporels ──
 export const isBeforeLaunch = () => new Date() < LAUNCH_DATE;

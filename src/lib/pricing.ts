@@ -24,10 +24,10 @@ export const SITTER_PRICE_ANNUAL = `65${NBSP}€/an`;
 export const SITTER_PRICE_ANNUAL_NUMERIC = 65;
 export const SITTER_PRICE_ANNUAL_MONTHLY_EQUIV = `5,42${NBSP}€/mois`;
 export const SITTER_PRICE_ANNUAL_DISCOUNT_PCT = 22;
-export const SITTER_PRICE_START = "14 juillet 2026";
-export const SITTER_PRICE_START_ISO = "2026-07-14";
-export const FOUNDER_DEADLINE = "14 juillet 2026";
-export const FOUNDER_DEADLINE_ISO = "2026-07-14";
+export const SITTER_PRICE_START = "30 septembre 2026";
+export const SITTER_PRICE_START_ISO = "2026-09-30";
+export const FOUNDER_DEADLINE = "30 septembre 2026";
+export const FOUNDER_DEADLINE_ISO = "2026-09-30";
 
 // ── Parrainage ───────────────────────────────────────────────────────────────
 // Nombre de mois d'abonnement gardien offerts par filleul activé une fois

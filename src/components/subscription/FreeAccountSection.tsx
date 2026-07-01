@@ -6,7 +6,7 @@
  * - écrans de checkout
  *
  * Objectif : clarifier ce qui reste accessible sans frais
- * pour TOUS les comptes après le 15 juillet 2026, qu'ils soient
+ * pour TOUS les comptes après le 1er octobre 2026, qu'ils soient
  * abonnés ou non. Aucun CTA, section purement informative.
  */
 const accesGratuits: Array<{ titre: string; detail: string }> = [

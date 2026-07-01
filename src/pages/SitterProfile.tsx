@@ -148,7 +148,7 @@ const SitterProfile = () => {
     supabase.from("profiles").select("is_founder, created_at").eq("id", user.id).single().then(({ data: p }) => {
       if (p) {
         const created = p.created_at ? new Date(p.created_at) : new Date();
-        setIsFounder(p.is_founder || created < new Date("2026-07-13T00:00:00Z"));
+        setIsFounder(p.is_founder || created < new Date("2026-09-30T00:00:00Z"));
       }
     });
     supabase.from("sitter_gallery").select("id", { count: "exact", head: true }).eq("user_id", user.id).then(({ count }) => {
