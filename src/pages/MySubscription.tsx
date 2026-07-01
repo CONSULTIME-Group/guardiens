@@ -694,10 +694,10 @@ const MySubscription = () => {
 
           <div className="flex flex-col items-center gap-2 pt-2">
             <Button variant="outline" className="border-primary text-primary hover:bg-primary/5 font-body" onClick={() => setShowSupportDialog(true)}>
-              Choisir ma formule pour le 15 juillet
+              Choisir ma formule pour le 1er octobre 2026
             </Button>
             <p className="text-xs text-muted-foreground italic text-center max-w-xs font-body">
-              Votre abonnement démarrera le 15 juillet, vous ne perdrez pas un seul jour.
+              Votre abonnement démarrera le 1er octobre 2026, vous ne perdrez pas un seul jour.
             </p>
           </div>
 
