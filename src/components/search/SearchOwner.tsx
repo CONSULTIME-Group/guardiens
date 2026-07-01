@@ -875,11 +875,23 @@ const SearchOwner = () => {
             {hasActiveFilters && (
               <button onClick={resetFilters} className="text-xs text-primary hover:underline whitespace-nowrap shrink-0">Réinit.</button>
             )}
-            <div className="flex gap-1.5 shrink-0">
+            {/* Mobile : Select compact — Desktop : pills visibles */}
+            <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
+              <SelectTrigger className="sm:hidden h-8 w-auto gap-1.5 rounded-full border-border bg-card px-3 text-xs shrink-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent align="start">
+                <SelectItem value="closest">Plus proches</SelectItem>
+                <SelectItem value="rating">Mieux notés</SelectItem>
+                <SelectItem value="experience">Plus expérimentés</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="hidden sm:flex gap-1.5 shrink-0">
               {[{ label: "Plus proches", value: "closest" as SortOption }, { label: "Mieux notés", value: "rating" as SortOption }, { label: "Plus expérimentés", value: "experience" as SortOption }].map(opt => (
                 <button key={opt.value} onClick={() => setSort(opt.value)} className={sort === opt.value ? sortPillActive : sortPillBase}>{opt.label}</button>
               ))}
             </div>
+
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
             {city && (
