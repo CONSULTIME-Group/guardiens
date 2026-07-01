@@ -25,8 +25,8 @@ describe("pricing constants", () => {
   it("exposes correct atomic values", () => {
     expect(SITTER_PRICE_NUMERIC).toBe(6.99);
     expect(SITTER_PRICE_CURRENCY).toBe("EUR");
-    expect(SITTER_PRICE_START).toBe("30 septembre 2026");
-    expect(SITTER_PRICE_START_ISO).toBe("2026-09-30");
+    expect(SITTER_PRICE_START).toBe("1er octobre 2026");
+    expect(SITTER_PRICE_START_ISO).toBe("2026-10-01");
     expect(FOUNDER_DEADLINE).toBe("30 septembre 2026");
     expect(FOUNDER_DEADLINE_ISO).toBe("2026-09-30");
   });
