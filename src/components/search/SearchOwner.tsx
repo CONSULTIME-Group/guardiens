@@ -557,10 +557,10 @@ const SearchOwner = () => {
       {/* Title */}
       <div className="px-6 pt-6 pb-2 md:pt-8 space-y-1.5">
         <h2 className="font-heading text-3xl font-bold">Trouver un gardien</h2>
-        <p className="text-sm text-muted-foreground">Le gardien idéal pour votre maison et vos animaux, du coin par défaut, élargissez à toute la France à tout moment.</p>
-        {/* KPI preuve sociale, visible mobile + desktop, compact */}
+        <p className="text-sm text-muted-foreground">Près de chez vous par défaut, partout en France en un clic.</p>
+        {/* KPI preuve sociale, desktop uniquement, discret (masqué mobile pour désencombrer above-the-fold) */}
         {(activeSittersCount || activeOwnersCount) && (
-          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground pt-1">
+          <p className="hidden md:flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground pt-1">
             {!!activeSittersCount && (
               <span className="inline-flex items-center">
                 <span className="font-semibold text-foreground mr-1">{activeSittersCount.toLocaleString("fr-FR")}</span>
@@ -579,6 +579,7 @@ const SearchOwner = () => {
           </p>
         )}
       </div>
+
 
 
       {/* Sticky search bar */}
@@ -724,11 +725,11 @@ const SearchOwner = () => {
             </PopoverContent>
           </Popover>
 
-          {/* PILL 2, Rayon (only meaningful in radius zone mode) */}
+          {/* PILL 2, Rayon — mobile uniquement (desktop a le Select rayon dans le hero) */}
           {zoneMode === "radius" && (
             <Popover open={openPop === "rad"} onOpenChange={(o) => setOpenPop(o ? "rad" : null)}>
               <PopoverTrigger asChild>
-                <button className={pillBase}>{radius[0]} km</button>
+                <button className={`md:hidden ${pillBase}`}>{radius[0]} km</button>
               </PopoverTrigger>
               <PopoverContent align="start" className="w-64 p-3 space-y-3">
                 <div className="flex gap-2 flex-wrap">
@@ -754,6 +755,7 @@ const SearchOwner = () => {
               </PopoverContent>
             </Popover>
           )}
+
 
           {/* PILL 3, Dates : retiré tant que la disponibilité datée gardien n'est pas modélisée */}
           {/* PILL 4, Animaux */}
@@ -861,37 +863,10 @@ const SearchOwner = () => {
           <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:hidden" />
         </div>
 
-        {/* Zone mode selector with density counters */}
-        <div className="relative -mr-6 sm:mr-0">
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pr-10 sm:pr-0 snap-x snap-mandatory scroll-px-6 overscroll-x-contain">
-            <span className="text-xs text-muted-foreground shrink-0 mr-1">Zone&nbsp;:</span>
-            {zoneChips.map((z) => {
-              const active = zoneMode === z.key;
-              return (
-                <button
-                  key={z.key}
-                  onClick={() => {
-                    if (z.disabled) return;
-                    setZoneMode(z.key);
-                    trackEvent("search_empty_action", { source: "owner", metadata: { action: "change_zone", zone_mode: z.key } });
-                  }}
-                  disabled={z.disabled}
-                  className={`snap-start shrink-0 rounded-full px-3 py-1 min-h-9 inline-flex items-center text-xs border transition-colors whitespace-nowrap ${
-                    active
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : z.disabled
-                        ? "border-border text-muted-foreground/50 cursor-not-allowed"
-                        : "border-border text-muted-foreground hover:border-primary"
-                  }`}
-                  title={z.disabled ? "Renseignez une ville" : undefined}
-                >
-                  {z.label} <span className="opacity-70">({z.count})</span>
-                </button>
-              );
-            })}
-          </div>
-          <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:hidden" />
-        </div>
+        {/* Zone mode selector retiré du toolbar : redondant avec le Select rayon (desktop),
+            la pill Rayon (mobile) et le bouton "Élargir à France entière" de l'empty state.
+            Le changement de mode zone reste accessible via l'empty state et l'OutOfZoneBanner. */}
+
 
         {/* Sort bar + view toggle (sticky avec les pills pour cohérence visuelle) */}
         <div className="flex items-center justify-between gap-2 -mx-6 px-6 pt-2.5 border-t border-border/60 flex-nowrap">
@@ -900,11 +875,23 @@ const SearchOwner = () => {
             {hasActiveFilters && (
               <button onClick={resetFilters} className="text-xs text-primary hover:underline whitespace-nowrap shrink-0">Réinit.</button>
             )}
-            <div className="flex gap-1.5 shrink-0">
+            {/* Mobile : Select compact — Desktop : pills visibles */}
+            <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
+              <SelectTrigger className="sm:hidden h-8 w-auto gap-1.5 rounded-full border-border bg-card px-3 text-xs shrink-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent align="start">
+                <SelectItem value="closest">Plus proches</SelectItem>
+                <SelectItem value="rating">Mieux notés</SelectItem>
+                <SelectItem value="experience">Plus expérimentés</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="hidden sm:flex gap-1.5 shrink-0">
               {[{ label: "Plus proches", value: "closest" as SortOption }, { label: "Mieux notés", value: "rating" as SortOption }, { label: "Plus expérimentés", value: "experience" as SortOption }].map(opt => (
                 <button key={opt.value} onClick={() => setSort(opt.value)} className={sort === opt.value ? sortPillActive : sortPillBase}>{opt.label}</button>
               ))}
             </div>
+
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
             {city && (
