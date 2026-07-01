@@ -1329,15 +1329,16 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  {/* Animals picker retiré, remplacé par la pill catégorie « Animaux » ci-dessus */}
 
 
-   {/* Verified toggle promu (raccourci confiance) */}
-   <button
-  onClick={() => setVerifiedOnly(v => !v)}
-  aria-pressed={verifiedOnly}
-  className={`${pillClass} ${verifiedOnly ? "bg-primary/10 border-primary text-primary" : ""}`}
-  >
-  <ShieldCheck className={`h-4 w-4 ${verifiedOnly ? "text-primary" : "text-muted-foreground"}`} />
-  <span>{verifiedOnly ? "Vérifiés uniquement" : "Vérifié"}</span>
-  </button>
+   {/* Pill "Vérifié" retirée : accessible dans le sheet Filtres, redondance supprimée. */}
+   {verifiedOnly && (
+     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-full bg-primary/10 border border-primary text-primary text-xs font-semibold shrink-0 whitespace-nowrap">
+       <ShieldCheck className="h-3.5 w-3.5" />
+       Vérifiés uniquement
+       <button aria-label="Retirer filtre Vérifié" onClick={() => setVerifiedOnly(false)} className="rounded-full hover:bg-primary/20 p-0.5">
+         <X className="h-3 w-3" />
+       </button>
+     </span>
+   )}
 
    {/* Advanced filters pill, type de logement / environnement, désactivé hors connexion */}
    <div
