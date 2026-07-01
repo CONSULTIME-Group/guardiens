@@ -387,8 +387,8 @@ const MySubscription = () => {
               <div className="absolute top-3 left-8 right-8 h-px bg-border" aria-hidden="true" />
               {[
                 { label: "Maintenant", sub: "Accès complet", state: "active" as const },
-                { label: "14 juillet", sub: "Badge Fondateur", state: "founder" as const },
-                { label: "15 juillet", sub: "Fin de la grâce", state: "future" as const },
+                { label: "30 septembre 2026", sub: "Badge Fondateur", state: "founder" as const },
+                { label: "1er octobre 2026", sub: "Fin de la grâce", state: "future" as const },
                 { label: "Ensuite", sub: "6,99 €/mois · sans engagement", state: "future" as const },
               ].map(({ label, sub: subText, state }) => (
                 <li key={label} className="flex flex-col items-center gap-1.5 z-10 flex-1">
