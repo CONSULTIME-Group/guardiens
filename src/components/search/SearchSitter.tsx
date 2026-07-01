@@ -44,7 +44,7 @@ import { ILLUSTRATIONS } from "@/components/shared/EmptyState";
 import { getDeptCode, DEPT_NAMES } from "@/lib/departments";
 import { getRegionCode, getRegionName, getDeptsInRegion, REGION_NAMES, DEPT_TO_REGION } from "@/lib/regions";
 import { trackEvent } from "@/lib/analytics";
-import ReachReassuranceBanner from "@/components/marketing/ReachReassuranceBanner";
+// ReachReassuranceBanner retiré : redondant avec le sélecteur Zone.
 import LocationPickerPopover from "@/components/search/header/LocationPickerPopover";
 import ZonePickerPopover from "@/components/search/header/ZonePickerPopover";
 import DatesPickerPopover from "@/components/search/header/DatesPickerPopover";
@@ -1074,7 +1074,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const availableSitsCount = results.filter((r: any) => !r.isAssigned && !r.isCompleted && !r.isPast && !r.is_demo).length;
  const demoCount = results.filter((r: any) => r.is_demo).length;
  const resultCount = tab === "missions" && missionSubTab === "members" ? availableMembers.length : availableSitsCount;
-  const hasNoLocalRealMissions = tab === "missions" && missionSubTab === "published" && !loading && zoneMode !== "france" && resultCount === 0 && densityCounts.france > 0;
+  // hasNoLocalRealMissions retiré : OutOfZoneBanner couvre déjà ce cas.
  const countLabel = tab === "missions" && missionSubTab === "members"
  ? `${resultCount} membre${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""}`
  : resultCount === 0 && demoCount > 0
@@ -1213,15 +1213,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  </div>
  </div>
  )}
- {/* Réassurance périmètre. En public on raccourcit (la promesse est déjà dans le hero). */}
- {!isPublic && (
- <div className="px-6 pt-4">
- <ReachReassuranceBanner
- variant="inline"
- inlineText="Du coin par défaut, élargissez à toute la France quand vous le voulez."
- />
- </div>
- )}
+  {/* Réassurance périmètre retirée : redondante avec le sélecteur Zone (radius / dept / France). */}
 
   {/* ─── Sticky search bar ─── */}
   <div className="sticky top-[52px] md:top-0 z-[1100] bg-background border-b-2 border-border shadow-sm">
@@ -1433,55 +1425,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
       <span className="inline-flex items-center justify-center rounded-full bg-primary-foreground/20 px-1.5 py-0.5 text-[10px] font-bold">{intlCount}</span>
     </Link>
    )}
-  {tab === "sits" && user && (
- <TooltipProvider>
- <Tooltip>
- <TooltipTrigger asChild>
- {isMobile ? (
- <Button
- variant={alertCreated ? "secondary" : "outline"}
- size="icon"
- disabled={!city || isCreatingAlert}
- onClick={alertCreated ? () => navigate("/settings") : handleCreateAlert}
- className="shrink-0 mr-2"
- >
- {isCreatingAlert ? (
- <Loader2 className="h-4 w-4 animate-spin" />
- ) : alertCreated ? (
- <BellRing className="h-4 w-4" />
- ) : (
- <Bell className="h-4 w-4" />
- )}
- </Button>
- ) : (
- <Button
- variant={alertCreated ? "secondary" : "outline"}
- size="sm"
- disabled={!city || isCreatingAlert}
- onClick={alertCreated ? () => navigate("/settings") : handleCreateAlert}
- className="ml-auto mr-2 shrink-0"
- >
- {isCreatingAlert ? (
- <Loader2 className="h-4 w-4 animate-spin" />
- ) : alertCreated ? (
- <BellRing className="h-4 w-4" />
- ) : (
- <Bell className="h-4 w-4" />
- )}
- {isCreatingAlert ? "Création…" : alertCreated ? "Alerte créée" : "Créer une alerte"}
- </Button>
- )}
- </TooltipTrigger>
- <TooltipContent>
- {!city
- ? "Sélectionnez une ville pour créer une alerte"
- : alertCreated
- ? "Gérer vos alertes dans les paramètres"
- : "Créer une alerte pour cette recherche"}
- </TooltipContent>
- </Tooltip>
- </TooltipProvider>
- )}
+  {/* Bouton « Créer une alerte » retiré du toolbar : l'empty state et OutOfZoneBanner exposent déjà ce CTA au bon moment. */}
   <div className="hidden sm:flex border border-border rounded-lg overflow-hidden shrink-0">
  <button
  onClick={() => setViewMode("list")}
@@ -1520,27 +1464,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     />
   )}
 
-  {hasNoLocalRealMissions && (
-    <div className="mx-6 mt-4 rounded-2xl border-2 border-primary/40 bg-primary/10 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-      <div className="min-w-0">
-        <p className="font-heading font-semibold text-base text-foreground">
-          {densityCounts.france} mission{densityCounts.france > 1 ? "s" : ""} publiée{densityCounts.france > 1 ? "s" : ""} hors de votre zone
-        </p>
-        <p className="text-sm text-muted-foreground mt-1">
-          Votre recherche est centrée sur {city || "votre secteur"}. Élargissez à toute la France pour voir l'annonce d'Agnès et les autres coups de main ouverts.
-        </p>
-      </div>
-      <Button
-        className="shrink-0"
-        onClick={() => {
-          trackEvent("search_outofzone_click", { source: "missions_outofzone_banner", metadata: { action: "expand_zone", to: "france", previous_mode: zoneMode, count_france: densityCounts.france, city } });
-          setZoneMode("france");
-        }}
-      >
-        Voir toute la France
-      </Button>
-    </div>
-  )}
+  {/* hasNoLocalRealMissions banner retiré : OutOfZoneBanner couvre déjà l'élargissement de zone. */}
 
  {/* ─── No city warning ─── (masqué si OutOfZoneBanner déjà visible pour éviter l'empilement) */}
  {!userCity && !(tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius) && (
