@@ -1490,8 +1490,8 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     </div>
   )}
 
- {/* ─── No city warning ─── */}
- {!userCity && (
+ {/* ─── No city warning ─── (masqué si OutOfZoneBanner déjà visible pour éviter l'empilement) */}
+ {!userCity && !(tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius) && (
  <div className="mx-6 mt-4 bg-accent border border-border rounded-lg p-3 text-sm">
  <MapPin className="inline h-4 w-4 mr-1.5 text-primary" />
  <Link to="/profile" className="text-primary underline">Renseignez votre ville</Link> pour voir les gardes près de chez vous.
