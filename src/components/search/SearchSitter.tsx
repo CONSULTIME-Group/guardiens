@@ -1940,33 +1940,44 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     />
   ) : (
   <>
-    {!isPublic && tab === "sits" && (
-      <SitterDiscoveryBanner
-        totalFrance={densityCounts.france}
-        totalRadius={densityCounts.radius}
-        zoneMode={zoneMode}
-        city={city}
-        alertCreated={alertCreated}
-        isCreatingAlert={isCreatingAlert}
-        onCreateAlert={handleCreateAlert}
-        isAvailable={!!sitterProfile?.is_available}
-        onActivateAvailable={handleActivateAvailable}
-        onExpandToFrance={() => {
-          trackEvent("search_empty_action", { source: "discovery_banner", metadata: { action: "expand_to_france", from: zoneMode, radius_count: densityCounts.radius, france_count: densityCounts.france } });
-          setZoneMode("france");
-        }}
-      />
-    )}
-    {tab === "sits" && user && sitterProfile && (
-      <div className="mb-4">
-        <AffinityMissingCTA
-          side="sitter"
-          profile={sitterProfile}
-          context="search_listing"
-          scope="list"
-        />
-      </div>
-    )}
+    {(() => {
+      // Priorité UNIQUE : OutOfZoneBanner > SitterDiscoveryBanner > AffinityMissingCTA.
+      // Une seule bannière au-dessus des résultats pour éviter l'empilement.
+      const outOfZoneVisible = tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius && availableSitsCount > 0;
+      const showDiscovery = !isPublic && tab === "sits" && !outOfZoneVisible;
+      const showAffinity = tab === "sits" && !!user && !!sitterProfile && !outOfZoneVisible && !showDiscovery;
+      return (
+        <>
+          {showDiscovery && (
+            <SitterDiscoveryBanner
+              totalFrance={densityCounts.france}
+              totalRadius={densityCounts.radius}
+              zoneMode={zoneMode}
+              city={city}
+              alertCreated={alertCreated}
+              isCreatingAlert={isCreatingAlert}
+              onCreateAlert={handleCreateAlert}
+              isAvailable={!!sitterProfile?.is_available}
+              onActivateAvailable={handleActivateAvailable}
+              onExpandToFrance={() => {
+                trackEvent("search_empty_action", { source: "discovery_banner", metadata: { action: "expand_to_france", from: zoneMode, radius_count: densityCounts.radius, france_count: densityCounts.france } });
+                setZoneMode("france");
+              }}
+            />
+          )}
+          {showAffinity && (
+            <div className="mb-4">
+              <AffinityMissingCTA
+                side="sitter"
+                profile={sitterProfile}
+                context="search_listing"
+                scope="list"
+              />
+            </div>
+          )}
+        </>
+      );
+    })()}
 
     <div className={tab === "missions"
       ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4"
