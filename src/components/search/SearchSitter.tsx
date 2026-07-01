@@ -2024,7 +2024,9 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  )}
 
   {/* ─── FAB mobile toggle carte/liste ─── */}
-  {isMobile && tab === "sits" && (
+   {/* FAB masqué en état vide : rien à afficher sur la carte, il ne ferait que
+        chevaucher les CTA de l'empty state. */}
+   {isMobile && tab === "sits" && availableSitsCount > 0 && (
     <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[1200] sm:hidden">
       <button
         onClick={() => setViewMode(viewMode === "list" ? "map" : "list")}
