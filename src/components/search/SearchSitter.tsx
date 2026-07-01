@@ -1972,8 +1972,21 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
       ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4"
       : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 lg:gap-x-8 gap-y-6 sm:gap-y-10 lg:gap-y-12"}>
     {results.map((item, idx) => renderCard(item, idx))}
-    </div>
+     </div>
 
+     {/* Lien "Français à l'étranger" en pied de résultats (déplacé depuis le toolbar) */}
+     {tab === "sits" && intlCount > 0 && !loading && results.length > 0 && (
+       <div className="mt-8 flex justify-center">
+         <Link
+           to="/annonces/international"
+           className="inline-flex items-center gap-2 rounded-full border border-border bg-card hover:bg-accent hover:border-primary/40 text-sm text-foreground px-4 py-2 transition-colors"
+           aria-label={`Voir les ${intlCount} annonces hors France`}
+         >
+           <Globe2 className="h-4 w-4 text-muted-foreground" />
+           <span>Vous cherchez à l'étranger ? Voir les {intlCount} annonce{intlCount > 1 ? "s" : ""} hors France</span>
+         </Link>
+       </div>
+     )}
   </>
   )}
  </div>
