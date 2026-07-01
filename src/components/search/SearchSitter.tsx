@@ -1113,7 +1113,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
      L'onglet « Coup de main » a été retiré : les missions et l'entraide
      vivent dans le hub dédié /petites-missions pour éviter la confusion
      entre recherche de gardes et entraide communautaire. */}
- {!isPublic && tab !== "sits" && ((): null => { setTab("sits"); return null; })()}
+ {/* Migration douce : ancien state "missions" forcé sur "sits" via effet */}
  {!isPublic && (
    <div className="px-4 sm:px-6 pt-3 sm:pt-4 border-b border-border flex items-center justify-between gap-3">
      <h2 className="text-sm font-semibold text-foreground pb-2">Annonces de garde</h2>
