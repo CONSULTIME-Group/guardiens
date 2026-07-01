@@ -834,7 +834,7 @@ const BillingSection = ({ user }: { user: any }) => {
           <div className="rounded-lg border border-border bg-muted/30 p-4">
             <p className="text-sm font-medium">Espace gardien</p>
             <p className="text-xs text-muted-foreground mt-1">
-              À 0 € pour tous les gardiens jusqu'au 14 juillet 2026. Ensuite, abonnement standard à 6,99 € / mois.
+              À 0 € pour tous les gardiens jusqu'au 30 septembre 2026. Ensuite, abonnement standard à 6,99 € / mois.
             </p>
           </div>
         )}

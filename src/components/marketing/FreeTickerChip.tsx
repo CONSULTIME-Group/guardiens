@@ -9,7 +9,7 @@ interface FreeTickerChipProps {
 }
 
 /**
- * Petit "ticker" discret rappelant la accès à 0 € en cours jusqu'au 14 juillet 2026.
+ * Petit "ticker" discret rappelant la accès à 0 € en cours jusqu'au 30 septembre 2026.
  * - Pendant la période : pastille pulsée + texte daté.
  * - Hors période : optionnel fallback (ex. "À 0 € pour les propriétaires").
  */
@@ -20,7 +20,7 @@ export const FreeTickerChip = ({
 }: FreeTickerChipProps) => {
   const active = isInGracePeriod();
 
-  // Dernier jour inclus = 14 juillet (GRACE_END exclusif au 15 juillet 00:00)
+  // Dernier jour inclus = 30 septembre (GRACE_END exclusif au 1er octobre 00:00)
   const lastFreeDay = new Date(GRACE_END.getTime() - 24 * 60 * 60 * 1000);
   const lastDayLabel = lastFreeDay.toLocaleDateString("fr-FR", {
     day: "numeric",

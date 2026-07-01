@@ -31,7 +31,7 @@ const StickyCTA = ({ city, stats }: Props) => {
   if (stats.guardiansCount === 0 && stats.activeListings === 0)
     return <div ref={sentinelRef} />;
 
-  const isBeforeLaunch = new Date() < new Date("2026-07-13");
+  const isBeforeLaunch = new Date() < new Date("2026-09-30");
 
   let message: string;
   let ctaText: string;

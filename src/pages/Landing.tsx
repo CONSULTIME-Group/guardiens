@@ -483,14 +483,14 @@ const Landing = () => {
                     eligibleCustomerType: "Sitter",
                     availabilityStarts: SITTER_PRICE_START_ISO,
                     description:
-                      "Abonnement gardien à 6,99 €/mois à partir du 14 juillet 2026.",
+                      "Abonnement gardien à 6,99 €/mois à partir du 1er octobre 2026.",
                     priceSpecification: {
                       "@type": "UnitPriceSpecification",
                       price: String(SITTER_PRICE_NUMERIC),
                       priceCurrency: SITTER_PRICE_CURRENCY,
                       unitCode: "MON",
                       description:
-                        "Abonnement gardien à 6,99 €/mois après le 14 juillet 2026, accès sans abonnement jusqu'à cette date.",
+                        "Abonnement gardien à 6,99 €/mois à partir du 1er octobre 2026, accès à 0 € jusqu'à cette date.",
                     },
                   },
                   {
@@ -527,7 +527,7 @@ const Landing = () => {
                     name: "Faut-il payer pour s'inscrire en tant que propriétaire ?",
                     acceptedAnswer: {
                       "@type": "Answer",
-                      text: "L'inscription, la publication d'annonces et les échanges avec les gardiens sont sans abonnement requis pour les propriétaires. Aucune carte bancaire demandée. Les gardiens bénéficient d'un accès sans abonnement jusqu'au 14 juillet 2026, puis l'abonnement est à 6,99 €/mois. L'entraide entre gens du coin reste sans abonnement pour tous.",
+                      text: "L'inscription, la publication d'annonces et les échanges avec les gardiens sont sans abonnement requis pour les propriétaires. Aucune carte bancaire demandée. Les gardiens bénéficient d'un accès sans abonnement jusqu'au 30 septembre 2026, puis l'abonnement est à 6,99 €/mois. L'entraide entre gens du coin reste sans abonnement pour tous.",
                     },
                   },
                   {

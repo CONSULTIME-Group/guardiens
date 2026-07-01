@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
 - Fondée par Jérémie et Elisa après 5 ans de house-sitting en France (37 maisons gardées, 234 animaux accompagnés).
 - Rencontre physique obligatoire propriétaire/gardien avant chaque garde.
 - Propriétaires sans frais. Gardiens : 6,99 €/mois résiliable, 10 € ponctuel, ou 65 €/an. Aucune commission.
-- Gratuit pour tous jusqu'au 14 juillet 2026.
+- Gratuit pour tous jusqu'au 30 septembre 2026.
 - L'animal reste chez lui, la maison reste vivante (courrier, plantes, lumières). Vérification d'identité + avis croisés.
 
 RÈGLES STRICTES :
@@ -158,10 +158,10 @@ Structure EXACTE :
 (intro + 4 profils en **gras** : retraités actifs, jeunes actifs en télétravail, familles, étudiants vérifiés. Mentionnez les [petites missions](/petites-missions) pour les gardes courtes.)
 
 ## Tarifs Guardiens : transparents et sans surprise
-(3 paragraphes en **gras** : Propriétaires sans frais ; Gardiens 6,99 €/mois ou 10 € ponctuel ou 65 €/an ; Aucune commission par garde. Lien [page tarifs complète](/tarifs). Gratuité totale jusqu'au 14 juillet 2026.)
+(3 paragraphes en **gras** : Propriétaires sans frais ; Gardiens 6,99 €/mois ou 10 € ponctuel ou 65 €/an ; Aucune commission par garde. Lien [page tarifs complète](/tarifs). Gratuité totale jusqu'au 30 septembre 2026.)
 
 ## Notre histoire et notre engagement à ${city}
-(2-3 paragraphes : fondation Jérémie & Elisa, 37 maisons et 234 animaux en 5 ans, lancement officiel 14 juillet 2026, ${city} dans le déploiement France entière)
+(2-3 paragraphes : fondation Jérémie & Elisa, 37 maisons et 234 animaux en 5 ans, lancement officiel 30 septembre 2026, ${city} dans le déploiement France entière)
 
 ## Questions fréquentes des propriétaires à ${city}
 (5 à 6 questions au format **Question ?** + réponse 2-3 phrases : rencontre préalable, urgence, frais cachés, animaux à besoins spécifiques, durée min/max, vérification d'identité)`;

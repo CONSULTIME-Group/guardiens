@@ -6,7 +6,7 @@ interface FreePeriodBannerProps {
 
 /**
  * Bandeau d'information sur la période de accès à 0 € en cours.
- * Affiché uniquement entre le lancement (14 juin 2026) et le 14 juillet 2026 inclus.
+ * Affiché uniquement entre le lancement (14 juin 2026) et le 30 septembre 2026 inclus.
  * Indique les dates exactes pour rassurer les visiteurs.
  */
 export const FreePeriodBanner = ({ className = "" }: FreePeriodBannerProps) => {
@@ -17,7 +17,7 @@ export const FreePeriodBanner = ({ className = "" }: FreePeriodBannerProps) => {
     month: "long",
     year: "numeric",
   });
-  // GRACE_END est exclusif (15 juillet 00:00) → dernier jour inclus = 14 juillet
+  // GRACE_END est exclusif (1er octobre 00:00) → dernier jour inclus = 30 septembre
   const lastFreeDay = new Date(GRACE_END.getTime() - 24 * 60 * 60 * 1000);
   const lastDayLabel = lastFreeDay.toLocaleDateString("fr-FR", {
     day: "numeric",

@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px;">
           <p>Bonjour ${founder.first_name || ''},</p>
           <p>Merci d'avoir rejoint Guardiens dès le début.</p>
-          <p>Votre période d'accès fondateur se termine le <strong>13 juillet 2026</strong>.</p>
+          <p>Votre période d'accès fondateur se termine le <strong>30 septembre 2026</strong>.</p>
           <p>Après cette date, un abonnement à 6,99€/mois sera nécessaire pour continuer à postuler aux gardes.</p>
           <p>Votre badge Fondateur reste à vie, quelle que soit votre décision.</p>
           <p style="margin: 24px 0;">

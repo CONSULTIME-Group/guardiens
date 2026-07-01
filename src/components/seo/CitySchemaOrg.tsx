@@ -62,7 +62,7 @@ const ANNECY_FAQ = [
  },
  {
  q: "Combien coûte une garde de maison à Annecy ?",
- a: "Pour les propriétaires, Guardiens est gratuit : aucun frais, aucune commission. Les gardiens accèdent à la plateforme via un abonnement modeste (6,99 €/mois), et tous les gardiens sont gratuits jusqu'au 14 juillet 2026.",
+ a: "Pour les propriétaires, Guardiens est gratuit : aucun frais, aucune commission. Les gardiens accèdent à la plateforme via un abonnement modeste (6,99 €/mois), et tous les gardiens sont gratuits jusqu'au 30 septembre 2026.",
  },
  {
  q: "Combien de temps à l'avance publier mon annonce pour les vacances d'été ?",
@@ -93,7 +93,7 @@ const GRENOBLE_FAQ = [
  },
  {
  q: "À combien revient une garde de chien à Grenoble ?",
- a: "Pour les propriétaires, c'est gratuit : aucun frais ni commission sur la plateforme. Les gardiens souscrivent un abonnement à 6,99 €/mois et sont gratuits jusqu'au 14 juillet 2026.",
+ a: "Pour les propriétaires, c'est gratuit : aucun frais ni commission sur la plateforme. Les gardiens souscrivent un abonnement à 6,99 €/mois et sont gratuits jusqu'au 30 septembre 2026.",
  },
 ];
 
@@ -116,7 +116,7 @@ const CHAMBERY_FAQ = [
  },
  {
  q: "Combien coûte Guardiens à Chambéry ?",
- a: "Pour les propriétaires, c'est entièrement gratuit. Les gardiens accèdent à la plateforme via un abonnement à 6,99 €/mois (ou 12 € en one-shot), et tous les gardiens sont gratuits jusqu'au 14 juillet 2026.",
+ a: "Pour les propriétaires, c'est entièrement gratuit. Les gardiens accèdent à la plateforme via un abonnement à 6,99 €/mois (ou 12 € en one-shot), et tous les gardiens sont gratuits jusqu'au 30 septembre 2026.",
  },
 ];
 

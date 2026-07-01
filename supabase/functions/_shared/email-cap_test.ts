@@ -51,9 +51,9 @@ Deno.test('isQuietAt — 08:00 Paris is NOT quiet (exclusive end)', () => {
 })
 
 Deno.test('isQuietAt — works in summer DST (CEST, +02:00)', () => {
-  assertEquals(isQuietAt(parisAt('2026-07-15', 14)), false)
-  assertEquals(isQuietAt(parisAt('2026-07-15', 23)), true)
-  assertEquals(isQuietAt(parisAt('2026-07-15', 8)), false)
+  assertEquals(isQuietAt(parisAt('2026-10-01', 14)), false)
+  assertEquals(isQuietAt(parisAt('2026-10-01', 23)), true)
+  assertEquals(isQuietAt(parisAt('2026-10-01', 8)), false)
 })
 
 // =============================================================

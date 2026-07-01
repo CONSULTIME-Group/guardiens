@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { Settings, Globe, Database, ExternalLink, CheckCircle2, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-const FOUNDER_DATE = "2026-07-13";
+const FOUNDER_DATE = "2026-09-30";
 
 const AdminSettings = () => {
  const [stats, setStats] = useState({ totalUsers: 0, totalSits: 0, totalReviews: 0 });
