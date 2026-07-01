@@ -226,10 +226,10 @@ const SearchListingCard = ({
 
         {isDemo && (
           <span
-            className="absolute inset-x-0 top-0 bg-amber-400/95 text-amber-950 text-[10px] font-semibold uppercase tracking-[0.2em] px-3 py-1.5 text-center backdrop-blur-sm"
+            className="absolute top-3 left-3 bg-amber-400/95 text-amber-950 text-[9px] font-semibold uppercase tracking-[0.15em] px-2 py-0.5 rounded-sm backdrop-blur-sm shadow-sm"
             data-testid="demo-example-badge"
           >
-            Annonce d'exemple
+            Exemple
           </span>
         )}
         {(isAssigned || isCompleted || isPast) && (
