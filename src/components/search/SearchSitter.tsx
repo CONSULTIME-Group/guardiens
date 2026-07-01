@@ -1249,29 +1249,63 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
      </span>
     </button>
    )}
-   <div
-    id="search-filter-pills"
-    className={`relative -mr-6 sm:mr-0 ${isMobile && viewMode === "map" && !mobileFiltersOpen ? "hidden" : ""}`}
-   >
-   <div className="flex flex-row items-center gap-2 px-6 py-3 overflow-x-auto no-scrollbar pr-10 sm:pr-6 snap-x snap-mandatory scroll-px-6 overscroll-x-contain">
- {/* Location pill */}
- <LocationPickerPopover
-   open={editingCity}
-   onOpenChange={setEditingCity}
-   triggerClassName={pillClass}
-   city={city}
-   cityInput={cityInput}
-   onCityInputChange={handleCityInputChange}
-   onCityConfirm={handleCityConfirm}
-   citySuggestions={citySuggestions}
-   deptSuggestions={deptSuggestions}
-   regionSuggestions={regionSuggestions}
-   primaryDeptCode={primaryDeptCode}
-   onCitySelect={handleCitySelect}
-   onDeptSelect={handleDeptSelect}
-   onRegionSelect={handleRegionSelect}
-   onGeolocate={handleGeolocation}
- />
+    {/* ─── Hero search bar (desktop) ─── Champ ville dominant + CTA Rechercher */}
+    <div className="hidden md:flex items-center gap-3 px-6 pt-4 pb-2">
+      <div className="flex-1 min-w-0">
+        <LocationPickerPopover
+          open={editingCity}
+          onOpenChange={setEditingCity}
+          triggerClassName="w-full flex items-center gap-3 rounded-2xl border border-border bg-card hover:border-primary transition-colors px-5 py-4 text-left shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          city={city}
+          cityInput={cityInput}
+          onCityInputChange={handleCityInputChange}
+          onCityConfirm={handleCityConfirm}
+          citySuggestions={citySuggestions}
+          deptSuggestions={deptSuggestions}
+          regionSuggestions={regionSuggestions}
+          primaryDeptCode={primaryDeptCode}
+          onCitySelect={handleCitySelect}
+          onDeptSelect={handleDeptSelect}
+          onRegionSelect={handleRegionSelect}
+          onGeolocate={handleGeolocation}
+        />
+      </div>
+      <Button
+        size="lg"
+        onClick={() => doSearch()}
+        disabled={loading}
+        className="shrink-0 rounded-2xl px-6"
+      >
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Rechercher"}
+      </Button>
+    </div>
+
+    <div
+     id="search-filter-pills"
+     className={`relative -mr-6 sm:mr-0 ${isMobile && viewMode === "map" && !mobileFiltersOpen ? "hidden" : ""}`}
+    >
+    <div className="flex flex-row items-center gap-2 px-6 py-3 overflow-x-auto no-scrollbar pr-10 sm:pr-6 snap-x snap-mandatory scroll-px-6 overscroll-x-contain">
+  {/* Location pill (mobile uniquement — sur desktop, le champ ville hero est au-dessus) */}
+  <div className="md:hidden contents">
+  <LocationPickerPopover
+    open={editingCity}
+    onOpenChange={setEditingCity}
+    triggerClassName={pillClass}
+    city={city}
+    cityInput={cityInput}
+    onCityInputChange={handleCityInputChange}
+    onCityConfirm={handleCityConfirm}
+    citySuggestions={citySuggestions}
+    deptSuggestions={deptSuggestions}
+    regionSuggestions={regionSuggestions}
+    primaryDeptCode={primaryDeptCode}
+    onCitySelect={handleCitySelect}
+    onDeptSelect={handleDeptSelect}
+    onRegionSelect={handleRegionSelect}
+    onGeolocate={handleGeolocation}
+  />
+  </div>
+
 
    {/* Zone pill (radius / dept / region / france), désactivé hors connexion */}
    <div
