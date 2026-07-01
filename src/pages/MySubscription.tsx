@@ -122,11 +122,11 @@ function ReferralSection({ referralCode, userId }: { referralCode: string | null
 
 const FOUNDER_FAQ = [
   {
-    q: "C'est vraiment offert jusqu'au 15 juillet ?",
-    a: "Oui. Aucune carte bancaire demandée avant le 15 juillet. Après cette date, vous choisissez librement de souscrire, rien ne démarre automatiquement.",
+    q: "C'est vraiment offert jusqu'au 30 septembre 2026 ?",
+    a: "Oui. Aucune carte bancaire demandée avant le 1er octobre 2026. Après cette date, vous choisissez librement de souscrire, rien ne démarre automatiquement.",
   },
   {
-    q: "Que se passe-t-il après le 15 juillet ?",
+    q: "Que se passe-t-il après le 30 septembre 2026 ?",
     a: "Une seule formule récurrente : 6,99 €/mois sans engagement, résiliable en un clic. Une formule « accès un mois » à 10 € en paiement unique reste également disponible.",
   },
   {
@@ -387,8 +387,8 @@ const MySubscription = () => {
               <div className="absolute top-3 left-8 right-8 h-px bg-border" aria-hidden="true" />
               {[
                 { label: "Maintenant", sub: "Accès complet", state: "active" as const },
-                { label: "14 juillet", sub: "Badge Fondateur", state: "founder" as const },
-                { label: "15 juillet", sub: "Fin de la grâce", state: "future" as const },
+                { label: "30 septembre 2026", sub: "Badge Fondateur", state: "founder" as const },
+                { label: "1er octobre 2026", sub: "Fin de la grâce", state: "future" as const },
                 { label: "Ensuite", sub: "6,99 €/mois · sans engagement", state: "future" as const },
               ].map(({ label, sub: subText, state }) => (
                 <li key={label} className="flex flex-col items-center gap-1.5 z-10 flex-1">
@@ -488,7 +488,7 @@ const MySubscription = () => {
                 <FounderBadge size="lg" />
                 <div className="space-y-1">
                   <p className="text-sm font-semibold text-founder-foreground font-body">
-                    Vous devenez Fondateur le 14 juillet.
+                    Vous devenez Fondateur le 30 septembre 2026.
                   </p>
                   <p className="text-sm text-founder-foreground/80 font-body leading-relaxed">
                     Chaque membre inscrit avant le 30 septembre 2026 reçoit le badge Fondateur, visible sur son profil public. L'accès offert, lui, est étendu à tous les inscrits jusqu'au 30 septembre 2026.
@@ -528,7 +528,7 @@ const MySubscription = () => {
 
         {/* Pricing preview */}
         <div className="bg-card border border-border rounded-xl p-5 space-y-3">
-          <p className="hidden md:block text-xs uppercase tracking-widest text-muted-foreground font-body">Après le 15 juillet, la formule</p>
+          <p className="hidden md:block text-xs uppercase tracking-widest text-muted-foreground font-body">À partir du 1er octobre 2026, la formule</p>
           <div className="flex flex-col items-center text-center space-y-1">
             <p className="font-heading text-3xl font-bold text-primary">
               6,99 €<span className="text-sm font-normal text-muted-foreground">/mois</span>
@@ -694,10 +694,10 @@ const MySubscription = () => {
 
           <div className="flex flex-col items-center gap-2 pt-2">
             <Button variant="outline" className="border-primary text-primary hover:bg-primary/5 font-body" onClick={() => setShowSupportDialog(true)}>
-              Choisir ma formule pour le 15 juillet
+              Choisir ma formule pour le 1er octobre 2026
             </Button>
             <p className="text-xs text-muted-foreground italic text-center max-w-xs font-body">
-              Votre abonnement démarrera le 15 juillet, vous ne perdrez pas un seul jour.
+              Votre abonnement démarrera le 1er octobre 2026, vous ne perdrez pas un seul jour.
             </p>
           </div>
 
