@@ -422,7 +422,7 @@ export default function ArticleDetail() {
  "priceCurrency": SITTER_PRICE_CURRENCY,
  "eligibleCustomerType": "Sitter",
  "availabilityStarts": SITTER_PRICE_START_ISO,
- "description": "Abonnement gardien à 6,99 €/mois à partir du 30 septembre 2026.",
+ "description": "Abonnement gardien à 6,99 €/mois à partir du 1er octobre 2026.",
  "priceSpecification": {
  "@type": "UnitPriceSpecification",
  "price": "6.99",

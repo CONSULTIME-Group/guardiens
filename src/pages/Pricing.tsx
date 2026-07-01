@@ -278,7 +278,7 @@ const Pricing = () => {
    {
     "@type": "Offer",
     name: "Abonnement Gardien, Mensuel",
-    description: `Abonnement gardien à 6,99 €/mois à partir du 30 septembre 2026. Sans engagement, résiliable à tout moment.`,
+    description: `Abonnement gardien à 6,99 €/mois à partir du 1er octobre 2026. Sans engagement, résiliable à tout moment.`,
     price: String(SITTER_PRICE_NUMERIC),
     priceCurrency: SITTER_PRICE_CURRENCY,
     eligibleCustomerType: "Sitter",
