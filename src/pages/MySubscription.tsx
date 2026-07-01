@@ -122,11 +122,11 @@ function ReferralSection({ referralCode, userId }: { referralCode: string | null
 
 const FOUNDER_FAQ = [
   {
-    q: "C'est vraiment offert jusqu'au 15 juillet ?",
-    a: "Oui. Aucune carte bancaire demandée avant le 15 juillet. Après cette date, vous choisissez librement de souscrire, rien ne démarre automatiquement.",
+    q: "C'est vraiment offert jusqu'au 30 septembre 2026 ?",
+    a: "Oui. Aucune carte bancaire demandée avant le 1er octobre 2026. Après cette date, vous choisissez librement de souscrire, rien ne démarre automatiquement.",
   },
   {
-    q: "Que se passe-t-il après le 15 juillet ?",
+    q: "Que se passe-t-il après le 30 septembre 2026 ?",
     a: "Une seule formule récurrente : 6,99 €/mois sans engagement, résiliable en un clic. Une formule « accès un mois » à 10 € en paiement unique reste également disponible.",
   },
   {
