@@ -70,8 +70,18 @@ export const AdvancedFiltersSheet = ({
           <SlidersHorizontal className="h-4 w-4" />
           <span className="text-foreground">Filtres</span>
           {hasActiveFilters && (
-            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary" />
+            activeFiltersCount && activeFiltersCount > 0 ? (
+              <span
+                className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold leading-none"
+                aria-label={`${activeFiltersCount} filtre${activeFiltersCount > 1 ? "s" : ""} actif${activeFiltersCount > 1 ? "s" : ""}`}
+              >
+                {activeFiltersCount}
+              </span>
+            ) : (
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary" />
+            )
           )}
+
         </button>
       </SheetTrigger>
       <SheetContent side="right" className="w-[88vw] sm:w-80 max-w-sm overflow-y-auto">
