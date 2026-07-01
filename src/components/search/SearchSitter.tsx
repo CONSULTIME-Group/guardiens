@@ -677,7 +677,17 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  });
  }
  if (verifiedOnly) items = items.filter((s: any) => s.owner?.identity_verified);
- const { items: locFiltered, cityCoords } = await filterByLocation(items, (s: any) => s.owner?.city, searchCoords, (s: any) => s.owner?.postal_code, (s: any) => !!s.country && s.country !== "FR");
+ const { items: locFiltered, cityCoords } = await filterByLocation(
+ items,
+ (s: any) => s.owner?.city,
+ searchCoords,
+ (s: any) => s.owner?.postal_code,
+ (s: any) => !!s.country && s.country !== "FR",
+ // Density : uniquement les annonces actionnables (publiées, ouvertes aux
+ // candidatures, non expirées) pour rester aligné avec l'eyebrow SEO.
+ (s: any) => s.status === "published" && s.accepting_applications !== false && (!s.end_date || s.end_date >= todayIso),
+ );
+
  items = locFiltered;
  const enriched = await Promise.all(
  items.map(async (sit: any) => {
