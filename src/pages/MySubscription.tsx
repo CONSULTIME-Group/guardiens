@@ -528,7 +528,7 @@ const MySubscription = () => {
 
         {/* Pricing preview */}
         <div className="bg-card border border-border rounded-xl p-5 space-y-3">
-          <p className="hidden md:block text-xs uppercase tracking-widest text-muted-foreground font-body">Après le 15 juillet, la formule</p>
+          <p className="hidden md:block text-xs uppercase tracking-widest text-muted-foreground font-body">À partir du 1er octobre 2026, la formule</p>
           <div className="flex flex-col items-center text-center space-y-1">
             <p className="font-heading text-3xl font-bold text-primary">
               6,99 €<span className="text-sm font-normal text-muted-foreground">/mois</span>
