@@ -1425,55 +1425,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
       <span className="inline-flex items-center justify-center rounded-full bg-primary-foreground/20 px-1.5 py-0.5 text-[10px] font-bold">{intlCount}</span>
     </Link>
    )}
-  {tab === "sits" && user && (
- <TooltipProvider>
- <Tooltip>
- <TooltipTrigger asChild>
- {isMobile ? (
- <Button
- variant={alertCreated ? "secondary" : "outline"}
- size="icon"
- disabled={!city || isCreatingAlert}
- onClick={alertCreated ? () => navigate("/settings") : handleCreateAlert}
- className="shrink-0 mr-2"
- >
- {isCreatingAlert ? (
- <Loader2 className="h-4 w-4 animate-spin" />
- ) : alertCreated ? (
- <BellRing className="h-4 w-4" />
- ) : (
- <Bell className="h-4 w-4" />
- )}
- </Button>
- ) : (
- <Button
- variant={alertCreated ? "secondary" : "outline"}
- size="sm"
- disabled={!city || isCreatingAlert}
- onClick={alertCreated ? () => navigate("/settings") : handleCreateAlert}
- className="ml-auto mr-2 shrink-0"
- >
- {isCreatingAlert ? (
- <Loader2 className="h-4 w-4 animate-spin" />
- ) : alertCreated ? (
- <BellRing className="h-4 w-4" />
- ) : (
- <Bell className="h-4 w-4" />
- )}
- {isCreatingAlert ? "Création…" : alertCreated ? "Alerte créée" : "Créer une alerte"}
- </Button>
- )}
- </TooltipTrigger>
- <TooltipContent>
- {!city
- ? "Sélectionnez une ville pour créer une alerte"
- : alertCreated
- ? "Gérer vos alertes dans les paramètres"
- : "Créer une alerte pour cette recherche"}
- </TooltipContent>
- </Tooltip>
- </TooltipProvider>
- )}
+  {/* Bouton « Créer une alerte » retiré du toolbar : l'empty state et OutOfZoneBanner exposent déjà ce CTA au bon moment. */}
   <div className="hidden sm:flex border border-border rounded-lg overflow-hidden shrink-0">
  <button
  onClick={() => setViewMode("list")}
