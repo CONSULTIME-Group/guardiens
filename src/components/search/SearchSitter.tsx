@@ -44,7 +44,7 @@ import { ILLUSTRATIONS } from "@/components/shared/EmptyState";
 import { getDeptCode, DEPT_NAMES } from "@/lib/departments";
 import { getRegionCode, getRegionName, getDeptsInRegion, REGION_NAMES, DEPT_TO_REGION } from "@/lib/regions";
 import { trackEvent } from "@/lib/analytics";
-import ReachReassuranceBanner from "@/components/marketing/ReachReassuranceBanner";
+// ReachReassuranceBanner retiré : redondant avec le sélecteur Zone.
 import LocationPickerPopover from "@/components/search/header/LocationPickerPopover";
 import ZonePickerPopover from "@/components/search/header/ZonePickerPopover";
 import DatesPickerPopover from "@/components/search/header/DatesPickerPopover";
