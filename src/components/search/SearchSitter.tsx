@@ -1109,24 +1109,21 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  </div>
  </div>
  )}
- {/* ─── Tabs ─── (masqués en mode public : la page /annonces est dédiée gardes) */}
+ {/* ─── En-tête onglet ─── (masqué en mode public : /annonces est dédiée gardes)
+     L'onglet « Coup de main » a été retiré : les missions et l'entraide
+     vivent dans le hub dédié /petites-missions pour éviter la confusion
+     entre recherche de gardes et entraide communautaire. */}
+ {/* Migration douce : ancien state "missions" forcé sur "sits" via effet */}
  {!isPublic && (
-   <div className="px-4 sm:px-6 pt-3 sm:pt-4 border-b border-border">
-   <div className="flex gap-1 sm:gap-6">
-					{([
-				{ key: "sits" as SearchTab, label: "Annonces" },
-					{ key: "missions" as SearchTab, label: "Coup de main" },
-					]).map(({ key, label }) => (
- <button
- key={key}
- onClick={() => setTab(key)}
-  className={`flex-1 sm:flex-none min-h-[44px] px-3 sm:px-0 pb-2 text-sm font-medium transition-colors ${tab === key ? "text-foreground border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"}`}
- >
- {label}
- </button>
- ))}
- </div>
- </div>
+   <div className="px-4 sm:px-6 pt-3 sm:pt-4 border-b border-border flex items-center justify-between gap-3">
+     <h2 className="text-sm font-semibold text-foreground pb-2">Annonces de garde</h2>
+     <Link
+       to="/petites-missions"
+       className="text-xs text-primary hover:underline pb-2 shrink-0"
+     >
+       Coup de main & entraide →
+     </Link>
+   </div>
  )}
 
  {/* Mission sub-tabs */}
@@ -1493,8 +1490,8 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     </div>
   )}
 
- {/* ─── No city warning ─── */}
- {!userCity && (
+ {/* ─── No city warning ─── (masqué si OutOfZoneBanner déjà visible pour éviter l'empilement) */}
+ {!userCity && !(tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius) && (
  <div className="mx-6 mt-4 bg-accent border border-border rounded-lg p-3 text-sm">
  <MapPin className="inline h-4 w-4 mr-1.5 text-primary" />
  <Link to="/profile" className="text-primary underline">Renseignez votre ville</Link> pour voir les gardes près de chez vous.
