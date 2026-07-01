@@ -1464,27 +1464,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     />
   )}
 
-  {hasNoLocalRealMissions && (
-    <div className="mx-6 mt-4 rounded-2xl border-2 border-primary/40 bg-primary/10 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-      <div className="min-w-0">
-        <p className="font-heading font-semibold text-base text-foreground">
-          {densityCounts.france} mission{densityCounts.france > 1 ? "s" : ""} publiée{densityCounts.france > 1 ? "s" : ""} hors de votre zone
-        </p>
-        <p className="text-sm text-muted-foreground mt-1">
-          Votre recherche est centrée sur {city || "votre secteur"}. Élargissez à toute la France pour voir l'annonce d'Agnès et les autres coups de main ouverts.
-        </p>
-      </div>
-      <Button
-        className="shrink-0"
-        onClick={() => {
-          trackEvent("search_outofzone_click", { source: "missions_outofzone_banner", metadata: { action: "expand_zone", to: "france", previous_mode: zoneMode, count_france: densityCounts.france, city } });
-          setZoneMode("france");
-        }}
-      >
-        Voir toute la France
-      </Button>
-    </div>
-  )}
+  {/* hasNoLocalRealMissions banner retiré : OutOfZoneBanner couvre déjà l'élargissement de zone. */}
 
  {/* ─── No city warning ─── (masqué si OutOfZoneBanner déjà visible pour éviter l'empilement) */}
  {!userCity && !(tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius) && (
