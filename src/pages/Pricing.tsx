@@ -106,16 +106,16 @@ La formule **accès un mois (10 €)** est un paiement unique sans renouvellemen
 La formule **annuelle (65 €/an)** est résiliable à tout moment ; le renouvellement annuel n'a lieu qu'à la date anniversaire.`,
  },
  {
-  q: `Pourquoi le 14 juillet ?`,
-  a: `Il fallait une date après plusieurs semaines d'accès gratuit, un repère simple, partagé par toutes et tous. Le **${SITTER_PRICE_START}, fête nationale**, s'est imposé naturellement.
+  q: `Pourquoi le 1er octobre 2026 ?`,
+  a: `Il fallait une date après plusieurs mois d'accès gratuit, un repère simple et partagé par toutes et tous. Le **${SITTER_PRICE_START}** s'est imposé naturellement comme point de bascule.
 
-C'est ce jour-là que l'accès gratuit prend fin pour les gardiens. À partir du **1er octobre 2026**, l'abonnement gardien à ${SITTER_PRICE} devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit en permanence.`,
+C'est ce jour-là que l'accès gratuit prend fin pour les gardiens. À partir du **${SITTER_PRICE_START}**, l'abonnement gardien à ${SITTER_PRICE} devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit en permanence.`,
  },
  {
   q: "Y a-t-il des frais cachés ?",
-  a: `Non. **Jusqu'au ${SITTER_PRICE_START} :** rien à payer pour personne, sans carte bancaire.
+  a: `Non. **Jusqu'au 30 septembre 2026 inclus :** rien à payer pour personne, sans carte bancaire.
 
-**Après le ${SITTER_PRICE_START}, ce que paient les gardiens :** ${SITTER_PRICE}, 10\u00A0€ pour un mois, ou 65\u00A0€/an (−22\u00A0%). C'est tout.
+**À partir du ${SITTER_PRICE_START}, ce que paient les gardiens :** ${SITTER_PRICE}, 10\u00A0€ pour un mois, ou 65\u00A0€/an (−22\u00A0%). C'est tout.
 
 **Ce que paient les propriétaires :** Rien, jamais. Publier, recevoir des candidatures, choisir, évaluer, accès gratuit en permanence.
 
