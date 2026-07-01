@@ -1324,6 +1324,8 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
         onOpenChange={setFilterSheetOpen}
         pillClass={pillClass}
         hasActiveFilters={hasActiveFilters}
+        activeFiltersCount={activeFiltersCount}
+
         resetFilters={resetFilters}
         housingTypes={housingTypes}
         toggleHousingType={toggleHousingType}
