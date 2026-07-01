@@ -1452,8 +1452,9 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 
  {/* Densité supprimée, déjà visible dans le sélecteur de Zone et le bandeau hors-zone */}
 
-  {/* ─── Out-of-zone banner ─── */}
-  {tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius && (
+  {/* ─── Out-of-zone banner ─── (masqué en état vide : l'empty state gère déjà
+       « Élargir » + « Créer alerte » — ne dupliquez pas les CTA au-dessus) */}
+  {tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius && availableSitsCount > 0 && (
     <OutOfZoneBanner
       zoneMode={zoneMode}
       setZoneMode={setZoneMode}
