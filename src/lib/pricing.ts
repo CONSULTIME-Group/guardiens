@@ -24,8 +24,8 @@ export const SITTER_PRICE_ANNUAL = `65${NBSP}€/an`;
 export const SITTER_PRICE_ANNUAL_NUMERIC = 65;
 export const SITTER_PRICE_ANNUAL_MONTHLY_EQUIV = `5,42${NBSP}€/mois`;
 export const SITTER_PRICE_ANNUAL_DISCOUNT_PCT = 22;
-export const SITTER_PRICE_START = "30 septembre 2026";
-export const SITTER_PRICE_START_ISO = "2026-09-30";
+export const SITTER_PRICE_START = "1er octobre 2026";
+export const SITTER_PRICE_START_ISO = "2026-10-01";
 export const FOUNDER_DEADLINE = "30 septembre 2026";
 export const FOUNDER_DEADLINE_ISO = "2026-09-30";
 
