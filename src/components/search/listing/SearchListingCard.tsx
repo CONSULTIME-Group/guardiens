@@ -226,10 +226,10 @@ const SearchListingCard = ({
 
         {isDemo && (
           <span
-            className="absolute inset-x-0 top-0 bg-amber-400/95 text-amber-950 text-[10px] font-semibold uppercase tracking-[0.2em] px-3 py-1.5 text-center backdrop-blur-sm"
+            className="absolute top-3 left-3 bg-amber-400/95 text-amber-950 text-[9px] font-semibold uppercase tracking-[0.15em] px-2 py-0.5 rounded-sm backdrop-blur-sm shadow-sm"
             data-testid="demo-example-badge"
           >
-            Annonce d'exemple
+            Exemple
           </span>
         )}
         {(isAssigned || isCompleted || isPast) && (
@@ -277,13 +277,14 @@ const SearchListingCard = ({
         <div className="absolute bottom-5 left-5 right-5 flex flex-wrap items-end gap-1.5">
           {Object.entries(petGroups).slice(0, 3).map(([species, names]) => {
             const IconComp = speciesIcon[species] || PawPrint;
+            const count = names.length;
             return (
               <span
                 key={species}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white/10 backdrop-blur-md border border-white/25 rounded-full text-white text-[11px] font-medium"
+                className="inline-flex items-center gap-1 px-2 py-1 bg-white/10 backdrop-blur-md border border-white/25 rounded-full text-white text-[11px] font-medium"
               >
                 <IconComp className="h-3 w-3 opacity-80" />
-                ×{names.length}
+                {count > 1 && <span>×{count}</span>}
               </span>
             );
           })}

@@ -1329,15 +1329,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  {/* Animals picker retiré, remplacé par la pill catégorie « Animaux » ci-dessus */}
 
 
-   {/* Verified toggle promu (raccourci confiance) */}
-   <button
-  onClick={() => setVerifiedOnly(v => !v)}
-  aria-pressed={verifiedOnly}
-  className={`${pillClass} ${verifiedOnly ? "bg-primary/10 border-primary text-primary" : ""}`}
-  >
-  <ShieldCheck className={`h-4 w-4 ${verifiedOnly ? "text-primary" : "text-muted-foreground"}`} />
-  <span>{verifiedOnly ? "Vérifiés uniquement" : "Vérifié"}</span>
-  </button>
+   {/* Pill "Vérifié" retirée : accessible dans le sheet Filtres. La chip d'actif ci-dessous suffit. */}
 
    {/* Advanced filters pill, type de logement / environnement, désactivé hors connexion */}
    <div
@@ -1413,18 +1405,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  </SelectContent>
  </Select>
  </div>
-   {tab === "sits" && intlCount > 0 && (
-    <Link
-      to="/annonces/international"
-      className="inline-flex items-center gap-1.5 shrink-0 rounded-full border border-primary/40 bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-semibold px-3 py-1.5 mr-2 shadow-sm transition-colors"
-      aria-label={`Voir les ${intlCount} annonces hors France`}
-    >
-      <Globe2 className="h-3.5 w-3.5" />
-      <span className="hidden sm:inline">Français à l'étranger</span>
-      <span className="sm:hidden">Étranger</span>
-      <span className="inline-flex items-center justify-center rounded-full bg-primary-foreground/20 px-1.5 py-0.5 text-[10px] font-bold">{intlCount}</span>
-    </Link>
-   )}
+   {/* Lien "Français à l'étranger" retiré du toolbar — trop peu utilisé pour occuper cette place. Déplacé en fin de résultats. */}
   {/* Bouton « Créer une alerte » retiré du toolbar : l'empty state et OutOfZoneBanner exposent déjà ce CTA au bon moment. */}
   <div className="hidden sm:flex border border-border rounded-lg overflow-hidden shrink-0">
  <button
@@ -1447,22 +1428,25 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 
  {/* Densité supprimée, déjà visible dans le sélecteur de Zone et le bandeau hors-zone */}
 
-  {/* ─── Out-of-zone banner ─── (masqué en état vide : l'empty state gère déjà
-       « Élargir » + « Créer alerte » — ne dupliquez pas les CTA au-dessus) */}
-  {tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius && availableSitsCount > 0 && (
-    <OutOfZoneBanner
-      zoneMode={zoneMode}
-      setZoneMode={setZoneMode}
-      densityCounts={densityCounts}
-      radius={radius}
-      city={city}
-      alertCreated={alertCreated}
-      isCreatingAlert={isCreatingAlert}
-      handleCreateAlert={handleCreateAlert}
-      navigate={navigate}
-      trackEvent={trackEvent}
-    />
-  )}
+   {/* ─── Out-of-zone banner ─── PRIORITÉ 1 : quand il s'affiche, il masque
+        SitterDiscoveryBanner et AffinityMissingCTA (une seule bannière au-dessus des résultats). */}
+   {(() => {
+     const showOutOfZone = tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius && availableSitsCount > 0;
+     return showOutOfZone ? (
+       <OutOfZoneBanner
+         zoneMode={zoneMode}
+         setZoneMode={setZoneMode}
+         densityCounts={densityCounts}
+         radius={radius}
+         city={city}
+         alertCreated={alertCreated}
+         isCreatingAlert={isCreatingAlert}
+         handleCreateAlert={handleCreateAlert}
+         navigate={navigate}
+         trackEvent={trackEvent}
+       />
+     ) : null;
+   })()}
 
   {/* hasNoLocalRealMissions banner retiré : OutOfZoneBanner couvre déjà l'élargissement de zone. */}
 
@@ -1945,40 +1929,64 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     />
   ) : (
   <>
-    {!isPublic && tab === "sits" && (
-      <SitterDiscoveryBanner
-        totalFrance={densityCounts.france}
-        totalRadius={densityCounts.radius}
-        zoneMode={zoneMode}
-        city={city}
-        alertCreated={alertCreated}
-        isCreatingAlert={isCreatingAlert}
-        onCreateAlert={handleCreateAlert}
-        isAvailable={!!sitterProfile?.is_available}
-        onActivateAvailable={handleActivateAvailable}
-        onExpandToFrance={() => {
-          trackEvent("search_empty_action", { source: "discovery_banner", metadata: { action: "expand_to_france", from: zoneMode, radius_count: densityCounts.radius, france_count: densityCounts.france } });
-          setZoneMode("france");
-        }}
-      />
-    )}
-    {tab === "sits" && user && sitterProfile && (
-      <div className="mb-4">
-        <AffinityMissingCTA
-          side="sitter"
-          profile={sitterProfile}
-          context="search_listing"
-          scope="list"
-        />
-      </div>
-    )}
+    {(() => {
+      // Priorité UNIQUE : OutOfZoneBanner > SitterDiscoveryBanner > AffinityMissingCTA.
+      // Une seule bannière au-dessus des résultats pour éviter l'empilement.
+      const outOfZoneVisible = tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius && availableSitsCount > 0;
+      const showDiscovery = !isPublic && tab === "sits" && !outOfZoneVisible;
+      const showAffinity = tab === "sits" && !!user && !!sitterProfile && !outOfZoneVisible && !showDiscovery;
+      return (
+        <>
+          {showDiscovery && (
+            <SitterDiscoveryBanner
+              totalFrance={densityCounts.france}
+              totalRadius={densityCounts.radius}
+              zoneMode={zoneMode}
+              city={city}
+              alertCreated={alertCreated}
+              isCreatingAlert={isCreatingAlert}
+              onCreateAlert={handleCreateAlert}
+              isAvailable={!!sitterProfile?.is_available}
+              onActivateAvailable={handleActivateAvailable}
+              onExpandToFrance={() => {
+                trackEvent("search_empty_action", { source: "discovery_banner", metadata: { action: "expand_to_france", from: zoneMode, radius_count: densityCounts.radius, france_count: densityCounts.france } });
+                setZoneMode("france");
+              }}
+            />
+          )}
+          {showAffinity && (
+            <div className="mb-4">
+              <AffinityMissingCTA
+                side="sitter"
+                profile={sitterProfile}
+                context="search_listing"
+                scope="list"
+              />
+            </div>
+          )}
+        </>
+      );
+    })()}
 
     <div className={tab === "missions"
       ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4"
       : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 lg:gap-x-8 gap-y-6 sm:gap-y-10 lg:gap-y-12"}>
     {results.map((item, idx) => renderCard(item, idx))}
-    </div>
+     </div>
 
+     {/* Lien "Français à l'étranger" en pied de résultats (déplacé depuis le toolbar) */}
+     {tab === "sits" && intlCount > 0 && !loading && results.length > 0 && (
+       <div className="mt-8 flex justify-center">
+         <Link
+           to="/annonces/international"
+           className="inline-flex items-center gap-2 rounded-full border border-border bg-card hover:bg-accent hover:border-primary/40 text-sm text-foreground px-4 py-2 transition-colors"
+           aria-label={`Voir les ${intlCount} annonces hors France`}
+         >
+           <Globe2 className="h-4 w-4 text-muted-foreground" />
+           <span>Vous cherchez à l'étranger ? Voir les {intlCount} annonce{intlCount > 1 ? "s" : ""} hors France</span>
+         </Link>
+       </div>
+     )}
   </>
   )}
  </div>
