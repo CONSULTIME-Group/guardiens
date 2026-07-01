@@ -928,7 +928,7 @@ const CreateSit = () => {
               <Label htmlFor="flexible-notes" className="text-sm font-medium">Précisez vos dates approximatives</Label>
               <Input
                 id="flexible-notes"
-                placeholder="Ex : autour du 15 juillet, flexible d'une semaine"
+                placeholder="Ex : autour du 15 août, flexible d'une semaine"
                 value={flexibleNotes}
                 onChange={e => setFlexibleNotes(e.target.value)}
                 className="mt-1.5 h-12 text-base"
