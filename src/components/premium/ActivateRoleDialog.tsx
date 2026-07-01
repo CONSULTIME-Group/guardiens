@@ -50,8 +50,23 @@ const ActivateRoleDialog = ({ open, onClose, targetRole }: ActivateRoleDialogPro
     if (!user) return;
     setLoading(true);
     try {
+      // Pendant la période gratuite pour tous (jusqu'au 30/09/2026),
+      // on active directement le rôle gardien sans passer par Stripe.
+      if (isBeforeLaunch() || isInGracePeriod()) {
+        const { error } = await supabase.rpc("change_user_role", {
+          p_user_id: user.id,
+          p_new_role: "both" as any,
+        });
+        if (error) throw error;
+        onClose();
+        toast.success("Votre espace gardien est activé !");
+        setTimeout(() => (window.location.href = "/dashboard?activated=true"), 400);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke("create-checkout-session", {
         body: {
+          formula_type: "monthly",
           success_url: `${window.location.origin}/dashboard?activated=true`,
           cancel_url: `${window.location.origin}/dashboard?cancelled=true`,
         },
@@ -60,8 +75,8 @@ const ActivateRoleDialog = ({ open, onClose, targetRole }: ActivateRoleDialogPro
       if (data?.url) {
         window.location.href = data.url;
       }
-    } catch {
-      toast.error("Une erreur est survenue. Réessayez.");
+    } catch (e: any) {
+      toast.error(e?.message || "Une erreur est survenue. Réessayez.");
       setLoading(false);
     }
   };
