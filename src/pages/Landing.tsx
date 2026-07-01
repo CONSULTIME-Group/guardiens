@@ -490,7 +490,7 @@ const Landing = () => {
                       priceCurrency: SITTER_PRICE_CURRENCY,
                       unitCode: "MON",
                       description:
-                        "Abonnement gardien à 6,99 €/mois après le 30 septembre 2026, accès sans abonnement jusqu'à cette date.",
+                        "Abonnement gardien à 6,99 €/mois à partir du 1er octobre 2026, accès à 0 € jusqu'à cette date.",
                     },
                   },
                   {
