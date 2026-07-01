@@ -1213,15 +1213,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  </div>
  </div>
  )}
- {/* Réassurance périmètre. En public on raccourcit (la promesse est déjà dans le hero). */}
- {!isPublic && (
- <div className="px-6 pt-4">
- <ReachReassuranceBanner
- variant="inline"
- inlineText="Du coin par défaut, élargissez à toute la France quand vous le voulez."
- />
- </div>
- )}
+  {/* Réassurance périmètre retirée : redondante avec le sélecteur Zone (radius / dept / France). */}
 
   {/* ─── Sticky search bar ─── */}
   <div className="sticky top-[52px] md:top-0 z-[1100] bg-background border-b-2 border-border shadow-sm">
