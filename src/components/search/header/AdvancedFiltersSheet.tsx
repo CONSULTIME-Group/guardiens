@@ -40,6 +40,8 @@ export const AdvancedFiltersSheet = ({
   onOpenChange,
   pillClass,
   hasActiveFilters,
+  activeFiltersCount,
+
   resetFilters,
   housingTypes,
   toggleHousingType,
