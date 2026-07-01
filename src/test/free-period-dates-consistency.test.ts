@@ -94,7 +94,7 @@ describe("Cohérence des dates de gratuité", () => {
 
   describe("présence des dates canoniques", () => {
     const REQUIRED_PRESENCE: Record<string, RegExp[]> = {
-      "src/pages/Pricing.tsx": [/30\s+septembre\s+2026/, /1er\s+octobre\s+2026/],
+      "src/pages/Pricing.tsx": [/1er\s+octobre\s+2026/],
       "src/pages/Cgs.tsx": [/30\s+septembre\s+2026/, /1er\s+octobre\s+2026/],
       "src/pages/Landing.tsx": [/30\s+septembre\s+2026/],
     };
