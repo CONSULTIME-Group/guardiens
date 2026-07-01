@@ -1074,7 +1074,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const availableSitsCount = results.filter((r: any) => !r.isAssigned && !r.isCompleted && !r.isPast && !r.is_demo).length;
  const demoCount = results.filter((r: any) => r.is_demo).length;
  const resultCount = tab === "missions" && missionSubTab === "members" ? availableMembers.length : availableSitsCount;
-  const hasNoLocalRealMissions = tab === "missions" && missionSubTab === "published" && !loading && zoneMode !== "france" && resultCount === 0 && densityCounts.france > 0;
+  // hasNoLocalRealMissions retiré : OutOfZoneBanner couvre déjà ce cas.
  const countLabel = tab === "missions" && missionSubTab === "members"
  ? `${resultCount} membre${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""}`
  : resultCount === 0 && demoCount > 0
