@@ -554,6 +554,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  searchCoords: { lat: number; lng: number } | null,
  getPostalCodeFn?: (item: any) => string | undefined,
  alwaysIncludeFn?: (item: any) => boolean,
+ densityFilterFn?: (item: any) => boolean,
  ) => {
  const cityCoords = new Map<string, { lat: number; lng: number }>();
  const uniqueCities = [...new Set(items.map(getCityFn).filter(Boolean))] as string[];
@@ -562,21 +563,25 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
  }));
 
- // Compute density counts for each zone mode (always, for the counter UI)
+ // Compute density counts for each zone mode (always, for the counter UI).
+ // Density est calculée sur les items « actionnables » (open/publiés/non expirés)
+ // pour rester aligné avec les compteurs SEO/eyebrow des pages publiques.
+ const densityItems = densityFilterFn ? items.filter(densityFilterFn) : items;
  const refDept = getDeptCode(getZoneRefPostalCode());
  const refRegion = getRegionCode(refDept);
- const radiusCount = searchCoords ? items.filter((s) => {
+ const radiusCount = searchCoords ? densityItems.filter((s) => {
  const c = getCityFn(s); if (!c) return false;
  const co = cityCoords.get(c); if (!co) return false;
  return haversineDistance(searchCoords.lat, searchCoords.lng, co.lat, co.lng) <= radius[0];
  }).length : 0;
- const deptCount = refDept ? items.filter((s) => {
+ const deptCount = refDept ? densityItems.filter((s) => {
  const cp = getPostalCodeFn?.(s); return cp ? getDeptCode(cp) === refDept : false;
  }).length : 0;
- const regionCount = refRegion ? items.filter((s) => {
+ const regionCount = refRegion ? densityItems.filter((s) => {
  const cp = getPostalCodeFn?.(s); return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
  }).length : 0;
- setDensityCounts({ radius: radiusCount, dept: deptCount, region: regionCount, france: items.length });
+ setDensityCounts({ radius: radiusCount, dept: deptCount, region: regionCount, france: densityItems.length });
+
 
  // Apply the selected zone filter (international items always pass through)
  const passThrough = (s: any) => alwaysIncludeFn ? alwaysIncludeFn(s) : false;
@@ -672,7 +677,17 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  });
  }
  if (verifiedOnly) items = items.filter((s: any) => s.owner?.identity_verified);
- const { items: locFiltered, cityCoords } = await filterByLocation(items, (s: any) => s.owner?.city, searchCoords, (s: any) => s.owner?.postal_code, (s: any) => !!s.country && s.country !== "FR");
+ const { items: locFiltered, cityCoords } = await filterByLocation(
+ items,
+ (s: any) => s.owner?.city,
+ searchCoords,
+ (s: any) => s.owner?.postal_code,
+ (s: any) => !!s.country && s.country !== "FR",
+ // Density : uniquement les annonces actionnables (publiées, ouvertes aux
+ // candidatures, non expirées) pour rester aligné avec l'eyebrow SEO.
+ (s: any) => s.status === "published" && s.accepting_applications !== false && (!s.end_date || s.end_date >= todayIso),
+ );
+
  items = locFiltered;
  const enriched = await Promise.all(
  items.map(async (sit: any) => {
@@ -1309,6 +1324,8 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
         onOpenChange={setFilterSheetOpen}
         pillClass={pillClass}
         hasActiveFilters={hasActiveFilters}
+        activeFiltersCount={activeFiltersCount}
+
         resetFilters={resetFilters}
         housingTypes={housingTypes}
         toggleHousingType={toggleHousingType}
