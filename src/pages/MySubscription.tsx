@@ -488,7 +488,7 @@ const MySubscription = () => {
                 <FounderBadge size="lg" />
                 <div className="space-y-1">
                   <p className="text-sm font-semibold text-founder-foreground font-body">
-                    Vous devenez Fondateur le 14 juillet.
+                    Vous devenez Fondateur le 30 septembre 2026.
                   </p>
                   <p className="text-sm text-founder-foreground/80 font-body leading-relaxed">
                     Chaque membre inscrit avant le 30 septembre 2026 reçoit le badge Fondateur, visible sur son profil public. L'accès offert, lui, est étendu à tous les inscrits jusqu'au 30 septembre 2026.
