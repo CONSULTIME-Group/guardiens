@@ -1357,7 +1357,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  {/* ─── Sort bar + view toggle (sticky avec les pills pour cohérence visuelle) ─── */}
  <div className="flex justify-between items-center gap-2 px-4 sm:px-6 py-2 border-t border-border/60 bg-background flex-nowrap">
  <div className="flex items-center gap-2 min-w-0 flex-1">
- <span className="text-xs sm:text-sm text-muted-foreground truncate">{loading ? "Recherche…" : countLabel}</span>
+ <span className="text-xs sm:text-sm text-muted-foreground truncate flex-1 min-w-0" title={countLabel}>{loading ? "Recherche…" : countLabel}</span>
  <Select value={sort} onValueChange={(v) => handleSortChange(v as SortOption)}>
  <SelectTrigger className="h-8 w-auto gap-1.5 rounded-full border-border bg-card px-3 text-xs shrink-0">
  <span className="text-muted-foreground hidden sm:inline">Trier&nbsp;:</span>
@@ -1452,8 +1452,9 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 
  {/* Densité supprimée, déjà visible dans le sélecteur de Zone et le bandeau hors-zone */}
 
-  {/* ─── Out-of-zone banner ─── */}
-  {tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius && (
+  {/* ─── Out-of-zone banner ─── (masqué en état vide : l'empty state gère déjà
+       « Élargir » + « Créer alerte » — ne dupliquez pas les CTA au-dessus) */}
+  {tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius && availableSitsCount > 0 && (
     <OutOfZoneBanner
       zoneMode={zoneMode}
       setZoneMode={setZoneMode}
@@ -2023,7 +2024,9 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  )}
 
   {/* ─── FAB mobile toggle carte/liste ─── */}
-  {isMobile && tab === "sits" && (
+   {/* FAB masqué en état vide : rien à afficher sur la carte, il ne ferait que
+        chevaucher les CTA de l'empty state. */}
+   {isMobile && tab === "sits" && availableSitsCount > 0 && (
     <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[1200] sm:hidden">
       <button
         onClick={() => setViewMode(viewMode === "list" ? "map" : "list")}
