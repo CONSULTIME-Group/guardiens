@@ -1405,18 +1405,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  </SelectContent>
  </Select>
  </div>
-   {tab === "sits" && intlCount > 0 && (
-    <Link
-      to="/annonces/international"
-      className="inline-flex items-center gap-1.5 shrink-0 rounded-full border border-primary/40 bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-semibold px-3 py-1.5 mr-2 shadow-sm transition-colors"
-      aria-label={`Voir les ${intlCount} annonces hors France`}
-    >
-      <Globe2 className="h-3.5 w-3.5" />
-      <span className="hidden sm:inline">Français à l'étranger</span>
-      <span className="sm:hidden">Étranger</span>
-      <span className="inline-flex items-center justify-center rounded-full bg-primary-foreground/20 px-1.5 py-0.5 text-[10px] font-bold">{intlCount}</span>
-    </Link>
-   )}
+   {/* Lien "Français à l'étranger" retiré du toolbar — trop peu utilisé pour occuper cette place. Déplacé en fin de résultats. */}
   {/* Bouton « Créer une alerte » retiré du toolbar : l'empty state et OutOfZoneBanner exposent déjà ce CTA au bon moment. */}
   <div className="hidden sm:flex border border-border rounded-lg overflow-hidden shrink-0">
  <button
