@@ -16,6 +16,8 @@ interface AdvancedFiltersSheetProps {
   onOpenChange: (open: boolean) => void;
   pillClass: string;
   hasActiveFilters: boolean;
+  activeFiltersCount?: number;
+
   resetFilters: () => void;
   housingTypes: HousingFilter[];
   toggleHousingType: (t: HousingFilter) => void;
