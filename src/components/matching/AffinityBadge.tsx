@@ -35,7 +35,7 @@ interface AffinityBadgeProps {
 function tone(score: number): string {
   if (score >= 80) return "bg-success/15 text-success border-success/30";
   if (score >= 60) return "bg-primary/10 text-primary border-primary/25";
-  if (score >= 40) return "bg-warning/15 text-warning border-warning/30";
+  // ≥40 (seuil d'affichage) : ton neutre, pas de warning orange qui suggère un problème.
   return "bg-muted text-muted-foreground border-border";
 }
 
