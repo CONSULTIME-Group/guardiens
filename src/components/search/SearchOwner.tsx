@@ -1204,7 +1204,8 @@ const SearchOwner = () => {
                     </div>
                   </Link>
                 );
-              })}
+              });
+              })()}
             </div>
             </>
           )}
