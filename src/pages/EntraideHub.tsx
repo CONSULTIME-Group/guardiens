@@ -382,6 +382,9 @@ const EntraideHub = () => {
             </div>
           </div>
 
+          {/* Bloc pédagogique "Comment ça marche" — concept d'échange */}
+          <ExchangeHowItWorks variant="public" className="mb-6" />
+
           {/* Onglets pleine largeur, avec fade-mask sur overflow */}
           <div className="mb-4 border-b border-border relative">
             <div
