@@ -32,6 +32,7 @@ interface MissionRow {
   latitude: number | null;
   longitude: number | null;
   created_at: string;
+  photos: string[] | null;
 }
 
 const MissionsCityPage = () => {
