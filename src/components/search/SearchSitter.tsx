@@ -120,6 +120,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const [verifiedOnly, setVerifiedOnly] = useState(false);
  const [withPhotosOnly, setWithPhotosOnly] = useState(false);
  const [minExperience, setMinExperience] = useState<ExperienceFilter>("all");
+ const [visibleCount, setVisibleCount] = useState(12);
  const [emergencyOnly, setEmergencyOnly] = useState(searchParams.get("emergency") === "true");
  // Mode test démos : ?testDemos=1 dans l'URL active un panneau de diagnostic
  // qui vérifie la présence + l'intercalation des annonces d'exemple sur tous
@@ -774,7 +775,8 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     }
   });
   setResultCoords(coordsMap);
-  setResults(final);
+ setResults(final);
+ setVisibleCount(12);
  };
 
 
@@ -852,7 +854,8 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   else if (sort === "recent") final.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   // Démos toujours visibles, intercalées
   final = interleaveDemos(final, DEMO_MISSIONS, 3);
-  setResults(final);
+ setResults(final);
+ setVisibleCount(12);
   };
 
  const searchAvailableMembers = async (searchCoords: { lat: number; lng: number } | null) => {
@@ -1944,11 +1947,74 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
       );
     })()}
 
-    <div className={tab === "missions"
-      ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4"
-      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 lg:gap-x-8 gap-y-6 sm:gap-y-10 lg:gap-y-12"}>
-    {results.map((item, idx) => renderCard(item, idx))}
-     </div>
+    {tab === "missions" ? (
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+        {results.map((item, idx) => renderCard(item, idx))}
+      </div>
+    ) : (() => {
+      // Groupement lecture : Disponibles → Exemples → Passées / Attribuées
+      const activeReal = results.filter((r: any) => !r.is_demo && !r.isAssigned && !r.isCompleted && !r.isPast);
+      const demos = results.filter((r: any) => r.is_demo);
+      const inactive = results.filter((r: any) => !r.is_demo && (r.isAssigned || r.isCompleted || r.isPast));
+      const visibleActive = activeReal.slice(0, visibleCount);
+      const hasMore = visibleActive.length < activeReal.length;
+      const gridCls = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 lg:gap-x-8 gap-y-8 sm:gap-y-10";
+      const groupHeader = (title: string, count: number, sub?: string) => (
+        <div className="mb-4 flex items-baseline justify-between gap-3">
+          <h3 className="font-heading text-base sm:text-lg font-semibold text-foreground">
+            {title} <span className="text-muted-foreground font-normal">({count})</span>
+          </h3>
+          {sub && <p className="text-xs text-muted-foreground hidden sm:block">{sub}</p>}
+        </div>
+      );
+      let globalIdx = 0;
+      return (
+        <>
+          {visibleActive.length > 0 && (
+            <section className="mb-10">
+              {(demos.length > 0 || inactive.length > 0) && groupHeader("Annonces disponibles", activeReal.length)}
+              <div className={gridCls}>
+                {visibleActive.map((item) => renderCard(item, globalIdx++))}
+              </div>
+              {hasMore && (
+                <div className="mt-8 flex justify-center">
+                  <button
+                    onClick={() => setVisibleCount((c) => c + 12)}
+                    className="rounded-full border border-border bg-card hover:bg-accent hover:border-primary/40 px-6 py-2.5 text-sm font-medium text-foreground transition-colors"
+                  >
+                    Voir plus d'annonces ({activeReal.length - visibleActive.length} restantes)
+                  </button>
+                </div>
+              )}
+            </section>
+          )}
+
+          {demos.length > 0 && (
+            <section className="mb-10">
+              {groupHeader("Exemples pour patienter", demos.length, "Aperçu du type d'annonces publiées par la communauté")}
+              <div className={gridCls}>
+                {demos.map((item) => renderCard(item, globalIdx++))}
+              </div>
+            </section>
+          )}
+
+          {inactive.length > 0 && (
+            <details className="group mb-6">
+              <summary className="cursor-pointer list-none flex items-center justify-between rounded-xl border border-border bg-muted/40 hover:bg-muted/60 px-4 py-3 mb-4 transition-colors">
+                <span className="font-heading text-sm font-semibold text-foreground">
+                  Historique local <span className="text-muted-foreground font-normal">({inactive.length} annonce{inactive.length > 1 ? "s" : ""} passée{inactive.length > 1 ? "s" : ""} ou attribuée{inactive.length > 1 ? "s" : ""})</span>
+                </span>
+                <span className="text-xs text-primary font-semibold group-open:hidden">Afficher ▾</span>
+                <span className="text-xs text-primary font-semibold hidden group-open:inline">Masquer ▴</span>
+              </summary>
+              <div className={gridCls}>
+                {inactive.map((item) => renderCard(item, globalIdx++))}
+              </div>
+            </details>
+          )}
+        </>
+      );
+    })()}
 
      {/* Lien "Français à l'étranger" en pied de résultats (déplacé depuis le toolbar) */}
      {tab === "sits" && intlCount > 0 && !loading && results.length > 0 && (
