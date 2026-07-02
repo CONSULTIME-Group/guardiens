@@ -1,108 +1,53 @@
-# Module « Questions & conseils »
+# Plan — Coups de main : photos, concept & workflow
 
-Forum communautaire léger pour poser une question (comportement animal, jardin, maison, garde…) et recevoir plusieurs réponses publiques. **Séparé** des petites missions (qui restent transactionnelles : Besoin / Offre).
+Constat de l'audit : le module fonctionne, mais souffre de 3 problèmes majeurs.
 
-## Périmètre
+## Problèmes identifiés
 
-- Route dédiée : `/questions` (liste + filtres) et `/questions/:id` (détail + fil de réponses).
-- Entrée depuis le dashboard : remplacer le bloc actuel « Échanges autour de vous » par 2 cartes côte à côte : « Petites missions » (existant) + « Questions & conseils » (nouveau).
-- Cohabite avec `/petites-missions`, aucune fusion DB.
+1. **Photos absentes "Près de chez vous"** : la requête `relatedMissions` dans `SmallMissionDetail.tsx` et `PublicMissionView.tsx` ne sélectionne pas `photos`. Résultat : placeholder-lettre systématique, même quand l'annonce a des photos.
+2. **Concept "échange" invisible** : le champ `exchange_offer` existe en DB et est obligatoire à la création, mais rien n'explique clairement à l'utilisateur (ni côté propriétaire ni côté gardien) que **le coup de main = un échange donnant-donnant, sans argent**. Les dashboards parlent de "petites missions" ou "échanges" sans jamais définir le pacte.
+3. **Workflow flou** : trois surfaces (`/petites-missions`, `/questions`, `/annonces/petites-missions`), vocabulaire mélangé (mission / échange / coup de main / besoin / offre), et aucun rappel du fonctionnement au moment de créer.
 
-## Modèle de données
+## Lot 1 — Fix photos (P0, technique)
 
-Deux nouvelles tables publiques.
+- **`SmallMissionDetail.tsx`** (~ligne 250-300) : ajouter `photos` au `select` de la requête `relatedMissions`.
+- **`PublicMissionView.tsx`** (~ligne 343) : idem.
+- **Placeholder unifié** : extraire le bloc inline en un mini composant `MissionCardCover` (photo si dispo, sinon gradient par catégorie avec label "Animaux/Jardin/Maison/Savoir-faire" — pas la lettre du titre, aligné sur `SearchListingCard`).
 
-### `community_questions`
-- `category` : `animaux | jardin | maison | garde | autre`
-- `title` (5–120), `body` (20–4000), `tags text[]`, `city` (optionnel)
-- `status` : `open | resolved | closed` (auteur peut marquer « résolu »)
-- `accepted_answer_id` (nullable, FK community_answers)
-- `views_count`, `answers_count`, `helpful_count` (compteurs)
-- `is_pinned`, `is_hidden` (modération)
+## Lot 2 — Clarifier le concept "échange" (éditorial)
 
-### `community_answers`
-- `question_id` FK, `parent_answer_id` (1 niveau de réponse imbriquée)
-- `body` (10–4000), `helpful_count`
-- `is_author_pick` (épinglé par l'auteur de la question)
-- `is_hidden`
+Un pacte en 1 phrase, décliné partout : **« Un coup de main = un échange. Sans argent, sans abonnement. Vous demandez, vous proposez quelque chose en retour (café, œufs, un service, une histoire). »**
 
-### `community_answer_votes`
-- `(answer_id, user_id)` unique, type `helpful`.
+- **Dashboard propriétaire** (`MissionsTabsCard.tsx`) : bandeau pédagogique 2 lignes au-dessus des onglets — pacte + CTA "Publier une demande".
+- **Dashboard gardien** (`MissionsNearbySection.tsx`) : bandeau symétrique — pacte + CTA "Proposer mon aide".
+- **Page dédiée** (`SmallMissions.tsx` + `SmallMissionsPublic.tsx`) : bloc "Comment ça marche" en 3 étapes visuelles fixes (1. Publier · 2. Convenir de l'échange en message · 3. Se donner un coup de main), immédiatement sous le hero.
+- **Formulaire de création** (`CreateSmallMission.tsx`) : au-dessus du champ `exchange_offer`, une micro-explication + 3 exemples cliquables ("Un café et des biscuits", "Des œufs de la semaine", "Un coup de main en retour quand vous voulez") qui pré-remplissent.
 
-### RLS
-- Lecture publique (`anon` + `authenticated`) sur questions/answers non masquées.
-- Écriture : `authenticated` uniquement, scoping `auth.uid()`.
-- Admin : peut tout modérer via `has_role(auth.uid(), 'admin')`.
-- Triggers pour incrémenter `answers_count` / `helpful_count`.
-- `GRANT` complets (anon SELECT, authenticated CRUD scoped, service_role ALL).
+## Lot 3 — Nettoyage vocabulaire (cohérence)
 
-### Modération
-- Réutilise `reports` (table existante) avec `target_type = 'question' | 'answer'`.
-- Réutilise `blocked_users` : un user bloqué n'apparaît pas dans les fils.
-- Auto-masquage à 3 signalements (trigger).
+- Standardiser : **"coup de main"** = le module, **"demande"** / **"offre"** = les deux types, **"échange"** = ce qui se convient. Bannir "mission" et "petite mission" dans le contenu visible (URLs et code DB conservés).
+- Retirer la catégorie collision `house = "Coups de main"` dans `CATEGORY_META` → renommer en `"Maison"`.
+- Aligner labels catégories questions FR ↔ missions (utiliser les libellés FR partout côté UI).
 
-## UI / composants
+## Lot 4 — Workflow allégé (UX)
 
-```
-src/pages/Questions.tsx                 # liste + filtres catégorie/statut/ville
-src/pages/QuestionDetail.tsx            # question + fil de réponses
-src/pages/QuestionCreate.tsx            # formulaire création
-src/components/community/
-  QuestionCard.tsx
-  AnswerThread.tsx
-  AnswerComposer.tsx
-  HelpfulButton.tsx
-  CategoryPills.tsx
-src/components/dashboard/CommunityQuestionsSection.tsx  # bloc dashboard
-src/hooks/useCommunityQuestions.ts
-src/hooks/useQuestionDetail.ts
-```
+- **Étape confirmation** (post-création) : afficher un écran/toast avec récap + rappel "Vous serez notifié dès qu'un membre propose un échange. À vous ensuite de valider en message."
+- **Réponse (`ProposeExchangeDialog`)** : ajouter en tête du dialogue un rappel visuel de ce que le propriétaire propose en échange, pour que le répondant s'aligne.
+- **`SmallMissionDetail`** : rendre le bloc `exchange_offer` beaucoup plus visible (encadré, pas noyé dans le corps).
 
-## Dashboard
+## Hors périmètre (à valider séparément)
 
-Remplace `MissionsNearbySection` par un layout 2 colonnes :
+- Ajouter des photos aux `community_questions` (aujourd'hui zéro photo).
+- Fusionner `/petites-missions` et l'onglet Besoins/Offres de `/questions` en une surface unique.
+- Ajouter un champ `exchange_expected` structuré (aujourd'hui c'est du texte libre).
 
-```text
-+----------------------------+----------------------------+
-| Petites missions           | Questions & conseils       |
-| (Besoin / Offre — actuel)  | (NOUVEAU)                  |
-| 3 missions proches         | 3 questions actives proches|
-| → /petites-missions        | → /questions               |
-+----------------------------+----------------------------+
-```
+## Détails techniques
 
-Sur mobile : stack vertical, Questions en 2ᵉ.
+- Aucune migration DB nécessaire pour les Lots 1-4.
+- Le placeholder cover devient un composant partagé `src/components/missions/MissionCardCover.tsx`.
+- Le bandeau pédagogique devient un composant partagé `src/components/missions/ExchangePactBanner.tsx` (variantes owner/sitter/public).
+- Vérifs Playwright : `/petites-missions/:id` avec photo (doit s'afficher), sans photo (fallback catégorie), dashboards (bandeau visible), création (exemples cliquables).
 
-## SEO
+---
 
-- `/questions` : title « Questions & conseils entre gardiens et propriétaires »
-- `/questions/:id` : title dynamique = `{title} — Questions & conseils`, JSON-LD `QAPage` avec `mainEntity: Question + suggestedAnswer[] + acceptedAnswer`.
-- Sitemap : ajouter questions `status = 'open' OR 'resolved'`, exclure `closed/hidden`.
-
-## Analytics
-
-- `question_create_submit` { category }
-- `question_view` { id }
-- `answer_submit` { question_id, is_first_answer }
-- `answer_helpful_click` { answer_id }
-- `question_mark_resolved` { id, answers_count }
-
-## Garde-fous
-
-- Vouvoiement, aucune icône Lucide dans le contenu éditorial (titres/cartes ok pour actions/nav).
-- Pas de « voisin », pas de tiret cadratin, pas d'AURA.
-- Aucune mention concurrent.
-- Light mode par défaut.
-
-## Livraison (3 étapes séquentielles)
-
-1. **Migration DB** (tables + RLS + triggers + GRANTs + realtime sur `community_answers`).
-2. **Pages + hooks + composants** + intégration dashboard 2 colonnes.
-3. **SEO** : sitemap + JSON-LD QAPage + `PageMeta`.
-
-## Hors scope (volontairement)
-
-- Notifications push/email sur nouvelle réponse → V2.
-- Tag « expert vétérinaire » → V2 (nécessite badge dédié).
-- Upload photos dans questions → V2.
-- Recherche full-text → V2 (filtres catégorie/ville suffisent au lancement).
+Je livre les 4 lots d'un coup, ou vous préférez que je commence par le Lot 1 (fix photos) + Lot 2 (concept) et qu'on juge avant les Lots 3-4 ?

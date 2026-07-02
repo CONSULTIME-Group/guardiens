@@ -31,6 +31,7 @@ import MatchedHelpersInviteBlock from "@/components/missions/MatchedHelpersInvit
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import PublicMissionView from "@/components/missions/PublicMissionView";
+import MissionCardCover from "@/components/missions/MissionCardCover";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import { isAuthorOf } from "@/lib/ownership";
 
@@ -222,7 +223,7 @@ const SmallMissionDetail = () => {
     const [authorRes, relatedRes, respsRes, givenFbRes, recFbRes] = await Promise.all([
       supabase.rpc("get_mission_author_public", { _mission_id: m.id }),
       supabase.from("small_missions")
-        .select("id, title, description, category, city, postal_code, created_at, duration_estimate")
+        .select("id, title, description, category, city, postal_code, created_at, duration_estimate, photos, mission_type")
         .eq("status", "open")
         .neq("id", m.id)
         .or(`category.eq.${m.category},city.eq.${m.city}`)
@@ -1295,13 +1296,12 @@ const SmallMissionDetail = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
               {relatedMissions.slice(0, 3).map((rm) => (
                 <Link key={rm.id} to={`/petites-missions/${rm.id}`} className="group block">
-                  <div className="rounded-2xl overflow-hidden mb-5 aspect-[4/3] bg-muted shadow-sm">
-                    <div className="w-full h-full bg-gradient-to-br from-primary/10 via-muted to-primary/5 group-hover:scale-105 transition-transform duration-700 flex items-center justify-center">
-                      <span className="font-heading text-3xl font-bold text-primary/30">
-                        {rm.title.charAt(0)}
-                      </span>
-                    </div>
-                  </div>
+                  <MissionCardCover
+                    photo={Array.isArray(rm.photos) ? rm.photos[0] : null}
+                    category={rm.category}
+                    title={rm.title}
+                    className="mb-5"
+                  />
                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
                     {(CATEGORY_META[rm.category] || CATEGORY_META.animals).label}
                   </p>

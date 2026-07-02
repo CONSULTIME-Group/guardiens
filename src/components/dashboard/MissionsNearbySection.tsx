@@ -7,6 +7,7 @@ import {
   X, Sparkles, ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ExchangePactBanner from "@/components/missions/ExchangePactBanner";
 
 const SKILL_TO_MISSION: Record<string, string> = {
   animaux: "animals",
@@ -72,9 +73,9 @@ const MissionsNearbySection = () => {
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-1">
-        <h2 className="font-heading text-xl font-semibold">Échanges autour de vous</h2>
+        <h2 className="font-heading text-xl font-semibold">Coups de main autour de vous</h2>
         <Link to="/petites-missions" className="text-xs text-primary hover:underline font-medium">
-          Voir toutes les missions →
+          Voir tout →
         </Link>
       </div>
       <p className="text-sm text-foreground/60 mt-1 mb-4">
@@ -82,6 +83,8 @@ const MissionsNearbySection = () => {
           ? "Les échanges près de chez vous, en priorité ceux qui correspondent à vos compétences."
           : "Des gens du coin qui cherchent de l'aide, d'autres qui proposent la leur."}
       </p>
+
+      <ExchangePactBanner variant="sitter" className="mb-4" />
 
       {/* Tuiles thématiques de modèles, pré-remplissent le formulaire */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
