@@ -953,7 +953,11 @@ const SearchOwner = () => {
                     ? "Soyez parmi les premiers propriétaires"
                     : city
                       ? `Aucun gardien à ${city} pour l'instant`
-                      : "Aucun gardien dans cette zone pour l'instant"}
+                      : zoneMode === "france"
+                        ? "Aucun gardien en France pour l'instant"
+                        : zoneMode === "dept" && refDept
+                          ? `Aucun gardien dans ${deptLabel} pour l'instant`
+                          : "Aucun gardien dans cette zone pour l'instant"}
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
                   {isLaunchMode
