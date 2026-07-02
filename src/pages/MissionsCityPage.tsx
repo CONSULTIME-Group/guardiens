@@ -10,6 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { supabase } from "@/integrations/supabase/client";
 import { haversineDistance } from "@/lib/geocode";
 import { MISSIONS_LYON } from "@/data/missionsCityContent";
+import MissionCardCover from "@/components/missions/MissionCardCover";
 
 const SITE_URL = "https://guardiens.fr";
 
@@ -31,6 +32,7 @@ interface MissionRow {
   latitude: number | null;
   longitude: number | null;
   created_at: string;
+  photos: string[] | null;
 }
 
 const MissionsCityPage = () => {
@@ -41,7 +43,7 @@ const MissionsCityPage = () => {
     const load = async () => {
       const { data } = await supabase
         .from("small_missions")
-        .select("id, title, category, city, latitude, longitude, created_at")
+        .select("id, title, category, city, latitude, longitude, created_at, photos")
         .eq("status", "open")
         .order("created_at", { ascending: false })
         .limit(100);
@@ -152,26 +154,37 @@ const MissionsCityPage = () => {
 
             {missions.length > 0 ? (
               <ul className="space-y-3">
-                {missions.map((m) => (
-                  <li key={m.id}>
-                    <Link
-                      to={`/petites-missions/${m.id}`}
-                      className="block p-4 rounded-xl border border-border bg-card hover:bg-accent/50 transition-colors"
-                    >
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="min-w-0">
-                          <p className="font-heading text-base font-semibold text-foreground truncate">
-                            {m.title}
-                          </p>
-                          <p className="text-xs text-foreground/60 mt-1">
-                            {m.city ? `${m.city} · ` : ""}{CATEGORY_LABEL[m.category] || m.category}
-                          </p>
+                {missions.map((m) => {
+                  const hasPhoto = Array.isArray(m.photos) && m.photos.length > 0;
+                  return (
+                    <li key={m.id}>
+                      <Link
+                        to={`/petites-missions/${m.id}`}
+                        className="flex gap-4 p-4 rounded-xl border border-border bg-card hover:bg-accent/50 transition-colors"
+                      >
+                        {hasPhoto && (
+                          <MissionCardCover
+                            photo={m.photos![0]}
+                            category={m.category}
+                            title={m.title}
+                            className="w-24 sm:w-32 shrink-0 aspect-[4/3] rounded-lg"
+                          />
+                        )}
+                        <div className="flex items-center justify-between gap-4 flex-1 min-w-0">
+                          <div className="min-w-0">
+                            <p className="font-heading text-base font-semibold text-foreground truncate">
+                              {m.title}
+                            </p>
+                            <p className="text-xs text-foreground/60 mt-1">
+                              {m.city ? `${m.city} · ` : ""}{CATEGORY_LABEL[m.category] || m.category}
+                            </p>
+                          </div>
+                          <span className="text-xs text-primary font-semibold shrink-0">Voir →</span>
                         </div>
-                        <span className="text-xs text-primary font-semibold shrink-0">Voir →</span>
-                      </div>
-                    </Link>
-                  </li>
-                ))}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <div className="p-8 rounded-2xl border border-dashed border-border bg-accent/20 text-center">

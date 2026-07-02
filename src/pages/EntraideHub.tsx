@@ -21,6 +21,7 @@ import type { CommunityCategory } from "@/lib/communityCategories";
 import { DEPT_NAMES, getDeptCode } from "@/lib/departments";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import MissionCardCover from "@/components/missions/MissionCardCover";
 
 type Tab = "questions" | "besoins" | "offres";
 type MissionStatus = "all" | "open" | "in_progress" | "completed";
@@ -52,6 +53,7 @@ interface MissionRow {
   status: string;
   mission_type: "besoin" | "offre" | null;
   user_id: string;
+  photos?: string[] | null;
   profiles?: { first_name: string | null; avatar_url: string | null } | null;
 }
 
@@ -220,7 +222,7 @@ const EntraideHub = () => {
       const { data } = await supabase
         .from("small_missions")
         .select(
-          "id, title, description, category, city, postal_code, created_at, date_needed, duration_estimate, status, mission_type, user_id, profiles:user_id(first_name, avatar_url)",
+          "id, title, description, category, city, postal_code, created_at, date_needed, duration_estimate, status, mission_type, user_id, photos, profiles:user_id(first_name, avatar_url)",
         )
         .in("status", ["open", "in_progress", "completed"] as any)
         .order("created_at", { ascending: false })
@@ -637,8 +639,17 @@ const EntraideHub = () => {
                           <li key={m.id}>
                             <Link
                               to={`/petites-missions/${m.id}`}
-                              className="block p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all"
+                              className="flex gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all"
                             >
+                              {Array.isArray(m.photos) && m.photos.length > 0 && (
+                                <MissionCardCover
+                                  photo={m.photos[0]}
+                                  category={m.category}
+                                  title={m.title}
+                                  className="w-24 sm:w-32 shrink-0 aspect-[4/3] rounded-lg"
+                                />
+                              )}
+                              <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-2 flex-wrap">
                                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase tracking-wide">
                                   {MISSION_CATEGORY_LABEL[m.category] || "Autre"}
@@ -682,6 +693,7 @@ const EntraideHub = () => {
                                 {dateLabel && <span>Pour le {dateLabel}</span>}
                                 {m.duration_estimate && <span>{m.duration_estimate}</span>}
                                 <span className="ml-auto">{formatRelative(m.created_at)}</span>
+                              </div>
                               </div>
                             </Link>
                           </li>

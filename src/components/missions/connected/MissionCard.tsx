@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { formatCity, ModeFilter, DURATION_LABELS } from "./constants";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
+import MissionCardCover from "@/components/missions/MissionCardCover";
 
 const LOCALE_MAP: Record<string, string> = { fr: "fr-FR", en: "en-US", es: "es-ES", it: "it-IT", de: "de-DE" };
 
@@ -49,7 +50,15 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onNavigateDetail(); } }}
       className="cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
     >
-      <Card className={`border-border transition-colors h-full ${isCompleted ? "opacity-50 grayscale" : "hover:border-primary/30"}`}>
+      <Card className={`border-border transition-colors h-full overflow-hidden ${isCompleted ? "opacity-50 grayscale" : "hover:border-primary/30"}`}>
+        {Array.isArray(m.photos) && m.photos.length > 0 && (
+          <MissionCardCover
+            photo={m.photos[0]}
+            category={catKey}
+            title={m.title}
+            className="rounded-none rounded-t-lg aspect-[16/9]"
+          />
+        )}
         <CardContent className="p-4 space-y-2">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{tp(`mission_categories.${catKey}`)}</span>
