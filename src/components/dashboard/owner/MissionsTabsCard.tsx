@@ -2,6 +2,7 @@ import { memo, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ExchangePactBanner from "@/components/missions/ExchangePactBanner";
+import ExchangeHowItWorks from "@/components/missions/ExchangeHowItWorks";
 import type { SmallMission } from "./types";
 
 interface MissionsTabsCardProps {
