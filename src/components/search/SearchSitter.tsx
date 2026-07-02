@@ -775,7 +775,8 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     }
   });
   setResultCoords(coordsMap);
-  setResults(final);
+ setResults(final);
+ setVisibleCount(12);
  };
 
 
@@ -853,7 +854,8 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   else if (sort === "recent") final.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   // Démos toujours visibles, intercalées
   final = interleaveDemos(final, DEMO_MISSIONS, 3);
-  setResults(final);
+ setResults(final);
+ setVisibleCount(12);
   };
 
  const searchAvailableMembers = async (searchCoords: { lat: number; lng: number } | null) => {
