@@ -1067,13 +1067,32 @@ const SearchOwner = () => {
                 </div>
               )}
             {results.length > 0 && <OwnerAffinityBanner className="mb-4" />}
+            {(() => {
+              // Détecte les prénoms dupliqués dans la page pour désambiguïser (Marie → Marie · Écully)
+              const nameCounts: Record<string, number> = {};
+              results.forEach((s: any) => {
+                const fn = (s.profile?.first_name || "Gardien").toLowerCase();
+                nameCounts[fn] = (nameCounts[fn] || 0) + 1;
+              });
+              return null;
+            })()}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
-              {results.map((s: any) => {
+              {(() => {
+                const nameCounts: Record<string, number> = {};
+                results.forEach((s: any) => {
+                  const fn = (s.profile?.first_name || "Gardien").toLowerCase();
+                  nameCounts[fn] = (nameCounts[fn] || 0) + 1;
+                });
+                return results.map((s: any) => {
                 const profile = s.profile;
                 const sitterAnimalTypes: string[] = s.animal_types || [];
                 const firstName = profile?.first_name || "Gardien";
+                const isDuplicate = nameCounts[firstName.toLowerCase()] > 1;
                 const bio = profile?.bio ? (profile.bio.length > 80 ? profile.bio.slice(0, 80) + "…" : profile.bio) : null;
-                const distLabel = s._dist === 0 ? "Dans votre ville" : (s._dist != null && s._dist !== Infinity ? `à ${s._dist} km` : null);
+                // « Dans votre ville » supprimé : quand le gardien est dans la ville recherchée,
+                // on affiche uniquement la ville (l'info est implicite). Sinon la distance seule.
+                const sameCity = s._dist === 0 || (city && profile?.city && profile.city.toLowerCase() === city.toLowerCase());
+                const distLabel = !sameCity && s._dist != null && s._dist !== Infinity ? `à ${s._dist} km` : null;
 
                 return (
                   <Link
