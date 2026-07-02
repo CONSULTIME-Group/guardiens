@@ -184,30 +184,41 @@ const SmallMissionsPublic = () => {
             <ul className="space-y-3">
               {filtered.map((m) => {
                 const isOffre = (m.mission_type ?? "besoin") === "offre";
+                const hasPhoto = Array.isArray(m.photos) && m.photos.length > 0;
                 return (
                   <li key={m.id}>
                     <Link
                       to={`/petites-missions/${m.id}`}
-                      className="block p-4 rounded-xl bg-card border border-border hover:bg-accent/50 transition-colors"
+                      className="flex gap-4 p-4 rounded-xl bg-card border border-border hover:bg-accent/50 transition-colors"
                     >
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                          {CATEGORY_LABEL[m.category] || "Autre"}
-                        </span>
-                        <span
-                          className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                            isOffre ? "bg-success/15 text-success" : "bg-primary/10 text-primary"
-                          }`}
-                        >
-                          {isOffre ? "Propose son aide" : "Demande"}
-                        </span>
-                        {m.city && (
-                          <span className="text-xs text-foreground/50">{m.city}</span>
-                        )}
+                      {hasPhoto && (
+                        <MissionCardCover
+                          photo={m.photos![0]}
+                          category={m.category}
+                          title={m.title}
+                          className="w-24 sm:w-32 shrink-0 aspect-[4/3] rounded-lg"
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                            {CATEGORY_LABEL[m.category] || "Autre"}
+                          </span>
+                          <span
+                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                              isOffre ? "bg-success/15 text-success" : "bg-primary/10 text-primary"
+                            }`}
+                          >
+                            {isOffre ? "Propose son aide" : "Demande"}
+                          </span>
+                          {m.city && (
+                            <span className="text-xs text-foreground/50">{m.city}</span>
+                          )}
+                        </div>
+                        <p className="font-heading text-base font-semibold text-foreground line-clamp-2">
+                          {m.title}
+                        </p>
                       </div>
-                      <p className="font-heading text-base font-semibold text-foreground line-clamp-2">
-                        {m.title}
-                      </p>
                     </Link>
                   </li>
                 );
