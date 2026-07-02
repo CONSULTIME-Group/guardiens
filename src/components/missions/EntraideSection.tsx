@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Handshake, ThumbsUp, Star, Sprout, PawPrint, GraduationCap } from "lucide-react";
 import { MISSION_BADGES } from "./MissionFeedbackModal";
+import MissionCardCover from "@/components/missions/MissionCardCover";
 
 interface EntraideSectionProps {
   userId: string;
