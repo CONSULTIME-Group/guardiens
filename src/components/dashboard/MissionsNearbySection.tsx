@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ExchangePactBanner from "@/components/missions/ExchangePactBanner";
+import MissionCardCover from "@/components/missions/MissionCardCover";
 
 const SKILL_TO_MISSION: Record<string, string> = {
   animaux: "animals",
