@@ -951,12 +951,16 @@ const SearchOwner = () => {
                 <h2 className="font-heading text-xl font-semibold">
                   {isLaunchMode
                     ? "Soyez parmi les premiers propriétaires"
-                    : "Aucun gardien dans cette zone pour l'instant"}
+                    : city
+                      ? `Aucun gardien à ${city} pour l'instant`
+                      : "Aucun gardien dans cette zone pour l'instant"}
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
                   {isLaunchMode
                     ? "La communauté de gardiens se construit. Créez une alerte pour recevoir un e-mail dès qu'un gardien rejoint votre zone."
-                    : "Voici comment trouver le bon gardien quand même."}
+                    : zoneMode !== "france"
+                      ? "Essayez d'élargir à la France entière, ou activez une alerte pour être prévenu dès qu'un gardien rejoint votre zone."
+                      : "Activez une alerte pour être prévenu dès qu'un gardien rejoint votre zone."}
                 </p>
               </div>
 
