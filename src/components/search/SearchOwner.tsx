@@ -949,58 +949,7 @@ const SearchOwner = () => {
                 </p>
               </div>
 
-              {/* Bloc suggestions pour relancer la recherche */}
-              {!isLaunchMode && (
-                <div className="bg-muted/30 rounded-xl border border-border p-4 space-y-3">
-                  <h3 className="text-sm font-medium">Suggestions pour relancer votre recherche</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {hasActiveFilters && (
-                      <button
-                        onClick={resetFilters}
-                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors"
-                      >
-geneous with the previous and next token: ...
-[Assistant: je dois remplacer par une version qui ne met pas de JSX inline IIFE dans le JSX, car cela peut poser problème. Je vais extraire le helper nextRadius avant le return, ou je vais simplement calculer nextRadius dans le scope du composant.
-
-Attendez, il y a une erreur dans mon reasoning. Le line_replace tool n'a pas encore été appelé. Je dois juste écrire le contenu correct.
-
-Je vais calculer nextRadius dans le composant ou directement dans le JSX avec une expression simple.
-
-`RADIUS_SHORTCUTS` = [5, 10, 15, 30, 50].
-Si radius[0] est par exemple 15, next = 30.
-Je peux utiliser : `RADIUS_SHORTCUTS[RADIUS_SHORTCUTS.indexOf(radius[0]) + 1]`
-Mais `radius[0]` peut ne pas être dans RADIUS_SHORTCUTS (ALLOWED_ALERT_RADII = [5,15,30,50,100]).
-`radius` est initialisé à [15] et mis à jour via le Select qui utilise ALLOWED_ALERT_RADII. RADIUS_SHORTCUTS = [5, 10, 15, 30, 50].
-Donc radius[0] peut être 5, 15, 30, 50, 100 (ALLOWED) ou 10 (RADIUS_SHORTCUTS mobile).
-Pour être sûr, je vais utiliser ALLOWED_ALERT_RADII pour le calcul du next.
-
-Je vais créer une petite fonction helper juste avant le return :
-```tsx
-  const nextRadius = (current: number) => {
-    const arr = ALLOWED_ALERT_RADII;
-    const idx = arr.findIndex(r => r > current);
-    return idx >= 0 ? arr[idx] : null;
-  };
-```
-Mais non, je ne peux pas facilement insérer une fonction au milieu du fichier. Je vais juste mettre une expression simple dans le JSX.
-
-Je vais utiliser `ALLOWED_ALERT_RADII` directement.
-```tsx
-{zoneMode === "radius" && (() => {
-  const arr = ALLOWED_ALERT_RADII;
-  const idx = arr.findIndex(r => r > radius[0]);
-  const nextR = idx >= 0 ? arr[idx] : null;
-  if (!nextR) return null;
-  return (
-    <button ...>Élargir à {nextR} km</button>
-  );
-})()}
-```
-
-Bon, allons-y avec l'édition. J'insère aussi un petit helper dans le scope si possible, mais le plus simple est d'utiliser une IIFE inline. Le TSX le supporte.
-
-Nouveau plan : je vais remplacer les lignes 950-952.
-
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {/* Carte 1, Élargir la zone (si une zone plus large a des résultats) */}
                 {expansion && (
                   <button
