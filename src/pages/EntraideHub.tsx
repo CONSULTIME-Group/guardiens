@@ -220,7 +220,7 @@ const EntraideHub = () => {
       const { data } = await supabase
         .from("small_missions")
         .select(
-          "id, title, description, category, city, postal_code, created_at, date_needed, duration_estimate, status, mission_type, user_id, profiles:user_id(first_name, avatar_url)",
+          "id, title, description, category, city, postal_code, created_at, date_needed, duration_estimate, status, mission_type, user_id, photos, profiles:user_id(first_name, avatar_url)",
         )
         .in("status", ["open", "in_progress", "completed"] as any)
         .order("created_at", { ascending: false })
