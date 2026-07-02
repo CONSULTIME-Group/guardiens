@@ -124,13 +124,23 @@ const MissionsNearbySection = () => {
             const meta = CATEGORY_META[m.category] || CATEGORY_META.animals;
             const Icon = meta.icon;
             const isBesoin = m.mission_type !== "offre";
+            const hasPhoto = Array.isArray(m.photos) && m.photos.length > 0;
             return (
               <Link
                 key={m.id}
                 to={`/petites-missions/${m.id}`}
                 className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:bg-accent/50 transition-colors"
               >
-                <Icon className={`h-5 w-5 ${meta.colorClass} shrink-0`} />
+                {hasPhoto ? (
+                  <MissionCardCover
+                    photo={m.photos[0]}
+                    category={m.category}
+                    title={m.title}
+                    className="w-16 h-16 aspect-square shrink-0 rounded-lg"
+                  />
+                ) : (
+                  <Icon className={`h-5 w-5 ${meta.colorClass} shrink-0`} />
+                )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
