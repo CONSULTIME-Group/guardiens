@@ -184,9 +184,14 @@ const SearchListingCard = ({
     return isClickable ? <Link to={linkTo} className="block h-full">{missionCard}</Link> : <>{missionCard}</>;
   }
 
+  // ─── Card « sit » : refonte 2026 (grille éditoriale calme) ───
+  // Principes : photo 4:3 propre (pas de badge lourd en overlay), méta sous
+  // l'image, badge affinité en pill sémantique ton-sur-ton (« Très compatible »
+  // si score ≥ 60 %, silence sinon), ombre 2 couches subtile, bordure 1 px 6 %.
+  // Indisponibles : overlay blanc 40 % (jamais grayscale agressif ni noir).
   const cardContent = (
     <article
-      className={`group relative ${isClickable ? "cursor-pointer" : ""} ${isInactive ? "opacity-60" : ""} ${testDemoMode ? (isDemo ? "card-test-demo" : "card-test-real") : ""}`}
+      className={`group relative flex h-full flex-col ${isClickable ? "cursor-pointer" : ""} ${isInactive ? "opacity-70" : ""} ${testDemoMode ? (isDemo ? "card-test-demo" : "card-test-real") : ""}`}
       aria-disabled={isInactive || undefined}
       data-testid={isDemo ? "search-card-demo" : "search-card-real"}
       data-demo={isDemo ? "true" : "false"}
@@ -202,17 +207,17 @@ const SearchListingCard = ({
         </span>
       )}
 
-      {/* ─── Hero visual ─── */}
+      {/* ─── Photo 4:3, propre, overlays minimalistes ─── */}
       <div
-        className={`relative aspect-[4/3] overflow-hidden rounded-xl bg-muted transition-all duration-500 ease-out ${
-          isClickable ? "group-hover:shadow-2xl group-hover:-translate-y-2" : ""
-        } ${isDemo ? "ring-1 ring-amber-300/70" : ""}`}
+        className={`relative aspect-[4/3] overflow-hidden rounded-2xl bg-muted border border-black/[0.06] shadow-[0_1px_3px_rgba(11,31,26,0.05),0_4px_16px_-4px_rgba(11,31,26,0.06)] transition-all duration-500 ease-out ${
+          isClickable ? "group-hover:shadow-[0_4px_12px_rgba(11,31,26,0.08),0_16px_40px_-8px_rgba(11,31,26,0.10)]" : ""
+        }`}
       >
         {coverPhoto ? (
           <img
             src={coverPhoto}
             alt=""
-            className={`w-full h-full object-cover transition-transform duration-[1000ms] ease-out ${isClickable ? "group-hover:scale-105" : ""} ${isInactive ? "grayscale" : ""} ${isDemo ? "saturate-[0.85]" : ""}`}
+            className={`w-full h-full object-cover transition-transform duration-[900ms] ease-out ${isClickable ? "group-hover:scale-[1.03]" : ""}`}
             loading="lazy"
           />
         ) : (
@@ -221,138 +226,110 @@ const SearchListingCard = ({
           </div>
         )}
 
-        {/* Soft bottom gradient for legible overlay chips */}
-        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/55 via-black/15 to-transparent pointer-events-none" />
+        {/* Favori seul en overlay top-right, discret. */}
+        {!isDemo && !isInactive && (
+          <div className="absolute top-3 right-3" onClick={(e) => e.preventDefault()}>
+            <FavoriteButton targetType="sit" targetId={item.id} size="sm" />
+          </div>
+        )}
 
+        {/* Badge « Exemple » discret en coin (lin sur lin), pas de saturation cassée. */}
         {isDemo && (
           <span
-            className="absolute top-3 left-3 bg-amber-400/95 text-amber-950 text-[9px] font-semibold uppercase tracking-[0.15em] px-2 py-0.5 rounded-sm backdrop-blur-sm shadow-sm"
+            className="absolute top-3 left-3 bg-warning/95 text-warning-foreground text-[10px] font-semibold uppercase tracking-[0.16em] px-2 py-0.5 rounded-full shadow-sm"
             data-testid="demo-example-badge"
           >
             Exemple
           </span>
         )}
+
+        {/* Indisponible : overlay blanc doux + pill neutre au centre. */}
         {(isAssigned || isCompleted || isPast) && (
-          <span className="absolute inset-0 flex items-center justify-center">
-            <span className="bg-foreground/85 text-background px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] shadow-md">
+          <div className="absolute inset-0 bg-white/45 backdrop-blur-[1px] flex items-center justify-center">
+            <span className="bg-white/95 text-foreground text-[10px] font-semibold uppercase tracking-[0.2em] px-4 py-1.5 rounded-full border border-black/[0.06] shadow-sm">
               {isPast || isCompleted ? "Annonce passée" : "Gardiennage attribué"}
             </span>
-          </span>
+          </div>
         )}
+      </div>
 
-        {/* Top-left stacked badges */}
-        <div className="absolute top-5 left-5 flex flex-col gap-1.5 pointer-events-none">
-          {!isInactive && !isDemo && item.owner?.identity_verified && (
-            <span className="w-fit px-2.5 py-1 bg-primary text-primary-foreground text-[10px] font-bold tracking-[0.2em] uppercase shadow-lg">
-              Vérifié
+      {/* ─── Corps de carte sous l'image ─── */}
+      <div className="mt-4 px-0.5 flex flex-col flex-1">
+        {/* Ligne 1 : ville · distance, en eyebrow sauge discret */}
+        <p className={`text-[11px] uppercase tracking-[0.16em] font-medium truncate ${isOutOfZone ? "text-primary" : "text-primary/70"}`}>
+          <span className="truncate">{item.owner?.city || "France"}</span>
+          {item.distance != null && (
+            <span className="ml-1 opacity-70">
+              · {item.distance < 1 ? "< 1" : Math.round(item.distance).toLocaleString("fr-FR").replace(/\s/g, "\u202F")} km
             </span>
           )}
-          {item.isNew && !isDemo && !isInactive && (
-            <span className="w-fit px-2.5 py-1 bg-white/95 backdrop-blur-sm text-foreground text-[10px] font-bold tracking-[0.2em] uppercase shadow-lg">
-              Nouveau
-            </span>
-          )}
+        </p>
+
+        {/* Ligne 2 : titre Outfit (font-sans) pour scannabilité, poids medium */}
+        <div className="mt-1.5 flex items-start justify-between gap-2">
+          <h3 className="font-sans text-[15px] sm:text-[16px] font-medium leading-snug text-foreground line-clamp-2">
+            {item.title || "Sans titre"}
+          </h3>
+          {item.owner?.is_founder && <div className="shrink-0 pt-0.5"><FounderBadge size="sm" /></div>}
         </div>
 
-        {/* Top-right favorite + affinity */}
-        {!isDemo && !isMission && !isInactive && (
-          <div className="absolute top-4 right-4 flex items-center gap-2" onClick={(e) => e.preventDefault()}>
-            {affinity && affinityDisplayed && (
-              <div className="rounded-full bg-white/95 backdrop-blur-md shadow-sm">
-                <AffinityBadge
-                  result={affinity}
-                  size="sm"
-                  trackingContext="search_listing"
-                  trackingId={item.id}
-                />
-              </div>
-            )}
-            <FavoriteButton targetType="sit" targetId={item.id} size="sm" />
-          </div>
-
-        )}
-
-
-        {/* Bottom-left glassy chips: pets + dates */}
-        <div className="absolute bottom-5 left-5 right-5 flex flex-wrap items-end gap-1.5">
-          {Object.entries(petGroups).slice(0, 3).map(([species, names]) => {
+        {/* Ligne 3 : meta compacte (animaux + dates), petite typo, gris */}
+        <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-muted-foreground">
+          {Object.entries(petGroups).slice(0, 3).map(([species, names], idx) => {
             const IconComp = speciesIcon[species] || PawPrint;
             const count = names.length;
             return (
-              <span
-                key={species}
-                className="inline-flex items-center gap-1 px-2 py-1 bg-white/10 backdrop-blur-md border border-white/25 rounded-full text-white text-[11px] font-medium"
-              >
-                <IconComp className="h-3 w-3 opacity-80" />
+              <span key={species} className="inline-flex items-center gap-1">
+                {idx > 0 && <span aria-hidden className="opacity-40">·</span>}
+                <IconComp className="h-3 w-3 opacity-70" aria-hidden />
                 {count > 1 && <span>×{count}</span>}
               </span>
             );
           })}
           {dateLabel && (
-            <span className="inline-flex items-center px-2.5 py-1.5 bg-white/10 backdrop-blur-md border border-white/25 rounded-full text-white text-[11px] font-medium">
-              {dateLabel}
-            </span>
-          )}
-          {isOutOfZone && !isInactive && (
-            <span
-              className="ml-auto inline-flex items-center px-2.5 py-1.5 bg-primary/95 backdrop-blur-md text-primary-foreground rounded-full text-[11px] font-semibold"
-              title={`Cette annonce est à ${Math.round(item.distance)} km, au-delà de votre rayon de ${radius} km`}
-            >
-              {Math.round(item.distance)} km
-            </span>
+            <>
+              {Object.keys(petGroups).length > 0 && <span aria-hidden className="opacity-40">·</span>}
+              <span>{dateLabel}</span>
+            </>
           )}
         </div>
-      </div>
 
-      {/* ─── Body, editorial ─── */}
-      <div className="mt-3 sm:mt-6 px-1">
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="font-heading text-[17px] sm:text-xl md:text-[26px] font-medium leading-[1.2] text-foreground tracking-tight line-clamp-2">
-            {item.title || "Sans titre"}
-          </h3>
-          {item.owner?.is_founder && <div className="shrink-0 pt-1"><FounderBadge size="sm" /></div>}
-        </div>
-
-        <div className="mt-2 sm:mt-3 flex items-center justify-between gap-3">
-          <p className={`text-[11px] uppercase tracking-[0.18em] font-light truncate ${isOutOfZone ? "text-foreground" : "text-muted-foreground"}`}>
-            <span className="truncate">{item.owner?.city || ""}</span>
-            {item.distance != null && (
-              <span className={`ml-1 ${isOutOfZone ? "font-medium text-primary" : ""}`}>
-                · {item.distance < 1 ? "< 1" : Math.round(item.distance).toLocaleString("fr-FR").replace(/\s/g, "\u202F")} km
+        {/* Ligne 4 : badges de confiance / affinité, ton-sur-ton, silence si rien. */}
+        {(!isInactive && !isDemo) && (
+          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+            {item.owner?.identity_verified && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/[0.06] text-primary text-[11px] font-semibold px-2 py-0.5">
+                Vérifié
               </span>
             )}
-          </p>
-
-          {!isInactive && !isDemo && (
-            <span className="relative inline-flex items-center gap-1.5 text-primary font-semibold text-sm shrink-0">
-              <span>Postuler</span>
-              <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1.5">→</span>
-              <span className="absolute -bottom-1 left-0 h-[1px] w-0 bg-primary transition-all duration-300 group-hover:w-[calc(100%-1rem)]" />
-            </span>
-          )}
-        </div>
-
-        {(item.environments?.length > 0 || item.ownerEnvironments?.length > 0) && (
-          <div className="mt-4">
-            <EnvironmentPills selected={item.environments?.length > 0 ? item.environments : item.ownerEnvironments || []} onChange={() => {}} readOnly maxVisible={2} />
+            {affinity && affinityDisplayed && (
+              <AffinityBadge
+                result={affinity}
+                size="sm"
+                variant="semantic"
+                trackingContext="search_listing"
+                trackingId={item.id}
+              />
+            )}
+            {isOutOfZone && (
+              <span className="ml-auto inline-flex items-center rounded-full bg-primary/95 text-primary-foreground text-[10px] font-semibold px-2 py-0.5">
+                {Math.round(item.distance)} km
+              </span>
+            )}
           </div>
         )}
 
-        {isMission && item.description && (
-          <p className="mt-3 text-sm text-muted-foreground line-clamp-2 leading-relaxed">{item.description}</p>
-        )}
-
         {isAssigned && (
-          <p className="mt-3 text-xs text-muted-foreground italic">Cette garde a déjà trouvé son gardien.</p>
+          <p className="mt-2 text-[11px] text-muted-foreground italic">Cette garde a déjà trouvé son gardien.</p>
         )}
         {isCompleted && (
-          <p className="mt-3 text-xs text-muted-foreground italic">Garde déjà réalisée, aperçu de l'activité.</p>
+          <p className="mt-2 text-[11px] text-muted-foreground italic">Garde déjà réalisée, aperçu de l'activité.</p>
         )}
         {isPast && !isCompleted && (
-          <p className="mt-3 text-xs text-muted-foreground italic">Annonce passée, consultable à titre d'historique.</p>
+          <p className="mt-2 text-[11px] text-muted-foreground italic">Annonce passée, consultable à titre d'historique.</p>
         )}
         {isDemo && (
-          <p className="mt-3 text-xs text-amber-700 italic">Exemple, cliquez pour découvrir</p>
+          <p className="mt-2 text-[11px] text-warning-foreground/80 italic">Exemple, cliquez pour découvrir</p>
         )}
       </div>
     </article>

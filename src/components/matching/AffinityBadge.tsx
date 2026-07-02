@@ -30,6 +30,13 @@ interface AffinityBadgeProps {
   trackingContext?: string;
   /** Identifiant complémentaire pour la dédup (ex: id de la cible). */
   trackingId?: string;
+  /**
+   * "numeric" (défaut) : affiche le pourcentage.
+   * "semantic" : pill ton-sur-ton avec libellé « Très compatible » / « Compatible »
+   * (rien si score < 60). Recommandé sur les cartes de résultats de recherche
+   * pour éviter l'effet marketplace algorithmique froid (recherche UX 2026).
+   */
+  variant?: "numeric" | "semantic";
 }
 
 function tone(score: number): string {
@@ -39,12 +46,19 @@ function tone(score: number): string {
   return "bg-muted text-muted-foreground border-border";
 }
 
+function semanticLabel(score: number): string | null {
+  if (score >= 80) return "Très compatible";
+  if (score >= 60) return "Compatible";
+  return null;
+}
+
 const AffinityBadge = ({
   result,
   size = "md",
   className,
   trackingContext,
   trackingId,
+  variant = "numeric",
 }: AffinityBadgeProps) => {
   const wrapRef = useRef<HTMLButtonElement>(null);
 
@@ -69,16 +83,25 @@ const AffinityBadge = ({
   useImpressionOnce(wrapRef, dedupeKey, onSeen);
 
   if (!result) return null;
+
+  // Variante sémantique : rien en-dessous de 60% (silence = pas de bruit visuel).
+  const label = variant === "semantic" ? semanticLabel(result.score) : null;
+  if (variant === "semantic" && !label) return null;
+
   const sizing = size === "sm" ? "text-[11px] px-2 py-0.5" : "text-xs px-2.5 py-1";
 
   // Empêche la navigation du Link parent SANS bloquer l'ouverture du Popover.
-  // - preventDefault sur le span parent neutralise le défaut natif du <a>
-  // - stopPropagation empêche le onClick de Link de se déclencher
-  // - le bouton interne reçoit le clic normalement → Radix ouvre le Popover
   const blockLink = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
   };
+
+  const displayText =
+    variant === "semantic" ? label : `${result.score}% d'affinité`;
+  const ariaLabel =
+    variant === "semantic"
+      ? `${label} (${result.score}% d'affinité), voir le détail`
+      : `Affinité ${result.score}% (${result.total} critères sur 7 comparés), voir le détail`;
 
   return (
     <Popover>
@@ -94,9 +117,12 @@ const AffinityBadge = ({
               tone(result.score),
               className,
             )}
-            aria-label={`Affinité ${result.score}% (${result.total} critères sur 7 comparés), voir le détail`}
+            aria-label={ariaLabel}
           >
-            {result.score}% d'affinité
+            {variant === "semantic" && (
+              <span aria-hidden className="mr-0.5 opacity-70">✦</span>
+            )}
+            {displayText}
           </button>
         </PopoverTrigger>
       </span>
