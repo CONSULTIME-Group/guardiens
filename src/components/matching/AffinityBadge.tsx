@@ -58,6 +58,7 @@ const AffinityBadge = ({
   className,
   trackingContext,
   trackingId,
+  variant = "numeric",
 }: AffinityBadgeProps) => {
   const wrapRef = useRef<HTMLButtonElement>(null);
 
