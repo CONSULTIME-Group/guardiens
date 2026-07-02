@@ -87,6 +87,7 @@ const MissionsNearbySection = () => {
       </p>
 
       <ExchangePactBanner variant="sitter" className="mb-4" />
+      <ExchangeHowItWorks variant="sitter" className="mb-4" />
 
       {/* Tuiles thématiques de modèles, pré-remplissent le formulaire */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
