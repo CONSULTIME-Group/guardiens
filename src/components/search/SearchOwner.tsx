@@ -1144,6 +1144,9 @@ const SearchOwner = () => {
                     <div className="p-3 flex flex-col flex-1">
                       <p className="text-sm font-semibold truncate">
                         {firstName}
+                        {isDuplicate && profile?.city && (
+                          <span className="text-xs font-normal text-muted-foreground ml-1">· {profile.city}</span>
+                        )}
                         {profile?.identity_verified && (
                           <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium ml-1.5 inline-block align-middle">Vérifié</span>
                         )}
