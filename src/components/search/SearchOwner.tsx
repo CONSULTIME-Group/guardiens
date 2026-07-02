@@ -661,13 +661,8 @@ const SearchOwner = () => {
             </Select>
           )}
 
-          <Button
-            size="lg"
-            onClick={() => { setOpenPop(null); }}
-            className="shrink-0 rounded-2xl px-6 h-[52px]"
-          >
-            Rechercher
-          </Button>
+          {/* CTA « Rechercher » retiré : la recherche est live (ville/rayon → refetch auto),
+              le bouton primary volait l'attention pour zéro action utile. */}
         </div>
 
         <div className="relative -mr-6 sm:mr-0">
@@ -1048,7 +1043,9 @@ const SearchOwner = () => {
             </div>
           ) : (
             <>
-              {city && !alertCreated && (
+              {/* Bandeau « Recevez une alerte » : masqué quand la zone est déjà bien peuplée
+                  (≥ 8 résultats). L'action reste accessible via la cloche dans le toolbar. */}
+              {city && !alertCreated && results.length > 0 && results.length < 8 && (
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted/40 px-4 py-2.5">
                   <p className="text-xs text-muted-foreground flex items-center gap-2">
                     <Bell className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden="true" />
@@ -1071,12 +1068,22 @@ const SearchOwner = () => {
               )}
             {results.length > 0 && <OwnerAffinityBanner className="mb-4" />}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
-              {results.map((s: any) => {
+              {(() => {
+                const nameCounts: Record<string, number> = {};
+                results.forEach((s: any) => {
+                  const fn = (s.profile?.first_name || "Gardien").toLowerCase();
+                  nameCounts[fn] = (nameCounts[fn] || 0) + 1;
+                });
+                return results.map((s: any) => {
                 const profile = s.profile;
                 const sitterAnimalTypes: string[] = s.animal_types || [];
                 const firstName = profile?.first_name || "Gardien";
+                const isDuplicate = nameCounts[firstName.toLowerCase()] > 1;
                 const bio = profile?.bio ? (profile.bio.length > 80 ? profile.bio.slice(0, 80) + "…" : profile.bio) : null;
-                const distLabel = s._dist === 0 ? "Dans votre ville" : (s._dist != null && s._dist !== Infinity ? `à ${s._dist} km` : null);
+                // « Dans votre ville » supprimé : quand le gardien est dans la ville recherchée,
+                // on affiche uniquement la ville (l'info est implicite). Sinon la distance seule.
+                const sameCity = s._dist === 0 || (city && profile?.city && profile.city.toLowerCase() === city.toLowerCase());
+                const distLabel = !sameCity && s._dist != null && s._dist !== Infinity ? `à ${s._dist} km` : null;
 
                 return (
                   <Link
@@ -1128,6 +1135,9 @@ const SearchOwner = () => {
                     <div className="p-3 flex flex-col flex-1">
                       <p className="text-sm font-semibold truncate">
                         {firstName}
+                        {isDuplicate && profile?.city && (
+                          <span className="text-xs font-normal text-muted-foreground ml-1">· {profile.city}</span>
+                        )}
                         {profile?.identity_verified && (
                           <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium ml-1.5 inline-block align-middle">Vérifié</span>
                         )}
@@ -1188,7 +1198,8 @@ const SearchOwner = () => {
                     </div>
                   </Link>
                 );
-              })}
+              });
+              })()}
             </div>
             </>
           )}
