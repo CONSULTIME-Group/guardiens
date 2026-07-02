@@ -22,6 +22,7 @@ import { DEPT_NAMES, getDeptCode } from "@/lib/departments";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import MissionCardCover from "@/components/missions/MissionCardCover";
+import ExchangeHowItWorks from "@/components/missions/ExchangeHowItWorks";
 
 type Tab = "questions" | "besoins" | "offres";
 type MissionStatus = "all" | "open" | "in_progress" | "completed";
@@ -380,6 +381,9 @@ const EntraideHub = () => {
               </Button>
             </div>
           </div>
+
+          {/* Bloc pédagogique "Comment ça marche" — concept d'échange */}
+          <ExchangeHowItWorks variant="public" className="mb-6" />
 
           {/* Onglets pleine largeur, avec fade-mask sur overflow */}
           <div className="mb-4 border-b border-border relative">

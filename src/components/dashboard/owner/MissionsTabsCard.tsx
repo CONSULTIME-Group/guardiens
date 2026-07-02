@@ -2,6 +2,7 @@ import { memo, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ExchangePactBanner from "@/components/missions/ExchangePactBanner";
+import ExchangeHowItWorks from "@/components/missions/ExchangeHowItWorks";
 import type { SmallMission } from "./types";
 
 interface MissionsTabsCardProps {
@@ -64,6 +65,7 @@ const MissionsTabsCard = memo(({ myMissions, nearbyMissions }: MissionsTabsCardP
       </div>
 
       <ExchangePactBanner variant="owner" className="mb-4" />
+      <ExchangeHowItWorks variant="owner" className="mb-4" />
 
       {/* Onglets internes */}
       <div className="flex gap-1 p-1 bg-muted/50 rounded-xl mb-4" role="tablist">
