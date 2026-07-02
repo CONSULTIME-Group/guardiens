@@ -21,6 +21,7 @@ import type { CommunityCategory } from "@/lib/communityCategories";
 import { DEPT_NAMES, getDeptCode } from "@/lib/departments";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import MissionCardCover from "@/components/missions/MissionCardCover";
 
 type Tab = "questions" | "besoins" | "offres";
 type MissionStatus = "all" | "open" | "in_progress" | "completed";
