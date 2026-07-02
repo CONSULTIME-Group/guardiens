@@ -925,7 +925,7 @@ const SearchOwner = () => {
                 </div>
               ))}
             </div>
-          ) : results.length === 0 ? (
+          ) : (results.length === 0 || searchParams.get("debug_empty") === "1") ? (
             <div className="max-w-2xl mx-auto py-12 md:py-16 space-y-6 md:space-y-8">
               <div className="text-center space-y-4">
                 {(() => { const Illu = ILLUSTRATIONS.walkingDog; return <div className="mx-auto w-32 h-32 md:w-40 md:h-40"><Illu /></div>; })()}
