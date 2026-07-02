@@ -639,8 +639,17 @@ const EntraideHub = () => {
                           <li key={m.id}>
                             <Link
                               to={`/petites-missions/${m.id}`}
-                              className="block p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all"
+                              className="flex gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all"
                             >
+                              {Array.isArray(m.photos) && m.photos.length > 0 && (
+                                <MissionCardCover
+                                  photo={m.photos[0]}
+                                  category={m.category}
+                                  title={m.title}
+                                  className="w-24 sm:w-32 shrink-0 aspect-[4/3] rounded-lg"
+                                />
+                              )}
+                              <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-2 flex-wrap">
                                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase tracking-wide">
                                   {MISSION_CATEGORY_LABEL[m.category] || "Autre"}
