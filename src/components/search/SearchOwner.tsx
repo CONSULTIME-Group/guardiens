@@ -926,10 +926,10 @@ const SearchOwner = () => {
               ))}
             </div>
           ) : results.length === 0 ? (
-            <div className="max-w-2xl mx-auto py-10 space-y-4">
-              <div className="text-center space-y-3">
-                {(() => { const Illu = ILLUSTRATIONS.walkingDog; return <Illu />; })()}
-                <h2 className="font-heading text-xl font-semibold">
+            <div className="max-w-2xl mx-auto py-12 md:py-16 space-y-6 md:space-y-8">
+              <div className="text-center space-y-4">
+                {(() => { const Illu = ILLUSTRATIONS.walkingDog; return <div className="mx-auto w-32 h-32 md:w-40 md:h-40"><Illu /></div>; })()}
+                <h2 className="font-heading text-xl md:text-2xl font-semibold">
                   {isLaunchMode
                     ? "Soyez parmi les premiers propriétaires"
                     : city
@@ -940,24 +940,34 @@ const SearchOwner = () => {
                           ? `Aucun gardien dans ${deptLabel} pour l'instant`
                           : "Aucun gardien dans cette zone pour l'instant"}
                 </h2>
-                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
                   {isLaunchMode
                     ? "La communauté de gardiens se construit. Créez une alerte pour recevoir un e-mail dès qu'un gardien rejoint votre zone."
                     : zoneMode !== "france"
                       ? "Essayez d'élargir à la France entière, ou activez une alerte pour être prévenu dès qu'un gardien rejoint votre zone."
                       : "Activez une alerte pour être prévenu dès qu'un gardien rejoint votre zone."}
                 </p>
+                {hasActiveFilters && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={resetFilters}
+                    className="rounded-full mt-2"
+                  >
+                    Réinitialiser les filtres
+                  </Button>
+                )}
               </div>
 
               {/* Bloc suggestions pour relancer la recherche */}
               {!isLaunchMode && (
-                <div className="bg-muted/30 rounded-xl border border-border p-4 space-y-3">
-                  <h3 className="text-sm font-medium">Suggestions pour relancer votre recherche</h3>
+                <div className="bg-card rounded-xl border border-border shadow-sm p-5 space-y-3">
+                  <h3 className="text-sm font-semibold">Suggestions pour relancer votre recherche</h3>
                   <div className="flex flex-wrap gap-2">
                     {hasActiveFilters && (
                       <button
                         onClick={resetFilters}
-                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors"
+                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-background hover:border-primary hover:bg-primary/5 transition-colors"
                       >
                         Supprimer les filtres actifs
                       </button>
@@ -965,7 +975,7 @@ const SearchOwner = () => {
                     {animalTypes.length > 0 && !animalTypes.includes("Tous") && (
                       <button
                         onClick={() => setAnimalTypes([])}
-                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors"
+                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-background hover:border-primary hover:bg-primary/5 transition-colors"
                       >
                         Tous les animaux
                       </button>
@@ -975,7 +985,7 @@ const SearchOwner = () => {
                       return next ? (
                         <button
                           onClick={() => setRadius([next])}
-                          className="rounded-full px-3 py-1.5 text-xs border border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors"
+                          className="rounded-full px-3 py-1.5 text-xs border border-border bg-background hover:border-primary hover:bg-primary/5 transition-colors"
                         >
                           Élargir à {next} km
                         </button>
@@ -984,7 +994,7 @@ const SearchOwner = () => {
                     {zoneMode === "radius" && (
                       <button
                         onClick={() => setZoneMode("dept")}
-                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors"
+                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-background hover:border-primary hover:bg-primary/5 transition-colors"
                       >
                         Rechercher dans le département
                       </button>
@@ -992,7 +1002,7 @@ const SearchOwner = () => {
                     {zoneMode === "dept" && (
                       <button
                         onClick={() => setZoneMode("france")}
-                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors"
+                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-background hover:border-primary hover:bg-primary/5 transition-colors"
                       >
                         France entière
                       </button>
@@ -1000,7 +1010,7 @@ const SearchOwner = () => {
                     {minRating !== "all" && (
                       <button
                         onClick={() => setMinRating("all")}
-                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors"
+                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-background hover:border-primary hover:bg-primary/5 transition-colors"
                       >
                         Toutes les notes
                       </button>
@@ -1008,7 +1018,7 @@ const SearchOwner = () => {
                     {minSits !== "all" && (
                       <button
                         onClick={() => setMinSits("all")}
-                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors"
+                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-background hover:border-primary hover:bg-primary/5 transition-colors"
                       >
                         Toutes les expériences
                       </button>
@@ -1016,7 +1026,7 @@ const SearchOwner = () => {
                     {animalTypes.length === 0 && (
                       <button
                         onClick={() => toggleAnimal("Chiens")}
-                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors"
+                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-background hover:border-primary hover:bg-primary/5 transition-colors"
                       >
                         Essayer Chiens
                       </button>
@@ -1025,7 +1035,7 @@ const SearchOwner = () => {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Carte 1, Élargir la zone (si une zone plus large a des résultats) */}
                 {expansion && (
                   <button
