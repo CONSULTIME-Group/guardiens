@@ -30,6 +30,13 @@ interface AffinityBadgeProps {
   trackingContext?: string;
   /** Identifiant complémentaire pour la dédup (ex: id de la cible). */
   trackingId?: string;
+  /**
+   * "numeric" (défaut) : affiche le pourcentage.
+   * "semantic" : pill ton-sur-ton avec libellé « Très compatible » / « Compatible »
+   * (rien si score < 60). Recommandé sur les cartes de résultats de recherche
+   * pour éviter l'effet marketplace algorithmique froid (recherche UX 2026).
+   */
+  variant?: "numeric" | "semantic";
 }
 
 function tone(score: number): string {
@@ -37,6 +44,12 @@ function tone(score: number): string {
   if (score >= 60) return "bg-primary/10 text-primary border-primary/25";
   // ≥40 (seuil d'affichage) : ton neutre, pas de warning orange qui suggère un problème.
   return "bg-muted text-muted-foreground border-border";
+}
+
+function semanticLabel(score: number): string | null {
+  if (score >= 80) return "Très compatible";
+  if (score >= 60) return "Compatible";
+  return null;
 }
 
 const AffinityBadge = ({
