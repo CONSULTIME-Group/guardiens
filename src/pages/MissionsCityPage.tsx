@@ -10,6 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { supabase } from "@/integrations/supabase/client";
 import { haversineDistance } from "@/lib/geocode";
 import { MISSIONS_LYON } from "@/data/missionsCityContent";
+import MissionCardCover from "@/components/missions/MissionCardCover";
 
 const SITE_URL = "https://guardiens.fr";
 
