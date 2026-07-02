@@ -949,6 +949,82 @@ const SearchOwner = () => {
                 </p>
               </div>
 
+              {/* Bloc suggestions pour relancer la recherche */}
+              {!isLaunchMode && (
+                <div className="bg-muted/30 rounded-xl border border-border p-4 space-y-3">
+                  <h3 className="text-sm font-medium">Suggestions pour relancer votre recherche</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {hasActiveFilters && (
+                      <button
+                        onClick={resetFilters}
+                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors"
+                      >
+                        Supprimer les filtres actifs
+                      </button>
+                    )}
+                    {animalTypes.length > 0 && !animalTypes.includes("Tous") && (
+                      <button
+                        onClick={() => setAnimalTypes([])}
+                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors"
+                      >
+                        Tous les animaux
+                      </button>
+                    )}
+                    {zoneMode === "radius" && (() => {
+                      const next = ALLOWED_ALERT_RADII.find(r => r > radius[0]);
+                      return next ? (
+                        <button
+                          onClick={() => setRadius([next])}
+                          className="rounded-full px-3 py-1.5 text-xs border border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors"
+                        >
+                          Élargir à {next} km
+                        </button>
+                      ) : null;
+                    })()}
+                    {zoneMode === "radius" && (
+                      <button
+                        onClick={() => setZoneMode("dept")}
+                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors"
+                      >
+                        Rechercher dans le département
+                      </button>
+                    )}
+                    {zoneMode === "dept" && (
+                      <button
+                        onClick={() => setZoneMode("france")}
+                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors"
+                      >
+                        France entière
+                      </button>
+                    )}
+                    {minRating !== "all" && (
+                      <button
+                        onClick={() => setMinRating("all")}
+                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors"
+                      >
+                        Toutes les notes
+                      </button>
+                    )}
+                    {minSits !== "all" && (
+                      <button
+                        onClick={() => setMinSits("all")}
+                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors"
+                      >
+                        Toutes les expériences
+                      </button>
+                    )}
+                    {animalTypes.length === 0 && (
+                      <button
+                        onClick={() => toggleAnimal("Chiens")}
+                        className="rounded-full px-3 py-1.5 text-xs border border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors"
+                      >
+                        Essayer Chiens
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {/* Carte 1, Élargir la zone (si une zone plus large a des résultats) */}
                 {expansion && (
