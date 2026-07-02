@@ -661,13 +661,8 @@ const SearchOwner = () => {
             </Select>
           )}
 
-          <Button
-            size="lg"
-            onClick={() => { setOpenPop(null); }}
-            className="shrink-0 rounded-2xl px-6 h-[52px]"
-          >
-            Rechercher
-          </Button>
+          {/* CTA « Rechercher » retiré : la recherche est live (ville/rayon → refetch auto),
+              le bouton primary volait l'attention pour zéro action utile. */}
         </div>
 
         <div className="relative -mr-6 sm:mr-0">
@@ -1048,7 +1043,9 @@ const SearchOwner = () => {
             </div>
           ) : (
             <>
-              {city && !alertCreated && (
+              {/* Bandeau « Recevez une alerte » : masqué quand la zone est déjà bien peuplée
+                  (≥ 8 résultats). L'action reste accessible via la cloche dans le toolbar. */}
+              {city && !alertCreated && results.length > 0 && results.length < 8 && (
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted/40 px-4 py-2.5">
                   <p className="text-xs text-muted-foreground flex items-center gap-2">
                     <Bell className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden="true" />
