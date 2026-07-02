@@ -52,6 +52,7 @@ interface MissionRow {
   status: string;
   mission_type: "besoin" | "offre" | null;
   user_id: string;
+  photos?: string[] | null;
   profiles?: { first_name: string | null; avatar_url: string | null } | null;
 }
 
