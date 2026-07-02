@@ -65,6 +65,7 @@ const MissionsTabsCard = memo(({ myMissions, nearbyMissions }: MissionsTabsCardP
       </div>
 
       <ExchangePactBanner variant="owner" className="mb-4" />
+      <ExchangeHowItWorks variant="owner" className="mb-4" />
 
       {/* Onglets internes */}
       <div className="flex gap-1 p-1 bg-muted/50 rounded-xl mb-4" role="tablist">
