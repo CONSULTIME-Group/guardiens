@@ -1077,8 +1077,8 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   // hasNoLocalRealMissions retiré : OutOfZoneBanner couvre déjà ce cas.
  const countLabel = tab === "missions" && missionSubTab === "members"
  ? `${resultCount} membre${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""}`
- : resultCount === 0 && demoCount > 0
- ? "Aucune annonce réelle pour le moment"
+  : resultCount === 0 && demoCount > 0
+  ? `${demoCount} exemple${demoCount > 1 ? "s" : ""} ci-dessous, en attendant de vraies annonces`
  : resultCount === 0
  ? (city ? `Aucune annonce ouverte près de ${city}` : "Aucune annonce ouverte sur ce périmètre")
  : city
@@ -1165,7 +1165,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
      Masquées en mode public sur l'onglet sits : ces catégories
      ("Maison / Jardins / Bricolage / Animaux") sont pensées pour les
      missions, pas pour les annonces de garde où elles induisent en erreur. */}
- {!(isPublic && tab === "sits") && (
+ {tab === "missions" && (
  <div className="px-6 pt-3">
  <div className="flex flex-wrap gap-2">
 				{([
@@ -1177,29 +1177,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 				]).map(({ key, label, icon: Icon }) => (
  <button
  key={key}
- onClick={() => {
-   setMissionCategoryFilter(key);
-   // Sur l'onglet Gardes : on mappe la catégorie aux filtres existants
-   if (tab === "sits") {
-     if (key === "all") {
-       setHousingTypes([]);
-       setEnvironments([]);
-     } else if (key === "house") {
-       setHousingTypes(["house"]);
-       setEnvironments([]);
-     } else if (key === "garden") {
-       setHousingTypes(["farm"]);
-       setEnvironments(["campagne"]);
-     } else if (key === "skills") {
-       // Bricolage : pas de mapping spécifique sur les gardes, on reset
-       setHousingTypes([]);
-       setEnvironments([]);
-     } else if (key === "animals") {
-       setHousingTypes([]);
-       setEnvironments([]);
-     }
-   }
- }}
+  onClick={() => setMissionCategoryFilter(key)}
  className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors ${
  missionCategoryFilter === key
  ? "bg-foreground text-background border-foreground"
@@ -1262,14 +1240,12 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
           onGeolocate={handleGeolocation}
         />
       </div>
-      <Button
-        size="lg"
-        onClick={() => doSearch()}
-        disabled={loading}
-        className="shrink-0 rounded-2xl px-6"
-      >
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Rechercher"}
-      </Button>
+      {loading && (
+        <div className="shrink-0 flex items-center gap-2 text-sm text-muted-foreground px-2">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Recherche…
+        </div>
+      )}
     </div>
 
     <div
