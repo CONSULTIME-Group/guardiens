@@ -43,7 +43,7 @@ const MissionsCityPage = () => {
     const load = async () => {
       const { data } = await supabase
         .from("small_missions")
-        .select("id, title, category, city, latitude, longitude, created_at")
+        .select("id, title, category, city, latitude, longitude, created_at, photos")
         .eq("status", "open")
         .order("created_at", { ascending: false })
         .limit(100);
