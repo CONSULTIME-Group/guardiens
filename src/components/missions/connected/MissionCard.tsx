@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { formatCity, ModeFilter, DURATION_LABELS } from "./constants";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
+import MissionCardCover from "@/components/missions/MissionCardCover";
 
 const LOCALE_MAP: Record<string, string> = { fr: "fr-FR", en: "en-US", es: "es-ES", it: "it-IT", de: "de-DE" };
 
