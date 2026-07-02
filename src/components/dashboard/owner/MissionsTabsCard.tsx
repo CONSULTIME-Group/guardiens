@@ -76,7 +76,7 @@ const MissionsTabsCard = memo(({ myMissions, nearbyMissions }: MissionsTabsCardP
         activeMine.length === 0 && archivedMine.length === 0 ? (
           <div className="py-1">
             <p className="text-xs text-muted-foreground font-sans mb-3">
-              <span className="font-semibold text-foreground">Osez !</span> Demandez un coup de main, ou proposez quelque chose en échange, un café, une histoire, un service…
+              Demandez un coup de main, proposez quelque chose en échange (café, œufs, un service, une histoire).
             </p>
             <div className="flex flex-col gap-2">
               <Button
@@ -153,13 +153,13 @@ const MissionsTabsCard = memo(({ myMissions, nearbyMissions }: MissionsTabsCardP
         nearbyMissions.length === 0 ? (
           <div className="rounded-xl bg-muted/40 border border-dashed border-border p-3 text-center">
             <p className="text-xs text-muted-foreground font-sans italic">
-              Aucune mission autour de vous pour le moment.
+              Aucun coup de main autour de vous pour le moment.
             </p>
             <button
               onClick={() => navigate("/petites-missions")}
               className="mt-2 text-xs text-primary hover:underline font-sans font-medium"
             >
-              Parcourir toutes les missions →
+              Parcourir tous les échanges →
             </button>
           </div>
         ) : (
