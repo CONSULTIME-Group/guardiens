@@ -78,8 +78,10 @@ const SearchPage = () => {
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
-      {/* H1 + intro éditoriale (rendus pour tous, garantit le H1 unique au crawler) */}
-      <SearchSeoIntro />
+      {/* H1 SEO invisible, contextualisé selon la vue (gardiens vs annonces).
+          Les h2 visibles des vues SearchOwner/SearchSitter restent la seule
+          titraille visuelle du hero pour éviter le doublon d'eyebrow. */}
+      <SearchSeoIntro variant={showSitterView ? "listings" : "sitters"} />
 
       {/* Bandeau visiteur, discret, non sticky pour préserver le viewport mobile.
           Hiérarchie : libellé "Consultation libre" + bénéfice clair + CTA primaire. */}
