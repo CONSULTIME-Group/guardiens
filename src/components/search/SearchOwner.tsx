@@ -1067,15 +1067,6 @@ const SearchOwner = () => {
                 </div>
               )}
             {results.length > 0 && <OwnerAffinityBanner className="mb-4" />}
-            {(() => {
-              // Détecte les prénoms dupliqués dans la page pour désambiguïser (Marie → Marie · Écully)
-              const nameCounts: Record<string, number> = {};
-              results.forEach((s: any) => {
-                const fn = (s.profile?.first_name || "Gardien").toLowerCase();
-                nameCounts[fn] = (nameCounts[fn] || 0) + 1;
-              });
-              return null;
-            })()}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
               {(() => {
                 const nameCounts: Record<string, number> = {};
