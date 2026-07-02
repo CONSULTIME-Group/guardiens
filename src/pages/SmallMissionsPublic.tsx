@@ -39,6 +39,7 @@ interface MissionRow {
   city: string | null;
   created_at: string;
   mission_type: "besoin" | "offre" | null;
+  photos: string[] | null;
 }
 
 const SmallMissionsPublic = () => {
