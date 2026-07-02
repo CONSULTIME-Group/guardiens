@@ -114,6 +114,7 @@ const EntraideSection = ({ userId }: EntraideSectionProps) => {
               const meta = CATEGORY_META[m.category] || CATEGORY_META.animals;
               const Icon = meta.icon;
               const isBesoin = m.mission_type !== "offre";
+              const hasPhoto = Array.isArray(m.photos) && m.photos.length > 0;
               return (
                 <Link
                   key={m.id}
@@ -125,7 +126,16 @@ const EntraideSection = ({ userId }: EntraideSectionProps) => {
                   }`}>
                     {isBesoin ? "Besoin" : "Offre"}
                   </span>
-                  <Icon className="h-4 w-4 text-primary shrink-0" />
+                  {hasPhoto ? (
+                    <MissionCardCover
+                      photo={m.photos[0]}
+                      category={m.category}
+                      title={m.title}
+                      className="w-12 h-12 aspect-square shrink-0 rounded-md"
+                    />
+                  ) : (
+                    <Icon className="h-4 w-4 text-primary shrink-0" />
+                  )}
                   <p className="text-sm font-heading font-semibold truncate flex-1">{m.title}</p>
                   <span className="text-sm text-primary font-semibold shrink-0">Proposer un échange →</span>
                 </Link>
