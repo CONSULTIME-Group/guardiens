@@ -694,6 +694,7 @@ const EntraideHub = () => {
                                 {m.duration_estimate && <span>{m.duration_estimate}</span>}
                                 <span className="ml-auto">{formatRelative(m.created_at)}</span>
                               </div>
+                              </div>
                             </Link>
                           </li>
                         );
