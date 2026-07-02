@@ -120,6 +120,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const [verifiedOnly, setVerifiedOnly] = useState(false);
  const [withPhotosOnly, setWithPhotosOnly] = useState(false);
  const [minExperience, setMinExperience] = useState<ExperienceFilter>("all");
+ const [visibleCount, setVisibleCount] = useState(12);
  const [emergencyOnly, setEmergencyOnly] = useState(searchParams.get("emergency") === "true");
  // Mode test démos : ?testDemos=1 dans l'URL active un panneau de diagnostic
  // qui vérifie la présence + l'intercalation des annonces d'exemple sur tous
