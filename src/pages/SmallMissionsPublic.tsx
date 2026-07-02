@@ -55,7 +55,7 @@ const SmallMissionsPublic = () => {
       setLoading(true);
       const { data } = await supabase
         .from("small_missions")
-        .select("id, title, category, city, created_at, mission_type")
+        .select("id, title, category, city, created_at, mission_type, photos")
         .eq("status", "open")
         .order("created_at", { ascending: false })
         .limit(50);
