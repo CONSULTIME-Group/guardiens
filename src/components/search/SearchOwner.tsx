@@ -304,7 +304,7 @@ const SearchOwner = () => {
 
     let items = (sitters || []).filter((s: any) => s.profile?.profile_completion >= 60);
 
-    // Geocode all sitter cities once (needed for radius mode + density counter)
+    // Geocode all sitter cities once
     const uniqueCities = [...new Set(items.map((s: any) => s.profile?.city).filter(Boolean))] as string[];
     const cityCoords = new Map<string, { lat: number; lng: number }>();
     await Promise.all(uniqueCities.map(async (c) => {
@@ -323,26 +323,7 @@ const SearchOwner = () => {
       searchCoords = await geocodeCity(city);
     }
 
-    // Compute density counters (always, drives the zone selector UI)
-    const radiusCount = searchCoords ? items.filter((s: any) => {
-      const c = s.profile?.city; if (!c) return false;
-      const co = cityCoords.get(c); if (!co) return false;
-      return haversineDistance(searchCoords!.lat, searchCoords!.lng, co.lat, co.lng) <= radius[0];
-    }).length : 0;
-    const deptCount = refDept ? items.filter((s: any) => {
-      const cp = s.profile?.postal_code; return cp ? getDeptCode(cp) === refDept : false;
-    }).length : 0;
-    const regionCount = refRegion ? items.filter((s: any) => {
-      const cp = s.profile?.postal_code; return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
-    }).length : 0;
-    setDensityCounts({
-      radius: radiusCount,
-      dept: deptCount,
-      region: regionCount,
-      france: franceTotalSitters ?? items.length,
-    });
-
-    // Helper: enrichit un sitter avec ses coords (pour la vue carte) et sa distance
+    // Helper: enrich a sitter with coords and distance
     const withCoords = (s: any) => {
       const sitterCity = s.profile?.city;
       const coords = sitterCity ? cityCoords.get(sitterCity) : null;
@@ -350,85 +331,26 @@ const SearchOwner = () => {
       return { ...s, _dist: dist, _lat: coords?.lat ?? null, _lng: coords?.lng ?? null };
     };
 
-    // Apply selected zone filter + compute distance + coords
-    if (zoneMode === "radius") {
-      if (searchCoords) {
-        items = items
-          .map(withCoords)
-          .filter((s: any) => s._dist != null && s._dist <= radius[0]);
-      } else if (city) {
-        // Fallback: name match
-        items = items
-          .filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase()))
-          .map(withCoords);
-      } else {
-        items = items.map(withCoords);
-      }
-    } else if (zoneMode === "dept" && refDept) {
-      items = items
-        .filter((s: any) => {
-          const cp = s.profile?.postal_code; return cp ? getDeptCode(cp) === refDept : false;
-        })
-        .map(withCoords);
-    } else if (zoneMode === "region" && refRegion) {
-      items = items
-        .filter((s: any) => {
-          const cp = s.profile?.postal_code; return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
-        })
-        .map(withCoords);
-    } else {
-      // france
-      items = items.map(withCoords);
-    }
+    // Enrich ALL items with coords (needed for density counts across zones)
+    const allItems = items.map(withCoords);
 
-    // Filter: vehicle
-    if (vehicled) items = items.filter((s: any) => s.has_vehicle);
-    // Filter: available
-    if (availableOnly) items = items.filter((s: any) => s.is_available);
-    // Filter: verified
-    if (verifiedOnly) items = items.filter((s: any) => s.profile?.identity_verified);
-    // Filter: pros only (verified pro_status)
-    if (proOnly) items = items.filter((s: any) => s.profile?.pro_status === "verified");
-    // Filter: animal types
-    if (animalTypes.length > 0 && !animalTypes.includes("Tous")) {
-      const wanted = animalTypes.map(a => animalChipToType[a]).filter(Boolean);
-      items = items.filter((s: any) => {
-        const types: string[] = s.animal_types || [];
-        return wanted.some(w => types.includes(w));
-      });
-    }
-    // Filter: min sits
-    if (minSits !== "all") {
-      const min = parseInt(minSits);
-      items = items.filter((s: any) => (s.profile?.completed_sits_count || 0) >= min);
-    }
-
-    // Enrich with reviews + badges + emergency
-    const userIds = items.map((s: any) => s.user_id);
-    const [allBadgesRes, emergencyRes] = userIds.length > 0
+    // Fetch badges, emergency profiles, and reviews for ALL candidates
+    const allUserIds = allItems.map((s: any) => s.user_id);
+    const [allBadgesRes, emergencyRes] = allUserIds.length > 0
       ? await Promise.all([
-          supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", userIds),
-          supabase.from("emergency_sitter_profiles").select("user_id, is_active").in("user_id", userIds).eq("is_active", true),
+          supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", allUserIds),
+          supabase.from("emergency_sitter_profiles").select("user_id, is_active").in("user_id", allUserIds).eq("is_active", true),
         ])
       : [{ data: [] as any[] }, { data: [] as any[] }] as const;
 
     const emergencySet = new Set((emergencyRes.data || []).map((e: any) => e.user_id));
-    if (emergencyOnly) items = items.filter((s: any) => emergencySet.has(s.user_id));
 
-    const badgeMap = new Map<string, Map<string, number>>();
-    (allBadgesRes.data || []).forEach((b: any) => {
-      if (!badgeMap.has(b.user_id)) badgeMap.set(b.user_id, new Map());
-      const m = badgeMap.get(b.user_id)!;
-      m.set(b.badge_id, (m.get(b.badge_id) || 0) + 1);
-    });
-
-    // Batch fetch reviews for all candidates in a single query (avoid N+1)
     const reviewsAgg = new Map<string, { sum: number; count: number }>();
-    if (userIds.length > 0) {
+    if (allUserIds.length > 0) {
       const { data: reviewRows } = await supabase
         .from("reviews")
         .select("reviewee_id, overall_rating")
-        .in("reviewee_id", userIds)
+        .in("reviewee_id", allUserIds)
         .eq("published", true);
       (reviewRows || []).forEach((r: any) => {
         const cur = reviewsAgg.get(r.reviewee_id) || { sum: 0, count: 0 };
@@ -438,7 +360,15 @@ const SearchOwner = () => {
       });
     }
 
-    const enriched = items.map((s: any) => {
+    const badgeMap = new Map<string, Map<string, number>>();
+    (allBadgesRes.data || []).forEach((b: any) => {
+      if (!badgeMap.has(b.user_id)) badgeMap.set(b.user_id, new Map());
+      const m = badgeMap.get(b.user_id)!;
+      m.set(b.badge_id, (m.get(b.badge_id) || 0) + 1);
+    });
+
+    // Enrich all items
+    const enrichedAll = allItems.map((s: any) => {
       const agg = reviewsAgg.get(s.user_id);
       const avgRating = agg && agg.count > 0 ? agg.sum / agg.count : null;
       const userBadges = badgeMap.get(s.user_id);
@@ -448,14 +378,65 @@ const SearchOwner = () => {
       return { ...s, avgRating, reviewCount: agg?.count || 0, topBadges, isEmergency: emergencySet.has(s.user_id) };
     });
 
-    // Filter: min rating (post-enrichment)
-    let final = enriched;
+    // Apply ALL advanced filters (non-zone) to get the pool used for density counts
+    let filtered = enrichedAll;
+    if (vehicled) filtered = filtered.filter((s: any) => s.has_vehicle);
+    if (availableOnly) filtered = filtered.filter((s: any) => s.is_available);
+    if (verifiedOnly) filtered = filtered.filter((s: any) => s.profile?.identity_verified);
+    if (proOnly) filtered = filtered.filter((s: any) => s.profile?.pro_status === "verified");
+    if (animalTypes.length > 0 && !animalTypes.includes("Tous")) {
+      const wanted = animalTypes.map(a => animalChipToType[a]).filter(Boolean);
+      filtered = filtered.filter((s: any) => {
+        const types: string[] = s.animal_types || [];
+        return wanted.some(w => types.includes(w));
+      });
+    }
+    if (minSits !== "all") {
+      const min = parseInt(minSits);
+      filtered = filtered.filter((s: any) => (s.profile?.completed_sits_count || 0) >= min);
+    }
+    if (emergencyOnly) filtered = filtered.filter((s: any) => s.isEmergency);
     if (minRating !== "all") {
       const min = parseFloat(minRating);
-      final = final.filter((s: any) => s.avgRating !== null && s.avgRating >= min);
+      filtered = filtered.filter((s: any) => s.avgRating !== null && s.avgRating >= min);
     }
 
+    // Compute density counts on the FILTERED pool (before zone filter)
+    const radiusCount = searchCoords ? filtered.filter((s: any) => s._dist != null && s._dist <= radius[0]).length : 0;
+    const deptCount = refDept ? filtered.filter((s: any) => {
+      const cp = s.profile?.postal_code; return cp ? getDeptCode(cp) === refDept : false;
+    }).length : 0;
+    const regionCount = refRegion ? filtered.filter((s: any) => {
+      const cp = s.profile?.postal_code; return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
+    }).length : 0;
+    setDensityCounts({
+      radius: radiusCount,
+      dept: deptCount,
+      region: regionCount,
+      france: filtered.length,
+    });
+
+    // Apply zone filter to the filtered pool
+    let results = filtered;
+    if (zoneMode === "radius") {
+      if (searchCoords) {
+        results = results.filter((s: any) => s._dist != null && s._dist <= radius[0]);
+      } else if (city) {
+        results = results.filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase()));
+      }
+    } else if (zoneMode === "dept" && refDept) {
+      results = results.filter((s: any) => {
+        const cp = s.profile?.postal_code; return cp ? getDeptCode(cp) === refDept : false;
+      });
+    } else if (zoneMode === "region" && refRegion) {
+      results = results.filter((s: any) => {
+        const cp = s.profile?.postal_code; return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
+      });
+    }
+    // france: no zone filter applied
+
     // Sort
+    let final = results;
     if (sort === "closest") {
       final.sort((a, b) => {
         if (a.isEmergency !== b.isEmergency) return a.isEmergency ? -1 : 1;
@@ -476,7 +457,7 @@ const SearchOwner = () => {
     setResults(final);
     setSearchCenter(searchCoords);
     setLoading(false);
-  }, [city, cityPostalCode, userPostalCode, radius, zoneMode, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, proOnly, minSits, minRating, sort, franceTotalSitters]);
+  }, [city, cityPostalCode, userPostalCode, radius, zoneMode, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, proOnly, minSits, minRating, sort]);
 
   // Auto-search on filter change (debounced)
   useEffect(() => {
