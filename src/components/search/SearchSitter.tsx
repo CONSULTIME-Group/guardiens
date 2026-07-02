@@ -1177,29 +1177,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 				]).map(({ key, label, icon: Icon }) => (
  <button
  key={key}
- onClick={() => {
-   setMissionCategoryFilter(key);
-   // Sur l'onglet Gardes : on mappe la catégorie aux filtres existants
-   if (tab === "sits") {
-     if (key === "all") {
-       setHousingTypes([]);
-       setEnvironments([]);
-     } else if (key === "house") {
-       setHousingTypes(["house"]);
-       setEnvironments([]);
-     } else if (key === "garden") {
-       setHousingTypes(["farm"]);
-       setEnvironments(["campagne"]);
-     } else if (key === "skills") {
-       // Bricolage : pas de mapping spécifique sur les gardes, on reset
-       setHousingTypes([]);
-       setEnvironments([]);
-     } else if (key === "animals") {
-       setHousingTypes([]);
-       setEnvironments([]);
-     }
-   }
- }}
+  onClick={() => setMissionCategoryFilter(key)}
  className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors ${
  missionCategoryFilter === key
  ? "bg-foreground text-background border-foreground"
