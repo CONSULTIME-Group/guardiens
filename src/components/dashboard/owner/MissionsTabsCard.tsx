@@ -1,6 +1,7 @@
 import { memo, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import ExchangePactBanner from "@/components/missions/ExchangePactBanner";
 import type { SmallMission } from "./types";
 
 interface MissionsTabsCardProps {
@@ -56,11 +57,13 @@ const MissionsTabsCard = memo(({ myMissions, nearbyMissions }: MissionsTabsCardP
   return (
     <div className="bg-card border border-border rounded-2xl p-5 transition-shadow duration-300 hover:shadow-sm">
       <div className="flex items-center justify-between gap-2 mb-3">
-        <h3 className="text-sm font-semibold text-foreground">Petites missions</h3>
+        <h3 className="text-sm font-semibold text-foreground">Coups de main</h3>
         <Link to="/petites-missions" className="text-xs text-primary font-sans hover:underline shrink-0">
           Voir tout
         </Link>
       </div>
+
+      <ExchangePactBanner variant="owner" className="mb-4" />
 
       {/* Onglets internes */}
       <div className="flex gap-1 p-1 bg-muted/50 rounded-xl mb-4" role="tablist">
