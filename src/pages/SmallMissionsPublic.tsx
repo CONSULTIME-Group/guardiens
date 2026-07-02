@@ -7,6 +7,7 @@ import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import MissionCardCover from "@/components/missions/MissionCardCover";
 
 type MissionCategory = "animals" | "garden" | "house" | "errand" | "tech" | "company" | "other";
 
