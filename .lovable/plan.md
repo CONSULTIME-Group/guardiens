@@ -14,14 +14,17 @@ Réactiver la base entière avec un CTA unique : publier une première demande d
 `product` (conseils/accompagnement, opt-out possible), pas transactional. Passe par `send-mass-email` existant, qui respecte déjà les préférences.
 
 ## Contenu
-- **Sujet** : « Et si vous demandiez un coup de main cette semaine ? »
-- **Preview** : « Une garde ponctuelle, une question véto, un conseil… la communauté répond. »
-- **Corps** (vouvoiement, pas de tiret cadratin, pas d'emoji, pas d'icônes Lucide) :
-  - Accroche : rappel que les coups de main sont gratuits, sans engagement, entre gens du coin.
-  - 3 exemples concrets courts : promener le chien pendant un rdv, question sur l'alimentation d'un chat senior, aide pour transporter un animal chez le véto.
-  - Rassurance : réponses en général sous 48h, notation mutuelle, aucune transaction financière.
-- **CTA principal** : « Publier une demande » → `https://guardiens.fr/coups-de-main/nouveau` (ou route équivalente `CreateSmallMission`).
-- **CTA secondaire (lien texte)** : « Parcourir les demandes du moment » → `/coups-de-main`.
+- **Sujet** : « Et si on s'entraidait un peu cette semaine ? »
+- **Preview** : « Un coup de main, un échange, un service rendu entre gens du coin. »
+- **Corps** (vouvoiement, pas de tiret cadratin, pas d'emoji, pas d'icônes Lucide, ton entraide/échange) :
+  - Accroche : les coups de main, c'est de l'entraide entre gens du coin. Sans argent, sans abonnement, sans engagement. Vous demandez quelque chose, vous proposez quelque chose en retour.
+  - 3 exemples concrets d'échange :
+    - « Promener Filou 3 fois cette semaine, en échange d'un plateau de fromages maison. »
+    - « Nourrir mes 4 chats ce week-end, je vous rapporte du miel de mes ruches. »
+    - « Une question sur l'alimentation d'un chat senior ? Un véto à la retraite du coin peut vous répondre, et vous lui offrez un café. »
+  - Rassurance (sans engagement de délai) : chacun propose ce qu'il peut, chacun donne ce qu'il veut en retour. Aucune transaction financière, notation mutuelle, communauté locale.
+- **CTA principal** : « Publier mon échange » → `/petites-missions/creer?type=besoin`
+- **CTA secondaire (lien texte)** : « Voir les échanges en cours près de chez moi » → `/petites-missions`
 
 ## Flow d'exécution
 1. Ouvrir `/admin` → outil emails de masse existant (`send-mass-email`).
