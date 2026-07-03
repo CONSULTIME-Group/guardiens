@@ -313,6 +313,17 @@ export const MassEmailFiltersPanel = ({ segment, setSegment, filters, setFilters
                   checked={!!filters.no_conversation_ever}
                   onChange={(c) => update({ no_conversation_ever: c })}
                 />
+                <CheckboxRow
+                  id="no-mission" label="N'a jamais publié de coup de main"
+                  checked={!!filters.no_mission_ever}
+                  onChange={(c) => update({ no_mission_ever: c })}
+                />
+                <CheckboxRow
+                  id="respect-optout" label="Respecter l'opt-out « Conseils & accompagnement » (recommandé)"
+                  checked={!!filters.respect_product_optout}
+                  onChange={(c) => update({ respect_product_optout: c })}
+                />
+
               </AccordionContent>
             </AccordionItem>
 
