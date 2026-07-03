@@ -22,7 +22,7 @@ Réactiver la base entière avec un CTA unique : publier une première demande d
     - « Promener Filou 3 fois cette semaine, en échange d'un plateau de fromages maison. »
     - « Nourrir mes 4 chats ce week-end, je vous rapporte du miel de mes ruches. »
     - « Une question sur l'alimentation d'un chat senior ? Un véto à la retraite du coin peut vous répondre, et vous lui offrez un café. »
-  - Rassurance (sans engagement de délai) : chacun propose ce qu'il peut, chacun donne ce qu'il veut en retour. Aucune transaction financière, notation mutuelle, communauté locale.
+  - Rassurance (sans engagement de délai) : chacun propose ce qu'il peut, chacun donne ce qu'il veut en retour. Aucune transaction financière, pas de compteur, juste de la confiance entre gens du coin.
 - **CTA principal** : « Publier mon échange » → `/petites-missions/creer?type=besoin`
 - **CTA secondaire (lien texte)** : « Voir les échanges en cours près de chez moi » → `/petites-missions`
 
