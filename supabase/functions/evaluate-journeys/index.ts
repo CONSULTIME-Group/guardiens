@@ -134,11 +134,13 @@ Deno.serve(async (req) => {
   const seqByKey = new Map(sequences.map((s) => [s.key, s]))
 
   for (const j of activeJourneys ?? []) {
+    if (stats.sent >= MAX_SENDS_PER_RUN) { stats.capped = true; break }
     try {
       const seq = seqByKey.get(j.sequence_key)
       if (!seq) continue
       const steps = stepsBySeq.get(seq.id) ?? []
       const nextStep = steps.find((s) => s.step_order === j.current_step + 1)
+
 
       // No more steps → completed
       if (!nextStep) {
