@@ -95,10 +95,10 @@ Deno.serve(async (req) => {
         const { data: rawSits } = await supabase
           .from("sits")
           .select(`
-            id, title, description, start_date, end_date, is_urgent, cover_photo_url,
+            id, title, specific_expectations, owner_message, start_date, end_date, is_urgent, cover_photo_url,
             city, country,
             profiles:user_id (first_name, city, postal_code, country, avatar_url),
-            properties:property_id (photos, type, pets (name, species, photo_url))
+            properties:property_id (photos, type, description, pets (name, species, photo_url))
           `)
           .eq("status", "published")
           .or("country.is.null,country.eq.FR")
