@@ -301,7 +301,7 @@ function renderSitCard(sit: any): string {
   const propertyLabel = PROPERTY_TYPE[sit.properties?.type] || "Logement";
   const dates = formatDateRange(sit.start_date, sit.end_date);
   const img = pickSitImage(sit);
-  const desc = truncate(sit.description || "", 130);
+  const desc = truncate(sit.specific_expectations || sit.owner_message || sit.properties?.description || "", 130);
   const link = `https://guardiens.fr/sits/${sit.id}`;
 
   const imageBlock = img
