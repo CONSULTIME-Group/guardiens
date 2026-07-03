@@ -83,7 +83,12 @@ Deno.serve(async (req) => {
     dryRun = body?.dryRun === true
   } catch { /* cron */ }
 
-  const stats = { enrolled: 0, sent: 0, exited: 0, completed: 0, skipped: 0, errors: 0 }
+  const stats = { enrolled: 0, sent: 0, exited: 0, completed: 0, skipped: 0, errors: 0, capped: false }
+  // Hard cap per run to stay under the 150s edge timeout. Remaining journeys
+  // will be picked up by the next cron tick.
+  const MAX_SENDS_PER_RUN = 80
+  const SEND_DELAY_MS = 250 // ~4 req/s to stay under Resend rate limits
+
 
   const { data: sequencesRaw } = await supabase
     .from('nurturing_sequences')
@@ -129,11 +134,13 @@ Deno.serve(async (req) => {
   const seqByKey = new Map(sequences.map((s) => [s.key, s]))
 
   for (const j of activeJourneys ?? []) {
+    if (stats.sent >= MAX_SENDS_PER_RUN) { stats.capped = true; break }
     try {
       const seq = seqByKey.get(j.sequence_key)
       if (!seq) continue
       const steps = stepsBySeq.get(seq.id) ?? []
       const nextStep = steps.find((s) => s.step_order === j.current_step + 1)
+
 
       // No more steps → completed
       if (!nextStep) {
@@ -277,8 +284,11 @@ Deno.serve(async (req) => {
         last_step_at: new Date().toISOString(),
       }).eq('id', j.id)
 
-      if (actuallySent) stats.sent++
-      else stats.skipped++
+      if (actuallySent) {
+        stats.sent++
+        await new Promise((r) => setTimeout(r, SEND_DELAY_MS))
+      } else stats.skipped++
+
     } catch (err) {
       console.error('Journey eval error', j.id, err)
       stats.errors++
