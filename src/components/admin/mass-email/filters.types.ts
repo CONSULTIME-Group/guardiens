@@ -31,10 +31,15 @@ export interface MassEmailFilters {
   no_application_ever?: boolean;      // gardien n'ayant jamais postulé
   no_sit_published_ever?: boolean;    // proprio n'ayant jamais publié d'annonce
   no_conversation_ever?: boolean;     // n'a jamais initié de conversation
+  no_mission_ever?: boolean;          // n'a jamais publié de coup de main
+
+  // Respect des préférences d'opt-out catégorie "product"
+  respect_product_optout?: boolean;
 
   // Exclusions explicites, ex: ne pas envoyer au propriétaire d'une annonce mise en avant
   exclude_user_ids?: string[];
 }
+
 
 /** Présets rapides "dormants", un clic pour appliquer un combo de filtres. */
 export interface DormantPreset {
@@ -88,7 +93,16 @@ export const DORMANT_PRESETS: DormantPreset[] = [
     segment: "fondateurs",
     filters: { has_completed_sits: "no" },
   },
+  {
+
+    key: "premier_coup_de_main",
+    label: "Jamais posté de coup de main",
+    description: "Toute la base, sauf ceux qui ont déjà publié un coup de main (respecte opt-out product)",
+    segment: "tous",
+    filters: { no_mission_ever: true, respect_product_optout: true },
+  },
 ];
+
 
 export const SEGMENT_OPTIONS: { value: Segment; label: string; description: string }[] = [
   { value: "tous", label: "Tous les inscrits", description: "Tous rôles confondus" },
@@ -123,6 +137,9 @@ export function countActiveFilters(f: MassEmailFilters): number {
   if (f.no_application_ever) n++;
   if (f.no_sit_published_ever) n++;
   if (f.no_conversation_ever) n++;
+  if (f.no_mission_ever) n++;
+  if (f.respect_product_optout) n++;
   if (f.exclude_user_ids && f.exclude_user_ids.length > 0) n++;
+
   return n;
 }
