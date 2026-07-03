@@ -48,13 +48,29 @@ Deno.serve(async (req) => {
 
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-  // Restrict to internal callers (pg_cron / pg_net or admin scripts).
+  // Restrict to internal callers (pg_cron / pg_net), or an authenticated admin
+  // user (manual trigger from /admin/nurturing).
   const token = req.headers.get('Authorization')?.replace('Bearer ', '') ?? ''
-  if (token !== serviceKey && token !== anonKey) {
+  let authorized = token === serviceKey || (anonKey !== '' && token === anonKey)
+  if (!authorized && token) {
+    try {
+      const adminClient = createClient(Deno.env.get('SUPABASE_URL')!, serviceKey)
+      const { data: userData } = await adminClient.auth.getUser(token)
+      if (userData?.user) {
+        const { data: isAdmin } = await adminClient.rpc('has_role', {
+          _user_id: userData.user.id,
+          _role: 'admin',
+        })
+        if (isAdmin) authorized = true
+      }
+    } catch { /* fallthrough to 401 */ }
+  }
+  if (!authorized) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
+
 
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
