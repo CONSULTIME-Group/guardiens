@@ -284,8 +284,11 @@ Deno.serve(async (req) => {
         last_step_at: new Date().toISOString(),
       }).eq('id', j.id)
 
-      if (actuallySent) stats.sent++
-      else stats.skipped++
+      if (actuallySent) {
+        stats.sent++
+        await new Promise((r) => setTimeout(r, SEND_DELAY_MS))
+      } else stats.skipped++
+
     } catch (err) {
       console.error('Journey eval error', j.id, err)
       stats.errors++
