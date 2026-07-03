@@ -1,53 +1,49 @@
-# Plan — Coups de main : photos, concept & workflow
+# Campagne « Postez votre premier coup de main »
 
-Constat de l'audit : le module fonctionne, mais souffre de 3 problèmes majeurs.
+## Objectif
+Réactiver la base entière avec un CTA unique : publier une première demande de coup de main (garde ponctuelle, question, conseil animal). Mesurer qui postule/répond.
 
-## Problèmes identifiés
+## Cible
+- **Segment** : `tous` (gardiens + proprios + duals), tous rôles confondus.
+- **Exclusions automatiques** :
+  - Utilisateurs déjà auteurs d'au moins 1 `small_missions` (inutile de relancer).
+  - Utilisateurs désinscrits (`suppressed_emails`) et opt-out catégorie `product`.
+- **Volume estimé** : à afficher via le mode `count` avant envoi.
 
-1. **Photos absentes "Près de chez vous"** : la requête `relatedMissions` dans `SmallMissionDetail.tsx` et `PublicMissionView.tsx` ne sélectionne pas `photos`. Résultat : placeholder-lettre systématique, même quand l'annonce a des photos.
-2. **Concept "échange" invisible** : le champ `exchange_offer` existe en DB et est obligatoire à la création, mais rien n'explique clairement à l'utilisateur (ni côté propriétaire ni côté gardien) que **le coup de main = un échange donnant-donnant, sans argent**. Les dashboards parlent de "petites missions" ou "échanges" sans jamais définir le pacte.
-3. **Workflow flou** : trois surfaces (`/petites-missions`, `/questions`, `/annonces/petites-missions`), vocabulaire mélangé (mission / échange / coup de main / besoin / offre), et aucun rappel du fonctionnement au moment de créer.
+## Catégorie email
+`product` (conseils/accompagnement, opt-out possible), pas transactional. Passe par `send-mass-email` existant, qui respecte déjà les préférences.
 
-## Lot 1 — Fix photos (P0, technique)
+## Contenu
+- **Sujet** : « Et si vous demandiez un coup de main cette semaine ? »
+- **Preview** : « Une garde ponctuelle, une question véto, un conseil… la communauté répond. »
+- **Corps** (vouvoiement, pas de tiret cadratin, pas d'emoji, pas d'icônes Lucide) :
+  - Accroche : rappel que les coups de main sont gratuits, sans engagement, entre gens du coin.
+  - 3 exemples concrets courts : promener le chien pendant un rdv, question sur l'alimentation d'un chat senior, aide pour transporter un animal chez le véto.
+  - Rassurance : réponses en général sous 48h, notation mutuelle, aucune transaction financière.
+- **CTA principal** : « Publier une demande » → `https://guardiens.fr/coups-de-main/nouveau` (ou route équivalente `CreateSmallMission`).
+- **CTA secondaire (lien texte)** : « Parcourir les demandes du moment » → `/coups-de-main`.
 
-- **`SmallMissionDetail.tsx`** (~ligne 250-300) : ajouter `photos` au `select` de la requête `relatedMissions`.
-- **`PublicMissionView.tsx`** (~ligne 343) : idem.
-- **Placeholder unifié** : extraire le bloc inline en un mini composant `MissionCardCover` (photo si dispo, sinon gradient par catégorie avec label "Animaux/Jardin/Maison/Savoir-faire" — pas la lettre du titre, aligné sur `SearchListingCard`).
-
-## Lot 2 — Clarifier le concept "échange" (éditorial)
-
-Un pacte en 1 phrase, décliné partout : **« Un coup de main = un échange. Sans argent, sans abonnement. Vous demandez, vous proposez quelque chose en retour (café, œufs, un service, une histoire). »**
-
-- **Dashboard propriétaire** (`MissionsTabsCard.tsx`) : bandeau pédagogique 2 lignes au-dessus des onglets — pacte + CTA "Publier une demande".
-- **Dashboard gardien** (`MissionsNearbySection.tsx`) : bandeau symétrique — pacte + CTA "Proposer mon aide".
-- **Page dédiée** (`SmallMissions.tsx` + `SmallMissionsPublic.tsx`) : bloc "Comment ça marche" en 3 étapes visuelles fixes (1. Publier · 2. Convenir de l'échange en message · 3. Se donner un coup de main), immédiatement sous le hero.
-- **Formulaire de création** (`CreateSmallMission.tsx`) : au-dessus du champ `exchange_offer`, une micro-explication + 3 exemples cliquables ("Un café et des biscuits", "Des œufs de la semaine", "Un coup de main en retour quand vous voulez") qui pré-remplissent.
-
-## Lot 3 — Nettoyage vocabulaire (cohérence)
-
-- Standardiser : **"coup de main"** = le module, **"demande"** / **"offre"** = les deux types, **"échange"** = ce qui se convient. Bannir "mission" et "petite mission" dans le contenu visible (URLs et code DB conservés).
-- Retirer la catégorie collision `house = "Coups de main"` dans `CATEGORY_META` → renommer en `"Maison"`.
-- Aligner labels catégories questions FR ↔ missions (utiliser les libellés FR partout côté UI).
-
-## Lot 4 — Workflow allégé (UX)
-
-- **Étape confirmation** (post-création) : afficher un écran/toast avec récap + rappel "Vous serez notifié dès qu'un membre propose un échange. À vous ensuite de valider en message."
-- **Réponse (`ProposeExchangeDialog`)** : ajouter en tête du dialogue un rappel visuel de ce que le propriétaire propose en échange, pour que le répondant s'aligne.
-- **`SmallMissionDetail`** : rendre le bloc `exchange_offer` beaucoup plus visible (encadré, pas noyé dans le corps).
-
-## Hors périmètre (à valider séparément)
-
-- Ajouter des photos aux `community_questions` (aujourd'hui zéro photo).
-- Fusionner `/petites-missions` et l'onglet Besoins/Offres de `/questions` en une surface unique.
-- Ajouter un champ `exchange_expected` structuré (aujourd'hui c'est du texte libre).
+## Flow d'exécution
+1. Ouvrir `/admin` → outil emails de masse existant (`send-mass-email`).
+2. Sélectionner segment `tous`, cocher exclusion « pas de mission publiée » (`no_sit_published_ever` déjà géré ; ajouter filtre équivalent `no_mission_ever` si absent).
+3. Lancer un `mode: count` pour valider le volume.
+4. Envoyer par batches de 100 (déjà en place), tracking ouvertures/clics activé.
+5. Suivi J+3 et J+7 dans `AdminMassEmailsStats` : ouvertures, clics CTA, nouvelles missions publiées.
 
 ## Détails techniques
+- **Filtre à ajouter** dans `send-mass-email/index.ts` : `no_mission_ever` (analogue à `no_sit_published_ever` mais sur table `small_missions.user_id`). Petite addition côté serveur + case à cocher dans l'UI admin d'envoi.
+- **Vérifier** que `send-mass-email` filtre déjà les opt-out `product` via `email_preferences` ; sinon, ajouter un `NOT IN` sur les user_ids ayant désactivé la catégorie.
+- **URL CTA** : confirmer le slug exact de la page `CreateSmallMission` (probablement `/coups-de-main/nouveau`).
+- **Rate limit Resend** : batches de 100 avec pause 1s (déjà en place).
 
-- Aucune migration DB nécessaire pour les Lots 1-4.
-- Le placeholder cover devient un composant partagé `src/components/missions/MissionCardCover.tsx`.
-- Le bandeau pédagogique devient un composant partagé `src/components/missions/ExchangePactBanner.tsx` (variantes owner/sitter/public).
-- Vérifs Playwright : `/petites-missions/:id` avec photo (doit s'afficher), sans photo (fallback catégorie), dashboards (bandeau visible), création (exemples cliquables).
+## Hors scope
+- Pas de relance automatique J+7 dans ce lot (à décider après lecture des stats).
+- Pas de version SMS/push.
+- Pas de refonte du template HTML de `send-mass-email`.
 
----
+## Livrables
+1. Filtre `no_mission_ever` ajouté (backend + UI admin).
+2. Vérif/ajout du filtrage opt-out `product`.
+3. Rédaction sujet + corps + CTA prêts à coller dans l'outil admin.
 
-Je livre les 4 lots d'un coup, ou vous préférez que je commence par le Lot 1 (fix photos) + Lot 2 (concept) et qu'on juge avant les Lots 3-4 ?
+Validez-vous ce plan ? Je peux aussi ajuster la cible (par ex. exclure les inscrits < 7 jours pour ne pas doubler l'onboarding).
