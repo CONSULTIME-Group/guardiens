@@ -31,10 +31,15 @@ export interface MassEmailFilters {
   no_application_ever?: boolean;      // gardien n'ayant jamais postulé
   no_sit_published_ever?: boolean;    // proprio n'ayant jamais publié d'annonce
   no_conversation_ever?: boolean;     // n'a jamais initié de conversation
+  no_mission_ever?: boolean;          // n'a jamais publié de coup de main
+
+  // Respect des préférences d'opt-out catégorie "product"
+  respect_product_optout?: boolean;
 
   // Exclusions explicites, ex: ne pas envoyer au propriétaire d'une annonce mise en avant
   exclude_user_ids?: string[];
 }
+
 
 /** Présets rapides "dormants", un clic pour appliquer un combo de filtres. */
 export interface DormantPreset {
