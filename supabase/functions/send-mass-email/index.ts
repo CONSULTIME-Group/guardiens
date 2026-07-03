@@ -23,8 +23,11 @@ interface MassEmailFilters {
   no_application_ever?: boolean;
   no_sit_published_ever?: boolean;
   no_conversation_ever?: boolean;
+  no_mission_ever?: boolean;
+  respect_product_optout?: boolean;
   exclude_user_ids?: string[];
 }
+
 
 function buildHtml(subject: string, body: string, ctaLabel?: string, ctaUrl?: string): string {
   // Brand : --primary 153 42% 30% ≈ #2C6E49 (vert forêt) ; --background ≈ #FAF9F6
