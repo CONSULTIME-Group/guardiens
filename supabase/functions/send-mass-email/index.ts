@@ -224,6 +224,27 @@ async function fetchTargetedProfiles(
     result = result.filter((p) => inactiveIds.has(p.id));
   }
 
+  // Aucune petite mission (coup de main) publiée
+  if (filters.no_mission_ever) {
+    const { data: missionAuthors } = await serviceClient
+      .from("small_missions")
+      .select("user_id");
+    const withMission = new Set((missionAuthors || []).map((m: any) => m.user_id));
+    result = result.filter((p) => !withMission.has(p.id));
+  }
+
+  // Respect opt-out catégorie "product" (conseils / accompagnement)
+  if (filters.respect_product_optout) {
+    const { data: optOuts } = await serviceClient
+      .from("email_preferences")
+      .select("user_id")
+      .eq("product_emails", false);
+    const optedOut = new Set((optOuts || []).map((p: any) => p.user_id));
+    result = result.filter((p) => !optedOut.has(p.id));
+  }
+
+
+
   // Exclusion explicite par user_id (ex: ne pas envoyer au propriétaire d'une annonce mise en avant)
   if (filters.exclude_user_ids && filters.exclude_user_ids.length > 0) {
     const excluded = new Set(filters.exclude_user_ids);
