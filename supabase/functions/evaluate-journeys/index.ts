@@ -83,7 +83,12 @@ Deno.serve(async (req) => {
     dryRun = body?.dryRun === true
   } catch { /* cron */ }
 
-  const stats = { enrolled: 0, sent: 0, exited: 0, completed: 0, skipped: 0, errors: 0 }
+  const stats = { enrolled: 0, sent: 0, exited: 0, completed: 0, skipped: 0, errors: 0, capped: false }
+  // Hard cap per run to stay under the 150s edge timeout. Remaining journeys
+  // will be picked up by the next cron tick.
+  const MAX_SENDS_PER_RUN = 80
+  const SEND_DELAY_MS = 250 // ~4 req/s to stay under Resend rate limits
+
 
   const { data: sequencesRaw } = await supabase
     .from('nurturing_sequences')
