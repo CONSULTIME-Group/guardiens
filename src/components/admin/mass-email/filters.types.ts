@@ -92,8 +92,15 @@ export const DORMANT_PRESETS: DormantPreset[] = [
     description: "Fondateurs sans aucune garde réalisée",
     segment: "fondateurs",
     filters: { has_completed_sits: "no" },
+  {
+    key: "premier_coup_de_main",
+    label: "Jamais posté de coup de main",
+    description: "Toute la base, sauf ceux qui ont déjà publié un coup de main (respecte opt-out product)",
+    segment: "tous",
+    filters: { no_mission_ever: true, respect_product_optout: true },
   },
 ];
+
 
 export const SEGMENT_OPTIONS: { value: Segment; label: string; description: string }[] = [
   { value: "tous", label: "Tous les inscrits", description: "Tous rôles confondus" },
