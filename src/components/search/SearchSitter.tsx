@@ -610,64 +610,39 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  return { items: filtered, cityCoords };
  };
 
-  const searchSits = async (searchCoords: { lat: number; lng: number } | null) => {
-  // On inclut les statuts passés (expired / completed / cancelled) pour la
-  // transparence et le SEO visiteur : ils sont affichés grisés avec le label
-  // « Annonce passée » et ne sont pas actionnables.
-   // On inclut les annonces internationales : elles apparaissent comme bonus
-   // sur la carte et dans la grille, même quand un filtre géographique français
-   // est actif (rayon / dept / région). Elles bypassent le filtre dans filterByLocation.
-   let query = supabase
+   const searchSits = async (searchCoords: { lat: number; lng: number } | null) => {
+   // On inclut les statuts passés (expired / completed / cancelled / archived)
+   // ainsi que les annonces dépubliées (draft + unpublished_at) pour la
+   // transparence côté membre connecté : elles s'affichent grisées avec un
+   // libellé explicite et ne sont pas actionnables.
+    // On inclut les annonces internationales : elles apparaissent comme bonus
+    // sur la carte et dans la grille, même quand un filtre géographique français
+    // est actif (rayon / dept / région). Elles bypassent le filtre dans filterByLocation.
+    let query = supabase
 .from("sits")
 .select("*, property:properties!sits_property_id_fkey(type, environment, photos, cover_photo_url)")
-.in("status", ["published", "confirmed", "in_progress", "completed", "cancelled"])
+.or("status.in.(published,confirmed,in_progress,completed,cancelled,archived),and(status.eq.draft,unpublished_at.not.is.null)")
 .order("created_at", { ascending: false });
-  if (startDate) query = query.gte("end_date", startDate);
-  if (endDate) query = query.lte("start_date", endDate);
-  const { data } = await query;
-  let items = data || [];
-
-  // Hydrate owner data from public_profiles (safe public view) in a single batched call
-  const ownerIds = Array.from(new Set(items.map((s: any) => s.user_id).filter(Boolean)));
-  if (ownerIds.length > 0) {
-  const [{ data: owners }, { data: galleryRows }] = await Promise.all([
-    supabase
-.from("public_profiles")
-.select("id, first_name, avatar_url, city, postal_code, identity_verified, is_founder")
-.in("id", ownerIds),
-    supabase
-.from("owner_gallery")
-.select("user_id, photo_url, position")
-.in("user_id", ownerIds)
-.order("position", { ascending: true }),
-  ]);
-  const ownerMap = new Map((owners || []).map((o: any) => [o.id, o]));
-  const galleryFirstMap = new Map<string, string>();
-  (galleryRows || []).forEach((g: any) => {
-    if (g?.user_id && g?.photo_url && !galleryFirstMap.has(g.user_id)) {
-      galleryFirstMap.set(g.user_id, g.photo_url);
-    }
-  });
-  items = items.map((s: any) => ({
-    ...s,
-    owner: ownerMap.get(s.user_id) || null,
-    ownerGalleryFirstPhoto: galleryFirstMap.get(s.user_id) || null,
-  }));
-  }
-  // Mark assigned/past sits (will be rendered greyed-out, non-clickable).
-  // « expired » est calculé côté client : statut « published » avec end_date passée.
-  const todayIso = new Date().toISOString().slice(0, 10);
-  items = items.map((s: any) => {
-    const isCompleted = s.status === "completed";
-    const isCancelled = s.status === "cancelled";
-    const isExpired = s.status === "published" && s.end_date && s.end_date < todayIso;
-    return {
-      ...s,
-      isAssigned: s.status === "confirmed" || s.status === "in_progress",
-      isCompleted,
-      isPast: isExpired || isCancelled,
-    };
-  });
+   if (startDate) query = query.gte("end_date", startDate);
+   if (endDate) query = query.lte("start_date", endDate);
+   const { data } = await query;
+   let items = data || [];
+...
+   items = items.map((s: any) => {
+     const isCompleted = s.status === "completed";
+     const isCancelled = s.status === "cancelled";
+     const isArchived = s.status === "archived";
+     const isUnpublished = s.status === "draft" && !!s.unpublished_at;
+     const isExpired = s.status === "published" && s.end_date && s.end_date < todayIso;
+     return {
+       ...s,
+       isAssigned: s.status === "confirmed" || s.status === "in_progress",
+       isCompleted,
+       isArchived,
+       isUnpublished,
+       isPast: isExpired || isCancelled || isArchived || isUnpublished,
+     };
+   });
  if (housingType !== "all") items = items.filter((s: any) => s.property?.type === housingType);
  if (withPhotosOnly) items = items.filter((s: any) => s.property?.photos?.length > 0);
  if (duration !== "all") {
