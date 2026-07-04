@@ -1082,7 +1082,12 @@
     "proposal_sent": "Proposition envoyée",
     "help_name": "Aider {{name}}",
     "propose_to": "Proposer à {{name}}",
-    "default_member": "un membre"
+    "default_member": "un membre",
+    "type_need_label": "Besoin d'aide",
+    "type_offer_label": "Propose son aide",
+    "counterpart_label": "Contrepartie",
+    "help_short": "Aider",
+    "propose_short": "Proposer"
   },
   "helper_card": {
     "available": "Disponible pour aider",

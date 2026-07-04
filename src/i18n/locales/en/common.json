@@ -1071,7 +1071,12 @@
     "proposal_sent": "Proposal sent",
     "help_name": "Help {{name}}",
     "propose_to": "Offer to {{name}}",
-    "default_member": "a member"
+    "default_member": "a member",
+    "type_need_label": "Needs help",
+    "type_offer_label": "Offers help",
+    "counterpart_label": "In exchange",
+    "help_short": "Help",
+    "propose_short": "Offer"
   },
   "helper_card": {
     "available": "Available to help",
