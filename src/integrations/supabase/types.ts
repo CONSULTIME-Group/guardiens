@@ -5648,6 +5648,15 @@ export type Database = {
         Args: { p_referred_id: string }
         Returns: undefined
       }
+      auto_archive_past_sits: {
+        Args: never
+        Returns: {
+          archived_finished: number
+          archived_published: number
+          ended: number
+          started: number
+        }[]
+      }
       auto_flag_urgent_sits: { Args: never; Returns: number }
       award_badge: {
         Args: {
