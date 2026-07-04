@@ -732,6 +732,7 @@ const EmptyState = ({
   onReset,
   examples,
   onExample,
+  howSteps,
 }: {
   title: string;
   hint?: string;
@@ -740,6 +741,7 @@ const EmptyState = ({
   onReset?: () => void;
   examples?: { label: string; cat: string }[];
   onExample?: (ex: { label: string; cat: string }) => void;
+  howSteps?: string[];
 }) => (
   <div className="p-8 rounded-2xl border border-dashed border-border bg-accent/20 text-center">
     <p className="font-heading text-lg text-foreground/85">{title}</p>
@@ -752,6 +754,18 @@ const EmptyState = ({
         </Button>
       )}
     </div>
+    {howSteps && howSteps.length > 0 && (
+      <div className="mt-6 pt-5 border-t border-border/60 text-left">
+        <p className="text-xs font-semibold uppercase tracking-wide text-foreground/55 mb-3 text-center">
+          Comment ça marche
+        </p>
+        <ol className="space-y-2 text-sm text-foreground/75 list-decimal list-inside">
+          {howSteps.map((step, i) => (
+            <li key={i}>{step}</li>
+          ))}
+        </ol>
+      </div>
+    )}
     {examples && examples.length > 0 && onExample && (
       <div className="mt-6 pt-5 border-t border-border/60">
         <p className="text-xs font-semibold uppercase tracking-wide text-foreground/55 mb-3">
