@@ -108,6 +108,7 @@ const TestErrorBoundary = lazy(() => import("./pages/TestErrorBoundary"));
 const TestEmptyStates = lazy(() => import("./pages/TestEmptyStates"));
 
 const PreviewOngoingSitHero = lazy(() => import("./pages/dev/PreviewOngoingSitHero"));
+const PreviewMissionCards = lazy(() => import("./pages/dev/PreviewMissionCards"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const EmailPreferences = lazy(() => import("./pages/EmailPreferences"));
 const CityPage = lazy(() => import("./pages/CityPage"));
@@ -407,6 +408,7 @@ const AppRoutes = () => (
       <Route path="/test/empty-states" element={<TestEmptyStates />} />
       
       <Route path="/dev/preview/ongoing-sit-hero" element={<PreviewOngoingSitHero />} />
+      <Route path="/dev/preview/mission-cards" element={<PreviewMissionCards />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />
       <Route path="/email-preferences" element={<EmailPreferences />} />
       <Route path="/parrainage" element={<ParrainageRoute />} />
