@@ -33,7 +33,7 @@ const Email = ({ firstName }: Props) => {
             il y a sûrement un gardien près de chez vous.
           </Text>
           <Section style={ctaSection}>
-            <Button style={button} href={`${SITE_URL}/proprietaire/annonces/nouveau`}>
+            <Button style={button} href={`${SITE_URL}/sits/create`}>
               Publier mon besoin
             </Button>
           </Section>
