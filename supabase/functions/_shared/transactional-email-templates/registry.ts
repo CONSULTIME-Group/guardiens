@@ -54,6 +54,8 @@ import { template as referralBoostMonthly } from './referral-boost-monthly.tsx'
 import { template as proProfileApproved } from './pro-profile-approved.tsx'
 import { template as proProfileRejected } from './pro-profile-rejected.tsx'
 import { template as summerListingReminder } from './summer-listing-reminder.tsx'
+import { template as sitterMutualAidInvite } from './sitter-mutual-aid-invite.tsx'
+
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'nearby-sit-alert': nearbySitAlert,
@@ -101,4 +103,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'pro-profile-approved': proProfileApproved,
   'pro-profile-rejected': proProfileRejected,
   'summer-listing-reminder': summerListingReminder,
+  'sitter-mutual-aid-invite': sitterMutualAidInvite,
 }
+
