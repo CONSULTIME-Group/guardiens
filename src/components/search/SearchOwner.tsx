@@ -136,9 +136,11 @@ const SearchOwner = () => {
 
   // Load owner city + postal code on mount, URL params take precedence
   useEffect(() => {
-    const urlCity = searchParams.get("city");
+    const urlCity = searchParams.get("city") || searchParams.get("ville");
     const urlPostal = searchParams.get("postal_code");
     const urlZone = searchParams.get("zone");
+    const urlRadius = parseInt(searchParams.get("rayon") || "", 10);
+    if (Number.isFinite(urlRadius) && urlRadius > 0 && urlRadius <= 200) setRadius([snapToAllowedRadius(urlRadius)]);
 
     if (urlCity) {
       setCity(urlCity);
