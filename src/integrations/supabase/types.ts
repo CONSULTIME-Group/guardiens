@@ -6071,6 +6071,7 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "cancelled"
+        | "archived"
       small_mission_category: "animals" | "garden" | "house" | "skills"
       small_mission_response_status: "pending" | "accepted" | "declined"
       small_mission_status: "open" | "in_progress" | "completed" | "cancelled"
@@ -6328,6 +6329,7 @@ export const Constants = {
         "in_progress",
         "completed",
         "cancelled",
+        "archived",
       ],
       small_mission_category: ["animals", "garden", "house", "skills"],
       small_mission_response_status: ["pending", "accepted", "declined"],
