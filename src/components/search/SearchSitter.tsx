@@ -533,9 +533,11 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const { alertCreated, isCreatingAlert, handleCreateAlert } = useSearchAlert({
   city,
   cityPostalCode,
+   userPostalCode,
   radius,
   setRadius,
-  resetKeys: [city, radius],
+   zoneMode,
+   resetKeys: [city, radius, zoneMode],
  });
 
 
