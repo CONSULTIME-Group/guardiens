@@ -30,6 +30,19 @@ const MSO_RESET = `
     color: inherit !important;
     text-decoration: none !important;
   }
+  img { border: 0; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
+  @media only screen and (max-width: 600px) {
+    .em-container { padding: 20px 16px !important; border-radius: 0 !important; max-width: 100% !important; }
+    .em-hero { padding: 18px 16px !important; margin: 0 0 20px !important; }
+    .em-h1 { font-size: 22px !important; line-height: 1.25 !important; }
+    .em-text { font-size: 15px !important; line-height: 1.6 !important; }
+    .em-card { padding: 14px 16px !important; }
+    .em-card-title { font-size: 14px !important; }
+    .em-card-line { font-size: 14px !important; line-height: 22px !important; }
+    .em-cta { margin: 24px 0 8px !important; }
+    .em-btn { display: block !important; width: 100% !important; box-sizing: border-box !important; padding: 16px 20px !important; font-size: 16px !important; }
+    .em-hint { font-size: 12px !important; }
+  }
 `
 
 export const BrandedHead = () => (

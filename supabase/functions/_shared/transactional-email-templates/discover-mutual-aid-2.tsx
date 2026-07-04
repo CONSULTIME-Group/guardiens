@@ -19,42 +19,42 @@ const DiscoverMutualAidOfferEmail = ({ firstName }: Props) => (
     <BrandedHead />
     <Preview>Proposez un coup de main et vivez une histoire</Preview>
     <Body style={main}>
-      <Container style={container}>
+      <Container style={container} className="em-container">
         <BrandHeader />
 
-        <Section style={hero}>
+        <Section style={hero} className="em-hero">
           <Text style={heroKicker}>Coup de main</Text>
-          <Heading style={h1}>Envie de nouveauté ? Offrez un coup de main.</Heading>
+          <Heading style={h1} className="em-h1">Envie de nouveauté ? Offrez un coup de main.</Heading>
         </Section>
 
-        <Text style={text}>
+        <Text style={text} className="em-text">
           Bonjour{firstName ? ` ${firstName}` : ''},
         </Text>
 
-        <Text style={text}>
+        <Text style={text} className="em-text">
           Vous avez du temps, un savoir-faire, une voiture, une bonne paire de bras ?
           Quelqu'un près de chez vous en a peut-être besoin aujourd'hui. Proposer son aide,
           c'est ouvrir la porte à une rencontre, une histoire, parfois une aventure.
         </Text>
 
-        <Section style={card}>
-          <Text style={cardTitle}>Ce que vous pouvez proposer :</Text>
-          <Text style={cardLine}>· Un trajet, un transport, un déménagement court</Text>
-          <Text style={cardLine}>· Du bricolage, du jardinage, un dépannage</Text>
-          <Text style={cardLine}>· De la compagnie, une promenade, une discussion</Text>
-          <Text style={cardLine}>· Un savoir à partager, un service ponctuel</Text>
+        <Section style={card} className="em-card">
+          <Text style={cardTitle} className="em-card-title">Ce que vous pouvez proposer :</Text>
+          <Text style={cardLine} className="em-card-line">· Un trajet, un transport, un déménagement court</Text>
+          <Text style={cardLine} className="em-card-line">· Du bricolage, du jardinage, un dépannage</Text>
+          <Text style={cardLine} className="em-card-line">· De la compagnie, une promenade, une discussion</Text>
+          <Text style={cardLine} className="em-card-line">· Un savoir à partager, un service ponctuel</Text>
         </Section>
 
-        <Text style={text}>
+        <Text style={text} className="em-text">
           C'est gratuit, sans transaction financière. L'entraide repose sur la confiance
           et le plaisir de rendre service. Vous pourriez être surpris par ce que ça change.
         </Text>
 
-        <Section style={ctaSection}>
-          <Button style={button} href={CTA_URL}>
+        <Section style={ctaSection} className="em-cta">
+          <Button style={button} className="em-btn" href={CTA_URL}>
             Proposer un coup de main
           </Button>
-          <Text style={ctaHint}>Connectez-vous, puis publiez votre proposition en quelques clics.</Text>
+          <Text style={ctaHint} className="em-hint">Connectez-vous, puis publiez votre proposition en quelques clics.</Text>
         </Section>
 
         <Hr style={hr} />
