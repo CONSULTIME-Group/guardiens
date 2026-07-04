@@ -103,6 +103,18 @@ const OwnerSitManagement = ({
           </Button>
         )}
 
+        {canArchive && onArchiveClick && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onArchiveClick}
+            className="justify-start gap-2"
+          >
+            <Archive className="h-3.5 w-3.5" />
+            Archiver l'annonce
+          </Button>
+        )}
+
         {canCancel && (
           <Button
             variant="outline"
