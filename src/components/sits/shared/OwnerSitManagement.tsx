@@ -7,7 +7,7 @@
  */
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Pencil, Share2, XCircle, BookOpen, Settings2 } from "lucide-react";
+import { Pencil, Share2, XCircle, BookOpen, Settings2, Archive } from "lucide-react";
 
 interface OwnerSitManagementProps {
   sitId: string;
@@ -20,6 +20,9 @@ interface OwnerSitManagementProps {
   /** Indique si l'annonce publiée peut être dépubliée (remise en brouillon). */
   canUnpublish?: boolean;
   onUnpublishClick?: () => void;
+  /** Indique si l'annonce peut être archivée manuellement (completed/cancelled). */
+  canArchive?: boolean;
+  onArchiveClick?: () => void;
 }
 
 const OwnerSitManagement = ({
@@ -31,6 +34,8 @@ const OwnerSitManagement = ({
   onShareClick,
   canUnpublish,
   onUnpublishClick,
+  canArchive,
+  onArchiveClick,
 }: OwnerSitManagementProps) => {
   return (
     <section
@@ -95,6 +100,18 @@ const OwnerSitManagement = ({
           >
             <XCircle className="h-3.5 w-3.5" />
             Dépublier l'annonce
+          </Button>
+        )}
+
+        {canArchive && onArchiveClick && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onArchiveClick}
+            className="justify-start gap-2"
+          >
+            <Archive className="h-3.5 w-3.5" />
+            Archiver l'annonce
           </Button>
         )}
 

@@ -5648,6 +5648,7 @@ export type Database = {
         Args: { p_referred_id: string }
         Returns: undefined
       }
+      archive_sit: { Args: { p_sit_id: string }; Returns: undefined }
       auto_archive_past_sits: {
         Args: never
         Returns: {
