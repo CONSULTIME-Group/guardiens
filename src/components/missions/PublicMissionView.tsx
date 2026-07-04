@@ -177,7 +177,7 @@ const PublicMissionView = ({
                   alt={`Photo illustrant l'annonce : ${mission.title}`}
                   className="w-full aspect-video object-cover"
                   loading="eager"
-                  fetchPriority="high"
+                  {...({ fetchpriority: "high" } as any)}
                   width={1200}
                   height={675}
                 />
