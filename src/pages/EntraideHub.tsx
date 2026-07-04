@@ -327,10 +327,10 @@ const EntraideHub = () => {
         : { label: "Proposer mon aide", action: goOffer };
 
   const meta = TAB_META[tab];
-  const accentClasses: Record<Tab, { border: string; text: string; pill: string }> = {
-    questions: { border: "border-primary", text: "text-foreground", pill: "bg-primary/15 text-primary" },
-    besoins: { border: "border-secondary", text: "text-foreground", pill: "bg-secondary/40 text-foreground" },
-    offres: { border: "border-accent", text: "text-foreground", pill: "bg-accent/60 text-foreground" },
+  const accentClasses: Record<Tab, { active: string; pill: string }> = {
+    questions: { active: "bg-primary text-primary-foreground border-primary", pill: "bg-primary-foreground/20 text-primary-foreground" },
+    besoins: { active: "bg-secondary text-secondary-foreground border-secondary", pill: "bg-secondary-foreground/15 text-secondary-foreground" },
+    offres: { active: "bg-accent text-accent-foreground border-accent", pill: "bg-accent-foreground/15 text-accent-foreground" },
   };
 
   const hasMissionFilters = mCategory !== "all" || mStatus !== "open" || mSort !== "recent";
