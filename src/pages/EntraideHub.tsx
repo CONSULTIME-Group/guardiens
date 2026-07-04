@@ -379,50 +379,49 @@ const EntraideHub = () => {
             </Button>
           </div>
 
-          {/* Onglets pleine largeur, avec fade-mask sur overflow */}
-          <div className="mb-4 border-b border-border relative">
-            <div
-              role="tablist"
-              aria-label="Catégorie de contenu"
-              className="flex gap-1 sm:gap-2 overflow-x-auto min-w-0 scrollbar-none"
-              style={{ scrollbarWidth: "none" }}
-            >
-              {(Object.keys(TAB_META) as Tab[]).map((t) => {
-                const isActive = tab === t;
-                const a = accentClasses[t];
-                const filtered = tabFiltered[t];
-                const total = tabTotals[t];
-                const showRatio = filtered !== total;
-                return (
-                  <button
-                    key={t}
-                    role="tab"
-                    id={`tab-${t}`}
-                    aria-selected={isActive}
-                    aria-controls={`panel-${t}`}
-                    tabIndex={isActive ? 0 : -1}
-                    onClick={() => setTab(t)}
-                    className={`shrink-0 px-3 sm:px-4 py-2 -mb-px border-b-2 text-sm font-semibold transition-colors flex items-center gap-2 ${
-                      isActive
-                        ? `${a.border} ${a.text}`
-                        : "border-transparent text-foreground/60 hover:text-foreground"
-                    }`}
-                  >
-                    <span>{TAB_META[t].short}</span>
+          {/* Onglets pill, grille 3 colonnes, aucun scroll horizontal */}
+          <div
+            role="tablist"
+            aria-label="Catégorie de contenu"
+            className="mb-4 grid grid-cols-3 gap-1.5 sm:gap-2 p-1 rounded-2xl bg-muted/60"
+          >
+            {(Object.keys(TAB_META) as Tab[]).map((t) => {
+              const isActive = tab === t;
+              const a = accentClasses[t];
+              const filtered = tabFiltered[t];
+              const total = tabTotals[t];
+              const showRatio = filtered !== total;
+              return (
+                <button
+                  key={t}
+                  role="tab"
+                  id={`tab-${t}`}
+                  aria-selected={isActive}
+                  aria-controls={`panel-${t}`}
+                  tabIndex={isActive ? 0 : -1}
+                  onClick={() => setTab(t)}
+                  className={`min-w-0 rounded-xl px-2 sm:px-3 py-2 border text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${
+                    isActive
+                      ? `${a.active} shadow-sm`
+                      : "border-transparent text-foreground/65 hover:text-foreground hover:bg-background/60"
+                  }`}
+                >
+                  <span className="truncate">{TAB_META[t].short}</span>
+                  {total > 0 && (
                     <span
-                      className={`text-xs px-1.5 py-0.5 rounded-full font-medium tabular-nums ${
-                        isActive ? a.pill : "bg-muted text-foreground/60"
+                      className={`shrink-0 text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full font-medium tabular-nums ${
+                        isActive ? a.pill : "bg-background/80 text-foreground/60"
                       }`}
                       aria-label={showRatio ? `${filtered} affichés sur ${total} au total` : `${total} au total`}
                     >
                       {showRatio ? `${filtered}/${total}` : total}
                     </span>
-                  </button>
-                );
-              })}
-            </div>
-            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent sm:hidden" aria-hidden="true" />
+                  )}
+                </button>
+              );
+            })}
           </div>
+
 
           {/* Toggle Mes publications, hors barre d'onglets */}
           {isAuthenticated && (
