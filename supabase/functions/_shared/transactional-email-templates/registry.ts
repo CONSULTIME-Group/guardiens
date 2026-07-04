@@ -103,4 +103,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'pro-profile-approved': proProfileApproved,
   'pro-profile-rejected': proProfileRejected,
   'summer-listing-reminder': summerListingReminder,
+  'sitter-mutual-aid-invite': sitterMutualAidInvite,
 }
+
