@@ -177,6 +177,23 @@ const OwnerSitView = ({
   // canUnpublish, propriétaire d'une annonce publiée sans gardien accepté :
   // on remet simplement en brouillon (pas d'avis, pas de notification gardien).
   const canUnpublish = !isPast && sit.status === "published";
+  // canArchive, propriétaire d'une annonce terminée ou annulée : archive
+  // manuelle immédiate (sinon le cron le fait automatiquement après 7 jours).
+  const canArchive = sit.status === "completed" || sit.status === "cancelled";
+
+  const handleArchive = async () => {
+    const { error } = await supabase.rpc("archive_sit" as any, { p_sit_id: sit.id });
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Archivage impossible",
+        description: "Réessayez ou contactez le support.",
+      });
+      return;
+    }
+    setSit({ ...sit, status: "archived" } as any);
+    toast({ title: "Annonce archivée" });
+  };
 
   // Étape 1 : ouvre la modale de confirmation en pré-comptant les candidatures
   // actives qui seront clôturées, l'owner doit voir l'impact avant de cliquer.
