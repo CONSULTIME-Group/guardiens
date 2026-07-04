@@ -712,6 +712,7 @@ const EntraideHub = () => {
                     ctaLabel={tab === "besoins" ? "Publier une demande" : "Proposer mon aide"}
                     onCta={tab === "besoins" ? goNeed : goOffer}
                     onReset={hasMissionFilters ? resetMissionFilters : undefined}
+                    howSteps={meta.how}
                   />
                 )}
               </>
