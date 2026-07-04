@@ -138,7 +138,7 @@ export function useSearchAlert({ city, cityPostalCode, userPostalCode, radius, s
       if (msg.includes("DOUBLON")) {
         toast({ title: "Vous avez déjà cette alerte", description: "Une alerte identique existe déjà pour cette zone." });
         setAlertCreated(true);
-      } else if (msg.includes("MAX_ZONES")) {
+      } else if (msg.includes("MAX_ZONES") || msg.includes("Maximum 3")) {
         toast({
           variant: "destructive",
           title: "Maximum atteint",
