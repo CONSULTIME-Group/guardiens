@@ -670,6 +670,8 @@ const OwnerSitView = ({
         onCancelClick={() => setCancelOpen(true)}
         canUnpublish={canUnpublish}
         onUnpublishClick={requestUnpublish}
+        canArchive={canArchive}
+        onArchiveClick={handleArchive}
       />
 
       <SitFooterReassurance />
