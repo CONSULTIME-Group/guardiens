@@ -168,15 +168,21 @@ const PublicMissionView = ({
               </div>
             </header>
 
-            {/* Image principale */}
-            <div className="mb-12 rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
-              <img
-                src={heroImage}
-                alt={mission.title}
-                className="w-full aspect-video object-cover"
-                loading="eager"
-              />
-            </div>
+            {/* Image principale — masquée si aucune photo pour éviter
+                la bannière générique répétée d'une annonce à l'autre. */}
+            {heroImage && (
+              <div className="mb-12 rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
+                <img
+                  src={heroImage}
+                  alt={`Photo illustrant l'annonce : ${mission.title}`}
+                  className="w-full aspect-video object-cover"
+                  loading="eager"
+                  fetchPriority="high"
+                  width={1200}
+                  height={675}
+                />
+              </div>
+            )}
 
             <div className="max-w-2xl space-y-10">
               {/* Auteur */}
