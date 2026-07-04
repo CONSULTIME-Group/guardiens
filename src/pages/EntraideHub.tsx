@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { ChevronDown } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -445,24 +444,7 @@ const EntraideHub = () => {
           <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
             <p className="text-sm text-foreground/65 mb-4">{meta.description}</p>
 
-            {/* Comment ça marche, replié dès qu'il y a du contenu */}
-            <details
-              open={tabTotals[tab] === 0}
-              className="mb-6 rounded-xl border border-border bg-card group"
-            >
-              <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between text-sm font-semibold text-foreground">
-                <span>Comment ça marche ?</span>
-                <ChevronDown
-                  className="h-4 w-4 text-foreground/50 transition-transform group-open:rotate-180"
-                  aria-hidden="true"
-                />
-              </summary>
-              <ol className="px-4 pb-4 space-y-2 text-sm text-foreground/75 list-decimal list-inside">
-                {meta.how.map((step, i) => (
-                  <li key={i}>{step}</li>
-                ))}
-              </ol>
-            </details>
+            {/* Comment ça marche affiché uniquement dans les empty states ci-dessous */}
 
             {/* Onglet Questions */}
             {tab === "questions" && (
@@ -528,6 +510,7 @@ const EntraideHub = () => {
                     ctaLabel="Poser une question"
                     onCta={goAsk}
                     onReset={hasQuestionFilters ? resetQuestionFilters : undefined}
+                    howSteps={meta.how}
                     examples={
                       !mineOnly && !hasQuestionFilters
                         ? [
@@ -729,6 +712,7 @@ const EntraideHub = () => {
                     ctaLabel={tab === "besoins" ? "Publier une demande" : "Proposer mon aide"}
                     onCta={tab === "besoins" ? goNeed : goOffer}
                     onReset={hasMissionFilters ? resetMissionFilters : undefined}
+                    howSteps={meta.how}
                   />
                 )}
               </>
@@ -750,6 +734,7 @@ const EmptyState = ({
   onReset,
   examples,
   onExample,
+  howSteps,
 }: {
   title: string;
   hint?: string;
@@ -758,6 +743,7 @@ const EmptyState = ({
   onReset?: () => void;
   examples?: { label: string; cat: string }[];
   onExample?: (ex: { label: string; cat: string }) => void;
+  howSteps?: string[];
 }) => (
   <div className="p-8 rounded-2xl border border-dashed border-border bg-accent/20 text-center">
     <p className="font-heading text-lg text-foreground/85">{title}</p>
@@ -770,6 +756,18 @@ const EmptyState = ({
         </Button>
       )}
     </div>
+    {howSteps && howSteps.length > 0 && (
+      <div className="mt-6 pt-5 border-t border-border/60 text-left">
+        <p className="text-xs font-semibold uppercase tracking-wide text-foreground/55 mb-3 text-center">
+          Comment ça marche
+        </p>
+        <ol className="space-y-2 text-sm text-foreground/75 list-decimal list-inside">
+          {howSteps.map((step, i) => (
+            <li key={i}>{step}</li>
+          ))}
+        </ol>
+      </div>
+    )}
     {examples && examples.length > 0 && onExample && (
       <div className="mt-6 pt-5 border-t border-border/60">
         <p className="text-xs font-semibold uppercase tracking-wide text-foreground/55 mb-3">
