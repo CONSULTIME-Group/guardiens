@@ -124,6 +124,9 @@ const PageMeta = ({
     };
 
     upsertMetaTag({ attr: "name", key: "robots", content: noindex ? "noindex, follow" : "index, follow" });
+    // Écrase la meta description statique (index.html) qui sinon reste en
+    // premier dans le DOM et est lue par les crawlers avant celle de Helmet.
+    upsertMetaTag({ attr: "name", key: "description", content: metaDescription });
     upsertCanonical(canonicalUrl);
     upsertHreflangAlternates();
 
@@ -176,10 +179,12 @@ const PageMeta = ({
   // article:*), sinon ils sont dupliqués (Helmet ajoute par-dessus le DOM
   // déjà mutée). Helmet ne sert plus qu'au <title> et à la <meta description>,
   // que React Helmet déduplique correctement par `name`.
+  // NB : la <meta name="description"> est gérée impérativement dans le
+  // useEffect ci-dessus pour écraser la meta statique d'index.html.
+  // Helmet ne sert plus qu'au <title> (dédupliqué nativement par le navigateur).
   return (
     <Helmet>
       <title>{fullTitle}</title>
-      <meta name="description" content={metaDescription} />
     </Helmet>
   );
 };

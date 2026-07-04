@@ -583,7 +583,7 @@ const Landing = () => {
           alt="Golden retriever assis dans l'herbe d'un jardin ensoleillé, gueule ouverte."
           className="absolute inset-0 w-full h-full object-cover"
           loading="eager"
-          fetchPriority="high"
+          {...({ fetchpriority: "high" } as any)}
           width={1920}
           height={1080}
           sizes="100vw"

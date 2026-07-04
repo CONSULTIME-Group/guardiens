@@ -867,7 +867,22 @@ const SmallMissionDetail = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground animate-fade-in">
-      <PageMeta title={`${mission.title}, Coup de main près de chez vous | Guardiens`} description={mission.description?.slice(0, 155)} image={mission.photos?.[0]} type="article" publishedAt={mission.created_at} />
+      <PageMeta
+        title={`${mission.title} · Coup de main à ${cityLabel}`}
+        description={(() => {
+          const raw = mission.description?.trim();
+          if (raw && raw.length >= 60) return raw.slice(0, 155);
+          const parts = [
+            `${catMeta.label} à ${cityLabel}`,
+            mission.exchange_offer ? `En échange : ${mission.exchange_offer}` : null,
+            "Coup de main entre particuliers, gratuit et sans engagement.",
+          ].filter(Boolean);
+          return parts.join(". ").slice(0, 155);
+        })()}
+        image={mission.photos?.[0]}
+        type="article"
+        publishedAt={mission.created_at}
+      />
       <Helmet>
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",

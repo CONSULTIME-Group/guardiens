@@ -61,7 +61,9 @@
     <meta name="geo.placename" content="France" />
     <link rel="preload" href="/fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/playfair-latin.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" as="image" type="image/webp" href="/hero-landing.webp" fetchpriority="high" />
+    <!-- hero-landing.webp est préchargé côté Landing.tsx uniquement pour éviter
+         un preload gaspillé sur toutes les autres routes. -->
+
     <link rel="preconnect" href="https://erhccyqevdyevpyctsjj.supabase.co" />
     <link rel="preconnect" href="https://erhccyqevdyevpyctsjj.supabase.co" crossorigin />
     <link rel="dns-prefetch" href="https://erhccyqevdyevpyctsjj.supabase.co" />

@@ -7,6 +7,8 @@ import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import RelatedMissionCard from "@/components/missions/RelatedMissionCard";
 import { Helmet } from "react-helmet-async";
 
+// Bannière générique "entraide" : conservée uniquement en dernier recours OG image,
+// jamais rendue en hero visible (elle rendait toutes les annonces sans photo identiques).
 const entraideHeader =
   "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/entraide-header.webp";
 
@@ -71,22 +73,38 @@ const PublicMissionView = ({
   memberSinceLong,
   onShare,
 }: Props) => {
-  const heroImage = mission.photos?.[0] || entraideHeader;
+  const heroImage = mission.photos?.[0] || null;
+  const ogImage = mission.photos?.[0] || entraideHeader;
   const cityLabel = titlecaseCity(mission.city) || "France";
   const redirect = `/petites-missions/${mission.id}`;
+
+  // Meta description contextuelle : on privilégie la vraie description,
+  // sinon on fabrique une phrase spécifique (ville + catégorie + contrepartie)
+  // pour éviter la meta boilerplate de la landing.
+  const metaDescription = (() => {
+    const raw = mission.description?.trim();
+    if (raw && raw.length >= 60) return raw.slice(0, 155);
+    const parts = [
+      `${catMeta.label} à ${cityLabel}`,
+      mission.exchange_offer ? `En échange : ${mission.exchange_offer}` : null,
+      "Coup de main entre particuliers, gratuit et sans engagement.",
+    ].filter(Boolean);
+    return parts.join(". ").slice(0, 155);
+  })();
 
   return (
     <div className="min-h-screen bg-background text-foreground animate-fade-in">
       <PageMeta
-        title={`${mission.title}, Coup de main près de chez vous | Guardiens`}
-        description={mission.description?.slice(0, 155)}
+        title={`${mission.title} · Coup de main à ${cityLabel}`}
+        description={metaDescription}
+        image={ogImage}
       />
       <Helmet>
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Service",
           name: mission.title,
-          description: mission.description?.slice(0, 300),
+          description: mission.description?.slice(0, 300) || metaDescription,
           areaServed: cityLabel,
           serviceType: catMeta.label,
           provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
@@ -150,15 +168,21 @@ const PublicMissionView = ({
               </div>
             </header>
 
-            {/* Image principale */}
-            <div className="mb-12 rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
-              <img
-                src={heroImage}
-                alt={mission.title}
-                className="w-full aspect-video object-cover"
-                loading="eager"
-              />
-            </div>
+            {/* Image principale — masquée si aucune photo pour éviter
+                la bannière générique répétée d'une annonce à l'autre. */}
+            {heroImage && (
+              <div className="mb-12 rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
+                <img
+                  src={heroImage}
+                  alt={`Photo illustrant l'annonce : ${mission.title}`}
+                  className="w-full aspect-video object-cover"
+                  loading="eager"
+                  {...({ fetchpriority: "high" } as any)}
+                  width={1200}
+                  height={675}
+                />
+              </div>
+            )}
 
             <div className="max-w-2xl space-y-10">
               {/* Auteur */}
