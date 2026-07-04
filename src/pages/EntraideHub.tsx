@@ -22,7 +22,7 @@ import { DEPT_NAMES, getDeptCode } from "@/lib/departments";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import MissionCardCover from "@/components/missions/MissionCardCover";
-import ExchangeHowItWorks from "@/components/missions/ExchangeHowItWorks";
+
 
 type Tab = "questions" | "besoins" | "offres";
 type MissionStatus = "all" | "open" | "in_progress" | "completed";
@@ -349,41 +349,35 @@ const EntraideHub = () => {
   return (
     <>
       <PageMeta
-        title="Entraide locale : conseils & coups de main, Guardiens"
+        title="Entraide, questions et coups de main entre gens du coin, Guardiens"
         description="Posez une question, demandez un coup de main (garde animaux, jardin, promenade) ou proposez votre aide près de chez vous. Gratuit."
         path="/petites-missions"
       />
       <div className="min-h-screen bg-background">
-        <PageBreadcrumb items={[{ label: "Conseils & coups de main" }]} />
+        <PageBreadcrumb items={[{ label: "Entraide" }]} />
 
         <section className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-28 sm:py-8 min-w-0">
-          {/* Header */}
-          <div className="mb-6">
-            <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">
-              Entraide locale, près de chez vous
-            </h1>
-            <p className="text-foreground/70 mt-2">
-              Posez une question, demandez un coup de main ponctuel ou proposez le vôtre, entre gens du coin.
-            </p>
-            <div className="flex flex-wrap items-center gap-2 mt-3">
-              <span className="text-[11px] font-semibold uppercase tracking-wide px-2 py-1 rounded-full bg-accent/50 text-foreground/80">
-                Gratuit, sans engagement
-              </span>
-              <span className="text-[11px] font-semibold uppercase tracking-wide px-2 py-1 rounded-full bg-primary/10 text-primary">
-                Couverture France entière
-              </span>
+          {/* Header compact */}
+          <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">
+                  Entraide
+                </h1>
+                <span className="text-[11px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-accent/50 text-foreground/80">
+                  Gratuit
+                </span>
+              </div>
+              <p className="text-sm text-foreground/70 mt-1.5">
+                Questions et coups de main ponctuels entre gens du coin.
+              </p>
             </div>
 
-            {/* CTA primaire (création) selon onglet actif */}
-            <div className="mt-5">
-              <Button onClick={primaryCta.action} className="w-full sm:w-auto">
-                {primaryCta.label}
-              </Button>
-            </div>
+            {/* CTA primaire selon onglet actif */}
+            <Button onClick={primaryCta.action} size="sm" className="shrink-0">
+              {primaryCta.label}
+            </Button>
           </div>
-
-          {/* Bloc pédagogique "Comment ça marche" — concept d'échange */}
-          <ExchangeHowItWorks variant="public" className="mb-6" />
 
           {/* Onglets pleine largeur, avec fade-mask sur overflow */}
           <div className="mb-4 border-b border-border relative">
