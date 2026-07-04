@@ -149,6 +149,7 @@ const AdminRelanceIncomplet = lazy(() => import("./pages/admin/AdminRelanceIncom
 const AdminNurturing = lazy(() => import("./pages/admin/AdminNurturing"));
 const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
+const AdminTraffic = lazy(() => import("./pages/admin/AdminTraffic"));
 const AdminErrors = lazy(() => import("./pages/admin/AdminErrors"));
 const AdminDiagnostics = lazy(() => import("./pages/admin/AdminDiagnostics"));
 const AdminTestSitterFields = lazy(() => import("./pages/admin/AdminTestSitterFields"));
