@@ -42,6 +42,7 @@ export const SitterDiscoveryBanner = ({
   onExpandToFrance,
 }: SitterDiscoveryBannerProps) => {
   const isLowStock = totalFrance < LOW_STOCK_THRESHOLD;
+  const alertScopeLabel = zoneMode === "france" ? "en France" : city ? `sur ${city}` : "près de chez vous";
   const showExpansion =
     zoneMode === "radius" && totalFrance > totalRadius && totalFrance - totalRadius >= 2;
 
@@ -63,10 +64,10 @@ export const SitterDiscoveryBanner = ({
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 {totalFrance > 0 ? (
                   <>
-                    <span className="font-medium text-foreground">{totalFrance}</span> annonce{totalFrance > 1 ? "s" : ""} publiée{totalFrance > 1 ? "s" : ""} en ce moment en France. La communauté grandit chaque semaine, créez une alerte pour ne rien manquer{city ? ` sur ${city}` : ""}.
+                    <span className="font-medium text-foreground">{totalFrance}</span> annonce{totalFrance > 1 ? "s" : ""} publiée{totalFrance > 1 ? "s" : ""} en ce moment en France. La communauté grandit chaque semaine, créez une alerte pour ne rien manquer {alertScopeLabel}.
                   </>
                 ) : (
-                  <>Aucune annonce active pour le moment. Soyez prévenu(e) en premier dès qu'une garde se publie{city ? ` sur ${city}` : " près de chez vous"}.</>
+                  <>Aucune annonce active pour le moment. Soyez prévenu(e) en premier dès qu'une garde se publie {alertScopeLabel}.</>
                 )}
               </p>
             </>
