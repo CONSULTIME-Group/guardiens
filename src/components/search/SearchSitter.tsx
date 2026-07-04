@@ -1960,7 +1960,6 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     ) : (() => {
       // Groupement lecture : Disponibles → Exemples → Passées / Attribuées
       const activeReal = results.filter((r: any) => !r.is_demo && !r.isAssigned && !r.isCompleted && !r.isPast);
-      const demos = results.filter((r: any) => r.is_demo);
       const inactive = results.filter((r: any) => !r.is_demo && (r.isAssigned || r.isCompleted || r.isPast));
       const visibleActive = activeReal.slice(0, visibleCount);
       const hasMore = visibleActive.length < activeReal.length;
@@ -1978,7 +1977,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
         <>
           {visibleActive.length > 0 && (
             <section className="mb-10">
-              {(demos.length > 0 || inactive.length > 0) && groupHeader("Annonces disponibles", activeReal.length)}
+              {inactive.length > 0 && groupHeader("Annonces disponibles", activeReal.length)}
               <div className={gridCls}>
                 {visibleActive.map((item) => renderCard(item, globalIdx++))}
               </div>
@@ -1992,15 +1991,6 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
                   </button>
                 </div>
               )}
-            </section>
-          )}
-
-          {demos.length > 0 && (
-            <section className="mb-10">
-              {groupHeader("Exemples pour patienter", demos.length, "Aperçu du type d'annonces publiées par la communauté")}
-              <div className={gridCls}>
-                {demos.map((item) => renderCard(item, globalIdx++))}
-              </div>
             </section>
           )}
 
