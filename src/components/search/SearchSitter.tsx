@@ -627,7 +627,36 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
    if (endDate) query = query.lte("start_date", endDate);
    const { data } = await query;
    let items = data || [];
-...
+
+   // Hydrate owner data from public_profiles (safe public view) in a single batched call
+   const ownerIds = Array.from(new Set(items.map((s: any) => s.user_id).filter(Boolean)));
+   if (ownerIds.length > 0) {
+   const [{ data: owners }, { data: galleryRows }] = await Promise.all([
+     supabase
+.from("public_profiles")
+.select("id, first_name, avatar_url, city, postal_code, identity_verified, is_founder")
+.in("id", ownerIds),
+     supabase
+.from("owner_gallery")
+.select("user_id, photo_url, position")
+.in("user_id", ownerIds)
+.order("position", { ascending: true }),
+   ]);
+   const ownerMap = new Map((owners || []).map((o: any) => [o.id, o]));
+   const galleryFirstMap = new Map<string, string>();
+   (galleryRows || []).forEach((g: any) => {
+     if (g?.user_id && g?.photo_url && !galleryFirstMap.has(g.user_id)) {
+       galleryFirstMap.set(g.user_id, g.photo_url);
+     }
+   });
+   items = items.map((s: any) => ({
+     ...s,
+     owner: ownerMap.get(s.user_id) || null,
+     ownerGalleryFirstPhoto: galleryFirstMap.get(s.user_id) || null,
+   }));
+   }
+   // Mark assigned/past sits (will be rendered greyed-out, non-clickable).
+   const todayIso = new Date().toISOString().slice(0, 10);
    items = items.map((s: any) => {
      const isCompleted = s.status === "completed";
      const isCancelled = s.status === "cancelled";
