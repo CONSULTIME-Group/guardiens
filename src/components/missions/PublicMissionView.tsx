@@ -4,7 +4,7 @@ import { Share2, CheckCircle2, ShieldCheck } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
-import MissionCardCover from "@/components/missions/MissionCardCover";
+import RelatedMissionCard from "@/components/missions/RelatedMissionCard";
 import { Helmet } from "react-helmet-async";
 
 const entraideHeader =
