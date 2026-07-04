@@ -46,8 +46,7 @@ const adminNavGroups: NavGroup[] = [
     label: "PILOTAGE",
     items: [
       { to: "/admin", icon: LayoutDashboard, label: "Vue d'ensemble", end: true },
-      { to: "/admin/analytics", icon: BarChart3, label: "Analytics" },
-      { to: "/admin/seo", icon: MapPin, label: "SEO" },
+      { to: "/admin/traffic", icon: BarChart3, label: "Trafic" },
       { to: "/admin/subscriptions", icon: CreditCard, label: "Abonnements" },
     ],
   },
