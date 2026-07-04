@@ -355,25 +355,18 @@ const EntraideHub = () => {
       <div className="min-h-screen bg-background">
         <PageBreadcrumb items={[{ label: "Entraide" }]} />
 
-        <section className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-28 sm:py-8 min-w-0">
-          {/* Header compact */}
-          <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">
-                  Entraide
-                </h1>
-                <span className="text-[11px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-accent/50 text-foreground/80">
-                  Gratuit
-                </span>
-              </div>
-              <p className="text-sm text-foreground/70 mt-1.5">
-                Questions et coups de main ponctuels entre gens du coin.
-              </p>
+        <section className="max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-28 sm:pt-6 sm:pb-8 min-w-0">
+          {/* Header ultra-compact : H1 + badge + CTA discret sur une ligne */}
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <h1 className="font-heading text-xl sm:text-2xl font-bold text-foreground truncate">
+                Entraide
+              </h1>
+              <span className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-accent/40 text-foreground/70 shrink-0">
+                Gratuit
+              </span>
             </div>
-
-            {/* CTA primaire selon onglet actif */}
-            <Button onClick={primaryCta.action} size="sm" className="shrink-0">
+            <Button onClick={primaryCta.action} size="sm" variant="outline" className="shrink-0 text-xs h-8">
               {primaryCta.label}
             </Button>
           </div>
@@ -442,7 +435,6 @@ const EntraideHub = () => {
           )}
 
           <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
-            <p className="text-sm text-foreground/65 mb-4">{meta.description}</p>
 
             {/* Comment ça marche affiché uniquement dans les empty states ci-dessous */}
 
