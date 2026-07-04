@@ -8,7 +8,7 @@ import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_URL = 'https://guardiens.fr'
-const CTA_URL = `${SITE_URL}/login?redirect=${encodeURIComponent('/petites-missions/creer')}`
+const CTA_URL = `${SITE_URL}/login?redirect=${encodeURIComponent('/petites-missions/creer?utm_source=email&utm_medium=email&utm_campaign=discover_mutual_aid&utm_content=variant_2')}&utm_source=email&utm_medium=email&utm_campaign=discover_mutual_aid&utm_content=variant_2`
 
 interface Props {
   firstName?: string
