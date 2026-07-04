@@ -435,7 +435,6 @@ const EntraideHub = () => {
           )}
 
           <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
-            <p className="text-sm text-foreground/65 mb-4">{meta.description}</p>
 
             {/* Comment ça marche affiché uniquement dans les empty states ci-dessous */}
 
