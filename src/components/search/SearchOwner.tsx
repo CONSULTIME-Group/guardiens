@@ -214,33 +214,98 @@ const SearchOwner = () => {
 
   // Create sitter alert
   const handleCreateAlert = async () => {
-    if (!city || alertCreated || isCreatingAlert) return;
+    if ((zoneMode !== "france" && !city) || alertCreated || isCreatingAlert) return;
     setIsCreatingAlert(true);
     trackEvent("search_empty_action", { source: "owner", metadata: { action: "create_alert", zone_mode: zoneMode } });
 
-    // Snap au rayon autorisé le plus proche (la RPC n'accepte que 5/15/30/50/100)
-    let usedRadius = snapToAllowedRadius(radius[0]);
-    let { data, error } = await supabase.rpc("create_alert_from_search", {
-      p_city: city,
-      p_postal_code: cityPostalCode ?? null,
-      p_radius_km: usedRadius,
-    });
+    let usedRadius: number | null = null;
+    let savedScope = city;
+    let error: any = null;
 
-    // Fallback : si INVALID_RADIUS (désync UI / cache), on réessaye une fois avec 15 km par défaut
-    if (error && (error.message || "").includes("INVALID_RADIUS")) {
-      logger.warn("create_alert_from_search INVALID_RADIUS, retry with fallback", {
-        attempted: usedRadius,
-        original: radius[0],
-      });
-      usedRadius = 15;
-      ({ data, error } = await supabase.rpc("create_alert_from_search", {
+    if (zoneMode === "france") {
+      savedScope = "France entière";
+      const { data: existing } = await supabase
+        .from("alert_preferences")
+        .select("id")
+        .eq("active", true)
+        .eq("zone_type", "region")
+        .eq("region_code", "FR")
+        .contains("alert_types", ["gardes"])
+        .limit(1);
+
+      if (existing && existing.length > 0) {
+        error = { message: "DOUBLON" };
+      } else {
+        ({ error } = await supabase.rpc("create_alert_preference", {
+          p_label: "Gardes · France entière",
+          p_zone_type: "region",
+          p_city: null,
+          p_postal_code: null,
+          p_radius_km: null,
+          p_departement: null,
+          p_region_code: "FR",
+          p_alert_types: ["gardes"],
+          p_heure_envoi: "08:00",
+          p_frequence: "quotidien",
+        }));
+      }
+    } else if (zoneMode === "dept") {
+      const deptCode = getDeptCode(cityPostalCode ?? userPostalCode ?? null);
+      savedScope = deptCode ? `département ${deptCode}` : city;
+      if (!deptCode) {
+        error = { message: "INVALID_DEPARTMENT" };
+      } else {
+        const { data: existing } = await supabase
+          .from("alert_preferences")
+          .select("id")
+          .eq("active", true)
+          .eq("zone_type", "departement")
+          .eq("departement", deptCode)
+          .contains("alert_types", ["gardes"])
+          .limit(1);
+
+        if (existing && existing.length > 0) {
+          error = { message: "DOUBLON" };
+        } else {
+          ({ error } = await supabase.rpc("create_alert_preference", {
+            p_label: `Gardes · Département ${deptCode}`,
+            p_zone_type: "departement",
+            p_city: null,
+            p_postal_code: null,
+            p_radius_km: null,
+            p_departement: deptCode,
+            p_region_code: null,
+            p_alert_types: ["gardes"],
+            p_heure_envoi: "08:00",
+            p_frequence: "quotidien",
+          }));
+        }
+      }
+    } else {
+      // Snap au rayon autorisé le plus proche (la RPC n'accepte que 5/15/30/50/100)
+      usedRadius = snapToAllowedRadius(radius[0]);
+      ({ error } = await supabase.rpc("create_alert_from_search", {
         p_city: city,
         p_postal_code: cityPostalCode ?? null,
         p_radius_km: usedRadius,
       }));
-      if (!error) {
-        // Aligne l'UI sur le rayon réellement utilisé
-        setRadius([usedRadius]);
+
+      // Fallback : si INVALID_RADIUS (désync UI / cache), on réessaye une fois avec 15 km par défaut
+      if (error && (error.message || "").includes("INVALID_RADIUS")) {
+        logger.warn("create_alert_from_search INVALID_RADIUS, retry with fallback", {
+          attempted: usedRadius,
+          original: radius[0],
+        });
+        usedRadius = 15;
+        ({ error } = await supabase.rpc("create_alert_from_search", {
+          p_city: city,
+          p_postal_code: cityPostalCode ?? null,
+          p_radius_km: usedRadius,
+        }));
+        if (!error) {
+          // Aligne l'UI sur le rayon réellement utilisé
+          setRadius([usedRadius]);
+        }
       }
     }
 
@@ -250,7 +315,7 @@ const SearchOwner = () => {
       if (msg.includes("DOUBLON")) {
         toastUi({ title: "Vous avez déjà cette alerte", description: "Une alerte identique existe déjà pour cette zone." });
         setAlertCreated(true);
-      } else if (msg.includes("MAX_ZONES")) {
+      } else if (msg.includes("MAX_ZONES") || msg.includes("Maximum 3")) {
         toastUi({
           variant: "destructive",
           title: "Maximum atteint",
@@ -259,6 +324,8 @@ const SearchOwner = () => {
         });
       } else if (msg.includes("INVALID_CITY")) {
         toastUi({ variant: "destructive", title: "Ville requise", description: "Sélectionnez une ville avant de créer une alerte." });
+      } else if (msg.includes("INVALID_DEPARTMENT")) {
+        toastUi({ variant: "destructive", title: "Département indisponible", description: "Sélectionnez une ville avec code postal avant de créer cette alerte." });
       } else if (msg.includes("INVALID_RADIUS")) {
         toastUi({
           variant: "destructive",
@@ -271,7 +338,9 @@ const SearchOwner = () => {
     } else {
       toastUi({
         title: "Alerte créée",
-        description: `Vous recevrez un e-mail dès qu'un nouveau gardien rejoint la zone autour de ${city} (rayon ${usedRadius} km).`,
+        description: usedRadius
+          ? `Vous recevrez un e-mail dès qu'une nouvelle garde apparaît autour de ${city} (rayon ${usedRadius} km).`
+          : `Vous recevrez un e-mail dès qu'une nouvelle garde apparaît sur ${savedScope}.`,
         action: <ToastAction altText="Personnaliser" onClick={() => navigate("/settings")}>Personnaliser</ToastAction>,
       });
       setAlertCreated(true);
