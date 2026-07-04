@@ -47,12 +47,18 @@ function installGtagStub() {
   const w = window as any;
   w.dataLayer = w.dataLayer || [];
   if (typeof w.gtag !== "function") {
-    w.gtag = function gtag(...args: any[]) {
-      w.dataLayer.push(args);
+    // IMPORTANT: use `arguments` (Arguments object), not rest params.
+    // Google Tag (gtag.js v2) checks Arguments-object internals when draining
+    // the dataLayer queue; a plain Array pushed via `...args` silently drops
+    // all queued commands (js/config/event) → 0 /g/collect hits.
+    w.gtag = function gtag() {
+      // eslint-disable-next-line prefer-rest-params
+      w.dataLayer.push(arguments);
     };
   }
   return w.gtag as (...args: any[]) => void;
 }
+
 
 export function loadGoogleAnalytics() {
   if (gaLoaded || typeof window === "undefined") return;
