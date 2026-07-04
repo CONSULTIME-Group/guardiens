@@ -510,6 +510,7 @@ const EntraideHub = () => {
                     ctaLabel="Poser une question"
                     onCta={goAsk}
                     onReset={hasQuestionFilters ? resetQuestionFilters : undefined}
+                    howSteps={meta.how}
                     examples={
                       !mineOnly && !hasQuestionFilters
                         ? [
