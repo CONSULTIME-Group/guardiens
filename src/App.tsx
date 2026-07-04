@@ -360,7 +360,9 @@ const AppRoutes = () => (
         <Route path="/admin/legal" element={<AdminLegal />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/contact-messages" element={<AdminContactMessages />} />
-        <Route path="/admin/seo" element={<AdminSEO />} />
+        <Route path="/admin/traffic" element={<AdminTraffic />} />
+        <Route path="/admin/seo" element={<Navigate to="/admin/traffic?tab=acquisition" replace />} />
+        <Route path="/admin/analytics" element={<Navigate to="/admin/traffic" replace />} />
         <Route path="/admin/lifecycle" element={<AdminLifecycle />} />
         <Route path="/admin/skills" element={<AdminSkills />} />
         <Route path="/admin/envois-groupes" element={<AdminMassEmails />} />
@@ -368,7 +370,6 @@ const AppRoutes = () => (
         <Route path="/admin/relance-incomplet" element={<AdminRelanceIncomplet />} />
         <Route path="/admin/nurturing" element={<AdminNurturing />} />
         <Route path="/admin/messages" element={<AdminMessages />} />
-        <Route path="/admin/analytics" element={<AdminAnalytics />} />
         <Route path="/admin/errors" element={<AdminErrors />} />
         <Route path="/admin/diagnostics" element={<AdminDiagnostics />} />
         <Route path="/admin/test-sitter-fields" element={<AdminTestSitterFields />} />
