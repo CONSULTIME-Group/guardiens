@@ -119,7 +119,7 @@ const AlertsSection = ({ user }: { user: any }) => {
       p_postal_code: formZoneType === "rayon" ? formPostalCode : null,
       p_radius_km: formZoneType === "rayon" ? formRadiusKm : null,
       p_departement: formZoneType === "departement" ? formDepartement : null,
-      p_region_code: formZoneType === "region" ? "ARA" : null,
+      p_region_code: formZoneType === "region" ? "FR" : null,
       p_alert_types: formAlertTypes,
       p_heure_envoi: formHeure,
       p_frequence: formFrequence,
@@ -136,7 +136,7 @@ const AlertsSection = ({ user }: { user: any }) => {
       postal_code: formZoneType === "rayon" ? formPostalCode : null,
       radius_km: formZoneType === "rayon" ? formRadiusKm : null,
       departement: formZoneType === "departement" ? formDepartement : null,
-      region_code: formZoneType === "region" ? "ARA" : null,
+      region_code: formZoneType === "region" ? "FR" : null,
       alert_types: formAlertTypes, heure_envoi: formHeure, frequence: formFrequence,
       active: true, created_at: new Date().toISOString(),
     }]);

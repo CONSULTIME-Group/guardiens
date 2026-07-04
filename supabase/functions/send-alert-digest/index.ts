@@ -129,6 +129,9 @@ Deno.serve(async (req) => {
               const pc = (sit.profiles as any)?.postal_code || "";
               if (pc.startsWith(pref.departement)) sits.push(sit);
 
+            } else if (pref.zone_type === "region" && pref.region_code === "FR") {
+              sits.push(sit);
+
             } else if (pref.zone_type === "region" && pref.region_code === "ARA") {
               const pc = (sit.profiles as any)?.postal_code || "";
               const dept = pc.substring(0, 2);
@@ -155,6 +158,9 @@ Deno.serve(async (req) => {
 
             } else if (pref.zone_type === "departement" && pref.departement) {
               if ((m.postal_code || "").startsWith(pref.departement)) missions.push(m);
+
+            } else if (pref.zone_type === "region" && pref.region_code === "FR") {
+              missions.push(m);
 
             } else if (pref.zone_type === "region" && pref.region_code === "ARA") {
               const dept = (m.postal_code || "").substring(0, 2);
