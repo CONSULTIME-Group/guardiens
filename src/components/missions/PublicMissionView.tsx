@@ -75,6 +75,8 @@ const PublicMissionView = ({
 }: Props) => {
   const heroImage = mission.photos?.[0] || null;
   const ogImage = mission.photos?.[0] || entraideHeader;
+  const cityLabel = titlecaseCity(mission.city) || "France";
+  const redirect = `/petites-missions/${mission.id}`;
 
   // Meta description contextuelle : on privilégie la vraie description,
   // sinon on fabrique une phrase spécifique (ville + catégorie + contrepartie)
