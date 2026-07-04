@@ -8,6 +8,7 @@ import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_URL = 'https://guardiens.fr'
+const CTA_URL = `${SITE_URL}/login?redirect=${encodeURIComponent('/petites-missions/creer')}`
 
 interface Props {
   firstName?: string
@@ -20,20 +21,24 @@ const DiscoverMutualAidOfferEmail = ({ firstName }: Props) => (
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
-        <Heading style={h1}>Envie de nouveauté&nbsp;? Offrez un coup de main.</Heading>
+
+        <Section style={hero}>
+          <Text style={heroKicker}>Coup de main</Text>
+          <Heading style={h1}>Envie de nouveauté ? Offrez un coup de main.</Heading>
+        </Section>
 
         <Text style={text}>
           Bonjour{firstName ? ` ${firstName}` : ''},
         </Text>
 
         <Text style={text}>
-          Vous avez du temps, un savoir-faire, une voiture, une bonne paire de bras&nbsp;?
+          Vous avez du temps, un savoir-faire, une voiture, une bonne paire de bras ?
           Quelqu'un près de chez vous en a peut-être besoin aujourd'hui. Proposer son aide,
           c'est ouvrir la porte à une rencontre, une histoire, parfois une aventure.
         </Text>
 
         <Section style={card}>
-          <Text style={cardTitle}>Ce que vous pouvez proposer&nbsp;:</Text>
+          <Text style={cardTitle}>Ce que vous pouvez proposer :</Text>
           <Text style={cardLine}>· Un trajet, un transport, un déménagement court</Text>
           <Text style={cardLine}>· Du bricolage, du jardinage, un dépannage</Text>
           <Text style={cardLine}>· De la compagnie, une promenade, une discussion</Text>
@@ -46,15 +51,11 @@ const DiscoverMutualAidOfferEmail = ({ firstName }: Props) => (
         </Text>
 
         <Section style={ctaSection}>
-          <Button style={button} href={`${SITE_URL}/petites-missions/creer`}>
+          <Button style={button} href={CTA_URL}>
             Proposer un coup de main
           </Button>
+          <Text style={ctaHint}>Connectez-vous, puis publiez votre proposition en quelques clics.</Text>
         </Section>
-
-        <Text style={muted}>
-          Vous préférez d'abord parcourir les demandes&nbsp;?{' '}
-          Rendez-vous sur la page « Petites missions ».
-        </Text>
 
         <Hr style={hr} />
 
@@ -68,26 +69,29 @@ const DiscoverMutualAidOfferEmail = ({ firstName }: Props) => (
   </Html>
 )
 
-const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
-const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
-const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 20px' }
-const text = { fontSize: '14px', color: 'hsl(37, 7%, 30%)', lineHeight: '1.6', margin: '0 0 16px' }
-const card = { backgroundColor: 'hsl(40, 33%, 96%)', padding: '16px', borderRadius: '10px', margin: '16px 0' }
-const cardTitle = { color: 'hsl(153, 42%, 30%)', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }
+const main = { backgroundColor: '#f7f5f0', fontFamily: "'Outfit', Arial, sans-serif" }
+const container = { padding: '32px 28px', maxWidth: '560px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '14px' }
+const hero = { backgroundColor: 'hsl(153, 42%, 96%)', padding: '22px 20px', borderRadius: '12px', margin: '0 0 24px', borderLeft: '4px solid hsl(153, 42%, 30%)' }
+const heroKicker = { fontSize: '11px', letterSpacing: '1.5px', textTransform: 'uppercase' as const, color: 'hsl(153, 42%, 30%)', fontWeight: 600, margin: '0 0 6px' }
+const h1 = { fontSize: '24px', lineHeight: '1.25', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 20%)', margin: 0, fontFamily: "'Playfair Display', Georgia, serif" }
+const text = { fontSize: '15px', color: 'hsl(37, 7%, 25%)', lineHeight: '1.65', margin: '0 0 16px' }
+const card = { backgroundColor: 'hsl(40, 33%, 96%)', padding: '18px 20px', borderRadius: '10px', margin: '18px 0' }
+const cardTitle = { color: 'hsl(153, 42%, 25%)', fontSize: '14px', fontWeight: 600, marginBottom: '10px' }
 const cardLine = { color: 'hsl(37, 7%, 30%)', fontSize: '14px', lineHeight: '22px', marginBottom: '4px' }
-const ctaSection = { textAlign: 'center' as const, margin: '28px 0' }
+const ctaSection = { textAlign: 'center' as const, margin: '32px 0 12px' }
 const button = {
   backgroundColor: 'hsl(153, 42%, 30%)',
   color: '#ffffff',
-  padding: '12px 28px',
-  borderRadius: '8px',
+  padding: '14px 32px',
+  borderRadius: '10px',
   fontSize: '15px',
   fontWeight: '600' as const,
   textDecoration: 'none',
   display: 'inline-block',
+  boxShadow: '0 2px 6px hsla(153, 42%, 20%, 0.15)',
 }
-const muted = { color: 'hsl(37, 7%, 50%)', fontSize: '13px', lineHeight: '20px', marginTop: '20px' }
-const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
+const ctaHint = { fontSize: '12px', color: 'hsl(37, 7%, 50%)', margin: '12px 0 0' }
+const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '24px 0 16px' }
 
 export const template: TemplateEntry = {
   component: DiscoverMutualAidOfferEmail,
