@@ -333,27 +333,16 @@ const PublicMissionView = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
               {relatedMissions.slice(0, 3).map((rm: any) => (
-                <Link
+                <RelatedMissionCard
                   key={rm.id}
                   to={`/petites-missions/${rm.id}`}
-                  className="group block"
-                >
-                  <MissionCardCover
-                    photo={Array.isArray(rm.photos) ? rm.photos[0] : null}
-                    category={rm.category}
-                    title={rm.title}
-                    className="mb-5"
-                  />
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
-                    {rm.category}
-                  </p>
-                  <h3 className="font-heading text-xl font-bold mb-1 group-hover:text-primary transition-colors line-clamp-2">
-                    {rm.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground font-medium">
-                    {titlecaseCity(rm.city) || "France"} · {timeAgoFr(rm.created_at)}
-                  </p>
-                </Link>
+                  photo={Array.isArray(rm.photos) ? rm.photos[0] : null}
+                  category={rm.category}
+                  title={rm.title}
+                  city={titlecaseCity(rm.city)}
+                  timeAgo={timeAgoFr(rm.created_at)}
+                  exchangeOffer={rm.exchange_offer}
+                />
               ))}
             </div>
           </section>
