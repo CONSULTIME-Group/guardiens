@@ -2005,18 +2005,16 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
           )}
 
           {inactive.length > 0 && (
-            <details className="group mb-6">
-              <summary className="cursor-pointer list-none flex items-center justify-between rounded-xl border border-border bg-muted/40 hover:bg-muted/60 px-4 py-3 mb-4 transition-colors">
-                <span className="font-heading text-sm font-semibold text-foreground">
-                  Historique local <span className="text-muted-foreground font-normal">({inactive.length} annonce{inactive.length > 1 ? "s" : ""} passée{inactive.length > 1 ? "s" : ""} ou attribuée{inactive.length > 1 ? "s" : ""})</span>
-                </span>
-                <span className="text-xs text-primary font-semibold group-open:hidden">Afficher ▾</span>
-                <span className="text-xs text-primary font-semibold hidden group-open:inline">Masquer ▴</span>
-              </summary>
+            <section className="mb-10">
+              {groupHeader(
+                "Annonces passées ou attribuées",
+                inactive.length,
+                "Signal d'activité dans la zone, non actionnables",
+              )}
               <div className={gridCls}>
                 {inactive.map((item) => renderCard(item, globalIdx++))}
               </div>
-            </details>
+            </section>
           )}
         </>
       );
