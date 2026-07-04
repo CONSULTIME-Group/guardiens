@@ -34,6 +34,8 @@ const OwnerSitManagement = ({
   onShareClick,
   canUnpublish,
   onUnpublishClick,
+  canArchive,
+  onArchiveClick,
 }: OwnerSitManagementProps) => {
   return (
     <section
