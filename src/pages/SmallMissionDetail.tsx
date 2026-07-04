@@ -31,7 +31,7 @@ import MatchedHelpersInviteBlock from "@/components/missions/MatchedHelpersInvit
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import PublicMissionView from "@/components/missions/PublicMissionView";
-import MissionCardCover from "@/components/missions/MissionCardCover";
+import RelatedMissionCard from "@/components/missions/RelatedMissionCard";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import { isAuthorOf } from "@/lib/ownership";
 
