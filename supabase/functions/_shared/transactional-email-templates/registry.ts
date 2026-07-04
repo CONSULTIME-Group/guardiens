@@ -53,6 +53,7 @@ import { template as ownerNoSitJ10 } from './owner-no-sit-j10.tsx'
 import { template as referralBoostMonthly } from './referral-boost-monthly.tsx'
 import { template as proProfileApproved } from './pro-profile-approved.tsx'
 import { template as proProfileRejected } from './pro-profile-rejected.tsx'
+import { template as summerListingReminder } from './summer-listing-reminder.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'nearby-sit-alert': nearbySitAlert,
@@ -99,4 +100,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'referral-boost-monthly': referralBoostMonthly,
   'pro-profile-approved': proProfileApproved,
   'pro-profile-rejected': proProfileRejected,
+  'summer-listing-reminder': summerListingReminder,
 }
