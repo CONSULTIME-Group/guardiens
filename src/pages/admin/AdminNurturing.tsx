@@ -307,10 +307,17 @@ const AdminNurturing = () => {
   const triggerEvaluate = async () => {
     setTriggering(true);
     try {
-      const { error } = await supabase.functions.invoke("evaluate-journeys", { body: { manual: true } });
+      const { data, error } = await supabase.functions.invoke("evaluate-journeys", { body: { manual: true } });
       if (error) throw error;
-      toast.success("Évaluation lancée, actualisation dans 3 s");
-      setTimeout(() => fetchData(), 3000);
+      const stats = (data as { stats?: { sent?: number; skipped?: number; exited?: number; enrolled?: number; errors?: number; capped?: boolean } } | null)?.stats;
+      if (stats) {
+        toast.success(
+          `Envoyés ${stats.sent ?? 0} · sautés ${stats.skipped ?? 0} · sortis ${stats.exited ?? 0} · enrôlés ${stats.enrolled ?? 0}${stats.capped ? " (plafond atteint)" : ""}`,
+        );
+      } else {
+        toast.success("Évaluation terminée");
+      }
+      await fetchData();
     } catch (e) {
       toast.error("Échec du déclenchement", { description: e instanceof Error ? e.message : String(e) });
     } finally {
