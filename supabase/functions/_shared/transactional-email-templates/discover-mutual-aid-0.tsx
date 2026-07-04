@@ -19,43 +19,43 @@ const DiscoverMutualAidIntroEmail = ({ firstName }: Props) => (
     <BrandedHead />
     <Preview>L'entraide sur Guardiens, en deux minutes</Preview>
     <Body style={main}>
-      <Container style={container}>
+      <Container style={container} className="em-container">
         <BrandHeader />
 
-        <Section style={hero}>
+        <Section style={hero} className="em-hero">
           <Text style={heroKicker}>Coup de main</Text>
-          <Heading style={h1}>L'entraide, le petit pilier qui change tout.</Heading>
+          <Heading style={h1} className="em-h1">L'entraide, le petit pilier qui change tout.</Heading>
         </Section>
 
-        <Text style={text}>
+        <Text style={text} className="em-text">
           Bonjour{firstName ? ` ${firstName}` : ''},
         </Text>
 
-        <Text style={text}>
+        <Text style={text} className="em-text">
           Vous venez de rejoindre Guardiens. À côté des gardes d'animaux, il existe un espace
           discret mais précieux : les <strong>petites missions d'entraide</strong>. Un endroit
           où l'on demande, où l'on propose, où l'on rend service, sans transaction financière,
           simplement entre membres du coin.
         </Text>
 
-        <Section style={card}>
-          <Text style={cardTitle}>En pratique, ça ressemble à quoi ?</Text>
-          <Text style={cardLine}>· Récupérer un colis pendant une absence</Text>
-          <Text style={cardLine}>· Demander un avis sur un artisan ou une adresse</Text>
-          <Text style={cardLine}>· Partager un trajet, prêter un outil, donner un coup de main</Text>
-          <Text style={cardLine}>· Tenir compagnie, marcher ensemble, échanger un savoir</Text>
+        <Section style={card} className="em-card">
+          <Text style={cardTitle} className="em-card-title">En pratique, ça ressemble à quoi ?</Text>
+          <Text style={cardLine} className="em-card-line">· Récupérer un colis pendant une absence</Text>
+          <Text style={cardLine} className="em-card-line">· Demander un avis sur un artisan ou une adresse</Text>
+          <Text style={cardLine} className="em-card-line">· Partager un trajet, prêter un outil, donner un coup de main</Text>
+          <Text style={cardLine} className="em-card-line">· Tenir compagnie, marcher ensemble, échanger un savoir</Text>
         </Section>
 
-        <Text style={text}>
+        <Text style={text} className="em-text">
           Pas d'obligation, pas d'engagement. Quand l'envie vient, la vôtre ou celle d'un
           proche, l'entraide est là, gratuite et simple à utiliser.
         </Text>
 
-        <Section style={ctaSection}>
-          <Button style={button} href={CTA_URL}>
+        <Section style={ctaSection} className="em-cta">
+          <Button style={button} className="em-btn" href={CTA_URL}>
             Publier un coup de main
           </Button>
-          <Text style={ctaHint}>Connectez-vous, puis rédigez votre demande en deux minutes.</Text>
+          <Text style={ctaHint} className="em-hint">Connectez-vous, puis rédigez votre demande en deux minutes.</Text>
         </Section>
 
         <Hr style={hr} />
