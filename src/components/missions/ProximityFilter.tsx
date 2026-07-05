@@ -105,7 +105,7 @@ const ProximityFilter = ({
                 ? "proximity-geo-error"
                 : undefined
           }
-          className={`h-8 w-[130px] pl-8 pr-7 text-xs ${showPostalError ? "border-destructive" : ""}`}
+          className={`h-9 w-[148px] pl-8 pr-7 text-xs ${showPostalError ? "border-destructive" : ""}`}
         />
         {postal && (
           <button
