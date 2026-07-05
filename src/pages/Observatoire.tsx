@@ -266,7 +266,7 @@ const Observatoire = () => {
  Les chiffres « 37 maisons gardées » et « 234 animaux accompagnés » correspondent au cumul vécu par les fondateurs Jérémie et Elisa entre 2021 et 2026, période de validation terrain qui a précédé l'ouverture publique de Guardiens.
  </p>
  <p>
- Les éléments tarifaires (gratuité propriétaire, 6,99 €/mois gardien, 12 € one-shot, gratuité jusqu'au 30 septembre 2026) sont publiés sur <Link to="/tarifs" className="text-primary hover:underline">la page Tarifs</Link>.
+ Les éléments tarifaires (gratuité propriétaire, 6,99 €/mois gardien, 65 €/an, 10 € oneshot, gratuité jusqu'au 30 septembre 2026) sont publiés sur <Link to="/tarifs" className="text-primary hover:underline">la page Tarifs</Link>.
  </p>
  <p>
  Les éléments structurels (vérification d'identité, badges, Trust Score, réseau Gardien d'Urgence) sont décrits sur <Link to="/a-propos" className="text-primary hover:underline">la page À propos</Link> et dans la <Link to="/faq" className="text-primary hover:underline">FAQ</Link>.
