@@ -1319,39 +1319,48 @@ const SmallMissionDetail = () => {
         {/* ══════════════════════════════════════════════════════ */}
         {/* ── Recommandations ── */}
         {/* ══════════════════════════════════════════════════════ */}
-        {relatedMissions.length > 0 && (
-          <section className="mt-12 md:mt-32 pt-8 md:pt-16 border-t border-border">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-10 gap-4">
-              <div>
-                <h2 className="font-heading text-3xl md:text-4xl font-bold mb-2">Près de chez vous</h2>
-                <p className="text-muted-foreground text-lg">
-                  D'autres coups de main à {cityLabel} et alentours
-                </p>
+        {relatedMissions.length > 0 && (() => {
+          // Vérifie qu'au moins UNE suggestion est dans le rayon "près de chez vous".
+          // Sinon on titre honnêtement pour ne pas mentir au lecteur.
+          const anyNear = relatedMissions.some(
+            (rm: any) => typeof rm.__distance_km === "number" && rm.__distance_km <= NEAR_RADIUS_KM,
+          );
+          const sectionTitle = anyNear ? "Près de chez vous" : "D'autres coups de main";
+          const sectionSubtitle = anyNear
+            ? `D'autres coups de main à ${cityLabel} et alentours`
+            : "Encore peu d'annonces dans votre secteur, voici des exemples récents à découvrir.";
+          return (
+            <section className="mt-12 md:mt-32 pt-8 md:pt-16 border-t border-border">
+              <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-10 gap-4">
+                <div>
+                  <h2 className="font-heading text-3xl md:text-4xl font-bold mb-2">{sectionTitle}</h2>
+                  <p className="text-muted-foreground text-lg">{sectionSubtitle}</p>
+                </div>
+                <Link
+                  to="/petites-missions"
+                  className="font-bold text-sm border-b-2 border-foreground pb-1 hover:opacity-70 transition-opacity self-start md:self-auto"
+                >
+                  Tout parcourir
+                </Link>
               </div>
-              <Link
-                to="/petites-missions"
-                className="font-bold text-sm border-b-2 border-foreground pb-1 hover:opacity-70 transition-opacity self-start md:self-auto"
-              >
-                Tout parcourir
-              </Link>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-              {relatedMissions.slice(0, 3).map((rm) => (
-                <RelatedMissionCard
-                  key={rm.id}
-                  to={`/petites-missions/${rm.id}`}
-                  photo={Array.isArray(rm.photos) ? rm.photos[0] : null}
-                  category={rm.category}
-                  title={rm.title}
-                  city={titlecaseCity(rm.city)}
-                  timeAgo={timeAgoFr(rm.created_at)}
-                  exchangeOffer={(rm as any).exchange_offer}
-                />
-              ))}
-            </div>
-          </section>
-        )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+                {relatedMissions.slice(0, 3).map((rm) => (
+                  <RelatedMissionCard
+                    key={rm.id}
+                    to={`/petites-missions/${rm.id}`}
+                    photo={Array.isArray(rm.photos) ? rm.photos[0] : null}
+                    category={rm.category}
+                    title={sanitizeUserTitle(rm.title) || rm.title}
+                    city={titlecaseCity(rm.city)}
+                    timeAgo={timeAgoFr(rm.created_at)}
+                    exchangeOffer={(rm as any).exchange_offer}
+                  />
+                ))}
+              </div>
+            </section>
+          );
+        })()}
       </div>
 
       {/* Mobile sticky CTA */}
