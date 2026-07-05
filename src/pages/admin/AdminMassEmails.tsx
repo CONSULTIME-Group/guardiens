@@ -34,7 +34,7 @@ interface MassEmail {
   status: string;
 }
 
-// Campagne "Oser demander", pré-remplie pour faciliter l'envoi en 1 clic.
+// Campagnes prédéfinies
 const OSER_SUBJECT = "Et si vous osiez demander, vous aussi ?";
 const OSER_BODY = `Bonjour,
 
@@ -57,6 +57,72 @@ Et si c'était aujourd'hui ?
 À très vite,
 L'équipe Guardiens.`;
 
+const ENTRAIDE_SUBJECT = "L'entraide entre gardiens, c'est ici et c'est gratuit";
+const ENTRAIDE_BODY = `Bonjour,
+
+Vous avez une question sur l'éducation de votre animal ? Un doute sur une santé passagère ? Besoin d'un conseil pour un voyage, un déménagement, ou simplement un coup de main pour un arrosage de plantes ?
+
+L'espace Conseil et coup de main est fait pour cela.
+
+Ce n'est pas réservé aux experts : c'est la communauté qui répond, et parfois des professionnels du monde animal aussi. Parmi les personnes inscrites, il y a déjà des soigneurs, des éducateurs, des comportementalistes et d'autres passionnés qui partagent leur expérience librement.
+
+Et ce n'est qu'un début. Petit à petit, nous allons intégrer davantage de professionnels : toiletteurs, vétérinaires, soigneurs, éducateurs, comportementalistes. Ils pourront répondre aux questions de la communauté et vous pourrez aussi les contacter directement via leur espace professionnel.
+
+L'essentiel reste le même : poser une question, échanger, recevoir de l'aide. C'est simple, c'est humain, et c'est gratuit.
+
+Cet espace est gratuit. Il le restera toujours. C'est l'essence même du site : l'entraide et le réseau entre gens qui aiment les animaux.
+
+N'hésitez pas : une question est souvent le début d'une belle rencontre.
+
+À très vite,
+L'équipe Guardiens`;
+
+interface CampaignPreset {
+  key: string;
+  label: string;
+  segment: Segment;
+  filters: MassEmailFilters;
+  subject: string;
+  body: string;
+  ctaEnabled: boolean;
+  ctaLabel: string;
+  ctaUrl: string;
+  utmEnabled: boolean;
+  utmCampaign: string;
+  utmContent: string;
+}
+
+const CAMPAIGN_PRESETS: CampaignPreset[] = [
+  {
+    key: "oser",
+    label: "Oser demander",
+    segment: "tous",
+    filters: {},
+    subject: OSER_SUBJECT,
+    body: OSER_BODY,
+    ctaEnabled: true,
+    ctaLabel: "Publier une mission",
+    ctaUrl: "https://guardiens.fr/entraide/nouvelle",
+    utmEnabled: true,
+    utmCampaign: "oser-2026-05",
+    utmContent: "cta",
+  },
+  {
+    key: "entraide",
+    label: "Entraide gratuite",
+    segment: "tous",
+    filters: { respect_product_optout: true },
+    subject: ENTRAIDE_SUBJECT,
+    body: ENTRAIDE_BODY,
+    ctaEnabled: true,
+    ctaLabel: "Poser ma question",
+    ctaUrl: "https://guardiens.fr/petites-missions/creer?type=besoin",
+    utmEnabled: true,
+    utmCampaign: "entraide-gratuite-2025-07",
+    utmContent: "cta",
+  },
+];
+
 const AdminMassEmails = () => {
   // Form state, pré-rempli avec la campagne "Oser demander"
   const [segment, setSegment] = useState<Segment>("tous");
@@ -77,6 +143,23 @@ const AdminMassEmails = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmInput, setConfirmInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [activePreset, setActivePreset] = useState<string>("oser");
+
+  const applyPreset = useCallback((key: string) => {
+    const p = CAMPAIGN_PRESETS.find((x) => x.key === key);
+    if (!p) return;
+    setSegment(p.segment);
+    setFilters(p.filters);
+    setSubject(p.subject);
+    setBody(p.body);
+    setCtaEnabled(p.ctaEnabled);
+    setCtaLabel(p.ctaLabel);
+    setCtaUrl(p.ctaUrl);
+    setUtmEnabled(p.utmEnabled);
+    setUtmCampaign(p.utmCampaign);
+    setUtmContent(p.utmContent);
+    setActivePreset(key);
+  }, []);
 
   // History
   const [history, setHistory] = useState<MassEmail[]>([]);
@@ -175,6 +258,19 @@ const AdminMassEmails = () => {
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold text-foreground">Envois groupés</h1>
+
+      <div className="flex flex-wrap gap-2">
+        {CAMPAIGN_PRESETS.map((p) => (
+          <Button
+            key={p.key}
+            variant={activePreset === p.key ? "default" : "outline"}
+            size="sm"
+            onClick={() => applyPreset(p.key)}
+          >
+            {p.label}
+          </Button>
+        ))}
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left column */}
@@ -302,7 +398,7 @@ const AdminMassEmails = () => {
             <div className="flex items-start gap-3">
               <div className="flex-1 space-y-1">
                 <p className="text-sm font-semibold text-foreground">
-                  Prêt à envoyer la campagne « Oser demander »
+                  Prêt à envoyer la campagne « {CAMPAIGN_PRESETS.find((p) => p.key === activePreset)?.label || "Personnalisée"} »
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Tout est pré-rempli et tracé (campaign : <code className="font-mono">{effectiveCampaign}</code>).
