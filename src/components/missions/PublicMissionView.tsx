@@ -223,7 +223,7 @@ const PublicMissionView = ({
               <div className="mb-12 rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
                 <img
                   src={heroImage}
-                  alt={`Photo illustrant l\x27annonce : ${displayTitle}`}
+                  alt={`Photo illustrant l'annonce : ${displayTitle}`}
                   className="w-full aspect-video object-cover"
                   loading="eager"
                   {...({ fetchpriority: "high" } as any)}
