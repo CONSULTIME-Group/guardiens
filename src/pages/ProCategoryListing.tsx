@@ -12,6 +12,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
+import ProVerifiedBadge from "@/components/pros/ProVerifiedBadge";
+import { trackEvent } from "@/lib/analytics";
 
 type ProRow = {
   id: string;
@@ -22,6 +25,8 @@ type ProRow = {
   logo_url: string | null;
   description: string | null;
   urgences_24_7: boolean;
+  siret_verified: boolean;
+  siret_verified_at: string | null;
 };
 
 const citySlugify = (s: string) =>
