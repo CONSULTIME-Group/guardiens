@@ -23,6 +23,22 @@ describe("refreshArticleValidator", () => {
     }
   });
 
+  it("rejette les nouveaux patterns renforcés (à 0 €, profitez de la gratuité, 10 € oneshot)", () => {
+    const NBSP = "\u00A0";
+    const critical = [
+      "L'inscription est à 0 €.",
+      `Compte à 0${NBSP}€ pour les propriétaires.`,
+      "à 0€ pour tous",
+      "Profitez de la gratuité jusqu'à la fin.",
+      "Formule à 10 € pour un mois.",
+      "10 € oneshot disponible.",
+    ];
+    for (const s of critical) {
+      const r = validateRefreshedContent(s);
+      expect(r.ok, `Devrait rejeter: ${s}`).toBe(false);
+    }
+  });
+
   it("accepte un contenu conforme", () => {
     const clean = `# Titre\n\nGuardiens est gratuit aujourd'hui, sans engagement. Vous serez prévenu à l'avance quand cela changera.\n\nUn gardien de confiance prend soin de vos animaux.`;
     const r = validateRefreshedContent(clean);
@@ -30,8 +46,8 @@ describe("refreshArticleValidator", () => {
     expect(r.violations).toEqual([]);
   });
 
-  it("détecte au moins 12 patterns configurés", () => {
-    expect(FORBIDDEN_PATTERNS.length).toBeGreaterThanOrEqual(12);
+  it("détecte au moins 14 patterns configurés (renforcement post-pivot)", () => {
+    expect(FORBIDDEN_PATTERNS.length).toBeGreaterThanOrEqual(14);
   });
 });
 
