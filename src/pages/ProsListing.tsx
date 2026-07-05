@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
 import ProsMap from "@/components/pros/ProsMap";
+import ProVerifiedBadge from "@/components/pros/ProVerifiedBadge";
 import { useAuth } from "@/contexts/AuthContext";
 
 type ProRow = {
@@ -22,6 +23,8 @@ type ProRow = {
   logo_url: string | null;
   description: string | null;
   urgences_24_7: boolean;
+  siret_verified: boolean;
+  siret_verified_at: string | null;
 };
 
 type SortKey = "recent" | "alpha" | "city";
@@ -42,7 +45,7 @@ export default function ProsListing() {
       setLoading(true);
       const { data } = await supabase
         .from("pro_profiles")
-        .select("id, slug, raison_sociale, category, city, logo_url, description, urgences_24_7")
+        .select("id, slug, raison_sociale, category, city, logo_url, description, urgences_24_7, siret_verified, siret_verified_at")
         .eq("status", "approved")
         .order("created_at", { ascending: false });
       setPros((data as any) ?? []);
@@ -106,6 +109,37 @@ export default function ProsListing() {
             )}
           </div>
         </header>
+
+        {/* Deux niveaux de pros : pédagogie sobre */}
+        <section className="mb-8 rounded-2xl border border-border bg-card p-5 md:p-6">
+          <h2 className="font-heading text-lg md:text-xl font-semibold text-foreground mb-1">
+            Deux niveaux de pros dans notre annuaire
+          </h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Vous choisissez selon votre confiance et votre budget.
+          </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
+              <div className="mb-2">
+                <ProVerifiedBadge surface="card_listing" trackImpression={false} />
+              </div>
+              <p className="text-sm text-foreground leading-relaxed">
+                SIRET contrôlé manuellement par notre équipe. Contact direct au moment de la demande d'inscription. Recommandé pour les gardes qui demandent un professionnel identifié.
+              </p>
+            </div>
+            <div className="rounded-xl border border-border bg-background p-4">
+              <div className="mb-2">
+                <span className="inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                  Déclaratif
+                </span>
+              </div>
+              <p className="text-sm text-foreground leading-relaxed">
+                Fiche remplie par le pro, sans vérification de notre part. Utile pour explorer un territoire, comparer, ou entrer en contact rapidement.
+              </p>
+            </div>
+          </div>
+        </section>
+
 
         {/* Barre de filtres unique : recherche + catégorie + tri + 24/7 + vue */}
         <div className="space-y-3 mb-6">
@@ -199,7 +233,17 @@ export default function ProsListing() {
               const cat = getCategoryByValue(p.category);
               return (
                 <Link key={p.id} to={`/pros/${p.slug}`} className="group min-w-0">
-                  <Card className="h-full hover:shadow-md transition overflow-hidden">
+                  <Card className={`h-full hover:shadow-md transition overflow-hidden relative ${p.siret_verified ? "border-primary/30" : ""}`}>
+                    {p.siret_verified && (
+                      <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
+                        <ProVerifiedBadge
+                          verifiedAt={p.siret_verified_at}
+                          proId={p.id}
+                          surface="card_listing"
+                          size="sm"
+                        />
+                      </div>
+                    )}
                     <CardContent className="p-5">
                       <div className="flex items-center gap-3 mb-3">
                         {p.logo_url ? (
@@ -217,7 +261,7 @@ export default function ProsListing() {
                             {getProInitials(p.raison_sociale)}
                           </div>
                         )}
-                        <div className="min-w-0">
+                        <div className="min-w-0 pr-16">
                           <h2 className="font-semibold truncate group-hover:underline">
                             {p.raison_sociale}
                           </h2>

@@ -6,10 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { getCategoryByValue } from "@/lib/proCategories";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
+import { trackEvent } from "@/lib/analytics";
+import { ShieldCheck } from "lucide-react";
 
 type ProRow = {
   id: string;
@@ -27,6 +30,9 @@ type ProRow = {
   email_contact: string | null;
   created_at: string;
   rejection_reason: string | null;
+  siret_verified: boolean;
+  siret_verified_at: string | null;
+  pricing_tier: "standard" | "verified";
 };
 
 type Tab = "pending" | "approved" | "rejected";
@@ -82,6 +88,31 @@ export default function AdminProDirectory() {
     load(tab);
   };
 
+  const toggleVerified = async (row: ProRow) => {
+    const next = !row.siret_verified;
+    const { data: userData } = await supabase.auth.getUser();
+    const adminId = userData.user?.id ?? null;
+    const { error } = await supabase
+      .from("pro_profiles")
+      .update({
+        siret_verified: next,
+        siret_verified_by: next ? adminId : null,
+      } as any)
+      .eq("id", row.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    void trackEvent("pro_admin_verification_toggled", {
+      metadata: { pro_id: row.id, verified: next, admin_id: adminId },
+    });
+    toast.success(next ? "SIRET marqué comme vérifié" : "Vérification SIRET retirée");
+    load(tab);
+  };
+
+  const verifiedCount = rows.filter((r) => r.siret_verified).length;
+  const standardCount = rows.length - verifiedCount;
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-6xl min-w-0">
       <AdminPageHeader
@@ -104,6 +135,14 @@ export default function AdminProDirectory() {
         </TabsList>
 
         <TabsContent value={tab} className="mt-6 space-y-4">
+          {tab === "approved" && rows.length > 0 && (
+            <div className="text-xs text-muted-foreground border border-border bg-card rounded-lg px-3 py-2">
+              <span className="font-semibold text-foreground">{verifiedCount}</span> pro
+              {verifiedCount > 1 ? "s" : ""} vérifié{verifiedCount > 1 ? "s" : ""} SIRET ·{" "}
+              <span className="font-semibold text-foreground">{standardCount}</span> déclaratif
+              {standardCount > 1 ? "s" : ""}
+            </div>
+          )}
           {loading ? (
             <p className="text-muted-foreground">Chargement…</p>
           ) : rows.length === 0 ? (
@@ -129,11 +168,29 @@ export default function AdminProDirectory() {
                           <h3 className="font-semibold">{row.raison_sociale}</h3>
                           <Badge variant="outline">{cat?.label}</Badge>
                           {row.city && <Badge variant="secondary">{row.city}</Badge>}
+                          {row.siret_verified && (
+                            <Badge className="bg-primary/10 text-primary border-primary/30 gap-1">
+                              <ShieldCheck className="h-3 w-3" />
+                              Vérifié Guardiens
+                            </Badge>
+                          )}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
                           SIRET : {row.siret || "non renseigné"} · Créée le{" "}
                           {new Date(row.created_at).toLocaleDateString("fr-FR")}
                         </p>
+                        <label className="mt-2 flex items-center gap-2 text-xs cursor-pointer text-foreground">
+                          <Checkbox
+                            checked={row.siret_verified}
+                            onCheckedChange={() => toggleVerified(row)}
+                          />
+                          <span className="font-medium">SIRET vérifié</span>
+                          {row.siret_verified && row.siret_verified_at && (
+                            <span className="text-muted-foreground">
+                              (le {new Date(row.siret_verified_at).toLocaleDateString("fr-FR")})
+                            </span>
+                          )}
+                        </label>
                         {row.description && (
                           <p className="text-sm mt-3 whitespace-pre-line line-clamp-4">
                             {row.description}

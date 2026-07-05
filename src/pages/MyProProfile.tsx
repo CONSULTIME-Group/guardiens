@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { trackEvent } from "@/lib/analytics";
 
 export default function MyProProfile() {
   const { user } = useAuth();
@@ -324,6 +325,58 @@ export default function MyProProfile() {
                     {profile.status === "rejected" && "Voyez le motif au-dessus, puis renvoyez en validation."}
                   </p>
                 </div>
+              </div>
+
+              {/* Statut de vérification SIRET */}
+              <div className="bg-card rounded-xl border border-border p-6 shadow-sm hover:shadow-md transition-shadow sm:col-span-2">
+                <div className="flex justify-between items-start mb-3 gap-3">
+                  <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
+                    Vérification Guardiens
+                  </span>
+                  {profile.siret_verified && (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 text-primary px-2.5 py-1 text-[11px] font-semibold">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      SIRET vérifié
+                    </span>
+                  )}
+                </div>
+                {profile.siret_verified ? (
+                  <>
+                    <p className="text-sm text-foreground">
+                      Votre fiche affiche le badge « Vérifié Guardiens »
+                      {profile.siret_verified_at
+                        ? ` depuis le ${new Date(profile.siret_verified_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}`
+                        : ""}
+                      . Il apparaît sur votre fiche publique et dans les résultats d'annuaire.
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Le badge Vérifié Guardiens sera prochainement lié à une offre tarifaire différenciée. Nous vous préviendrons avant tout changement.
+                    </p>
+                  </>
+                ) : profile.status === "approved" ? (
+                  <>
+                    <p className="text-sm text-foreground mb-3">
+                      Vous pouvez demander la vérification SIRET pour obtenir le badge « Vérifié Guardiens ». Contrôle manuel par notre équipe, sous 48 h ouvrées.
+                    </p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        void trackEvent("pro_verification_request_clicked", { metadata: { pro_id: profile.id } });
+                        window.location.href = `mailto:contact@guardiens.fr?subject=${encodeURIComponent("Demande de vérification SIRET, " + profile.raison_sociale)}&body=${encodeURIComponent("Bonjour,\n\nJe souhaite demander la vérification SIRET de ma fiche pro.\n\nRaison sociale : " + profile.raison_sociale + "\nSIRET : " + (profile.siret ?? "non renseigné") + "\n\nMerci.")}`;
+                      }}
+                    >
+                      Demander la vérification SIRET
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-3">
+                      Le badge Vérifié Guardiens sera prochainement lié à une offre tarifaire différenciée. Restez à l'écoute.
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    La vérification SIRET sera disponible dès la publication de votre fiche.
+                  </p>
+                )}
               </div>
 
               <div className="bg-card rounded-xl border border-border p-6 shadow-sm hover:shadow-md transition-shadow">

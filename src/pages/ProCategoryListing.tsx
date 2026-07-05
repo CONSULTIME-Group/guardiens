@@ -12,6 +12,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
+import ProVerifiedBadge from "@/components/pros/ProVerifiedBadge";
+import { trackEvent } from "@/lib/analytics";
 
 type ProRow = {
   id: string;
@@ -22,6 +25,8 @@ type ProRow = {
   logo_url: string | null;
   description: string | null;
   urgences_24_7: boolean;
+  siret_verified: boolean;
+  siret_verified_at: string | null;
 };
 
 const citySlugify = (s: string) =>
@@ -38,6 +43,7 @@ export default function ProCategoryListing() {
   const [pros, setPros] = useState<ProRow[]>([]);
   const [allCitiesForCat, setAllCitiesForCat] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
 
   useEffect(() => {
     if (!category) return;
@@ -45,7 +51,7 @@ export default function ProCategoryListing() {
       setLoading(true);
       const { data } = await supabase
         .from("pro_profiles")
-        .select("id, slug, raison_sociale, category, city, logo_url, description, urgences_24_7")
+        .select("id, slug, raison_sociale, category, city, logo_url, description, urgences_24_7, siret_verified, siret_verified_at")
         .eq("status", "approved")
         .eq("category", category.value as any)
         .order("created_at", { ascending: false });
@@ -65,9 +71,16 @@ export default function ProCategoryListing() {
   }, [villeSlug, allCitiesForCat]);
 
   const filtered = useMemo(() => {
-    if (!villeSlug) return pros;
-    return pros.filter((p) => p.city && citySlugify(p.city) === villeSlug);
-  }, [pros, villeSlug]);
+    let list = pros;
+    if (villeSlug) list = list.filter((p) => p.city && citySlugify(p.city) === villeSlug);
+    if (verifiedOnly) list = list.filter((p) => p.siret_verified);
+    return list;
+  }, [pros, villeSlug, verifiedOnly]);
+
+  const verifiedCount = useMemo(
+    () => (villeSlug ? pros.filter((p) => p.city && citySlugify(p.city) === villeSlug) : pros).filter((p) => p.siret_verified).length,
+    [pros, villeSlug],
+  );
 
   if (!category) {
     return (
@@ -140,13 +153,29 @@ export default function ProCategoryListing() {
         <header className="mb-6 md:mb-10">
           <h1 className="text-2xl md:text-4xl font-display font-bold mb-2">{h1}</h1>
           <p className="text-lg text-muted-foreground max-w-2xl">{category.shortDesc}</p>
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="mt-6 flex flex-wrap items-center gap-3">
             <Button asChild>
               <Link to="/pros/inscription">Inscrire mon activité</Link>
             </Button>
             <Button asChild variant="outline">
               <Link to="/pros">Toutes les catégories</Link>
             </Button>
+            {verifiedCount > 0 && (
+              <label className="ml-auto flex items-center gap-2 text-sm cursor-pointer">
+                <Checkbox
+                  checked={verifiedOnly}
+                  onCheckedChange={(v) => {
+                    const enabled = !!v;
+                    setVerifiedOnly(enabled);
+                    void trackEvent("pros_filter_verified_toggled", {
+                      metadata: { enabled, category: category.value, ville: villeSlug ?? null },
+                    });
+                  }}
+                />
+                Vérifiés Guardiens uniquement
+                <span className="text-muted-foreground text-xs">({verifiedCount})</span>
+              </label>
+            )}
           </div>
         </header>
 
@@ -193,7 +222,17 @@ export default function ProCategoryListing() {
               const cat = getCategoryByValue(p.category);
               return (
                 <Link key={p.id} to={`/pros/${p.slug}`} className="group">
-                  <Card className="h-full hover:shadow-md transition">
+                  <Card className={`h-full hover:shadow-md transition relative ${p.siret_verified ? "border-primary/30" : ""}`}>
+                    {p.siret_verified && (
+                      <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
+                        <ProVerifiedBadge
+                          verifiedAt={p.siret_verified_at}
+                          proId={p.id}
+                          surface="card_annuaire"
+                          size="sm"
+                        />
+                      </div>
+                    )}
                     <CardContent className="p-5">
                       <div className="flex items-center gap-3 mb-3">
                         {p.logo_url ? (
@@ -210,7 +249,7 @@ export default function ProCategoryListing() {
                             {getProInitials(p.raison_sociale)}
                           </div>
                         )}
-                        <div className="min-w-0">
+                        <div className="min-w-0 pr-16">
                           <h2 className="font-semibold truncate group-hover:underline">
                             {p.raison_sociale}
                           </h2>
