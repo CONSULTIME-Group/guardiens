@@ -549,9 +549,10 @@ const Register = () => {
   {roles.map((role) => (
   <button
   key={role.value}
+  type="button"
   onClick={() => {
   setSelectedRole(role.value);
-  setStep(2);
+  setFormError(null);
   trackEvent("signup_role_selected", {
   source: "/inscription",
   metadata: { role: role.value },
@@ -575,6 +576,74 @@ const Register = () => {
    ))}
   </div>
 
+  <div
+    className={cn(
+      "mt-4 flex items-start gap-3 rounded-lg border p-3 transition-colors",
+      termsHighlighted && !acceptedTerms
+        ? "border-destructive bg-destructive/5 animate-in fade-in-0"
+        : "border-border bg-muted/30"
+    )}
+  >
+    <Checkbox
+      id="accept-terms"
+      checked={acceptedTerms}
+      onCheckedChange={(v) => {
+        const checked = v === true;
+        setAcceptedTerms(checked);
+        if (checked) {
+          setTermsHighlighted(false);
+          setFormError(null);
+          try { trackEvent("signup_terms_checked" as any, { source: "/inscription", metadata: { step: 1 } }); } catch {}
+        }
+      }}
+      className="mt-0.5"
+    />
+    <label htmlFor="accept-terms" className="text-sm text-foreground/80 leading-snug cursor-pointer">
+      <Trans
+        i18nKey="register_page.accept_label"
+        components={{
+          1: <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
+          2: <Link to="/cgs" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
+          3: <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
+        }}
+      />
+    </label>
+  </div>
+
+  {termsHighlighted && !acceptedTerms && (
+    <p className="mt-2 text-xs text-destructive">
+      {t("register_page.terms_required_hint")}
+    </p>
+  )}
+
+  <Button
+    type="button"
+    size="lg"
+    className="w-full mt-4"
+    disabled={!selectedRole}
+    onClick={() => {
+      if (!selectedRole) return;
+      if (!acceptedTerms) {
+        setTermsHighlighted(true);
+        setFormError(null);
+        try {
+          trackEvent("signup_step_1_terms_unchecked_click_continue" as any, {
+            source: "/inscription",
+            metadata: { role: selectedRole },
+          });
+          trackEvent("signup_form_blocked", {
+            source: "/inscription",
+            metadata: { reason: "terms_unchecked", role: selectedRole, step: 1 },
+          });
+        } catch {}
+        return;
+      }
+      setStep(2);
+    }}
+  >
+    {t("register_page.continue")}
+  </Button>
+
    <p className="mt-4 text-center text-[11px] lg:text-xs text-muted-foreground/80">
      {t("register_page.role_change_hint")}
    </p>
@@ -590,6 +659,17 @@ const Register = () => {
   <button type="button" onClick={() => setStep(1)} className="block mx-auto mt-2 text-xs text-muted-foreground hover:text-foreground">
   {t("register_page.change_role")}
   </button>
+  </div>
+
+  <div className="flex items-center justify-between rounded-md bg-success-soft border border-success-border px-3 py-2 text-xs text-success-foreground">
+    <span>{t("register_page.terms_accepted_confirm")}</span>
+    <button
+      type="button"
+      onClick={() => setStep(1)}
+      className="text-xs font-medium text-primary hover:underline"
+    >
+      {t("register_page.terms_accepted_edit")}
+    </button>
   </div>
 
   <Button
@@ -625,8 +705,8 @@ const Register = () => {
     type="email"
     placeholder={t("register_page.email_placeholder")}
     value={email}
-    onChange={(e) => setEmail(e.target.value)}
-    onFocus={() => { try { trackEvent("signup_form_focused" as any, { source: "/inscription", metadata: { field: "email" } }); } catch {} }}
+    onChange={(e) => { setEmail(e.target.value); setFormError(null); }}
+    onFocus={() => { try { trackEvent("signup_form_field_focused" as any, { source: "/inscription", metadata: { field: "email" } }); } catch {} }}
     required
     autoComplete="email"
     className="rounded-lg h-12"
@@ -637,7 +717,16 @@ const Register = () => {
     <Label htmlFor="password">{t("register_page.password_label")}</Label>
     <button
      type="button"
-     onClick={() => { const pw = generateSuggestedPassword(); setPassword(pw); setShowPassword(true); setFormError(null); }}
+     onClick={() => {
+       const pw = generateSuggestedPassword();
+       setPassword(pw);
+       setShowPassword(true);
+       setFormError(null);
+       try {
+         trackEvent("signup_password_generated" as any, { source: "/inscription" });
+         trackEvent("signup_password_generated_used" as any, { source: "/inscription" });
+       } catch {}
+     }}
      className="text-xs text-primary hover:underline"
     >
      {t("register_page.suggest_password")}
@@ -650,7 +739,7 @@ const Register = () => {
      placeholder={t("register_page.password_placeholder")}
      value={password}
      onChange={(e) => { setPassword(e.target.value); setFormError(null); }}
-     onFocus={() => { try { trackEvent("signup_form_focused" as any, { source: "/inscription", metadata: { field: "password" } }); } catch {} }}
+     onFocus={() => { try { trackEvent("signup_form_field_focused" as any, { source: "/inscription", metadata: { field: "password" } }); } catch {} }}
      required
      minLength={8}
      autoComplete="new-password"
@@ -667,63 +756,14 @@ const Register = () => {
     </button>
    </div>
 
-   {password.length >= 6 && isObviouslyWeak(password) && (
-    <p className="text-xs text-warning-foreground bg-warning-soft border border-warning-border rounded px-2 py-1.5 animate-in fade-in-0">
-     {t("register_page.password_weak_live")}
-    </p>
+   <PasswordStrengthMeter password={password} isCommon={isObviouslyWeak(password)} />
+
+   {formError && (
+     <p role="alert" aria-live="polite" className="text-sm text-destructive bg-destructive/5 border border-destructive/30 rounded-md px-3 py-2">
+       {formError}
+     </p>
    )}
-
-  {password.length > 0 && (
-  <div className="flex gap-1 h-1.5 rounded-full overflow-hidden bg-muted animate-in fade-in-0 duration-200">
-  {[1, 2, 3, 4].map((i) => (
-  <div
-  key={i}
-  className={cn(
-  "flex-1 rounded-full transition-all duration-300",
-  i <= pwStrength.score ? pwStrength.color : "bg-transparent"
-  )}
-  />
-  ))}
   </div>
-  )}
-
-  {formError && <p className="text-sm text-destructive">{formError}</p>}
-  </div>
-
-
-           <div
-             className={cn(
-               "flex items-start gap-3 rounded-lg border p-3 transition-colors",
-               termsHighlighted && !acceptedTerms
-                 ? "border-destructive bg-destructive/5 animate-in fade-in-0"
-                 : "border-border bg-muted/30"
-             )}
-           >
-             <Checkbox
-               id="accept-terms"
-               checked={acceptedTerms}
-               onCheckedChange={(v) => {
-                 const checked = v === true;
-                 setAcceptedTerms(checked);
-                 if (checked) {
-                   setTermsHighlighted(false);
-                   setFormError(null);
-                   try { trackEvent("signup_terms_checked" as any, { source: "/inscription" }); } catch {}
-                 }
-               }}
-               className="mt-0.5"
-             />
-             <label htmlFor="accept-terms" className="text-sm text-foreground/80 leading-snug cursor-pointer">
-               <Trans
-                 i18nKey="register_page.accept_label"
-                 components={{
-                   1: <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
-                   2: <Link to="/cgs" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
-                   3: <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
-                 }}
-               />
-             </label>
-           </div>
 
            <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
              {isLoading ? t("register_page.submitting") : t("register_page.submit")}
