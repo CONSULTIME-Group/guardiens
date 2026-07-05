@@ -90,6 +90,9 @@ const PublicMissionView = ({
   const ogImage = mission.photos?.[0] || undefined;
   const cityLabel = titlecaseCity(mission.city) || "France";
   const redirect = `/petites-missions/${mission.id}`;
+  // Rétro-sanitize : les annonces créées avant la sanitize à la source
+  // conservent des titres en minuscules ou avec fautes ("chez soit").
+  const displayTitle = sanitizeUserTitle(mission.title) || mission.title;
   const CategoryIcon = CATEGORY_ICON[mission.category] || Sparkles;
   const authorFirstName = author?.first_name
     ? author.first_name.charAt(0).toUpperCase() + author.first_name.slice(1).toLowerCase()
