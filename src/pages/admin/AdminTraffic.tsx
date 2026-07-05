@@ -10,6 +10,7 @@ import { useSeoData } from "@/hooks/useSeoData";
 
 const AdminAnalytics = lazy(() => import("./AdminAnalytics"));
 const AdminSEO = lazy(() => import("./AdminSEO"));
+const AdminSignupFunnelTab = lazy(() => import("@/components/admin/AdminSignupFunnelTab"));
 
 function pctChange(current: number, previous: number): number | undefined {
   if (previous === 0 && current === 0) return 0;
@@ -25,7 +26,11 @@ function formatDuration(seconds: number): string {
 
 const AdminTraffic = () => {
   const [params, setParams] = useSearchParams();
-  const tab = params.get("tab") === "acquisition" ? "acquisition" : "interne";
+  const tabParam = params.get("tab");
+  const tab =
+    tabParam === "acquisition" || tabParam === "signup-funnel"
+      ? tabParam
+      : "interne";
   const { data, loading } = useSeoData();
   const ga4 = data?.ga4;
   const gsc = data?.gsc;
@@ -114,6 +119,9 @@ const AdminTraffic = () => {
           <TabsTrigger value="acquisition">
             <MousePointerClick className="h-4 w-4 mr-2" /> Acquisition SEO
           </TabsTrigger>
+          <TabsTrigger value="signup-funnel">
+            <Users className="h-4 w-4 mr-2" /> Funnel signup
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="interne" className="mt-6">
@@ -125,6 +133,12 @@ const AdminTraffic = () => {
         <TabsContent value="acquisition" className="mt-6">
           <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
             <AdminSEO />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="signup-funnel" className="mt-6">
+          <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
+            <AdminSignupFunnelTab />
           </Suspense>
         </TabsContent>
       </Tabs>
