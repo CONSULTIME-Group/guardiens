@@ -45,7 +45,7 @@ export default function ProsListing() {
       setLoading(true);
       const { data } = await supabase
         .from("pro_profiles")
-        .select("id, slug, raison_sociale, category, city, logo_url, description, urgences_24_7")
+        .select("id, slug, raison_sociale, category, city, logo_url, description, urgences_24_7, siret_verified, siret_verified_at")
         .eq("status", "approved")
         .order("created_at", { ascending: false });
       setPros((data as any) ?? []);
