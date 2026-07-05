@@ -1319,74 +1319,114 @@ const SmallMissionDetail = () => {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-3 mb-6">
+                <ul
+                  className="space-y-3 mb-6 list-none p-0"
+                  aria-label={`Réponses à la mission (${responses.length})`}
+                >
                   {responses.map((r: any) => (
-                    <MissionResponseCard
-                      key={r.id}
-                      response={r}
-                      isAuthor={isAuthor}
-                      currentUserId={user?.id}
-                      missionOwnerId={mission.user_id}
-                      processing={processingResponseId === r.id}
-                      onSelect={() => handleAcceptResponse(r.id)}
-                      onDecline={() => handleDeclineResponse(r.id)}
-                      onOpenMessages={() => navigate(r.conversation_id ? `/messages?c=${r.conversation_id}` : "/messages")}
-                    />
+                    <li key={r.id}>
+                      <MissionResponseCard
+                        response={r}
+                        isAuthor={isAuthor}
+                        currentUserId={user?.id}
+                        missionOwnerId={mission.user_id}
+                        processing={processingResponseId === r.id}
+                        onSelect={() => handleAcceptResponse(r.id)}
+                        onDecline={() => handleDeclineResponse(r.id)}
+                        onOpenMessages={() => navigate(r.conversation_id ? `/messages?c=${r.conversation_id}` : "/messages")}
+                      />
+                    </li>
                   ))}
-                </div>
+                </ul>
               )}
+
+              {/* Zone live pour annoncer l'ajout d'une réponse aux lecteurs d'écran */}
+              <div className="sr-only" aria-live="polite" aria-atomic="true">
+                {responses.length > 0 ? `${responses.length} réponse${responses.length > 1 ? "s" : ""} publiée${responses.length > 1 ? "s" : ""}.` : ""}
+              </div>
 
               {/* Composer inline type commentaire */}
               {!isAuthor && mission.status === "open" && canApplyMissions && !hasResponded && (
-                <div id="composer" className="scroll-mt-24">
-                  <div className="bg-card border border-border rounded-2xl p-3 md:p-4 flex items-start gap-3">
+                <section
+                  id="composer"
+                  className="scroll-mt-24"
+                  aria-labelledby="composer-heading"
+                >
+                  <h3 id="composer-heading" className="sr-only">Publier une réponse à la mission</h3>
+                  <form
+                    className="bg-card border border-border rounded-2xl p-3 md:p-4 flex items-start gap-3"
+                    onSubmit={(e) => { e.preventDefault(); handleRespond(); }}
+                    aria-busy={submitting}
+                  >
                     {(user as any)?.avatar_url ? (
                       <img
                         src={(user as any).avatar_url}
                         alt=""
+                        aria-hidden="true"
                         className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover shrink-0"
                       />
                     ) : (
-                      <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-muted flex items-center justify-center font-bold text-sm shrink-0">
+                      <div
+                        aria-hidden="true"
+                        className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-muted flex items-center justify-center font-bold text-sm shrink-0"
+                      >
                         {(user as any)?.first_name?.charAt(0) || "?"}
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
+                      <label htmlFor="composer-textarea" className="sr-only">
+                        Votre réponse à {author?.first_name || "l'auteur"} (minimum {MIN_MESSAGE_LEN} caractères, maximum {MAX_MESSAGE_LEN})
+                      </label>
                       <Textarea
                         id="composer-textarea"
+                        name="mission-response"
                         placeholder={`Répondez à ${author?.first_name || "l'auteur"}, présentez-vous en deux mots…`}
                         value={message}
                         onChange={(e) => setMessage(e.target.value.slice(0, MAX_MESSAGE_LEN))}
+                        onKeyDown={(e) => {
+                          if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && messageValid && !submitting) {
+                            e.preventDefault();
+                            handleRespond();
+                          }
+                        }}
                         rows={3}
-                        aria-invalid={messageTooShort}
-                        aria-describedby="composer-help"
-                        className={`min-h-[72px] resize-none rounded-xl border-0 bg-muted/50 focus-visible:ring-1 text-sm md:text-base ${messageTooShort ? "focus-visible:ring-destructive/60 ring-1 ring-destructive/40" : "focus-visible:ring-primary/40"}`}
+                        required
+                        minLength={MIN_MESSAGE_LEN}
                         maxLength={MAX_MESSAGE_LEN}
+                        aria-required="true"
+                        aria-invalid={messageTooShort}
+                        aria-describedby={messageTooShort ? "composer-error composer-help" : "composer-help"}
+                        className={`min-h-[72px] resize-none rounded-xl border-0 bg-muted/50 focus-visible:ring-1 text-sm md:text-base ${messageTooShort ? "focus-visible:ring-destructive/60 ring-1 ring-destructive/40" : "focus-visible:ring-primary/40"}`}
                       />
                       {messageTooShort && (
-                        <p className="text-[11px] text-destructive mt-1.5" role="alert">
+                        <p id="composer-error" className="text-[11px] text-destructive mt-1.5" role="alert">
                           Encore {MIN_MESSAGE_LEN - trimmedMessage.length} caractère{MIN_MESSAGE_LEN - trimmedMessage.length > 1 ? "s" : ""} minimum pour publier.
                         </p>
                       )}
                       <div className="flex items-center justify-between gap-2 mt-2">
                         <span id="composer-help" className={`text-[11px] ${message.length > 450 ? "text-warning" : "text-muted-foreground"}`}>
-                          {message.length}/{MAX_MESSAGE_LEN} · Visible par tout le monde
+                          <span aria-hidden="true">{message.length}/{MAX_MESSAGE_LEN} · Visible par tout le monde</span>
+                          <span className="sr-only">
+                            {message.length} caractères sur {MAX_MESSAGE_LEN}. Visible par tout le monde. Astuce : Ctrl + Entrée pour publier.
+                          </span>
                         </span>
                         <Button
+                          type="submit"
                           size="sm"
-                          onClick={handleRespond}
                           disabled={submitting || !messageValid}
-                          className="rounded-full gap-1.5"
+                          aria-disabled={submitting || !messageValid}
+                          aria-label={submitting ? "Envoi de la réponse en cours" : "Publier la réponse"}
+                          className="rounded-full gap-1.5 min-h-11"
                         >
-                          <Send className="h-3.5 w-3.5" />
-                          {submitting ? "Envoi…" : "Publier"}
+                          <Send className="h-3.5 w-3.5" aria-hidden="true" />
+                          <span>{submitting ? "Envoi…" : "Publier"}</span>
                         </Button>
                       </div>
-
                     </div>
-                  </div>
-                </div>
+                  </form>
+                </section>
               )}
+
 
               {/* États composer : déjà répondu / non éligible */}
               {!isAuthor && hasResponded && (
