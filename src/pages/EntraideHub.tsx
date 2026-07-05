@@ -656,7 +656,7 @@ const EntraideHub = () => {
                                 )}
                               </div>
                               <p className="font-heading text-base font-semibold text-foreground line-clamp-2">
-                                {m.title}
+                                {sanitizeUserTitle(m.title) || m.title}
                               </p>
                               {m.description && (
                                 <p className="text-sm text-foreground/65 mt-1 line-clamp-2">
