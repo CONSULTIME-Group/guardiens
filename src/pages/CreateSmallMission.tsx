@@ -379,7 +379,7 @@ const CreateSmallMission = () => {
                     ) : (
                       <span className="text-muted-foreground">Minimum {MIN_DESC_LEN} caractères.</span>
                     )}
-                    <span className={cn("tabular-nums", description.trim().length >= MIN_DESC_LEN ? "text-muted-foreground" : "text-destructive")}>
+                    <span className={cn("tabular-nums", descTouched && description.trim().length < MIN_DESC_LEN ? "text-destructive" : "text-muted-foreground")}>
                       {description.trim().length}/{MIN_DESC_LEN}
                     </span>
                   </div>
