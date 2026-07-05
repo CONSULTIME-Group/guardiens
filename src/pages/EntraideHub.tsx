@@ -438,8 +438,7 @@ const EntraideHub = () => {
                       }`}
                       aria-label={showRatio ? `${filtered} affichés sur ${total} au total` : `${total} au total`}
                     >
-                      <span className="sm:hidden">{total}</span>
-                      <span className="hidden sm:inline">{showRatio ? `${filtered}/${total}` : total}</span>
+                      {total}
                     </span>
                   )}
                 </button>
