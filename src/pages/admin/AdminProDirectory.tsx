@@ -168,11 +168,29 @@ export default function AdminProDirectory() {
                           <h3 className="font-semibold">{row.raison_sociale}</h3>
                           <Badge variant="outline">{cat?.label}</Badge>
                           {row.city && <Badge variant="secondary">{row.city}</Badge>}
+                          {row.siret_verified && (
+                            <Badge className="bg-primary/10 text-primary border-primary/30 gap-1">
+                              <ShieldCheck className="h-3 w-3" />
+                              Vérifié Guardiens
+                            </Badge>
+                          )}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
                           SIRET : {row.siret || "non renseigné"} · Créée le{" "}
                           {new Date(row.created_at).toLocaleDateString("fr-FR")}
                         </p>
+                        <label className="mt-2 flex items-center gap-2 text-xs cursor-pointer text-foreground">
+                          <Checkbox
+                            checked={row.siret_verified}
+                            onCheckedChange={() => toggleVerified(row)}
+                          />
+                          <span className="font-medium">SIRET vérifié</span>
+                          {row.siret_verified && row.siret_verified_at && (
+                            <span className="text-muted-foreground">
+                              (le {new Date(row.siret_verified_at).toLocaleDateString("fr-FR")})
+                            </span>
+                          )}
+                        </label>
                         {row.description && (
                           <p className="text-sm mt-3 whitespace-pre-line line-clamp-4">
                             {row.description}
