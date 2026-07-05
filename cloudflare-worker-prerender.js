@@ -182,18 +182,8 @@ export default {
       });
     }
 
-    // === Routes spéciales servies par le Worker ===
-    if (pathname === '/robots.txt') {
-      return new Response(ROBOTS_TXT, {
-        status: 200,
-        headers: {
-          'content-type': 'text/plain; charset=utf-8',
-          'cache-control': 'public, max-age=3600',
-          'x-prerender-worker': 'guardiens-prerender-v5',
-          'x-prerender-status': 'worker-served',
-        },
-      });
-    }
+    // /robots.txt : plus intercepté — laissé passer vers l'origine
+    // (public/robots.txt généré liste toutes les routes privées à Disallow).
 
     const { shouldPrerender, isBot, ua, reasons } = detectBot(request);
     const url = request.url;
