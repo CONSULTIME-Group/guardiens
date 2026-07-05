@@ -218,19 +218,6 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const SmallMissionsRoute = () => {
-  const { isAuthenticated } = useAuth();
-  if (isAuthenticated) {
-    // Cohérence mobile : AppLayout fournit la top bar (logo + cloches) et la
-    // bottom nav, identique aux autres hubs (/dashboard, /sits, /messages).
-    return (
-      <AppLayout>
-        <SmallMissions />
-      </AppLayout>
-    );
-  }
-  return <SmallMissionsPublic />;
-};
 
 const ParrainageRoute = () => {
   const { isAuthenticated } = useAuth();
