@@ -135,6 +135,14 @@ export default function AdminProDirectory() {
         </TabsList>
 
         <TabsContent value={tab} className="mt-6 space-y-4">
+          {tab === "approved" && rows.length > 0 && (
+            <div className="text-xs text-muted-foreground border border-border bg-card rounded-lg px-3 py-2">
+              <span className="font-semibold text-foreground">{verifiedCount}</span> pro
+              {verifiedCount > 1 ? "s" : ""} vérifié{verifiedCount > 1 ? "s" : ""} SIRET ·{" "}
+              <span className="font-semibold text-foreground">{standardCount}</span> déclaratif
+              {standardCount > 1 ? "s" : ""}
+            </div>
+          )}
           {loading ? (
             <p className="text-muted-foreground">Chargement…</p>
           ) : rows.length === 0 ? (
