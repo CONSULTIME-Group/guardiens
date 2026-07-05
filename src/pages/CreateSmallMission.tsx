@@ -93,8 +93,12 @@ const CreateSmallMission = () => {
   const [city, setCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [dateNeeded, setDateNeeded] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [endCalendarOpen, setEndCalendarOpen] = useState(false);
   const [duration, setDuration] = useState("");
+  const [petSpecies, setPetSpecies] = useState("");
+  const [petSize, setPetSize] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [photos, setPhotos] = useState<string[]>([]);
   const [appliedTemplateId, setAppliedTemplateId] = useState<string | null>(null);
@@ -189,7 +193,10 @@ const CreateSmallMission = () => {
       city: city.trim(),
       postal_code: postalCode.trim(),
       date_needed: dateNeeded || null,
+      end_date: endDate || null,
       duration_estimate: duration,
+      pet_species: category === "animals" ? (petSpecies || null) : null,
+      pet_size: category === "animals" ? (petSize || null) : null,
       photos,
       latitude: coords?.lat ?? null,
       longitude: coords?.lng ?? null,
@@ -500,6 +507,89 @@ const CreateSmallMission = () => {
                   </Drawer>
                   <p className="text-xs text-muted-foreground">Optionnel si la date n'est pas encore fixée.</p>
                 </div>
+
+                {/* Date de fin (optionnelle) */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Date de fin (optionnel)</Label>
+                  <Drawer open={endCalendarOpen} onOpenChange={setEndCalendarOpen}>
+                    <DrawerTrigger asChild>
+                      <button
+                        type="button"
+                        className={cn(
+                          "w-full h-12 flex items-center gap-3 px-4 rounded-xl border border-border bg-background text-left text-base transition-colors hover:border-primary/40",
+                          !endDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        {endDate
+                          ? format(parseISO(endDate), "EEEE d MMMM yyyy", { locale: fr })
+                          : "Jusqu'à quelle date ?"}
+                      </button>
+                    </DrawerTrigger>
+                    <DrawerContent className="max-h-[85vh]">
+                      <DrawerHeader><DrawerTitle>Date de fin</DrawerTitle></DrawerHeader>
+                      <div className="flex flex-col items-center pb-6 px-4 gap-4">
+                        <Calendar
+                          mode="single"
+                          locale={fr}
+                          selected={endDate ? parseISO(endDate) : undefined}
+                          onSelect={(d) => {
+                            setEndDate(d ? format(d, "yyyy-MM-dd") : "");
+                            setEndCalendarOpen(false);
+                          }}
+                          disabled={(d) => d < startOfDay(dateNeeded ? parseISO(dateNeeded) : new Date())}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                        {endDate && (
+                          <Button type="button" variant="ghost" size="sm" className="w-full"
+                            onClick={() => { setEndDate(""); setEndCalendarOpen(false); }}>
+                            Effacer
+                          </Button>
+                        )}
+                        <DrawerClose asChild>
+                          <Button variant="outline" className="w-full h-12">Fermer</Button>
+                        </DrawerClose>
+                      </div>
+                    </DrawerContent>
+                  </Drawer>
+                </div>
+
+                {/* Profil animal, uniquement si catégorie animaux */}
+                {category === "animals" && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 rounded-2xl border border-border p-4 bg-muted/30">
+                    <div className="sm:col-span-2">
+                      <p className="text-sm font-semibold mb-0.5">L'animal concerné</p>
+                      <p className="text-xs text-muted-foreground">Aide les gens à savoir s'ils peuvent proposer leur aide.</p>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium">Espèce</Label>
+                      <Select value={petSpecies} onValueChange={setPetSpecies}>
+                        <SelectTrigger className="h-11"><SelectValue placeholder="Chien, chat…" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="chien">Chien</SelectItem>
+                          <SelectItem value="chat">Chat</SelectItem>
+                          <SelectItem value="rongeur">Rongeur</SelectItem>
+                          <SelectItem value="oiseau">Oiseau</SelectItem>
+                          <SelectItem value="poisson">Poisson</SelectItem>
+                          <SelectItem value="reptile">Reptile</SelectItem>
+                          <SelectItem value="autre">Autre</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium">Taille</Label>
+                      <Select value={petSize} onValueChange={setPetSize}>
+                        <SelectTrigger className="h-11"><SelectValue placeholder="Petit, moyen…" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="petit">Petit</SelectItem>
+                          <SelectItem value="moyen">Moyen</SelectItem>
+                          <SelectItem value="grand">Grand</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
 
                 {/* Durée */}
                 <div className="space-y-2">

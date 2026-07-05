@@ -30,6 +30,10 @@ interface MissionLike {
   exchange_offer?: string | null;
   photos?: string[] | null;
   duration_estimate?: string | null;
+  date_needed?: string | null;
+  end_date?: string | null;
+  pet_species?: string | null;
+  pet_size?: string | null;
 }
 
 interface AuthorLike {
@@ -337,6 +341,31 @@ const PublicMissionView = ({
                       Disponibilité
                     </p>
                     <p className="text-base font-semibold text-foreground">{durationLabel}</p>
+                  </div>
+                )}
+                {(mission.date_needed || mission.end_date) && (
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+                      Période
+                    </p>
+                    <p className="text-base font-semibold text-foreground">
+                      {mission.date_needed
+                        ? new Date(mission.date_needed).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })
+                        : "Dès que possible"}
+                      {mission.end_date
+                        ? ` → ${new Date(mission.end_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}`
+                        : ""}
+                    </p>
+                  </div>
+                )}
+                {mission.category === "animals" && (mission.pet_species || mission.pet_size) && (
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+                      Animal
+                    </p>
+                    <p className="text-base font-semibold text-foreground capitalize">
+                      {[mission.pet_species, mission.pet_size].filter(Boolean).join(" · ")}
+                    </p>
                   </div>
                 )}
                 <div>
