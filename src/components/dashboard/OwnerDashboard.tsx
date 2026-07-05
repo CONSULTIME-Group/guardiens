@@ -38,6 +38,7 @@ import LiveSignalStrip from "./shared/LiveSignalStrip";
 import SectionEyebrow from "./shared/SectionEyebrow";
 import TodoCard, { type TodoItem } from "./owner/TodoCard";
 import PriorityActionCard from "./shared/PriorityActionCard";
+import DraftResumeCard from "./DraftResumeCard";
 import { useOwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
 import ActivationScoreCard from "./owner/ActivationScoreCard";
 import NextActionsList from "./owner/NextActionsList";
