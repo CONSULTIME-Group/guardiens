@@ -117,6 +117,7 @@ export default function PublicSitterProfile() {
   const [ownerDataLoading, setOwnerDataLoading] = useState(true);
   const [missionsPublished, setMissionsPublished] = useState<any[]>([]);
   const [missionsHelped, setMissionsHelped] = useState<any[]>([]);
+  const [thanksReceived, setThanksReceived] = useState<number>(0);
   const [externalExperiences, setExternalExperiences] = useState<any[]>([]);
   const [ownerGalleryPhotos, setOwnerGalleryPhotos] = useState<any[]>([]);
 
