@@ -22,6 +22,11 @@ import NearbyAnnoncesCard from "./sitter/NearbyAnnoncesCard";
 import DashSection from "./owner/DashSection";
 import SitterDashboardSkeleton from "./sitter/SitterDashboardSkeleton";
 import SitterActivityPanel from "./sitter/SitterActivityPanel";
+import SitterFirstNBA from "./SitterFirstNBA";
+import SitterFirstNBASkeleton from "./SitterFirstNBASkeleton";
+import NoNearbySitsEmptyState from "./NoNearbySitsEmptyState";
+import { useIsNewSitter } from "@/hooks/useIsNewUser";
+import { useSitterTopAffinitySits } from "@/hooks/useSitterTopAffinitySits";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { CheckCircle, Circle, ChevronRight, Newspaper, AlertCircle } from "lucide-react";
@@ -52,6 +57,18 @@ const SitterDashboard = () => {
     toggleAvailability,
     reputation, groupedBadges,
   } = useSitterDashboardData(user?.id);
+
+  // NBA nouveau gardien : score d'affinité + fallback empty state.
+  // Le hook est appelé inconditionnellement (règle des hooks). Il ne fetche
+  // que si userId présent (cf. `enabled` du useQuery).
+  const isNewSitter = useIsNewSitter({ totalApps: totalApps ?? 0, completedSits: completedSits ?? 0 });
+  const {
+    topSits,
+    hasMinimumPool,
+    hasPostalCode,
+    totalPublished,
+    isLoading: nbaLoading,
+  } = useSitterTopAffinitySits();
 
   if (loading) return <SitterDashboardSkeleton />;
 
@@ -371,74 +388,103 @@ const SitterDashboard = () => {
           Ordre cockpit : Header + Action prioritaire → KPI strip Mon activité
           → Activation → Opportunités → Profil (accordéon). */}
       <div className="min-w-0">
-        {/* COCKPIT */}
-        <SitterCockpit
-          userId={user?.id}
-          firstName={user?.firstName}
-          avatarUrl={avatarUrl}
-          isFounder={user?.isFounder}
-          isAvailable={isAvailable}
-          onToggleAvailability={toggleAvailability}
-          nextGuard={nextGuard}
-          profileCompletion={profileCompletion}
-          postalCode={postalCode}
-          nearbyListings={nearbyListings}
-          competencesCount={competencesCount}
-          interestsCount={interestsCount}
-        />
-
-        {/* Erreurs de fetch, affichées discrètement sous le cockpit */}
-        {(nextGuardError || nearbyError) && (
-          <div className="px-4 sm:px-5 md:px-8 mt-2 space-y-2">
-            {nextGuardError && (
-              <DashboardSectionState
-                variant="error"
-                eyebrow="Prochaine garde"
-                description={nextGuardError}
-                onRetry={() => window.location.reload()}
+        {isNewSitter ? (
+          <>
+            {/* ═══ New-user path : NBA affinité dominante, pas de cockpit/KPI vides ═══ */}
+            {nbaLoading ? (
+              <SitterFirstNBASkeleton />
+            ) : hasMinimumPool && hasPostalCode ? (
+              <SitterFirstNBA sits={topSits} />
+            ) : (
+              <NoNearbySitsEmptyState
+                totalPublishedSits={totalPublished}
+                postalCode={postalCode}
               />
             )}
-            {nearbyError && (
-              <DashboardSectionState
-                variant="error"
-                eyebrow="Annonces à proximité"
-                description={nearbyError}
-                onRetry={() => window.location.reload()}
-              />
+
+            {/* Bannière accès (garde le contexte tarif/onboarding) */}
+            <div className="px-4 sm:px-5 md:px-8 mt-4">
+              {!(level === 4 || level === "3B")
+                ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+                : <FreePeriodBanner />}
+            </div>
+
+            <div className="mt-6">
+              {ChecklistBlock}
+            </div>
+            <div className="px-4 sm:px-5 md:px-8 mb-6">
+              {buildSecondaryAccordion({ withConseils: true })}
+            </div>
+          </>
+        ) : (
+          <>
+            {/* COCKPIT */}
+            <SitterCockpit
+              userId={user?.id}
+              firstName={user?.firstName}
+              avatarUrl={avatarUrl}
+              isFounder={user?.isFounder}
+              isAvailable={isAvailable}
+              onToggleAvailability={toggleAvailability}
+              nextGuard={nextGuard}
+              profileCompletion={profileCompletion}
+              postalCode={postalCode}
+              nearbyListings={nearbyListings}
+              competencesCount={competencesCount}
+              interestsCount={interestsCount}
+            />
+
+            {(nextGuardError || nearbyError) && (
+              <div className="px-4 sm:px-5 md:px-8 mt-2 space-y-2">
+                {nextGuardError && (
+                  <DashboardSectionState
+                    variant="error"
+                    eyebrow="Prochaine garde"
+                    description={nextGuardError}
+                    onRetry={() => window.location.reload()}
+                  />
+                )}
+                {nearbyError && (
+                  <DashboardSectionState
+                    variant="error"
+                    eyebrow="Annonces à proximité"
+                    description={nearbyError}
+                    onRetry={() => window.location.reload()}
+                  />
+                )}
+              </div>
             )}
-          </div>
+
+            <div className="px-4 sm:px-5 md:px-8 mt-4">
+              <SitterActivityPanel
+                isAvailable={isAvailable}
+                profileCompletion={profileCompletion}
+                nextGuard={nextGuard}
+                unreadCount={unreadCount}
+                pendingAppsCount={pendingAppsCount}
+                nearbyListings={nearbyListings}
+              />
+            </div>
+
+            {!nextGuard && (
+              <div className="px-4 sm:px-5 md:px-8 mt-4">
+                {!(level === 4 || level === "3B")
+                  ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+                  : <FreePeriodBanner />}
+              </div>
+            )}
+
+            <div className="mt-6">
+              {ChecklistBlock}
+            </div>
+            <div className="px-4 sm:px-5 md:px-8 mb-6">
+              {DiscoverySections}
+            </div>
+            <div className="px-4 sm:px-5 md:px-8 mb-6">
+              {buildSecondaryAccordion({ withConseils: true })}
+            </div>
+          </>
         )}
-
-        {/* KPI strip Mon activité, pleine largeur, juste sous l'action prioritaire */}
-        <div className="px-4 sm:px-5 md:px-8 mt-4">
-          <SitterActivityPanel
-            isAvailable={isAvailable}
-            profileCompletion={profileCompletion}
-            nextGuard={nextGuard}
-            unreadCount={unreadCount}
-            pendingAppsCount={pendingAppsCount}
-            nearbyListings={nearbyListings}
-          />
-        </div>
-
-        {/* Bannière contextuelle, une seule */}
-        {!nextGuard && (
-          <div className="px-4 sm:px-5 md:px-8 mt-4">
-            {!(level === 4 || level === "3B")
-              ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
-              : <FreePeriodBanner />}
-          </div>
-        )}
-
-        <div className="mt-6">
-          {ChecklistBlock}
-        </div>
-        <div className="px-4 sm:px-5 md:px-8 mb-6">
-          {DiscoverySections}
-        </div>
-        <div className="px-4 sm:px-5 md:px-8 mb-6">
-          {buildSecondaryAccordion({ withConseils: true })}
-        </div>
       </div>
 
 
