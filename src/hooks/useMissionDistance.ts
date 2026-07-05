@@ -197,6 +197,11 @@ export function useMissionDistance(missions: MissionLike[]) {
     [distanceMap],
   );
 
+  const hasDistance = useCallback(
+    (id: string): boolean => distanceMap.has(id),
+    [distanceMap],
+  );
+
   return useMemo(
     () => ({
       postal,
@@ -206,10 +211,12 @@ export function useMissionDistance(missions: MissionLike[]) {
       origin,
       active,
       resolving,
+      computing,
       getDistance,
+      hasDistance,
       useMyLocation,
       isValidPostal: isValidFrPostal(postal),
     }),
-    [postal, setPostal, radius, setRadius, origin, active, resolving, getDistance, useMyLocation],
+    [postal, setPostal, radius, setRadius, origin, active, resolving, computing, getDistance, hasDistance, useMyLocation],
   );
 }
