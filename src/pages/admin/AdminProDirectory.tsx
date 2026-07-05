@@ -88,6 +88,31 @@ export default function AdminProDirectory() {
     load(tab);
   };
 
+  const toggleVerified = async (row: ProRow) => {
+    const next = !row.siret_verified;
+    const { data: userData } = await supabase.auth.getUser();
+    const adminId = userData.user?.id ?? null;
+    const { error } = await supabase
+      .from("pro_profiles")
+      .update({
+        siret_verified: next,
+        siret_verified_by: next ? adminId : null,
+      } as any)
+      .eq("id", row.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    void trackEvent("pro_admin_verification_toggled", {
+      metadata: { pro_id: row.id, verified: next, admin_id: adminId },
+    });
+    toast.success(next ? "SIRET marqué comme vérifié" : "Vérification SIRET retirée");
+    load(tab);
+  };
+
+  const verifiedCount = rows.filter((r) => r.siret_verified).length;
+  const standardCount = rows.length - verifiedCount;
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-6xl min-w-0">
       <AdminPageHeader
