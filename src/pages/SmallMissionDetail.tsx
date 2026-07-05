@@ -896,7 +896,7 @@ const SmallMissionDetail = () => {
   return (
     <div className="min-h-screen bg-background text-foreground animate-fade-in">
       <PageMeta
-        title={`${mission.title} · Coup de main à ${cityLabel}`}
+        title={`${displayTitle} · Coup de main à ${cityLabel}`}
         description={(() => {
           const raw = mission.description?.trim();
           if (raw && raw.length >= 60) return raw.slice(0, 155);
@@ -915,7 +915,7 @@ const SmallMissionDetail = () => {
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Service",
-          name: mission.title,
+          name: displayTitle,
           description: mission.description?.slice(0, 300),
           areaServed: cityLabel,
           serviceType: catMeta.label,
