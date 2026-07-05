@@ -69,7 +69,6 @@ export type EventType =
   | "checklist_item_completed"        // Item checklist coché (item_name, order)
   | "checklist_all_completed"         // Checklist finalisée (user_role, time_seconds_since_signup)
   | "sitter_no_nearby_sit_shown"      // Empty state annonces (radius_km, alert_subscribed)
-  | "sitter_no_nearby_sit_shown"      // Empty state annonces (radius_km, alert_subscribed)
   | "owner_alert_subscribed"          // Owner s'abonne aux alertes (type)
   // Chantier 4 Casse A : reprise brouillon annonce -----------------------------
   | "dashboard_draft_card_seen"         // Impression de la carte "annonce en cours" (sit_id)
