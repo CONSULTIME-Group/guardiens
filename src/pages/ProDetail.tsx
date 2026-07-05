@@ -225,8 +225,14 @@ export default function ProDetail() {
               {pro.google_place_id && (
                 <GoogleRatingInline proId={pro.id} placeId={pro.google_place_id} />
               )}
+              {pro.siret_verified && (
+                <ProVerifiedBadge
+                  verifiedAt={(pro as any).siret_verified_at}
+                  proId={pro.id}
+                  surface="detail"
+                />
+              )}
               {pro.urgences_24_7 && <Badge variant="secondary">Urgences 24/7</Badge>}
-              {pro.siret_verified && <Badge variant="secondary">SIRET vérifié</Badge>}
             </div>
             <ProContactCTA
               phone={pro.phone}
