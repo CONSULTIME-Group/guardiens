@@ -576,24 +576,28 @@ const EntraideHub = () => {
                       </button>
                     )}
                   </div>
-                  <div className="-mx-3 px-3 sm:mx-0 sm:px-0 overflow-x-auto">
-                    <div className="flex gap-2 w-max sm:w-auto sm:flex-wrap">
-                      {MISSION_CATEGORIES.map((c) => (
-                        <button
-                          key={c}
-                          type="button"
-                          onClick={() => setMCategory(c)}
-                          aria-pressed={mCategory === c}
-                          className={`shrink-0 px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
-                            mCategory === c
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : "bg-card text-muted-foreground border-border hover:bg-accent"
-                          }`}
-                        >
-                          {c === "all" ? "Toutes catégories" : MISSION_CATEGORY_LABEL[c]}
-                        </button>
-                      ))}
+                  <div className="relative -mx-3 sm:mx-0">
+                    <div className="px-3 sm:px-0 overflow-x-auto scrollbar-none">
+                      <div className="flex gap-2 w-max sm:w-auto sm:flex-wrap">
+                        {MISSION_CATEGORIES.map((c) => (
+                          <button
+                            key={c}
+                            type="button"
+                            onClick={() => setMCategory(c)}
+                            aria-pressed={mCategory === c}
+                            className={`shrink-0 px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
+                              mCategory === c
+                                ? "bg-primary text-primary-foreground border-primary"
+                                : "bg-card text-muted-foreground border-border hover:bg-accent"
+                            }`}
+                          >
+                            {c === "all" ? "Toutes catégories" : MISSION_CATEGORY_LABEL[c]}
+                          </button>
+                        ))}
+                      </div>
                     </div>
+                    {/* Fade edges mobile pour indiquer le scroll horizontal */}
+                    <div className="sm:hidden pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-card/80 to-transparent rounded-r-2xl" aria-hidden="true" />
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <Select value={mStatus} onValueChange={(v) => setMStatus(v as MissionStatus)}>
