@@ -338,9 +338,10 @@ const CreateSmallMission = () => {
                     maxLength={120}
                     className="h-12 text-base"
                   />
-                  {titleTouched && title.trim().length < 3 && (
+                  {titleTouched && title.trim().length < MIN_TITLE_LEN && (
                     <p className="text-xs text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3 shrink-0" /> Au moins 3 caractères requis.
+                      <AlertCircle className="h-3 w-3 shrink-0" />
+                      Titre trop court ({title.trim().length}/{MIN_TITLE_LEN} caractères). Ex&nbsp;: « Garder mon chien pendant le week-end ».
                     </p>
                   )}
                 </div>
@@ -354,15 +355,27 @@ const CreateSmallMission = () => {
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     onBlur={() => setDescTouched(true)}
-                    placeholder={missionType === "offre" ? tp("desc_ph_offer") : tp("desc_ph_need")}
-                    rows={4}
+                    placeholder={
+                      missionType === "offre"
+                        ? tp("desc_ph_offer")
+                        : "Précisez l'animal (espèce, taille, âge), les dates approximatives et ce que vous attendez concrètement (promenade, gamelle, jeu…). Plus c'est clair, plus vite vous aurez des propositions."
+                    }
+                    rows={5}
                     className="text-base resize-none"
                   />
-                  {descTouched && description.trim().length < 10 && (
-                    <p className="text-xs text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3 shrink-0" /> Description trop courte.
-                    </p>
-                  )}
+                  <div className="flex items-center justify-between text-xs">
+                    {descTouched && description.trim().length < MIN_DESC_LEN ? (
+                      <p className="text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3 shrink-0" />
+                        Description trop courte, décrivez le contexte pour rassurer.
+                      </p>
+                    ) : (
+                      <span className="text-muted-foreground">Minimum {MIN_DESC_LEN} caractères.</span>
+                    )}
+                    <span className={cn("tabular-nums", description.trim().length >= MIN_DESC_LEN ? "text-muted-foreground" : "text-destructive")}>
+                      {description.trim().length}/{MIN_DESC_LEN}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Échange proposé */}
