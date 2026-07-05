@@ -15,7 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { hasMedication } from "@/lib/medication";
-import { trackFirstAction } from "@/lib/analytics";
+import { trackFirstAction, trackEvent } from "@/lib/analytics";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { COUNTRIES } from "@/lib/countries";
 import ImproveListingButton from "@/components/ai/ImproveListingButton";
