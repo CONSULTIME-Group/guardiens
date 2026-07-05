@@ -288,6 +288,16 @@ const CreateSit = () => {
         let draftRes: { data: any } | null = null;
         if (draftIdParam) {
           draftRes = await supabase.from("sits").select("*").eq("id", draftIdParam).eq("user_id", user.id).eq("status", "draft").maybeSingle();
+          if (!draftRes?.data) {
+            // ?resume= explicite mais brouillon inexistant ou pas au user : on redirige proprement.
+            toast({
+              variant: "destructive",
+              title: "Brouillon introuvable",
+              description: "Ce brouillon n'existe pas ou ne vous appartient pas.",
+            });
+            navigate("/dashboard");
+            return;
+          }
         } else {
           draftRes = await supabase.from("sits").select("*").eq("user_id", user.id).eq("status", "draft").order("created_at", { ascending: false }).limit(1).maybeSingle();
         }
@@ -309,6 +319,15 @@ const CreateSit = () => {
           setCoverPhotoUrl(d.cover_photo_url || null);
           setSitCity((d as any).city || "");
           setSitCountry((d as any).country || "FR");
+          if (draftIdParam) {
+            const days = d.created_at
+              ? Math.round((Date.now() - new Date(d.created_at).getTime()) / 86_400_000)
+              : null;
+            void trackEvent("sit_draft_resumed", {
+              source: "create_sit_page",
+              metadata: { sit_id: d.id, days_since_created: days },
+            });
+          }
         }
       }
 
