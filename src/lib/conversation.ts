@@ -45,7 +45,6 @@ export async function startConversation(
       p_context_type: opts.context,
       p_sit_id: opts.sitId ?? null,
       p_small_mission_id: opts.smallMissionId ?? null,
-      p_long_stay_id: null,
     });
 
     if (error) {

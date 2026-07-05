@@ -300,8 +300,6 @@ const AppRoutes = () => (
       <Route path="/questions" element={<Navigate to="/petites-missions?tab=questions" replace />} />
       <Route path="/questions/nouvelle" element={<ProtectedRoute><AppLayout><QuestionCreate /></AppLayout></ProtectedRoute>} />
       <Route path="/questions/:id" element={<AppLayout><QuestionDetail /></AppLayout>} />
-      {/* Legacy: garde longue durée supprimée — redirige vers la home publique */}
-      <Route path="/long-stays/:id" element={<Navigate to="/" replace />} />
       <Route path="/actualites/gardes-longue-duree-guide" element={<Navigate to="/actualites" replace />} />
       <Route path="/profil/:id" element={<RedirectProfil />} />
       <Route path="/proprietaires/:id" element={<RedirectProprietaire />} />
