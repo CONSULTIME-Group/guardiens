@@ -259,6 +259,19 @@ const AdminMassEmails = () => {
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold text-foreground">Envois groupés</h1>
 
+      <div className="flex flex-wrap gap-2">
+        {CAMPAIGN_PRESETS.map((p) => (
+          <Button
+            key={p.key}
+            variant={activePreset === p.key ? "default" : "outline"}
+            size="sm"
+            onClick={() => applyPreset(p.key)}
+          >
+            {p.label}
+          </Button>
+        ))}
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left column */}
         <div className="lg:col-span-2 space-y-6">
