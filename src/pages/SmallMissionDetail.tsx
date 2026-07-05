@@ -590,7 +590,7 @@ const SmallMissionDetail = () => {
           <div className="h-4 w-48 bg-muted rounded mb-6" />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
             <div className="lg:col-span-8 space-y-6">
-              <div className="h-64 md:h-80 bg-muted rounded-[2rem]" />
+              <div className="h-64 md:h-80 bg-muted rounded-2xl" />
               <div className="h-8 w-3/4 bg-muted rounded" />
               <div className="h-4 w-1/2 bg-muted rounded" />
               <div className="space-y-2">
@@ -600,8 +600,8 @@ const SmallMissionDetail = () => {
               </div>
             </div>
             <div className="lg:col-span-4 space-y-6">
-              <div className="h-72 bg-muted rounded-[2rem]" />
-              <div className="h-48 bg-muted rounded-[2rem]" />
+              <div className="h-72 bg-muted rounded-2xl" />
+              <div className="h-48 bg-muted rounded-2xl" />
             </div>
           </div>
         </div>
@@ -678,7 +678,7 @@ const SmallMissionDetail = () => {
     // Author : récap propositions
     if (isAuthor) {
       return (
-        <div className="bg-card p-7 rounded-[2rem] shadow-xl shadow-foreground/5 border border-border space-y-5">
+        <div className="bg-card p-7 rounded-2xl shadow-sm border border-border space-y-5">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Votre annonce</p>
             <span className={`inline-flex items-center gap-2 text-sm font-medium ${mission.status === "open" ? "text-success" : "text-muted-foreground"}`}>
@@ -719,7 +719,7 @@ const SmallMissionDetail = () => {
     if (myResponse) {
       if (myResponse.status === "accepted" && mission.status === "in_progress") {
         return (
-          <div className="bg-card p-7 rounded-[2rem] shadow-xl shadow-foreground/5 border border-success-border space-y-4">
+          <div className="bg-card p-7 rounded-2xl shadow-sm border border-success-border space-y-4">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-success" />
               <p className="font-heading text-lg font-semibold text-success">Proposition acceptée</p>
@@ -735,7 +735,7 @@ const SmallMissionDetail = () => {
       }
       if (myResponse.status === "pending") {
         return (
-          <div className="bg-card p-7 rounded-[2rem] shadow-xl shadow-foreground/5 border border-border space-y-3">
+          <div className="bg-card p-7 rounded-2xl shadow-sm border border-border space-y-3">
             <div className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-info" />
               <p className="font-heading text-lg font-semibold">Proposition envoyée</p>
@@ -770,7 +770,7 @@ const SmallMissionDetail = () => {
       }
       if (myResponse.status === "declined") {
         return (
-          <div className="bg-card p-7 rounded-[2rem] shadow-sm border border-border space-y-3">
+          <div className="bg-card p-7 rounded-2xl shadow-sm border border-border space-y-3">
             <div className="flex items-center gap-2">
               <XCircle className="h-5 w-5 text-muted-foreground" />
               <p className="font-heading text-lg font-semibold text-muted-foreground">Non retenu(e)</p>
@@ -790,7 +790,7 @@ const SmallMissionDetail = () => {
     // Visiteur connecté, gate (profil incomplet)
     if (mission.status === "open" && accessLevel === 1) {
       return (
-        <div className="bg-card p-7 rounded-[2rem] shadow-xl shadow-foreground/5 border border-border">
+        <div className="bg-card p-7 rounded-2xl shadow-sm border border-border">
           <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="mission" />
         </div>
       );
@@ -826,7 +826,7 @@ const SmallMissionDetail = () => {
         : `Dites bonjour à ${author?.first_name || "l'auteur"}, présentez-vous en deux mots.`;
 
       return (
-        <div className="bg-card p-7 rounded-[2rem] shadow-xl shadow-foreground/5 border border-border space-y-5">
+        <div className="bg-card p-7 rounded-2xl shadow-sm border border-border space-y-5">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{eyebrow}</p>
             <p className="font-heading text-xl font-bold text-foreground leading-tight">
@@ -882,7 +882,7 @@ const SmallMissionDetail = () => {
 
     // Mission fermée / autres cas, état neutre
     return (
-      <div className="bg-card p-7 rounded-[2rem] shadow-sm border border-border space-y-3">
+      <div className="bg-card p-7 rounded-2xl shadow-sm border border-border space-y-3">
         <p className="font-heading text-lg font-semibold">{statusMeta.label}</p>
         <p className="text-sm text-muted-foreground leading-relaxed">
           {mission.status === "in_progress" && "Cette mission est en cours d'organisation."}
@@ -1052,7 +1052,7 @@ const SmallMissionDetail = () => {
             {/* Image principale : uniquement si photo réelle. Pas de fallback
                 générique qui rendrait toutes les annonces identiques. */}
             {heroImage && (
-              <div className="mb-7 md:mb-12 rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
+              <div className="mb-7 md:mb-12 rounded-2xl overflow-hidden shadow-sm bg-muted">
                 <img
                   src={heroImage}
                   alt={displayTitle}
@@ -1158,7 +1158,7 @@ const SmallMissionDetail = () => {
             {renderSidebarCard()}
 
             {/* Localisation approximative */}
-            <div className="bg-card rounded-[2rem] overflow-hidden shadow-sm border border-border">
+            <div className="bg-card rounded-2xl overflow-hidden shadow-sm border border-border">
               <ApproximateLocationMap
                 city={mission.city}
                 postalCode={mission.postal_code}
