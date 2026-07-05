@@ -322,11 +322,11 @@ const SmallMissionDetail = () => {
         .single();
       if (!fresh) throw new Error("Mission introuvable.");
       if (fresh.status !== "open") {
-        toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de propositions." });
+        toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de réponses." });
         return;
       }
       if (fresh.user_id === user.id) {
-        toast({ variant: "destructive", title: "Action impossible", description: "Vous ne pouvez pas postuler à votre propre mission." });
+        toast({ variant: "destructive", title: "Action impossible", description: "Vous ne pouvez pas répondre à votre propre annonce." });
         return;
       }
 
@@ -362,12 +362,12 @@ const SmallMissionDetail = () => {
 
         setHasResponded(true);
         setMessage("");
-        toast({ title: "Proposition envoyée !", description: "La personne qui demande va être prévenue." });
+        toast({ title: "Réponse publiée !", description: "La personne qui demande va être prévenue." });
         load();
       }
     } catch (err: any) {
       logger.error("[handleRespond]", { err: String(err) });
-      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible d'envoyer votre proposition." });
+      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible de publier votre réponse." });
     } finally {
       setSubmitting(false);
     }
@@ -384,7 +384,7 @@ const SmallMissionDetail = () => {
         .from("small_missions").select("status").eq("id", id!).single();
       if (!freshMission) throw new Error("Mission introuvable");
       if (freshMission.status === "cancelled" || freshMission.status === "completed") {
-        toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de propositions." });
+        toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de réponses." });
         return;
       }
 
@@ -427,14 +427,14 @@ const SmallMissionDetail = () => {
         await supabase.from("messages").insert({
           conversation_id: convId,
           sender_id: user!.id,
-          content: `Proposition acceptée pour « ${mission.title} ». Vous pouvez maintenant échanger pour organiser l'entraide.`,
+          content: `Personne retenue pour « ${mission.title} ». Vous pouvez maintenant échanger pour organiser l'entraide.`,
           is_system: true,
         });
       }
 
       await supabase.from("notifications").insert({
         user_id: resp.responder_id, type: "mission_accepted",
-        title: "Proposition acceptée",
+        title: "Personne retenue",
         body: `Votre proposition pour "${mission.title}" a été acceptée. Vous pouvez maintenant échanger par messagerie.`,
         link: convId ? `/messages?c=${convId}` : `/messages`,
       });
@@ -450,10 +450,10 @@ const SmallMissionDetail = () => {
         },
       }).catch(() => {});
 
-      toast({ title: "Proposition acceptée !" });
+      toast({ title: "Vous avez retenu cette personne !" });
     } catch (err: any) {
       logger.error("[handleAcceptResponse]", { err: String(err) });
-      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible d'accepter cette proposition." });
+      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible de retenir cette personne." });
       // Rollback optimistic UI
       setResponses(prev => prev.map(r => r.id === responseId ? { ...r, status: "pending" } : r));
     } finally {
@@ -474,7 +474,7 @@ const SmallMissionDetail = () => {
 
       await supabase.from("notifications").insert({
         user_id: resp.responder_id, type: "mission_declined",
-        title: "Proposition non retenue",
+        title: "Non retenu(e) cette fois",
         body: `Quelqu'un d'autre a été choisi pour "${mission.title}". Merci pour votre proposition.`,
       });
 
@@ -723,7 +723,7 @@ const SmallMissionDetail = () => {
           <div className="bg-card p-5 rounded-2xl shadow-sm border border-success-border space-y-4">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-success" />
-              <p className="font-heading text-lg font-semibold text-success">Proposition acceptée</p>
+              <p className="font-heading text-lg font-semibold text-success">Personne retenue</p>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {author?.first_name || "L'auteur"} vous a choisi(e). Organisez la suite en direct.
@@ -739,7 +739,7 @@ const SmallMissionDetail = () => {
           <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-3">
             <div className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-info" />
-              <p className="font-heading text-lg font-semibold">Proposition envoyée</p>
+              <p className="font-heading text-lg font-semibold">Réponse publiée</p>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {author?.first_name || "L'auteur"} a reçu votre mot. Vous serez prévenu(e) dès qu'il y a une réponse.
@@ -750,7 +750,7 @@ const SmallMissionDetail = () => {
               size="sm"
               className="w-full rounded-full"
               onClick={async () => {
-                if (!confirm("Retirer votre proposition ?")) return;
+                if (!confirm("Retirer votre réponse ?")) return;
                 const { error } = await supabase
                   .from("small_mission_responses")
                   .delete()
@@ -761,10 +761,10 @@ const SmallMissionDetail = () => {
                 }
                 setHasResponded(false);
                 setResponses(prev => prev.filter(r => r.id !== myResponse.id));
-                toast({ title: "Proposition retirée" });
+                toast({ title: "Réponse retirée" });
               }}
             >
-              Retirer ma proposition
+              Retirer ma réponse
             </Button>
           </div>
         );
@@ -818,7 +818,7 @@ const SmallMissionDetail = () => {
       const heading = isOffer
         ? `Répondez à ${author?.first_name || "l'auteur"}`
         : `Écrivez un mot à ${author?.first_name || "l'auteur"}`;
-      const ctaLabel = isOffer ? "Envoyer ma demande" : "Envoyer ma proposition";
+      const ctaLabel = isOffer ? "Envoyer ma demande" : "Publier ma réponse";
       const chipLabels = isOffer
         ? ["Ça m'intéresse", "Vos dispos ?", "On en discute"]
         : ["Je suis dispo", "Ça me parle", "Selon vous"];
