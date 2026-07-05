@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { Share2, CheckCircle2, ShieldCheck, Eye, Users, Dog, Flower2, Home as HomeIcon, Sparkles } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
