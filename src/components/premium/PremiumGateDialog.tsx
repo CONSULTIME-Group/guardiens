@@ -37,7 +37,6 @@ const PremiumGateDialog = ({ open, onClose, featureName }: PremiumGateDialogProp
             onClick={() => {
               trackCtaClick("premium_gate_activate", "premium_gate_dialog", {
                 feature: featureName,
-                free_now: freeNow,
               });
               onClose();
               navigate("/mon-abonnement");
