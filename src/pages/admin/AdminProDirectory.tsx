@@ -6,10 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { getCategoryByValue } from "@/lib/proCategories";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
+import { trackEvent } from "@/lib/analytics";
+import { ShieldCheck } from "lucide-react";
 
 type ProRow = {
   id: string;
