@@ -675,7 +675,7 @@ const EntraideHub = () => {
                                   </span>
                                 )}
                                 {dateLabel && <span>Pour le {dateLabel}</span>}
-                                {m.duration_estimate && <span>{m.duration_estimate}</span>}
+                                {m.duration_estimate && <span>{DURATION_LABEL[m.duration_estimate] || m.duration_estimate}</span>}
                                 <span className="ml-auto">{formatRelative(m.created_at)}</span>
                               </div>
                               </div>
