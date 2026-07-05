@@ -193,20 +193,7 @@ const Register = () => {
  return;
  }
 
-  if (!acceptedTerms) {
-    setFormError(t("register_page.error_terms"));
-    setTermsHighlighted(true);
-    setTimeout(() => {
-      document.getElementById("accept-terms")?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 50);
-    try {
-      trackEvent("signup_form_blocked", {
-        source: "/inscription",
-        metadata: { reason: "terms_unchecked", role: selectedRole },
-      });
-    } catch {}
-    return;
-  }
+  // NB: CGU acceptance is validated at step 1 before reaching step 2 — no re-check here.
 
  try {
  trackEvent("signup_form_submitted", {
@@ -282,6 +269,10 @@ const Register = () => {
  setStep("confirmation");
  } catch (error: any) {
  const rawMessage = error?.message || "unknown";
+ // Toujours logger le brut pour diagnostiquer les catch-all silencieux
+ // eslint-disable-next-line no-console
+ console.error("signup_failed_raw", { message: rawMessage, code: error?.code, status: error?.status, name: error?.name });
+ try { logger.error("signup_failed_raw", { message: rawMessage, code: error?.code, status: error?.status }); } catch {}
  try {
  trackEvent("signup_failed", {
  source: "/inscription",
@@ -299,18 +290,9 @@ const Register = () => {
  const info = mapAuthError(error);
  if (info.code === "user_already_exists") {
  setExistingAccountOpen(true);
- } else if (
- info.code === "weak_password" ||
- info.code === "invalid_email" ||
- info.code === "rate_limited"
- ) {
- setFormError(`${info.title}. ${info.description ?? ""}`.trim());
  } else {
- toast({
- variant: "destructive",
- title: info.title,
- description: info.description,
- });
+ // Toujours persistant, jamais toast éphémère : l'utilisateur doit pouvoir relire.
+ setFormError(`${info.title}. ${info.description ?? ""}`.trim());
  }
  }
  } finally {
