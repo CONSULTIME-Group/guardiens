@@ -688,7 +688,7 @@ const SmallMissionDetail = () => {
           </div>
           <div className="grid grid-cols-2 gap-3 pt-1">
             <div className="bg-muted/50 rounded-2xl p-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Propositions</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Réponses</p>
               <p className="font-heading text-3xl font-bold text-foreground leading-none">{responses.length}</p>
             </div>
             <div className="bg-muted/50 rounded-2xl p-4">
@@ -697,8 +697,8 @@ const SmallMissionDetail = () => {
             </div>
           </div>
           {(mission.status === "open" || mission.status === "in_progress") && responses.length > 0 && (
-            <a href="#propositions" className="block">
-              <Button className="w-full rounded-full" size="lg">Voir les propositions</Button>
+            <a href="#reponses" className="block">
+              <Button className="w-full rounded-full" size="lg">Voir les réponses</Button>
             </a>
           )}
           {mission.status === "in_progress" && (
