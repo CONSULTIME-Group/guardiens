@@ -34,7 +34,7 @@ interface MassEmail {
   status: string;
 }
 
-// Campagne "Oser demander", pré-remplie pour faciliter l'envoi en 1 clic.
+// Campagnes prédéfinies
 const OSER_SUBJECT = "Et si vous osiez demander, vous aussi ?";
 const OSER_BODY = `Bonjour,
 
@@ -56,6 +56,72 @@ Et si c'était aujourd'hui ?
 
 À très vite,
 L'équipe Guardiens.`;
+
+const ENTRAIDE_SUBJECT = "L'entraide entre gardiens, c'est ici et c'est gratuit";
+const ENTRAIDE_BODY = `Bonjour,
+
+Vous avez une question sur l'éducation de votre animal ? Un doute sur une santé passagère ? Besoin d'un conseil pour un voyage, un déménagement, ou simplement un coup de main pour un arrosage de plantes ?
+
+L'espace Conseil et coup de main est fait pour cela.
+
+Ce n'est pas réservé aux experts : c'est la communauté qui répond, et parfois des professionnels du monde animal aussi. Parmi les personnes inscrites, il y a déjà des soigneurs, des éducateurs, des comportementalistes et d'autres passionnés qui partagent leur expérience librement.
+
+Et ce n'est qu'un début. Petit à petit, nous allons intégrer davantage de professionnels : toiletteurs, vétérinaires, soigneurs, éducateurs, comportementalistes. Ils pourront répondre aux questions de la communauté et vous pourrez aussi les contacter directement via leur espace professionnel.
+
+L'essentiel reste le même : poser une question, échanger, recevoir de l'aide. C'est simple, c'est humain, et c'est gratuit.
+
+Cet espace est gratuit. Il le restera toujours. C'est l'essence même du site : l'entraide et le réseau entre gens qui aiment les animaux.
+
+N'hésitez pas : une question est souvent le début d'une belle rencontre.
+
+À très vite,
+L'équipe Guardiens`;
+
+interface CampaignPreset {
+  key: string;
+  label: string;
+  segment: Segment;
+  filters: MassEmailFilters;
+  subject: string;
+  body: string;
+  ctaEnabled: boolean;
+  ctaLabel: string;
+  ctaUrl: string;
+  utmEnabled: boolean;
+  utmCampaign: string;
+  utmContent: string;
+}
+
+const CAMPAIGN_PRESETS: CampaignPreset[] = [
+  {
+    key: "oser",
+    label: "Oser demander",
+    segment: "tous",
+    filters: {},
+    subject: OSER_SUBJECT,
+    body: OSER_BODY,
+    ctaEnabled: true,
+    ctaLabel: "Publier une mission",
+    ctaUrl: "https://guardiens.fr/entraide/nouvelle",
+    utmEnabled: true,
+    utmCampaign: "oser-2026-05",
+    utmContent: "cta",
+  },
+  {
+    key: "entraide",
+    label: "Entraide gratuite",
+    segment: "tous",
+    filters: { respect_product_optout: true },
+    subject: ENTRAIDE_SUBJECT,
+    body: ENTRAIDE_BODY,
+    ctaEnabled: true,
+    ctaLabel: "Poser ma question",
+    ctaUrl: "https://guardiens.fr/petites-missions/creer?type=besoin",
+    utmEnabled: true,
+    utmCampaign: "entraide-gratuite-2025-07",
+    utmContent: "cta",
+  },
+];
 
 const AdminMassEmails = () => {
   // Form state, pré-rempli avec la campagne "Oser demander"
