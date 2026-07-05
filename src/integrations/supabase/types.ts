@@ -5359,6 +5359,7 @@ export type Database = {
       }
     }
     Functions: {
+      accept_application: { Args: { p_application_id: string }; Returns: Json }
       accept_garde_accord: {
         Args: {
           p_document_content: Json
