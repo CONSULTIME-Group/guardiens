@@ -123,15 +123,7 @@ const ActivateRoleDialog = ({ open, onClose, targetRole }: ActivateRoleDialogPro
             Envie de garder des maisons aussi ?
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground text-center">
-            {freeNow ? (
-              <>
-                L'espace gardien est <strong>à 0 € pour tous jusqu'au {lastFreeDay}</strong>. Activez-le sans frais, sans engagement, l'abonnement (6,99&nbsp;€/mois) ne s'appliquera qu'ensuite, et vous pourrez vous désabonner à tout moment.
-              </>
-            ) : (
-              <>
-                L'abonnement gardien est à 6,99&nbsp;€/mois, sans engagement, résiliable à tout moment depuis vos paramètres.
-              </>
-            )}
+            L'espace gardien est <strong>gratuit aujourd'hui, sans engagement</strong>. Vous serez prévenu à l'avance en cas d'évolution tarifaire.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2 pt-2">

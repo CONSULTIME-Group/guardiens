@@ -62,7 +62,7 @@ const ANNECY_FAQ = [
  },
  {
  q: "Combien coûte une garde de maison à Annecy ?",
- a: "Pour les propriétaires, Guardiens est gratuit : aucun frais, aucune commission. Les gardiens accèdent à la plateforme via un abonnement modeste (6,99 €/mois), et tous les gardiens sont gratuits jusqu'au 30 septembre 2026.",
+ a: "Pour les propriétaires, Guardiens est gratuit : aucun frais, aucune commission. L'accès gardien est également gratuit aujourd'hui, sans engagement.",
  },
  {
  q: "Combien de temps à l'avance publier mon annonce pour les vacances d'été ?",
@@ -93,7 +93,7 @@ const GRENOBLE_FAQ = [
  },
  {
  q: "À combien revient une garde de chien à Grenoble ?",
- a: "Pour les propriétaires, c'est gratuit : aucun frais ni commission sur la plateforme. Les gardiens souscrivent un abonnement à 6,99 €/mois et sont gratuits jusqu'au 30 septembre 2026.",
+ a: "Pour les propriétaires, c'est gratuit : aucun frais ni commission sur la plateforme. L'accès gardien est également gratuit aujourd'hui, sans engagement.",
  },
 ];
 
@@ -116,7 +116,7 @@ const CHAMBERY_FAQ = [
  },
  {
  q: "Combien coûte Guardiens à Chambéry ?",
- a: "Pour les propriétaires, c'est entièrement gratuit. Les gardiens accèdent à la plateforme via un abonnement à 6,99 €/mois, 65 €/an, ou 10 € pour un mois en oneshot, et tous les gardiens sont gratuits jusqu'au 30 septembre 2026.",
+ a: "Pour les propriétaires, c'est entièrement gratuit. L'accès gardien est également gratuit aujourd'hui, sans engagement.",
  },
 ];
 
@@ -127,7 +127,7 @@ const DEFAULT_FAQ = (cityName: string) => [
  },
  {
  q: `Est-ce vraiment gratuit pour les propriétaires à ${cityName} ?`,
- a: "Oui. Guardiens est gratuit pour tous les propriétaires : aucun frais, aucune commission. Seuls les gardiens souscrivent un abonnement (6,99 €/mois) pour accéder aux annonces et postuler.",
+ a: "Oui. Guardiens est gratuit pour tous les propriétaires : aucun frais, aucune commission. L'accès gardien est également gratuit aujourd'hui, sans engagement.",
  },
  {
  q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityName} ?`,
@@ -172,7 +172,7 @@ const CitySchemaOrg = ({ city }: Props) => {
  price: "0",
  priceCurrency: "EUR",
  eligibleCustomerType: "Owner",
- description: "À 0 € pour les propriétaires, sans abonnement requis.",
+ description: "Gratuit pour les propriétaires, sans abonnement requis.",
  },
  },
  {

@@ -478,7 +478,7 @@ const Landing = () => {
                     name: "Faut-il payer pour s'inscrire en tant que propriétaire ?",
                     acceptedAnswer: {
                       "@type": "Answer",
-                      text: "L'inscription, la publication d'annonces et les échanges avec les gardiens sont sans abonnement requis pour les propriétaires. Aucune carte bancaire demandée. Les gardiens bénéficient d'un accès sans abonnement jusqu'au 30 septembre 2026, puis l'abonnement est à 6,99 €/mois. L'entraide entre gens du coin reste sans abonnement pour tous.",
+                      text: "L'inscription, la publication d'annonces et les échanges avec les gardiens sont sans abonnement requis pour les propriétaires. Aucune carte bancaire demandée. Les gardiens bénéficient également d'un accès gratuit aujourd'hui, sans engagement. L'entraide entre gens du coin reste sans abonnement pour tous.",
                     },
                   },
                   {

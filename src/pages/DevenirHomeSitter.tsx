@@ -216,7 +216,7 @@ export default function DevenirHomeSitter() {
               </h2>
               <p className="text-muted-foreground m-0">
                 Créez votre profil gratuitement et candidatez aux gardes près
-                de chez vous. Service gardien gratuit jusqu'au 30 septembre 2026.
+                de chez vous. Accès gardien gratuit aujourd'hui, sans engagement.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button asChild>

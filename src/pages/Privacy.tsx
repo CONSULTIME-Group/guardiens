@@ -254,7 +254,7 @@ const Privacy = () => {
           {/* 12 */}
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">12. Analyse d'impact relative à la protection des données (AIPD)</h2>
           <p>
-            Compte tenu de la nature de certains traitements (vérification d'identité, géolocalisation, communications entre membres), une <strong className="text-foreground">analyse d'impact relative à la protection des données</strong> (AIPD) sera réalisée conformément à l'article 35 du RGPD avant le 1er octobre 2026, date du passage payant. Cette analyse est mise à jour à chaque évolution majeure du service.
+            Compte tenu de la nature de certains traitements (vérification d'identité, géolocalisation, communications entre membres), une <strong className="text-foreground">analyse d'impact relative à la protection des données</strong> (AIPD) sera réalisée conformément à l'article 35 du RGPD préalablement à toute évolution du modèle économique. Cette analyse est mise à jour à chaque évolution majeure du service.
           </p>
 
           {/* 13 */}

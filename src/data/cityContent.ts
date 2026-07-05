@@ -249,7 +249,7 @@ Tous passent par le même processus de vérification : identité contrôlée, pr
 
 C'est cette expérience de terrain qui structure aujourd'hui la plateforme : la rencontre physique obligatoire avant chaque garde, le guide de la maison qui centralise toutes les informations pratiques, le réseau de gardiens d'urgence mobilisables en quelques heures, les avis croisés qui construisent la confiance au fil du temps.
 
-Guardiens lance officiellement le 30 septembre 2026 avec les premiers fondateurs, ceux qui rejoignent la plateforme avant le lancement public et qui contribuent à façonner l'outil. Lyon est le point de départ, la France entière le terrain naturel d'expansion.`,
+Guardiens accueille aujourd'hui ses premiers membres fondateurs, ceux qui rejoignent la plateforme pendant sa phase de construction et contribuent à façonner l'outil. Lyon est le point de départ, la France entière le terrain naturel d'expansion.`,
  },
  {
  id: "faq",

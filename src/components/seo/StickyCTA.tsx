@@ -31,17 +31,15 @@ const StickyCTA = ({ city, stats }: Props) => {
   if (stats.guardiansCount === 0 && stats.activeListings === 0)
     return <div ref={sentinelRef} />;
 
-  const isBeforeLaunch = new Date() < new Date("2026-09-30");
-
   let message: string;
   let ctaText: string;
   let ctaLink: string;
 
-  if (isBeforeLaunch && stats.guardiansCount > 0) {
-    message = `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} déjà inscrit${stats.guardiansCount > 1 ? "s" : ""} à ${city.name}. Rejoignez les membres fondateurs avant le 30 septembre 2026.`;
+  if (stats.guardiansCount > 0 && stats.activeListings === 0) {
+    message = `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} déjà inscrit${stats.guardiansCount > 1 ? "s" : ""} à ${city.name}. Rejoignez la communauté, c'est gratuit aujourd'hui.`;
     ctaText = "Créer mon compte";
     ctaLink = "/inscription";
-  } else if (isBeforeLaunch) {
+  } else if (stats.guardiansCount === 0 && stats.activeListings === 0) {
     message = `Soyez parmi les premiers gardiens à ${city.name}.`;
     ctaText = "Rejoindre Guardiens";
     ctaLink = "/inscription";

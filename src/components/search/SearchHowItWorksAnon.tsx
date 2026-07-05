@@ -122,8 +122,7 @@ const SearchHowItWorksAnon = () => (
             Prêt à postuler à votre première garde ?
           </p>
           <p className="text-sm text-muted-foreground mt-1">
-            Inscription gratuite. Espace gardien gratuit jusqu'au 30 septembre
-            2026, puis 6,99 € par mois sans engagement.
+            Inscription gratuite. L'espace gardien est également gratuit aujourd'hui, sans engagement.
           </p>
         </div>
         <div className="flex gap-2 shrink-0">

@@ -19,15 +19,9 @@ interface PremiumGateDialogProps {
 
 const PremiumGateDialog = ({ open, onClose, featureName }: PremiumGateDialogProps) => {
   const navigate = useNavigate();
-  const freeNow = isBeforeLaunch() || isInGracePeriod();
 
-  const description = freeNow
-    ? `Activez votre espace gardien pour accéder à ${featureName}. À 0 € pour tous en ce moment, jusqu'au 30 septembre 2026 inclus.`
-    : `Abonnez-vous pour accéder à ${featureName}. 6,99 €/mois, sans engagement, résiliable en un clic.`;
-
-  const ctaLabel = freeNow
-    ? "Activer mon espace gardien, à 0 €"
-    : "Activer mon espace gardien, 6,99 €/mois";
+  const description = `Activez votre espace gardien pour accéder à ${featureName}. C'est gratuit aujourd'hui, sans engagement.`;
+  const ctaLabel = "Activer mon espace gardien";
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
