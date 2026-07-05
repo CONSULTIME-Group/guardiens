@@ -9,9 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Mail, Clock, FileText, Send, ShieldOff, History, Settings2, RefreshCw, AlertCircle, Ban, Eye, SendHorizonal, Pencil, Info, CheckCircle2, BarChart3, Inbox } from "lucide-react";
+import { Mail, Clock, FileText, Send, ShieldOff, History, Settings2, RefreshCw, AlertCircle, Ban, Eye, SendHorizonal, Pencil, Info, CheckCircle2, BarChart3, Inbox, Bell } from "lucide-react";
 import { ConfirmationsTab } from "./_components/ConfirmationsTab";
 import { QueueTab } from "./_components/QueueTab";
+import SitterDigestTab from "./_components/SitterDigestTab";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -860,7 +861,7 @@ const AdminEmails = () => {
       <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Emails & Communications</h1>
 
       <Tabs defaultValue="templates" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-4 md:grid-cols-8">
           <TabsTrigger value="templates" className="text-xs gap-1">
             <FileText className="h-3.5 w-3.5" /> Templates
           </TabsTrigger>
@@ -869,6 +870,9 @@ const AdminEmails = () => {
           </TabsTrigger>
           <TabsTrigger value="engagement" className="text-xs gap-1">
             <BarChart3 className="h-3.5 w-3.5" /> Engagement
+          </TabsTrigger>
+          <TabsTrigger value="sitter-digest" className="text-xs gap-1">
+            <Bell className="h-3.5 w-3.5" /> Digest gardien
           </TabsTrigger>
           <TabsTrigger value="queue" className="text-xs gap-1">
             <Inbox className="h-3.5 w-3.5" /> File
@@ -887,6 +891,7 @@ const AdminEmails = () => {
         <TabsContent value="templates"><TemplatesTab /></TabsContent>
         <TabsContent value="confirmations"><ConfirmationsTab /></TabsContent>
         <TabsContent value="engagement"><EngagementTab /></TabsContent>
+        <TabsContent value="sitter-digest"><SitterDigestTab /></TabsContent>
         <TabsContent value="queue"><QueueTab /></TabsContent>
         <TabsContent value="logs"><LogsTab /></TabsContent>
         <TabsContent value="suppressions"><SuppressionsTab /></TabsContent>
