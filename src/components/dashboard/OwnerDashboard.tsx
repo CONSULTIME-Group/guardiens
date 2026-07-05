@@ -387,26 +387,36 @@ const OwnerDashboard = () => {
         </div>
       </header>
 
+      {/* ═══ Draft en cours : carte de reprise prioritaire (masque la NBA "1ère annonce") ═══ */}
+      {hasDraft && latestDraft && (
+        <div className="px-5 md:px-8">
+          <DraftResumeCard draft={latestDraft as any} />
+        </div>
+      )}
+
       {/* ═══ Action prioritaire unique , UN seul CTA dominant ═══
           Synthétise « la seule chose à faire maintenant » avant les listes
-          détaillées (TodoCard) qui restent disponibles plus bas. */}
-      <div className="px-5 md:px-8">
-        <PriorityActionCard
-          eyebrow={priorityAction.eyebrow}
-          title={isNewOwner ? "Publiez votre première annonce" : priorityAction.title}
-          description={newOwnerDescription}
-          ctaLabel={isNewOwner ? "Publier mon annonce" : priorityAction.ctaLabel}
-          ctaTo={isNewOwner ? "/sits/create" : priorityAction.ctaTo}
-          urgency={isNewOwner ? "high" : priorityAction.urgency}
-        />
-        {isNewOwner && (
-          <p className="text-xs text-muted-foreground mt-2 pl-1">
-            <Link to="/annonces" className="underline underline-offset-2 hover:text-foreground">
-              Voir des exemples d'annonces publiées
-            </Link>
-          </p>
-        )}
-      </div>
+          détaillées (TodoCard) qui restent disponibles plus bas.
+          On la masque si une annonce est déjà en cours de rédaction (redondant). */}
+      {!hasDraft && (
+        <div className="px-5 md:px-8">
+          <PriorityActionCard
+            eyebrow={priorityAction.eyebrow}
+            title={isNewOwner ? "Publiez votre première annonce" : priorityAction.title}
+            description={newOwnerDescription}
+            ctaLabel={isNewOwner ? "Publier mon annonce" : priorityAction.ctaLabel}
+            ctaTo={isNewOwner ? "/sits/create" : priorityAction.ctaTo}
+            urgency={isNewOwner ? "high" : priorityAction.urgency}
+          />
+          {isNewOwner && (
+            <p className="text-xs text-muted-foreground mt-2 pl-1">
+              <Link to="/annonces" className="underline underline-offset-2 hover:text-foreground">
+                Voir des exemples d'annonces publiées
+              </Link>
+            </p>
+          )}
+        </div>
+      )}
 
       {isNewOwner ? (
         <div className="px-5 md:px-8">
