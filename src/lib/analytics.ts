@@ -48,6 +48,15 @@ export type EventType =
   | "exp_mission_bio_scroll"  // Scroll max atteint sur la liste (release, max_scroll_pct, is_mobile)
   | "affinity_badge_seen"     // Badge d'affinité affiché (context: sit_detail|public_profile|search|favorites, score, total)
   | "interests_focus_click"  // Clic sur l'indicateur de progression OU le CTA cockpit menant au champ Centres d'intérêt (source: indicator|cockpit_cta, count actuel)
+  // Workflow acceptation candidature ----------------------------------------
+  | "application_accepted"          // RPC accept_application OK (application_id, sit_id)
+  | "sit_confirmed"                 // Sit passe à confirmed (sit_id, auto_rejected_count)
+  | "application_accept_failed"     // RPC accept_application KO (reason, application_id)
+  | "accord_dialog_opened"          // Modale AccordDeGarde ouverte (sit_id, role)
+  | "accord_signed_owner"           // Owner signe l'accord (sit_id, garde_id)
+  | "accord_signed_gardien"         // Gardien signe l'accord (sit_id, garde_id)
+  | "accord_dialog_closed_unsigned" // Modale fermée sans signer (sit_id, role, scroll_completed)
+  | "sit_owner_state_viewed"        // État vu côté owner (sit_id, state)
   // Module Questions & conseils -----------------------------------------------
   | "question_create_submit"   // Question publiée (metadata.category)
   | "question_view"            // Vue d'une question (metadata.id)
