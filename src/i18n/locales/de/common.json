@@ -30,6 +30,7 @@
       "house_sitting_guide": "House-sitting Ratgeber",
       "faq": "FAQ",
       "pricing": "Tarife",
+      "observatory": "Observatorium",
       "what_is_house_sitting": "Was ist house-sitting",
       "about": "Über uns",
       "contact": "Kontakt",
@@ -72,7 +73,8 @@
       "testimonials": "Erfahrungsberichte",
       "story": "Unsere Geschichte",
       "cities": "Ratgeber & Städte",
-      "faq": "FAQ"
+      "faq": "FAQ",
+      "numbers": "Kennzahlen"
     },
     "usages": {
       "eyebrow": "Was wir gemeinsam tun",
@@ -170,11 +172,11 @@
     },
     "testimonials": {
       "title": "Sie haben es gewagt. Das ist ihre Erfahrung.",
-      "source": "Erfahrungsberichte von Mitgliedern des Gründer-Programms (Januar – Mai 2026). Reale Vornamen und Städte, Erzählungen auf Wunsch anonymisiert.",
+      "source": "Erfahrungsberichte, gesammelt bei unseren ersten Mitgliedern (Januar bis Mai 2026). Reale Vornamen und Städte, Erzählungen auf Wunsch anonymisiert.",
       "prev_aria": "Vorheriger Bericht",
       "next_aria": "Nächster Bericht",
       "page_aria": "Zu Seite {{n}} der Berichte gehen",
-      "program_label": "Gründer-Programm"
+      "program_label": "Langjähriges Mitglied"
     },
     "story": {
       "eyebrow": "Unsere Geschichte",
@@ -216,9 +218,16 @@
       "q6": "Ist Guardiens überall in Frankreich verfügbar?",
       "a6": "Ja. Das Netzwerk von Guardiens erstreckt sich über alle Regionen Frankreichs, vom Baskenland bis zur Bretagne, über die Alpen bis in den Norden. Sie finden unabhängig von Ihrem Departement einen Betreuer in der Nähe."
     },
+    "inventory": {
+      "title": "Was wir für Sie gebaut haben",
+      "subtitle": "Ein lebendiges Inventar, bei jedem Besuch aktualisiert.",
+      "cities_label": "abgedeckte Städte",
+      "breeds_label": "dokumentierte Rassen",
+      "places_label": "geolokalisierte hundefreundliche Orte",
+      "pros_label": "Tierprofis",
+      "cta": "Vollständiges Observatorium ansehen"
+    },
     "final": {
-      "badge_program": "Gründer-Programm",
-      "badge_offer": "Gründer-Abzeichen inklusive",
       "title": "Ihre nächste Geschichte beginnt hier.",
       "lede": "Sie werden unbeschwert verreisen. Sie werden mit etwas anderem zurückkehren: einem neu entdeckten Ort, einer Begegnung, jemandem, den Sie sonst nie getroffen hätten.",
       "cta_owner": "Anzeige veröffentlichen",

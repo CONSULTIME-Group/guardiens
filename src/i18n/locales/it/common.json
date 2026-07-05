@@ -30,6 +30,7 @@
       "house_sitting_guide": "Guida all'house-sitting",
       "faq": "FAQ",
       "pricing": "Tariffe",
+      "observatory": "Osservatorio",
       "what_is_house_sitting": "Cos'è l'house-sitting",
       "about": "A proposito",
       "contact": "Contatti",
@@ -72,7 +73,8 @@
       "testimonials": "Testimonianze",
       "story": "La nostra storia",
       "cities": "Guide & città",
-      "faq": "FAQ"
+      "faq": "FAQ",
+      "numbers": "Cifre"
     },
     "usages": {
       "eyebrow": "Cosa facciamo insieme",
@@ -170,11 +172,11 @@
     },
     "testimonials": {
       "title": "Hanno osato. Ecco cosa è rimasto loro.",
-      "source": "Testimonianze raccolte tra i membri del programma Fondatore (gennaio – maggio 2026). Nomi e città reali, racconti resi anonimi su loro richiesta.",
+      "source": "Testimonianze raccolte tra i nostri primi membri (gennaio a maggio 2026). Nomi e città reali, racconti resi anonimi su loro richiesta.",
       "prev_aria": "Testimonianza precedente",
       "next_aria": "Testimonianza successiva",
       "page_aria": "Vai alla pagina delle testimonianze {{n}}",
-      "program_label": "Programma Fondatore"
+      "program_label": "Membro storico"
     },
     "story": {
       "eyebrow": "La nostra storia",
@@ -216,9 +218,16 @@
       "q6": "Guardiens è disponibile in tutta la Francia?",
       "a6": "Sì. La rete Guardiens si estende in tutte le regioni della Francia, dai Paesi Baschi alla Bretagna, passando per le Alpi e il Nord. Troverà un custode vicino a Lei ovunque si trovi."
     },
+    "inventory": {
+      "title": "Ciò che abbiamo costruito per Lei",
+      "subtitle": "Un inventario vivo, aggiornato a ogni visita.",
+      "cities_label": "città coperte",
+      "breeds_label": "razze documentate",
+      "places_label": "luoghi dog-friendly geolocalizzati",
+      "pros_label": "professionisti per animali",
+      "cta": "Vedere l'osservatorio completo"
+    },
     "final": {
-      "badge_program": "Programma Fondatore",
-      "badge_offer": "Badge fondatore offerto",
       "title": "La Sua prossima storia inizia qui.",
       "lede": "Partirà con la mente leggera. Tornerà con qualcos'altro: un luogo scoperto, un incontro, qualcuno che non avrebbe mai incrociato.",
       "cta_owner": "Pubblicare il mio annuncio",

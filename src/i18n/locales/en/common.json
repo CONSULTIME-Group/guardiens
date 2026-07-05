@@ -30,6 +30,7 @@
       "house_sitting_guide": "House-sitting guide",
       "faq": "FAQ",
       "pricing": "Pricing",
+      "observatory": "Observatory",
       "what_is_house_sitting": "What is house-sitting",
       "about": "About",
       "contact": "Contact",
@@ -72,7 +73,8 @@
       "testimonials": "Testimonials",
       "story": "Our story",
       "cities": "Guides & cities",
-      "faq": "FAQ"
+      "faq": "FAQ",
+      "numbers": "Numbers"
     },
     "usages": {
       "eyebrow": "What we do together",
@@ -170,11 +172,11 @@
     },
     "testimonials": {
       "title": "They dared. Here is what they kept.",
-      "source": "Testimonials collected from Founder programme members (January – May 2026). Real first names and cities, stories anonymised at their request.",
+      "source": "Testimonials collected from our early members (January to May 2026). Real first names and cities, stories anonymised at their request.",
       "prev_aria": "Previous testimonial",
       "next_aria": "Next testimonial",
       "page_aria": "Go to testimonial page {{n}}",
-      "program_label": "Founder Programme"
+      "program_label": "Longtime member"
     },
     "story": {
       "eyebrow": "Our story",
@@ -216,9 +218,16 @@
       "q6": "Is Guardiens available everywhere in France?",
       "a6": "Yes. The Guardiens network extends to all regions of France, from the Basque Country to Brittany, through the Alps and the North. You will find a sitter near you regardless of your department."
     },
+    "inventory": {
+      "title": "What we've built for you",
+      "subtitle": "A living inventory, refreshed on every visit.",
+      "cities_label": "cities covered",
+      "breeds_label": "breeds documented",
+      "places_label": "geolocated dog-friendly places",
+      "pros_label": "pet professionals",
+      "cta": "See the full observatory"
+    },
     "final": {
-      "badge_program": "Founder Programme",
-      "badge_offer": "Founder badge offered",
       "title": "Your next story begins here.",
       "lede": "You will leave with peace of mind. You will return with something else, a discovered corner, a meeting, someone you would never have crossed paths with.",
       "cta_owner": "Publish my listing",
