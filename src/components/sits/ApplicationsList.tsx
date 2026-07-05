@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { logger } from "@/lib/logger";
+import { trackEvent } from "@/lib/analytics";
 import FounderBadge from "@/components/badges/FounderBadge";
 import AccordDeGarde from "@/components/gardes/AccordDeGarde";
 import { Link } from "react-router-dom";
@@ -113,229 +114,252 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     if (accepting) return;
     setAccepting(true);
     try {
-    const sitterName = app.sitter?.first_name || "Ce gardien";
-    const sitterId = app.sitter_id;
+      const sitterName = app.sitter?.first_name || "Ce gardien";
+      const sitterId = app.sitter_id;
 
-    // Vérification serveur : la garde n'est-elle pas déjà confirmée/annulée ?
-    const { data: currentSit } = await supabase
-      .from("sits").select("status").eq("id", sitId).single();
-    if (!currentSit || ["confirmed", "in_progress", "completed", "cancelled"].includes(currentSit.status)) {
-      toast({
-        title: "Action impossible",
-        description: "Cette garde n'accepte plus de nouvelles confirmations.",
-        variant: "destructive",
+      // 1) Appel RPC atomique côté serveur.
+      const { data: rpcData, error: rpcError } = await supabase.rpc(
+        "accept_application" as any,
+        { p_application_id: app.id } as any,
+      );
+
+      if (rpcError) {
+        logger.error("accept_application rpc failed", { error: rpcError.message });
+        trackEvent("application_accept_failed", {
+          metadata: { reason: rpcError.message, application_id: app.id, sit_id: sitId },
+        });
+        toast({
+          title: "Impossible d'accepter la candidature",
+          description: rpcError.message.includes("sit_not_open")
+            ? "Cette garde n'accepte plus de nouvelles confirmations."
+            : rpcError.message.includes("not_owner")
+              ? "Action réservée au propriétaire de l'annonce."
+              : "Une erreur est survenue, réessayez dans un instant.",
+          variant: "destructive",
+        });
+        setConfirmApp(null);
+        load();
+        return;
+      }
+
+      const result = (rpcData ?? {}) as { sit_id?: string; auto_rejected_count?: number };
+      trackEvent("application_accepted", {
+        metadata: { application_id: app.id, sit_id: result.sit_id ?? sitId },
       });
-      setAccepting(false);
-      setConfirmApp(null);
-      load();
-      return;
-    }
-
-    const { error: acceptErr } = await supabase.from("applications").update({ status: "accepted" as any }).eq("id", app.id);
-    if (acceptErr) throw acceptErr;
-
-    const { data: rejectedApps } = await supabase
-      .from("applications")
-      .select("sitter_id")
-      .eq("sit_id", sitId)
-      .neq("id", app.id)
-      .not("status", "in", "(rejected,cancelled)");
-
-    await supabase
-      .from("applications")
-      .update({ status: "rejected" as any })
-      .eq("sit_id", sitId)
-      .neq("id", app.id)
-      .not("status", "in", "(rejected,cancelled)");
-
-    // Confirmer la garde ET fermer les candidatures
-    await supabase.from("sits").update({
-      status: "confirmed" as any,
-      accepting_applications: false,
-    } as any).eq("id", sitId);
-
-    const petNamesStr = petNames.join(", ");
-    const confirmMsg = `La garde est confirmée. Vous avez été choisi(e) pour garder ${petNamesStr} du ${startDate} au ${endDate}.`;
-    const { data: acceptedConv } = await supabase
-      .from("conversations")
-      .select("id")
-      .eq("sit_id", sitId)
-      .eq("sitter_id", sitterId)
-      .maybeSingle();
-
-    if (acceptedConv && user) {
-      await supabase.from("messages").insert({
-        conversation_id: acceptedConv.id,
-        sender_id: user.id,
-        content: confirmMsg,
-        is_system: true,
+      trackEvent("sit_confirmed", {
+        metadata: {
+          sit_id: result.sit_id ?? sitId,
+          auto_rejected_count: result.auto_rejected_count ?? 0,
+        },
       });
 
-      const { data: guideData } = await supabase
-        .from("house_guides")
+      // 2) Messages système + notifications + emails (post-transaction, non bloquant).
+      const petNamesStr = petNames.join(", ");
+      const confirmMsg = `La garde est confirmée. Vous avez été choisi(e) pour garder ${petNamesStr} du ${startDate} au ${endDate}.`;
+      const { data: acceptedConv } = await supabase
+        .from("conversations")
         .select("id")
-        .eq("property_id", propertyId)
+        .eq("sit_id", sitId)
+        .eq("sitter_id", sitterId)
         .maybeSingle();
 
-      if (guideData) {
+      if (acceptedConv && user) {
         await supabase.from("messages").insert({
           conversation_id: acceptedConv.id,
           sender_id: user.id,
-          content: "Le guide de la maison est disponible. Vous y trouverez l'adresse exacte, les codes d'accès, les contacts utiles et toutes les consignes.",
+          content: confirmMsg,
           is_system: true,
         });
-      }
 
-      await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", acceptedConv.id);
-    }
-
-    // Send notification to sitter, with dedup guard
-    const { data: existingNotif } = await supabase
-      .from("notifications")
-      .select("id")
-      .eq("user_id", sitterId)
-      .eq("type", "sit_confirmed")
-      .eq("link", `/mes-gardes`)
-      .maybeSingle();
-
-    if (!existingNotif) {
-      const { data: proprio } = await supabase
-        .from("profiles")
-        .select("first_name")
-        .eq("id", user!.id)
-        .single();
-
-      const { data: guideCheck } = await supabase
-        .from("house_guides")
-        .select("id")
-        .eq("user_id", user!.id)
-        .eq("published", true)
-        .maybeSingle();
-
-      let startFormatted = "";
-      if (startDate) {
-        try {
-          startFormatted = format(parseISO(startDate), "dd MMMM", { locale: fr });
-        } catch {
-          startFormatted = startDate;
-        }
-      }
-
-      await supabase.from("notifications").insert({
-        user_id: sitterId,
-        type: "sit_confirmed",
-        title: "Garde confirmée",
-        body: guideCheck
-          ? `Votre garde chez ${proprio?.first_name ?? "votre hôte"} est confirmée. Le guide de la maison sera disponible dans votre espace à partir du ${startFormatted}.`
-          : `Votre garde chez ${proprio?.first_name ?? "votre hôte"} est confirmée. Rendez-vous dans "Mes gardes" pour les détails.`,
-        link: `/mes-gardes`,
-      });
-
-      // Email transactionnel, candidature acceptée (gardien)
-      sendTransactionalEmail({
-        templateName: "application-accepted",
-        recipientUserId: sitterId,
-        idempotencyKey: `app-accepted-${app.id}`,
-        templateData: {
-          sitTitle,
-          ownerFirstName: proprio?.first_name ?? "",
-        },
-      }).catch(() => {});
-
-      // Email transactionnel, garde confirmée (propriétaire)
-      let endFormatted = "";
-      if (endDate) {
-        try { endFormatted = format(parseISO(endDate), "dd MMMM yyyy", { locale: fr }); } catch { endFormatted = endDate; }
-      }
-      const startFormattedFull = startDate
-        ? (() => { try { return format(parseISO(startDate), "dd MMMM yyyy", { locale: fr }); } catch { return startDate; } })()
-        : "";
-      sendTransactionalEmail({
-        templateName: "sit-confirmed",
-        recipientUserId: user!.id,
-        idempotencyKey: `sit-confirmed-${sitId}`,
-        templateData: {
-          sitTitle,
-          sitterFirstName: app.sitter?.first_name ?? "",
-          startDate: startFormattedFull,
-          endDate: endFormatted,
-          petNames: petNames.join(", "),
-          sitId,
-        },
-      }).catch(() => {});
-    }
-
-
-    if (rejectedApps && user) {
-      for (const ra of rejectedApps) {
-        const { data: rejConv } = await supabase
-          .from("conversations")
+        const { data: guideData } = await supabase
+          .from("house_guides")
           .select("id")
-          .eq("sit_id", sitId)
-          .eq("sitter_id", ra.sitter_id)
+          .eq("property_id", propertyId)
           .maybeSingle();
-        if (rejConv) {
+
+        if (guideData) {
           await supabase.from("messages").insert({
-            conversation_id: rejConv.id,
+            conversation_id: acceptedConv.id,
             sender_id: user.id,
-            content: `Le propriétaire a choisi un autre gardien pour cette garde. Merci pour votre candidature !`,
+            content: "Le guide de la maison est disponible. Vous y trouverez l'adresse exacte, les codes d'accès, les contacts utiles et toutes les consignes.",
             is_system: true,
           });
-          await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", rejConv.id);
         }
 
-        // Email transactionnel, candidature non retenue (non-bloquant)
+        await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", acceptedConv.id);
+      }
+
+      // Notification + emails (dédup via idempotencyKey).
+      const { data: existingNotif } = await supabase
+        .from("notifications")
+        .select("id")
+        .eq("user_id", sitterId)
+        .eq("type", "sit_confirmed")
+        .eq("link", `/mes-gardes`)
+        .maybeSingle();
+
+      if (!existingNotif) {
+        const { data: proprio } = await supabase
+          .from("profiles")
+          .select("first_name")
+          .eq("id", user!.id)
+          .single();
+
+        const { data: guideCheck } = await supabase
+          .from("house_guides")
+          .select("id")
+          .eq("user_id", user!.id)
+          .eq("published", true)
+          .maybeSingle();
+
+        let startFormatted = "";
+        if (startDate) {
+          try {
+            startFormatted = format(parseISO(startDate), "dd MMMM", { locale: fr });
+          } catch {
+            startFormatted = startDate;
+          }
+        }
+
+        await supabase.from("notifications").insert({
+          user_id: sitterId,
+          type: "sit_confirmed",
+          title: "Garde confirmée",
+          body: guideCheck
+            ? `Votre garde chez ${proprio?.first_name ?? "votre hôte"} est confirmée. Le guide de la maison sera disponible dans votre espace à partir du ${startFormatted}.`
+            : `Votre garde chez ${proprio?.first_name ?? "votre hôte"} est confirmée. Rendez-vous dans "Mes gardes" pour les détails.`,
+          link: `/mes-gardes`,
+        });
+
         sendTransactionalEmail({
-          templateName: "application-declined",
-          recipientUserId: ra.sitter_id,
-          idempotencyKey: `app-declined-auto-${sitId}-${ra.sitter_id}`,
-          templateData: { sitTitle },
+          templateName: "application-accepted",
+          recipientUserId: sitterId,
+          idempotencyKey: `app-accepted-${app.id}`,
+          templateData: {
+            sitTitle,
+            ownerFirstName: proprio?.first_name ?? "",
+          },
+        }).catch(() => {});
+
+        let endFormatted = "";
+        if (endDate) {
+          try { endFormatted = format(parseISO(endDate), "dd MMMM yyyy", { locale: fr }); } catch { endFormatted = endDate; }
+        }
+        const startFormattedFull = startDate
+          ? (() => { try { return format(parseISO(startDate), "dd MMMM yyyy", { locale: fr }); } catch { return startDate; } })()
+          : "";
+        sendTransactionalEmail({
+          templateName: "sit-confirmed",
+          recipientUserId: user!.id,
+          idempotencyKey: `sit-confirmed-${sitId}`,
+          templateData: {
+            sitTitle,
+            sitterFirstName: app.sitter?.first_name ?? "",
+            startDate: startFormattedFull,
+            endDate: endFormatted,
+            petNames: petNames.join(", "),
+            sitId,
+          },
         }).catch(() => {});
       }
-    }
 
-    // Fetch data for AccordDeGarde
-    const { data: proprioProfile } = await supabase
-      .from("profiles")
-      .select("first_name, city")
-      .eq("id", user!.id)
-      .maybeSingle();
+      // Message système + email pour les candidatures auto-déclinées.
+      const { data: autoRejected } = await supabase
+        .from("applications")
+        .select("sitter_id")
+        .eq("sit_id", sitId)
+        .eq("status", "rejected")
+        .neq("id", app.id);
 
-    setAccordData({
-      gardeId: sitId,
-      dateDebut: startDate ?? "",
-      dateFin: endDate ?? "",
-      adresse: proprioProfile?.city ?? "",
-      proprio: {
-        prenom: proprioProfile?.first_name ?? "Le propriétaire",
-        telephone: "",
-      },
-      gardien: {
-        prenom: app.sitter?.first_name ?? "Le gardien",
-      },
-      animaux: petNames.map((name: string) => ({
-        prenom: name,
-        espece: "",
-      })),
-      reglesVie: {
-        animauxPartout: null,
-        invites: null,
-        tabac: null,
-        autresPrecisions: null,
-      },
-      voisinConfiance: null,
-      urgences: null,
-      montantVetMax: null,
-      montantLogementMax: null,
-      estLongueDuree: false,
-      contributionCharges: null,
-    });
-    setShowAccord(true);
+      if (autoRejected && user) {
+        for (const ra of autoRejected) {
+          const { data: rejConv } = await supabase
+            .from("conversations")
+            .select("id")
+            .eq("sit_id", sitId)
+            .eq("sitter_id", ra.sitter_id)
+            .maybeSingle();
+          if (rejConv) {
+            await supabase.from("messages").insert({
+              conversation_id: rejConv.id,
+              sender_id: user.id,
+              content: `Le propriétaire a choisi un autre gardien pour cette garde. Merci pour votre candidature !`,
+              is_system: true,
+            });
+            await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", rejConv.id);
+          }
 
-    toast({ title: "Garde confirmée !", description: `${sitterName} a été choisi(e) pour cette garde.` });
-    setConfirmApp(null);
-    } catch (error) {
+          sendTransactionalEmail({
+            templateName: "application-declined",
+            recipientUserId: ra.sitter_id,
+            idempotencyKey: `app-declined-auto-${sitId}-${ra.sitter_id}`,
+            templateData: { sitTitle },
+          }).catch(() => {});
+        }
+      }
+
+      // 3) Construire accordData enrichi (sit + property + pets réels).
+      const { data: sitFull } = await supabase
+        .from("sits")
+        .select("id, start_date, end_date, property_id, properties(address, city), pets:pets(name, species, breed, birth_date)")
+        .eq("id", sitId)
+        .maybeSingle() as any;
+
+      const { data: proprioProfile } = await supabase
+        .from("profiles")
+        .select("first_name, city, phone_number")
+        .eq("id", user!.id)
+        .maybeSingle() as any;
+
+      const pets = Array.isArray(sitFull?.pets) && sitFull.pets.length > 0
+        ? sitFull.pets.map((p: any) => ({
+            prenom: p.name,
+            espece: p.species ?? "",
+            race: p.breed ?? undefined,
+          }))
+        : petNames.map((name: string) => ({ prenom: name, espece: "" }));
+
+      const adresse = sitFull?.properties?.address
+        || sitFull?.properties?.city
+        || proprioProfile?.city
+        || "";
+
+      setAccordData({
+        gardeId: sitId,
+        dateDebut: startDate ?? "",
+        dateFin: endDate ?? "",
+        adresse,
+        proprio: {
+          prenom: proprioProfile?.first_name ?? "Le propriétaire",
+          telephone: proprioProfile?.phone_number ?? "",
+        },
+        gardien: {
+          prenom: app.sitter?.first_name ?? "Le gardien",
+        },
+        animaux: pets,
+        reglesVie: {
+          animauxPartout: null,
+          invites: null,
+          tabac: null,
+          autresPrecisions: null,
+        },
+        voisinConfiance: null,
+        urgences: null,
+        montantVetMax: 300,
+        montantLogementMax: null,
+        estLongueDuree: false,
+        contributionCharges: null,
+      });
+      setShowAccord(true);
+
+      toast({ title: "Garde confirmée !", description: `${sitterName} a été choisi(e) pour cette garde.` });
+      setConfirmApp(null);
+      load();
+    } catch (error: any) {
       logger.error('handleAccept error', { error: String(error) });
+      trackEvent("application_accept_failed", {
+        metadata: { reason: String(error?.message ?? error), application_id: app.id },
+      });
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de la confirmation.",
@@ -345,6 +369,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       setAccepting(false);
     }
   };
+
 
   const handleDecline = async (app: any, message?: string) => {
     try {
@@ -721,12 +746,32 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       )}
 
       {showAccord && accordData && (
-        <Dialog open={showAccord} onOpenChange={(o) => { if (!o) { setShowAccord(false); setConfirmApp(null); load(); } }}>
+        <Dialog
+          open={showAccord}
+          onOpenChange={(o) => {
+            if (!o) {
+              trackEvent("accord_dialog_closed_unsigned", {
+                metadata: { sit_id: sitId, role: "proprio" },
+              });
+              setShowAccord(false);
+              setConfirmApp(null);
+              load();
+            }
+          }}
+        >
           <DialogContent className="max-w-2xl p-0 overflow-hidden">
             <DialogTitle className="sr-only">Accord de garde</DialogTitle>
             <AccordDeGarde
               garde={accordData}
-              onClose={() => { setShowAccord(false); setConfirmApp(null); load(); }}
+              role="proprio"
+              onClose={() => {
+                trackEvent("accord_dialog_closed_unsigned", {
+                  metadata: { sit_id: sitId, role: "proprio" },
+                });
+                setShowAccord(false);
+                setConfirmApp(null);
+                load();
+              }}
             />
           </DialogContent>
         </Dialog>

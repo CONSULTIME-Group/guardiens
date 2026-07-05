@@ -42,6 +42,7 @@ import EmergencyAlertBanner from "@/components/sits/EmergencyAlertBanner";
 import SitDateHistory from "@/components/sits/SitDateHistory";
 import ApplicationsList from "@/components/sits/ApplicationsList";
 import PostConfirmationChecklist from "@/components/sits/PostConfirmationChecklist";
+import AccordOwnerStatusBanner from "@/components/gardes/AccordOwnerStatusBanner";
 import CancelSitModal from "@/components/sits/CancelSitModal";
 import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
 import SitPhotoManager from "@/components/sits/owner/SitPhotoManager";
@@ -518,6 +519,7 @@ const OwnerSitView = ({
       {/* Post-confirmation checklist */}
       {(sit.status === "confirmed" || sit.status === "in_progress") && (
         <div className="mb-8">
+          <AccordOwnerStatusBanner sitId={sit.id} sitStatus={sit.status} />
           <PostConfirmationChecklist
             sitId={sit.id}
             sitOwnerId={sit.user_id}
