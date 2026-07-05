@@ -116,7 +116,7 @@ const VALID_TABS: Tab[] = ["questions", "besoins", "offres"];
 const VALID_Q_CATS = ["all", "animaux", "jardin", "maison", "garde", "autre"] as const;
 const VALID_Q_STATUS = ["all", "open", "resolved"] as const;
 const VALID_M_STATUS: MissionStatus[] = ["all", "open", "in_progress", "completed"];
-const VALID_M_SORT: MissionSort[] = ["recent", "date_needed"];
+const VALID_M_SORT: MissionSort[] = ["recent", "date_needed", "distance"];
 
 const M_STATUS_LABEL: Record<MissionStatus, string> = {
   all: "Tous statuts",
@@ -128,6 +128,7 @@ const M_STATUS_LABEL: Record<MissionStatus, string> = {
 const M_SORT_LABEL: Record<MissionSort, string> = {
   recent: "Plus récentes",
   date_needed: "Date la plus proche",
+  distance: "Proches d'abord",
 };
 
 const formatDateNeeded = (d: string | null) => {
