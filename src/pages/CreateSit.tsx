@@ -1215,8 +1215,12 @@ const CreateSit = () => {
                 onClick={async () => {
                   const id = await saveDraft();
                   if (id) {
-                    toast({ title: "Brouillon enregistré", description: "Vous pourrez le reprendre depuis « Mes gardes »." });
-                    navigate("/sits?tab=drafts");
+                    void trackEvent("sit_draft_saved_manually", {
+                      source: "create_sit_page",
+                      metadata: { sit_id: id },
+                    });
+                    toast({ title: "Brouillon enregistré", description: "Vous pourrez le reprendre depuis votre dashboard." });
+                    navigate("/dashboard");
                   }
                 }}
                 disabled={savingDraft || !property}
