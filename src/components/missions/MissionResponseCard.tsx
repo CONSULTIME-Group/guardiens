@@ -4,6 +4,10 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Heart, CheckCircle2, MessageSquare, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -146,10 +150,28 @@ const MissionResponseCard = ({
             {/* Actions auteur */}
             {isAuthor && r.status === "pending" && (
               <>
-                <Button size="sm" onClick={onSelect} disabled={processing} className="rounded-full ml-auto">
-                  <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                  {processing ? "…" : "Retenir cette personne"}
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button size="sm" disabled={processing} className="rounded-full ml-auto">
+                      <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                      {processing ? "…" : "Retenir cette personne"}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Retenir {r.responder?.first_name || "cette personne"} pour aider ?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Vous confirmez publiquement que cette personne vous aide sur cette mission.
+                        Elle apparaîtra comme « Personne retenue » ici et sur son profil public.
+                        Les autres réponses ne seront pas déclinées automatiquement.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Annuler</AlertDialogCancel>
+                      <AlertDialogAction onClick={onSelect}>Confirmer</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
                 <Button size="sm" variant="ghost" onClick={onDecline} disabled={processing} className="rounded-full text-muted-foreground">
                   Écarter
                 </Button>
