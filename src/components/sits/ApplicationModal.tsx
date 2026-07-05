@@ -9,7 +9,8 @@ import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { toast } from "@/hooks/use-toast";
 import { Send, Star, MapPin, Shield, ShieldCheck, CheckCircle2, Calendar } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { trackFirstAction } from "@/lib/analytics";
+import { trackFirstAction, trackEvent } from "@/lib/analytics";
+import { readDigestAttribution, clearDigestAttribution } from "@/lib/digestAttribution";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -110,7 +111,27 @@ const ApplicationModal = ({
       toast({ title: "Erreur", description: "Impossible d'envoyer la candidature.", variant: "destructive" });
       return;
     }
-    try { await trackFirstAction("application_sent", { sit_id: sitId }); } catch {}
+    const digestAttr = readDigestAttribution(sitId);
+    try {
+      await trackFirstAction("application_sent", {
+        sit_id: sitId,
+        from_digest: !!digestAttr,
+        digest_email_id: digestAttr?.email_id ?? null,
+      });
+    } catch {}
+    if (digestAttr) {
+      try {
+        await trackEvent("sitter_digest_apply_from_email", {
+          source: "ApplicationModal",
+          metadata: {
+            sit_id: sitId,
+            application_id: created?.id ?? null,
+            email_id: digestAttr.email_id ?? null,
+          },
+        });
+      } catch {}
+      clearDigestAttribution();
+    }
 
     // Notifier le propriétaire (in-app + email), best-effort, ne bloque pas le flux
     try {

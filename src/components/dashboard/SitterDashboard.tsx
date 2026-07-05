@@ -25,6 +25,7 @@ import SitterActivityPanel from "./sitter/SitterActivityPanel";
 import SitterFirstNBA from "./SitterFirstNBA";
 import SitterFirstNBASkeleton from "./SitterFirstNBASkeleton";
 import NoNearbySitsEmptyState from "./NoNearbySitsEmptyState";
+import NextDigestCard from "./sitter/NextDigestCard";
 import { useIsNewSitter } from "@/hooks/useIsNewUser";
 import { useSitterTopAffinitySits } from "@/hooks/useSitterTopAffinitySits";
 
@@ -409,6 +410,10 @@ const SitterDashboard = () => {
                 : <FreePeriodBanner />}
             </div>
 
+            <div className="px-4 sm:px-5 md:px-8 mt-4">
+              <NextDigestCard />
+            </div>
+
             <div className="mt-6">
               {ChecklistBlock}
             </div>
@@ -464,6 +469,10 @@ const SitterDashboard = () => {
                 pendingAppsCount={pendingAppsCount}
                 nearbyListings={nearbyListings}
               />
+            </div>
+
+            <div className="px-4 sm:px-5 md:px-8 mt-4">
+              <NextDigestCard />
             </div>
 
             {!nextGuard && (
