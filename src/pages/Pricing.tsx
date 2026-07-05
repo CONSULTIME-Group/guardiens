@@ -116,7 +116,7 @@ const Pricing = () => {
                 <AccordionItem key={item.id} value={item.id}>
                   <AccordionTrigger
                     onClick={() =>
-                      trackEvent("pricing_faq_expanded", { question_id: item.id })
+                      trackEvent("pricing_faq_expanded", { metadata: { question_id: item.id } })
                     }
                     className="font-body text-left"
                   >
