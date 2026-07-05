@@ -258,9 +258,13 @@ export default function ProOnboarding() {
           ← Tableau de bord
         </Button>
         <h1 className="text-3xl font-display font-bold mb-2">Inscrire mon activité pro</h1>
-        <p className="text-muted-foreground mb-6">
+        <p className="text-muted-foreground mb-4">
           Annuaire en phase bêta. Validation manuelle sous 48 h pour garantir la qualité.
         </p>
+        <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+          Une fois votre fiche publiée, vous pourrez demander une vérification SIRET pour obtenir le badge « Vérifié Guardiens ». Ce badge apparaît sur votre fiche et dans les résultats de l'annuaire.
+        </p>
+
 
 
         <Card className="mb-6 border-accent/30 bg-accent/5">
