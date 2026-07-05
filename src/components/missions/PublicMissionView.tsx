@@ -60,7 +60,16 @@ interface Props {
   timeAgoFr: (iso: string) => string;
   memberSinceLong: (iso?: string | null) => string | null;
   onShare: () => void;
+  viewCount?: number;
+  responsesCount?: number;
 }
+
+const CATEGORY_ICON: Record<string, typeof Dog> = {
+  animals: Dog,
+  garden: Flower2,
+  house: HomeIcon,
+  skills: Sparkles,
+};
 
 const PublicMissionView = ({
   mission,
@@ -72,6 +81,8 @@ const PublicMissionView = ({
   timeAgoFr,
   memberSinceLong,
   onShare,
+  viewCount = 0,
+  responsesCount = 0,
 }: Props) => {
   const heroImage = mission.photos?.[0] || null;
   const ogImage = mission.photos?.[0] || entraideHeader;
