@@ -438,8 +438,7 @@ const EntraideHub = () => {
                       }`}
                       aria-label={showRatio ? `${filtered} affichés sur ${total} au total` : `${total} au total`}
                     >
-                      <span className="sm:hidden">{total}</span>
-                      <span className="hidden sm:inline">{showRatio ? `${filtered}/${total}` : total}</span>
+                      {total}
                     </span>
                   )}
                 </button>
@@ -448,21 +447,22 @@ const EntraideHub = () => {
           </div>
 
 
-          {/* Toggle Mes publications, hors barre d'onglets */}
+          {/* Toggle Mes publications, discret sous les onglets */}
           {isAuthenticated && (
-            <div className="mb-5 flex justify-end">
+            <div className="mb-4 flex justify-end items-center gap-2">
+              <span className="text-[11px] text-muted-foreground">Affichage :</span>
               <button
                 type="button"
                 onClick={() => setMineOnly((v) => !v)}
                 aria-pressed={mineOnly}
                 aria-label={mineOnly ? "Afficher toutes les publications" : "N'afficher que mes publications"}
-                className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
+                className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border transition-colors ${
                   mineOnly
                     ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-card text-muted-foreground border-border hover:bg-accent"
+                    : "bg-transparent text-muted-foreground border-border/70 hover:bg-accent hover:text-foreground"
                 }`}
               >
-                {mineOnly ? "Mes publications ✓" : "Mes publications"}
+                {mineOnly ? "Mes publications ✓" : "Toutes"}
               </button>
             </div>
           )}
@@ -576,24 +576,28 @@ const EntraideHub = () => {
                       </button>
                     )}
                   </div>
-                  <div className="-mx-3 px-3 sm:mx-0 sm:px-0 overflow-x-auto">
-                    <div className="flex gap-2 w-max sm:w-auto sm:flex-wrap">
-                      {MISSION_CATEGORIES.map((c) => (
-                        <button
-                          key={c}
-                          type="button"
-                          onClick={() => setMCategory(c)}
-                          aria-pressed={mCategory === c}
-                          className={`shrink-0 px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
-                            mCategory === c
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : "bg-card text-muted-foreground border-border hover:bg-accent"
-                          }`}
-                        >
-                          {c === "all" ? "Toutes catégories" : MISSION_CATEGORY_LABEL[c]}
-                        </button>
-                      ))}
+                  <div className="relative -mx-3 sm:mx-0">
+                    <div className="px-3 sm:px-0 overflow-x-auto scrollbar-none">
+                      <div className="flex gap-2 w-max sm:w-auto sm:flex-wrap">
+                        {MISSION_CATEGORIES.map((c) => (
+                          <button
+                            key={c}
+                            type="button"
+                            onClick={() => setMCategory(c)}
+                            aria-pressed={mCategory === c}
+                            className={`shrink-0 px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
+                              mCategory === c
+                                ? "bg-primary text-primary-foreground border-primary"
+                                : "bg-card text-muted-foreground border-border hover:bg-accent"
+                            }`}
+                          >
+                            {c === "all" ? "Toutes catégories" : MISSION_CATEGORY_LABEL[c]}
+                          </button>
+                        ))}
+                      </div>
                     </div>
+                    {/* Fade edges mobile pour indiquer le scroll horizontal */}
+                    <div className="sm:hidden pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-card/80 to-transparent rounded-r-2xl" aria-hidden="true" />
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <Select value={mStatus} onValueChange={(v) => setMStatus(v as MissionStatus)}>
@@ -802,7 +806,7 @@ const EntraideHub = () => {
                         );
                       })}
                     </ul>
-                    {filteredMissions.length > visibleCount && (
+                    {filteredMissions.length > visibleCount ? (
                       <div className="mt-4 flex justify-center">
                         <Button
                           variant="outline"
@@ -810,6 +814,20 @@ const EntraideHub = () => {
                         >
                           Charger plus ({filteredMissions.length - visibleCount} restantes)
                         </Button>
+                      </div>
+                    ) : (
+                      <div className="mt-8 p-5 rounded-2xl border border-dashed border-border bg-accent/20 text-center">
+                        <p className="text-sm text-muted-foreground">
+                          Vous avez vu {filteredMissions.length === 1 ? "l'unique publication" : `les ${filteredMissions.length} publications`} qui correspondent.
+                        </p>
+                        <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                          <Button size="sm" onClick={tab === "besoins" ? goNeed : goOffer}>
+                            {tab === "besoins" ? "Publier une demande" : "Proposer mon aide"}
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => setTab(tab === "besoins" ? "offres" : "besoins")}>
+                            Voir {tab === "besoins" ? "les offres d'aide" : "les demandes"}
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </>
