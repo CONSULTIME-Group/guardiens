@@ -116,7 +116,7 @@ const CHAMBERY_FAQ = [
  },
  {
  q: "Combien coûte Guardiens à Chambéry ?",
- a: "Pour les propriétaires, c'est entièrement gratuit. Les gardiens accèdent à la plateforme via un abonnement à 6,99 €/mois (ou 12 € en one-shot), et tous les gardiens sont gratuits jusqu'au 30 septembre 2026.",
+ a: "Pour les propriétaires, c'est entièrement gratuit. Les gardiens accèdent à la plateforme via un abonnement à 6,99 €/mois, 65 €/an, ou 10 € pour un mois en oneshot, et tous les gardiens sont gratuits jusqu'au 30 septembre 2026.",
  },
 ];
 

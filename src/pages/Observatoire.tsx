@@ -47,7 +47,7 @@ const KEY_STATS: Stat[] = [
  {
  label: "Abonnement gardien",
  value: "6,99 €/mois",
- detail: "Tarif standard, sans engagement. Alternative one-shot à 12 €. Tous les gardiens sont gratuits jusqu'au 30 septembre 2026.",
+ detail: "Tarif standard, sans engagement. Alternatives : 65 €/an ou 10 € pour un mois en oneshot. Tous les gardiens sont gratuits jusqu'au 30 septembre 2026.",
  },
  {
  label: "Vérification d'identité",
@@ -191,7 +191,7 @@ const Observatoire = () => {
  Guardiens fonctionne sur un modèle volontairement déséquilibré : <strong>les propriétaires d'animaux n'ont jamais rien à payer</strong>. Pas d'inscription, pas de frais de mise en relation, pas de commission sur les gardes. C'est un choix structurel qui distingue la plateforme depuis sa création.
  </p>
  <p>
- Les gardiens, eux, souscrivent un abonnement modeste pour accéder aux annonces et postuler : <strong>6,99 €/mois sans engagement</strong>, ou <strong>12 € en paiement unique</strong>. Aucune commission n'est prélevée sur les transactions, parce qu'il n'y a pas de transactions financières entre membres : l'échange repose sur la garde du logement contre la garde des animaux.
+ Les gardiens, eux, souscrivent un abonnement modeste pour accéder aux annonces et postuler : <strong>6,99 €/mois sans engagement</strong>, <strong>65 €/an</strong>, ou <strong>10 € pour un mois en oneshot</strong>. Aucune commission n'est prélevée sur les transactions, parce qu'il n'y a pas de transactions financières entre membres : l'échange repose sur la garde du logement contre la garde des animaux.
  </p>
  <p>
  Pendant la période de lancement, <strong>tous les gardiens sont gratuits jusqu'au 30 septembre 2026</strong>. Au-delà, le tarif standard s'applique, avec une remise prorata 2026 à 5,59 €/mois (-20 %) pour les inscrits avant cette date.
@@ -266,7 +266,7 @@ const Observatoire = () => {
  Les chiffres « 37 maisons gardées » et « 234 animaux accompagnés » correspondent au cumul vécu par les fondateurs Jérémie et Elisa entre 2021 et 2026, période de validation terrain qui a précédé l'ouverture publique de Guardiens.
  </p>
  <p>
- Les éléments tarifaires (gratuité propriétaire, 6,99 €/mois gardien, 12 € one-shot, gratuité jusqu'au 30 septembre 2026) sont publiés sur <Link to="/tarifs" className="text-primary hover:underline">la page Tarifs</Link>.
+ Les éléments tarifaires (gratuité propriétaire, 6,99 €/mois gardien, 65 €/an, 10 € oneshot, gratuité jusqu'au 30 septembre 2026) sont publiés sur <Link to="/tarifs" className="text-primary hover:underline">la page Tarifs</Link>.
  </p>
  <p>
  Les éléments structurels (vérification d'identité, badges, Trust Score, réseau Gardien d'Urgence) sont décrits sur <Link to="/a-propos" className="text-primary hover:underline">la page À propos</Link> et dans la <Link to="/faq" className="text-primary hover:underline">FAQ</Link>.
