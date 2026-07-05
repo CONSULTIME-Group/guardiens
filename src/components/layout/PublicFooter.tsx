@@ -47,6 +47,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
               <li><Link to="/actualites/house-sitting-aura-guide-complet" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_guide")}</Link></li>
               <li><Link to="/faq" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.faq")}</Link></li>
               <li><Link to="/tarifs" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.pricing")}</Link></li>
+              <li><Link to="/observatoire-garde-animaux" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.observatory")}</Link></li>
               <li><Link to="/actualites/c-est-quoi-le-house-sitting" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.what_is_house_sitting")}</Link></li>
             </ul>
           </div>

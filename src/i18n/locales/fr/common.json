@@ -30,6 +30,7 @@
       "house_sitting_guide": "Guide du house-sitting",
       "faq": "FAQ",
       "pricing": "Tarifs",
+      "observatory": "Observatoire",
       "what_is_house_sitting": "C'est quoi le house-sitting",
       "about": "À propos",
       "contact": "Contact",
@@ -72,7 +73,8 @@
       "testimonials": "Témoignages",
       "story": "Notre histoire",
       "cities": "Guides & villes",
-      "faq": "FAQ"
+      "faq": "FAQ",
+      "numbers": "Chiffres"
     },
     "usages": {
       "eyebrow": "Ce qu'on fait ensemble",
@@ -170,11 +172,11 @@
     },
     "testimonials": {
       "title": "Ils ont osé. Voici ce qu'il leur reste.",
-      "source": "Témoignages recueillis auprès des membres du programme Fondateur (janvier – mai 2026). Prénoms et villes réels, récits anonymisés à leur demande.",
+      "source": "Témoignages recueillis auprès de nos premiers membres (janvier à mai 2026). Prénoms et villes réels, récits anonymisés à leur demande.",
       "prev_aria": "Témoignage précédent",
       "next_aria": "Témoignage suivant",
       "page_aria": "Aller à la page de témoignages {{n}}",
-      "program_label": "Programme Fondateur"
+      "program_label": "Membre historique"
     },
     "story": {
       "eyebrow": "Notre histoire",
@@ -216,9 +218,16 @@
       "q6": "Guardiens est-il disponible partout en France ?",
       "a6": "Oui. Le réseau Guardiens s'étend dans toutes les régions de France, du Pays basque à la Bretagne, en passant par les Alpes et le Nord. Vous trouverez un gardien près de chez vous quel que soit votre département."
     },
+    "inventory": {
+      "title": "Ce qu'on a construit pour vous",
+      "subtitle": "Un inventaire vivant, remis à jour à chaque visite.",
+      "cities_label": "villes couvertes",
+      "breeds_label": "races documentées",
+      "places_label": "lieux dog-friendly géolocalisés",
+      "pros_label": "pros animaliers",
+      "cta": "Voir l'observatoire complet"
+    },
     "final": {
-      "badge_program": "Programme Fondateur",
-      "badge_offer": "Badge fondateur offert",
       "title": "Votre prochaine histoire commence ici.",
       "lede": "Vous partirez l'esprit léger. Vous rentrerez avec autre chose, un coin découvert, une rencontre, quelqu'un que vous n'auriez jamais croisé.",
       "cta_owner": "Publier mon annonce",

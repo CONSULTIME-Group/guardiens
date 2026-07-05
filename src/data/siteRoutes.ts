@@ -249,7 +249,7 @@ title: "Tarifs Guardiens, gratuit aujourd'hui sans engagement | Guardiens",
  {
  path: "/inscription",
  title: "Inscription — Créer un compte gratuit | Guardiens",
- metaDescription: "Rejoignez la communauté Guardiens. Inscription gratuite pour tous, sans engagement.",
+ metaDescription: "Rejoignez la communauté Guardiens. Inscription gratuite pour tous, aujourd'hui et sans deadline. Ni carte bancaire, ni engagement.",
  h1: "Créer un compte",
  sitemapPriority: "0.6",
  changeFreq: "monthly",
@@ -344,7 +344,7 @@ export const dynamicRoutes: DynamicRouteConfig[] = [
  sampleParams: { slug: "nouveaux-tarifs-2026" },
  // Titre et description réels servis par la page (vérifiés strictement)
  sampleTitle: "Tarifs Guardiens 2026 | Guardiens",
- sampleDescription: "Guardiens est gratuit aujourd'hui pour tous, sans engagement, sans commission ni frais cachés.",
+ sampleDescription: "Guardiens reste gratuit tant que le service ne nous satisfait pas. Sans engagement, sans commission, sans deadline annoncée.",
  },
  {
  pathPattern: "/house-sitting/:city",
