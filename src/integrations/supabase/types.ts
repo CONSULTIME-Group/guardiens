@@ -4868,11 +4868,14 @@ export type Database = {
           date_needed: string | null
           description: string
           duration_estimate: string
+          end_date: string | null
           exchange_offer: string
           id: string
           latitude: number | null
           longitude: number | null
           mission_type: Database["public"]["Enums"]["mission_type_enum"]
+          pet_size: string | null
+          pet_species: string | null
           photos: string[]
           postal_code: string
           status: Database["public"]["Enums"]["small_mission_status"]
@@ -4888,11 +4891,14 @@ export type Database = {
           date_needed?: string | null
           description?: string
           duration_estimate?: string
+          end_date?: string | null
           exchange_offer?: string
           id?: string
           latitude?: number | null
           longitude?: number | null
           mission_type?: Database["public"]["Enums"]["mission_type_enum"]
+          pet_size?: string | null
+          pet_species?: string | null
           photos?: string[]
           postal_code?: string
           status?: Database["public"]["Enums"]["small_mission_status"]
@@ -4908,11 +4914,14 @@ export type Database = {
           date_needed?: string | null
           description?: string
           duration_estimate?: string
+          end_date?: string | null
           exchange_offer?: string
           id?: string
           latitude?: number | null
           longitude?: number | null
           mission_type?: Database["public"]["Enums"]["mission_type_enum"]
+          pet_size?: string | null
+          pet_species?: string | null
           photos?: string[]
           postal_code?: string
           status?: Database["public"]["Enums"]["small_mission_status"]
