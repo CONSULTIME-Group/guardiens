@@ -191,10 +191,10 @@ const Observatoire = () => {
  Guardiens fonctionne sur un modèle volontairement déséquilibré : <strong>les propriétaires d'animaux n'ont jamais rien à payer</strong>. Pas d'inscription, pas de frais de mise en relation, pas de commission sur les gardes. C'est un choix structurel qui distingue la plateforme depuis sa création.
  </p>
  <p>
- Les gardiens, eux, souscrivent un abonnement modeste pour accéder aux annonces et postuler : <strong>6,99 €/mois sans engagement</strong>, <strong>65 €/an</strong>, ou <strong>10 € pour un mois en oneshot</strong>. Aucune commission n'est prélevée sur les transactions, parce qu'il n'y a pas de transactions financières entre membres : l'échange repose sur la garde du logement contre la garde des animaux.
+ Les gardiens accèdent aujourd'hui à toutes les fonctionnalités sans abonnement et sans carte bancaire. <strong>Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons.</strong> Aucune commission n'est prélevée sur les échanges, parce qu'il n'y a pas de transaction financière entre membres : l'échange repose sur la garde du logement contre la garde des animaux.
  </p>
  <p>
- Pendant la période de lancement, <strong>tous les gardiens sont gratuits jusqu'au 30 septembre 2026</strong>. Au-delà, le tarif standard s'applique, avec une remise prorata 2026 à 5,59 €/mois (-20 %) pour les inscrits avant cette date.
+ Aucune date de bascule tarifaire n'est fixée à ce jour. Chaque membre sera informé par email 30 jours à l'avance si le modèle change.
  </p>
  </div>
  </section>
