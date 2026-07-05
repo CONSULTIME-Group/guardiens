@@ -1,37 +1,86 @@
 // src/lib/pricing.ts
-// Source unique de vérité pour le pricing Guardiens.
-// Toute modification ici se propage à toutes les pages, meta tags, Schemas, et BDD via les composants.
+// Source unique de vérité pour le pricing Guardiens (helpers d'affichage).
+// La bascule tarifaire est pilotée par `PRICING_IS_ACTIVE` dans src/config/pricing.ts.
 //
 // Convention typographique :
 // - Espace insécable (\u00A0) AVANT le symbole € et entre nombre et unité.
-// - Virgule décimale française pour l'affichage ("6,99"), point décimal pour la valeur numérique JS.
-// - Mois en lettres minuscules.
+// - Virgule décimale française pour l'affichage ("6,99"), point décimal pour la valeur JS.
+
+import {
+  PRICING_IS_ACTIVE,
+  SITTER_PRICE_MONTHLY,
+  SITTER_PRICE_YEARLY,
+  SITTER_PRICE_ONESHOT as CFG_SITTER_PRICE_ONESHOT,
+} from "@/config/pricing";
 
 const NBSP = "\u00A0";
 
-// ── Constantes atomiques ─────────────────────────────────────────────────────
-export const OWNER_PRICE = `0${NBSP}€`;
-export const SITTER_PRICE = `6,99${NBSP}€/mois`;
-export const SITTER_PRICE_NUMERIC = 6.99;
+// ── Helpers publics ─────────────────────────────────────────────────────────
+export function isPricingActive(): boolean {
+  return PRICING_IS_ACTIVE;
+}
+
+export function getSitterMonthlyLabel(): string {
+  return PRICING_IS_ACTIVE
+    ? `${SITTER_PRICE_MONTHLY.toFixed(2).replace(".", ",")}${NBSP}€/mois`
+    : "Gratuit";
+}
+
+export function getSitterYearlyLabel(): string {
+  return PRICING_IS_ACTIVE ? `${SITTER_PRICE_YEARLY}${NBSP}€/an` : "Gratuit";
+}
+
+export function getSitterOneshotLabel(): string {
+  return PRICING_IS_ACTIVE ? `${CFG_SITTER_PRICE_ONESHOT}${NBSP}€` : "Gratuit";
+}
+
+export function getOwnerPriceLabel(): string {
+  return "Gratuit";
+}
+
+export function getPricingBaseline(): string {
+  return "Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.";
+}
+
+export function getPricingBaselineShort(): string {
+  return "Gratuit pour vous, sans engagement.";
+}
+
+// ── Constantes conservées pour compatibilité (call-sites existants) ─────────
+// Tant que PRICING_IS_ACTIVE = false, ces constantes ne doivent PAS être
+// affichées publiquement. Passez par les helpers ci-dessus.
+export const OWNER_PRICE = "Gratuit";
+export const SITTER_PRICE = getSitterMonthlyLabel();
+export const SITTER_PRICE_NUMERIC = SITTER_PRICE_MONTHLY;
 export const SITTER_PRICE_CURRENCY = "EUR";
 
-// Formule ponctuelle, paiement unique pour un mois d'accès, sans renouvellement.
-export const SITTER_PRICE_ONESHOT = `10${NBSP}€`;
-export const SITTER_PRICE_ONESHOT_NUMERIC = 10;
+export const SITTER_PRICE_ONESHOT = getSitterOneshotLabel();
+export const SITTER_PRICE_ONESHOT_NUMERIC = CFG_SITTER_PRICE_ONESHOT;
 
-// Formule annuelle, paiement récurrent annuel, équivalent ~5,42 €/mois (-22 % vs mensuel).
-export const SITTER_PRICE_ANNUAL = `65${NBSP}€/an`;
-export const SITTER_PRICE_ANNUAL_NUMERIC = 65;
+export const SITTER_PRICE_ANNUAL = getSitterYearlyLabel();
+export const SITTER_PRICE_ANNUAL_NUMERIC = SITTER_PRICE_YEARLY;
 export const SITTER_PRICE_ANNUAL_MONTHLY_EQUIV = `5,42${NBSP}€/mois`;
 export const SITTER_PRICE_ANNUAL_DISCOUNT_PCT = 22;
-export const SITTER_PRICE_START = "1er octobre 2026";
-export const SITTER_PRICE_START_ISO = "2026-10-01";
-export const FOUNDER_DEADLINE = "30 septembre 2026";
-export const FOUNDER_DEADLINE_ISO = "2026-09-30";
+
+/**
+ * @deprecated Plus de date de bascule fixée. Conservé uniquement pour ne pas
+ * casser les imports résiduels. Utilisez `getPricingBaseline()` à la place.
+ */
+export const SITTER_PRICE_START = "à une date ultérieure";
+/**
+ * @deprecated Plus de date de bascule fixée.
+ */
+export const SITTER_PRICE_START_ISO = "";
+/**
+ * @deprecated Plus de programme Fondateur à échéance.
+ */
+export const FOUNDER_DEADLINE = "à une date ultérieure";
+/**
+ * @deprecated
+ */
+export const FOUNDER_DEADLINE_ISO = "";
 
 // ── Parrainage ───────────────────────────────────────────────────────────────
-// Nombre de mois d'abonnement gardien offerts par filleul activé une fois
-// que l'abonnement deviendra payant (cf. SITTER_PRICE_START). Source unique.
 export const REFERRAL_FREE_MONTHS = 1;
 export const REFERRAL_REWARD_LABEL =
   REFERRAL_FREE_MONTHS === 1
@@ -39,8 +88,6 @@ export const REFERRAL_REWARD_LABEL =
     : `${REFERRAL_FREE_MONTHS}${NBSP}mois offerts`;
 
 // ── Versions composées prêtes à l'emploi ─────────────────────────────────────
-export const PRICING_LONG = `À ${OWNER_PRICE} pour les propriétaires, sans abonnement requis. Abonnement gardien à ${SITTER_PRICE} à partir du ${SITTER_PRICE_START} (accès à ${OWNER_PRICE} jusqu'à cette date). Inscrivez-vous avant le ${FOUNDER_DEADLINE} pour le badge Fondateur.`;
-
-export const PRICING_SHORT = `À ${OWNER_PRICE} pour les propriétaires. ${SITTER_PRICE} pour les gardiens à partir du ${SITTER_PRICE_START}.`;
-
-export const PRICING_VERY_SHORT = `À ${OWNER_PRICE} pour les propriétaires.`;
+export const PRICING_LONG = getPricingBaseline();
+export const PRICING_SHORT = getPricingBaselineShort();
+export const PRICING_VERY_SHORT = getPricingBaselineShort();
