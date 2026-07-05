@@ -231,6 +231,43 @@ const OwnerDashboard = () => {
   const nextActions = useMemo(() => computeOwnerNextActions(nextActionsInput), [nextActionsInput]);
   const activationScore = useMemo(() => computeOwnerActivationScore(nextActionsInput), [nextActionsInput]);
 
+  /* ── Détection nouveau propriétaire (0 sit, 0 pet) : applique le
+       précepte 2026 « 1 seule NBA above the fold, pas 4 cartes empilées ».
+       On enrichit la description de la NBA avec un signal local
+       (nombre de gardiens vérifiés à proximité). ── */
+  const isNewOwner = useIsNewOwner({ sitsCount: sits.length, petsCount: pets.length });
+  const nearbyCount = nearbyOwnerSittersData?.totalCount ?? 0;
+  const nearbyRadius = nearbyOwnerSittersData?.radiusUsed ?? null;
+  const newOwnerDescription = useMemo(() => {
+    if (!isNewOwner) return priorityAction.description;
+    if (nearbyCount >= 5 && nearbyRadius) {
+      return `${nearbyCount} gardiens vérifiés à ${nearbyRadius} km attendent une annonce comme la vôtre. Environ 2 minutes pour publier.`;
+    }
+    if (nearbyCount > 0 && nearbyRadius) {
+      return `Vous êtes parmi les premiers dans votre secteur. Publiez votre annonce, on active les notifications pour les gardiens qui s'inscriront près de chez vous.`;
+    }
+    return `Plus de 2 200 gardiens vérifiés en France. Publiez votre annonce, on prévient ceux qui correspondent le mieux. Environ 2 minutes.`;
+  }, [isNewOwner, nearbyCount, nearbyRadius, priorityAction.description]);
+
+  // Trace 1 fois par session le premier affichage dashboard "nouveau proprio"
+  useEffect(() => {
+    if (loading || !user?.id || !isNewOwner) return;
+    const key = `dash_first_view_owner_${user.id}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+      trackEvent("dashboard_first_time_view", {
+        source: "/dashboard",
+        metadata: {
+          user_role: "owner",
+          view_variant: "new_owner_nba",
+          nearby_count: nearbyCount,
+          nearby_radius: nearbyRadius,
+        },
+      });
+    } catch {}
+  }, [loading, user?.id, isNewOwner, nearbyCount, nearbyRadius]);
+
   /* ── Render ── */
 
 
