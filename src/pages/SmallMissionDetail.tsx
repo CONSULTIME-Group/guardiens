@@ -310,8 +310,22 @@ const SmallMissionDetail = () => {
     return () => { supabase.removeChannel(channel); };
   }, [id, load]);
 
+  const MIN_MESSAGE_LEN = 10;
+  const MAX_MESSAGE_LEN = 500;
+  const trimmedMessage = message.trim();
+  const messageTooShort = trimmedMessage.length > 0 && trimmedMessage.length < MIN_MESSAGE_LEN;
+  const messageValid = trimmedMessage.length >= MIN_MESSAGE_LEN && trimmedMessage.length <= MAX_MESSAGE_LEN;
+
   const handleRespond = async () => {
-    if (!user || !id || !message.trim() || submitting) return;
+    if (!user || !id || submitting) return;
+    if (!trimmedMessage) {
+      toast({ variant: "destructive", title: "Message vide", description: "Écrivez un mot avant de publier votre réponse." });
+      return;
+    }
+    if (trimmedMessage.length < MIN_MESSAGE_LEN) {
+      toast({ variant: "destructive", title: "Message trop court", description: `Ajoutez au moins ${MIN_MESSAGE_LEN} caractères pour que l'auteur comprenne votre proposition.` });
+      return;
+    }
     setSubmitting(true);
     try {
       // Pre-check: re-read mission status to avoid responding to a closed mission
@@ -331,8 +345,9 @@ const SmallMissionDetail = () => {
       }
 
       const { error } = await supabase.from("small_mission_responses").insert({
-        mission_id: id, responder_id: user.id, message: message.trim(),
+        mission_id: id, responder_id: user.id, message: trimmedMessage,
       });
+
       if (error) {
         if (error.code === "23505") {
           toast({ variant: "destructive", title: "Déjà envoyé", description: "Vous avez déjà proposé votre aide pour cette mission." });
@@ -1332,25 +1347,33 @@ const SmallMissionDetail = () => {
                         id="composer-textarea"
                         placeholder={`Répondez à ${author?.first_name || "l'auteur"}, présentez-vous en deux mots…`}
                         value={message}
-                        onChange={(e) => setMessage(e.target.value.slice(0, 500))}
+                        onChange={(e) => setMessage(e.target.value.slice(0, MAX_MESSAGE_LEN))}
                         rows={3}
-                        className="min-h-[72px] resize-none rounded-xl border-0 bg-muted/50 focus-visible:ring-1 focus-visible:ring-primary/40 text-sm md:text-base"
-                        maxLength={500}
+                        aria-invalid={messageTooShort}
+                        aria-describedby="composer-help"
+                        className={`min-h-[72px] resize-none rounded-xl border-0 bg-muted/50 focus-visible:ring-1 text-sm md:text-base ${messageTooShort ? "focus-visible:ring-destructive/60 ring-1 ring-destructive/40" : "focus-visible:ring-primary/40"}`}
+                        maxLength={MAX_MESSAGE_LEN}
                       />
+                      {messageTooShort && (
+                        <p className="text-[11px] text-destructive mt-1.5" role="alert">
+                          Encore {MIN_MESSAGE_LEN - trimmedMessage.length} caractère{MIN_MESSAGE_LEN - trimmedMessage.length > 1 ? "s" : ""} minimum pour publier.
+                        </p>
+                      )}
                       <div className="flex items-center justify-between gap-2 mt-2">
-                        <span className={`text-[11px] ${message.length > 450 ? "text-warning" : "text-muted-foreground"}`}>
-                          {message.length}/500 · Visible par tout le monde
+                        <span id="composer-help" className={`text-[11px] ${message.length > 450 ? "text-warning" : "text-muted-foreground"}`}>
+                          {message.length}/{MAX_MESSAGE_LEN} · Visible par tout le monde
                         </span>
                         <Button
                           size="sm"
                           onClick={handleRespond}
-                          disabled={submitting || !message.trim()}
+                          disabled={submitting || !messageValid}
                           className="rounded-full gap-1.5"
                         >
                           <Send className="h-3.5 w-3.5" />
                           {submitting ? "Envoi…" : "Publier"}
                         </Button>
                       </div>
+
                     </div>
                   </div>
                 </div>
