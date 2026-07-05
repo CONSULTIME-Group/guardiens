@@ -1302,66 +1302,36 @@ const SmallMissionDetail = () => {
         </div>
 
         {/* ══════════════════════════════════════════════════════ */}
-        {/* ── PUBLISHER : Propositions reçues ── */}
+        {/* ── Réponses (lecture publique, esprit commentaires) ── */}
         {/* ══════════════════════════════════════════════════════ */}
-        {isAuthor && (mission.status === "open" || mission.status === "in_progress") && (
-          <section id="propositions" className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border scroll-mt-8">
+        {(mission.status === "open" || mission.status === "in_progress" || mission.status === "completed") && (
+          <section id="reponses" className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border scroll-mt-8">
             <div className="flex items-center gap-3 mb-6">
               <MessageSquare className="h-5 w-5 text-primary" />
               <h2 className="font-heading text-2xl md:text-3xl font-bold">
-                Propositions reçues <span className="text-muted-foreground font-normal">({responses.length})</span>
+                Réponses <span className="text-muted-foreground font-normal">({responses.length})</span>
               </h2>
             </div>
             {responses.length === 0 ? (
               <div className="bg-muted/40 rounded-2xl p-8 text-center">
                 <p className="text-muted-foreground italic">
-                  Pas encore de proposition. Patience, souvent, les premières arrivent dans la journée.
+                  Pas encore de réponse. Soyez la première personne à réagir.
                 </p>
               </div>
             ) : (
               <div className="space-y-3 max-w-3xl">
                 {responses.map((r: any) => (
-                  <div key={r.id} className="bg-card rounded-2xl border border-border p-5">
-                    <div className="flex items-start gap-4">
-                      {r.responder?.avatar_url ? (
-                        <img src={r.responder.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover" />
-                      ) : (
-                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center font-bold">
-                          {r.responder?.first_name?.charAt(0) || "?"}
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
-                          <p className="font-semibold">{r.responder?.first_name || "Quelqu'un"}</p>
-                          <p className="text-xs text-muted-foreground">{format(new Date(r.created_at), "d MMM à HH:mm", { locale: fr })}</p>
-                        </div>
-                        <p className="text-sm text-foreground/85 leading-relaxed whitespace-pre-wrap">{r.message}</p>
-                        <div className="flex gap-2 mt-4 flex-wrap">
-                          {r.status === "pending" && (
-                            <>
-                              <Button size="sm" onClick={() => handleAcceptResponse(r.id)} disabled={!!processingResponseId} className="rounded-full">
-                                {processingResponseId === r.id ? "…" : "Accepter"}
-                              </Button>
-                              <Button size="sm" variant="outline" onClick={() => handleDeclineResponse(r.id)} disabled={!!processingResponseId} className="rounded-full">
-                                Décliner
-                              </Button>
-                            </>
-                          )}
-                          {r.status === "accepted" && (
-                            <>
-                              <span className="text-xs font-medium text-success bg-success-soft px-3 py-1 rounded-full">Acceptée</span>
-                              <Button size="sm" variant="outline" onClick={() => navigate(r.conversation_id ? `/messages?c=${r.conversation_id}` : "/messages")} className="rounded-full gap-2">
-                                <MessageSquare className="h-3.5 w-3.5" /> Messagerie
-                              </Button>
-                            </>
-                          )}
-                          {r.status === "declined" && (
-                            <span className="text-xs font-medium text-destructive bg-destructive/10 px-3 py-1 rounded-full">Non retenu(e)</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <MissionResponseCard
+                    key={r.id}
+                    response={r}
+                    isAuthor={isAuthor}
+                    currentUserId={user?.id}
+                    missionOwnerId={mission.user_id}
+                    processing={processingResponseId === r.id}
+                    onSelect={() => handleAcceptResponse(r.id)}
+                    onDecline={() => handleDeclineResponse(r.id)}
+                    onOpenMessages={() => navigate(r.conversation_id ? `/messages?c=${r.conversation_id}` : "/messages")}
+                  />
                 ))}
               </div>
             )}
