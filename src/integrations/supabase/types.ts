@@ -442,6 +442,7 @@ export type Database = {
       }
       articles: {
         Row: {
+          admin_notes: string | null
           author_name: string
           canonical_url: string | null
           category: string
@@ -469,6 +470,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          admin_notes?: string | null
           author_name?: string
           canonical_url?: string | null
           category?: string
@@ -496,6 +498,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          admin_notes?: string | null
           author_name?: string
           canonical_url?: string | null
           category?: string
