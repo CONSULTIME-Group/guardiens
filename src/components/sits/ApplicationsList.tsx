@@ -746,12 +746,32 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       )}
 
       {showAccord && accordData && (
-        <Dialog open={showAccord} onOpenChange={(o) => { if (!o) { setShowAccord(false); setConfirmApp(null); load(); } }}>
+        <Dialog
+          open={showAccord}
+          onOpenChange={(o) => {
+            if (!o) {
+              trackEvent("accord_dialog_closed_unsigned", {
+                metadata: { sit_id: sitId, role: "proprio" },
+              });
+              setShowAccord(false);
+              setConfirmApp(null);
+              load();
+            }
+          }}
+        >
           <DialogContent className="max-w-2xl p-0 overflow-hidden">
             <DialogTitle className="sr-only">Accord de garde</DialogTitle>
             <AccordDeGarde
               garde={accordData}
-              onClose={() => { setShowAccord(false); setConfirmApp(null); load(); }}
+              role="proprio"
+              onClose={() => {
+                trackEvent("accord_dialog_closed_unsigned", {
+                  metadata: { sit_id: sitId, role: "proprio" },
+                });
+                setShowAccord(false);
+                setConfirmApp(null);
+                load();
+              }}
             />
           </DialogContent>
         </Dialog>
