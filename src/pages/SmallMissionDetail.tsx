@@ -797,83 +797,34 @@ const SmallMissionDetail = () => {
       );
     }
 
-    // Visiteur connecté, peut postuler
+    // Visiteur connecté, peut répondre — carte compacte, la vraie saisie se fait sous le fil
     if (mission.status === "open" && canApplyMissions) {
       const isOffer = (mission as any).mission_type === "offre";
-      const starters = isOffer
-        ? [
-            `Bonjour ${author?.first_name || ""}, votre proposition m'intéresse, j'aurais besoin d'un coup de main.`.trim(),
-            `Bonjour ${author?.first_name || ""}, merci pour votre offre, dites-moi vos disponibilités.`.trim(),
-            `Bonjour ${author?.first_name || ""}, on peut en discuter ? J'ai un besoin qui correspond.`.trim(),
-          ]
-        : [
-            `Bonjour ${author?.first_name || ""}, je suis disponible et ${mission.city ? `je connais bien ${titlecaseCity(mission.city)}` : "pas loin de chez vous"}.`.trim(),
-            mission.category === "animals"
-              ? `Bonjour ${author?.first_name || ""}, j'ai l'habitude des animaux et je serais ravi(e) de vous aider.`
-              : `Bonjour ${author?.first_name || ""}, votre demande me parle, j'aimerais vous aider.`,
-            `Bonjour ${author?.first_name || ""}, dites-moi quand ça vous arrange, je m'organise.`,
-          ];
-
-      const eyebrow = isOffer ? "Solliciter cette aide" : "Proposer mon aide";
-      const heading = isOffer
-        ? `Répondez à ${author?.first_name || "l'auteur"}`
-        : `Écrivez un mot à ${author?.first_name || "l'auteur"}`;
-      const ctaLabel = isOffer ? "Envoyer ma demande" : "Publier ma réponse";
-      const chipLabels = isOffer
-        ? ["Ça m'intéresse", "Vos dispos ?", "On en discute"]
-        : ["Je suis dispo", "Ça me parle", "Selon vous"];
-      const placeholder = isOffer
-        ? `Dites bonjour à ${author?.first_name || "l'auteur"}, expliquez votre besoin en deux mots.`
-        : `Dites bonjour à ${author?.first_name || "l'auteur"}, présentez-vous en deux mots.`;
-
+      const ctaLabel = isOffer ? "Solliciter cette aide" : "Répondre publiquement";
       return (
-        <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-5">
+        <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-4">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{eyebrow}</p>
-            <p className="font-heading text-xl font-bold text-foreground leading-tight">
-              {heading}
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Comment ça marche</p>
+            <p className="font-heading text-lg font-bold text-foreground leading-snug">
+              Répondez comme en commentaire.
+            </p>
+            <p className="text-sm text-muted-foreground leading-relaxed mt-1">
+              Votre réponse est visible par tout le monde. {author?.first_name || "L'auteur"} pourra
+              <span className="font-semibold text-foreground"> retenir une personne pour aider</span>.
             </p>
           </div>
-
-          {!message.trim() && (
-            <div className="flex flex-wrap gap-1.5">
-              {starters.map((s, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setMessage(s)}
-                  className="text-xs px-2.5 py-1 rounded-full border border-border bg-background hover:bg-accent hover:border-primary/40 transition-colors text-muted-foreground hover:text-foreground"
-                >
-                  {chipLabels[i]}
-                </button>
-              ))}
-            </div>
-          )}
-
-          <div>
-            <Textarea
-              placeholder={placeholder}
-              value={message}
-              onChange={e => setMessage(e.target.value.slice(0, 500))}
-              className="min-h-[120px] rounded-2xl text-base"
-              maxLength={500}
-            />
-            <div className="flex items-center justify-between text-[11px] text-muted-foreground mt-1.5 px-1">
-              <span>{author?.first_name || "L'auteur"} reçoit votre mot directement</span>
-              <span className={message.length > 450 ? "text-warning" : ""}>{message.length}/500</span>
-            </div>
-          </div>
-
           <Button
-            className="w-full rounded-full font-bold text-base shadow-lg shadow-primary/20"
+            className="w-full rounded-full font-bold text-base"
             size="lg"
-            onClick={handleRespond}
-            disabled={submitting || !message.trim()}
+            onClick={() => {
+              const el = document.getElementById("composer");
+              el?.scrollIntoView({ behavior: "smooth", block: "center" });
+              setTimeout(() => document.getElementById("composer-textarea")?.focus(), 400);
+            }}
           >
-            {submitting ? "Envoi…" : ctaLabel}
+            {ctaLabel}
           </Button>
-
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground pt-1">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
             <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Gratuit, entre membres</span>
             <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Sans engagement</span>
           </div>
