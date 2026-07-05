@@ -447,21 +447,22 @@ const EntraideHub = () => {
           </div>
 
 
-          {/* Toggle Mes publications, hors barre d'onglets */}
+          {/* Toggle Mes publications, discret sous les onglets */}
           {isAuthenticated && (
-            <div className="mb-5 flex justify-end">
+            <div className="mb-4 flex justify-end items-center gap-2">
+              <span className="text-[11px] text-muted-foreground">Affichage :</span>
               <button
                 type="button"
                 onClick={() => setMineOnly((v) => !v)}
                 aria-pressed={mineOnly}
                 aria-label={mineOnly ? "Afficher toutes les publications" : "N'afficher que mes publications"}
-                className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
+                className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border transition-colors ${
                   mineOnly
                     ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-card text-muted-foreground border-border hover:bg-accent"
+                    : "bg-transparent text-muted-foreground border-border/70 hover:bg-accent hover:text-foreground"
                 }`}
               >
-                {mineOnly ? "Mes publications ✓" : "Mes publications"}
+                {mineOnly ? "Mes publications ✓" : "Toutes"}
               </button>
             </div>
           )}
