@@ -97,7 +97,12 @@ export type EventType =
   | "admin_article_refresh_applied"         // Refresh IA appliqué (article_id, slug, changes_count)
   | "admin_article_batch_refresh_started"   // Batch démarré (count)
   | "admin_article_batch_refresh_completed" // Batch fini (success_count, error_count)
-  | "admin_article_pillar_validated_manually"; // Pilier sorti manuellement du noindex (article_id, slug)
+  | "admin_article_pillar_validated_manually" // Pilier sorti manuellement du noindex (article_id, slug)
+  // Pros vérifiés SIRET (Chantier badge + admin toggle) ---------------------
+  | "pro_verified_badge_seen"            // Impression du badge Vérifié (pro_id, surface: 'detail'|'card_annuaire'|'card_listing')
+  | "pros_filter_verified_toggled"       // Toggle filtre "Vérifiés uniquement" (enabled, category, ville)
+  | "pro_admin_verification_toggled"     // Admin toggle SIRET vérifié (pro_id, verified, admin_id)
+  | "pro_verification_request_clicked";  // Pro demande la vérification depuis son espace (pro_id)
 
 interface TrackOptions {
   source?: string;
