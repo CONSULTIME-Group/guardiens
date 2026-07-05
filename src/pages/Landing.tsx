@@ -23,7 +23,7 @@ import RecentSitsItemListJsonLd from "@/components/seo/RecentSitsItemListJsonLd"
 
 import PublicFooter from "@/components/layout/PublicFooter";
 import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
-import { SITTER_PRICE_NUMERIC, SITTER_PRICE_CURRENCY, SITTER_PRICE_START_ISO } from "@/lib/pricing";
+// Pricing pivot : plus d'Offer JSON-LD tant que PRICING_IS_ACTIVE = false.
 import RevealOnScroll from "@/components/ui/RevealOnScroll";
 
 const HOME_ROUTE = staticRoutes.find((route) => route.path === "/");
