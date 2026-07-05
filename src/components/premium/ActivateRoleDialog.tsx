@@ -12,7 +12,7 @@ import { PawPrint, Home } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { isBeforeLaunch, isInGracePeriod, GRACE_END } from "@/lib/constants";
+import { isBeforeLaunch, isInGracePeriod } from "@/lib/constants";
 
 interface ActivateRoleDialogProps {
   open: boolean;
@@ -107,13 +107,6 @@ const ActivateRoleDialog = ({ open, onClose, targetRole }: ActivateRoleDialogPro
     );
   }
 
-  const freeNow = isBeforeLaunch() || isInGracePeriod();
-  const lastFreeDay = new Date(GRACE_END.getTime() - 24 * 60 * 60 * 1000).toLocaleDateString("fr-FR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="sm:max-w-md">
@@ -128,7 +121,7 @@ const ActivateRoleDialog = ({ open, onClose, targetRole }: ActivateRoleDialogPro
         </DialogHeader>
         <div className="flex flex-col gap-2 pt-2">
           <Button onClick={handleActivateGardien} disabled={loading}>
-            {loading ? "Redirection..." : freeNow ? "Activer mon espace gardien →" : "Activer mon abonnement →"}
+            {loading ? "Redirection..." : "Activer mon espace gardien →"}
           </Button>
           <Button variant="ghost" onClick={onClose} disabled={loading}>
             Pas maintenant
