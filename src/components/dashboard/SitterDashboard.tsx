@@ -58,26 +58,28 @@ const SitterDashboard = () => {
   // (Sous-titre dynamique supprimé : redondant avec le titre de la
   // PriorityActionCard du cockpit. Cf. audit dashboard 2026.)
 
-  // ── Checklist UNIFIÉE, fusion onboarding + profile completion ──
-  // Items atomiques actionnables (pas l'agrégat profile_completion).
-  // NB : le toggle "mode disponible" est porté UNIQUEMENT par SitterHero
-  // (source de vérité unique). On ne le duplique plus ici.
-  const allItems = [
-    { done: !!postalCode, label: "Indiquer mon code postal", to: "/profile?focus=postal_code" },
-    { done: !!avatarUrl, label: "Ajouter une photo de profil", to: "/profile?section=identite" },
-    { done: !!(bio && bio.length >= 50), label: "Écrire ma bio (motivation, expérience)", to: "/profile?section=profil" },
-    { done: hasAnimalExperience, label: "Ajouter une expérience animale", to: "/profile?section=experience" },
-    { done: identityStatus === "verified" || identityVerified, label: "Vérifier mon identité (recommandé)", to: "/settings#verification" },
+  // ── Checklist NEW-SITTER : 3 items décisifs + 2 items secondaires ──
+  // Précepte 2026 : 2-4 étapes visibles max, le reste dans un fold-out.
+  // Les 3 items primaires débloquent "je peux postuler et être choisi" :
+  // photo (rassure), bio ≥ 50 (motivation), code postal (annonces locales).
+  const primaryItems = [
+    { key: "avatar", done: !!avatarUrl, label: "Ajouter une photo de profil", hint: "Rassure les propriétaires en 1 coup d'œil", to: "/profile?section=identite" },
+    { key: "bio", done: !!(bio && bio.length >= 50), label: "Écrire votre bio (50 caractères min)", hint: "Motivation, expérience, ce qui vous rend fiable", to: "/profile?section=profil" },
+    { key: "postal", done: !!postalCode, label: "Renseigner votre code postal", hint: "Pour voir les annonces près de chez vous", to: "/profile?focus=postal_code" },
   ];
+  const secondaryItems = [
+    { key: "experience", done: hasAnimalExperience, label: "Ajouter une expérience animale", to: "/profile?section=experience" },
+    { key: "identity", done: identityStatus === "verified" || identityVerified, label: "Vérifier votre identité (recommandé)", to: "/settings#verification" },
+  ];
+  const allItems = [...primaryItems, ...secondaryItems];
   const completedItems = allItems.filter(c => c.done);
-  const incompleteItems = allItems.filter(c => !c.done);
   const allChecklistDone = completedItems.length === allItems.length;
+  const primaryDone = primaryItems.filter(c => c.done).length;
   const progressPct = Math.round((completedItems.length / allItems.length) * 100);
 
   // ── Bloc activation unifié ──
   const ChecklistBlock = (
     <section aria-labelledby="onboarding-checklist-heading" className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
-      {/* Toast inline CP manquant, remplace le bandeau destructif full-width */}
       {!postalCode && (
         <div className="mb-3 flex items-start gap-3 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3" role="alert">
           <AlertCircle className="h-4 w-4 text-warning shrink-0 mt-0.5" aria-hidden="true" />
@@ -94,15 +96,15 @@ const SitterDashboard = () => {
       {allChecklistDone ? null : (
         <DashSection
           eyebrow="Activation"
-          title="Finalisez votre profil"
-          description={`${completedItems.length}/${allItems.length} étapes, ${progressPct}%`}
+          title="3 étapes pour débloquer les annonces"
+          description={`${primaryDone}/${primaryItems.length} étapes essentielles, ${progressPct}% du profil`}
         >
           <Progress value={progressPct} className="mb-3" />
 
           <div role="list" className="bg-card border border-border rounded-2xl overflow-hidden">
-            {allItems.map((item: any, i: number) => (
+            {primaryItems.map((item, i) => (
               <Link
-                key={i}
+                key={item.key}
                 to={item.to}
                 role="listitem"
                 aria-disabled={item.done}
@@ -110,27 +112,68 @@ const SitterDashboard = () => {
                   item.done ? "pointer-events-none" : "cursor-pointer hover:bg-muted/40 hover:translate-x-0.5"
                 }`}
               >
-                <div className="flex items-center">
+                <div className="flex items-center min-w-0">
                   {item.done ? (
-                    <CheckCircle className="h-4 w-4 text-primary" aria-hidden="true" />
+                    <CheckCircle className="h-4 w-4 text-primary shrink-0" aria-hidden="true" />
                   ) : (
-                    <Circle className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
+                    <Circle className="h-4 w-4 text-muted-foreground shrink-0 transition-colors group-hover:text-primary" aria-hidden="true" />
                   )}
-                  <span className={`text-sm ml-3 ${item.done ? "line-through text-foreground/50" : "text-foreground"}`}>
-                    {item.label}
-                  </span>
+                  <div className="ml-3 min-w-0">
+                    <span className={`text-sm block ${item.done ? "line-through text-foreground/50" : "text-foreground"}`}>
+                      {item.label}
+                    </span>
+                    {!item.done && item.hint && (
+                      <span className="text-xs text-muted-foreground block mt-0.5">{item.hint}</span>
+                    )}
+                  </div>
                 </div>
                 {!item.done && (
-                  <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
+                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
                 )}
               </Link>
             ))}
           </div>
+
+          {/* 2 items secondaires masqués par défaut : « aller plus loin » */}
+          {secondaryItems.some(i => !i.done) && (
+            <details className="mt-3 rounded-2xl bg-card border border-border overflow-hidden">
+              <summary className="cursor-pointer list-none px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted/30 flex items-center justify-between">
+                <span>Aller plus loin, débloquer plus d'annonces</span>
+                <span className="text-xs text-muted-foreground" aria-hidden="true">▾</span>
+              </summary>
+              <div role="list">
+                {secondaryItems.map((item) => (
+                  <Link
+                    key={item.key}
+                    to={item.to}
+                    role="listitem"
+                    aria-disabled={item.done}
+                    className={`group flex items-center justify-between py-3 px-4 border-t border-border transition-all duration-200 ease-out ${
+                      item.done ? "pointer-events-none" : "cursor-pointer hover:bg-muted/40"
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      {item.done ? (
+                        <CheckCircle className="h-4 w-4 text-primary" aria-hidden="true" />
+                      ) : (
+                        <Circle className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                      )}
+                      <span className={`text-sm ml-3 ${item.done ? "line-through text-foreground/50" : "text-foreground"}`}>
+                        {item.label}
+                      </span>
+                    </div>
+                    {!item.done && <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
+                  </Link>
+                ))}
+              </div>
+            </details>
+          )}
         </DashSection>
       )}
 
     </section>
   );
+
 
   // ── Accordéon unique : Conseils + Réputation + Badges ──
   // 3 strates secondaires regroupées dans UN seul Accordion pour densifier
