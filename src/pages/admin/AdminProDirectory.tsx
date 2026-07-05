@@ -27,6 +27,9 @@ type ProRow = {
   email_contact: string | null;
   created_at: string;
   rejection_reason: string | null;
+  siret_verified: boolean;
+  siret_verified_at: string | null;
+  pricing_tier: "standard" | "verified";
 };
 
 type Tab = "pending" | "approved" | "rejected";
