@@ -1258,35 +1258,117 @@ const SmallMissionDetail = () => {
         {/* ══════════════════════════════════════════════════════ */}
         {(mission.status === "open" || mission.status === "in_progress" || mission.status === "completed") && (
           <section id="reponses" className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border scroll-mt-8">
-            <div className="flex items-center gap-3 mb-6">
-              <MessageSquare className="h-5 w-5 text-primary" />
-              <h2 className="font-heading text-2xl md:text-3xl font-bold">
-                Réponses <span className="text-muted-foreground font-normal">({responses.length})</span>
-              </h2>
+            <div className="max-w-3xl">
+              <div className="flex items-center gap-3 mb-3">
+                <MessageSquare className="h-5 w-5 text-primary" />
+                <h2 className="font-heading text-2xl md:text-3xl font-bold">
+                  Réponses <span className="text-muted-foreground font-normal">({responses.length})</span>
+                </h2>
+              </div>
+
+              {/* Explainer : quoi faire + rôle de la personne retenue */}
+              <div className="bg-muted/40 border border-border rounded-2xl p-4 mb-5 text-sm text-foreground/80 leading-relaxed">
+                {isAuthor ? (
+                  <>
+                    <span className="font-semibold text-foreground">Vous êtes l'auteur.</span>{" "}
+                    Chaque membre peut réagir publiquement. Quand une réponse vous convient, cliquez sur
+                    <span className="font-semibold text-foreground"> « Retenir cette personne »</span> :
+                    elle deviendra la <span className="font-semibold text-success">personne retenue pour vous aider</span>,
+                    visible ici et sur son profil public.
+                  </>
+                ) : (
+                  <>
+                    <span className="font-semibold text-foreground">Répondez comme en commentaire.</span>{" "}
+                    Votre réponse est publique. Si {author?.first_name || "l'auteur"} vous
+                    <span className="font-semibold text-foreground"> retient pour l'aider</span>, vous serez
+                    identifié(e) comme <span className="font-semibold text-success">« personne retenue »</span> et
+                    cela apparaîtra sur votre profil public. Vous pouvez aussi dire
+                    <span className="font-semibold text-foreground"> « Merci »</span> à une réponse utile.
+                  </>
+                )}
+              </div>
+
+              {responses.length === 0 ? (
+                <div className="bg-muted/40 rounded-2xl p-6 text-center mb-5">
+                  <p className="text-muted-foreground italic">
+                    Pas encore de réponse. Soyez la première personne à réagir.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3 mb-6">
+                  {responses.map((r: any) => (
+                    <MissionResponseCard
+                      key={r.id}
+                      response={r}
+                      isAuthor={isAuthor}
+                      currentUserId={user?.id}
+                      missionOwnerId={mission.user_id}
+                      processing={processingResponseId === r.id}
+                      onSelect={() => handleAcceptResponse(r.id)}
+                      onDecline={() => handleDeclineResponse(r.id)}
+                      onOpenMessages={() => navigate(r.conversation_id ? `/messages?c=${r.conversation_id}` : "/messages")}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Composer inline type commentaire */}
+              {!isAuthor && mission.status === "open" && canApplyMissions && !hasResponded && (
+                <div id="composer" className="scroll-mt-24">
+                  <div className="bg-card border border-border rounded-2xl p-3 md:p-4 flex items-start gap-3">
+                    {(user as any)?.avatar_url ? (
+                      <img
+                        src={(user as any).avatar_url}
+                        alt=""
+                        className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover shrink-0"
+                      />
+                    ) : (
+                      <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-muted flex items-center justify-center font-bold text-sm shrink-0">
+                        {(user as any)?.first_name?.charAt(0) || "?"}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <Textarea
+                        id="composer-textarea"
+                        placeholder={`Répondez à ${author?.first_name || "l'auteur"}, présentez-vous en deux mots…`}
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value.slice(0, 500))}
+                        rows={3}
+                        className="min-h-[72px] resize-none rounded-xl border-0 bg-muted/50 focus-visible:ring-1 focus-visible:ring-primary/40 text-sm md:text-base"
+                        maxLength={500}
+                      />
+                      <div className="flex items-center justify-between gap-2 mt-2">
+                        <span className={`text-[11px] ${message.length > 450 ? "text-warning" : "text-muted-foreground"}`}>
+                          {message.length}/500 · Visible par tout le monde
+                        </span>
+                        <Button
+                          size="sm"
+                          onClick={handleRespond}
+                          disabled={submitting || !message.trim()}
+                          className="rounded-full gap-1.5"
+                        >
+                          <Send className="h-3.5 w-3.5" />
+                          {submitting ? "Envoi…" : "Publier"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* États composer : déjà répondu / non éligible */}
+              {!isAuthor && hasResponded && (
+                <div className="bg-success-soft/40 border border-success/30 rounded-2xl p-4 text-sm text-foreground/80 flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
+                  Vous avez déjà répondu. {author?.first_name || "L'auteur"} vous répondra ici même.
+                </div>
+              )}
+              {!isAuthor && mission.status === "open" && !canApplyMissions && accessLevel === 1 && (
+                <div className="rounded-2xl border border-border p-4">
+                  <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="mission" />
+                </div>
+              )}
             </div>
-            {responses.length === 0 ? (
-              <div className="bg-muted/40 rounded-2xl p-8 text-center">
-                <p className="text-muted-foreground italic">
-                  Pas encore de réponse. Soyez la première personne à réagir.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3 max-w-3xl">
-                {responses.map((r: any) => (
-                  <MissionResponseCard
-                    key={r.id}
-                    response={r}
-                    isAuthor={isAuthor}
-                    currentUserId={user?.id}
-                    missionOwnerId={mission.user_id}
-                    processing={processingResponseId === r.id}
-                    onSelect={() => handleAcceptResponse(r.id)}
-                    onDecline={() => handleDeclineResponse(r.id)}
-                    onOpenMessages={() => navigate(r.conversation_id ? `/messages?c=${r.conversation_id}` : "/messages")}
-                  />
-                ))}
-              </div>
-            )}
           </section>
         )}
 
