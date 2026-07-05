@@ -233,7 +233,17 @@ export default function ProsListing() {
               const cat = getCategoryByValue(p.category);
               return (
                 <Link key={p.id} to={`/pros/${p.slug}`} className="group min-w-0">
-                  <Card className="h-full hover:shadow-md transition overflow-hidden">
+                  <Card className={`h-full hover:shadow-md transition overflow-hidden relative ${p.siret_verified ? "border-primary/30" : ""}`}>
+                    {p.siret_verified && (
+                      <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
+                        <ProVerifiedBadge
+                          verifiedAt={p.siret_verified_at}
+                          proId={p.id}
+                          surface="card_listing"
+                          size="sm"
+                        />
+                      </div>
+                    )}
                     <CardContent className="p-5">
                       <div className="flex items-center gap-3 mb-3">
                         {p.logo_url ? (
@@ -251,7 +261,7 @@ export default function ProsListing() {
                             {getProInitials(p.raison_sociale)}
                           </div>
                         )}
-                        <div className="min-w-0">
+                        <div className="min-w-0 pr-16">
                           <h2 className="font-semibold truncate group-hover:underline">
                             {p.raison_sociale}
                           </h2>
