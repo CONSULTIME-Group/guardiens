@@ -34,6 +34,11 @@ import PublicMissionView from "@/components/missions/PublicMissionView";
 import RelatedMissionCard from "@/components/missions/RelatedMissionCard";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import { isAuthorOf } from "@/lib/ownership";
+import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
+import { haversineDistance } from "@/utils/geo";
+
+/** Rayon max (km) pour considérer une mission « près de chez vous ». */
+const NEAR_RADIUS_KM = 100;
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
   animals: { label: "Animaux", icon: Dog, colorClass: "text-primary" },
