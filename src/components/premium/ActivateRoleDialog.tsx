@@ -50,7 +50,7 @@ const ActivateRoleDialog = ({ open, onClose, targetRole }: ActivateRoleDialogPro
     if (!user) return;
     setLoading(true);
     try {
-      // Pendant la période gratuite pour tous (jusqu'au 30/09/2026),
+      // Pendant la phase gratuite (PRICING_IS_ACTIVE = false),
       // on active directement le rôle gardien sans passer par Stripe.
       if (isBeforeLaunch() || isInGracePeriod()) {
         const { error } = await supabase.rpc("change_user_role", {

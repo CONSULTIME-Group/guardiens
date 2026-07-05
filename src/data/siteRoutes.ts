@@ -130,7 +130,7 @@ metaDescription: "Trouvez un gardien du coin pour votre maison et vos animaux. H
  },
  {
  path: "/tarifs",
-title: "Tarifs — 6,99\u00A0€/mois pour les gardiens | Guardiens",
+title: "Tarifs Guardiens, gratuit aujourd'hui sans engagement | Guardiens",
  metaDescription: "6,99\u00A0€/mois pour les gardiens, sans engagement. À 0 € pour les propriétaires. Sans commission, sans frais cachés.",
  h1: "Nos tarifs",
  sitemapPriority: "0.8",
@@ -343,7 +343,7 @@ export const dynamicRoutes: DynamicRouteConfig[] = [
  // Instance représentative : l'article "nouveaux-tarifs-2026" (contenu stable, pilier SEO)
  sampleParams: { slug: "nouveaux-tarifs-2026" },
  // Titre et description réels servis par la page (vérifiés strictement)
- sampleTitle: "Tarifs Guardiens 2026 — 6,99\u00A0€/mois, 7 jours offerts | Guardiens",
+ sampleTitle: "Tarifs Guardiens 2026 | Guardiens",
  sampleDescription: "Les tarifs officiels Guardiens pour 2026 : 6,99\u00A0€/mois pour les gardiens avec 7 jours offerts, à 0 € pour les propriétaires. Sans commission ni frais cachés.",
  },
  {
