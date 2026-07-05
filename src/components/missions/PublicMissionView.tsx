@@ -371,12 +371,11 @@ const PublicMissionView = ({
                 postalCode={mission.postal_code}
                 lat={mission.latitude}
                 lng={mission.longitude}
-                className="h-64"
+                className="h-40"
               />
-              <div className="p-5">
-                <p className="font-semibold text-sm text-foreground mb-1">Localisation approximative</p>
+              <div className="p-4">
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  L'adresse exacte est partagée uniquement après mise en relation, par respect de la vie privée.
+                  Localisation approximative. L'adresse exacte est partagée après mise en relation.
                 </p>
               </div>
             </div>
