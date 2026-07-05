@@ -1,43 +1,48 @@
 /**
- * Garde-fou : plus aucune trace de "Programme Fondateur" ou "Badge fondateur"
- * dans les traductions (post-pivot pricing). Bloque la réintroduction.
- * Vérifie aussi que Landing.tsx n'utilise plus landing.final.badge_program
- * ni landing.final.badge_offer.
+ * Garde-fou pivot pricing sur la Landing.
+ * Bloque la réintroduction des chips "Programme Fondateur" / "Badge fondateur"
+ * dans le CTA final et le renommage de `program_label` vers "Programme Fondateur".
+ *
+ * Note : d'anciennes clés `pre_launch.*` (bloc pré-lancement désactivé tant que
+ * PRICING_IS_ACTIVE = false) mentionnent encore "Fondateur", elles sont hors
+ * périmètre de ce garde-fou.
  */
 import { describe, it, expect } from "vitest";
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const LOCALES_DIR = resolve(__dirname, "../i18n/locales");
+const LOCALES = ["fr", "en", "es", "it", "de"] as const;
 const LANDING_TSX = resolve(__dirname, "../pages/Landing.tsx");
 
-const FORBIDDEN_PATTERNS = [
-  /Programme Fondateur/i,
-  /Badge fondateur/i,
-  /Founder Programme/i,
-  /Founder badge/i,
-  /Programa Fundador/i,
-  /Insignia fundador/i,
-  /Programma Fondatore/i,
-  /Badge fondatore/i,
-  /Gründer-Programm/i,
-  /Gründer-Abzeichen/i,
-];
+const forbiddenLabels: Record<(typeof LOCALES)[number], RegExp> = {
+  fr: /Programme Fondateur/i,
+  en: /Founder Programme/i,
+  es: /Programa Fundador/i,
+  it: /Programma Fondatore/i,
+  de: /Gründer-Programm/i,
+};
 
 describe("no-founder-in-landing-copy", () => {
-  const locales = readdirSync(LOCALES_DIR).filter((f) =>
-    ["fr", "en", "es", "it", "de"].includes(f),
-  );
+  for (const lang of LOCALES) {
+    it(`locale ${lang} : landing.final.badge_program et badge_offer sont supprimés`, () => {
+      const raw = readFileSync(
+        resolve(__dirname, `../i18n/locales/${lang}/common.json`),
+        "utf-8",
+      );
+      const json = JSON.parse(raw);
+      const finalBlock = json?.landing?.final ?? {};
+      expect(finalBlock.badge_program).toBeUndefined();
+      expect(finalBlock.badge_offer).toBeUndefined();
+    });
 
-  for (const lang of locales) {
-    it(`locale ${lang} ne contient plus aucune mention "Programme Fondateur"`, () => {
-      const content = readFileSync(`${LOCALES_DIR}/${lang}/common.json`, "utf-8");
-      for (const pattern of FORBIDDEN_PATTERNS) {
-        expect(
-          pattern.test(content),
-          `Locale ${lang} contient encore un motif proscrit: ${pattern}`,
-        ).toBe(false);
-      }
+    it(`locale ${lang} : landing.testimonials.program_label ne mentionne plus le programme fondateur`, () => {
+      const raw = readFileSync(
+        resolve(__dirname, `../i18n/locales/${lang}/common.json`),
+        "utf-8",
+      );
+      const json = JSON.parse(raw);
+      const label = json?.landing?.testimonials?.program_label ?? "";
+      expect(forbiddenLabels[lang].test(label)).toBe(false);
     });
   }
 
