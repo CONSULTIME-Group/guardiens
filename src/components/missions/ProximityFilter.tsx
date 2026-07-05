@@ -61,12 +61,13 @@ const ProximityFilter = ({
     setGeoError(null);
     const res = await onUseMyLocation();
     setLocating(false);
-    if (res.ok) {
+    if (res.ok === true) {
       toast.success("Position détectée. Tri par proximité activé.");
       return;
     }
-    setGeoError(res.reason);
-    toast.error(GEO_ERROR_MESSAGES[res.reason]);
+    const reason = res.reason;
+    setGeoError(reason);
+    toast.error(GEO_ERROR_MESSAGES[reason]);
   };
 
   // Toute saisie manuelle purge l'erreur géoloc pour ne pas fausser le contexte.
