@@ -459,6 +459,18 @@ const PublicMissionView = ({
           </div>
         </section>
       </div>
+
+      {/* CTA sticky mobile : facilite la conversion sur téléphone où la
+          sidebar n'est plus visible en scrollant. Caché en lg+. */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur px-4 py-3 shadow-[0_-8px_20px_-12px_hsl(var(--foreground)/0.15)]">
+        <Link to={`/inscription?redirect=${encodeURIComponent(redirect)}`} className="block">
+          <Button className="w-full py-5 rounded-full font-bold text-sm shadow-lg shadow-primary/20">
+            Proposer mon aide, gratuit
+          </Button>
+        </Link>
+      </div>
+      {/* Réserve d'espace pour éviter que la sticky masque le footer sur mobile. */}
+      <div className="lg:hidden h-20" aria-hidden />
     </div>
   );
 };
