@@ -132,7 +132,8 @@ export function useMissionDistance(missions: MissionLike[]) {
     };
   }, [origin, missions]);
 
-  /* Géoloc navigateur → reverse via edge geocode (fallback : on lit le CP) */
+  /* Géoloc navigateur → pose l'origine {lat,lng} directement.
+     Le CP reste vide en UI (pas de reverse-geocode), mais tri et filtre marchent. */
   const useMyLocation = useCallback((): Promise<boolean> => {
     return new Promise((resolve) => {
       if (typeof navigator === "undefined" || !navigator.geolocation) {
@@ -140,21 +141,9 @@ export function useMissionDistance(missions: MissionLike[]) {
         return;
       }
       navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          try {
-            const { data } = await supabase.functions.invoke("reverse-geocode", {
-              body: { lat: pos.coords.latitude, lng: pos.coords.longitude },
-            });
-            const cp = data?.postal_code;
-            if (typeof cp === "string" && isValidFrPostal(cp)) {
-              setPostal(cp);
-              resolve(true);
-              return;
-            }
-          } catch {
-            /* noop */
-          }
-          // Fallback : pose l'origine directement, sans CP
+        (pos) => {
+          setPostalState("");
+          writeLS(LS_POSTAL, null);
           setOrigin({ lat: pos.coords.latitude, lng: pos.coords.longitude });
           resolve(true);
         },
@@ -162,7 +151,7 @@ export function useMissionDistance(missions: MissionLike[]) {
         { enableHighAccuracy: false, timeout: 8000, maximumAge: 60_000 },
       );
     });
-  }, [setPostal]);
+  }, []);
 
   const active = Boolean(origin);
 
