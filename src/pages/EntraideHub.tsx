@@ -21,12 +21,14 @@ import { DEPT_NAMES, getDeptCode } from "@/lib/departments";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import MissionCardCover from "@/components/missions/MissionCardCover";
+import ProximityFilter from "@/components/missions/ProximityFilter";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
+import { useMissionDistance } from "@/hooks/useMissionDistance";
 
 
 type Tab = "questions" | "besoins" | "offres";
 type MissionStatus = "all" | "open" | "in_progress" | "completed";
-type MissionSort = "recent" | "date_needed";
+type MissionSort = "recent" | "date_needed" | "distance";
 
 const MISSION_CATEGORY_LABEL: Record<string, string> = {
   animals: "Animaux",
@@ -114,7 +116,7 @@ const VALID_TABS: Tab[] = ["questions", "besoins", "offres"];
 const VALID_Q_CATS = ["all", "animaux", "jardin", "maison", "garde", "autre"] as const;
 const VALID_Q_STATUS = ["all", "open", "resolved"] as const;
 const VALID_M_STATUS: MissionStatus[] = ["all", "open", "in_progress", "completed"];
-const VALID_M_SORT: MissionSort[] = ["recent", "date_needed"];
+const VALID_M_SORT: MissionSort[] = ["recent", "date_needed", "distance"];
 
 const M_STATUS_LABEL: Record<MissionStatus, string> = {
   all: "Tous statuts",
@@ -126,6 +128,7 @@ const M_STATUS_LABEL: Record<MissionStatus, string> = {
 const M_SORT_LABEL: Record<MissionSort, string> = {
   recent: "Plus récentes",
   date_needed: "Date la plus proche",
+  distance: "Proches d'abord",
 };
 
 const formatDateNeeded = (d: string | null) => {
@@ -263,6 +266,9 @@ const EntraideHub = () => {
     supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null));
   }, []);
 
+  /* Filtre proximité (CP + rayon) */
+  const proximity = useMissionDistance(missions);
+
   const sortMissions = (arr: MissionRow[]): MissionRow[] => {
     if (mSort === "date_needed") {
       return [...arr].sort((a, b) => {
@@ -270,6 +276,16 @@ const EntraideHub = () => {
         if (!a.date_needed) return 1;
         if (!b.date_needed) return -1;
         return a.date_needed.localeCompare(b.date_needed);
+      });
+    }
+    if (mSort === "distance" && proximity.active) {
+      return [...arr].sort((a, b) => {
+        const da = proximity.getDistance(a.id);
+        const db = proximity.getDistance(b.id);
+        if (da == null && db == null) return 0;
+        if (da == null) return 1;
+        if (db == null) return -1;
+        return da - db;
       });
     }
     return arr;
@@ -282,11 +298,15 @@ const EntraideHub = () => {
       if (mStatus !== "all" && m.status !== mStatus) return false;
       if (mCategory !== "all" && m.category !== mCategory) return false;
       if (mineOnly && currentUserId && m.user_id !== currentUserId) return false;
+      if (proximity.active) {
+        const d = proximity.getDistance(m.id);
+        if (d == null || d > proximity.radius) return false;
+      }
       return true;
     });
     return sortMissions(filtered);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [missions, tab, mCategory, mStatus, mineOnly, currentUserId, mSort]);
+  }, [missions, tab, mCategory, mStatus, mineOnly, currentUserId, mSort, proximity.active, proximity.radius, proximity.getDistance]);
 
   const visibleMissions = filteredMissions.slice(0, visibleCount);
 
@@ -581,7 +601,12 @@ const EntraideHub = () => {
                       </SelectTrigger>
                       <SelectContent>
                         {VALID_M_SORT.map((s) => (
-                          <SelectItem key={s} value={s} className="text-xs">
+                          <SelectItem
+                            key={s}
+                            value={s}
+                            disabled={s === "distance" && !proximity.active}
+                            className="text-xs"
+                          >
                             {M_SORT_LABEL[s]}
                           </SelectItem>
                         ))}
@@ -597,6 +622,17 @@ const EntraideHub = () => {
                       </button>
                     )}
                   </div>
+                  <ProximityFilter
+                    postal={proximity.postal}
+                    onPostalChange={proximity.setPostal}
+                    radius={proximity.radius}
+                    onRadiusChange={proximity.setRadius}
+                    active={proximity.active}
+                    resolving={proximity.resolving}
+                    isValidPostal={proximity.isValidPostal}
+                    onUseMyLocation={proximity.useMyLocation}
+                    onClear={() => proximity.setPostal("")}
+                  />
                 </div>
 
                 {mLoading ? (
@@ -677,6 +713,14 @@ const EntraideHub = () => {
                                     {dept ? `, ${dept}` : ""}
                                   </span>
                                 )}
+                                {proximity.active && (() => {
+                                  const d = proximity.getDistance(m.id);
+                                  return d != null ? (
+                                    <span className="font-medium text-primary">
+                                      {d < 1 ? "moins d'1 km" : `à ${Math.round(d)} km`}
+                                    </span>
+                                  ) : null;
+                                })()}
                                 {dateLabel && <span>Pour le {dateLabel}</span>}
                                 {m.duration_estimate && <span>{DURATION_LABEL[m.duration_estimate] || m.duration_estimate}</span>}
                                 <span className="ml-auto">{formatRelative(m.created_at)}</span>
