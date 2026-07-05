@@ -1025,8 +1025,8 @@ const SmallMissionDetail = () => {
                   </span>
                 </Link>
               )}
-              <div className="flex items-center gap-2 mb-4 flex-wrap">
-                <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-widest uppercase">
+              <div className="flex items-center gap-2 mb-3 md:mb-4 flex-wrap">
+                <span className="inline-block px-2.5 py-1 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-widest uppercase">
                   {catMeta.label}
                 </span>
                 <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase ${statusMeta.className}`}>
@@ -1036,33 +1036,34 @@ const SmallMissionDetail = () => {
                   variant="outline"
                   size="sm"
                   onClick={handleSharePublishedLink}
-                  className="gap-1.5 rounded-full ml-auto h-8"
+                  className="gap-1.5 rounded-full ml-auto h-8 px-3"
                   aria-label="Partager cette annonce"
                 >
-                  <Share2 className="h-3.5 w-3.5" /> Partager
+                  <Share2 className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Partager</span>
                 </Button>
               </div>
-              <h1 className="font-heading text-2xl md:text-3xl lg:text-4xl font-bold leading-tight mb-3 text-foreground">
+              <h1 className="font-heading text-[1.6rem] leading-[1.15] sm:text-3xl md:text-4xl lg:text-[2.75rem] font-bold mb-3 text-foreground break-words">
                 {displayTitle}
               </h1>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5">
-                  <MapPin className="h-3.5 w-3.5" />
-                  {cityLabel}{mission.postal_code ? ` (${mission.postal_code.slice(0, 2)})` : ""}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs sm:text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5 min-w-0">
+                  <MapPin className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{cityLabel}{mission.postal_code ? ` (${mission.postal_code.slice(0, 2)})` : ""}</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5" />
+                  <Clock className="h-3.5 w-3.5 shrink-0" />
                   Publié {timeAgoFr(mission.created_at)}
                 </span>
                 {durationLabel && (
                   <span className="inline-flex items-center gap-1.5">
-                    <Calendar className="h-3.5 w-3.5" />
+                    <Calendar className="h-3.5 w-3.5 shrink-0" />
                     {durationLabel}
                   </span>
                 )}
                 {responses.length > 0 && (
                   <span className="inline-flex items-center gap-1.5">
-                    <Users className="h-3.5 w-3.5" />
+                    <Users className="h-3.5 w-3.5 shrink-0" />
                     {responses.length} proposition{responses.length > 1 ? "s" : ""}
                   </span>
                 )}
@@ -1071,7 +1072,7 @@ const SmallMissionDetail = () => {
 
             {/* Image principale : uniquement si photo réelle. */}
             {heroImage && (
-              <div className="mb-6 md:mb-8 rounded-2xl overflow-hidden border border-border bg-muted">
+              <div className="mb-5 md:mb-8 rounded-xl md:rounded-2xl overflow-hidden border border-border bg-muted">
                 <img
                   src={heroImage}
                   alt={displayTitle}
