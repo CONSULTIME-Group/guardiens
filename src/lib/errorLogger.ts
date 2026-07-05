@@ -39,6 +39,9 @@ const IGNORED_PATTERNS: RegExp[] = [
   /'at' is not a function/i,
   /\.findLast(Index)? is not a function/i,
   /Object\.hasOwn is not a function/i,
+  // Outlook Safe Links / bots de scan email : "Object Not Found Matching Id:X, MethodName:update, ParamCount:4"
+  // Erreur générée par le scanner Microsoft lors du prefetch des liens (ex: /unsubscribe). Non actionnable.
+  /Object Not Found Matching Id:\d+, MethodName:/i,
 ];
 
 function shouldIgnore(message: string): boolean {
