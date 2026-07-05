@@ -117,6 +117,7 @@ export default function PublicSitterProfile() {
   const [ownerDataLoading, setOwnerDataLoading] = useState(true);
   const [missionsPublished, setMissionsPublished] = useState<any[]>([]);
   const [missionsHelped, setMissionsHelped] = useState<any[]>([]);
+  const [thanksReceived, setThanksReceived] = useState<number>(0);
   const [externalExperiences, setExternalExperiences] = useState<any[]>([]);
   const [ownerGalleryPhotos, setOwnerGalleryPhotos] = useState<any[]>([]);
 
@@ -563,8 +564,15 @@ export default function PublicSitterProfile() {
         .order('created_at', { ascending: false })
         .limit(20);
 
+      const { data: recognition } = await (supabase as any)
+        .from('helper_recognition_stats')
+        .select('useful_count')
+        .eq('user_id', id)
+        .maybeSingle();
+
       setMissionsPublished(published ?? []);
       setMissionsHelped(!helpedResult.error ? (helpedResult.data ?? []) : []);
+      setThanksReceived(Number(recognition?.useful_count ?? 0));
     };
 
     loadEntraideData();
@@ -2105,11 +2113,12 @@ export default function PublicSitterProfile() {
       {activeTab === 'entraide' && (
         <div className="max-w-4xl mx-auto px-4 py-8 space-y-10">
 
-          {(missionsPublished.length > 0 || missionsHelped.length > 0 || missionFeedbacks.length > 0) && (
-            <div className="grid grid-cols-3 gap-3">
+          {(missionsPublished.length > 0 || missionsHelped.length > 0 || missionFeedbacks.length > 0 || thanksReceived > 0) && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
                 { value: missionsPublished.length, label: 'Mission' + (missionsPublished.length > 1 ? 's publiées' : ' publiée') },
                 { value: missionsHelped.length, label: 'Coup' + (missionsHelped.length > 1 ? 's de main donnés' : ' de main donné') },
+                { value: thanksReceived, label: 'Merci' + (thanksReceived > 1 ? 's reçus' : ' reçu') },
                 { value: missionFeedbacks.length, label: 'Avis reçu' + (missionFeedbacks.length > 1 ? 's' : '') },
               ].map(({ value, label }) => (
                 <div key={label} className="bg-card border border-border rounded-xl px-4 py-4 text-center">
