@@ -110,6 +110,37 @@ export default function ProsListing() {
           </div>
         </header>
 
+        {/* Deux niveaux de pros : pédagogie sobre */}
+        <section className="mb-8 rounded-2xl border border-border bg-card p-5 md:p-6">
+          <h2 className="font-heading text-lg md:text-xl font-semibold text-foreground mb-1">
+            Deux niveaux de pros dans notre annuaire
+          </h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Vous choisissez selon votre confiance et votre budget.
+          </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
+              <div className="mb-2">
+                <ProVerifiedBadge surface="card_listing" trackImpression={false} />
+              </div>
+              <p className="text-sm text-foreground leading-relaxed">
+                SIRET contrôlé manuellement par notre équipe. Contact direct au moment de la demande d'inscription. Recommandé pour les gardes qui demandent un professionnel identifié.
+              </p>
+            </div>
+            <div className="rounded-xl border border-border bg-background p-4">
+              <div className="mb-2">
+                <span className="inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                  Déclaratif
+                </span>
+              </div>
+              <p className="text-sm text-foreground leading-relaxed">
+                Fiche remplie par le pro, sans vérification de notre part. Utile pour explorer un territoire, comparer, ou entrer en contact rapidement.
+              </p>
+            </div>
+          </div>
+        </section>
+
+
         {/* Barre de filtres unique : recherche + catégorie + tri + 24/7 + vue */}
         <div className="space-y-3 mb-6">
           <div className="flex flex-col md:flex-row gap-2">
