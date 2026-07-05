@@ -55,6 +55,7 @@ import { template as proProfileApproved } from './pro-profile-approved.tsx'
 import { template as proProfileRejected } from './pro-profile-rejected.tsx'
 import { template as summerListingReminder } from './summer-listing-reminder.tsx'
 import { template as sitterMutualAidInvite } from './sitter-mutual-aid-invite.tsx'
+import { template as analysisRequestsDigest } from './analysis-requests-digest.tsx'
 
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
@@ -104,5 +105,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'pro-profile-rejected': proProfileRejected,
   'summer-listing-reminder': summerListingReminder,
   'sitter-mutual-aid-invite': sitterMutualAidInvite,
+  'analysis-requests-digest': analysisRequestsDigest,
 }
 
