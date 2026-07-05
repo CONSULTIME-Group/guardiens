@@ -1176,6 +1176,111 @@ const SmallMissionDetail = () => {
           <aside id="proposer-aide" className="lg:col-span-4 lg:sticky lg:top-6 space-y-4 scroll-mt-20">
             {renderSidebarCard()}
 
+            {/* ── Fiche récap : auteur, période, animal, preuve sociale ── */}
+            <div className="bg-card rounded-2xl border border-border shadow-sm divide-y divide-border">
+              {/* Auteur */}
+              {author && (
+                <div className="p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2.5">
+                    {(mission as any).mission_type === "offre" ? "Proposé par" : "Demandé par"}
+                  </p>
+                  {(() => {
+                    const AuthorRow = (
+                      <>
+                        {author.avatar_url ? (
+                          <img
+                            src={author.avatar_url}
+                            alt={author.first_name || "Auteur"}
+                            className="w-10 h-10 rounded-full object-cover shrink-0"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-heading text-sm font-bold text-foreground shrink-0">
+                            {author.first_name?.charAt(0) || "?"}
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-foreground truncate flex items-center gap-1.5">
+                            <span className="truncate">{author.first_name || "Un membre"}</span>
+                            {author.identity_verified && (
+                              <ShieldCheck className="h-3.5 w-3.5 text-success shrink-0" aria-label="Identité vérifiée" />
+                            )}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground truncate">
+                            {[memberSince(author.created_at), titlecaseCity(author.city) || null].filter(Boolean).join(" · ")}
+                          </p>
+                        </div>
+                      </>
+                    );
+                    return author.user_id ? (
+                      <Link
+                        to={`/gardiens/${author.user_id}`}
+                        className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+                      >
+                        {AuthorRow}
+                      </Link>
+                    ) : (
+                      <div className="flex items-center gap-3">{AuthorRow}</div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* Faits : période, durée, animal */}
+              {(mission.date_needed || mission.end_date || durationLabel || (mission.category === "animals" && (mission.pet_species || mission.pet_size))) && (
+                <dl className="p-4 grid grid-cols-2 gap-x-3 gap-y-3">
+                  {(mission.date_needed || mission.end_date) && (
+                    <div className="col-span-2">
+                      <dt className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5 inline-flex items-center gap-1.5">
+                        <Calendar className="h-3 w-3" /> Période
+                      </dt>
+                      <dd className="text-sm font-semibold text-foreground">
+                        {mission.date_needed
+                          ? format(new Date(mission.date_needed), "d MMM", { locale: fr })
+                          : "Dès que possible"}
+                        {mission.end_date ? ` – ${format(new Date(mission.end_date), "d MMM", { locale: fr })}` : ""}
+                      </dd>
+                    </div>
+                  )}
+                  {durationLabel && (
+                    <div className={mission.category === "animals" && (mission.pet_species || mission.pet_size) ? "" : "col-span-2"}>
+                      <dt className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5 inline-flex items-center gap-1.5">
+                        <Clock className="h-3 w-3" /> Durée
+                      </dt>
+                      <dd className="text-sm font-semibold text-foreground">{durationLabel}</dd>
+                    </div>
+                  )}
+                  {mission.category === "animals" && (mission.pet_species || mission.pet_size) && (
+                    <div className={durationLabel ? "" : "col-span-2"}>
+                      <dt className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5 inline-flex items-center gap-1.5">
+                        <Dog className="h-3 w-3" /> Animal
+                      </dt>
+                      <dd className="text-sm font-semibold text-foreground capitalize truncate">
+                        {[mission.pet_species, mission.pet_size].filter(Boolean).join(" · ")}
+                      </dd>
+                    </div>
+                  )}
+                </dl>
+              )}
+
+              {/* Preuve sociale */}
+              {(((mission as any).view_count ?? 0) > 0 || responses.length > 0) && (
+                <div className="p-4 grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Vues</p>
+                    <p className="font-heading text-lg font-bold text-foreground leading-none">
+                      {(mission as any).view_count ?? 0}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Propositions</p>
+                    <p className="font-heading text-lg font-bold text-foreground leading-none">
+                      {responses.length}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Localisation approximative */}
             <div className="bg-card rounded-2xl overflow-hidden shadow-sm border border-border">
               <ApproximateLocationMap
