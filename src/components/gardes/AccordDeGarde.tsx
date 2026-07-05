@@ -129,6 +129,9 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  // IP fetch failed, proceed without
  }
 
+ trackEvent("accord_signed_gardien", {
+ metadata: { sit_id: garde.gardeId, garde_id: garde.gardeId },
+ });
  const { error } = await supabase.from("garde_accords").insert({
  garde_id: garde.gardeId,
  user_id: user.id,
@@ -145,6 +148,9 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  onClose?.();
  } else {
  // Proprio flow (existing RPC)
+ trackEvent("accord_signed_owner", {
+ metadata: { sit_id: garde.gardeId, garde_id: garde.gardeId },
+ });
  const { error } = await supabase.rpc("accept_garde_accord", {
  p_garde_id: garde.gardeId,
  p_document_hash: hash,
