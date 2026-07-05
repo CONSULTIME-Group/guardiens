@@ -1064,7 +1064,7 @@ const SmallMissionDetail = () => {
                 {responses.length > 0 && (
                   <span className="inline-flex items-center gap-1.5">
                     <Users className="h-3.5 w-3.5 shrink-0" />
-                    {responses.length} proposition{responses.length > 1 ? "s" : ""}
+                    {responses.length} réponse{responses.length > 1 ? "s" : ""}
                   </span>
                 )}
               </div>
