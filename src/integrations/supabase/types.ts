@@ -387,6 +387,95 @@ export type Database = {
           },
         ]
       }
+      article_refresh_logs: {
+        Row: {
+          admin_id: string | null
+          after_content_hash: string | null
+          applied: boolean
+          article_id: string
+          before_content_hash: string
+          changes_count: number | null
+          created_at: string
+          dry_run: boolean
+          error_message: string | null
+          gemini_model: string | null
+          id: string
+          input_tokens: number | null
+          noindex_after: boolean | null
+          output_tokens: number | null
+          removed_patterns: Json | null
+          triggered_at: string
+          warnings: Json | null
+        }
+        Insert: {
+          admin_id?: string | null
+          after_content_hash?: string | null
+          applied?: boolean
+          article_id: string
+          before_content_hash: string
+          changes_count?: number | null
+          created_at?: string
+          dry_run?: boolean
+          error_message?: string | null
+          gemini_model?: string | null
+          id?: string
+          input_tokens?: number | null
+          noindex_after?: boolean | null
+          output_tokens?: number | null
+          removed_patterns?: Json | null
+          triggered_at?: string
+          warnings?: Json | null
+        }
+        Update: {
+          admin_id?: string | null
+          after_content_hash?: string | null
+          applied?: boolean
+          article_id?: string
+          before_content_hash?: string
+          changes_count?: number | null
+          created_at?: string
+          dry_run?: boolean
+          error_message?: string | null
+          gemini_model?: string | null
+          id?: string
+          input_tokens?: number | null
+          noindex_after?: boolean | null
+          output_tokens?: number | null
+          removed_patterns?: Json | null
+          triggered_at?: string
+          warnings?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_refresh_logs_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "article_refresh_logs_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "article_refresh_logs_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "article_refresh_logs_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       article_translations: {
         Row: {
           article_id: string
