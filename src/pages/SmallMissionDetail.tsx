@@ -995,8 +995,9 @@ const SmallMissionDetail = () => {
           <article className="lg:col-span-8 min-w-0">
             <header className="mb-6 md:mb-10">
               <div className="flex items-center gap-3 mb-6 flex-wrap">
+                {/* Badge catégorie seul, sans le préfixe "Entraide ·" déjà donné par le breadcrumb. */}
                 <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-widest uppercase">
-                  Entraide · {catMeta.label}
+                  {catMeta.label}
                 </span>
                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase ${statusMeta.className}`}>
                   {statusMeta.label}
@@ -1012,7 +1013,7 @@ const SmallMissionDetail = () => {
                 </Button>
               </div>
               <h1 className="font-heading text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-5 md:mb-6 text-foreground">
-                {mission.title}
+                {displayTitle}
               </h1>
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-base text-muted-foreground">
                 <div className="flex items-center gap-2">
