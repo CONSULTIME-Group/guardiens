@@ -56,6 +56,7 @@ export function useMissionDistance(missions: MissionLike[]) {
   const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(null);
   const [distanceMap, setDistanceMap] = useState<Map<string, number>>(new Map());
   const [resolving, setResolving] = useState(false);
+  const [computing, setComputing] = useState(false);
   const [prefilled, setPrefilled] = useState(false);
 
   const setPostal = useCallback((v: string) => {
@@ -115,8 +116,15 @@ export function useMissionDistance(missions: MissionLike[]) {
     let cancelled = false;
     if (!origin) {
       setDistanceMap(new Map());
+      setComputing(false);
       return;
     }
+    if (missions.length === 0) {
+      setDistanceMap(new Map());
+      setComputing(false);
+      return;
+    }
+    setComputing(true);
     (async () => {
       const results = await Promise.all(
         missions.map(async (m) => {
@@ -129,6 +137,7 @@ export function useMissionDistance(missions: MissionLike[]) {
       );
       if (cancelled) return;
       setDistanceMap(new Map(results));
+      setComputing(false);
     })();
     return () => {
       cancelled = true;
@@ -188,6 +197,11 @@ export function useMissionDistance(missions: MissionLike[]) {
     [distanceMap],
   );
 
+  const hasDistance = useCallback(
+    (id: string): boolean => distanceMap.has(id),
+    [distanceMap],
+  );
+
   return useMemo(
     () => ({
       postal,
@@ -197,10 +211,12 @@ export function useMissionDistance(missions: MissionLike[]) {
       origin,
       active,
       resolving,
+      computing,
       getDistance,
+      hasDistance,
       useMyLocation,
       isValidPostal: isValidFrPostal(postal),
     }),
-    [postal, setPostal, radius, setRadius, origin, active, resolving, getDistance, useMyLocation],
+    [postal, setPostal, radius, setRadius, origin, active, resolving, computing, getDistance, hasDistance, useMyLocation],
   );
 }

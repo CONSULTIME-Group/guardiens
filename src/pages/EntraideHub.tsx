@@ -633,6 +633,13 @@ const EntraideHub = () => {
                     onUseMyLocation={proximity.useMyLocation}
                     onClear={() => proximity.setPostal("")}
                   />
+                  <p className="sr-only" role="status" aria-live="polite">
+                    {proximity.active
+                      ? proximity.computing
+                        ? `Calcul des distances autour de votre position dans un rayon de ${proximity.radius} kilomètres.`
+                        : `Tri par proximité activé. Rayon : ${proximity.radius} kilomètres. ${filteredMissions.length} mission${filteredMissions.length > 1 ? "s" : ""} affichée${filteredMissions.length > 1 ? "s" : ""}.`
+                      : "Tri par proximité désactivé."}
+                  </p>
                 </div>
 
                 {mLoading ? (
@@ -657,11 +664,34 @@ const EntraideHub = () => {
                             : m.status === "completed"
                               ? { label: "Terminée", aria: "Statut : terminée" }
                               : null;
+                        const d = proximity.active ? proximity.getDistance(m.id) : null;
+                        const hasDist = proximity.active ? proximity.hasDistance(m.id) : false;
+                        const distanceLabel =
+                          proximity.active
+                            ? d != null
+                              ? d < 1
+                                ? "moins d'1 km"
+                                : `à ${Math.round(d)} km`
+                              : proximity.computing || !hasDist
+                                ? "Distance en cours de calcul"
+                                : "Distance indisponible"
+                            : null;
+                        const cardAria = [
+                          `Voir la mission : ${sanitizeUserTitle(m.title) || m.title}`,
+                          m.city ? `à ${m.city}` : "",
+                          proximity.active && d != null
+                            ? d < 1
+                              ? "à moins d'1 kilomètre de vous"
+                              : `à environ ${Math.round(d)} kilomètres de vous`
+                            : "",
+                        ]
+                          .filter(Boolean)
+                          .join(", ");
                         return (
                           <li key={m.id}>
                             <Link
                               to={`/petites-missions/${m.id}`}
-                              aria-label={`Voir la mission : ${sanitizeUserTitle(m.title) || m.title}${m.city ? `, ${m.city}` : ""}`}
+                              aria-label={cardAria}
                               className="flex gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                             >
                               {Array.isArray(m.photos) && m.photos.length > 0 && (
@@ -713,14 +743,37 @@ const EntraideHub = () => {
                                     {dept ? `, ${dept}` : ""}
                                   </span>
                                 )}
-                                {proximity.active && (() => {
-                                  const d = proximity.getDistance(m.id);
-                                  return d != null ? (
-                                    <span className="font-medium text-primary">
-                                      {d < 1 ? "moins d'1 km" : `à ${Math.round(d)} km`}
+                                {proximity.active && distanceLabel && (
+                                  d != null ? (
+                                    <span
+                                      className="font-medium text-primary"
+                                      aria-label={
+                                        d < 1
+                                          ? "Distance : moins d'un kilomètre"
+                                          : `Distance : environ ${Math.round(d)} kilomètres`
+                                      }
+                                    >
+                                      {distanceLabel}
                                     </span>
-                                  ) : null;
-                                })()}
+                                  ) : proximity.computing || !hasDist ? (
+                                    <span
+                                      className="text-foreground/50 italic"
+                                      aria-live="polite"
+                                      aria-busy="true"
+                                      aria-label="Calcul de la distance en cours"
+                                    >
+                                      …
+                                    </span>
+                                  ) : (
+                                    <span
+                                      className="text-foreground/50"
+                                      aria-label="Distance indisponible pour cette mission"
+                                      title="Distance indisponible"
+                                    >
+                                      – km
+                                    </span>
+                                  )
+                                )}
                                 {dateLabel && <span>Pour le {dateLabel}</span>}
                                 {m.duration_estimate && <span>{DURATION_LABEL[m.duration_estimate] || m.duration_estimate}</span>}
                                 <span className="ml-auto">{formatRelative(m.created_at)}</span>
