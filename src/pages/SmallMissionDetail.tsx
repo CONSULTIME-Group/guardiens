@@ -998,6 +998,33 @@ const SmallMissionDetail = () => {
           {/* ── COLONNE PRINCIPALE ── */}
           <article className="lg:col-span-8 min-w-0">
             <header className="mb-6 md:mb-8">
+              {/* Chip "Connecté" : ancre visuelle d'identité (utile surtout sur
+                  mobile où la Sidebar est masquée). */}
+              {user && (
+                <Link
+                  to="/dashboard"
+                  className="inline-flex items-center gap-2 mb-4 pl-1 pr-3 py-1 rounded-full bg-success-soft border border-success-border hover:opacity-90 transition-opacity max-w-full"
+                  aria-label="Retour à votre espace"
+                >
+                  {(user as any).avatarUrl ? (
+                    <img
+                      src={(user as any).avatarUrl}
+                      alt=""
+                      className="w-6 h-6 rounded-full object-cover shrink-0"
+                    />
+                  ) : (
+                    <span className="w-6 h-6 rounded-full bg-success text-success-foreground flex items-center justify-center text-[10px] font-bold shrink-0">
+                      {((user as any).firstName || "?").charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-success min-w-0">
+                    <span className="w-1.5 h-1.5 rounded-full bg-success shrink-0" />
+                    <span className="truncate">
+                      Connecté{(user as any).firstName ? ` · ${(user as any).firstName}` : ""}
+                    </span>
+                  </span>
+                </Link>
+              )}
               <div className="flex items-center gap-2 mb-4 flex-wrap">
                 <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-widest uppercase">
                   {catMeta.label}
