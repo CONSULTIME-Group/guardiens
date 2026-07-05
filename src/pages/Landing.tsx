@@ -652,7 +652,8 @@ const Landing = () => {
                   {item.label}
                 </a>
               </li>
-            ))}
+              ));
+            })()}
           </ul>
         </div>
       </nav>
