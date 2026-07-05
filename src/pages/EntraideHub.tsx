@@ -806,7 +806,7 @@ const EntraideHub = () => {
                         );
                       })}
                     </ul>
-                    {filteredMissions.length > visibleCount && (
+                    {filteredMissions.length > visibleCount ? (
                       <div className="mt-4 flex justify-center">
                         <Button
                           variant="outline"
@@ -814,6 +814,20 @@ const EntraideHub = () => {
                         >
                           Charger plus ({filteredMissions.length - visibleCount} restantes)
                         </Button>
+                      </div>
+                    ) : (
+                      <div className="mt-8 p-5 rounded-2xl border border-dashed border-border bg-accent/20 text-center">
+                        <p className="text-sm text-muted-foreground">
+                          Vous avez vu {filteredMissions.length === 1 ? "l'unique publication" : `les ${filteredMissions.length} publications`} qui correspondent.
+                        </p>
+                        <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                          <Button size="sm" onClick={tab === "besoins" ? goNeed : goOffer}>
+                            {tab === "besoins" ? "Publier une demande" : "Proposer mon aide"}
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => setTab(tab === "besoins" ? "offres" : "besoins")}>
+                            Voir {tab === "besoins" ? "les offres d'aide" : "les demandes"}
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </>
