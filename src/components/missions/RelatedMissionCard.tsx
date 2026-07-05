@@ -92,45 +92,33 @@ const RelatedMissionCard = ({ to, photo, category, title, city, timeAgo, exchang
             </span>
           </>
         ) : (
-          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col justify-between p-5`}>
-            <div className="flex items-start justify-between">
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-background/80 backdrop-blur text-primary">
-                {label}
-              </span>
-              <CategoryGlyph category={cat} className="w-12 h-12 text-primary/30 shrink-0" />
-            </div>
-            <div>
-              <p className="font-heading text-lg md:text-xl font-bold text-primary leading-tight line-clamp-3">
-                {title}
-              </p>
-              {exchangeOffer && (
-                <p className="mt-2 text-xs text-foreground/70 italic line-clamp-2">
-                  « {exchangeOffer} »
-                </p>
-              )}
-            </div>
+          // Sans photo : gradient teinté + glyphe en filigrane + chip catégorie,
+          // MAIS pas de titre dans le cover (le titre est rendu sous la carte
+          // comme pour les variantes avec photo, pour garantir des hauteurs de
+          // grille strictement identiques).
+          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-start justify-between p-5`}>
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-background/80 backdrop-blur text-primary">
+              {label}
+            </span>
+            <CategoryGlyph category={cat} className="w-14 h-14 text-primary/30 shrink-0" />
           </div>
         )}
       </div>
 
-      {/* Bloc texte sous la carte : uniquement quand la photo occupe le cover
-          (sinon le titre est déjà dans le poster) */}
-      {showImage ? (
-        <div className="mt-4">
-          <h3 className="font-heading text-xl font-bold mb-1 group-hover:text-primary transition-colors line-clamp-2">
-            {title}
-          </h3>
-          <p className="text-sm text-muted-foreground font-medium">
-            {city || "France"}{timeAgo ? ` · ${timeAgo}` : ""}
+      {/* Structure texte identique dans les deux cas → grille homogène. */}
+      <div className="mt-4">
+        <h3 className="font-heading text-xl font-bold mb-1 group-hover:text-primary transition-colors line-clamp-2">
+          {title}
+        </h3>
+        <p className="text-sm text-muted-foreground font-medium">
+          {city || "France"}{timeAgo ? ` · ${timeAgo}` : ""}
+        </p>
+        {!showImage && exchangeOffer && (
+          <p className="mt-1.5 text-xs text-muted-foreground italic line-clamp-1">
+            « {exchangeOffer} »
           </p>
-        </div>
-      ) : (
-        <div className="mt-4">
-          <p className="text-sm text-muted-foreground font-medium">
-            {city || "France"}{timeAgo ? ` · ${timeAgo}` : ""}
-          </p>
-        </div>
-      )}
+        )}
+      </div>
     </Link>
   );
 };
