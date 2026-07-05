@@ -77,12 +77,14 @@ export default function DraftResumeCard({ draft, onDeleted }: Props) {
   const total = FIELDS.length;
   const modified = draft.updated_at || draft.created_at || null;
 
-  const impressionRef = useImpressionOnce<HTMLDivElement>(() => {
+  const impressionRef = useRef<HTMLDivElement>(null);
+  const onSeen = useCallback(() => {
     void trackEvent("dashboard_draft_card_seen", {
       source: "owner_dashboard",
       metadata: { sit_id: draft.id },
     });
-  });
+  }, [draft.id]);
+  useImpressionOnce(impressionRef, `draft_card_${draft.id}`, onSeen);
 
   const daysSinceCreated = useMemo(() => {
     if (!draft.created_at) return null;
