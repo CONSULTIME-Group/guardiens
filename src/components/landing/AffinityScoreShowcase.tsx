@@ -67,7 +67,7 @@ export default function AffinityScoreShowcase() {
                 {t("landing.affinity.demo_label")}
               </span>
               <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1 font-body text-sm font-semibold tabular-nums">
-                {demo.score}\u00A0% · {demo.matchedCount}/{demo.totalCount}
+                {demo.score}&nbsp;% · {demo.matchedCount}/{demo.totalCount}
               </span>
             </div>
             <div className="flex items-center gap-3 mb-6 text-sm text-foreground/70">
@@ -86,7 +86,7 @@ export default function AffinityScoreShowcase() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline justify-between gap-2">
                       <span className={b.matched ? "text-foreground" : "text-foreground/55"}>{b.criterion}</span>
-                      <span className="text-xs text-foreground/45 tabular-nums shrink-0">{b.weight}\u00A0%</span>
+                      <span className="text-xs text-foreground/45 tabular-nums shrink-0">{b.weight}&nbsp;%</span>
                     </div>
                     <div className="text-xs text-foreground/55">{b.note}</div>
                   </div>
