@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
 import ProsMap from "@/components/pros/ProsMap";
+import ProVerifiedBadge from "@/components/pros/ProVerifiedBadge";
 import { useAuth } from "@/contexts/AuthContext";
 
 type ProRow = {
@@ -22,6 +23,8 @@ type ProRow = {
   logo_url: string | null;
   description: string | null;
   urgences_24_7: boolean;
+  siret_verified: boolean;
+  siret_verified_at: string | null;
 };
 
 type SortKey = "recent" | "alpha" | "city";
