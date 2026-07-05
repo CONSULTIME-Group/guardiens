@@ -158,12 +158,9 @@ async function injectProfileJsonLd(originResponse, profileId) {
   }
 }
 
-// robots.txt servi en dur (rapide, fiable)
-const ROBOTS_TXT = `User-agent: *
-Allow: /
-
-Sitemap: https://guardiens.fr/sitemap.xml
-`;
+// robots.txt : servi par l'origine (public/robots.txt généré par scripts/generate-robots.mjs)
+// pour garantir que les Disallow des routes privées (/admin, /dashboard, /messages, /sits...)
+// soient bien exposés aux crawlers. Le Worker ne l'intercepte plus.
 
 export default {
   async fetch(request, env, ctx) {
