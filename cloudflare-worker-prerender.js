@@ -210,7 +210,16 @@ export default {
     console.log('[Prerender] Bot — UA: "' + ua + '" — URL: ' + url);
 
     try {
-      const token = (env && env.PRERENDER_TOKEN) || PRERENDER_TOKEN_FALLBACK;
+    try {
+      const token = env && env.PRERENDER_TOKEN;
+      if (!token) {
+        console.log('[Prerender] PRERENDER_TOKEN missing, falling back to origin without prerender');
+        const originResp = await fetchOrigin(request);
+        return withDiagHeaders(originResp, {
+          ...baseDiag,
+          'X-Prerender-Status': 'fallback-no-token',
+        });
+      }
       const prerenderResponse = await fetchPrerender(url, token);
 
       if (prerenderResponse.ok) {
