@@ -21,6 +21,19 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  if (!PRICING_IS_ACTIVE) {
+    return new Response(
+      JSON.stringify({
+        error: "pricing_not_active",
+        message: "Les abonnements ne sont pas encore disponibles.",
+      }),
+      {
+        status: 503,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
+  }
+
   try {
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
