@@ -709,91 +709,94 @@ const EntraideHub = () => {
                               aria-label={cardAria}
                               className="flex gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                             >
-                              {Array.isArray(m.photos) && m.photos.length > 0 && (
-                                <MissionCardCover
-                                  photo={m.photos[0]}
-                                  category={m.category}
-                                  title={m.title}
-                                  className="w-24 sm:w-32 shrink-0 aspect-[4/3] rounded-lg"
-                                />
-                              )}
+                              <MissionCardCover
+                                photo={m.photos && m.photos[0] ? m.photos[0] : null}
+                                category={m.category}
+                                title={m.title}
+                                className="w-24 sm:w-32 shrink-0 aspect-[4/3] rounded-lg"
+                              />
                               <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase tracking-wide">
-                                  {MISSION_CATEGORY_LABEL[m.category] || "Autre"}
-                                </span>
-                                {statusBadge && (
-                                  <span
-                                    className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted text-foreground/60 uppercase tracking-wide"
-                                    aria-label={statusBadge.aria}
-                                  >
-                                    {statusBadge.label}
-                                  </span>
-                                )}
-                                {isMine && (
-                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-secondary/40 text-foreground uppercase tracking-wide">
-                                    Vous
-                                  </span>
-                                )}
-                              </div>
-                              <p className="font-heading text-base font-semibold text-foreground line-clamp-2">
-                                {sanitizeUserTitle(m.title) || m.title}
-                              </p>
-                              {m.description && (
-                                <p className="text-sm text-foreground/65 mt-1 line-clamp-2">
-                                  {m.description}
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                  <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase tracking-wide">
+                                      {MISSION_CATEGORY_LABEL[m.category] || "Autre"}
+                                    </span>
+                                    {statusBadge && (
+                                      <span
+                                        className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground uppercase tracking-wide"
+                                        aria-label={statusBadge.aria}
+                                      >
+                                        {statusBadge.label}
+                                      </span>
+                                    )}
+                                    {isMine && (
+                                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground uppercase tracking-wide">
+                                        Vous
+                                      </span>
+                                    )}
+                                  </div>
+                                  {proximity.active && (
+                                    d != null ? (
+                                      <span
+                                        className="shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary tabular-nums"
+                                        aria-label={
+                                          d < 1
+                                            ? "Distance : moins d'un kilomètre"
+                                            : `Distance : environ ${Math.round(d)} kilomètres`
+                                        }
+                                      >
+                                        {distanceLabel}
+                                      </span>
+                                    ) : proximity.computing || !hasDist ? (
+                                      <span
+                                        className="shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground italic"
+                                        aria-live="polite"
+                                        aria-busy="true"
+                                        aria-label="Calcul de la distance en cours"
+                                      >
+                                        …
+                                      </span>
+                                    ) : (
+                                      <span
+                                        className="shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground"
+                                        aria-label="Distance indisponible"
+                                        title="Distance indisponible"
+                                      >
+                                        – km
+                                      </span>
+                                    )
+                                  )}
+                                </div>
+                                <p className="font-heading text-base font-semibold text-foreground line-clamp-2">
+                                  {sanitizeUserTitle(m.title) || m.title}
                                 </p>
-                              )}
-                              <div className="flex items-center gap-2 mt-3">
-                                <Avatar className="h-6 w-6 shrink-0">
-                                  <AvatarImage src={m.profiles?.avatar_url || undefined} alt="" loading="lazy" />
-                                  <AvatarFallback className="text-[10px]">{initial}</AvatarFallback>
-                                </Avatar>
-                                <span className="text-xs text-foreground/70 truncate">{authorName}</span>
-                              </div>
-                              <div className="flex items-center gap-x-3 gap-y-1 mt-2 text-xs text-foreground/55 flex-wrap">
-                                {m.city && (
-                                  <span>
-                                    {m.city}
-                                    {dept ? `, ${dept}` : ""}
-                                  </span>
+                                {m.description && (
+                                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                    {m.description}
+                                  </p>
                                 )}
-                                {proximity.active && distanceLabel && (
-                                  d != null ? (
-                                    <span
-                                      className="font-medium text-primary"
-                                      aria-label={
-                                        d < 1
-                                          ? "Distance : moins d'un kilomètre"
-                                          : `Distance : environ ${Math.round(d)} kilomètres`
-                                      }
-                                    >
-                                      {distanceLabel}
-                                    </span>
-                                  ) : proximity.computing || !hasDist ? (
-                                    <span
-                                      className="text-foreground/50 italic"
-                                      aria-live="polite"
-                                      aria-busy="true"
-                                      aria-label="Calcul de la distance en cours"
-                                    >
-                                      …
-                                    </span>
-                                  ) : (
-                                    <span
-                                      className="text-foreground/50"
-                                      aria-label="Distance indisponible pour cette mission"
-                                      title="Distance indisponible"
-                                    >
-                                      – km
-                                    </span>
-                                  )
-                                )}
-                                {dateLabel && <span>Pour le {dateLabel}</span>}
-                                {m.duration_estimate && <span>{DURATION_LABEL[m.duration_estimate] || m.duration_estimate}</span>}
-                                <span className="ml-auto">{formatRelative(m.created_at)}</span>
+                                <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground flex-wrap">
+                                  <Avatar className="h-5 w-5 shrink-0">
+                                    <AvatarImage src={m.profiles?.avatar_url || undefined} alt="" loading="lazy" />
+                                    <AvatarFallback className="text-[9px]">{initial}</AvatarFallback>
+                                  </Avatar>
+                                  <span className="truncate max-w-[10rem]">{authorName}</span>
+                                  {m.city && (
+                                    <>
+                                      <span aria-hidden="true">·</span>
+                                      <span className="truncate">{m.city}{dept ? `, ${dept}` : ""}</span>
+                                    </>
+                                  )}
+                                  {dateLabel && (
+                                    <>
+                                      <span aria-hidden="true">·</span>
+                                      <span>Pour le {dateLabel}</span>
+                                    </>
+                                  )}
+                                  <span className="ml-auto">{formatRelative(m.created_at)}</span>
+                                </div>
                               </div>
-                              </div>
+
                             </Link>
                           </li>
                         );
