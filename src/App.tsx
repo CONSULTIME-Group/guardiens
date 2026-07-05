@@ -126,7 +126,7 @@ const DevenirHomeSitter = lazy(() => import("./pages/DevenirHomeSitter"));
 
 const DepartmentPage = lazy(() => import("./pages/DepartmentPage"));
 const Pricing = lazy(() => import("./pages/Pricing"));
-const SmallMissionsPublic = lazy(() => import("./pages/SmallMissionsPublic"));
+
 const SmallMissionDetail = lazy(() => import("./pages/SmallMissionDetail"));
 const MissionsCityPage = lazy(() => import("./pages/MissionsCityPage"));
 const CreateSmallMission = lazy(() => import("./pages/CreateSmallMission"));
