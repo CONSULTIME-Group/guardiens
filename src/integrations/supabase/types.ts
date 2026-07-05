@@ -983,7 +983,6 @@ export type Database = {
           first_message_sent: boolean
           id: string
           last_message_at: string | null
-          long_stay_id: string | null
           owner_id: string
           reminder_sent_at: string | null
           sit_id: string | null
@@ -1001,7 +1000,6 @@ export type Database = {
           first_message_sent?: boolean
           id?: string
           last_message_at?: string | null
-          long_stay_id?: string | null
           owner_id: string
           reminder_sent_at?: string | null
           sit_id?: string | null
@@ -1019,7 +1017,6 @@ export type Database = {
           first_message_sent?: boolean
           id?: string
           last_message_at?: string | null
-          long_stay_id?: string | null
           owner_id?: string
           reminder_sent_at?: string | null
           sit_id?: string | null
@@ -1029,13 +1026,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "conversations_long_stay_id_fkey"
-            columns: ["long_stay_id"]
-            isOneToOne: false
-            referencedRelation: "long_stays"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "conversations_owner_id_fkey"
             columns: ["owner_id"]
@@ -2119,142 +2109,6 @@ export type Database = {
           transport?: string
         }
         Relationships: []
-      }
-      long_stay_applications: {
-        Row: {
-          created_at: string
-          id: string
-          long_stay_id: string
-          message: string | null
-          sitter_id: string
-          status: Database["public"]["Enums"]["application_status"]
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          long_stay_id: string
-          message?: string | null
-          sitter_id: string
-          status?: Database["public"]["Enums"]["application_status"]
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          long_stay_id?: string
-          message?: string | null
-          sitter_id?: string
-          status?: Database["public"]["Enums"]["application_status"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "long_stay_applications_long_stay_id_fkey"
-            columns: ["long_stay_id"]
-            isOneToOne: false
-            referencedRelation: "long_stays"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "long_stay_applications_sitter_id_fkey"
-            columns: ["sitter_id"]
-            isOneToOne: false
-            referencedRelation: "profile_reputation"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "long_stay_applications_sitter_id_fkey"
-            columns: ["sitter_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "long_stay_applications_sitter_id_fkey"
-            columns: ["sitter_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      long_stays: {
-        Row: {
-          access_level: Database["public"]["Enums"]["long_stay_access_level"]
-          conditions: string | null
-          created_at: string
-          end_date: string | null
-          estimated_contribution: string | null
-          id: string
-          owner_fee_paid: boolean
-          property_id: string
-          sitter_fee_paid: boolean
-          start_date: string | null
-          status: Database["public"]["Enums"]["long_stay_status"]
-          title: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          access_level?: Database["public"]["Enums"]["long_stay_access_level"]
-          conditions?: string | null
-          created_at?: string
-          end_date?: string | null
-          estimated_contribution?: string | null
-          id?: string
-          owner_fee_paid?: boolean
-          property_id: string
-          sitter_fee_paid?: boolean
-          start_date?: string | null
-          status?: Database["public"]["Enums"]["long_stay_status"]
-          title?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          access_level?: Database["public"]["Enums"]["long_stay_access_level"]
-          conditions?: string | null
-          created_at?: string
-          end_date?: string | null
-          estimated_contribution?: string | null
-          id?: string
-          owner_fee_paid?: boolean
-          property_id?: string
-          sitter_fee_paid?: boolean
-          start_date?: string | null
-          status?: Database["public"]["Enums"]["long_stay_status"]
-          title?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "long_stays_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "long_stays_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profile_reputation"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "long_stays_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "long_stays_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       mass_email_sends: {
         Row: {
@@ -5871,16 +5725,6 @@ export type Database = {
           user_id: string
         }[]
       }
-      get_or_create_conversation: {
-        Args: {
-          p_context_type: Database["public"]["Enums"]["conversation_context"]
-          p_long_stay_id?: string
-          p_other_user_id: string
-          p_sit_id?: string
-          p_small_mission_id?: string
-        }
-        Returns: string
-      }
       get_own_email: { Args: never; Returns: string }
       get_pro_map_points: {
         Args: never
@@ -6097,7 +5941,6 @@ export type Database = {
         | "sitter_inquiry"
         | "mission_help"
         | "owner_pitch"
-        | "long_stay"
         | "helper_inquiry"
       gallery_source: "guardiens" | "external"
       guide_place_category:
@@ -6109,13 +5952,6 @@ export type Database = {
         | "pet_shop"
         | "water_point"
         | "general_park"
-      long_stay_access_level: "eligible" | "past_sitters" | "invite_only"
-      long_stay_status:
-        | "draft"
-        | "published"
-        | "confirmed"
-        | "completed"
-        | "cancelled"
       mission_type_enum: "besoin" | "offre"
       owner_gallery_category:
         | "home_life"
@@ -6346,7 +6182,6 @@ export const Constants = {
         "sitter_inquiry",
         "mission_help",
         "owner_pitch",
-        "long_stay",
         "helper_inquiry",
       ],
       gallery_source: ["guardiens", "external"],
@@ -6359,14 +6194,6 @@ export const Constants = {
         "pet_shop",
         "water_point",
         "general_park",
-      ],
-      long_stay_access_level: ["eligible", "past_sitters", "invite_only"],
-      long_stay_status: [
-        "draft",
-        "published",
-        "confirmed",
-        "completed",
-        "cancelled",
       ],
       mission_type_enum: ["besoin", "offre"],
       owner_gallery_category: [
