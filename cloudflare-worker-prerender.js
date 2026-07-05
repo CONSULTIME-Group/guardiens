@@ -8,10 +8,9 @@
  * so you can curl and see exactly what the Worker decided.
  */
 
-// PRERENDER_TOKEN est lu depuis env.PRERENDER_TOKEN (variable chiffrée Cloudflare)
-// Fallback hardcodé conservé temporairement au cas où la variable ne serait pas encore
-// déployée — À SUPPRIMER une fois la variable confirmée active en prod.
-const PRERENDER_TOKEN_FALLBACK = 'P7riC8MFdBNYlNYGa8oz';
+// PRERENDER_TOKEN est lu exclusivement depuis env.PRERENDER_TOKEN
+// (variable chiffrée Cloudflare Worker Secrets). Aucun fallback en clair.
+// Si absent, le Worker log un warning et sert l'origine sans prerender.
 const PRERENDER_SERVICE = 'https://service.prerender.io/';
 const PRERENDER_TIMEOUT_MS = 10000;
 
