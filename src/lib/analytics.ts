@@ -62,7 +62,14 @@ export type EventType =
   | "question_view"            // Vue d'une question (metadata.id)
   | "answer_submit"            // Réponse publiée (metadata.question_id, is_first_answer, is_reply)
   | "answer_helpful_click"     // Vote utile sur une réponse (metadata.answer_id)
-  | "question_mark_resolved";  // Auteur marque la question comme résolue
+  | "question_mark_resolved"   // Auteur marque la question comme résolue
+  // Dashboard new-user (Casse A) ---------------------------------------------
+  | "dashboard_cta_clicked"           // Clic CTA dashboard (cta, is_first_time, user_role)
+  | "dashboard_first_time_view"       // Premier affichage dashboard nouveau (user_role, view_variant)
+  | "checklist_item_completed"        // Item checklist coché (item_name, order)
+  | "checklist_all_completed"         // Checklist finalisée (user_role, time_seconds_since_signup)
+  | "sitter_no_nearby_sit_shown"      // Empty state annonces (radius_km, alert_subscribed)
+  | "owner_alert_subscribed";         // Owner s'abonne aux alertes (type)
 
 interface TrackOptions {
   source?: string;
