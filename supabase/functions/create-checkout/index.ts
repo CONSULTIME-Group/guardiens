@@ -74,6 +74,20 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  if (!PRICING_IS_ACTIVE) {
+    return new Response(
+      JSON.stringify({
+        error: "pricing_not_active",
+        message: "Les abonnements ne sont pas encore disponibles.",
+      }),
+      {
+        status: 503,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
+  }
+
+
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_ANON_KEY") ?? ""
