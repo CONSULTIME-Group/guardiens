@@ -33,6 +33,7 @@ import PublicFooter from "@/components/layout/PublicFooter";
 import { AppLayout } from "@/components/layout/AppLayout";
 import PublicMissionView from "@/components/missions/PublicMissionView";
 import RelatedMissionCard from "@/components/missions/RelatedMissionCard";
+import MissionResponseCard from "@/components/missions/MissionResponseCard";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import { isAuthorOf } from "@/lib/ownership";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
