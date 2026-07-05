@@ -560,9 +560,23 @@ const EntraideHub = () => {
             {/* Onglets Besoins / Offres */}
             {(tab === "besoins" || tab === "offres") && (
               <>
-                {/* Barre de filtres compacte */}
-                <div className="space-y-3 mb-6">
-                  <div className="-mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto">
+                {/* Bloc filtres unifié dans une card */}
+                <div className="mb-6 rounded-2xl border border-border bg-card/50 p-3 sm:p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Filtrer
+                    </p>
+                    {hasMissionFilters && (
+                      <button
+                        type="button"
+                        onClick={resetMissionFilters}
+                        className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+                      >
+                        Réinitialiser
+                      </button>
+                    )}
+                  </div>
+                  <div className="-mx-3 px-3 sm:mx-0 sm:px-0 overflow-x-auto">
                     <div className="flex gap-2 w-max sm:w-auto sm:flex-wrap">
                       {MISSION_CATEGORIES.map((c) => (
                         <button
@@ -573,7 +587,7 @@ const EntraideHub = () => {
                           className={`shrink-0 px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
                             mCategory === c
                               ? "bg-primary text-primary-foreground border-primary"
-                              : "bg-card text-foreground/70 border-border hover:bg-accent"
+                              : "bg-card text-muted-foreground border-border hover:bg-accent"
                           }`}
                         >
                           {c === "all" ? "Toutes catégories" : MISSION_CATEGORY_LABEL[c]}
@@ -611,27 +625,28 @@ const EntraideHub = () => {
                         ))}
                       </SelectContent>
                     </Select>
-                    {hasMissionFilters && (
-                      <button
-                        type="button"
-                        onClick={resetMissionFilters}
-                        className="ml-auto text-xs text-foreground/60 hover:text-foreground underline underline-offset-2"
-                      >
-                        Réinitialiser
-                      </button>
+                  </div>
+                  <div className="pt-2 border-t border-border/60">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                      Proximité
+                    </p>
+                    <ProximityFilter
+                      postal={proximity.postal}
+                      onPostalChange={proximity.setPostal}
+                      radius={proximity.radius}
+                      onRadiusChange={proximity.setRadius}
+                      active={proximity.active}
+                      resolving={proximity.resolving}
+                      isValidPostal={proximity.isValidPostal}
+                      onUseMyLocation={proximity.useMyLocation}
+                      onClear={() => proximity.setPostal("")}
+                    />
+                    {!proximity.active && (
+                      <p className="text-[11px] text-muted-foreground mt-2">
+                        Saisissez un code postal ou utilisez votre position pour activer le tri par distance.
+                      </p>
                     )}
                   </div>
-                  <ProximityFilter
-                    postal={proximity.postal}
-                    onPostalChange={proximity.setPostal}
-                    radius={proximity.radius}
-                    onRadiusChange={proximity.setRadius}
-                    active={proximity.active}
-                    resolving={proximity.resolving}
-                    isValidPostal={proximity.isValidPostal}
-                    onUseMyLocation={proximity.useMyLocation}
-                    onClear={() => proximity.setPostal("")}
-                  />
                   <p className="sr-only" role="status" aria-live="polite">
                     {proximity.active
                       ? proximity.computing
@@ -640,6 +655,7 @@ const EntraideHub = () => {
                       : "Tri par proximité désactivé."}
                   </p>
                 </div>
+
 
                 {mLoading ? (
                   <div className="space-y-3" aria-busy="true" aria-live="polite">
