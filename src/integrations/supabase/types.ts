@@ -5808,6 +5808,10 @@ export type Database = {
           total_inscrits: number
         }[]
       }
+      get_signup_funnel_metrics: {
+        Args: { p_period_days?: number }
+        Returns: Json
+      }
       get_sit_application_counts: {
         Args: { p_sit_id: string }
         Returns: {
