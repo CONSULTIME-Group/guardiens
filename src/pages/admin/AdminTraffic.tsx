@@ -26,7 +26,11 @@ function formatDuration(seconds: number): string {
 
 const AdminTraffic = () => {
   const [params, setParams] = useSearchParams();
-  const tab = params.get("tab") === "acquisition" ? "acquisition" : "interne";
+  const tabParam = params.get("tab");
+  const tab =
+    tabParam === "acquisition" || tabParam === "signup-funnel"
+      ? tabParam
+      : "interne";
   const { data, loading } = useSeoData();
   const ga4 = data?.ga4;
   const gsc = data?.gsc;
