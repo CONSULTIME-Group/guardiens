@@ -713,6 +713,14 @@ const EntraideHub = () => {
                                     {dept ? `, ${dept}` : ""}
                                   </span>
                                 )}
+                                {proximity.active && (() => {
+                                  const d = proximity.getDistance(m.id);
+                                  return d != null ? (
+                                    <span className="font-medium text-primary">
+                                      {d < 1 ? "moins d'1 km" : `à ${Math.round(d)} km`}
+                                    </span>
+                                  ) : null;
+                                })()}
                                 {dateLabel && <span>Pour le {dateLabel}</span>}
                                 {m.duration_estimate && <span>{DURATION_LABEL[m.duration_estimate] || m.duration_estimate}</span>}
                                 <span className="ml-auto">{formatRelative(m.created_at)}</span>
