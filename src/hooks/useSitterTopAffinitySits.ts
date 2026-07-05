@@ -121,7 +121,7 @@ export function useSitterTopAffinitySits(): Result {
       const scored: AffinitySitCard[] = [];
       for (const sit of sits) {
         const ownerPrefs = ownerPrefsById.get(sit.user_id) ?? {};
-        const pets = petsByOwner.get(sit.user_id) ?? [];
+        const pets = petsByProperty.get(sit.property_id) ?? [];
         const affinity = computeAffinityScore(
           {
             preferred_sitter_types: ownerPrefs.preferred_sitter_types,
