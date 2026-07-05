@@ -929,7 +929,7 @@ const SmallMissionDetail = () => {
         })}</script>
       </Helmet>
 
-      <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+      <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
         {/* Breadcrumb */}
         <div className="mb-6">
           <PageBreadcrumb items={[{ label: "Coups de main", href: "/petites-missions" }, { label: displayTitle }]} />
@@ -994,65 +994,57 @@ const SmallMissionDetail = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
           {/* ── COLONNE PRINCIPALE ── */}
           <article className="lg:col-span-8 min-w-0">
-            <header className="mb-6 md:mb-10">
-              <div className="flex items-center gap-3 mb-6 flex-wrap">
-                {/* Badge catégorie seul, sans le préfixe "Entraide ·" déjà donné par le breadcrumb. */}
-                <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-widest uppercase">
+            <header className="mb-6 md:mb-8">
+              <div className="flex items-center gap-2 mb-4 flex-wrap">
+                <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-widest uppercase">
                   {catMeta.label}
                 </span>
-                <span className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase ${statusMeta.className}`}>
+                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase ${statusMeta.className}`}>
                   {statusMeta.label}
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleSharePublishedLink}
-                  className="gap-1.5 rounded-full ml-auto"
+                  className="gap-1.5 rounded-full ml-auto h-8"
                   aria-label="Partager cette annonce"
                 >
                   <Share2 className="h-3.5 w-3.5" /> Partager
                 </Button>
               </div>
-              <h1 className="font-heading text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-5 md:mb-6 text-foreground">
+              <h1 className="font-heading text-2xl md:text-3xl lg:text-4xl font-bold leading-tight mb-3 text-foreground">
                 {displayTitle}
               </h1>
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-base text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-foreground/30" />
-                  <span>{cityLabel}{mission.postal_code ? ` (${mission.postal_code.slice(0, 2)})` : ""}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-foreground/30" />
-                  <span>Publié {timeAgoFr(mission.created_at)}</span>
-                </div>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5">
+                  <MapPin className="h-3.5 w-3.5" />
+                  {cityLabel}{mission.postal_code ? ` (${mission.postal_code.slice(0, 2)})` : ""}
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5" />
+                  Publié {timeAgoFr(mission.created_at)}
+                </span>
                 {durationLabel && (
-                  <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-foreground/30" />
-                    <span>{durationLabel}</span>
-                  </div>
-                )}
-                {mission.date_needed && (
-                  <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-foreground/30" />
-                    <span>{format(new Date(mission.date_needed), "d MMMM yyyy", { locale: fr })}</span>
-                  </div>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {durationLabel}
+                  </span>
                 )}
                 {responses.length > 0 && (
-                  <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-foreground/30" />
-                    <span>{responses.length} proposition{responses.length > 1 ? "s" : ""}</span>
-                  </div>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Users className="h-3.5 w-3.5" />
+                    {responses.length} proposition{responses.length > 1 ? "s" : ""}
+                  </span>
                 )}
               </div>
             </header>
 
-            {/* Image principale : uniquement si photo réelle. Pas de fallback
-                générique qui rendrait toutes les annonces identiques. */}
+            {/* Image principale : uniquement si photo réelle. */}
             {heroImage && (
-              <div className="mb-7 md:mb-12 rounded-2xl overflow-hidden shadow-sm bg-muted">
+              <div className="mb-6 md:mb-8 rounded-2xl overflow-hidden border border-border bg-muted">
                 <img
                   src={heroImage}
                   alt={displayTitle}
@@ -1064,12 +1056,12 @@ const SmallMissionDetail = () => {
 
             {/* Photos additionnelles */}
             {extraPhotos.length > 0 && (
-              <div className="mb-12">
+              <div className="mb-8">
                 <MissionPhotoGallery photos={mission.photos!} />
               </div>
             )}
 
-            <div className="max-w-2xl space-y-7 md:space-y-10">
+            <div className="max-w-2xl space-y-6 md:space-y-8">
               {/* Auteur */}
               {author && (() => {
                 const AuthorInner = (
@@ -1079,24 +1071,24 @@ const SmallMissionDetail = () => {
                         <img
                           src={author.avatar_url}
                           alt={author.first_name || "Auteur"}
-                          className="w-16 h-16 rounded-full object-cover border-2 border-background shadow-sm"
+                          className="w-12 h-12 rounded-full object-cover border border-border"
                         />
                       ) : (
-                        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center font-heading text-xl font-bold text-foreground">
+                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center font-heading text-base font-bold text-foreground">
                           {author.first_name?.charAt(0) || "?"}
                         </div>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-lg font-semibold text-foreground flex items-center gap-2 flex-wrap">
+                      <p className="text-base font-semibold text-foreground flex items-center gap-2 flex-wrap">
                         {(mission as any).mission_type === "offre" ? "Proposé par" : "Demandé par"} {author.first_name || "un membre"}
                         {author.identity_verified && (
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-success bg-success-soft px-2 py-0.5 rounded-full">
-                            <ShieldCheck className="h-3 w-3" /> Identité vérifiée
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-success bg-success-soft px-2 py-0.5 rounded-full">
+                            <ShieldCheck className="h-3 w-3" /> Vérifié
                           </span>
                         )}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         {[memberSince(author.created_at), titlecaseCity(author.city) || null].filter(Boolean).join(" · ")}
                       </p>
                       {author.user_id && (
@@ -1111,12 +1103,12 @@ const SmallMissionDetail = () => {
                 return author.user_id ? (
                   <Link
                     to={`/gardiens/${author.user_id}`}
-                    className="group flex items-center gap-5 pb-5 md:pb-8 border-b border-border hover:opacity-90 transition-opacity"
+                    className="group flex items-center gap-4 pb-6 border-b border-border hover:opacity-90 transition-opacity"
                   >
                     {AuthorInner}
                   </Link>
                 ) : (
-                  <div className="flex items-center gap-5 pb-5 md:pb-8 border-b border-border">
+                  <div className="flex items-center gap-4 pb-6 border-b border-border">
                     {AuthorInner}
                   </div>
                 );
@@ -1124,22 +1116,22 @@ const SmallMissionDetail = () => {
 
               {/* Description */}
               <section>
-                <div className="flex items-center gap-2 mb-5 flex-wrap">
-                  <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground">
+                <div className="flex items-center gap-2 mb-3 flex-wrap">
+                  <h2 className="font-heading text-xl md:text-2xl font-bold text-foreground">
                     {(mission as any).mission_type === "offre" ? "La proposition" : "La mission"}
                   </h2>
                   {(mission as any).mission_type === "offre" && (
-                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-success/15 text-success text-xs font-body font-semibold tracking-wide">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-success/15 text-success text-[11px] font-body font-semibold tracking-wide">
                       Propose son aide
                     </span>
                   )}
                 </div>
-                <div className="space-y-5 text-lg leading-relaxed text-foreground/85 whitespace-pre-wrap">
+                <div className="space-y-4 text-base md:text-[17px] leading-relaxed text-foreground/85 whitespace-pre-wrap">
                   {mission.description}
                 </div>
               </section>
 
-              {/* En échange - version discrète (ne doit pas voler la vedette à la mission). */}
+              {/* En échange */}
               {mission.exchange_offer && (
                 <aside className="border-l-2 border-primary/40 bg-muted/40 pl-4 py-3 rounded-r-lg">
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
@@ -1154,7 +1146,7 @@ const SmallMissionDetail = () => {
           </article>
 
           {/* ── SIDEBAR ── */}
-          <aside id="proposer-aide" className="lg:col-span-4 lg:sticky lg:top-8 space-y-6 scroll-mt-20">
+          <aside id="proposer-aide" className="lg:col-span-4 lg:sticky lg:top-6 space-y-4 scroll-mt-20">
             {renderSidebarCard()}
 
             {/* Localisation approximative */}
@@ -1164,12 +1156,12 @@ const SmallMissionDetail = () => {
                 postalCode={mission.postal_code}
                 lat={mission.latitude}
                 lng={mission.longitude}
-                className="h-64"
+                className="h-44"
               />
-              <div className="p-5">
+              <div className="p-4">
                 <p className="font-semibold text-sm text-foreground mb-1">Localisation approximative</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  L'adresse exacte est partagée uniquement après mise en relation, par respect de la vie privée.
+                  L'adresse exacte est partagée après mise en relation.
                 </p>
               </div>
             </div>
