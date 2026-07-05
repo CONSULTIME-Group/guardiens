@@ -2113,11 +2113,12 @@ export default function PublicSitterProfile() {
       {activeTab === 'entraide' && (
         <div className="max-w-4xl mx-auto px-4 py-8 space-y-10">
 
-          {(missionsPublished.length > 0 || missionsHelped.length > 0 || missionFeedbacks.length > 0) && (
-            <div className="grid grid-cols-3 gap-3">
+          {(missionsPublished.length > 0 || missionsHelped.length > 0 || missionFeedbacks.length > 0 || thanksReceived > 0) && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
                 { value: missionsPublished.length, label: 'Mission' + (missionsPublished.length > 1 ? 's publiées' : ' publiée') },
                 { value: missionsHelped.length, label: 'Coup' + (missionsHelped.length > 1 ? 's de main donnés' : ' de main donné') },
+                { value: thanksReceived, label: 'Merci' + (thanksReceived > 1 ? 's reçus' : ' reçu') },
                 { value: missionFeedbacks.length, label: 'Avis reçu' + (missionFeedbacks.length > 1 ? 's' : '') },
               ].map(({ value, label }) => (
                 <div key={label} className="bg-card border border-border rounded-xl px-4 py-4 text-center">
