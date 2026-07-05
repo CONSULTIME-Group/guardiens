@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { PRICING_IS_ACTIVE } from '../_shared/config-pricing.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
