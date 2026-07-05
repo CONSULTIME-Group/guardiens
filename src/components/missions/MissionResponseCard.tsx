@@ -130,20 +130,22 @@ const MissionResponseCard = ({
                 onClick={toggleThanks}
                 disabled={busy}
                 aria-pressed={thanked}
+                aria-busy={busy}
+                aria-label={`${thanked ? "Retirer le merci" : "Dire merci"} à ${r.responder?.first_name || "cette personne"}${count > 0 ? ` (${count} merci${count > 1 ? "s" : ""} pour l'instant)` : ""}`}
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors",
+                  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
                   thanked
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-card text-foreground/70 border-border hover:bg-accent",
                 )}
               >
-                <Heart className={cn("h-3.5 w-3.5", thanked && "fill-current")} />
-                Merci {count > 0 && <span className="tabular-nums">· {count}</span>}
+                <Heart aria-hidden="true" className={cn("h-3.5 w-3.5", thanked && "fill-current")} />
+                <span>Merci {count > 0 && <span className="tabular-nums">· {count}</span>}</span>
               </button>
             )}
             {!canThank && count > 0 && (
-              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Heart className="h-3.5 w-3.5" /> {count} merci{count > 1 ? "s" : ""}
+              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground" aria-label={`${count} merci${count > 1 ? "s" : ""} reçu${count > 1 ? "s" : ""}`}>
+                <Heart aria-hidden="true" className="h-3.5 w-3.5" /> <span aria-hidden="true">{count} merci{count > 1 ? "s" : ""}</span>
               </span>
             )}
 
@@ -152,9 +154,16 @@ const MissionResponseCard = ({
               <>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button size="sm" disabled={processing} className="rounded-full ml-auto">
-                      <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                      {processing ? "…" : "Retenir cette personne"}
+                    <Button
+                      size="sm"
+                      disabled={processing}
+                      aria-disabled={processing}
+                      aria-busy={processing}
+                      aria-label={`Retenir ${r.responder?.first_name || "cette personne"} pour aider`}
+                      className="rounded-full ml-auto min-h-11"
+                    >
+                      <CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5 mr-1" />
+                      <span>{processing ? "…" : "Retenir cette personne"}</span>
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
@@ -172,20 +181,36 @@ const MissionResponseCard = ({
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
-                <Button size="sm" variant="ghost" onClick={onDecline} disabled={processing} className="rounded-full text-muted-foreground">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={onDecline}
+                  disabled={processing}
+                  aria-disabled={processing}
+                  aria-label={`Écarter la réponse de ${r.responder?.first_name || "cette personne"}`}
+                  className="rounded-full text-muted-foreground min-h-11"
+                >
                   Écarter
                 </Button>
               </>
             )}
             {isAuthor && r.status === "accepted" && (
-              <Button size="sm" variant="outline" onClick={onOpenMessages} className="rounded-full gap-2 ml-auto">
-                <MessageSquare className="h-3.5 w-3.5" /> Messagerie
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={onOpenMessages}
+                aria-label={`Ouvrir la messagerie avec ${r.responder?.first_name || "cette personne"}`}
+                className="rounded-full gap-2 ml-auto min-h-11"
+              >
+                <MessageSquare aria-hidden="true" className="h-3.5 w-3.5" />
+                <span>Messagerie</span>
               </Button>
             )}
             {!isAuthor && r.status === "declined" && (
-              <span className="text-[10px] text-muted-foreground italic ml-auto">Non retenu(e)</span>
+              <span className="text-[10px] text-muted-foreground italic ml-auto" role="status">Non retenu(e)</span>
             )}
           </div>
+
         </div>
       </div>
     </article>
