@@ -21,6 +21,7 @@ import { DEPT_NAMES, getDeptCode } from "@/lib/departments";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import MissionCardCover from "@/components/missions/MissionCardCover";
+import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 
 
 type Tab = "questions" | "besoins" | "offres";
@@ -624,7 +625,7 @@ const EntraideHub = () => {
                           <li key={m.id}>
                             <Link
                               to={`/petites-missions/${m.id}`}
-                              aria-label={`Voir la mission : ${m.title}${m.city ? `, ${m.city}` : ""}`}
+                              aria-label={`Voir la mission : ${sanitizeUserTitle(m.title) || m.title}${m.city ? `, ${m.city}` : ""}`}
                               className="flex gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                             >
                               {Array.isArray(m.photos) && m.photos.length > 0 && (
@@ -655,7 +656,7 @@ const EntraideHub = () => {
                                 )}
                               </div>
                               <p className="font-heading text-base font-semibold text-foreground line-clamp-2">
-                                {m.title}
+                                {sanitizeUserTitle(m.title) || m.title}
                               </p>
                               {m.description && (
                                 <p className="text-sm text-foreground/65 mt-1 line-clamp-2">

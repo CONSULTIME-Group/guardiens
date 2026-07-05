@@ -126,8 +126,7 @@ const DevenirHomeSitter = lazy(() => import("./pages/DevenirHomeSitter"));
 
 const DepartmentPage = lazy(() => import("./pages/DepartmentPage"));
 const Pricing = lazy(() => import("./pages/Pricing"));
-const SmallMissions = lazy(() => import("./pages/SmallMissions"));
-const SmallMissionsPublic = lazy(() => import("./pages/SmallMissionsPublic"));
+
 const SmallMissionDetail = lazy(() => import("./pages/SmallMissionDetail"));
 const MissionsCityPage = lazy(() => import("./pages/MissionsCityPage"));
 const CreateSmallMission = lazy(() => import("./pages/CreateSmallMission"));
@@ -218,19 +217,6 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const SmallMissionsRoute = () => {
-  const { isAuthenticated } = useAuth();
-  if (isAuthenticated) {
-    // Cohérence mobile : AppLayout fournit la top bar (logo + cloches) et la
-    // bottom nav, identique aux autres hubs (/dashboard, /sits, /messages).
-    return (
-      <AppLayout>
-        <SmallMissions />
-      </AppLayout>
-    );
-  }
-  return <SmallMissionsPublic />;
-};
 
 const ParrainageRoute = () => {
   const { isAuthenticated } = useAuth();
