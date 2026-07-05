@@ -144,12 +144,24 @@ const formatRelative = (iso: string) => {
   }
 };
 
+const DURATION_LABEL: Record<string, string> = {
+  quick: "Moins d'1 h",
+  short: "1 à 2 h",
+  medium: "Une demi-journée",
+  long: "Une journée",
+  several: "Plusieurs jours",
+};
+
 const EntraideHub = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [params, setParams] = useSearchParams();
 
-  const initialTab = (params.get("tab") as Tab) || "besoins";
+  // Deep link : ?mode=offer → tab=offres, ?mode=need → tab=besoins
+  const modeParam = params.get("mode");
+  const mappedFromMode: Tab | null =
+    modeParam === "offer" ? "offres" : modeParam === "need" ? "besoins" : null;
+  const initialTab = mappedFromMode || (params.get("tab") as Tab) || "besoins";
   const [tab, setTab] = useState<Tab>(VALID_TABS.includes(initialTab) ? initialTab : "besoins");
 
   /* Onglet Questions */
@@ -406,7 +418,8 @@ const EntraideHub = () => {
                       }`}
                       aria-label={showRatio ? `${filtered} affichés sur ${total} au total` : `${total} au total`}
                     >
-                      {showRatio ? `${filtered}/${total}` : total}
+                      <span className="sm:hidden">{total}</span>
+                      <span className="hidden sm:inline">{showRatio ? `${filtered}/${total}` : total}</span>
                     </span>
                   )}
                 </button>
@@ -611,7 +624,8 @@ const EntraideHub = () => {
                           <li key={m.id}>
                             <Link
                               to={`/petites-missions/${m.id}`}
-                              className="flex gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all"
+                              aria-label={`Voir la mission : ${m.title}${m.city ? `, ${m.city}` : ""}`}
+                              className="flex gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                             >
                               {Array.isArray(m.photos) && m.photos.length > 0 && (
                                 <MissionCardCover
@@ -663,7 +677,7 @@ const EntraideHub = () => {
                                   </span>
                                 )}
                                 {dateLabel && <span>Pour le {dateLabel}</span>}
-                                {m.duration_estimate && <span>{m.duration_estimate}</span>}
+                                {m.duration_estimate && <span>{DURATION_LABEL[m.duration_estimate] || m.duration_estimate}</span>}
                                 <span className="ml-auto">{formatRelative(m.created_at)}</span>
                               </div>
                               </div>
