@@ -3160,12 +3160,15 @@ export type Database = {
           ordre_number: string | null
           phone: string | null
           postal_code: string | null
+          pricing_tier: Database["public"]["Enums"]["pro_pricing_tier"]
           raison_sociale: string
           rating_avg: number | null
           rating_count: number
           rejection_reason: string | null
           siret: string | null
           siret_verified: boolean
+          siret_verified_at: string | null
+          siret_verified_by: string | null
           slug: string
           social_links: Json
           status: Database["public"]["Enums"]["pro_moderation_status"]
@@ -3200,12 +3203,15 @@ export type Database = {
           ordre_number?: string | null
           phone?: string | null
           postal_code?: string | null
+          pricing_tier?: Database["public"]["Enums"]["pro_pricing_tier"]
           raison_sociale: string
           rating_avg?: number | null
           rating_count?: number
           rejection_reason?: string | null
           siret?: string | null
           siret_verified?: boolean
+          siret_verified_at?: string | null
+          siret_verified_by?: string | null
           slug: string
           social_links?: Json
           status?: Database["public"]["Enums"]["pro_moderation_status"]
@@ -3240,12 +3246,15 @@ export type Database = {
           ordre_number?: string | null
           phone?: string | null
           postal_code?: string | null
+          pricing_tier?: Database["public"]["Enums"]["pro_pricing_tier"]
           raison_sociale?: string
           rating_avg?: number | null
           rating_count?: number
           rejection_reason?: string | null
           siret?: string | null
           siret_verified?: boolean
+          siret_verified_at?: string | null
+          siret_verified_by?: string | null
           slug?: string
           social_links?: Json
           status?: Database["public"]["Enums"]["pro_moderation_status"]
@@ -3261,7 +3270,29 @@ export type Database = {
           zone_cities?: string[]
           zone_radius_km?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "pro_profiles_siret_verified_by_fkey"
+            columns: ["siret_verified_by"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pro_profiles_siret_verified_by_fkey"
+            columns: ["siret_verified_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pro_profiles_siret_verified_by_fkey"
+            columns: ["siret_verified_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pro_reviews: {
         Row: {
@@ -6143,6 +6174,7 @@ export type Database = {
         | "certification"
         | "other"
       pro_moderation_status: "pending" | "approved" | "rejected"
+      pro_pricing_tier: "standard" | "verified"
       pro_profile_status_enum: "none" | "pending" | "verified" | "rejected"
       pro_verification_status_enum:
         | "pending"
@@ -6392,6 +6424,7 @@ export const Constants = {
         "other",
       ],
       pro_moderation_status: ["pending", "approved", "rejected"],
+      pro_pricing_tier: ["standard", "verified"],
       pro_profile_status_enum: ["none", "pending", "verified", "rejected"],
       pro_verification_status_enum: [
         "pending",
