@@ -91,7 +91,13 @@ export type EventType =
   | "sitter_secondary_card_clicked"    // Clic carte secondaire (type: missions|breeds|guides)
   // Pivot pricing "gratuit sans deadline" -----------------------------------
   | "pricing_baseline_seen"            // Impression du bloc éditorial baseline (surface: tarifs|landing_faq|my_subscription|observatoire)
-  | "pricing_faq_expanded";            // Ouverture d'une question de la FAQ tarifs (question_id)
+  | "pricing_faq_expanded"             // Ouverture d'une question de la FAQ tarifs (question_id)
+  // Admin refresh IA articles post-pivot -------------------------------------
+  | "admin_article_refresh_previewed"       // Aperçu du refresh IA (article_id, slug)
+  | "admin_article_refresh_applied"         // Refresh IA appliqué (article_id, slug, changes_count)
+  | "admin_article_batch_refresh_started"   // Batch démarré (count)
+  | "admin_article_batch_refresh_completed" // Batch fini (success_count, error_count)
+  | "admin_article_pillar_validated_manually"; // Pilier sorti manuellement du noindex (article_id, slug)
 
 interface TrackOptions {
   source?: string;
