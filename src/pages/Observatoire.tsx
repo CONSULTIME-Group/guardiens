@@ -5,6 +5,7 @@ import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 
 /**
  * /observatoire-garde-animaux
@@ -73,6 +74,8 @@ const KEY_STATS: Stat[] = [
 const PAGE_URL = "https://guardiens.fr/observatoire-garde-animaux";
 
 const Observatoire = () => {
+  const { data: counts } = useInventaireCounts();
+  const fmt = (n: number) => new Intl.NumberFormat("fr-FR").format(n || 0);
  const datasetSchema = {
  "@context": "https://schema.org",
  "@type": "Dataset",
@@ -157,6 +160,26 @@ const Observatoire = () => {
  </Card>
  ))}
  </div>
+ </section>
+
+ <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
+  <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
+    Notre inventaire vivant
+  </h2>
+  <p className="text-muted-foreground mb-6">
+    Compteurs recalculés à chaque visite : ce que nous avons publié, pas des estimations.
+  </p>
+  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(counts?.cities_total || 0)}</p><p className="text-sm font-semibold text-foreground mb-1">Villes couvertes</p><p className="text-xs text-muted-foreground">Guides locaux publiés.</p></CardContent></Card>
+    <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(counts?.breeds_total || 0)}</p><p className="text-sm font-semibold text-foreground mb-1">Races documentées</p><p className="text-xs text-muted-foreground">Fiches complètes avec conseils de garde.</p></CardContent></Card>
+    <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(counts?.places_total || 0)}</p><p className="text-sm font-semibold text-foreground mb-1">Lieux dog-friendly</p><p className="text-xs text-muted-foreground">Parcs, cafés, sentiers, vétérinaires…</p></CardContent></Card>
+    <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(counts?.pros_total || 0)}</p><p className="text-sm font-semibold text-foreground mb-1">Professionnels</p><p className="text-xs text-muted-foreground">Fiches vérifiées de l'annuaire.</p></CardContent></Card>
+  </div>
+  <div className="mt-5">
+    <Link to="/actualites/inventaire-guardiens-france#demande" className="text-primary hover:underline text-sm font-medium">
+      Voir l'inventaire complet et demander une analyse →
+    </Link>
+  </div>
  </section>
 
  <section className="max-w-4xl mx-auto px-4 py-12 border-t border-border">
