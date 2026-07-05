@@ -11,6 +11,7 @@ import ProReviews from "@/components/pros/ProReviews";
 import ProContactCTA from "@/components/pros/ProContactCTA";
 import SimilarPros from "@/components/pros/SimilarPros";
 import GoogleRatingInline from "@/components/pros/GoogleRatingInline";
+import ProVerifiedBadge from "@/components/pros/ProVerifiedBadge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
