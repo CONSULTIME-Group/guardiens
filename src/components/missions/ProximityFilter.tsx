@@ -105,7 +105,7 @@ const ProximityFilter = ({
                 ? "proximity-geo-error"
                 : undefined
           }
-          className={`h-8 w-[130px] pl-8 pr-7 text-xs ${showPostalError ? "border-destructive" : ""}`}
+          className={`h-9 w-[148px] pl-8 pr-7 text-xs ${showPostalError ? "border-destructive" : ""}`}
         />
         {postal && (
           <button
@@ -125,7 +125,7 @@ const ProximityFilter = ({
         disabled={!active}
       >
         <SelectTrigger
-          className="h-8 w-auto min-w-[100px] text-xs"
+          className="h-9 w-auto min-w-[100px] text-xs"
           aria-label="Rayon de recherche"
         >
           <SelectValue />
@@ -141,11 +141,11 @@ const ProximityFilter = ({
 
       <Button
         type="button"
-        variant="ghost"
+        variant="outline"
         size="sm"
         onClick={handleLocate}
         disabled={locating || resolving}
-        className="h-8 text-xs gap-1.5"
+        className="h-9 text-xs gap-1.5 px-3"
         aria-label={
           locating
             ? "Recherche de votre position en cours"
@@ -158,7 +158,7 @@ const ProximityFilter = ({
         ) : (
           <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
         )}
-        <span className="hidden sm:inline">
+        <span>
           {locating ? "Localisation…" : "Ma position"}
         </span>
       </Button>
