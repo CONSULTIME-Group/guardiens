@@ -43,6 +43,7 @@ export default function ProCategoryListing() {
   const [pros, setPros] = useState<ProRow[]>([]);
   const [allCitiesForCat, setAllCitiesForCat] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
 
   useEffect(() => {
     if (!category) return;
