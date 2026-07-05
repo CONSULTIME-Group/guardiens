@@ -17,6 +17,9 @@ export const RADIUS_OPTIONS = [15, 30, 50, 100] as const;
 export type RadiusKm = (typeof RADIUS_OPTIONS)[number];
 export const DEFAULT_RADIUS: RadiusKm = 30;
 
+export type GeolocationErrorReason = "denied" | "timeout" | "unavailable" | "unsupported";
+export type GeolocationResult = { ok: true } | { ok: false; reason: GeolocationErrorReason };
+
 export interface MissionLike {
   id: string;
   postal_code: string | null;
