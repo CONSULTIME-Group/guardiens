@@ -593,7 +593,7 @@ const Register = () => {
         if (checked) {
           setTermsHighlighted(false);
           setFormError(null);
-          try { trackEvent("signup_terms_checked" as any, { source: "/inscription", metadata: { step: 1 } }); } catch {}
+          try { trackEvent("signup_terms_checked", { source: "/inscription", metadata: { step: 1 } }); } catch {}
         }
       }}
       className="mt-0.5"
