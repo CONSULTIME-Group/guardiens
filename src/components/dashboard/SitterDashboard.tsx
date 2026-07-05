@@ -22,6 +22,11 @@ import NearbyAnnoncesCard from "./sitter/NearbyAnnoncesCard";
 import DashSection from "./owner/DashSection";
 import SitterDashboardSkeleton from "./sitter/SitterDashboardSkeleton";
 import SitterActivityPanel from "./sitter/SitterActivityPanel";
+import SitterFirstNBA from "./SitterFirstNBA";
+import SitterFirstNBASkeleton from "./SitterFirstNBASkeleton";
+import NoNearbySitsEmptyState from "./NoNearbySitsEmptyState";
+import { useIsNewSitter } from "@/hooks/useIsNewUser";
+import { useSitterTopAffinitySits } from "@/hooks/useSitterTopAffinitySits";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { CheckCircle, Circle, ChevronRight, Newspaper, AlertCircle } from "lucide-react";
