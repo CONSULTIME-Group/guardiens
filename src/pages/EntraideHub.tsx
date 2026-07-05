@@ -612,6 +612,15 @@ const EntraideHub = () => {
                         ))}
                       </SelectContent>
                     </Select>
+                    {hasMissionFilters && (
+                      <button
+                        type="button"
+                        onClick={resetMissionFilters}
+                        className="ml-auto text-xs text-foreground/60 hover:text-foreground underline underline-offset-2"
+                      >
+                        Réinitialiser
+                      </button>
+                    )}
                   </div>
                   <ProximityFilter
                     postal={proximity.postal}
@@ -624,16 +633,6 @@ const EntraideHub = () => {
                     onUseMyLocation={proximity.useMyLocation}
                     onClear={() => proximity.setPostal("")}
                   />
-                    {hasMissionFilters && (
-                      <button
-                        type="button"
-                        onClick={resetMissionFilters}
-                        className="ml-auto text-xs text-foreground/60 hover:text-foreground underline underline-offset-2"
-                      >
-                        Réinitialiser
-                      </button>
-                    )}
-                  </div>
                 </div>
 
                 {mLoading ? (
