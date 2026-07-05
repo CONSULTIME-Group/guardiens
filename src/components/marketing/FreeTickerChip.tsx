@@ -1,4 +1,5 @@
 import { isInGracePeriod, GRACE_END } from "@/lib/constants";
+import { isPricingActive } from "@/lib/pricing";
 
 interface FreeTickerChipProps {
   /** Variante d'affichage : sur fond sombre (hero) ou sur fond clair */
@@ -18,7 +19,10 @@ export const FreeTickerChip = ({
   className = "",
   fallback = "À 0 € pour les propriétaires",
 }: FreeTickerChipProps) => {
+  // Pivot pricing sans deadline : composant désactivé tant que PRICING_IS_ACTIVE = false.
+  if (!isPricingActive()) return null;
   const active = isInGracePeriod();
+
 
   // Dernier jour inclus = 30 septembre (GRACE_END exclusif au 1er octobre 00:00)
   const lastFreeDay = new Date(GRACE_END.getTime() - 24 * 60 * 60 * 1000);

@@ -1,4 +1,5 @@
 import { isInGracePeriod, GRACE_END } from "@/lib/constants";
+import { isPricingActive } from "@/lib/pricing";
 
 interface FreePeriodBannerProps {
   className?: string;
@@ -10,6 +11,8 @@ interface FreePeriodBannerProps {
  * Indique les dates exactes pour rassurer les visiteurs.
  */
 export const FreePeriodBanner = ({ className = "" }: FreePeriodBannerProps) => {
+  // Pivot pricing sans deadline : composant désactivé tant que PRICING_IS_ACTIVE = false.
+  if (!isPricingActive()) return null;
   if (!isInGracePeriod()) return null;
 
   const endLabel = GRACE_END.toLocaleDateString("fr-FR", {

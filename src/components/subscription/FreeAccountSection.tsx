@@ -42,7 +42,11 @@ const accesGratuits: Array<{ titre: string; detail: string }> = [
  },
 ];
 
+import { isPricingActive } from "@/lib/pricing";
+
 const FreeAccountSection = () => {
+ // Pivot pricing sans deadline : section masquée tant que PRICING_IS_ACTIVE = false.
+ if (!isPricingActive()) return null;
  return (
  <section
  aria-labelledby="compte-offert-titre"
