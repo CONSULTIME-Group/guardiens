@@ -34,6 +34,11 @@ import PublicMissionView from "@/components/missions/PublicMissionView";
 import RelatedMissionCard from "@/components/missions/RelatedMissionCard";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import { isAuthorOf } from "@/lib/ownership";
+import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
+import { haversineDistance } from "@/utils/geo";
+
+/** Rayon max (km) pour considérer une mission « près de chez vous ». */
+const NEAR_RADIUS_KM = 100;
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
   animals: { label: "Animaux", icon: Dog, colorClass: "text-primary" },
@@ -219,16 +224,18 @@ const SmallMissionDetail = () => {
     if (!m) { setLoading(false); return; }
     setMission(m);
 
-    // Parallélisation : tous ces appels sont indépendants une fois la mission chargée
+    // Parallélisation : tous ces appels sont indépendants une fois la mission chargée.
+    // Pour "près de chez vous" on charge un pool large (30) puis on filtre par distance
+    // côté client (haversine) pour éviter de proposer Vergons (04) à quelqu'un du 93.
     const [authorRes, relatedRes, respsRes, givenFbRes, recFbRes] = await Promise.all([
       supabase.rpc("get_mission_author_public", { _mission_id: m.id }),
       supabase.from("small_missions")
-        .select("id, title, description, category, city, postal_code, created_at, duration_estimate, photos, mission_type")
+        .select("id, title, description, category, city, postal_code, created_at, duration_estimate, photos, mission_type, latitude, longitude")
         .eq("status", "open")
         .neq("id", m.id)
         .or(`category.eq.${m.category},city.eq.${m.city}`)
         .order("created_at", { ascending: false })
-        .limit(3),
+        .limit(30),
       supabase.from("small_mission_responses")
         .select("*, responder:profiles!small_mission_responses_responder_id_fkey(first_name, avatar_url)")
         .eq("mission_id", id).order("created_at", { ascending: false }),
@@ -244,7 +251,27 @@ const SmallMissionDetail = () => {
 
     const authorRow: any = Array.isArray(authorRes.data) ? authorRes.data[0] : authorRes.data;
     setAuthor(authorRow ? { ...authorRow, created_at: authorRow.member_since } : null);
-    setRelatedMissions(relatedRes.data || []);
+
+    // Filtrage par proximité réelle si on connaît les coords de la mission courante.
+    const pool = (relatedRes.data || []) as any[];
+    let ranked: any[] = pool;
+    if (m.latitude && m.longitude) {
+      const meLat = m.latitude as number;
+      const meLng = m.longitude as number;
+      const withDist = pool
+        .map((r) => {
+          const d = (r.latitude && r.longitude)
+            ? haversineDistance({ lat: meLat, lng: meLng }, { lat: r.latitude, lng: r.longitude })
+            : Number.POSITIVE_INFINITY;
+          return { ...r, __distance_km: d };
+        })
+        .sort((a, b) => a.__distance_km - b.__distance_km);
+      const near = withDist.filter((r) => r.__distance_km <= NEAR_RADIUS_KM);
+      // On garde au moins 3 cartes si le rayon strict est vide (fallback catégorie).
+      ranked = near.length >= 3 ? near : withDist;
+    }
+    setRelatedMissions(ranked.slice(0, 3));
+
     setResponses(respsRes.data || []);
 
     if (user) {
@@ -640,6 +667,7 @@ const SmallMissionDetail = () => {
   const heroImage = mission.photos?.[0] || entraideHeader;
   const extraPhotos = (mission.photos || []).slice(1);
   const cityLabel = titlecaseCity(mission.city) || "France";
+  const displayTitle = sanitizeUserTitle(mission.title) || mission.title;
   const durationLabel = mission.duration_estimate ? (DURATION_LABELS[mission.duration_estimate] || mission.duration_estimate) : null;
 
   /* ── Sidebar contextuelle ─────────────────────────────────────────── */
@@ -868,7 +896,7 @@ const SmallMissionDetail = () => {
   return (
     <div className="min-h-screen bg-background text-foreground animate-fade-in">
       <PageMeta
-        title={`${mission.title} · Coup de main à ${cityLabel}`}
+        title={`${displayTitle} · Coup de main à ${cityLabel}`}
         description={(() => {
           const raw = mission.description?.trim();
           if (raw && raw.length >= 60) return raw.slice(0, 155);
@@ -887,7 +915,7 @@ const SmallMissionDetail = () => {
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Service",
-          name: mission.title,
+          name: displayTitle,
           description: mission.description?.slice(0, 300),
           areaServed: cityLabel,
           serviceType: catMeta.label,
@@ -900,7 +928,7 @@ const SmallMissionDetail = () => {
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
         {/* Breadcrumb */}
         <div className="mb-6">
-          <PageBreadcrumb items={[{ label: "Coups de main", href: "/petites-missions" }, { label: mission.title }]} />
+          <PageBreadcrumb items={[{ label: "Coups de main", href: "/petites-missions" }, { label: displayTitle }]} />
         </div>
 
         {/* Banner publication */}
@@ -967,8 +995,9 @@ const SmallMissionDetail = () => {
           <article className="lg:col-span-8 min-w-0">
             <header className="mb-6 md:mb-10">
               <div className="flex items-center gap-3 mb-6 flex-wrap">
+                {/* Badge catégorie seul, sans le préfixe "Entraide ·" déjà donné par le breadcrumb. */}
                 <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-widest uppercase">
-                  Entraide · {catMeta.label}
+                  {catMeta.label}
                 </span>
                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase ${statusMeta.className}`}>
                   {statusMeta.label}
@@ -984,7 +1013,7 @@ const SmallMissionDetail = () => {
                 </Button>
               </div>
               <h1 className="font-heading text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-5 md:mb-6 text-foreground">
-                {mission.title}
+                {displayTitle}
               </h1>
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-base text-muted-foreground">
                 <div className="flex items-center gap-2">
@@ -1020,7 +1049,7 @@ const SmallMissionDetail = () => {
             <div className="mb-7 md:mb-12 rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
               <img
                 src={heroImage}
-                alt={mission.title}
+                alt={displayTitle}
                 className="w-full aspect-video object-cover"
                 loading="eager"
               />
@@ -1103,17 +1132,16 @@ const SmallMissionDetail = () => {
                 </div>
               </section>
 
-              {/* En échange */}
+              {/* En échange - version discrète (ne doit pas voler la vedette à la mission). */}
               {mission.exchange_offer && (
-                <section className="bg-muted/60 p-5 md:p-10 rounded-[2rem] border border-border relative overflow-hidden">
-                  <div className="absolute -top-6 -right-6 w-32 h-32 bg-primary/5 rounded-full blur-2xl" aria-hidden />
-                  <h3 className="text-xs font-bold tracking-[0.2em] uppercase mb-4 text-muted-foreground">
-                    {(mission as any).mission_type === "offre" ? "Ce que je souhaite en échange" : "En échange de votre aide"}
-                  </h3>
-                  <blockquote className="font-heading text-xl md:text-2xl italic leading-snug text-foreground/90">
+                <aside className="border-l-2 border-primary/40 bg-muted/40 pl-4 py-3 rounded-r-lg">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                    {(mission as any).mission_type === "offre" ? "Souhaité en échange" : "En échange"}
+                  </p>
+                  <p className="text-sm md:text-base text-foreground/85 italic leading-snug">
                     « {mission.exchange_offer} »
-                  </blockquote>
-                </section>
+                  </p>
+                </aside>
               )}
             </div>
           </article>
@@ -1291,39 +1319,48 @@ const SmallMissionDetail = () => {
         {/* ══════════════════════════════════════════════════════ */}
         {/* ── Recommandations ── */}
         {/* ══════════════════════════════════════════════════════ */}
-        {relatedMissions.length > 0 && (
-          <section className="mt-12 md:mt-32 pt-8 md:pt-16 border-t border-border">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-10 gap-4">
-              <div>
-                <h2 className="font-heading text-3xl md:text-4xl font-bold mb-2">Près de chez vous</h2>
-                <p className="text-muted-foreground text-lg">
-                  D'autres coups de main à {cityLabel} et alentours
-                </p>
+        {relatedMissions.length > 0 && (() => {
+          // Vérifie qu'au moins UNE suggestion est dans le rayon "près de chez vous".
+          // Sinon on titre honnêtement pour ne pas mentir au lecteur.
+          const anyNear = relatedMissions.some(
+            (rm: any) => typeof rm.__distance_km === "number" && rm.__distance_km <= NEAR_RADIUS_KM,
+          );
+          const sectionTitle = anyNear ? "Près de chez vous" : "D'autres coups de main";
+          const sectionSubtitle = anyNear
+            ? `D'autres coups de main à ${cityLabel} et alentours`
+            : "Encore peu d'annonces dans votre secteur, voici des exemples récents à découvrir.";
+          return (
+            <section className="mt-12 md:mt-32 pt-8 md:pt-16 border-t border-border">
+              <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-10 gap-4">
+                <div>
+                  <h2 className="font-heading text-3xl md:text-4xl font-bold mb-2">{sectionTitle}</h2>
+                  <p className="text-muted-foreground text-lg">{sectionSubtitle}</p>
+                </div>
+                <Link
+                  to="/petites-missions"
+                  className="font-bold text-sm border-b-2 border-foreground pb-1 hover:opacity-70 transition-opacity self-start md:self-auto"
+                >
+                  Tout parcourir
+                </Link>
               </div>
-              <Link
-                to="/petites-missions"
-                className="font-bold text-sm border-b-2 border-foreground pb-1 hover:opacity-70 transition-opacity self-start md:self-auto"
-              >
-                Tout parcourir
-              </Link>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-              {relatedMissions.slice(0, 3).map((rm) => (
-                <RelatedMissionCard
-                  key={rm.id}
-                  to={`/petites-missions/${rm.id}`}
-                  photo={Array.isArray(rm.photos) ? rm.photos[0] : null}
-                  category={rm.category}
-                  title={rm.title}
-                  city={titlecaseCity(rm.city)}
-                  timeAgo={timeAgoFr(rm.created_at)}
-                  exchangeOffer={(rm as any).exchange_offer}
-                />
-              ))}
-            </div>
-          </section>
-        )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+                {relatedMissions.slice(0, 3).map((rm) => (
+                  <RelatedMissionCard
+                    key={rm.id}
+                    to={`/petites-missions/${rm.id}`}
+                    photo={Array.isArray(rm.photos) ? rm.photos[0] : null}
+                    category={rm.category}
+                    title={sanitizeUserTitle(rm.title) || rm.title}
+                    city={titlecaseCity(rm.city)}
+                    timeAgo={timeAgoFr(rm.created_at)}
+                    exchangeOffer={(rm as any).exchange_offer}
+                  />
+                ))}
+              </div>
+            </section>
+          );
+        })()}
       </div>
 
       {/* Mobile sticky CTA */}

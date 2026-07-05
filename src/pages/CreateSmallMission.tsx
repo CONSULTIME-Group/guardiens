@@ -25,6 +25,11 @@ import { trackFirstAction } from "@/lib/analytics";
 import { recordMissionCreatedAttribution } from "@/lib/campaignAttribution";
 import { templatesFor, MISSION_TEMPLATES, type MissionTemplate } from "@/data/missionTemplates";
 import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
+import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
+
+/** Longueurs minimales pour éviter les annonces vides ou illisibles. */
+const MIN_TITLE_LEN = 15;
+const MIN_DESC_LEN = 60;
 
 const EURO_REGEX = /\d+\s*[€]|[€]\s*\d+|\d+\s*euro/i;
 
@@ -131,7 +136,11 @@ const CreateSmallMission = () => {
   };
 
   /* Step 1 validation */
-  const step1Valid = title.trim().length >= 3 && description.trim().length >= 10 && exchangeOffer.trim().length >= 2 && !exchangeError;
+  const step1Valid =
+    title.trim().length >= MIN_TITLE_LEN &&
+    description.trim().length >= MIN_DESC_LEN &&
+    exchangeOffer.trim().length >= 2 &&
+    !exchangeError;
 
   const handleNextStep = () => {
     setTitleTouched(true);
@@ -149,13 +158,30 @@ const CreateSmallMission = () => {
       toast({ title: tp("toast_required_title"), description: tp("toast_required_desc"), variant: "destructive" });
       return;
     }
+    // Garde-fous côté client : évite d'insérer une annonce trop courte
+    // même si l'utilisateur skippe la validation Step 1 (retour arrière + submit).
+    if (title.trim().length < MIN_TITLE_LEN || description.trim().length < MIN_DESC_LEN) {
+      toast({
+        title: "Annonce trop courte",
+        description: `Titre ≥ ${MIN_TITLE_LEN} caractères, description ≥ ${MIN_DESC_LEN} caractères.`,
+        variant: "destructive",
+      });
+      setStep(1);
+      setTitleTouched(true);
+      setDescTouched(true);
+      return;
+    }
     setSubmitting(true);
     let coords: { lat: number; lng: number } | null = null;
     try { coords = await geocodeCity(city.trim()); } catch { coords = null; }
 
+    // Titre nettoyé (capitalisation, espaces, fautes fréquentes) au save
+    // pour normaliser à la source.
+    const cleanTitle = sanitizeUserTitle(title) || title.trim();
+
     const { data: inserted, error } = await supabase.from("small_missions").insert({
       user_id: user.id,
-      title: title.trim(),
+      title: cleanTitle,
       description: description.trim(),
       category: category as any,
       mission_type: missionType,
@@ -312,9 +338,10 @@ const CreateSmallMission = () => {
                     maxLength={120}
                     className="h-12 text-base"
                   />
-                  {titleTouched && title.trim().length < 3 && (
+                  {titleTouched && title.trim().length < MIN_TITLE_LEN && (
                     <p className="text-xs text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3 shrink-0" /> Au moins 3 caractères requis.
+                      <AlertCircle className="h-3 w-3 shrink-0" />
+                      Titre trop court ({title.trim().length}/{MIN_TITLE_LEN} caractères). Ex&nbsp;: « Garder mon chien pendant le week-end ».
                     </p>
                   )}
                 </div>
@@ -328,15 +355,27 @@ const CreateSmallMission = () => {
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     onBlur={() => setDescTouched(true)}
-                    placeholder={missionType === "offre" ? tp("desc_ph_offer") : tp("desc_ph_need")}
-                    rows={4}
+                    placeholder={
+                      missionType === "offre"
+                        ? tp("desc_ph_offer")
+                        : "Précisez l'animal (espèce, taille, âge), les dates approximatives et ce que vous attendez concrètement (promenade, gamelle, jeu…). Plus c'est clair, plus vite vous aurez des propositions."
+                    }
+                    rows={5}
                     className="text-base resize-none"
                   />
-                  {descTouched && description.trim().length < 10 && (
-                    <p className="text-xs text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3 shrink-0" /> Description trop courte.
-                    </p>
-                  )}
+                  <div className="flex items-center justify-between text-xs">
+                    {descTouched && description.trim().length < MIN_DESC_LEN ? (
+                      <p className="text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3 shrink-0" />
+                        Description trop courte, décrivez le contexte pour rassurer.
+                      </p>
+                    ) : (
+                      <span className="text-muted-foreground">Minimum {MIN_DESC_LEN} caractères.</span>
+                    )}
+                    <span className={cn("tabular-nums", description.trim().length >= MIN_DESC_LEN ? "text-muted-foreground" : "text-destructive")}>
+                      {description.trim().length}/{MIN_DESC_LEN}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Échange proposé */}
