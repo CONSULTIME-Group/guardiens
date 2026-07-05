@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Share2, CheckCircle2, ShieldCheck } from "lucide-react";
+import { Share2, CheckCircle2, ShieldCheck, Eye, Users, Dog, Flower2, Home as HomeIcon, Sparkles } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
