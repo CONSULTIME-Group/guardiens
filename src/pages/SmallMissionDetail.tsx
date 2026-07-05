@@ -667,6 +667,7 @@ const SmallMissionDetail = () => {
   const heroImage = mission.photos?.[0] || entraideHeader;
   const extraPhotos = (mission.photos || []).slice(1);
   const cityLabel = titlecaseCity(mission.city) || "France";
+  const displayTitle = sanitizeUserTitle(mission.title) || mission.title;
   const durationLabel = mission.duration_estimate ? (DURATION_LABELS[mission.duration_estimate] || mission.duration_estimate) : null;
 
   /* ── Sidebar contextuelle ─────────────────────────────────────────── */
