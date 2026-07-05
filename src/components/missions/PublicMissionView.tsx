@@ -1,16 +1,16 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Share2, CheckCircle2, ShieldCheck } from "lucide-react";
+import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
+import { Share2, CheckCircle2, ShieldCheck, Eye, Users, Dog, Flower2, Home as HomeIcon, Sparkles } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import RelatedMissionCard from "@/components/missions/RelatedMissionCard";
 import { Helmet } from "react-helmet-async";
 
-// Bannière générique "entraide" : conservée uniquement en dernier recours OG image,
-// jamais rendue en hero visible (elle rendait toutes les annonces sans photo identiques).
-const entraideHeader =
-  "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/entraide-header.webp";
+// (Pas de bannière de fallback : une annonce sans photo ne doit PAS
+// afficher une image générique qui rendrait toutes les annonces
+// identiques ou pire, trompeuse au partage social.)
 
 interface CatMeta {
   label: string;
@@ -60,7 +60,16 @@ interface Props {
   timeAgoFr: (iso: string) => string;
   memberSinceLong: (iso?: string | null) => string | null;
   onShare: () => void;
+  viewCount?: number;
+  responsesCount?: number;
 }
+
+const CATEGORY_ICON: Record<string, typeof Dog> = {
+  animals: Dog,
+  garden: Flower2,
+  house: HomeIcon,
+  skills: Sparkles,
+};
 
 const PublicMissionView = ({
   mission,
@@ -72,11 +81,22 @@ const PublicMissionView = ({
   timeAgoFr,
   memberSinceLong,
   onShare,
+  viewCount = 0,
+  responsesCount = 0,
 }: Props) => {
   const heroImage = mission.photos?.[0] || null;
-  const ogImage = mission.photos?.[0] || entraideHeader;
+  // Pas d'image OG générique : évite qu'une annonce sans photo affiche
+  // « alpinistes coucher de soleil » sur les partages.
+  const ogImage = mission.photos?.[0] || undefined;
   const cityLabel = titlecaseCity(mission.city) || "France";
   const redirect = `/petites-missions/${mission.id}`;
+  // Rétro-sanitize : les annonces créées avant la sanitize à la source
+  // conservent des titres en minuscules ou avec fautes ("chez soit").
+  const displayTitle = sanitizeUserTitle(mission.title) || mission.title;
+  const CategoryIcon = CATEGORY_ICON[mission.category] || Sparkles;
+  const authorFirstName = author?.first_name
+    ? author.first_name.charAt(0).toUpperCase() + author.first_name.slice(1).toLowerCase()
+    : null;
 
   // Meta description contextuelle : on privilégie la vraie description,
   // sinon on fabrique une phrase spécifique (ville + catégorie + contrepartie)
@@ -92,10 +112,18 @@ const PublicMissionView = ({
     return parts.join(". ").slice(0, 155);
   })();
 
+  // Titre court (< 20 mots dans la description) → typo hero plus mesurée
+  // pour éviter l'effet « cathédrale sur un tabouret ».
+  const descLen = (mission.description || "").trim().split(/\s+/).filter(Boolean).length;
+  const isShortMission = descLen < 20;
+  const h1Class = isShortMission
+    ? "font-heading text-3xl md:text-4xl font-bold leading-[1.15] mb-6 text-foreground"
+    : "font-heading text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6 text-foreground";
+
   return (
     <div className="min-h-screen bg-background text-foreground animate-fade-in">
       <PageMeta
-        title={`${mission.title} · Coup de main à ${cityLabel}`}
+        title={`${displayTitle} · Coup de main à ${cityLabel}`}
         description={metaDescription}
         image={ogImage}
       />
@@ -103,7 +131,7 @@ const PublicMissionView = ({
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Service",
-          name: mission.title,
+          name: displayTitle,
           description: mission.description?.slice(0, 300) || metaDescription,
           areaServed: cityLabel,
           serviceType: catMeta.label,
@@ -119,12 +147,15 @@ const PublicMissionView = ({
       </Helmet>
 
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        {/* Breadcrumb */}
+        {/* Breadcrumb (avec maillon ville pour le SEO local) */}
         <div className="mb-8">
           <PageBreadcrumb
             items={[
               { label: "Coups de main", href: "/petites-missions" },
-              { label: mission.title },
+              ...(mission.city
+                ? [{ label: cityLabel, href: `/petites-missions?city=${encodeURIComponent(mission.city)}` }]
+                : []),
+              { label: displayTitle },
             ]}
           />
         </div>
@@ -134,8 +165,9 @@ const PublicMissionView = ({
           <article className="lg:col-span-8 min-w-0">
             <header className="mb-10">
               <div className="flex items-center gap-3 mb-6 flex-wrap">
-                <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-widest uppercase">
-                  Entraide · {catMeta.label}
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-widest uppercase">
+                  <CategoryIcon className="h-3 w-3" />
+                  {catMeta.label}
                 </span>
                 <Button
                   variant="outline"
@@ -147,9 +179,7 @@ const PublicMissionView = ({
                   <Share2 className="h-3.5 w-3.5" /> Partager
                 </Button>
               </div>
-              <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6 text-foreground">
-                {mission.title}
-              </h1>
+              <h1 className={h1Class}>{displayTitle}</h1>
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-base text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-foreground/30" />
@@ -166,15 +196,34 @@ const PublicMissionView = ({
                   </div>
                 )}
               </div>
+              {/* Preuve sociale légère */}
+              {(viewCount > 0 || responsesCount > 0) && (
+                <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                  {viewCount > 0 && (
+                    <span className="inline-flex items-center gap-1.5">
+                      <Eye className="h-3.5 w-3.5" />
+                      {viewCount} {viewCount > 1 ? "vues" : "vue"}
+                    </span>
+                  )}
+                  {responsesCount > 0 && (
+                    <span className="inline-flex items-center gap-1.5">
+                      <Users className="h-3.5 w-3.5" />
+                      {responsesCount} {responsesCount > 1 ? "propositions" : "proposition"} d'aide
+                    </span>
+                  )}
+                </div>
+              )}
             </header>
 
-            {/* Image principale — masquée si aucune photo pour éviter
-                la bannière générique répétée d'une annonce à l'autre. */}
+            {/* Image principale : uniquement si photo réelle fournie.
+                Sinon on ne montre AUCUNE image (pas de fallback trompeur
+                type « alpinistes coucher de soleil » ou bannière générique
+                qui rendait toutes les annonces identiques). */}
             {heroImage && (
               <div className="mb-12 rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
                 <img
                   src={heroImage}
-                  alt={`Photo illustrant l'annonce : ${mission.title}`}
+                  alt={`Photo illustrant l'annonce : ${displayTitle}`}
                   className="w-full aspect-video object-cover"
                   loading="eager"
                   {...({ fetchpriority: "high" } as any)}
@@ -193,18 +242,18 @@ const PublicMissionView = ({
                       {author.avatar_url ? (
                         <img
                           src={author.avatar_url}
-                          alt={author.first_name || "Auteur"}
+                          alt={authorFirstName || "Auteur"}
                           className="w-16 h-16 rounded-full object-cover border-2 border-background shadow-sm"
                         />
                       ) : (
                         <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center font-heading text-xl font-bold text-foreground">
-                          {author.first_name?.charAt(0) || "?"}
+                          {authorFirstName?.charAt(0) || "?"}
                         </div>
                       )}
                     </div>
                     <div className="min-w-0">
                       <p className="text-lg font-semibold text-foreground flex items-center gap-2 flex-wrap">
-                        Proposé par {author.first_name || "un membre"}
+                        Proposé par {authorFirstName || "un membre"}
                         {author.identity_verified && (
                           <span
                             className="inline-flex items-center gap-1 text-xs font-medium text-success bg-success-soft px-2 py-0.5 rounded-full"
@@ -325,12 +374,11 @@ const PublicMissionView = ({
                 postalCode={mission.postal_code}
                 lat={mission.latitude}
                 lng={mission.longitude}
-                className="h-64"
+                className="h-40"
               />
-              <div className="p-5">
-                <p className="font-semibold text-sm text-foreground mb-1">Localisation approximative</p>
+              <div className="p-4">
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  L'adresse exacte est partagée uniquement après mise en relation, par respect de la vie privée.
+                  Localisation approximative. L'adresse exacte est partagée après mise en relation.
                 </p>
               </div>
             </div>
@@ -362,7 +410,7 @@ const PublicMissionView = ({
                   to={`/petites-missions/${rm.id}`}
                   photo={Array.isArray(rm.photos) ? rm.photos[0] : null}
                   category={rm.category}
-                  title={rm.title}
+                  title={sanitizeUserTitle(rm.title) || rm.title}
                   city={titlecaseCity(rm.city)}
                   timeAgo={timeAgoFr(rm.created_at)}
                   exchangeOffer={rm.exchange_offer}

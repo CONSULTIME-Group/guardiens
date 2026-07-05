@@ -658,6 +658,8 @@ const SmallMissionDetail = () => {
           timeAgoFr={timeAgoFr}
           memberSinceLong={memberSince}
           onShare={handleSharePublishedLink}
+          viewCount={(mission as any).view_count ?? 0}
+          responsesCount={responses.length}
         />
         <PublicFooter />
       </>
