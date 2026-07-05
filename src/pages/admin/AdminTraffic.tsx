@@ -119,6 +119,9 @@ const AdminTraffic = () => {
           <TabsTrigger value="acquisition">
             <MousePointerClick className="h-4 w-4 mr-2" /> Acquisition SEO
           </TabsTrigger>
+          <TabsTrigger value="signup-funnel">
+            <Users className="h-4 w-4 mr-2" /> Funnel signup
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="interne" className="mt-6">
@@ -130,6 +133,12 @@ const AdminTraffic = () => {
         <TabsContent value="acquisition" className="mt-6">
           <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
             <AdminSEO />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="signup-funnel" className="mt-6">
+          <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
+            <AdminSignupFunnelTab />
           </Suspense>
         </TabsContent>
       </Tabs>
