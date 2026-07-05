@@ -249,17 +249,9 @@ const EntraideHub = () => {
     void load();
   }, []);
 
-  // P1 — Si aucun paramètre tab dans l'URL et aucune mission ouverte, bascule par défaut sur Questions.
-  useEffect(() => {
-    if (mLoading) return;
-    if (params.get("tab")) return;
-    const openBesoins = missions.filter((m) => (m.mission_type ?? "besoin") === "besoin" && m.status === "open").length;
-    const openOffres = missions.filter((m) => m.mission_type === "offre" && m.status === "open").length;
-    if (openBesoins === 0 && openOffres === 0) {
-      setTab("questions");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mLoading]);
+  // Note : plus de bascule automatique vers Questions quand aucune mission ouverte.
+  // L'utilisateur qui clique « Coup de main » dans la nav doit rester sur Demandes,
+  // même vide — l'empty state guide l'action de publication.
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   useEffect(() => {
@@ -389,19 +381,26 @@ const EntraideHub = () => {
         <PageBreadcrumb items={[{ label: "Entraide" }]} />
 
         <section className="max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-28 sm:pt-6 sm:pb-8 min-w-0">
-          {/* Header ultra-compact : H1 + badge + CTA discret sur une ligne */}
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 min-w-0">
-              <h1 className="font-heading text-xl sm:text-2xl font-bold text-foreground truncate">
-                Entraide
-              </h1>
-              <span className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-accent/40 text-foreground/70 shrink-0">
-                Gratuit
-              </span>
+          {/* Header : H1 + sous-titre + badge + CTA principal en couleur pleine */}
+          <div className="mb-5">
+            <div className="flex items-start justify-between gap-3 flex-wrap">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">
+                    Entraide
+                  </h1>
+                  <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-primary/10 text-primary shrink-0">
+                    Gratuit
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1.5 max-w-xl">
+                  Questions à la communauté, demandes et propositions de coups de main entre gens du coin.
+                </p>
+              </div>
+              <Button onClick={primaryCta.action} size="sm" className="shrink-0 h-9">
+                {primaryCta.label}
+              </Button>
             </div>
-            <Button onClick={primaryCta.action} size="sm" variant="outline" className="shrink-0 text-xs h-8">
-              {primaryCta.label}
-            </Button>
           </div>
 
           {/* Onglets pill, grille 3 colonnes, aucun scroll horizontal */}
@@ -428,14 +427,14 @@ const EntraideHub = () => {
                   className={`min-w-0 rounded-xl px-2 sm:px-3 py-2 border text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${
                     isActive
                       ? `${a.active} shadow-sm`
-                      : "border-transparent text-foreground/65 hover:text-foreground hover:bg-background/60"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:bg-background/60"
                   }`}
                 >
                   <span className="truncate">{TAB_META[t].short}</span>
                   {total > 0 && (
                     <span
                       className={`shrink-0 text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full font-medium tabular-nums ${
-                        isActive ? a.pill : "bg-background/80 text-foreground/60"
+                        isActive ? a.pill : "bg-background/80 text-muted-foreground"
                       }`}
                       aria-label={showRatio ? `${filtered} affichés sur ${total} au total` : `${total} au total`}
                     >
@@ -460,7 +459,7 @@ const EntraideHub = () => {
                 className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
                   mineOnly
                     ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-card text-foreground/70 border-border hover:bg-accent"
+                    : "bg-card text-muted-foreground border-border hover:bg-accent"
                 }`}
               >
                 {mineOnly ? "Mes publications ✓" : "Mes publications"}
@@ -487,7 +486,7 @@ const EntraideHub = () => {
                         className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
                           qStatus === s
                             ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-card text-foreground/70 border-border hover:bg-accent"
+                            : "bg-card text-muted-foreground border-border hover:bg-accent"
                         }`}
                       >
                         {s === "all" ? "Toutes" : s === "open" ? "Ouvertes" : "Résolues"}
@@ -497,7 +496,7 @@ const EntraideHub = () => {
                       <button
                         type="button"
                         onClick={resetQuestionFilters}
-                        className="ml-auto text-xs text-foreground/60 hover:text-foreground underline underline-offset-2"
+                        className="ml-auto text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
                       >
                         Réinitialiser
                       </button>
@@ -561,9 +560,23 @@ const EntraideHub = () => {
             {/* Onglets Besoins / Offres */}
             {(tab === "besoins" || tab === "offres") && (
               <>
-                {/* Barre de filtres compacte */}
-                <div className="space-y-3 mb-6">
-                  <div className="-mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto">
+                {/* Bloc filtres unifié dans une card */}
+                <div className="mb-6 rounded-2xl border border-border bg-card/50 p-3 sm:p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Filtrer
+                    </p>
+                    {hasMissionFilters && (
+                      <button
+                        type="button"
+                        onClick={resetMissionFilters}
+                        className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+                      >
+                        Réinitialiser
+                      </button>
+                    )}
+                  </div>
+                  <div className="-mx-3 px-3 sm:mx-0 sm:px-0 overflow-x-auto">
                     <div className="flex gap-2 w-max sm:w-auto sm:flex-wrap">
                       {MISSION_CATEGORIES.map((c) => (
                         <button
@@ -574,7 +587,7 @@ const EntraideHub = () => {
                           className={`shrink-0 px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
                             mCategory === c
                               ? "bg-primary text-primary-foreground border-primary"
-                              : "bg-card text-foreground/70 border-border hover:bg-accent"
+                              : "bg-card text-muted-foreground border-border hover:bg-accent"
                           }`}
                         >
                           {c === "all" ? "Toutes catégories" : MISSION_CATEGORY_LABEL[c]}
@@ -612,27 +625,28 @@ const EntraideHub = () => {
                         ))}
                       </SelectContent>
                     </Select>
-                    {hasMissionFilters && (
-                      <button
-                        type="button"
-                        onClick={resetMissionFilters}
-                        className="ml-auto text-xs text-foreground/60 hover:text-foreground underline underline-offset-2"
-                      >
-                        Réinitialiser
-                      </button>
+                  </div>
+                  <div className="pt-2 border-t border-border/60">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                      Proximité
+                    </p>
+                    <ProximityFilter
+                      postal={proximity.postal}
+                      onPostalChange={proximity.setPostal}
+                      radius={proximity.radius}
+                      onRadiusChange={proximity.setRadius}
+                      active={proximity.active}
+                      resolving={proximity.resolving}
+                      isValidPostal={proximity.isValidPostal}
+                      onUseMyLocation={proximity.useMyLocation}
+                      onClear={() => proximity.setPostal("")}
+                    />
+                    {!proximity.active && (
+                      <p className="text-[11px] text-muted-foreground mt-2">
+                        Saisissez un code postal ou utilisez votre position pour activer le tri par distance.
+                      </p>
                     )}
                   </div>
-                  <ProximityFilter
-                    postal={proximity.postal}
-                    onPostalChange={proximity.setPostal}
-                    radius={proximity.radius}
-                    onRadiusChange={proximity.setRadius}
-                    active={proximity.active}
-                    resolving={proximity.resolving}
-                    isValidPostal={proximity.isValidPostal}
-                    onUseMyLocation={proximity.useMyLocation}
-                    onClear={() => proximity.setPostal("")}
-                  />
                   <p className="sr-only" role="status" aria-live="polite">
                     {proximity.active
                       ? proximity.computing
@@ -641,6 +655,7 @@ const EntraideHub = () => {
                       : "Tri par proximité désactivé."}
                   </p>
                 </div>
+
 
                 {mLoading ? (
                   <div className="space-y-3" aria-busy="true" aria-live="polite">
@@ -694,91 +709,94 @@ const EntraideHub = () => {
                               aria-label={cardAria}
                               className="flex gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                             >
-                              {Array.isArray(m.photos) && m.photos.length > 0 && (
-                                <MissionCardCover
-                                  photo={m.photos[0]}
-                                  category={m.category}
-                                  title={m.title}
-                                  className="w-24 sm:w-32 shrink-0 aspect-[4/3] rounded-lg"
-                                />
-                              )}
+                              <MissionCardCover
+                                photo={m.photos && m.photos[0] ? m.photos[0] : null}
+                                category={m.category}
+                                title={m.title}
+                                className="w-24 sm:w-32 shrink-0 aspect-[4/3] rounded-lg"
+                              />
                               <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase tracking-wide">
-                                  {MISSION_CATEGORY_LABEL[m.category] || "Autre"}
-                                </span>
-                                {statusBadge && (
-                                  <span
-                                    className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted text-foreground/60 uppercase tracking-wide"
-                                    aria-label={statusBadge.aria}
-                                  >
-                                    {statusBadge.label}
-                                  </span>
-                                )}
-                                {isMine && (
-                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-secondary/40 text-foreground uppercase tracking-wide">
-                                    Vous
-                                  </span>
-                                )}
-                              </div>
-                              <p className="font-heading text-base font-semibold text-foreground line-clamp-2">
-                                {sanitizeUserTitle(m.title) || m.title}
-                              </p>
-                              {m.description && (
-                                <p className="text-sm text-foreground/65 mt-1 line-clamp-2">
-                                  {m.description}
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                  <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase tracking-wide">
+                                      {MISSION_CATEGORY_LABEL[m.category] || "Autre"}
+                                    </span>
+                                    {statusBadge && (
+                                      <span
+                                        className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground uppercase tracking-wide"
+                                        aria-label={statusBadge.aria}
+                                      >
+                                        {statusBadge.label}
+                                      </span>
+                                    )}
+                                    {isMine && (
+                                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground uppercase tracking-wide">
+                                        Vous
+                                      </span>
+                                    )}
+                                  </div>
+                                  {proximity.active && (
+                                    d != null ? (
+                                      <span
+                                        className="shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary tabular-nums"
+                                        aria-label={
+                                          d < 1
+                                            ? "Distance : moins d'un kilomètre"
+                                            : `Distance : environ ${Math.round(d)} kilomètres`
+                                        }
+                                      >
+                                        {distanceLabel}
+                                      </span>
+                                    ) : proximity.computing || !hasDist ? (
+                                      <span
+                                        className="shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground italic"
+                                        aria-live="polite"
+                                        aria-busy="true"
+                                        aria-label="Calcul de la distance en cours"
+                                      >
+                                        …
+                                      </span>
+                                    ) : (
+                                      <span
+                                        className="shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground"
+                                        aria-label="Distance indisponible"
+                                        title="Distance indisponible"
+                                      >
+                                        – km
+                                      </span>
+                                    )
+                                  )}
+                                </div>
+                                <p className="font-heading text-base font-semibold text-foreground line-clamp-2">
+                                  {sanitizeUserTitle(m.title) || m.title}
                                 </p>
-                              )}
-                              <div className="flex items-center gap-2 mt-3">
-                                <Avatar className="h-6 w-6 shrink-0">
-                                  <AvatarImage src={m.profiles?.avatar_url || undefined} alt="" loading="lazy" />
-                                  <AvatarFallback className="text-[10px]">{initial}</AvatarFallback>
-                                </Avatar>
-                                <span className="text-xs text-foreground/70 truncate">{authorName}</span>
-                              </div>
-                              <div className="flex items-center gap-x-3 gap-y-1 mt-2 text-xs text-foreground/55 flex-wrap">
-                                {m.city && (
-                                  <span>
-                                    {m.city}
-                                    {dept ? `, ${dept}` : ""}
-                                  </span>
+                                {m.description && (
+                                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                    {m.description}
+                                  </p>
                                 )}
-                                {proximity.active && distanceLabel && (
-                                  d != null ? (
-                                    <span
-                                      className="font-medium text-primary"
-                                      aria-label={
-                                        d < 1
-                                          ? "Distance : moins d'un kilomètre"
-                                          : `Distance : environ ${Math.round(d)} kilomètres`
-                                      }
-                                    >
-                                      {distanceLabel}
-                                    </span>
-                                  ) : proximity.computing || !hasDist ? (
-                                    <span
-                                      className="text-foreground/50 italic"
-                                      aria-live="polite"
-                                      aria-busy="true"
-                                      aria-label="Calcul de la distance en cours"
-                                    >
-                                      …
-                                    </span>
-                                  ) : (
-                                    <span
-                                      className="text-foreground/50"
-                                      aria-label="Distance indisponible pour cette mission"
-                                      title="Distance indisponible"
-                                    >
-                                      – km
-                                    </span>
-                                  )
-                                )}
-                                {dateLabel && <span>Pour le {dateLabel}</span>}
-                                {m.duration_estimate && <span>{DURATION_LABEL[m.duration_estimate] || m.duration_estimate}</span>}
-                                <span className="ml-auto">{formatRelative(m.created_at)}</span>
+                                <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground flex-wrap">
+                                  <Avatar className="h-5 w-5 shrink-0">
+                                    <AvatarImage src={m.profiles?.avatar_url || undefined} alt="" loading="lazy" />
+                                    <AvatarFallback className="text-[9px]">{initial}</AvatarFallback>
+                                  </Avatar>
+                                  <span className="truncate max-w-[10rem]">{authorName}</span>
+                                  {m.city && (
+                                    <>
+                                      <span aria-hidden="true">·</span>
+                                      <span className="truncate">{m.city}{dept ? `, ${dept}` : ""}</span>
+                                    </>
+                                  )}
+                                  {dateLabel && (
+                                    <>
+                                      <span aria-hidden="true">·</span>
+                                      <span>Pour le {dateLabel}</span>
+                                    </>
+                                  )}
+                                  <span className="ml-auto">{formatRelative(m.created_at)}</span>
+                                </div>
                               </div>
-                              </div>
+
                             </Link>
                           </li>
                         );
@@ -850,8 +868,8 @@ const EmptyState = ({
   howSteps?: string[];
 }) => (
   <div className="p-8 rounded-2xl border border-dashed border-border bg-accent/20 text-center">
-    <p className="font-heading text-lg text-foreground/85">{title}</p>
-    {hint && <p className="text-sm text-foreground/60 mt-2">{hint}</p>}
+    <p className="font-heading text-lg text-foreground">{title}</p>
+    {hint && <p className="text-sm text-muted-foreground mt-2">{hint}</p>}
     <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
       <Button onClick={onCta}>{ctaLabel}</Button>
       {onReset && (
@@ -862,10 +880,10 @@ const EmptyState = ({
     </div>
     {howSteps && howSteps.length > 0 && (
       <div className="mt-6 pt-5 border-t border-border/60 text-left">
-        <p className="text-xs font-semibold uppercase tracking-wide text-foreground/55 mb-3 text-center">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3 text-center">
           Comment ça marche
         </p>
-        <ol className="space-y-2 text-sm text-foreground/75 list-decimal list-inside">
+        <ol className="space-y-2 text-sm text-foreground/80 list-decimal list-inside">
           {howSteps.map((step, i) => (
             <li key={i}>{step}</li>
           ))}
@@ -874,7 +892,7 @@ const EmptyState = ({
     )}
     {examples && examples.length > 0 && onExample && (
       <div className="mt-6 pt-5 border-t border-border/60">
-        <p className="text-xs font-semibold uppercase tracking-wide text-foreground/55 mb-3">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">
           Exemples pour démarrer
         </p>
         <div className="flex flex-col gap-2">
@@ -883,7 +901,7 @@ const EmptyState = ({
               key={ex.label}
               type="button"
               onClick={() => onExample(ex)}
-              className="text-left text-sm px-3 py-2 rounded-lg bg-card border border-border hover:border-primary hover:bg-accent/40 transition-colors text-foreground/80"
+              className="text-left text-sm px-3 py-2 rounded-lg bg-card border border-border hover:border-primary hover:bg-accent/40 transition-colors text-foreground"
             >
               « {ex.label} »
             </button>
