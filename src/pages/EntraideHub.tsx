@@ -21,12 +21,14 @@ import { DEPT_NAMES, getDeptCode } from "@/lib/departments";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import MissionCardCover from "@/components/missions/MissionCardCover";
+import ProximityFilter from "@/components/missions/ProximityFilter";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
+import { useMissionDistance } from "@/hooks/useMissionDistance";
 
 
 type Tab = "questions" | "besoins" | "offres";
 type MissionStatus = "all" | "open" | "in_progress" | "completed";
-type MissionSort = "recent" | "date_needed";
+type MissionSort = "recent" | "date_needed" | "distance";
 
 const MISSION_CATEGORY_LABEL: Record<string, string> = {
   animals: "Animaux",
