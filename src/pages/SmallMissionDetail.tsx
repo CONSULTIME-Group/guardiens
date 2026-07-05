@@ -929,7 +929,7 @@ const SmallMissionDetail = () => {
         })}</script>
       </Helmet>
 
-      <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+      <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
         {/* Breadcrumb */}
         <div className="mb-6">
           <PageBreadcrumb items={[{ label: "Coups de main", href: "/petites-missions" }, { label: displayTitle }]} />
@@ -994,7 +994,7 @@ const SmallMissionDetail = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-10 items-start">
           {/* ── COLONNE PRINCIPALE ── */}
           <article className="lg:col-span-8 min-w-0">
             <header className="mb-6 md:mb-8">
@@ -1025,8 +1025,8 @@ const SmallMissionDetail = () => {
                   </span>
                 </Link>
               )}
-              <div className="flex items-center gap-2 mb-4 flex-wrap">
-                <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-widest uppercase">
+              <div className="flex items-center gap-2 mb-3 md:mb-4 flex-wrap">
+                <span className="inline-block px-2.5 py-1 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-widest uppercase">
                   {catMeta.label}
                 </span>
                 <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase ${statusMeta.className}`}>
@@ -1036,33 +1036,34 @@ const SmallMissionDetail = () => {
                   variant="outline"
                   size="sm"
                   onClick={handleSharePublishedLink}
-                  className="gap-1.5 rounded-full ml-auto h-8"
+                  className="gap-1.5 rounded-full ml-auto h-8 px-3"
                   aria-label="Partager cette annonce"
                 >
-                  <Share2 className="h-3.5 w-3.5" /> Partager
+                  <Share2 className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Partager</span>
                 </Button>
               </div>
-              <h1 className="font-heading text-2xl md:text-3xl lg:text-4xl font-bold leading-tight mb-3 text-foreground">
+              <h1 className="font-heading text-[1.6rem] leading-[1.15] sm:text-3xl md:text-4xl lg:text-[2.75rem] font-bold mb-3 text-foreground break-words">
                 {displayTitle}
               </h1>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5">
-                  <MapPin className="h-3.5 w-3.5" />
-                  {cityLabel}{mission.postal_code ? ` (${mission.postal_code.slice(0, 2)})` : ""}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs sm:text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5 min-w-0">
+                  <MapPin className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{cityLabel}{mission.postal_code ? ` (${mission.postal_code.slice(0, 2)})` : ""}</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5" />
+                  <Clock className="h-3.5 w-3.5 shrink-0" />
                   Publié {timeAgoFr(mission.created_at)}
                 </span>
                 {durationLabel && (
                   <span className="inline-flex items-center gap-1.5">
-                    <Calendar className="h-3.5 w-3.5" />
+                    <Calendar className="h-3.5 w-3.5 shrink-0" />
                     {durationLabel}
                   </span>
                 )}
                 {responses.length > 0 && (
                   <span className="inline-flex items-center gap-1.5">
-                    <Users className="h-3.5 w-3.5" />
+                    <Users className="h-3.5 w-3.5 shrink-0" />
                     {responses.length} proposition{responses.length > 1 ? "s" : ""}
                   </span>
                 )}
@@ -1071,7 +1072,7 @@ const SmallMissionDetail = () => {
 
             {/* Image principale : uniquement si photo réelle. */}
             {heroImage && (
-              <div className="mb-6 md:mb-8 rounded-2xl overflow-hidden border border-border bg-muted">
+              <div className="mb-5 md:mb-8 rounded-xl md:rounded-2xl overflow-hidden border border-border bg-muted">
                 <img
                   src={heroImage}
                   alt={displayTitle}
@@ -1304,7 +1305,7 @@ const SmallMissionDetail = () => {
         {/* ── PUBLISHER : Propositions reçues ── */}
         {/* ══════════════════════════════════════════════════════ */}
         {isAuthor && (mission.status === "open" || mission.status === "in_progress") && (
-          <section id="propositions" className="mt-12 pt-8 border-t border-border scroll-mt-8">
+          <section id="propositions" className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border scroll-mt-8">
             <div className="flex items-center gap-3 mb-6">
               <MessageSquare className="h-5 w-5 text-primary" />
               <h2 className="font-heading text-2xl md:text-3xl font-bold">
@@ -1371,7 +1372,7 @@ const SmallMissionDetail = () => {
         {/* ── PUBLISHER : Avis post-mission ── */}
         {/* ══════════════════════════════════════════════════════ */}
         {isAuthor && mission.status === "completed" && acceptedResponses.length > 0 && (
-          <section className="mt-12 pt-8 border-t border-border">
+          <section className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border">
             <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">Laisser un avis</h2>
             <div className="space-y-4 max-w-3xl">
               {acceptedResponses.map(r => (
@@ -1400,7 +1401,7 @@ const SmallMissionDetail = () => {
         {/* ── CANDIDAT accepté + terminé : avis ── */}
         {/* ══════════════════════════════════════════════════════ */}
         {!isAuthor && myResponse?.status === "accepted" && mission.status === "completed" && (
-          <section className="mt-12 pt-8 border-t border-border max-w-3xl">
+          <section className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border max-w-3xl">
             <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">Votre retour sur cette mission</h2>
             {feedbackSent[mission.user_id] ? (
               <div className="bg-muted/50 rounded-2xl p-4 flex items-center gap-2 text-sm text-muted-foreground">
@@ -1461,7 +1462,7 @@ const SmallMissionDetail = () => {
             ? `D'autres coups de main à ${cityLabel} et alentours`
             : "Encore peu d'annonces dans votre secteur, voici des exemples récents à découvrir.";
           return (
-            <section className="mt-12 pt-8 border-t border-border">
+            <section className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border">
               <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-3">
                 <div>
                   <h2 className="font-heading text-2xl md:text-3xl font-bold mb-1">{sectionTitle}</h2>
@@ -1475,7 +1476,7 @@ const SmallMissionDetail = () => {
                 </Link>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {relatedMissions.slice(0, 3).map((rm) => (
                   <RelatedMissionCard
                     key={rm.id}
