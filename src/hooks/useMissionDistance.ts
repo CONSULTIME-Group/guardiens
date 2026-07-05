@@ -56,6 +56,7 @@ export function useMissionDistance(missions: MissionLike[]) {
   const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(null);
   const [distanceMap, setDistanceMap] = useState<Map<string, number>>(new Map());
   const [resolving, setResolving] = useState(false);
+  const [computing, setComputing] = useState(false);
   const [prefilled, setPrefilled] = useState(false);
 
   const setPostal = useCallback((v: string) => {
