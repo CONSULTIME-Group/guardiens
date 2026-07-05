@@ -601,12 +601,29 @@ const EntraideHub = () => {
                       </SelectTrigger>
                       <SelectContent>
                         {VALID_M_SORT.map((s) => (
-                          <SelectItem key={s} value={s} className="text-xs">
+                          <SelectItem
+                            key={s}
+                            value={s}
+                            disabled={s === "distance" && !proximity.active}
+                            className="text-xs"
+                          >
                             {M_SORT_LABEL[s]}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+                  <ProximityFilter
+                    postal={proximity.postal}
+                    onPostalChange={proximity.setPostal}
+                    radius={proximity.radius}
+                    onRadiusChange={proximity.setRadius}
+                    active={proximity.active}
+                    resolving={proximity.resolving}
+                    isValidPostal={proximity.isValidPostal}
+                    onUseMyLocation={proximity.useMyLocation}
+                    onClear={() => proximity.setPostal("")}
+                  />
                     {hasMissionFilters && (
                       <button
                         type="button"
