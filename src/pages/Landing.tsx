@@ -16,6 +16,9 @@ import PageMeta from "@/components/PageMeta";
 // import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
 import LiveListingsSection from "@/components/landing/LiveListingsSection";
 import InventoryStrip from "@/components/landing/InventoryStrip";
+import InternationalStrip from "@/components/landing/InternationalStrip";
+import AffinityScoreShowcase from "@/components/landing/AffinityScoreShowcase";
+import ProsShowcase from "@/components/landing/ProsShowcase";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
 import RealMembersStrip from "@/components/landing/RealMembersStrip";
 import PublicHeader from "@/components/layout/PublicHeader";
@@ -625,18 +628,23 @@ const Landing = () => {
       >
         <div className="max-w-6xl mx-auto px-6">
           <ul className="flex items-center gap-1 overflow-x-auto scrollbar-none py-2.5 -mx-2 px-2">
-            {[
-              { href: "#usages", label: t("landing.toc.care_aid") },
-              { href: "#comment-ca-marche", label: t("landing.toc.how") },
-              { href: "#entraide", label: t("landing.toc.aid") },
-              { href: "#confiance", label: t("landing.toc.trust") },
-              { href: "#temoignages", label: t("landing.toc.testimonials") },
-              { href: "#chiffres", label: t("landing.toc.numbers") },
-              { href: "#notre-histoire", label: t("landing.toc.story") },
-              { href: "#guides-villes", label: t("landing.toc.cities") },
-              { href: "#faq", label: t("landing.toc.faq") },
-            ].map((item) => (
-              <li key={item.href} className="shrink-0">
+            {(() => {
+              const items = [
+                { href: "#usages", label: t("landing.toc.care_aid"), mobile: true },
+                { href: "#international", label: t("landing.toc.international"), mobile: false },
+                { href: "#comment-ca-marche", label: t("landing.toc.how"), mobile: false },
+                { href: "#entraide", label: t("landing.toc.aid"), mobile: false },
+                { href: "#chiffres", label: t("landing.toc.numbers"), mobile: true },
+                { href: "#confiance", label: t("landing.toc.trust"), mobile: true },
+                { href: "#matching", label: t("landing.toc.matching"), mobile: true },
+                { href: "#temoignages", label: t("landing.toc.testimonials"), mobile: true },
+                { href: "#notre-histoire", label: t("landing.toc.story"), mobile: false },
+                { href: "#pros", label: t("landing.toc.pros"), mobile: false },
+                { href: "#guides-villes", label: t("landing.toc.cities"), mobile: false },
+                { href: "#faq", label: t("landing.toc.faq"), mobile: true },
+              ];
+              return items.map((item) => (
+                <li key={item.href} className={item.mobile ? "shrink-0" : "shrink-0 hidden md:list-item"}>
                 <a
                   href={item.href}
                   className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] tracking-[0.14em] uppercase font-body text-foreground/55 hover:text-primary hover:bg-primary/5 transition-colors whitespace-nowrap"
