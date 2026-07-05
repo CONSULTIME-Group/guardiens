@@ -46,7 +46,7 @@ const faqItems: Array<{ id: string; q: string; a: string }> = [
 
 const Pricing = () => {
   useEffect(() => {
-    trackEvent("pricing_baseline_seen", { surface: "tarifs" });
+    trackEvent("pricing_baseline_seen", { metadata: { surface: "tarifs" } });
   }, []);
 
   const faqJsonLd = {
