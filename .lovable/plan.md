@@ -1,47 +1,54 @@
-# Filtre proximité sur EntraideHub
+# Nettoyage dead code « long_stay » / garde longue durée
 
-## Contexte
-`EntraideHub` charge aujourd'hui les 120 missions ouvertes les plus récentes, sans géoloc ni tri distance. Le silo « près de chez vous » n'est donc pas tenu. Objectif : rendre la proximité opérationnelle sans casser l'expérience visiteur non-connecté.
+## Verdict d'audit
 
-## Décisions à confirmer (2 questions)
+**Mort.** Aucun composant UI actif. La route `/long-stays/:id` existe mais redirige vers `/`. Résidus : payloads `p_long_stay_id: null` (compat RPC), enum analytics jamais émis, tables Supabase encore présentes en DB.
 
-1. **Source de position** :
-   - a) Code postal du profil (par défaut si connecté), avec fallback saisie manuelle « Autour de [CP] » pour visiteurs.
-   - b) API géoloc navigateur (prompt), fallback CP.
-   - c) Les deux : CP profil par défaut, bouton « Utiliser ma position » optionnel.
-2. **Rayon** : 15, 30, 50 km — un seul rayon par défaut ou sélecteur ?
+## Portée du nettoyage
 
-Recommandation : **1c + sélecteur 15 / 30 / 50 / 100 km, défaut 30 km**, cohérent avec la mémoire `mutual-aid-ux-v2`.
+### 1. Frontend
 
-## Périmètre
+- `src/App.tsx` — supprimer la route legacy `/long-stays/:id` (ligne 303-304) et son commentaire.
+- `src/hooks/useAutoOpenConversation.ts:94` — retirer `p_long_stay_id: null` de l'appel RPC.
+- `src/lib/conversation.ts:48` — idem.
+- `src/components/sits/ApplicationModal.tsx:170` — idem.
+- `src/lib/analytics.ts:140` — retirer `"long_stay_created"` du type union.
+- `src/pages/admin/AdminSitsManagement.tsx:26,276` — retirer les commentaires devenus obsolètes.
 
-- Ajouter un `PostalInput` compact (chip « Autour de [CP] ») dans la barre de filtres, à côté du sélecteur catégorie.
-- Sur profil connecté avec `postal_code`, pré-remplir. Sur visiteur, chip vide → « Où êtes-vous ? ».
-- Ajouter un `Select` rayon (15/30/50/100 km).
-- Ajouter un tri « Proche d'abord » (via haversine côté client) en 3e option (récent / date besoin / proximité).
-- Filtrer côté client : n'afficher que les missions dont la distance ≤ rayon, sinon message vide dédié.
+### 2. Backend (Lovable Cloud)
 
-## Impl technique
+Migration SQL pour supprimer proprement :
 
-- Réutiliser `src/lib/geo/haversine.ts` (existe déjà via SearchSitter).
-- Résoudre CP → lat/lng via `geocode_cache` (table existante).
-- Persister CP + rayon dans `localStorage` (`entraide.postal`, `entraide.radius`).
-- Ne pas géocoder à chaque render : mémo `useMemo` sur `[postal, radius, missions]`.
-- Fallback gracieux : si CP invalide, désactiver le tri distance et afficher un tooltip.
-- Ajouter analytics : `entraide.filter.proximity_used`.
+- FK `conversations.long_stay_id` et la colonne.
+- Table `public.long_stay_applications`.
+- Table `public.long_stays`.
+- Enums `long_stay_status`, `long_stay_access_level`.
+- Retrait de la valeur `"long_stay"` de l'enum concerné (types.ts:6100, 6349) — nécessite recréation de l'enum.
+- Paramètre `p_long_stay_id` des fonctions RPC concernées (RPC `open_or_create_conversation` ou équivalent) — soit suppression du paramètre, soit conservation en `default null` si d'autres appelants dépendent de la signature.
 
-## Fichiers touchés
+Après migration, `src/integrations/supabase/types.ts` sera régénéré automatiquement.
 
-- `src/pages/EntraideHub.tsx` (barre de filtres + tri + affichage distance).
-- Nouveau : `src/components/missions/ProximityFilter.tsx` (chip CP + rayon).
-- `src/hooks/useMissionDistance.ts` (résolution CP → coords + calcul distance).
+## Détails techniques
 
-## Hors périmètre
+**Point d'attention RPC** : avant de supprimer le paramètre `p_long_stay_id` de la fonction Postgres, il faut vérifier qu'aucune edge function ni appelant externe ne l'utilise. Option prudente : garder le paramètre côté SQL avec `default null` et se contenter de retirer les `null` explicites côté client (moins invasif, même résultat visible).
 
-- Pas de refonte de la carte / vue map.
-- Pas de push notifications sur nouvelles missions proches (déjà couvert par `alert_preferences`).
-- Pas de changement DB.
+**Ordre de migration recommandé** :
 
-## Effort estimé
+```text
+1. DROP TABLE long_stay_applications CASCADE
+2. ALTER TABLE conversations DROP COLUMN long_stay_id
+3. DROP TABLE long_stays CASCADE
+4. DROP TYPE long_stay_status, long_stay_access_level
+5. Recréer l'enum sit_type sans 'long_stay' (si présent)
+6. Régénérer types.ts
+```
 
-3-4 h dev + QA mobile/desktop.
+**Vérifications post-nettoyage** :
+
+- `bunx tsgo --noEmit` doit passer.
+- Recherche `rg -i "long_stay|longstay|garde longue"` doit ne retourner que d'éventuels commentaires historiques anodins.
+- Test manuel : `/long-stays/abc` doit désormais renvoyer une 404 propre (au lieu d'une redirection silencieuse), sauf si vous préférez conserver la redirection pour les liens externes indexés.
+
+## Question ouverte
+
+**Conserver ou supprimer la redirection `/long-stays/:id → /`** ? Utile si des liens externes (emails passés, indexation) pointent encore vers ces URLs. Sinon, 404 propre.
