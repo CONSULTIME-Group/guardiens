@@ -123,7 +123,7 @@ const PublicMissionView = ({
   return (
     <div className="min-h-screen bg-background text-foreground animate-fade-in">
       <PageMeta
-        title={`${mission.title} · Coup de main à ${cityLabel}`}
+        title={`${displayTitle} · Coup de main à ${cityLabel}`}
         description={metaDescription}
         image={ogImage}
       />
@@ -131,7 +131,7 @@ const PublicMissionView = ({
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Service",
-          name: mission.title,
+          name: displayTitle,
           description: mission.description?.slice(0, 300) || metaDescription,
           areaServed: cityLabel,
           serviceType: catMeta.label,
@@ -155,7 +155,7 @@ const PublicMissionView = ({
               ...(mission.city
                 ? [{ label: cityLabel, href: `/petites-missions?city=${encodeURIComponent(mission.city)}` }]
                 : []),
-              { label: mission.title },
+              { label: displayTitle },
             ]}
           />
         </div>
@@ -179,7 +179,7 @@ const PublicMissionView = ({
                   <Share2 className="h-3.5 w-3.5" /> Partager
                 </Button>
               </div>
-              <h1 className={h1Class}>{mission.title}</h1>
+              <h1 className={h1Class}>{displayTitle}</h1>
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-base text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-foreground/30" />
@@ -223,7 +223,7 @@ const PublicMissionView = ({
               <div className="mb-12 rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
                 <img
                   src={heroImage}
-                  alt={`Photo illustrant l'annonce : ${mission.title}`}
+                  alt={`Photo illustrant l\x27annonce : ${displayTitle}`}
                   className="w-full aspect-video object-cover"
                   loading="eager"
                   {...({ fetchpriority: "high" } as any)}
