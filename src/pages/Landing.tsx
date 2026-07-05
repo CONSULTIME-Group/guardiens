@@ -458,57 +458,8 @@ const Landing = () => {
                   "Garde de chat",
                   "Entraide locale",
                 ],
-                offers: [
-                  {
-                    "@type": "Offer",
-                    name: "Espace propriétaire",
-                    price: "0",
-                    priceCurrency: SITTER_PRICE_CURRENCY,
-                    eligibleCustomerType: "Owner",
-                    description:
-                      "Gratuit pour les propriétaires, sans abonnement requis.",
-                    priceSpecification: {
-                      "@type": "PriceSpecification",
-                      price: "0",
-                      priceCurrency: SITTER_PRICE_CURRENCY,
-                      description:
-                        "Publication d'annonces et mise en relation sans abonnement pour les propriétaires. Sans carte bancaire.",
-                    },
-                  },
-                  {
-                    "@type": "Offer",
-                    name: "Abonnement gardien",
-                    price: String(SITTER_PRICE_NUMERIC),
-                    priceCurrency: SITTER_PRICE_CURRENCY,
-                    eligibleCustomerType: "Sitter",
-                    availabilityStarts: SITTER_PRICE_START_ISO,
-                    description:
-                      "Abonnement gardien à 6,99 €/mois à partir du 1er octobre 2026.",
-                    priceSpecification: {
-                      "@type": "UnitPriceSpecification",
-                      price: String(SITTER_PRICE_NUMERIC),
-                      priceCurrency: SITTER_PRICE_CURRENCY,
-                      unitCode: "MON",
-                      description:
-                        "Abonnement gardien à 6,99 €/mois à partir du 1er octobre 2026, accès à 0 € jusqu'à cette date.",
-                    },
-                  },
-                  {
-                    "@type": "Offer",
-                    name: "Entraide entre gens du coin",
-                    price: "0",
-                    priceCurrency: SITTER_PRICE_CURRENCY,
-                    description:
-                      "Petites missions et entraide sans abonnement pour tous.",
-                    priceSpecification: {
-                      "@type": "PriceSpecification",
-                      price: "0",
-                      priceCurrency: SITTER_PRICE_CURRENCY,
-                      description:
-                        "Petites missions et entraide sans abonnement pour tous.",
-                    },
-                  },
-                ],
+                // Pas d'`offers` tant que PRICING_IS_ACTIVE = false : évite un
+                // Rich Result Google avec un prix qui contredirait /tarifs.
               },
               {
                 "@type": "FAQPage",
