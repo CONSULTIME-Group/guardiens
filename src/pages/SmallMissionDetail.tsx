@@ -33,6 +33,7 @@ import PublicFooter from "@/components/layout/PublicFooter";
 import { AppLayout } from "@/components/layout/AppLayout";
 import PublicMissionView from "@/components/missions/PublicMissionView";
 import RelatedMissionCard from "@/components/missions/RelatedMissionCard";
+import MissionResponseCard from "@/components/missions/MissionResponseCard";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import { isAuthorOf } from "@/lib/ownership";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
@@ -321,11 +322,11 @@ const SmallMissionDetail = () => {
         .single();
       if (!fresh) throw new Error("Mission introuvable.");
       if (fresh.status !== "open") {
-        toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de propositions." });
+        toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de réponses." });
         return;
       }
       if (fresh.user_id === user.id) {
-        toast({ variant: "destructive", title: "Action impossible", description: "Vous ne pouvez pas postuler à votre propre mission." });
+        toast({ variant: "destructive", title: "Action impossible", description: "Vous ne pouvez pas répondre à votre propre annonce." });
         return;
       }
 
@@ -361,12 +362,12 @@ const SmallMissionDetail = () => {
 
         setHasResponded(true);
         setMessage("");
-        toast({ title: "Proposition envoyée !", description: "La personne qui demande va être prévenue." });
+        toast({ title: "Réponse publiée !", description: "La personne qui demande va être prévenue." });
         load();
       }
     } catch (err: any) {
       logger.error("[handleRespond]", { err: String(err) });
-      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible d'envoyer votre proposition." });
+      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible de publier votre réponse." });
     } finally {
       setSubmitting(false);
     }
@@ -383,7 +384,7 @@ const SmallMissionDetail = () => {
         .from("small_missions").select("status").eq("id", id!).single();
       if (!freshMission) throw new Error("Mission introuvable");
       if (freshMission.status === "cancelled" || freshMission.status === "completed") {
-        toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de propositions." });
+        toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de réponses." });
         return;
       }
 
@@ -426,14 +427,14 @@ const SmallMissionDetail = () => {
         await supabase.from("messages").insert({
           conversation_id: convId,
           sender_id: user!.id,
-          content: `Proposition acceptée pour « ${mission.title} ». Vous pouvez maintenant échanger pour organiser l'entraide.`,
+          content: `Personne retenue pour « ${mission.title} ». Vous pouvez maintenant échanger pour organiser l'entraide.`,
           is_system: true,
         });
       }
 
       await supabase.from("notifications").insert({
         user_id: resp.responder_id, type: "mission_accepted",
-        title: "Proposition acceptée",
+        title: "Personne retenue",
         body: `Votre proposition pour "${mission.title}" a été acceptée. Vous pouvez maintenant échanger par messagerie.`,
         link: convId ? `/messages?c=${convId}` : `/messages`,
       });
@@ -449,10 +450,10 @@ const SmallMissionDetail = () => {
         },
       }).catch(() => {});
 
-      toast({ title: "Proposition acceptée !" });
+      toast({ title: "Vous avez retenu cette personne !" });
     } catch (err: any) {
       logger.error("[handleAcceptResponse]", { err: String(err) });
-      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible d'accepter cette proposition." });
+      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible de retenir cette personne." });
       // Rollback optimistic UI
       setResponses(prev => prev.map(r => r.id === responseId ? { ...r, status: "pending" } : r));
     } finally {
@@ -473,7 +474,7 @@ const SmallMissionDetail = () => {
 
       await supabase.from("notifications").insert({
         user_id: resp.responder_id, type: "mission_declined",
-        title: "Proposition non retenue",
+        title: "Non retenu(e) cette fois",
         body: `Quelqu'un d'autre a été choisi pour "${mission.title}". Merci pour votre proposition.`,
       });
 
@@ -688,7 +689,7 @@ const SmallMissionDetail = () => {
           </div>
           <div className="grid grid-cols-2 gap-3 pt-1">
             <div className="bg-muted/50 rounded-2xl p-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Propositions</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Réponses</p>
               <p className="font-heading text-3xl font-bold text-foreground leading-none">{responses.length}</p>
             </div>
             <div className="bg-muted/50 rounded-2xl p-4">
@@ -697,8 +698,8 @@ const SmallMissionDetail = () => {
             </div>
           </div>
           {(mission.status === "open" || mission.status === "in_progress") && responses.length > 0 && (
-            <a href="#propositions" className="block">
-              <Button className="w-full rounded-full" size="lg">Voir les propositions</Button>
+            <a href="#reponses" className="block">
+              <Button className="w-full rounded-full" size="lg">Voir les réponses</Button>
             </a>
           )}
           {mission.status === "in_progress" && (
@@ -722,7 +723,7 @@ const SmallMissionDetail = () => {
           <div className="bg-card p-5 rounded-2xl shadow-sm border border-success-border space-y-4">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-success" />
-              <p className="font-heading text-lg font-semibold text-success">Proposition acceptée</p>
+              <p className="font-heading text-lg font-semibold text-success">Personne retenue</p>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {author?.first_name || "L'auteur"} vous a choisi(e). Organisez la suite en direct.
@@ -738,7 +739,7 @@ const SmallMissionDetail = () => {
           <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-3">
             <div className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-info" />
-              <p className="font-heading text-lg font-semibold">Proposition envoyée</p>
+              <p className="font-heading text-lg font-semibold">Réponse publiée</p>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {author?.first_name || "L'auteur"} a reçu votre mot. Vous serez prévenu(e) dès qu'il y a une réponse.
@@ -749,7 +750,7 @@ const SmallMissionDetail = () => {
               size="sm"
               className="w-full rounded-full"
               onClick={async () => {
-                if (!confirm("Retirer votre proposition ?")) return;
+                if (!confirm("Retirer votre réponse ?")) return;
                 const { error } = await supabase
                   .from("small_mission_responses")
                   .delete()
@@ -760,10 +761,10 @@ const SmallMissionDetail = () => {
                 }
                 setHasResponded(false);
                 setResponses(prev => prev.filter(r => r.id !== myResponse.id));
-                toast({ title: "Proposition retirée" });
+                toast({ title: "Réponse retirée" });
               }}
             >
-              Retirer ma proposition
+              Retirer ma réponse
             </Button>
           </div>
         );
@@ -817,7 +818,7 @@ const SmallMissionDetail = () => {
       const heading = isOffer
         ? `Répondez à ${author?.first_name || "l'auteur"}`
         : `Écrivez un mot à ${author?.first_name || "l'auteur"}`;
-      const ctaLabel = isOffer ? "Envoyer ma demande" : "Envoyer ma proposition";
+      const ctaLabel = isOffer ? "Envoyer ma demande" : "Publier ma réponse";
       const chipLabels = isOffer
         ? ["Ça m'intéresse", "Vos dispos ?", "On en discute"]
         : ["Je suis dispo", "Ça me parle", "Selon vous"];
@@ -1064,7 +1065,7 @@ const SmallMissionDetail = () => {
                 {responses.length > 0 && (
                   <span className="inline-flex items-center gap-1.5">
                     <Users className="h-3.5 w-3.5 shrink-0" />
-                    {responses.length} proposition{responses.length > 1 ? "s" : ""}
+                    {responses.length} réponse{responses.length > 1 ? "s" : ""}
                   </span>
                 )}
               </div>
@@ -1273,7 +1274,7 @@ const SmallMissionDetail = () => {
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Propositions</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Réponses</p>
                     <p className="font-heading text-lg font-bold text-foreground leading-none">
                       {responses.length}
                     </p>
@@ -1302,66 +1303,36 @@ const SmallMissionDetail = () => {
         </div>
 
         {/* ══════════════════════════════════════════════════════ */}
-        {/* ── PUBLISHER : Propositions reçues ── */}
+        {/* ── Réponses (lecture publique, esprit commentaires) ── */}
         {/* ══════════════════════════════════════════════════════ */}
-        {isAuthor && (mission.status === "open" || mission.status === "in_progress") && (
-          <section id="propositions" className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border scroll-mt-8">
+        {(mission.status === "open" || mission.status === "in_progress" || mission.status === "completed") && (
+          <section id="reponses" className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border scroll-mt-8">
             <div className="flex items-center gap-3 mb-6">
               <MessageSquare className="h-5 w-5 text-primary" />
               <h2 className="font-heading text-2xl md:text-3xl font-bold">
-                Propositions reçues <span className="text-muted-foreground font-normal">({responses.length})</span>
+                Réponses <span className="text-muted-foreground font-normal">({responses.length})</span>
               </h2>
             </div>
             {responses.length === 0 ? (
               <div className="bg-muted/40 rounded-2xl p-8 text-center">
                 <p className="text-muted-foreground italic">
-                  Pas encore de proposition. Patience, souvent, les premières arrivent dans la journée.
+                  Pas encore de réponse. Soyez la première personne à réagir.
                 </p>
               </div>
             ) : (
               <div className="space-y-3 max-w-3xl">
                 {responses.map((r: any) => (
-                  <div key={r.id} className="bg-card rounded-2xl border border-border p-5">
-                    <div className="flex items-start gap-4">
-                      {r.responder?.avatar_url ? (
-                        <img src={r.responder.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover" />
-                      ) : (
-                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center font-bold">
-                          {r.responder?.first_name?.charAt(0) || "?"}
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
-                          <p className="font-semibold">{r.responder?.first_name || "Quelqu'un"}</p>
-                          <p className="text-xs text-muted-foreground">{format(new Date(r.created_at), "d MMM à HH:mm", { locale: fr })}</p>
-                        </div>
-                        <p className="text-sm text-foreground/85 leading-relaxed whitespace-pre-wrap">{r.message}</p>
-                        <div className="flex gap-2 mt-4 flex-wrap">
-                          {r.status === "pending" && (
-                            <>
-                              <Button size="sm" onClick={() => handleAcceptResponse(r.id)} disabled={!!processingResponseId} className="rounded-full">
-                                {processingResponseId === r.id ? "…" : "Accepter"}
-                              </Button>
-                              <Button size="sm" variant="outline" onClick={() => handleDeclineResponse(r.id)} disabled={!!processingResponseId} className="rounded-full">
-                                Décliner
-                              </Button>
-                            </>
-                          )}
-                          {r.status === "accepted" && (
-                            <>
-                              <span className="text-xs font-medium text-success bg-success-soft px-3 py-1 rounded-full">Acceptée</span>
-                              <Button size="sm" variant="outline" onClick={() => navigate(r.conversation_id ? `/messages?c=${r.conversation_id}` : "/messages")} className="rounded-full gap-2">
-                                <MessageSquare className="h-3.5 w-3.5" /> Messagerie
-                              </Button>
-                            </>
-                          )}
-                          {r.status === "declined" && (
-                            <span className="text-xs font-medium text-destructive bg-destructive/10 px-3 py-1 rounded-full">Non retenu(e)</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <MissionResponseCard
+                    key={r.id}
+                    response={r}
+                    isAuthor={isAuthor}
+                    currentUserId={user?.id}
+                    missionOwnerId={mission.user_id}
+                    processing={processingResponseId === r.id}
+                    onSelect={() => handleAcceptResponse(r.id)}
+                    onDecline={() => handleDeclineResponse(r.id)}
+                    onOpenMessages={() => navigate(r.conversation_id ? `/messages?c=${r.conversation_id}` : "/messages")}
+                  />
                 ))}
               </div>
             )}

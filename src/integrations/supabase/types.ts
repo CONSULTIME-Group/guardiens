@@ -4785,12 +4785,60 @@ export type Database = {
           },
         ]
       }
+      small_mission_response_thanks: {
+        Row: {
+          created_at: string
+          response_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          response_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          response_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "small_mission_response_thanks_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "small_mission_responses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "small_mission_response_thanks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "small_mission_response_thanks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "small_mission_response_thanks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       small_mission_responses: {
         Row: {
           conversation_id: string | null
           created_at: string
           exchange_date: string | null
           exchange_offer: string | null
+          helpful_count: number
           id: string
           message: string
           mission_id: string
@@ -4803,6 +4851,7 @@ export type Database = {
           created_at?: string
           exchange_date?: string | null
           exchange_offer?: string | null
+          helpful_count?: number
           id?: string
           message?: string
           mission_id: string
@@ -4815,6 +4864,7 @@ export type Database = {
           created_at?: string
           exchange_date?: string | null
           exchange_offer?: string | null
+          helpful_count?: number
           id?: string
           message?: string
           mission_id?: string
@@ -5224,6 +5274,36 @@ export type Database = {
           template_name: string | null
         }
         Relationships: []
+      }
+      helper_recognition_stats: {
+        Row: {
+          selected_count: number | null
+          useful_count: number | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "small_mission_responses_responder_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "small_mission_responses_responder_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "small_mission_responses_responder_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mass_email_stats: {
         Row: {
