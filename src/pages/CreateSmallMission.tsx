@@ -25,6 +25,11 @@ import { trackFirstAction } from "@/lib/analytics";
 import { recordMissionCreatedAttribution } from "@/lib/campaignAttribution";
 import { templatesFor, MISSION_TEMPLATES, type MissionTemplate } from "@/data/missionTemplates";
 import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
+import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
+
+/** Longueurs minimales pour éviter les annonces vides ou illisibles. */
+const MIN_TITLE_LEN = 15;
+const MIN_DESC_LEN = 60;
 
 const EURO_REGEX = /\d+\s*[€]|[€]\s*\d+|\d+\s*euro/i;
 
