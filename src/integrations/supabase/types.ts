@@ -256,6 +256,54 @@ export type Database = {
           },
         ]
       }
+      analysis_requests: {
+        Row: {
+          admin_notes: string | null
+          city_context: string | null
+          created_at: string
+          delivered_at: string | null
+          delivered_url: string | null
+          details: string | null
+          email: string | null
+          id: string
+          ip_hash: string | null
+          request_type: Database["public"]["Enums"]["analysis_request_type"]
+          status: Database["public"]["Enums"]["analysis_request_status"]
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          city_context?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          delivered_url?: string | null
+          details?: string | null
+          email?: string | null
+          id?: string
+          ip_hash?: string | null
+          request_type: Database["public"]["Enums"]["analysis_request_type"]
+          status?: Database["public"]["Enums"]["analysis_request_status"]
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          city_context?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          delivered_url?: string | null
+          details?: string | null
+          email?: string | null
+          id?: string
+          ip_hash?: string | null
+          request_type?: Database["public"]["Enums"]["analysis_request_type"]
+          status?: Database["public"]["Enums"]["analysis_request_status"]
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           created_at: string | null
@@ -5713,6 +5761,7 @@ export type Database = {
         Args: { p_garde_id: string }
         Returns: string[]
       }
+      get_inventaire_counts: { Args: never; Returns: Json }
       get_mission_author_public: {
         Args: { _mission_id: string }
         Returns: {
@@ -5930,6 +5979,8 @@ export type Database = {
     Enums: {
       activity_level: "calm" | "moderate" | "sportive"
       alone_duration: "never" | "2h" | "6h" | "all_day"
+      analysis_request_status: "new" | "in_progress" | "done" | "archived"
+      analysis_request_type: "city" | "breed" | "places" | "pros" | "other"
       app_role: "admin" | "moderator" | "user"
       application_status:
         | "pending"
@@ -6169,6 +6220,8 @@ export const Constants = {
     Enums: {
       activity_level: ["calm", "moderate", "sportive"],
       alone_duration: ["never", "2h", "6h", "all_day"],
+      analysis_request_status: ["new", "in_progress", "done", "archived"],
+      analysis_request_type: ["city", "breed", "places", "pros", "other"],
       app_role: ["admin", "moderator", "user"],
       application_status: [
         "pending",

@@ -31,6 +31,7 @@ const BADGE_TITLES: Record<string, string> = {
   adminMessageFailed: "messages admin en échec",
   errors: "erreurs non résolues",
   guideRequests: "demandes de guides en attente",
+  analysisRequests: "demandes d'analyse à traiter",
   reportsSit: "signalements visant des annonces / gardes",
   reportsMission: "signalements visant des petites missions",
 };
@@ -89,6 +90,7 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/articles-longue-traine", icon: FileText, label: "Articles longue traîne" },
       { to: "/admin/faq", icon: HelpCircle, label: "FAQ" },
       { to: "/admin/guides", icon: Compass, label: "Guides locaux", badgeKey: "guideRequests" },
+      { to: "/admin/analysis-requests", icon: HelpCircle, label: "Demandes d'analyse", badgeKey: "analysisRequests" },
       { to: "/admin/city-pages", icon: MapPin, label: "Pages villes" },
       { to: "/admin/departments", icon: MapPin, label: "Départements" },
       { to: "/admin/breeds", icon: MapPin, label: "Fiches de race" },
@@ -134,6 +136,7 @@ export const AdminSidebar = () => {
         supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").eq("target_type", "sit"),
         supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").eq("target_type", "small_mission"),
         supabase.from("pro_verifications").select("id", { count: "exact", head: true }).in("status", ["needs_review", "pending"]),
+        (supabase.from("analysis_requests" as any) as any).select("id", { count: "exact", head: true }).eq("status", "new"),
       ]);
 
       // Compétences saisies dans les profils mais pas encore validées
@@ -170,6 +173,7 @@ export const AdminSidebar = () => {
         reportsSit: results[10].count || 0,
         reportsMission: results[11].count || 0,
         pros: results[12].count || 0,
+        analysisRequests: results[13].count || 0,
       });
     };
     fetchBadges();

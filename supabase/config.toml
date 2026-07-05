@@ -39,3 +39,5 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = true
   [functions.moderate-content]
     verify_jwt = true
+  [functions.submit-analysis-request]
+    verify_jwt = false
