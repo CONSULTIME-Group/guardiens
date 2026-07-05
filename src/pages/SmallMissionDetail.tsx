@@ -928,7 +928,7 @@ const SmallMissionDetail = () => {
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
         {/* Breadcrumb */}
         <div className="mb-6">
-          <PageBreadcrumb items={[{ label: "Coups de main", href: "/petites-missions" }, { label: mission.title }]} />
+          <PageBreadcrumb items={[{ label: "Coups de main", href: "/petites-missions" }, { label: displayTitle }]} />
         </div>
 
         {/* Banner publication */}
