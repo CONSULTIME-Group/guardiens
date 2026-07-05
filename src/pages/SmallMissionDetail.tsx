@@ -1132,17 +1132,16 @@ const SmallMissionDetail = () => {
                 </div>
               </section>
 
-              {/* En échange */}
+              {/* En échange - version discrète (ne doit pas voler la vedette à la mission). */}
               {mission.exchange_offer && (
-                <section className="bg-muted/60 p-5 md:p-10 rounded-[2rem] border border-border relative overflow-hidden">
-                  <div className="absolute -top-6 -right-6 w-32 h-32 bg-primary/5 rounded-full blur-2xl" aria-hidden />
-                  <h3 className="text-xs font-bold tracking-[0.2em] uppercase mb-4 text-muted-foreground">
-                    {(mission as any).mission_type === "offre" ? "Ce que je souhaite en échange" : "En échange de votre aide"}
-                  </h3>
-                  <blockquote className="font-heading text-xl md:text-2xl italic leading-snug text-foreground/90">
+                <aside className="border-l-2 border-primary/40 bg-muted/40 pl-4 py-3 rounded-r-lg">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                    {(mission as any).mission_type === "offre" ? "Souhaité en échange" : "En échange"}
+                  </p>
+                  <p className="text-sm md:text-base text-foreground/85 italic leading-snug">
                     « {mission.exchange_offer} »
-                  </blockquote>
-                </section>
+                  </p>
+                </aside>
               )}
             </div>
           </article>
