@@ -123,6 +123,7 @@ const AdminGuides = lazy(() => import("./pages/admin/AdminGuides"));
 const AdminDepartments = lazy(() => import("./pages/admin/AdminDepartments"));
 const AdminBreeds = lazy(() => import("./pages/admin/AdminBreeds"));
 const AdminLongTailArticles = lazy(() => import("./pages/admin/AdminLongTailArticles"));
+const AdminArticlesRefreshPostPivot = lazy(() => import("./pages/admin/AdminArticlesRefreshPostPivot"));
 const Parrainage = lazy(() => import("./pages/Parrainage"));
 const DevenirHomeSitter = lazy(() => import("./pages/DevenirHomeSitter"));
 
@@ -344,6 +345,7 @@ const AppRoutes = () => (
         <Route path="/admin/departments" element={<AdminDepartments />} />
         <Route path="/admin/breeds" element={<AdminBreeds />} />
         <Route path="/admin/articles-longue-traine" element={<AdminLongTailArticles />} />
+        <Route path="/admin/articles/refresh-post-pivot" element={<AdminArticlesRefreshPostPivot />} />
 
         <Route path="/admin/faq" element={<AdminFAQ />} />
         <Route path="/admin/small-missions" element={<AdminSmallMissions />} />
