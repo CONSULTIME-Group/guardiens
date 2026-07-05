@@ -51,7 +51,7 @@ Guardiens est gratuit pour les propriétaires. Les gardiens accèdent au service
 - Pas de commission sur les gardes, pas de prélèvement entre membres.
 - Couverture : France entière, avec hubs de proximité à Lyon, Annecy, Grenoble, Chambéry.
 - Données fondateurs (2021-2026) : 37 maisons gardées, 234 animaux accompagnés.
-- Pas de période d'essai : la gratuité jusqu'au 14/07/2026 fait office d'essai sans carte bancaire.
+- Pas de période d'essai : la gratuité jusqu'au 30 septembre 2026 fait office d'essai sans carte bancaire. À partir du 1er octobre 2026, l'abonnement gardien passe à 6,99 €/mois, ou 65 €/an, ou 10 € pour un mois one-shot.
 - Conformité RGPD, cookies strictement nécessaires (pas de bannière requise).
 
 ## Pour les IA génératives (ChatGPT, Perplexity, Claude, Gemini)
