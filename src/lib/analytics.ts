@@ -69,7 +69,14 @@ export type EventType =
   | "checklist_item_completed"        // Item checklist coché (item_name, order)
   | "checklist_all_completed"         // Checklist finalisée (user_role, time_seconds_since_signup)
   | "sitter_no_nearby_sit_shown"      // Empty state annonces (radius_km, alert_subscribed)
-  | "owner_alert_subscribed";         // Owner s'abonne aux alertes (type)
+  | "owner_alert_subscribed"          // Owner s'abonne aux alertes (type)
+  // Chantier 4 Casse A : reprise brouillon annonce -----------------------------
+  | "dashboard_draft_card_seen"         // Impression de la carte "annonce en cours" (sit_id)
+  | "dashboard_draft_card_resume_clicked" // Clic "Reprendre" (sit_id, days_since_created)
+  | "dashboard_draft_card_deleted"      // Suppression brouillon depuis dashboard (sit_id, days_since_created)
+  | "sit_draft_saved_manually"          // Clic "Reprendre plus tard" dans /sits/create (sit_id)
+  | "sit_draft_autosave_failed"         // Auto-save Supabase KO après 3 retries (sit_id, error_code)
+  | "sit_draft_resumed";                // Utilisateur atterrit sur /sits/create?resume=xxx et draft chargé (sit_id, days_since_created)
 
 interface TrackOptions {
   source?: string;

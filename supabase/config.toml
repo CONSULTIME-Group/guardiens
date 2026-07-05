@@ -43,3 +43,5 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = false
   [functions.send-analysis-requests-digest]
     verify_jwt = false
+  [functions.send-sit-draft-reminder]
+    verify_jwt = false

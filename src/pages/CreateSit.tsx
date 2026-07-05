@@ -15,7 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { hasMedication } from "@/lib/medication";
-import { trackFirstAction } from "@/lib/analytics";
+import { trackFirstAction, trackEvent } from "@/lib/analytics";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { COUNTRIES } from "@/lib/countries";
 import ImproveListingButton from "@/components/ai/ImproveListingButton";
@@ -196,7 +196,7 @@ const CreateSit = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const fromSitId = searchParams.get("from");
-  const draftIdParam = searchParams.get("draftId");
+  const draftIdParam = searchParams.get("draftId") || searchParams.get("resume");
 
   const [currentStep, setCurrentStep] = useState(0);
   const [sitLocation, setSitLocation] = useState<"home" | "away" | null>(null);
@@ -288,6 +288,16 @@ const CreateSit = () => {
         let draftRes: { data: any } | null = null;
         if (draftIdParam) {
           draftRes = await supabase.from("sits").select("*").eq("id", draftIdParam).eq("user_id", user.id).eq("status", "draft").maybeSingle();
+          if (!draftRes?.data) {
+            // ?resume= explicite mais brouillon inexistant ou pas au user : on redirige proprement.
+            toast({
+              variant: "destructive",
+              title: "Brouillon introuvable",
+              description: "Ce brouillon n'existe pas ou ne vous appartient pas.",
+            });
+            navigate("/dashboard");
+            return;
+          }
         } else {
           draftRes = await supabase.from("sits").select("*").eq("user_id", user.id).eq("status", "draft").order("created_at", { ascending: false }).limit(1).maybeSingle();
         }
@@ -309,6 +319,15 @@ const CreateSit = () => {
           setCoverPhotoUrl(d.cover_photo_url || null);
           setSitCity((d as any).city || "");
           setSitCountry((d as any).country || "FR");
+          if (draftIdParam) {
+            const days = d.created_at
+              ? Math.round((Date.now() - new Date(d.created_at).getTime()) / 86_400_000)
+              : null;
+            void trackEvent("sit_draft_resumed", {
+              source: "create_sit_page",
+              metadata: { sit_id: d.id, days_since_created: days },
+            });
+          }
         }
       }
 
@@ -1196,8 +1215,12 @@ const CreateSit = () => {
                 onClick={async () => {
                   const id = await saveDraft();
                   if (id) {
-                    toast({ title: "Brouillon enregistré", description: "Vous pourrez le reprendre depuis « Mes gardes »." });
-                    navigate("/sits?tab=drafts");
+                    void trackEvent("sit_draft_saved_manually", {
+                      source: "create_sit_page",
+                      metadata: { sit_id: id },
+                    });
+                    toast({ title: "Brouillon enregistré", description: "Vous pourrez le reprendre depuis votre dashboard." });
+                    navigate("/dashboard");
                   }
                 }}
                 disabled={savingDraft || !property}
