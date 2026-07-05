@@ -564,8 +564,15 @@ export default function PublicSitterProfile() {
         .order('created_at', { ascending: false })
         .limit(20);
 
+      const { data: recognition } = await (supabase as any)
+        .from('helper_recognition_stats')
+        .select('useful_count')
+        .eq('user_id', id)
+        .maybeSingle();
+
       setMissionsPublished(published ?? []);
       setMissionsHelped(!helpedResult.error ? (helpedResult.data ?? []) : []);
+      setThanksReceived(Number(recognition?.useful_count ?? 0));
     };
 
     loadEntraideData();
