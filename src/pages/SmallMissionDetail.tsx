@@ -310,8 +310,22 @@ const SmallMissionDetail = () => {
     return () => { supabase.removeChannel(channel); };
   }, [id, load]);
 
+  const MIN_MESSAGE_LEN = 10;
+  const MAX_MESSAGE_LEN = 500;
+  const trimmedMessage = message.trim();
+  const messageTooShort = trimmedMessage.length > 0 && trimmedMessage.length < MIN_MESSAGE_LEN;
+  const messageValid = trimmedMessage.length >= MIN_MESSAGE_LEN && trimmedMessage.length <= MAX_MESSAGE_LEN;
+
   const handleRespond = async () => {
-    if (!user || !id || !message.trim() || submitting) return;
+    if (!user || !id || submitting) return;
+    if (!trimmedMessage) {
+      toast({ variant: "destructive", title: "Message vide", description: "Écrivez un mot avant de publier votre réponse." });
+      return;
+    }
+    if (trimmedMessage.length < MIN_MESSAGE_LEN) {
+      toast({ variant: "destructive", title: "Message trop court", description: `Ajoutez au moins ${MIN_MESSAGE_LEN} caractères pour que l'auteur comprenne votre proposition.` });
+      return;
+    }
     setSubmitting(true);
     try {
       // Pre-check: re-read mission status to avoid responding to a closed mission
@@ -331,8 +345,9 @@ const SmallMissionDetail = () => {
       }
 
       const { error } = await supabase.from("small_mission_responses").insert({
-        mission_id: id, responder_id: user.id, message: message.trim(),
+        mission_id: id, responder_id: user.id, message: trimmedMessage,
       });
+
       if (error) {
         if (error.code === "23505") {
           toast({ variant: "destructive", title: "Déjà envoyé", description: "Vous avez déjà proposé votre aide pour cette mission." });
