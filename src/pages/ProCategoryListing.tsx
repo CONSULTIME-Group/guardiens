@@ -153,13 +153,29 @@ export default function ProCategoryListing() {
         <header className="mb-6 md:mb-10">
           <h1 className="text-2xl md:text-4xl font-display font-bold mb-2">{h1}</h1>
           <p className="text-lg text-muted-foreground max-w-2xl">{category.shortDesc}</p>
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="mt-6 flex flex-wrap items-center gap-3">
             <Button asChild>
               <Link to="/pros/inscription">Inscrire mon activité</Link>
             </Button>
             <Button asChild variant="outline">
               <Link to="/pros">Toutes les catégories</Link>
             </Button>
+            {verifiedCount > 0 && (
+              <label className="ml-auto flex items-center gap-2 text-sm cursor-pointer">
+                <Checkbox
+                  checked={verifiedOnly}
+                  onCheckedChange={(v) => {
+                    const enabled = !!v;
+                    setVerifiedOnly(enabled);
+                    void trackEvent("pros_filter_verified_toggled", {
+                      metadata: { enabled, category: category.value, ville: villeSlug ?? null },
+                    });
+                  }}
+                />
+                Vérifiés Guardiens uniquement
+                <span className="text-muted-foreground text-xs">({verifiedCount})</span>
+              </label>
+            )}
           </div>
         </header>
 
