@@ -18,6 +18,7 @@ import { mapAuthError } from "@/lib/authErrorMessages";
 import { Eye, EyeOff, MailCheck, ArrowLeft } from "lucide-react";
 import { InAppBrowserBanner } from "@/components/auth/InAppBrowserBanner";
 import { AuthIllustrationPanel } from "@/components/auth/AuthIllustrationPanel";
+import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
 import { lovable } from "@/integrations/lovable";
 import { startOAuthFlow, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
 import {
