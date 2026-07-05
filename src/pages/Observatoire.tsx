@@ -46,8 +46,8 @@ const KEY_STATS: Stat[] = [
  },
  {
  label: "Abonnement gardien",
- value: "6,99 €/mois",
- detail: "Tarif standard, sans engagement. Alternatives : 65 €/an ou 10 € pour un mois en oneshot. Tous les gardiens sont gratuits jusqu'au 30 septembre 2026.",
+ value: "Gratuit",
+ detail: "Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Aucune date de bascule n'est fixée à ce jour.",
  },
  {
  label: "Vérification d'identité",
