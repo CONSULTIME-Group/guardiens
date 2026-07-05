@@ -1330,20 +1330,20 @@ const SmallMissionDetail = () => {
             : "Encore peu d'annonces dans votre secteur, voici des exemples récents à découvrir.";
           return (
             <section className="mt-12 pt-8 border-t border-border">
-              <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-10 gap-4">
+              <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-3">
                 <div>
-                  <h2 className="font-heading text-3xl md:text-4xl font-bold mb-2">{sectionTitle}</h2>
-                  <p className="text-muted-foreground text-lg">{sectionSubtitle}</p>
+                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-1">{sectionTitle}</h2>
+                  <p className="text-muted-foreground text-sm">{sectionSubtitle}</p>
                 </div>
                 <Link
                   to="/petites-missions"
-                  className="font-bold text-sm border-b-2 border-foreground pb-1 hover:opacity-70 transition-opacity self-start md:self-auto"
+                  className="font-bold text-sm border-b-2 border-foreground pb-0.5 hover:opacity-70 transition-opacity self-start md:self-auto"
                 >
                   Tout parcourir
                 </Link>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {relatedMissions.slice(0, 3).map((rm) => (
                   <RelatedMissionCard
                     key={rm.id}
