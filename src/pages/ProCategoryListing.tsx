@@ -51,7 +51,7 @@ export default function ProCategoryListing() {
       setLoading(true);
       const { data } = await supabase
         .from("pro_profiles")
-        .select("id, slug, raison_sociale, category, city, logo_url, description, urgences_24_7")
+        .select("id, slug, raison_sociale, category, city, logo_url, description, urgences_24_7, siret_verified, siret_verified_at")
         .eq("status", "approved")
         .eq("category", category.value as any)
         .order("created_at", { ascending: false });
