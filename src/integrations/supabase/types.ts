@@ -1376,6 +1376,7 @@ export type Database = {
           alert_emails: boolean
           created_at: string
           digest_emails: boolean
+          new_sit_digest: boolean
           product_emails: boolean
           updated_at: string
           user_id: string
@@ -1384,6 +1385,7 @@ export type Database = {
           alert_emails?: boolean
           created_at?: string
           digest_emails?: boolean
+          new_sit_digest?: boolean
           product_emails?: boolean
           updated_at?: string
           user_id: string
@@ -1392,6 +1394,7 @@ export type Database = {
           alert_emails?: boolean
           created_at?: string
           digest_emails?: boolean
+          new_sit_digest?: boolean
           product_emails?: boolean
           updated_at?: string
           user_id?: string
@@ -4490,6 +4493,71 @@ export type Database = {
           },
         ]
       }
+      sitter_digest_queue: {
+        Row: {
+          affinity_score: number | null
+          distance_km: number | null
+          id: string
+          queued_at: string
+          sent_at: string | null
+          sit_id: string
+          sitter_id: string
+          skip_reason: string | null
+          status: string
+        }
+        Insert: {
+          affinity_score?: number | null
+          distance_km?: number | null
+          id?: string
+          queued_at?: string
+          sent_at?: string | null
+          sit_id: string
+          sitter_id: string
+          skip_reason?: string | null
+          status?: string
+        }
+        Update: {
+          affinity_score?: number | null
+          distance_km?: number | null
+          id?: string
+          queued_at?: string
+          sent_at?: string | null
+          sit_id?: string
+          sitter_id?: string
+          skip_reason?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sitter_digest_queue_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "sits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sitter_digest_queue_sitter_id_fkey"
+            columns: ["sitter_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "sitter_digest_queue_sitter_id_fkey"
+            columns: ["sitter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sitter_digest_queue_sitter_id_fkey"
+            columns: ["sitter_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sitter_gallery: {
         Row: {
           animal_breed: string | null
@@ -5787,6 +5855,10 @@ export type Database = {
         }
         Returns: string
       }
+      calculate_affinity_score_pg: {
+        Args: { owner_id: string; sitter_id: string }
+        Returns: number
+      }
       calculate_profile_completion: {
         Args: { p_user_id: string }
         Returns: number
@@ -5969,6 +6041,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      haversine_km: {
+        Args: { lat1: number; lat2: number; lng1: number; lng2: number }
+        Returns: number
       }
       increment_cp_relance: { Args: { user_ids: string[] }; Returns: undefined }
       increment_photo_analysis_quota: {
