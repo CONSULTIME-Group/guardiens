@@ -167,7 +167,6 @@ const ApplicationModal = ({
       p_context_type: "sit_application",
       p_sit_id: sitId,
       p_small_mission_id: null,
-      p_long_stay_id: null,
     });
 
     if (!convErr && convId) {

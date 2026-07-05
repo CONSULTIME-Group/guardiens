@@ -137,7 +137,7 @@ export async function trackEventWithUserId(
  * 1er message, création mission d'entraide, etc.
  */
 export async function trackFirstAction(
-  kind: "sit_created" | "application_sent" | "message_sent" | "mission_created" | "long_stay_created",
+  kind: "sit_created" | "application_sent" | "message_sent" | "mission_created",
   extraMetadata: Record<string, any> = {}
 ) {
   try {

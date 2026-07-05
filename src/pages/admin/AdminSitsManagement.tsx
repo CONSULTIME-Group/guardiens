@@ -23,7 +23,6 @@ const AdminSitsManagement = () => {
   const [sits, setSits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState("operational");
-  // filterType supprimé : "garde longue durée" n'existe plus
   const [search, setSearch] = useState("");
   const [filterCountry, setFilterCountry] = useState<string>("all");
   const [sitters, setSitters] = useState<Record<string, { name: string; avatar: string | null }>>({});
@@ -273,7 +272,6 @@ const AdminSitsManagement = () => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Rechercher…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
-        {/* filterType retiré (long-stay supprimé) */}
         <Select value={filterStatus} onValueChange={setFilterStatus}>
           <SelectTrigger className="w-[220px]"><SelectValue /></SelectTrigger>
           <SelectContent>
