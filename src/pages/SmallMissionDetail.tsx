@@ -1049,7 +1049,7 @@ const SmallMissionDetail = () => {
             <div className="mb-7 md:mb-12 rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
               <img
                 src={heroImage}
-                alt={mission.title}
+                alt={displayTitle}
                 className="w-full aspect-video object-cover"
                 loading="eager"
               />
