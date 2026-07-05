@@ -338,6 +338,7 @@ const AppRoutes = () => (
         <Route path="/admin/emails" element={<AdminEmails />} />
         <Route path="/admin/experiences" element={<AdminExperienceVerification />} />
         <Route path="/admin/articles" element={<AdminArticles />} />
+        <Route path="/admin/articles/refresh-post-pivot" element={<AdminArticlesRefreshPostPivot />} />
         <Route path="/admin/articles/:id" element={<ArticleEditor />} />
         <Route path="/admin/city-pages" element={<AdminCityPages />} />
         <Route path="/admin/guides" element={<AdminGuides />} />
@@ -345,7 +346,6 @@ const AppRoutes = () => (
         <Route path="/admin/departments" element={<AdminDepartments />} />
         <Route path="/admin/breeds" element={<AdminBreeds />} />
         <Route path="/admin/articles-longue-traine" element={<AdminLongTailArticles />} />
-        <Route path="/admin/articles/refresh-post-pivot" element={<AdminArticlesRefreshPostPivot />} />
 
         <Route path="/admin/faq" element={<AdminFAQ />} />
         <Route path="/admin/small-missions" element={<AdminSmallMissions />} />
