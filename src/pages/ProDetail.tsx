@@ -43,7 +43,7 @@ export default function ProDetail() {
       let req = supabase
         .from("pro_profiles")
         .select(
-          "id, user_id, slug, raison_sociale, category, sub_categories, city, postal_code, description, phone, website, email_contact, urgences_24_7, siret_verified, logo_url, cover_url, tarif_min, tarif_max, tarif_note, horaires, diplomes, ordre_number, zone_radius_km, zone_cities, status, rating_avg, rating_count, google_place_id"
+          "id, user_id, slug, raison_sociale, category, sub_categories, city, postal_code, description, phone, website, email_contact, urgences_24_7, siret_verified, siret_verified_at, logo_url, cover_url, tarif_min, tarif_max, tarif_note, horaires, diplomes, ordre_number, zone_radius_km, zone_cities, status, rating_avg, rating_count, google_place_id"
         )
         .eq("slug", slug);
       // Anon: restreint aux fiches approuvées. Connecté: la RLS expose aussi
