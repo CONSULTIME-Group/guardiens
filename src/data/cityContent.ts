@@ -236,7 +236,7 @@ Tous passent par le même processus de vérification : identité contrôlée, pr
 
 **Propriétaires : sans frais.** Vous publiez votre annonce, vous recevez des candidatures, vous choisissez votre gardien. Tout cela sans débourser un centime, toute l'année 2026.
 
-**Gardiens : trois formules au choix.** L'abonnement mensuel à 6,99 euros par mois (résiliable à tout moment), la formule ponctuelle à 10 euros (pour une garde unique), ou l'abonnement annuel à 65 euros par an (soit environ 5,42 euros par mois équivalent, −22 pour cent vs mensuel). [Consultez le détail des formules sur la page tarifs](/tarifs).
+**Gardiens est gratuit aujourd'hui**, sans engagement, pour les propriétaires comme pour les gardiens. Vous serez prévenu à l'avance en cas d'évolution tarifaire. [Consultez le détail des formules sur la page tarifs](/tarifs).
 
 **Aucune commission par garde.** Contrairement aux plateformes qui prélèvent 15 à 20 pour cent sur chaque transaction, Guardiens ne touche rien sur les gardes elles-mêmes. Le gardien paie son abonnement, le propriétaire ne paie rien. C'est tout.`,
  },
@@ -249,7 +249,7 @@ Tous passent par le même processus de vérification : identité contrôlée, pr
 
 C'est cette expérience de terrain qui structure aujourd'hui la plateforme : la rencontre physique obligatoire avant chaque garde, le guide de la maison qui centralise toutes les informations pratiques, le réseau de gardiens d'urgence mobilisables en quelques heures, les avis croisés qui construisent la confiance au fil du temps.
 
-Guardiens lance officiellement le 30 septembre 2026 avec les premiers fondateurs, ceux qui rejoignent la plateforme avant le lancement public et qui contribuent à façonner l'outil. Lyon est le point de départ, la France entière le terrain naturel d'expansion.`,
+Guardiens accueille aujourd'hui ses premiers membres fondateurs, ceux qui rejoignent la plateforme pendant sa phase de construction et contribuent à façonner l'outil. Lyon est le point de départ, la France entière le terrain naturel d'expansion.`,
  },
  {
  id: "faq",

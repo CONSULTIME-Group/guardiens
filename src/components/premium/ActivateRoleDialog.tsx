@@ -12,7 +12,7 @@ import { PawPrint, Home } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { isBeforeLaunch, isInGracePeriod, GRACE_END } from "@/lib/constants";
+import { isBeforeLaunch, isInGracePeriod } from "@/lib/constants";
 
 interface ActivateRoleDialogProps {
   open: boolean;
@@ -50,7 +50,7 @@ const ActivateRoleDialog = ({ open, onClose, targetRole }: ActivateRoleDialogPro
     if (!user) return;
     setLoading(true);
     try {
-      // Pendant la période gratuite pour tous (jusqu'au 30/09/2026),
+      // Pendant la phase gratuite (PRICING_IS_ACTIVE = false),
       // on active directement le rôle gardien sans passer par Stripe.
       if (isBeforeLaunch() || isInGracePeriod()) {
         const { error } = await supabase.rpc("change_user_role", {
@@ -91,7 +91,7 @@ const ActivateRoleDialog = ({ open, onClose, targetRole }: ActivateRoleDialogPro
               Vous avez aussi des animaux à faire garder ?
             </DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground text-center">
-              L'espace propriétaire est à 0 €. Activez-le en un clic pour publier des annonces et trouver un gardien près de chez vous.
+              L'espace propriétaire est gratuit. Activez-le en un clic pour publier des annonces et trouver un gardien près de chez vous.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-2 pt-2">
@@ -107,13 +107,6 @@ const ActivateRoleDialog = ({ open, onClose, targetRole }: ActivateRoleDialogPro
     );
   }
 
-  const freeNow = isBeforeLaunch() || isInGracePeriod();
-  const lastFreeDay = new Date(GRACE_END.getTime() - 24 * 60 * 60 * 1000).toLocaleDateString("fr-FR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="sm:max-w-md">
@@ -123,20 +116,12 @@ const ActivateRoleDialog = ({ open, onClose, targetRole }: ActivateRoleDialogPro
             Envie de garder des maisons aussi ?
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground text-center">
-            {freeNow ? (
-              <>
-                L'espace gardien est <strong>à 0 € pour tous jusqu'au {lastFreeDay}</strong>. Activez-le sans frais, sans engagement, l'abonnement (6,99&nbsp;€/mois) ne s'appliquera qu'ensuite, et vous pourrez vous désabonner à tout moment.
-              </>
-            ) : (
-              <>
-                L'abonnement gardien est à 6,99&nbsp;€/mois, sans engagement, résiliable à tout moment depuis vos paramètres.
-              </>
-            )}
+            L'espace gardien est <strong>gratuit aujourd'hui, sans engagement</strong>. Vous serez prévenu à l'avance en cas d'évolution tarifaire.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2 pt-2">
           <Button onClick={handleActivateGardien} disabled={loading}>
-            {loading ? "Redirection..." : freeNow ? "Activer mon espace gardien →" : "Activer mon abonnement →"}
+            {loading ? "Redirection..." : "Activer mon espace gardien →"}
           </Button>
           <Button variant="ghost" onClick={onClose} disabled={loading}>
             Pas maintenant

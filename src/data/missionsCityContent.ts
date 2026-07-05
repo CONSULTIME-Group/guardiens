@@ -66,7 +66,7 @@ export const MISSIONS_LYON: MissionsCityContent = {
     },
     {
       q: "Faut-il un abonnement pour publier une mission à Lyon ?",
-      a: "Non. Les petites missions d'entraide sont accessibles à tous les membres inscrits sur Guardiens, sans abonnement et sans frais. Seul l'espace gardien, pour les longues gardes à domicile, nécessite un abonnement à 6,99 € par mois.",
+      a: "Non. Les petites missions d'entraide sont accessibles à tous les membres inscrits sur Guardiens, sans abonnement et sans frais. L'espace gardien, pour les longues gardes à domicile, est également gratuit aujourd'hui, sans engagement.",
     },
     {
       q: "Quelle différence avec une garde de maison à Lyon ?",

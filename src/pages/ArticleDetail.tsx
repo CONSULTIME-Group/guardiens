@@ -417,22 +417,11 @@ export default function ArticleDetail() {
   "areaServed": { "@type": "Country", "name": "France" },
  "offers": {
  "@type": "Offer",
- "name": "Abonnement gardien mensuel",
- "price": String(SITTER_PRICE_NUMERIC),
- "priceCurrency": SITTER_PRICE_CURRENCY,
- "eligibleCustomerType": "Sitter",
- "availabilityStarts": SITTER_PRICE_START_ISO,
- "description": "Abonnement gardien à 6,99 €/mois à partir du 1er octobre 2026.",
- "priceSpecification": {
- "@type": "UnitPriceSpecification",
- "price": "6.99",
+ "name": "Accès gardien",
+ "price": "0",
  "priceCurrency": "EUR",
- "referenceQuantity": {
- "@type": "QuantitativeValue",
- "value": "1",
- "unitCode": "MON"
- }
- },
+ "eligibleCustomerType": "Sitter",
+ "description": "Accès gardien gratuit aujourd'hui, sans engagement.",
  "availability": "https://schema.org/InStock"
  }
  })}</script>
