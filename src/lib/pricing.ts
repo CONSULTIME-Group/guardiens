@@ -88,6 +88,10 @@ export const REFERRAL_REWARD_LABEL =
     : `${REFERRAL_FREE_MONTHS}${NBSP}mois offerts`;
 
 // ── Versions composées prêtes à l'emploi ─────────────────────────────────────
-export const PRICING_LONG = getPricingBaseline();
-export const PRICING_SHORT = getPricingBaselineShort();
-export const PRICING_VERY_SHORT = getPricingBaselineShort();
+// NB: littéraux string (pas d'appel de fonction) pour que le script
+// scripts/sync-index-html.mjs puisse les extraire par regex.
+export const PRICING_LONG =
+  "Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.";
+export const PRICING_SHORT = "Gratuit pour vous, sans engagement.";
+export const PRICING_VERY_SHORT = "Gratuit pour vous, sans engagement.";
+
