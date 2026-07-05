@@ -1347,25 +1347,33 @@ const SmallMissionDetail = () => {
                         id="composer-textarea"
                         placeholder={`Répondez à ${author?.first_name || "l'auteur"}, présentez-vous en deux mots…`}
                         value={message}
-                        onChange={(e) => setMessage(e.target.value.slice(0, 500))}
+                        onChange={(e) => setMessage(e.target.value.slice(0, MAX_MESSAGE_LEN))}
                         rows={3}
-                        className="min-h-[72px] resize-none rounded-xl border-0 bg-muted/50 focus-visible:ring-1 focus-visible:ring-primary/40 text-sm md:text-base"
-                        maxLength={500}
+                        aria-invalid={messageTooShort}
+                        aria-describedby="composer-help"
+                        className={`min-h-[72px] resize-none rounded-xl border-0 bg-muted/50 focus-visible:ring-1 text-sm md:text-base ${messageTooShort ? "focus-visible:ring-destructive/60 ring-1 ring-destructive/40" : "focus-visible:ring-primary/40"}`}
+                        maxLength={MAX_MESSAGE_LEN}
                       />
+                      {messageTooShort && (
+                        <p className="text-[11px] text-destructive mt-1.5" role="alert">
+                          Encore {MIN_MESSAGE_LEN - trimmedMessage.length} caractère{MIN_MESSAGE_LEN - trimmedMessage.length > 1 ? "s" : ""} minimum pour publier.
+                        </p>
+                      )}
                       <div className="flex items-center justify-between gap-2 mt-2">
-                        <span className={`text-[11px] ${message.length > 450 ? "text-warning" : "text-muted-foreground"}`}>
-                          {message.length}/500 · Visible par tout le monde
+                        <span id="composer-help" className={`text-[11px] ${message.length > 450 ? "text-warning" : "text-muted-foreground"}`}>
+                          {message.length}/{MAX_MESSAGE_LEN} · Visible par tout le monde
                         </span>
                         <Button
                           size="sm"
                           onClick={handleRespond}
-                          disabled={submitting || !message.trim()}
+                          disabled={submitting || !messageValid}
                           className="rounded-full gap-1.5"
                         >
                           <Send className="h-3.5 w-3.5" />
                           {submitting ? "Envoi…" : "Publier"}
                         </Button>
                       </div>
+
                     </div>
                   </div>
                 </div>
