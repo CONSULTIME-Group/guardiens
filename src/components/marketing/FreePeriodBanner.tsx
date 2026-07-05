@@ -1,4 +1,5 @@
 import { isInGracePeriod, GRACE_END } from "@/lib/constants";
+import { isPricingActive } from "@/lib/pricing";
 
 interface FreePeriodBannerProps {
   className?: string;
