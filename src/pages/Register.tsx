@@ -174,22 +174,21 @@ const Register = () => {
 
  if (password.length < 8) {
  setFormError(t("register_page.error_min_length"));
+ try { trackEvent("signup_form_blocked", { source: "/inscription", metadata: { reason: "min_length", role: selectedRole } }); } catch {}
  return;
  }
 
  if (isObviouslyWeak(password)) {
  setFormError(t("register_page.error_too_common"));
  try {
- trackEvent("signup_failed", {
- source: "/inscription",
- metadata: { stage: "auth", error_code: "weak_password", error_message: "weak_password_local", role: selectedRole },
- });
+ trackEvent("signup_form_blocked", { source: "/inscription", metadata: { reason: "too_common", role: selectedRole } });
  } catch {}
  return;
  }
 
  if (pwStrength.score < 2) {
  setFormError(t("register_page.error_too_weak"));
+ try { trackEvent("signup_form_blocked", { source: "/inscription", metadata: { reason: "too_weak", role: selectedRole } }); } catch {}
  return;
  }
 
