@@ -30,6 +30,7 @@ import MissionPublishedBanner from "@/components/missions/MissionPublishedBanner
 import MatchedHelpersInviteBlock from "@/components/missions/MatchedHelpersInviteBlock";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
+import { AppLayout } from "@/components/layout/AppLayout";
 import PublicMissionView from "@/components/missions/PublicMissionView";
 import RelatedMissionCard from "@/components/missions/RelatedMissionCard";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
@@ -666,7 +667,7 @@ const SmallMissionDetail = () => {
     );
   }
 
-  const heroImage = mission.photos?.[0] || entraideHeader;
+  const heroImage = mission.photos?.[0] || null;
   const extraPhotos = (mission.photos || []).slice(1);
   const cityLabel = titlecaseCity(mission.city) || "France";
   const displayTitle = sanitizeUserTitle(mission.title) || mission.title;
@@ -896,7 +897,8 @@ const SmallMissionDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground animate-fade-in">
+    <AppLayout>
+    <div className="text-foreground animate-fade-in">
       <PageMeta
         title={`${displayTitle} · Coup de main à ${cityLabel}`}
         description={(() => {
@@ -1047,15 +1049,18 @@ const SmallMissionDetail = () => {
               </div>
             </header>
 
-            {/* Image principale */}
-            <div className="mb-7 md:mb-12 rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
-              <img
-                src={heroImage}
-                alt={displayTitle}
-                className="w-full aspect-video object-cover"
-                loading="eager"
-              />
-            </div>
+            {/* Image principale : uniquement si photo réelle. Pas de fallback
+                générique qui rendrait toutes les annonces identiques. */}
+            {heroImage && (
+              <div className="mb-7 md:mb-12 rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
+                <img
+                  src={heroImage}
+                  alt={displayTitle}
+                  className="w-full aspect-video object-cover"
+                  loading="eager"
+                />
+              </div>
+            )}
 
             {/* Photos additionnelles */}
             {extraPhotos.length > 0 && (
@@ -1367,7 +1372,7 @@ const SmallMissionDetail = () => {
 
       {/* Mobile sticky CTA */}
       {!isAuthor && mission.status === "open" && canApplyMissions && !hasResponded && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.15)]">
+        <div className="lg:hidden fixed bottom-16 md:bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.15)]">
           <Button
             size="lg"
             className="w-full rounded-full font-bold text-base shadow-lg shadow-primary/20"
@@ -1400,6 +1405,7 @@ const SmallMissionDetail = () => {
         </DialogContent>
       </Dialog>
     </div>
+    </AppLayout>
   );
 };
 
