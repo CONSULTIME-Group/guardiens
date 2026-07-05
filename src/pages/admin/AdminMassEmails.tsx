@@ -398,7 +398,7 @@ const AdminMassEmails = () => {
             <div className="flex items-start gap-3">
               <div className="flex-1 space-y-1">
                 <p className="text-sm font-semibold text-foreground">
-                  Prêt à envoyer la campagne « Oser demander »
+                  Prêt à envoyer la campagne « {CAMPAIGN_PRESETS.find((p) => p.key === activePreset)?.label || "Personnalisée"} »
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Tout est pré-rempli et tracé (campaign : <code className="font-mono">{effectiveCampaign}</code>).
