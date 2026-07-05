@@ -633,6 +633,13 @@ const EntraideHub = () => {
                     onUseMyLocation={proximity.useMyLocation}
                     onClear={() => proximity.setPostal("")}
                   />
+                  <p className="sr-only" role="status" aria-live="polite">
+                    {proximity.active
+                      ? proximity.computing
+                        ? `Calcul des distances autour de votre position dans un rayon de ${proximity.radius} kilomètres.`
+                        : `Tri par proximité activé. Rayon : ${proximity.radius} kilomètres. ${filteredMissions.length} mission${filteredMissions.length > 1 ? "s" : ""} affichée${filteredMissions.length > 1 ? "s" : ""}.`
+                      : "Tri par proximité désactivé."}
+                  </p>
                 </div>
 
                 {mLoading ? (
