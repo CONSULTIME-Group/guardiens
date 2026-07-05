@@ -15,6 +15,7 @@ import PageMeta from "@/components/PageMeta";
 // DemoListingShowcase retiré (cards « Bientôt disponible » anti-vente).
 // import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
 import LiveListingsSection from "@/components/landing/LiveListingsSection";
+import InventoryStrip from "@/components/landing/InventoryStrip";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
 import RealMembersStrip from "@/components/landing/RealMembersStrip";
 import PublicHeader from "@/components/layout/PublicHeader";
@@ -71,9 +72,9 @@ function getSeasonalBanner(): { title: string; description: string } {
 
 
 
-// Témoignages, répartition géographique équilibrée (France entière, hors
-// concentration AURA), avec date et libellé "Programme Fondateurs" pour
-// l'E-E-A-T (Expérience réelle + transparence).
+// Témoignages, répartition géographique équilibrée (France entière). Communauté
+// fondatrice, période janvier à mai 2026, pour l'E-E-A-T local (expérience
+// réelle et transparence).
 const testimonials = [
   {
     name: "Nadia",
@@ -630,6 +631,7 @@ const Landing = () => {
               { href: "#entraide", label: t("landing.toc.aid") },
               { href: "#confiance", label: t("landing.toc.trust") },
               { href: "#temoignages", label: t("landing.toc.testimonials") },
+              { href: "#chiffres", label: t("landing.toc.numbers") },
               { href: "#notre-histoire", label: t("landing.toc.story") },
               { href: "#guides-villes", label: t("landing.toc.cities") },
               { href: "#faq", label: t("landing.toc.faq") },
@@ -963,6 +965,11 @@ const Landing = () => {
       {/* ═══════════════ SECTION 5, ANNONCES EN COURS (live) ═══════════════ */}
       <RevealSection>
         <LiveListingsSection />
+      </RevealSection>
+
+      {/* ═══════════════ SECTION 5.5, CHIFFRES DU RÉSEAU (InventoryStrip) ═══════════════ */}
+      <RevealSection>
+        <InventoryStrip />
       </RevealSection>
 
       {/* Vitrine démo désactivée : doublonnait LiveListingsSection avec des cards
@@ -1456,11 +1463,7 @@ const Landing = () => {
       {/* ═══════════════ SECTION 10, CTA FINAL (fusion Fondateur + double CTA) ═══════════════ */}
       <section id="commencer" className="py-10 md:py-20 bg-primary scroll-mt-24">
         <RevealSection className="max-w-2xl mx-auto px-6 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-6 bg-white/15 border border-white/30">
-            <span className="font-body text-xs text-white uppercase tracking-widest">{t("landing.final.badge_program")}</span>
-            <span aria-hidden="true" className="text-white/40">·</span>
-            <span className="font-body text-xs text-white/90">{t("landing.final.badge_offer")}</span>
-          </div>
+          {/* Chips "Programme Fondateur" retirés (signal de deadline implicite). */}
           <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6">
             {t("landing.final.title")}
           </h2>
