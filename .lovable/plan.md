@@ -1,54 +1,97 @@
-# Nettoyage dead code « long_stay » / garde longue durée
 
-## Verdict d'audit
+# Article inventaire Guardiens, plan d'exécution
 
-**Mort.** Aucun composant UI actif. La route `/long-stays/:id` existe mais redirige vers `/`. Résidus : payloads `p_long_stay_id: null` (compat RPC), enum analytics jamais émis, tables Supabase encore présentes en DB.
+Chantier lourd (4-5h), 10 étapes séquencées. Voici comment j'attaque.
 
-## Portée du nettoyage
+## Vérifications préalables à faire avant de coder
 
-### 1. Frontend
+1. **Table `guide_requests`** : existe déjà (13 colonnes, 4 policies d'après le contexte). Je lis le schéma actuel avant d'ajouter une migration, pour ne pas dupliquer des colonnes.
+2. **Pattern article** : `ArticleDetail.tsx` rend depuis BDD. Je regarde s'il gère déjà des placeholders ou des composants React injectés, pour choisir Option A (Markdown + placeholders) ou Option B (composant React dédié via routeur d'exceptions).
+3. **Turnstile Cloudflare** : je vérifie s'il est déjà en place dans le projet (`TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`). Si absent, je demande à l'utilisateur avant d'ajouter la dépendance.
+4. **Edge function d'illustration article** : je vérifie son nom exact avant de l'appeler pour générer la cover.
+5. **Cron pattern** : je vérifie si `pg_cron` est déjà utilisé sur d'autres jobs (email queue oui) pour rester cohérent.
 
-- `src/App.tsx` — supprimer la route legacy `/long-stays/:id` (ligne 303-304) et son commentaire.
-- `src/hooks/useAutoOpenConversation.ts:94` — retirer `p_long_stay_id: null` de l'appel RPC.
-- `src/lib/conversation.ts:48` — idem.
-- `src/components/sits/ApplicationModal.tsx:170` — idem.
-- `src/lib/analytics.ts:140` — retirer `"long_stay_created"` du type union.
-- `src/pages/admin/AdminSitsManagement.tsx:26,276` — retirer les commentaires devenus obsolètes.
+## Décisions par défaut (je choisis, dis stop si pas ok)
 
-### 2. Backend (Lovable Cloud)
+- **Option B** pour l'article : composant React dédié `ArticleInventaire` monté via routeur d'exceptions dans `ArticleDetail`. Plus lisible que du Markdown avec placeholders custom, meilleur pour les données live.
+- **Cover image** : je génère via l'edge function existante si dispo, sinon `imagegen--generate_image` en fallback.
+- **Turnstile** : si pas déjà présent, je livre le formulaire avec honeypot + rate-limit IP uniquement, et je pose une TODO pour l'ajout Turnstile ultérieur. Sinon je le branche.
+- **Digest admin** : envoi via le pipeline app-emails existant (`send-transactional-email` + template dédié), pas de nouveau système.
+- **Signature double** : "Jérémie et Elisa" à la fin, sans emoji ni icône.
 
-Migration SQL pour supprimer proprement :
+## Séquence d'exécution
 
-- FK `conversations.long_stay_id` et la colonne.
-- Table `public.long_stay_applications`.
-- Table `public.long_stays`.
-- Enums `long_stay_status`, `long_stay_access_level`.
-- Retrait de la valeur `"long_stay"` de l'enum concerné (types.ts:6100, 6349) — nécessite recréation de l'enum.
-- Paramètre `p_long_stay_id` des fonctions RPC concernées (RPC `open_or_create_conversation` ou équivalent) — soit suppression du paramètre, soit conservation en `default null` si d'autres appelants dépendent de la signature.
+### Étape 1, base de données (migration unique)
+- Vérifier et compléter `guide_requests` : colonnes manquantes (`ip_hash`, `city_context`, `admin_notes`, `delivered_at`, `delivered_url`, `updated_at`, `status` enum interne).
+- Trigger `update_updated_at_column` sur `guide_requests`.
+- RLS : INSERT réservé service_role (via edge function), SELECT/UPDATE/DELETE admin uniquement.
+- RPC `get_inventaire_counts()` SECURITY DEFINER, retourne JSON groupé (cities, breeds par species, places par category, pros).
+- GRANTs corrects sur la RPC (execute to anon + authenticated).
 
-Après migration, `src/integrations/supabase/types.ts` sera régénéré automatiquement.
+### Étape 2, edge function `submit-guide-request`
+- CORS restreint à guardiens.fr et preview Lovable.
+- Zod validation stricte.
+- Honeypot `website` : drop silencieux si non vide.
+- Turnstile : vérification server-to-server si secret dispo, sinon skip.
+- Hash IP SHA256 avec `HASH_SALT` (à générer via `generate_secret` si absent).
+- Rate-limit 15 min par IP.
+- Insert row.
+- Enqueue confirmation email si `email` fourni.
+- Retour 200 avec ticket_id court.
 
-## Détails techniques
+### Étape 3, composant `GuideRequestForm`
+- Radio group 5 types, label conditionnel du champ `subject`.
+- Textarea `details` (500 max), input `email` optionnel, checkbox RGPD.
+- Honeypot masqué visuellement mais accessible aux bots.
+- Toast succès/échec, état loading.
 
-**Point d'attention RPC** : avant de supprimer le paramètre `p_long_stay_id` de la fonction Postgres, il faut vérifier qu'aucune edge function ni appelant externe ne l'utilise. Option prudente : garder le paramètre côté SQL avec `default null` et se contenter de retirer les `null` explicites côté client (moins invasif, même résultat visible).
+### Étape 4, hook `useInventaireCounts`
+- React Query, staleTime 5 min.
+- Appel unique de la RPC.
+- Retour typé.
 
-**Ordre de migration recommandé** :
+### Étape 5, article
+- Insert en BDD via `supabase--insert` : slug, titles, meta, published_at.
+- Cover : génération illustration + upload storage, ou fallback.
+- Composant `ArticleInventaire` monté dans `ArticleDetail` quand slug match.
+- 7 sections comme au prompt, vouvoiement, aucun mot proscrit, aucun tiret cadratin.
+- FAQPage + Article + Dataset Schema.org.
+- Signature Jérémie et Elisa, `dateModified` dynamique.
 
-```text
-1. DROP TABLE long_stay_applications CASCADE
-2. ALTER TABLE conversations DROP COLUMN long_stay_id
-3. DROP TABLE long_stays CASCADE
-4. DROP TYPE long_stay_status, long_stay_access_level
-5. Recréer l'enum sit_type sans 'long_stay' (si présent)
-6. Régénérer types.ts
-```
+### Étape 6, teaser Observatoire
+- Ajout section "Notre inventaire vivant" entre stats et confiance, 4 tuiles via `useInventaireCounts`, CTA vers `#demande`.
 
-**Vérifications post-nettoyage** :
+### Étape 7, admin kanban
+- Route `/admin/guide-requests` dans `App.tsx`.
+- Entrée dans `AdminSidebar` entre small-missions et contact-messages.
+- Page `AdminGuideRequests` : 4 colonnes drag-less (boutons "étape suivante"), KPI en haut (demandes/mois, temps médian, camembert répartition), filtre par type.
+- Modal "Livré avec URL" pour renseigner `delivered_url`.
 
-- `bunx tsgo --noEmit` doit passer.
-- Recherche `rg -i "long_stay|longstay|garde longue"` doit ne retourner que d'éventuels commentaires historiques anodins.
-- Test manuel : `/long-stays/abc` doit désormais renvoyer une 404 propre (au lieu d'une redirection silencieuse), sauf si vous préférez conserver la redirection pour les liens externes indexés.
+### Étape 8, digest quotidien
+- Edge function `send-guide-requests-digest`.
+- Job `pg_cron` 8h Europe/Paris.
+- Requête : demandes créées depuis hier 8h, groupées par type.
+- Skip si 0.
+- Envoi via `send-transactional-email` avec template `guide-requests-digest`.
 
-## Question ouverte
+### Étape 9, SEO
+- Sitemap régénéré (via script existant si présent).
+- Schema.org validé (le test `jsonld-validation` doit passer).
+- Vérif `no-em-dash-guard` : je scan mon contenu avant commit.
 
-**Conserver ou supprimer la redirection `/long-stays/:id → /`** ? Utile si des liens externes (emails passés, indexation) pointent encore vers ces URLs. Sinon, 404 propre.
+### Étape 10, tests
+- Typecheck.
+- Tests existants (no-em-dash, jsonld, footer-token) doivent rester verts.
+- Un test unitaire sur la RPC `get_inventaire_counts` (structure de retour).
+
+## Ce que je ne fais pas sans confirmation
+
+- Installer Turnstile si absent : je pose la question en cours de route.
+- Ajouter le composant React dans un nouveau routeur : je reste sur `ArticleDetail`.
+- Modifier la sidebar au-delà de l'entrée demandée.
+
+## Estimation
+
+Cohérent avec l'estimation du prompt : 4 à 5h côté agent, en 8 à 12 exécutions groupées.
+
+Dites go et j'attaque par l'étape 1 (lecture schéma + migration).
