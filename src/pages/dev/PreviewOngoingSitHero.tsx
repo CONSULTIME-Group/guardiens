@@ -33,6 +33,7 @@ const ongoingSit: SitRow = {
 };
 
 export default function PreviewOngoingSitHero() {
+  if (!import.meta.env.DEV) return <Navigate to="/" replace />;
   return (
     <div className="min-h-screen bg-background p-4">
       <Helmet><meta name="robots" content="noindex,nofollow" /></Helmet>
