@@ -2,7 +2,7 @@
 
 > Plateforme de garde d'animaux à domicile en France. Mise en relation entre propriétaires d'animaux et gardiens de confiance habitant près de chez vous, sans frais cachés et sans transaction financière entre membres.
 
-Guardiens est gratuit pour les propriétaires. Les gardiens accèdent au service via un abonnement à 6,99 €/mois (ou 12 € en one-shot), sans engagement. L'entraide entre membres (petites missions du quotidien : promenade, visite, dépannage) est gratuite et n'inclut jamais de nuitée.
+Guardiens est gratuit pour les propriétaires. Les gardiens accèdent au service via un abonnement à 6,99 €/mois, 65 €/an, ou 10 € pour un mois en oneshot, sans engagement. L'entraide entre membres (petites missions du quotidien : promenade, visite, dépannage) est gratuite et n'inclut jamais de nuitée.
 
 ## Pages principales
 
