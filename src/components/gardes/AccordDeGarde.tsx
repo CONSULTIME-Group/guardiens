@@ -87,6 +87,14 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  check();
  }, [role, user, garde.gardeId]);
 
+ // Analytics : ouverture de la modale (émis une fois par montage).
+ useEffect(() => {
+   trackEvent("accord_dialog_opened", {
+     metadata: { sit_id: garde.gardeId, role },
+   });
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, []);
+
  const handleScroll = () => {
  const el = scrollRef.current;
  if (!el) return;
