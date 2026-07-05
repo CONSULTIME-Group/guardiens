@@ -224,16 +224,18 @@ const SmallMissionDetail = () => {
     if (!m) { setLoading(false); return; }
     setMission(m);
 
-    // Parallélisation : tous ces appels sont indépendants une fois la mission chargée
+    // Parallélisation : tous ces appels sont indépendants une fois la mission chargée.
+    // Pour "près de chez vous" on charge un pool large (30) puis on filtre par distance
+    // côté client (haversine) pour éviter de proposer Vergons (04) à quelqu'un du 93.
     const [authorRes, relatedRes, respsRes, givenFbRes, recFbRes] = await Promise.all([
       supabase.rpc("get_mission_author_public", { _mission_id: m.id }),
       supabase.from("small_missions")
-        .select("id, title, description, category, city, postal_code, created_at, duration_estimate, photos, mission_type")
+        .select("id, title, description, category, city, postal_code, created_at, duration_estimate, photos, mission_type, latitude, longitude")
         .eq("status", "open")
         .neq("id", m.id)
         .or(`category.eq.${m.category},city.eq.${m.city}`)
         .order("created_at", { ascending: false })
-        .limit(3),
+        .limit(30),
       supabase.from("small_mission_responses")
         .select("*, responder:profiles!small_mission_responses_responder_id_fkey(first_name, avatar_url)")
         .eq("mission_id", id).order("created_at", { ascending: false }),
@@ -249,7 +251,27 @@ const SmallMissionDetail = () => {
 
     const authorRow: any = Array.isArray(authorRes.data) ? authorRes.data[0] : authorRes.data;
     setAuthor(authorRow ? { ...authorRow, created_at: authorRow.member_since } : null);
-    setRelatedMissions(relatedRes.data || []);
+
+    // Filtrage par proximité réelle si on connaît les coords de la mission courante.
+    const pool = (relatedRes.data || []) as any[];
+    let ranked: any[] = pool;
+    if (m.latitude && m.longitude) {
+      const meLat = m.latitude as number;
+      const meLng = m.longitude as number;
+      const withDist = pool
+        .map((r) => {
+          const d = (r.latitude && r.longitude)
+            ? haversineDistance({ lat: meLat, lng: meLng }, { lat: r.latitude, lng: r.longitude })
+            : Number.POSITIVE_INFINITY;
+          return { ...r, __distance_km: d };
+        })
+        .sort((a, b) => a.__distance_km - b.__distance_km);
+      const near = withDist.filter((r) => r.__distance_km <= NEAR_RADIUS_KM);
+      // On garde au moins 3 cartes si le rayon strict est vide (fallback catégorie).
+      ranked = near.length >= 3 ? near : withDist;
+    }
+    setRelatedMissions(ranked.slice(0, 3));
+
     setResponses(respsRes.data || []);
 
     if (user) {
