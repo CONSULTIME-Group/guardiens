@@ -21,6 +21,7 @@ import { DEPT_NAMES, getDeptCode } from "@/lib/departments";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import MissionCardCover from "@/components/missions/MissionCardCover";
+import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 
 
 type Tab = "questions" | "besoins" | "offres";
