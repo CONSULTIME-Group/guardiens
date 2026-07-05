@@ -30,6 +30,10 @@ interface MissionLike {
   exchange_offer?: string | null;
   photos?: string[] | null;
   duration_estimate?: string | null;
+  date_needed?: string | null;
+  end_date?: string | null;
+  pet_species?: string | null;
+  pet_size?: string | null;
 }
 
 interface AuthorLike {
