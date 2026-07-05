@@ -741,6 +741,11 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* ═══════════════ SECTION 2.5, INTERNATIONAL (InternationalStrip) ═══════════════ */}
+      <RevealSection>
+        <InternationalStrip />
+      </RevealSection>
+
       {/* ═══════════════ SECTION 2bis, CE QUI ARRIVE EN PLUS ═══════════════ */}
       <section id="rencontre" className="py-10 md:py-20 bg-accent/40 border-y border-accent scroll-mt-24">
         <div className="max-w-3xl mx-auto px-6">
@@ -1057,6 +1062,11 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* ═══════════════ SECTION 6.5, SCORE D'AFFINITÉ (AffinityScoreShowcase) ═══════════════ */}
+      <RevealSection>
+        <AffinityScoreShowcase />
+      </RevealSection>
+
       {/* ═══════════════ SECTION 7, TÉMOIGNAGES ═══════════════ */}
       <section id="temoignages" className="py-10 md:py-20 bg-background scroll-mt-24">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
@@ -1208,6 +1218,11 @@ const Landing = () => {
           </div>
         </div>
       </section>
+
+      {/* ═══════════════ SECTION 8.5, PROS ANIMALIERS (ProsShowcase) ═══════════════ */}
+      <RevealSection>
+        <ProsShowcase />
+      </RevealSection>
 
       {/* ═══════════════ SECTION 9, GUIDES + VILLES (fusion SEO) ═══════════════ */}
       <section id="guides-villes" className="py-10 md:py-20 bg-background scroll-mt-24">
