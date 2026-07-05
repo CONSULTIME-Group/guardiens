@@ -1,3 +1,5 @@
+import { Helmet } from "react-helmet-async";
+import { Navigate } from "react-router-dom";
 import MissionCard from "@/components/missions/connected/MissionCard";
 
 const MOCK = [
@@ -51,24 +53,28 @@ const MOCK = [
   },
 ];
 
-const PreviewMissionCards = () => (
-  <div className="min-h-screen bg-background p-8">
-    <h1 className="font-heading text-2xl mb-6">Preview MissionCard</h1>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl">
-      {MOCK.map((m) => (
-        <MissionCard
-          key={m.id}
-          mission={m}
-          currentUserId="viewer"
-          isAuthenticated
-          canApplyMissions
-          mode="need"
-          onNavigateDetail={() => {}}
-          onPropose={() => {}}
-        />
-      ))}
+const PreviewMissionCards = () => {
+  if (!import.meta.env.DEV) return <Navigate to="/" replace />;
+  return (
+    <div className="min-h-screen bg-background p-8">
+      <Helmet><meta name="robots" content="noindex,nofollow" /></Helmet>
+      <h1 className="font-heading text-2xl mb-6">Preview MissionCard</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl">
+        {MOCK.map((m) => (
+          <MissionCard
+            key={m.id}
+            mission={m}
+            currentUserId="viewer"
+            isAuthenticated
+            canApplyMissions
+            mode="need"
+            onNavigateDetail={() => {}}
+            onPropose={() => {}}
+          />
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default PreviewMissionCards;

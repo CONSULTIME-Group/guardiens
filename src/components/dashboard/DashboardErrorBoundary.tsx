@@ -64,7 +64,7 @@ export class DashboardErrorBoundary extends Component<Props, State> {
     });
 
     try {
-      trackEvent("dashboard_error" as any, {
+      trackEvent("dashboard_error", {
         source: "/dashboard",
         metadata: {
           section: this.props.section,

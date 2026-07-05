@@ -8,10 +8,9 @@
  * so you can curl and see exactly what the Worker decided.
  */
 
-// PRERENDER_TOKEN est lu depuis env.PRERENDER_TOKEN (variable chiffrée Cloudflare)
-// Fallback hardcodé conservé temporairement au cas où la variable ne serait pas encore
-// déployée — À SUPPRIMER une fois la variable confirmée active en prod.
-const PRERENDER_TOKEN_FALLBACK = 'P7riC8MFdBNYlNYGa8oz';
+// PRERENDER_TOKEN est lu exclusivement depuis env.PRERENDER_TOKEN
+// (variable chiffrée Cloudflare Worker Secrets). Aucun fallback en clair.
+// Si absent, le Worker log un warning et sert l'origine sans prerender.
 const PRERENDER_SERVICE = 'https://service.prerender.io/';
 const PRERENDER_TIMEOUT_MS = 10000;
 
@@ -159,12 +158,9 @@ async function injectProfileJsonLd(originResponse, profileId) {
   }
 }
 
-// robots.txt servi en dur (rapide, fiable)
-const ROBOTS_TXT = `User-agent: *
-Allow: /
-
-Sitemap: https://guardiens.fr/sitemap.xml
-`;
+// robots.txt : servi par l'origine (public/robots.txt généré par scripts/generate-robots.mjs)
+// pour garantir que les Disallow des routes privées (/admin, /dashboard, /messages, /sits...)
+// soient bien exposés aux crawlers. Le Worker ne l'intercepte plus.
 
 export default {
   async fetch(request, env, ctx) {
@@ -186,18 +182,8 @@ export default {
       });
     }
 
-    // === Routes spéciales servies par le Worker ===
-    if (pathname === '/robots.txt') {
-      return new Response(ROBOTS_TXT, {
-        status: 200,
-        headers: {
-          'content-type': 'text/plain; charset=utf-8',
-          'cache-control': 'public, max-age=3600',
-          'x-prerender-worker': 'guardiens-prerender-v5',
-          'x-prerender-status': 'worker-served',
-        },
-      });
-    }
+    // /robots.txt : plus intercepté — laissé passer vers l'origine
+    // (public/robots.txt généré liste toutes les routes privées à Disallow).
 
     const { shouldPrerender, isBot, ua, reasons } = detectBot(request);
     const url = request.url;
@@ -224,7 +210,15 @@ export default {
     console.log('[Prerender] Bot — UA: "' + ua + '" — URL: ' + url);
 
     try {
-      const token = (env && env.PRERENDER_TOKEN) || PRERENDER_TOKEN_FALLBACK;
+      const token = env && env.PRERENDER_TOKEN;
+      if (!token) {
+        console.log('[Prerender] PRERENDER_TOKEN missing, falling back to origin without prerender');
+        const originResp = await fetchOrigin(request);
+        return withDiagHeaders(originResp, {
+          ...baseDiag,
+          'X-Prerender-Status': 'fallback-no-token',
+        });
+      }
       const prerenderResponse = await fetchPrerender(url, token);
 
       if (prerenderResponse.ok) {
