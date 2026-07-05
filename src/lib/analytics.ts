@@ -76,7 +76,11 @@ export type EventType =
   | "dashboard_draft_card_deleted"      // Suppression brouillon depuis dashboard (sit_id, days_since_created)
   | "sit_draft_saved_manually"          // Clic "Reprendre plus tard" dans /sits/create (sit_id)
   | "sit_draft_autosave_failed"         // Auto-save Supabase KO après 3 retries (sit_id, error_code)
-  | "sit_draft_resumed";                // Utilisateur atterrit sur /sits/create?resume=xxx et draft chargé (sit_id, days_since_created)
+  | "sit_draft_resumed"                // Utilisateur atterrit sur /sits/create?resume=xxx et draft chargé (sit_id, days_since_created)
+  // Hygiène ré-audit : events émis en prod, désormais typés -------------------
+  | "signup_terms_checked"             // CGU cochées (metadata.step: 1 | 2)
+  | "dashboard_error"                  // Erreur boundary dashboard (metadata.error_type, component?)
+  | "admin_ga4_diag_test";             // Test diagnostic GA4 admin (metadata.result: 'ok' | 'ko', message?)
 
 interface TrackOptions {
   source?: string;
