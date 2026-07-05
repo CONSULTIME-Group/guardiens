@@ -85,9 +85,15 @@ const PublicMissionView = ({
   responsesCount = 0,
 }: Props) => {
   const heroImage = mission.photos?.[0] || null;
-  const ogImage = mission.photos?.[0] || entraideHeader;
+  // Pas d'image OG générique : évite qu'une annonce sans photo affiche
+  // « alpinistes coucher de soleil » sur les partages.
+  const ogImage = mission.photos?.[0] || undefined;
   const cityLabel = titlecaseCity(mission.city) || "France";
   const redirect = `/petites-missions/${mission.id}`;
+  const CategoryIcon = CATEGORY_ICON[mission.category] || Sparkles;
+  const authorFirstName = author?.first_name
+    ? author.first_name.charAt(0).toUpperCase() + author.first_name.slice(1).toLowerCase()
+    : null;
 
   // Meta description contextuelle : on privilégie la vraie description,
   // sinon on fabrique une phrase spécifique (ville + catégorie + contrepartie)
@@ -102,6 +108,14 @@ const PublicMissionView = ({
     ].filter(Boolean);
     return parts.join(". ").slice(0, 155);
   })();
+
+  // Titre court (< 20 mots dans la description) → typo hero plus mesurée
+  // pour éviter l'effet « cathédrale sur un tabouret ».
+  const descLen = (mission.description || "").trim().split(/\s+/).filter(Boolean).length;
+  const isShortMission = descLen < 20;
+  const h1Class = isShortMission
+    ? "font-heading text-3xl md:text-4xl font-bold leading-[1.15] mb-6 text-foreground"
+    : "font-heading text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6 text-foreground";
 
   return (
     <div className="min-h-screen bg-background text-foreground animate-fade-in">
