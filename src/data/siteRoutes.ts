@@ -131,7 +131,7 @@ metaDescription: "Trouvez un gardien du coin pour votre maison et vos animaux. H
  {
  path: "/tarifs",
 title: "Tarifs Guardiens, gratuit aujourd'hui sans engagement | Guardiens",
- metaDescription: "6,99\u00A0€/mois pour les gardiens, sans engagement. À 0 € pour les propriétaires. Sans commission, sans frais cachés.",
+ metaDescription: "6,99\u00A0€/mois pour les gardiens, sans engagement. Gratuit pour les propriétaires. Sans commission, sans frais cachés.",
  h1: "Nos tarifs",
  sitemapPriority: "0.8",
  changeFreq: "weekly",
@@ -248,8 +248,8 @@ title: "Tarifs Guardiens, gratuit aujourd'hui sans engagement | Guardiens",
  },
  {
  path: "/inscription",
- title: "Inscription — Créer un compte à 0 € | Guardiens",
- metaDescription: "Rejoignez la communauté Guardiens. Inscription à 0 € pour les propriétaires, 6,99\u00A0€/mois pour les gardiens, sans engagement.",
+ title: "Inscription — Créer un compte gratuit | Guardiens",
+ metaDescription: "Rejoignez la communauté Guardiens. Inscription gratuit pour les propriétaires, 6,99\u00A0€/mois pour les gardiens, sans engagement.",
  h1: "Créer un compte",
  sitemapPriority: "0.6",
  changeFreq: "monthly",
@@ -344,7 +344,7 @@ export const dynamicRoutes: DynamicRouteConfig[] = [
  sampleParams: { slug: "nouveaux-tarifs-2026" },
  // Titre et description réels servis par la page (vérifiés strictement)
  sampleTitle: "Tarifs Guardiens 2026 | Guardiens",
- sampleDescription: "Les tarifs officiels Guardiens pour 2026 : 6,99\u00A0€/mois pour les gardiens avec 7 jours offerts, à 0 € pour les propriétaires. Sans commission ni frais cachés.",
+ sampleDescription: "Les tarifs officiels Guardiens pour 2026 : 6,99\u00A0€/mois pour les gardiens avec 7 jours offerts, gratuit pour les propriétaires. Sans commission ni frais cachés.",
  },
  {
  pathPattern: "/house-sitting/:city",

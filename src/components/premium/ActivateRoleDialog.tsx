@@ -91,7 +91,7 @@ const ActivateRoleDialog = ({ open, onClose, targetRole }: ActivateRoleDialogPro
               Vous avez aussi des animaux à faire garder ?
             </DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground text-center">
-              L'espace propriétaire est à 0 €. Activez-le en un clic pour publier des annonces et trouver un gardien près de chez vous.
+              L'espace propriétaire est gratuit. Activez-le en un clic pour publier des annonces et trouver un gardien près de chez vous.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-2 pt-2">

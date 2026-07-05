@@ -68,7 +68,7 @@ export default function CitySidebar({ city, sitters }: CitySidebarProps) {
             Vous partez bientôt ?
           </h3>
           <p className="text-sm text-primary-foreground/85 mb-4">
-            Publiez votre annonce en 2 minutes. C'est à 0 € pour les propriétaires.
+            Publiez votre annonce en 2 minutes. C'est gratuit pour les propriétaires.
           </p>
           <Link to="/inscription" className="block">
             <Button variant="secondary" className="w-full gap-2 font-semibold">

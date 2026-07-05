@@ -134,7 +134,7 @@ const DepartmentPage = () => {
  </Badge>
  <Badge variant="outline" className="text-base px-4 py-2 gap-2">
  <Heart className="h-4 w-4" />
- Inscription à 0 €
+ Inscription gratuite
  </Badge>
  </div>
 
@@ -239,9 +239,9 @@ const DepartmentPage = () => {
  <Card>
  <CardContent className="p-4 md:p-6">
  <Heart className="h-8 w-8 text-primary mb-3" />
- <h3 className="font-semibold text-foreground mb-2">À 0 € pour les propriétaires</h3>
+ <h3 className="font-semibold text-foreground mb-2">Gratuit pour les propriétaires</h3>
  <p className="text-sm text-muted-foreground">
- Inscription à 0 €. Pas de commission sur les gardes.
+ Inscription gratuite. Pas de commission sur les gardes.
  </p>
  </CardContent>
  </Card>
@@ -289,7 +289,7 @@ const DepartmentPage = () => {
  "@context": "https://schema.org",
  "@type": "Service",
  name: `Pet sitting & House sitting dans le ${page.department}`,
- description: `Service de garde d'animaux et house sitting à 0 € pour les propriétaires dans le ${page.department}. ${cityPages.length} villes couvertes. Gardiens vérifiés.`,
+ description: `Service de garde d'animaux et house sitting gratuit pour les propriétaires dans le ${page.department}. ${cityPages.length} villes couvertes. Gardiens vérifiés.`,
  provider: {
  "@type": "Organization",
  name: "Guardiens",
@@ -309,7 +309,7 @@ const DepartmentPage = () => {
  price: "0",
  priceCurrency: "EUR",
  eligibleCustomerType: "Owner",
- description: "À 0 € pour les propriétaires, sans abonnement requis.",
+ description: "Gratuit pour les propriétaires, sans abonnement requis.",
  },
  }),
  }}
@@ -336,7 +336,7 @@ const DepartmentPage = () => {
  name: `Le house sitting dans le ${page.department} est-il sans frais ?`,
  acceptedAnswer: {
  "@type": "Answer",
- text: "Oui, Guardiens est à 0 € pour les propriétaires. Le house sitting repose sur l'échange : le gardien loge sans frais en échange de la garde de vos animaux.",
+ text: "Oui, Guardiens est gratuit pour les propriétaires. Le house sitting repose sur l'échange : le gardien loge sans frais en échange de la garde de vos animaux.",
  },
  },
  ],

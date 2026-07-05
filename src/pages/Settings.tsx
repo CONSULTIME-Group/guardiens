@@ -827,21 +827,21 @@ const BillingSection = ({ user }: { user: any }) => {
       <div className="space-y-4">
         <div className="rounded-lg border border-border bg-muted/30 p-4">
           <p className="text-sm font-medium">Espace propriétaire</p>
-          <p className="text-xs text-muted-foreground mt-1">L'espace propriétaire est à 0 €.</p>
+          <p className="text-xs text-muted-foreground mt-1">L'espace propriétaire est gratuit.</p>
         </div>
 
         {isSitter && (
           <div className="rounded-lg border border-border bg-muted/30 p-4">
             <p className="text-sm font-medium">Espace gardien</p>
             <p className="text-xs text-muted-foreground mt-1">
-              À 0 € pour tous les gardiens jusqu'au 30 septembre 2026. Ensuite, abonnement standard à 6,99 € / mois.
+              Gratuit pour tous les gardiens jusqu'au aujourd'hui. Ensuite, abonnement standard à 6,99 € / mois.
             </p>
           </div>
         )}
 
         <div className="rounded-lg border border-border bg-muted/30 p-4">
           <p className="text-sm font-medium">Petites missions d'entraide</p>
-          <p className="text-xs text-muted-foreground mt-1">L'entraide est à 0 €, sans frais ni commission.</p>
+          <p className="text-xs text-muted-foreground mt-1">L'entraide est gratuite, sans frais ni commission.</p>
         </div>
 
         <div className="flex flex-wrap gap-2 pt-2">

@@ -54,10 +54,10 @@ const Cgs = () => {
           </p>
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">2.2 Services proposés</h3>
           <ul className="list-disc pl-6 space-y-1">
-            <li><strong className="text-foreground">Espace Propriétaire</strong> : publication d'annonces de garde, consultation des candidatures, messagerie interne, gestion des avis. Service entièrement à 0 €.</li>
+            <li><strong className="text-foreground">Espace Propriétaire</strong> : publication d'annonces de garde, consultation des candidatures, messagerie interne, gestion des avis. Service entièrement gratuit.</li>
             <li><strong className="text-foreground">Espace Gardien</strong> : consultation et candidature aux annonces, messagerie interne, profil enrichi, accès aux fonctionnalités complètes de la Plateforme. Service payant après la période de lancement.</li>
-            <li><strong className="text-foreground">Petites missions (entraide)</strong> : participation au système d'entraide communautaire, sans nuitée. Service entièrement à 0 € pour tous les membres.</li>
-            <li><strong className="text-foreground">Vérification d'identité</strong> : service optionnel de validation d'identité, à 0 €.</li>
+            <li><strong className="text-foreground">Petites missions (entraide)</strong> : participation au système d'entraide communautaire, sans nuitée. Service entièrement gratuit pour tous les membres.</li>
+            <li><strong className="text-foreground">Vérification d'identité</strong> : service optionnel de validation d'identité, gratuit.</li>
           </ul>
 
           {/* 3 */}
@@ -73,9 +73,9 @@ const Cgs = () => {
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-t border-border"><td className="p-2">Espace Propriétaire</td><td className="p-2">À 0 €, sans carte bancaire requise</td><td className="p-2">Aucun</td></tr>
+                <tr className="border-t border-border"><td className="p-2">Espace Propriétaire</td><td className="p-2">Gratuit, sans carte bancaire requise</td><td className="p-2">Aucun</td></tr>
                 <tr className="border-t border-border"><td className="p-2">Espace Gardien (standard)</td><td className="p-2">6,99&nbsp;€ TTC/mois</td><td className="p-2">Sans engagement, résiliable à tout moment</td></tr>
-                <tr className="border-t border-border"><td className="p-2">Petites missions (entraide)</td><td className="p-2">À 0 € pour tous les membres</td><td className="p-2">Aucun</td></tr>
+                <tr className="border-t border-border"><td className="p-2">Petites missions (entraide)</td><td className="p-2">Gratuit pour tous les membres</td><td className="p-2">Aucun</td></tr>
               </tbody>
             </table>
           </div>

@@ -5,19 +5,19 @@ interface FreeTickerChipProps {
   /** Variante d'affichage : sur fond sombre (hero) ou sur fond clair */
   variant?: "onDark" | "onLight";
   className?: string;
-  /** Texte affiché hors période de accès à 0 € (fallback). Si null, ne rend rien. */
+  /** Texte affiché hors période de accès gratuit (fallback). Si null, ne rend rien. */
   fallback?: string | null;
 }
 
 /**
- * Petit "ticker" discret rappelant la accès à 0 € en cours sans engagement.
+ * Petit "ticker" discret rappelant la accès gratuit en cours sans engagement.
  * - Pendant la période : pastille pulsée + texte daté.
- * - Hors période : optionnel fallback (ex. "À 0 € pour les propriétaires").
+ * - Hors période : optionnel fallback (ex. "Gratuit pour les propriétaires").
  */
 export const FreeTickerChip = ({
   variant = "onDark",
   className = "",
-  fallback = "À 0 € pour les propriétaires",
+  fallback = "Gratuit pour les propriétaires",
 }: FreeTickerChipProps) => {
   // Pivot pricing sans deadline : composant désactivé tant que PRICING_IS_ACTIVE = false.
   if (!isPricingActive()) return null;
@@ -60,7 +60,7 @@ export const FreeTickerChip = ({
         <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
       </span>
       <span className="font-body text-xs tracking-wide">
-        <span className="font-semibold">À 0 € pour tous</span>
+        <span className="font-semibold">Gratuit pour tous</span>
         <span className="opacity-85"> · jusqu'au {lastDayLabel}</span>
       </span>
     </div>
