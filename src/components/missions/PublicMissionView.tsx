@@ -7,10 +7,9 @@ import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import RelatedMissionCard from "@/components/missions/RelatedMissionCard";
 import { Helmet } from "react-helmet-async";
 
-// Bannière générique "entraide" : conservée uniquement en dernier recours OG image,
-// jamais rendue en hero visible (elle rendait toutes les annonces sans photo identiques).
-const entraideHeader =
-  "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/entraide-header.webp";
+// (Pas de bannière de fallback : une annonce sans photo ne doit PAS
+// afficher une image générique qui rendrait toutes les annonces
+// identiques ou pire, trompeuse au partage social.)
 
 interface CatMeta {
   label: string;
