@@ -623,7 +623,8 @@ const EntraideHub = () => {
                           <li key={m.id}>
                             <Link
                               to={`/petites-missions/${m.id}`}
-                              className="flex gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all"
+                              aria-label={`Voir la mission : ${m.title}${m.city ? `, ${m.city}` : ""}`}
+                              className="flex gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                             >
                               {Array.isArray(m.photos) && m.photos.length > 0 && (
                                 <MissionCardCover
