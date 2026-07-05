@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { trackEvent } from "@/lib/analytics";
 
 export default function MyProProfile() {
   const { user } = useAuth();
