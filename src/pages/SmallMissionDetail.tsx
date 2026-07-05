@@ -1506,11 +1506,12 @@ const SmallMissionDetail = () => {
             size="lg"
             className="w-full rounded-full font-bold text-base shadow-lg shadow-primary/20"
             onClick={() => {
-              const el = document.getElementById("proposer-aide");
-              el?.scrollIntoView({ behavior: "smooth", block: "start" });
+              const el = document.getElementById("composer");
+              el?.scrollIntoView({ behavior: "smooth", block: "center" });
+              setTimeout(() => document.getElementById("composer-textarea")?.focus(), 400);
             }}
           >
-            {(mission as any).mission_type === "offre" ? "Solliciter cette aide" : "Proposer mon aide"}
+            {(mission as any).mission_type === "offre" ? "Solliciter cette aide" : "Répondre publiquement"}
           </Button>
         </div>
       )}
