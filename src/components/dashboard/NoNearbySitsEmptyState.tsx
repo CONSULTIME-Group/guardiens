@@ -68,19 +68,33 @@ const NoNearbySitsEmptyState = ({
         p_radius_km: currentRadius,
         p_departement: null,
         p_region_code: null,
-        p_alert_types: ["gardes"],
+        p_alert_types: ["gardes", "new_sit"],
         p_heure_envoi: "08:00",
         p_frequence: "quotidien",
       });
       if (error) throw error;
+
+      // Active en parallèle le digest quotidien pour cohérence : le gardien
+      // qui active une alerte reçoit aussi le digest 20h.
+      await supabase
+        .from("email_preferences")
+        .upsert(
+          { user_id: user.id, new_sit_digest: true },
+          { onConflict: "user_id" },
+        );
+
       setAlertActive(true);
       toast({
         title: "Alerte activée",
-        description: "Vous serez alerté par email dès qu'une annonce est publiée près de chez vous.",
+        description: `Chaque soir à 20h, si des annonces matchent votre profil dans un rayon de ${currentRadius} km, vous recevez un digest par email.`,
       });
       void trackEvent("sitter_alert_subscribed", {
         source: "dashboard_empty_state",
-        metadata: { type: "new_sit_in_radius", radius_km: currentRadius },
+        metadata: { type: "new_sit_in_radius", radius_km: currentRadius, digest_enabled: true },
+      });
+      void trackEvent("sitter_alert_confirmation_seen", {
+        source: "dashboard_empty_state",
+        metadata: { radius_km: currentRadius },
       });
     } catch (e: any) {
       toast({

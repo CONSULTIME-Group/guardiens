@@ -89,6 +89,13 @@ export type EventType =
   | "sitter_alert_subscribed"          // Inscription alerte (type, radius_km)
   | "sitter_alert_modify_radius"       // Modification du rayon (old_km, new_km)
   | "sitter_secondary_card_clicked"    // Clic carte secondaire (type: missions|breeds|guides)
+  | "sitter_alert_confirmation_seen"   // Toast/message post-inscription alerte (radius_km)
+  | "sitter_next_digest_card_seen"     // Carte "prochain digest" sur dashboard gardien
+  | "sitter_digest_sent"               // Envoi digest quotidien (sitter_id, sits_count, email_id?)
+  | "sitter_digest_opened"             // Ouverture email digest (sitter_id, email_id?)
+  | "sitter_digest_cta_clicked"        // Clic CTA "Postuler en 1 clic" (sitter_id, sit_id, position, affinity_score, email_id?)
+  | "sitter_digest_apply_from_email"   // Candidature depuis digest (sitter_id, sit_id, email_id?)
+  | "sitter_digest_optin_toggled"      // Toggle opt-in dans /email-preferences (enabled)
   // Pivot pricing "gratuit sans deadline" -----------------------------------
   | "pricing_baseline_seen"            // Impression du bloc éditorial baseline (surface: tarifs|landing_faq|my_subscription|observatoire)
   | "pricing_faq_expanded"             // Ouverture d'une question de la FAQ tarifs (question_id)
