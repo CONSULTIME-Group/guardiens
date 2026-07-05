@@ -88,7 +88,10 @@ export type EventType =
   | "sitter_no_nearby_empty_state_seen" // 1×/session (total_published, radius_km)
   | "sitter_alert_subscribed"          // Inscription alerte (type, radius_km)
   | "sitter_alert_modify_radius"       // Modification du rayon (old_km, new_km)
-  | "sitter_secondary_card_clicked";   // Clic carte secondaire (type: missions|breeds|guides)
+  | "sitter_secondary_card_clicked"    // Clic carte secondaire (type: missions|breeds|guides)
+  // Pivot pricing "gratuit sans deadline" -----------------------------------
+  | "pricing_baseline_seen"            // Impression du bloc éditorial baseline (surface: tarifs|landing_faq|my_subscription|observatoire)
+  | "pricing_faq_expanded";            // Ouverture d'une question de la FAQ tarifs (question_id)
 
 interface TrackOptions {
   source?: string;
