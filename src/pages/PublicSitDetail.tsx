@@ -19,6 +19,7 @@ import { fr } from "date-fns/locale";
 import { trackEvent } from "@/lib/analytics";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { logger } from "@/lib/logger";
+import { captureDigestAttribution } from "@/lib/digestAttribution";
 
 import ApplicationModal from "@/components/sits/ApplicationModal";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
@@ -227,12 +228,26 @@ const PublicSitDetail = () => {
 
         if (!sitViewFired.current) {
           sitViewFired.current = true;
+          const attr = captureDigestAttribution(id);
           try {
             trackEvent("sit_view", {
               source: "/annonces/:id",
-              metadata: { sit_id: id, viewer_type: resolvedViewer },
+              metadata: {
+                sit_id: id,
+                viewer_type: resolvedViewer,
+                from_digest: !!attr,
+                digest_email_id: attr?.email_id ?? null,
+              },
             });
           } catch {}
+          if (attr) {
+            try {
+              trackEvent("sitter_digest_cta_clicked", {
+                source: "/annonces/:id",
+                metadata: { sit_id: id, email_id: attr.email_id ?? null },
+              });
+            } catch {}
+          }
         }
       } catch (e: any) {
         logger.warn("[PublicSitDetail] load failed", { sit_param: param, error: e?.message });
