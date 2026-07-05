@@ -1273,7 +1273,7 @@ const SmallMissionDetail = () => {
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Propositions</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Réponses</p>
                     <p className="font-heading text-lg font-bold text-foreground leading-none">
                       {responses.length}
                     </p>
