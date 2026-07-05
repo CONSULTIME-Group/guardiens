@@ -196,7 +196,7 @@ const CreateSit = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const fromSitId = searchParams.get("from");
-  const draftIdParam = searchParams.get("draftId");
+  const draftIdParam = searchParams.get("draftId") || searchParams.get("resume");
 
   const [currentStep, setCurrentStep] = useState(0);
   const [sitLocation, setSitLocation] = useState<"home" | "away" | null>(null);
