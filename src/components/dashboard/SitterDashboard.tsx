@@ -58,6 +58,18 @@ const SitterDashboard = () => {
     reputation, groupedBadges,
   } = useSitterDashboardData(user?.id);
 
+  // NBA nouveau gardien : score d'affinité + fallback empty state.
+  // Le hook est appelé inconditionnellement (règle des hooks). Il ne fetche
+  // que si userId présent (cf. `enabled` du useQuery).
+  const isNewSitter = useIsNewSitter({ totalApps: totalApps ?? 0, completedSits: completedSits ?? 0 });
+  const {
+    topSits,
+    hasMinimumPool,
+    hasPostalCode,
+    totalPublished,
+    isLoading: nbaLoading,
+  } = useSitterTopAffinitySits();
+
   if (loading) return <SitterDashboardSkeleton />;
 
   // (Sous-titre dynamique supprimé : redondant avec le titre de la
