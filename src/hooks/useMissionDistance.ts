@@ -133,23 +133,45 @@ export function useMissionDistance(missions: MissionLike[]) {
   }, [origin, missions]);
 
   /* Géoloc navigateur → pose l'origine {lat,lng} directement.
-     Le CP reste vide en UI (pas de reverse-geocode), mais tri et filtre marchent. */
-  const useMyLocation = useCallback((): Promise<boolean> => {
+     Le CP reste vide en UI (pas de reverse-geocode), mais tri et filtre marchent.
+     Retourne un résultat typé pour permettre à l'UI d'afficher un message clair
+     et un fallback (saisie manuelle du code postal). */
+  const useMyLocation = useCallback((): Promise<GeolocationResult> => {
     return new Promise((resolve) => {
       if (typeof navigator === "undefined" || !navigator.geolocation) {
-        resolve(false);
+        resolve({ ok: false, reason: "unsupported" });
         return;
       }
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setPostalState("");
-          writeLS(LS_POSTAL, null);
-          setOrigin({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-          resolve(true);
-        },
-        () => resolve(false),
-        { enableHighAccuracy: false, timeout: 8000, maximumAge: 60_000 },
-      );
+      // Certains navigateurs (Safari, contextes non-HTTPS) exposent l'API
+      // mais rejettent aussitôt. On garde une seule voie de sortie.
+      let settled = false;
+      const done = (r: GeolocationResult) => {
+        if (settled) return;
+        settled = true;
+        resolve(r);
+      };
+      try {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            setPostalState("");
+            writeLS(LS_POSTAL, null);
+            setOrigin({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+            done({ ok: true });
+          },
+          (err) => {
+            const reason: GeolocationErrorReason =
+              err.code === err.PERMISSION_DENIED
+                ? "denied"
+                : err.code === err.TIMEOUT
+                  ? "timeout"
+                  : "unavailable";
+            done({ ok: false, reason });
+          },
+          { enableHighAccuracy: false, timeout: 8000, maximumAge: 60_000 },
+        );
+      } catch {
+        done({ ok: false, reason: "unavailable" });
+      }
     });
   }, []);
 
