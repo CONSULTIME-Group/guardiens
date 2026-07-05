@@ -143,6 +143,23 @@ const AdminMassEmails = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmInput, setConfirmInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [activePreset, setActivePreset] = useState<string>("oser");
+
+  const applyPreset = useCallback((key: string) => {
+    const p = CAMPAIGN_PRESETS.find((x) => x.key === key);
+    if (!p) return;
+    setSegment(p.segment);
+    setFilters(p.filters);
+    setSubject(p.subject);
+    setBody(p.body);
+    setCtaEnabled(p.ctaEnabled);
+    setCtaLabel(p.ctaLabel);
+    setCtaUrl(p.ctaUrl);
+    setUtmEnabled(p.utmEnabled);
+    setUtmCampaign(p.utmCampaign);
+    setUtmContent(p.utmContent);
+    setActivePreset(key);
+  }, []);
 
   // History
   const [history, setHistory] = useState<MassEmail[]>([]);
