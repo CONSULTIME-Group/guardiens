@@ -102,7 +102,10 @@ export type EventType =
   | "pro_verified_badge_seen"            // Impression du badge Vérifié (pro_id, surface: 'detail'|'card_annuaire'|'card_listing')
   | "pros_filter_verified_toggled"       // Toggle filtre "Vérifiés uniquement" (enabled, category, ville)
   | "pro_admin_verification_toggled"     // Admin toggle SIRET vérifié (pro_id, verified, admin_id)
-  | "pro_verification_request_clicked";  // Pro demande la vérification depuis son espace (pro_id)
+  | "pro_verification_request_clicked"    // Pro demande la vérification depuis son espace (pro_id)
+  // Landing InventoryStrip (chiffres du réseau) -----------------------------
+  | "inventory_strip_seen"                // Impression bandeau chiffres du réseau (1x/session)
+  | "inventory_strip_cta_clicked";        // Clic CTA "Voir l'observatoire complet" (destination)
 
 interface TrackOptions {
   source?: string;
