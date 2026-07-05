@@ -136,7 +136,11 @@ const CreateSmallMission = () => {
   };
 
   /* Step 1 validation */
-  const step1Valid = title.trim().length >= 3 && description.trim().length >= 10 && exchangeOffer.trim().length >= 2 && !exchangeError;
+  const step1Valid =
+    title.trim().length >= MIN_TITLE_LEN &&
+    description.trim().length >= MIN_DESC_LEN &&
+    exchangeOffer.trim().length >= 2 &&
+    !exchangeError;
 
   const handleNextStep = () => {
     setTitleTouched(true);
@@ -154,13 +158,30 @@ const CreateSmallMission = () => {
       toast({ title: tp("toast_required_title"), description: tp("toast_required_desc"), variant: "destructive" });
       return;
     }
+    // Garde-fous côté client : évite d'insérer une annonce trop courte
+    // même si l'utilisateur skippe la validation Step 1 (retour arrière + submit).
+    if (title.trim().length < MIN_TITLE_LEN || description.trim().length < MIN_DESC_LEN) {
+      toast({
+        title: "Annonce trop courte",
+        description: `Titre ≥ ${MIN_TITLE_LEN} caractères, description ≥ ${MIN_DESC_LEN} caractères.`,
+        variant: "destructive",
+      });
+      setStep(1);
+      setTitleTouched(true);
+      setDescTouched(true);
+      return;
+    }
     setSubmitting(true);
     let coords: { lat: number; lng: number } | null = null;
     try { coords = await geocodeCity(city.trim()); } catch { coords = null; }
 
+    // Titre nettoyé (capitalisation, espaces, fautes fréquentes) au save
+    // pour normaliser à la source.
+    const cleanTitle = sanitizeUserTitle(title) || title.trim();
+
     const { data: inserted, error } = await supabase.from("small_missions").insert({
       user_id: user.id,
-      title: title.trim(),
+      title: cleanTitle,
       description: description.trim(),
       category: category as any,
       mission_type: missionType,
