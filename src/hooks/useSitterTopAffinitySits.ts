@@ -72,17 +72,18 @@ export function useSitterTopAffinitySits(): Result {
 
       // 3. Pool candidat
       const todayIso = new Date().toISOString().slice(0, 10);
-      const { data: sits } = await supabase
+      const sitsRes: any = await supabase
         .from("sits")
-        .select("id, title, city, start_date, end_date, cover_photo_url, user_id")
+        .select("id, title, city, start_date, end_date, cover_photo_url, user_id, property_id")
         .eq("status", "published")
         .eq("accepting_applications", true)
         .gte("end_date", todayIso)
         .neq("user_id", userId!)
         .order("created_at", { ascending: false })
         .limit(30);
+      const sits: any[] = sitsRes.data ?? [];
 
-      if (!sits || sits.length === 0 || !sitter) {
+      if (sits.length === 0 || !sitter) {
         return {
           topSits: [] as AffinitySitCard[],
           totalPublished: totalPublished ?? 0,
@@ -91,11 +92,13 @@ export function useSitterTopAffinitySits(): Result {
       }
 
       const ownerIds = Array.from(new Set(sits.map((s) => s.user_id).filter(Boolean))) as string[];
+      const propertyIds = Array.from(new Set(sits.map((s) => s.property_id).filter(Boolean))) as string[];
 
-      // Owners (prénom, prefs) + pets
-      const [ownersRes, petsRes, ownerProfilesRes] = await Promise.all([
+      const [ownersRes, petsRes, ownerProfilesRes]: any[] = await Promise.all([
         supabase.from("profiles").select("id, first_name").in("id", ownerIds),
-        supabase.from("pets").select("user_id, species, special_needs").in("user_id", ownerIds),
+        propertyIds.length > 0
+          ? supabase.from("pets").select("property_id, species, special_needs").in("property_id", propertyIds)
+          : Promise.resolve({ data: [] }),
         supabase
           .from("owner_profiles")
           .select("user_id, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected")
@@ -105,11 +108,11 @@ export function useSitterTopAffinitySits(): Result {
       const firstNameByOwner = new Map<string, string | null>(
         (ownersRes.data ?? []).map((p: any) => [p.id, p.first_name ?? null]),
       );
-      const petsByOwner = new Map<string, { species: string | null; special_needs: string | null }[]>();
-      for (const p of petsRes.data ?? []) {
-        const arr = petsByOwner.get(p.user_id) ?? [];
+      const petsByProperty = new Map<string, { species: string | null; special_needs: string | null }[]>();
+      for (const p of (petsRes.data ?? []) as any[]) {
+        const arr = petsByProperty.get(p.property_id) ?? [];
         arr.push({ species: p.species, special_needs: p.special_needs });
-        petsByOwner.set(p.user_id, arr);
+        petsByProperty.set(p.property_id, arr);
       }
       const ownerPrefsById = new Map<string, any>(
         (ownerProfilesRes.data ?? []).map((o: any) => [o.user_id, o]),
