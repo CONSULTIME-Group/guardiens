@@ -43,7 +43,7 @@ Guardiens est gratuit pour les propriétaires. Les gardiens accèdent au service
 - Plateforme : Guardiens, garde d'animaux à domicile en France.
 - Éditeur : Jérémie Martinot, SIRET 894 864 040 00015.
 - Modèle : gratuit pour les propriétaires d'animaux, sans commission ni frais cachés.
-- Abonnement gardien : 6,99 €/mois ou 12 € en one-shot, sans engagement.
+- Abonnement gardien : 6,99 €/mois, 65 €/an, ou 10 € pour un mois en oneshot, sans engagement.
 - Période de gratuité totale : tous les gardiens sont gratuits jusqu'au 30 septembre 2026.
 - Entraide entre membres (petites missions du quotidien) : gratuite, sans nuitée, sans transaction financière.
 - Vérification : pièce d'identité vérifiée manuellement pour chaque gardien.
