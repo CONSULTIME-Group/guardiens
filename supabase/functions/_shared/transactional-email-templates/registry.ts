@@ -56,6 +56,7 @@ import { template as proProfileRejected } from './pro-profile-rejected.tsx'
 import { template as summerListingReminder } from './summer-listing-reminder.tsx'
 import { template as sitterMutualAidInvite } from './sitter-mutual-aid-invite.tsx'
 import { template as analysisRequestsDigest } from './analysis-requests-digest.tsx'
+import { template as sitDraftReminder } from './sit-draft-reminder.tsx'
 
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
