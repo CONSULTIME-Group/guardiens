@@ -519,6 +519,7 @@ const OwnerSitView = ({
       {/* Post-confirmation checklist */}
       {(sit.status === "confirmed" || sit.status === "in_progress") && (
         <div className="mb-8">
+          <AccordOwnerStatusBanner sitId={sit.id} sitStatus={sit.status} />
           <PostConfirmationChecklist
             sitId={sit.id}
             sitOwnerId={sit.user_id}
