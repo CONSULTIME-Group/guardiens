@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { logger } from "@/lib/logger";
+import { trackEvent } from "@/lib/analytics";
 import FounderBadge from "@/components/badges/FounderBadge";
 import AccordDeGarde from "@/components/gardes/AccordDeGarde";
 import { Link } from "react-router-dom";
