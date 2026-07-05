@@ -144,11 +144,14 @@ const PublicMissionView = ({
       </Helmet>
 
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        {/* Breadcrumb */}
+        {/* Breadcrumb (avec maillon ville pour le SEO local) */}
         <div className="mb-8">
           <PageBreadcrumb
             items={[
               { label: "Coups de main", href: "/petites-missions" },
+              ...(mission.city
+                ? [{ label: cityLabel, href: `/petites-missions?city=${encodeURIComponent(mission.city)}` }]
+                : []),
               { label: mission.title },
             ]}
           />
@@ -159,8 +162,9 @@ const PublicMissionView = ({
           <article className="lg:col-span-8 min-w-0">
             <header className="mb-10">
               <div className="flex items-center gap-3 mb-6 flex-wrap">
-                <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-widest uppercase">
-                  Entraide · {catMeta.label}
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-widest uppercase">
+                  <CategoryIcon className="h-3 w-3" />
+                  {catMeta.label}
                 </span>
                 <Button
                   variant="outline"
@@ -172,9 +176,7 @@ const PublicMissionView = ({
                   <Share2 className="h-3.5 w-3.5" /> Partager
                 </Button>
               </div>
-              <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6 text-foreground">
-                {mission.title}
-              </h1>
+              <h1 className={h1Class}>{mission.title}</h1>
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-base text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-foreground/30" />
@@ -191,10 +193,29 @@ const PublicMissionView = ({
                   </div>
                 )}
               </div>
+              {/* Preuve sociale légère */}
+              {(viewCount > 0 || responsesCount > 0) && (
+                <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                  {viewCount > 0 && (
+                    <span className="inline-flex items-center gap-1.5">
+                      <Eye className="h-3.5 w-3.5" />
+                      {viewCount} {viewCount > 1 ? "vues" : "vue"}
+                    </span>
+                  )}
+                  {responsesCount > 0 && (
+                    <span className="inline-flex items-center gap-1.5">
+                      <Users className="h-3.5 w-3.5" />
+                      {responsesCount} {responsesCount > 1 ? "propositions" : "proposition"} d'aide
+                    </span>
+                  )}
+                </div>
+              )}
             </header>
 
-            {/* Image principale — masquée si aucune photo pour éviter
-                la bannière générique répétée d'une annonce à l'autre. */}
+            {/* Image principale : uniquement si photo réelle fournie.
+                Sinon on ne montre AUCUNE image (pas de fallback trompeur
+                type « alpinistes coucher de soleil » ou bannière générique
+                qui rendait toutes les annonces identiques). */}
             {heroImage && (
               <div className="mb-12 rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
                 <img
