@@ -218,7 +218,7 @@
     },
     "final": {
       "badge_program": "Founder Programme",
-      "badge_offer": "Badge offered before July 14, 2026",
+      "badge_offer": "Founder badge offered",
       "title": "Your next story begins here.",
       "lede": "You will leave with peace of mind. You will return with something else, a discovered corner, a meeting, someone you would never have crossed paths with.",
       "cta_owner": "Publish my listing",
@@ -333,7 +333,7 @@
       "annual_equiv": "Either ~{{equiv}} €/month equivalent · Saving of {{savings}} €/year",
       "cta_become_sitter": "Become a sitter",
       "cta_oneshot": "Access for one month, €10",
-      "cta_monthly": "Subscribe, €6.99/month",
+      "cta_monthly": "Access for free",
       "cta_annual": "Choose annual, €65/year",
       "opening_checkout": "Opening payment…",
       "note_before": "No credit card requested.",
