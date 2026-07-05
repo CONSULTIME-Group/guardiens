@@ -71,9 +71,16 @@ export default function ProCategoryListing() {
   }, [villeSlug, allCitiesForCat]);
 
   const filtered = useMemo(() => {
-    if (!villeSlug) return pros;
-    return pros.filter((p) => p.city && citySlugify(p.city) === villeSlug);
-  }, [pros, villeSlug]);
+    let list = pros;
+    if (villeSlug) list = list.filter((p) => p.city && citySlugify(p.city) === villeSlug);
+    if (verifiedOnly) list = list.filter((p) => p.siret_verified);
+    return list;
+  }, [pros, villeSlug, verifiedOnly]);
+
+  const verifiedCount = useMemo(
+    () => (villeSlug ? pros.filter((p) => p.city && citySlugify(p.city) === villeSlug) : pros).filter((p) => p.siret_verified).length,
+    [pros, villeSlug],
+  );
 
   if (!category) {
     return (
