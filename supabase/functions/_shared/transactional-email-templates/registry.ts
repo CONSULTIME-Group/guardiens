@@ -107,5 +107,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'summer-listing-reminder': summerListingReminder,
   'sitter-mutual-aid-invite': sitterMutualAidInvite,
   'analysis-requests-digest': analysisRequestsDigest,
+  'sit-draft-reminder': sitDraftReminder,
 }
 
