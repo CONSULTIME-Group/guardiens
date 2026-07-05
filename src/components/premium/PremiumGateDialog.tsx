@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Crown } from "lucide-react";
-import { isBeforeLaunch, isInGracePeriod } from "@/lib/constants";
 import { trackCtaClick } from "@/lib/analytics";
 
 interface PremiumGateDialogProps {

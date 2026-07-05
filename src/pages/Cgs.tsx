@@ -74,7 +74,7 @@ const Cgs = () => {
               </thead>
               <tbody>
                 <tr className="border-t border-border"><td className="p-2">Espace Propriétaire</td><td className="p-2">Gratuit, sans carte bancaire requise</td><td className="p-2">Aucun</td></tr>
-                <tr className="border-t border-border"><td className="p-2">Espace Gardien (standard)</td><td className="p-2">6,99&nbsp;€ TTC/mois</td><td className="p-2">Sans engagement, résiliable à tout moment</td></tr>
+                <tr className="border-t border-border"><td className="p-2">Espace Gardien (standard)</td><td className="p-2">Gratuit aujourd'hui, sans engagement</td><td className="p-2">Sans engagement, résiliable à tout moment</td></tr>
                 <tr className="border-t border-border"><td className="p-2">Petites missions (entraide)</td><td className="p-2">Gratuit pour tous les membres</td><td className="p-2">Aucun</td></tr>
               </tbody>
             </table>

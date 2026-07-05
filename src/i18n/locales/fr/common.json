@@ -282,7 +282,7 @@
     },
     "grace": {
       "title": "Les Fondateurs ont jusqu'au {{date}}",
-      "text": "Les premiers membres conservent leur accès gratuit jusqu'au {{date}}. Après cette date, l'abonnement à {{price}} sera nécessaire pour les gardiens. Le badge Fondateur reste affiché sur votre profil."
+      "text": "Les premiers membres bénéficient d'un accès gratuit, sans engagement. Le badge Fondateur reste affiché sur votre profil."
     },
     "owner_card": {
       "badge": "Toujours gratuit",
@@ -334,7 +334,7 @@
       "cta_become_sitter": "Devenir gardien",
       "cta_oneshot": "Accéder un mois, 10 €",
       "cta_monthly": "Accéder gratuitement",
-      "cta_annual": "Choisir l'annuel, 65 €/an",
+      "cta_annual": "Choisir l'annuel",
       "opening_checkout": "Ouverture du paiement…",
       "note_before": "Aucune carte bancaire demandée.",
       "note_visitor": "Inscription gratuite. Aucune carte bancaire avant la souscription d'une formule.",

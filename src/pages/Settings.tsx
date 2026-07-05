@@ -834,7 +834,7 @@ const BillingSection = ({ user }: { user: any }) => {
           <div className="rounded-lg border border-border bg-muted/30 p-4">
             <p className="text-sm font-medium">Espace gardien</p>
             <p className="text-xs text-muted-foreground mt-1">
-              Gratuit pour tous les gardiens jusqu'au aujourd'hui. Ensuite, abonnement standard à 6,99 € / mois.
+              L'espace gardien est gratuit aujourd'hui, sans engagement. Vous serez prévenu à l'avance en cas d'évolution tarifaire.
             </p>
           </div>
         )}
