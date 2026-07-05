@@ -239,18 +239,18 @@ const PublicMissionView = ({
                       {author.avatar_url ? (
                         <img
                           src={author.avatar_url}
-                          alt={author.first_name || "Auteur"}
+                          alt={authorFirstName || "Auteur"}
                           className="w-16 h-16 rounded-full object-cover border-2 border-background shadow-sm"
                         />
                       ) : (
                         <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center font-heading text-xl font-bold text-foreground">
-                          {author.first_name?.charAt(0) || "?"}
+                          {authorFirstName?.charAt(0) || "?"}
                         </div>
                       )}
                     </div>
                     <div className="min-w-0">
                       <p className="text-lg font-semibold text-foreground flex items-center gap-2 flex-wrap">
-                        Proposé par {author.first_name || "un membre"}
+                        Proposé par {authorFirstName || "un membre"}
                         {author.identity_verified && (
                           <span
                             className="inline-flex items-center gap-1 text-xs font-medium text-success bg-success-soft px-2 py-0.5 rounded-full"
