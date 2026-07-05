@@ -144,12 +144,24 @@ const formatRelative = (iso: string) => {
   }
 };
 
+const DURATION_LABEL: Record<string, string> = {
+  quick: "Moins d'1 h",
+  short: "1 à 2 h",
+  medium: "Une demi-journée",
+  long: "Une journée",
+  several: "Plusieurs jours",
+};
+
 const EntraideHub = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [params, setParams] = useSearchParams();
 
-  const initialTab = (params.get("tab") as Tab) || "besoins";
+  // Deep link : ?mode=offer → tab=offres, ?mode=need → tab=besoins
+  const modeParam = params.get("mode");
+  const mappedFromMode: Tab | null =
+    modeParam === "offer" ? "offres" : modeParam === "need" ? "besoins" : null;
+  const initialTab = mappedFromMode || (params.get("tab") as Tab) || "besoins";
   const [tab, setTab] = useState<Tab>(VALID_TABS.includes(initialTab) ? initialTab : "besoins");
 
   /* Onglet Questions */
