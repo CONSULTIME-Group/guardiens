@@ -266,6 +266,9 @@ const EntraideHub = () => {
     supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null));
   }, []);
 
+  /* Filtre proximité (CP + rayon) */
+  const proximity = useMissionDistance(missions);
+
   const sortMissions = (arr: MissionRow[]): MissionRow[] => {
     if (mSort === "date_needed") {
       return [...arr].sort((a, b) => {
@@ -273,6 +276,16 @@ const EntraideHub = () => {
         if (!a.date_needed) return 1;
         if (!b.date_needed) return -1;
         return a.date_needed.localeCompare(b.date_needed);
+      });
+    }
+    if (mSort === "distance" && proximity.active) {
+      return [...arr].sort((a, b) => {
+        const da = proximity.getDistance(a.id);
+        const db = proximity.getDistance(b.id);
+        if (da == null && db == null) return 0;
+        if (da == null) return 1;
+        if (db == null) return -1;
+        return da - db;
       });
     }
     return arr;
@@ -285,11 +298,15 @@ const EntraideHub = () => {
       if (mStatus !== "all" && m.status !== mStatus) return false;
       if (mCategory !== "all" && m.category !== mCategory) return false;
       if (mineOnly && currentUserId && m.user_id !== currentUserId) return false;
+      if (proximity.active) {
+        const d = proximity.getDistance(m.id);
+        if (d == null || d > proximity.radius) return false;
+      }
       return true;
     });
     return sortMissions(filtered);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [missions, tab, mCategory, mStatus, mineOnly, currentUserId, mSort]);
+  }, [missions, tab, mCategory, mStatus, mineOnly, currentUserId, mSort, proximity.active, proximity.radius, proximity.getDistance]);
 
   const visibleMissions = filteredMissions.slice(0, visibleCount);
 
