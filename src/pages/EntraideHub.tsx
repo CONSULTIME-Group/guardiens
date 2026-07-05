@@ -427,14 +427,14 @@ const EntraideHub = () => {
                   className={`min-w-0 rounded-xl px-2 sm:px-3 py-2 border text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${
                     isActive
                       ? `${a.active} shadow-sm`
-                      : "border-transparent text-foreground/65 hover:text-foreground hover:bg-background/60"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:bg-background/60"
                   }`}
                 >
                   <span className="truncate">{TAB_META[t].short}</span>
                   {total > 0 && (
                     <span
                       className={`shrink-0 text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full font-medium tabular-nums ${
-                        isActive ? a.pill : "bg-background/80 text-foreground/60"
+                        isActive ? a.pill : "bg-background/80 text-muted-foreground"
                       }`}
                       aria-label={showRatio ? `${filtered} affichés sur ${total} au total` : `${total} au total`}
                     >
@@ -459,7 +459,7 @@ const EntraideHub = () => {
                 className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
                   mineOnly
                     ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-card text-foreground/70 border-border hover:bg-accent"
+                    : "bg-card text-muted-foreground border-border hover:bg-accent"
                 }`}
               >
                 {mineOnly ? "Mes publications ✓" : "Mes publications"}
@@ -486,7 +486,7 @@ const EntraideHub = () => {
                         className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
                           qStatus === s
                             ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-card text-foreground/70 border-border hover:bg-accent"
+                            : "bg-card text-muted-foreground border-border hover:bg-accent"
                         }`}
                       >
                         {s === "all" ? "Toutes" : s === "open" ? "Ouvertes" : "Résolues"}
@@ -496,7 +496,7 @@ const EntraideHub = () => {
                       <button
                         type="button"
                         onClick={resetQuestionFilters}
-                        className="ml-auto text-xs text-foreground/60 hover:text-foreground underline underline-offset-2"
+                        className="ml-auto text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
                       >
                         Réinitialiser
                       </button>
@@ -868,8 +868,8 @@ const EmptyState = ({
   howSteps?: string[];
 }) => (
   <div className="p-8 rounded-2xl border border-dashed border-border bg-accent/20 text-center">
-    <p className="font-heading text-lg text-foreground/85">{title}</p>
-    {hint && <p className="text-sm text-foreground/60 mt-2">{hint}</p>}
+    <p className="font-heading text-lg text-foreground">{title}</p>
+    {hint && <p className="text-sm text-muted-foreground mt-2">{hint}</p>}
     <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
       <Button onClick={onCta}>{ctaLabel}</Button>
       {onReset && (
@@ -880,10 +880,10 @@ const EmptyState = ({
     </div>
     {howSteps && howSteps.length > 0 && (
       <div className="mt-6 pt-5 border-t border-border/60 text-left">
-        <p className="text-xs font-semibold uppercase tracking-wide text-foreground/55 mb-3 text-center">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3 text-center">
           Comment ça marche
         </p>
-        <ol className="space-y-2 text-sm text-foreground/75 list-decimal list-inside">
+        <ol className="space-y-2 text-sm text-foreground/80 list-decimal list-inside">
           {howSteps.map((step, i) => (
             <li key={i}>{step}</li>
           ))}
@@ -892,7 +892,7 @@ const EmptyState = ({
     )}
     {examples && examples.length > 0 && onExample && (
       <div className="mt-6 pt-5 border-t border-border/60">
-        <p className="text-xs font-semibold uppercase tracking-wide text-foreground/55 mb-3">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">
           Exemples pour démarrer
         </p>
         <div className="flex flex-col gap-2">
@@ -901,7 +901,7 @@ const EmptyState = ({
               key={ex.label}
               type="button"
               onClick={() => onExample(ex)}
-              className="text-left text-sm px-3 py-2 rounded-lg bg-card border border-border hover:border-primary hover:bg-accent/40 transition-colors text-foreground/80"
+              className="text-left text-sm px-3 py-2 rounded-lg bg-card border border-border hover:border-primary hover:bg-accent/40 transition-colors text-foreground"
             >
               « {ex.label} »
             </button>
