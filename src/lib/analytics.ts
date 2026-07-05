@@ -80,7 +80,15 @@ export type EventType =
   // Hygiène ré-audit : events émis en prod, désormais typés -------------------
   | "signup_terms_checked"             // CGU cochées (metadata.step: 1 | 2)
   | "dashboard_error"                  // Erreur boundary dashboard (metadata.error_type, component?)
-  | "admin_ga4_diag_test";             // Test diagnostic GA4 admin (metadata.result: 'ok' | 'ko', message?)
+  | "admin_ga4_diag_test"              // Test diagnostic GA4 admin (metadata.result: 'ok' | 'ko', message?)
+  // Chantier 2.3 Casse A : NBA nouveau gardien --------------------------------
+  | "sitter_first_nba_seen"            // 1×/session (sits_count, avg_affinity_score)
+  | "sitter_first_nba_card_clicked"    // Clic sur une des 3 cards (sit_id, affinity_score, position)
+  | "see_all_sits_clicked"             // Clic "Voir toutes les annonces" (source)
+  | "sitter_no_nearby_empty_state_seen" // 1×/session (total_published, radius_km)
+  | "sitter_alert_subscribed"          // Inscription alerte (type, radius_km)
+  | "sitter_alert_modify_radius"       // Modification du rayon (old_km, new_km)
+  | "sitter_secondary_card_clicked";   // Clic carte secondaire (type: missions|breeds|guides)
 
 interface TrackOptions {
   source?: string;
