@@ -116,8 +116,15 @@ export function useMissionDistance(missions: MissionLike[]) {
     let cancelled = false;
     if (!origin) {
       setDistanceMap(new Map());
+      setComputing(false);
       return;
     }
+    if (missions.length === 0) {
+      setDistanceMap(new Map());
+      setComputing(false);
+      return;
+    }
+    setComputing(true);
     (async () => {
       const results = await Promise.all(
         missions.map(async (m) => {
@@ -130,6 +137,7 @@ export function useMissionDistance(missions: MissionLike[]) {
       );
       if (cancelled) return;
       setDistanceMap(new Map(results));
+      setComputing(false);
     })();
     return () => {
       cancelled = true;
