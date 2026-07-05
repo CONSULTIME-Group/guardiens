@@ -5725,6 +5725,15 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_or_create_conversation: {
+        Args: {
+          p_context_type: Database["public"]["Enums"]["conversation_context"]
+          p_other_user_id: string
+          p_sit_id?: string
+          p_small_mission_id?: string
+        }
+        Returns: string
+      }
       get_own_email: { Args: never; Returns: string }
       get_pro_map_points: {
         Args: never
