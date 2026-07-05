@@ -210,7 +210,6 @@ export default {
     console.log('[Prerender] Bot — UA: "' + ua + '" — URL: ' + url);
 
     try {
-    try {
       const token = env && env.PRERENDER_TOKEN;
       if (!token) {
         console.log('[Prerender] PRERENDER_TOKEN missing, falling back to origin without prerender');
