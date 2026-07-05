@@ -1,4 +1,5 @@
 import { isInGracePeriod, GRACE_END } from "@/lib/constants";
+import { isPricingActive } from "@/lib/pricing";
 
 interface FreeTickerChipProps {
   /** Variante d'affichage : sur fond sombre (hero) ou sur fond clair */
