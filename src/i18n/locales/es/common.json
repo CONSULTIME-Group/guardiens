@@ -74,7 +74,10 @@
       "story": "Nuestra historia",
       "cities": "Guías y ciudades",
       "faq": "FAQ",
-      "numbers": "Cifras"
+      "numbers": "Cifras",
+      "international": "Internacional",
+      "matching": "Emparejamiento",
+      "pros": "Profesionales"
     },
     "usages": {
       "eyebrow": "Lo que hacemos juntos",
@@ -233,6 +236,50 @@
       "cta_owner": "Publicar mi anuncio",
       "cta_sitter": "Quiero ser cuidador",
       "footnote": "Registro en 2 minutos, sin tarjeta bancaria."
+    },
+    "international": {
+      "title": "¿Vive en el extranjero? Que alguien cuide su casa en Francia, y a la inversa.",
+      "subtitle_active": "Desde el lanzamiento, se organizan cuidados entre Francia y el resto del mundo. {{count}} anuncios internacionales en curso.",
+      "subtitle_soon": "Nuestros primeros cuidadores se organizan. Muy pronto disponible en varios países.",
+      "card1": {
+        "title": "Vive en el extranjero, cuide su residencia en Francia.",
+        "cta": "Publicar mi anuncio Francia"
+      },
+      "card2": {
+        "title": "Viaja al extranjero, encuentre un cuidador local.",
+        "cta": "Ver anuncios internacionales"
+      },
+      "card3": {
+        "title": "Una comunidad que crece con Marrakech, Lisboa, Bali.",
+        "cta": "Ver el mapa"
+      }
+    },
+    "affinity": {
+      "title": "El emparejamiento que importa, 7 criterios, no solo la proximidad",
+      "subtitle": "Una puntuación calculada automáticamente entre cada propietario y cada cuidador: ponderada, transparente, visible.",
+      "bullet1": "Cálculo automático cuando un cuidador se postula a su anuncio",
+      "bullet2": "Siete criterios ponderados: estilo de vida, animales, experiencia, disponibilidad, comunicación, preferencias del hogar, proximidad",
+      "bullet3": "Ve el detalle, decide usted",
+      "cta": "Entender la puntuación de afinidad",
+      "demo_label": "Ejemplo de emparejamiento"
+    },
+    "pros": {
+      "title": "Veterinarios, peluqueros, educadores, verificados Guardiens",
+      "subtitle": "Un directorio local de profesionales para animales. Verificación SIRET manual por nuestro equipo para quienes muestran la insignia.",
+      "card1": {
+        "title": "Veterinarios",
+        "cta": "Encontrar un veterinario cerca"
+      },
+      "card2": {
+        "title": "Peluqueros y educadores",
+        "cta": "Ver el directorio"
+      },
+      "card3": {
+        "title": "Transportistas y osteópatas",
+        "cta": "Explorar"
+      },
+      "counter": "{{total}} profesionales para animales listados, {{verified}} verificados SIRET",
+      "cta_all": "Ver todos los profesionales"
     }
   },
   "faq": {
