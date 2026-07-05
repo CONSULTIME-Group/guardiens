@@ -1172,7 +1172,7 @@ const SmallMissionDetail = () => {
         {/* ── PUBLISHER : Propositions reçues ── */}
         {/* ══════════════════════════════════════════════════════ */}
         {isAuthor && (mission.status === "open" || mission.status === "in_progress") && (
-          <section id="propositions" className="mt-16 pt-12 border-t border-border scroll-mt-8">
+          <section id="propositions" className="mt-12 pt-8 border-t border-border scroll-mt-8">
             <div className="flex items-center gap-3 mb-6">
               <MessageSquare className="h-5 w-5 text-primary" />
               <h2 className="font-heading text-2xl md:text-3xl font-bold">
@@ -1239,7 +1239,7 @@ const SmallMissionDetail = () => {
         {/* ── PUBLISHER : Avis post-mission ── */}
         {/* ══════════════════════════════════════════════════════ */}
         {isAuthor && mission.status === "completed" && acceptedResponses.length > 0 && (
-          <section className="mt-16 pt-12 border-t border-border">
+          <section className="mt-12 pt-8 border-t border-border">
             <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">Laisser un avis</h2>
             <div className="space-y-4 max-w-3xl">
               {acceptedResponses.map(r => (
@@ -1268,7 +1268,7 @@ const SmallMissionDetail = () => {
         {/* ── CANDIDAT accepté + terminé : avis ── */}
         {/* ══════════════════════════════════════════════════════ */}
         {!isAuthor && myResponse?.status === "accepted" && mission.status === "completed" && (
-          <section className="mt-16 pt-12 border-t border-border max-w-3xl">
+          <section className="mt-12 pt-8 border-t border-border max-w-3xl">
             <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">Votre retour sur cette mission</h2>
             {feedbackSent[mission.user_id] ? (
               <div className="bg-muted/50 rounded-2xl p-4 flex items-center gap-2 text-sm text-muted-foreground">
@@ -1329,7 +1329,7 @@ const SmallMissionDetail = () => {
             ? `D'autres coups de main à ${cityLabel} et alentours`
             : "Encore peu d'annonces dans votre secteur, voici des exemples récents à découvrir.";
           return (
-            <section className="mt-12 md:mt-32 pt-8 md:pt-16 border-t border-border">
+            <section className="mt-12 pt-8 border-t border-border">
               <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-10 gap-4">
                 <div>
                   <h2 className="font-heading text-3xl md:text-4xl font-bold mb-2">{sectionTitle}</h2>
