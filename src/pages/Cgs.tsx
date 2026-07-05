@@ -83,23 +83,19 @@ const Cgs = () => {
             Les prix sont exprimés en euros toutes taxes comprises. La TVA n'est pas applicable conformément à l'article 293 B du CGI.
           </p>
 
-          <h3 className="font-heading text-lg font-semibold text-foreground pt-2">3.2 Absence de période d'essai</h3>
+          <h3 className="font-heading text-lg font-semibold text-foreground pt-2">3.2 Modèle actuel</h3>
           <p>
-            La souscription Gardien ne comporte pas de période d'essai gratuite. La rassurance équivalente est apportée par&nbsp;: (i)&nbsp;l'accès intégralement offert jusqu'au 14&nbsp;juillet&nbsp;2026 (cf. 3.3), (ii)&nbsp;l'absence d'engagement de durée et la résiliation en un clic (cf. 5), (iii)&nbsp;la formule «&nbsp;accès un mois&nbsp;» à 10&nbsp;€ en paiement unique sans renouvellement automatique.
+            Guardiens reste gratuit tant que l'éditeur n'est pas satisfait du service qu'il souhaite offrir. Aucune date de bascule tarifaire n'est fixée à ce jour. L'accès Gardien comme l'accès Propriétaire est intégralement offert, sans engagement de durée et sans carte bancaire requise à l'inscription.
           </p>
 
-          <h3 className="font-heading text-lg font-semibold text-foreground pt-2">3.3 Période de lancement</h3>
+          <h3 className="font-heading text-lg font-semibold text-foreground pt-2">3.3 Préavis en cas d'évolution</h3>
           <p>
-            Jusqu'au 30 septembre 2026, l'accès Gardien est intégralement offert. À compter du 1er octobre 2026, l'abonnement à 6,99&nbsp;€ TTC/mois devient nécessaire pour postuler aux gardes.
+            Si l'éditeur décide d'activer une facturation à l'avenir, chaque membre sera prévenu par email au moins 30&nbsp;jours avant la bascule. Les conditions tarifaires précises seront communiquées à ce moment-là. Aucun prélèvement ne pourra intervenir sans consentement explicite du membre.
           </p>
 
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">3.4 Programme Fondateur</h3>
-          <p>Les utilisateurs inscrits avant le 30 septembre 2026 bénéficient du statut de <strong className="text-foreground">Fondateur</strong> et des conditions préférentielles suivantes&nbsp;:</p>
-          <ul className="list-disc pl-6 space-y-1">
-            <li>Accès à 0 € à l'ensemble des fonctionnalités Gardien jusqu'au 30 septembre 2026 (accès à 0 € étendue à tous les inscrits sur cette période)&nbsp;;</li>
-            <li>Badge Fondateur permanent affiché sur leur profil, réservé aux inscrits avant le 30 septembre 2026&nbsp;;</li>
-            <li>Reconduction au tarif standard de 6,99&nbsp;€ TTC/mois à compter du 1er octobre 2026, sauf résiliation préalable.</li>
-          </ul>
+          <p>Les premiers utilisateurs inscrits sur Guardiens bénéficient du statut de <strong className="text-foreground">Fondateur</strong>, matérialisé par un badge permanent affiché sur leur profil. Ce badge est symbolique et distingue les membres qui ont rejoint l'aventure dès le départ.</p>
+
 
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">3.5 Programme de parrainage</h3>
           <p>

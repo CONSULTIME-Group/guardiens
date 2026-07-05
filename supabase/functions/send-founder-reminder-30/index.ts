@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { PRICING_IS_ACTIVE } from '../_shared/config-pricing.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,6 +10,13 @@ const GATEWAY_URL = 'https://connector-gateway.lovable.dev/resend'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+
+  if (!PRICING_IS_ACTIVE) {
+    return new Response(
+      JSON.stringify({ skipped: 'pricing_not_active' }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    )
+  }
 
   try {
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!

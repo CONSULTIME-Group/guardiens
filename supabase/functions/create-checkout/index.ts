@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { PRICING_IS_ACTIVE } from "../_shared/config-pricing.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -72,6 +73,20 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  if (!PRICING_IS_ACTIVE) {
+    return new Response(
+      JSON.stringify({
+        error: "pricing_not_active",
+        message: "Les abonnements ne sont pas encore disponibles.",
+      }),
+      {
+        status: 503,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
+  }
+
 
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",

@@ -75,7 +75,7 @@ function buildRows(): Row[] {
     field: "OWNER_PRICE",
     found: OWNER_PRICE,
     expected: `0${NBSP}€`,
-    ok: OWNER_PRICE === `0${NBSP}€`,
+    ok: (OWNER_PRICE as string) === `0${NBSP}€`,
   });
 
   // -------- Mensuel 6,99 € --------

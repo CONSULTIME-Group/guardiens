@@ -30,5 +30,5 @@ Fichier de suivi des tâches reportées. Mis à jour manuellement après chaque 
   - Pré-requis utilisateur : autoriser popups + cookies tiers sur `lovable.dev` et `accounts.google.com`, garder l'onglet Lovable ouvert pendant tout le flow.
   - Commande de reprise : dire « relance GSC » dans le chat → l'agent rappelle `standard_connectors--connect connector_id=google_search_console`.
   - Une fois connecté, flow META verification sur `https://guardiens.lovable.app/` puis soumettre `https://guardiens.lovable.app/sitemap.xml` (ou idéalement `https://guardiens.fr/sitemap.xml` si on déclare la propriété sur le domaine custom).
-  - **Échéance impérative** : avant le 1er octobre 2026 (fin de la gratuité gardiens, début du tracking de conversion search nécessaire).
+  - **Échéance impérative** : à définir (pas de date fixée, pivot pricing "gratuit sans deadline" du 5 juillet 2026).
   - Finding tracker associé : `gsc:gsc` (catégorie indexing, impact mid). Marqué « ignored » manuellement dans Lovable → SEO & AI search.

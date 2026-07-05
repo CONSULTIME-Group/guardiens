@@ -4,55 +4,49 @@ import {
   SITTER_PRICE,
   SITTER_PRICE_NUMERIC,
   SITTER_PRICE_CURRENCY,
-  SITTER_PRICE_START,
-  SITTER_PRICE_START_ISO,
-  FOUNDER_DEADLINE,
-  FOUNDER_DEADLINE_ISO,
   PRICING_LONG,
   PRICING_SHORT,
   PRICING_VERY_SHORT,
+  isPricingActive,
+  getSitterMonthlyLabel,
+  getOwnerPriceLabel,
+  getPricingBaseline,
 } from "../pricing";
 
-const NBSP = "\u00A0";
-const FORBIDDEN = ["gratuit", "à vie", "pour toujours", "13 mai"];
-
-describe("pricing constants", () => {
-  it("uses non-breaking space before €", () => {
-    expect(OWNER_PRICE).toBe(`0${NBSP}€`);
-    expect(SITTER_PRICE).toBe(`6,99${NBSP}€/mois`);
+/**
+ * Pivot pricing "gratuit sans deadline", 5 juillet 2026.
+ *
+ * Tant que PRICING_IS_ACTIVE = false, les labels utilisateur sont figés sur
+ * « Gratuit » et la baseline ne contient aucune date de bascule.
+ */
+describe("pricing helpers (pivot gratuit sans deadline)", () => {
+  it("le flag pricing est désactivé", () => {
+    expect(isPricingActive()).toBe(false);
   });
 
-  it("exposes correct atomic values", () => {
+  it("labels utilisateur figés sur 'Gratuit'", () => {
+    expect(OWNER_PRICE).toBe("Gratuit");
+    expect(SITTER_PRICE).toBe("Gratuit");
+    expect(getSitterMonthlyLabel()).toBe("Gratuit");
+    expect(getOwnerPriceLabel()).toBe("Gratuit");
+  });
+
+  it("constantes atomiques conservées pour réactivation future", () => {
     expect(SITTER_PRICE_NUMERIC).toBe(6.99);
     expect(SITTER_PRICE_CURRENCY).toBe("EUR");
-    expect(SITTER_PRICE_START).toBe("1er octobre 2026");
-    expect(SITTER_PRICE_START_ISO).toBe("2026-10-01");
-    expect(FOUNDER_DEADLINE).toBe("30 septembre 2026");
-    expect(FOUNDER_DEADLINE_ISO).toBe("2026-09-30");
   });
 
-  it("PRICING_LONG contains required mentions", () => {
-    expect(PRICING_LONG).toContain("1er octobre 2026");
-    expect(PRICING_LONG).toContain("6,99");
-    expect(PRICING_LONG).toContain("30 septembre 2026");
-    expect(PRICING_LONG).toContain("Fondateur");
+  it("PRICING_LONG contient la baseline pivot", () => {
+    expect(PRICING_LONG).toBe(getPricingBaseline());
+    expect(PRICING_LONG).toContain("gratuit tant que nous ne sommes pas satisfaits");
+    expect(PRICING_LONG).not.toMatch(/1er\s+octobre\s+2026/);
+    expect(PRICING_LONG).not.toMatch(/30\s+septembre\s+2026/);
   });
 
-  it("PRICING_SHORT contains required mentions", () => {
-    expect(PRICING_SHORT).toContain("1er octobre 2026");
-    expect(PRICING_SHORT).toContain("6,99");
+  it("PRICING_SHORT et PRICING_VERY_SHORT sont concis et sans date", () => {
+    for (const t of [PRICING_SHORT, PRICING_VERY_SHORT]) {
+      expect(t.toLowerCase()).toContain("sans engagement");
+      expect(t).not.toMatch(/2026/);
+    }
   });
-
-  it("PRICING_VERY_SHORT contains owner price", () => {
-    expect(PRICING_VERY_SHORT).toContain(OWNER_PRICE);
-  });
-
-  it.each([PRICING_LONG, PRICING_SHORT, PRICING_VERY_SHORT])(
-    "does not contain forbidden vocabulary: %s",
-    (text) => {
-      for (const word of FORBIDDEN) {
-        expect(text.toLowerCase()).not.toContain(word.toLowerCase());
-      }
-    },
-  );
 });
