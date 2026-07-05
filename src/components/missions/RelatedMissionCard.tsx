@@ -96,11 +96,16 @@ const RelatedMissionCard = ({ to, photo, category, title, city, timeAgo, exchang
           // MAIS pas de titre dans le cover (le titre est rendu sous la carte
           // comme pour les variantes avec photo, pour garantir des hauteurs de
           // grille strictement identiques).
-          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-start justify-between p-5`}>
-            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-background/80 backdrop-blur text-primary">
+          <div className={`w-full h-full bg-gradient-to-br ${gradient} relative flex flex-col justify-between p-5`}>
+            <span className="self-start px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-background/85 backdrop-blur text-primary">
               {label}
             </span>
-            <CategoryGlyph category={cat} className="w-14 h-14 text-primary/30 shrink-0" />
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <CategoryGlyph category={cat} className="w-28 h-28 text-primary/25" />
+            </div>
+            <span className="self-end text-[10px] font-medium uppercase tracking-wider text-primary/70">
+              Sans photo
+            </span>
           </div>
         )}
       </div>
