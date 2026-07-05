@@ -74,7 +74,10 @@
       "story": "La nostra storia",
       "cities": "Guide & città",
       "faq": "FAQ",
-      "numbers": "Cifre"
+      "numbers": "Cifre",
+      "international": "Internazionale",
+      "matching": "Abbinamento",
+      "pros": "Professionisti"
     },
     "usages": {
       "eyebrow": "Cosa facciamo insieme",
@@ -233,6 +236,50 @@
       "cta_owner": "Pubblicare il mio annuncio",
       "cta_sitter": "Voglio fare il custode",
       "footnote": "Iscrizione in 2 minuti, senza carta di credito."
+    },
+    "international": {
+      "title": "Vive all'estero? Faccia vegliare sulla Sua casa in Francia, e viceversa.",
+      "subtitle_active": "Dal lancio, si organizzano custodie tra la Francia e il resto del mondo. {{count}} annunci internazionali in corso.",
+      "subtitle_soon": "I nostri primi custodi si organizzano. Presto disponibile in vari paesi.",
+      "card1": {
+        "title": "Vive all'estero, custodisca la Sua residenza in Francia.",
+        "cta": "Pubblicare il mio annuncio Francia"
+      },
+      "card2": {
+        "title": "Va all'estero, trovi un custode locale.",
+        "cta": "Vedere gli annunci internazionali"
+      },
+      "card3": {
+        "title": "Una comunità che cresce con Marrakech, Lisbona, Bali.",
+        "cta": "Vedere la mappa"
+      }
+    },
+    "affinity": {
+      "title": "L'abbinamento che conta, 7 criteri, non solo la vicinanza",
+      "subtitle": "Un punteggio calcolato automaticamente tra ogni proprietario e ogni custode: ponderato, trasparente, visibile.",
+      "bullet1": "Calcolo automatico appena un custode si candida al Suo annuncio",
+      "bullet2": "Sette criteri ponderati: stile di vita, animali, esperienza, disponibilità, comunicazione, preferenze casa, vicinanza",
+      "bullet3": "Vede il dettaglio, decide Lei",
+      "cta": "Capire il punteggio di affinità",
+      "demo_label": "Esempio di abbinamento"
+    },
+    "pros": {
+      "title": "Veterinari, toelettatori, educatori, verificati Guardiens",
+      "subtitle": "Un elenco locale di professionisti per animali. Verifica SIRET manuale del nostro team per chi mostra il distintivo.",
+      "card1": {
+        "title": "Veterinari",
+        "cta": "Trovare un veterinario vicino"
+      },
+      "card2": {
+        "title": "Toelettatori ed educatori",
+        "cta": "Vedere l'elenco"
+      },
+      "card3": {
+        "title": "Trasportatori e osteopati",
+        "cta": "Esplorare"
+      },
+      "counter": "{{total}} professionisti per animali elencati, {{verified}} verificati SIRET",
+      "cta_all": "Vedere tutti i professionisti"
     }
   },
   "faq": {

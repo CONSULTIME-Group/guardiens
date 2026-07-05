@@ -74,7 +74,10 @@
       "story": "Our story",
       "cities": "Guides & cities",
       "faq": "FAQ",
-      "numbers": "Numbers"
+      "numbers": "Numbers",
+      "international": "International",
+      "matching": "Matching",
+      "pros": "Pros"
     },
     "usages": {
       "eyebrow": "What we do together",
@@ -233,6 +236,50 @@
       "cta_owner": "Publish my listing",
       "cta_sitter": "I want to sit",
       "footnote": "Registration in 2 minutes, no credit card required."
+    },
+    "international": {
+      "title": "Living abroad? Have someone watch your French home, and vice versa.",
+      "subtitle_active": "Since launch, care exchanges have been organised between France and the rest of the world. {{count}} international listings ongoing.",
+      "subtitle_soon": "Our first sitters are organising. Coming soon in several countries.",
+      "card1": {
+        "title": "You live abroad, look after your French home.",
+        "cta": "Post my France listing"
+      },
+      "card2": {
+        "title": "You are travelling abroad, find a local sitter.",
+        "cta": "See international listings"
+      },
+      "card3": {
+        "title": "A community growing with Marrakech, Lisbon, Bali.",
+        "cta": "See the map"
+      }
+    },
+    "affinity": {
+      "title": "The match that matters, 7 criteria, not just proximity",
+      "subtitle": "An affinity score computed automatically between every owner and every sitter: weighted, transparent, visible.",
+      "bullet1": "Computed automatically as soon as a sitter applies to your listing",
+      "bullet2": "Seven weighted criteria: lifestyle, animals, experience, availability, communication, home preferences, proximity",
+      "bullet3": "You see the details, you decide",
+      "cta": "Understand the affinity score",
+      "demo_label": "Sample match"
+    },
+    "pros": {
+      "title": "Vets, groomers, trainers, verified by Guardiens",
+      "subtitle": "A local directory of pet professionals. Manual SIRET verification by our team for those who display the badge.",
+      "card1": {
+        "title": "Vets",
+        "cta": "Find a vet near me"
+      },
+      "card2": {
+        "title": "Groomers and trainers",
+        "cta": "Browse the directory"
+      },
+      "card3": {
+        "title": "Transporters and osteopaths",
+        "cta": "Explore"
+      },
+      "counter": "{{total}} pet professionals listed, {{verified}} SIRET-verified",
+      "cta_all": "See all professionals"
     }
   },
   "faq": {

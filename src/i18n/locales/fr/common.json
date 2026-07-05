@@ -74,7 +74,10 @@
       "story": "Notre histoire",
       "cities": "Guides & villes",
       "faq": "FAQ",
-      "numbers": "Chiffres"
+      "numbers": "Chiffres",
+      "international": "International",
+      "matching": "Matching",
+      "pros": "Pros"
     },
     "usages": {
       "eyebrow": "Ce qu'on fait ensemble",
@@ -233,6 +236,50 @@
       "cta_owner": "Publier mon annonce",
       "cta_sitter": "Je veux garder",
       "footnote": "Inscription en 2 minutes, sans carte bancaire."
+    },
+    "international": {
+      "title": "Français à l'étranger ? Faites veiller sur votre maison en France, et inversement.",
+      "subtitle_active": "Depuis le lancement, des gardes s'organisent entre la France et le reste du monde. {{count}} annonces internationales en cours.",
+      "subtitle_soon": "Les premiers gardiens s'organisent. Bientôt disponible dans plusieurs pays.",
+      "card1": {
+        "title": "Vous vivez à l'étranger, gardez votre résidence en France.",
+        "cta": "Publier mon annonce France"
+      },
+      "card2": {
+        "title": "Vous partez à l'étranger, trouvez un gardien local.",
+        "cta": "Voir les annonces internationales"
+      },
+      "card3": {
+        "title": "Une communauté qui grandit avec Marrakech, Lisbonne, Bali.",
+        "cta": "Voir la carte"
+      }
+    },
+    "affinity": {
+      "title": "Le match qui compte, 7 critères, pas juste la proximité",
+      "subtitle": "Un score calculé automatiquement entre chaque propriétaire et chaque gardien, pondéré, transparent, visible.",
+      "bullet1": "Calcul automatique dès qu'un gardien postule à votre annonce",
+      "bullet2": "Sept critères pondérés selon l'importance : mode de vie, animaux, expérience, disponibilité, communication, préférences maison, proximité",
+      "bullet3": "Vous voyez le détail, vous décidez",
+      "cta": "Comprendre le score d'affinité",
+      "demo_label": "Exemple de match"
+    },
+    "pros": {
+      "title": "Vétérinaires, toiletteurs, éducateurs, vérifiés Guardiens",
+      "subtitle": "Un annuaire local de professionnels animaliers. Vérification SIRET manuelle par notre équipe pour ceux qui affichent le badge.",
+      "card1": {
+        "title": "Vétérinaires",
+        "cta": "Trouver un véto près de chez moi"
+      },
+      "card2": {
+        "title": "Toiletteurs et éducateurs",
+        "cta": "Voir l'annuaire"
+      },
+      "card3": {
+        "title": "Transporteurs et ostéopathes",
+        "cta": "Explorer"
+      },
+      "counter": "{{total}} pros animaliers référencés, {{verified}} vérifiés SIRET",
+      "cta_all": "Voir tous les pros"
     }
   },
   "faq": {

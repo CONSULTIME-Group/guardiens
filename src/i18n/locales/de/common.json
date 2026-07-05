@@ -74,7 +74,10 @@
       "story": "Unsere Geschichte",
       "cities": "Ratgeber & Städte",
       "faq": "FAQ",
-      "numbers": "Kennzahlen"
+      "numbers": "Kennzahlen",
+      "international": "International",
+      "matching": "Matching",
+      "pros": "Profis"
     },
     "usages": {
       "eyebrow": "Was wir gemeinsam tun",
@@ -233,6 +236,50 @@
       "cta_owner": "Anzeige veröffentlichen",
       "cta_sitter": "Ich möchte betreuen",
       "footnote": "Anmeldung in 2 Minuten, ohne Kreditkarte."
+    },
+    "international": {
+      "title": "Sie leben im Ausland? Lassen Sie über Ihr Haus in Frankreich wachen, und umgekehrt.",
+      "subtitle_active": "Seit dem Start werden Betreuungen zwischen Frankreich und dem Rest der Welt organisiert. {{count}} internationale Anzeigen laufend.",
+      "subtitle_soon": "Unsere ersten Betreuer organisieren sich. Bald in mehreren Ländern verfügbar.",
+      "card1": {
+        "title": "Sie leben im Ausland, betreuen Sie Ihre Residenz in Frankreich.",
+        "cta": "Meine Frankreich-Anzeige veröffentlichen"
+      },
+      "card2": {
+        "title": "Sie reisen ins Ausland, finden Sie einen lokalen Betreuer.",
+        "cta": "Internationale Anzeigen ansehen"
+      },
+      "card3": {
+        "title": "Eine Gemeinschaft, die mit Marrakesch, Lissabon, Bali wächst.",
+        "cta": "Karte ansehen"
+      }
+    },
+    "affinity": {
+      "title": "Das Matching, das zählt, 7 Kriterien, nicht nur Nähe",
+      "subtitle": "Ein Score, automatisch berechnet zwischen jedem Eigentümer und jedem Betreuer: gewichtet, transparent, sichtbar.",
+      "bullet1": "Automatische Berechnung, sobald ein Betreuer sich auf Ihre Anzeige bewirbt",
+      "bullet2": "Sieben gewichtete Kriterien: Lebensstil, Tiere, Erfahrung, Verfügbarkeit, Kommunikation, Hauspräferenzen, Nähe",
+      "bullet3": "Sie sehen das Detail, Sie entscheiden",
+      "cta": "Den Affinitäts-Score verstehen",
+      "demo_label": "Beispiel-Match"
+    },
+    "pros": {
+      "title": "Tierärzte, Groomer, Trainer, von Guardiens verifiziert",
+      "subtitle": "Ein lokales Verzeichnis von Tierprofis. Manuelle SIRET-Verifizierung durch unser Team für alle mit dem Badge.",
+      "card1": {
+        "title": "Tierärzte",
+        "cta": "Einen Tierarzt in der Nähe finden"
+      },
+      "card2": {
+        "title": "Groomer und Trainer",
+        "cta": "Verzeichnis ansehen"
+      },
+      "card3": {
+        "title": "Transporteure und Osteopathen",
+        "cta": "Erkunden"
+      },
+      "counter": "{{total}} gelistete Tierprofis, {{verified}} SIRET-verifiziert",
+      "cta_all": "Alle Profis ansehen"
     }
   },
   "faq": {

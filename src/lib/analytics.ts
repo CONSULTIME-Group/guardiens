@@ -105,7 +105,14 @@ export type EventType =
   | "pro_verification_request_clicked"    // Pro demande la vérification depuis son espace (pro_id)
   // Landing InventoryStrip (chiffres du réseau) -----------------------------
   | "inventory_strip_seen"                // Impression bandeau chiffres du réseau (1x/session)
-  | "inventory_strip_cta_clicked";        // Clic CTA "Voir l'observatoire complet" (destination)
+  | "inventory_strip_cta_clicked"         // Clic CTA "Voir l'observatoire complet" (destination)
+  // Landing sections stratégiques pass 2 ------------------------------------
+  | "affinity_showcase_seen"              // Impression vitrine score d'affinité (1x/session)
+  | "affinity_showcase_cta_clicked"       // Clic CTA "Comprendre le score" (destination)
+  | "international_strip_seen"            // Impression bandeau international (1x/session)
+  | "international_strip_card_clicked"    // Clic sur une card international (card_id)
+  | "pros_showcase_seen"                  // Impression vitrine pros animaliers (1x/session)
+  | "pros_showcase_card_clicked";         // Clic sur une card pros (card_id)
 
 interface TrackOptions {
   source?: string;
