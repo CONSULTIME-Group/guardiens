@@ -93,8 +93,12 @@ const CreateSmallMission = () => {
   const [city, setCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [dateNeeded, setDateNeeded] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [endCalendarOpen, setEndCalendarOpen] = useState(false);
   const [duration, setDuration] = useState("");
+  const [petSpecies, setPetSpecies] = useState("");
+  const [petSize, setPetSize] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [photos, setPhotos] = useState<string[]>([]);
   const [appliedTemplateId, setAppliedTemplateId] = useState<string | null>(null);
