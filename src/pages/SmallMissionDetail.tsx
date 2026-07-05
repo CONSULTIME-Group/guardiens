@@ -344,9 +344,11 @@ const SmallMissionDetail = () => {
         return;
       }
 
-      const { error } = await supabase.from("small_mission_responses").insert({
-        mission_id: id, responder_id: user.id, message: trimmedMessage,
-      });
+      const { data: inserted, error } = await supabase
+        .from("small_mission_responses")
+        .insert({ mission_id: id, responder_id: user.id, message: trimmedMessage })
+        .select("*, responder:profiles!small_mission_responses_responder_id_fkey(first_name, avatar_url)")
+        .single();
 
       if (error) {
         if (error.code === "23505") {
@@ -356,13 +358,24 @@ const SmallMissionDetail = () => {
           throw error;
         }
       } else {
-        // Notify mission author
-        await supabase.from("notifications").insert({
+        // Optimistic UI : afficher la nouvelle réponse tout de suite en tête de liste
+        if (inserted) {
+          setResponses((prev) => {
+            if (prev.some((r) => r.id === (inserted as any).id)) return prev;
+            return [inserted as any, ...prev];
+          });
+        }
+        setHasResponded(true);
+        setMessage("");
+        toast({ title: "Réponse publiée !", description: "La personne qui demande va être prévenue." });
+
+        // Notify mission author (non-bloquant côté UI)
+        supabase.from("notifications").insert({
           user_id: fresh.user_id, type: "mission_proposal",
           title: "Nouvelle proposition d'aide",
           body: `${(user as any).first_name || "Un membre"} propose son aide pour "${fresh.title}"`,
           link: `/petites-missions/${id}`,
-        });
+        }).then(() => {});
 
         // Email transactionnel, propriétaire de la mission notifié (non-bloquant)
         sendTransactionalEmail({
@@ -374,12 +387,8 @@ const SmallMissionDetail = () => {
             missionTitle: fresh.title,
           },
         }).catch(() => {});
-
-        setHasResponded(true);
-        setMessage("");
-        toast({ title: "Réponse publiée !", description: "La personne qui demande va être prévenue." });
-        load();
       }
+
     } catch (err: any) {
       logger.error("[handleRespond]", { err: String(err) });
       toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible de publier votre réponse." });
