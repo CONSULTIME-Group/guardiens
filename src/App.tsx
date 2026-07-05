@@ -71,6 +71,8 @@ const Settings = lazy(() => import("./pages/Settings"));
 const OwnerProfile = lazy(() => import("./pages/OwnerProfile"));
 const News = lazy(() => import("./pages/News"));
 const ArticleDetail = lazy(() => import("./pages/ArticleDetail"));
+const ArticleInventaire = lazy(() => import("./pages/ArticleInventaire"));
+const AdminAnalysisRequests = lazy(() => import("./pages/admin/AdminAnalysisRequests"));
 const AuthorPage = lazy(() => import("./pages/AuthorPage"));
 const About = lazy(() => import("./pages/About"));
 const Observatoire = lazy(() => import("./pages/Observatoire"));
@@ -267,6 +269,7 @@ const AppRoutes = () => (
       <Route path="/reset-password" element={<ResetPassword />} />
       
       <Route path="/actualites" element={<News />} />
+      <Route path="/actualites/inventaire-guardiens-france" element={<ArticleInventaire />} />
       <Route path="/actualites/:slug" element={<ArticleDetail />} />
       <Route path="/auteurs/:slug" element={<AuthorPage />} />
       <Route path="/articles" element={<Navigate to="/actualites" replace />} />
@@ -337,6 +340,7 @@ const AppRoutes = () => (
         <Route path="/admin/articles/:id" element={<ArticleEditor />} />
         <Route path="/admin/city-pages" element={<AdminCityPages />} />
         <Route path="/admin/guides" element={<AdminGuides />} />
+        <Route path="/admin/analysis-requests" element={<AdminAnalysisRequests />} />
         <Route path="/admin/departments" element={<AdminDepartments />} />
         <Route path="/admin/breeds" element={<AdminBreeds />} />
         <Route path="/admin/articles-longue-traine" element={<AdminLongTailArticles />} />
