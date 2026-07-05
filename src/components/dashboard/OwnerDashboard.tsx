@@ -53,6 +53,8 @@ import {
 import type { Pet } from "./owner/types";
 import { useOwnerDashboardData } from "@/hooks/useOwnerDashboardData";
 import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
+import { useIsNewOwner } from "@/hooks/useIsNewUser";
+import { trackEvent } from "@/lib/analytics";
 import { SITTER_PRICE_START, REFERRAL_REWARD_LABEL } from "@/lib/pricing";
 
 /* ═══════════════════════════════════════════════════════
@@ -229,6 +231,43 @@ const OwnerDashboard = () => {
   const nextActions = useMemo(() => computeOwnerNextActions(nextActionsInput), [nextActionsInput]);
   const activationScore = useMemo(() => computeOwnerActivationScore(nextActionsInput), [nextActionsInput]);
 
+  /* ── Détection nouveau propriétaire (0 sit, 0 pet) : applique le
+       précepte 2026 « 1 seule NBA above the fold, pas 4 cartes empilées ».
+       On enrichit la description de la NBA avec un signal local
+       (nombre de gardiens vérifiés à proximité). ── */
+  const isNewOwner = useIsNewOwner({ sitsCount: sits.length, petsCount: pets.length });
+  const nearbyCount = nearbyOwnerSittersData?.totalCount ?? 0;
+  const nearbyRadius = nearbyOwnerSittersData?.radiusUsed ?? null;
+  const newOwnerDescription = useMemo(() => {
+    if (!isNewOwner) return priorityAction.description;
+    if (nearbyCount >= 5 && nearbyRadius) {
+      return `${nearbyCount} gardiens vérifiés à ${nearbyRadius} km attendent une annonce comme la vôtre. Environ 2 minutes pour publier.`;
+    }
+    if (nearbyCount > 0 && nearbyRadius) {
+      return `Vous êtes parmi les premiers dans votre secteur. Publiez votre annonce, on active les notifications pour les gardiens qui s'inscriront près de chez vous.`;
+    }
+    return `Plus de 2 200 gardiens vérifiés en France. Publiez votre annonce, on prévient ceux qui correspondent le mieux. Environ 2 minutes.`;
+  }, [isNewOwner, nearbyCount, nearbyRadius, priorityAction.description]);
+
+  // Trace 1 fois par session le premier affichage dashboard "nouveau proprio"
+  useEffect(() => {
+    if (loading || !user?.id || !isNewOwner) return;
+    const key = `dash_first_view_owner_${user.id}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+      trackEvent("dashboard_first_time_view", {
+        source: "/dashboard",
+        metadata: {
+          user_role: "owner",
+          view_variant: "new_owner_nba",
+          nearby_count: nearbyCount,
+          nearby_radius: nearbyRadius,
+        },
+      });
+    } catch {}
+  }, [loading, user?.id, isNewOwner, nearbyCount, nearbyRadius]);
+
   /* ── Render ── */
 
 
@@ -339,47 +378,72 @@ const OwnerDashboard = () => {
       <div className="px-5 md:px-8">
         <PriorityActionCard
           eyebrow={priorityAction.eyebrow}
-          title={priorityAction.title}
-          description={priorityAction.description}
-          ctaLabel={priorityAction.ctaLabel}
-          ctaTo={priorityAction.ctaTo}
-          urgency={priorityAction.urgency}
+          title={isNewOwner ? "Publiez votre première annonce" : priorityAction.title}
+          description={newOwnerDescription}
+          ctaLabel={isNewOwner ? "Publier mon annonce" : priorityAction.ctaLabel}
+          ctaTo={isNewOwner ? "/sits/create" : priorityAction.ctaTo}
+          urgency={isNewOwner ? "high" : priorityAction.urgency}
         />
+        {isNewOwner && (
+          <p className="text-xs text-muted-foreground mt-2 pl-1">
+            <Link to="/annonces" className="underline underline-offset-2 hover:text-foreground">
+              Voir des exemples d'annonces publiées
+            </Link>
+          </p>
+        )}
       </div>
 
-      {/* ═══ Et ensuite : 2 actions suivantes + score d'activation ═══
-          Évite l'effet « page blanche » : même si PriorityActionCard a sa
-          cible, on suggère les prochaines étapes utiles. La carte
-          d'activation s'auto-retire quand 6/6 est atteint. */}
-      {(nextActions.length > 1 || !activationScore.allDone) && (
-        <details className={`px-5 md:px-8 ${!showAllMobile ? "hidden md:block" : ""}`}>
-          <summary className="cursor-pointer list-none text-sm text-muted-foreground hover:text-foreground py-1.5 flex items-center gap-1.5 select-none">
-            Voir les étapes suivantes <span aria-hidden="true" className="ml-0.5">▾</span>
-          </summary>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-3">
-            <NextActionsList actions={nextActions} excludeId={priorityAction.variant} />
-            <ActivationScoreCard score={activationScore} />
-          </div>
-        </details>
-      )}
-
-
-
-
-
-
-      {/* AccessGateBanner seul ici ; RoleActivationBanner + LiveSignalStrip déplacés dans le footer "Ressources". */}
-      <div className={`px-5 md:px-8 ${!showAllMobile ? "hidden md:block" : ""}`}>
-        <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
-      </div>
-
-
-      {/* ═══ Bloc unifié "À faire maintenant" ═══ */}
-      {todoItems.length > 0 && (
+      {isNewOwner ? (
         <div className="px-5 md:px-8">
-          <TodoCard items={todoItems} />
+          <details className="group rounded-2xl bg-card border border-border overflow-hidden">
+            <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
+              <div>
+                <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
+                  Plus tard
+                </p>
+                <p className="text-sm font-semibold text-foreground">
+                  Voir aussi mes tâches et mon score de complétion
+                </p>
+              </div>
+              <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
+            </summary>
+            <div className="px-4 pb-4 pt-2 grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <NextActionsList actions={nextActions} excludeId={priorityAction.variant} />
+              <ActivationScoreCard score={activationScore} />
+              {todoItems.length > 0 && (
+                <div className="lg:col-span-2">
+                  <TodoCard items={todoItems} />
+                </div>
+              )}
+            </div>
+          </details>
         </div>
+      ) : (
+        <>
+          {(nextActions.length > 1 || !activationScore.allDone) && (
+            <details className={`px-5 md:px-8 ${!showAllMobile ? "hidden md:block" : ""}`}>
+              <summary className="cursor-pointer list-none text-sm text-muted-foreground hover:text-foreground py-1.5 flex items-center gap-1.5 select-none">
+                Voir les étapes suivantes <span aria-hidden="true" className="ml-0.5">▾</span>
+              </summary>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-3">
+                <NextActionsList actions={nextActions} excludeId={priorityAction.variant} />
+                <ActivationScoreCard score={activationScore} />
+              </div>
+            </details>
+          )}
+
+          <div className={`px-5 md:px-8 ${!showAllMobile ? "hidden md:block" : ""}`}>
+            <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+          </div>
+
+          {todoItems.length > 0 && (
+            <div className="px-5 md:px-8">
+              <TodoCard items={todoItems} />
+            </div>
+          )}
+        </>
       )}
+
 
       {/* ═══ Garde en cours (prioritaire, contextuel) ═══ */}
       {ongoingSit && (
