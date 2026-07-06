@@ -175,7 +175,11 @@ export type EventType =
   | "alma_review_bubble_seen"                   // Bulle brouillon avis affichée (sit_id, role)
   | "alma_review_draft_generated"               // Brouillon avis généré (sit_id, role)
   | "alma_review_submitted_with_draft"          // Avis publié avec brouillon Alma (sit_id, role)
-  | "alma_review_submitted_without_draft";      // Avis publié sans brouillon Alma (sit_id, role)
+  | "alma_review_submitted_without_draft"       // Avis publié sans brouillon Alma (sit_id, role)
+  // Alma Pass 2 : WelcomeBackDigest ----------------------------------------
+  | "alma_welcomeback_seen"                     // Digest affiché (variant, audience, signals)
+  | "alma_welcomeback_action_clicked"           // Action cliquée depuis digest (variant, action_id)
+  | "alma_welcomeback_dismissed";               // Digest fermé (variant)
 
 
 interface TrackOptions {
