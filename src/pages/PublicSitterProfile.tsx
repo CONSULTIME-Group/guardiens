@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import PageMeta from "@/components/PageMeta";
 import BadgeRow from "@/components/badges/BadgeRow";
+import MissionBadgesReceived from "@/components/missions/MissionBadgesReceived";
 import SpecialBadgeHighlight from "@/components/badges/SpecialBadgeHighlight";
 import { BadgeSceau } from "@/components/badges/BadgeSceau";
 import StatutGardienBadge from "@/components/profile/StatutGardienBadge";
@@ -1527,6 +1528,7 @@ export default function PublicSitterProfile() {
                         <BadgeRow badges={userBadges} />
                       </>
                     )}
+                    {id && <MissionBadgesReceived profileId={id} />}
                     <TrustTimeline
                       memberSince={profile?.created_at}
                       reviews={reviews}

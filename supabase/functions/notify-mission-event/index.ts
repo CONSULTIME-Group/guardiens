@@ -38,6 +38,7 @@ type EventType =
   | 'mission_response_withdrawn'
   | 'mission_feedback_received'
   | 'mission_thanks_received'
+  | 'mission_auto_closed'
 
 const ALLOWED_EVENTS: ReadonlySet<EventType> = new Set([
   'mission_proposal',
@@ -48,6 +49,7 @@ const ALLOWED_EVENTS: ReadonlySet<EventType> = new Set([
   'mission_response_withdrawn',
   'mission_feedback_received',
   'mission_thanks_received',
+  'mission_auto_closed',
 ])
 
 // Bypass rate-limit pour ces événements critiques
@@ -143,6 +145,15 @@ function buildCopy(
         link: missionLink,
         emailTemplate: 'mission-thanks-received',
       }
+    case 'mission_auto_closed': {
+      const ageDays = typeof meta.age_days === 'number' ? meta.age_days : undefined
+      return {
+        title: 'Votre mission a été clôturée automatiquement',
+        body: `"${missionTitle}" a été clôturée après une période sans activité. Vous pouvez la republier.`,
+        link: missionLink,
+        emailTemplate: 'mission-auto-closed',
+      }
+    }
   }
 }
 

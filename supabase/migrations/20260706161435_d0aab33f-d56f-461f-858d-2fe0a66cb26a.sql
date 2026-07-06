@@ -1,0 +1,1 @@
+ALTER VIEW public.profile_mission_badges SET (security_invoker = true);

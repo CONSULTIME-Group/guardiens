@@ -59,6 +59,17 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = true
   [functions.generate-house-guide]
     verify_jwt = true
+  [functions.auto-close-small-missions]
+    verify_jwt = true
+  [functions.send-mission-nudges]
+    verify_jwt = true
+  [functions.send-mutual-aid-weekly-digest]
+    verify_jwt = true
+
+
+
+
+
 
 
 
