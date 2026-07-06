@@ -109,7 +109,10 @@ const Notifications = () => {
   };
 
   const unreadCount = notifications.filter((n) => !n.read_at).length;
-  const groups = groupByDay(notifications);
+  const displayed = urgentFilter
+    ? notifications.filter((n) => URGENT_TYPES.has(n.type))
+    : notifications;
+  const groups = groupByDay(displayed);
 
   return (
     <div className="relative max-w-2xl mx-auto px-4 pb-24 pt-4 md:px-6 md:pt-8 md:pb-16 animate-fade-in">
