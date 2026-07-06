@@ -429,9 +429,26 @@ const LeaveReview = () => {
         <label className="text-sm font-medium mb-2 block">
           Commentaire <span className="text-muted-foreground font-normal">(min. 50 caractères)</span>
         </label>
+        {sitId && (
+          <AlmaReviewDraftBubble
+            sitId={sitId}
+            conversationId={conversationId}
+            role={isOwnerReview ? "owner" : "sitter"}
+            subRatings={subRatings}
+            comment={comment}
+            selectedBadges={selectedBadges}
+            onDraft={(draft) => {
+              setComment(draft);
+              setUsedAlmaDraft(true);
+            }}
+          />
+        )}
         <Textarea
           value={comment}
-          onChange={(e) => setComment(e.target.value)}
+          onChange={(e) => {
+            setComment(e.target.value);
+            if (usedAlmaDraft) setUsedAlmaDraft(false);
+          }}
           placeholder={intro.placeholder}
           rows={6}
           className="text-sm"
@@ -440,6 +457,7 @@ const LeaveReview = () => {
           {comment.trim().length}/50 caractères minimum
         </p>
       </div>
+
 
       {/* Legal RGPD notice */}
       <div className="rounded-lg bg-muted/40 border border-border p-3 mb-8">
