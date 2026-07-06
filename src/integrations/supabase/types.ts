@@ -5362,6 +5362,22 @@ export type Database = {
           },
         ]
       }
+      email_delivery_stats: {
+        Row: {
+          bounce_rate: number | null
+          bounced: number | null
+          click_rate: number | null
+          clicked: number | null
+          complained: number | null
+          day: string | null
+          delivered: number | null
+          open_rate: number | null
+          opened: number | null
+          sent: number | null
+          template_name: string | null
+        }
+        Relationships: []
+      }
       email_idempotency_daily_counts: {
         Row: {
           day: string | null
