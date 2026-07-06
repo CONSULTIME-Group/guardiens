@@ -65,6 +65,7 @@ export function hasNoActiveSit(
  */
 export type OwnerNbaVariant =
   | "sit_draft_from_prompt"
+  | "sit_draft_from_prompt_with_existing_draft"
   | "draft_resume"
   | "no_active_sit"
   | "priority_action";
@@ -74,7 +75,13 @@ export function computeOwnerNbaVariant(input: {
   hasDraft: boolean;
   hasNoActiveSit?: boolean;
 }): OwnerNbaVariant {
-  if (input.hasDraft) return "draft_resume";
+  // Un draft existe : la NBA dominante est DraftResumeCard. Si le concierge
+  // IA (SitDraftFromPrompt) est également affiché en secondaire, on trace un
+  // variant distinct pour ventiler l'usage.
+  if (input.hasDraft) {
+    if (input.hasNoActiveSit) return "sit_draft_from_prompt_with_existing_draft";
+    return "draft_resume";
+  }
   if (input.isNewOwner) return "sit_draft_from_prompt";
   if (input.hasNoActiveSit) return "no_active_sit";
   return "priority_action";
