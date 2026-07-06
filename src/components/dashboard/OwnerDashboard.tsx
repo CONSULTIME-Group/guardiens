@@ -61,6 +61,8 @@ import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
 import { useIsNewOwner, isEarlyOwner, hasNoActiveSit, computeOwnerNbaVariant } from "@/hooks/useIsNewUser";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
+import { useAlmaFirstMeeting } from "@/hooks/useAlmaFirstMeeting";
+import { AlmaFirstMeeting } from "@/components/ai/alma/AlmaFirstMeeting";
 import { trackEvent } from "@/lib/analytics";
 import { SITTER_PRICE_START, REFERRAL_REWARD_LABEL } from "@/lib/pricing";
 
