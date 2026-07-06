@@ -97,11 +97,60 @@ function sessionId(): string {
 
 export function AlmaProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
+  const location = useLocation();
   const [state, setState] = useState<SchedulerState>(() => makeInitialState("balanced"));
   const [queue, setQueue] = useState<AlmaWhisper[]>([]);
   const [current, setCurrent] = useState<AlmaWhisper | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
+  const lastInputFocusRef = useRef<number>(0);
+  const inputFocusedRef = useRef<boolean>(false);
+  const pathnameRef = useRef(location.pathname);
+  pathnameRef.current = location.pathname;
+
+  // Surveille le focus des champs de saisie pour mettre en pause les whispers
+  // proactifs pendant que l'utilisateur tape.
+  useEffect(() => {
+    const isFormField = (el: EventTarget | null): boolean => {
+      if (!(el instanceof HTMLElement)) return false;
+      const tag = el.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return true;
+      if (el.isContentEditable) return true;
+      return false;
+    };
+    const onFocusIn = (e: FocusEvent) => {
+      if (isFormField(e.target)) {
+        inputFocusedRef.current = true;
+        lastInputFocusRef.current = Date.now();
+      }
+    };
+    const onFocusOut = (e: FocusEvent) => {
+      if (isFormField(e.target)) {
+        inputFocusedRef.current = false;
+        lastInputFocusRef.current = Date.now();
+      }
+    };
+    const onInput = (e: Event) => {
+      if (isFormField(e.target)) {
+        lastInputFocusRef.current = Date.now();
+      }
+    };
+    document.addEventListener("focusin", onFocusIn);
+    document.addEventListener("focusout", onFocusOut);
+    document.addEventListener("input", onInput, true);
+    return () => {
+      document.removeEventListener("focusin", onFocusIn);
+      document.removeEventListener("focusout", onFocusOut);
+      document.removeEventListener("input", onInput, true);
+    };
+  }, []);
+
+  const isProactiveMuted = useCallback((): boolean => {
+    if (isWhisperExcludedRoute(pathnameRef.current)) return true;
+    if (inputFocusedRef.current) return true;
+    if (Date.now() - lastInputFocusRef.current < INPUT_FOCUS_QUIET_MS) return true;
+    return false;
+  }, []);
 
   // Charge fréquence + blacklist
   useEffect(() => {
@@ -129,21 +178,31 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
   }, [user?.id]);
 
   const canEmit = useCallback(
-    (type: AlmaWhisperType) => canEmitPure(stateRef.current, type).ok,
-    [],
+    (type: AlmaWhisperType) => {
+      if (isProactiveMuted()) return false;
+      return canEmitPure(stateRef.current, type).ok;
+    },
+    [isProactiveMuted],
   );
 
-  const queueWhisper = useCallback((whisper: AlmaWhisper) => {
-    setQueue((q) => {
-      // dédoublonne par type déjà en queue ou déjà en cours
-      if (q.some((w) => w.type === whisper.type)) return q;
-      return [...q, whisper];
-    });
-  }, []);
+  const queueWhisper = useCallback(
+    (whisper: AlmaWhisper) => {
+      // Gate de silence : route de formulaire exclue ou champ en cours de saisie.
+      if (isProactiveMuted()) return;
+      setQueue((q) => {
+        // dédoublonne par type déjà en queue ou déjà en cours
+        if (q.some((w) => w.type === whisper.type)) return q;
+        return [...q, whisper];
+      });
+    },
+    [isProactiveMuted],
+  );
 
   // Sélection du prochain whisper
   useEffect(() => {
     if (current || queue.length === 0) return;
+    // Ne rien émettre si l'utilisateur est en train de saisir ou sur une route exclue.
+    if (isProactiveMuted()) return;
     const next = pickNext(queue, stateRef.current);
     if (!next) return;
 
@@ -166,7 +225,8 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
           metadata: next.metadata ?? null,
         } as any);
     }
-  }, [current, queue, user?.id]);
+  }, [current, queue, user?.id, isProactiveMuted, location.pathname]);
+
 
   const dismissCurrent = useCallback(
     (reason: AlmaDismissReason) => {
