@@ -1311,6 +1311,99 @@ export type Database = {
         }
         Relationships: []
       }
+      email_delivery_snapshots: {
+        Row: {
+          bounce_rate: number
+          breaches: Json
+          click_rate: number
+          complaint_rate: number
+          created_at: string
+          id: string
+          open_rate: number
+          per_template: Json
+          snapshot_date: string
+          total_bounced: number
+          total_clicked: number
+          total_complained: number
+          total_delivered: number
+          total_opened: number
+          total_sent: number
+          window_days: number
+        }
+        Insert: {
+          bounce_rate?: number
+          breaches?: Json
+          click_rate?: number
+          complaint_rate?: number
+          created_at?: string
+          id?: string
+          open_rate?: number
+          per_template?: Json
+          snapshot_date: string
+          total_bounced?: number
+          total_clicked?: number
+          total_complained?: number
+          total_delivered?: number
+          total_opened?: number
+          total_sent?: number
+          window_days: number
+        }
+        Update: {
+          bounce_rate?: number
+          breaches?: Json
+          click_rate?: number
+          complaint_rate?: number
+          created_at?: string
+          id?: string
+          open_rate?: number
+          per_template?: Json
+          snapshot_date?: string
+          total_bounced?: number
+          total_clicked?: number
+          total_complained?: number
+          total_delivered?: number
+          total_opened?: number
+          total_sent?: number
+          window_days?: number
+        }
+        Relationships: []
+      }
+      email_delivery_thresholds: {
+        Row: {
+          alert_enabled: boolean
+          alert_recipient: string | null
+          bounce_pct_max: number
+          complaint_pct_max: number
+          id: number
+          min_sends: number
+          open_pct_min: number
+          updated_at: string
+          window_days: number
+        }
+        Insert: {
+          alert_enabled?: boolean
+          alert_recipient?: string | null
+          bounce_pct_max?: number
+          complaint_pct_max?: number
+          id?: number
+          min_sends?: number
+          open_pct_min?: number
+          updated_at?: string
+          window_days?: number
+        }
+        Update: {
+          alert_enabled?: boolean
+          alert_recipient?: string | null
+          bounce_pct_max?: number
+          complaint_pct_max?: number
+          id?: number
+          min_sends?: number
+          open_pct_min?: number
+          updated_at?: string
+          window_days?: number
+        }
+        Relationships: []
+      }
       email_engagement_events: {
         Row: {
           created_at: string
