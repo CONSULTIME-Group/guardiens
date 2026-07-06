@@ -12,6 +12,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Mail, Clock, FileText, Send, ShieldOff, History, Settings2, RefreshCw, AlertCircle, Ban, Eye, SendHorizonal, Pencil, Info, CheckCircle2, BarChart3, Inbox, Bell } from "lucide-react";
 import { ConfirmationsTab } from "./_components/ConfirmationsTab";
 import { QueueTab } from "./_components/QueueTab";
+import DeliveryTab from "./_components/DeliveryTab";
+import { useSearchParams } from "react-router-dom";
 import SitterDigestTab from "./_components/SitterDigestTab";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
