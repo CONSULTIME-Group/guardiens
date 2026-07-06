@@ -27,6 +27,16 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface PropertySummary {
   id: string;
@@ -246,6 +256,8 @@ const CreateSit = () => {
   const [savingDraft, setSavingDraft] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [incompleteNudgeOpen, setIncompleteNudgeOpen] = useState(false);
+  const incompleteNudgeSeenRef = useRef(false);
   const hasUserEditedRef = useRef(false);
   const initialLoadedRef = useRef(false);
 
@@ -439,11 +451,17 @@ const CreateSit = () => {
   const MIN_DESCRIPTION = 150;
   const descriptionValid = specificExpectations.length >= MIN_DESCRIPTION;
   const hasPhoto = !!coverPhotoUrl || ownerPhotos.length > 0;
-  const canPublish = profileCompletion >= 60 && property && title && startDate && endDate && !dateError && descriptionValid && hasPhoto;
+  // Seuil de publication abaissé de 60 % à 40 % (owner Pass 2) : débloque
+  // les propriétaires en cours d'onboarding sans sacrifier la qualité minimale
+  // (photo, description, dates). Un badge non bloquant rappelle la complétion
+  // du profil sur l'annonce tant qu'elle est < 80 %.
+  const PUBLISH_PROFILE_THRESHOLD = 40;
+  const NUDGE_PROFILE_THRESHOLD = 80;
+  const canPublish = profileCompletion >= PUBLISH_PROFILE_THRESHOLD && property && title && startDate && endDate && !dateError && descriptionValid && hasPhoto;
 
   type PublishBlocker = { id: string; label: string; anchor?: string; action?: string };
   const publishBlockers: PublishBlocker[] = [
-    profileCompletion < 60 ? { id: "profile", label: `Profil complété à 60 % minimum (actuellement ${profileCompletion} %)`, action: "/owner-profile" } : null,
+    profileCompletion < PUBLISH_PROFILE_THRESHOLD ? { id: "profile", label: `Profil complété à ${PUBLISH_PROFILE_THRESHOLD} % minimum (actuellement ${profileCompletion} %)`, action: "/owner-profile" } : null,
     !property ? { id: "property", label: "Logement renseigné", action: "/owner-profile" } : null,
     !title ? { id: "title", label: "Titre de l'annonce", anchor: "title-field" } : null,
     !startDate ? { id: "start", label: "Date de début", anchor: "dates-field" } : null,
@@ -1268,11 +1286,23 @@ const CreateSit = () => {
             ) : (
               <Button
                 onClick={() => {
-                  if (canPublish) {
-                    setPreviewOpen(true);
-                  } else {
+                  if (!canPublish) {
                     onPublishClick();
+                    return;
                   }
+                  // Nudge non bloquant si profil < 80 % : on ouvre une modale
+                  // qui laisse le choix "Publier maintenant" ou "Compléter d'abord".
+                  if (profileCompletion < NUDGE_PROFILE_THRESHOLD) {
+                    if (!incompleteNudgeSeenRef.current) {
+                      incompleteNudgeSeenRef.current = true;
+                      trackEvent("owner_publish_with_incomplete_profile_modal_seen", {
+                        metadata: { profile_completion: profileCompletion },
+                      });
+                    }
+                    setIncompleteNudgeOpen(true);
+                    return;
+                  }
+                  setPreviewOpen(true);
                 }}
                 disabled={publishing}
                 aria-disabled={!canPublish}
@@ -1289,6 +1319,44 @@ const CreateSit = () => {
           </div>
         </div>
       </div>
+
+      {/* Modale nudge non bloquante : profil complété entre 40 % et 80 %.
+          Le clic "Publier maintenant" enchaîne sur l'aperçu classique. */}
+      <AlertDialog open={incompleteNudgeOpen} onOpenChange={setIncompleteNudgeOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Vous pouvez publier maintenant, votre profil sera complété plus tard
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Votre profil est complété à {profileCompletion} %. Vous pouvez remplir les
+              informations manquantes après avoir publié. Les gardiens verront votre annonce
+              et pourront candidater.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setIncompleteNudgeOpen(false);
+                navigate("/profile");
+              }}
+            >
+              Compléter d'abord mon profil
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                trackEvent("owner_publish_with_incomplete_profile_confirmed", {
+                  metadata: { profile_completion: profileCompletion },
+                });
+                setIncompleteNudgeOpen(false);
+                setPreviewOpen(true);
+              }}
+            >
+              Publier maintenant
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AnnouncementPreviewDialog
         open={previewOpen}

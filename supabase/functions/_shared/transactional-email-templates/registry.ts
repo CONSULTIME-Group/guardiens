@@ -50,6 +50,7 @@ import { template as missionProposalAccepted } from './mission-proposal-accepted
 import { template as missionProposalDeclined } from './mission-proposal-declined.tsx'
 import { template as ownerNoSitJ3 } from './owner-no-sit-j3.tsx'
 import { template as ownerNoSitJ10 } from './owner-no-sit-j10.tsx'
+import { template as ownerNoSitJ21 } from './owner-no-sit-j21.tsx'
 import { template as referralBoostMonthly } from './referral-boost-monthly.tsx'
 import { template as proProfileApproved } from './pro-profile-approved.tsx'
 import { template as proProfileRejected } from './pro-profile-rejected.tsx'
@@ -102,6 +103,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'mission-proposal-declined': missionProposalDeclined,
   'owner-no-sit-j3': ownerNoSitJ3,
   'owner-no-sit-j10': ownerNoSitJ10,
+  'owner-no-sit-j21': ownerNoSitJ21,
   'referral-boost-monthly': referralBoostMonthly,
   'pro-profile-approved': proProfileApproved,
   'pro-profile-rejected': proProfileRejected,

@@ -195,6 +195,22 @@ Deno.serve(async (req) => {
       }
 
       const idempotencyKey = `journey-${j.sequence_key}-${j.id}-step-${nextStep.step_order}`
+
+      // Enrichissement contextuel : pour les séquences owner-no-sit-*, on
+      // hydrate ville, gardiens à proximité et top 3 prénoms via la RPC PG.
+      // Fail-open : si la RPC échoue ou renvoie null, on envoie sans ces champs.
+      let ownerContext: Record<string, unknown> = {}
+      if (j.sequence_key === 'owner-no-sit-relance') {
+        try {
+          const { data: ctx } = await supabase.rpc('get_owner_nurturing_context', { _owner_id: j.user_id })
+          if (ctx && typeof ctx === 'object') {
+            ownerContext = ctx as Record<string, unknown>
+          }
+        } catch (ctxErr) {
+          console.warn('[owner-context] rpc failed, sending without enrichment', ctxErr)
+        }
+      }
+
       const sendRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
         method: 'POST',
         headers: {
@@ -213,6 +229,7 @@ Deno.serve(async (req) => {
             daysSinceLastSeen: profile.last_seen_at
               ? Math.floor((Date.now() - new Date(profile.last_seen_at).getTime()) / 86400_000)
               : undefined,
+            ...ownerContext,
           },
           metadata: { source: `journey:${j.sequence_key}:${nextStep.step_order}`, user_id: j.user_id },
         }),
