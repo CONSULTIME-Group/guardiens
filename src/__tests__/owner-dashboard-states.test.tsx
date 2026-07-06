@@ -60,23 +60,26 @@ describe("OwnerDashboard states — précepte 2026 « 1 NBA dominante »", () =>
     expect(s.showDesktopHeroCta).toBe(false);
   });
 
-  it("new-owner avec draft : DraftResumeCard prend le relais, SitDraftFromPrompt masqué", () => {
+  it("new-owner avec draft : DraftResumeCard + SitDraftFromPrompt secondaire (concierge toujours accessible)", () => {
     const s = state([{ status: "draft" }], []);
     expect(s.earlyOwner).toBe(true);
-    expect(s.nbaVariant).toBe("draft_resume");
-    expect(s.showSitDraftFromPrompt).toBe(false);
+    expect(s.nbaVariant).toBe("sit_draft_from_prompt_with_existing_draft");
+    expect(s.showSitDraftFromPrompt).toBe(true);
+    expect(s.sitDraftSecondary).toBe(true);
     expect(s.showDraftResumeCard).toBe(true);
     expect(s.showPriorityActionCard).toBe(false);
     expect(s.showOwnerFirstNBAGardiens).toBe(true);
     expect(s.showDesktopHeroCta).toBe(false);
   });
 
-  it("early owner (drafts uniquement, aucune annonce publiée) : identique au new-owner avec draft", () => {
+  it("early owner (drafts uniquement) : DraftResumeCard + concierge IA secondaire", () => {
     const s = state([{ status: "draft" }, { status: "draft" }], []);
     expect(s.isNewOwner).toBe(false);
     expect(s.earlyOwner).toBe(true);
-    expect(s.nbaVariant).toBe("draft_resume");
+    expect(s.nbaVariant).toBe("sit_draft_from_prompt_with_existing_draft");
     expect(s.showDraftResumeCard).toBe(true);
+    expect(s.showSitDraftFromPrompt).toBe(true);
+    expect(s.sitDraftSecondary).toBe(true);
     expect(s.showPriorityActionCard).toBe(false);
     expect(s.showOwnerFirstNBAGardiens).toBe(true);
     expect(s.showDesktopHeroCta).toBe(false);
