@@ -7,6 +7,7 @@ import { slugify } from "@/lib/normalize";
 import { CITIES } from "@/data/cities";
 import { buildOgImageUrl } from "@/lib/ogImage";
 import ShareLink from "@/components/share/ShareLink";
+import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 
 interface BreedProfile {
   species: string;
