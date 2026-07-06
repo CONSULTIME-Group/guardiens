@@ -72,6 +72,9 @@ const OwnerDashboard = () => {
   const navigate = useNavigate();
   const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
   const [showAllMobile, setShowAllMobile] = useState(false);
+  // Pass 5 — compagnon culturel : anecdote fondatrice ou stat sociale.
+  useAlmaCulturalFact({ surface: "dashboard", context: { role: "owner" } });
+
 
 
   
