@@ -36,7 +36,7 @@ export function useAlmaFrequency(): {
         .maybeSingle();
       if (cancelled) return;
       const raw = (data as any)?.alma_frequency;
-      if (raw === "silent" || raw === "balanced" || raw === "talkative") {
+      if (raw === "silent" || raw === "low" || raw === "balanced" || raw === "talkative") {
         setFrequencyState(raw);
       }
       setLoading(false);
