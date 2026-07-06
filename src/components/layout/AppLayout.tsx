@@ -8,6 +8,10 @@ import Breadcrumbs from "./Breadcrumbs";
 // n'utilisent jamais le shell AppLayout mais partagent l'entry bundle.
 const NotificationBell = lazy(() => import("./NotificationBell"));
 const MessageBell = lazy(() => import("./MessageBell"));
+const AlmaWhisperOutlet = lazy(() =>
+  import("@/components/ai/alma/AlmaWhisper").then((m) => ({ default: m.AlmaWhisperOutlet })),
+);
+import { AlmaProvider } from "@/contexts/AlmaContext";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
