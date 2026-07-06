@@ -190,14 +190,27 @@ const OwnerDashboard = () => {
     const anyPublished = sits.some(s => s.status === "published");
     if (anyPublished) return "Votre annonce est en ligne, les candidatures arrivent.";
     // Historique présent mais plus rien d'actif : on évite le message « première annonce » trompeur.
-    if (sits.length > 0) {
+    if (sits.length > 0 && !earlyOwner) {
       return `${sits.length} annonce${sits.length > 1 ? "s" : ""} dans votre historique, aucune en cours.`;
+    }
+    // Early owner avec brouillon : on reprend le fil.
+    if (earlyOwner && hasDraft) {
+      return "Vous avez commencé une annonce. Reprenez où vous en étiez.";
+    }
+    // New/early owner sans brouillon : subtitle personnalisé via signal local.
+    if (earlyOwner) {
+      const firstName = user?.firstName ? capitalize(user.firstName) : null;
+      const hello = firstName ? `Bienvenue, ${firstName}.` : "Bienvenue chez Guardiens.";
+      if (nearbyCount > 0 && nearbyRadius) {
+        return `${hello} ${nearbyCount} gardien${nearbyCount > 1 ? "s" : ""} vérifié${nearbyCount > 1 ? "s" : ""} dans un rayon de ${nearbyRadius} km attendent une annonce.`;
+      }
+      return `${hello} Publiez votre première annonce, on vous accompagne.`;
     }
     return "Publiez votre première annonce pour trouver un gardien.";
 
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ongoingSit, sits, pendingAppCount]);
+  }, [ongoingSit, sits, pendingAppCount, hasDraft, user?.firstName]);
 
   // Banner contextuel supprimé : verif & candidatures non lues affichées en chips inline dans le hero.
 
