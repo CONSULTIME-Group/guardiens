@@ -643,6 +643,38 @@ const SmallMissionDetail = () => {
     setSearchParams({}, { replace: true });
   };
 
+  const handleOneClickInterest = async () => {
+    if (!user || !id || !mission || oneClickInterestBusy) return;
+    if (mission.user_id === user.id) return;
+    setOneClickInterestBusy(true);
+    try {
+      trackEvent("mission_offer_one_click_interest", { metadata: { mission_id: id } });
+      // 1. Récupère/crée conversation (RPC atomique)
+      const { conversationId, error: convError } = await startConversation({
+        otherUserId: mission.user_id,
+        context: "mission_help",
+        smallMissionId: id,
+      });
+      if (!conversationId) {
+        toast({ variant: "destructive", title: "Erreur", description: convError || "Impossible d'ouvrir la conversation." });
+        return;
+      }
+      // 2. Insert réponse (silencieux si doublon)
+      const templateMsg = `Bonjour ${author?.first_name || ""}, votre proposition « ${mission.title} » m'intéresse. Je vous contacte en privé pour en discuter.`.trim();
+      await supabase
+        .from("small_mission_responses")
+        .insert({ mission_id: id, responder_id: user.id, message: templateMsg })
+        .then(() => {});
+      // 3. Redirige messagerie
+      navigate(`/messages?c=${conversationId}`);
+    } catch (err: any) {
+      logger.error("[handleOneClickInterest]", { err: String(err) });
+      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible d'envoyer votre intérêt." });
+    } finally {
+      setOneClickInterestBusy(false);
+    }
+  };
+
   if (loading) {
     return (
       <>
