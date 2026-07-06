@@ -5,6 +5,7 @@ import {
   ShieldCheck, Mail, FileText, LogOut, ArrowLeft, MapPin, HelpCircle,
   Compass, Handshake, Briefcase, CreditCard, MessageSquare, ScrollText, Settings,
   Lightbulb, AlertTriangle, Bug, Stethoscope, Sprout, BarChart3, Send,
+  Sparkles,
   ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
