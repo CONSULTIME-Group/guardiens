@@ -848,7 +848,9 @@ const Messages = () => {
               }}
               sending={sending}
             />
+            </>
           )}
+
         </div>
       ) : !isMobile ? (
         /* Empty state desktop, gouache emptyMailbox conforme à la charte */
