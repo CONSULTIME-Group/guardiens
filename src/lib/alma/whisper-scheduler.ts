@@ -63,11 +63,11 @@ export function canEmit(
   if (state.blacklistedTypes.has(type)) return { ok: false, reason: "blacklisted" };
   if (state.emittedCount >= cfg.maxPerSession) return { ok: false, reason: "quota" };
 
-  if (state.lastEmittedAt && now - state.lastEmittedAt < cfg.cooldownMs) {
+  if (state.lastEmittedAt !== null && now - state.lastEmittedAt < cfg.cooldownMs) {
     return { ok: false, reason: "cooldown" };
   }
   if (
-    state.lastDismissedAt &&
+    state.lastDismissedAt !== null &&
     state.lastDismissReason === "closed_manually" &&
     now - state.lastDismissedAt < DISMISS_COOLDOWN_MS
   ) {
