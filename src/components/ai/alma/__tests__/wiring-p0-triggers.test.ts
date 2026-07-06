@@ -76,7 +76,7 @@ describe("Trigger 12 retour d'absence — payload whisper", () => {
     expect(w.message.includes("—")).toBe(false);
     expect(w.primaryAction?.actionId).toBe("see_matches");
   });
-  it("produit un whisper P0 sitter en tutoiement", () => {
+  it("produit un whisper P0 sitter en vouvoiement (règle éditoriale absolue)", () => {
     const w = buildLongAbsenceReturnWhisper({
       firstName: "Yanis",
       newSits: 8,
@@ -85,6 +85,7 @@ describe("Trigger 12 retour d'absence — payload whisper", () => {
       onSeeMatches: () => {},
     });
     expect(w.audience).toBe("sitter");
-    expect(w.message).toContain("ta zone");
+    expect(w.message).toContain("votre zone");
+    expect(w.message).not.toMatch(/\bta\b|\bton\b|\btes\b|\btu\b/i);
   });
 });
