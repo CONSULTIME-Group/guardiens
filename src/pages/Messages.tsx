@@ -22,6 +22,8 @@ import { trackFirstAction } from "@/lib/analytics";
 import { moderateContent } from "@/lib/moderation";
 import { appStatusBadge as appStatusLabels } from "@/lib/messageStatus";
 import { useAutoOpenConversation } from "@/hooks/useAutoOpenConversation";
+import AlmaMessageOpener from "@/components/ai/alma/AlmaMessageOpener";
+
 
 const MESSAGES_PAGE_SIZE = 50;
 
