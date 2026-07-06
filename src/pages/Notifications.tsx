@@ -151,10 +151,28 @@ const Notifications = () => {
         </div>
       )}
 
+      {/* Résumé Alma proactif */}
+      {!loading && notifications.length > 0 && (
+        <AlmaNotifSummaryBubble
+          notifications={notifications}
+          urgentFilterActive={urgentFilter}
+          onFilterUrgent={() => setUrgentFilter(true)}
+        />
+      )}
+
+      {urgentFilter && (
+        <div className="mb-3 flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs">
+          <span className="text-muted-foreground">Filtre « urgentes » actif</span>
+          <Button variant="ghost" size="sm" className="h-7" onClick={() => setUrgentFilter(false)}>
+            Voir tout
+          </Button>
+        </div>
+      )}
+
       {/* Contenu */}
       {loading ? (
         <NotificationSkeleton />
-      ) : notifications.length === 0 ? (
+      ) : displayed.length === 0 ? (
         <NotificationsEmptyState />
       ) : (
         <div>
