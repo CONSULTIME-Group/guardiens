@@ -48,6 +48,7 @@ import { template as missionInvitation } from './mission-invitation.tsx'
 import { template as unreadMessagesReminder } from './unread-messages-reminder.tsx'
 import { template as missionProposalAccepted } from './mission-proposal-accepted.tsx'
 import { template as missionProposalDeclined } from './mission-proposal-declined.tsx'
+import { template as missionResponseWithdrawn } from './mission-response-withdrawn.tsx'
 import { template as ownerNoSitJ3 } from './owner-no-sit-j3.tsx'
 import { template as ownerNoSitJ10 } from './owner-no-sit-j10.tsx'
 import { template as ownerNoSitJ21 } from './owner-no-sit-j21.tsx'
@@ -102,6 +103,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'unread-messages-reminder': unreadMessagesReminder,
   'mission-proposal-accepted': missionProposalAccepted,
   'mission-proposal-declined': missionProposalDeclined,
+  'mission-response-withdrawn': missionResponseWithdrawn,
   'owner-no-sit-j3': ownerNoSitJ3,
   'owner-no-sit-j10': ownerNoSitJ10,
   'owner-no-sit-j21': ownerNoSitJ21,

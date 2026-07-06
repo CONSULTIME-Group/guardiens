@@ -4,6 +4,8 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Heart, CheckCircle2, MessageSquare, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -18,7 +20,8 @@ interface Props {
   currentUserId?: string;
   missionOwnerId: string;
   processing: boolean;
-  onSelect: () => void;
+  pendingCount?: number;
+  onSelect: (mode: "keep" | "decline_others") => void;
   onDecline: () => void;
   onOpenMessages: () => void;
 }
@@ -35,6 +38,7 @@ const MissionResponseCard = ({
   currentUserId,
   missionOwnerId,
   processing,
+  pendingCount = 0,
   onSelect,
   onDecline,
   onOpenMessages,
@@ -43,6 +47,7 @@ const MissionResponseCard = ({
   const [count, setCount] = useState<number>(r.helpful_count ?? 0);
   const [thanked, setThanked] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [acceptMode, setAcceptMode] = useState<"keep" | "decline_others">("keep");
 
   const isOwnResponse = currentUserId && r.responder_id === currentUserId;
   const canThank =
@@ -86,11 +91,15 @@ const MissionResponseCard = ({
     setBusy(false);
   };
 
+  const isWithdrawn = r.status === "withdrawn";
+
   return (
     <article
       className={cn(
         "bg-card rounded-2xl border p-4 md:p-5 transition-colors",
-        r.status === "accepted" ? "border-success/40 bg-success-soft/30" : "border-border",
+        r.status === "accepted" && "border-success/40 bg-success-soft/30",
+        !r.status || r.status === "pending" ? "border-border" : "",
+        isWithdrawn && "border-border opacity-60 grayscale",
       )}
     >
       <div className="flex items-start gap-3 md:gap-4">
@@ -172,12 +181,36 @@ const MissionResponseCard = ({
                       <AlertDialogDescription>
                         Vous confirmez publiquement que cette personne vous aide sur cette mission.
                         Elle apparaîtra comme « Personne retenue » ici et sur son profil public.
-                        Les autres réponses ne seront pas déclinées automatiquement.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
+                    {pendingCount > 1 && (
+                      <div className="rounded-xl border border-border bg-muted/40 p-3">
+                        <p className="text-xs font-semibold text-foreground mb-2">
+                          {pendingCount - 1} autre{pendingCount - 1 > 1 ? "s" : ""} réponse{pendingCount - 1 > 1 ? "s" : ""} en attente
+                        </p>
+                        <RadioGroup
+                          value={acceptMode}
+                          onValueChange={(v) => setAcceptMode(v as "keep" | "decline_others")}
+                          className="space-y-2"
+                        >
+                          <div className="flex items-start gap-2">
+                            <RadioGroupItem value="keep" id={`mode-keep-${r.id}`} className="mt-0.5" />
+                            <Label htmlFor={`mode-keep-${r.id}`} className="text-sm font-normal leading-snug cursor-pointer">
+                              Garder les autres réponses ouvertes (au cas où)
+                            </Label>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <RadioGroupItem value="decline_others" id={`mode-decline-${r.id}`} className="mt-0.5" />
+                            <Label htmlFor={`mode-decline-${r.id}`} className="text-sm font-normal leading-snug cursor-pointer">
+                              Écarter les autres réponses (elles seront prévenues)
+                            </Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                    )}
                     <AlertDialogFooter>
                       <AlertDialogCancel>Annuler</AlertDialogCancel>
-                      <AlertDialogAction onClick={onSelect}>Confirmer</AlertDialogAction>
+                      <AlertDialogAction onClick={() => onSelect(acceptMode)}>Confirmer</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
@@ -208,6 +241,9 @@ const MissionResponseCard = ({
             )}
             {!isAuthor && r.status === "declined" && (
               <span className="text-[10px] text-muted-foreground italic ml-auto" role="status">Non retenu(e)</span>
+            )}
+            {isWithdrawn && (
+              <span className="text-[10px] text-muted-foreground italic ml-auto" role="status">Réponse retirée</span>
             )}
           </div>
 

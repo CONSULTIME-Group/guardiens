@@ -36,11 +36,20 @@ const reasonOptions: Record<string, { label: string; reasons: { value: string; l
       { value: "other", label: "Autre" },
     ],
   },
+  small_mission: {
+    label: "cette petite mission",
+    reasons: [
+      { value: "misleading", label: "Annonce trompeuse" },
+      { value: "scam", label: "Arnaque suspectée" },
+      { value: "inappropriate", label: "Contenu inapproprié" },
+      { value: "other", label: "Autre" },
+    ],
+  },
 };
 
 interface ReportButtonProps {
   targetId: string;
-  targetType: "profile" | "sit" | "review";
+  targetType: "profile" | "sit" | "review" | "small_mission";
   className?: string;
 }
 

@@ -139,7 +139,14 @@ export type EventType =
   | "entraide_empty_state_template_clicked"     // Exemple cliquable empty state (tab, template_key)
   | "entraide_all_status_default_used"          // Fallback filtre status=all car <20 missions (missions_count)
   | "mission_expired_badge_seen"                // Badge "date dépassée" impression (mission_id, days_overdue)
-  | "mission_expired_reschedule_clicked";       // Clic "Reporter" sur mission expirée (mission_id)
+  | "mission_expired_reschedule_clicked"        // Clic "Reporter" sur mission expirée (mission_id)
+  // EntraideHub Pass 1, vagues 2-3 (modale réponse + workflow) ---------------
+  | "mission_response_modal_opened"             // Ouverture modale de réponse depuis sidebar (mission_id, mission_type)
+  | "mission_response_template_used"            // Template rapide sélectionné dans la modale (mission_id, template_key)
+  | "mission_response_submitted_from_modal"     // Envoi depuis la modale (mission_id, has_template)
+  | "mission_offer_one_click_interest"          // Clic "Je suis intéressé" sur mission offer (mission_id)
+  | "mission_accept_response_cascade_choice"    // Mode choisi lors de l'acceptation (mode: keep|decline_others, pending_count)
+  | "mission_response_withdrawn";               // Réponse retirée par son auteur (mission_id, response_id)
 
 interface TrackOptions {
   source?: string;

@@ -35,6 +35,8 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import PublicMissionView from "@/components/missions/PublicMissionView";
 import RelatedMissionCard from "@/components/missions/RelatedMissionCard";
 import MissionResponseCard from "@/components/missions/MissionResponseCard";
+import MissionResponseModal from "@/components/missions/MissionResponseModal";
+import { startConversation } from "@/lib/conversation";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import { isAuthorOf } from "@/lib/ownership";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
@@ -209,6 +211,8 @@ const SmallMissionDetail = () => {
   const [closingNoSelect, setClosingNoSelect] = useState(false);
   const [processingResponseId, setProcessingResponseId] = useState<string | null>(null);
   const [completing, setCompleting] = useState(false);
+  const [responseModalOpen, setResponseModalOpen] = useState(false);
+  const [oneClickInterestBusy, setOneClickInterestBusy] = useState(false);
 
   // Per-person feedback tracking: receiverId → submitted
   const [feedbackSent, setFeedbackSent] = useState<Record<string, boolean>>({});
@@ -317,13 +321,14 @@ const SmallMissionDetail = () => {
   const messageTooShort = trimmedMessage.length > 0 && trimmedMessage.length < MIN_MESSAGE_LEN;
   const messageValid = trimmedMessage.length >= MIN_MESSAGE_LEN && trimmedMessage.length <= MAX_MESSAGE_LEN;
 
-  const handleRespond = async () => {
+  const handleRespond = async (overrideMessage?: string) => {
     if (!user || !id || submitting) return;
-    if (!trimmedMessage) {
+    const msg = (overrideMessage ?? message).trim();
+    if (!msg) {
       toast({ variant: "destructive", title: "Message vide", description: "Écrivez un mot avant de publier votre réponse." });
       return;
     }
-    if (trimmedMessage.length < MIN_MESSAGE_LEN) {
+    if (msg.length < MIN_MESSAGE_LEN) {
       toast({ variant: "destructive", title: "Message trop court", description: `Ajoutez au moins ${MIN_MESSAGE_LEN} caractères pour que l'auteur comprenne votre proposition.` });
       return;
     }
@@ -347,7 +352,7 @@ const SmallMissionDetail = () => {
 
       const { data: inserted, error } = await supabase
         .from("small_mission_responses")
-        .insert({ mission_id: id, responder_id: user.id, message: trimmedMessage })
+        .insert({ mission_id: id, responder_id: user.id, message: msg })
         .select("*, responder:profiles!small_mission_responses_responder_id_fkey(first_name, avatar_url)")
         .single();
 
@@ -398,7 +403,7 @@ const SmallMissionDetail = () => {
     }
   };
 
-  const handleAcceptResponse = async (responseId: string) => {
+  const handleAcceptResponse = async (responseId: string, mode: "keep" | "decline_others" = "keep") => {
     if (processingResponseId) return;
     const resp = responses.find(r => r.id === responseId);
     if (!resp) return;
@@ -423,6 +428,36 @@ const SmallMissionDetail = () => {
       }
 
       setResponses(prev => prev.map(r => r.id === responseId ? { ...r, status: "accepted" } : r));
+
+      // Cascade decline si demandé
+      const pendingOthers = responses.filter(r => r.id !== responseId && r.status === "pending");
+      trackEvent("mission_accept_response_cascade_choice", {
+        metadata: { mode, pending_count: pendingOthers.length },
+      });
+      if (mode === "decline_others" && pendingOthers.length > 0) {
+        const otherIds = pendingOthers.map(r => r.id);
+        await supabase.from("small_mission_responses")
+          .update({ status: "declined" as any })
+          .in("id", otherIds);
+        await supabase.from("notifications").insert(
+          pendingOthers.map(r => ({
+            user_id: r.responder_id, type: "mission_declined",
+            title: "Non retenu(e) cette fois",
+            body: `Quelqu'un d'autre a été choisi pour "${mission.title}". Merci pour votre proposition.`,
+          }))
+        );
+        pendingOthers.forEach(r => {
+          sendTransactionalEmail({
+            templateName: "mission-proposal-declined",
+            recipientUserId: r.responder_id,
+            idempotencyKey: `mission-proposal-declined-${r.id}`,
+            templateData: { missionTitle: mission.title },
+          }).catch(() => {});
+        });
+        setResponses(prev => prev.map(r =>
+          otherIds.includes(r.id) ? { ...r, status: "declined" } : r,
+        ));
+      }
 
       // Reuse existing conversation if any (responder may have already proposed via dialog)
       const { data: existingConv } = await supabase
@@ -608,6 +643,38 @@ const SmallMissionDetail = () => {
     setSearchParams({}, { replace: true });
   };
 
+  const handleOneClickInterest = async () => {
+    if (!user || !id || !mission || oneClickInterestBusy) return;
+    if (mission.user_id === user.id) return;
+    setOneClickInterestBusy(true);
+    try {
+      trackEvent("mission_offer_one_click_interest", { metadata: { mission_id: id } });
+      // 1. Récupère/crée conversation (RPC atomique)
+      const { conversationId, error: convError } = await startConversation({
+        otherUserId: mission.user_id,
+        context: "mission_help",
+        smallMissionId: id,
+      });
+      if (!conversationId) {
+        toast({ variant: "destructive", title: "Erreur", description: convError || "Impossible d'ouvrir la conversation." });
+        return;
+      }
+      // 2. Insert réponse (silencieux si doublon)
+      const templateMsg = `Bonjour ${author?.first_name || ""}, votre proposition « ${mission.title} » m'intéresse. Je vous contacte en privé pour en discuter.`.trim();
+      await supabase
+        .from("small_mission_responses")
+        .insert({ mission_id: id, responder_id: user.id, message: templateMsg })
+        .then(() => {});
+      // 3. Redirige messagerie
+      navigate(`/messages?c=${conversationId}`);
+    } catch (err: any) {
+      logger.error("[handleOneClickInterest]", { err: String(err) });
+      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible d'envoyer votre intérêt." });
+    } finally {
+      setOneClickInterestBusy(false);
+    }
+  };
+
   if (loading) {
     return (
       <>
@@ -778,14 +845,36 @@ const SmallMissionDetail = () => {
                 if (!confirm("Retirer votre réponse ?")) return;
                 const { error } = await supabase
                   .from("small_mission_responses")
-                  .delete()
+                  .update({ status: "withdrawn" as any })
                   .eq("id", myResponse.id);
                 if (error) {
                   toast({ variant: "destructive", title: "Erreur", description: error.message });
                   return;
                 }
-                setHasResponded(false);
-                setResponses(prev => prev.filter(r => r.id !== myResponse.id));
+                // On garde hasResponded=true : la ligne reste en BDD (status=withdrawn), pas de re-réponse possible sans admin.
+                setResponses(prev => prev.map(r =>
+                  r.id === myResponse.id ? { ...r, status: "withdrawn" } : r,
+                ));
+                trackEvent("mission_response_withdrawn", {
+                  metadata: { mission_id: id, response_id: myResponse.id },
+                });
+                // Notif + email auteur (non-bloquant)
+                supabase.from("notifications").insert({
+                  user_id: mission.user_id, type: "mission_response_withdrawn",
+                  title: "Réponse retirée",
+                  body: `${(user as any).first_name || "Un membre"} a retiré sa réponse à « ${mission.title} ».`,
+                  link: `/petites-missions/${id}`,
+                }).then(() => {});
+                sendTransactionalEmail({
+                  templateName: "mission-response-withdrawn",
+                  recipientUserId: mission.user_id,
+                  idempotencyKey: `mission-response-withdrawn-${myResponse.id}`,
+                  templateData: {
+                    responderFirstName: (user as any).first_name || "",
+                    missionTitle: mission.title,
+                    missionId: id,
+                  },
+                }).catch(() => {});
                 toast({ title: "Réponse retirée" });
               }}
             >
@@ -803,6 +892,19 @@ const SmallMissionDetail = () => {
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Quelqu'un d'autre a été choisi cette fois. Merci d'avoir osé proposer.
+            </p>
+            <Link to="/petites-missions" className="block">
+              <Button variant="outline" className="w-full rounded-full">Voir d'autres coups de main</Button>
+            </Link>
+          </div>
+        );
+      }
+      if (myResponse.status === "withdrawn") {
+        return (
+          <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-3">
+            <p className="font-heading text-lg font-semibold text-muted-foreground">Réponse retirée</p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Vous avez retiré votre proposition sur cette mission.
             </p>
             <Link to="/petites-missions" className="block">
               <Button variant="outline" className="w-full rounded-full">Voir d'autres coups de main</Button>
@@ -842,13 +944,25 @@ const SmallMissionDetail = () => {
             className="w-full rounded-full font-bold text-base"
             size="lg"
             onClick={() => {
-              const el = document.getElementById("composer");
-              el?.scrollIntoView({ behavior: "smooth", block: "center" });
-              setTimeout(() => document.getElementById("composer-textarea")?.focus(), 400);
+              setResponseModalOpen(true);
+              trackEvent("mission_response_modal_opened", {
+                metadata: { mission_id: mission.id, mission_type: isOffer ? "offre" : "besoin" },
+              });
             }}
           >
             {ctaLabel}
           </Button>
+          {isOffer && (
+            <Button
+              variant="outline"
+              className="w-full rounded-full font-semibold text-sm gap-2"
+              disabled={oneClickInterestBusy}
+              onClick={handleOneClickInterest}
+            >
+              <MessageSquare className="h-4 w-4" />
+              {oneClickInterestBusy ? "Ouverture…" : "Je suis intéressé(e), contactez-moi"}
+            </Button>
+          )}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
             <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Gratuit, entre membres</span>
             <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Sans engagement</span>
@@ -1113,7 +1227,12 @@ const SmallMissionDetail = () => {
                         </p>
                       )}
                     </div>
-                    {!isAuthor && <ReportButton targetId={mission.user_id} targetType="profile" />}
+                    {!isAuthor && (
+                      <div className="flex items-center gap-2 shrink-0">
+                        <ReportButton targetId={mission.user_id} targetType="profile" />
+                        <ReportButton targetId={mission.id} targetType="small_mission" />
+                      </div>
+                    )}
                   </>
                 );
                 return author.user_id ? (
@@ -1343,7 +1462,8 @@ const SmallMissionDetail = () => {
                         currentUserId={user?.id}
                         missionOwnerId={mission.user_id}
                         processing={processingResponseId === r.id}
-                        onSelect={() => handleAcceptResponse(r.id)}
+                        pendingCount={pendingResponses.length}
+                        onSelect={(mode) => handleAcceptResponse(r.id, mode)}
                         onDecline={() => handleDeclineResponse(r.id)}
                         onOpenMessages={() => navigate(r.conversation_id ? `/messages?c=${r.conversation_id}` : "/messages")}
                       />
@@ -1618,6 +1738,23 @@ const SmallMissionDetail = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Modale de réponse (déclenchée depuis sidebar) */}
+      <MissionResponseModal
+        open={responseModalOpen}
+        onOpenChange={setResponseModalOpen}
+        missionId={mission.id}
+        missionType={((mission as any).mission_type === "offre" ? "offre" : "besoin") as "besoin" | "offre"}
+        authorFirstName={author?.first_name}
+        submitting={submitting}
+        onSubmit={async (msg, templateKey) => {
+          await handleRespond(msg);
+          trackEvent("mission_response_submitted_from_modal", {
+            metadata: { mission_id: mission.id, has_template: !!templateKey },
+          });
+          setResponseModalOpen(false);
+        }}
+      />
     </div>
     </AppLayout>
   );
