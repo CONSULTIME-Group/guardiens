@@ -36,6 +36,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Helmet } from "react-helmet-async";
 import MobileStickyCTA from "@/components/dashboard/owner/MobileStickyCTA";
+import { RepublishAlmaDialog } from "@/components/ai/alma/RepublishAlmaDialog";
 
 /* ── Status configs ── */
 const statusConfig: Record<string, { label: string; className: string }> = {
@@ -135,6 +136,7 @@ const Sits = () => {
   // (showArchived state removed, replaced by tabs)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [archiveConfirm, setArchiveConfirm] = useState<string | null>(null);
+  const [republishDialog, setRepublishDialog] = useState<{ id: string; title?: string | null } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [openGuideId, setOpenGuideId] = useState<string | null>(null);
@@ -755,12 +757,25 @@ const Sits = () => {
                 isOwner={isOwnerView}
                 onArchive={() => setArchiveConfirm(sit.id)}
                 onDelete={() => setDeleteConfirm(sit.id)}
-                onRepublish={() => handleRepublish(sit.id)}
+                onRepublish={() =>
+                  isOwnerView && activeOwnerTab === "archived"
+                    ? setRepublishDialog({ id: sit.id, title: sit.title })
+                    : handleRepublish(sit.id)
+                }
                 onOpenGuide={(id) => setOpenGuideId(id)}
               />
             );
           })}
         </div>
+      )}
+
+      {republishDialog && (
+        <RepublishAlmaDialog
+          open={!!republishDialog}
+          onOpenChange={(v) => !v && setRepublishDialog(null)}
+          sitId={republishDialog.id}
+          sourceTitle={republishDialog.title}
+        />
       )}
 
       {/* Guide detail view */}
