@@ -871,7 +871,7 @@ const AdminEmails = () => {
       <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Emails & Communications</h1>
 
       <Tabs value={tab} onValueChange={setTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-9">
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-10">
           <TabsTrigger value="templates" className="text-xs gap-1">
             <FileText className="h-3.5 w-3.5" /> Templates
           </TabsTrigger>
@@ -886,6 +886,9 @@ const AdminEmails = () => {
           </TabsTrigger>
           <TabsTrigger value="sitter-digest" className="text-xs gap-1">
             <Bell className="h-3.5 w-3.5" /> Digest gardien
+          </TabsTrigger>
+          <TabsTrigger value="mission-digest" className="text-xs gap-1">
+            <Bell className="h-3.5 w-3.5" /> Digest entraide
           </TabsTrigger>
           <TabsTrigger value="queue" className="text-xs gap-1">
             <Inbox className="h-3.5 w-3.5" /> File
