@@ -29,6 +29,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { AdvancedFiltersSheet } from "@/components/search/header/AdvancedFiltersSheet";
 import { SearchEmptyState } from "@/components/search/listing/SearchEmptyState";
+import { AlmaEmptySearchBubble } from "@/components/ai/alma/AlmaEmptySearchBubble";
 import { SitterDiscoveryBanner } from "@/components/search/SitterDiscoveryBanner";
 import { OutOfZoneBanner } from "@/components/search/listing/OutOfZoneBanner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
