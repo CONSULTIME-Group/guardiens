@@ -492,3 +492,226 @@ function KpiCard({ label, value }: { label: string; value: string | number }) {
     </Card>
   );
 }
+
+/* ══════════════════════════ Onglet Faits culturels ══════════════════════════ */
+
+const FACT_TYPES = [
+  { value: "all", label: "Tous" },
+  { value: "breed_did_you_know", label: "Race" },
+  { value: "city_did_you_know", label: "Ville" },
+  { value: "social_stat", label: "Stat sociale" },
+  { value: "seasonal_advice", label: "Conseil saisonnier" },
+  { value: "founder_anecdote", label: "Anecdote fondatrice" },
+] as const;
+
+interface CulturalFactRow {
+  id: string;
+  fact_type: string;
+  content: string;
+  context_filter: Record<string, unknown>;
+  active: boolean;
+  source_url: string | null;
+  seasonal_start_month: number | null;
+  seasonal_end_month: number | null;
+  created_at: string;
+}
+
+function CulturalFactsTab({ since }: { since: string }) {
+  const qc = useQueryClient();
+  const seenRef = useRef(false);
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [surfaceFilter, setSurfaceFilter] = useState<string>("");
+
+  useEffect(() => {
+    if (seenRef.current) return;
+    seenRef.current = true;
+    void trackEvent("admin_alma_cultural_facts_tab_seen");
+  }, []);
+
+  const { data: facts = [], isLoading } = useQuery({
+    queryKey: ["admin-alma-cultural-facts"],
+    queryFn: async (): Promise<CulturalFactRow[]> => {
+      const { data, error } = await supabase
+        .from("alma_cultural_facts" as any)
+        .select("*")
+        .order("fact_type", { ascending: true })
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return (data ?? []) as unknown as CulturalFactRow[];
+    },
+  });
+
+  const { data: stats = [] } = useQuery({
+    queryKey: ["admin-alma-cultural-stats", since],
+    queryFn: async () => {
+      const [seenRes, clickRes] = await Promise.all([
+        supabase
+          .from("analytics_events")
+          .select("metadata, created_at")
+          .eq("event_type", "alma_cultural_fact_seen")
+          .gte("created_at", since)
+          .limit(20000),
+        supabase
+          .from("analytics_events")
+          .select("metadata, created_at")
+          .eq("event_type", "alma_cultural_fact_action_clicked")
+          .gte("created_at", since)
+          .limit(20000),
+      ]);
+      const seen = new Map<string, number>();
+      const clicks = new Map<string, number>();
+      for (const r of seenRes.data ?? []) {
+        const id = (r as any).metadata?.fact_id;
+        if (id) seen.set(id, (seen.get(id) ?? 0) + 1);
+      }
+      for (const r of clickRes.data ?? []) {
+        const id = (r as any).metadata?.fact_id;
+        if (id) clicks.set(id, (clicks.get(id) ?? 0) + 1);
+      }
+      return Array.from(seen.entries()).map(([id, views]) => ({
+        id,
+        views,
+        clicks: clicks.get(id) ?? 0,
+      }));
+    },
+  });
+
+  const statsById = useMemo(() => {
+    const m = new Map<string, { views: number; clicks: number }>();
+    for (const s of stats) m.set(s.id, { views: s.views, clicks: s.clicks });
+    return m;
+  }, [stats]);
+
+  const filtered = useMemo(() => {
+    return facts.filter((f) => {
+      if (typeFilter !== "all" && f.fact_type !== typeFilter) return false;
+      if (surfaceFilter.trim()) {
+        const surf = (f.context_filter as any)?.surface;
+        const target = surfaceFilter.trim();
+        if (Array.isArray(surf)) {
+          if (!surf.includes(target)) return false;
+        } else if (typeof surf === "string") {
+          if (surf !== target) return false;
+        } else {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [facts, typeFilter, surfaceFilter]);
+
+  const toggleActive = async (fact: CulturalFactRow) => {
+    const next = !fact.active;
+    const { error } = await supabase
+      .from("alma_cultural_facts" as any)
+      .update({ active: next } as any)
+      .eq("id", fact.id);
+    if (error) return;
+    void trackEvent("admin_alma_cultural_fact_toggled", {
+      metadata: { fact_id: fact.id, active: next },
+    });
+    void qc.invalidateQueries({ queryKey: ["admin-alma-cultural-facts"] });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <SelectTrigger className="w-56">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {FACT_TYPES.map((t) => (
+              <SelectItem key={t.value} value={t.value}>
+                {t.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <input
+          type="text"
+          placeholder="Filtrer par surface (ex : dashboard)"
+          value={surfaceFilter}
+          onChange={(e) => setSurfaceFilter(e.target.value)}
+          className="h-9 px-3 rounded-md border border-input bg-background text-sm w-64"
+        />
+        <span className="text-xs text-muted-foreground">
+          {filtered.length} fait{filtered.length > 1 ? "s" : ""}
+        </span>
+      </div>
+
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Type</TableHead>
+                <TableHead>Contenu</TableHead>
+                <TableHead>Contexte</TableHead>
+                <TableHead className="text-right">Vues (30j)</TableHead>
+                <TableHead className="text-right">Clics action</TableHead>
+                <TableHead className="text-right">Taux clic</TableHead>
+                <TableHead>Actif</TableHead>
+                <TableHead />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center text-muted-foreground py-6">
+                    Chargement…
+                  </TableCell>
+                </TableRow>
+              ) : filtered.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center text-muted-foreground py-6">
+                    Aucun fait pour ces filtres.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filtered.map((f) => {
+                  const s = statsById.get(f.id) ?? { views: 0, clicks: 0 };
+                  const clickRate = s.views > 0 ? s.clicks / s.views : 0;
+                  return (
+                    <TableRow key={f.id} className={!f.active ? "opacity-60" : undefined}>
+                      <TableCell>
+                        <Badge variant="secondary" className="font-mono text-[10px]">
+                          {f.fact_type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="max-w-md">
+                        <div className="text-sm">{f.content}</div>
+                        {f.source_url && (
+                          <div className="text-xs text-muted-foreground truncate">
+                            {f.source_url}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-mono text-[10px] max-w-xs truncate">
+                        {JSON.stringify(f.context_filter)}
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums">{s.views}</TableCell>
+                      <TableCell className="text-right tabular-nums">{s.clicks}</TableCell>
+                      <TableCell className="text-right tabular-nums">{fmtPct(clickRate)}</TableCell>
+                      <TableCell>
+                        <Badge variant={f.active ? "default" : "outline"}>
+                          {f.active ? "Actif" : "Désactivé"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button size="sm" variant="ghost" onClick={() => toggleActive(f)}>
+                          {f.active ? "Désactiver" : "Réactiver"}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
