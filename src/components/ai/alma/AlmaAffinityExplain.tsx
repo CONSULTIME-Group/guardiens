@@ -45,9 +45,8 @@ export function AlmaAffinityExplain({
 
   const handleClick = async () => {
     trackEvent("alma_affinity_explain_clicked", {
-      sit_id: targetId,
-      score: result.score,
-      context,
+      source: context,
+      metadata: { sit_id: targetId, score: result.score },
     });
     setOpen(true);
     if (data) return;
