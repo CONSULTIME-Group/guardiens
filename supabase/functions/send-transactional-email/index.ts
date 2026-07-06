@@ -34,6 +34,21 @@ import {
   nextQuietEndFrom,
 } from '../_shared/email-cap.ts'
 
+// Alma persona (Pass 3 C2) : liste des templates signés visuellement par Alma
+// (header + intro + signoff). Tout log/analytics de ces envois porte
+// `alma_signed: true` pour permettre l'attribution ROI de la persona.
+const ALMA_SIGNED_TEMPLATES = new Set<string>([
+  'sitter-daily-digest',
+  'mission-daily-digest',
+  'sit-draft-reminder',
+  'owner-no-sit-j3',
+  'owner-no-sit-j10',
+  'owner-no-sit-j21',
+])
+export function isAlmaSigned(templateName: string): boolean {
+  return ALMA_SIGNED_TEMPLATES.has(templateName)
+}
+
 function isQuietNow(): boolean {
   return isQuietAt(new Date())
 }
