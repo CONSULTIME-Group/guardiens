@@ -74,6 +74,7 @@ const SECTIONS: SectionDef[] = [
   { id: "alerts", label: "Alertes annonces", icon: Bell, group: "Préférences" },
   { id: "privacy", label: "Confidentialité", icon: EyeOff, group: "Préférences" },
   { id: "appearance", label: "Apparence", icon: Sun, group: "Préférences" },
+  { id: "alma", label: "Fréquence d'Alma", icon: MessageCircle, group: "Préférences" },
   { id: "billing", label: "Abonnement", icon: CreditCard, group: "Mes espaces" },
   { id: "data", label: "Mes données", icon: Download, group: "Aide & données" },
   { id: "help", label: "Aide & liens utiles", icon: HelpCircle, group: "Aide & données" },
