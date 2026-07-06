@@ -66,13 +66,16 @@ export function hasNoActiveSit(
 export type OwnerNbaVariant =
   | "sit_draft_from_prompt"
   | "draft_resume"
+  | "no_active_sit"
   | "priority_action";
 
 export function computeOwnerNbaVariant(input: {
   isNewOwner: boolean;
   hasDraft: boolean;
+  hasNoActiveSit?: boolean;
 }): OwnerNbaVariant {
   if (input.hasDraft) return "draft_resume";
   if (input.isNewOwner) return "sit_draft_from_prompt";
+  if (input.hasNoActiveSit) return "no_active_sit";
   return "priority_action";
 }
