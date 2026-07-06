@@ -19,7 +19,15 @@ import { trackEvent } from "@/lib/analytics";
 const PLACEHOLDER =
   "Exemple : Je pars 15 jours en août avec 2 chats à Lyon, je cherche quelqu'un de calme qui télétravaille.";
 
-export default function SitDraftFromPrompt() {
+export interface SitDraftFromPromptProps {
+  /**
+   * Affichage secondaire (moins accentué) quand un DraftResumeCard est déjà
+   * visible au-dessus. On adapte le titre pour proposer une seconde absence.
+   */
+  secondary?: boolean;
+}
+
+export default function SitDraftFromPrompt({ secondary = false }: SitDraftFromPromptProps = {}) {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
@@ -31,14 +39,16 @@ export default function SitDraftFromPrompt() {
   useEffect(() => {
     if (!seenRef.current) {
       seenRef.current = true;
-      void trackEvent("owner_draft_from_prompt_input_seen");
+      void trackEvent("owner_draft_from_prompt_input_seen", {
+        metadata: { secondary },
+      });
     }
     // Attribution email intent : ouverture depuis onboarding-j1
     if (searchParams.get("intent") === "draft_from_prompt") {
       void trackEvent("owner_intent_draft_from_prompt_from_email");
       setTimeout(() => textareaRef.current?.focus(), 200);
     }
-  }, [searchParams]);
+  }, [searchParams, secondary]);
 
   const handleGenerate = useCallback(async () => {
     const clean = prompt.trim();
