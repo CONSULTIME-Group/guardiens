@@ -146,6 +146,15 @@ const LeaveReview = () => {
 
       setReviewee(profile);
       setAlreadyReviewed(!!existingReview);
+
+      const { data: convData } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("sit_id", sitId)
+        .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`)
+        .maybeSingle();
+      setConversationId(convData?.id ?? null);
+
       setLoading(false);
     };
 
