@@ -1395,7 +1395,8 @@ const SmallMissionDetail = () => {
                         currentUserId={user?.id}
                         missionOwnerId={mission.user_id}
                         processing={processingResponseId === r.id}
-                        onSelect={() => handleAcceptResponse(r.id)}
+                        pendingCount={pendingResponses.length}
+                        onSelect={(mode) => handleAcceptResponse(r.id, mode)}
                         onDecline={() => handleDeclineResponse(r.id)}
                         onOpenMessages={() => navigate(r.conversation_id ? `/messages?c=${r.conversation_id}` : "/messages")}
                       />
