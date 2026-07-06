@@ -60,8 +60,10 @@ export function IncompleteProfileBadge({
       to="/profile"
       onClick={() =>
         trackEvent("owner_incomplete_profile_badge_clicked", {
-          profile_completion: profileCompletion,
-          fields_remaining: fieldsRemaining,
+          metadata: {
+            profile_completion: profileCompletion,
+            fields_remaining: fieldsRemaining,
+          },
         })
       }
       className={cn(
