@@ -192,7 +192,13 @@ const Register = () => {
  return;
  }
 
-  // NB: CGU acceptance is validated at step 1 before reaching step 2 — no re-check here.
+  // Garde-fou : les liens /inscription?role=... sautent l'étape 1, on doit donc revérifier ici.
+  if (!acceptedTerms) {
+   setTermsHighlighted(true);
+   setFormError(t("register_page.terms_required_hint"));
+   try { trackEvent("signup_form_blocked", { source: "/inscription", metadata: { reason: "terms_not_accepted", role: selectedRole } }); } catch {}
+   return;
+  }
 
  try {
  trackEvent("signup_form_submitted", {
