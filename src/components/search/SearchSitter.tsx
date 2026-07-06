@@ -29,6 +29,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { AdvancedFiltersSheet } from "@/components/search/header/AdvancedFiltersSheet";
 import { SearchEmptyState } from "@/components/search/listing/SearchEmptyState";
+import { AlmaEmptySearchBubble } from "@/components/ai/alma/AlmaEmptySearchBubble";
 import { SitterDiscoveryBanner } from "@/components/search/SitterDiscoveryBanner";
 import { OutOfZoneBanner } from "@/components/search/listing/OutOfZoneBanner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -1896,24 +1897,59 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  );
  })()
   ) : results.length === 0 ? (
-    <SearchEmptyState
-      tab={tab}
-      setTab={setTab}
-      zoneMode={zoneMode}
-      setZoneMode={setZoneMode}
-      densityCounts={densityCounts}
-      nearbyRegions={nearbyRegions}
-      nearbyZones={nearbyZones}
-      launchModeCount={launchModeCount}
-      crossTabCount={crossTabCount}
-      city={city}
-      alertCreated={alertCreated}
-      isCreatingAlert={isCreatingAlert}
-      handleCreateAlert={handleCreateAlert}
-      sitterProfile={sitterProfile}
-      handleActivateAvailable={handleActivateAvailable}
-      trackEvent={trackEvent}
-    />
+    <>
+      <AlmaEmptySearchBubble
+        hasFilters={hasActiveFilters}
+        radius={radius[0]}
+        zoneMode={zoneMode}
+        activeFilters={{
+          emergencyOnly,
+          verifiedOnly,
+          withPhotosOnly,
+          minExperience,
+          environments,
+          housingTypes,
+          animalTypes,
+          startDate,
+          endDate,
+          duration,
+        }}
+        onExpandToRegion={() => {
+          setZoneMode("region");
+          setRadius([100]);
+        }}
+        onOpenAlert={() => { void handleCreateAlert(); }}
+        onRelaxFilter={(filter) => {
+          if (filter === "emergencyOnly") setEmergencyOnly(false);
+          else if (filter === "verifiedOnly") setVerifiedOnly(false);
+          else if (filter === "withPhotosOnly") setWithPhotosOnly(false);
+          else if (filter === "minExperience") setMinExperience("all");
+          else if (filter === "environments") setEnvironments([]);
+          else if (filter === "housingType") setHousingTypes([]);
+          else if (filter === "animalTypes") setAnimalTypes([]);
+          else if (filter === "dates") { setStartDate(""); setEndDate(""); }
+          else if (filter === "duration") setDuration("all");
+        }}
+      />
+      <SearchEmptyState
+        tab={tab}
+        setTab={setTab}
+        zoneMode={zoneMode}
+        setZoneMode={setZoneMode}
+        densityCounts={densityCounts}
+        nearbyRegions={nearbyRegions}
+        nearbyZones={nearbyZones}
+        launchModeCount={launchModeCount}
+        crossTabCount={crossTabCount}
+        city={city}
+        alertCreated={alertCreated}
+        isCreatingAlert={isCreatingAlert}
+        handleCreateAlert={handleCreateAlert}
+        sitterProfile={sitterProfile}
+        handleActivateAvailable={handleActivateAvailable}
+        trackEvent={trackEvent}
+      />
+    </>
   ) : (
   <>
     {(() => {

@@ -12,6 +12,7 @@ import type { NotificationData } from "@/components/notifications/NotificationIt
 import { NotificationSkeleton } from "@/components/notifications/NotificationSkeleton";
 import { NotificationsEmptyState } from "@/components/notifications/NotificationsEmptyState";
 import { NotificationGroup } from "@/components/notifications/NotificationGroup";
+import { AlmaNotifSummaryBubble } from "@/components/ai/alma/AlmaNotifSummaryBubble";
 
 /* ------------------------------------------------------------------ */
 /* Groupement par tranche temporelle                                    */
@@ -54,6 +55,8 @@ const Notifications = () => {
 
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [urgentFilter, setUrgentFilter] = useState(false);
+  const URGENT_TYPES = new Set(["mission_proposal", "mission_accepted", "new_message"]);
 
   const load = useCallback(async () => {
     if (!userId) { setNotifications([]); setLoading(false); return; }
@@ -106,7 +109,10 @@ const Notifications = () => {
   };
 
   const unreadCount = notifications.filter((n) => !n.read_at).length;
-  const groups = groupByDay(notifications);
+  const displayed = urgentFilter
+    ? notifications.filter((n) => URGENT_TYPES.has(n.type))
+    : notifications;
+  const groups = groupByDay(displayed);
 
   return (
     <div className="relative max-w-2xl mx-auto px-4 pb-24 pt-4 md:px-6 md:pt-8 md:pb-16 animate-fade-in">
@@ -145,10 +151,28 @@ const Notifications = () => {
         </div>
       )}
 
+      {/* Résumé Alma proactif */}
+      {!loading && notifications.length > 0 && (
+        <AlmaNotifSummaryBubble
+          notifications={notifications}
+          urgentFilterActive={urgentFilter}
+          onFilterUrgent={() => setUrgentFilter(true)}
+        />
+      )}
+
+      {urgentFilter && (
+        <div className="mb-3 flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs">
+          <span className="text-muted-foreground">Filtre « urgentes » actif</span>
+          <Button variant="ghost" size="sm" className="h-7" onClick={() => setUrgentFilter(false)}>
+            Voir tout
+          </Button>
+        </div>
+      )}
+
       {/* Contenu */}
       {loading ? (
         <NotificationSkeleton />
-      ) : notifications.length === 0 ? (
+      ) : displayed.length === 0 ? (
         <NotificationsEmptyState />
       ) : (
         <div>
