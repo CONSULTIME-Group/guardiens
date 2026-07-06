@@ -133,7 +133,13 @@ export type EventType =
   | "owner_first_nba_gardiens_seen"             // Impression carte 3 gardiens (sitters_count, avg_affinity)
   | "owner_first_nba_gardien_card_clicked"      // Clic sur une des 3 cards (sitter_id, affinity_score, distance_km, position)
   | "owner_intent_draft_from_prompt_from_email"// Arrivée sur dashboard depuis email ?intent=draft_from_prompt
-  | "owner_dashboard_nba_choice";               // NBA dominante retenue au 1er rendu dashboard owner (variant)
+  | "owner_dashboard_nba_choice"                // NBA dominante retenue au 1er rendu dashboard owner (variant)
+  // EntraideHub Pass 1 (UX + fixes workflow) --------------------------------
+  | "mission_created_incomplete_profile"        // Mission publiée avec profil < 60 % (profile_completion)
+  | "entraide_empty_state_template_clicked"     // Exemple cliquable empty state (tab, template_key)
+  | "entraide_all_status_default_used"          // Fallback filtre status=all car <20 missions (missions_count)
+  | "mission_expired_badge_seen"                // Badge "date dépassée" impression (mission_id, days_overdue)
+  | "mission_expired_reschedule_clicked";       // Clic "Reporter" sur mission expirée (mission_id)
 
 interface TrackOptions {
   source?: string;
