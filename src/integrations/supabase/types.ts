@@ -5256,6 +5256,8 @@ export type Database = {
         Row: {
           category: Database["public"]["Enums"]["small_mission_category"]
           city: string
+          close_reason: string | null
+          closed_at: string | null
           created_at: string
           date_needed: string | null
           description: string
@@ -5279,6 +5281,8 @@ export type Database = {
         Insert: {
           category?: Database["public"]["Enums"]["small_mission_category"]
           city?: string
+          close_reason?: string | null
+          closed_at?: string | null
           created_at?: string
           date_needed?: string | null
           description?: string
@@ -5302,6 +5306,8 @@ export type Database = {
         Update: {
           category?: Database["public"]["Enums"]["small_mission_category"]
           city?: string
+          close_reason?: string | null
+          closed_at?: string | null
           created_at?: string
           date_needed?: string | null
           description?: string
@@ -5683,6 +5689,37 @@ export type Database = {
           unique_opens: number | null
         }
         Relationships: []
+      }
+      profile_mission_badges: {
+        Row: {
+          badge_key: string | null
+          earned_count: number | null
+          last_earned_at: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_feedbacks_receiver_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "mission_feedbacks_receiver_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_feedbacks_receiver_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profile_reputation: {
         Row: {
