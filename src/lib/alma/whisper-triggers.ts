@@ -199,10 +199,7 @@ export function buildLongAbsenceReturnWhisper(params: {
   audience: "owner" | "sitter";
   onSeeMatches: () => void;
 }): AlmaWhisper {
-  const isOwner = params.audience === "owner";
-  const msg = isOwner
-    ? `Bon retour ${params.firstName}. Depuis 2 semaines, ${params.newSits} nouvelles annonces ont bougé dans votre zone, dont ${params.matches} qui matchent votre profil.`
-    : `Bon retour ${params.firstName}. Depuis 2 semaines, ${params.newSits} nouvelles annonces ont bougé dans ta zone, dont ${params.matches} qui matchent ton profil.`;
+  const msg = `Bon retour ${params.firstName}. Depuis 2 semaines, ${params.newSits} nouvelles annonces ont bougé dans votre zone, dont ${params.matches} qui matchent votre profil.`;
   return {
     ...base("long_absence_return"),
     audience: params.audience,
