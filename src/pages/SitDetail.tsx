@@ -16,6 +16,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { geocodeCity } from "@/lib/geocode";
 import SitDetailSkeleton from "@/components/skeletons/SitDetailSkeleton";
 import OwnerSitView from "@/components/sits/views/OwnerSitView";
+import { IncompleteProfileBadge } from "@/components/sits/IncompleteProfileBadge";
 import SitterSitView from "@/components/sits/views/SitterSitView";
 import { useSitRealtime } from "@/components/sits/views/useSitRealtime";
 import { backfillOwnerGalleryDimensions } from "@/lib/backfillGalleryDimensions";
@@ -245,6 +246,15 @@ const SitDetail = () => {
         <title>{sit.title ? `${sit.title} · Mon annonce` : "Mon annonce"}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
+
+      {isOwner && ownerProfile?.profile_completion != null && (
+        <div className="mb-3">
+          <IncompleteProfileBadge
+            profileCompletion={ownerProfile.profile_completion}
+            isOwnerViewer={isOwner}
+          />
+        </div>
+      )}
 
       {isOwner ? (
         <OwnerSitView
