@@ -341,10 +341,10 @@ const OwnerDashboard = () => {
       sessionStorage.setItem(key, "1");
       void trackEvent("owner_dashboard_nba_choice", {
         source: "/dashboard",
-        metadata: { variant: nbaVariant, early_owner: earlyOwner },
+        metadata: { variant: nbaVariant, early_owner: earlyOwner, no_active_sit: noActiveSit },
       });
     } catch {}
-  }, [loading, user?.id, nbaVariant, earlyOwner]);
+  }, [loading, user?.id, nbaVariant, earlyOwner, noActiveSit]);
 
 
   /* ── Render ── */
