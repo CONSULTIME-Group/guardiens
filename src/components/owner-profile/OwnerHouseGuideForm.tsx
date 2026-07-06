@@ -380,16 +380,31 @@ const OwnerHouseGuideForm = () => {
         </p>
       </div>
 
+      <AlmaHouseGuideAssist onDrafts={handleAlmaDrafts} />
+
       <Accordion type="multiple" className="space-y-3">
         {ACCORDION_SECTIONS.map(section => {
           const complete = isSectionComplete(guide, section.fields);
           const Icon = section.icon;
+          const sectionDrafts: Record<string, (keyof HouseGuideDrafts)[]> = {
+            access: ["wifi_info"],
+            instructions: ["neighborhood"],
+            emergency: ["veterinary", "emergency"],
+          };
+          const draftKeys = sectionDrafts[section.id] || [];
+          const hasAlmaDraft = draftKeys.some(k => almaSections.has(k));
           return (
             <AccordionItem key={section.id} value={section.id} className="bg-card border border-border rounded-xl p-0 overflow-hidden">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2 flex-1">
                   <Icon className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm font-medium">{section.title}</span>
+                  {hasAlmaDraft && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5">
+                      <Sparkles className="h-2.5 w-2.5" />
+                      Brouillon Alma, à personnaliser
+                    </span>
+                  )}
                 </div>
                 <span className="mr-2">
                   {complete ? (
@@ -412,6 +427,7 @@ const OwnerHouseGuideForm = () => {
           );
         })}
       </Accordion>
+
 
       {/* Publish state */}
       <div className="space-y-3 pt-2">
