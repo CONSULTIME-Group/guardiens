@@ -76,7 +76,7 @@ export function AlmaMotivationBubble({ currentValue, onPick }: Props) {
         }
       >
         {drafts.length === 0 ? (
-          <p>Ta motivation fait moins de 50 caractères. Je te propose 3 versions à partir de tes réponses. Tu choisis, tu ajustes.</p>
+          <p>Votre motivation fait moins de 50 caractères. Je vous propose 3 versions à partir de vos réponses. Vous choisissez, vous ajustez.</p>
         ) : (
           <div className="space-y-2">
             <p>Voici 3 propositions. Clique sur celle qui te ressemble le plus.</p>
