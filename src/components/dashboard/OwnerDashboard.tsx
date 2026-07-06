@@ -440,9 +440,9 @@ const OwnerDashboard = () => {
                 </Link>
               </Button>
             )}
-            {/* CTA hero desktop masqué pour early/new-owner : la NBA dominante
-                (SitDraftFromPrompt ou DraftResumeCard) sert déjà de CTA principal. */}
-            {!earlyOwner && (
+            {/* CTA hero desktop masqué pour early/new-owner ou owner sans annonce active :
+                la NBA dominante (SitDraftFromPrompt ou DraftResumeCard) sert déjà de CTA principal. */}
+            {!showAlmaProactive && (
               <Button
                 size="lg"
                 onClick={() => navigate("/sits/create")}
@@ -455,8 +455,8 @@ const OwnerDashboard = () => {
         </div>
       </header>
 
-      {/* ═══ Owner Pass 3 — Concierge IA (new-owner uniquement, avant tout brouillon) ═══ */}
-      {isNewOwner && !hasDraft && (
+      {/* ═══ Owner Pass 3 — Concierge IA (owner sans annonce active, avant tout brouillon) ═══ */}
+      {showAlmaProactive && !hasDraft && (
         <div className="px-5 md:px-8">
           <SitDraftFromPrompt />
         </div>
@@ -470,11 +470,10 @@ const OwnerDashboard = () => {
       )}
 
       {/* ═══ Action prioritaire unique , UN seul CTA dominant ═══
-          Précepte 2026 : 1 seule NBA above the fold. Pour un new-owner,
-          SitDraftFromPrompt est la NBA dominante ; on masque PriorityActionCard
-          pour éviter 3 CTA "Publier" empilés. On la masque aussi si un draft
-          est en cours (DraftResumeCard prend le relais). */}
-      {!hasDraft && !isNewOwner && (
+          Précepte 2026 : 1 seule NBA above the fold. Pour un owner sans annonce
+          active, SitDraftFromPrompt / DraftResumeCard est la NBA dominante ;
+          on masque PriorityActionCard pour éviter les CTA "Publier" empilés. */}
+      {!hasDraft && !showAlmaProactive && (
         <div className="px-5 md:px-8">
           <PriorityActionCard
             eyebrow={priorityAction.eyebrow}
