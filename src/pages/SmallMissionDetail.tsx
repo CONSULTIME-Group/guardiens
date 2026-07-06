@@ -10,7 +10,7 @@ import {
   Heart, MessageSquare, CheckCircle2, Users, XCircle, ThumbsUp,
   ThumbsDown, Star, RotateCcw, Send, Home, X, Share2, ShieldCheck, Sparkles,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, differenceInCalendarDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
