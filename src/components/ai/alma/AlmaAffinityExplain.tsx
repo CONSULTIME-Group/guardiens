@@ -67,7 +67,7 @@ export function AlmaAffinityExplain({
       );
       if (fnError) throw fnError;
       setData(resp as ExplainResponse);
-      trackEvent("alma_affinity_explanation_seen", { mode, sit_id: targetId });
+      trackEvent("alma_affinity_explanation_seen", { metadata: { mode, sit_id: targetId } });
     } catch (e) {
       setError(
         e instanceof Error
