@@ -560,6 +560,8 @@ const OwnerDashboard = () => {
 
         {/* Colonne pilotage : annonce, animaux, avis, candidatures */}
         <div className="lg:col-span-2 space-y-6">
+          <AlmaSilentSitBubble sits={sits as any} />
+
           <MonAnnonceCard
             sits={sits}
             pets={pets}
@@ -568,6 +570,7 @@ const OwnerDashboard = () => {
             pendingAppCount={pendingAppCount}
             coverPhoto={propertyCoverPhoto}
           />
+
 
           {/* Mes animaux, remonté juste après l'annonce (logique : maison → animaux) */}
           <DashSection
