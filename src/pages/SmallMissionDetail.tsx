@@ -568,14 +568,14 @@ const SmallMissionDetail = () => {
       // Batch notifications to accepted responders (compute inline to avoid forward-ref)
       const accepted = responses.filter(r => r.status === "accepted");
       if (accepted.length > 0) {
-        await supabase.from("notifications").insert(
-          accepted.map(r => ({
-            user_id: r.responder_id, type: "mission_completed",
-            title: "Mission terminée",
-            body: `La mission "${mission.title}" est terminée. Laissez un avis !`,
-            link: `/petites-missions/${id}`,
-          }))
-        );
+        supabase.functions.invoke("notify-mission-event", {
+          body: {
+            event_type: "mission_completed",
+            mission_id: id,
+            actor_id: user!.id,
+            target_ids: accepted.map(r => r.responder_id),
+          },
+        }).catch(() => {});
       }
       toast({ title: "Mission marquée comme terminée !" });
     } catch (err: any) {
