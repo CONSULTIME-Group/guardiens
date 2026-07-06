@@ -53,6 +53,12 @@ const fmtDate = (iso: string | null) =>
 export default function AdminAlma() {
   const seenRef = useRef(false);
   const [range, setRange] = useState<Range>("30d");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = searchParams.get("tab") === "cultural-facts"
+    ? "cultural-facts"
+    : searchParams.get("tab") === "whispers"
+      ? "whispers"
+      : "bubbles";
 
   useEffect(() => {
     if (seenRef.current) return;
@@ -62,11 +68,18 @@ export default function AdminAlma() {
 
   const since = useMemo(() => rangeSinceISO(range), [range]);
 
+  const handleTabChange = (next: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (next === "bubbles") params.delete("tab");
+    else params.set("tab", next);
+    setSearchParams(params, { replace: true });
+  };
+
   return (
     <div className="space-y-6">
       <AdminPageHeader
         title="Alma"
-        description="Adoption des bulles Alma, engagement sur les whispers Pass 4, et impact fonctionnel par moment."
+        description="Adoption des bulles Alma, engagement sur les whispers Pass 4, et pilotage du compagnon culturel Pass 5."
       />
 
       <div className="flex items-center gap-3">
@@ -85,13 +98,16 @@ export default function AdminAlma() {
         </Select>
       </div>
 
-      <Tabs defaultValue="bubbles">
+      <Tabs value={tab} onValueChange={handleTabChange}>
         <TabsList>
           <TabsTrigger value="bubbles">
             <Sparkles className="h-4 w-4 mr-2" aria-hidden="true" /> Bulles
           </TabsTrigger>
           <TabsTrigger value="whispers">
             <MessageCircle className="h-4 w-4 mr-2" aria-hidden="true" /> Whispers
+          </TabsTrigger>
+          <TabsTrigger value="cultural-facts">
+            <BookOpen className="h-4 w-4 mr-2" aria-hidden="true" /> Faits culturels
           </TabsTrigger>
         </TabsList>
 
@@ -101,6 +117,10 @@ export default function AdminAlma() {
 
         <TabsContent value="whispers" className="mt-4">
           <WhispersTab since={since} range={range} />
+        </TabsContent>
+
+        <TabsContent value="cultural-facts" className="mt-4">
+          <CulturalFactsTab since={since} />
         </TabsContent>
       </Tabs>
     </div>
