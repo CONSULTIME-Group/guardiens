@@ -6001,6 +6001,17 @@ export type Database = {
         Args: { _owner_id: string }
         Returns: Json
       }
+      get_owner_top_3_sitters: {
+        Args: { _owner_id: string }
+        Returns: {
+          affinity_score: number
+          avatar_url: string
+          city: string
+          distance_km: number
+          first_name: string
+          sitter_id: string
+        }[]
+      }
       get_pro_map_points: {
         Args: never
         Returns: {
