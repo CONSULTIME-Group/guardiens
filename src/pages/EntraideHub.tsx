@@ -712,6 +712,7 @@ const EntraideHub = () => {
                             : m.status === "completed"
                               ? { label: "Terminée", aria: "Statut : terminée" }
                               : null;
+                        const expired = isMissionExpired(m);
                         const d = proximity.active ? proximity.getDistance(m.id) : null;
                         const hasDist = proximity.active ? proximity.hasDistance(m.id) : false;
                         const distanceLabel =
