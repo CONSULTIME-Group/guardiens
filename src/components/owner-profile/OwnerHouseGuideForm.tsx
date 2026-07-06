@@ -7,7 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Key, Home, AlertTriangle, ClipboardList, Heart, Check, Circle, CheckCircle, Loader2 } from "lucide-react";
+import { Key, Home, AlertTriangle, ClipboardList, Heart, Check, Circle, CheckCircle, Loader2, Sparkles } from "lucide-react";
+import { AlmaHouseGuideAssist, type HouseGuideDrafts } from "@/components/ai/alma/AlmaHouseGuideAssist";
+import { trackEvent } from "@/lib/analytics";
 
 interface GuideData {
   exact_address: string;
