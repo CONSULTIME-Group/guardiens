@@ -63,7 +63,6 @@ export function AlmaNotifSummaryBubble({
   const { frequency } = useAlmaFrequency();
   const { activeRole } = useAuth();
   const audience = activeRole === "owner" ? "owner" : "sitter";
-  const vouv = audience === "owner";
 
   const unread = useMemo(
     () => notifications.filter((n) => !n.read_at),
