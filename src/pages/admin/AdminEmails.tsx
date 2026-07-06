@@ -891,6 +891,9 @@ const AdminEmails = () => {
           <TabsTrigger value="mission-digest" className="text-xs gap-1">
             <Bell className="h-3.5 w-3.5" /> Digest entraide
           </TabsTrigger>
+          <TabsTrigger value="mutual-aid" className="text-xs gap-1">
+            <BarChart3 className="h-3.5 w-3.5" /> Entraide
+          </TabsTrigger>
           <TabsTrigger value="queue" className="text-xs gap-1">
             <Inbox className="h-3.5 w-3.5" /> File
           </TabsTrigger>
