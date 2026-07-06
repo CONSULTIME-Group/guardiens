@@ -384,6 +384,7 @@ const Settings = () => {
       case "alerts": return <AlertsSection user={user} />;
       case "privacy": return <PrivacySection prefs={prefs} onSave={savePrefs} />;
       case "appearance": return <ThemeSection />;
+      case "alma": return <AlmaFrequencySection />;
       case "billing": return <BillingSection user={user} />;
       case "data": return <DataSection onExport={handleExport} exporting={exporting} />;
       case "help": return <HelpSection />;
