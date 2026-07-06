@@ -6326,6 +6326,10 @@ export type Database = {
         Returns: number
       }
       normalize_analytics_source: { Args: { raw: string }; Returns: string }
+      notify_owner_of_new_application: {
+        Args: { _application_id: string }
+        Returns: string
+      }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
