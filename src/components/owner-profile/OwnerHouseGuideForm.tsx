@@ -229,8 +229,35 @@ const OwnerHouseGuideForm = () => {
 
   const handleChange = useCallback((field: keyof GuideData, value: string) => {
     setGuide(prev => ({ ...prev, [field]: value }));
+    // Détection 1ère édition d'une section pré-remplie par Alma
+    setAlmaSections(prev => {
+      let next = prev;
+      (Object.keys(DRAFT_TO_FIELD) as (keyof HouseGuideDrafts)[]).forEach(k => {
+        if (DRAFT_TO_FIELD[k] === field && prev.has(k)) {
+          if (next === prev) next = new Set(prev);
+          next.delete(k);
+          void trackEvent("alma_house_guide_section_edited", { metadata: { section: k } });
+        }
+      });
+      return next;
+    });
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => saveGuide(), 800);
+  }, [saveGuide]);
+
+  const handleAlmaDrafts = useCallback((drafts: HouseGuideDrafts) => {
+    setGuide(prev => ({
+      ...prev,
+      wifi_instructions: drafts.wifi_info || prev.wifi_instructions,
+      detailed_instructions: drafts.neighborhood || prev.detailed_instructions,
+      vet_address: drafts.veterinary || prev.vet_address,
+      emergency_contact_name: drafts.emergency || prev.emergency_contact_name,
+    }));
+    const filled = new Set<keyof HouseGuideDrafts>(["wifi_info", "neighborhood", "veterinary", "emergency"]);
+    setAlmaSections(filled);
+    filled.forEach(k => almaEverFilledRef.current.add(k));
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => saveGuide(), 400);
   }, [saveGuide]);
 
   const handleFinalize = async () => {
