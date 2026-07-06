@@ -12,6 +12,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Mail, Clock, FileText, Send, ShieldOff, History, Settings2, RefreshCw, AlertCircle, Ban, Eye, SendHorizonal, Pencil, Info, CheckCircle2, BarChart3, Inbox, Bell } from "lucide-react";
 import { ConfirmationsTab } from "./_components/ConfirmationsTab";
 import { QueueTab } from "./_components/QueueTab";
+import DeliveryTab from "./_components/DeliveryTab";
+import { useSearchParams } from "react-router-dom";
 import SitterDigestTab from "./_components/SitterDigestTab";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -856,17 +858,27 @@ const EngagementTab = () => {
 
 // ── Main page ──
 const AdminEmails = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = searchParams.get("tab") || "templates";
+  const setTab = (v: string) => {
+    const next = new URLSearchParams(searchParams);
+    next.set("tab", v);
+    setSearchParams(next, { replace: true });
+  };
   return (
     <div className="space-y-6">
       <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Emails & Communications</h1>
 
-      <Tabs defaultValue="templates" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4 md:grid-cols-8">
+      <Tabs value={tab} onValueChange={setTab} className="space-y-4">
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-9">
           <TabsTrigger value="templates" className="text-xs gap-1">
             <FileText className="h-3.5 w-3.5" /> Templates
           </TabsTrigger>
           <TabsTrigger value="confirmations" className="text-xs gap-1">
             <CheckCircle2 className="h-3.5 w-3.5" /> Confirmations
+          </TabsTrigger>
+          <TabsTrigger value="delivery" className="text-xs gap-1">
+            <AlertCircle className="h-3.5 w-3.5" /> Delivery
           </TabsTrigger>
           <TabsTrigger value="engagement" className="text-xs gap-1">
             <BarChart3 className="h-3.5 w-3.5" /> Engagement
@@ -890,6 +902,7 @@ const AdminEmails = () => {
 
         <TabsContent value="templates"><TemplatesTab /></TabsContent>
         <TabsContent value="confirmations"><ConfirmationsTab /></TabsContent>
+        <TabsContent value="delivery"><DeliveryTab /></TabsContent>
         <TabsContent value="engagement"><EngagementTab /></TabsContent>
         <TabsContent value="sitter-digest"><SitterDigestTab /></TabsContent>
         <TabsContent value="queue"><QueueTab /></TabsContent>

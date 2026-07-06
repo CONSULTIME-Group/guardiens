@@ -59,6 +59,7 @@ import { template as sitterMutualAidInvite } from './sitter-mutual-aid-invite.ts
 import { template as analysisRequestsDigest } from './analysis-requests-digest.tsx'
 import { template as sitDraftReminder } from './sit-draft-reminder.tsx'
 import { template as sitterDailyDigest } from './sitter-daily-digest.tsx'
+import { template as adminDeliveryAlert } from './admin-delivery-alert.tsx'
 
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
@@ -112,6 +113,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'analysis-requests-digest': analysisRequestsDigest,
   'sit-draft-reminder': sitDraftReminder,
   'sitter-daily-digest': sitterDailyDigest,
+  'admin-delivery-alert': adminDeliveryAlert,
 }
 
 
