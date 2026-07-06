@@ -808,14 +808,36 @@ const SmallMissionDetail = () => {
                 if (!confirm("Retirer votre réponse ?")) return;
                 const { error } = await supabase
                   .from("small_mission_responses")
-                  .delete()
+                  .update({ status: "withdrawn" as any })
                   .eq("id", myResponse.id);
                 if (error) {
                   toast({ variant: "destructive", title: "Erreur", description: error.message });
                   return;
                 }
                 setHasResponded(false);
-                setResponses(prev => prev.filter(r => r.id !== myResponse.id));
+                setResponses(prev => prev.map(r =>
+                  r.id === myResponse.id ? { ...r, status: "withdrawn" } : r,
+                ));
+                trackEvent("mission_response_withdrawn", {
+                  metadata: { mission_id: id, response_id: myResponse.id },
+                });
+                // Notif + email auteur (non-bloquant)
+                supabase.from("notifications").insert({
+                  user_id: mission.user_id, type: "mission_response_withdrawn",
+                  title: "Réponse retirée",
+                  body: `${(user as any).first_name || "Un membre"} a retiré sa réponse à « ${mission.title} ».`,
+                  link: `/petites-missions/${id}`,
+                }).then(() => {});
+                sendTransactionalEmail({
+                  templateName: "mission-response-withdrawn",
+                  recipientUserId: mission.user_id,
+                  idempotencyKey: `mission-response-withdrawn-${myResponse.id}`,
+                  templateData: {
+                    responderFirstName: (user as any).first_name || "",
+                    missionTitle: mission.title,
+                    missionId: id,
+                  },
+                }).catch(() => {});
                 toast({ title: "Réponse retirée" });
               }}
             >
