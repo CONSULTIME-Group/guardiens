@@ -193,7 +193,13 @@ export type EventType =
   | "alma_empty_search_bubble_seen"             // Bulle empty search affichée (restrictive_filter, radius, zone_mode)
   | "alma_empty_search_action_clicked"          // Action empty search cliquée (action_id, restrictive_filter?)
   | "alma_notif_summary_seen"                   // Résumé notifs affiché (unread, applications, messages, social)
-  | "alma_notif_urgent_filter_clicked";         // Filtre "3 urgentes" cliqué (audience)
+  | "alma_notif_urgent_filter_clicked"          // Filtre "3 urgentes" cliqué (audience)
+  // Alma Pass 4 : narratrice cross-page ------------------------------------
+  | "alma_whisper_emitted"                      // Whisper narratif affiché (whisper_type, surface, priority)
+  | "alma_whisper_dismissed"                    // Whisper fermé (whisper_type, reason)
+  | "alma_whisper_action_clicked"               // Action d'un whisper cliquée (whisper_type, action_id)
+  | "alma_frequency_changed"                    // Slider fréquence Alma modifié (from, to)
+  | "alma_blacklisted_type";                    // Whisper type blacklisté 30j après 3 dismiss (whisper_type)
 
 
 
