@@ -3644,6 +3644,7 @@ export type Database = {
       profiles: {
         Row: {
           account_status: string
+          alma_frequency: Database["public"]["Enums"]["alma_frequency"]
           animal_experience: string
           available_for_help: boolean | null
           avatar_url: string | null
@@ -3695,6 +3696,7 @@ export type Database = {
         }
         Insert: {
           account_status?: string
+          alma_frequency?: Database["public"]["Enums"]["alma_frequency"]
           animal_experience?: string
           available_for_help?: boolean | null
           avatar_url?: string | null
@@ -3746,6 +3748,7 @@ export type Database = {
         }
         Update: {
           account_status?: string
+          alma_frequency?: Database["public"]["Enums"]["alma_frequency"]
           animal_experience?: string
           available_for_help?: boolean | null
           avatar_url?: string | null
@@ -6418,6 +6421,7 @@ export type Database = {
     }
     Enums: {
       activity_level: "calm" | "moderate" | "sportive"
+      alma_frequency: "silent" | "balanced" | "talkative"
       alone_duration: "never" | "2h" | "6h" | "all_day"
       analysis_request_status: "new" | "in_progress" | "done" | "archived"
       analysis_request_type: "city" | "breed" | "places" | "pros" | "other"
@@ -6664,6 +6668,7 @@ export const Constants = {
   public: {
     Enums: {
       activity_level: ["calm", "moderate", "sportive"],
+      alma_frequency: ["silent", "balanced", "talkative"],
       alone_duration: ["never", "2h", "6h", "all_day"],
       analysis_request_status: ["new", "in_progress", "done", "archived"],
       analysis_request_type: ["city", "breed", "places", "pros", "other"],
