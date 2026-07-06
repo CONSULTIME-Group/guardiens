@@ -58,12 +58,13 @@ function AlmaWhisperCard({ whisper, onDismiss }: AlmaWhisperCardProps) {
         <button
           type="button"
           onClick={() => onDismiss("closed_manually")}
-          className="absolute right-2 top-2 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition"
+          className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition"
           aria-label="Fermer le message d'Alma"
         >
           <X className="h-3.5 w-3.5" />
         </button>
-        <div className="flex items-start gap-2 pr-6">
+        <div className="flex items-start gap-2 pr-10">
+
           <div className="text-primary shrink-0">
             <AlmaAvatar size={24} />
           </div>
