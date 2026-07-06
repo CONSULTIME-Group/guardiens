@@ -23,6 +23,7 @@ import { moderateContent } from "@/lib/moderation";
 import { appStatusBadge as appStatusLabels } from "@/lib/messageStatus";
 import { useAutoOpenConversation } from "@/hooks/useAutoOpenConversation";
 import AlmaMessageOpener from "@/components/ai/alma/AlmaMessageOpener";
+import { AlmaStagnantConversationWhisper } from "@/components/ai/alma/wiring/AlmaStagnantConversationWhisper";
 
 
 const MESSAGES_PAGE_SIZE = 50;
@@ -826,6 +827,23 @@ const Messages = () => {
                   missionId={activeConv.small_mission_id}
                   otherUserId={activeConv.other_user.id}
                   onDraftReady={(text) => setNewMessage(text)}
+                />
+              )}
+              {user && activeConv.owner_id === user.id && messages.length > 0 && (
+                <AlmaStagnantConversationWhisper
+                  conversationId={activeConv.id}
+                  audience="owner"
+                  otherFirstName={activeConv.other_user?.first_name ?? null}
+                  messages={messages}
+                  onProposeMeeting={(tpl) => {
+                    setNewMessage(tpl);
+                    setTimeout(() => {
+                      const ta = document.querySelector<HTMLTextAreaElement>(
+                        'textarea[placeholder], textarea',
+                      );
+                      ta?.focus();
+                    }, 0);
+                  }}
                 />
               )}
               <MessageComposer
