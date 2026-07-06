@@ -250,6 +250,52 @@ const ApplicationModal = ({
           {/* Left: message */}
           <div className="space-y-3">
             <label className="text-sm font-medium">Votre message</label>
+            {!almaDismissed && (
+              <AlmaBubble
+                audience="sitter"
+                variant="inline"
+                loading={almaLoading}
+                onDismiss={() => setAlmaDismissed(true)}
+                actions={
+                  <>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={async () => {
+                        setAlmaLoading(true);
+                        try {
+                          const { data, error } = await supabase.functions.invoke("draft-application-letter", { body: { sit_id: sitId } });
+                          if (error) throw error;
+                          if ((data as any)?.error) throw new Error((data as any).error);
+                          const draft = (data as any)?.draft as string;
+                          if (!draft) throw new Error("Aucun brouillon reçu");
+                          setMessage(draft);
+                          setAlmaUsed(true);
+                          setAlmaDismissed(true);
+                          await trackEvent("alma_application_letter_generated", { metadata: { sit_id: sitId } });
+                          toast({ title: "Brouillon Alma prêt", description: "Tu peux relire et personnaliser avant d'envoyer." });
+                        } catch (e: any) {
+                          toast({ title: "Alma indisponible", description: e?.message || "Réessaie dans un instant.", variant: "destructive" });
+                        } finally {
+                          setAlmaLoading(false);
+                        }
+                      }}
+                      disabled={almaLoading}
+                    >
+                      Oui, écrire un brouillon
+                    </Button>
+                    <Button type="button" size="sm" variant="ghost" onClick={() => setAlmaDismissed(true)}>
+                      Non, je préfère écrire moi-même
+                    </Button>
+                  </>
+                }
+              >
+                Je peux te suggérer un début de lettre à partir de ta bio et de cette annonce. Tu gardes le contrôle.
+              </AlmaBubble>
+            )}
+            {almaUsed && !almaDismissed && (
+              <p className="text-[10px] font-medium text-primary/80 uppercase tracking-wider">Brouillon Alma, à personnaliser</p>
+            )}
             <Textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -257,7 +303,11 @@ const ApplicationModal = ({
               className="resize-none"
               placeholder="Votre message de candidature..."
             />
+            {almaUsed && (
+              <p className="text-xs text-muted-foreground">Brouillon Alma inséré, à personnaliser avant envoi.</p>
+            )}
           </div>
+
 
           {/* Right: profile preview */}
           {sitterInfo && (
