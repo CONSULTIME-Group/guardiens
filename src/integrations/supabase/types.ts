@@ -256,6 +256,45 @@ export type Database = {
           },
         ]
       }
+      alma_cultural_facts: {
+        Row: {
+          active: boolean
+          content: string
+          context_filter: Json
+          created_at: string
+          fact_type: string
+          id: string
+          priority: number
+          seasonal_end_month: number | null
+          seasonal_start_month: number | null
+          source_url: string | null
+        }
+        Insert: {
+          active?: boolean
+          content: string
+          context_filter?: Json
+          created_at?: string
+          fact_type: string
+          id?: string
+          priority?: number
+          seasonal_end_month?: number | null
+          seasonal_start_month?: number | null
+          source_url?: string | null
+        }
+        Update: {
+          active?: boolean
+          content?: string
+          context_filter?: Json
+          created_at?: string
+          fact_type?: string
+          id?: string
+          priority?: number
+          seasonal_end_month?: number | null
+          seasonal_start_month?: number | null
+          source_url?: string | null
+        }
+        Relationships: []
+      }
       alma_whisper_history: {
         Row: {
           action_taken: string | null
@@ -6254,6 +6293,10 @@ export type Database = {
         Returns: {
           whisper_type: string
         }[]
+      }
+      get_alma_cultural_fact: {
+        Args: { p_context?: Json; p_surface: string; p_user_id: string }
+        Returns: Json
       }
       get_dormant_recovery_context: {
         Args: { _user_id: string }
