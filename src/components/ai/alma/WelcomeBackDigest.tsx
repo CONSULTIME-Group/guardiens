@@ -269,6 +269,9 @@ export function WelcomeBackDigest({
     }
   }, [variant]);
 
+  // Kill switch : si l'utilisateur a choisi "silent", Alma ne parle jamais
+  // spontanément, même si un digest est disponible.
+  if (almaFrequency === "silent") return null;
   if (dismissed || !variant || !signals) return null;
 
   const copy = getCopy(variant, signals);
