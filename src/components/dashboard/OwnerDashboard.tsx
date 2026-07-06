@@ -58,7 +58,7 @@ import {
 import type { Pet } from "./owner/types";
 import { useOwnerDashboardData } from "@/hooks/useOwnerDashboardData";
 import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
-import { useIsNewOwner, isEarlyOwner, computeOwnerNbaVariant } from "@/hooks/useIsNewUser";
+import { useIsNewOwner, isEarlyOwner, hasNoActiveSit, computeOwnerNbaVariant } from "@/hooks/useIsNewUser";
 import { trackEvent } from "@/lib/analytics";
 import { SITTER_PRICE_START, REFERRAL_REWARD_LABEL } from "@/lib/pricing";
 
@@ -131,6 +131,18 @@ const OwnerDashboard = () => {
     () => isEarlyOwner({ sits: sits as any, pets: pets as any }),
     [sits, pets],
   );
+  const noActiveSit = useMemo(
+    () => hasNoActiveSit(sits as any),
+    [sits],
+  );
+  /**
+   * Alma proactive : le dashboard affiche SitDraftFromPrompt (si new owner),
+   * OwnerFirstNBAGardiens et un subtitle contextuel personnalisé, et masque
+   * le CTA hero desktop, pour tout owner qui n'a aucune annonce active,
+   * qu'il ait ou non des animaux enregistrés.
+   */
+  const isOwnerRole = user?.role === "owner" || user?.role === "both";
+  const showAlmaProactive = earlyOwner || (noActiveSit && isOwnerRole);
   const nearbyCount = nearbyOwnerSittersData?.totalCount ?? 0;
   const nearbyRadius = nearbyOwnerSittersData?.radiusUsed ?? null;
 
@@ -200,13 +212,22 @@ const OwnerDashboard = () => {
     }
     const anyPublished = sits.some(s => s.status === "published");
     if (anyPublished) return "Votre annonce est en ligne, les candidatures arrivent.";
+    // Owner sans annonce active (draft/archived/completed/cancelled uniquement) :
+    // subtitle contextuel qui reprend le fil ou relance la publication.
+    if (hasDraft) {
+      return "Vous avez commencé une annonce. Reprenez où vous en étiez.";
+    }
+    if (noActiveSit && sits.length > 0 && !earlyOwner) {
+      const firstName = user?.firstName ? capitalize(user.firstName) : null;
+      const hello = firstName ? `Ravi de vous revoir, ${firstName}.` : "Ravi de vous revoir.";
+      if (nearbyCount > 0 && nearbyRadius) {
+        return `${hello} ${nearbyCount} gardien${nearbyCount > 1 ? "s" : ""} vérifié${nearbyCount > 1 ? "s" : ""} à ${nearbyRadius} km attendent votre prochaine annonce.`;
+      }
+      return `${hello} Republiez une annonce quand vous êtes prêt, on vous accompagne.`;
+    }
     // Historique présent mais plus rien d'actif : on évite le message « première annonce » trompeur.
     if (sits.length > 0 && !earlyOwner) {
       return `${sits.length} annonce${sits.length > 1 ? "s" : ""} dans votre historique, aucune en cours.`;
-    }
-    // Early owner avec brouillon : on reprend le fil.
-    if (earlyOwner && hasDraft) {
-      return "Vous avez commencé une annonce. Reprenez où vous en étiez.";
     }
     // New/early owner sans brouillon : subtitle personnalisé via signal local.
     if (earlyOwner) {
@@ -221,7 +242,7 @@ const OwnerDashboard = () => {
 
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ongoingSit, sits, pendingAppCount, hasDraft, user?.firstName]);
+  }, [ongoingSit, sits, pendingAppCount, hasDraft, noActiveSit, earlyOwner, nearbyCount, nearbyRadius, user?.firstName]);
 
   // Banner contextuel supprimé : verif & candidatures non lues affichées en chips inline dans le hero.
 
@@ -288,8 +309,8 @@ const OwnerDashboard = () => {
 
   /* ── NBA variant retenue (précepte 2026 : 1 seule NBA dominante). ── */
   const nbaVariant = useMemo(
-    () => computeOwnerNbaVariant({ isNewOwner, hasDraft }),
-    [isNewOwner, hasDraft],
+    () => computeOwnerNbaVariant({ isNewOwner, hasDraft, hasNoActiveSit: noActiveSit }),
+    [isNewOwner, hasDraft, noActiveSit],
   );
 
   // Trace 1 fois par session le premier affichage dashboard "nouveau proprio"
@@ -320,10 +341,10 @@ const OwnerDashboard = () => {
       sessionStorage.setItem(key, "1");
       void trackEvent("owner_dashboard_nba_choice", {
         source: "/dashboard",
-        metadata: { variant: nbaVariant, early_owner: earlyOwner },
+        metadata: { variant: nbaVariant, early_owner: earlyOwner, no_active_sit: noActiveSit },
       });
     } catch {}
-  }, [loading, user?.id, nbaVariant, earlyOwner]);
+  }, [loading, user?.id, nbaVariant, earlyOwner, noActiveSit]);
 
 
   /* ── Render ── */
@@ -419,9 +440,9 @@ const OwnerDashboard = () => {
                 </Link>
               </Button>
             )}
-            {/* CTA hero desktop masqué pour early/new-owner : la NBA dominante
-                (SitDraftFromPrompt ou DraftResumeCard) sert déjà de CTA principal. */}
-            {!earlyOwner && (
+            {/* CTA hero desktop masqué pour early/new-owner ou owner sans annonce active :
+                la NBA dominante (SitDraftFromPrompt ou DraftResumeCard) sert déjà de CTA principal. */}
+            {!showAlmaProactive && (
               <Button
                 size="lg"
                 onClick={() => navigate("/sits/create")}
@@ -434,8 +455,8 @@ const OwnerDashboard = () => {
         </div>
       </header>
 
-      {/* ═══ Owner Pass 3 — Concierge IA (new-owner uniquement, avant tout brouillon) ═══ */}
-      {isNewOwner && !hasDraft && (
+      {/* ═══ Owner Pass 3 — Concierge IA (owner sans annonce active, avant tout brouillon) ═══ */}
+      {showAlmaProactive && !hasDraft && (
         <div className="px-5 md:px-8">
           <SitDraftFromPrompt />
         </div>
@@ -449,11 +470,10 @@ const OwnerDashboard = () => {
       )}
 
       {/* ═══ Action prioritaire unique , UN seul CTA dominant ═══
-          Précepte 2026 : 1 seule NBA above the fold. Pour un new-owner,
-          SitDraftFromPrompt est la NBA dominante ; on masque PriorityActionCard
-          pour éviter 3 CTA "Publier" empilés. On la masque aussi si un draft
-          est en cours (DraftResumeCard prend le relais). */}
-      {!hasDraft && !isNewOwner && (
+          Précepte 2026 : 1 seule NBA above the fold. Pour un owner sans annonce
+          active, SitDraftFromPrompt / DraftResumeCard est la NBA dominante ;
+          on masque PriorityActionCard pour éviter les CTA "Publier" empilés. */}
+      {!hasDraft && !showAlmaProactive && (
         <div className="px-5 md:px-8">
           <PriorityActionCard
             eyebrow={priorityAction.eyebrow}
@@ -734,7 +754,7 @@ const OwnerDashboard = () => {
       {/* ═══ Preuve tangible du vivier local (early owner) ═══
           Descendu sous la grille de pilotage pour ne pas concurrencer la NBA.
           Reste visible tant qu'aucune annonce n'est publiée (drafts inclus). */}
-      {earlyOwner && (
+      {showAlmaProactive && (
         <div className="px-5 md:px-8">
           <OwnerFirstNBAGardiens />
         </div>

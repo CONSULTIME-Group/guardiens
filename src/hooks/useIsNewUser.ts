@@ -37,19 +37,45 @@ export function isEarlyOwner(input: {
 }
 
 /**
+ * "No active sit" = aucune annonce publiée ou confirmée (in-flight).
+ * Vrai si l'owner n'a aucune sit, ou si toutes ses sits sont dans un
+ * statut non-actif : draft, archived, cancelled, completed.
+ *
+ * Indépendant des animaux : couvre le cas d'un owner qui a des pets et
+ * un historique d'annonces (archived/completed après saison) mais rien
+ * en ligne actuellement. Alma doit rester proactive dans ce cas.
+ */
+const NON_ACTIVE_SIT_STATUSES = new Set([
+  "draft",
+  "archived",
+  "cancelled",
+  "completed",
+]);
+
+export function hasNoActiveSit(
+  sits: Array<{ status?: string | null }>,
+): boolean {
+  if (sits.length === 0) return true;
+  return sits.every((s) => NON_ACTIVE_SIT_STATUSES.has(s.status ?? ""));
+}
+
+/**
  * Détermine la NBA dominante du dashboard owner.
  * Un et un seul variant est actif à la fois (précepte 2026).
  */
 export type OwnerNbaVariant =
   | "sit_draft_from_prompt"
   | "draft_resume"
+  | "no_active_sit"
   | "priority_action";
 
 export function computeOwnerNbaVariant(input: {
   isNewOwner: boolean;
   hasDraft: boolean;
+  hasNoActiveSit?: boolean;
 }): OwnerNbaVariant {
   if (input.hasDraft) return "draft_resume";
   if (input.isNewOwner) return "sit_draft_from_prompt";
+  if (input.hasNoActiveSit) return "no_active_sit";
   return "priority_action";
 }

@@ -12,31 +12,37 @@
 import { describe, it, expect } from "vitest";
 import {
   isEarlyOwner,
+  hasNoActiveSit,
   useIsNewOwner,
   computeOwnerNbaVariant,
 } from "@/hooks/useIsNewUser";
 
 type SitLite = { status: string };
 
-function state(sits: SitLite[], pets: unknown[]) {
+function state(sits: SitLite[], pets: unknown[], role: "owner" | "sitter" | "both" = "owner") {
   const isNewOwner = useIsNewOwner({
     sitsCount: sits.length,
     petsCount: pets.length,
   });
   const early = isEarlyOwner({ sits, pets });
+  const noActiveSit = hasNoActiveSit(sits);
+  const isOwnerRole = role === "owner" || role === "both";
+  const showAlmaProactive = early || (noActiveSit && isOwnerRole);
   const hasDraft = sits.some((s) => s.status === "draft");
-  const nbaVariant = computeOwnerNbaVariant({ isNewOwner, hasDraft });
+  const nbaVariant = computeOwnerNbaVariant({ isNewOwner, hasDraft, hasNoActiveSit: noActiveSit });
   return {
     isNewOwner,
     earlyOwner: early,
+    noActiveSit,
+    showAlmaProactive,
     hasDraft,
     nbaVariant,
     // Miroir des conditions JSX du dashboard :
-    showSitDraftFromPrompt: isNewOwner && !hasDraft,
+    showSitDraftFromPrompt: showAlmaProactive && !hasDraft,
     showDraftResumeCard: hasDraft,
-    showPriorityActionCard: !hasDraft && !isNewOwner,
-    showOwnerFirstNBAGardiens: early,
-    showDesktopHeroCta: !early,
+    showPriorityActionCard: !hasDraft && !showAlmaProactive,
+    showOwnerFirstNBAGardiens: showAlmaProactive,
+    showDesktopHeroCta: !showAlmaProactive,
   };
 }
 
@@ -87,16 +93,52 @@ describe("OwnerDashboard states — précepte 2026 « 1 NBA dominante »", () =>
     expect(s.showDesktopHeroCta).toBe(true);
   });
 
-  it("owner avec animaux mais aucun sit : n'est PAS early (pets ancrent la maison)", () => {
-    const s = state([], [{ id: "pet1" }]);
+  it("owner avec animaux mais aucun sit : n'est PAS early, mais hasNoActiveSit + role owner → Alma proactive", () => {
+    const s = state([], [{ id: "pet1" }], "owner");
     expect(s.isNewOwner).toBe(false);
     expect(s.earlyOwner).toBe(false);
-    expect(s.nbaVariant).toBe("priority_action");
+    expect(s.noActiveSit).toBe(true);
+    expect(s.showAlmaProactive).toBe(true);
+    expect(s.nbaVariant).toBe("no_active_sit");
+    expect(s.showSitDraftFromPrompt).toBe(true);
+    expect(s.showPriorityActionCard).toBe(false);
+    expect(s.showOwnerFirstNBAGardiens).toBe(true);
+    expect(s.showDesktopHeroCta).toBe(false);
   });
 
   it("owner avec draft + publié : n'est PAS early (une annonce est en ligne)", () => {
     const s = state([{ status: "draft" }, { status: "published" }], []);
     expect(s.earlyOwner).toBe(false);
+    expect(s.noActiveSit).toBe(false);
     expect(s.nbaVariant).toBe("draft_resume");
+  });
+
+  // Cas Jérémie martinot@gmail.com : role=both, 2 pets, 1 draft + 2 archived, 0 published.
+  // Doit voir DraftResumeCard + OwnerFirstNBAGardiens + subtitle contextuel, CTA hero masqué.
+  it("owner (role=both) avec pets + draft + archived, aucune publiée : Alma proactive, DraftResumeCard dominante", () => {
+    const s = state(
+      [{ status: "draft" }, { status: "archived" }, { status: "archived" }],
+      [{ id: "pet1" }, { id: "pet2" }],
+      "both",
+    );
+    expect(s.isNewOwner).toBe(false);
+    expect(s.earlyOwner).toBe(false);
+    expect(s.noActiveSit).toBe(true);
+    expect(s.showAlmaProactive).toBe(true);
+    expect(s.hasDraft).toBe(true);
+    expect(s.nbaVariant).toBe("draft_resume");
+    expect(s.showDraftResumeCard).toBe(true);
+    expect(s.showSitDraftFromPrompt).toBe(false); // masqué car hasDraft
+    expect(s.showPriorityActionCard).toBe(false);
+    expect(s.showOwnerFirstNBAGardiens).toBe(true);
+    expect(s.showDesktopHeroCta).toBe(false);
+  });
+
+  it("sitter pur avec pets et archived : hasNoActiveSit vrai mais role sitter → PAS Alma proactive", () => {
+    const s = state([{ status: "archived" }], [{ id: "pet1" }], "sitter");
+    expect(s.noActiveSit).toBe(true);
+    expect(s.showAlmaProactive).toBe(false);
+    expect(s.showPriorityActionCard).toBe(true);
+    expect(s.showDesktopHeroCta).toBe(true);
   });
 });
