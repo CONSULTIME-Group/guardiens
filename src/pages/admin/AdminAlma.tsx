@@ -284,7 +284,7 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
   }, [stats]);
 
   const freqBreakdown = useMemo(() => {
-    const acc = { silent: 0, balanced: 0, talkative: 0 } as Record<string, number>;
+    const acc = { silent: 0, low: 0, balanced: 0, talkative: 0 } as Record<string, number>;
     for (const row of freq) {
       const k = row.alma_frequency ?? "balanced";
       acc[k] = (acc[k] ?? 0) + 1;
