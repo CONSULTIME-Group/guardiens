@@ -256,6 +256,64 @@ export type Database = {
           },
         ]
       }
+      alma_whisper_history: {
+        Row: {
+          action_taken: string | null
+          dismissed_reason: string | null
+          emitted_at: string
+          id: string
+          metadata: Json | null
+          session_id: string | null
+          surface: string
+          user_id: string
+          whisper_type: string
+        }
+        Insert: {
+          action_taken?: string | null
+          dismissed_reason?: string | null
+          emitted_at?: string
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          surface: string
+          user_id: string
+          whisper_type: string
+        }
+        Update: {
+          action_taken?: string | null
+          dismissed_reason?: string | null
+          emitted_at?: string
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          surface?: string
+          user_id?: string
+          whisper_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alma_whisper_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "alma_whisper_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alma_whisper_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       analysis_requests: {
         Row: {
           admin_notes: string | null
@@ -6154,6 +6212,16 @@ export type Database = {
         Returns: string
       }
       get_activity_since_last_visit: { Args: never; Returns: Json }
+      get_alma_blacklisted_types: {
+        Args: never
+        Returns: {
+          whisper_type: string
+        }[]
+      }
+      get_dormant_recovery_context: {
+        Args: { _user_id: string }
+        Returns: Json
+      }
       get_email_preferences_by_email: {
         Args: { p_email: string }
         Returns: {
@@ -6240,6 +6308,7 @@ export type Database = {
           pending_app_count: number
         }[]
       }
+      get_sit_context_for_alma: { Args: { _sit_id: string }; Returns: Json }
       get_sit_views_count: {
         Args: { p_sit_ids: string[] }
         Returns: {
@@ -6247,6 +6316,10 @@ export type Database = {
           views_30d: number
           views_total: number
         }[]
+      }
+      get_sitter_context_for_alma: {
+        Args: { _owner_id: string; _sitter_id: string }
+        Returns: Json
       }
       get_unread_messages_count: { Args: { _user_id: string }; Returns: number }
       get_user_email_for_notification: {
