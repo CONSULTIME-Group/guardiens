@@ -42,13 +42,13 @@ describe("AlmaNotifSummaryBubble", () => {
     expect(screen.getByText(/vous avez 6 notifications/i)).toBeInTheDocument();
   });
 
-  it("renders tutoiement for sitter role", () => {
+  it("utilise le vouvoiement même en rôle sitter", () => {
     authMock.mockReturnValue({ user: { id: "u1" }, activeRole: "sitter" });
     const notifs = Array.from({ length: 5 }, (_, i) => mk("new_message", i));
     render(
       <AlmaNotifSummaryBubble notifications={notifs} onFilterUrgent={vi.fn()} />,
     );
-    expect(screen.getByText(/tu as 5 notifications/i)).toBeInTheDocument();
+    expect(screen.getByText(/vous avez 5 notifications/i)).toBeInTheDocument();
   });
 
   it("shows on mixed types even below 5 unread", () => {
