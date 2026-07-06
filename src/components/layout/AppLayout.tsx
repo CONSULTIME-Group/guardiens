@@ -40,6 +40,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
 
 
   return (
+    <AlmaProvider>
     <div className="flex min-h-screen bg-background">
       <Sidebar />
       <main id="main-content" className="flex-1 min-w-0 pb-20 md:pb-0 overflow-x-clip" role="main">
@@ -83,7 +84,11 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
           }}
         />
       )}
+      <Suspense fallback={null}>
+        <AlmaWhisperOutlet />
+      </Suspense>
       {/* DuplicateAccountGuard mont\u00e9 globalement dans App.tsx */}
     </div>
+    </AlmaProvider>
   );
 };
