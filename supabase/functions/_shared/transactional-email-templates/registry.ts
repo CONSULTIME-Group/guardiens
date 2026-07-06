@@ -103,6 +103,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'mission-proposal-declined': missionProposalDeclined,
   'owner-no-sit-j3': ownerNoSitJ3,
   'owner-no-sit-j10': ownerNoSitJ10,
+  'owner-no-sit-j21': ownerNoSitJ21,
   'referral-boost-monthly': referralBoostMonthly,
   'pro-profile-approved': proProfileApproved,
   'pro-profile-rejected': proProfileRejected,
