@@ -26,6 +26,7 @@ import SitterFirstNBA from "./SitterFirstNBA";
 import SitterFirstNBASkeleton from "./SitterFirstNBASkeleton";
 import NoNearbySitsEmptyState from "./NoNearbySitsEmptyState";
 import NextDigestCard from "./sitter/NextDigestCard";
+import NextMissionDigestCard from "./NextMissionDigestCard";
 import { useIsNewSitter } from "@/hooks/useIsNewUser";
 import { useSitterTopAffinitySits } from "@/hooks/useSitterTopAffinitySits";
 
