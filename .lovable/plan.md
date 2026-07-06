@@ -1,55 +1,32 @@
-# Alma Pass 3 — cross-canal + republish + finition
+Audit lecture seule terminé, aucune modification de code proposée.
 
-Périmètre large (7 chantiers). Livraison en **un seul commit** comme demandé, mais je propose de découper l'exécution en 2 vagues pour maîtriser le risque. Confirmez avant que je lance.
+## Synthèse
 
-## Vague A (prioritaire, forte valeur, faible risque)
+L'absence perçue d'Alma s'explique par trois faits combinés :
 
-### C1 — Republish depuis annonce archivée
-- Bouton "Republier avec Alma" sur `/sits` (liste) + `SitDetail` si `status IN ('archived','cancelled','completed')`
-- Modale `<AlmaBubble />` avec 2 modes radio : **copy** (par défaut) / **adapt** (prompt libre)
-- `CreateSit.tsx` détecte `?from={sit_id}&mode=copy|adapt` :
-  - copy : pré-remplit tout sauf dates + photos optionnelles
-  - adapt : appel `draft-sit-from-prompt` étendu avec contexte de l'ancienne sit
-- Bandeau `AlmaBubble variant="inline"` + badge "Republication de {ancien_titre}"
-- Analytics : `alma_republish_bubble_seen`, `alma_republish_mode_selected`, `alma_republish_published`
+1. **La page profil de l'utilisateur n'a aucun câblage Alma** (ni whisper proactif, ni `useAlmaCulturalFact`). Aucun whisper ne peut y apparaître, ce n'est pas un bug.
+2. **Le quota `balanced` (défaut de tous les comptes) est très serré** : 1 seul `cultural_fact` par session, 3 whispers actionnables max, cooldown 5 min entre chaque, cooldown 15 min après un dismiss X, mise en sourdine totale après 2 dismiss X. En base : 663 comptes `balanced`, 1 `talkative`, 0 `silent`.
+3. **La navigation ne relance pas de nouveaux whispers** car l'état du scheduler (`emittedCount`, `sessionMuted`, `lastEmittedAt`) est global à `AlmaProvider` monté dans `AppLayout` et survit aux changements de page ; `sessionStorage` mémorise aussi les surfaces déjà servies.
 
-### C2 — Voix Alma dans les 5 digests emails
-Refonte cosmétique **sans changement fonctionnel** des templates :
-- `send-sitter-daily-digest`, `send-mission-daily-digest`, `send-mutual-aid-weekly-digest`, `send-sit-draft-reminder`, nurturing owner J+3/J+10/J+21
-- Header : avatar Alma SVG 32px + signature "Alma" + baseline
-- Intro : "Bonjour {prénom}, c'est Alma. Voici ce que j'ai vu pour vous depuis hier." (vouvoiement owner / tutoiement sitter)
-- Footer : "Vous relisez, vous décidez."
-- Ajouter `alma_signed: true` aux events `email_*_sent`
+L'apparence « aléatoire » vient du tirage pondéré côté RPC + dedup 24 h + variabilité du pool éligible selon la surface et la race.
 
-### C3 — Alma dans le welcome email + `/dashboard?welcome=alma`
-- `auth-email-hook` template signup : Alma se présente, CTA "Rencontrer Alma sur mon tableau de bord"
-- Dashboard : détection `?welcome=alma` → force `WelcomeBackDigest` avec variante d'accueil
-- Analytics : `alma_welcome_email_sent`, `alma_dashboard_first_meeting_seen`
+## Détails livrés dans l'audit
 
-### C5 — Cleanup persona cross-canal
-- Grep + remplacement : "L'IA", "Concierge IA", "Assistant IA" → "Alma" ; "Génération en cours" → "Alma prépare…"
-- Sparkles isolées → ajouter `<AlmaAvatar />`
-- Créer `docs/persona-alma.md`
+- Règles complètes de `canEmit` et `pickNext` (silent / muted / blacklisted / quota / cooldown / dismiss_cooldown ; P3 bloqué si P0/P1/P2 éligible).
+- Liste exhaustive des surfaces câblées : Dashboard, Messages, PublicSitterProfile pour les whispers actionnables ; OwnerDashboard, SitterDashboard, SearchPage, CityPage, BreedPage, PublicSitterProfile pour les facts culturels.
+- Confirmation que Profile, MySubscription, Favorites, Sits, SitDetail, Notifications, MesAvis, EmailPreferences, hubs SEO éditoriaux, etc. n'ont aucun câblage.
+- Impact des correctifs récents : gate `isProactiveMuted` limite Alma uniquement sur `/sits/create` et `/sits/:id/edit` et pendant les 3 s après une saisie, aucun impact sur les autres surfaces.
 
-### C7 — Contrôles
-- `bunx tsgo --noEmit` vert
-- Tests Vitest sur : détection republish, pré-remplissage copy/adapt, absence de vocabulaire proscrit dans nouveaux templates
-- Grep de non-régression persona
+## Options d'ajustement (à valider ensemble avant tout code)
 
-## Vague B (à confirmer, plus lourd)
+1. Étendre les surfaces câblées (`useAlmaCulturalFact`) à Profile, MySubscription, Favorites, Sits, Notifications, SitDetail.
+2. Relever `CULTURAL_FACT_LIMITS.balanced.maxPerSession` de 1 à 2-3 et ramener le cooldown DB de 24 h à 8-12 h.
+3. Ajouter un indicateur persistant (pastille sur avatar Alma en topbar) signalant qu'un conseil est prêt, décorrélé du whisper éphémère.
+4. Historique consultable des whispers ratés dans la session (tiroir/cloche).
+5. Assouplir la gate focus pour les P3 uniquement (facts non bloquants autorisés même en saisie).
+6. Query param `?alma=verbose` en dev pour bypass quota et cooldown.
+7. Exposer un aperçu du prochain créneau disponible dans les préférences user, pour dédramatiser l'aléa.
 
-### C4 — Push notifications web (marqué optionnel par vous)
-Service worker + opt-in `/settings` + rate limit 1/h + colonne `notification_preferences.alma_push_enabled`. **~1 chantier à part entière** (service worker, VAPID keys, edge function push, permission flow). Je recommande de le sortir en Pass 4.
+## Prochaine étape
 
-### C6 — Dashboard admin `/admin/alma`
-Adoption 7j/30j, taux d'acceptation, impact fonctionnel, freshness par moment, filtres période/rôle/moment/langue, export CSV. **Requiert instrumentation propre des 18 moments** + agrégations SQL. Faisable mais ~1 journée à part.
-
-## Ma recommandation
-
-Livrer **Vague A** (C1+C2+C3+C5+C7) dans ce commit, comme "Alma Pass 3 core". Traiter C4 (push) et C6 (admin KPI) en Pass 3.5 dédiée. Motif : C4 touche à l'infra service worker / permissions navigateur, C6 dépend de la stabilité des events analytics Pass 1+2+3 pour produire des KPI fiables. Les mélanger avec C1-C3 augmente la surface de bug sans bénéfice fonctionnel immédiat.
-
-## Question
-
-Vous confirmez :
-1. **Vague A seule dans ce commit** (recommandé), ou
-2. **Tout d'un coup** incluant push web + admin KPI (plus long, plus de risque) ?
+Aucune action code tant que vous n'avez pas priorisé parmi ces 7 options. Répondez avec la ou les options retenues (ex. « 1 + 2 » ou « 1, 3, 6 ») pour que je bascule en build mode sur un périmètre précis.
