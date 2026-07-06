@@ -130,12 +130,13 @@ const SitterDailyDigestEmail = ({ sitterFirstName, items = [] }: Props) => (
           </Link>
         </Text>
 
-        <Text style={baseline}>Gratuit pour vous, sans engagement.</Text>
+        <AlmaSignoff />
 
         <LegalFooter
           purpose="du bon fonctionnement de votre digest quotidien"
           basis="6.1.f"
         />
+
       </Container>
     </Body>
   </Html>
