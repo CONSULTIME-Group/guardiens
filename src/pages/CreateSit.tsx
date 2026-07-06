@@ -728,6 +728,29 @@ const CreateSit = () => {
           </div>
         )}
 
+        {showAlmaCreateBubble && (
+          <div className="mb-4">
+            <AlmaBubble
+              audience="owner"
+              variant="inline"
+              title="Décrivez votre absence, je remplis le formulaire"
+              onDismiss={handleAlmaCreateDismiss}
+              actions={
+                <>
+                  <Button size="sm" onClick={handleAlmaCreateIntent}>
+                    Décrire en une phrase
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={handleAlmaCreateDismiss}>
+                    Non merci, je remplis manuellement
+                  </Button>
+                </>
+              }
+            >
+              Vous préférez décrire votre besoin en une phrase et laisser Alma préparer le brouillon ? Je remplis les champs pour vous, vous relisez et publiez.
+            </AlmaBubble>
+          </div>
+        )}
+
         {!isRepublish && <FirstAnnonceTip />}
 
         {profileCompletion < 60 && (
