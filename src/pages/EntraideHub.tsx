@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -24,6 +24,7 @@ import MissionCardCover from "@/components/missions/MissionCardCover";
 import ProximityFilter from "@/components/missions/ProximityFilter";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { useMissionDistance } from "@/hooks/useMissionDistance";
+import { trackEvent } from "@/lib/analytics";
 
 
 type Tab = "questions" | "besoins" | "offres";
@@ -232,6 +233,9 @@ const EntraideHub = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mineOnly]);
 
+  // Chantier 4 : fallback status=all si <20 missions en base
+  const autoSwitchedStatusRef = useRef(false);
+  const allStatusFallbackTrackedRef = useRef(false);
   useEffect(() => {
     const load = async () => {
       setMLoading(true);
@@ -243,10 +247,21 @@ const EntraideHub = () => {
         .in("status", ["open", "in_progress", "completed"] as any)
         .order("created_at", { ascending: false })
         .limit(120);
-      setMissions((data || []) as unknown as MissionRow[]);
+      const rows = (data || []) as unknown as MissionRow[];
+      setMissions(rows);
       setMLoading(false);
+      // Auto-switch vers "all" si moins de 20 missions ET user n'a pas forcé un statut
+      if (!autoSwitchedStatusRef.current && rows.length < 20 && !params.get("status")) {
+        autoSwitchedStatusRef.current = true;
+        setMStatus("all");
+        if (!allStatusFallbackTrackedRef.current) {
+          allStatusFallbackTrackedRef.current = true;
+          void trackEvent("entraide_all_status_default_used", { metadata: { missions_count: rows.length } });
+        }
+      }
     };
     void load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Note : plus de bascule automatique vers Questions quand aucune mission ouverte.
@@ -261,26 +276,40 @@ const EntraideHub = () => {
   /* Filtre proximité (CP + rayon) */
   const proximity = useMissionDistance(missions);
 
+  const isMissionExpired = (m: MissionRow) => {
+    if (!m.date_needed) return false;
+    try { return new Date(m.date_needed) < new Date(new Date().setHours(0, 0, 0, 0)); } catch { return false; }
+  };
+
   const sortMissions = (arr: MissionRow[]): MissionRow[] => {
-    if (mSort === "date_needed") {
-      return [...arr].sort((a, b) => {
-        if (!a.date_needed && !b.date_needed) return 0;
-        if (!a.date_needed) return 1;
-        if (!b.date_needed) return -1;
-        return a.date_needed.localeCompare(b.date_needed);
-      });
-    }
-    if (mSort === "distance" && proximity.active) {
-      return [...arr].sort((a, b) => {
-        const da = proximity.getDistance(a.id);
-        const db = proximity.getDistance(b.id);
-        if (da == null && db == null) return 0;
-        if (da == null) return 1;
-        if (db == null) return -1;
-        return da - db;
-      });
-    }
-    return arr;
+    const applyPrimary = (list: MissionRow[]): MissionRow[] => {
+      if (mSort === "date_needed") {
+        return [...list].sort((a, b) => {
+          if (!a.date_needed && !b.date_needed) return 0;
+          if (!a.date_needed) return 1;
+          if (!b.date_needed) return -1;
+          return a.date_needed.localeCompare(b.date_needed);
+        });
+      }
+      if (mSort === "distance" && proximity.active) {
+        return [...list].sort((a, b) => {
+          const da = proximity.getDistance(a.id);
+          const db = proximity.getDistance(b.id);
+          if (da == null && db == null) return 0;
+          if (da == null) return 1;
+          if (db == null) return -1;
+          return da - db;
+        });
+      }
+      return list;
+    };
+    // Chantier 8 : missions expirées en fin de liste quel que soit le tri
+    const sorted = applyPrimary(arr);
+    return [...sorted].sort((a, b) => {
+      const ea = isMissionExpired(a) ? 1 : 0;
+      const eb = isMissionExpired(b) ? 1 : 0;
+      return ea - eb;
+    });
   };
 
   const filteredMissions = useMemo(() => {
@@ -683,6 +712,7 @@ const EntraideHub = () => {
                             : m.status === "completed"
                               ? { label: "Terminée", aria: "Statut : terminée" }
                               : null;
+                        const expired = isMissionExpired(m);
                         const d = proximity.active ? proximity.getDistance(m.id) : null;
                         const hasDist = proximity.active ? proximity.hasDistance(m.id) : false;
                         const distanceLabel =
@@ -736,6 +766,14 @@ const EntraideHub = () => {
                                     {isMine && (
                                       <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground uppercase tracking-wide">
                                         Vous
+                                      </span>
+                                    )}
+                                    {expired && (
+                                      <span
+                                        className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-warning/15 text-warning-foreground uppercase tracking-wide border border-warning/30"
+                                        aria-label="Statut : date dépassée"
+                                      >
+                                        Date dépassée
                                       </span>
                                     )}
                                   </div>
@@ -853,6 +891,31 @@ const EntraideHub = () => {
                     onCta={tab === "besoins" ? goNeed : goOffer}
                     onReset={hasMissionFilters ? resetMissionFilters : undefined}
                     howSteps={meta.how}
+                    examples={
+                      !mineOnly && !hasMissionFilters
+                        ? tab === "besoins"
+                          ? [
+                              { label: "Arroser mon potager 15 jours en août", cat: "need-garden-august" },
+                              { label: "Récupérer un colis Amazon en mon absence, samedi 12", cat: "need-amazon-pickup" },
+                              { label: "Un coup de main pour monter une bibliothèque IKEA", cat: "need-ikea-bookshelf" },
+                            ]
+                          : [
+                              { label: "Je peux vous garder votre chat le week-end si vous partez", cat: "offer-cat-weekend" },
+                              { label: "Prof de yoga bénévole en échange de bricolage", cat: "offer-yoga-barter" },
+                              { label: "Compétences en électricité, je peux dépanner un ami", cat: "offer-electricity" },
+                            ]
+                        : undefined
+                    }
+                    onExample={(ex) => {
+                      const type = tab === "besoins" ? "besoin" : "offre";
+                      void trackEvent("entraide_empty_state_template_clicked", { metadata: { tab, template_key: ex.cat } });
+                      const dest = `/petites-missions/creer?type=${type}&template=${ex.cat}`;
+                      navigate(
+                        isAuthenticated
+                          ? dest
+                          : `/inscription?redirect=${encodeURIComponent(dest)}`,
+                      );
+                    }}
                   />
                 )}
               </>

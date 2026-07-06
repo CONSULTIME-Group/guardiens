@@ -193,6 +193,74 @@ export const MISSION_TEMPLATES: MissionTemplate[] = [
       "J'ai une compétence que j'aime partager (à compléter : cuisine, couture, informatique, langue, musique, etc.). Je peux donner une ou deux heures pour vous transmettre les bases ou vous dépanner.",
     exchange: "Le plaisir de transmettre, ou ce que vous voulez offrir en retour",
   },
+
+  // ─── Exemples empty state hub EntraideHub (Pass 1) ───
+  {
+    id: "need-garden-august",
+    type: "besoin",
+    category: "garden",
+    duration: "several",
+    label: "Arroser mon potager 15 jours en août",
+    title: "Arroser mon potager 15 jours en août",
+    description:
+      "Je pars 15 jours en août et cherche quelqu'un pour passer arroser mon potager (tomates, courgettes, salades) un jour sur deux. Le tuyau est sur place, c'est rapide.",
+    exchange: "Servez-vous dans les légumes mûrs, ils sont à vous",
+  },
+  {
+    id: "need-amazon-pickup",
+    type: "besoin",
+    category: "house",
+    duration: "1-2h",
+    label: "Récupérer un colis Amazon samedi",
+    title: "Récupérer un colis Amazon en mon absence, samedi 12",
+    description:
+      "Je serai absent samedi entre 10h et 18h. Je cherche une personne de confiance à proximité pour réceptionner un colis Amazon devant chez moi (le livreur passe entre 14h et 16h) et le mettre à l'abri. Rapide.",
+    exchange: "Un café ou une petite attention à mon retour, comme vous voulez",
+  },
+  {
+    id: "need-ikea-bookshelf",
+    type: "besoin",
+    category: "house",
+    duration: "half_day",
+    label: "Monter une bibliothèque IKEA",
+    title: "Un coup de main pour monter une bibliothèque IKEA",
+    description:
+      "J'ai une grande bibliothèque IKEA à monter et je préfère m'y mettre à deux. Je cherche quelqu'un de patient, un bon tournevis et une demi-journée devraient suffire. Notice fournie.",
+    exchange: "Repas partagé à midi, je m'occupe de tout",
+  },
+  {
+    id: "offer-cat-weekend",
+    type: "offre",
+    category: "animals",
+    duration: "weekend",
+    label: "Garder votre chat le week-end",
+    title: "Je peux vous garder votre chat le week-end si vous partez",
+    description:
+      "Je suis disponible plusieurs week-ends par mois pour venir nourrir votre chat, changer l'eau et la litière, jouer un peu. Habitué·e aux félins, calme et régulier·e.",
+    exchange: "Un petit geste à votre retour, à voir ensemble",
+  },
+  {
+    id: "offer-yoga-barter",
+    type: "offre",
+    category: "skills",
+    duration: "1-2h",
+    label: "Prof de yoga contre bricolage",
+    title: "Prof de yoga bénévole en échange de bricolage",
+    description:
+      "Prof de yoga, je peux donner un cours particulier chez vous ou en extérieur. En échange, j'aimerais un coup de main sur des petits travaux (étagère, meuble à monter, luminaire à installer).",
+    exchange: "Une séance de yoga contre un coup de main bricolage",
+  },
+  {
+    id: "offer-electricity",
+    type: "offre",
+    category: "skills",
+    duration: "1-2h",
+    label: "Dépannage électricité",
+    title: "Compétences en électricité, je peux dépanner un ami",
+    description:
+      "Électricien de formation, je peux venir jeter un œil et dépanner les petites choses courantes (prise, interrupteur, luminaire, disjoncteur qui saute). Honnête sur ce que je sais faire et ce qui demande un vrai pro.",
+    exchange: "Un café, un repas partagé, ce qui vous fait plaisir",
+  },
 ];
 
 export function templatesFor(type: "besoin" | "offre"): MissionTemplate[] {

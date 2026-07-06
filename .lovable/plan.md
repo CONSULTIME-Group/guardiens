@@ -1,97 +1,67 @@
 
-# Article inventaire Guardiens, plan d'exécution
+# EntraideHub Pass 1, plan d'exécution
 
-Chantier lourd (4-5h), 10 étapes séquencées. Voici comment j'attaque.
+Gros chantier (~4-5h agent). Je découpe en 3 vagues pour livrer proprement et pouvoir valider entre chaque.
 
-## Vérifications préalables à faire avant de coder
+## Vérifications préalables (avant vague 1)
 
-1. **Table `guide_requests`** : existe déjà (13 colonnes, 4 policies d'après le contexte). Je lis le schéma actuel avant d'ajouter une migration, pour ne pas dupliquer des colonnes.
-2. **Pattern article** : `ArticleDetail.tsx` rend depuis BDD. Je regarde s'il gère déjà des placeholders ou des composants React injectés, pour choisir Option A (Markdown + placeholders) ou Option B (composant React dédié via routeur d'exceptions).
-3. **Turnstile Cloudflare** : je vérifie s'il est déjà en place dans le projet (`TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`). Si absent, je demande à l'utilisateur avant d'ajouter la dépendance.
-4. **Edge function d'illustration article** : je vérifie son nom exact avant de l'appeler pour générer la cover.
-5. **Cron pattern** : je vérifie si `pg_cron` est déjà utilisé sur d'autres jobs (email queue oui) pour rester cohérent.
+1. Lire `EntraideHub.tsx`, `SmallMissionDetail.tsx`, `CreateSmallMission.tsx`, `SmallMissionCard`, pour valider les points d'accroche exacts.
+2. Lire l'enum `small_mission_response_status` en BDD pour connaître les valeurs existantes avant ajout de `withdrawn`.
+3. Vérifier l'enum `reports.target_type` pour savoir s'il faut l'étendre à `small_mission`.
+4. Vérifier existence de `get_or_create_conversation` (utilisé chantier 5).
+5. Vérifier templates emails transactionnels existants pour caler `mission-response-withdrawn` et le mail de déclin cascade.
 
-## Décisions par défaut (je choisis, dis stop si pas ok)
+## Décisions par défaut (dites stop si pas ok)
 
-- **Option B** pour l'article : composant React dédié `ArticleInventaire` monté via routeur d'exceptions dans `ArticleDetail`. Plus lisible que du Markdown avec placeholders custom, meilleur pour les données live.
-- **Cover image** : je génère via l'edge function existante si dispo, sinon `imagegen--generate_image` en fallback.
-- **Turnstile** : si pas déjà présent, je livre le formulaire avec honeypot + rate-limit IP uniquement, et je pose une TODO pour l'ajout Turnstile ultérieur. Sinon je le branche.
-- **Digest admin** : envoi via le pipeline app-emails existant (`send-transactional-email` + template dédié), pas de nouveau système.
-- **Signature double** : "Jérémie et Elisa" à la fin, sans emoji ni icône.
+- **1 seul commit final** comme demandé, mais je livre en 3 vagues d'exécution pour vérifier au fil de l'eau.
+- **Notif + email cascade decline** : réutilise le pipeline `send-transactional-email` existant, template `mission-response-declined` (créé si absent).
+- **Badge "date dépassée"** : token `warning` du design system, pas de couleur hardcodée.
+- **Tri missions expirées** : côté client dans le hook du hub, pas de changement SQL.
+- **ReportButton** : je patche l'usage buggué + j'étends l'enum `reports.target_type` si nécessaire, admin filtre inclus si la page le permet sans refactor lourd.
 
-## Séquence d'exécution
+## Vague 1, quick wins UX pures (frontend only, 0 migration)
 
-### Étape 1, base de données (migration unique)
-- Vérifier et compléter `guide_requests` : colonnes manquantes (`ip_hash`, `city_context`, `admin_notes`, `delivered_at`, `delivered_url`, `updated_at`, `status` enum interne).
-- Trigger `update_updated_at_column` sur `guide_requests`.
-- RLS : INSERT réservé service_role (via edge function), SELECT/UPDATE/DELETE admin uniquement.
-- RPC `get_inventaire_counts()` SECURITY DEFINER, retourne JSON groupé (cities, breeds par species, places par category, pros).
-- GRANTs corrects sur la RPC (execute to anon + authenticated).
+- **Chantier 1** : retrait gate 60 % dans `CreateSmallMission.tsx`, badge soft-nudge auteur.
+- **Chantier 3** : 3 exemples cliquables sur tabs Besoins et Offres dans `EntraideHub.tsx`, pré-remplissage via `?template=` dans `CreateSmallMission.tsx`.
+- **Chantier 4** : compteur missions + fallback filtre `all` si <20, badges statuts sur cards.
+- **Chantier 8** : usage de `isDatePassed` (badge card + bannière detail + tri fin de liste).
+- **Chantier 7 (partie fix simple)** : correction `targetId={mission.user_id}` sur `ReportButton` profil.
 
-### Étape 2, edge function `submit-guide-request`
-- CORS restreint à guardiens.fr et preview Lovable.
-- Zod validation stricte.
-- Honeypot `website` : drop silencieux si non vide.
-- Turnstile : vérification server-to-server si secret dispo, sinon skip.
-- Hash IP SHA256 avec `HASH_SALT` (à générer via `generate_secret` si absent).
-- Rate-limit 15 min par IP.
-- Insert row.
-- Enqueue confirmation email si `email` fourni.
-- Retour 200 avec ticket_id court.
+Analytics ajoutés dans cette vague : `mission_created_incomplete_profile`, `entraide_empty_state_template_clicked`, `entraide_all_status_default_used`, `mission_expired_badge_seen`, `mission_expired_reschedule_clicked`.
 
-### Étape 3, composant `GuideRequestForm`
-- Radio group 5 types, label conditionnel du champ `subject`.
-- Textarea `details` (500 max), input `email` optionnel, checkbox RGPD.
-- Honeypot masqué visuellement mais accessible aux bots.
-- Toast succès/échec, état loading.
+## Vague 2, modale réponse + 1-clic offre (frontend + petite RPC)
 
-### Étape 4, hook `useInventaireCounts`
-- React Query, staleTime 5 min.
-- Appel unique de la RPC.
-- Retour typé.
+- **Chantier 2** : `MissionResponseModal.tsx` avec 3 templates, branchement CTA sidebar, composer inline conservé.
+- **Chantier 5** : CTA "Je suis intéressé, contactez-moi en privé" sur missions `offer`, appel `get_or_create_conversation` + insert `small_mission_responses` + redirect messagerie.
 
-### Étape 5, article
-- Insert en BDD via `supabase--insert` : slug, titles, meta, published_at.
-- Cover : génération illustration + upload storage, ou fallback.
-- Composant `ArticleInventaire` monté dans `ArticleDetail` quand slug match.
-- 7 sections comme au prompt, vouvoiement, aucun mot proscrit, aucun tiret cadratin.
-- FAQPage + Article + Dataset Schema.org.
-- Signature Jérémie et Elisa, `dateModified` dynamique.
+Analytics : `mission_response_modal_opened`, `mission_response_template_used`, `mission_response_submitted_from_modal`, `mission_offer_one_click_interest`.
 
-### Étape 6, teaser Observatoire
-- Ajout section "Notre inventaire vivant" entre stats et confiance, 4 tuiles via `useInventaireCounts`, CTA vers `#demande`.
+## Vague 3, workflow BDD (1 migration + edge function légère)
 
-### Étape 7, admin kanban
-- Route `/admin/guide-requests` dans `App.tsx`.
-- Entrée dans `AdminSidebar` entre small-missions et contact-messages.
-- Page `AdminGuideRequests` : 4 colonnes drag-less (boutons "étape suivante"), KPI en haut (demandes/mois, temps médian, camembert répartition), filtre par type.
-- Modal "Livré avec URL" pour renseigner `delivered_url`.
+- **Chantier 6** : modale accept avec 2 modes radio, cascade decline via UPDATE batch + notifs + emails.
+- **Chantier 9** : ajout enum `withdrawn`, `handleWithdrawResponse` passe en UPDATE, notif + email `mission-response-withdrawn`, affichage grisé.
+- **Chantier 7 (extension enum)** : ajout `small_mission` à `reports.target_type` + second `ReportButton` en pied de detail, filtre admin si trivial.
 
-### Étape 8, digest quotidien
-- Edge function `send-guide-requests-digest`.
-- Job `pg_cron` 8h Europe/Paris.
-- Requête : demandes créées depuis hier 8h, groupées par type.
-- Skip si 0.
-- Envoi via `send-transactional-email` avec template `guide-requests-digest`.
+Migration unique regroupant : enum `withdrawn`, enum `small_mission` sur reports, index si utile.
 
-### Étape 9, SEO
-- Sitemap régénéré (via script existant si présent).
-- Schema.org validé (le test `jsonld-validation` doit passer).
-- Vérif `no-em-dash-guard` : je scan mon contenu avant commit.
+Analytics : `mission_accept_response_cascade_choice`, `mission_response_withdrawn`.
 
-### Étape 10, tests
-- Typecheck.
-- Tests existants (no-em-dash, jsonld, footer-token) doivent rester verts.
-- Un test unitaire sur la RPC `get_inventaire_counts` (structure de retour).
+## Vague 4, tests et contrôles
 
-## Ce que je ne fais pas sans confirmation
+- Test Vitest `mission-response-cascade.test.ts` (mode decline_others met bien pending → declined).
+- Test Vitest `mission-empty-states.test.tsx` (3 exemples visibles sur Besoins et Offres).
+- `bunx tsgo --noEmit` vert.
+- Suite Vitest existante verte (no-em-dash, jsonld, footer-token, main-flex-min-w-0).
+- Scan manuel vocabulaire proscrit dans tous les nouveaux libellés.
 
-- Installer Turnstile si absent : je pose la question en cours de route.
-- Ajouter le composant React dans un nouveau routeur : je reste sur `ArticleDetail`.
-- Modifier la sidebar au-delà de l'entrée demandée.
+## Ce que je ne fais PAS sans confirmation
+
+- Refonte de la page `/admin/reports` au-delà d'un filtre trivial par target_type.
+- Ajout d'un nouveau système d'emails hors pipeline `send-transactional-email`.
+- Modification du design system (tokens, couleurs).
 
 ## Estimation
 
-Cohérent avec l'estimation du prompt : 4 à 5h côté agent, en 8 à 12 exécutions groupées.
+~4h agent, 12-15 tool calls groupées par vague, 1 commit final "EntraideHub Pass 1, quick wins UX + fixes workflow".
 
-Dites go et j'attaque par l'étape 1 (lecture schéma + migration).
+Dites **go** et j'attaque par les vérifications préalables + vague 1.

@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { trackEvent } from "@/lib/analytics";
 import { logger } from "@/lib/logger";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +11,7 @@ import {
   Heart, MessageSquare, CheckCircle2, Users, XCircle, ThumbsUp,
   ThumbsDown, Star, RotateCcw, Send, Home, X, Share2, ShieldCheck, Sparkles,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, differenceInCalendarDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
@@ -970,6 +971,17 @@ const SmallMissionDetail = () => {
           </div>
         )}
 
+        {/* Bannière "date dépassée" (Chantier 8 EntraideHub Pass 1) */}
+        {isDatePassed && (mission.status === "open" || mission.status === "in_progress") && mission.date_needed && (
+          <ExpiredMissionBanner
+            missionId={mission.id}
+            dateNeeded={mission.date_needed}
+            isAuthor={isAuthor}
+          />
+        )}
+
+
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-10 items-start">
           {/* ── COLONNE PRINCIPALE ── */}
           <article className="lg:col-span-8 min-w-0">
@@ -1101,7 +1113,7 @@ const SmallMissionDetail = () => {
                         </p>
                       )}
                     </div>
-                    {!isAuthor && <ReportButton targetId={mission.id} targetType="profile" />}
+                    {!isAuthor && <ReportButton targetId={mission.user_id} targetType="profile" />}
                   </>
                 );
                 return author.user_id ? (
@@ -1608,6 +1620,66 @@ const SmallMissionDetail = () => {
       </Dialog>
     </div>
     </AppLayout>
+  );
+};
+
+/**
+ * Bannière "date dépassée" (Chantier 8 EntraideHub Pass 1).
+ * Affichée en tête de mission dont date_needed est passée et statut open|in_progress.
+ * Auteur : CTA "Clôturer" + "Reporter à une nouvelle date" (redirige vers édition).
+ * Autre visiteur : simple info textuelle.
+ */
+const ExpiredMissionBanner = ({
+  missionId,
+  dateNeeded,
+  isAuthor,
+}: {
+  missionId: string;
+  dateNeeded: string;
+  isAuthor: boolean;
+}) => {
+  const navigate = useNavigate();
+  const daysOverdue = Math.max(0, differenceInCalendarDays(new Date(), new Date(dateNeeded)));
+  const seenRef = useRef(false);
+  useEffect(() => {
+    if (seenRef.current) return;
+    seenRef.current = true;
+    void trackEvent("mission_expired_badge_seen", {
+      metadata: { mission_id: missionId, days_overdue: daysOverdue },
+    });
+  }, [missionId, daysOverdue]);
+  const formatted = (() => {
+    try { return format(new Date(dateNeeded), "d MMMM yyyy"); } catch { return dateNeeded; }
+  })();
+  return (
+    <div className="bg-warning/10 border border-warning/40 rounded-2xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
+      <div className="flex-1 min-w-0">
+        <p className="font-medium text-warning-foreground">
+          {isAuthor
+            ? `Cette mission avait besoin d'aide le ${formatted}, il y a ${daysOverdue} jour${daysOverdue > 1 ? "s" : ""}.`
+            : `Attention : la date souhaitée (${formatted}) est passée depuis ${daysOverdue} jour${daysOverdue > 1 ? "s" : ""}.`}
+        </p>
+        {isAuthor && (
+          <p className="text-sm text-warning-foreground/80 mt-1">
+            Clôturez la mission si elle n'est plus d'actualité, ou reportez-la à une nouvelle date.
+          </p>
+        )}
+      </div>
+      {isAuthor && (
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              void trackEvent("mission_expired_reschedule_clicked", { metadata: { mission_id: missionId } });
+              navigate(`/petites-missions/${missionId}/editer`);
+            }}
+          >
+            Reporter
+          </Button>
+        </div>
+      )}
+    </div>
   );
 };
 

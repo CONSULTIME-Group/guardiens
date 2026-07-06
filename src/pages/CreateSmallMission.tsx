@@ -21,7 +21,7 @@ import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import MissionPhotoUpload from "@/components/missions/MissionPhotoUpload";
 import { geocodeCity } from "@/lib/geocode";
-import { trackFirstAction } from "@/lib/analytics";
+import { trackFirstAction, trackEvent } from "@/lib/analytics";
 import { recordMissionCreatedAttribution } from "@/lib/campaignAttribution";
 import { templatesFor, MISSION_TEMPLATES, type MissionTemplate } from "@/data/missionTemplates";
 import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
@@ -63,7 +63,10 @@ const CreateSmallMission = () => {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   const tp = (k: string, opts?: any) => t(`create_mission_page.${k}`, opts) as string;
-  const { level: accessLevel, profileCompletion, canApplyMissions, loading: accessLoading } = useAccessLevel();
+  const { level: accessLevel, profileCompletion, loading: accessLoading } = useAccessLevel();
+  // Chantier 1 EntraideHub Pass 1 : plus de gate 60 %, tout profil connecté peut publier.
+  // L'ID vérification devient un soft-nudge (badge auteur uniquement) sur SitDetail.
+  const canApplyMissions = true;
 
   const CATEGORIES = useMemo(() => [
     { value: "animals", label: tp("cat_animals") },
@@ -208,6 +211,9 @@ const CreateSmallMission = () => {
       return;
     }
     try { await trackFirstAction("mission_created", { category, mission_type: missionType }); } catch {}
+    if (typeof profileCompletion === "number" && profileCompletion < 60) {
+      try { await trackEvent("mission_created_incomplete_profile", { metadata: { profile_completion: profileCompletion, mission_id: inserted?.id ?? null } }); } catch {}
+    }
     if (inserted?.id) { try { await recordMissionCreatedAttribution(inserted.id); } catch {} }
     await queryClient.invalidateQueries({ queryKey: ["small-missions-all"] });
     toast({ title: tp("toast_published_title"), description: tp("toast_published_desc"), duration: 3000 });
