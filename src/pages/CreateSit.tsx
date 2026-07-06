@@ -265,6 +265,55 @@ const CreateSit = () => {
   const hasUserEditedRef = useRef(false);
   const initialLoadedRef = useRef(false);
 
+  // Chantier 3 — Concierge IA sur /sits/create : bulle Alma proposant de
+  // décrire l'absence en une phrase plutôt que de remplir manuellement.
+  // Ne s'affiche que sur formulaire vierge et hors reprise de brouillon.
+  const [almaBubbleDismissed, setAlmaBubbleDismissed] = useState<boolean>(() => {
+    try {
+      return typeof window !== "undefined"
+        && localStorage.getItem("sits_create_alma_dismissed") === "1";
+    } catch {
+      return false;
+    }
+  });
+  const almaBubbleSeenRef = useRef(false);
+  const isFormEmpty =
+    !title && !startDate && !endDate && !ownerMessage && !dailyRoutine
+    && !coverPhotoUrl && !specificExpectations && openTo.length === 0
+    && sitEnvironments.length === 0 && !isUrgent && !flexibleDates
+    && !flexibleNotes;
+  const showAlmaCreateBubble =
+    !almaBubbleDismissed
+    && !draftIdParam
+    && !fromSitId
+    && !republishMode
+    && !hasUserEditedRef.current
+    && isFormEmpty
+    && currentStep === 0;
+
+  useEffect(() => {
+    if (!showAlmaCreateBubble || almaBubbleSeenRef.current) return;
+    almaBubbleSeenRef.current = true;
+    try {
+      void trackEvent("sits_create_alma_bubble_seen", { source: "/sits/create" });
+    } catch { /* silent */ }
+  }, [showAlmaCreateBubble]);
+
+  const handleAlmaCreateIntent = useCallback(() => {
+    try {
+      void trackEvent("sits_create_alma_intent_clicked", { source: "/sits/create" });
+    } catch { /* silent */ }
+    navigate("/dashboard?intent=draft_from_prompt");
+  }, [navigate]);
+
+  const handleAlmaCreateDismiss = useCallback(() => {
+    try {
+      localStorage.setItem("sits_create_alma_dismissed", "1");
+      void trackEvent("sits_create_alma_dismissed", { source: "/sits/create" });
+    } catch { /* silent */ }
+    setAlmaBubbleDismissed(true);
+  }, []);
+
   useEffect(() => {
     if (!user) return;
     const load = async () => {
