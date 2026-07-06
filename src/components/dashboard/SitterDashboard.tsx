@@ -480,6 +480,10 @@ const SitterDashboard = () => {
               <NextDigestCard />
             </div>
 
+            <div className="px-4 sm:px-5 md:px-8 mt-4">
+              <NextMissionDigestCard />
+            </div>
+
             {!nextGuard && (
               <div className="px-4 sm:px-5 md:px-8 mt-4">
                 {!(level === 4 || level === "3B")
