@@ -476,21 +476,13 @@ const SmallMissionDetail = () => {
         });
       }
 
-      await supabase.from("notifications").insert({
-        user_id: resp.responder_id, type: "mission_accepted",
-        title: "Personne retenue",
-        body: `Votre proposition pour "${mission.title}" a été acceptée. Vous pouvez maintenant échanger par messagerie.`,
-        link: convId ? `/messages?c=${convId}` : `/messages`,
-      });
-
-      sendTransactionalEmail({
-        templateName: "mission-proposal-accepted",
-        recipientUserId: resp.responder_id,
-        idempotencyKey: `mission-proposal-accepted-${responseId}`,
-        templateData: {
-          authorFirstName: (author as any)?.first_name || "",
-          missionTitle: mission.title,
-          conversationId: convId || "",
+      supabase.functions.invoke("notify-mission-event", {
+        body: {
+          event_type: "mission_accepted",
+          mission_id: id,
+          actor_id: user!.id,
+          target_ids: [resp.responder_id],
+          metadata: { conversation_id: convId || null },
         },
       }).catch(() => {});
 
