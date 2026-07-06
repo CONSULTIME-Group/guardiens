@@ -86,7 +86,7 @@ const NoNearbySitsEmptyState = ({
       setAlertActive(true);
       toast({
         title: "Alerte activée",
-        description: `Chaque soir à 20h, si des annonces matchent votre profil dans un rayon de ${currentRadius} km, vous recevez un digest par email.`,
+        description: `Chaque soir à 20h, vous recevez un email récapitulatif des annonces qui correspondent à votre profil dans un rayon de ${currentRadius} km.`,
       });
       void trackEvent("sitter_alert_subscribed", {
         source: "dashboard_empty_state",
