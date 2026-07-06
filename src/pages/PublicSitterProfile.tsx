@@ -5,6 +5,7 @@ import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom"
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 import PageMeta from "@/components/PageMeta";
 import BadgeRow from "@/components/badges/BadgeRow";
 import MissionBadgesReceived from "@/components/missions/MissionBadgesReceived";
