@@ -375,22 +375,13 @@ const SmallMissionDetail = () => {
         setMessage("");
         toast({ title: "Réponse publiée !", description: "La personne qui demande va être prévenue." });
 
-        // Notify mission author (non-bloquant côté UI)
-        supabase.from("notifications").insert({
-          user_id: fresh.user_id, type: "mission_proposal",
-          title: "Nouvelle proposition d'aide",
-          body: `${(user as any).first_name || "Un membre"} propose son aide pour "${fresh.title}"`,
-          link: `/petites-missions/${id}`,
-        }).then(() => {});
-
-        // Email transactionnel, propriétaire de la mission notifié (non-bloquant)
-        sendTransactionalEmail({
-          templateName: "mission-response",
-          recipientUserId: fresh.user_id,
-          idempotencyKey: `mission-response-${id}-${user.id}`,
-          templateData: {
-            responderFirstName: (user as any).first_name || "",
-            missionTitle: fresh.title,
+        // Fan-out serveur (notif in-app + email) via edge function
+        supabase.functions.invoke("notify-mission-event", {
+          body: {
+            event_type: "mission_proposal",
+            mission_id: id,
+            actor_id: user.id,
+            target_ids: [fresh.user_id],
           },
         }).catch(() => {});
       }
