@@ -118,6 +118,8 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'sit-draft-reminder': sitDraftReminder,
   'sitter-daily-digest': sitterDailyDigest,
   'admin-delivery-alert': adminDeliveryAlert,
+  'mission-feedback-received': missionFeedbackReceived,
+  'mission-thanks-received': missionThanksReceived,
 }
 
 
