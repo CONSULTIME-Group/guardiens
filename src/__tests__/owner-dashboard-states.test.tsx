@@ -38,11 +38,12 @@ function state(sits: SitLite[], pets: unknown[], role: "owner" | "sitter" | "bot
     hasDraft,
     nbaVariant,
     // Miroir des conditions JSX du dashboard :
-    showSitDraftFromPrompt: showAlmaProactive && !hasDraft,
+    showSitDraftFromPrompt: showAlmaProactive, // toujours accessible si Alma proactive
     showDraftResumeCard: hasDraft,
     showPriorityActionCard: !hasDraft && !showAlmaProactive,
     showOwnerFirstNBAGardiens: showAlmaProactive,
     showDesktopHeroCta: !showAlmaProactive,
+    sitDraftSecondary: showAlmaProactive && hasDraft,
   };
 }
 
