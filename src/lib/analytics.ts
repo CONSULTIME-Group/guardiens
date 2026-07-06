@@ -132,7 +132,8 @@ export type EventType =
   | "owner_draft_from_prompt_published"         // Publication d'un sit issu d'un draft généré par prompt (sit_id)
   | "owner_first_nba_gardiens_seen"             // Impression carte 3 gardiens (sitters_count, avg_affinity)
   | "owner_first_nba_gardien_card_clicked"      // Clic sur une des 3 cards (sitter_id, affinity_score, distance_km, position)
-  | "owner_intent_draft_from_prompt_from_email";// Arrivée sur dashboard depuis email ?intent=draft_from_prompt
+  | "owner_intent_draft_from_prompt_from_email"// Arrivée sur dashboard depuis email ?intent=draft_from_prompt
+  | "owner_dashboard_nba_choice";               // NBA dominante retenue au 1er rendu dashboard owner (variant)
 
 interface TrackOptions {
   source?: string;

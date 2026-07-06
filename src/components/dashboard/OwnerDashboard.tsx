@@ -56,7 +56,7 @@ import {
 import type { Pet } from "./owner/types";
 import { useOwnerDashboardData } from "@/hooks/useOwnerDashboardData";
 import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
-import { useIsNewOwner } from "@/hooks/useIsNewUser";
+import { useIsNewOwner, isEarlyOwner, computeOwnerNbaVariant } from "@/hooks/useIsNewUser";
 import { trackEvent } from "@/lib/analytics";
 import { SITTER_PRICE_START, REFERRAL_REWARD_LABEL } from "@/lib/pricing";
 
@@ -122,6 +122,15 @@ const OwnerDashboard = () => {
     [sits],
   );
   const hasDraft = !!latestDraft;
+
+  /* ── Flags NBA & signal local calculés tôt (utilisés par subtitle + NBA) ── */
+  const isNewOwner = useIsNewOwner({ sitsCount: sits.length, petsCount: pets.length });
+  const earlyOwner = useMemo(
+    () => isEarlyOwner({ sits: sits as any, pets: pets as any }),
+    [sits, pets],
+  );
+  const nearbyCount = nearbyOwnerSittersData?.totalCount ?? 0;
+  const nearbyRadius = nearbyOwnerSittersData?.radiusUsed ?? null;
 
   const ongoingSit = useMemo(() =>
     sits.find(s => s.status === "confirmed" && s.start_date && new Date(s.start_date) <= now && s.end_date && new Date(s.end_date) >= now),
@@ -190,14 +199,27 @@ const OwnerDashboard = () => {
     const anyPublished = sits.some(s => s.status === "published");
     if (anyPublished) return "Votre annonce est en ligne, les candidatures arrivent.";
     // Historique présent mais plus rien d'actif : on évite le message « première annonce » trompeur.
-    if (sits.length > 0) {
+    if (sits.length > 0 && !earlyOwner) {
       return `${sits.length} annonce${sits.length > 1 ? "s" : ""} dans votre historique, aucune en cours.`;
+    }
+    // Early owner avec brouillon : on reprend le fil.
+    if (earlyOwner && hasDraft) {
+      return "Vous avez commencé une annonce. Reprenez où vous en étiez.";
+    }
+    // New/early owner sans brouillon : subtitle personnalisé via signal local.
+    if (earlyOwner) {
+      const firstName = user?.firstName ? capitalize(user.firstName) : null;
+      const hello = firstName ? `Bienvenue, ${firstName}.` : "Bienvenue chez Guardiens.";
+      if (nearbyCount > 0 && nearbyRadius) {
+        return `${hello} ${nearbyCount} gardien${nearbyCount > 1 ? "s" : ""} vérifié${nearbyCount > 1 ? "s" : ""} dans un rayon de ${nearbyRadius} km attendent une annonce.`;
+      }
+      return `${hello} Publiez votre première annonce, on vous accompagne.`;
     }
     return "Publiez votre première annonce pour trouver un gardien.";
 
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ongoingSit, sits, pendingAppCount]);
+  }, [ongoingSit, sits, pendingAppCount, hasDraft, user?.firstName]);
 
   // Banner contextuel supprimé : verif & candidatures non lues affichées en chips inline dans le hero.
 
@@ -249,13 +271,8 @@ const OwnerDashboard = () => {
   const nextActions = useMemo(() => computeOwnerNextActions(nextActionsInput), [nextActionsInput]);
   const activationScore = useMemo(() => computeOwnerActivationScore(nextActionsInput), [nextActionsInput]);
 
-  /* ── Détection nouveau propriétaire (0 sit, 0 pet) : applique le
-       précepte 2026 « 1 seule NBA above the fold, pas 4 cartes empilées ».
-       On enrichit la description de la NBA avec un signal local
+  /* ── Enrichit la description de la NBA avec un signal local
        (nombre de gardiens vérifiés à proximité). ── */
-  const isNewOwner = useIsNewOwner({ sitsCount: sits.length, petsCount: pets.length });
-  const nearbyCount = nearbyOwnerSittersData?.totalCount ?? 0;
-  const nearbyRadius = nearbyOwnerSittersData?.radiusUsed ?? null;
   const newOwnerDescription = useMemo(() => {
     if (!isNewOwner) return priorityAction.description;
     if (nearbyCount >= 5 && nearbyRadius) {
@@ -266,6 +283,12 @@ const OwnerDashboard = () => {
     }
     return `Plus de 2 200 gardiens vérifiés en France. Publiez votre annonce, on prévient ceux qui correspondent le mieux. Environ 2 minutes.`;
   }, [isNewOwner, nearbyCount, nearbyRadius, priorityAction.description]);
+
+  /* ── NBA variant retenue (précepte 2026 : 1 seule NBA dominante). ── */
+  const nbaVariant = useMemo(
+    () => computeOwnerNbaVariant({ isNewOwner, hasDraft }),
+    [isNewOwner, hasDraft],
+  );
 
   // Trace 1 fois par session le premier affichage dashboard "nouveau proprio"
   useEffect(() => {
@@ -285,6 +308,21 @@ const OwnerDashboard = () => {
       });
     } catch {}
   }, [loading, user?.id, isNewOwner, nearbyCount, nearbyRadius]);
+
+  // Trace 1 fois par session la NBA dominante retenue (ventilation des variants).
+  useEffect(() => {
+    if (loading || !user?.id) return;
+    const key = `dash_owner_nba_choice_${user.id}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+      void trackEvent("owner_dashboard_nba_choice", {
+        source: "/dashboard",
+        metadata: { variant: nbaVariant, early_owner: earlyOwner },
+      });
+    } catch {}
+  }, [loading, user?.id, nbaVariant, earlyOwner]);
+
 
   /* ── Render ── */
 
@@ -379,13 +417,17 @@ const OwnerDashboard = () => {
                 </Link>
               </Button>
             )}
-            <Button
-              size="lg"
-              onClick={() => navigate("/sits/create")}
-              className="rounded-xl"
-            >
-              <Plus className="h-4 w-4 mr-1.5" /> Publier une annonce
-            </Button>
+            {/* CTA hero desktop masqué pour early/new-owner : la NBA dominante
+                (SitDraftFromPrompt ou DraftResumeCard) sert déjà de CTA principal. */}
+            {!earlyOwner && (
+              <Button
+                size="lg"
+                onClick={() => navigate("/sits/create")}
+                className="rounded-xl"
+              >
+                <Plus className="h-4 w-4 mr-1.5" /> Publier une annonce
+              </Button>
+            )}
           </div>
         </div>
       </header>
@@ -405,35 +447,26 @@ const OwnerDashboard = () => {
       )}
 
       {/* ═══ Action prioritaire unique , UN seul CTA dominant ═══
-          Synthétise « la seule chose à faire maintenant » avant les listes
-          détaillées (TodoCard) qui restent disponibles plus bas.
-          On la masque si une annonce est déjà en cours de rédaction (redondant). */}
-      {!hasDraft && (
+          Précepte 2026 : 1 seule NBA above the fold. Pour un new-owner,
+          SitDraftFromPrompt est la NBA dominante ; on masque PriorityActionCard
+          pour éviter 3 CTA "Publier" empilés. On la masque aussi si un draft
+          est en cours (DraftResumeCard prend le relais). */}
+      {!hasDraft && !isNewOwner && (
         <div className="px-5 md:px-8">
           <PriorityActionCard
             eyebrow={priorityAction.eyebrow}
-            title={isNewOwner ? "Publiez votre première annonce" : priorityAction.title}
+            title={priorityAction.title}
             description={newOwnerDescription}
-            ctaLabel={isNewOwner ? "Publier mon annonce" : priorityAction.ctaLabel}
-            ctaTo={isNewOwner ? "/sits/create" : priorityAction.ctaTo}
-            urgency={isNewOwner ? "high" : priorityAction.urgency}
+            ctaLabel={priorityAction.ctaLabel}
+            ctaTo={priorityAction.ctaTo}
+            urgency={priorityAction.urgency}
           />
-          {isNewOwner && (
-            <p className="text-xs text-muted-foreground mt-2 pl-1">
-              <Link to="/annonces" className="underline underline-offset-2 hover:text-foreground">
-                Voir des exemples d'annonces publiées
-              </Link>
-            </p>
-          )}
         </div>
       )}
 
-      {/* ═══ Owner Pass 3 — 3 gardiens qui vous correspondent (new-owner sans sit publié) ═══ */}
-      {isNewOwner && (
-        <div className="px-5 md:px-8">
-          <OwnerFirstNBAGardiens />
-        </div>
-      )}
+      {/* OwnerFirstNBAGardiens : descendu sous la grille de pilotage
+          (voir plus bas) pour rester une preuve tangible du vivier local
+          sans concurrencer la NBA principale. */}
 
       {isNewOwner ? (
         <div className="px-5 md:px-8">
@@ -688,6 +721,16 @@ const OwnerDashboard = () => {
           </Link>
         </aside>
       </div>
+
+      {/* ═══ Preuve tangible du vivier local (early owner) ═══
+          Descendu sous la grille de pilotage pour ne pas concurrencer la NBA.
+          Reste visible tant qu'aucune annonce n'est publiée (drafts inclus). */}
+      {earlyOwner && (
+        <div className="px-5 md:px-8">
+          <OwnerFirstNBAGardiens />
+        </div>
+      )}
+
 
       {/* ═══ Preuve sociale, Highlights remontés et déployés par défaut ═══ */}
       {highlights.length > 0 && (

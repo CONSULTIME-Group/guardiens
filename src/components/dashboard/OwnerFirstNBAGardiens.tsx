@@ -71,13 +71,14 @@ export default function OwnerFirstNBAGardiens() {
         ))}
       </ul>
 
-      <div className="mt-5 flex justify-center">
-        <Button asChild size="lg" className="rounded-xl">
-          <Link to="/sits/create">
-            <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
-            Publier une annonce que ces gardiens verront
-          </Link>
-        </Button>
+      <div className="mt-4 flex justify-center">
+        <Link
+          to="/sits/create"
+          className="text-sm text-primary hover:underline underline-offset-2 font-medium inline-flex items-center gap-1"
+        >
+          <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+          Publier une annonce que ces gardiens verront
+        </Link>
       </div>
     </section>
   );
