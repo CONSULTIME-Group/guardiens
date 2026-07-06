@@ -14,6 +14,7 @@ import { useScrollDirection } from "@/hooks/useScrollDirection";
 // Lazy : NotificationBell tire date-fns. On évite vendor-date dans l'entry.
 const NotificationBell = lazy(() => import("./NotificationBell"));
 const MessageBell = lazy(() => import("./MessageBell"));
+const AlmaTopbarButton = lazy(() => import("@/components/ai/alma/AlmaTopbarButton"));
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import FeedbackDialog from "@/components/feedback/FeedbackDialog";
@@ -161,6 +162,9 @@ export const Sidebar = () => {
           <span className="ml-1.5 text-[10px] font-medium tracking-wide text-foreground/35 align-middle select-none" aria-hidden="true">bêta</span>
         </span>
         <div className="flex items-center gap-1">
+          <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
+            <AlmaTopbarButton />
+          </Suspense>
           <Suspense fallback={<div className="w-9 h-9" aria-hidden />}>
             <MessageBell />
           </Suspense>

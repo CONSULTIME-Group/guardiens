@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-export type AlmaFrequency = "silent" | "balanced" | "talkative";
+export type AlmaFrequency = "silent" | "low" | "balanced" | "talkative";
 
 export function useAlmaFrequency(): {
   frequency: AlmaFrequency;
@@ -36,7 +36,7 @@ export function useAlmaFrequency(): {
         .maybeSingle();
       if (cancelled) return;
       const raw = (data as any)?.alma_frequency;
-      if (raw === "silent" || raw === "balanced" || raw === "talkative") {
+      if (raw === "silent" || raw === "low" || raw === "balanced" || raw === "talkative") {
         setFrequencyState(raw);
       }
       setLoading(false);

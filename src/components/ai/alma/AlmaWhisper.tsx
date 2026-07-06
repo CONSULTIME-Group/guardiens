@@ -19,15 +19,18 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AlmaAvatar } from "./AlmaAvatar";
 import { useAlma } from "@/contexts/AlmaContext";
 import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
+import { resolveAlmaCtaHref } from "@/lib/alma/cta-actions";
 import type { AlmaWhisper as AlmaWhisperT } from "@/lib/alma/whisper-types";
 
 interface AlmaWhisperCardProps {
   whisper: AlmaWhisperT;
   onDismiss: (reason: "closed_manually" | "timeout" | "action_clicked") => void;
+  onRequestNext?: () => void;
 }
 
 function isMobileViewport(): boolean {
@@ -35,7 +38,7 @@ function isMobileViewport(): boolean {
   return window.matchMedia("(max-width: 767px)").matches;
 }
 
-function AlmaWhisperCard({ whisper, onDismiss }: AlmaWhisperCardProps) {
+function AlmaWhisperCard({ whisper, onDismiss, onRequestNext }: AlmaWhisperCardProps) {
   const timerRef = useRef<number | null>(null);
   const remainingRef = useRef<number>(0);
   const startedAtRef = useRef<number>(0);
@@ -156,8 +159,8 @@ function AlmaWhisperCard({ whisper, onDismiss }: AlmaWhisperCardProps) {
             <AlmaAvatar size={24} />
           </div>
           <div className="flex-1 min-w-0 space-y-2">
-            <p className="text-[13px] leading-snug text-foreground/90">{whisper.message}</p>
-            {(whisper.primaryAction || whisper.secondaryAction) && (
+            <p className="text-[13px] leading-snug text-foreground/90 whitespace-pre-line">{whisper.message}</p>
+            {(whisper.primaryAction || whisper.secondaryAction || whisper.allowNextTip) && (
               <div className="flex flex-wrap items-center gap-2">
                 {whisper.primaryAction && (
                   <button
@@ -185,6 +188,20 @@ function AlmaWhisperCard({ whisper, onDismiss }: AlmaWhisperCardProps) {
                     className="text-xs font-medium text-muted-foreground hover:text-foreground transition"
                   >
                     {whisper.secondaryAction.label}
+                  </button>
+                )}
+                {whisper.allowNextTip && onRequestNext && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      trackEvent("alma_whisper_action_clicked", {
+                        metadata: { whisper_type: whisper.type, action_id: "next_tip" },
+                      });
+                      onRequestNext();
+                    }}
+                    className="text-xs font-medium text-muted-foreground hover:text-foreground transition underline decoration-dotted underline-offset-2"
+                  >
+                    Un autre conseil
                   </button>
                 )}
               </div>
@@ -235,17 +252,55 @@ function useIsRadixModalOpen(): boolean {
   return isOpen;
 }
 
+/**
+ * Résout la surface générique à partir de l'URL courante pour piloter
+ * requestNextTip depuis le bouton « Un autre conseil ».
+ */
+function surfaceFromPath(pathname: string): string {
+  if (pathname === "/dashboard" || pathname.startsWith("/dashboard")) return "owner_dashboard";
+  if (pathname === "/sits" || pathname === "/sits/") return "sits_list";
+  if (pathname.startsWith("/sits/")) return "sit_detail";
+  if (pathname === "/favoris") return "favorites";
+  if (pathname.startsWith("/recherche-gardiens")) return "search_page";
+  if (pathname.startsWith("/gardiens/")) return "sitter_profile";
+  if (pathname.startsWith("/petites-missions")) return "mutual_aid";
+  return "listings";
+}
+
 export function AlmaWhisperOutlet() {
-  const { currentWhisper, dismissCurrent } = useAlma();
+  const { currentWhisper, dismissCurrent, requestNextTip } = useAlma();
   const isModalOpen = useIsRadixModalOpen();
+  const location = useLocation();
+  const navigate = useNavigate();
   if (!currentWhisper) return null;
-  // Un Dialog/Sheet Radix est ouvert : on masque totalement le whisper pour
-  // éviter tout empilement ambigu au-dessus du backdrop.
   if (isModalOpen) return null;
+
+  // Intercept CTA usage_nudge : si primaryAction pointe vers une action
+  // sémantique connue, on route via React Router. Sinon on laisse le onClick
+  // câblé par le builder (culturel : ouverture source externe).
+  const ctaAction = (currentWhisper.metadata as any)?.cta_action as string | undefined;
+  const href = resolveAlmaCtaHref(ctaAction);
+  const whisper: AlmaWhisperT =
+    href && currentWhisper.primaryAction
+      ? {
+          ...currentWhisper,
+          primaryAction: {
+            ...currentWhisper.primaryAction,
+            onClick: () => navigate(href),
+          },
+        }
+      : currentWhisper;
+
   return (
     <AlmaWhisperCard
-      whisper={currentWhisper}
+      whisper={whisper}
       onDismiss={(reason) => dismissCurrent(reason)}
+      onRequestNext={() => {
+        void requestNextTip({
+          surface: surfaceFromPath(location.pathname),
+          preferNudge: false,
+        });
+      }}
     />
   );
 }

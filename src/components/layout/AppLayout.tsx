@@ -11,6 +11,7 @@ const MessageBell = lazy(() => import("./MessageBell"));
 const AlmaWhisperOutlet = lazy(() =>
   import("@/components/ai/alma/AlmaWhisper").then((m) => ({ default: m.AlmaWhisperOutlet })),
 );
+const AlmaTopbarButton = lazy(() => import("@/components/ai/alma/AlmaTopbarButton"));
 import { AlmaProvider } from "@/contexts/AlmaContext";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
@@ -55,6 +56,9 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
           </div>
           <div className="flex items-center gap-1 shrink-0">
             <LanguageSwitcher compact />
+            <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
+              <AlmaTopbarButton />
+            </Suspense>
             <Suspense fallback={<div className="w-9 h-9" aria-hidden />}>
               <MessageBell />
             </Suspense>

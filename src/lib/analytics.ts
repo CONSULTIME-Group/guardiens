@@ -227,7 +227,12 @@ export type EventType =
   | "alma_cultural_fact_action_clicked"         // Clic action "En savoir plus" (fact_id, source_url)
   | "alma_cultural_fact_dismissed"              // Fait culturel fermé (fact_id, reason)
   | "admin_alma_cultural_facts_tab_seen"        // Onglet admin cultural facts affiché
-  | "admin_alma_cultural_fact_toggled";         // Désactivation/réactivation d'un fait (fact_id, active)
+  | "admin_alma_cultural_fact_toggled"          // Désactivation/réactivation d'un fait (fact_id, active)
+  // Alma évolution étape 1 — usage_nudge + next tip ------------------------
+  | "alma_next_tip_delivered"                   // Conseil "un autre" tiré (fact_id, kind, surface)
+  | "alma_next_tip_empty"                       // Pool épuisé pour cette surface (surface)
+  | "alma_usage_nudge_seen"                     // Usage nudge affiché (fact_id, surface, cta_action)
+  | "alma_topbar_button_clicked";               // Bouton persistant Alma cliqué en topbar (surface)
 
 
 

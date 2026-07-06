@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import EmptyState from "@/components/shared/EmptyState";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
+import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
 import { format, differenceInDays, isAfter, isBefore, isToday, parseISO, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -116,6 +118,14 @@ const Sits = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [sits, setSits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Alma étape 1 — compagnon culturel + usage_nudge sur la liste sits.
+  useAlmaCulturalFact({ surface: "sits_list", context: { role: activeRole } });
+  useAlmaUsageNudge({
+    surface: "sits_list",
+    role: activeRole === "owner" ? "owner" : "sitter",
+    state: "any",
+  });
 
   // Onglet actif synchronisé avec l'URL (?tab=...), partageable, retour navigateur OK
   const validTabs: Tab[] = ["upcoming", "in_progress", "completed", "cancelled"];

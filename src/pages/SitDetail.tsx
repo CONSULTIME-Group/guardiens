@@ -19,6 +19,8 @@ import OwnerSitView from "@/components/sits/views/OwnerSitView";
 import { IncompleteProfileBadge } from "@/components/sits/IncompleteProfileBadge";
 import SitterSitView from "@/components/sits/views/SitterSitView";
 import { useSitRealtime } from "@/components/sits/views/useSitRealtime";
+import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
+import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
 import { backfillOwnerGalleryDimensions } from "@/lib/backfillGalleryDimensions";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 import type { SitData } from "@/components/sits/views/types";
@@ -40,6 +42,14 @@ const fallbackImageForGeo = (city: string | null, country: string | null): strin
 const SitDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { user, activeRole } = useAuth();
+
+  // Alma étape 1 — compagnon culturel + usage_nudge sur la fiche annonce.
+  useAlmaCulturalFact({ surface: "sit_detail", context: { role: activeRole } });
+  useAlmaUsageNudge({
+    surface: "sit_detail",
+    role: activeRole === "owner" ? "owner" : "sitter",
+    state: "any",
+  });
 
   const [sit, setSit] = useState<SitData | null>(null);
   const [owner, setOwner] = useState<any>(null);
