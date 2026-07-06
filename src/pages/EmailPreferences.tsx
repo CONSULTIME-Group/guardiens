@@ -43,7 +43,8 @@ const EmailPreferences = () => {
       p_product: prefs.product_emails,
       p_digest: prefs.digest_emails,
       p_alert: prefs.alert_emails,
-    });
+      p_new_mission_digest: prefs.new_mission_digest,
+    } as any);
     setSaving(false);
     if (error) toast.error("Impossible d'enregistrer vos préférences");
     else toast.success("Préférences enregistrées");
