@@ -79,7 +79,7 @@ export function AlmaMotivationBubble({ currentValue, onPick }: Props) {
           <p>Votre motivation fait moins de 50 caractères. Je vous propose 3 versions à partir de vos réponses. Vous choisissez, vous ajustez.</p>
         ) : (
           <div className="space-y-2">
-            <p>Voici 3 propositions. Clique sur celle qui te ressemble le plus.</p>
+            <p>Voici 3 propositions. Cliquez sur celle qui vous ressemble le plus.</p>
             <div className="space-y-2">
               {drafts.map((d, i) => (
                 <button
