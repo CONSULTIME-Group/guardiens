@@ -131,6 +131,18 @@ const OwnerDashboard = () => {
     () => isEarlyOwner({ sits: sits as any, pets: pets as any }),
     [sits, pets],
   );
+  const noActiveSit = useMemo(
+    () => hasNoActiveSit(sits as any),
+    [sits],
+  );
+  /**
+   * Alma proactive : le dashboard affiche SitDraftFromPrompt (si new owner),
+   * OwnerFirstNBAGardiens et un subtitle contextuel personnalisé, et masque
+   * le CTA hero desktop, pour tout owner qui n'a aucune annonce active,
+   * qu'il ait ou non des animaux enregistrés.
+   */
+  const isOwnerRole = user?.role === "owner" || user?.role === "both";
+  const showAlmaProactive = earlyOwner || (noActiveSit && isOwnerRole);
   const nearbyCount = nearbyOwnerSittersData?.totalCount ?? 0;
   const nearbyRadius = nearbyOwnerSittersData?.radiusUsed ?? null;
 
