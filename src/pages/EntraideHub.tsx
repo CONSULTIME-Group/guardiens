@@ -939,6 +939,7 @@ const EntraideHub = () => {
               </>
             )}
           </div>
+          </div>{/* /desktop hidden md:block */}
         </section>
 
         {/* FAB mobile retiré : le CTA primaire du header (full-width) et la bottom nav suffisent */}
