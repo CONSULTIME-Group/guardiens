@@ -20,6 +20,7 @@ import { differenceInDays } from "date-fns";
 
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
+import NextMissionDigestCard from "./NextMissionDigestCard";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { useUserBadges } from "@/hooks/useProfileReputation";
 
