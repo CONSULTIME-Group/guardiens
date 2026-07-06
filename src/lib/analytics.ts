@@ -204,8 +204,18 @@ export type EventType =
  | "alma_republish_bubble_seen"                // Bandeau Alma republication affiché (sit_id)
  | "alma_republish_mode_selected"              // Mode choisi dans la modale republish (mode: copy|adapt, sit_id)
  | "alma_republish_published"                  // Nouvelle annonce publiée à partir d'une republication (original_sit_id, new_sit_id, mode)
- | "alma_welcome_email_sent"                   // Welcome email post-signup signé Alma envoyé
- | "alma_dashboard_first_meeting_seen";        // Dashboard ouvert avec ?welcome=alma (first meeting)
+  | "alma_welcome_email_sent"                   // Welcome email post-signup signé Alma envoyé
+  | "alma_dashboard_first_meeting_seen"         // Dashboard ouvert avec ?welcome=alma (first meeting)
+  // EntraideHub Pass 3 : cycle de vie + digest hebdo + badges profil ---------
+  | "mission_auto_closed"                       // Mission clôturée automatiquement (mission_id, close_reason, age_days)
+  | "mission_nudge_sent"                        // Nudge envoyé (nudge_type: feedback|no_response, mission_id)
+  | "mutual_aid_weekly_digest_sent"             // Digest hebdo envoyé (recipient_count)
+  | "mutual_aid_weekly_digest_opened"           // Digest hebdo ouvert (pixel)
+  | "mutual_aid_weekly_digest_cta_clicked"      // Clic CTA depuis digest hebdo (section, url)
+  | "profile_mission_badges_seen"               // Section badges d'entraide impressée sur profil (profile_id, badges_count)
+  | "next_mission_digest_card_seen"             // Carte "prochain digest mardi" affichée sur dashboard
+  | "entraide_feed_chip_toggled"                // Chip filter mobile toggled (filter_types)
+  | "entraide_feed_default_view";               // Vue par défaut du feed unifié mobile (une fois par session)
 
 
 
