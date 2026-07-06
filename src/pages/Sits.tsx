@@ -119,6 +119,14 @@ const Sits = () => {
   const [sits, setSits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Alma étape 1 — compagnon culturel + usage_nudge sur la liste sits.
+  useAlmaCulturalFact({ surface: "sits_list", context: { role: activeRole } });
+  useAlmaUsageNudge({
+    surface: "sits_list",
+    role: activeRole === "owner" ? "owner" : "sitter",
+    state: "any",
+  });
+
   // Onglet actif synchronisé avec l'URL (?tab=...), partageable, retour navigateur OK
   const validTabs: Tab[] = ["upcoming", "in_progress", "completed", "cancelled"];
   const validOwnerTabs: OwnerTab[] = ["active", "drafts", "archived"];
