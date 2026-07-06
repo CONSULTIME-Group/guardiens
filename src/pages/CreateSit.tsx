@@ -206,6 +206,8 @@ const CreateSit = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const fromSitId = searchParams.get("from");
+  const republishMode = (searchParams.get("mode") as "copy" | "adapt" | null) || null;
+  const republishPrompt = searchParams.get("prompt") || "";
   const draftIdParam = searchParams.get("draftId") || searchParams.get("resume");
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -252,6 +254,7 @@ const CreateSit = () => {
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [isRepublish, setIsRepublish] = useState(false);
+  const [sourceSitTitle, setSourceSitTitle] = useState<string | null>(null);
   const [draftId, setDraftId] = useState<string | null>(null);
   const [savingDraft, setSavingDraft] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
@@ -283,6 +286,7 @@ const CreateSit = () => {
       if (sourceSitRes?.data) {
         const s = sourceSitRes.data;
         setTitle(s.title || "");
+        setSourceSitTitle(s.title || null);
         setSpecificExpectations(s.specific_expectations || "");
         setOpenTo(s.open_to || []);
         setSitEnvironments(s.environments || []);
@@ -294,6 +298,12 @@ const CreateSit = () => {
         setSitCity((s as any).city || "");
         setSitCountry((s as any).country || "FR");
         setIsRepublish(true);
+        try {
+          trackEvent("alma_republish_bubble_seen", {
+            source: "create_sit_page",
+            metadata: { source_sit_id: fromSitId, mode: republishMode || "copy" },
+          });
+        } catch {}
       }
 
       if (!sourceSitRes?.data) {
