@@ -337,6 +337,7 @@ const AppRoutes = () => (
         <Route path="/admin/pros" element={<AdminPros />} />
         <Route path="/admin/pros-annuaire" element={<AdminProDirectory />} />
         <Route path="/admin/emails" element={<AdminEmails />} />
+        <Route path="/admin/alma" element={<AdminAlma />} />
         <Route path="/admin/experiences" element={<AdminExperienceVerification />} />
         <Route path="/admin/articles" element={<AdminArticles />} />
         <Route path="/admin/articles/refresh-post-pivot" element={<AdminArticlesRefreshPostPivot />} />
