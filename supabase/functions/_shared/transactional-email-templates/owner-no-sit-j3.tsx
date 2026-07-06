@@ -40,6 +40,7 @@ const Email = ({ firstName, city, nearby_sitters_count, radius_km, top_3_sitter_
       <Body style={main}>
         <Container style={container}>
           <BrandHeader />
+          <AlmaSignature />
           <Heading style={h1}>{name ? `Bonjour ${name},` : 'Bonjour,'}</Heading>
 
           <Text style={text}>
