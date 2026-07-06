@@ -30,6 +30,7 @@ import OwnerPitchSection from "@/components/settings/OwnerPitchSection";
 import { useTheme } from "@/contexts/ThemeContext";
 import { getPasswordStrength, validateStrongPassword } from "@/lib/passwordStrength";
 import { Link } from "react-router-dom";
+import { useAlmaFrequency, type AlmaFrequency } from "@/hooks/useAlmaFrequency";
 
 interface NotifPrefs {
   email_new_application: boolean;
