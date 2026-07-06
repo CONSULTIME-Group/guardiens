@@ -11,6 +11,17 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
+  // Auth guard: only accept the service-role key (used by pg_cron via pg_net).
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const token = req.headers.get("Authorization")?.replace("Bearer ", "") ?? "";
+  if (token !== serviceKey) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+
   const adminEmail = Deno.env.get("ADMIN_DIGEST_EMAIL");
   if (!adminEmail) {
     return new Response(

@@ -69,23 +69,29 @@ Deno.serve(async (req) => {
 
     const rawBody = await req.text();
 
-    // Vérification signature Svix (si secret configuré)
-    if (WEBHOOK_SECRET) {
-      const svixId = req.headers.get("svix-id");
-      const svixTimestamp = req.headers.get("svix-timestamp");
-      const svixSignature = req.headers.get("svix-signature");
-      if (!svixId || !svixTimestamp || !svixSignature) {
-        console.warn("Missing Svix headers");
-        return new Response(JSON.stringify({ error: "Missing signature headers" }), {
-          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (!verifySignature(WEBHOOK_SECRET, svixId, svixTimestamp, rawBody, svixSignature)) {
-        console.warn("Invalid signature");
-        return new Response(JSON.stringify({ error: "Invalid signature" }), {
-          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+    // Vérification signature Svix — MANDATORY. Sans secret, tout appelant pourrait
+    // corrompre les métriques de délivrabilité (bounces / complaints / opens).
+    if (!WEBHOOK_SECRET) {
+      console.error("RESEND_WEBHOOK_SECRET is not configured");
+      return new Response(
+        JSON.stringify({ error: "Webhook secret not configured" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    const svixId = req.headers.get("svix-id");
+    const svixTimestamp = req.headers.get("svix-timestamp");
+    const svixSignature = req.headers.get("svix-signature");
+    if (!svixId || !svixTimestamp || !svixSignature) {
+      console.warn("Missing Svix headers");
+      return new Response(JSON.stringify({ error: "Missing signature headers" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!verifySignature(WEBHOOK_SECRET, svixId, svixTimestamp, rawBody, svixSignature)) {
+      console.warn("Invalid signature");
+      return new Response(JSON.stringify({ error: "Invalid signature" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const event: ResendEvent = JSON.parse(rawBody);
