@@ -28,13 +28,13 @@ interface Copy {
 const COPY: Record<Role, Copy> = {
   owner: {
     body:
-      "Bonjour, je suis Alma. On m'a donné le nom d'une vraie chienne. Je vous accompagne ici : je vous guide, je prépare vos annonces, et je reste discrète quand vous n'avez pas besoin de moi. Pour commencer, décrivez une absence en une phrase. Je m'occupe du brouillon, vous relisez.",
+      "Bonjour, je suis Alma. Un petit bichon frisé tout blanc, arrivée de Córdoba en Argentine. Je vous accompagne ici : je vous guide et je prépare vos annonces. Pour commencer, décrivez une absence en une phrase. Je m'occupe du brouillon, vous relisez.",
     primaryLabel: "Décrire mon absence",
     primaryAction: "draft_sit",
   },
   sitter: {
     body:
-      "Bonjour, je suis Alma. On m'a donné le nom d'une vraie chienne. Je vous accompagne ici : je vous signale les gardes et je vous aide à bien vous présenter. Pour commencer, complétez votre profil. C'est ce qui fait le plus remonter vos candidatures.",
+      "Bonjour, je suis Alma. Un petit bichon frisé tout blanc, arrivée de Córdoba en Argentine. Je vous accompagne ici : je vous signale les gardes et je vous aide à bien vous présenter. Pour commencer, complétez votre profil. C'est ce qui fait le plus remonter vos candidatures.",
     primaryLabel: "Compléter mon profil",
     primaryAction: "complete_profile",
   },
