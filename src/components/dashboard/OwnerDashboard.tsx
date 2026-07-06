@@ -722,6 +722,16 @@ const OwnerDashboard = () => {
         </aside>
       </div>
 
+      {/* ═══ Preuve tangible du vivier local (early owner) ═══
+          Descendu sous la grille de pilotage pour ne pas concurrencer la NBA.
+          Reste visible tant qu'aucune annonce n'est publiée (drafts inclus). */}
+      {earlyOwner && (
+        <div className="px-5 md:px-8">
+          <OwnerFirstNBAGardiens />
+        </div>
+      )}
+
+
       {/* ═══ Preuve sociale, Highlights remontés et déployés par défaut ═══ */}
       {highlights.length > 0 && (
         <section
