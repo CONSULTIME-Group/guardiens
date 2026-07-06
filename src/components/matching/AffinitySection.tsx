@@ -6,11 +6,14 @@
  *    tracking « shadow » des impressions masquées),
  *  - le rendu du badge (auto-tracking « displayed » via IntersectionObserver),
  *  - le CTA contextuel quand le score n'est pas calculable et que le profil
- *    du visiteur peut être complété.
+ *    du visiteur peut être complété,
+ *  - le CTA Alma « Comprendre mon score » (Chantier 5) qui déplie une bulle
+ *    narrative reformulant chaque critère.
  */
 import AffinityBadge from "./AffinityBadge";
 import AffinityMissingCTA from "./AffinityMissingCTA";
 import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
+import AlmaAffinityExplain from "@/components/ai/alma/AlmaAffinityExplain";
 import type {
   AffinitySitterInput,
   AffinityOwnerInput,
@@ -51,16 +54,25 @@ const AffinitySection = ({
   }
 
   return (
-    <div className="mt-3 flex items-center gap-2">
-      <AffinityBadge
-        result={full}
-        size="md"
-        trackingContext={context}
-        trackingId={targetId}
-      />
-      <span className="text-xs text-muted-foreground">
-        Votre affinité avec ce propriétaire
-      </span>
+    <div className="mt-3 space-y-2">
+      <div className="flex items-center gap-2 flex-wrap">
+        <AffinityBadge
+          result={full}
+          size="md"
+          trackingContext={context}
+          trackingId={targetId}
+        />
+        <span className="text-xs text-muted-foreground">
+          Votre affinité avec ce propriétaire
+        </span>
+        <AlmaAffinityExplain
+          audience="sitter"
+          mode="sitter_view"
+          result={full}
+          context={context}
+          targetId={targetId}
+        />
+      </div>
     </div>
   );
 };
