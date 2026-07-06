@@ -8,6 +8,8 @@ import PostalCodeCityFields from "./PostalCodeCityFields";
 import { cn } from "@/lib/utils";
 import type { SitterProfileData } from "@/hooks/useSitterProfile";
 import GenerateBioButton from "@/components/ai/GenerateBioButton";
+import AlmaMotivationBubble from "@/components/ai/alma/AlmaMotivationBubble";
+
 
 interface Props {
   data: SitterProfileData;
@@ -123,9 +125,15 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
               : `${motivationLen} caractères`}
         </p>
         {motivationLen > 0 && motivationLen < 50 && (
-          <p className="text-xs text-destructive">
-            Ce champ doit contenir au moins 50 caractères pour rassurer les proprios.
-          </p>
+          <>
+            <p className="text-xs text-destructive">
+              Ce champ doit contenir au moins 50 caractères pour rassurer les proprios.
+            </p>
+            <AlmaMotivationBubble
+              currentValue={data.motivation || ""}
+              onPick={(text) => onChange({ motivation: text })}
+            />
+          </>
         )}
       </div>
     </div>
@@ -133,3 +141,4 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
 };
 
 export default StepIdentity;
+

@@ -155,7 +155,28 @@ export type EventType =
   | "mission_composer_step1_completed"          // Passage step 1 → step 2 (has_template)
   | "mission_composer_field_abandoned"          // Blur sans valeur suffisante sur un champ obligatoire (field)
   | "mission_composer_submitted"                // Submit form réussi (mission_id, category, mission_type)
-  | "mission_composer_abandoned";               // Unmount avec step >= 1 sans submit (last_step, has_title)
+  | "mission_composer_abandoned"                // Unmount avec step >= 1 sans submit (last_step, has_title)
+  // Alma Pass 1 (assistant incarné sur 6 moments transactionnels) --------------
+  | "alma_message_opener_seen"                  // Bulle brise-glace Messages affichée (audience, has_sit, has_mission)
+  | "alma_message_opener_generated"             // Brouillon premier message généré (audience, has_sit, has_mission)
+  | "alma_message_opener_sent"                  // Premier message envoyé avec brouillon Alma
+  | "alma_bio_bubble_seen"                      // Bulle bio/motivation affichée (field: bio|motivation)
+  | "alma_bio_drafts_generated"                 // 3 brouillons bio générés
+  | "alma_bio_draft_selected"                   // Brouillon bio choisi (draft_index, tone)
+  | "alma_application_bubble_seen"              // Bulle lettre candidature affichée (sit_id)
+  | "alma_application_letter_generated"         // Lettre candidature générée (sit_id)
+  | "alma_application_sent_with_draft"          // Candidature envoyée avec brouillon Alma (sit_id)
+  | "alma_application_sent_without_draft"       // Candidature envoyée sans brouillon Alma (sit_id)
+  | "alma_affinity_explain_clicked"             // Clic "Comprendre mon score" (sit_id, score)
+  | "alma_affinity_explanation_seen"            // Explication affinité affichée (mode)
+  | "alma_affinity_profile_action_clicked"      // Clic CTA "Améliorer mon profil" (target_field)
+  | "alma_silent_sit_bubble_seen"               // Bulle relance annonce silencieuse (sit_id, days_since_publish)
+  | "alma_silent_sit_action_clicked"            // Action rapide relance annonce (sit_id, action_id)
+  | "alma_review_bubble_seen"                   // Bulle brouillon avis affichée (sit_id, role)
+  | "alma_review_draft_generated"               // Brouillon avis généré (sit_id, role)
+  | "alma_review_submitted_with_draft"          // Avis publié avec brouillon Alma (sit_id, role)
+  | "alma_review_submitted_without_draft";      // Avis publié sans brouillon Alma (sit_id, role)
+
 
 interface TrackOptions {
   source?: string;

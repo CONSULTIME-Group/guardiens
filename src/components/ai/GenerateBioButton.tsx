@@ -8,7 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { AlmaAvatar } from "./alma/AlmaAvatar";
+
 
 type Draft = { tone: "chaleureux" | "professionnel" | "concis"; text: string };
 
@@ -58,17 +60,19 @@ export default function GenerateBioButton({ onPick }: Props) {
 
   return (
     <>
-      <Button type="button" variant="outline" size="sm" onClick={() => { reset(); setOpen(true); }} className="gap-2">
-        <Sparkles className="h-4 w-4" />
-        Générer ma bio
+      <Button type="button" variant="outline" size="sm" onClick={() => { reset(); setOpen(true); }} className="gap-2 text-primary">
+        <AlmaAvatar size={24} />
+        Générer ma bio avec Alma
       </Button>
+
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Brouillons de bio</DialogTitle>
-            <DialogDescription>Répondez en quelques mots, l'IA propose 3 versions. Vous choisissez celle qui vous ressemble.</DialogDescription>
+            <DialogTitle>Alma vous prépare 3 brouillons de bio</DialogTitle>
+            <DialogDescription>Répondez en quelques mots, Alma propose 3 versions. Vous choisissez celle qui vous ressemble.</DialogDescription>
           </DialogHeader>
+
 
           {step === "form" && (
             <div className="space-y-4">
@@ -97,9 +101,10 @@ export default function GenerateBioButton({ onPick }: Props) {
 
           {step === "loading" && (
             <div className="flex items-center justify-center py-16 gap-2 text-muted-foreground">
-              <Loader2 className="h-5 w-5 animate-spin" /> Rédaction des 3 brouillons…
+              <Loader2 className="h-5 w-5 animate-spin" /> Alma prépare 3 brouillons…
             </div>
           )}
+
 
           {step === "drafts" && (
             <div className="space-y-3">

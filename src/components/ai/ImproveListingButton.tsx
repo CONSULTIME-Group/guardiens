@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { AlmaAvatar } from "./alma/AlmaAvatar";
+
 
 type Props = {
   title: string;
@@ -59,23 +61,25 @@ export default function ImproveListingButton({ title, description, context, onAp
 
   return (
     <>
-      <Button type="button" variant="outline" size="sm" onClick={run} disabled={disabled || loading} className="gap-2">
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-        Améliorer avec l'IA
+      <Button type="button" variant="outline" size="sm" onClick={run} disabled={disabled || loading} className="gap-2 text-primary">
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <AlmaAvatar size={24} />}
+        Améliorer avec Alma
       </Button>
+
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Proposition d'amélioration</DialogTitle>
+            <DialogTitle>Alma vous propose une amélioration</DialogTitle>
             <DialogDescription>Vous choisissez ce que vous gardez. Aucun changement n'est appliqué sans votre validation.</DialogDescription>
           </DialogHeader>
 
           {loading && (
             <div className="flex items-center justify-center py-12 gap-2 text-muted-foreground">
-              <Loader2 className="h-5 w-5 animate-spin" /> Rédaction en cours…
+              <Loader2 className="h-5 w-5 animate-spin" /> Alma prépare…
             </div>
           )}
+
 
           {result && !loading && (
             <div className="space-y-4">
