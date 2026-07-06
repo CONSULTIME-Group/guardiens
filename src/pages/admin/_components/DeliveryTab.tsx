@@ -58,7 +58,7 @@ const DeliveryTab = () => {
       supabase.from("email_delivery_snapshots").select("*").order("snapshot_date", { ascending: false }).limit(30),
     ]);
     if (th) setThreshold(th as Threshold);
-    if (snaps) setSnapshots(snaps as Snapshot[]);
+    if (snaps) setSnapshots(snaps as unknown as Snapshot[]);
     setLoading(false);
   }, []);
 
