@@ -822,7 +822,62 @@ const ThemeSection = () => {
   );
 };
 
-const BillingSection = ({ user }: { user: any }) => {
+const ALMA_OPTIONS: { value: AlmaFrequency; label: string; description: string }[] = [
+  {
+    value: "silent",
+    label: "Silencieuse",
+    description: "Alma n'intervient jamais spontanément. Vous restez maître du tempo.",
+  },
+  {
+    value: "balanced",
+    label: "Équilibrée",
+    description: "Alma prend la parole aux moments clés : messages, candidatures, avis. Recommandé.",
+  },
+  {
+    value: "talkative",
+    label: "Bavarde",
+    description: "Alma vous accompagne partout, avec des suggestions et rappels supplémentaires.",
+  },
+];
+
+const AlmaFrequencySection = () => {
+  const { frequency, loading, setFrequency } = useAlmaFrequency();
+  return (
+    <section>
+      <SectionHeader
+        icon={MessageCircle}
+        title="Fréquence d'Alma"
+        description="Réglez à quel point la narratrice Guardiens prend la parole dans votre parcours."
+      />
+      <div className="space-y-3" aria-busy={loading}>
+        {ALMA_OPTIONS.map((opt) => {
+          const active = frequency === opt.value;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setFrequency(opt.value)}
+              aria-pressed={active}
+              className={`w-full text-left rounded-lg border p-4 transition-colors ${
+                active
+                  ? "border-primary bg-primary/5"
+                  : "border-border bg-card hover:bg-accent"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-semibold">{opt.label}</span>
+                {active && (
+                  <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" />
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">{opt.description}</p>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+};
   const isSitter = user?.role === "sitter" || user?.role === "both";
   return (
     <section>
