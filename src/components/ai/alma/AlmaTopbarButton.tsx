@@ -66,7 +66,7 @@ export default function AlmaTopbarButton({ className }: AlmaTopbarButtonProps) {
         className,
       )}
     >
-      <AlmaAvatar size={22} />
+      <AlmaAvatar size={24} />
     </button>
   );
 }
