@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
       answersCount: q.answers_count ?? 0,
     }))
 
-    // Section 1 (partiel) : missions récentes (24-96h) — filtrées par distance côté recipient
+    // Section 1 (partiel) : missions récentes (24-96h) , filtrées par distance côté recipient
     const missionsCutoff = new Date(now - 7 * 86400_000).toISOString()
     const { data: freshMissions } = await admin
       .from('small_missions')
