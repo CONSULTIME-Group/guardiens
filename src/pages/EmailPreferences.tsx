@@ -127,6 +127,23 @@ const EmailPreferences = () => {
               </CardHeader>
             </Card>
 
+            <Card>
+              <CardHeader className="flex flex-row items-start justify-between gap-4">
+                <div>
+                  <CardTitle className="text-base">Digest quotidien entraide</CardTitle>
+                  <CardDescription>
+                    Chaque soir, jusqu'à 3 nouvelles petites missions publiées dans les 24h
+                    dans un rayon de 30 km autour de chez vous. L'entraide reste gratuite.
+                  </CardDescription>
+                </div>
+                <Switch
+                  checked={prefs.new_mission_digest}
+                  onCheckedChange={(v) => setPrefs((p) => ({ ...p, new_mission_digest: v }))}
+                />
+              </CardHeader>
+            </Card>
+
+
             <div className="flex justify-end">
               <Button onClick={save} disabled={saving} className="h-11 md:h-auto">
                 {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
