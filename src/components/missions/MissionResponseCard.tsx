@@ -177,12 +177,36 @@ const MissionResponseCard = ({
                       <AlertDialogDescription>
                         Vous confirmez publiquement que cette personne vous aide sur cette mission.
                         Elle apparaîtra comme « Personne retenue » ici et sur son profil public.
-                        Les autres réponses ne seront pas déclinées automatiquement.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
+                    {pendingCount > 1 && (
+                      <div className="rounded-xl border border-border bg-muted/40 p-3">
+                        <p className="text-xs font-semibold text-foreground mb-2">
+                          {pendingCount - 1} autre{pendingCount - 1 > 1 ? "s" : ""} réponse{pendingCount - 1 > 1 ? "s" : ""} en attente
+                        </p>
+                        <RadioGroup
+                          value={acceptMode}
+                          onValueChange={(v) => setAcceptMode(v as "keep" | "decline_others")}
+                          className="space-y-2"
+                        >
+                          <div className="flex items-start gap-2">
+                            <RadioGroupItem value="keep" id={`mode-keep-${r.id}`} className="mt-0.5" />
+                            <Label htmlFor={`mode-keep-${r.id}`} className="text-sm font-normal leading-snug cursor-pointer">
+                              Garder les autres réponses ouvertes (au cas où)
+                            </Label>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <RadioGroupItem value="decline_others" id={`mode-decline-${r.id}`} className="mt-0.5" />
+                            <Label htmlFor={`mode-decline-${r.id}`} className="text-sm font-normal leading-snug cursor-pointer">
+                              Écarter les autres réponses (elles seront prévenues)
+                            </Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                    )}
                     <AlertDialogFooter>
                       <AlertDialogCancel>Annuler</AlertDialogCancel>
-                      <AlertDialogAction onClick={onSelect}>Confirmer</AlertDialogAction>
+                      <AlertDialogAction onClick={() => onSelect(acceptMode)}>Confirmer</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
