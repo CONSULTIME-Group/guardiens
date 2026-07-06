@@ -128,8 +128,9 @@ export default function SitDraftFromPrompt() {
           {loading ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
-              Génération en cours
+              Alma prépare…
             </>
+
           ) : (
             <>
               <Sparkles className="h-4 w-4 mr-2" aria-hidden="true" />

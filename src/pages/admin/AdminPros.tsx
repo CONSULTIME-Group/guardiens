@@ -255,7 +255,7 @@ const AdminPros = () => {
     <div className="space-y-6">
       <AdminPageHeader
         title="Vérifications Pro"
-        description="File des dossiers Gardiens Pro à modérer (diplôme, SIRET, autres pièces). L'IA pré-analyse, vous tranchez."
+        description="File des dossiers Gardiens Pro à modérer (diplôme, SIRET, autres pièces). Alma pré-analyse, vous tranchez."
       />
 
       <div className="flex flex-wrap gap-2 text-sm">
