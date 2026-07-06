@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import SitterDashboard from "@/components/dashboard/SitterDashboard";
 import { WelcomeBackDigest } from "@/components/ai/alma/WelcomeBackDigest";
+import { AlmaDormantReturnWhisper } from "@/components/ai/alma/wiring/AlmaDormantReturnWhisper";
 
 import { DashboardErrorBoundary } from "@/components/dashboard/DashboardErrorBoundary";
 import { trackEvent } from "@/lib/analytics";
@@ -212,6 +213,7 @@ const Dashboard = () => {
         >
           <div className="mx-auto w-full max-w-6xl px-4 pt-4 md:px-6">
             <WelcomeBackDigest />
+            <AlmaDormantReturnWhisper />
           </div>
           {displayedRole === "owner" ? <OwnerDashboard /> : <SitterDashboard />}
         </DashboardErrorBoundary>
