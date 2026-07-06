@@ -513,6 +513,10 @@ const OwnerDashboard = () => {
             <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
           </div>
 
+          <div className={`px-5 md:px-8 ${!showAllMobile ? "hidden md:block" : ""}`}>
+            <NextMissionDigestCard />
+          </div>
+
           {todoItems.length > 0 && (
             <div className="px-5 md:px-8">
               <TodoCard items={todoItems} />
