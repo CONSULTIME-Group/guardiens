@@ -41,6 +41,11 @@ const ApplicationModal = ({
   const [message, setMessage] = useState(defaultMessage);
   const [sending, setSending] = useState(false);
   const [sitterInfo, setSitterInfo] = useState<any>(null);
+  const [almaLoading, setAlmaLoading] = useState(false);
+  const [almaDismissed, setAlmaDismissed] = useState(false);
+  const [almaUsed, setAlmaUsed] = useState(false);
+  const almaSeenRef = useRef(false);
+
 
   // Load current user's sitter profile info for preview
   useEffect(() => {
