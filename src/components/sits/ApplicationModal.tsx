@@ -13,6 +13,8 @@ import { trackFirstAction, trackEvent } from "@/lib/analytics";
 import { readDigestAttribution, clearDigestAttribution } from "@/lib/digestAttribution";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
+import AlmaBubble from "@/components/ai/alma/AlmaBubble";
+
 
 interface ApplicationModalProps {
   open: boolean;
