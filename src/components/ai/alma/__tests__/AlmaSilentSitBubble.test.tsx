@@ -56,7 +56,7 @@ describe("AlmaSilentSitBubble", () => {
       },
     ];
     const { unmount } = render(wrap(<AlmaSilentSitBubble sits={sits} />));
-    await userEvent.click(screen.getByRole("button", { name: /masquer alma/i }));
+    fireEvent.click(screen.getByRole("button", { name: /masquer alma/i }));
     await waitFor(() =>
       expect(screen.queryByText(/aucune candidature/i)).not.toBeInTheDocument(),
     );
