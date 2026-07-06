@@ -20,9 +20,11 @@ export type AlmaWhisperType =
   | "owner_conversation_stagnant"
   // Cross
   | "sitter_international_discovery"
-  | "long_absence_return";
+  | "long_absence_return"
+  // Pass 5 — compagnon culturel (P3, ambiance, jamais bloquant)
+  | "cultural_fact";
 
-export type AlmaWhisperPriority = "P0" | "P1" | "P2";
+export type AlmaWhisperPriority = "P0" | "P1" | "P2" | "P3";
 
 export type AlmaAudience = "owner" | "sitter";
 
@@ -63,6 +65,7 @@ export const WHISPER_PRIORITY: Record<AlmaWhisperType, AlmaWhisperPriority> = {
   sitter_search_repeated_no_action: "P2",
   sitter_reactive_owner_context: "P2",
   owner_view_trend_up: "P2",
+  cultural_fact: "P3",
 };
 
 export const FREQUENCY_CONFIG: Record<
@@ -72,4 +75,18 @@ export const FREQUENCY_CONFIG: Record<
   silent: { maxPerSession: 0, cooldownMs: Infinity },
   balanced: { maxPerSession: 3, cooldownMs: 5 * 60 * 1000 },
   talkative: { maxPerSession: 8, cooldownMs: 90 * 1000 },
+};
+
+/**
+ * Quotas dédiés au compagnon culturel (Pass 5) — indépendants du quota
+ * général : on ne veut pas qu'un fait culturel consomme le budget d'un
+ * whisper actionnable, et inversement.
+ */
+export const CULTURAL_FACT_LIMITS: Record<
+  AlmaFrequency,
+  { maxPerSession: number; cooldownMs: number }
+> = {
+  silent: { maxPerSession: 0, cooldownMs: Infinity },
+  balanced: { maxPerSession: 1, cooldownMs: 5 * 60 * 1000 },
+  talkative: { maxPerSession: 2, cooldownMs: 3 * 60 * 1000 },
 };

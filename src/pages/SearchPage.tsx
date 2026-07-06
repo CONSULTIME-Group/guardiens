@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import SearchSeoIntro from "@/components/search/SearchSeoIntro";
 import SearchSeoFooter, { SEARCH_FAQ } from "@/components/search/SearchSeoFooter";
 import SearchHowItWorksAnon from "@/components/search/SearchHowItWorksAnon";
+import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 
 const SearchSitter = lazyWithRetry(
   () => import("@/components/search/SearchSitter"),
@@ -27,6 +28,10 @@ const SearchPage = () => {
 
   // Anonymous visitors and sitter role: show sitter search (browse listings).
   const showSitterView = !user || activeRole === "sitter";
+
+  // Pass 5 — compagnon culturel : fait ambiance sur la recherche.
+  useAlmaCulturalFact({ surface: "search", context: { role: activeRole } });
+
 
   // JSON-LD : WebPage + BreadcrumbList + FAQPage. L'ItemList n'est pas
   // matérialisé ici car les annonces sont chargées côté client (Googlebot

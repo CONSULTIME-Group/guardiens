@@ -7,6 +7,7 @@ import { slugify } from "@/lib/normalize";
 import { CITIES } from "@/data/cities";
 import { buildOgImageUrl } from "@/lib/ogImage";
 import ShareLink from "@/components/share/ShareLink";
+import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 
 interface BreedProfile {
   species: string;
@@ -66,6 +67,16 @@ const BreedPage = () => {
         setLoading(false);
       });
   }, [slug]);
+
+  // Pass 5 — compagnon culturel : fait race matché sur species + breed slug.
+  useAlmaCulturalFact({
+    surface: "race_page",
+    enabled: !!breed,
+    context: {
+      animal_species: breed?.species,
+      animal_breed: breed ? slugify(breed.breed) : undefined,
+    },
+  });
 
   if (notFound) return <Navigate to="/races" replace />;
   if (loading || !breed) {

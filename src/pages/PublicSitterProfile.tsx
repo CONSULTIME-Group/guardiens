@@ -5,6 +5,7 @@ import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom"
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 import PageMeta from "@/components/PageMeta";
 import BadgeRow from "@/components/badges/BadgeRow";
 import MissionBadgesReceived from "@/components/missions/MissionBadgesReceived";
@@ -97,6 +98,15 @@ export default function PublicSitterProfile() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [sitterProfile, setSitterProfile] = useState<any>(null);
+
+  // Pass 5 — compagnon culturel : fait race si l'un des animaux du gardien matche.
+  useAlmaCulturalFact({
+    surface: "sitter_profile",
+    context: {
+      role: auth.activeRole,
+      animal_species: (sitterProfile as any)?.animal_types?.[0] ?? undefined,
+    },
+  });
   const [ownerProfile, setOwnerProfile] = useState<OwnerProfileData | null>(null);
   const [missionCount, setMissionCount] = useState<number>(0);
   const [badges, setBadges] = useState<{ badge_key: string; count: number }[]>([]);

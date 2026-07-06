@@ -221,7 +221,13 @@ export type EventType =
   | "entraide_feed_default_view"                // Vue par défaut du feed unifié mobile (une fois par session)
   | "admin_mutual_aid_dashboard_seen"           // Dashboard admin entraide affiché (1x par montage)
   | "admin_alma_dashboard_seen"                 // Dashboard admin Alma affiché (1x par montage)
-  | "admin_alma_export_csv_clicked";            // Export CSV depuis dashboard admin Alma
+  | "admin_alma_export_csv_clicked"             // Export CSV depuis dashboard admin Alma
+  // Alma Pass 5 — compagnon culturel -----------------------------------------
+  | "alma_cultural_fact_seen"                   // Fait culturel affiché (fact_id, fact_type, surface)
+  | "alma_cultural_fact_action_clicked"         // Clic action "En savoir plus" (fact_id, source_url)
+  | "alma_cultural_fact_dismissed"              // Fait culturel fermé (fact_id, reason)
+  | "admin_alma_cultural_facts_tab_seen"        // Onglet admin cultural facts affiché
+  | "admin_alma_cultural_fact_toggled";         // Désactivation/réactivation d'un fait (fact_id, active)
 
 
 

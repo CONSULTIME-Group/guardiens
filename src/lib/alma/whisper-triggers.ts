@@ -212,3 +212,46 @@ export function buildLongAbsenceReturnWhisper(params: {
     },
   };
 }
+
+/* ---------------- Pass 5 — Compagnon culturel ---------------- */
+
+export interface CulturalFactPayload {
+  id: string;
+  type: string; // fact_type serveur
+  content: string;
+  source_url?: string | null;
+}
+
+/**
+ * Whisper d'ambiance issu de `alma_cultural_facts`.
+ * Aucun CTA d'action produit : simplement une action optionnelle « En savoir plus »
+ * si une source est renseignée. Auto-dismiss long (25s) pour laisser lire.
+ */
+export function buildCulturalFactWhisper(params: {
+  fact: CulturalFactPayload;
+  audience: "owner" | "sitter";
+  surface: string;
+  onSource?: (url: string) => void;
+}): AlmaWhisper {
+  const url = params.fact.source_url?.trim() || null;
+  return {
+    ...base("cultural_fact"),
+    audience: params.audience,
+    surface: params.surface,
+    message: params.fact.content,
+    autoDismissMs: 25_000,
+    primaryAction:
+      url && params.onSource
+        ? {
+            label: "En savoir plus",
+            onClick: () => params.onSource!(url),
+            actionId: "cultural_fact_source",
+          }
+        : undefined,
+    metadata: {
+      fact_id: params.fact.id,
+      fact_type: params.fact.type,
+      source_url: url,
+    },
+  };
+}
