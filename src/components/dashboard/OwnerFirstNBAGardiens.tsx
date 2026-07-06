@@ -136,6 +136,9 @@ function SitterCard({ sitter, position }: { sitter: AffinitySitterCard; position
             ))}
           </ul>
         )}
+        <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary">
+          Voir son profil →
+        </span>
       </Link>
     </li>
   );
