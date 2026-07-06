@@ -5,6 +5,7 @@ import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
 import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import SitterDashboard from "@/components/dashboard/SitterDashboard";
+import { WelcomeBackDigest } from "@/components/ai/alma/WelcomeBackDigest";
 
 import { DashboardErrorBoundary } from "@/components/dashboard/DashboardErrorBoundary";
 import { trackEvent } from "@/lib/analytics";
