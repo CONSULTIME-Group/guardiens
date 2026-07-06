@@ -61,6 +61,8 @@ import { template as analysisRequestsDigest } from './analysis-requests-digest.t
 import { template as sitDraftReminder } from './sit-draft-reminder.tsx'
 import { template as sitterDailyDigest } from './sitter-daily-digest.tsx'
 import { template as adminDeliveryAlert } from './admin-delivery-alert.tsx'
+import { template as missionFeedbackReceived } from './mission-feedback-received.tsx'
+import { template as missionThanksReceived } from './mission-thanks-received.tsx'
 
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
