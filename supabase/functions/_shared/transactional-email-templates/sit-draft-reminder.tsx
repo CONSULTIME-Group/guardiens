@@ -29,8 +29,12 @@ const SitDraftReminderEmail = ({
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
+        <AlmaSignature />
         <Heading style={h1}>Vous avez commencé une annonce chez Guardiens</Heading>
-        <Text style={text}>Bonjour{firstName ? ` ${firstName}` : ''},</Text>
+        <AlmaIntro
+          firstName={firstName}
+          seen="Voici où en est votre annonce en brouillon."
+        />
         <Text style={text}>
           Hier, vous avez commencé à rédiger une annonce pour faire garder vos
           animaux et votre maison. Elle vous attend en brouillon dans votre espace.
@@ -51,8 +55,9 @@ const SitDraftReminderEmail = ({
           Vous pouvez aussi supprimer ce brouillon depuis votre dashboard si vous
           préférez.
         </Text>
-        <Text style={text}>À bientôt sur Guardiens,<br />Jérémie &amp; Elisa</Text>
+        <AlmaSignoff />
         <LegalFooter purpose="du rappel de brouillon d'annonce" basis="6.1.f" />
+
       </Container>
     </Body>
   </Html>
