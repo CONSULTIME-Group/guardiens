@@ -70,7 +70,7 @@ export function buildPopularSitWhisper(params: {
     ...base("sitter_popular_sit_context"),
     audience: "sitter",
     surface: "sit_detail",
-    message: `Cette annonce a été vue ${params.viewCount} fois cette semaine, ${params.applicationsCount} candidats. Ton affinité ${params.affinityScore}% te met dans le top.`,
+    message: `Cette annonce a été vue ${params.viewCount} fois cette semaine, ${params.applicationsCount} candidats. Votre affinité ${params.affinityScore}% vous met dans le top.`,
     primaryAction: { label: "Postuler maintenant", onClick: params.onApply, actionId: "apply" },
   };
 }
