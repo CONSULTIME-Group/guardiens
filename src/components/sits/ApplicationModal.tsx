@@ -82,6 +82,16 @@ const ApplicationModal = ({
     load();
   }, [user, open]);
 
+  // Alma Pass 1 : impression de la bulle lettre candidature (1×/ouverture)
+  useEffect(() => {
+    if (open && !almaSeenRef.current) {
+      almaSeenRef.current = true;
+      void trackEvent("alma_application_bubble_seen", { metadata: { sit_id: sitId } });
+    }
+    if (!open) almaSeenRef.current = false;
+  }, [open, sitId]);
+
+
   const handleSend = async () => {
     if (!user || !message.trim()) return;
     setSending(true);
