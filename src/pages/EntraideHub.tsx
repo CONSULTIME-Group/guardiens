@@ -768,6 +768,14 @@ const EntraideHub = () => {
                                         Vous
                                       </span>
                                     )}
+                                    {expired && (
+                                      <span
+                                        className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-warning/15 text-warning-foreground uppercase tracking-wide border border-warning/30"
+                                        aria-label="Statut : date dépassée"
+                                      >
+                                        Date dépassée
+                                      </span>
+                                    )}
                                   </div>
                                   {proximity.active && (
                                     d != null ? (
