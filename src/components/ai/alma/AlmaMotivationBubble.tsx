@@ -89,7 +89,7 @@ export function AlmaMotivationBubble({ currentValue, onPick }: Props) {
                     onPick(d.text);
                     void trackEvent("alma_bio_draft_selected", { metadata: { draft_index: i, tone: d.tone } });
                     setDismissed(true);
-                    toast({ title: "Brouillon inséré", description: "Tu peux le modifier librement." });
+                    toast({ title: "Brouillon inséré", description: "Vous pouvez le modifier librement." });
                   }}
                   className="w-full text-left rounded-lg border border-border p-2.5 hover:border-primary transition"
                 >
