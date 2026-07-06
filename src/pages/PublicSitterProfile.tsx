@@ -95,6 +95,16 @@ export default function PublicSitterProfile() {
   const { data: userBadges } = useUserBadges(id);
   const heroWeights = useHeroWeights();
 
+  // Pass 5 — compagnon culturel : fait race si l'un des animaux du gardien matche.
+  useAlmaCulturalFact({
+    surface: "sitter_profile",
+    context: {
+      role: auth.activeRole,
+      animal_species: (sitterProfile as any)?.animal_types?.[0] ?? undefined,
+    },
+  });
+
+
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [sitterProfile, setSitterProfile] = useState<any>(null);
