@@ -123,6 +123,15 @@ const OwnerDashboard = () => {
   );
   const hasDraft = !!latestDraft;
 
+  /* ── Flags NBA & signal local calculés tôt (utilisés par subtitle + NBA) ── */
+  const isNewOwner = useIsNewOwner({ sitsCount: sits.length, petsCount: pets.length });
+  const earlyOwner = useMemo(
+    () => isEarlyOwner({ sits: sits as any, pets: pets as any }),
+    [sits, pets],
+  );
+  const nearbyCount = nearbyOwnerSittersData?.totalCount ?? 0;
+  const nearbyRadius = nearbyOwnerSittersData?.radiusUsed ?? null;
+
   const ongoingSit = useMemo(() =>
     sits.find(s => s.status === "confirmed" && s.start_date && new Date(s.start_date) <= now && s.end_date && new Date(s.end_date) >= now),
     // eslint-disable-next-line react-hooks/exhaustive-deps
