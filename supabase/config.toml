@@ -47,4 +47,7 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = false
   [functions.send-sitter-daily-digest]
     verify_jwt = true
+  [functions.draft-sit-from-prompt]
+    verify_jwt = true
+
 

@@ -125,7 +125,14 @@ export type EventType =
   | "international_strip_seen"            // Impression bandeau international (1x/session)
   | "international_strip_card_clicked"    // Clic sur une card international (card_id)
   | "pros_showcase_seen"                  // Impression vitrine pros animaliers (1x/session)
-  | "pros_showcase_card_clicked";         // Clic sur une card pros (card_id)
+  | "pros_showcase_card_clicked"          // Clic sur une card pros (card_id)
+  // Owner Pass 3 (concierge IA + carte 3 gardiens) --------------------------
+  | "owner_draft_from_prompt_input_seen"        // Impression du composant "1 phrase" (1×/session)
+  | "owner_draft_from_prompt_generated"         // Génération réussie (prompt_length, generated_length, confidence, draft_id)
+  | "owner_draft_from_prompt_published"         // Publication d'un sit issu d'un draft généré par prompt (sit_id)
+  | "owner_first_nba_gardiens_seen"             // Impression carte 3 gardiens (sitters_count, avg_affinity)
+  | "owner_first_nba_gardien_card_clicked"      // Clic sur une des 3 cards (sitter_id, affinity_score, distance_km, position)
+  | "owner_intent_draft_from_prompt_from_email";// Arrivée sur dashboard depuis email ?intent=draft_from_prompt
 
 interface TrackOptions {
   source?: string;
