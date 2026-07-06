@@ -262,6 +262,8 @@ export type Database = {
           content: string
           context_filter: Json
           created_at: string
+          cta_action: string | null
+          cta_label: string | null
           fact_type: string
           id: string
           needs_pro_referral: boolean
@@ -269,6 +271,8 @@ export type Database = {
           seasonal_end_month: number | null
           seasonal_start_month: number | null
           source_url: string | null
+          target_role: string
+          target_state: string
           weight: number
         }
         Insert: {
@@ -276,6 +280,8 @@ export type Database = {
           content: string
           context_filter?: Json
           created_at?: string
+          cta_action?: string | null
+          cta_label?: string | null
           fact_type: string
           id?: string
           needs_pro_referral?: boolean
@@ -283,6 +289,8 @@ export type Database = {
           seasonal_end_month?: number | null
           seasonal_start_month?: number | null
           source_url?: string | null
+          target_role?: string
+          target_state?: string
           weight?: number
         }
         Update: {
@@ -290,6 +298,8 @@ export type Database = {
           content?: string
           context_filter?: Json
           created_at?: string
+          cta_action?: string | null
+          cta_label?: string | null
           fact_type?: string
           id?: string
           needs_pro_referral?: boolean
@@ -297,6 +307,8 @@ export type Database = {
           seasonal_end_month?: number | null
           seasonal_start_month?: number | null
           source_url?: string | null
+          target_role?: string
+          target_state?: string
           weight?: number
         }
         Relationships: []
@@ -6300,8 +6312,30 @@ export type Database = {
           whisper_type: string
         }[]
       }
-      get_alma_cultural_fact: {
-        Args: { p_context?: Json; p_surface: string; p_user_id: string }
+      get_alma_cultural_fact:
+        | {
+            Args: { p_context?: Json; p_surface: string; p_user_id: string }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_bypass_cooldown?: boolean
+              p_context?: Json
+              p_exclude_ids?: string[]
+              p_surface: string
+              p_user_id: string
+            }
+            Returns: Json
+          }
+      get_alma_usage_nudge: {
+        Args: {
+          p_bypass_cooldown?: boolean
+          p_exclude_ids?: string[]
+          p_role?: string
+          p_state?: string
+          p_surface: string
+          p_user_id: string
+        }
         Returns: Json
       }
       get_dormant_recovery_context: {

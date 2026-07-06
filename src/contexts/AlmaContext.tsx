@@ -1,15 +1,13 @@
 /**
- * AlmaContext — état global cross-page de la narratrice Alma (Pass 4).
+ * AlmaContext — état global cross-page de la narratrice Alma.
  *
- * Rôle :
- *  - Charger la préférence `profiles.alma_frequency` et les types blacklistés
- *    via RPC `get_alma_blacklisted_types`.
- *  - Maintenir la queue courante et le whisper actuellement visible.
- *  - Exposer canEmit(type) au reste de l'app pour gate les triggers.
- *  - Logger chaque émission et chaque dismiss dans `alma_whisper_history`.
- *
- * `useAlma()` retourne toujours un objet stable : composants peuvent l'appeler
- * sans provider (dégrade en no-op) pour ne pas casser les surfaces publiques.
+ * Étape 1 évolution :
+ *  - `verboseMode` piloté par le query param `?alma=verbose` (session courante,
+ *    bypass total du quota / cooldown / mute des whispers proactifs).
+ *  - `requestNextTip({ surface, context, role, state })` : tirage initié par
+ *    l'utilisateur (bouton « Un autre conseil » sur la bulle, ou point d'accès
+ *    Alma persistant en topbar). Bypasse toutes les gates de session côté client
+ *    et les cooldowns côté serveur. Respecte le dedup 24h via `p_exclude_ids`.
  */
 import {
   createContext,
@@ -21,7 +19,7 @@ import {
   useState,
   ReactNode,
 } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { trackEvent } from "@/lib/analytics";
@@ -30,6 +28,7 @@ import {
   AlmaWhisperType,
   AlmaFrequency,
   AlmaDismissReason,
+  AlmaAudience,
 } from "@/lib/alma/whisper-types";
 import {
   canEmit as canEmitPure,
@@ -39,12 +38,10 @@ import {
   pickNext,
   SchedulerState,
 } from "@/lib/alma/whisper-scheduler";
+import { buildCulturalFactWhisper, buildUsageNudgeWhisper } from "@/lib/alma/whisper-triggers";
 
 /**
  * Routes sur lesquelles Alma NE DOIT PAS afficher de whisper flottant proactif.
- * Concerne les formulaires de création/édition d'annonce : le whisper flottant
- * (bottom-24 mobile, pointer-events-auto) recouvre les champs et bloque les taps.
- * La bulle inline "Décrire en une phrase" reste affichée, elle n'utilise pas ce canal.
  */
 const WHISPER_EXCLUDED_ROUTES: RegExp[] = [
   /^\/sits\/create(\/|$|\?)/,
@@ -55,13 +52,45 @@ function isWhisperExcludedRoute(pathname: string): boolean {
   return WHISPER_EXCLUDED_ROUTES.some((re) => re.test(pathname));
 }
 
-/**
- * Fenêtre de silence après la dernière saisie utilisateur dans un champ.
- * Tant qu'un input/textarea/select a le focus ou l'a eu dans les 3 dernières
- * secondes, aucun whisper proactif ne s'affiche.
- */
 const INPUT_FOCUS_QUIET_MS = 3000;
+const VERBOSE_SESSION_KEY = "alma_verbose_mode";
+const SEEN_IDS_SESSION_KEY = "alma_seen_fact_ids";
+const MAX_SEEN_IDS = 40;
 
+function loadSeenIds(): string[] {
+  try {
+    const raw = sessionStorage.getItem(SEEN_IDS_SESSION_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr.slice(-MAX_SEEN_IDS) : [];
+  } catch {
+    return [];
+  }
+}
+function pushSeenId(id: string) {
+  try {
+    const arr = loadSeenIds();
+    if (arr.includes(id)) return;
+    arr.push(id);
+    sessionStorage.setItem(
+      SEEN_IDS_SESSION_KEY,
+      JSON.stringify(arr.slice(-MAX_SEEN_IDS)),
+    );
+  } catch {
+    /* silent */
+  }
+}
+
+export interface RequestNextTipParams {
+  surface: string;
+  context?: Record<string, unknown>;
+  role?: "owner" | "sitter" | "any";
+  state?: "any" | "no_active_sit" | "new_owner" | "new_sitter" | "profile_incomplete";
+  /** Si false, on ne tente pas d'abord un nudge (utile pour rester "culturel pur"). */
+  preferNudge?: boolean;
+  /** Message affiché si aucun conseil éligible. */
+  emptyMessage?: string;
+}
 
 interface AlmaContextValue {
   queueWhisper: (whisper: AlmaWhisper) => void;
@@ -69,6 +98,9 @@ interface AlmaContextValue {
   canEmit: (type: AlmaWhisperType) => boolean;
   currentWhisper: AlmaWhisper | null;
   frequency: AlmaFrequency;
+  verboseMode: boolean;
+  /** Tire à la demande le prochain conseil éligible pour cette surface. */
+  requestNextTip: (params: RequestNextTipParams) => Promise<void>;
 }
 
 const NOOP_VALUE: AlmaContextValue = {
@@ -77,6 +109,8 @@ const NOOP_VALUE: AlmaContextValue = {
   canEmit: () => false,
   currentWhisper: null,
   frequency: "balanced",
+  verboseMode: false,
+  requestNextTip: async () => {},
 };
 
 const AlmaCtx = createContext<AlmaContextValue>(NOOP_VALUE);
@@ -96,8 +130,9 @@ function sessionId(): string {
 }
 
 export function AlmaProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, activeRole } = useAuth();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [state, setState] = useState<SchedulerState>(() => makeInitialState("balanced"));
   const [queue, setQueue] = useState<AlmaWhisper[]>([]);
   const [current, setCurrent] = useState<AlmaWhisper | null>(null);
@@ -108,8 +143,27 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
   const pathnameRef = useRef(location.pathname);
   pathnameRef.current = location.pathname;
 
-  // Surveille le focus des champs de saisie pour mettre en pause les whispers
-  // proactifs pendant que l'utilisateur tape.
+  // Verbose mode : query param ?alma=verbose OU flag session (persiste après refresh)
+  const [verboseMode, setVerboseMode] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem(VERBOSE_SESSION_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+  useEffect(() => {
+    if (searchParams.get("alma") === "verbose" && !verboseMode) {
+      try {
+        sessionStorage.setItem(VERBOSE_SESSION_KEY, "1");
+      } catch {
+        /* silent */
+      }
+      setVerboseMode(true);
+      // eslint-disable-next-line no-console
+      console.info("[Alma] verbose mode activé pour cette session.");
+    }
+  }, [searchParams, verboseMode]);
+
   useEffect(() => {
     const isFormField = (el: EventTarget | null): boolean => {
       if (!(el instanceof HTMLElement)) return false;
@@ -146,11 +200,12 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const isProactiveMuted = useCallback((): boolean => {
+    if (verboseMode) return false;
     if (isWhisperExcludedRoute(pathnameRef.current)) return true;
     if (inputFocusedRef.current) return true;
     if (Date.now() - lastInputFocusRef.current < INPUT_FOCUS_QUIET_MS) return true;
     return false;
-  }, []);
+  }, [verboseMode]);
 
   // Charge fréquence + blacklist
   useEffect(() => {
@@ -166,7 +221,11 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
         supabase.rpc("get_alma_blacklisted_types" as any),
       ]);
       if (cancelled) return;
-      const freq = ((profile as any)?.alma_frequency ?? "balanced") as AlmaFrequency;
+      const raw = (profile as any)?.alma_frequency;
+      const freq: AlmaFrequency =
+        raw === "silent" || raw === "low" || raw === "balanced" || raw === "talkative"
+          ? raw
+          : "balanced";
       const blTypes = Array.isArray(blacklist)
         ? (blacklist as any[]).map((r) => r.whisper_type as AlmaWhisperType)
         : [];
@@ -179,39 +238,53 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
 
   const canEmit = useCallback(
     (type: AlmaWhisperType) => {
+      if (verboseMode) return true;
       if (isProactiveMuted()) return false;
       return canEmitPure(stateRef.current, type).ok;
     },
-    [isProactiveMuted],
+    [isProactiveMuted, verboseMode],
   );
 
   const queueWhisper = useCallback(
     (whisper: AlmaWhisper) => {
-      // Gate de silence : route de formulaire exclue ou champ en cours de saisie.
-      if (isProactiveMuted()) return;
+      if (!verboseMode && isProactiveMuted()) return;
       setQueue((q) => {
-        // dédoublonne par type déjà en queue ou déjà en cours
         if (q.some((w) => w.type === whisper.type)) return q;
         return [...q, whisper];
       });
     },
-    [isProactiveMuted],
+    [isProactiveMuted, verboseMode],
   );
 
   // Sélection du prochain whisper
   useEffect(() => {
     if (current || queue.length === 0) return;
-    // Ne rien émettre si l'utilisateur est en train de saisir ou sur une route exclue.
-    if (isProactiveMuted()) return;
-    const next = pickNext(queue, stateRef.current);
+    if (!verboseMode && isProactiveMuted()) return;
+
+    let next: AlmaWhisper | null;
+    if (verboseMode) {
+      // Bypass total : on prend le plus prioritaire de la queue.
+      const order: Record<string, number> = { P0: 0, P1: 1, P2: 2, P3: 3 };
+      next = [...queue].sort((a, b) => order[a.priority] - order[b.priority])[0] ?? null;
+    } else {
+      next = pickNext(queue, stateRef.current);
+    }
     if (!next) return;
 
     setCurrent(next);
-    setQueue((q) => q.filter((w) => w.id !== next.id));
-    setState((s) => onEmit(s));
+    setQueue((q) => q.filter((w) => w.id !== next!.id));
+    if (!verboseMode) setState((s) => onEmit(s));
+
+    const factId = (next.metadata as any)?.fact_id;
+    if (factId) pushSeenId(String(factId));
 
     trackEvent("alma_whisper_emitted", {
-      metadata: { whisper_type: next.type, surface: next.surface, priority: next.priority },
+      metadata: {
+        whisper_type: next.type,
+        surface: next.surface,
+        priority: next.priority,
+        verbose: verboseMode,
+      },
     });
 
     if (user?.id) {
@@ -225,8 +298,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
           metadata: next.metadata ?? null,
         } as any);
     }
-  }, [current, queue, user?.id, isProactiveMuted, location.pathname]);
-
+  }, [current, queue, user?.id, isProactiveMuted, verboseMode]);
 
   const dismissCurrent = useCallback(
     (reason: AlmaDismissReason) => {
@@ -251,6 +323,85 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
     [current, user?.id],
   );
 
+  const requestNextTip = useCallback<AlmaContextValue["requestNextTip"]>(
+    async ({ surface, context, role, state: userState, preferNudge = true, emptyMessage }) => {
+      if (!user?.id) return;
+      const audience: AlmaAudience = activeRole === "owner" ? "owner" : "sitter";
+      const excluded = loadSeenIds();
+
+      // 1) Essai usage_nudge en priorité si preferNudge et role/state fournis.
+      if (preferNudge && role && userState) {
+        try {
+          const { data } = await supabase.rpc("get_alma_usage_nudge" as any, {
+            p_user_id: user.id,
+            p_surface: surface,
+            p_role: role,
+            p_state: userState,
+            p_bypass_cooldown: true,
+            p_exclude_ids: excluded,
+          });
+          if (data && (data as any).id) {
+            const nudge = buildUsageNudgeWhisper({ payload: data as any, audience, surface });
+            setCurrent(nudge);
+            pushSeenId(String((data as any).id));
+            trackEvent("alma_next_tip_delivered", {
+              metadata: { fact_id: (data as any).id, kind: "usage_nudge", surface },
+            });
+            return;
+          }
+        } catch {
+          /* silent, on tombe sur cultural */
+        }
+      }
+
+      // 2) Sinon, fait culturel.
+      try {
+        const { data } = await supabase.rpc("get_alma_cultural_fact" as any, {
+          p_user_id: user.id,
+          p_surface: surface,
+          p_context: (context ?? {}) as any,
+          p_bypass_cooldown: true,
+          p_exclude_ids: excluded,
+        });
+        if (data && (data as any).id) {
+          const fact = data as any;
+          const whisper = buildCulturalFactWhisper({
+            fact,
+            audience,
+            surface,
+            onSource: (url) => {
+              try {
+                window.open(url, "_blank", "noopener,noreferrer");
+              } catch { /* silent */ }
+            },
+          });
+          setCurrent(whisper);
+          pushSeenId(String(fact.id));
+          trackEvent("alma_next_tip_delivered", {
+            metadata: { fact_id: fact.id, kind: "cultural_fact", surface },
+          });
+          return;
+        }
+      } catch {
+        /* silent */
+      }
+
+      // 3) Rien de neuf.
+      setCurrent({
+        id: `alma-empty-${Date.now()}`,
+        type: "cultural_fact",
+        audience,
+        surface,
+        priority: "P3",
+        allowNextTip: false,
+        message: emptyMessage ?? "Rien de neuf pour l'instant, revenez tout à l'heure.",
+        autoDismissMs: 6_000,
+      });
+      trackEvent("alma_next_tip_empty", { metadata: { surface } });
+    },
+    [user?.id, activeRole],
+  );
+
   const value = useMemo<AlmaContextValue>(
     () => ({
       queueWhisper,
@@ -258,8 +409,10 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
       canEmit,
       currentWhisper: current,
       frequency: state.frequency,
+      verboseMode,
+      requestNextTip,
     }),
-    [queueWhisper, dismissCurrent, canEmit, current, state.frequency],
+    [queueWhisper, dismissCurrent, canEmit, current, state.frequency, verboseMode, requestNextTip],
   );
 
   return <AlmaCtx.Provider value={value}>{children}</AlmaCtx.Provider>;

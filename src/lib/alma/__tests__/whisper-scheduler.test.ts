@@ -28,25 +28,35 @@ describe("Alma whisper scheduler", () => {
     expect(canEmit(s, "sitter_fresh_sit_detected").reason).toBe("silent");
   });
 
-  it("balanced autorise 3 whispers max avec cooldown 5min", () => {
+  it("balanced autorise 5 whispers max avec cooldown 150s", () => {
     let s = makeInitialState("balanced");
-    const now = 1_000_000;
-    expect(canEmit(s, "sitter_fresh_sit_detected", now).ok).toBe(true);
-    s = onEmit(s, now);
-    expect(canEmit(s, "sitter_fresh_sit_detected", now + 1000).reason).toBe("cooldown");
-    // au-delà du cooldown
-    s = onEmit(s, now + 6 * 60 * 1000);
-    s = onEmit(s, now + 12 * 60 * 1000);
-    expect(canEmit(s, "sitter_fresh_sit_detected", now + 18 * 60 * 1000).reason).toBe("quota");
-  });
-
-  it("talkative autorise 8 whispers avec cooldown 90s", () => {
-    let s = makeInitialState("talkative");
-    let now = 0;
-    for (let i = 0; i < 8; i++) {
+    let now = 1_000_000;
+    for (let i = 0; i < 5; i++) {
       expect(canEmit(s, "sitter_fresh_sit_detected", now).ok).toBe(true);
       s = onEmit(s, now);
-      now += 91_000;
+      now += 151_000;
+    }
+    expect(canEmit(s, "sitter_fresh_sit_detected", now).reason).toBe("quota");
+  });
+
+  it("talkative autorise 12 whispers avec cooldown 25s", () => {
+    let s = makeInitialState("talkative");
+    let now = 0;
+    for (let i = 0; i < 12; i++) {
+      expect(canEmit(s, "sitter_fresh_sit_detected", now).ok).toBe(true);
+      s = onEmit(s, now);
+      now += 26_000;
+    }
+    expect(canEmit(s, "sitter_fresh_sit_detected", now).reason).toBe("quota");
+  });
+
+  it("low autorise 3 whispers max avec cooldown 10min", () => {
+    let s = makeInitialState("low");
+    let now = 0;
+    for (let i = 0; i < 3; i++) {
+      expect(canEmit(s, "sitter_fresh_sit_detected", now).ok).toBe(true);
+      s = onEmit(s, now);
+      now += 11 * 60 * 1000;
     }
     expect(canEmit(s, "sitter_fresh_sit_detected", now).reason).toBe("quota");
   });

@@ -220,12 +220,14 @@ export interface CulturalFactPayload {
   type: string; // fact_type serveur
   content: string;
   source_url?: string | null;
+  cta_label?: string | null;
+  cta_action?: string | null;
 }
 
 /**
  * Whisper d'ambiance issu de `alma_cultural_facts`.
- * Aucun CTA d'action produit : simplement une action optionnelle « En savoir plus »
- * si une source est renseignée. Auto-dismiss long (25s) pour laisser lire.
+ * Auto-dismiss long (25 s) pour laisser lire. Bouton "Un autre conseil"
+ * activé par défaut (câblé côté AlmaWhisperOutlet).
  */
 export function buildCulturalFactWhisper(params: {
   fact: CulturalFactPayload;
@@ -240,6 +242,7 @@ export function buildCulturalFactWhisper(params: {
     surface: params.surface,
     message: params.fact.content,
     autoDismissMs: 25_000,
+    allowNextTip: true,
     primaryAction:
       url && params.onSource
         ? {
@@ -255,3 +258,51 @@ export function buildCulturalFactWhisper(params: {
     },
   };
 }
+
+/* ---------------- Étape 1 — usage_nudge ---------------- */
+
+export interface UsageNudgePayload {
+  id: string;
+  type: "usage_nudge";
+  content: string;
+  cta_label?: string | null;
+  cta_action?: string | null;
+}
+
+/**
+ * Whisper d'incitation (usage_nudge, P2). Auto-dismiss 22 s pour laisser
+ * lire ET agir. Bouton « Un autre conseil » activé.
+ * Le CTA principal est câblé par AlmaWhisperOutlet via `resolveAlmaCtaHref`
+ * (navigation React Router) : on met ici juste un placeholder no-op remplacé
+ * dynamiquement par le consommateur qui a accès au router.
+ */
+export function buildUsageNudgeWhisper(params: {
+  payload: UsageNudgePayload;
+  audience: "owner" | "sitter";
+  surface: string;
+  onCta?: (ctaAction: string) => void;
+}): AlmaWhisper {
+  const ctaLabel = params.payload.cta_label?.trim() || null;
+  const ctaAction = params.payload.cta_action?.trim() || null;
+  const hasCta = ctaLabel && ctaAction && ctaAction !== "none";
+  return {
+    ...base("usage_nudge"),
+    audience: params.audience,
+    surface: params.surface,
+    message: params.payload.content,
+    autoDismissMs: 22_000,
+    allowNextTip: true,
+    primaryAction: hasCta
+      ? {
+          label: ctaLabel!,
+          onClick: () => params.onCta?.(ctaAction!),
+          actionId: `usage_nudge_${ctaAction}`,
+        }
+      : undefined,
+    metadata: {
+      fact_id: params.payload.id,
+      cta_action: ctaAction,
+    },
+  };
+}
+
