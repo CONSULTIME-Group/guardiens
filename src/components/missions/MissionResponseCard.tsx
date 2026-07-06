@@ -4,6 +4,8 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Heart, CheckCircle2, MessageSquare, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -18,7 +20,8 @@ interface Props {
   currentUserId?: string;
   missionOwnerId: string;
   processing: boolean;
-  onSelect: () => void;
+  pendingCount?: number;
+  onSelect: (mode: "keep" | "decline_others") => void;
   onDecline: () => void;
   onOpenMessages: () => void;
 }
@@ -35,6 +38,7 @@ const MissionResponseCard = ({
   currentUserId,
   missionOwnerId,
   processing,
+  pendingCount = 0,
   onSelect,
   onDecline,
   onOpenMessages,
@@ -43,6 +47,7 @@ const MissionResponseCard = ({
   const [count, setCount] = useState<number>(r.helpful_count ?? 0);
   const [thanked, setThanked] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [acceptMode, setAcceptMode] = useState<"keep" | "decline_others">("keep");
 
   const isOwnResponse = currentUserId && r.responder_id === currentUserId;
   const canThank =
