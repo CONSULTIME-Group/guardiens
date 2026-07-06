@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
   // Find users with profile_completion < 60 who signed up in the window
   const { data: eligibleProfiles, error: queryError } = await supabase
     .from('profiles')
-    .select('id, email, first_name, profile_completion')
+    .select('id, email, first_name, profile_completion, role, city')
     .lt('profile_completion', 60)
     .gte('created_at', new Date(Date.now() - maxHours * 3600_000).toISOString())
     .lte('created_at', new Date(Date.now() - minHours * 3600_000).toISOString())
@@ -66,6 +66,29 @@ Deno.serve(async (req) => {
       continue
     }
 
+    // Enrich for owners: nearby sitter count + top 3 affinity sitters
+    const isOwner = profile.role === 'owner' || profile.role === 'both'
+    let nearbySittersCount: number | null = null
+    let topSitters: unknown[] = []
+
+    if (isOwner) {
+      try {
+        const [{ data: ctx }, { data: top3 }] = await Promise.all([
+          supabase.rpc('get_owner_nurturing_context', { _owner_id: profile.id }),
+          supabase.rpc('get_owner_top_3_sitters', { _owner_id: profile.id }),
+        ])
+        if (ctx && typeof ctx === 'object') {
+          const c = ctx as Record<string, unknown>
+          if (typeof c.nearby_sitters_count === 'number') {
+            nearbySittersCount = c.nearby_sitters_count
+          }
+        }
+        if (Array.isArray(top3)) topSitters = top3
+      } catch (e) {
+        console.warn(`Context enrichment failed for ${profile.id}:`, e)
+      }
+    }
+
     // Send via the transactional email function
     const { error } = await supabase.functions.invoke('send-transactional-email', {
       body: {
@@ -73,7 +96,11 @@ Deno.serve(async (req) => {
         recipientEmail: profile.email,
         idempotencyKey: `onboarding-j1-${profile.id}`,
         templateData: {
-          firstName: profile.first_name || 'toi',
+          firstName: profile.first_name || '',
+          isOwner,
+          city: profile.city ?? null,
+          nearbySittersCount,
+          topSitters,
         },
       },
     })
