@@ -878,6 +878,8 @@ const AlmaFrequencySection = () => {
     </section>
   );
 };
+
+const BillingSection = ({ user }: { user: any }) => {
   const isSitter = user?.role === "sitter" || user?.role === "both";
   return (
     <section>
