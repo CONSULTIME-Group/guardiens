@@ -5,6 +5,7 @@ import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
 import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import SitterDashboard from "@/components/dashboard/SitterDashboard";
+import { WelcomeBackDigest } from "@/components/ai/alma/WelcomeBackDigest";
 
 import { DashboardErrorBoundary } from "@/components/dashboard/DashboardErrorBoundary";
 import { trackEvent } from "@/lib/analytics";
@@ -209,6 +210,9 @@ const Dashboard = () => {
             displayedRole === "owner" ? "Le dashboard propriétaire" : "Le dashboard gardien"
           }
         >
+          <div className="mx-auto w-full max-w-6xl px-4 pt-4 md:px-6">
+            <WelcomeBackDigest />
+          </div>
           {displayedRole === "owner" ? <OwnerDashboard /> : <SitterDashboard />}
         </DashboardErrorBoundary>
 
