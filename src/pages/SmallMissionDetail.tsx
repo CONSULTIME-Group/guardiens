@@ -508,17 +508,13 @@ const SmallMissionDetail = () => {
       if (error) throw error;
       setResponses(prev => prev.map(r => r.id === responseId ? { ...r, status: "declined" } : r));
 
-      await supabase.from("notifications").insert({
-        user_id: resp.responder_id, type: "mission_declined",
-        title: "Non retenu(e) cette fois",
-        body: `Quelqu'un d'autre a été choisi pour "${mission.title}". Merci pour votre proposition.`,
-      });
-
-      sendTransactionalEmail({
-        templateName: "mission-proposal-declined",
-        recipientUserId: resp.responder_id,
-        idempotencyKey: `mission-proposal-declined-${responseId}`,
-        templateData: { missionTitle: mission.title },
+      supabase.functions.invoke("notify-mission-event", {
+        body: {
+          event_type: "mission_declined",
+          mission_id: id,
+          actor_id: user!.id,
+          target_ids: [resp.responder_id],
+        },
       }).catch(() => {});
     } catch (err: any) {
       logger.error("[handleDeclineResponse]", { err: String(err) });
