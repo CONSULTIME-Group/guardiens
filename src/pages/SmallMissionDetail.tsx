@@ -1720,6 +1720,23 @@ const SmallMissionDetail = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Modale de réponse (déclenchée depuis sidebar) */}
+      <MissionResponseModal
+        open={responseModalOpen}
+        onOpenChange={setResponseModalOpen}
+        missionId={mission.id}
+        missionType={((mission as any).mission_type === "offre" ? "offre" : "besoin") as "besoin" | "offre"}
+        authorFirstName={author?.first_name}
+        submitting={submitting}
+        onSubmit={async (msg, templateKey) => {
+          await handleRespond(msg);
+          trackEvent("mission_response_submitted_from_modal", {
+            metadata: { mission_id: mission.id, has_template: !!templateKey },
+          });
+          setResponseModalOpen(false);
+        }}
+      />
     </div>
     </AppLayout>
   );
