@@ -25,7 +25,6 @@ import ProximityFilter from "@/components/missions/ProximityFilter";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { useMissionDistance } from "@/hooks/useMissionDistance";
 import { trackEvent } from "@/lib/analytics";
-import { useRef } from "react";
 
 
 type Tab = "questions" | "besoins" | "offres";
