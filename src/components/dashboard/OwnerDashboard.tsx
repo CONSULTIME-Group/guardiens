@@ -428,6 +428,13 @@ const OwnerDashboard = () => {
         </div>
       )}
 
+      {/* ═══ Owner Pass 3 — 3 gardiens qui vous correspondent (new-owner sans sit publié) ═══ */}
+      {isNewOwner && (
+        <div className="px-5 md:px-8">
+          <OwnerFirstNBAGardiens />
+        </div>
+      )}
+
       {isNewOwner ? (
         <div className="px-5 md:px-8">
           <details className="group rounded-2xl bg-card border border-border overflow-hidden">
