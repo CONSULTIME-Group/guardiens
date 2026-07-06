@@ -21,6 +21,7 @@ import {
   useState,
   ReactNode,
 } from "react";
+import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { trackEvent } from "@/lib/analytics";
@@ -38,6 +39,29 @@ import {
   pickNext,
   SchedulerState,
 } from "@/lib/alma/whisper-scheduler";
+
+/**
+ * Routes sur lesquelles Alma NE DOIT PAS afficher de whisper flottant proactif.
+ * Concerne les formulaires de création/édition d'annonce : le whisper flottant
+ * (bottom-24 mobile, pointer-events-auto) recouvre les champs et bloque les taps.
+ * La bulle inline "Décrire en une phrase" reste affichée, elle n'utilise pas ce canal.
+ */
+const WHISPER_EXCLUDED_ROUTES: RegExp[] = [
+  /^\/sits\/create(\/|$|\?)/,
+  /^\/sits\/[^/]+\/edit(\/|$|\?)/,
+];
+
+function isWhisperExcludedRoute(pathname: string): boolean {
+  return WHISPER_EXCLUDED_ROUTES.some((re) => re.test(pathname));
+}
+
+/**
+ * Fenêtre de silence après la dernière saisie utilisateur dans un champ.
+ * Tant qu'un input/textarea/select a le focus ou l'a eu dans les 3 dernières
+ * secondes, aucun whisper proactif ne s'affiche.
+ */
+const INPUT_FOCUS_QUIET_MS = 3000;
+
 
 interface AlmaContextValue {
   queueWhisper: (whisper: AlmaWhisper) => void;
