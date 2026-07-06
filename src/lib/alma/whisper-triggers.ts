@@ -40,7 +40,7 @@ export function buildSearchIndecisionWhisper(params: { onRefine: () => void }): 
     ...base("sitter_search_indecision"),
     audience: "sitter",
     surface: "search",
-    message: "20 annonces vues, aucune retenue. Je peux affiner selon tes critères les plus forts ?",
+    message: "20 annonces vues, aucune retenue. Je peux affiner selon vos critères les plus forts ?",
     primaryAction: { label: "Affiner", onClick: params.onRefine, actionId: "refine" },
   };
 }
