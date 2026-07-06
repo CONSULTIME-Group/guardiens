@@ -9,6 +9,8 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
+import { AlmaSignature, AlmaIntro } from './_alma-signature.tsx'
+import { AlmaSignoff } from './_alma-signoff.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
@@ -47,6 +49,7 @@ const SitterDailyDigestEmail = ({ sitterFirstName, items = [] }: Props) => (
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
+        <AlmaSignature />
 
         <Heading style={h1}>
           {items.length > 1
@@ -54,14 +57,13 @@ const SitterDailyDigestEmail = ({ sitterFirstName, items = [] }: Props) => (
             : 'Une annonce qui vous correspond aujourd\'hui'}
         </Heading>
 
-        <Text style={text}>
-          Bonjour{sitterFirstName ? ` ${sitterFirstName}` : ''},
-        </Text>
+        <AlmaIntro firstName={sitterFirstName} />
 
         <Text style={text}>
           Voici les nouvelles annonces publiées ces dernières 24 heures qui matchent
           votre profil. Le score d'affinité indique la compatibilité selon vos préférences.
         </Text>
+
 
         {items.map((item, idx) => (
           <Section key={item.sitId} style={{ ...card, marginTop: idx === 0 ? '20px' : '14px' }}>
@@ -128,12 +130,13 @@ const SitterDailyDigestEmail = ({ sitterFirstName, items = [] }: Props) => (
           </Link>
         </Text>
 
-        <Text style={baseline}>Gratuit pour vous, sans engagement.</Text>
+        <AlmaSignoff />
 
         <LegalFooter
           purpose="du bon fonctionnement de votre digest quotidien"
           basis="6.1.f"
         />
+
       </Container>
     </Body>
   </Html>

@@ -4,6 +4,8 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
+import { AlmaSignature } from './_alma-signature.tsx'
+import { AlmaSignoff } from './_alma-signoff.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
@@ -29,6 +31,7 @@ const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
       <Body style={main}>
         <Container style={container}>
           <BrandHeader />
+          <AlmaSignature />
           <Heading style={h1}>{name ? `Bonjour ${name},` : 'Bonjour,'}</Heading>
 
           <Text style={text}>
@@ -75,6 +78,7 @@ const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
 
           <Text style={sig}>Jérémie et Elisa</Text>
 
+          <AlmaSignoff />
           <Hr style={hr} />
           <LegalFooter purpose="d'accompagnement à la prise en main de votre compte" basis="6.1.f" />
         </Container>

@@ -9,6 +9,8 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
+import { AlmaSignature, AlmaIntro } from './_alma-signature.tsx'
+import { AlmaSignoff } from './_alma-signoff.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
@@ -51,6 +53,7 @@ const MissionDailyDigestEmail = ({ helperFirstName, items = [] }: Props) => (
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
+        <AlmaSignature />
 
         <Heading style={h1}>
           {items.length > 1
@@ -58,12 +61,13 @@ const MissionDailyDigestEmail = ({ helperFirstName, items = [] }: Props) => (
             : 'Un coup de main près de chez vous'}
         </Heading>
 
-        <Text style={text}>Bonjour{helperFirstName ? ` ${helperFirstName}` : ''},</Text>
+        <AlmaIntro firstName={helperFirstName} />
 
         <Text style={text}>
           Voici les petites missions publiées ces dernières 24 heures dans un rayon
           de 30 km autour de chez vous. L'entraide est gratuite et sans engagement.
         </Text>
+
 
         {items.map((item, idx) => (
           <Section key={item.missionId} style={{ ...card, marginTop: idx === 0 ? '20px' : '14px' }}>
@@ -114,12 +118,13 @@ const MissionDailyDigestEmail = ({ helperFirstName, items = [] }: Props) => (
           </Link>
         </Text>
 
-        <Text style={baseline}>L'entraide reste gratuite, pour toujours.</Text>
+        <AlmaSignoff />
 
         <LegalFooter
           purpose="du bon fonctionnement de votre digest entraide quotidien"
           basis="6.1.f"
         />
+
       </Container>
     </Body>
   </Html>
