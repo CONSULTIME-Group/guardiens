@@ -66,9 +66,7 @@ export function AlmaMessageOpener({
       setDismissed(true);
       toast({
         title: "Brouillon Alma prêt",
-        description: audience === "owner"
-          ? "Vous pouvez relire et ajuster avant d'envoyer."
-          : "Tu peux relire et ajuster avant d'envoyer.",
+        description: "Vous pouvez relire et ajuster avant d'envoyer.",
       });
     } catch (e: any) {
       toast({
