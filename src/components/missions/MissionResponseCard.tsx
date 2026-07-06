@@ -242,6 +242,9 @@ const MissionResponseCard = ({
             {!isAuthor && r.status === "declined" && (
               <span className="text-[10px] text-muted-foreground italic ml-auto" role="status">Non retenu(e)</span>
             )}
+            {isWithdrawn && (
+              <span className="text-[10px] text-muted-foreground italic ml-auto" role="status">Réponse retirée</span>
+            )}
           </div>
 
         </div>
