@@ -851,7 +851,7 @@ const SmallMissionDetail = () => {
                   toast({ variant: "destructive", title: "Erreur", description: error.message });
                   return;
                 }
-                setHasResponded(false);
+                // On garde hasResponded=true : la ligne reste en BDD (status=withdrawn), pas de re-réponse possible sans admin.
                 setResponses(prev => prev.map(r =>
                   r.id === myResponse.id ? { ...r, status: "withdrawn" } : r,
                 ));
