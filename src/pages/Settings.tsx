@@ -56,7 +56,7 @@ const defaultPrefs: NotifPrefs = {
 
 type SectionId =
   | "account" | "security" | "spaces" | "notifications" | "alerts"
-  | "privacy" | "owner-pitch" | "appearance" | "billing" | "data" | "help" | "danger";
+  | "privacy" | "owner-pitch" | "appearance" | "alma" | "billing" | "data" | "help" | "danger";
 
 interface SectionDef {
   id: SectionId;
