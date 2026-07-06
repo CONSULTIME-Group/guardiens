@@ -61,10 +61,11 @@ export default function ImproveListingButton({ title, description, context, onAp
 
   return (
     <>
-      <Button type="button" variant="outline" size="sm" onClick={run} disabled={disabled || loading} className="gap-2">
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-        Améliorer avec l'IA
+      <Button type="button" variant="outline" size="sm" onClick={run} disabled={disabled || loading} className="gap-2 text-primary">
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <AlmaAvatar size={24} />}
+        Améliorer avec Alma
       </Button>
+
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl">
