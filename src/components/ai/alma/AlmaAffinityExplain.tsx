@@ -137,7 +137,7 @@ export function AlmaAffinityExplain({
                           variant="outline"
                           onClick={() =>
                             trackEvent("alma_affinity_profile_action_clicked", {
-                              target_field: n.field_to_update ?? undefined,
+                              metadata: { target_field: n.field_to_update ?? null },
                             })
                           }
                         >
