@@ -174,18 +174,24 @@ Deno.serve(async (req) => {
     return json({ error: 'missing_fields' }, 400)
   }
 
-  // Vérifier le caller
-  const userClient = createClient(SUPABASE_URL, ANON_KEY, {
-    global: { headers: { Authorization: authHeader } },
-  })
-  const { data: userData, error: userErr } = await userClient.auth.getUser()
-  if (userErr || !userData?.user) return json({ error: 'unauthorized' }, 401)
-  const callerId = userData.user.id
+  // Bypass service role : les triggers PG appellent avec la service key
+  const bearer = authHeader.replace('Bearer ', '').trim()
+  const isServiceRoleCall = bearer === SERVICE_KEY
+
+  let callerId: string | null = null
+  if (!isServiceRoleCall) {
+    const userClient = createClient(SUPABASE_URL, ANON_KEY, {
+      global: { headers: { Authorization: authHeader } },
+    })
+    const { data: userData, error: userErr } = await userClient.auth.getUser()
+    if (userErr || !userData?.user) return json({ error: 'unauthorized' }, 401)
+    callerId = userData.user.id
+  }
 
   const admin = createClient(SUPABASE_URL, SERVICE_KEY)
 
-  // Le caller doit être l'acteur ou un admin
-  if (callerId !== payload.actor_id) {
+  // Le caller doit être l'acteur ou un admin (sauf appel service role interne)
+  if (!isServiceRoleCall && callerId && callerId !== payload.actor_id) {
     const { data: isAdmin } = await admin.rpc('has_role', {
       _user_id: callerId,
       _role: 'admin',
