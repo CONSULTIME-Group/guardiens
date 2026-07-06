@@ -8,6 +8,8 @@ import PostalCodeCityFields from "./PostalCodeCityFields";
 import { cn } from "@/lib/utils";
 import type { SitterProfileData } from "@/hooks/useSitterProfile";
 import GenerateBioButton from "@/components/ai/GenerateBioButton";
+import AlmaMotivationBubble from "@/components/ai/alma/AlmaMotivationBubble";
+
 
 interface Props {
   data: SitterProfileData;
