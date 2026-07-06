@@ -91,11 +91,15 @@ const MissionResponseCard = ({
     setBusy(false);
   };
 
+  const isWithdrawn = r.status === "withdrawn";
+
   return (
     <article
       className={cn(
         "bg-card rounded-2xl border p-4 md:p-5 transition-colors",
-        r.status === "accepted" ? "border-success/40 bg-success-soft/30" : "border-border",
+        r.status === "accepted" && "border-success/40 bg-success-soft/30",
+        !r.status || r.status === "pending" ? "border-border" : "",
+        isWithdrawn && "border-border opacity-60 grayscale",
       )}
     >
       <div className="flex items-start gap-3 md:gap-4">
