@@ -1,0 +1,1 @@
+ALTER VIEW public.email_delivery_stats SET (security_invoker = true);
