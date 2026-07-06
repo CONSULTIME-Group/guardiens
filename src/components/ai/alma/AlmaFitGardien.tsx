@@ -10,7 +10,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
-import { computeAffinity, type AffinitySitterInput } from "@/lib/affinityScore";
+import { computeAffinityResultFull, type AffinitySitterInput } from "@/lib/affinityScore";
 import { trackEvent } from "@/lib/analytics";
 import { AlmaBubble } from "./AlmaBubble";
 import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
