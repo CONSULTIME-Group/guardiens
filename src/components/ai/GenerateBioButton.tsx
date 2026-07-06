@@ -8,7 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { AlmaAvatar } from "./alma/AlmaAvatar";
+
 
 type Draft = { tone: "chaleureux" | "professionnel" | "concis"; text: string };
 
