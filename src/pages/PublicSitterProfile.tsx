@@ -95,6 +95,10 @@ export default function PublicSitterProfile() {
   const { data: userBadges } = useUserBadges(id);
   const heroWeights = useHeroWeights();
 
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<any>(null);
+  const [sitterProfile, setSitterProfile] = useState<any>(null);
+
   // Pass 5 — compagnon culturel : fait race si l'un des animaux du gardien matche.
   useAlmaCulturalFact({
     surface: "sitter_profile",
@@ -103,11 +107,6 @@ export default function PublicSitterProfile() {
       animal_species: (sitterProfile as any)?.animal_types?.[0] ?? undefined,
     },
   });
-
-
-  const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<any>(null);
-  const [sitterProfile, setSitterProfile] = useState<any>(null);
   const [ownerProfile, setOwnerProfile] = useState<OwnerProfileData | null>(null);
   const [missionCount, setMissionCount] = useState<number>(0);
   const [badges, setBadges] = useState<{ badge_key: string; count: number }[]>([]);
