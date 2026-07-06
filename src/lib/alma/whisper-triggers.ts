@@ -53,7 +53,7 @@ export function buildSearchRepeatedNoActionWhisper(params: {
     audience: "sitter",
     surface: "search",
     message:
-      "Tu explores depuis un moment. Veux-tu que je te propose 3 annonces qui matchent le mieux ton profil ?",
+      "Vous explorez depuis un moment. Voulez-vous que je vous propose 3 annonces qui matchent le mieux votre profil ?",
     primaryAction: { label: "Voir mes 3 meilleures", onClick: params.onSeeTop, actionId: "top3" },
   };
 }
