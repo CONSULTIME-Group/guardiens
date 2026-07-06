@@ -1,67 +1,34 @@
+# EntraideHub Pass 1, plan d'exécution — TERMINÉ
 
-# EntraideHub Pass 1, plan d'exécution
+## Livraisons
 
-Gros chantier (~4-5h agent). Je découpe en 3 vagues pour livrer proprement et pouvoir valider entre chaque.
+### Vague 1 (livré précédemment)
+- Retrait gate 60% dans `CreateSmallMission.tsx`, tracking soft-nudge.
+- 3 exemples cliquables sur tabs Besoins et Offres dans `EntraideHub.tsx`.
+- Compteur missions, fallback filtre `all` si <20.
+- `isDatePassed` : badge card, bannière detail, tri fin de liste.
+- Fix `ReportButton targetId={mission.user_id}` sur profil.
+- Templates : 6 exemples spécifiques.
 
-## Vérifications préalables (avant vague 1)
+### Vague 2 (ce commit)
+- `MissionResponseModal.tsx` : 3 templates rapides Besoin/Offre + textarea + submit.
+- Sidebar CTA "Répondre publiquement" / "Solliciter cette aide" ouvre la modale (composer inline conservé).
+- CTA 1-clic "Je suis intéressé(e), contactez-moi" sur missions `offre` : `startConversation` (context `mission_help`) + insert réponse + redirect `/messages`.
 
-1. Lire `EntraideHub.tsx`, `SmallMissionDetail.tsx`, `CreateSmallMission.tsx`, `SmallMissionCard`, pour valider les points d'accroche exacts.
-2. Lire l'enum `small_mission_response_status` en BDD pour connaître les valeurs existantes avant ajout de `withdrawn`.
-3. Vérifier l'enum `reports.target_type` pour savoir s'il faut l'étendre à `small_mission`.
-4. Vérifier existence de `get_or_create_conversation` (utilisé chantier 5).
-5. Vérifier templates emails transactionnels existants pour caler `mission-response-withdrawn` et le mail de déclin cascade.
+### Vague 3 (ce commit)
+- Migration : `ALTER TYPE small_mission_response_status ADD VALUE 'withdrawn'`.
+- Modale accept : 2 modes radio (garder / écarter les autres) affichée si >1 réponse pending. Cascade decline batch + notifs + email `mission-proposal-declined`.
+- Retrait réponse : DELETE → UPDATE status=withdrawn + notif + email `mission-response-withdrawn` (nouveau template + registry).
+- Affichage grisé pour statut withdrawn dans `MissionResponseCard` + branche dédiée sidebar.
+- `ReportButton` : ajout config `small_mission` + second bouton (mission + profil) dans le header auteur de la page detail.
 
-## Décisions par défaut (dites stop si pas ok)
+### Vague 4 (contrôles)
+- `bunx tsgo --noEmit` : vert.
+- `src/pages/__tests__/mission-response-cascade.test.ts` : 3 tests OK.
+- Suite Vitest existante : mêmes 15 échecs pré-existants (snapshots + `window` non défini dans un timer d'`ActiveRolesSection`), rien de nouveau.
 
-- **1 seul commit final** comme demandé, mais je livre en 3 vagues d'exécution pour vérifier au fil de l'eau.
-- **Notif + email cascade decline** : réutilise le pipeline `send-transactional-email` existant, template `mission-response-declined` (créé si absent).
-- **Badge "date dépassée"** : token `warning` du design system, pas de couleur hardcodée.
-- **Tri missions expirées** : côté client dans le hook du hub, pas de changement SQL.
-- **ReportButton** : je patche l'usage buggué + j'étends l'enum `reports.target_type` si nécessaire, admin filtre inclus si la page le permet sans refactor lourd.
+## Analytics ajoutés
+`mission_response_modal_opened`, `mission_response_template_used`, `mission_response_submitted_from_modal`, `mission_offer_one_click_interest`, `mission_accept_response_cascade_choice`, `mission_response_withdrawn`.
 
-## Vague 1, quick wins UX pures (frontend only, 0 migration)
-
-- **Chantier 1** : retrait gate 60 % dans `CreateSmallMission.tsx`, badge soft-nudge auteur.
-- **Chantier 3** : 3 exemples cliquables sur tabs Besoins et Offres dans `EntraideHub.tsx`, pré-remplissage via `?template=` dans `CreateSmallMission.tsx`.
-- **Chantier 4** : compteur missions + fallback filtre `all` si <20, badges statuts sur cards.
-- **Chantier 8** : usage de `isDatePassed` (badge card + bannière detail + tri fin de liste).
-- **Chantier 7 (partie fix simple)** : correction `targetId={mission.user_id}` sur `ReportButton` profil.
-
-Analytics ajoutés dans cette vague : `mission_created_incomplete_profile`, `entraide_empty_state_template_clicked`, `entraide_all_status_default_used`, `mission_expired_badge_seen`, `mission_expired_reschedule_clicked`.
-
-## Vague 2, modale réponse + 1-clic offre (frontend + petite RPC)
-
-- **Chantier 2** : `MissionResponseModal.tsx` avec 3 templates, branchement CTA sidebar, composer inline conservé.
-- **Chantier 5** : CTA "Je suis intéressé, contactez-moi en privé" sur missions `offer`, appel `get_or_create_conversation` + insert `small_mission_responses` + redirect messagerie.
-
-Analytics : `mission_response_modal_opened`, `mission_response_template_used`, `mission_response_submitted_from_modal`, `mission_offer_one_click_interest`.
-
-## Vague 3, workflow BDD (1 migration + edge function légère)
-
-- **Chantier 6** : modale accept avec 2 modes radio, cascade decline via UPDATE batch + notifs + emails.
-- **Chantier 9** : ajout enum `withdrawn`, `handleWithdrawResponse` passe en UPDATE, notif + email `mission-response-withdrawn`, affichage grisé.
-- **Chantier 7 (extension enum)** : ajout `small_mission` à `reports.target_type` + second `ReportButton` en pied de detail, filtre admin si trivial.
-
-Migration unique regroupant : enum `withdrawn`, enum `small_mission` sur reports, index si utile.
-
-Analytics : `mission_accept_response_cascade_choice`, `mission_response_withdrawn`.
-
-## Vague 4, tests et contrôles
-
-- Test Vitest `mission-response-cascade.test.ts` (mode decline_others met bien pending → declined).
-- Test Vitest `mission-empty-states.test.tsx` (3 exemples visibles sur Besoins et Offres).
-- `bunx tsgo --noEmit` vert.
-- Suite Vitest existante verte (no-em-dash, jsonld, footer-token, main-flex-min-w-0).
-- Scan manuel vocabulaire proscrit dans tous les nouveaux libellés.
-
-## Ce que je ne fais PAS sans confirmation
-
-- Refonte de la page `/admin/reports` au-delà d'un filtre trivial par target_type.
-- Ajout d'un nouveau système d'emails hors pipeline `send-transactional-email`.
-- Modification du design system (tokens, couleurs).
-
-## Estimation
-
-~4h agent, 12-15 tool calls groupées par vague, 1 commit final "EntraideHub Pass 1, quick wins UX + fixes workflow".
-
-Dites **go** et j'attaque par les vérifications préalables + vague 1.
+## Prêt pour Pass 2
+Infra emails, `startConversation`, enum `withdrawn` en place. On peut enchaîner sur la Pass 2 (notifications + digest).
