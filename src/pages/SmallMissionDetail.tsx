@@ -1101,7 +1101,7 @@ const SmallMissionDetail = () => {
                         </p>
                       )}
                     </div>
-                    {!isAuthor && <ReportButton targetId={mission.id} targetType="profile" />}
+                    {!isAuthor && <ReportButton targetId={mission.user_id} targetType="profile" />}
                   </>
                 );
                 return author.user_id ? (
