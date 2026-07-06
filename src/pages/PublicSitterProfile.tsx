@@ -1063,6 +1063,20 @@ export default function PublicSitterProfile() {
                 </div>
               )}
 
+              {/* Alma Pass 2 — Chantier 2 : bulle fit gardien pour owner avec au moins une annonce publiée */}
+              {activeTab === 'gardien' && id && sitterProfile && (
+                <div className="self-stretch mt-3">
+                  <AlmaFitGardien
+                    sitter={{
+                      id,
+                      first_name: profile?.first_name ?? null,
+                      reviewCount: reviewCount,
+                    }}
+                    sitterProfile={sitterProfile}
+                  />
+                </div>
+              )}
+
               <div className="flex items-center gap-2 sm:gap-4 text-sm text-foreground/80 mt-1 flex-wrap font-medium drop-shadow-sm">
                 {statsItems.map((s, i) => (
                   <span key={i} className="flex items-center gap-1">
