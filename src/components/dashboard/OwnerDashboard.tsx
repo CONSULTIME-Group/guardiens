@@ -61,6 +61,8 @@ import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
 import { useIsNewOwner, isEarlyOwner, hasNoActiveSit, computeOwnerNbaVariant } from "@/hooks/useIsNewUser";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
+import { useAlmaFirstMeeting } from "@/hooks/useAlmaFirstMeeting";
+import { AlmaFirstMeeting } from "@/components/ai/alma/AlmaFirstMeeting";
 import { trackEvent } from "@/lib/analytics";
 import { SITTER_PRICE_START, REFERRAL_REWARD_LABEL } from "@/lib/pricing";
 
@@ -73,8 +75,10 @@ const OwnerDashboard = () => {
   const navigate = useNavigate();
   const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
   const [showAllMobile, setShowAllMobile] = useState(false);
+  // Premier contact Alma : bloque les whispers proactifs tant qu'il n'est pas vu.
+  const { shouldShow: showAlmaFirstMeeting, markSeen: markAlmaFirstMeetingSeen } = useAlmaFirstMeeting();
   // Pass 5 — compagnon culturel : anecdote fondatrice ou stat sociale.
-  useAlmaCulturalFact({ surface: "dashboard", context: { role: "owner" } });
+  useAlmaCulturalFact({ surface: "dashboard", context: { role: "owner" }, enabled: !showAlmaFirstMeeting });
 
 
 
@@ -145,6 +149,7 @@ const OwnerDashboard = () => {
     surface: "owner_dashboard",
     role: "owner",
     state: isNewOwner ? "new_owner" : noActiveSit ? "no_active_sit" : "any",
+    enabled: !showAlmaFirstMeeting,
   });
   /**
    * Alma proactive : le dashboard affiche SitDraftFromPrompt (si new owner),
@@ -416,6 +421,12 @@ const OwnerDashboard = () => {
   return (
     <div className="space-y-6 md:space-y-8 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-8">
 {/* pb mobile = BottomNav (h-16=64px) + Sticky CTA (~72px) + safe-area iPhone notch. */}
+
+      {showAlmaFirstMeeting && (
+        <div className="px-5 md:px-8 pt-2">
+          <AlmaFirstMeeting role="owner" onDone={markAlmaFirstMeetingSeen} />
+        </div>
+      )}
 
       {/* ═══ Hero header (compact, eyebrow + titre + sous-titre contextuel) ═══ */}
       <header className="px-5 md:px-8 pt-2 animate-fade-in">

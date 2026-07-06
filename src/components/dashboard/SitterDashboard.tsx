@@ -1,5 +1,7 @@
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
+import { useAlmaFirstMeeting } from "@/hooks/useAlmaFirstMeeting";
+import { AlmaFirstMeeting } from "@/components/ai/alma/AlmaFirstMeeting";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
@@ -45,8 +47,10 @@ const SitterDashboard = () => {
   const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
   const [searchParams, setSearchParams] = useSearchParams();
   const { hasAccess: hasSubscription } = useSubscriptionAccess();
+  // Premier contact Alma : bloque les whispers proactifs tant qu'il n'est pas vu.
+  const { shouldShow: showAlmaFirstMeeting, markSeen: markAlmaFirstMeetingSeen } = useAlmaFirstMeeting();
   // Pass 5 — compagnon culturel : fait d'ambiance selon rôle et ville.
-  useAlmaCulturalFact({ surface: "dashboard", context: { role: "sitter" } });
+  useAlmaCulturalFact({ surface: "dashboard", context: { role: "sitter" }, enabled: !showAlmaFirstMeeting });
 
 
 
@@ -77,6 +81,7 @@ const SitterDashboard = () => {
       : (profileCompletion ?? 100) < 60
         ? "profile_incomplete"
         : "any",
+    enabled: !showAlmaFirstMeeting,
   });
   const {
     topSits,
@@ -395,6 +400,11 @@ const SitterDashboard = () => {
   return (
     <div className="space-y-0 overflow-hidden pb-24 md:pb-8">
 {/* pb-24 mobile = BottomNav (h-16) + sticky CTA (~32px). h-20 spacer supprimé (doublon). */}
+      {showAlmaFirstMeeting && (
+        <div className="px-4 sm:px-5 md:px-8 pt-2">
+          <AlmaFirstMeeting role="sitter" onDone={markAlmaFirstMeetingSeen} />
+        </div>
+      )}
       {/* Role activation */}
       <div className="px-4 sm:px-5 md:px-8 mb-4">
         <RoleActivationBanner userRole={user?.role || "sitter"} />
