@@ -138,8 +138,8 @@ export function AlmaEmptySearchBubble({
           </>
         }
       >
-        Je cible d'abord la région et je te préviens dès qu'une annonce colle à
-        ton profil. Si tu préfères voir plus tout de suite, je peux aussi
+        Je cible d'abord la région et je vous préviens dès qu'une annonce colle à
+        votre profil. Si vous préférez voir plus tout de suite, je peux aussi
         assouplir un critère.
       </AlmaBubble>
     </div>
