@@ -12,31 +12,37 @@
 import { describe, it, expect } from "vitest";
 import {
   isEarlyOwner,
+  hasNoActiveSit,
   useIsNewOwner,
   computeOwnerNbaVariant,
 } from "@/hooks/useIsNewUser";
 
 type SitLite = { status: string };
 
-function state(sits: SitLite[], pets: unknown[]) {
+function state(sits: SitLite[], pets: unknown[], role: "owner" | "sitter" | "both" = "owner") {
   const isNewOwner = useIsNewOwner({
     sitsCount: sits.length,
     petsCount: pets.length,
   });
   const early = isEarlyOwner({ sits, pets });
+  const noActiveSit = hasNoActiveSit(sits);
+  const isOwnerRole = role === "owner" || role === "both";
+  const showAlmaProactive = early || (noActiveSit && isOwnerRole);
   const hasDraft = sits.some((s) => s.status === "draft");
-  const nbaVariant = computeOwnerNbaVariant({ isNewOwner, hasDraft });
+  const nbaVariant = computeOwnerNbaVariant({ isNewOwner, hasDraft, hasNoActiveSit: noActiveSit });
   return {
     isNewOwner,
     earlyOwner: early,
+    noActiveSit,
+    showAlmaProactive,
     hasDraft,
     nbaVariant,
     // Miroir des conditions JSX du dashboard :
-    showSitDraftFromPrompt: isNewOwner && !hasDraft,
+    showSitDraftFromPrompt: showAlmaProactive && !hasDraft,
     showDraftResumeCard: hasDraft,
-    showPriorityActionCard: !hasDraft && !isNewOwner,
-    showOwnerFirstNBAGardiens: early,
-    showDesktopHeroCta: !early,
+    showPriorityActionCard: !hasDraft && !showAlmaProactive,
+    showOwnerFirstNBAGardiens: showAlmaProactive,
+    showDesktopHeroCta: !showAlmaProactive,
   };
 }
 
