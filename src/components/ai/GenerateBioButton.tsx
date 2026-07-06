@@ -101,9 +101,10 @@ export default function GenerateBioButton({ onPick }: Props) {
 
           {step === "loading" && (
             <div className="flex items-center justify-center py-16 gap-2 text-muted-foreground">
-              <Loader2 className="h-5 w-5 animate-spin" /> Rédaction des 3 brouillons…
+              <Loader2 className="h-5 w-5 animate-spin" /> Alma prépare 3 brouillons…
             </div>
           )}
+
 
           {step === "drafts" && (
             <div className="space-y-3">
