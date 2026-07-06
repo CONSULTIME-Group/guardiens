@@ -87,18 +87,19 @@ export default function SitDraftFromPrompt() {
   return (
     <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
       <div className="flex items-start gap-3 mb-3">
-        <div className="rounded-xl bg-primary/10 p-2 text-primary">
-          <Sparkles className="h-5 w-5" aria-hidden="true" />
+        <div className="rounded-xl bg-primary/10 p-2 text-primary shrink-0">
+          <AlmaAvatar size={32} />
         </div>
         <div className="min-w-0">
           <h2 className="text-lg md:text-xl font-serif font-semibold text-foreground leading-tight">
-            Décrivez votre absence en une phrase, on prépare le brouillon
+            Décrivez votre absence en une phrase, Alma prépare le brouillon
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
             Vous relisez et publiez en 2 minutes.
           </p>
         </div>
       </div>
+
 
       <Textarea
         ref={textareaRef}
