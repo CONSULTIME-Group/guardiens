@@ -535,14 +535,15 @@ const SmallMissionDetail = () => {
         await supabase.from("small_mission_responses")
           .update({ status: "declined" as any })
           .in("id", ids);
-        // Batch notifications
-        await supabase.from("notifications").insert(
-          pending.map(r => ({
-            user_id: r.responder_id, type: "mission_cancelled",
-            title: "Mission annulée",
-            body: `La mission "${mission.title}" a été clôturée sans sélection.`,
-          }))
-        );
+        // Fan-out serveur
+        supabase.functions.invoke("notify-mission-event", {
+          body: {
+            event_type: "mission_cancelled",
+            mission_id: id,
+            actor_id: user!.id,
+            target_ids: pending.map(r => r.responder_id),
+          },
+        }).catch(() => {});
       }
       await supabase.from("small_missions").update({ status: "cancelled" as any }).eq("id", id!);
       setMission((prev: any) => ({ ...prev, status: "cancelled" }));
