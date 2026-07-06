@@ -69,9 +69,10 @@ export default function GenerateBioButton({ onPick }: Props) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Brouillons de bio</DialogTitle>
-            <DialogDescription>Répondez en quelques mots, l'IA propose 3 versions. Vous choisissez celle qui vous ressemble.</DialogDescription>
+            <DialogTitle>Alma vous prépare 3 brouillons de bio</DialogTitle>
+            <DialogDescription>Répondez en quelques mots, Alma propose 3 versions. Vous choisissez celle qui vous ressemble.</DialogDescription>
           </DialogHeader>
+
 
           {step === "form" && (
             <div className="space-y-4">
