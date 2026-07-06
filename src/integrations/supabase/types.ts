@@ -5997,6 +5997,10 @@ export type Database = {
         Returns: string
       }
       get_own_email: { Args: never; Returns: string }
+      get_owner_nurturing_context: {
+        Args: { _owner_id: string }
+        Returns: Json
+      }
       get_pro_map_points: {
         Args: never
         Returns: {
