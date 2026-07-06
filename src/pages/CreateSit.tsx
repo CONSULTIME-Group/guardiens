@@ -1286,11 +1286,23 @@ const CreateSit = () => {
             ) : (
               <Button
                 onClick={() => {
-                  if (canPublish) {
-                    setPreviewOpen(true);
-                  } else {
+                  if (!canPublish) {
                     onPublishClick();
+                    return;
                   }
+                  // Nudge non bloquant si profil < 80 % : on ouvre une modale
+                  // qui laisse le choix "Publier maintenant" ou "Compléter d'abord".
+                  if (profileCompletion < NUDGE_PROFILE_THRESHOLD) {
+                    if (!incompleteNudgeSeenRef.current) {
+                      incompleteNudgeSeenRef.current = true;
+                      trackEvent("owner_publish_with_incomplete_profile_modal_seen", {
+                        metadata: { profile_completion: profileCompletion },
+                      });
+                    }
+                    setIncompleteNudgeOpen(true);
+                    return;
+                  }
+                  setPreviewOpen(true);
                 }}
                 disabled={publishing}
                 aria-disabled={!canPublish}
@@ -1307,6 +1319,44 @@ const CreateSit = () => {
           </div>
         </div>
       </div>
+
+      {/* Modale nudge non bloquante : profil complété entre 40 % et 80 %.
+          Le clic "Publier maintenant" enchaîne sur l'aperçu classique. */}
+      <AlertDialog open={incompleteNudgeOpen} onOpenChange={setIncompleteNudgeOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Vous pouvez publier maintenant, votre profil sera complété plus tard
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Votre profil est complété à {profileCompletion} %. Vous pouvez remplir les
+              informations manquantes après avoir publié. Les gardiens verront votre annonce
+              et pourront candidater.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setIncompleteNudgeOpen(false);
+                navigate("/profile");
+              }}
+            >
+              Compléter d'abord mon profil
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                trackEvent("owner_publish_with_incomplete_profile_confirmed", {
+                  metadata: { profile_completion: profileCompletion },
+                });
+                setIncompleteNudgeOpen(false);
+                setPreviewOpen(true);
+              }}
+            >
+              Publier maintenant
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AnnouncementPreviewDialog
         open={previewOpen}
