@@ -415,6 +415,10 @@ const SitterDashboard = () => {
               <NextDigestCard />
             </div>
 
+            <div className="px-4 sm:px-5 md:px-8 mt-4">
+              <NextMissionDigestCard />
+            </div>
+
             <div className="mt-6">
               {ChecklistBlock}
             </div>
