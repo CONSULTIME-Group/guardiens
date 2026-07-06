@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAlmaFrequency } from "@/hooks/useAlmaFrequency";
 import { trackEvent } from "@/lib/analytics";
 import { AlmaBubble, type AlmaAudience } from "./AlmaBubble";
 
