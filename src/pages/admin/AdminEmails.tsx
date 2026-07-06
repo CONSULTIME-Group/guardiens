@@ -909,6 +909,7 @@ const AdminEmails = () => {
         <TabsContent value="delivery"><DeliveryTab /></TabsContent>
         <TabsContent value="engagement"><EngagementTab /></TabsContent>
         <TabsContent value="sitter-digest"><SitterDigestTab /></TabsContent>
+        <TabsContent value="mission-digest"><MissionDigestTab /></TabsContent>
         <TabsContent value="queue"><QueueTab /></TabsContent>
         <TabsContent value="logs"><LogsTab /></TabsContent>
         <TabsContent value="suppressions"><SuppressionsTab /></TabsContent>
