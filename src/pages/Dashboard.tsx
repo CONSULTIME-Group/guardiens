@@ -169,6 +169,19 @@ const Dashboard = () => {
         window.history.replaceState({}, "", "/dashboard");
       }
     }
+    // Pass 3 — Welcome Alma : premier atterrissage depuis l'email de bienvenue.
+    if (searchParams.get("welcome") === "alma") {
+      try {
+        trackEvent("alma_dashboard_first_meeting_seen", {
+          source: "/dashboard",
+          metadata: { role: user?.role || null },
+        });
+      } catch {}
+      // On nettoie l'URL après consommation (le WelcomeBackDigest reste actif via sessionStorage).
+      const url = new URL(window.location.href);
+      url.searchParams.delete("welcome");
+      window.history.replaceState({}, "", url.pathname + (url.search || ""));
+    }
     // Handle role activation query params
     const activated = searchParams.get("activated");
     const cancelled = searchParams.get("cancelled");
