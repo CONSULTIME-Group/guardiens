@@ -637,6 +637,27 @@ const CreateSit = () => {
             : "Les informations de votre profil sont pré-remplies. Ajoutez les détails spécifiques à cette garde."}
         </p>
 
+        {isRepublish && (
+          <div className="mb-4">
+            <AlmaBubble audience="owner" variant="inline">
+              {republishMode === "adapt" ? (
+                <>
+                  Je pars de votre annonce
+                  {sourceSitTitle ? <> « <strong>{sourceSitTitle}</strong> »</> : null}
+                  . J'ai retenu ce que vous vouliez ajuster :{" "}
+                  <em className="text-muted-foreground">« {republishPrompt.slice(0, 240) || "à préciser ci-dessous" } »</em>. Reprenez la main, corrigez ce qui doit l'être, vous relisez avant de publier.
+                </>
+              ) : (
+                <>
+                  Je repars de votre annonce
+                  {sourceSitTitle ? <> « <strong>{sourceSitTitle}</strong> »</> : null}
+                  . Ajustez uniquement les nouvelles dates et ce qui a changé, je m'occupe du reste.
+                </>
+              )}
+            </AlmaBubble>
+          </div>
+        )}
+
         {/* Draft indicator */}
         {draftLabel && (
           <div className={cn(
