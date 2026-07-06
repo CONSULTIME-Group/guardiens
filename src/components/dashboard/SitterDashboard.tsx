@@ -81,6 +81,7 @@ const SitterDashboard = () => {
       : (profileCompletion ?? 100) < 60
         ? "profile_incomplete"
         : "any",
+    enabled: !showAlmaFirstMeeting,
   });
   const {
     topSits,
