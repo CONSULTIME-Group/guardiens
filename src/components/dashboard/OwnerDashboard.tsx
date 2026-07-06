@@ -212,13 +212,22 @@ const OwnerDashboard = () => {
     }
     const anyPublished = sits.some(s => s.status === "published");
     if (anyPublished) return "Votre annonce est en ligne, les candidatures arrivent.";
+    // Owner sans annonce active (draft/archived/completed/cancelled uniquement) :
+    // subtitle contextuel qui reprend le fil ou relance la publication.
+    if (hasDraft) {
+      return "Vous avez commencé une annonce. Reprenez où vous en étiez.";
+    }
+    if (noActiveSit && sits.length > 0 && !earlyOwner) {
+      const firstName = user?.firstName ? capitalize(user.firstName) : null;
+      const hello = firstName ? `Ravi de vous revoir, ${firstName}.` : "Ravi de vous revoir.";
+      if (nearbyCount > 0 && nearbyRadius) {
+        return `${hello} ${nearbyCount} gardien${nearbyCount > 1 ? "s" : ""} vérifié${nearbyCount > 1 ? "s" : ""} à ${nearbyRadius} km attendent votre prochaine annonce.`;
+      }
+      return `${hello} Republiez une annonce quand vous êtes prêt, on vous accompagne.`;
+    }
     // Historique présent mais plus rien d'actif : on évite le message « première annonce » trompeur.
     if (sits.length > 0 && !earlyOwner) {
       return `${sits.length} annonce${sits.length > 1 ? "s" : ""} dans votre historique, aucune en cours.`;
-    }
-    // Early owner avec brouillon : on reprend le fil.
-    if (earlyOwner && hasDraft) {
-      return "Vous avez commencé une annonce. Reprenez où vous en étiez.";
     }
     // New/early owner sans brouillon : subtitle personnalisé via signal local.
     if (earlyOwner) {
@@ -233,7 +242,7 @@ const OwnerDashboard = () => {
 
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ongoingSit, sits, pendingAppCount, hasDraft, user?.firstName]);
+  }, [ongoingSit, sits, pendingAppCount, hasDraft, noActiveSit, earlyOwner, nearbyCount, nearbyRadius, user?.firstName]);
 
   // Banner contextuel supprimé : verif & candidatures non lues affichées en chips inline dans le hero.
 
