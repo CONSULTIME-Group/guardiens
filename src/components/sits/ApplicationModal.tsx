@@ -118,7 +118,14 @@ const ApplicationModal = ({
       toast({ title: "Erreur", description: "Impossible d'envoyer la candidature.", variant: "destructive" });
       return;
     }
+    // Alma Pass 1 : mesurer l'usage du brouillon Alma vs rédaction manuelle
+    try {
+      await trackEvent(almaUsed ? "alma_application_sent_with_draft" : "alma_application_sent_without_draft", {
+        metadata: { sit_id: sitId },
+      });
+    } catch {}
     const digestAttr = readDigestAttribution(sitId);
+
     try {
       await trackFirstAction("application_sent", {
         sit_id: sitId,
