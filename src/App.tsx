@@ -100,6 +100,7 @@ const AdminReports = lazy(() => import("./pages/admin/AdminReports"));
 const AdminVerifications = lazy(() => import("./pages/admin/AdminVerifications"));
 const AdminPros = lazy(() => import("./pages/admin/AdminPros"));
 const AdminEmails = lazy(() => import("./pages/admin/AdminEmails"));
+const AdminAlma = lazy(() => import("./pages/admin/AdminAlma"));
 const AdminExperienceVerification = lazy(() => import("./pages/admin/AdminExperienceVerification"));
 const PlancheBadges = lazy(() => import("./pages/PlancheBadges"));
 const TestBadgesLongLabels = lazy(() => import("./pages/TestBadgesLongLabels"));
