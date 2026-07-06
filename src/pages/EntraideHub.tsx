@@ -411,6 +411,10 @@ const EntraideHub = () => {
         <PageBreadcrumb items={[{ label: "Entraide" }]} />
 
         <section className="max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-28 sm:pt-6 sm:pb-8 min-w-0">
+          <EntraideGeolocBanner
+            hasCoords={proximity.active}
+            onUseMyLocation={proximity.useMyLocation}
+          />
           {/* Header : H1 + sous-titre + badge + CTA principal en couleur pleine */}
           <div className="mb-5">
             <div className="flex items-start justify-between gap-3 flex-wrap">
