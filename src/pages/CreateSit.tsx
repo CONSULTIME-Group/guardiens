@@ -256,6 +256,8 @@ const CreateSit = () => {
   const [savingDraft, setSavingDraft] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [incompleteNudgeOpen, setIncompleteNudgeOpen] = useState(false);
+  const incompleteNudgeSeenRef = useRef(false);
   const hasUserEditedRef = useRef(false);
   const initialLoadedRef = useRef(false);
 
