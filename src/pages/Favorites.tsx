@@ -40,8 +40,16 @@ const PageSkeleton = () => (
 /* ─── composant principal ────────────────────────────────────────────────── */
 const Favorites = () => {
   const { t, i18n } = useTranslation();
-  const { user } = useAuth();
+  const { user, activeRole } = useAuth();
   const { data: favorites, isLoading: isLoadingFavorites } = useFavorites();
+
+  // Alma étape 1 — compagnon culturel + usage_nudge sur la page favoris.
+  useAlmaCulturalFact({ surface: "favorites", context: { role: activeRole } });
+  useAlmaUsageNudge({
+    surface: "favorites",
+    role: activeRole === "owner" ? "owner" : "sitter",
+    state: "any",
+  });
 
   const sitterIds = favorites?.filter(f => f.target_type === "sitter").map(f => f.target_id) ?? [];
   const sitIds    = favorites?.filter(f => f.target_type === "sit").map(f => f.target_id)    ?? [];
