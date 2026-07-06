@@ -121,7 +121,7 @@ export function AlmaEmptySearchBubble({
       <AlmaBubble
         audience="sitter"
         variant="inline"
-        title="Aucune annonce dans ta zone avec ces critères. Veux-tu que je propose 3 pistes ?"
+        title="Aucune annonce dans votre zone avec ces critères. Voulez-vous que je propose 3 pistes ?"
         actions={
           <>
             <Button size="sm" variant="outline" onClick={() => click("expand_region")}>
@@ -138,8 +138,8 @@ export function AlmaEmptySearchBubble({
           </>
         }
       >
-        Je cible d'abord la région et je te préviens dès qu'une annonce colle à
-        ton profil. Si tu préfères voir plus tout de suite, je peux aussi
+        Je cible d'abord la région et je vous préviens dès qu'une annonce colle à
+        votre profil. Si vous préférez voir plus tout de suite, je peux aussi
         assouplir un critère.
       </AlmaBubble>
     </div>

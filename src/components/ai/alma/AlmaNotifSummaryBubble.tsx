@@ -63,7 +63,6 @@ export function AlmaNotifSummaryBubble({
   const { frequency } = useAlmaFrequency();
   const { activeRole } = useAuth();
   const audience = activeRole === "owner" ? "owner" : "sitter";
-  const vouv = audience === "owner";
 
   const unread = useMemo(
     () => notifications.filter((n) => !n.read_at),
@@ -109,9 +108,7 @@ export function AlmaNotifSummaryBubble({
     onFilterUrgent();
   };
 
-  const intro = vouv
-    ? `Vous avez ${unread.length} notification${unread.length > 1 ? "s" : ""} non lue${unread.length > 1 ? "s" : ""}.`
-    : `Tu as ${unread.length} notification${unread.length > 1 ? "s" : ""} non lue${unread.length > 1 ? "s" : ""}.`;
+  const intro = `Vous avez ${unread.length} notification${unread.length > 1 ? "s" : ""} non lue${unread.length > 1 ? "s" : ""}.`;
 
   const details = [
     applications > 0 ? `${applications} candidature${applications > 1 ? "s" : ""} à trier` : null,
@@ -119,9 +116,7 @@ export function AlmaNotifSummaryBubble({
     social > 0 ? `${social} social` : null,
   ].filter(Boolean).join(", ");
 
-  const question = vouv
-    ? `On regarde les ${urgentCount || 3} urgente${(urgentCount || 3) > 1 ? "s" : ""} d'abord ?`
-    : `On regarde les ${urgentCount || 3} urgente${(urgentCount || 3) > 1 ? "s" : ""} d'abord ?`;
+  const question = `On regarde les ${urgentCount || 3} urgente${(urgentCount || 3) > 1 ? "s" : ""} d'abord ?`;
 
   return (
     <div className="mb-4">

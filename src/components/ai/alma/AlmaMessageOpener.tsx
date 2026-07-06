@@ -41,7 +41,7 @@ export function AlmaMessageOpener({
 
   const message = audience === "owner"
     ? `Vous voulez que je vous prépare un premier message à partir de votre annonce et du profil de ${prenom} ? Vous relisez avant d'envoyer.`
-    : `Tu veux, je te prépare un premier message à partir de cette annonce et de ta bio ? Tu gardes le contrôle.`;
+    : `Voulez-vous que je vous prépare un premier message à partir de cette annonce et de votre bio ? Vous gardez le contrôle.`;
 
   const handleGenerate = async () => {
     setLoading(true);
@@ -66,9 +66,7 @@ export function AlmaMessageOpener({
       setDismissed(true);
       toast({
         title: "Brouillon Alma prêt",
-        description: audience === "owner"
-          ? "Vous pouvez relire et ajuster avant d'envoyer."
-          : "Tu peux relire et ajuster avant d'envoyer.",
+        description: "Vous pouvez relire et ajuster avant d'envoyer.",
       });
     } catch (e: any) {
       toast({

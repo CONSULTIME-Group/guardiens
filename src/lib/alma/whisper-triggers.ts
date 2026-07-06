@@ -40,7 +40,7 @@ export function buildSearchIndecisionWhisper(params: { onRefine: () => void }): 
     ...base("sitter_search_indecision"),
     audience: "sitter",
     surface: "search",
-    message: "20 annonces vues, aucune retenue. Je peux affiner selon tes critères les plus forts ?",
+    message: "20 annonces vues, aucune retenue. Je peux affiner selon vos critères les plus forts ?",
     primaryAction: { label: "Affiner", onClick: params.onRefine, actionId: "refine" },
   };
 }
@@ -53,7 +53,7 @@ export function buildSearchRepeatedNoActionWhisper(params: {
     audience: "sitter",
     surface: "search",
     message:
-      "Tu explores depuis un moment. Veux-tu que je te propose 3 annonces qui matchent le mieux ton profil ?",
+      "Vous explorez depuis un moment. Voulez-vous que je vous propose 3 annonces qui matchent le mieux votre profil ?",
     primaryAction: { label: "Voir mes 3 meilleures", onClick: params.onSeeTop, actionId: "top3" },
   };
 }
@@ -70,7 +70,7 @@ export function buildPopularSitWhisper(params: {
     ...base("sitter_popular_sit_context"),
     audience: "sitter",
     surface: "sit_detail",
-    message: `Cette annonce a été vue ${params.viewCount} fois cette semaine, ${params.applicationsCount} candidats. Ton affinité ${params.affinityScore}% te met dans le top.`,
+    message: `Cette annonce a été vue ${params.viewCount} fois cette semaine, ${params.applicationsCount} candidats. Votre affinité ${params.affinityScore}% vous met dans le top.`,
     primaryAction: { label: "Postuler maintenant", onClick: params.onApply, actionId: "apply" },
   };
 }
@@ -183,7 +183,7 @@ export function buildInternationalDiscoveryWhisper(params: {
     ...base("sitter_international_discovery"),
     audience: "sitter",
     surface: "listings",
-    message: `Alma remarque, une annonce à ${params.city} vient d'apparaître. Ce n'est pas ta zone, mais ton chien pourrait aimer le soleil.`,
+    message: `Alma remarque, une annonce à ${params.city} vient d'apparaître. Ce n'est pas votre zone, mais votre chien pourrait aimer le soleil.`,
     primaryAction: {
       label: "Voir les annonces internationales",
       onClick: params.onExplore,
@@ -199,10 +199,7 @@ export function buildLongAbsenceReturnWhisper(params: {
   audience: "owner" | "sitter";
   onSeeMatches: () => void;
 }): AlmaWhisper {
-  const isOwner = params.audience === "owner";
-  const msg = isOwner
-    ? `Bon retour ${params.firstName}. Depuis 2 semaines, ${params.newSits} nouvelles annonces ont bougé dans votre zone, dont ${params.matches} qui matchent votre profil.`
-    : `Bon retour ${params.firstName}. Depuis 2 semaines, ${params.newSits} nouvelles annonces ont bougé dans ta zone, dont ${params.matches} qui matchent ton profil.`;
+  const msg = `Bon retour ${params.firstName}. Depuis 2 semaines, ${params.newSits} nouvelles annonces ont bougé dans votre zone, dont ${params.matches} qui matchent votre profil.`;
   return {
     ...base("long_absence_return"),
     audience: params.audience,

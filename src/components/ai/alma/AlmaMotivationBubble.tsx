@@ -76,10 +76,10 @@ export function AlmaMotivationBubble({ currentValue, onPick }: Props) {
         }
       >
         {drafts.length === 0 ? (
-          <p>Ta motivation fait moins de 50 caractères. Je te propose 3 versions à partir de tes réponses. Tu choisis, tu ajustes.</p>
+          <p>Votre motivation fait moins de 50 caractères. Je vous propose 3 versions à partir de vos réponses. Vous choisissez, vous ajustez.</p>
         ) : (
           <div className="space-y-2">
-            <p>Voici 3 propositions. Clique sur celle qui te ressemble le plus.</p>
+            <p>Voici 3 propositions. Cliquez sur celle qui vous ressemble le plus.</p>
             <div className="space-y-2">
               {drafts.map((d, i) => (
                 <button
@@ -89,7 +89,7 @@ export function AlmaMotivationBubble({ currentValue, onPick }: Props) {
                     onPick(d.text);
                     void trackEvent("alma_bio_draft_selected", { metadata: { draft_index: i, tone: d.tone } });
                     setDismissed(true);
-                    toast({ title: "Brouillon inséré", description: "Tu peux le modifier librement." });
+                    toast({ title: "Brouillon inséré", description: "Vous pouvez le modifier librement." });
                   }}
                   className="w-full text-left rounded-lg border border-border p-2.5 hover:border-primary transition"
                 >
