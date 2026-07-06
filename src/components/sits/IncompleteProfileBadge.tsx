@@ -41,8 +41,10 @@ export function IncompleteProfileBadge({
     if (!shouldShow || seenRef.current) return;
     seenRef.current = true;
     trackEvent("owner_incomplete_profile_badge_seen", {
-      profile_completion: profileCompletion,
-      fields_remaining: fieldsRemaining,
+      metadata: {
+        profile_completion: profileCompletion,
+        fields_remaining: fieldsRemaining,
+      },
     });
   }, [shouldShow, profileCompletion, fieldsRemaining]);
 
