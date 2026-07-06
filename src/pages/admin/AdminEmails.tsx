@@ -914,6 +914,7 @@ const AdminEmails = () => {
         <TabsContent value="engagement"><EngagementTab /></TabsContent>
         <TabsContent value="sitter-digest"><SitterDigestTab /></TabsContent>
         <TabsContent value="mission-digest"><MissionDigestTab /></TabsContent>
+        <TabsContent value="mutual-aid"><MutualAidDashboardTab /></TabsContent>
         <TabsContent value="queue"><QueueTab /></TabsContent>
         <TabsContent value="logs"><LogsTab /></TabsContent>
         <TabsContent value="suppressions"><SuppressionsTab /></TabsContent>
