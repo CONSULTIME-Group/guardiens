@@ -3670,6 +3670,7 @@ export type Database = {
           identity_verified: boolean
           is_founder: boolean
           last_cp_relance_at: string | null
+          last_dashboard_visit_at: string | null
           last_name: string | null
           last_seen_at: string | null
           latitude: number | null
@@ -3720,6 +3721,7 @@ export type Database = {
           identity_verified?: boolean
           is_founder?: boolean
           last_cp_relance_at?: string | null
+          last_dashboard_visit_at?: string | null
           last_name?: string | null
           last_seen_at?: string | null
           latitude?: number | null
@@ -3770,6 +3772,7 @@ export type Database = {
           identity_verified?: boolean
           is_founder?: boolean
           last_cp_relance_at?: string | null
+          last_dashboard_visit_at?: string | null
           last_name?: string | null
           last_seen_at?: string | null
           latitude?: number | null
@@ -6147,6 +6150,7 @@ export type Database = {
         Args: { p_city: string; p_id: string; p_title: string }
         Returns: string
       }
+      get_activity_since_last_visit: { Args: never; Returns: Json }
       get_email_preferences_by_email: {
         Args: { p_email: string }
         Returns: {
