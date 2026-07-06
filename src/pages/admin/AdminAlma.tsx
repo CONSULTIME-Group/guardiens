@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, AlertTriangle, Sparkles, MessageCircle } from "lucide-react";
+import { Download, AlertTriangle, Sparkles, MessageCircle, BookOpen } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
