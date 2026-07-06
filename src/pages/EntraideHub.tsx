@@ -22,6 +22,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import MissionCardCover from "@/components/missions/MissionCardCover";
 import ProximityFilter from "@/components/missions/ProximityFilter";
+import EntraideGeolocBanner from "@/components/missions/EntraideGeolocBanner";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { useMissionDistance } from "@/hooks/useMissionDistance";
 import { trackEvent } from "@/lib/analytics";
