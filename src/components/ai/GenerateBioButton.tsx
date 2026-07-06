@@ -60,10 +60,11 @@ export default function GenerateBioButton({ onPick }: Props) {
 
   return (
     <>
-      <Button type="button" variant="outline" size="sm" onClick={() => { reset(); setOpen(true); }} className="gap-2">
-        <Sparkles className="h-4 w-4" />
-        Générer ma bio
+      <Button type="button" variant="outline" size="sm" onClick={() => { reset(); setOpen(true); }} className="gap-2 text-primary">
+        <AlmaAvatar size={24} />
+        Générer ma bio avec Alma
       </Button>
+
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
