@@ -14,6 +14,7 @@ import { useScrollDirection } from "@/hooks/useScrollDirection";
 // Lazy : NotificationBell tire date-fns. On évite vendor-date dans l'entry.
 const NotificationBell = lazy(() => import("./NotificationBell"));
 const MessageBell = lazy(() => import("./MessageBell"));
+const AlmaTopbarButton = lazy(() => import("@/components/ai/alma/AlmaTopbarButton"));
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import FeedbackDialog from "@/components/feedback/FeedbackDialog";
