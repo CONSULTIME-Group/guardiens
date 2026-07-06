@@ -276,26 +276,40 @@ const EntraideHub = () => {
   /* Filtre proximité (CP + rayon) */
   const proximity = useMissionDistance(missions);
 
+  const isMissionExpired = (m: MissionRow) => {
+    if (!m.date_needed) return false;
+    try { return new Date(m.date_needed) < new Date(new Date().setHours(0, 0, 0, 0)); } catch { return false; }
+  };
+
   const sortMissions = (arr: MissionRow[]): MissionRow[] => {
-    if (mSort === "date_needed") {
-      return [...arr].sort((a, b) => {
-        if (!a.date_needed && !b.date_needed) return 0;
-        if (!a.date_needed) return 1;
-        if (!b.date_needed) return -1;
-        return a.date_needed.localeCompare(b.date_needed);
-      });
-    }
-    if (mSort === "distance" && proximity.active) {
-      return [...arr].sort((a, b) => {
-        const da = proximity.getDistance(a.id);
-        const db = proximity.getDistance(b.id);
-        if (da == null && db == null) return 0;
-        if (da == null) return 1;
-        if (db == null) return -1;
-        return da - db;
-      });
-    }
-    return arr;
+    const applyPrimary = (list: MissionRow[]): MissionRow[] => {
+      if (mSort === "date_needed") {
+        return [...list].sort((a, b) => {
+          if (!a.date_needed && !b.date_needed) return 0;
+          if (!a.date_needed) return 1;
+          if (!b.date_needed) return -1;
+          return a.date_needed.localeCompare(b.date_needed);
+        });
+      }
+      if (mSort === "distance" && proximity.active) {
+        return [...list].sort((a, b) => {
+          const da = proximity.getDistance(a.id);
+          const db = proximity.getDistance(b.id);
+          if (da == null && db == null) return 0;
+          if (da == null) return 1;
+          if (db == null) return -1;
+          return da - db;
+        });
+      }
+      return list;
+    };
+    // Chantier 8 : missions expirées en fin de liste quel que soit le tri
+    const sorted = applyPrimary(arr);
+    return [...sorted].sort((a, b) => {
+      const ea = isMissionExpired(a) ? 1 : 0;
+      const eb = isMissionExpired(b) ? 1 : 0;
+      return ea - eb;
+    });
   };
 
   const filteredMissions = useMemo(() => {
