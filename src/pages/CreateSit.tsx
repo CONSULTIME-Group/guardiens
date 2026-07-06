@@ -567,6 +567,13 @@ const CreateSit = () => {
       }
 
       try { await trackFirstAction("sit_created", { sit_id: sitId, is_urgent: isUrgent }); } catch {}
+      if (searchParams.get("source") === "ai_prompt") {
+        try {
+          await trackEvent("owner_draft_from_prompt_published", {
+            metadata: { sit_id: sitId, draft_id: draftId ?? null },
+          });
+        } catch {}
+      }
       toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant postuler." });
       navigate(`/sits/${sitId}`);
     } catch (err: any) {
