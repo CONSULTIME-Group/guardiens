@@ -93,7 +93,9 @@ export function AlmaFitGardien({ sitter, sitterProfile }: Props) {
   // Affinity
   const affinity = useMemo(() => {
     if (!owner || !sitterProfile) return null;
-    return computeAffinity(owner, sitterProfile);
+    const res = computeAffinityResultFull(owner, sitterProfile);
+    if (!res || res.displayed === false) return null;
+    return res;
   }, [owner, sitterProfile]);
 
   // Tracking impression une seule fois
