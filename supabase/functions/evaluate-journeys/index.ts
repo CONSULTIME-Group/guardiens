@@ -47,11 +47,11 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
 
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-  const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-  // Restrict to internal callers (pg_cron / pg_net), or an authenticated admin
-  // user (manual trigger from /admin/nurturing).
+  // Restrict to internal callers (pg_cron / pg_net with service role), or an
+  // authenticated admin user (manual trigger from /admin/nurturing).
+  // NOTE: never accept the anon key — it's publicly embedded in the client bundle.
   const token = req.headers.get('Authorization')?.replace('Bearer ', '') ?? ''
-  let authorized = token === serviceKey || (anonKey !== '' && token === anonKey)
+  let authorized = token === serviceKey
   if (!authorized && token) {
     try {
       const adminClient = createClient(Deno.env.get('SUPABASE_URL')!, serviceKey)
