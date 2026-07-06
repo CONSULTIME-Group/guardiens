@@ -178,6 +178,7 @@ export function WelcomeBackDigest({
   className,
 }: WelcomeBackDigestProps) {
   const { activeRole } = useAuth();
+  const { frequency: almaFrequency } = useAlmaFrequency();
   const navigate = useNavigate();
   const audience: AlmaAudience = activeRole === "owner" ? "owner" : "sitter";
 
