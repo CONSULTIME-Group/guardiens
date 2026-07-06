@@ -891,6 +891,31 @@ const EntraideHub = () => {
                     onCta={tab === "besoins" ? goNeed : goOffer}
                     onReset={hasMissionFilters ? resetMissionFilters : undefined}
                     howSteps={meta.how}
+                    examples={
+                      !mineOnly && !hasMissionFilters
+                        ? tab === "besoins"
+                          ? [
+                              { label: "Arroser mon potager 15 jours en août", cat: "need-garden-august" },
+                              { label: "Récupérer un colis Amazon en mon absence, samedi 12", cat: "need-amazon-pickup" },
+                              { label: "Un coup de main pour monter une bibliothèque IKEA", cat: "need-ikea-bookshelf" },
+                            ]
+                          : [
+                              { label: "Je peux vous garder votre chat le week-end si vous partez", cat: "offer-cat-weekend" },
+                              { label: "Prof de yoga bénévole en échange de bricolage", cat: "offer-yoga-barter" },
+                              { label: "Compétences en électricité, je peux dépanner un ami", cat: "offer-electricity" },
+                            ]
+                        : undefined
+                    }
+                    onExample={(ex) => {
+                      const type = tab === "besoins" ? "besoin" : "offre";
+                      void trackEvent("entraide_empty_state_template_clicked", { metadata: { tab, template_key: ex.cat } });
+                      const dest = `/petites-missions/creer?type=${type}&template=${ex.cat}`;
+                      navigate(
+                        isAuthenticated
+                          ? dest
+                          : `/inscription?redirect=${encodeURIComponent(dest)}`,
+                      );
+                    }}
                   />
                 )}
               </>
