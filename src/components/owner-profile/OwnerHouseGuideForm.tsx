@@ -102,10 +102,22 @@ const OwnerHouseGuideForm = () => {
   const guideRef = useRef(guide);
   const propertyIdRef = useRef(propertyId);
   const guideIdRef = useRef(guideId);
+  // Sections encore marquées "Brouillon Alma" (retirées au 1er edit)
+  const [almaSections, setAlmaSections] = useState<Set<keyof HouseGuideDrafts>>(new Set());
+  // Sections ayant été pré-remplies par Alma à un moment (pour alma_house_guide_saved_with_draft)
+  const almaEverFilledRef = useRef<Set<keyof HouseGuideDrafts>>(new Set());
 
   guideRef.current = guide;
   propertyIdRef.current = propertyId;
   guideIdRef.current = guideId;
+
+  // Mapping trames Alma → champs guide
+  const DRAFT_TO_FIELD: Record<keyof HouseGuideDrafts, keyof GuideData> = {
+    wifi_info: "wifi_instructions",
+    neighborhood: "detailed_instructions",
+    veterinary: "vet_address",
+    emergency: "emergency_contact_name",
+  };
 
   const isPublishable = !!(
     guide.exact_address?.trim() &&
