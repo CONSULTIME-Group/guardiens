@@ -397,7 +397,7 @@ const CreateSmallMission = () => {
                   <Textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    onBlur={() => setDescTouched(true)}
+                    onBlur={handleDescBlur}
                     placeholder={
                       missionType === "offre"
                         ? tp("desc_ph_offer")
