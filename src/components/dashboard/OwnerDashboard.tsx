@@ -417,13 +417,17 @@ const OwnerDashboard = () => {
                 </Link>
               </Button>
             )}
-            <Button
-              size="lg"
-              onClick={() => navigate("/sits/create")}
-              className="rounded-xl"
-            >
-              <Plus className="h-4 w-4 mr-1.5" /> Publier une annonce
-            </Button>
+            {/* CTA hero desktop masqué pour early/new-owner : la NBA dominante
+                (SitDraftFromPrompt ou DraftResumeCard) sert déjà de CTA principal. */}
+            {!earlyOwner && (
+              <Button
+                size="lg"
+                onClick={() => navigate("/sits/create")}
+                className="rounded-xl"
+              >
+                <Plus className="h-4 w-4 mr-1.5" /> Publier une annonce
+              </Button>
+            )}
           </div>
         </div>
       </header>
@@ -443,35 +447,26 @@ const OwnerDashboard = () => {
       )}
 
       {/* ═══ Action prioritaire unique , UN seul CTA dominant ═══
-          Synthétise « la seule chose à faire maintenant » avant les listes
-          détaillées (TodoCard) qui restent disponibles plus bas.
-          On la masque si une annonce est déjà en cours de rédaction (redondant). */}
-      {!hasDraft && (
+          Précepte 2026 : 1 seule NBA above the fold. Pour un new-owner,
+          SitDraftFromPrompt est la NBA dominante ; on masque PriorityActionCard
+          pour éviter 3 CTA "Publier" empilés. On la masque aussi si un draft
+          est en cours (DraftResumeCard prend le relais). */}
+      {!hasDraft && !isNewOwner && (
         <div className="px-5 md:px-8">
           <PriorityActionCard
             eyebrow={priorityAction.eyebrow}
-            title={isNewOwner ? "Publiez votre première annonce" : priorityAction.title}
+            title={priorityAction.title}
             description={newOwnerDescription}
-            ctaLabel={isNewOwner ? "Publier mon annonce" : priorityAction.ctaLabel}
-            ctaTo={isNewOwner ? "/sits/create" : priorityAction.ctaTo}
-            urgency={isNewOwner ? "high" : priorityAction.urgency}
+            ctaLabel={priorityAction.ctaLabel}
+            ctaTo={priorityAction.ctaTo}
+            urgency={priorityAction.urgency}
           />
-          {isNewOwner && (
-            <p className="text-xs text-muted-foreground mt-2 pl-1">
-              <Link to="/annonces" className="underline underline-offset-2 hover:text-foreground">
-                Voir des exemples d'annonces publiées
-              </Link>
-            </p>
-          )}
         </div>
       )}
 
-      {/* ═══ Owner Pass 3 — 3 gardiens qui vous correspondent (new-owner sans sit publié) ═══ */}
-      {isNewOwner && (
-        <div className="px-5 md:px-8">
-          <OwnerFirstNBAGardiens />
-        </div>
-      )}
+      {/* OwnerFirstNBAGardiens : descendu sous la grille de pilotage
+          (voir plus bas) pour rester une preuve tangible du vivier local
+          sans concurrencer la NBA principale. */}
 
       {isNewOwner ? (
         <div className="px-5 md:px-8">
