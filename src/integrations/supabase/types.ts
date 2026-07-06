@@ -6393,10 +6393,20 @@ export type Database = {
       unpublish_sit:
         | { Args: { p_sit_id: string }; Returns: number }
         | { Args: { p_reason?: string; p_sit_id: string }; Returns: number }
-      upsert_my_email_preferences: {
-        Args: { p_alert: boolean; p_digest: boolean; p_product: boolean }
-        Returns: undefined
-      }
+      upsert_my_email_preferences:
+        | {
+            Args: { p_alert: boolean; p_digest: boolean; p_product: boolean }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              p_alert: boolean
+              p_digest: boolean
+              p_new_mission_digest?: boolean
+              p_product: boolean
+            }
+            Returns: undefined
+          }
     }
     Enums: {
       activity_level: "calm" | "moderate" | "sportive"
