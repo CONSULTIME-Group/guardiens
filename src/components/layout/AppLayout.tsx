@@ -11,6 +11,7 @@ const MessageBell = lazy(() => import("./MessageBell"));
 const AlmaWhisperOutlet = lazy(() =>
   import("@/components/ai/alma/AlmaWhisper").then((m) => ({ default: m.AlmaWhisperOutlet })),
 );
+const AlmaTopbarButton = lazy(() => import("@/components/ai/alma/AlmaTopbarButton"));
 import { AlmaProvider } from "@/contexts/AlmaContext";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
