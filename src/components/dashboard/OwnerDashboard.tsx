@@ -44,6 +44,7 @@ import OwnerFirstNBAGardiens from "./OwnerFirstNBAGardiens";
 import { useOwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
 import ActivationScoreCard from "./owner/ActivationScoreCard";
 import NextActionsList from "./owner/NextActionsList";
+import AlmaSilentSitBubble from "@/components/ai/alma/AlmaSilentSitBubble";
 import {
   computeOwnerNextActions,
   computeOwnerActivationScore,
