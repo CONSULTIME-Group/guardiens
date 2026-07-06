@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-type Prefs = { product_emails: boolean; digest_emails: boolean; alert_emails: boolean };
+type Prefs = { product_emails: boolean; digest_emails: boolean; alert_emails: boolean; new_mission_digest: boolean };
 
 const EmailPreferences = () => {
   const { user, loading: authLoading } = useAuth();
