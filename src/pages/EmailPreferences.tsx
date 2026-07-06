@@ -9,23 +9,28 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-type Prefs = { product_emails: boolean; digest_emails: boolean; alert_emails: boolean };
+type Prefs = { product_emails: boolean; digest_emails: boolean; alert_emails: boolean; new_mission_digest: boolean };
 
 const EmailPreferences = () => {
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [prefs, setPrefs] = useState<Prefs>({ product_emails: true, digest_emails: true, alert_emails: true });
+  const [prefs, setPrefs] = useState<Prefs>({ product_emails: true, digest_emails: true, alert_emails: true, new_mission_digest: true });
 
   useEffect(() => {
     if (!user) return;
     (async () => {
       const { data } = await supabase
         .from("email_preferences")
-        .select("product_emails, digest_emails, alert_emails")
+        .select("product_emails, digest_emails, alert_emails, new_mission_digest")
         .eq("user_id", user.id)
         .maybeSingle();
-      if (data) setPrefs(data as Prefs);
+      if (data) setPrefs({
+        product_emails: data.product_emails ?? true,
+        digest_emails: data.digest_emails ?? true,
+        alert_emails: data.alert_emails ?? true,
+        new_mission_digest: (data as any).new_mission_digest ?? true,
+      });
       setLoading(false);
     })();
   }, [user]);
@@ -38,7 +43,8 @@ const EmailPreferences = () => {
       p_product: prefs.product_emails,
       p_digest: prefs.digest_emails,
       p_alert: prefs.alert_emails,
-    });
+      p_new_mission_digest: prefs.new_mission_digest,
+    } as any);
     setSaving(false);
     if (error) toast.error("Impossible d'enregistrer vos préférences");
     else toast.success("Préférences enregistrées");
@@ -120,6 +126,23 @@ const EmailPreferences = () => {
                 />
               </CardHeader>
             </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-start justify-between gap-4">
+                <div>
+                  <CardTitle className="text-base">Digest quotidien entraide</CardTitle>
+                  <CardDescription>
+                    Chaque soir, jusqu'à 3 nouvelles petites missions publiées dans les 24h
+                    dans un rayon de 30 km autour de chez vous. L'entraide reste gratuite.
+                  </CardDescription>
+                </div>
+                <Switch
+                  checked={prefs.new_mission_digest}
+                  onCheckedChange={(v) => setPrefs((p) => ({ ...p, new_mission_digest: v }))}
+                />
+              </CardHeader>
+            </Card>
+
 
             <div className="flex justify-end">
               <Button onClick={save} disabled={saving} className="h-11 md:h-auto">

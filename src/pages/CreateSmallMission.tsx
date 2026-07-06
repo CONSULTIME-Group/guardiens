@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -137,6 +137,31 @@ const CreateSmallMission = () => {
     if (tpl) applyTemplate(tpl);
   }, []);
 
+  // Attrition composer : 5 events (opened / step1_completed / field_abandoned / submitted / abandoned)
+  const submittedRef = useRef(false);
+  useEffect(() => {
+    try { trackEvent("mission_composer_opened", { metadata: { type: missionType } }); } catch {}
+    return () => {
+      if (!submittedRef.current) {
+        try { trackEvent("mission_composer_abandoned", { metadata: { last_step: step, has_title: title.trim().length > 0 } }); } catch {}
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleTitleBlur = () => {
+    setTitleTouched(true);
+    if (title.trim().length > 0 && title.trim().length < MIN_TITLE_LEN) {
+      try { trackEvent("mission_composer_field_abandoned", { metadata: { field: "title", length: title.trim().length } }); } catch {}
+    }
+  };
+  const handleDescBlur = () => {
+    setDescTouched(true);
+    if (description.trim().length > 0 && description.trim().length < MIN_DESC_LEN) {
+      try { trackEvent("mission_composer_field_abandoned", { metadata: { field: "description", length: description.trim().length } }); } catch {}
+    }
+  };
+
   const handleExchangeChange = (val: string) => {
     setExchangeOffer(val);
     setExchangeError(EURO_REGEX.test(val) ? tp("exchange_error_euros") : "");
@@ -153,7 +178,10 @@ const CreateSmallMission = () => {
     setTitleTouched(true);
     setDescTouched(true);
     setExchangeTouched(true);
-    if (step1Valid) setStep(2);
+    if (step1Valid) {
+      setStep(2);
+      try { trackEvent("mission_composer_step1_completed", { metadata: { has_template: !!appliedTemplateId } }); } catch {}
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -216,6 +244,8 @@ const CreateSmallMission = () => {
     }
     if (inserted?.id) { try { await recordMissionCreatedAttribution(inserted.id); } catch {} }
     await queryClient.invalidateQueries({ queryKey: ["small-missions-all"] });
+    submittedRef.current = true;
+    try { trackEvent("mission_composer_submitted", { metadata: { mission_id: inserted?.id, category, mission_type: missionType } }); } catch {}
     toast({ title: tp("toast_published_title"), description: tp("toast_published_desc"), duration: 3000 });
     navigate(inserted?.id ? `/petites-missions/${inserted.id}?published=1` : "/petites-missions");
   };
@@ -346,7 +376,7 @@ const CreateSmallMission = () => {
                   <Input
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    onBlur={() => setTitleTouched(true)}
+                    onBlur={handleTitleBlur}
                     placeholder={missionType === "offre" ? tp("title_ph_offer") : tp("title_ph_need")}
                     maxLength={120}
                     className="h-12 text-base"
@@ -367,7 +397,7 @@ const CreateSmallMission = () => {
                   <Textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    onBlur={() => setDescTouched(true)}
+                    onBlur={handleDescBlur}
                     placeholder={
                       missionType === "offre"
                         ? tp("desc_ph_offer")

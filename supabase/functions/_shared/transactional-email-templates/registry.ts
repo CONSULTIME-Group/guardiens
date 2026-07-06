@@ -63,6 +63,7 @@ import { template as sitterDailyDigest } from './sitter-daily-digest.tsx'
 import { template as adminDeliveryAlert } from './admin-delivery-alert.tsx'
 import { template as missionFeedbackReceived } from './mission-feedback-received.tsx'
 import { template as missionThanksReceived } from './mission-thanks-received.tsx'
+import { template as missionDailyDigest } from './mission-daily-digest.tsx'
 
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
@@ -120,6 +121,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'admin-delivery-alert': adminDeliveryAlert,
   'mission-feedback-received': missionFeedbackReceived,
   'mission-thanks-received': missionThanksReceived,
+  'mission-daily-digest': missionDailyDigest,
 }
 
 
