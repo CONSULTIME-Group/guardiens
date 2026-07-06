@@ -398,7 +398,7 @@ const SmallMissionDetail = () => {
     }
   };
 
-  const handleAcceptResponse = async (responseId: string) => {
+  const handleAcceptResponse = async (responseId: string, mode: "keep" | "decline_others" = "keep") => {
     if (processingResponseId) return;
     const resp = responses.find(r => r.id === responseId);
     if (!resp) return;
@@ -423,6 +423,36 @@ const SmallMissionDetail = () => {
       }
 
       setResponses(prev => prev.map(r => r.id === responseId ? { ...r, status: "accepted" } : r));
+
+      // Cascade decline si demandé
+      const pendingOthers = responses.filter(r => r.id !== responseId && r.status === "pending");
+      trackEvent("mission_accept_response_cascade_choice", {
+        metadata: { mode, pending_count: pendingOthers.length },
+      });
+      if (mode === "decline_others" && pendingOthers.length > 0) {
+        const otherIds = pendingOthers.map(r => r.id);
+        await supabase.from("small_mission_responses")
+          .update({ status: "declined" as any })
+          .in("id", otherIds);
+        await supabase.from("notifications").insert(
+          pendingOthers.map(r => ({
+            user_id: r.responder_id, type: "mission_declined",
+            title: "Non retenu(e) cette fois",
+            body: `Quelqu'un d'autre a été choisi pour "${mission.title}". Merci pour votre proposition.`,
+          }))
+        );
+        pendingOthers.forEach(r => {
+          sendTransactionalEmail({
+            templateName: "mission-proposal-declined",
+            recipientUserId: r.responder_id,
+            idempotencyKey: `mission-proposal-declined-${r.id}`,
+            templateData: { missionTitle: mission.title },
+          }).catch(() => {});
+        });
+        setResponses(prev => prev.map(r =>
+          otherIds.includes(r.id) ? { ...r, status: "declined" } : r,
+        ));
+      }
 
       // Reuse existing conversation if any (responder may have already proposed via dialog)
       const { data: existingConv } = await supabase
