@@ -73,8 +73,10 @@ const OwnerDashboard = () => {
   const navigate = useNavigate();
   const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
   const [showAllMobile, setShowAllMobile] = useState(false);
+  // Premier contact Alma : bloque les whispers proactifs tant qu'il n'est pas vu.
+  const { shouldShow: showAlmaFirstMeeting, markSeen: markAlmaFirstMeetingSeen } = useAlmaFirstMeeting();
   // Pass 5 — compagnon culturel : anecdote fondatrice ou stat sociale.
-  useAlmaCulturalFact({ surface: "dashboard", context: { role: "owner" } });
+  useAlmaCulturalFact({ surface: "dashboard", context: { role: "owner" }, enabled: !showAlmaFirstMeeting });
 
 
 
