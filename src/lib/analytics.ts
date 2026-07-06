@@ -198,8 +198,14 @@ export type EventType =
   | "alma_whisper_emitted"                      // Whisper narratif affiché (whisper_type, surface, priority)
   | "alma_whisper_dismissed"                    // Whisper fermé (whisper_type, reason)
   | "alma_whisper_action_clicked"               // Action d'un whisper cliquée (whisper_type, action_id)
-  | "alma_frequency_changed"                    // Slider fréquence Alma modifié (from, to)
-  | "alma_blacklisted_type";                    // Whisper type blacklisté 30j après 3 dismiss (whisper_type)
+ | "alma_frequency_changed"                    // Slider fréquence Alma modifié (from, to)
+ | "alma_blacklisted_type"                     // Whisper type blacklisté 30j après 3 dismiss (whisper_type)
+ // Pass 3 — republish + welcome cross-canal ----------------------------------
+ | "alma_republish_bubble_seen"                // Bandeau Alma republication affiché (sit_id)
+ | "alma_republish_mode_selected"              // Mode choisi dans la modale republish (mode: copy|adapt, sit_id)
+ | "alma_republish_published"                  // Nouvelle annonce publiée à partir d'une republication (original_sit_id, new_sit_id, mode)
+ | "alma_welcome_email_sent"                   // Welcome email post-signup signé Alma envoyé
+ | "alma_dashboard_first_meeting_seen";        // Dashboard ouvert avec ?welcome=alma (first meeting)
 
 
 

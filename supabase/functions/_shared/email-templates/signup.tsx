@@ -81,15 +81,23 @@ export const SignupEmail = ({
           autres comme on le ferait pour un proche.
         </Text>
 
+        {/* Présentation d'Alma */}
         <Text style={lead}>
-          Il ne reste qu'une étape pour activer votre compte et nous
-          retrouver.
+          Je m'appelle <strong>Alma</strong>, je serai votre assistante sur {siteName}.
+          Je vous préviens des nouvelles opportunités, je vous propose des brouillons
+          quand vous êtes bloqué, et je vous prépare des synthèses des activités qui
+          vous concernent. Vous relisez, vous décidez. On commence ?
+        </Text>
+
+        <Text style={lead}>
+          Il ne reste qu'une étape pour activer votre compte et me retrouver
+          sur votre tableau de bord.
         </Text>
 
         {/* CTA principal placé HAUT pour conversion immédiate */}
         <Section style={ctaSection}>
           <Button style={button} href={confirmationUrl}>
-            Activer votre compte
+            Activer mon compte et rencontrer Alma
           </Button>
           <Text style={ctaSubtext}>
             Ce lien est valable 24 heures.

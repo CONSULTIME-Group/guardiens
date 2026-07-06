@@ -21,6 +21,7 @@ import { COUNTRIES } from "@/lib/countries";
 import ImproveListingButton from "@/components/ai/ImproveListingButton";
 import { moderateContent } from "@/lib/moderation";
 import AnnouncementPreviewDialog from "@/components/sits/owner/AnnouncementPreviewDialog";
+import { AlmaBubble } from "@/components/ai/alma/AlmaBubble";
 import {
   Sheet,
   SheetContent,
@@ -206,6 +207,8 @@ const CreateSit = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const fromSitId = searchParams.get("from");
+  const republishMode = (searchParams.get("mode") as "copy" | "adapt" | null) || null;
+  const republishPrompt = searchParams.get("prompt") || "";
   const draftIdParam = searchParams.get("draftId") || searchParams.get("resume");
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -252,6 +255,7 @@ const CreateSit = () => {
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [isRepublish, setIsRepublish] = useState(false);
+  const [sourceSitTitle, setSourceSitTitle] = useState<string | null>(null);
   const [draftId, setDraftId] = useState<string | null>(null);
   const [savingDraft, setSavingDraft] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
@@ -283,6 +287,7 @@ const CreateSit = () => {
       if (sourceSitRes?.data) {
         const s = sourceSitRes.data;
         setTitle(s.title || "");
+        setSourceSitTitle(s.title || null);
         setSpecificExpectations(s.specific_expectations || "");
         setOpenTo(s.open_to || []);
         setSitEnvironments(s.environments || []);
@@ -294,6 +299,12 @@ const CreateSit = () => {
         setSitCity((s as any).city || "");
         setSitCountry((s as any).country || "FR");
         setIsRepublish(true);
+        try {
+          trackEvent("alma_republish_bubble_seen", {
+            source: "create_sit_page",
+            metadata: { source_sit_id: fromSitId, mode: republishMode || "copy" },
+          });
+        } catch {}
       }
 
       if (!sourceSitRes?.data) {
@@ -574,6 +585,14 @@ const CreateSit = () => {
           });
         } catch {}
       }
+      if (isRepublish && fromSitId && sitId) {
+        try {
+          await trackEvent("alma_republish_published", {
+            source: "create_sit_page",
+            metadata: { original_sit_id: fromSitId, new_sit_id: sitId, mode: republishMode || "copy" },
+          });
+        } catch {}
+      }
       toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant postuler." });
       navigate(`/sits/${sitId}`);
     } catch (err: any) {
@@ -625,6 +644,27 @@ const CreateSit = () => {
             ? "Les informations de votre précédente annonce sont pré-remplies. Ajustez les dates et détails si besoin."
             : "Les informations de votre profil sont pré-remplies. Ajoutez les détails spécifiques à cette garde."}
         </p>
+
+        {isRepublish && (
+          <div className="mb-4">
+            <AlmaBubble audience="owner" variant="inline">
+              {republishMode === "adapt" ? (
+                <>
+                  Je pars de votre annonce
+                  {sourceSitTitle ? <> « <strong>{sourceSitTitle}</strong> »</> : null}
+                  . J'ai retenu ce que vous vouliez ajuster :{" "}
+                  <em className="text-muted-foreground">« {republishPrompt.slice(0, 240) || "à préciser ci-dessous" } »</em>. Reprenez la main, corrigez ce qui doit l'être, vous relisez avant de publier.
+                </>
+              ) : (
+                <>
+                  Je repars de votre annonce
+                  {sourceSitTitle ? <> « <strong>{sourceSitTitle}</strong> »</> : null}
+                  . Ajustez uniquement les nouvelles dates et ce qui a changé, je m'occupe du reste.
+                </>
+              )}
+            </AlmaBubble>
+          </div>
+        )}
 
         {/* Draft indicator */}
         {draftLabel && (
