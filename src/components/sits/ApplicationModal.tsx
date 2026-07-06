@@ -144,16 +144,10 @@ const ApplicationModal = ({
       const sitterFirstName = (meProfile?.first_name as string) || "Un gardien";
       const sitTitle = (sitInfo?.title as string) || "votre annonce";
 
-      // Notification in-app
-      await supabase.from("notifications").insert({
-        user_id: ownerId,
-        type: "new_application",
-        title: "Nouvelle candidature",
-        body: `${sitterFirstName} a postulé à « ${sitTitle} ».`,
-        link: `/sits/${sitId}#candidatures`,
-        actor_name: sitterFirstName,
-        actor_avatar_url: meProfile?.avatar_url ?? null,
-      });
+      // Notification in-app : contenu composé côté serveur (SECURITY DEFINER) pour empêcher toute falsification.
+      if (created?.id) {
+        await supabase.rpc("notify_owner_of_new_application", { _application_id: created.id });
+      }
 
       // Email transactionnel (idempotent par candidature)
       if (ownerProfile?.email) {
