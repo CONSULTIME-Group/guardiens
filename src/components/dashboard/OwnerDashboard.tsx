@@ -455,17 +455,20 @@ const OwnerDashboard = () => {
         </div>
       </header>
 
-      {/* ═══ Owner Pass 3 — Concierge IA (owner sans annonce active, avant tout brouillon) ═══ */}
-      {showAlmaProactive && !hasDraft && (
-        <div className="px-5 md:px-8">
-          <SitDraftFromPrompt />
-        </div>
-      )}
-
-      {/* ═══ Draft en cours : carte de reprise prioritaire (masque la NBA "1ère annonce") ═══ */}
+      {/* ═══ Draft en cours : carte de reprise prioritaire, en tête ═══ */}
       {hasDraft && latestDraft && (
         <div className="px-5 md:px-8">
           <DraftResumeCard draft={latestDraft as any} />
+        </div>
+      )}
+
+      {/* ═══ Owner Pass 3 — Concierge IA (owner sans annonce active) ═══
+          Reste accessible en permanence même si un brouillon existe :
+          l'owner peut vouloir décrire une autre absence sans écraser son
+          draft en cours. Affichage secondaire (moins accentué) dans ce cas. */}
+      {showAlmaProactive && (
+        <div className="px-5 md:px-8">
+          <SitDraftFromPrompt secondary={hasDraft} />
         </div>
       )}
 
