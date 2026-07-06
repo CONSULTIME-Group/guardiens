@@ -585,6 +585,14 @@ const CreateSit = () => {
           });
         } catch {}
       }
+      if (isRepublish && fromSitId && sitId) {
+        try {
+          await trackEvent("alma_republish_published", {
+            source: "create_sit_page",
+            metadata: { original_sit_id: fromSitId, new_sit_id: sitId, mode: republishMode || "copy" },
+          });
+        } catch {}
+      }
       toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant postuler." });
       navigate(`/sits/${sitId}`);
     } catch (err: any) {
