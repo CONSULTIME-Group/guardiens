@@ -970,6 +970,17 @@ const SmallMissionDetail = () => {
           </div>
         )}
 
+        {/* Bannière "date dépassée" (Chantier 8 EntraideHub Pass 1) */}
+        {isDatePassed && (mission.status === "open" || mission.status === "in_progress") && mission.date_needed && (
+          <ExpiredMissionBanner
+            missionId={mission.id}
+            dateNeeded={mission.date_needed}
+            isAuthor={isAuthor}
+          />
+        )}
+
+
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-10 items-start">
           {/* ── COLONNE PRINCIPALE ── */}
           <article className="lg:col-span-8 min-w-0">
