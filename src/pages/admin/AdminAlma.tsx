@@ -345,7 +345,7 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
       <Card>
         <CardContent className="p-6 space-y-3">
           <h3 className="text-sm font-semibold">Répartition frequency setting</h3>
-          {(["silent", "balanced", "talkative"] as const).map((k) => {
+          {(["silent", "low", "balanced", "talkative"] as const).map((k) => {
             const c = freqBreakdown.counts[k] ?? 0;
             const pct = (c / freqBreakdown.total) * 100;
             return (
