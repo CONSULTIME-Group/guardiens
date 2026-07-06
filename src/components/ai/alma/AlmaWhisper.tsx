@@ -1,12 +1,23 @@
 /**
  * <AlmaWhisper /> — petite bulle non bloquante émise par la narratrice Alma
  * au fil de la navigation. Slide-in bottom-right desktop, bottom (au-dessus de
- * BottomNav) mobile. Auto-dismiss après 20s.
+ * BottomNav) mobile.
+ *
+ * Timer d'auto-dismiss :
+ *   - 20 s par défaut (25 s cultural côté trigger).
+ *   - Pour les faits culturels sur mobile : 30 s, et le timer ne démarre qu'au
+ *     premier scroll ou à la première interaction utilisateur.
+ *   - Pausé sur focus / pointerenter / touchstart de la bulle, repris sur
+ *     blur / pointerleave.
+ *
+ * Z-index : la bulle est en z-40 pour rester sous les overlays Radix (Dialog,
+ * Sheet en z-50). En plus, si un modal Radix est ouvert, on masque totalement
+ * la bulle.
  *
  * <AlmaWhisperOutlet /> — monté dans AppLayout, s'abonne à AlmaContext et
  * affiche currentWhisper.
  */
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { AlmaAvatar } from "./AlmaAvatar";
 import { useAlma } from "@/contexts/AlmaContext";
@@ -19,16 +30,87 @@ interface AlmaWhisperCardProps {
   onDismiss: (reason: "closed_manually" | "timeout" | "action_clicked") => void;
 }
 
+function isMobileViewport(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(max-width: 767px)").matches;
+}
+
 function AlmaWhisperCard({ whisper, onDismiss }: AlmaWhisperCardProps) {
   const timerRef = useRef<number | null>(null);
+  const remainingRef = useRef<number>(0);
+  const startedAtRef = useRef<number>(0);
+  const pausedRef = useRef<boolean>(false);
+
+  const isMobile = isMobileViewport();
+  const isCulturalMobile = whisper.type === "cultural_fact" && isMobile;
+  // Cultural sur mobile : 30 s, et démarrage différé (attente d'une interaction).
+  // Sinon : whisper.autoDismissMs ou 20 s par défaut.
+  const totalDelay = isCulturalMobile ? 30_000 : whisper.autoDismissMs ?? 20_000;
+
+  const clearTimer = useCallback(() => {
+    if (timerRef.current !== null) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  const startTimer = useCallback(
+    (ms: number) => {
+      clearTimer();
+      remainingRef.current = ms;
+      startedAtRef.current = Date.now();
+      timerRef.current = window.setTimeout(() => onDismiss("timeout"), ms);
+    },
+    [clearTimer, onDismiss],
+  );
+
+  const pauseTimer = useCallback(() => {
+    if (pausedRef.current || timerRef.current === null) return;
+    const elapsed = Date.now() - startedAtRef.current;
+    remainingRef.current = Math.max(0, remainingRef.current - elapsed);
+    clearTimer();
+    pausedRef.current = true;
+  }, [clearTimer]);
+
+  const resumeTimer = useCallback(() => {
+    if (!pausedRef.current) return;
+    pausedRef.current = false;
+    startTimer(remainingRef.current > 0 ? remainingRef.current : totalDelay);
+  }, [startTimer, totalDelay]);
 
   useEffect(() => {
-    const delay = whisper.autoDismissMs ?? 20000;
-    timerRef.current = window.setTimeout(() => onDismiss("timeout"), delay);
+    pausedRef.current = false;
+
+    if (isCulturalMobile) {
+      // Le timer ne démarre qu'à la première interaction utilisateur.
+      let started = false;
+      const startOnce = () => {
+        if (started) return;
+        started = true;
+        startTimer(totalDelay);
+        window.removeEventListener("scroll", startOnce);
+        window.removeEventListener("touchstart", startOnce);
+        window.removeEventListener("pointerdown", startOnce);
+        window.removeEventListener("keydown", startOnce);
+      };
+      window.addEventListener("scroll", startOnce, { passive: true });
+      window.addEventListener("touchstart", startOnce, { passive: true });
+      window.addEventListener("pointerdown", startOnce, { passive: true });
+      window.addEventListener("keydown", startOnce);
+      return () => {
+        clearTimer();
+        window.removeEventListener("scroll", startOnce);
+        window.removeEventListener("touchstart", startOnce);
+        window.removeEventListener("pointerdown", startOnce);
+        window.removeEventListener("keydown", startOnce);
+      };
+    }
+
+    startTimer(totalDelay);
     return () => {
-      if (timerRef.current) window.clearTimeout(timerRef.current);
+      clearTimer();
     };
-  }, [whisper.id, whisper.autoDismissMs, onDismiss]);
+  }, [whisper.id, isCulturalMobile, totalDelay, startTimer, clearTimer]);
 
   const handleAction = (
     onClick: () => void,
@@ -46,8 +128,13 @@ function AlmaWhisperCard({ whisper, onDismiss }: AlmaWhisperCardProps) {
       role="status"
       aria-live="polite"
       data-whisper-type={whisper.type}
+      onPointerEnter={pauseTimer}
+      onPointerLeave={resumeTimer}
+      onTouchStart={pauseTimer}
+      onFocusCapture={pauseTimer}
+      onBlurCapture={resumeTimer}
       className={cn(
-        "fixed z-50 pointer-events-auto",
+        "fixed z-40 pointer-events-auto",
         "left-3 right-3 md:left-auto md:right-6",
         "bottom-24 md:bottom-6",
         "md:max-w-sm",
@@ -109,9 +196,52 @@ function AlmaWhisperCard({ whisper, onDismiss }: AlmaWhisperCardProps) {
   );
 }
 
+/**
+ * Détecte la présence d'un overlay Radix ouvert (Dialog, Sheet, AlertDialog…).
+ * On observe le body pour réagir à l'ouverture/fermeture, et on vérifie deux
+ * signaux robustes utilisés par Radix :
+ *   - un élément avec [role="dialog"][data-state="open"]
+ *   - un overlay Radix ouvert ([data-radix-dialog-overlay], data-state="open")
+ * En complément, Radix pose `data-scroll-locked` sur le body à l'ouverture.
+ */
+function useIsRadixModalOpen(): boolean {
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    const compute = () => {
+      const hasOpenDialog =
+        document.querySelector('[role="dialog"][data-state="open"]') !== null ||
+        document.querySelector('[role="alertdialog"][data-state="open"]') !== null;
+      const hasOpenOverlay =
+        document.querySelector('[data-radix-dialog-overlay][data-state="open"]') !== null ||
+        document.querySelector('[data-radix-alert-dialog-overlay][data-state="open"]') !== null;
+      const bodyLocked = document.body.hasAttribute("data-scroll-locked");
+      setIsOpen(hasOpenDialog || hasOpenOverlay || bodyLocked);
+    };
+
+    compute();
+    const mo = new MutationObserver(compute);
+    mo.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["data-state", "data-scroll-locked"],
+    });
+    return () => mo.disconnect();
+  }, []);
+
+  return isOpen;
+}
+
 export function AlmaWhisperOutlet() {
   const { currentWhisper, dismissCurrent } = useAlma();
+  const isModalOpen = useIsRadixModalOpen();
   if (!currentWhisper) return null;
+  // Un Dialog/Sheet Radix est ouvert : on masque totalement le whisper pour
+  // éviter tout empilement ambigu au-dessus du backdrop.
+  if (isModalOpen) return null;
   return (
     <AlmaWhisperCard
       whisper={currentWhisper}
