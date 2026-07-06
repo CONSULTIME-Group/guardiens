@@ -309,8 +309,8 @@ const OwnerDashboard = () => {
 
   /* ── NBA variant retenue (précepte 2026 : 1 seule NBA dominante). ── */
   const nbaVariant = useMemo(
-    () => computeOwnerNbaVariant({ isNewOwner, hasDraft }),
-    [isNewOwner, hasDraft],
+    () => computeOwnerNbaVariant({ isNewOwner, hasDraft, hasNoActiveSit: noActiveSit }),
+    [isNewOwner, hasDraft, noActiveSit],
   );
 
   // Trace 1 fois par session le premier affichage dashboard "nouveau proprio"
