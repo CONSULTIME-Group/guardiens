@@ -134,6 +134,9 @@ export type EventType =
   | "owner_first_nba_gardien_card_clicked"      // Clic sur une des 3 cards (sitter_id, affinity_score, distance_km, position)
   | "owner_intent_draft_from_prompt_from_email"// Arrivée sur dashboard depuis email ?intent=draft_from_prompt
   | "owner_dashboard_nba_choice"                // NBA dominante retenue au 1er rendu dashboard owner (variant)
+  | "sits_create_alma_bubble_seen"              // Bulle Alma inline vue sur /sits/create (formulaire vierge)
+  | "sits_create_alma_intent_clicked"           // Clic "Décrire en une phrase" sur /sits/create
+  | "sits_create_alma_dismissed"                // Dismiss définitif de la bulle Alma sur /sits/create
   // EntraideHub Pass 1 (UX + fixes workflow) --------------------------------
   | "mission_created_incomplete_profile"        // Mission publiée avec profil < 60 % (profile_completion)
   | "entraide_empty_state_template_clicked"     // Exemple cliquable empty state (tab, template_key)

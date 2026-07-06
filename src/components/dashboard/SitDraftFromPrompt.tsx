@@ -19,7 +19,15 @@ import { trackEvent } from "@/lib/analytics";
 const PLACEHOLDER =
   "Exemple : Je pars 15 jours en août avec 2 chats à Lyon, je cherche quelqu'un de calme qui télétravaille.";
 
-export default function SitDraftFromPrompt() {
+export interface SitDraftFromPromptProps {
+  /**
+   * Affichage secondaire (moins accentué) quand un DraftResumeCard est déjà
+   * visible au-dessus. On adapte le titre pour proposer une seconde absence.
+   */
+  secondary?: boolean;
+}
+
+export default function SitDraftFromPrompt({ secondary = false }: SitDraftFromPromptProps = {}) {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
@@ -31,14 +39,16 @@ export default function SitDraftFromPrompt() {
   useEffect(() => {
     if (!seenRef.current) {
       seenRef.current = true;
-      void trackEvent("owner_draft_from_prompt_input_seen");
+      void trackEvent("owner_draft_from_prompt_input_seen", {
+        metadata: { secondary },
+      });
     }
     // Attribution email intent : ouverture depuis onboarding-j1
     if (searchParams.get("intent") === "draft_from_prompt") {
       void trackEvent("owner_intent_draft_from_prompt_from_email");
       setTimeout(() => textareaRef.current?.focus(), 200);
     }
-  }, [searchParams]);
+  }, [searchParams, secondary]);
 
   const handleGenerate = useCallback(async () => {
     const clean = prompt.trim();
@@ -85,14 +95,28 @@ export default function SitDraftFromPrompt() {
   }, [prompt, navigate, toast]);
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
+    <section
+      className={
+        secondary
+          ? "rounded-2xl border border-dashed border-border bg-muted/30 p-5 md:p-6"
+          : "rounded-2xl border border-border bg-card p-5 md:p-6"
+      }
+    >
       <div className="flex items-start gap-3 mb-3">
         <div className="rounded-xl bg-primary/10 p-2 text-primary shrink-0">
-          <AlmaAvatar size={32} />
+          <AlmaAvatar size={secondary ? 24 : 32} />
         </div>
         <div className="min-w-0">
-          <h2 className="text-lg md:text-xl font-serif font-semibold text-foreground leading-tight">
-            Décrivez votre absence en une phrase, Alma prépare le brouillon
+          <h2
+            className={
+              secondary
+                ? "text-base md:text-lg font-serif font-medium text-foreground leading-tight"
+                : "text-lg md:text-xl font-serif font-semibold text-foreground leading-tight"
+            }
+          >
+            {secondary
+              ? "Ou décrivez une autre absence, on prépare un nouveau brouillon"
+              : "Décrivez votre absence en une phrase, Alma prépare le brouillon"}
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
             Vous relisez et publiez en 2 minutes.

@@ -273,6 +273,11 @@ export function WelcomeBackDigest({
   // spontanément, même si un digest est disponible.
   if (almaFrequency === "silent") return null;
   if (dismissed || !variant || !signals) return null;
+  // Règle produit : Alma ne se présente jamais sans proposer d'action.
+  // Les variantes « first_visit » ne portent qu'un message d'accueil sans
+  // action concrète. Le concierge IA (SitDraftFromPrompt) et les NBA du
+  // dashboard prennent le relais, on reste silencieux ici.
+  if (variant === "owner_first_visit" || variant === "sitter_first_visit") return null;
 
   const copy = getCopy(variant, signals);
 
