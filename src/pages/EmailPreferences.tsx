@@ -22,10 +22,15 @@ const EmailPreferences = () => {
     (async () => {
       const { data } = await supabase
         .from("email_preferences")
-        .select("product_emails, digest_emails, alert_emails")
+        .select("product_emails, digest_emails, alert_emails, new_mission_digest")
         .eq("user_id", user.id)
         .maybeSingle();
-      if (data) setPrefs(data as Prefs);
+      if (data) setPrefs({
+        product_emails: data.product_emails ?? true,
+        digest_emails: data.digest_emails ?? true,
+        alert_emails: data.alert_emails ?? true,
+        new_mission_digest: (data as any).new_mission_digest ?? true,
+      });
       setLoading(false);
     })();
   }, [user]);
