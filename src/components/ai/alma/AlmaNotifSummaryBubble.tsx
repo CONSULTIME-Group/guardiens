@@ -109,9 +109,7 @@ export function AlmaNotifSummaryBubble({
     onFilterUrgent();
   };
 
-  const intro = vouv
-    ? `Vous avez ${unread.length} notification${unread.length > 1 ? "s" : ""} non lue${unread.length > 1 ? "s" : ""}.`
-    : `Tu as ${unread.length} notification${unread.length > 1 ? "s" : ""} non lue${unread.length > 1 ? "s" : ""}.`;
+  const intro = `Vous avez ${unread.length} notification${unread.length > 1 ? "s" : ""} non lue${unread.length > 1 ? "s" : ""}.`;
 
   const details = [
     applications > 0 ? `${applications} candidature${applications > 1 ? "s" : ""} à trier` : null,
