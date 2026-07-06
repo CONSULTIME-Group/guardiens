@@ -116,9 +116,7 @@ export function AlmaNotifSummaryBubble({
     social > 0 ? `${social} social` : null,
   ].filter(Boolean).join(", ");
 
-  const question = vouv
-    ? `On regarde les ${urgentCount || 3} urgente${(urgentCount || 3) > 1 ? "s" : ""} d'abord ?`
-    : `On regarde les ${urgentCount || 3} urgente${(urgentCount || 3) > 1 ? "s" : ""} d'abord ?`;
+  const question = `On regarde les ${urgentCount || 3} urgente${(urgentCount || 3) > 1 ? "s" : ""} d'abord ?`;
 
   return (
     <div className="mb-4">
