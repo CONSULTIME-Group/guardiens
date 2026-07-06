@@ -321,13 +321,14 @@ const SmallMissionDetail = () => {
   const messageTooShort = trimmedMessage.length > 0 && trimmedMessage.length < MIN_MESSAGE_LEN;
   const messageValid = trimmedMessage.length >= MIN_MESSAGE_LEN && trimmedMessage.length <= MAX_MESSAGE_LEN;
 
-  const handleRespond = async () => {
+  const handleRespond = async (overrideMessage?: string) => {
     if (!user || !id || submitting) return;
-    if (!trimmedMessage) {
+    const msg = (overrideMessage ?? message).trim();
+    if (!msg) {
       toast({ variant: "destructive", title: "Message vide", description: "Écrivez un mot avant de publier votre réponse." });
       return;
     }
-    if (trimmedMessage.length < MIN_MESSAGE_LEN) {
+    if (msg.length < MIN_MESSAGE_LEN) {
       toast({ variant: "destructive", title: "Message trop court", description: `Ajoutez au moins ${MIN_MESSAGE_LEN} caractères pour que l'auteur comprenne votre proposition.` });
       return;
     }
@@ -351,7 +352,7 @@ const SmallMissionDetail = () => {
 
       const { data: inserted, error } = await supabase
         .from("small_mission_responses")
-        .insert({ mission_id: id, responder_id: user.id, message: trimmedMessage })
+        .insert({ mission_id: id, responder_id: user.id, message: msg })
         .select("*, responder:profiles!small_mission_responses_responder_id_fkey(first_name, avatar_url)")
         .single();
 
