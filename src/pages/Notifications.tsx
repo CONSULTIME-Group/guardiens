@@ -55,6 +55,8 @@ const Notifications = () => {
 
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [urgentFilter, setUrgentFilter] = useState(false);
+  const URGENT_TYPES = new Set(["mission_proposal", "mission_accepted", "new_message"]);
 
   const load = useCallback(async () => {
     if (!userId) { setNotifications([]); setLoading(false); return; }
