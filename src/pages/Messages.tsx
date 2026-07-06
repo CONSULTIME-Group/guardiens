@@ -817,10 +817,22 @@ const Messages = () => {
               </div>
             </div>
           ) : (
-            <MessageComposer
+            <>
+              {messages.length === 0 && user && activeConv.other_user?.id && (activeConv.sit_id || activeConv.small_mission_id) && (
+                <AlmaMessageOpener
+                  audience={activeConv.owner_id === user.id ? "owner" : "sitter"}
+                  otherFirstName={activeConv.other_user?.first_name}
+                  sitId={activeConv.sit_id}
+                  missionId={activeConv.small_mission_id}
+                  otherUserId={activeConv.other_user.id}
+                  onDraftReady={(text) => setNewMessage(text)}
+                />
+              )}
+              <MessageComposer
               value={newMessage}
               onChange={setNewMessage}
               onSend={handleSend}
+
               onPickPhoto={async (file) => {
                 if (!user || !activeConv) return;
                 const ext = file.name.split(".").pop();
