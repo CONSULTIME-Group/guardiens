@@ -754,7 +754,7 @@ const OwnerDashboard = () => {
       {/* ═══ Preuve tangible du vivier local (early owner) ═══
           Descendu sous la grille de pilotage pour ne pas concurrencer la NBA.
           Reste visible tant qu'aucune annonce n'est publiée (drafts inclus). */}
-      {earlyOwner && (
+      {showAlmaProactive && (
         <div className="px-5 md:px-8">
           <OwnerFirstNBAGardiens />
         </div>
