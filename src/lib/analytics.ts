@@ -215,7 +215,8 @@ export type EventType =
   | "profile_mission_badges_seen"               // Section badges d'entraide impressée sur profil (profile_id, badges_count)
   | "next_mission_digest_card_seen"             // Carte "prochain digest mardi" affichée sur dashboard
   | "entraide_feed_chip_toggled"                // Chip filter mobile toggled (filter_types)
-  | "entraide_feed_default_view";               // Vue par défaut du feed unifié mobile (une fois par session)
+  | "entraide_feed_default_view"                // Vue par défaut du feed unifié mobile (une fois par session)
+  | "admin_mutual_aid_dashboard_seen";          // Dashboard admin entraide affiché (1x par montage)
 
 
 

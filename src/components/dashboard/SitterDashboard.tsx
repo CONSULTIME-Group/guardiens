@@ -26,6 +26,7 @@ import SitterFirstNBA from "./SitterFirstNBA";
 import SitterFirstNBASkeleton from "./SitterFirstNBASkeleton";
 import NoNearbySitsEmptyState from "./NoNearbySitsEmptyState";
 import NextDigestCard from "./sitter/NextDigestCard";
+import NextMissionDigestCard from "./NextMissionDigestCard";
 import { useIsNewSitter } from "@/hooks/useIsNewUser";
 import { useSitterTopAffinitySits } from "@/hooks/useSitterTopAffinitySits";
 
@@ -414,6 +415,10 @@ const SitterDashboard = () => {
               <NextDigestCard />
             </div>
 
+            <div className="px-4 sm:px-5 md:px-8 mt-4">
+              <NextMissionDigestCard />
+            </div>
+
             <div className="mt-6">
               {ChecklistBlock}
             </div>
@@ -473,6 +478,10 @@ const SitterDashboard = () => {
 
             <div className="px-4 sm:px-5 md:px-8 mt-4">
               <NextDigestCard />
+            </div>
+
+            <div className="px-4 sm:px-5 md:px-8 mt-4">
+              <NextMissionDigestCard />
             </div>
 
             {!nextGuard && (

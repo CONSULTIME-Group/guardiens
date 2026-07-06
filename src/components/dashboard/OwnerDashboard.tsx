@@ -20,6 +20,7 @@ import { differenceInDays } from "date-fns";
 
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
+import NextMissionDigestCard from "./NextMissionDigestCard";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { useUserBadges } from "@/hooks/useProfileReputation";
 
@@ -510,6 +511,10 @@ const OwnerDashboard = () => {
 
           <div className={`px-5 md:px-8 ${!showAllMobile ? "hidden md:block" : ""}`}>
             <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+          </div>
+
+          <div className={`px-5 md:px-8 ${!showAllMobile ? "hidden md:block" : ""}`}>
+            <NextMissionDigestCard />
           </div>
 
           {todoItems.length > 0 && (

@@ -16,6 +16,7 @@ import DeliveryTab from "./_components/DeliveryTab";
 import { useSearchParams } from "react-router-dom";
 import SitterDigestTab from "./_components/SitterDigestTab";
 import MissionDigestTab from "./_components/MissionDigestTab";
+import MutualAidDashboardTab from "./_components/MutualAidDashboardTab";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -871,7 +872,7 @@ const AdminEmails = () => {
       <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Emails & Communications</h1>
 
       <Tabs value={tab} onValueChange={setTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-10">
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-11">
           <TabsTrigger value="templates" className="text-xs gap-1">
             <FileText className="h-3.5 w-3.5" /> Templates
           </TabsTrigger>
@@ -889,6 +890,9 @@ const AdminEmails = () => {
           </TabsTrigger>
           <TabsTrigger value="mission-digest" className="text-xs gap-1">
             <Bell className="h-3.5 w-3.5" /> Digest entraide
+          </TabsTrigger>
+          <TabsTrigger value="mutual-aid" className="text-xs gap-1">
+            <BarChart3 className="h-3.5 w-3.5" /> Entraide
           </TabsTrigger>
           <TabsTrigger value="queue" className="text-xs gap-1">
             <Inbox className="h-3.5 w-3.5" /> File
@@ -910,6 +914,7 @@ const AdminEmails = () => {
         <TabsContent value="engagement"><EngagementTab /></TabsContent>
         <TabsContent value="sitter-digest"><SitterDigestTab /></TabsContent>
         <TabsContent value="mission-digest"><MissionDigestTab /></TabsContent>
+        <TabsContent value="mutual-aid"><MutualAidDashboardTab /></TabsContent>
         <TabsContent value="queue"><QueueTab /></TabsContent>
         <TabsContent value="logs"><LogsTab /></TabsContent>
         <TabsContent value="suppressions"><SuppressionsTab /></TabsContent>

@@ -26,6 +26,7 @@ import EntraideGeolocBanner from "@/components/missions/EntraideGeolocBanner";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { useMissionDistance } from "@/hooks/useMissionDistance";
 import { trackEvent } from "@/lib/analytics";
+import MobileEntraideFeed from "@/components/community/MobileEntraideFeed";
 
 
 type Tab = "questions" | "besoins" | "offres";
@@ -437,6 +438,18 @@ const EntraideHub = () => {
             </div>
           </div>
 
+          {/* Chantier 5 Pass 3 : feed unifié mobile (md:hidden). */}
+          <MobileEntraideFeed
+            missions={missions}
+            questions={questions as any}
+            loading={mLoading || qLoading}
+            onAsk={goAsk}
+            onNeed={goNeed}
+            onOffer={goOffer}
+          />
+
+          {/* Desktop : onglets classiques 3 tabs. */}
+          <div className="hidden md:block">
           {/* Onglets pill, grille 3 colonnes, aucun scroll horizontal */}
           <div
             role="tablist"
@@ -926,6 +939,7 @@ const EntraideHub = () => {
               </>
             )}
           </div>
+          </div>{/* /desktop hidden md:block */}
         </section>
 
         {/* FAB mobile retiré : le CTA primaire du header (full-width) et la bottom nav suffisent */}
