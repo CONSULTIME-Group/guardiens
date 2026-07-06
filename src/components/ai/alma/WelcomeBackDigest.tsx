@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAlmaFrequency } from "@/hooks/useAlmaFrequency";
 import { trackEvent } from "@/lib/analytics";
 import { AlmaBubble, type AlmaAudience } from "./AlmaBubble";
 
@@ -177,6 +178,7 @@ export function WelcomeBackDigest({
   className,
 }: WelcomeBackDigestProps) {
   const { activeRole } = useAuth();
+  const { frequency: almaFrequency } = useAlmaFrequency();
   const navigate = useNavigate();
   const audience: AlmaAudience = activeRole === "owner" ? "owner" : "sitter";
 
@@ -267,6 +269,9 @@ export function WelcomeBackDigest({
     }
   }, [variant]);
 
+  // Kill switch : si l'utilisateur a choisi "silent", Alma ne parle jamais
+  // spontanément, même si un digest est disponible.
+  if (almaFrequency === "silent") return null;
   if (dismissed || !variant || !signals) return null;
 
   const copy = getCopy(variant, signals);

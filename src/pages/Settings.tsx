@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import {
   User, Bell, Shield, Trash2, Download, Sun, Moon, Monitor, ArrowRight,
   CreditCard, HelpCircle, Eye, EyeOff, AlertTriangle, LogOut, Layers,
-  Loader2, CheckCircle2,
+  Loader2, CheckCircle2, MessageCircle,
 } from "lucide-react";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import ActiveRolesSection from "@/components/settings/ActiveRolesSection";
@@ -30,6 +30,7 @@ import OwnerPitchSection from "@/components/settings/OwnerPitchSection";
 import { useTheme } from "@/contexts/ThemeContext";
 import { getPasswordStrength, validateStrongPassword } from "@/lib/passwordStrength";
 import { Link } from "react-router-dom";
+import { useAlmaFrequency, type AlmaFrequency } from "@/hooks/useAlmaFrequency";
 
 interface NotifPrefs {
   email_new_application: boolean;
@@ -55,7 +56,7 @@ const defaultPrefs: NotifPrefs = {
 
 type SectionId =
   | "account" | "security" | "spaces" | "notifications" | "alerts"
-  | "privacy" | "owner-pitch" | "appearance" | "billing" | "data" | "help" | "danger";
+  | "privacy" | "owner-pitch" | "appearance" | "alma" | "billing" | "data" | "help" | "danger";
 
 interface SectionDef {
   id: SectionId;
@@ -73,6 +74,7 @@ const SECTIONS: SectionDef[] = [
   { id: "alerts", label: "Alertes annonces", icon: Bell, group: "Préférences" },
   { id: "privacy", label: "Confidentialité", icon: EyeOff, group: "Préférences" },
   { id: "appearance", label: "Apparence", icon: Sun, group: "Préférences" },
+  { id: "alma", label: "Fréquence d'Alma", icon: MessageCircle, group: "Préférences" },
   { id: "billing", label: "Abonnement", icon: CreditCard, group: "Mes espaces" },
   { id: "data", label: "Mes données", icon: Download, group: "Aide & données" },
   { id: "help", label: "Aide & liens utiles", icon: HelpCircle, group: "Aide & données" },
@@ -382,6 +384,7 @@ const Settings = () => {
       case "alerts": return <AlertsSection user={user} />;
       case "privacy": return <PrivacySection prefs={prefs} onSave={savePrefs} />;
       case "appearance": return <ThemeSection />;
+      case "alma": return <AlmaFrequencySection />;
       case "billing": return <BillingSection user={user} />;
       case "data": return <DataSection onExport={handleExport} exporting={exporting} />;
       case "help": return <HelpSection />;
@@ -815,6 +818,63 @@ const ThemeSection = () => {
           <Monitor className="h-4 w-4" /> Système
         </ToggleGroupItem>
       </ToggleGroup>
+    </section>
+  );
+};
+
+const ALMA_OPTIONS: { value: AlmaFrequency; label: string; description: string }[] = [
+  {
+    value: "silent",
+    label: "Silencieuse",
+    description: "Alma n'intervient jamais spontanément. Vous restez maître du tempo.",
+  },
+  {
+    value: "balanced",
+    label: "Équilibrée",
+    description: "Alma prend la parole aux moments clés : messages, candidatures, avis. Recommandé.",
+  },
+  {
+    value: "talkative",
+    label: "Bavarde",
+    description: "Alma vous accompagne partout, avec des suggestions et rappels supplémentaires.",
+  },
+];
+
+const AlmaFrequencySection = () => {
+  const { frequency, loading, setFrequency } = useAlmaFrequency();
+  return (
+    <section>
+      <SectionHeader
+        icon={MessageCircle}
+        title="Fréquence d'Alma"
+        description="Réglez à quel point la narratrice Guardiens prend la parole dans votre parcours."
+      />
+      <div className="space-y-3" aria-busy={loading}>
+        {ALMA_OPTIONS.map((opt) => {
+          const active = frequency === opt.value;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setFrequency(opt.value)}
+              aria-pressed={active}
+              className={`w-full text-left rounded-lg border p-4 transition-colors ${
+                active
+                  ? "border-primary bg-primary/5"
+                  : "border-border bg-card hover:bg-accent"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-semibold">{opt.label}</span>
+                {active && (
+                  <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" />
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">{opt.description}</p>
+            </button>
+          );
+        })}
+      </div>
     </section>
   );
 };
