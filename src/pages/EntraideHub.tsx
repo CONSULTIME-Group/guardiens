@@ -233,6 +233,9 @@ const EntraideHub = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mineOnly]);
 
+  // Chantier 4 : fallback status=all si <20 missions en base
+  const autoSwitchedStatusRef = useRef(false);
+  const allStatusFallbackTrackedRef = useRef(false);
   useEffect(() => {
     const load = async () => {
       setMLoading(true);
@@ -244,10 +247,21 @@ const EntraideHub = () => {
         .in("status", ["open", "in_progress", "completed"] as any)
         .order("created_at", { ascending: false })
         .limit(120);
-      setMissions((data || []) as unknown as MissionRow[]);
+      const rows = (data || []) as unknown as MissionRow[];
+      setMissions(rows);
       setMLoading(false);
+      // Auto-switch vers "all" si moins de 20 missions ET user n'a pas forcé un statut
+      if (!autoSwitchedStatusRef.current && rows.length < 20 && !params.get("status")) {
+        autoSwitchedStatusRef.current = true;
+        setMStatus("all");
+        if (!allStatusFallbackTrackedRef.current) {
+          allStatusFallbackTrackedRef.current = true;
+          void trackEvent("entraide_all_status_default_used", { metadata: { missions_count: rows.length } });
+        }
+      }
     };
     void load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Note : plus de bascule automatique vers Questions quand aucune mission ouverte.
