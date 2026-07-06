@@ -149,6 +149,7 @@ const OwnerDashboard = () => {
     surface: "owner_dashboard",
     role: "owner",
     state: isNewOwner ? "new_owner" : noActiveSit ? "no_active_sit" : "any",
+    enabled: !showAlmaFirstMeeting,
   });
   /**
    * Alma proactive : le dashboard affiche SitDraftFromPrompt (si new owner),
