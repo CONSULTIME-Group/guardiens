@@ -247,6 +247,15 @@ const SitDetail = () => {
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
+      {isOwner && ownerProfile?.profile_completion != null && (
+        <div className="mb-3">
+          <IncompleteProfileBadge
+            profileCompletion={ownerProfile.profile_completion}
+            isOwnerViewer={isOwner}
+          />
+        </div>
+      )}
+
       {isOwner ? (
         <OwnerSitView
           sit={sit}
