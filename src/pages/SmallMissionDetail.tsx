@@ -3,7 +3,7 @@ import { trackEvent } from "@/lib/analytics";
 import { logger } from "@/lib/logger";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
+
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -375,22 +375,13 @@ const SmallMissionDetail = () => {
         setMessage("");
         toast({ title: "Réponse publiée !", description: "La personne qui demande va être prévenue." });
 
-        // Notify mission author (non-bloquant côté UI)
-        supabase.from("notifications").insert({
-          user_id: fresh.user_id, type: "mission_proposal",
-          title: "Nouvelle proposition d'aide",
-          body: `${(user as any).first_name || "Un membre"} propose son aide pour "${fresh.title}"`,
-          link: `/petites-missions/${id}`,
-        }).then(() => {});
-
-        // Email transactionnel, propriétaire de la mission notifié (non-bloquant)
-        sendTransactionalEmail({
-          templateName: "mission-response",
-          recipientUserId: fresh.user_id,
-          idempotencyKey: `mission-response-${id}-${user.id}`,
-          templateData: {
-            responderFirstName: (user as any).first_name || "",
-            missionTitle: fresh.title,
+        // Fan-out serveur (notif in-app + email) via edge function
+        supabase.functions.invoke("notify-mission-event", {
+          body: {
+            event_type: "mission_proposal",
+            mission_id: id,
+            actor_id: user.id,
+            target_ids: [fresh.user_id],
           },
         }).catch(() => {});
       }
@@ -439,21 +430,14 @@ const SmallMissionDetail = () => {
         await supabase.from("small_mission_responses")
           .update({ status: "declined" as any })
           .in("id", otherIds);
-        await supabase.from("notifications").insert(
-          pendingOthers.map(r => ({
-            user_id: r.responder_id, type: "mission_declined",
-            title: "Non retenu(e) cette fois",
-            body: `Quelqu'un d'autre a été choisi pour "${mission.title}". Merci pour votre proposition.`,
-          }))
-        );
-        pendingOthers.forEach(r => {
-          sendTransactionalEmail({
-            templateName: "mission-proposal-declined",
-            recipientUserId: r.responder_id,
-            idempotencyKey: `mission-proposal-declined-${r.id}`,
-            templateData: { missionTitle: mission.title },
-          }).catch(() => {});
-        });
+        supabase.functions.invoke("notify-mission-event", {
+          body: {
+            event_type: "mission_declined",
+            mission_id: id,
+            actor_id: user!.id,
+            target_ids: pendingOthers.map(r => r.responder_id),
+          },
+        }).catch(() => {});
         setResponses(prev => prev.map(r =>
           otherIds.includes(r.id) ? { ...r, status: "declined" } : r,
         ));
@@ -492,21 +476,13 @@ const SmallMissionDetail = () => {
         });
       }
 
-      await supabase.from("notifications").insert({
-        user_id: resp.responder_id, type: "mission_accepted",
-        title: "Personne retenue",
-        body: `Votre proposition pour "${mission.title}" a été acceptée. Vous pouvez maintenant échanger par messagerie.`,
-        link: convId ? `/messages?c=${convId}` : `/messages`,
-      });
-
-      sendTransactionalEmail({
-        templateName: "mission-proposal-accepted",
-        recipientUserId: resp.responder_id,
-        idempotencyKey: `mission-proposal-accepted-${responseId}`,
-        templateData: {
-          authorFirstName: (author as any)?.first_name || "",
-          missionTitle: mission.title,
-          conversationId: convId || "",
+      supabase.functions.invoke("notify-mission-event", {
+        body: {
+          event_type: "mission_accepted",
+          mission_id: id,
+          actor_id: user!.id,
+          target_ids: [resp.responder_id],
+          metadata: { conversation_id: convId || null },
         },
       }).catch(() => {});
 
@@ -532,17 +508,13 @@ const SmallMissionDetail = () => {
       if (error) throw error;
       setResponses(prev => prev.map(r => r.id === responseId ? { ...r, status: "declined" } : r));
 
-      await supabase.from("notifications").insert({
-        user_id: resp.responder_id, type: "mission_declined",
-        title: "Non retenu(e) cette fois",
-        body: `Quelqu'un d'autre a été choisi pour "${mission.title}". Merci pour votre proposition.`,
-      });
-
-      sendTransactionalEmail({
-        templateName: "mission-proposal-declined",
-        recipientUserId: resp.responder_id,
-        idempotencyKey: `mission-proposal-declined-${responseId}`,
-        templateData: { missionTitle: mission.title },
+      supabase.functions.invoke("notify-mission-event", {
+        body: {
+          event_type: "mission_declined",
+          mission_id: id,
+          actor_id: user!.id,
+          target_ids: [resp.responder_id],
+        },
       }).catch(() => {});
     } catch (err: any) {
       logger.error("[handleDeclineResponse]", { err: String(err) });
@@ -563,14 +535,15 @@ const SmallMissionDetail = () => {
         await supabase.from("small_mission_responses")
           .update({ status: "declined" as any })
           .in("id", ids);
-        // Batch notifications
-        await supabase.from("notifications").insert(
-          pending.map(r => ({
-            user_id: r.responder_id, type: "mission_cancelled",
-            title: "Mission annulée",
-            body: `La mission "${mission.title}" a été clôturée sans sélection.`,
-          }))
-        );
+        // Fan-out serveur
+        supabase.functions.invoke("notify-mission-event", {
+          body: {
+            event_type: "mission_cancelled",
+            mission_id: id,
+            actor_id: user!.id,
+            target_ids: pending.map(r => r.responder_id),
+          },
+        }).catch(() => {});
       }
       await supabase.from("small_missions").update({ status: "cancelled" as any }).eq("id", id!);
       setMission((prev: any) => ({ ...prev, status: "cancelled" }));
@@ -595,14 +568,14 @@ const SmallMissionDetail = () => {
       // Batch notifications to accepted responders (compute inline to avoid forward-ref)
       const accepted = responses.filter(r => r.status === "accepted");
       if (accepted.length > 0) {
-        await supabase.from("notifications").insert(
-          accepted.map(r => ({
-            user_id: r.responder_id, type: "mission_completed",
-            title: "Mission terminée",
-            body: `La mission "${mission.title}" est terminée. Laissez un avis !`,
-            link: `/petites-missions/${id}`,
-          }))
-        );
+        supabase.functions.invoke("notify-mission-event", {
+          body: {
+            event_type: "mission_completed",
+            mission_id: id,
+            actor_id: user!.id,
+            target_ids: accepted.map(r => r.responder_id),
+          },
+        }).catch(() => {});
       }
       toast({ title: "Mission marquée comme terminée !" });
     } catch (err: any) {
@@ -858,21 +831,13 @@ const SmallMissionDetail = () => {
                 trackEvent("mission_response_withdrawn", {
                   metadata: { mission_id: id, response_id: myResponse.id },
                 });
-                // Notif + email auteur (non-bloquant)
-                supabase.from("notifications").insert({
-                  user_id: mission.user_id, type: "mission_response_withdrawn",
-                  title: "Réponse retirée",
-                  body: `${(user as any).first_name || "Un membre"} a retiré sa réponse à « ${mission.title} ».`,
-                  link: `/petites-missions/${id}`,
-                }).then(() => {});
-                sendTransactionalEmail({
-                  templateName: "mission-response-withdrawn",
-                  recipientUserId: mission.user_id,
-                  idempotencyKey: `mission-response-withdrawn-${myResponse.id}`,
-                  templateData: {
-                    responderFirstName: (user as any).first_name || "",
-                    missionTitle: mission.title,
-                    missionId: id,
+                // Fan-out serveur (notif + email auteur)
+                supabase.functions.invoke("notify-mission-event", {
+                  body: {
+                    event_type: "mission_response_withdrawn",
+                    mission_id: id,
+                    actor_id: user!.id,
+                    target_ids: [mission.user_id],
                   },
                 }).catch(() => {});
                 toast({ title: "Réponse retirée" });
