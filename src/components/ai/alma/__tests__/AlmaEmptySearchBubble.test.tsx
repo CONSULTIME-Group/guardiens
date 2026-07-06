@@ -33,9 +33,9 @@ describe("AlmaEmptySearchBubble", () => {
     expect(screen.getByRole("button", { name: /relâcher le filtre vérifié/i })).toBeInTheDocument();
   });
 
-  it("uses tutoiement (audience sitter)", () => {
+  it("utilise le vouvoiement (règle éditoriale absolue)", () => {
     render(<AlmaEmptySearchBubble {...defaultProps} />);
-    expect(screen.getByText(/veux-tu que je propose/i)).toBeInTheDocument();
+    expect(screen.getByText(/voulez-vous que je propose/i)).toBeInTheDocument();
   });
 
   it("returns null when frequency is silent", () => {
