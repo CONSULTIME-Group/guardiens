@@ -12,6 +12,7 @@ import type { NotificationData } from "@/components/notifications/NotificationIt
 import { NotificationSkeleton } from "@/components/notifications/NotificationSkeleton";
 import { NotificationsEmptyState } from "@/components/notifications/NotificationsEmptyState";
 import { NotificationGroup } from "@/components/notifications/NotificationGroup";
+import { AlmaNotifSummaryBubble } from "@/components/ai/alma/AlmaNotifSummaryBubble";
 
 /* ------------------------------------------------------------------ */
 /* Groupement par tranche temporelle                                    */
