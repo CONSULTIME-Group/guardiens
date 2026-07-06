@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import EmptyState from "@/components/shared/EmptyState";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
+import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
 import { format, differenceInDays, isAfter, isBefore, isToday, parseISO, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
