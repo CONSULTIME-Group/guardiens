@@ -271,13 +271,8 @@ const OwnerDashboard = () => {
   const nextActions = useMemo(() => computeOwnerNextActions(nextActionsInput), [nextActionsInput]);
   const activationScore = useMemo(() => computeOwnerActivationScore(nextActionsInput), [nextActionsInput]);
 
-  /* ── Détection nouveau propriétaire (0 sit, 0 pet) : applique le
-       précepte 2026 « 1 seule NBA above the fold, pas 4 cartes empilées ».
-       On enrichit la description de la NBA avec un signal local
+  /* ── Enrichit la description de la NBA avec un signal local
        (nombre de gardiens vérifiés à proximité). ── */
-  const isNewOwner = useIsNewOwner({ sitsCount: sits.length, petsCount: pets.length });
-  const nearbyCount = nearbyOwnerSittersData?.totalCount ?? 0;
-  const nearbyRadius = nearbyOwnerSittersData?.radiusUsed ?? null;
   const newOwnerDescription = useMemo(() => {
     if (!isNewOwner) return priorityAction.description;
     if (nearbyCount >= 5 && nearbyRadius) {
@@ -288,6 +283,12 @@ const OwnerDashboard = () => {
     }
     return `Plus de 2 200 gardiens vérifiés en France. Publiez votre annonce, on prévient ceux qui correspondent le mieux. Environ 2 minutes.`;
   }, [isNewOwner, nearbyCount, nearbyRadius, priorityAction.description]);
+
+  /* ── NBA variant retenue (précepte 2026 : 1 seule NBA dominante). ── */
+  const nbaVariant = useMemo(
+    () => computeOwnerNbaVariant({ isNewOwner, hasDraft }),
+    [isNewOwner, hasDraft],
+  );
 
   // Trace 1 fois par session le premier affichage dashboard "nouveau proprio"
   useEffect(() => {
@@ -307,6 +308,21 @@ const OwnerDashboard = () => {
       });
     } catch {}
   }, [loading, user?.id, isNewOwner, nearbyCount, nearbyRadius]);
+
+  // Trace 1 fois par session la NBA dominante retenue (ventilation des variants).
+  useEffect(() => {
+    if (loading || !user?.id) return;
+    const key = `dash_owner_nba_choice_${user.id}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+      void trackEvent("owner_dashboard_nba_choice", {
+        source: "/dashboard",
+        metadata: { variant: nbaVariant, early_owner: earlyOwner },
+      });
+    } catch {}
+  }, [loading, user?.id, nbaVariant, earlyOwner]);
+
 
   /* ── Render ── */
 
