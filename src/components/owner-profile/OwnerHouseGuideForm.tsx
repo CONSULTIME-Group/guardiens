@@ -317,6 +317,14 @@ const OwnerHouseGuideForm = () => {
       if (error) throw error;
 
       setGuide(prev => ({ ...prev, published: true }));
+      // alma_house_guide_saved_with_draft si au moins une section pré-remplie par Alma a été conservée
+      const kept = Array.from(almaEverFilledRef.current).filter((k) => {
+        const field = DRAFT_TO_FIELD[k];
+        return !!(current as any)[field];
+      });
+      if (kept.length > 0) {
+        void trackEvent("alma_house_guide_saved_with_draft", { metadata: { sections: kept } });
+      }
       toast.success("Guide enregistré", {
         description: "Guide enregistré. Il sera visible uniquement par votre gardien confirmé, pendant la durée de la garde.",
         duration: 3000,
