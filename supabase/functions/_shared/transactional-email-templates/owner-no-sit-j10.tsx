@@ -31,6 +31,7 @@ const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
       <Body style={main}>
         <Container style={container}>
           <BrandHeader />
+          <AlmaSignature />
           <Heading style={h1}>{name ? `Bonjour ${name},` : 'Bonjour,'}</Heading>
 
           <Text style={text}>
