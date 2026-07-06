@@ -86,9 +86,7 @@ export function AlmaReviewDraftBubble({
   };
 
   const tone =
-    role === "owner"
-      ? "Vos notes sont posées. Voulez-vous qu'Alma pose une première trame que vous ajusterez librement ?"
-      : "Tes notes sont posées. Veux-tu qu'Alma propose une première trame que tu ajusteras librement ?";
+    "Vos notes sont posées. Voulez-vous qu'Alma pose une première trame que vous ajusterez librement ?";
 
   return (
     <div className="mb-4">
