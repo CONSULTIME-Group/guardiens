@@ -31,6 +31,7 @@ import PublicExperiences from "@/components/profile/PublicExperiences";
 import TrustScore from "@/components/profile/TrustScore";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
+import AlmaFitGardien from "@/components/ai/alma/AlmaFitGardien";
 import ProfileSchemaOrg from "@/components/seo/ProfileSchemaOrg";
 import TrustTimeline from "@/components/profile/TrustTimeline";
 import { buildTrustTimeline } from "@/lib/trustTimeline";
@@ -1059,6 +1060,20 @@ export default function PublicSitterProfile() {
                     size="md"
                     scope="single"
                     caption="Votre affinité avec ce gardien"
+                  />
+                </div>
+              )}
+
+              {/* Alma Pass 2 — Chantier 2 : bulle fit gardien pour owner avec au moins une annonce publiée */}
+              {activeTab === 'gardien' && id && sitterProfile && (
+                <div className="self-stretch mt-3">
+                  <AlmaFitGardien
+                    sitter={{
+                      id,
+                      first_name: profile?.first_name ?? null,
+                      reviewCount: reviewCount,
+                    }}
+                    sitterProfile={sitterProfile}
                   />
                 </div>
               )}

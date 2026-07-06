@@ -57,6 +57,8 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = true
   [functions.draft-review]
     verify_jwt = true
+  [functions.generate-house-guide]
+    verify_jwt = true
 
 
 

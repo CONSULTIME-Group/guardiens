@@ -7,7 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Key, Home, AlertTriangle, ClipboardList, Heart, Check, Circle, CheckCircle, Loader2 } from "lucide-react";
+import { Key, Home, AlertTriangle, ClipboardList, Heart, Check, Circle, CheckCircle, Loader2, Sparkles } from "lucide-react";
+import { AlmaHouseGuideAssist, type HouseGuideDrafts } from "@/components/ai/alma/AlmaHouseGuideAssist";
+import { trackEvent } from "@/lib/analytics";
 
 interface GuideData {
   exact_address: string;
@@ -100,10 +102,22 @@ const OwnerHouseGuideForm = () => {
   const guideRef = useRef(guide);
   const propertyIdRef = useRef(propertyId);
   const guideIdRef = useRef(guideId);
+  // Sections encore marquées "Brouillon Alma" (retirées au 1er edit)
+  const [almaSections, setAlmaSections] = useState<Set<keyof HouseGuideDrafts>>(new Set());
+  // Sections ayant été pré-remplies par Alma à un moment (pour alma_house_guide_saved_with_draft)
+  const almaEverFilledRef = useRef<Set<keyof HouseGuideDrafts>>(new Set());
 
   guideRef.current = guide;
   propertyIdRef.current = propertyId;
   guideIdRef.current = guideId;
+
+  // Mapping trames Alma → champs guide
+  const DRAFT_TO_FIELD: Record<keyof HouseGuideDrafts, keyof GuideData> = {
+    wifi_info: "wifi_instructions",
+    neighborhood: "detailed_instructions",
+    veterinary: "vet_address",
+    emergency: "emergency_contact_name",
+  };
 
   const isPublishable = !!(
     guide.exact_address?.trim() &&
@@ -215,8 +229,35 @@ const OwnerHouseGuideForm = () => {
 
   const handleChange = useCallback((field: keyof GuideData, value: string) => {
     setGuide(prev => ({ ...prev, [field]: value }));
+    // Détection 1ère édition d'une section pré-remplie par Alma
+    setAlmaSections(prev => {
+      let next = prev;
+      (Object.keys(DRAFT_TO_FIELD) as (keyof HouseGuideDrafts)[]).forEach(k => {
+        if (DRAFT_TO_FIELD[k] === field && prev.has(k)) {
+          if (next === prev) next = new Set(prev);
+          next.delete(k);
+          void trackEvent("alma_house_guide_section_edited", { metadata: { section: k } });
+        }
+      });
+      return next;
+    });
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => saveGuide(), 800);
+  }, [saveGuide]);
+
+  const handleAlmaDrafts = useCallback((drafts: HouseGuideDrafts) => {
+    setGuide(prev => ({
+      ...prev,
+      wifi_instructions: drafts.wifi_info || prev.wifi_instructions,
+      detailed_instructions: drafts.neighborhood || prev.detailed_instructions,
+      vet_address: drafts.veterinary || prev.vet_address,
+      emergency_contact_name: drafts.emergency || prev.emergency_contact_name,
+    }));
+    const filled = new Set<keyof HouseGuideDrafts>(["wifi_info", "neighborhood", "veterinary", "emergency"]);
+    setAlmaSections(filled);
+    filled.forEach(k => almaEverFilledRef.current.add(k));
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => saveGuide(), 400);
   }, [saveGuide]);
 
   const handleFinalize = async () => {
@@ -276,6 +317,14 @@ const OwnerHouseGuideForm = () => {
       if (error) throw error;
 
       setGuide(prev => ({ ...prev, published: true }));
+      // alma_house_guide_saved_with_draft si au moins une section pré-remplie par Alma a été conservée
+      const kept = Array.from(almaEverFilledRef.current).filter((k) => {
+        const field = DRAFT_TO_FIELD[k];
+        return !!(current as any)[field];
+      });
+      if (kept.length > 0) {
+        void trackEvent("alma_house_guide_saved_with_draft", { metadata: { sections: kept } });
+      }
       toast.success("Guide enregistré", {
         description: "Guide enregistré. Il sera visible uniquement par votre gardien confirmé, pendant la durée de la garde.",
         duration: 3000,
@@ -331,16 +380,31 @@ const OwnerHouseGuideForm = () => {
         </p>
       </div>
 
+      <AlmaHouseGuideAssist onDrafts={handleAlmaDrafts} />
+
       <Accordion type="multiple" className="space-y-3">
         {ACCORDION_SECTIONS.map(section => {
           const complete = isSectionComplete(guide, section.fields);
           const Icon = section.icon;
+          const sectionDrafts: Record<string, (keyof HouseGuideDrafts)[]> = {
+            access: ["wifi_info"],
+            instructions: ["neighborhood"],
+            emergency: ["veterinary", "emergency"],
+          };
+          const draftKeys = sectionDrafts[section.id] || [];
+          const hasAlmaDraft = draftKeys.some(k => almaSections.has(k));
           return (
             <AccordionItem key={section.id} value={section.id} className="bg-card border border-border rounded-xl p-0 overflow-hidden">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2 flex-1">
                   <Icon className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm font-medium">{section.title}</span>
+                  {hasAlmaDraft && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5">
+                      <Sparkles className="h-2.5 w-2.5" />
+                      Brouillon Alma, à personnaliser
+                    </span>
+                  )}
                 </div>
                 <span className="mr-2">
                   {complete ? (
@@ -363,6 +427,7 @@ const OwnerHouseGuideForm = () => {
           );
         })}
       </Accordion>
+
 
       {/* Publish state */}
       <div className="space-y-3 pt-2">

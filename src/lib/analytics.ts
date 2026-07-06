@@ -179,7 +179,17 @@ export type EventType =
   // Alma Pass 2 : WelcomeBackDigest ----------------------------------------
   | "alma_welcomeback_seen"                     // Digest affiché (variant, audience, signals)
   | "alma_welcomeback_action_clicked"           // Action cliquée depuis digest (variant, action_id)
-  | "alma_welcomeback_dismissed";               // Digest fermé (variant)
+  | "alma_welcomeback_dismissed"                // Digest fermé (variant)
+  // Alma Pass 2 Tour 2 : guide maison génératif ----------------------------
+  | "alma_house_guide_bubble_seen"              // Bulle Alma affichée dans le formulaire guide maison
+  | "alma_house_guide_generated"                // Génération réussie des 4 trames
+  | "alma_house_guide_section_edited"           // 1ère édition d'une section pré-remplie par Alma (section)
+  | "alma_house_guide_saved_with_draft"         // Guide finalisé avec au moins une trame Alma conservée
+  // Alma Pass 2 Tour 2 : fit gardien sur PublicSitterProfile ---------------
+  | "alma_fit_gardien_seen"                     // Bulle fit gardien affichée (sitter_id, sit_id, score)
+  | "alma_fit_gardien_reciprocity_shown"        // Bonus reciprocity affiché (sitter_id, sit_id, views)
+  | "alma_invite_from_alma_clicked";            // Clic CTA Inviter depuis la bulle Alma (sitter_id, sit_id)
+
 
 
 interface TrackOptions {
