@@ -137,6 +137,31 @@ const CreateSmallMission = () => {
     if (tpl) applyTemplate(tpl);
   }, []);
 
+  // Attrition composer : 5 events (opened / step1_completed / field_abandoned / submitted / abandoned)
+  const submittedRef = useRef(false);
+  useEffect(() => {
+    try { trackEvent("mission_composer_opened", { metadata: { type: missionType } }); } catch {}
+    return () => {
+      if (!submittedRef.current) {
+        try { trackEvent("mission_composer_abandoned", { metadata: { last_step: step, has_title: title.trim().length > 0 } }); } catch {}
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleTitleBlur = () => {
+    setTitleTouched(true);
+    if (title.trim().length > 0 && title.trim().length < MIN_TITLE_LEN) {
+      try { trackEvent("mission_composer_field_abandoned", { metadata: { field: "title", length: title.trim().length } }); } catch {}
+    }
+  };
+  const handleDescBlur = () => {
+    setDescTouched(true);
+    if (description.trim().length > 0 && description.trim().length < MIN_DESC_LEN) {
+      try { trackEvent("mission_composer_field_abandoned", { metadata: { field: "description", length: description.trim().length } }); } catch {}
+    }
+  };
+
   const handleExchangeChange = (val: string) => {
     setExchangeOffer(val);
     setExchangeError(EURO_REGEX.test(val) ? tp("exchange_error_euros") : "");
@@ -153,7 +178,10 @@ const CreateSmallMission = () => {
     setTitleTouched(true);
     setDescTouched(true);
     setExchangeTouched(true);
-    if (step1Valid) setStep(2);
+    if (step1Valid) {
+      setStep(2);
+      try { trackEvent("mission_composer_step1_completed", { metadata: { has_template: !!appliedTemplateId } }); } catch {}
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
