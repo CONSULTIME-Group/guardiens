@@ -216,6 +216,12 @@ const LeaveReview = () => {
       return;
     }
 
+    trackEvent(
+      usedAlmaDraft ? "alma_review_submitted_with_draft" : "alma_review_submitted_without_draft",
+      { metadata: { sit_id: sitId, role: isOwnerReview ? "owner" : "sitter" } },
+    );
+
+
     // Attribution des écussons sélectionnés
     if (selectedBadges.length > 0) {
       const badgeRows = buildBadgeAttributionRows({
