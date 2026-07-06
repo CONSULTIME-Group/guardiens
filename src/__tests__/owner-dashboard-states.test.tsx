@@ -110,7 +110,7 @@ describe("OwnerDashboard states — précepte 2026 « 1 NBA dominante »", () =>
     expect(s.showDesktopHeroCta).toBe(false);
   });
 
-  it("owner avec draft + publié : n'est PAS early (une annonce est en ligne)", () => {
+  it("owner avec draft + publié : n'est PAS early, une annonce est en ligne", () => {
     const s = state([{ status: "draft" }, { status: "published" }], []);
     expect(s.earlyOwner).toBe(false);
     expect(s.noActiveSit).toBe(false);
@@ -118,8 +118,8 @@ describe("OwnerDashboard states — précepte 2026 « 1 NBA dominante »", () =>
   });
 
   // Cas Jérémie martinot@gmail.com : role=both, 2 pets, 1 draft + 2 archived, 0 published.
-  // Doit voir DraftResumeCard + OwnerFirstNBAGardiens + subtitle contextuel, CTA hero masqué.
-  it("owner (role=both) avec pets + draft + archived, aucune publiée : Alma proactive, DraftResumeCard dominante", () => {
+  // Doit voir DraftResumeCard EN TÊTE + SitDraftFromPrompt secondaire + OwnerFirstNBAGardiens.
+  it("owner (role=both) avec pets + draft + archived : DraftResumeCard + concierge IA secondaire", () => {
     const s = state(
       [{ status: "draft" }, { status: "archived" }, { status: "archived" }],
       [{ id: "pet1" }, { id: "pet2" }],
@@ -130,9 +130,10 @@ describe("OwnerDashboard states — précepte 2026 « 1 NBA dominante »", () =>
     expect(s.noActiveSit).toBe(true);
     expect(s.showAlmaProactive).toBe(true);
     expect(s.hasDraft).toBe(true);
-    expect(s.nbaVariant).toBe("draft_resume");
+    expect(s.nbaVariant).toBe("sit_draft_from_prompt_with_existing_draft");
     expect(s.showDraftResumeCard).toBe(true);
-    expect(s.showSitDraftFromPrompt).toBe(false); // masqué car hasDraft
+    expect(s.showSitDraftFromPrompt).toBe(true);
+    expect(s.sitDraftSecondary).toBe(true);
     expect(s.showPriorityActionCard).toBe(false);
     expect(s.showOwnerFirstNBAGardiens).toBe(true);
     expect(s.showDesktopHeroCta).toBe(false);
