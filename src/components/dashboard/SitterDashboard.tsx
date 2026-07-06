@@ -68,6 +68,16 @@ const SitterDashboard = () => {
   // Le hook est appelé inconditionnellement (règle des hooks). Il ne fetche
   // que si userId présent (cf. `enabled` du useQuery).
   const isNewSitter = useIsNewSitter({ totalApps: totalApps ?? 0, completedSits: completedSits ?? 0 });
+  // Alma étape 1 — usage_nudge P2, ciblé sur l'état du gardien.
+  useAlmaUsageNudge({
+    surface: "sitter_dashboard",
+    role: "sitter",
+    state: isNewSitter
+      ? "new_sitter"
+      : (profileCompletion ?? 100) < 60
+        ? "profile_incomplete"
+        : "any",
+  });
   const {
     topSits,
     hasMinimumPool,
