@@ -140,6 +140,12 @@ const OwnerDashboard = () => {
     () => hasNoActiveSit(sits as any),
     [sits],
   );
+  // Alma étape 1 — usage_nudge P2, ciblé sur l'état de l'owner.
+  useAlmaUsageNudge({
+    surface: "owner_dashboard",
+    role: "owner",
+    state: isNewOwner ? "new_owner" : noActiveSit ? "no_active_sit" : "any",
+  });
   /**
    * Alma proactive : le dashboard affiche SitDraftFromPrompt (si new owner),
    * OwnerFirstNBAGardiens et un subtitle contextuel personnalisé, et masque
