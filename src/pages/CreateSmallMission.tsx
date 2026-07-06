@@ -21,7 +21,7 @@ import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import MissionPhotoUpload from "@/components/missions/MissionPhotoUpload";
 import { geocodeCity } from "@/lib/geocode";
-import { trackFirstAction } from "@/lib/analytics";
+import { trackFirstAction, trackEvent } from "@/lib/analytics";
 import { recordMissionCreatedAttribution } from "@/lib/campaignAttribution";
 import { templatesFor, MISSION_TEMPLATES, type MissionTemplate } from "@/data/missionTemplates";
 import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
