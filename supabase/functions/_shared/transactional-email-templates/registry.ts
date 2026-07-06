@@ -121,6 +121,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'admin-delivery-alert': adminDeliveryAlert,
   'mission-feedback-received': missionFeedbackReceived,
   'mission-thanks-received': missionThanksReceived,
+  'mission-daily-digest': missionDailyDigest,
 }
 
 
