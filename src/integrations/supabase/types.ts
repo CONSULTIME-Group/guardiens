@@ -3759,6 +3759,7 @@ export type Database = {
       profiles: {
         Row: {
           account_status: string
+          alma_first_meeting_seen: boolean
           alma_frequency: Database["public"]["Enums"]["alma_frequency"]
           animal_experience: string
           available_for_help: boolean | null
@@ -3811,6 +3812,7 @@ export type Database = {
         }
         Insert: {
           account_status?: string
+          alma_first_meeting_seen?: boolean
           alma_frequency?: Database["public"]["Enums"]["alma_frequency"]
           animal_experience?: string
           available_for_help?: boolean | null
@@ -3863,6 +3865,7 @@ export type Database = {
         }
         Update: {
           account_status?: string
+          alma_first_meeting_seen?: boolean
           alma_frequency?: Database["public"]["Enums"]["alma_frequency"]
           animal_experience?: string
           available_for_help?: boolean | null
