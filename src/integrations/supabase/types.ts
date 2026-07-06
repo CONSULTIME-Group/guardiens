@@ -264,10 +264,12 @@ export type Database = {
           created_at: string
           fact_type: string
           id: string
+          needs_pro_referral: boolean
           priority: number
           seasonal_end_month: number | null
           seasonal_start_month: number | null
           source_url: string | null
+          weight: number
         }
         Insert: {
           active?: boolean
@@ -276,10 +278,12 @@ export type Database = {
           created_at?: string
           fact_type: string
           id?: string
+          needs_pro_referral?: boolean
           priority?: number
           seasonal_end_month?: number | null
           seasonal_start_month?: number | null
           source_url?: string | null
+          weight?: number
         }
         Update: {
           active?: boolean
@@ -288,10 +292,12 @@ export type Database = {
           created_at?: string
           fact_type?: string
           id?: string
+          needs_pro_referral?: boolean
           priority?: number
           seasonal_end_month?: number | null
           seasonal_start_month?: number | null
           source_url?: string | null
+          weight?: number
         }
         Relationships: []
       }
