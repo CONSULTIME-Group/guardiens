@@ -78,6 +78,7 @@ const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
 
           <Text style={sig}>Jérémie et Elisa</Text>
 
+          <AlmaSignoff />
           <Hr style={hr} />
           <LegalFooter purpose="d'accompagnement à la prise en main de votre compte" basis="6.1.f" />
         </Container>
