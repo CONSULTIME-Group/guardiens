@@ -45,7 +45,7 @@ const NoNearbySitsEmptyState = ({
         .select("id, radius_km, active")
         .eq("user_id", user.id)
         .eq("active", true)
-        .eq("zone_type", "radius")
+        .eq("zone_type", "rayon")
         .contains("alert_types", ["gardes"])
         .limit(1);
       if (!cancel) {
@@ -62,7 +62,7 @@ const NoNearbySitsEmptyState = ({
     try {
       const { error } = await supabase.rpc("create_alert_preference", {
         p_label: postalCode ? `Gardes · autour de ${postalCode}` : "Gardes · autour de chez moi",
-        p_zone_type: "radius",
+        p_zone_type: "rayon",
         p_city: null,
         p_postal_code: postalCode ?? null,
         p_radius_km: currentRadius,
