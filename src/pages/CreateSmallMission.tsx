@@ -376,7 +376,7 @@ const CreateSmallMission = () => {
                   <Input
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    onBlur={() => setTitleTouched(true)}
+                    onBlur={handleTitleBlur}
                     placeholder={missionType === "offre" ? tp("title_ph_offer") : tp("title_ph_need")}
                     maxLength={120}
                     className="h-12 text-base"
