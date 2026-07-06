@@ -47,8 +47,10 @@ const SitterDashboard = () => {
   const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
   const [searchParams, setSearchParams] = useSearchParams();
   const { hasAccess: hasSubscription } = useSubscriptionAccess();
+  // Premier contact Alma : bloque les whispers proactifs tant qu'il n'est pas vu.
+  const { shouldShow: showAlmaFirstMeeting, markSeen: markAlmaFirstMeetingSeen } = useAlmaFirstMeeting();
   // Pass 5 — compagnon culturel : fait d'ambiance selon rôle et ville.
-  useAlmaCulturalFact({ surface: "dashboard", context: { role: "sitter" } });
+  useAlmaCulturalFact({ surface: "dashboard", context: { role: "sitter" }, enabled: !showAlmaFirstMeeting });
 
 
 
