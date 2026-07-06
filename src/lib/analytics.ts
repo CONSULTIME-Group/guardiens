@@ -216,7 +216,9 @@ export type EventType =
   | "next_mission_digest_card_seen"             // Carte "prochain digest mardi" affichée sur dashboard
   | "entraide_feed_chip_toggled"                // Chip filter mobile toggled (filter_types)
   | "entraide_feed_default_view"                // Vue par défaut du feed unifié mobile (une fois par session)
-  | "admin_mutual_aid_dashboard_seen";          // Dashboard admin entraide affiché (1x par montage)
+  | "admin_mutual_aid_dashboard_seen"           // Dashboard admin entraide affiché (1x par montage)
+  | "admin_alma_dashboard_seen"                 // Dashboard admin Alma affiché (1x par montage)
+  | "admin_alma_export_csv_clicked";            // Export CSV depuis dashboard admin Alma
 
 
 

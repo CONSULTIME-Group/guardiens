@@ -5,6 +5,7 @@ import {
   ShieldCheck, Mail, FileText, LogOut, ArrowLeft, MapPin, HelpCircle,
   Compass, Handshake, Briefcase, CreditCard, MessageSquare, ScrollText, Settings,
   Lightbulb, AlertTriangle, Bug, Stethoscope, Sprout, BarChart3, Send,
+  Sparkles,
   ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -48,6 +49,7 @@ const adminNavGroups: NavGroup[] = [
     items: [
       { to: "/admin", icon: LayoutDashboard, label: "Vue d'ensemble", end: true },
       { to: "/admin/traffic", icon: BarChart3, label: "Trafic" },
+      { to: "/admin/alma", icon: Sparkles, label: "Alma" },
       { to: "/admin/subscriptions", icon: CreditCard, label: "Abonnements" },
     ],
   },
