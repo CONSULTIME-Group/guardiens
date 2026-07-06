@@ -899,13 +899,25 @@ const SmallMissionDetail = () => {
             className="w-full rounded-full font-bold text-base"
             size="lg"
             onClick={() => {
-              const el = document.getElementById("composer");
-              el?.scrollIntoView({ behavior: "smooth", block: "center" });
-              setTimeout(() => document.getElementById("composer-textarea")?.focus(), 400);
+              setResponseModalOpen(true);
+              trackEvent("mission_response_modal_opened", {
+                metadata: { mission_id: mission.id, mission_type: isOffer ? "offre" : "besoin" },
+              });
             }}
           >
             {ctaLabel}
           </Button>
+          {isOffer && (
+            <Button
+              variant="outline"
+              className="w-full rounded-full font-semibold text-sm gap-2"
+              disabled={oneClickInterestBusy}
+              onClick={handleOneClickInterest}
+            >
+              <MessageSquare className="h-4 w-4" />
+              {oneClickInterestBusy ? "Ouverture…" : "Je suis intéressé(e), contactez-moi"}
+            </Button>
+          )}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
             <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Gratuit, entre membres</span>
             <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Sans engagement</span>
