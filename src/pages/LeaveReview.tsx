@@ -10,6 +10,8 @@ import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, ThumbsUp, ThumbsDown, CheckCircle2 } from "lucide-react";
 import StarRating from "@/components/reviews/StarRating";
 import { BadgeSelector } from "@/components/badges/BadgeSelector";
+import AlmaReviewDraftBubble from "@/components/ai/alma/AlmaReviewDraftBubble";
+import { trackEvent } from "@/lib/analytics";
 import { Helmet } from "react-helmet-async";
 
 type ReviewDirection = "owner_to_sitter" | "sitter_to_owner";
@@ -50,6 +52,8 @@ const LeaveReview = () => {
   const [wouldRecommend, setWouldRecommend] = useState<boolean | null>(null);
   const [comment, setComment] = useState("");
   const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [usedAlmaDraft, setUsedAlmaDraft] = useState(false);
 
   const [reviewDirection, setReviewDirection] = useState<ReviewDirection>("owner_to_sitter");
 
@@ -142,6 +146,15 @@ const LeaveReview = () => {
 
       setReviewee(profile);
       setAlreadyReviewed(!!existingReview);
+
+      const { data: convData } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("sit_id", sitId)
+        .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`)
+        .maybeSingle();
+      setConversationId(convData?.id ?? null);
+
       setLoading(false);
     };
 
@@ -202,6 +215,12 @@ const LeaveReview = () => {
       setSubmitting(false);
       return;
     }
+
+    trackEvent(
+      usedAlmaDraft ? "alma_review_submitted_with_draft" : "alma_review_submitted_without_draft",
+      { metadata: { sit_id: sitId, role: isOwnerReview ? "owner" : "sitter" } },
+    );
+
 
     // Attribution des écussons sélectionnés
     if (selectedBadges.length > 0) {
@@ -416,9 +435,26 @@ const LeaveReview = () => {
         <label className="text-sm font-medium mb-2 block">
           Commentaire <span className="text-muted-foreground font-normal">(min. 50 caractères)</span>
         </label>
+        {sitId && (
+          <AlmaReviewDraftBubble
+            sitId={sitId}
+            conversationId={conversationId}
+            role={isOwnerReview ? "owner" : "sitter"}
+            subRatings={subRatings}
+            comment={comment}
+            selectedBadges={selectedBadges}
+            onDraft={(draft) => {
+              setComment(draft);
+              setUsedAlmaDraft(true);
+            }}
+          />
+        )}
         <Textarea
           value={comment}
-          onChange={(e) => setComment(e.target.value)}
+          onChange={(e) => {
+            setComment(e.target.value);
+            if (usedAlmaDraft) setUsedAlmaDraft(false);
+          }}
           placeholder={intro.placeholder}
           rows={6}
           className="text-sm"
@@ -427,6 +463,7 @@ const LeaveReview = () => {
           {comment.trim().length}/50 caractères minimum
         </p>
       </div>
+
 
       {/* Legal RGPD notice */}
       <div className="rounded-lg bg-muted/40 border border-border p-3 mb-8">
