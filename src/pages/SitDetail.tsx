@@ -19,6 +19,8 @@ import OwnerSitView from "@/components/sits/views/OwnerSitView";
 import { IncompleteProfileBadge } from "@/components/sits/IncompleteProfileBadge";
 import SitterSitView from "@/components/sits/views/SitterSitView";
 import { useSitRealtime } from "@/components/sits/views/useSitRealtime";
+import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
+import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
 import { backfillOwnerGalleryDimensions } from "@/lib/backfillGalleryDimensions";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 import type { SitData } from "@/components/sits/views/types";
