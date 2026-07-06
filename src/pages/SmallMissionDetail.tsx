@@ -899,6 +899,19 @@ const SmallMissionDetail = () => {
           </div>
         );
       }
+      if (myResponse.status === "withdrawn") {
+        return (
+          <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-3">
+            <p className="font-heading text-lg font-semibold text-muted-foreground">Réponse retirée</p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Vous avez retiré votre proposition sur cette mission.
+            </p>
+            <Link to="/petites-missions" className="block">
+              <Button variant="outline" className="w-full rounded-full">Voir d'autres coups de main</Button>
+            </Link>
+          </div>
+        );
+      }
       return null;
     }
 
