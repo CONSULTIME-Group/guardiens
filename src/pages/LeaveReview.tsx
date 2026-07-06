@@ -52,6 +52,8 @@ const LeaveReview = () => {
   const [wouldRecommend, setWouldRecommend] = useState<boolean | null>(null);
   const [comment, setComment] = useState("");
   const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [usedAlmaDraft, setUsedAlmaDraft] = useState(false);
 
   const [reviewDirection, setReviewDirection] = useState<ReviewDirection>("owner_to_sitter");
 
