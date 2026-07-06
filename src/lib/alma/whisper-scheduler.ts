@@ -83,8 +83,8 @@ export function pickNext(
 ): AlmaWhisper | null {
   const eligible = queue.filter((w) => canEmit(state, w.type, now).ok);
   if (eligible.length === 0) return null;
-  // Priorité P0 > P1 > P2, puis dernier arrivé (index le plus grand)
-  const order: Record<string, number> = { P0: 0, P1: 1, P2: 2 };
+  // Priorité P0 > P1 > P2 > P3, puis dernier arrivé (index le plus grand)
+  const order: Record<string, number> = { P0: 0, P1: 1, P2: 2, P3: 3 };
   eligible.sort((a, b) => {
     const pa = order[WHISPER_PRIORITY[a.type]];
     const pb = order[WHISPER_PRIORITY[b.type]];
@@ -92,7 +92,13 @@ export function pickNext(
     // même priorité : le plus récent (fin de queue) gagne
     return queue.indexOf(b) - queue.indexOf(a);
   });
-  return eligible[0];
+  // Un cultural_fact (P3) ne passe jamais si un whisper P0/P1/P2 est éligible.
+  const top = eligible[0];
+  if (top.type === "cultural_fact") {
+    const hasActionable = eligible.some((w) => w.type !== "cultural_fact");
+    if (hasActionable) return null;
+  }
+  return top;
 }
 
 export function onEmit(state: SchedulerState, now: number = Date.now()): SchedulerState {
