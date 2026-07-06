@@ -1469,6 +1469,7 @@ export type Database = {
           alert_emails: boolean
           created_at: string
           digest_emails: boolean
+          new_mission_digest: boolean
           new_sit_digest: boolean
           product_emails: boolean
           updated_at: string
@@ -1478,6 +1479,7 @@ export type Database = {
           alert_emails?: boolean
           created_at?: string
           digest_emails?: boolean
+          new_mission_digest?: boolean
           new_sit_digest?: boolean
           product_emails?: boolean
           updated_at?: string
@@ -1487,6 +1489,7 @@ export type Database = {
           alert_emails?: boolean
           created_at?: string
           digest_emails?: boolean
+          new_mission_digest?: boolean
           new_sit_digest?: boolean
           product_emails?: boolean
           updated_at?: string
@@ -2556,6 +2559,30 @@ export type Database = {
           },
         ]
       }
+      mission_event_idempotency: {
+        Row: {
+          created_at: string
+          event_key: string
+          event_type: string
+          mission_id: string | null
+          target_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_key: string
+          event_type: string
+          mission_id?: string | null
+          target_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_key?: string
+          event_type?: string
+          mission_id?: string | null
+          target_id?: string | null
+        }
+        Relationships: []
+      }
       mission_feedbacks: {
         Row: {
           badge_key: string | null
@@ -2635,6 +2662,68 @@ export type Database = {
             columns: ["receiver_id"]
             isOneToOne: false
             referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_notification_queue: {
+        Row: {
+          distance_km: number | null
+          helper_id: string
+          id: string
+          mission_id: string
+          queued_at: string
+          sent_at: string | null
+          skip_reason: string | null
+          status: string
+        }
+        Insert: {
+          distance_km?: number | null
+          helper_id: string
+          id?: string
+          mission_id: string
+          queued_at?: string
+          sent_at?: string | null
+          skip_reason?: string | null
+          status?: string
+        }
+        Update: {
+          distance_km?: number | null
+          helper_id?: string
+          id?: string
+          mission_id?: string
+          queued_at?: string
+          sent_at?: string | null
+          skip_reason?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_notification_queue_helper_id_fkey"
+            columns: ["helper_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "mission_notification_queue_helper_id_fkey"
+            columns: ["helper_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_notification_queue_helper_id_fkey"
+            columns: ["helper_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_notification_queue_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "small_missions"
             referencedColumns: ["id"]
           },
         ]
@@ -5981,6 +6070,10 @@ export type Database = {
         Returns: undefined
       }
       check_invitation_quota: { Args: { _owner_id: string }; Returns: boolean }
+      claim_mission_event: {
+        Args: { _event_type: string; _mission_id: string; _target_id: string }
+        Returns: boolean
+      }
       complete_onboarding: {
         Args: {
           p_animal_experience?: string
