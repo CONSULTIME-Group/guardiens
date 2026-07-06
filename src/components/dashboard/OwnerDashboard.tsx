@@ -39,6 +39,8 @@ import SectionEyebrow from "./shared/SectionEyebrow";
 import TodoCard, { type TodoItem } from "./owner/TodoCard";
 import PriorityActionCard from "./shared/PriorityActionCard";
 import DraftResumeCard from "./DraftResumeCard";
+import SitDraftFromPrompt from "./SitDraftFromPrompt";
+import OwnerFirstNBAGardiens from "./OwnerFirstNBAGardiens";
 import { useOwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
 import ActivationScoreCard from "./owner/ActivationScoreCard";
 import NextActionsList from "./owner/NextActionsList";
@@ -388,6 +390,13 @@ const OwnerDashboard = () => {
         </div>
       </header>
 
+      {/* ═══ Owner Pass 3 — Concierge IA (new-owner uniquement, avant tout brouillon) ═══ */}
+      {isNewOwner && !hasDraft && (
+        <div className="px-5 md:px-8">
+          <SitDraftFromPrompt />
+        </div>
+      )}
+
       {/* ═══ Draft en cours : carte de reprise prioritaire (masque la NBA "1ère annonce") ═══ */}
       {hasDraft && latestDraft && (
         <div className="px-5 md:px-8">
@@ -416,6 +425,13 @@ const OwnerDashboard = () => {
               </Link>
             </p>
           )}
+        </div>
+      )}
+
+      {/* ═══ Owner Pass 3 — 3 gardiens qui vous correspondent (new-owner sans sit publié) ═══ */}
+      {isNewOwner && (
+        <div className="px-5 md:px-8">
+          <OwnerFirstNBAGardiens />
         </div>
       )}
 
