@@ -26,6 +26,7 @@ import EntraideGeolocBanner from "@/components/missions/EntraideGeolocBanner";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { useMissionDistance } from "@/hooks/useMissionDistance";
 import { trackEvent } from "@/lib/analytics";
+import MobileEntraideFeed from "@/components/community/MobileEntraideFeed";
 
 
 type Tab = "questions" | "besoins" | "offres";
