@@ -50,6 +50,6 @@ describe("RepublishAlmaDialog", () => {
     const arg = navigateMock.mock.calls[0][0] as string;
     expect(arg).toContain("mode=adapt");
     expect(arg).toContain("prompt=");
-    expect(decodeURIComponent(arg)).toContain("Nouvelles dates été");
+    expect(decodeURIComponent(arg).replace(/\+/g, " ")).toContain("Nouvelles dates été");
   });
 });
