@@ -65,7 +65,7 @@ const Email = ({ firstName, city, nearby_sitters_count, radius_km, top_3_sitter_
             rencontre reste la meilleure façon de savoir si le courant passe.
           </Text>
 
-          <Text style={baseline}>Gratuit pour vous, sans engagement.</Text>
+          
 
           <Section style={ctaSection}>
             <Button style={button} href={publishUrl}>
