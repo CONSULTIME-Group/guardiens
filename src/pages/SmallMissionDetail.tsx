@@ -430,21 +430,14 @@ const SmallMissionDetail = () => {
         await supabase.from("small_mission_responses")
           .update({ status: "declined" as any })
           .in("id", otherIds);
-        await supabase.from("notifications").insert(
-          pendingOthers.map(r => ({
-            user_id: r.responder_id, type: "mission_declined",
-            title: "Non retenu(e) cette fois",
-            body: `Quelqu'un d'autre a été choisi pour "${mission.title}". Merci pour votre proposition.`,
-          }))
-        );
-        pendingOthers.forEach(r => {
-          sendTransactionalEmail({
-            templateName: "mission-proposal-declined",
-            recipientUserId: r.responder_id,
-            idempotencyKey: `mission-proposal-declined-${r.id}`,
-            templateData: { missionTitle: mission.title },
-          }).catch(() => {});
-        });
+        supabase.functions.invoke("notify-mission-event", {
+          body: {
+            event_type: "mission_declined",
+            mission_id: id,
+            actor_id: user!.id,
+            target_ids: pendingOthers.map(r => r.responder_id),
+          },
+        }).catch(() => {});
         setResponses(prev => prev.map(r =>
           otherIds.includes(r.id) ? { ...r, status: "declined" } : r,
         ));
