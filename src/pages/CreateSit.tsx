@@ -439,11 +439,17 @@ const CreateSit = () => {
   const MIN_DESCRIPTION = 150;
   const descriptionValid = specificExpectations.length >= MIN_DESCRIPTION;
   const hasPhoto = !!coverPhotoUrl || ownerPhotos.length > 0;
-  const canPublish = profileCompletion >= 60 && property && title && startDate && endDate && !dateError && descriptionValid && hasPhoto;
+  // Seuil de publication abaissé de 60 % à 40 % (owner Pass 2) : débloque
+  // les propriétaires en cours d'onboarding sans sacrifier la qualité minimale
+  // (photo, description, dates). Un badge non bloquant rappelle la complétion
+  // du profil sur l'annonce tant qu'elle est < 80 %.
+  const PUBLISH_PROFILE_THRESHOLD = 40;
+  const NUDGE_PROFILE_THRESHOLD = 80;
+  const canPublish = profileCompletion >= PUBLISH_PROFILE_THRESHOLD && property && title && startDate && endDate && !dateError && descriptionValid && hasPhoto;
 
   type PublishBlocker = { id: string; label: string; anchor?: string; action?: string };
   const publishBlockers: PublishBlocker[] = [
-    profileCompletion < 60 ? { id: "profile", label: `Profil complété à 60 % minimum (actuellement ${profileCompletion} %)`, action: "/owner-profile" } : null,
+    profileCompletion < PUBLISH_PROFILE_THRESHOLD ? { id: "profile", label: `Profil complété à ${PUBLISH_PROFILE_THRESHOLD} % minimum (actuellement ${profileCompletion} %)`, action: "/owner-profile" } : null,
     !property ? { id: "property", label: "Logement renseigné", action: "/owner-profile" } : null,
     !title ? { id: "title", label: "Titre de l'annonce", anchor: "title-field" } : null,
     !startDate ? { id: "start", label: "Date de début", anchor: "dates-field" } : null,
