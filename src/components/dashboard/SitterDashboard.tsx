@@ -1,5 +1,7 @@
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
+import { useAlmaFirstMeeting } from "@/hooks/useAlmaFirstMeeting";
+import { AlmaFirstMeeting } from "@/components/ai/alma/AlmaFirstMeeting";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
