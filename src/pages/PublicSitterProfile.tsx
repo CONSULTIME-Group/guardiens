@@ -31,6 +31,7 @@ import PublicExperiences from "@/components/profile/PublicExperiences";
 import TrustScore from "@/components/profile/TrustScore";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
+import AlmaFitGardien from "@/components/ai/alma/AlmaFitGardien";
 import ProfileSchemaOrg from "@/components/seo/ProfileSchemaOrg";
 import TrustTimeline from "@/components/profile/TrustTimeline";
 import { buildTrustTimeline } from "@/lib/trustTimeline";
