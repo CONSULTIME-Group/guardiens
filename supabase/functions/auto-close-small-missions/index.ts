@@ -87,19 +87,59 @@ Deno.serve(async (req) => {
       if (updErr) { errors.push({ mission_id: m.id, reason: updErr.message }); continue }
       closedCount++
 
-      // Notifie l'auteur (best effort)
+      // Notif in-app + email direct (bypass notify-mission-event : besoin de firstName + ageDays)
       try {
-        await admin.functions.invoke('notify-mission-event', {
+        await admin.from('notifications').insert({
+          user_id: m.user_id,
+          type: 'mission_auto_closed',
+          title: 'Votre mission a été clôturée automatiquement',
+          body: `"${m.title}" a été clôturée après ${m.ageDays} jours sans activité. Vous pouvez la republier.`,
+          link: `/petites-missions/${m.id}`,
+          actor_name: 'Système',
+        })
+
+        const { data: profile } = await admin
+          .from('profiles')
+          .select('email, first_name, account_status')
+          .eq('id', m.user_id)
+          .maybeSingle()
+        let email = (profile?.email as string | undefined)?.trim() || null
+        if (!email) {
+          const { data: authData } = await admin.auth.admin.getUserById(m.user_id)
+          email = authData?.user?.email ?? null
+        }
+        if (!email || profile?.account_status !== 'active') continue
+
+        const { data: prefs } = await admin
+          .from('email_preferences')
+          .select('product_emails')
+          .eq('user_id', m.user_id)
+          .maybeSingle()
+        if (prefs && prefs.product_emails === false) continue
+
+        const { data: sup } = await admin
+          .from('suppressed_emails')
+          .select('email')
+          .ilike('email', email)
+          .maybeSingle()
+        if (sup) continue
+
+        await admin.functions.invoke('send-transactional-email', {
           body: {
-            event_type: 'mission_auto_closed',
-            mission_id: m.id,
-            actor_id: m.user_id, // système : agit au nom de l'auteur (self-target ignoré, on force target_ids)
-            target_ids: [m.user_id],
-            metadata: { close_reason: 'expired', age_days: m.ageDays },
+            templateName: 'mission-auto-closed',
+            recipientEmail: email,
+            idempotencyKey: `mission-auto-closed-${m.id}`,
+            templateData: {
+              firstName: profile?.first_name ?? undefined,
+              missionTitle: m.title,
+              missionId: m.id,
+              ageDays: m.ageDays,
+            },
+            metadata: { mission_id: m.id, close_reason: 'expired', age_days: m.ageDays },
           },
         })
       } catch (e) {
-        console.warn('[auto-close] notify failed', m.id, e)
+        console.warn('[auto-close] notify/email failed', m.id, e)
       }
     }
 
