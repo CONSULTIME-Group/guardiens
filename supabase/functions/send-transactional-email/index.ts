@@ -660,6 +660,10 @@ Deno.serve(async (req) => {
     subject: resolvedSubject,
     html,
     text: plainText,
+    // Activation explicite du tracking Resend (pixel d'ouverture + réécriture des liens).
+    // Sans cette clé, les envois transactionnels remontent 0 open / 0 click dans email_send_log
+    // (le webhook resend-webhook ne reçoit alors que delivered / bounced / complained).
+    tracking: { opens: true, clicks: true },
   }
   if (Object.keys(headers).length > 0) {
     resendPayload.headers = headers

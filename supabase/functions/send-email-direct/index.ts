@@ -34,6 +34,8 @@ Deno.serve(async (req) => {
       to: Array.isArray(to) ? to : [to],
       subject,
       html,
+      // Tracking Resend explicite (pixel + réécriture liens) pour remonter opens/clicks au webhook.
+      tracking: { opens: true, clicks: true },
     }
     if (text) payload.text = text
     if (reply_to) payload.reply_to = reply_to
