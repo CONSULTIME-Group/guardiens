@@ -16,6 +16,7 @@ import DeliveryTab from "./_components/DeliveryTab";
 import { useSearchParams } from "react-router-dom";
 import SitterDigestTab from "./_components/SitterDigestTab";
 import MissionDigestTab from "./_components/MissionDigestTab";
+import MutualAidDashboardTab from "./_components/MutualAidDashboardTab";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
