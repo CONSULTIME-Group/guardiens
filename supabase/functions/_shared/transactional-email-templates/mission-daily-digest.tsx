@@ -53,6 +53,7 @@ const MissionDailyDigestEmail = ({ helperFirstName, items = [] }: Props) => (
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
+        <AlmaSignature />
 
         <Heading style={h1}>
           {items.length > 1
@@ -60,12 +61,13 @@ const MissionDailyDigestEmail = ({ helperFirstName, items = [] }: Props) => (
             : 'Un coup de main près de chez vous'}
         </Heading>
 
-        <Text style={text}>Bonjour{helperFirstName ? ` ${helperFirstName}` : ''},</Text>
+        <AlmaIntro firstName={helperFirstName} />
 
         <Text style={text}>
           Voici les petites missions publiées ces dernières 24 heures dans un rayon
           de 30 km autour de chez vous. L'entraide est gratuite et sans engagement.
         </Text>
+
 
         {items.map((item, idx) => (
           <Section key={item.missionId} style={{ ...card, marginTop: idx === 0 ? '20px' : '14px' }}>
