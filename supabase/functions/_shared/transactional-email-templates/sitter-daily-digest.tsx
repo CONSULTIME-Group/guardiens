@@ -49,6 +49,7 @@ const SitterDailyDigestEmail = ({ sitterFirstName, items = [] }: Props) => (
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
+        <AlmaSignature />
 
         <Heading style={h1}>
           {items.length > 1
@@ -56,14 +57,13 @@ const SitterDailyDigestEmail = ({ sitterFirstName, items = [] }: Props) => (
             : 'Une annonce qui vous correspond aujourd\'hui'}
         </Heading>
 
-        <Text style={text}>
-          Bonjour{sitterFirstName ? ` ${sitterFirstName}` : ''},
-        </Text>
+        <AlmaIntro firstName={sitterFirstName} />
 
         <Text style={text}>
           Voici les nouvelles annonces publiées ces dernières 24 heures qui matchent
           votre profil. Le score d'affinité indique la compatibilité selon vos préférences.
         </Text>
+
 
         {items.map((item, idx) => (
           <Section key={item.sitId} style={{ ...card, marginTop: idx === 0 ? '20px' : '14px' }}>
