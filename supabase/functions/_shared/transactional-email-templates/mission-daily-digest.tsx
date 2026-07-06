@@ -118,12 +118,13 @@ const MissionDailyDigestEmail = ({ helperFirstName, items = [] }: Props) => (
           </Link>
         </Text>
 
-        <Text style={baseline}>L'entraide reste gratuite, pour toujours.</Text>
+        <AlmaSignoff />
 
         <LegalFooter
           purpose="du bon fonctionnement de votre digest entraide quotidien"
           basis="6.1.f"
         />
+
       </Container>
     </Body>
   </Html>
