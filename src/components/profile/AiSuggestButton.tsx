@@ -52,10 +52,11 @@ const AiSuggestButton = ({ field, currentValue, context, onSuggestion }: AiSugge
       ) : hasValue ? (
         <RefreshCw className="h-3 w-3" />
       ) : (
-        <Sparkles className="h-3 w-3" />
+        <AlmaAvatar size={24} className="h-4 w-4" />
       )}
-      {loading ? "Génération..." : hasValue ? "Re-suggérer" : "Suggérer avec l'IA"}
+      {loading ? "Alma prépare…" : hasValue ? "Re-suggérer avec Alma" : "Suggérer avec Alma"}
     </Button>
+
   );
 };
 
