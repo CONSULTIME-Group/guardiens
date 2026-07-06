@@ -1,34 +1,55 @@
-# EntraideHub Pass 1, plan d'exécution — TERMINÉ
+# Alma Pass 3 — cross-canal + republish + finition
 
-## Livraisons
+Périmètre large (7 chantiers). Livraison en **un seul commit** comme demandé, mais je propose de découper l'exécution en 2 vagues pour maîtriser le risque. Confirmez avant que je lance.
 
-### Vague 1 (livré précédemment)
-- Retrait gate 60% dans `CreateSmallMission.tsx`, tracking soft-nudge.
-- 3 exemples cliquables sur tabs Besoins et Offres dans `EntraideHub.tsx`.
-- Compteur missions, fallback filtre `all` si <20.
-- `isDatePassed` : badge card, bannière detail, tri fin de liste.
-- Fix `ReportButton targetId={mission.user_id}` sur profil.
-- Templates : 6 exemples spécifiques.
+## Vague A (prioritaire, forte valeur, faible risque)
 
-### Vague 2 (ce commit)
-- `MissionResponseModal.tsx` : 3 templates rapides Besoin/Offre + textarea + submit.
-- Sidebar CTA "Répondre publiquement" / "Solliciter cette aide" ouvre la modale (composer inline conservé).
-- CTA 1-clic "Je suis intéressé(e), contactez-moi" sur missions `offre` : `startConversation` (context `mission_help`) + insert réponse + redirect `/messages`.
+### C1 — Republish depuis annonce archivée
+- Bouton "Republier avec Alma" sur `/sits` (liste) + `SitDetail` si `status IN ('archived','cancelled','completed')`
+- Modale `<AlmaBubble />` avec 2 modes radio : **copy** (par défaut) / **adapt** (prompt libre)
+- `CreateSit.tsx` détecte `?from={sit_id}&mode=copy|adapt` :
+  - copy : pré-remplit tout sauf dates + photos optionnelles
+  - adapt : appel `draft-sit-from-prompt` étendu avec contexte de l'ancienne sit
+- Bandeau `AlmaBubble variant="inline"` + badge "Republication de {ancien_titre}"
+- Analytics : `alma_republish_bubble_seen`, `alma_republish_mode_selected`, `alma_republish_published`
 
-### Vague 3 (ce commit)
-- Migration : `ALTER TYPE small_mission_response_status ADD VALUE 'withdrawn'`.
-- Modale accept : 2 modes radio (garder / écarter les autres) affichée si >1 réponse pending. Cascade decline batch + notifs + email `mission-proposal-declined`.
-- Retrait réponse : DELETE → UPDATE status=withdrawn + notif + email `mission-response-withdrawn` (nouveau template + registry).
-- Affichage grisé pour statut withdrawn dans `MissionResponseCard` + branche dédiée sidebar.
-- `ReportButton` : ajout config `small_mission` + second bouton (mission + profil) dans le header auteur de la page detail.
+### C2 — Voix Alma dans les 5 digests emails
+Refonte cosmétique **sans changement fonctionnel** des templates :
+- `send-sitter-daily-digest`, `send-mission-daily-digest`, `send-mutual-aid-weekly-digest`, `send-sit-draft-reminder`, nurturing owner J+3/J+10/J+21
+- Header : avatar Alma SVG 32px + signature "Alma" + baseline
+- Intro : "Bonjour {prénom}, c'est Alma. Voici ce que j'ai vu pour vous depuis hier." (vouvoiement owner / tutoiement sitter)
+- Footer : "Vous relisez, vous décidez."
+- Ajouter `alma_signed: true` aux events `email_*_sent`
 
-### Vague 4 (contrôles)
-- `bunx tsgo --noEmit` : vert.
-- `src/pages/__tests__/mission-response-cascade.test.ts` : 3 tests OK.
-- Suite Vitest existante : mêmes 15 échecs pré-existants (snapshots + `window` non défini dans un timer d'`ActiveRolesSection`), rien de nouveau.
+### C3 — Alma dans le welcome email + `/dashboard?welcome=alma`
+- `auth-email-hook` template signup : Alma se présente, CTA "Rencontrer Alma sur mon tableau de bord"
+- Dashboard : détection `?welcome=alma` → force `WelcomeBackDigest` avec variante d'accueil
+- Analytics : `alma_welcome_email_sent`, `alma_dashboard_first_meeting_seen`
 
-## Analytics ajoutés
-`mission_response_modal_opened`, `mission_response_template_used`, `mission_response_submitted_from_modal`, `mission_offer_one_click_interest`, `mission_accept_response_cascade_choice`, `mission_response_withdrawn`.
+### C5 — Cleanup persona cross-canal
+- Grep + remplacement : "L'IA", "Concierge IA", "Assistant IA" → "Alma" ; "Génération en cours" → "Alma prépare…"
+- Sparkles isolées → ajouter `<AlmaAvatar />`
+- Créer `docs/persona-alma.md`
 
-## Prêt pour Pass 2
-Infra emails, `startConversation`, enum `withdrawn` en place. On peut enchaîner sur la Pass 2 (notifications + digest).
+### C7 — Contrôles
+- `bunx tsgo --noEmit` vert
+- Tests Vitest sur : détection republish, pré-remplissage copy/adapt, absence de vocabulaire proscrit dans nouveaux templates
+- Grep de non-régression persona
+
+## Vague B (à confirmer, plus lourd)
+
+### C4 — Push notifications web (marqué optionnel par vous)
+Service worker + opt-in `/settings` + rate limit 1/h + colonne `notification_preferences.alma_push_enabled`. **~1 chantier à part entière** (service worker, VAPID keys, edge function push, permission flow). Je recommande de le sortir en Pass 4.
+
+### C6 — Dashboard admin `/admin/alma`
+Adoption 7j/30j, taux d'acceptation, impact fonctionnel, freshness par moment, filtres période/rôle/moment/langue, export CSV. **Requiert instrumentation propre des 18 moments** + agrégations SQL. Faisable mais ~1 journée à part.
+
+## Ma recommandation
+
+Livrer **Vague A** (C1+C2+C3+C5+C7) dans ce commit, comme "Alma Pass 3 core". Traiter C4 (push) et C6 (admin KPI) en Pass 3.5 dédiée. Motif : C4 touche à l'infra service worker / permissions navigateur, C6 dépend de la stabilité des events analytics Pass 1+2+3 pour produire des KPI fiables. Les mélanger avec C1-C3 augmente la surface de bug sans bénéfice fonctionnel immédiat.
+
+## Question
+
+Vous confirmez :
+1. **Vague A seule dans ce commit** (recommandé), ou
+2. **Tout d'un coup** incluant push web + admin KPI (plus long, plus de risque) ?
