@@ -67,20 +67,21 @@ export function AlmaBubble({
         <button
           type="button"
           onClick={onDismiss}
-          className="absolute right-2 top-2 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition"
+          className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition"
           aria-label="Masquer Alma"
         >
           <X className="h-3.5 w-3.5" />
         </button>
       )}
 
-      <div className="flex items-start gap-3">
+      <div className={cn("flex items-start gap-3", onDismiss && "pr-10")}>
         <div className="flex flex-col items-center gap-1 shrink-0 text-primary">
           <AlmaAvatar size={AVATAR_SIZE[variant]} />
           <span className="text-[10px] font-semibold uppercase tracking-wider text-primary/80">
             Alma
           </span>
         </div>
+
 
         <div className="flex-1 min-w-0 space-y-2">
           {title && (
