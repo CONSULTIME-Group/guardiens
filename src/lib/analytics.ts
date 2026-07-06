@@ -96,6 +96,12 @@ export type EventType =
   | "sitter_digest_cta_clicked"        // Clic CTA "Postuler en 1 clic" (sitter_id, sit_id, position, affinity_score, email_id?)
   | "sitter_digest_apply_from_email"   // Candidature depuis digest (sitter_id, sit_id, email_id?)
   | "sitter_digest_optin_toggled"      // Toggle opt-in dans /email-preferences (enabled)
+  // Owner Pass 2 (publish 40 % + nurturing renforcé) -----------------------
+  | "owner_incomplete_profile_badge_seen"      // Badge affiché à l'owner sur son annonce (profile_completion, fields_remaining?)
+  | "owner_incomplete_profile_badge_clicked"   // Clic sur le badge, redirect /profile
+  | "owner_publish_with_incomplete_profile_modal_seen"  // Modale nudge à l'ouverture (profile_completion)
+  | "owner_publish_with_incomplete_profile_confirmed"   // Owner confirme la publication malgré profil < 80 %
+  | "email_owner_no_sit_j21_sent"              // Envoi step J+21 séquence owner-no-sit-relance
   // Pivot pricing "gratuit sans deadline" -----------------------------------
   | "pricing_baseline_seen"            // Impression du bloc éditorial baseline (surface: tarifs|landing_faq|my_subscription|observatoire)
   | "pricing_faq_expanded"             // Ouverture d'une question de la FAQ tarifs (question_id)
