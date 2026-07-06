@@ -68,6 +68,16 @@ const BreedPage = () => {
       });
   }, [slug]);
 
+  // Pass 5 — compagnon culturel : fait race matché sur species + breed slug.
+  useAlmaCulturalFact({
+    surface: "race_page",
+    enabled: !!breed,
+    context: {
+      animal_species: breed?.species,
+      animal_breed: breed ? slugify(breed.breed) : undefined,
+    },
+  });
+
   if (notFound) return <Navigate to="/races" replace />;
   if (loading || !breed) {
     return (
