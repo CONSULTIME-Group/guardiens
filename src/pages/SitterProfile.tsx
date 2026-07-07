@@ -404,11 +404,11 @@ const SitterProfile = () => {
             }
             trustSlot={
               <TrustProfile
-                emailVerified={true}
+                emailVerified={emailVerified}
                 identityVerified={!!user?.identityVerified}
                 hasAvatar={!!(mergedData.avatar_url || user?.avatarUrl)}
                 profileCompletion={liveScore}
-                hasFirstActivity={false}
+                hasFirstActivity={hasFirstActivity}
                 role="sitter"
               />
             }
