@@ -833,7 +833,8 @@ export default function PublicSitterProfile() {
         <ProfileSchemaOrg
           name={firstName}
           city={city || undefined}
-          postalCode={profile.postal_code || undefined}
+          /* RGPD : on n'expose que les deux premiers chiffres (département), pas le code postal complet. */
+          postalCode={profile.postal_code ? String(profile.postal_code).slice(0, 2) : undefined}
           avatarUrl={profile.avatar_url || undefined}
           bio={bio || motivation || undefined}
           avgRating={avgRating}
