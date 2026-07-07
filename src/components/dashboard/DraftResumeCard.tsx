@@ -163,6 +163,11 @@ export default function DraftResumeCard({ draft, onDeleted }: Props) {
             <p className="text-sm text-muted-foreground mt-1">
               Reprenez où vous en étiez. Vous êtes à {filled} champs sur {total} remplis.
             </p>
+            {staleDate && (
+              <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 text-xs font-medium px-2 py-0.5 mt-1.5">
+                Dates à mettre à jour
+              </span>
+            )}
             {modified && (
               <p className="text-xs text-muted-foreground/80 mt-1">
                 Modifié {relativeTime(modified)}
