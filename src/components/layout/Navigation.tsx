@@ -271,6 +271,7 @@ export const Sidebar = () => {
               <SidebarItem to="/petites-missions" icon={Handshake} label="Conseils & coups de main" badge={missionBadgeCount} />
 
               <GroupLabel label="Ressources" />
+              <SidebarItem to="/conseils" icon={Sparkles} label="Conseils d'Alma" />
               <SidebarItem to="/actualites" icon={Newspaper} label="Guides & Conseils" />
               <SidebarItem to="/guides" icon={Compass} label="Guides locaux" />
             </>
