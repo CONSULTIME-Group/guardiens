@@ -380,7 +380,7 @@ export default function PublicSitterProfile() {
           supabase.from("subscriptions").select("status").eq("user_id", id).eq("status", "active").limit(1),
           supabase
             .from("owner_profiles")
-            .select("id, user_id, description, environments, competences, competences_disponible")
+            .select("id, user_id, welcome_notes, environments, competences, competences_disponible")
             .eq("user_id", id)
             .maybeSingle(),
           supabase
