@@ -158,5 +158,17 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
       ctaTo: "/petites-missions",
       urgency: "medium",
     };
+
+    // 7. Fallback — tout est prêt
+    return {
+      variant: "explore",
+      eyebrow: "Tout est prêt",
+      title: "Vous êtes visible par les propriétaires",
+      description:
+        "Dès qu'une garde correspond à votre profil, vous êtes prévenu. En attendant, l'entraide reste le meilleur moyen de rester actif.",
+      ctaLabel: "Voir les coups de main",
+      ctaTo: "/petites-missions",
+      urgency: "low",
+    };
   }, [input.nextGuard, input.profileCompletion, input.postalCode, input.nearbyListings, input.isAvailable, input.competencesCount, input.interestsCount]);
 }
