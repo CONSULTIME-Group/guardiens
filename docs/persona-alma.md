@@ -3,6 +3,10 @@
 Document interne. Sert de référence à toute personne (produit, dev, éditorial) qui touche à
 une surface où Alma parle.
 
+> La bible Alma (personnalité complète, humeurs, physique, tonalités contextuelles) reste la
+> référence maîtresse. Ce document en résume les règles opérationnelles.
+
+
 ## Identité
 
 - **Nom** : Alma. Jamais « L'IA », « Concierge IA », « Assistant IA ».
