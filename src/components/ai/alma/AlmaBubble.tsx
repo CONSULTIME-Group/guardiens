@@ -9,7 +9,7 @@
 import { ReactNode } from "react";
 import { Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AlmaAvatarLottie } from "./AlmaAvatarLottie";
+import { AlmaAvatar } from "./AlmaAvatar";
 
 export type AlmaVariant = "default" | "dashboard" | "inline" | "sticky-footer";
 export type AlmaAudience = "owner" | "sitter";
@@ -52,7 +52,7 @@ export function AlmaBubble({
   className,
 }: AlmaBubbleProps) {
   const loadingLabel = audience === "sitter" ? "Alma prépare…" : "Alma prépare…";
-  const lottieState = loading ? "thinking" : success ? "success" : "idle";
+  const mood = loading ? "thinking" : success ? "happy" : "idle";
 
   return (
     <div
@@ -79,7 +79,7 @@ export function AlmaBubble({
 
       <div className={cn("flex items-start gap-3", onDismiss && "pr-10")}>
         <div className="flex flex-col items-center gap-1 shrink-0 text-primary">
-          <AlmaAvatarLottie size={AVATAR_SIZE[variant]} state={lottieState} />
+          <AlmaAvatar size={AVATAR_SIZE[variant]} mood={mood} breathe />
           <span className="text-[10px] font-semibold uppercase tracking-wider text-primary/80">
             Alma
           </span>
