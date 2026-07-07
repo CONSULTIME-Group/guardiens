@@ -142,6 +142,8 @@ export default function PublicSitterProfile() {
   const [showAllMissionsPublished, setShowAllMissionsPublished] = useState(false);
   const [showAllMissionsHelped, setShowAllMissionsHelped] = useState(false);
   const [showAllEntraideFeedbacks, setShowAllEntraideFeedbacks] = useState(false);
+  // Filtre chips pour l'onglet Avis, aplati (plus de sous-onglets Gardes/Missions imbriqués).
+  const [reviewFilter, setReviewFilter] = useState<'all' | 'gardes' | 'missions'>('all');
 
   const VISIBLE_COUNT = 3;
   const ShowMoreBtn = ({ items, showAll, setShowAll }: { items: any[]; showAll: boolean; setShowAll: (v: boolean) => void }) =>
@@ -1047,12 +1049,23 @@ export default function PublicSitterProfile() {
                   <ReplyTimeBadge minutes={sitterProfile.reply_median_minutes} className="self-start mt-1" />
                 )}
 
-                {city && (
-                  <p className="text-sm sm:text-base text-foreground/80 flex items-center gap-1 font-medium min-w-0 max-w-full break-words">
-                    <MapPin className="w-3.5 h-3.5 shrink-0" />
-                    <span className="min-w-0 break-words">Gardien à {city}</span>
-                  </p>
-                )}
+                {city && (() => {
+                  // Sous-titre rôle-aware, cohérent quel que soit l'onglet actif.
+                  // Un dual-role affiche « Gardien et propriétaire à X » ;
+                  // sinon, on colle au rôle réel de la personne (pas juste au tab).
+                  const isDual = hasSitterProfile && hasOwnerProfile;
+                  const roleLabel = isDual
+                    ? 'Gardien et propriétaire'
+                    : (activeTab === 'proprio' || (!hasSitterProfile && hasOwnerProfile))
+                      ? 'Propriétaire'
+                      : 'Gardien';
+                  return (
+                    <p className="text-sm sm:text-base text-foreground/80 flex items-center gap-1 font-medium min-w-0 max-w-full break-words">
+                      <MapPin className="w-3.5 h-3.5 shrink-0" />
+                      <span className="min-w-0 break-words">{roleLabel} à {city}</span>
+                    </p>
+                  );
+                })()}
                 {(profile as any)?.pro_status === "verified" && (profile as any)?.pro_tagline && (
                   <p className="text-xs sm:text-sm text-foreground/75 italic mt-1 max-w-full break-words">
                     « {(profile as any).pro_tagline} »
@@ -1473,14 +1486,9 @@ export default function PublicSitterProfile() {
                     Galerie ({gallery.length})
                   </TabsTrigger>
                 )}
-                {((userBadges && userBadges.length > 0) || profile?.created_at) && (
-                  <TabsTrigger
-                    value="confiance"
-                    className="data-[state=active]:bg-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-body"
-                  >
-                    Confiance
-                  </TabsTrigger>
-                )}
+                {/* Onglet « Confiance » retiré du desktop : la section est désormais toujours
+                    visible en dessous des Tabs, plus besoin de cliquer pour voir les vérifications. */}
+
               </TabsList>
 
               {/* Onglet À propos */}
@@ -1506,48 +1514,66 @@ export default function PublicSitterProfile() {
                 <PublicExperiences experiences={externalExperiences} />
               </TabsContent>
 
-              {/* Onglet Avis */}
+              {/* Onglet Avis, aplati : liste unique triée + filtre à puces (plus de sous-onglets imbriqués). */}
               {reviewCount > 0 && (
                 <TabsContent value="avis" className="pt-6">
-                  <Tabs defaultValue="gardes" className="w-full">
-                    <TabsList className="mb-4">
-                      <TabsTrigger value="gardes">
-                        Gardes{gardeReviews.length > 0 ? ` (${gardeReviews.length})` : ""}
-                      </TabsTrigger>
-                      <TabsTrigger value="missions">
-                        Missions{missionReviews.length > 0 ? ` (${missionReviews.length})` : ""}
-                      </TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="gardes" forceMount>
-                      {gardeReviews.length === 0 ? (
-                        <p className="text-sm text-muted-foreground italic py-4 font-body">
-                          {firstName} n'a pas encore reçu d'avis de garde.
-                        </p>
-                      ) : (
-                        <ReviewGrid
-                          reviews={gardeReviews}
-                          showAll={showAllGardeReviews}
-                          setShowAll={setShowAllGardeReviews}
-                          badgesBySitId={badgesBySitId}
-                        />
-                      )}
-                    </TabsContent>
-                    <TabsContent value="missions" forceMount>
-                      {missionReviews.length === 0 ? (
-                        <p className="text-sm text-muted-foreground italic py-4 font-body">
-                          {firstName} n'a pas encore reçu d'avis de mission.
-                        </p>
-                      ) : (
-                        <ReviewGrid
-                          reviews={missionReviews}
-                          showAll={showAllMissionReviewsTab}
-                          setShowAll={setShowAllMissionReviewsTab}
-                        />
-                      )}
-                    </TabsContent>
-                  </Tabs>
+                  {(() => {
+                    const filtered = reviewFilter === 'gardes'
+                      ? gardeReviews
+                      : reviewFilter === 'missions'
+                        ? missionReviews
+                        : [...reviews].sort((a: any, b: any) =>
+                            new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+                    const chips: Array<{ id: 'all' | 'gardes' | 'missions'; label: string; count: number }> = [
+                      { id: 'all', label: 'Tous', count: reviews.length },
+                      { id: 'gardes', label: 'Gardes', count: gardeReviews.length },
+                      { id: 'missions', label: 'Missions', count: missionReviews.length },
+                    ];
+                    return (
+                      <>
+                        <div className="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="Filtrer les avis">
+                          {chips.map((c) => {
+                            const active = reviewFilter === c.id;
+                            return (
+                              <button
+                                key={c.id}
+                                type="button"
+                                role="tab"
+                                aria-selected={active}
+                                onClick={() => setReviewFilter(c.id)}
+                                className={[
+                                  'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-body transition-colors',
+                                  active
+                                    ? 'bg-primary text-primary-foreground border-primary'
+                                    : 'bg-card text-foreground/70 border-border hover:border-primary/40 hover:text-foreground',
+                                ].join(' ')}
+                              >
+                                {c.label}
+                                {c.count > 0 && (
+                                  <span className={active ? 'opacity-90' : 'text-muted-foreground'}>({c.count})</span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        {filtered.length === 0 ? (
+                          <p className="text-sm text-muted-foreground italic py-4 font-body">
+                            Aucun avis dans cette catégorie.
+                          </p>
+                        ) : (
+                          <ReviewGrid
+                            reviews={filtered}
+                            showAll={showAllGardeReviews}
+                            setShowAll={setShowAllGardeReviews}
+                            badgesBySitId={badgesBySitId}
+                          />
+                        )}
+                      </>
+                    );
+                  })()}
                 </TabsContent>
               )}
+
 
               {/* Onglet Pratique */}
               <TabsContent value="pratique" className="pt-6">
@@ -1577,34 +1603,47 @@ export default function PublicSitterProfile() {
                 </TabsContent>
               )}
 
-              {/* Onglet Confiance */}
-              {((userBadges && userBadges.length > 0) || profile?.created_at) && (
-                <TabsContent value="confiance" className="pt-6">
-                  <div className="space-y-6">
-                    {userBadges && userBadges.length > 0 && (
-                      <>
-                        <SpecialBadgeHighlight userBadges={userBadges} />
-                        <BadgeRow badges={userBadges} />
-                      </>
-                    )}
-                    {id && <MissionBadgesReceived profileId={id} />}
-                    <TrustTimeline
-                      memberSince={profile?.created_at}
-                      reviews={reviews}
-                      badges={(userBadges || []).map((b: any) => ({
-                        badge_id: b.badge_id,
-                        created_at: b.created_at,
-                        count: b.count ?? 1,
-                      }))}
-                      completedSits={completedSits}
-                      lastActivity={sitterProfile?.last_seen_at ?? null}
-                      firstName={firstName}
-                    />
-                  </div>
-                </TabsContent>
-              )}
             </Tabs>
+
+            {/* Section Confiance toujours visible sur desktop (badges + timeline + missions).
+                Sortie de l'onglet pour rendre la réassurance accessible sans clic. */}
+            {((userBadges && userBadges.length > 0) || profile?.created_at) && (
+              <section
+                id="confiance"
+                aria-label="Confiance et vérifications"
+                className="mt-10 pt-8 border-t border-border space-y-6"
+              >
+                <header>
+                  <p className="text-xs uppercase tracking-[2px] text-muted-foreground font-body mb-1.5">
+                    Confiance et vérifications
+                  </p>
+                  <h2 className="text-xl font-heading font-semibold text-foreground">
+                    Ce qui rassure chez {firstName}
+                  </h2>
+                </header>
+                {userBadges && userBadges.length > 0 && (
+                  <>
+                    <SpecialBadgeHighlight userBadges={userBadges} />
+                    <BadgeRow badges={userBadges} />
+                  </>
+                )}
+                {id && <MissionBadgesReceived profileId={id} />}
+                <TrustTimeline
+                  memberSince={profile?.created_at}
+                  reviews={reviews}
+                  badges={(userBadges || []).map((b: any) => ({
+                    badge_id: b.badge_id,
+                    created_at: b.created_at,
+                    count: b.count ?? 1,
+                  }))}
+                  completedSits={completedSits}
+                  lastActivity={sitterProfile?.last_seen_at ?? null}
+                  firstName={firstName}
+                />
+              </section>
+            )}
           </div>
+
 
           {/* MOBILE : onglets sticky scrollables (forceMount pour SEO) */}
           <div className="md:hidden">
@@ -1618,6 +1657,12 @@ export default function PublicSitterProfile() {
                     Avis&nbsp;({reviewCount})
                   </TabsTrigger>
                 )}
+                {/* Confiance remonté en 2e position pratique après Avis pour rendre la réassurance visible sans clic. */}
+                {((userBadges && userBadges.length > 0) || profile?.created_at) && (
+                  <TabsTrigger value="confiance" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
+                    Confiance
+                  </TabsTrigger>
+                )}
                 <TabsTrigger value="pratique" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
                   Pratique
                 </TabsTrigger>
@@ -1626,12 +1671,8 @@ export default function PublicSitterProfile() {
                     Galerie
                   </TabsTrigger>
                 )}
-                {((userBadges && userBadges.length > 0) || profile?.created_at) && (
-                  <TabsTrigger value="confiance" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
-                    Confiance
-                  </TabsTrigger>
-                )}
               </TabsList>
+
 
               {/* Onglet À propos */}
               <TabsContent value="apropos" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 space-y-5">
@@ -1652,40 +1693,64 @@ export default function PublicSitterProfile() {
                 <PublicExperiences experiences={externalExperiences} />
               </TabsContent>
 
-              {/* Onglet Avis */}
+              {/* Onglet Avis, aplati : liste unique triée + filtre à puces (plus de sous-onglets imbriqués). */}
               {reviewCount > 0 && (
                 <TabsContent value="avis" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5">
-                  <Tabs defaultValue={gardeReviews.length > 0 ? "gardes" : "missions"} className="w-full">
-                    <TabsList className="mb-3">
-                      <TabsTrigger value="gardes">Gardes{gardeReviews.length > 0 ? ` (${gardeReviews.length})` : ''}</TabsTrigger>
-                      <TabsTrigger value="missions">Missions{missionReviews.length > 0 ? ` (${missionReviews.length})` : ''}</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="gardes" forceMount>
-                      {gardeReviews.length === 0 ? (
-                        <p className="text-sm text-muted-foreground italic py-2 font-body">Pas encore d'avis de garde.</p>
-                      ) : (
-                        <ReviewGrid
-                          reviews={gardeReviews}
-                          showAll={showAllGardeReviews}
-                          setShowAll={setShowAllGardeReviews}
-                          badgesBySitId={badgesBySitId}
-                        />
-                      )}
-                    </TabsContent>
-                    <TabsContent value="missions" forceMount>
-                      {missionReviews.length === 0 ? (
-                        <p className="text-sm text-muted-foreground italic py-2 font-body">Pas encore d'avis de mission.</p>
-                      ) : (
-                        <ReviewGrid
-                          reviews={missionReviews}
-                          showAll={showAllMissionReviewsTab}
-                          setShowAll={setShowAllMissionReviewsTab}
-                        />
-                      )}
-                    </TabsContent>
-                  </Tabs>
+                  {(() => {
+                    const filtered = reviewFilter === 'gardes'
+                      ? gardeReviews
+                      : reviewFilter === 'missions'
+                        ? missionReviews
+                        : [...reviews].sort((a: any, b: any) =>
+                            new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+                    const chips: Array<{ id: 'all' | 'gardes' | 'missions'; label: string; count: number }> = [
+                      { id: 'all', label: 'Tous', count: reviews.length },
+                      { id: 'gardes', label: 'Gardes', count: gardeReviews.length },
+                      { id: 'missions', label: 'Missions', count: missionReviews.length },
+                    ];
+                    return (
+                      <>
+                        <div className="flex flex-wrap gap-2 mb-3" role="tablist" aria-label="Filtrer les avis">
+                          {chips.map((c) => {
+                            const active = reviewFilter === c.id;
+                            return (
+                              <button
+                                key={c.id}
+                                type="button"
+                                role="tab"
+                                aria-selected={active}
+                                onClick={() => setReviewFilter(c.id)}
+                                className={[
+                                  'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-body transition-colors',
+                                  active
+                                    ? 'bg-primary text-primary-foreground border-primary'
+                                    : 'bg-card text-foreground/70 border-border hover:border-primary/40 hover:text-foreground',
+                                ].join(' ')}
+                              >
+                                {c.label}
+                                {c.count > 0 && (
+                                  <span className={active ? 'opacity-90' : 'text-muted-foreground'}>({c.count})</span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        {filtered.length === 0 ? (
+                          <p className="text-sm text-muted-foreground italic py-2 font-body">Aucun avis dans cette catégorie.</p>
+                        ) : (
+                          <ReviewGrid
+                            reviews={filtered}
+                            showAll={showAllGardeReviews}
+                            setShowAll={setShowAllGardeReviews}
+                            badgesBySitId={badgesBySitId}
+                          />
+                        )}
+                      </>
+                    );
+                  })()}
                 </TabsContent>
               )}
+
 
               {/* Onglet Pratique */}
               <TabsContent value="pratique" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5">
@@ -1783,49 +1848,124 @@ export default function PublicSitterProfile() {
       {activeTab === 'proprio' && (
         <div className="max-w-4xl mx-auto pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
 
-          {/* Hero compact propriétaire */}
-          <div className="px-4 pt-5 pb-4 border-b border-border/60">
-            <div className="flex items-center gap-3 max-w-xl">
-              <img
-                src={profile?.avatar_url || '/placeholder.svg'}
-                alt={firstName}
-                className="w-14 h-14 rounded-full object-cover border-2 border-background shadow-sm ring-2 ring-primary/30 shrink-0"
-              />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="font-heading text-lg font-bold text-foreground capitalize leading-tight">{firstName}</h2>
-                  {profile?.identity_verified && (
-                    <span className="inline-flex items-center gap-1 text-[11px] text-primary border border-primary/30 rounded-full px-2 py-0.5 bg-primary/5 font-body">
-                      <Shield size={10} aria-hidden="true" /> ID vérifiée
+          {/* ── Bandeau qualification propriétaire, miroir du bandeau gardien ──
+              Le hero premium est déjà rendu en tête, ne pas dupliquer. */}
+          {(() => {
+            const ownerAvg = ownerReviews.length > 0
+              ? ownerReviews.reduce((s, r) => s + (Number(r.overall_rating) || 0), 0) / ownerReviews.length
+              : 0;
+            const speciesSet = Array.from(new Set(pets.map((p: any) => p.species).filter(Boolean)));
+            const speciesLabel = speciesSet
+              .map((s: any) => ANIMAL_LABELS[s as string] || s)
+              .join(', ');
+            const envLabel = (ownerProfile?.environments ?? [])
+              .map((e) => ENV_LABELS[e] || e)
+              .join(', ');
+            const Empty = ({ label }: { label: string }) => (
+              <p className="text-sm text-muted-foreground/70 italic font-body">{label}</p>
+            );
+            return (
+              <section
+                aria-label="Informations clés du propriétaire"
+                className="px-4 md:px-6 pt-5 md:pt-6"
+              >
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2.5 md:gap-3">
+                  {/* Tuile 1 : Animaux */}
+                  <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
+                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
+                      <span className="truncate">Animaux</span>
+                    </div>
+                    {pets.length > 0 ? (
+                      <p className="text-xs sm:text-sm text-foreground font-body leading-snug line-clamp-2 break-words">
+                        <span className="font-semibold">{pets.length}</span>
+                        {speciesLabel ? <span className="text-muted-foreground"> · {speciesLabel}</span> : null}
+                      </p>
+                    ) : (
+                      <Empty label="Non renseigné" />
+                    )}
+                  </div>
+
+                  {/* Tuile 2 : Environnement */}
+                  <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
+                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
+                      <span className="truncate">Environnement</span>
+                    </div>
+                    {envLabel ? (
+                      <p className="text-xs sm:text-sm text-foreground font-body leading-snug line-clamp-2 break-words">
+                        {envLabel}
+                      </p>
+                    ) : city ? (
+                      <p className="text-xs sm:text-sm text-foreground/80 font-body leading-snug break-words">{city}</p>
+                    ) : (
+                      <Empty label="Non renseigné" />
+                    )}
+                  </div>
+
+                  {/* Tuile 3 : Ancienneté + gardes publiées */}
+                  <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
+                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
+                      <span className="truncate">Ancienneté</span>
+                    </div>
+                    {profile?.created_at ? (
+                      <p className="text-xs sm:text-sm text-foreground font-body leading-snug break-words">
+                        <span className="font-semibold">{anciennete(profile.created_at)}</span>
+                      </p>
+                    ) : (
+                      <Empty label="Non renseigné" />
+                    )}
+                    <span className="text-[10px] sm:text-[11px] text-muted-foreground font-body">
+                      {ownerSitsTotal > 0
+                        ? `${ownerSitsTotal} garde${ownerSitsTotal > 1 ? 's' : ''} publiée${ownerSitsTotal > 1 ? 's' : ''}`
+                        : 'Aucune garde publiée'}
                     </span>
-                  )}
-                  {profile?.is_founder && (
-                    <span className="inline-flex items-center gap-1 text-[11px] text-foreground/70 border border-border rounded-full px-2 py-0.5 bg-card font-body">
-                      <Star size={10} aria-hidden="true" /> Fondateur
-                    </span>
-                  )}
+                  </div>
+
+                  {/* Tuile 4 : Confiance (avis + écussons) */}
+                  <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
+                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
+                      <span className="truncate">Confiance</span>
+                    </div>
+                    {(ownerReviews.length > 0 || totalBadgeCount > 0 || profile?.identity_verified) ? (
+                      <>
+                        <div className="flex items-baseline flex-wrap gap-x-1.5 gap-y-0.5 text-xs sm:text-sm text-foreground font-body">
+                          {ownerReviews.length > 0 ? (
+                            <>
+                              <span className="font-semibold whitespace-nowrap">{ownerAvg.toFixed(1)}<span className="text-primary">★</span></span>
+                              <span className="text-muted-foreground text-[11px] sm:text-xs">({ownerReviews.length} avis)</span>
+                            </>
+                          ) : profile?.identity_verified ? (
+                            <span className="text-foreground/80 text-[11px] sm:text-xs">Identité vérifiée</span>
+                          ) : (
+                            <span className="text-muted-foreground text-[11px] sm:text-xs italic">Aucun avis</span>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-x-1 sm:gap-x-1.5 gap-y-0.5 text-[10px] sm:text-[11px] text-muted-foreground font-body">
+                          {totalBadgeCount > 0 && (
+                            <span className="whitespace-nowrap">{totalBadgeCount} écusson{totalBadgeCount > 1 ? 's' : ''}</span>
+                          )}
+                          {totalBadgeCount > 0 && profile?.identity_verified && ownerReviews.length > 0 && <span aria-hidden="true">·</span>}
+                          {profile?.identity_verified && ownerReviews.length > 0 && (
+                            <span className="whitespace-nowrap">ID vérifiée</span>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <Empty label="Nouveau profil" />
+                    )}
+                  </div>
                 </div>
-                {city && (
-                  <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5 font-body">
-                    <MapPin className="w-3 h-3 shrink-0" aria-hidden="true" />
-                    Propriétaire à {city}
-                  </p>
+
+                {/* Empty state éditorial owner sans annonce */}
+                {ownerSitsTotal === 0 && !ownerDataLoading && (
+                  <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/30 p-4 text-sm text-foreground/80 font-body leading-relaxed">
+                    <span className="font-medium text-foreground">{firstName} prépare sa première garde.</span>{' '}
+                    En attendant, découvrez ses animaux et son environnement ci-dessous.
+                  </div>
                 )}
-                {(() => {
-                  const ownerAvgHero = ownerReviews.length > 0
-                    ? ownerReviews.reduce((s, r) => s + (Number(r.overall_rating) || 0), 0) / ownerReviews.length
-                    : 0;
-                  return ownerAvgHero > 0 && (
-                    <p className="text-xs text-foreground/70 font-body mt-0.5">
-                      <span className="font-semibold">{ownerAvgHero.toFixed(1)}</span>
-                      <span className="text-primary ml-0.5">★</span>
-                      <span className="text-muted-foreground ml-1">({ownerReviews.length} avis)</span>
-                    </p>
-                  );
-                })()}
-              </div>
-            </div>
-          </div>
+              </section>
+            );
+          })()}
+
 
           {/* Sous-onglets sticky scrollables (forceMount SEO) */}
           <Tabs defaultValue="apropos" className="w-full">
@@ -2155,6 +2295,42 @@ export default function PublicSitterProfile() {
               </TabsContent>
             )}
           </Tabs>
+
+          {/* Section Confiance propriétaire, toujours visible (miroir du gardien). */}
+          {(userBadges && userBadges.length > 0) || profile?.created_at ? (
+            <section
+              aria-label="Confiance et vérifications du propriétaire"
+              className="px-4 md:px-6 mt-8 pt-6 border-t border-border space-y-5"
+            >
+              <header>
+                <p className="text-xs uppercase tracking-[2px] text-muted-foreground font-body mb-1.5">
+                  Confiance et vérifications
+                </p>
+                <h2 className="text-lg font-heading font-semibold text-foreground">
+                  Ce qui rassure chez {firstName}
+                </h2>
+              </header>
+              {userBadges && userBadges.length > 0 && (
+                <>
+                  <SpecialBadgeHighlight userBadges={userBadges} />
+                  <BadgeRow badges={userBadges} size="compact" />
+                </>
+              )}
+              <TrustTimeline
+                memberSince={profile?.created_at}
+                reviews={ownerReviews as any}
+                badges={(userBadges || []).map((b: any) => ({
+                  badge_id: b.badge_id,
+                  created_at: b.created_at,
+                  count: b.count ?? 1,
+                }))}
+                completedSits={ownerSitsTotal}
+                lastActivity={null}
+                firstName={firstName}
+              />
+            </section>
+          ) : null}
+
 
           {/* CTA sticky bottom-16, au-dessus de la BottomNav h-16 */}
           {showCTA && (
