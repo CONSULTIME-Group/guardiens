@@ -1,124 +1,127 @@
 
-# Audit LECTURE SEULE — Profils publics (gardien + propriétaire)
+# Audit organisation & présentation, profils publics
+
+Lecture seule, aucune modification de code. Focus architecture de l'information, hiérarchie visuelle et cohérence de marque.
 
 ## Localisation
 
-- **Aucune page dédiée propriétaire.** Tout passe par `src/pages/PublicSitterProfile.tsx` (2322 l.) qui unifie gardien / proprio / entraide via `Tabs`.
-- Routes (`src/App.tsx`) :
-  - `/gardiens/:id` → `PublicSitterProfile` (L.315)
-  - `/proprietaires/:id` → `Navigate to /gardiens/:id?tab=proprio` (L.255-258)
-  - `/profil/:id` → `Navigate to /gardiens/:id` (L.249-252)
-  - `/annonces/:id` → `PublicSitDetail` (encart owner via `PublicSitView`)
-- Composants clés : `TrustScore.tsx`, `TrustTimeline.tsx`, `ProfileSchemaOrg.tsx`, `useProfileReputation.ts`, `supabase/functions/og-profile/index.ts`.
+- **Page unifiée** : `src/pages/PublicSitterProfile.tsx` (2 387 lignes) sert à la fois gardien, propriétaire et entraide via l'état `activeTab`.
+- **Routes** :
+  - `/gardiens/:id` → `PublicSitterProfile` (défaut onglet gardien)
+  - `/proprietaires/:id` → redirection technique vers `/gardiens/:id?tab=proprio`
+  - `/annonces/:id` → `PublicSitDetail.tsx` (fiche annonce, encart owner en sidebar)
+- **Hero commun** : L1000-1157 (avatar + prénom + badges + TrustScore + CTA hero).
+- **Barre onglets rôle** : L1194-1257 (Gardien / Propriétaire / Entraide).
+- **Contenu gardien** : L1262-1779 (4 tuiles + CTA, puis Tabs : À propos, Avis, Pratique, Galerie, Confiance).
+- **Contenu propriétaire** : L1783-2087+ (hero compact secondaire L1786-1828, sous-onglets À propos, Avis, Animaux, Gardes, Galerie).
+- **CTA sticky bottom mobile** : L1741-1777, **présent uniquement dans l'onglet Gardien**.
 
-## A. Profil public PROPRIÉTAIRE
+## Diagnostic présentation actuelle
 
-### A1. Pas de page dédiée, seulement `tab=proprio`
-Rendu conditionnel `PublicSitterProfile.tsx:1733-2141`. Si l'utilisateur n'a QUE `owner_profiles` (pas de sitter, pas d'entraide), `availableTabs === 1` et la barre d'onglets est masquée (L.1145) : plus aucun libellé ne dit « profil propriétaire ». Fonctionnel mais désorienté.
+### Ce qu'on voit above the fold
 
-### A2. Avec annonces publiées
-Rendu : avatar, prénom, ville, `identity_verified`, `is_founder`, note owner, bio owner, environments, compétences, badges, avis reçus, feedbacks entraide, animaux, galerie proprio, liste annonces (titre + dates + statut).
+**Gardien** (bon) : illustration hero, avatar large avec `StatutGardienBadge`, badge « Disponible » animé, pastille opaque prénom + note + favori + badges pro/fondateur, ville, `ReplyTimeBadge`, chips « Abonné / ID vérifiée / Fondateur / Urgence », `TrustScore`, éventuel Alma, puis stats. En 2 s, on comprend qui, la confiance, et où contacter (le CTA principal reste sous les 4 tuiles, pas dans le hero).
 
-**Restitution des annonces (onglet Gardes, L.2013-2067) :**
-- `sits` select L.514 = `id, title, start_date, end_date, status, created_at`.
-- Aucun `description`, `owner_message`, `environments`, `city`, `cover_photo` — donc les correctifs récents de la fiche annonce ne sont PAS reflétés sur le profil.
-- **Aucun lien cliquable** vers `/annonces/:id` : le visiteur ne peut pas ouvrir une annonce depuis le profil.
+**Propriétaire** (faible) : le hero commun premium disparaît. Une fois sur `?tab=proprio`, on retombe sur un **hero compact secondaire** (L1787-1828) : avatar 56 px, prénom H2 (pas H1), 2 mini-badges, ville, note. **Pas de TrustScore, pas de CTA, pas de badge disponibilité, pas de bandeau de qualification.** Le proprio a l'air d'un onglet secondaire d'un gardien, pas d'une personne à part entière.
 
-### A3. Sans annonce publiée
-Empty states corrects : « Aucune garde publiée pour l'instant » (L.2065), animaux (L.1994), avis (L.1904), galerie masquée si vide (L.1796). Non cassé, mais très pauvre : seul l'encart présentation reste riche.
+### Architecture de l'information
 
-### A4. Cohérence saisie → restitution (bug bloquant)
-`owner_profiles` select L.368-371 = `id, user_id, environments, competences, competences_disponible`. **`description` est absente du select** → `ownerProfile.description` est toujours `undefined`, le rendu retombe sur `profile.bio` (L.1810). Le mot rédigé dans « Mon profil propriétaire » n'apparaît JAMAIS sur le profil public.
+**Gardien** (L1263-1779) :
+1. Bandeau qualification rapide : 4 tuiles (Animaux, Zone, Disponibilité, Confiance) + CTA
+2. Tabs (desktop) / onglets sticky scrollables (mobile) : À propos, Avis, Pratique, Galerie, Confiance
+3. Dans « Avis » : encore des sous-onglets Gardes / Missions
+4. CTA sticky bottom mobile
 
-**Champs owner_profiles saisis mais jamais restitués publiquement** :
-`property_type`, `presence_expected`, `visits_allowed`, `overnight_guest`, `smoker_accepted`, `rules_notes`, `welcome_notes`, `news_frequency`, `news_format`, `meeting_preference`, `handover_preference`, `experience_required`, `specific_expectations`, `home_ambiance`, `languages`, `interests`, `life_pace`.
+**Propriétaire** (L1830-2087+) :
+1. Hero compact
+2. Sous-onglets sticky : À propos, Avis, Animaux, Gardes, Galerie
+3. Aucun CTA sticky, aucun bandeau de qualification équivalent aux 4 tuiles gardien
 
-## B. Profil public GARDIEN
+### Problèmes structurels majeurs
 
-### B1. Ce que voit le visiteur
-Hero illustré (L.850-1109), avatar + statut_gardien (novice/confirmé/super, L.944), prénom + FounderBadge + ProBadge + FavoriteButton + note (L.981), ville + tarif indicatif, badges Identité vérifiée / Abonné / Fondateur / Gardien secours (L.1019-1048), TrustScore, AlmaFitGardien, 4 tuiles rapides, CTA Contacter, sous-onglets À propos / Avis / Pratique / Galerie / Confiance (L.1398-1557 desktop, **dupliqués L.1562-1688 mobile ~170 lignes**). Expériences externes, TrustTimeline, badges missions, ReplyTimeBadge.
+1. **Triple niveau d'onglets côté gardien** : rôle (Gardien/Proprio/Entraide) → contenu (5 tabs) → dans Avis, encore Gardes/Missions. Le visiteur perd le fil et rate souvent l'onglet **Confiance** (badges, timeline, ID) alors que c'est **la** section rassurante clé, aujourd'hui cachée en dernière position derrière un clic.
+2. **Deux hero de niveaux très différents** entre gardien et proprio → rupture de marque forte. Un proprio n'a droit ni à l'illustration, ni au TrustScore, ni au CTA hero.
+3. **Onglet Propriétaire branché sur une URL « /gardiens/:id »** : c'est déroutant conceptuellement (« pourquoi ma page est sur /gardiens ? ») et sémantiquement (SEO, partage, breadcrumb).
+4. **Pas de bandeau qualification proprio** : côté gardien on a 4 tuiles synthétiques (animaux, zone, dispo, confiance). Côté proprio, il n'y a rien d'équivalent (nombre d'animaux, environnement, ancienneté, avis reçus, écussons) → le proprio paraît « pas fini ».
+5. **Owner sans annonce** : la page proprio existe mais l'onglet « Gardes » est vide, aucune amorce de réassurance (« Ce propriétaire prépare sa première annonce », « Voir son profil et ses animaux »). Impression de coquille vide.
+6. **CTA proprio absent en sticky mobile** : sur mobile, un gardien qui visite un proprio n'a **aucun** bouton contacter à portée. Le CTA n'existe que pour l'onglet Gardien (L1742).
+7. **Signaux de confiance mal placés côté gardien** : `TrustScore` est dans le hero (bien), mais Écussons + Timeline + ID détaillée sont noyés dans un onglet « Confiance » optionnel. Un visiteur qui reste sur « À propos » ne les voit jamais.
+8. **Ordre des onglets gardien** : À propos, Avis, Pratique, Galerie, Confiance. « Pratique » (tarifs, zone, compétences) est **la** page utile de décision, elle est en 3ᵉ position derrière « À propos » plutôt éditorial. Les avis (preuves sociales) devraient précéder « Pratique », ce qui est déjà le cas, mais « Confiance » devrait remonter avant « Galerie ».
+9. **Cohérence typographique** : gardien utilise `text-2xl sm:text-3xl md:text-4xl font-heading` pour H1, proprio `text-lg` pour H2 → écart énorme. Les libellés d'onglets et le corps sont eux plutôt cohérents.
+10. **Mobile <= 400 px** : hiérarchie préservée globalement (stats strip scrollable, onglets scrollables), mais l'empilement 4 tuiles → CTA → onglets → contenu → CTA sticky consomme beaucoup de scroll avant d'arriver aux avis.
 
-### B2. Champs sitter — écarts
-Tous les champs sitter_profiles pertinents sont rendus. Seul `accept_unsolicited_pitches` n'est pas exposé publiquement (usage serveur uniquement, normal).
+## Proposition d'organisation cible
 
-### B3. Profil incomplet / nouveau / sans avis
-Bien géré : « Nouveau profil » (L.1335), « n'a pas encore rédigé de présentation » (L.1453), onglets Avis / Galerie masqués si vides, stats « Pas encore noté ». `shouldNoindex=true` (L.735) exclut les profils pauvres des moteurs.
+### Décision de fond sur les onglets rôle
 
-## C. Transverse
+**Garder** l'onglet rôle Gardien / Propriétaire / Entraide (utile pour les dual-role). Mais :
+- Ce sont des **rôles d'une même personne**, pas des pages différentes. Donc le **hero commun premium** (avatar + illustration + TrustScore + CTA) doit être **identique** peu importe l'onglet actif.
+- Le hero compact proprio actuel (L1787-1828) doit disparaître au profit du hero commun.
 
-### C1. Confiance
-`identity_verified` lu depuis `public_profiles` (L.352). `completed_sits_count` maintenu par trigger DB. `statut_gardien` via view `profile_reputation`. TrustScore purement client (0-100). Le public reflète bien le vrai statut, sauf que la description owner masquée (A4) dégrade artificiellement la richesse perçue.
+### Ordre above the fold, unifié gardien + proprio
 
-### C2. Vie privée — fuites
+1. Illustration hero (déjà là)
+2. Avatar large + statut (StatutGardien pour sitter, équivalent « Propriétaire vérifié » pour owner)
+3. Pastille prénom + note + favori + badges (fondateur, ID vérifiée, abonné)
+4. Ville : « Gardien à X » / « Propriétaire à X » / « Gardien et propriétaire à X »
+5. TrustScore (identique pour les deux rôles)
+6. **CTA hero** (Contacter / S'inscrire) : à monter ici, plus visible que sous les 4 tuiles
 
-| Donnée | Chargée | Rendue | Risque |
+### Ordre des sections idéal, après hero
+
+**Gardien** :
+1. Bandeau 4 tuiles (Animaux, Zone, Dispo, Confiance) — garder
+2. Avis (preuve sociale d'abord)
+3. Pratique (tarifs, compétences, savoir-faire)
+4. Confiance étendue (badges, timeline, ID détail, expériences externes)
+5. À propos (bio, motivation) — dégrader en dernier, c'est le plus « décoratif »
+6. Galerie (accessoire)
+
+**Propriétaire** :
+1. Bandeau 4 tuiles équivalent : Animaux (nombre + espèces), Environnement, Ancienneté + gardes publiées, Confiance (avis + écussons)
+2. Animaux (le sujet central du proprio)
+3. Avis reçus des gardiens
+4. Gardes publiées (cliquables, comme corrigé récemment)
+5. À propos (welcome_notes + bio)
+6. Confiance / écussons
+
+### Faut-il garder les onglets contenu ?
+
+- **Sur desktop** : passer en **page longue avec ancres** plutôt qu'onglets. Un profil doit se lire, pas se cliquer. Les onglets desktop cachent la moitié de la page (surtout Confiance) et cassent le SEO comportemental. Garder une **table des matières sticky** à gauche/en haut avec les 5-6 sections.
+- **Sur mobile** : garder les onglets sticky scrollables (space budget serré), mais **ajouter un onglet « Confiance » actif par défaut si le visiteur arrive depuis un CTA « Voir les vérifications »**, sinon « Avis » par défaut (pas « À propos »).
+- **Éliminer le 3ᵉ niveau d'onglets** dans « Avis » (Gardes/Missions) : afficher les deux listes empilées avec un filtre à puces (« Gardes 5 · Missions 2 ») plutôt que des sous-tabs Radix.
+
+### Traiter le cas propriétaire à égalité
+
+- Hero commun premium (voir ci-dessus).
+- Bandeau 4 tuiles proprio.
+- **CTA sticky mobile** activé aussi sur l'onglet proprio.
+- **Owner sans annonce** : bloc soigné « [Prénom] prépare sa première garde. En attendant, découvrez ses animaux et son environnement. » + mise en avant Animaux et Environnement.
+- Optionnel : renommer la route publique proprio en `/proprietaires/:id` **direct** (sans redirect) avec le même composant et un `title`/`breadcrumb` cohérent.
+
+## Tableau récapitulatif
+
+| Zone | Problème de présentation | Sévérité | Reco |
 |---|---|---|---|
-| `last_name` | oui (L.353) | jamais | Chargement inutile, moyen |
-| `postal_code` | oui (L.353) | injecté en JSON-LD `PostalAddress` (L.795) | CP complet crawlable, moyen (RGPD) |
-| `public_profiles.*` | select("*") L.352 | large | À réduire |
-| `sitter_gallery.*` | select("*") L.364 | 2 colonnes utilisées | À réduire |
-| email, téléphone, adresse exacte | non chargés | — | OK |
+| Hero proprio (L1787-1828) | Hero compact 56 px, pas de TrustScore, pas de CTA, pas de badges hero, aucune illustration | **Bloquant** | Utiliser le hero commun premium (L1000-1157) pour les deux rôles |
+| Onglet Confiance (L1580-1605) | Section clé (badges + timeline + ID) cachée en dernière position derrière un clic | **Bloquant** | Sortir en section longue par défaut sur desktop, remonter avant Galerie sur mobile |
+| CTA gardien (L1391-1439) | Placé sous les 4 tuiles, pas visible above the fold | Moyen | Remonter dans le hero à côté du prénom + favori |
+| CTA proprio | Absent en sticky bottom mobile (L1742 uniquement onglet gardien) | **Bloquant** | Dupliquer le sticky bottom pour l'onglet proprio (« Contacter X ») |
+| Bandeau qualification proprio | Absent, alors que le gardien en a 4 tuiles synthétiques | **Bloquant** | Ajouter 4 tuiles proprio (Animaux, Environnement, Ancienneté, Avis + écussons) |
+| Onglets contenu desktop (L1444-1607) | 3 niveaux d'onglets sur gardien, contenu Confiance/Galerie souvent raté | Moyen | Passer en page longue avec table des matières sticky sur desktop |
+| Sous-onglets Avis Gardes/Missions (L1512-1548, L1658-1686) | 3ᵉ niveau de nesting, pénible et redondant | Moyen | Une seule liste chronologique avec filtre chips « Gardes · Missions · Tous » |
+| Owner sans annonce | Onglet Gardes vide sans réassurance | Moyen | Empty state éditorial + mise en avant Animaux/Environnement |
+| Route `/gardiens/:id?tab=proprio` | Un proprio hébergé sur une URL « gardiens », déroutant + SEO ambigu | Moyen | Servir directement sur `/proprietaires/:id` sans redirect, même composant |
+| H1 vs H2 gardien/proprio | H1 4xl côté gardien vs H2 lg côté proprio, rupture de marque | Moyen | Même H1 pour les deux rôles via hero unifié |
+| Ordre onglets gardien | « À propos » avant « Pratique » et « Confiance » | Cosmétique | Réordonner : Avis, Pratique, Confiance, À propos, Galerie |
+| Stats strip mobile (L1163-1191) | Doublon partiel avec les 4 tuiles gardien | Cosmétique | Fusionner : stats strip = version condensée des tuiles, pas les deux |
 
-`PublicSitDetail.tsx` charge correctement un select restreint (L.92) et n'expose pas le CP en HTML visible.
+## 5 changements prioritaires
 
-### C3. États
-- Loading : skeleton minimal (L.625-639) — pas de skeleton complet pour les tuiles.
-- 404 : `!profile && !ownerProfile` → écran simple (L.641-652).
-- **Erreur réseau : PAS de try/catch autour de `load()` → l'exception non catchée laisse `loading=false, profile=null` et affiche « Profil introuvable » pour un profil qui existe** (pattern déjà présent dans PublicSitDetail L.252-303, non repris ici).
-- Mobile ≤400px : classes responsive OK.
+1. **Hero unifié pour les deux rôles** : le proprio a droit au même hero premium (avatar large, TrustScore, badges, CTA à hauteur du nom). Supprimer le hero compact L1786-1828 et adapter les libellés (« Propriétaire à X », statut proprio).
+2. **CTA sticky bottom mobile actif sur l'onglet proprio** aussi. Aujourd'hui un gardien mobile ne peut pas contacter un proprio sans scroller chercher un bouton.
+3. **Bandeau 4 tuiles proprio** en tête de contenu (Animaux, Environnement, Ancienneté + gardes, Avis + écussons), miroir du bandeau gardien. Le proprio arrête d'avoir l'air « pas fini ».
+4. **Signaux de confiance sortis de leur onglet** : sur desktop, page longue avec section Confiance visible sans clic ; sur mobile, remonter l'onglet Confiance en 2ᵉ position (juste après Avis) et le rendre systématiquement présent.
+5. **Un seul niveau d'onglets « Avis »** : remplacer les sous-tabs Gardes/Missions par un filtre chips + liste unique triée par date. Réduit à 2 le nombre max de niveaux d'onglets vus par un visiteur.
 
-### C4. Typographie / emojis
-- `font-mono` résiduel sur la date de la timeline (`TrustTimeline.tsx:99`) — incongruent.
-- Bandes déco avec `fontFamily: 'sans-serif'` inline (L.822, 826) au lieu du token CSS.
-- Aucun emoji dans le contenu visible (🐾 uniquement dans le SVG og-profile).
-
-### C5. Bugs, code mort, N+1
-- **20 requêtes supabase** réparties sur 3 useEffects, sans `useQuery` (pas de cache, re-fetch à chaque changement de tab).
-- `hydrateReviewers` (L.414, L.533) : risque N+1 selon implémentation batch.
-- Duplication desktop/mobile des sous-onglets gardien : ~170 lignes (L.1380-1689) → deux sources de vérité.
-- Onglet proprio : lightbox absente (hover CSS uniquement) alors que la galerie sitter en a une (L.597-604).
-- Annonces owner : select tronqué + pas de lien vers la fiche annonce.
-
-### C6. SEO / partage
-
-| Aspect | État | Verdict |
-|---|---|---|
-| `<title>` dynamique | L.714-716 (≤60 chars) | OK |
-| `<meta description>` | L.726 (≤160 chars) | OK |
-| Canonical | passé via `PageMeta` (pas d'`<link canonical>` explicite Helmet) | À vérifier |
-| **og:image** | `profile.avatar_url` (L.833) — **edge function `og-profile` NON branchée** | Bloquant partage |
-| **`og-profile` edge function** | Retourne `image/svg+xml` (L.174) | **Bloquant : Facebook/LinkedIn/WhatsApp rejettent SVG** |
-| JSON-LD Person + Service + AggregateRating | `ProfileSchemaOrg.tsx` | Solide |
-| noindex profils pauvres | L.735 | Bonne pratique |
-
-## Tableau Zone | Problème | Sévérité | Correctif
-
-| # | Zone | Problème | Sévérité | Correctif proposé |
-|---|---|---|---|---|
-| 1 | Owner public | `owner_profiles.description` absent du SELECT (L.368-371) → jamais rendue | **Bloquant** | Ajouter `description` à la liste des colonnes |
-| 2 | Owner public | Annonces sans lien vers `/annonces/:id`, select `sits` tronqué (L.514) | Moyen | Ajouter `<Link>` sur chaque carte + `slug` au select |
-| 3 | Owner public | 17 champs owner_profiles saisis jamais restitués (règles, welcome_notes, life_pace, langues…) | Moyen | Sélectionner et rendre au moins welcome_notes, rules_notes, languages, life_pace |
-| 4 | Owner public | Onglet unique proprio → barre masquée, aucun titre de section | Moyen | Afficher `<h2>Profil Propriétaire</h2>` quand tab unique |
-| 5 | Owner public | Galerie proprio sans lightbox (hover CSS seul) | Cosmétique | Réutiliser l'état lightbox existant |
-| 6 | Sitter public | Duplication desktop/mobile des sous-onglets (~170 lignes) | Moyen | Extraire `<SitterTabContent>` partagé |
-| 7 | Transverse | Pas de try/catch autour de `load()` → « Profil introuvable » sur erreur réseau | **Bloquant** | try/catch + état `loadError` + bouton Réessayer (pattern PublicSitDetail) |
-| 8 | Transverse | 20 requêtes supabase sans cache, re-fetch au changement de tab | Moyen | Migrer vers `useQuery` avec `staleTime` |
-| 9 | Perf | N+1 potentiel dans `hydrateReviewers` | Moyen | Vérifier batch, sinon `.in()` unique |
-| 10 | Privacy | `last_name` chargé mais jamais rendu | Moyen | Retirer du select |
-| 11 | Privacy | `postal_code` complet dans JSON-LD `PostalAddress` (L.795) | Moyen (RGPD) | Passer seulement les 2 premiers chiffres ou omettre |
-| 12 | Privacy | `public_profiles.*` et `sitter_gallery.*` en `select("*")` | Moyen | Sélects explicites |
-| 13 | SEO/partage | `og-profile` retourne `image/svg+xml` — rejeté par FB/LinkedIn/WhatsApp | **Bloquant SEO** | Convertir en PNG (Resvg-wasm ou Deno canvas) |
-| 14 | SEO/partage | `og-profile` jamais appelé — og:image = avatar rond | Moyen | Brancher `og-profile?id=<id>` (conditionné à profil riche) |
-| 15 | Typo | `font-mono` résiduel dans TrustTimeline.tsx:99 | Cosmétique | Remplacer par `font-body` |
-| 16 | Typo | `fontFamily: 'sans-serif'` inline (L.822, 826) au lieu du token | Cosmétique | Utiliser var CSS |
-| 17 | UX | Annonces owner ne reprennent pas les corrections récentes (description, owner_message, environments, city) | Moyen | Lien vers fiche annonce (voir #2) |
-
-## Top 5 correctifs prioritaires
-
-1. **Ajouter `description` au SELECT `owner_profiles`** (`PublicSitterProfile.tsx:368-371`). Bug bloquant : la description propriétaire est systématiquement masquée. Une ligne de correctif.
-2. **`og-profile` : générer un PNG au lieu d'un SVG** (`supabase/functions/og-profile/index.ts:174`), puis **brancher l'URL comme `og:image`** dans `PublicSitterProfile.tsx:833`. Sans ça, tous les partages sociaux de profils sont dégradés.
-3. **try/catch global sur `load()`** dans `PublicSitterProfile` avec état d'erreur + bouton Réessayer. Sinon toute erreur réseau affiche à tort « Profil introuvable ».
-4. **Rendre les annonces owner cliquables + enrichir le select `sits`** (city, cover_photo, slug) et lier vers `/annonces/:id`. Permet de restituer les corrections récentes de fiche annonce sans dupliquer le rendu.
-5. **Nettoyage privacy** : retirer `last_name` du select profiles, réduire `postal_code` (2 premiers chiffres) dans le JSON-LD, remplacer les `select("*")` sur `public_profiles` et `sitter_gallery` par des sélections explicites.
-
-Ce plan est un audit livrable, aucune modification de code n'a été effectuée.
+Cible : profils clairs (un seul hero de marque), rassurants (confiance visible sans clic, CTA toujours accessible) et cohérents (proprio et gardien traités à égalité, même typographie, même densité).
