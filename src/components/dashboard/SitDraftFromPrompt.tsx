@@ -103,6 +103,7 @@ export default function SitDraftFromPrompt({ secondary = false, primary = null }
         title: "Erreur inattendue",
         description: e instanceof Error ? e.message : "Réessayez dans un instant.",
       });
+      setAlmaMood("attentive");
       setLoading(false);
     }
   }, [prompt, navigate, toast]);
