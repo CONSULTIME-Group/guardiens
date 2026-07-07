@@ -31,6 +31,8 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { getPasswordStrength, validateStrongPassword } from "@/lib/passwordStrength";
 import { Link } from "react-router-dom";
 import { useAlmaFrequency, type AlmaFrequency } from "@/hooks/useAlmaFrequency";
+import { useAlmaHidden } from "@/hooks/useAlmaHidden";
+
 
 interface NotifPrefs {
   email_new_application: boolean;
@@ -885,8 +887,10 @@ const ALMA_CATEGORY_GROUPS: AlmaCategoryGroup[] = [
 const AlmaFrequencySection = () => {
   const { user } = useAuth();
   const { frequency, loading, setFrequency } = useAlmaFrequency();
+  const { hidden, setHidden } = useAlmaHidden();
   const [muted, setMuted] = useState<Set<string>>(new Set());
   const [mutedLoaded, setMutedLoaded] = useState(false);
+
 
   useEffect(() => {
     if (!user?.id) return;
@@ -925,6 +929,29 @@ const AlmaFrequencySection = () => {
   return (
     <section className="space-y-8">
       <div>
+        <SectionHeader
+          icon={MessageCircle}
+          title="Afficher Alma"
+          description="Le dock d'Alma peut être complètement masqué. Vous pouvez le réafficher à tout moment ici."
+        />
+        <label className="flex items-start gap-3 rounded-lg border border-border bg-card p-4 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={!hidden}
+            onChange={(e) => setHidden(!e.target.checked)}
+            className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary/40"
+          />
+          <span>
+            <span className="text-sm font-semibold">Afficher Alma dans l'application</span>
+            <span className="block text-xs text-muted-foreground mt-0.5">
+              Décochez pour masquer complètement le dock. La fréquence ci-dessous reste conservée si vous réactivez l'affichage.
+            </span>
+          </span>
+        </label>
+      </div>
+
+      <div>
+
         <SectionHeader
           icon={MessageCircle}
           title="Fréquence d'Alma"

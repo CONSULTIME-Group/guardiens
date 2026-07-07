@@ -3761,6 +3761,7 @@ export type Database = {
           account_status: string
           alma_first_meeting_seen: boolean
           alma_frequency: Database["public"]["Enums"]["alma_frequency"]
+          alma_hidden: boolean
           alma_muted_categories: string[]
           animal_experience: string
           available_for_help: boolean | null
@@ -3815,6 +3816,7 @@ export type Database = {
           account_status?: string
           alma_first_meeting_seen?: boolean
           alma_frequency?: Database["public"]["Enums"]["alma_frequency"]
+          alma_hidden?: boolean
           alma_muted_categories?: string[]
           animal_experience?: string
           available_for_help?: boolean | null
@@ -3869,6 +3871,7 @@ export type Database = {
           account_status?: string
           alma_first_meeting_seen?: boolean
           alma_frequency?: Database["public"]["Enums"]["alma_frequency"]
+          alma_hidden?: boolean
           alma_muted_categories?: string[]
           animal_experience?: string
           available_for_help?: boolean | null

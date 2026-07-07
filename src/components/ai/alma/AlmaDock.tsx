@@ -17,18 +17,30 @@
  * Ne rend jamais AlmaAvatarLottie.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { BellOff, Bell, ChevronDown, Sparkles, X } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { ChevronDown, Sparkles, X, MoreHorizontal, Check, EyeOff, Lightbulb, Route } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AlmaAvatarAnimated } from "./AlmaAvatarAnimated";
 import { useAlma } from "@/contexts/AlmaContext";
-import { useAlmaFrequency } from "@/hooks/useAlmaFrequency";
+import { useAlmaFrequency, type AlmaFrequency } from "@/hooks/useAlmaFrequency";
+import { useAlmaHidden } from "@/hooks/useAlmaHidden";
 import { useAlmaEvolution, type AlmaStage } from "@/hooks/useAlmaEvolution";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import { trackEvent } from "@/lib/analytics";
 import { resolveAlmaCtaHref } from "@/lib/alma/cta-actions";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { AlmaWhisper as AlmaWhisperT, AlmaDismissReason } from "@/lib/alma/whisper-types";
+
 
 const STAGE_DOT_CLASS: Record<AlmaStage, string> = {
   nouvelle: "bg-muted-foreground/70",
@@ -147,18 +159,27 @@ function surfaceFromPath(
   return "listings";
 }
 
+const FREQUENCY_CHOICES: { value: AlmaFrequency; label: string }[] = [
+  { value: "silent", label: "Silencieuse" },
+  { value: "low", label: "Peu bavarde" },
+  { value: "balanced", label: "Modéré (recommandé)" },
+  { value: "talkative", label: "Bavarde" },
+];
+
 export function AlmaDock() {
   const { currentWhisper, dismissCurrent, requestNextTip } = useAlma();
   const { frequency, setFrequency } = useAlmaFrequency();
+  const { hidden, setHidden } = useAlmaHidden();
   const { activeRole } = useAuth();
   const { data: evolution } = useAlmaEvolution();
   const isModalOpen = useIsRadixModalOpen();
   const location = useLocation();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const [expanded, setExpanded] = useState(false);
   const [userCollapsed, setUserCollapsed] = useState(false);
-  const [stagePopoverOpen, setStagePopoverOpen] = useState(false);
+
 
   // Auto-timer d'auto-dismiss pour le whisper courant.
   const timerRef = useRef<number | null>(null);
@@ -251,23 +272,39 @@ export function AlmaDock() {
     doDismiss("action_clicked");
   };
 
-  const toggleSilence = async () => {
-    const next = isSilent ? "balanced" : "silent";
-    await setFrequency(next);
-    trackEvent("alma_frequency_changed", {
-      metadata: { from: frequency, to: next, source: "dock" },
+  const changeFrequency = useCallback(
+    async (next: AlmaFrequency) => {
+      if (next === frequency) return;
+      await setFrequency(next);
+      trackEvent("alma_frequency_changed", {
+        metadata: { from: frequency, to: next, source: "dock_menu" },
+      });
+      if (next === "silent") {
+        setExpanded(false);
+        setUserCollapsed(true);
+      }
+    },
+    [frequency, setFrequency],
+  );
+
+  const handleHide = useCallback(async () => {
+    await setHidden(true);
+    trackEvent("alma_frequency_changed" as any, {
+      metadata: { hidden: true, source: "dock_menu", action: "hide" },
     });
-    if (next === "silent") {
-      setExpanded(false);
-      setUserCollapsed(true);
-    }
-  };
+
+    toast({
+      title: "Alma est masquée.",
+      description: "Vous pouvez la réafficher dans Réglages, section Alma.",
+    });
+  }, [setHidden, toast]);
 
   const collapse = () => {
     setExpanded(false);
     setUserCollapsed(true);
     if (whisper) doDismiss("closed_manually");
   };
+
 
   const mood = whisper?.primaryAction ? "attentive" : "idle";
   const proposition = !whisper && !isSilent ? buildProposition(evolution, activeRole) : null;
@@ -290,14 +327,16 @@ export function AlmaDock() {
         onDemand: true,
         emptyMessage: "Rien de neuf pour l'instant, revenez un peu plus tard.",
       });
-      setStagePopoverOpen(false);
       setExpanded(true);
+
       setUserCollapsed(false);
     },
     [location.pathname, activeRole, requestNextTip],
   );
 
   if (isModalOpen) return null;
+  if (hidden) return null;
+
 
 
 
@@ -495,71 +534,21 @@ export function AlmaDock() {
             />
           )}
 
-          {/* Pastille de stade UNIQUE : cliquable, ouvre le popover
-              de progression. Positionnée dans le coin bas-droite de
-              l'avatar avec des classes de positionnement. */}
+          {/* Pastille de stade : simple indicateur non interactif. Le contrôle
+              passe désormais par le menu unique ci-dessous. */}
           {stage && (
-            <Popover open={stagePopoverOpen} onOpenChange={setStagePopoverOpen}>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  aria-label={`Votre stade avec Alma : ${STAGE_SHORT_LABEL[stage]}. Ouvrir les infos.`}
-                  title={`Alma · ${STAGE_SHORT_LABEL[stage]}`}
-                  className={cn(
-                    "absolute -bottom-1 -right-1 min-h-11 min-w-11 rounded-full flex items-center justify-center",
-                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                  )}
-                >
-                  <span
-                    aria-hidden
-                    className={cn(
-                      "h-3.5 w-3.5 rounded-full ring-2 ring-card transition hover:scale-110",
-                      STAGE_DOT_CLASS[stage],
-                    )}
-                  />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent
-                side="top"
-                align="end"
-                className="w-72 p-4"
-                sideOffset={12}
-              >
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span
-                    aria-hidden
-                    className={cn("h-2.5 w-2.5 rounded-full", STAGE_DOT_CLASS[stage])}
-                  />
-                  <p className="text-sm font-semibold text-foreground">
-                    Stade {STAGE_SHORT_LABEL[stage]}
-                  </p>
-                </div>
-                <p className="text-xs text-muted-foreground leading-snug">
-                  {evolution?.nextMilestone ??
-                    "Alma vous accompagne au fil de vos gestes dans la communauté."}
-                </p>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => askForTip("popover")}
-                    className="min-h-11 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  >
-                    Un conseil ?
-                  </button>
-                  <Link
-                    to="/alma"
-                    onClick={() => setStagePopoverOpen(false)}
-                    className="min-h-11 inline-flex items-center rounded-full px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition underline decoration-dotted underline-offset-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  >
-                    Voir le détail
-                  </Link>
-                </div>
-              </PopoverContent>
-            </Popover>
+            <span
+              aria-hidden
+              title={`Alma · ${STAGE_SHORT_LABEL[stage]}`}
+              className={cn(
+                "absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-card",
+                STAGE_DOT_CLASS[stage],
+              )}
+            />
           )}
         </div>
 
-        {/* Label Alma / stade */}
+        {/* Label Alma / stade (déclencheur du panneau) */}
         <button
           type="button"
           tabIndex={-1}
@@ -579,22 +568,93 @@ export function AlmaDock() {
 
         <div className="h-6 w-px bg-border/70" aria-hidden />
 
-        <button
-          type="button"
-          onClick={toggleSilence}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition"
-          aria-label={isSilent ? "Réactiver Alma" : "Mettre Alma en silence"}
-          aria-pressed={isSilent}
-          title={isSilent ? "Alma est en silence" : "Mettre Alma en silence"}
-        >
-          {isSilent ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
-        </button>
+        {/* Menu unique : parcours, conseil, fréquence, masquer. */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-label="Options d'Alma"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <MoreHorizontal className="h-5 w-5" aria-hidden />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="top" align="end" className="w-72" sideOffset={12}>
+            <DropdownMenuLabel className="pb-1">
+              <div className="flex items-center gap-2">
+                {stage && (
+                  <span
+                    aria-hidden
+                    className={cn("h-2.5 w-2.5 rounded-full", STAGE_DOT_CLASS[stage])}
+                  />
+                )}
+                <span className="text-sm font-semibold text-foreground">
+                  {stage ? `Alma, stade ${STAGE_SHORT_LABEL[stage]}` : "Alma, votre assistante"}
+                </span>
+              </div>
+              {evolution?.nextMilestone && (
+                <p className="mt-1 text-xs font-normal text-muted-foreground leading-snug">
+                  {evolution.nextMilestone}
+                </p>
+              )}
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="min-h-11 cursor-pointer"
+              onSelect={() => navigate("/alma")}
+            >
+              <Route className="mr-2 h-4 w-4" aria-hidden />
+              <span>Mon parcours</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="min-h-11 cursor-pointer"
+              onSelect={(e) => {
+                e.preventDefault();
+                askForTip("popover");
+              }}
+            >
+              <Lightbulb className="mr-2 h-4 w-4" aria-hidden />
+              <span>Un conseil ?</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
+              Fréquence
+            </DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              value={frequency}
+              onValueChange={(v) => {
+                void changeFrequency(v as AlmaFrequency);
+              }}
+            >
+              {FREQUENCY_CHOICES.map((c) => (
+                <DropdownMenuRadioItem
+                  key={c.value}
+                  value={c.value}
+                  className="min-h-11 cursor-pointer text-sm"
+                >
+                  {c.label}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="min-h-11 cursor-pointer text-destructive focus:text-destructive"
+              onSelect={(e) => {
+                e.preventDefault();
+                void handleHide();
+              }}
+            >
+              <EyeOff className="mr-2 h-4 w-4" aria-hidden />
+              <span>Masquer Alma</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {expanded && whisper && (
           <button
             type="button"
             onClick={collapse}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Replier Alma"
           >
             <ChevronDown className="h-4 w-4" />
@@ -604,5 +664,6 @@ export function AlmaDock() {
     </div>
   );
 }
+
 
 export default AlmaDock;
