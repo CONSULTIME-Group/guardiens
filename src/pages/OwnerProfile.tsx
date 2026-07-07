@@ -71,6 +71,7 @@ const OwnerProfilePage = () => {
   const {
     data, pets, loading, saving, completion, missingFields, lastSyncedAt,
     saveStep, addPet, updatePet, removePet, uploadPhoto,
+    loadError, reload, emailVerified, hasFirstActivity,
   } = useOwnerProfile();
 
   const [localData, setLocalData] = useState<Partial<OwnerProfileData>>({});
