@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import FounderBadge from "@/components/badges/FounderBadge";
+
 import { BadgeRow } from "@/components/badges/BadgeRow";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
@@ -439,7 +439,6 @@ const OwnerDashboard = () => {
               <h1 className="text-2xl md:text-3xl font-heading font-bold text-foreground leading-tight">
                 Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""}{"\u202F"}!
               </h1>
-              {user?.isFounder && <FounderBadge size="sm" />}
             </div>
             <p className="text-sm text-muted-foreground font-sans mt-1">{subtitle}</p>
           </div>
