@@ -442,9 +442,29 @@ export function useSitterProfile() {
 
   const uploadAvatar = useCallback(async (file: File): Promise<string | null> => {
     if (!user) return null;
-    const ext = file.name.split(".").pop();
+
+    // 1) Validation client (type + poids) alignée sur le bucket `avatars`.
+    const check = validateAvatarFile(file);
+    if (!check.ok) {
+      toast({ variant: "destructive", title: "Photo refusée", description: check.reason });
+      return null;
+    }
+
+    // 2) Compression (webp/jpg, max 1200px, ~300 ko). Convertit HEIC en JPG.
+    let toUpload: File;
+    try {
+      toUpload = await compressImageFile(file);
+    } catch (err) {
+      logger.error("Sitter avatar compression failed", { error: String(err) });
+      toast({ variant: "destructive", title: "Erreur", description: "Impossible de traiter cette image." });
+      return null;
+    }
+
+    const ext = toUpload.name.split(".").pop() || "jpg";
     const path = `${user.id}/avatar-${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: false });
+    const { error } = await supabase.storage
+      .from("avatars")
+      .upload(path, toUpload, { upsert: false, contentType: toUpload.type });
     if (error) {
       toast({ variant: "destructive", title: "Erreur", description: "Impossible de télécharger la photo." });
       return null;
@@ -475,5 +495,9 @@ export function useSitterProfile() {
     saveStep, addPastAnimal, removePastAnimal, uploadAvatar,
     completion,
     missingFields: computeMissingFields(data),
+    loadError,
+    reload: () => fetchData(),
+    emailVerified,
+    hasFirstActivity,
   };
 }
