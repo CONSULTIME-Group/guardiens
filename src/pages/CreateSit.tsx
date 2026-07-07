@@ -260,6 +260,7 @@ const CreateSit = () => {
   const [draftId, setDraftId] = useState<string | null>(null);
   const [savingDraft, setSavingDraft] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [adaptingWithAlma, setAdaptingWithAlma] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [incompleteNudgeOpen, setIncompleteNudgeOpen] = useState(false);
   const incompleteNudgeSeenRef = useRef(false);
