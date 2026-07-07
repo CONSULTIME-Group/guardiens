@@ -409,10 +409,12 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
   );
 
   const requestNextTip = useCallback<AlmaContextValue["requestNextTip"]>(
-    async ({ surface, context, role, state: userState, preferNudge = true, emptyMessage }) => {
+    async ({ surface, context, role, state: userState, preferNudge = true, emptyMessage, onDemand = false }) => {
       if (!user?.id) return;
       const audience: AlmaAudience = activeRole === "owner" ? "owner" : "sitter";
-      const excluded = loadSeenIds();
+      // En mode on_demand, on n'exclut RIEN côté client pour maximiser les chances
+      // de retour ; la RPC gère elle-même la dédup et le repli si besoin.
+      const excluded = onDemand ? [] : loadSeenIds();
 
       // 1) Essai usage_nudge en priorité si preferNudge et role/state fournis.
       if (preferNudge && role && userState) {
@@ -447,7 +449,9 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
           p_context: (context ?? {}) as any,
           p_bypass_cooldown: true,
           p_exclude_ids: excluded,
+          p_on_demand: onDemand,
         });
+
         if (data && (data as any).id) {
           const fact = data as any;
           const whisper = buildCulturalFactWhisper({
