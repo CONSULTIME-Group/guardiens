@@ -115,6 +115,7 @@ export function useAlmaCulturalFact({
           sessionStorage.setItem(`${SESSION_QUEUED_KEY}:${surface}`, "1");
           const prev = Number(sessionStorage.getItem(SESSION_COUNT_KEY) || "0");
           sessionStorage.setItem(SESSION_COUNT_KEY, String(prev + 1));
+          sessionStorage.setItem(SESSION_LAST_AT_KEY, String(Date.now()));
         } catch { /* silent */ }
       } catch {
         /* silent */
