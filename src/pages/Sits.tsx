@@ -133,6 +133,7 @@ const Sits = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [sits, setSits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Alma étape 1 — compagnon culturel + usage_nudge sur la liste sits.
   useAlmaCulturalFact({ surface: "sits_list", context: { role: activeRole } });
