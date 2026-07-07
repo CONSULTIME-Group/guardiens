@@ -147,6 +147,7 @@ Deno.serve(async (req) => {
         continue;
       }
       sent++;
+      if (sent >= MAX_PER_RUN) break;
     } catch (e: any) {
       errors.push({ sit_id: draft.id, reason: e?.message ?? "unknown" });
     }
