@@ -20,9 +20,15 @@ export default function PublicHeader() {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
+  const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
 
+  // Utilisateur connecté : l'en-tête public est masqué, la coquille
+  // authentifiée (AppLayout) fournit déjà la navigation.
+  if (isAuthenticated) return null;
+
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
+
 
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
