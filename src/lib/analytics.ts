@@ -90,7 +90,8 @@ export type EventType =
   | "sitter_alert_modify_radius"       // Modification du rayon (old_km, new_km)
   | "sitter_secondary_card_clicked"    // Clic carte secondaire (type: missions|breeds|guides)
   | "sitter_alert_confirmation_seen"   // Toast/message post-inscription alerte (radius_km)
-  | "sitter_next_digest_card_seen"     // Carte "prochain digest" sur dashboard gardien
+  | "sitter_next_digest_card_seen"     // Carte "prochain digest" sur dashboard gardien (déprécié, remplacé par sitter_email_digest_card_seen)
+  | "sitter_email_digest_card_seen"    // Carte unique "Vos rendez-vous email" sur dashboard gardien
   | "sitter_digest_sent"               // Envoi digest quotidien (sitter_id, sits_count, email_id?)
   | "sitter_digest_opened"             // Ouverture email digest (sitter_id, email_id?)
   | "sitter_digest_cta_clicked"        // Clic CTA "Postuler en 1 clic" (sitter_id, sit_id, position, affinity_score, email_id?)
