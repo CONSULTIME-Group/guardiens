@@ -144,6 +144,8 @@ function surfaceFromPath(pathname: string): string {
 export function AlmaDock() {
   const { currentWhisper, dismissCurrent, requestNextTip } = useAlma();
   const { frequency, setFrequency } = useAlmaFrequency();
+  const { activeRole } = useAuth();
+  const { data: evolution } = useAlmaEvolution();
   const isModalOpen = useIsRadixModalOpen();
   const location = useLocation();
   const navigate = useNavigate();
