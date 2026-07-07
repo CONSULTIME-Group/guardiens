@@ -40,32 +40,33 @@ import { Helmet } from "react-helmet-async";
 import MobileStickyCTA from "@/components/dashboard/owner/MobileStickyCTA";
 import { RepublishAlmaDialog } from "@/components/ai/alma/RepublishAlmaDialog";
 
-/* ── Status configs ── */
+/* ── Status configs (tokens sémantiques uniquement, compat dark mode) ── */
 const statusConfig: Record<string, { label: string; className: string }> = {
   draft: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
   published: { label: "En attente", className: "bg-muted text-muted-foreground" },
-  published_with_apps: { label: "Candidature(s) reçue(s)", className: "bg-blue-50 text-blue-700 border border-blue-200" },
-  confirmed: { label: "Garde confirmée", className: "bg-emerald-50 text-emerald-700 border border-emerald-200" },
-  in_progress: { label: "En cours", className: "bg-emerald-50 text-emerald-700 border border-emerald-200" },
-  completed: { label: "Terminée", className: "bg-muted text-foreground" },
-  cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive" },
-  expired: { label: "Expirée", className: "bg-red-50 text-red-600 border border-red-100" },
+  published_with_apps: { label: "Candidature(s) reçue(s)", className: "bg-info-soft text-info border border-info-border" },
+  confirmed: { label: "Garde confirmée", className: "bg-success-soft text-success border border-success-border" },
+  in_progress: { label: "En cours", className: "bg-success-soft text-success border border-success-border" },
+  completed: { label: "Terminée", className: "bg-muted text-foreground border border-border" },
+  cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive-text" },
+  expired: { label: "Expirée", className: "bg-warning-soft text-warning-foreground border border-warning-border" },
   unpublished: { label: "Dépubliée", className: "bg-muted text-muted-foreground border border-border" },
+  archived: { label: "Archivée", className: "bg-muted text-muted-foreground border border-dashed border-border" },
 };
 
 const appStatusConfig: Record<string, { label: string; className: string }> = {
   pending: { label: "Envoyée", className: "bg-muted text-muted-foreground" },
   viewed: { label: "Consultée", className: "bg-secondary/10 text-secondary" },
   discussing: { label: "En discussion", className: "bg-accent text-foreground" },
-  accepted: { label: "Acceptée", className: "bg-emerald-50 text-emerald-700" },
-  rejected: { label: "Déclinée", className: "bg-destructive/10 text-destructive" },
-  cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive" },
+  accepted: { label: "Acceptée", className: "bg-success-soft text-success border border-success-border" },
+  rejected: { label: "Déclinée", className: "bg-destructive/10 text-destructive-text" },
+  cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive-text" },
   owner_found: { label: "Propriétaire a trouvé", className: "bg-muted text-muted-foreground border border-border" },
   owner_withdrew: { label: "Annonce retirée", className: "bg-muted text-muted-foreground border border-border" },
 };
 
 type Tab = "upcoming" | "in_progress" | "completed" | "cancelled";
-type OwnerTab = "active" | "drafts" | "archived";
+type OwnerTab = "active" | "drafts" | "past";
 
 const tabs: { value: Tab; label: string; icon: typeof Calendar }[] = [
   { value: "upcoming", label: "Actives", icon: Calendar },
@@ -76,9 +77,9 @@ const tabs: { value: Tab; label: string; icon: typeof Calendar }[] = [
 
 
 const ownerTabs: { value: OwnerTab; label: string; icon: typeof Calendar }[] = [
-  { value: "active", label: "Actives", icon: Calendar },
+  { value: "active", label: "En ligne", icon: Calendar },
   { value: "drafts", label: "Brouillons", icon: Pencil },
-  { value: "archived", label: "Archivées", icon: Archive },
+  { value: "past", label: "Passées", icon: Archive },
 ];
 
 const formatShortDate = (d: string | null) =>
@@ -93,6 +94,8 @@ const getDuration = (start: string | null, end: string | null) => {
 const capitalize = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
 
 const getEffectiveStatus = (sit: any): string => {
+  // Rule A1: expiration a la priorite absolue sur le statut brut cancelled.
+  if (sit.cancellation_reason === "expired") return "expired";
   if (sit.status === "cancelled") return "cancelled";
   if (sit.status === "completed") return "completed";
   // Expired: end_date passed and not confirmed/completed
@@ -109,6 +112,18 @@ const getEffectiveStatus = (sit: any): string => {
     }
   }
   return sit.status;
+};
+
+// Owner-only: overlays d'affichage supplementaires (dépubliée, archivée manuelle)
+// La vue sitter continue d'utiliser getEffectiveStatus tel quel.
+const getOwnerEffectiveStatus = (sit: any): string => {
+  if (sit.cancellation_reason === "archived") return "archived";
+  if (sit.status === "draft" && sit.unpublished_at) {
+    // Dépubliée dont end_date est passee → traitée comme "expirée" (Passées).
+    if (sit.end_date && isBefore(parseISO(sit.end_date), new Date())) return "expired";
+    return "unpublished";
+  }
+  return getEffectiveStatus(sit);
 };
 
 const Sits = () => {
@@ -129,11 +144,13 @@ const Sits = () => {
 
   // Onglet actif synchronisé avec l'URL (?tab=...), partageable, retour navigateur OK
   const validTabs: Tab[] = ["upcoming", "in_progress", "completed", "cancelled"];
-  const validOwnerTabs: OwnerTab[] = ["active", "drafts", "archived"];
+  const validOwnerTabs: OwnerTab[] = ["active", "drafts", "past"];
   const urlTab = searchParams.get("tab");
   const isOwnerView = activeRole === "owner";
   const activeTab: Tab = (urlTab && validTabs.includes(urlTab as Tab) ? urlTab : "upcoming") as Tab;
-  const activeOwnerTab: OwnerTab = (urlTab && validOwnerTabs.includes(urlTab as OwnerTab) ? urlTab : "active") as OwnerTab;
+  // Rétro-compat : ancien lien ?tab=archived → past
+  const normalizedOwnerTab = urlTab === "archived" ? "past" : urlTab;
+  const activeOwnerTab: OwnerTab = (normalizedOwnerTab && validOwnerTabs.includes(normalizedOwnerTab as OwnerTab) ? normalizedOwnerTab : "active") as OwnerTab;
   const setActiveTab = useCallback((tab: Tab | OwnerTab) => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
@@ -201,9 +218,11 @@ const Sits = () => {
         .eq("user_id", user.id)
         .order("start_date", { ascending: false, nullsFirst: false });
 
-      // Auto-expire sits client-side
+      // Auto-expire sits client-side (published ET drafts jamais publies dont end_date est passee)
       const toExpire = (data || []).filter((s: any) =>
-        s.end_date && ["published"].includes(s.status) && isBefore(parseISO(s.end_date), new Date())
+        s.end_date
+        && ["published", "draft"].includes(s.status)
+        && isBefore(parseISO(s.end_date), new Date())
       );
       if (toExpire.length > 0) {
         for (const s of toExpire) {
@@ -225,14 +244,17 @@ const Sits = () => {
             supabase.from("reviews").select("id").eq("sit_id", sit.id).eq("reviewer_id", user.id).maybeSingle(),
           ]);
 
+          const wasExpired = !!toExpire.find((e: any) => e.id === sit.id);
+          const overlaidSit = {
+            ...sit,
+            status: wasExpired ? "cancelled" : sit.status,
+            cancellation_reason: wasExpired ? "expired" : sit.cancellation_reason,
+          };
           return {
             ...sit,
-            status: toExpire.find((e: any) => e.id === sit.id) ? "cancelled" : sit.status,
-            cancellation_reason: toExpire.find((e: any) => e.id === sit.id) ? "expired" : sit.cancellation_reason,
-            effectiveStatus: getEffectiveStatus({
-              ...sit,
-              status: toExpire.find((e: any) => e.id === sit.id) ? "cancelled" : sit.status,
-            }),
+            status: overlaidSit.status,
+            cancellation_reason: overlaidSit.cancellation_reason,
+            effectiveStatus: getOwnerEffectiveStatus(overlaidSit),
             applicationCount: appRes.data?.length || 0,
             pendingApplicationCount: appRes.data?.filter((a: any) => a.status === "pending").length || 0,
             acceptedSitter: sitterRes.data?.sitter ? sitterRes.data.sitter : null,
@@ -375,7 +397,17 @@ const Sits = () => {
   };
 
   const handleRepublish = async (sitId: string) => {
-    const today = new Date().toISOString().split("T")[0];
+    const sit = sits.find((s) => s.id === sitId);
+    const todayIso = new Date().toISOString().split("T")[0];
+    // Garde A3 : ne pas republier une annonce dont les dates sont deja passees.
+    if (sit?.end_date && sit.end_date < todayIso) {
+      toast({
+        title: "Dates a mettre a jour",
+        description: "Les dates de cette annonce sont passees. Modifiez-les avant de republier.",
+      });
+      navigate(`/sits/${sitId}/edit`);
+      return;
+    }
     await supabase.from("sits").update({
       status: "published" as any,
       cancellation_reason: null,
@@ -384,38 +416,42 @@ const Sits = () => {
       unpublished_at: null,
       last_unpublished_reason: null,
     } as any).eq("id", sitId).eq("user_id", user!.id);
-    toast({ title: "Annonce republiée" });
+    toast({ title: "Annonce republiee" });
     loadSits();
   };
 
-  // Separate active from archived/expired
-  // Une annonce est considérée « archivée » si :
-  //  - elle a été annulée avec une raison archived/expired (auto-archivage)
-  //  - OU elle a été dépubliée par le propriétaire (status=draft + unpublished_at)
-  //  - OU elle est terminée (completed) : la garde est passée, sort des Actives
-  const wasUnpublished = (s: any) =>
-    s.status === "draft" && !!s.unpublished_at;
-  const isArchived = (s: any) => {
+  // Bucketing owner : En ligne / Brouillons / Passees
+  //  - En ligne  : publiees, confirmees, en cours (avec ou sans candidatures)
+  //  - Brouillons: vrais brouillons jamais publies (non expires) + dépubliées dont les dates ne sont PAS passees
+  //  - Passees   : expired, completed, cancelled (manuel), archived (manuel)
+  // Une annonce est "passee" (cycle termine) si :
+  //  - effectiveStatus in {expired, completed, archived, cancelled}
+  const isPast = (s: any) => {
     const es = s.effectiveStatus || s.status;
-    return (
-      es === "completed"
-      || (s.status === "cancelled" && (s.cancellation_reason === "archived" || s.cancellation_reason === "expired"))
-      || wasUnpublished(s)
-    );
+    return ["expired", "completed", "archived", "cancelled"].includes(es);
   };
-  const isExpired = (s: any) => s.cancellation_reason === "expired";
+  const isDraft = (s: any) => {
+    if (isPast(s)) return false;
+    const es = s.effectiveStatus || s.status;
+    // vrai brouillon jamais publie OU dépubliée non expiree (effectiveStatus='unpublished')
+    return es === "draft" || es === "unpublished";
+  };
+  const isActive = (s: any) => !isPast(s) && !isDraft(s);
+  // Alias legacy pour la vue sitter (elle utilise isArchived pour derouler activeSits).
+  const isArchived = isPast;
 
   const activeSits = useMemo(() => sits.filter(s => !isArchived(s)), [sits]);
   
 
   // Comptages onglets sitter (vue inchangée)
+  // Une expiration/archivage owner-side est mappe vers "cancelled" cote sitter pour preserver le comportement.
   const tabCounts = useMemo(() => {
     const counts: Record<Tab, number> = { upcoming: 0, in_progress: 0, completed: 0, cancelled: 0 };
     if (isOwnerView) return counts;
     activeSits.forEach((s) => {
       const es = s.effectiveStatus || s.status;
       const appStatus = s.application_status;
-      if (appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled") counts.cancelled++;
+      if (appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled" || es === "expired" || es === "archived") counts.cancelled++;
       else if (es === "completed") counts.completed++;
       else if (es === "in_progress" && appStatus === "accepted") counts.in_progress++;
       else counts.upcoming++;
@@ -423,16 +459,13 @@ const Sits = () => {
     return counts;
   }, [activeSits, isOwnerView]);
 
-  // Comptages onglets owner, Actives / Brouillons / Archivées
-  // Brouillons = vrais brouillons jamais publiés (unpublished_at IS NULL)
-  // Archivées  = expirées, annulées-archivées, OU dépubliées (status=draft + unpublished_at)
+  // Comptages onglets owner : En ligne / Brouillons / Passees
   const ownerTabCounts = useMemo(() => {
-    const counts: Record<OwnerTab, number> = { active: 0, drafts: 0, archived: 0 };
+    const counts: Record<OwnerTab, number> = { active: 0, drafts: 0, past: 0 };
     if (!isOwnerView) return counts;
     sits.forEach((s) => {
-      const es = s.effectiveStatus || s.status;
-      if (isArchived(s)) counts.archived++;
-      else if (es === "draft") counts.drafts++;
+      if (isPast(s)) counts.past++;
+      else if (isDraft(s)) counts.drafts++;
       else counts.active++;
     });
     return counts;
@@ -442,15 +475,14 @@ const Sits = () => {
     let base: any[] = [];
     if (isOwnerView) {
       base = sits.filter((s) => {
-        const es = s.effectiveStatus || s.status;
         switch (activeOwnerTab) {
           case "drafts":
-            return es === "draft" && !isArchived(s);
-          case "archived":
-            return isArchived(s);
+            return isDraft(s);
+          case "past":
+            return isPast(s);
           case "active":
           default:
-            return !isArchived(s) && es !== "draft";
+            return isActive(s);
         }
       });
     } else {
@@ -697,11 +729,11 @@ const Sits = () => {
               description="Vos annonces non publiées apparaîtront ici. Vous pouvez les compléter à tout moment."
             />
           )}
-          {isOwnerView && activeOwnerTab === "archived" && (
+          {isOwnerView && activeOwnerTab === "past" && (
             <EmptyState
               illustration="quietLeaf"
-              title="Aucune annonce archivée"
-              description="Vos annonces archivées, expirées ou annulées s'afficheront ici."
+              title="Aucune annonce passée"
+              description="Vos annonces terminées, expirées, annulées ou archivées s'afficheront ici."
             />
           )}
           {!isOwnerView && activeTab === "upcoming" && (
@@ -749,17 +781,9 @@ const Sits = () => {
       ) : (
         <div className="space-y-3">
           {filteredSits.map((sit: any) => {
-            // En onglet "archived", on force l'effectiveStatus pour le bon rendu de la card
-            const cardSit = isOwnerView && activeOwnerTab === "archived"
-              ? {
-                  ...sit,
-                  effectiveStatus: wasUnpublished(sit)
-                    ? "unpublished"
-                    : isExpired(sit)
-                      ? "expired"
-                      : "cancelled",
-                }
-              : sit;
+            // effectiveStatus deja calcule par getOwnerEffectiveStatus dans l'enrichissement.
+            // Dans l'onglet Passees, l'affichage suit directement effectiveStatus.
+            const cardSit = sit;
             return (
               <SitCard
                 key={sit.id + (sit.application_id || "")}
@@ -768,7 +792,7 @@ const Sits = () => {
                 onArchive={() => setArchiveConfirm(sit.id)}
                 onDelete={() => setDeleteConfirm(sit.id)}
                 onRepublish={() =>
-                  isOwnerView && activeOwnerTab === "archived"
+                  isOwnerView && activeOwnerTab === "past"
                     ? setRepublishDialog({ id: sit.id, title: sit.title })
                     : handleRepublish(sit.id)
                 }
@@ -1246,7 +1270,7 @@ const QuickActions = ({
     );
   }
 
-  if (effectiveStatus === "expired" || effectiveStatus === "unpublished") {
+  if (effectiveStatus === "expired" || effectiveStatus === "unpublished" || effectiveStatus === "archived") {
     return (
       <>
         <button onClick={onRepublish} className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}>
@@ -1314,13 +1338,13 @@ const ActionsMenu = ({
   sit: any; effectiveStatus: string;
   onArchive: () => void; onDelete: () => void; onRepublish: () => void;
 }) => {
-  const showMenu = ["confirmed", "in_progress", "published", "draft", "expired", "cancelled"].includes(effectiveStatus);
+  const showMenu = ["confirmed", "in_progress", "published", "draft", "expired", "cancelled", "unpublished", "archived"].includes(effectiveStatus);
   if (!showMenu) return null;
 
-  const canEdit = ["draft", "published"].includes(effectiveStatus);
-  const canRepublish = ["expired", "cancelled"].includes(effectiveStatus);
+  const canEdit = ["draft", "published", "unpublished"].includes(effectiveStatus);
+  const canRepublish = ["expired", "cancelled", "unpublished", "archived"].includes(effectiveStatus);
   const canArchive = ["published", "draft"].includes(effectiveStatus) && sit.applicationCount > 0;
-  const canDelete = ["published", "draft", "expired", "cancelled"].includes(effectiveStatus) && sit.applicationCount === 0;
+  const canDelete = ["published", "draft", "expired", "cancelled", "unpublished", "archived"].includes(effectiveStatus) && sit.applicationCount === 0;
 
   return (
     <DropdownMenu>
