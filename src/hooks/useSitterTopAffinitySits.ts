@@ -7,7 +7,7 @@
  *
  * Retour :
  *  - `topSits`         : 3 sits triés par score décroissant
- *  - `hasMinimumPool`  : true si ≥ 3 sits scorables (fallback sinon vers empty state)
+ *  - `hasMinimumPool`  : true si ≥ 1 sit scorable (fallback sinon vers empty state)
  *  - `totalPublished`  : volume global d'annonces actives (pour l'empty state)
  *  - `hasPostalCode`   : vrai si le gardien a renseigné un code postal
  */
@@ -160,7 +160,7 @@ export function useSitterTopAffinitySits(): Result {
   const data = q.data;
   return {
     topSits: data?.topSits ?? [],
-    hasMinimumPool: (data?.topSits.length ?? 0) >= 3,
+    hasMinimumPool: (data?.topSits.length ?? 0) >= 1,
     hasPostalCode: data?.hasPostalCode ?? false,
     totalPublished: data?.totalPublished ?? 0,
     isLoading: q.isLoading,
