@@ -184,7 +184,19 @@ export default {
           "75%": { transform: "rotate(-4deg)" },
           "90%": { transform: "rotate(4deg)" },
         },
-
+        "alma-idle-gesture": {
+          "0%,70%,100%": { transform: "rotate(0deg) translateY(0)" },
+          "80%": { transform: "rotate(-4deg) translateY(-1px)" },
+          "90%": { transform: "rotate(3deg) translateY(0)" },
+        },
+        "alma-aura": {
+          "0%,100%": { transform: "scale(1)", opacity: "0.35" },
+          "50%": { transform: "scale(1.15)", opacity: "0.6" },
+        },
+        "alma-thinking-dot": {
+          "0%,80%,100%": { opacity: "0.25", transform: "translateY(0)" },
+          "40%": { opacity: "1", transform: "translateY(-2px)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
