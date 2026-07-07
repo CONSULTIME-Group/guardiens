@@ -158,6 +158,10 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<SchedulerState>(() => makeInitialState("balanced"));
   const [queue, setQueue] = useState<AlmaWhisper[]>([]);
   const [current, setCurrent] = useState<AlmaWhisper | null>(null);
+  const [activeProactiveSurface, setActiveProactiveSurface] =
+    useState<AlmaProactiveSurface | null>(null);
+  const activeSurfaceRef = useRef<AlmaProactiveSurface | null>(null);
+  activeSurfaceRef.current = activeProactiveSurface;
   const stateRef = useRef(state);
   stateRef.current = state;
   const lastInputFocusRef = useRef<number>(0);
