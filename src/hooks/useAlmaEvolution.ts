@@ -2,21 +2,30 @@
  * useAlmaEvolution — calcule le stade d'évolution de l'utilisateur courant
  * à partir de signaux RÉELS uniquement (jamais monétaire, jamais inventé).
  *
- * Stades :
- *  - "nouvelle" : profil < 60%
- *  - "eveillee" : profil >= 60% ET identité vérifiée
- *  - "complice" : au moins un acte d'engagement (annonce publiée, candidature,
- *                 petite mission publiée, garde réalisée, écusson reçu)
- *  - "fidele"   : engagement soutenu (>= 3 gardes réalisées OU >= 3 écussons
- *                 OU statut gardien d'urgence)
+ * Les seuils sont centralisés dans ALMA_THRESHOLDS pour être ajustés facilement.
+ * La vérification d'identité est un signal valorisé mais N'EST PLUS un plafond dur.
  *
- * Aucun stade dépendant d'un paiement ou d'un abonnement.
+ * Stades :
+ *  - "nouvelle" : par défaut, juste inscrit (profil sous le seuil).
+ *  - "eveillee" : profil complété au-dessus du seuil (par défaut 60 %).
+ *  - "complice" : profil complété ET au moins une action réelle
+ *                 (annonce publiée, candidature, mission d'entraide).
+ *  - "fidele"   : historique tangible, garde réalisée OU >= 3 missions d'entraide
+ *                 OU >= 1 écusson OU statut gardien d'urgence.
  */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
 export type AlmaStage = "nouvelle" | "eveillee" | "complice" | "fidele";
+
+/** Seuils centralisés, ajustables par produit sans toucher la logique. */
+export const ALMA_THRESHOLDS = {
+  profileCompletionMin: 60,
+  missionsForFidele: 3,
+  badgesForFidele: 1,
+  completedSitsForFidele: 1,
+} as const;
 
 export interface AlmaEvolution {
   stage: AlmaStage;
@@ -49,12 +58,13 @@ const STAGE_DESCRIPTION: Record<AlmaStage, string> = {
   nouvelle:
     "Alma vient de faire votre connaissance. Racontez-lui qui vous êtes pour qu'elle vous accompagne au mieux.",
   eveillee:
-    "Alma vous reconnaît. Votre profil est prêt et votre identité vérifiée, tout est en place pour passer à l'action.",
+    "Alma vous reconnaît. Votre profil est prêt, il ne manque plus qu'un premier geste vers la communauté.",
   complice:
-    "Alma vous a vu passer à l'action. Chaque nouveau geste renforce votre lien avec la communauté.",
+    "Alma vous a vu passer à l'action. Chaque nouveau geste renforce votre lien avec les gens du coin.",
   fidele:
     "Alma vous connaît bien. Vous incarnez l'esprit Guardiens et inspirez les autres membres du coin.",
 };
+
 
 export function useAlmaEvolution() {
   const { user, activeRole } = useAuth();
@@ -114,6 +124,9 @@ export function useAlmaEvolution() {
       const profileCompletion = user!.profileCompletion || 0;
       const identityVerified = user!.identityVerified;
 
+      const T = ALMA_THRESHOLDS;
+      const profileOk = profileCompletion >= T.profileCompletionMin;
+
       const hasEngagement =
         publishedSitsCount > 0 ||
         applicationsCount > 0 ||
@@ -122,11 +135,14 @@ export function useAlmaEvolution() {
         badgesCount > 0;
 
       const isFidele =
-        completedSitsCount >= 3 || badgesCount >= 3 || isEmergencySitter;
+        completedSitsCount >= T.completedSitsForFidele ||
+        missionsCount >= T.missionsForFidele ||
+        badgesCount >= T.badgesForFidele ||
+        isEmergencySitter;
 
+      // Identité valorisée mais NON bloquante : elle ne plafonne plus la progression.
       let stage: AlmaStage;
-      if (profileCompletion < 60) stage = "nouvelle";
-      else if (!identityVerified) stage = "eveillee"; // profil ok mais identité pas encore
+      if (!profileOk) stage = "nouvelle";
       else if (isFidele) stage = "fidele";
       else if (hasEngagement) stage = "complice";
       else stage = "eveillee";
@@ -136,34 +152,28 @@ export function useAlmaEvolution() {
       let nextActionLabel: string | null = null;
 
       if (stage === "nouvelle") {
-        nextMilestone = "Compléter votre profil à 60 % pour ouvrir l'étape suivante.";
-        nextActionHref = activeRole === "sitter" ? "/sitter-profile" : "/owner-profile";
+        nextMilestone = `Compléter votre profil à ${T.profileCompletionMin} % pour ouvrir l'étape suivante.`;
+        nextActionHref = activeRole === "owner" ? "/owner-profile" : "/profile";
         nextActionLabel = "Compléter mon profil";
       } else if (stage === "eveillee") {
-        if (!identityVerified) {
-          nextMilestone = "Vérifier votre identité pour rassurer la communauté.";
-          nextActionHref = "/settings#verification";
-          nextActionLabel = "Vérifier mon identité";
-        } else if (activeRole === "owner") {
-          nextMilestone = "Publier votre première annonce ou une petite mission.";
+        if (activeRole === "owner") {
+          nextMilestone = "Publier votre première annonce ou une petite mission pour devenir Complice.";
           nextActionHref = "/sits/create";
           nextActionLabel = "Publier une annonce";
         } else {
-          nextMilestone = "Postuler à votre première garde.";
+          nextMilestone = "Postuler à votre première garde pour devenir Complice.";
           nextActionHref = "/annonces";
           nextActionLabel = "Trouver une garde";
         }
       } else if (stage === "complice") {
         if (activeRole === "sitter") {
-          const remaining = Math.max(0, 3 - completedSitsCount);
           nextMilestone =
-            remaining > 0
-              ? `Réaliser ${remaining} garde${remaining > 1 ? "s" : ""} de plus pour devenir Fidèle.`
-              : "Continuer à recevoir des écussons pour devenir Fidèle.";
+            "Réaliser une garde, cumuler 3 missions d'entraide ou recevoir un écusson pour devenir Fidèle.";
           nextActionHref = "/annonces";
           nextActionLabel = "Trouver une garde";
         } else {
-          nextMilestone = "Publier une nouvelle annonce pour rester actif.";
+          nextMilestone =
+            "Réaliser une garde avec un gardien ou publier une nouvelle annonce pour devenir Fidèle.";
           nextActionHref = "/sits/create";
           nextActionLabel = "Créer une annonce";
         }
@@ -173,6 +183,7 @@ export function useAlmaEvolution() {
         nextActionHref = "/conseils";
         nextActionLabel = "Explorer les conseils";
       }
+
 
       return {
         stage,
