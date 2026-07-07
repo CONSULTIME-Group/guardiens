@@ -14,10 +14,12 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAlma } from "@/contexts/AlmaContext";
-import { AlmaAnimated } from "./AlmaAnimated";
+import { AlmaAvatarAnimated } from "./AlmaAvatarAnimated";
 import { type AlmaMood } from "./AlmaAvatar";
+import { useAlmaEvolution } from "@/hooks/useAlmaEvolution";
 import { trackEvent } from "@/lib/analytics";
 import { resolveAlmaCtaHref, type AlmaCtaAction } from "@/lib/alma/cta-actions";
+
 
 type Role = "owner" | "sitter";
 
