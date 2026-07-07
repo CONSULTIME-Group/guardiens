@@ -38,8 +38,15 @@ export default function AlmaEvolution() {
       </Helmet>
 
       <div className="mx-auto w-full max-w-3xl px-4 py-8 md:py-12">
-        <header className="flex items-center gap-4 mb-8">
-          <AlmaAvatarAnimated size={72} mood={STAGE_MOOD[currentStage]} />
+        <header className="flex flex-col items-center gap-5 mb-10 text-center md:flex-row md:items-start md:text-left md:gap-6">
+          <div className="relative shrink-0">
+            <AlmaAvatarAnimated
+              size={192}
+              mood={STAGE_MOOD[currentStage]}
+              stage={currentStage}
+              showHalo
+            />
+          </div>
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Votre parcours avec Alma
@@ -53,6 +60,7 @@ export default function AlmaEvolution() {
             </p>
           </div>
         </header>
+
 
         {data?.nextMilestone && (
           <Card className="p-4 md:p-5 mb-6 border-primary/30 bg-primary/5">

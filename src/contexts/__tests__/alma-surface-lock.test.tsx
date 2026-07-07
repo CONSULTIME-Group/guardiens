@@ -9,9 +9,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, renderHook, act, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AlmaProvider, useAlma } from "@/contexts/AlmaContext";
 import { AlmaFirstMeeting } from "@/components/ai/alma/AlmaFirstMeeting";
 import { WelcomeBackDigest } from "@/components/ai/alma/WelcomeBackDigest";
+
 
 // AuthContext : user connecté en mode sitter
 vi.mock("@/contexts/AuthContext", () => ({
@@ -62,14 +64,20 @@ vi.mock("@/integrations/supabase/client", () => ({
 vi.mock("@/lib/analytics", () => ({ trackEvent: vi.fn() }));
 
 function Wrapper({ children }: { children: React.ReactNode }) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false, gcTime: 0, staleTime: 0 } },
+  });
   return (
     <HelmetProvider>
-      <MemoryRouter>
-        <AlmaProvider>{children}</AlmaProvider>
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <AlmaProvider>{children}</AlmaProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
     </HelmetProvider>
   );
 }
+
 
 beforeEach(() => {
   try {

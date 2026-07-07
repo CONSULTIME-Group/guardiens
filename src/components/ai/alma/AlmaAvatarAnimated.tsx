@@ -20,6 +20,7 @@
  */
 import { CSSProperties, useId } from "react";
 import { cn } from "@/lib/utils";
+import type { AlmaStage } from "@/hooks/useAlmaEvolution";
 
 export type AlmaAnimatedMood =
   | "idle"
@@ -30,12 +31,51 @@ export type AlmaAnimatedMood =
   | "playful"
   | "sleepy";
 
+/**
+ * Mapping stade → asset dédié.
+ * EMPLACEMENT POUR LES ILLUSTRATIONS DÉDIÉES, À FOURNIR.
+ * Tant qu'une entrée vaut `null`, on tombe sur le rendu SVG animé actuel,
+ * différencié visuellement par le halo et l'intensité d'animation liés au stade.
+ * Pour brancher une illustration : importer l'asset, remplacer `null` par le
+ * `src`, l'avatar affichera automatiquement l'image (le SVG reste le fallback).
+ */
+export const ALMA_STAGE_ASSETS: Record<AlmaStage, string | null> = {
+  nouvelle: null,
+  eveillee: null,
+  complice: null,
+  fidele: null,
+};
+
+/** Classe Tailwind (halo lumineux) réutilisant les teintes de STAGE_DOT_CLASS. */
+const STAGE_HALO_CLASS: Record<AlmaStage, string> = {
+  nouvelle: "bg-muted-foreground/25",
+  eveillee: "bg-sky-500/30",
+  complice: "bg-primary/35",
+  fidele: "bg-amber-500/40",
+};
+
+/** Liseré fin autour du médaillon, selon le stade. */
+const STAGE_RING_CLASS: Record<AlmaStage, string> = {
+  nouvelle: "ring-muted-foreground/30",
+  eveillee: "ring-sky-500/40",
+  complice: "ring-primary/50",
+  fidele: "ring-amber-500/60",
+};
+
 interface Props {
   mood?: AlmaAnimatedMood;
   size?: number;
   className?: string;
   "aria-hidden"?: boolean;
+  /**
+   * Stade d'évolution utilisateur : influence l'aura, le liseré et
+   * l'intensité d'animation. Optionnel (rétro-compat).
+   */
+  stage?: AlmaStage;
+  /** Affiche un halo coloré derrière l'avatar (utile en grand format). */
+  showHalo?: boolean;
 }
+
 
 const STYLE = `
 [data-alma-animated] {
@@ -146,7 +186,34 @@ const STYLE = `
   [data-alma-animated][data-mood="sleepy"] .alma-body-breath { animation-duration: 7.5s; }
   [data-alma-animated][data-mood="sleepy"] .alma-eyelid     { transform: scaleY(0.7); animation: none; }
   [data-alma-animated][data-mood="sleepy"]                  { opacity: 0.88; }
+
+  /* ======== STADES (intensité progressive : plus le stade est avancé,
+     plus la respiration et la queue sont vives, plus le sourire est marqué) ======== */
+  [data-alma-animated][data-stage="nouvelle"] .alma-body-breath { animation-duration: 5.2s; }
+  [data-alma-animated][data-stage="nouvelle"] .alma-tail-base   { animation-duration: 4.2s; }
+
+  [data-alma-animated][data-stage="eveillee"] .alma-body-breath { animation-duration: 4.2s; }
+  [data-alma-animated][data-stage="eveillee"] .alma-tail-base   { animation-duration: 3.4s; }
+
+  [data-alma-animated][data-stage="complice"] .alma-body-breath { animation-duration: 3.4s; }
+  [data-alma-animated][data-stage="complice"] .alma-tail-base   { animation-duration: 2.6s; }
+  [data-alma-animated][data-stage="complice"] .alma-tail-mood   {
+    animation: alma-tail-wag 1.4s ease-in-out infinite;
+  }
+
+  [data-alma-animated][data-stage="fidele"]   .alma-body-breath { animation-duration: 2.8s; }
+  [data-alma-animated][data-stage="fidele"]   .alma-tail-base   { animation-duration: 2.0s; }
+  [data-alma-animated][data-stage="fidele"]   .alma-tail-mood   {
+    animation: alma-tail-wag 0.9s ease-in-out infinite;
+  }
+  [data-alma-animated][data-stage="fidele"]   .alma-ear-l       {
+    animation: alma-ear-perk-l 3.2s ease-in-out infinite;
+  }
+  [data-alma-animated][data-stage="fidele"]   .alma-ear-r       {
+    animation: alma-ear-perk-r 3.2s ease-in-out infinite;
+  }
 }
+
 
 /* Fallback statique : rien à faire, la pose de repos est déjà lisible */
 
@@ -297,6 +364,8 @@ export function AlmaAvatarAnimated({
   mood = "idle",
   size = 40,
   className,
+  stage,
+  showHalo = false,
   ...rest
 }: Props) {
   const ariaHidden = rest["aria-hidden"];
@@ -305,18 +374,79 @@ export function AlmaAvatarAnimated({
   const gBody = `alma-body-${uid}`;
   const gMuzzle = `alma-muzzle-${uid}`;
 
-  const style: CSSProperties = { width: size, height: size, display: "inline-block" };
+  const style: CSSProperties = {
+    width: size,
+    height: size,
+    display: "inline-block",
+    position: "relative",
+  };
+
+  // Illustration dédiée par stade si fournie (mapping ALMA_STAGE_ASSETS).
+  // Tant qu'aucune image n'est branchée, on rend le SVG animé avec les
+  // variations stade (aura, liseré, intensité).
+  const stageAsset = stage ? ALMA_STAGE_ASSETS[stage] : null;
+  if (stageAsset) {
+    return (
+      <span
+        data-alma-animated=""
+        data-mood={mood}
+        data-stage={stage}
+        aria-label={ariaHidden ? undefined : "Alma"}
+        role={ariaHidden ? undefined : "img"}
+        aria-hidden={ariaHidden}
+        className={cn(
+          "relative inline-flex items-center justify-center select-none",
+          className,
+        )}
+        style={style}
+      >
+        {showHalo && stage && (
+          <span
+            aria-hidden
+            className={cn(
+              "absolute inset-0 rounded-full blur-xl motion-safe:animate-alma-aura",
+              STAGE_HALO_CLASS[stage],
+            )}
+          />
+        )}
+        <img
+          src={stageAsset}
+          alt=""
+          width={size}
+          height={size}
+          draggable={false}
+          className={cn(
+            "relative block object-contain rounded-full",
+            stage && "ring-2 ring-offset-0",
+            stage && STAGE_RING_CLASS[stage],
+          )}
+          style={{ width: size, height: size }}
+        />
+      </span>
+    );
+  }
 
   return (
     <span
       data-alma-animated=""
       data-mood={mood}
+      data-stage={stage}
       aria-label={ariaHidden ? undefined : "Alma"}
       role={ariaHidden ? undefined : "img"}
       aria-hidden={ariaHidden}
       className={cn("select-none", className)}
       style={style}
     >
+      {showHalo && stage && (
+        <span
+          aria-hidden
+          className={cn(
+            "absolute inset-0 rounded-full blur-xl motion-safe:animate-alma-aura",
+            STAGE_HALO_CLASS[stage],
+          )}
+        />
+      )}
+
       <style>{STYLE}</style>
       <svg
         viewBox="0 0 100 100"

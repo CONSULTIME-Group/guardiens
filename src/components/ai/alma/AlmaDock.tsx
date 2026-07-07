@@ -441,7 +441,9 @@ export function AlmaDock() {
             <AlmaAvatarAnimated
               size={40}
               mood={isSilent ? "sleepy" : (mood === "attentive" ? "attentive" : "idle")}
+              stage={stage ?? undefined}
             />
+
             {!isSilent && (
               <Sparkles
                 aria-hidden
