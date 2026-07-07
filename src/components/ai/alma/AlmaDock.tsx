@@ -272,23 +272,38 @@ export function AlmaDock() {
     doDismiss("action_clicked");
   };
 
-  const toggleSilence = async () => {
-    const next = isSilent ? "balanced" : "silent";
-    await setFrequency(next);
-    trackEvent("alma_frequency_changed", {
-      metadata: { from: frequency, to: next, source: "dock" },
+  const changeFrequency = useCallback(
+    async (next: AlmaFrequency) => {
+      if (next === frequency) return;
+      await setFrequency(next);
+      trackEvent("alma_frequency_changed", {
+        metadata: { from: frequency, to: next, source: "dock_menu" },
+      });
+      if (next === "silent") {
+        setExpanded(false);
+        setUserCollapsed(true);
+      }
+    },
+    [frequency, setFrequency],
+  );
+
+  const handleHide = useCallback(async () => {
+    await setHidden(true);
+    trackEvent("alma_hidden_toggled", {
+      metadata: { hidden: true, source: "dock_menu" },
     });
-    if (next === "silent") {
-      setExpanded(false);
-      setUserCollapsed(true);
-    }
-  };
+    toast({
+      title: "Alma est masquée.",
+      description: "Vous pouvez la réafficher dans Réglages, section Alma.",
+    });
+  }, [setHidden, toast]);
 
   const collapse = () => {
     setExpanded(false);
     setUserCollapsed(true);
     if (whisper) doDismiss("closed_manually");
   };
+
 
   const mood = whisper?.primaryAction ? "attentive" : "idle";
   const proposition = !whisper && !isSilent ? buildProposition(evolution, activeRole) : null;
