@@ -734,11 +734,11 @@ const Sits = () => {
               description="Vos annonces non publiées apparaîtront ici. Vous pouvez les compléter à tout moment."
             />
           )}
-          {isOwnerView && activeOwnerTab === "archived" && (
+          {isOwnerView && activeOwnerTab === "past" && (
             <EmptyState
               illustration="quietLeaf"
-              title="Aucune annonce archivée"
-              description="Vos annonces archivées, expirées ou annulées s'afficheront ici."
+              title="Aucune annonce passée"
+              description="Vos annonces terminées, expirées, annulées ou archivées s'afficheront ici."
             />
           )}
           {!isOwnerView && activeTab === "upcoming" && (
