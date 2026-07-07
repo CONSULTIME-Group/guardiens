@@ -424,12 +424,8 @@ const Sits = () => {
   //  - En ligne  : publiees, confirmees, en cours (avec ou sans candidatures)
   //  - Brouillons: vrais brouillons jamais publies (non expires) + dépubliées dont les dates ne sont PAS passees
   //  - Passees   : expired, completed, cancelled (manuel), archived (manuel)
-  const wasUnpublished = (s: any) =>
-    s.status === "draft" && !!s.unpublished_at;
-
   // Une annonce est "passee" (cycle termine) si :
-  //  - effectiveStatus in {expired, completed, archived}
-  //  - OU status=cancelled (annulation manuelle : cancellation_reason != archived/expired est deja couvert par effectiveStatus)
+  //  - effectiveStatus in {expired, completed, archived, cancelled}
   const isPast = (s: any) => {
     const es = s.effectiveStatus || s.status;
     return ["expired", "completed", "archived", "cancelled"].includes(es);
@@ -443,7 +439,6 @@ const Sits = () => {
   const isActive = (s: any) => !isPast(s) && !isDraft(s);
   // Alias legacy pour la vue sitter (elle utilise isArchived pour derouler activeSits).
   const isArchived = isPast;
-  const isExpired = (s: any) => (s.effectiveStatus || s.status) === "expired";
 
   const activeSits = useMemo(() => sits.filter(s => !isArchived(s)), [sits]);
   
