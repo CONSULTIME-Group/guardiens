@@ -365,7 +365,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
           }
         });
     }
-  }, [current, queue, user?.id, isProactiveMuted, verboseMode]);
+  }, [current, queue, user?.id, isProactiveMuted, verboseMode, claimProactiveSurface]);
 
   const dismissCurrent = useCallback(
     (reason: AlmaDismissReason) => {
@@ -373,6 +373,11 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
       const w = current;
       setCurrent(null);
       setState((s) => onDismiss(s, reason));
+      // Libère le verrou de surface tenu par ce whisper.
+      if (activeSurfaceRef.current === "whisper") {
+        activeSurfaceRef.current = null;
+        setActiveProactiveSurface(null);
+      }
 
       trackEvent("alma_whisper_dismissed", {
         metadata: { whisper_type: w.type, reason },
