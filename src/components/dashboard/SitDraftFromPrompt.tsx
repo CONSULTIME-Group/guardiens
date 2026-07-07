@@ -15,6 +15,7 @@ import { AlmaAnimated } from "@/components/ai/alma/AlmaAnimated";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent } from "@/lib/analytics";
+import type { OwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
 
 const PLACEHOLDER =
   "Exemple : Je pars 15 jours en août avec 2 chats à Lyon, je cherche quelqu'un de calme qui télétravaille.";
@@ -25,6 +26,13 @@ export interface SitDraftFromPromptProps {
    * visible au-dessus. On adapte le titre pour proposer une seconde absence.
    */
   secondary?: boolean;
+  /**
+   * Action primaire proprio (activation). Quand `create_first_sit`, on affiche
+   * une phrase courte d'Alma expliquant POURQUOI publier maintenant. Quand
+   * `publish_draft`, la carte bascule en mode « finalisez et publiez » avec
+   * un CTA direct vers le brouillon concerné.
+   */
+  primary?: OwnerPrimaryAction | null;
 }
 
 export default function SitDraftFromPrompt({ secondary = false }: SitDraftFromPromptProps = {}) {
