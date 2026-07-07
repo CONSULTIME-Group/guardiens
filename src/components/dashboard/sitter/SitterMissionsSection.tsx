@@ -67,19 +67,48 @@ const SitterMissionsSection = memo(({
     </div>
   );
 
+  const TAB_ORDER: Array<"mine" | "nearby"> = ["mine", "nearby"];
+  const tabRefs = useRef<Record<"mine" | "nearby", HTMLButtonElement | null>>({
+    mine: null,
+    nearby: null,
+  });
+
+  const onTabKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLButtonElement>) => {
+      const idx = TAB_ORDER.indexOf(tab);
+      let nextIdx = idx;
+      if (e.key === "ArrowRight") nextIdx = (idx + 1) % TAB_ORDER.length;
+      else if (e.key === "ArrowLeft")
+        nextIdx = (idx - 1 + TAB_ORDER.length) % TAB_ORDER.length;
+      else if (e.key === "Home") nextIdx = 0;
+      else if (e.key === "End") nextIdx = TAB_ORDER.length - 1;
+      else return;
+      e.preventDefault();
+      const nextKey = TAB_ORDER[nextIdx];
+      setTab(nextKey);
+      tabRefs.current[nextKey]?.focus();
+    },
+    [tab],
+  );
+
   const tabBtn = (key: "mine" | "nearby", label: string, count: number) => {
     const active = tab === key;
     return (
       <button
+        ref={(el) => (tabRefs.current[key] = el)}
         type="button"
+        role="tab"
+        id={`sitter-missions-tab-${key}`}
+        aria-selected={active}
+        aria-controls={`sitter-missions-panel-${key}`}
+        tabIndex={active ? 0 : -1}
         onClick={() => setTab(key)}
-        className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ease-out ${
+        onKeyDown={onTabKeyDown}
+        className={`flex-1 min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
           active
             ? "bg-card text-foreground shadow-sm"
             : "text-muted-foreground hover:text-foreground hover:bg-card/50"
         }`}
-        aria-pressed={active}
-        role="tab"
       >
         {label}
         {count > 0 && (
@@ -101,10 +130,15 @@ const SitterMissionsSection = memo(({
       </div>
 
       {/* Onglets */}
-      <div className="flex gap-1 p-1 bg-muted/50 rounded-xl mb-4" role="tablist">
+      <div
+        className="flex gap-1 p-1 bg-muted/50 rounded-xl mb-4"
+        role="tablist"
+        aria-label="Filtre des petites missions"
+      >
         {tabBtn("mine", "Les miennes", openCount)}
         {tabBtn("nearby", "Autour de vous", nearbyMissions.length)}
       </div>
+
 
       {/* ─── Onglet : Les miennes ─── */}
       {tab === "mine" && (
