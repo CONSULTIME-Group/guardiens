@@ -332,6 +332,7 @@ const CreateSit = () => {
 
       setProfileCompletion(profileRes.data?.profile_completion || 0);
       setOwnerCity(profileRes.data?.city || "");
+      setOwnerBio((profileRes.data as any)?.bio || "");
       setOwnerPhotos((galleryRes.data || []).map((g: any) => g.photo_url));
 
       if (sourceSitRes?.data) {
