@@ -528,11 +528,12 @@ export default function PublicSitterProfile() {
         setPets(fetchedPets);
 
         // Query 2, Annonces publiées (pagination progressive : 50 par lot, "Voir plus" charge la suite)
+        // Ne liste QUE les annonces réellement publiées (pas les gardes confirmées/terminées internes).
         const { data: sitsData, error: sitsErr, count: sitsCount } = await supabase
           .from('sits')
-          .select('id, title, start_date, end_date, status, created_at', { count: 'exact' })
+          .select('id, slug, title, city, cover_photo_url, start_date, end_date, status, created_at', { count: 'exact' })
           .eq('user_id', id)
-          .in('status', ['published', 'confirmed', 'completed'])
+          .in('status', ['published'])
           .order('created_at', { ascending: false })
           .range(0, OWNER_SITS_PAGE_SIZE - 1);
         if (sitsErr) console.error('[sits]', sitsErr);
