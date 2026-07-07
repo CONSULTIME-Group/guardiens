@@ -90,7 +90,14 @@ export interface RequestNextTipParams {
   preferNudge?: boolean;
   /** Message affiché si aucun conseil éligible. */
   emptyMessage?: string;
+  /**
+   * True quand la demande est initiée par un clic utilisateur (bouton "Un conseil ?").
+   * Contourne le cooldown 24h serveur et assouplit la dédup (autorise de renvoyer
+   * un fait déjà vu si rien de neuf n'est disponible). N'affecte pas le proactif.
+   */
+  onDemand?: boolean;
 }
+
 
 /**
  * Verrou global : une seule surface Alma « proactive » visible à la fois.
