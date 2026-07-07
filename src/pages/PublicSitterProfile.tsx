@@ -2050,23 +2050,36 @@ export default function PublicSitterProfile() {
                     const s = statusMap[sit.status] ?? { label: sit.status, style: 'bg-muted text-foreground/40' };
                     const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
                     const isPast = ['completed', 'finished', 'cancelled', 'archived'].includes(sit.status);
+                    const sitHref = `/annonces/${sit.slug && String(sit.slug).trim().length > 0 ? sit.slug : sit.id}`;
                     return (
-                      <div
+                      <Link
                         key={sit.id}
-                        className={`flex items-center justify-between gap-4 bg-card border border-border rounded-xl px-4 py-3 ${isPast ? 'opacity-60' : ''}`}
+                        to={sitHref}
+                        className={`flex items-center gap-3 bg-card border border-border rounded-xl px-3 py-2.5 hover:border-primary/40 hover:bg-muted/30 transition-colors ${isPast ? 'opacity-60' : ''}`}
                       >
-                        <div className="min-w-0">
+                        {sit.cover_photo_url ? (
+                          <img
+                            src={sit.cover_photo_url}
+                            alt=""
+                            loading="lazy"
+                            className="w-14 h-14 rounded-lg object-cover shrink-0"
+                          />
+                        ) : (
+                          <div className="w-14 h-14 rounded-lg bg-muted shrink-0 flex items-center justify-center text-foreground/30">
+                            <Home className="h-5 w-5" aria-hidden="true" />
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
                           <p className="text-sm font-medium text-foreground font-body truncate">{sit.title || 'Garde'}</p>
-                          {(sit.start_date || sit.end_date) && (
-                            <p className="text-xs text-foreground/50 font-body mt-0.5">
-                              {sit.start_date && fmt(sit.start_date)}{sit.end_date && ` → ${fmt(sit.end_date)}`}
-                            </p>
-                          )}
+                          <p className="text-xs text-foreground/50 font-body mt-0.5 truncate">
+                            {sit.city ? `${sit.city} · ` : ''}
+                            {sit.start_date && fmt(sit.start_date)}{sit.end_date && ` → ${fmt(sit.end_date)}`}
+                          </p>
                         </div>
                         <span className={`text-xs font-medium px-2.5 py-1 rounded-full shrink-0 font-body whitespace-nowrap ${s.style}`}>
                           {s.label}
                         </span>
-                      </div>
+                      </Link>
                     );
                   })}
                   <div className="flex flex-col items-start gap-2 mt-2">
