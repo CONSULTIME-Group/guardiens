@@ -17,15 +17,91 @@
  * Ne rend jamais AlmaAvatarLottie.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BellOff, Bell, ChevronDown, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AlmaAvatarAnimated } from "./AlmaAvatarAnimated";
 import { useAlma } from "@/contexts/AlmaContext";
 import { useAlmaFrequency } from "@/hooks/useAlmaFrequency";
+import { useAlmaEvolution, type AlmaStage } from "@/hooks/useAlmaEvolution";
+import { useAuth } from "@/contexts/AuthContext";
 import { trackEvent } from "@/lib/analytics";
 import { resolveAlmaCtaHref } from "@/lib/alma/cta-actions";
 import type { AlmaWhisper as AlmaWhisperT, AlmaDismissReason } from "@/lib/alma/whisper-types";
+
+const STAGE_DOT_CLASS: Record<AlmaStage, string> = {
+  nouvelle: "bg-muted-foreground/70",
+  eveillee: "bg-sky-500",
+  complice: "bg-primary",
+  fidele: "bg-amber-500",
+};
+
+const STAGE_SHORT_LABEL: Record<AlmaStage, string> = {
+  nouvelle: "Nouvelle",
+  eveillee: "Éveillée",
+  complice: "Complice",
+  fidele: "Fidèle",
+};
+
+interface Proposition {
+  message: string;
+  ctaLabel: string;
+  ctaTo: string;
+}
+
+function buildProposition(
+  evolution: ReturnType<typeof useAlmaEvolution>["data"],
+  activeRole: "owner" | "sitter",
+): Proposition | null {
+  if (!evolution) return null;
+  const { signals } = evolution;
+
+  if (signals.profileCompletion < 60) {
+    return {
+      message: "Complétons votre profil pour qu'Alma vous accompagne mieux.",
+      ctaLabel: "Compléter mon profil",
+      ctaTo: activeRole === "sitter" ? "/sitter-profile" : "/owner-profile",
+    };
+  }
+  if (!signals.identityVerified) {
+    return {
+      message: "Vérifions votre identité pour rassurer la communauté.",
+      ctaLabel: "Vérifier mon identité",
+      ctaTo: "/settings#verification",
+    };
+  }
+  if (activeRole === "owner") {
+    if (signals.hasDraftSit) {
+      return {
+        message: "Reprenons votre brouillon d'annonce, il n'attend que vous.",
+        ctaLabel: "Reprendre le brouillon",
+        ctaTo: "/sits",
+      };
+    }
+    if (signals.publishedSitsCount === 0) {
+      return {
+        message: "Publions votre première annonce pour trouver une personne de confiance.",
+        ctaLabel: "Créer une annonce",
+        ctaTo: "/sits/create",
+      };
+    }
+  } else {
+    if (signals.applicationsCount === 0) {
+      return {
+        message: "Trouvons une garde qui vous ressemble près de chez vous.",
+        ctaLabel: "Voir les annonces",
+        ctaTo: "/annonces",
+      };
+    }
+  }
+  return {
+    message: "Vous êtes bien lancé. Envie d'un conseil du jour ?",
+    ctaLabel: "Explorer les conseils",
+    ctaTo: "/conseils",
+  };
+}
+
+
 
 function useIsRadixModalOpen(): boolean {
   const [isOpen, setIsOpen] = useState(false);
@@ -68,6 +144,8 @@ function surfaceFromPath(pathname: string): string {
 export function AlmaDock() {
   const { currentWhisper, dismissCurrent, requestNextTip } = useAlma();
   const { frequency, setFrequency } = useAlmaFrequency();
+  const { activeRole } = useAuth();
+  const { data: evolution } = useAlmaEvolution();
   const isModalOpen = useIsRadixModalOpen();
   const location = useLocation();
   const navigate = useNavigate();
@@ -185,6 +263,8 @@ export function AlmaDock() {
   };
 
   const mood = whisper?.primaryAction ? "attentive" : "idle";
+  const proposition = !whisper && !isSilent ? buildProposition(evolution, activeRole) : null;
+  const stage = evolution?.stage ?? null;
 
   return (
     <div
@@ -273,6 +353,49 @@ export function AlmaDock() {
         </div>
       )}
 
+      {/* Panneau de proposition permanente (aucun whisper actif) */}
+      {expanded && !whisper && proposition && (
+        <div
+          role="status"
+          className={cn(
+            "pointer-events-auto mb-2 w-[min(20rem,calc(100vw-1.5rem))]",
+            "rounded-2xl border border-border bg-card text-card-foreground shadow-lg",
+            "p-3 pr-9 relative",
+            "animate-in slide-in-from-bottom-2 fade-in duration-300",
+          )}
+        >
+          <button
+            type="button"
+            onClick={() => { setExpanded(false); setUserCollapsed(true); }}
+            className="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition"
+            aria-label="Fermer la proposition d'Alma"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+          <p className="text-[13px] leading-snug text-foreground/90">
+            {proposition.message}
+          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => { navigate(proposition.ctaTo); setExpanded(false); }}
+              className="rounded-full bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 hover:bg-primary/90 transition"
+            >
+              {proposition.ctaLabel}
+            </button>
+            {stage && (
+              <Link
+                to="/alma"
+                onClick={() => setExpanded(false)}
+                className="text-xs font-medium text-muted-foreground hover:text-foreground transition underline decoration-dotted underline-offset-2"
+              >
+                Voir mon parcours
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Dock replié (avatar + label + contrôles) */}
       <div
         className={cn(
@@ -283,20 +406,22 @@ export function AlmaDock() {
         <button
           type="button"
           onClick={() => {
-            if (whisper) {
-              setExpanded((v) => !v);
-              if (expanded) setUserCollapsed(true);
-              else setUserCollapsed(false);
-            }
+            setExpanded((v) => !v);
+            if (expanded) setUserCollapsed(true);
+            else setUserCollapsed(false);
           }}
           className="relative flex items-center gap-2 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          aria-label={whisper ? "Voir le message d'Alma" : "Alma est en veille"}
+          aria-label={
+            whisper
+              ? "Voir le message d'Alma"
+              : proposition
+              ? "Voir la proposition d'Alma"
+              : "Ouvrir Alma"
+          }
           aria-expanded={expanded}
         >
           {/* Avatar avec aura pulsante + ombre de contact + accent Sparkles */}
           <span className="relative inline-flex flex-col items-center">
-            {/* Aura : signale une présence active. Cadence plus rapide si un
-               whisper actionnable est en attente. Masquée en silence. */}
             {!isSilent && (
               <span
                 aria-hidden
@@ -312,12 +437,27 @@ export function AlmaDock() {
               size={40}
               mood={isSilent ? "sleepy" : (mood === "attentive" ? "attentive" : "idle")}
             />
-            {/* Accent scintillant, toujours accolé à l'avatar */}
             {!isSilent && (
               <Sparkles
                 aria-hidden
                 className="absolute -top-0.5 -right-0.5 h-3 w-3 text-primary drop-shadow-sm motion-safe:animate-alma-aura"
               />
+            )}
+            {/* Écusson de stade — clic vers /alma. */}
+            {stage && (
+              <Link
+                to="/alma"
+                onClick={(e) => e.stopPropagation()}
+                aria-label={`Votre stade avec Alma : ${STAGE_SHORT_LABEL[stage]}. Voir mon parcours.`}
+                title={`Alma · ${STAGE_SHORT_LABEL[stage]}`}
+                className={cn(
+                  "absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full ring-2 ring-card",
+                  "flex items-center justify-center transition hover:scale-110",
+                  STAGE_DOT_CLASS[stage],
+                )}
+              >
+                <span className="sr-only">Parcours Alma</span>
+              </Link>
             )}
             <span
               aria-hidden
@@ -327,7 +467,7 @@ export function AlmaDock() {
           <span className="flex flex-col items-start leading-tight pr-1">
             <span className="text-xs font-semibold text-foreground/80">Alma</span>
             <span className="text-[10px] font-medium text-muted-foreground">
-              votre assistante
+              {stage ? STAGE_SHORT_LABEL[stage] : "votre assistante"}
             </span>
           </span>
           {whisper && !expanded && (
@@ -337,6 +477,7 @@ export function AlmaDock() {
             />
           )}
         </button>
+
 
         <div className="h-6 w-px bg-border/70" aria-hidden />
 

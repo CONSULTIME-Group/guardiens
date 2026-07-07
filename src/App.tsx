@@ -128,6 +128,7 @@ const AdminArticlesRefreshPostPivot = lazy(() => import("./pages/admin/AdminArti
 const Parrainage = lazy(() => import("./pages/Parrainage"));
 const DevenirHomeSitter = lazy(() => import("./pages/DevenirHomeSitter"));
 const AlmaTips = lazy(() => import("./pages/AlmaTips"));
+const AlmaEvolution = lazy(() => import("./pages/AlmaEvolution"));
 
 const DepartmentPage = lazy(() => import("./pages/DepartmentPage"));
 const Pricing = lazy(() => import("./pages/Pricing"));
@@ -272,6 +273,7 @@ const AppRoutes = () => (
       <Route path="/reset-password" element={<ResetPassword />} />
       
       <Route path="/conseils" element={<AlmaTips />} />
+      <Route path="/alma" element={<AppLayout><AlmaEvolution /></AppLayout>} />
       <Route path="/actualites" element={<News />} />
       <Route path="/actualites/inventaire-guardiens-france" element={<ArticleInventaire />} />
       <Route path="/actualites/:slug" element={<ArticleDetail />} />
