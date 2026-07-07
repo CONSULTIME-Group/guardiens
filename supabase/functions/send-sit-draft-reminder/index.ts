@@ -13,6 +13,7 @@ const corsHeaders = {
 
 const TEMPLATE = "sit-draft-reminder";
 const TOTAL_FIELDS = 8;
+const MAX_PER_RUN = 25;
 
 function countRemaining(sit: Record<string, any>): number {
   const filled = [
