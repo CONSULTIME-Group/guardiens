@@ -92,6 +92,19 @@ export interface RequestNextTipParams {
   emptyMessage?: string;
 }
 
+/**
+ * Verrou global : une seule surface Alma « proactive » visible à la fois.
+ * Poids plus élevé = priorité plus haute (peut déloger l'occupant courant).
+ * first_meeting (100) > welcome_back (50) > whisper (10). Le dock replié
+ * et la proposition permanente du dock ne sont PAS soumis au verrou.
+ */
+export type AlmaProactiveSurface = "first_meeting" | "welcome_back" | "whisper";
+const SURFACE_WEIGHT: Record<AlmaProactiveSurface, number> = {
+  first_meeting: 100,
+  welcome_back: 50,
+  whisper: 10,
+};
+
 interface AlmaContextValue {
   queueWhisper: (whisper: AlmaWhisper) => void;
   dismissCurrent: (reason: AlmaDismissReason) => void;
@@ -101,6 +114,12 @@ interface AlmaContextValue {
   verboseMode: boolean;
   /** Tire à la demande le prochain conseil éligible pour cette surface. */
   requestNextTip: (params: RequestNextTipParams) => Promise<void>;
+  /** Surface proactive actuellement affichée, ou null si aucune. */
+  activeProactiveSurface: AlmaProactiveSurface | null;
+  /** Tente de réserver la surface proactive. Retourne true si accordé. */
+  claimProactiveSurface: (kind: AlmaProactiveSurface) => boolean;
+  /** Libère la surface si elle est encore détenue par `kind`. */
+  releaseProactiveSurface: (kind: AlmaProactiveSurface) => void;
 }
 
 const NOOP_VALUE: AlmaContextValue = {
@@ -111,6 +130,9 @@ const NOOP_VALUE: AlmaContextValue = {
   frequency: "balanced",
   verboseMode: false,
   requestNextTip: async () => {},
+  activeProactiveSurface: null,
+  claimProactiveSurface: () => false,
+  releaseProactiveSurface: () => {},
 };
 
 const AlmaCtx = createContext<AlmaContextValue>(NOOP_VALUE);
