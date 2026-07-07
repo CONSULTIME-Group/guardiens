@@ -484,8 +484,10 @@ const OwnerDashboard = () => {
         </div>
       </header>
 
-      {/* ═══ Draft en cours : carte de reprise prioritaire, en tête ═══ */}
-      {hasDraft && latestDraft && (
+      {/* ═══ Draft en cours : carte de reprise prioritaire, en tête ═══
+          Masquée quand l'action primaire est « publish_draft » : SitDraftFromPrompt
+          rend déjà la carte d'activation dédiée en mode publication. */}
+      {hasDraft && latestDraft && primaryAction?.action !== "publish_draft" && (
         <div className="px-5 md:px-8">
           <DraftResumeCard draft={latestDraft as any} />
         </div>
@@ -495,9 +497,12 @@ const OwnerDashboard = () => {
           Reste accessible en permanence même si un brouillon existe :
           l'owner peut vouloir décrire une autre absence sans écraser son
           draft en cours. Affichage secondaire (moins accentué) dans ce cas. */}
-      {showAlmaProactive && (
+      {(showAlmaProactive || hasPrimaryAction) && (
         <div className="px-5 md:px-8">
-          <SitDraftFromPrompt secondary={hasDraft} />
+          <SitDraftFromPrompt
+            secondary={hasDraft && primaryAction?.action !== "publish_draft"}
+            primary={primaryAction}
+          />
         </div>
       )}
 
@@ -505,7 +510,7 @@ const OwnerDashboard = () => {
           Précepte 2026 : 1 seule NBA above the fold. Pour un owner sans annonce
           active, SitDraftFromPrompt / DraftResumeCard est la NBA dominante ;
           on masque PriorityActionCard pour éviter les CTA "Publier" empilés. */}
-      {!hasDraft && !showAlmaProactive && (
+      {!hasDraft && !showAlmaProactive && !hasPrimaryAction && (
         <div className="px-5 md:px-8">
           <PriorityActionCard
             eyebrow={priorityAction.eyebrow}
