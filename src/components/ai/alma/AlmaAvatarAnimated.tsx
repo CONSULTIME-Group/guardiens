@@ -382,55 +382,40 @@ export function AlmaAvatarAnimated({
           <circle cx="36" cy="50" r="3" fill="var(--alma-cheek)" />
           <circle cx="64" cy="50" r="3" fill="var(--alma-cheek)" />
 
-          {/* Yeux : grands ronds, iris brun foncé, reflets */}
+          {/* Yeux : grands ronds foncés (bichon), reflets */}
           <g className="alma-part alma-eyes">
-            {/* Blanc discret pour la profondeur */}
-            <ellipse cx="41" cy="43" rx="3.4" ry="3.8" fill="#f5efe4" />
-            <ellipse cx="59" cy="43" rx="3.4" ry="3.8" fill="#f5efe4" />
-            {/* Iris */}
-            <ellipse cx="41" cy="43.3" rx="2.9" ry="3.4" fill="var(--alma-eye)" />
-            <ellipse cx="59" cy="43.3" rx="2.9" ry="3.4" fill="var(--alma-eye)" />
+            {/* Halo brun très léger pour cerner l'œil */}
+            <ellipse cx="41" cy="43" rx="3.6" ry="4" fill="var(--alma-mouth)" opacity="0.18" />
+            <ellipse cx="59" cy="43" rx="3.6" ry="4" fill="var(--alma-mouth)" opacity="0.18" />
+            {/* Iris foncé qui remplit l'œil (peu de sclère visible) */}
+            <ellipse cx="41" cy="43" rx="3" ry="3.6" fill="var(--alma-eye)" />
+            <ellipse cx="59" cy="43" rx="3" ry="3.6" fill="var(--alma-eye)" />
             {/* Reflets principaux */}
-            <circle cx="42.1" cy="42" r="0.9" fill="var(--alma-eye-hi)" />
-            <circle cx="60.1" cy="42" r="0.9" fill="var(--alma-eye-hi)" />
+            <circle cx="42.1" cy="41.7" r="1" fill="var(--alma-eye-hi)" />
+            <circle cx="60.1" cy="41.7" r="1" fill="var(--alma-eye-hi)" />
             {/* Micro-reflets secondaires */}
-            <circle cx="40.2" cy="44.6" r="0.4" fill="var(--alma-eye-hi)" opacity="0.7" />
-            <circle cx="58.2" cy="44.6" r="0.4" fill="var(--alma-eye-hi)" opacity="0.7" />
+            <circle cx="40" cy="44.8" r="0.45" fill="var(--alma-eye-hi)" opacity="0.7" />
+            <circle cx="58" cy="44.8" r="0.45" fill="var(--alma-eye-hi)" opacity="0.7" />
           </g>
           {/* Paupières (clignement / sleepy) */}
-          <rect className="alma-part alma-eyelid" x="37.4" y="39.2" width="7.2" height="7.6" rx="3.6" fill="var(--alma-fur-shadow)" />
-          <rect className="alma-part alma-eyelid" x="55.4" y="39.2" width="7.2" height="7.6" rx="3.6" fill="var(--alma-fur-shadow)" />
+          <rect className="alma-part alma-eyelid" x="37.4" y="39" width="7.2" height="8" rx="3.6" fill="var(--alma-fur-shadow)" />
+          <rect className="alma-part alma-eyelid" x="55.4" y="39" width="7.2" height="8" rx="3.6" fill="var(--alma-fur-shadow)" />
 
           {/* Nez : truffe arrondie brillante */}
-          <ellipse cx="50" cy="52.5" rx="2.8" ry="2.2" fill="var(--alma-nose)" />
-          <ellipse cx="49.2" cy="51.7" rx="0.9" ry="0.6" fill="#ffffff" opacity="0.55" />
+          <ellipse cx="50" cy="52.5" rx="3.2" ry="2.5" fill="var(--alma-nose)" />
+          <ellipse cx="49" cy="51.6" rx="1" ry="0.7" fill="#ffffff" opacity="0.55" />
 
-          {/* Ligne verticale sous la truffe */}
-          <path d="M50 54.7 L50 57" stroke="var(--alma-mouth)" strokeWidth="0.7" strokeLinecap="round" />
+          {/* Sillon vertical sous la truffe */}
+          <path d="M50 55 L50 57.5" stroke="var(--alma-mouth)" strokeWidth="1" strokeLinecap="round" />
 
-          {/* Sourire discret */}
+          {/* Sourire discret plus lisible en petit */}
           <path
-            d="M45 58 q5 4 10 0"
+            d="M43 58 q3.5 4.5 7 4.5 q3.5 0 7 -4.5"
             fill="none"
             stroke="var(--alma-mouth)"
-            strokeWidth="1"
+            strokeWidth="1.4"
             strokeLinecap="round"
-          />
-          <path
-            d="M45 58 q0 -2 -2 -2"
-            fill="none"
-            stroke="var(--alma-mouth)"
-            strokeWidth="0.8"
-            strokeLinecap="round"
-            opacity="0.7"
-          />
-          <path
-            d="M55 58 q0 -2 2 -2"
-            fill="none"
-            stroke="var(--alma-mouth)"
-            strokeWidth="0.8"
-            strokeLinecap="round"
-            opacity="0.7"
+            strokeLinejoin="round"
           />
 
           {/* Langue (apparaît en happy / playful) */}
