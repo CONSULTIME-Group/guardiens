@@ -64,14 +64,20 @@ vi.mock("@/integrations/supabase/client", () => ({
 vi.mock("@/lib/analytics", () => ({ trackEvent: vi.fn() }));
 
 function Wrapper({ children }: { children: React.ReactNode }) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false, gcTime: 0, staleTime: 0 } },
+  });
   return (
     <HelmetProvider>
-      <MemoryRouter>
-        <AlmaProvider>{children}</AlmaProvider>
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <AlmaProvider>{children}</AlmaProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
     </HelmetProvider>
   );
 }
+
 
 beforeEach(() => {
   try {
