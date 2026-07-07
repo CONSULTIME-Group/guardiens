@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { useAuth } from "@/contexts/AuthContext";
+
 
 const NAV_DEFS: ReadonlyArray<{ key: string; to: string; beta?: boolean }> = [
   { key: "listings", to: "/annonces" },
