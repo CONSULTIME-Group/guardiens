@@ -111,10 +111,16 @@ export function AlmaFirstMeeting({ role, onDone }: Props) {
       >
         <span className="text-lg leading-none" aria-hidden="true">×</span>
       </button>
-      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 pr-10">
-        <div className="shrink-0 inline-flex items-center justify-center rounded-full ring-2 ring-primary/30 bg-background">
-          <AlmaAnimated size={88} mood={mood} />
+      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 pr-10">
+        <div className="shrink-0 relative inline-flex items-center justify-center">
+          <AlmaAvatarAnimated
+            size={160}
+            mood={mood === "attention" ? "attentive" : (mood as any)}
+            stage={evolution?.stage}
+            showHalo
+          />
         </div>
+
         <div className="flex-1 min-w-0 space-y-3 text-center sm:text-left">
           <div>
             <span className="text-[10px] font-semibold uppercase tracking-wider text-primary/80">
