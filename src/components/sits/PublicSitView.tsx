@@ -558,6 +558,9 @@ const PublicSitView = ({
                     Dates
                   </p>
                   <p className="text-base font-semibold text-foreground">{naturalDateLabel}</p>
+                  {sit.flexible_dates && (
+                    <p className="text-xs text-muted-foreground mt-1">Dates flexibles</p>
+                  )}
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
