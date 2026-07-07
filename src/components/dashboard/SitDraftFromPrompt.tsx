@@ -102,9 +102,9 @@ export default function SitDraftFromPrompt({ secondary = false }: SitDraftFromPr
           : "rounded-2xl border border-border bg-card p-5 md:p-6"
       }
     >
-      <div className="flex items-start gap-3 mb-3">
-        <div className="rounded-xl bg-primary/10 p-2 text-primary shrink-0">
-          <AlmaAvatar size={secondary ? 24 : 32} />
+      <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 mb-3">
+        <div className="shrink-0 self-start">
+          <AlmaAnimated size={72} />
         </div>
         <div className="min-w-0">
           <h2
