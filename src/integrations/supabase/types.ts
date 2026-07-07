@@ -6385,6 +6385,7 @@ export type Database = {
         Args: { _owner_id: string }
         Returns: Json
       }
+      get_owner_sits_enriched: { Args: { p_owner: string }; Returns: Json[] }
       get_owner_top_3_sitters: {
         Args: { _owner_id: string }
         Returns: {
