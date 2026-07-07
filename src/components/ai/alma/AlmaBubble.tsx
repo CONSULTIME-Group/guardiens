@@ -10,6 +10,7 @@ import { ReactNode } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AlmaAvatar } from "./AlmaAvatar";
+import type { AlmaStage } from "@/hooks/useAlmaEvolution";
 
 export type AlmaVariant = "default" | "dashboard" | "inline" | "sticky-footer";
 export type AlmaAudience = "owner" | "sitter";
@@ -24,7 +25,10 @@ export interface AlmaBubbleProps {
   actions?: ReactNode;
   onDismiss?: () => void;
   className?: string;
+  /** Stade utilisateur (halo / liseré). Optionnel. */
+  stage?: AlmaStage;
 }
+
 
 const VARIANT_STYLES: Record<AlmaVariant, string> = {
   default: "p-4 md:p-5",
