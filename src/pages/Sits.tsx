@@ -66,7 +66,7 @@ const appStatusConfig: Record<string, { label: string; className: string }> = {
 };
 
 type Tab = "upcoming" | "in_progress" | "completed" | "cancelled";
-type OwnerTab = "active" | "drafts" | "archived";
+type OwnerTab = "active" | "drafts" | "past";
 
 const tabs: { value: Tab; label: string; icon: typeof Calendar }[] = [
   { value: "upcoming", label: "Actives", icon: Calendar },
@@ -77,9 +77,9 @@ const tabs: { value: Tab; label: string; icon: typeof Calendar }[] = [
 
 
 const ownerTabs: { value: OwnerTab; label: string; icon: typeof Calendar }[] = [
-  { value: "active", label: "Actives", icon: Calendar },
+  { value: "active", label: "En ligne", icon: Calendar },
   { value: "drafts", label: "Brouillons", icon: Pencil },
-  { value: "archived", label: "Archivées", icon: Archive },
+  { value: "past", label: "Passées", icon: Archive },
 ];
 
 const formatShortDate = (d: string | null) =>
