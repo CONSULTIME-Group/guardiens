@@ -105,6 +105,44 @@ export default function SitDraftFromPrompt({ secondary = false, primary = null }
     }
   }, [prompt, navigate, toast]);
 
+  // Mode « brouillon prêt à publier » : la carte devient un rappel direct
+  // avec CTA vers /sits/create?resume=<id>. Pas de champ prompt à re-remplir.
+  if (primary?.action === "publish_draft" && primary.draftId) {
+    const draftId = primary.draftId;
+    return (
+      <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
+          <div className="shrink-0 self-start">
+            <AlmaAnimated size={72} mood="attention" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-lg md:text-xl font-heading font-semibold text-foreground leading-tight">
+              Votre brouillon est prêt. Il ne manque que la publication.
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Sans publication, les gardiens de votre secteur ne peuvent pas se proposer. Reprenez votre brouillon, quelques minutes suffisent.
+            </p>
+            <div className="mt-4">
+              <Button
+                onClick={() => {
+                  void trackEvent("owner_primary_action_publish_draft_click", {
+                    metadata: { draft_id: draftId },
+                  });
+                  navigate(`/sits/create?resume=${draftId}`);
+                }}
+                className="rounded-xl"
+              >
+                Reprendre et publier
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const showCreateFirstAlma = primary?.action === "create_first_sit";
+
   return (
     <section
       className={
@@ -132,6 +170,11 @@ export default function SitDraftFromPrompt({ secondary = false, primary = null }
           <p className="text-sm text-muted-foreground mt-1">
             Vous relisez et publiez en 2 minutes.
           </p>
+          {showCreateFirstAlma && (
+            <p className="text-sm text-foreground/90 mt-2 leading-relaxed">
+              Votre annonce est ce qui déclenche tout. Sans elle, les gardiens de votre secteur ne peuvent pas se proposer.
+            </p>
+          )}
         </div>
       </div>
 
