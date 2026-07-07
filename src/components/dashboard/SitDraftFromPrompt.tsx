@@ -71,11 +71,12 @@ export default function SitDraftFromPrompt({ secondary = false, primary = null }
       if (error || !data?.draftId) {
         const msg = (data as any)?.error || error?.message || "Génération impossible pour le moment.";
         toast({ variant: "destructive", title: "Brouillon non généré", description: msg });
+        setAlmaMood("attentive");
         setLoading(false);
         return;
       }
       setAlmaMood("happy");
-      window.setTimeout(() => setAlmaMood("idle"), 800);
+      window.setTimeout(() => setAlmaMood("attentive"), 1200);
       void trackEvent("owner_draft_from_prompt_generated", {
         metadata: {
           prompt_length: clean.length,
