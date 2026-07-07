@@ -71,7 +71,7 @@ export function useAlmaEvolution() {
           supabase
             .from("sits")
             .select("id, status")
-            .eq("owner_id", uid),
+            .eq("user_id", uid),
           supabase
             .from("applications")
             .select("id")
@@ -80,8 +80,8 @@ export function useAlmaEvolution() {
           supabase
             .from("small_missions")
             .select("id")
-            .eq("owner_id", uid)
-            .in("status", ["published", "in_progress", "completed"])
+            .eq("user_id", uid)
+            .in("status", ["open", "in_progress", "completed"])
             .limit(1),
           supabase
             .from("badge_attributions")
@@ -95,7 +95,7 @@ export function useAlmaEvolution() {
           supabase
             .from("sits")
             .select("id")
-            .eq("owner_id", uid)
+            .eq("user_id", uid)
             .eq("status", "draft")
             .limit(1),
         ]);
