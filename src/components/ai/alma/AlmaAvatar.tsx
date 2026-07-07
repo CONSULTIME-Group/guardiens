@@ -52,23 +52,35 @@ export function AlmaAvatar({
   const [failed, setFailed] = useState(false);
 
   // One-shot moods : replay lorsque la valeur (ré)apparaît.
+  const isOneShot =
+    mood === "happy" ||
+    mood === "attention" ||
+    mood === "attentive" ||
+    mood === "playful";
   const [oneShotKey, setOneShotKey] = useState(0);
   useEffect(() => {
-    if (mood === "happy" || mood === "attention") {
+    if (isOneShot) {
       setOneShotKey((k) => k + 1);
     }
-  }, [mood]);
+  }, [mood, isOneShot]);
 
   const moodClass =
     mood === "happy"
       ? "motion-safe:animate-alma-happy"
-      : mood === "attention"
+      : mood === "attention" || mood === "attentive"
       ? "motion-safe:animate-alma-attention"
+      : mood === "playful"
+      ? "motion-safe:animate-alma-playful"
+      : mood === "thinking"
+      ? "motion-safe:animate-alma-thinking"
+      : mood === "gentle"
+      ? "motion-safe:animate-alma-gentle"
       : mood === "sleepy"
       ? "opacity-70 motion-safe:animate-alma-breathe-slow"
       : breathe
       ? "motion-safe:animate-alma-breathe"
       : "";
+
 
   const commonClass = cn(
     "inline-block rounded-full object-cover select-none",
