@@ -35,6 +35,7 @@ import FavoriteButton from "@/components/shared/FavoriteButton";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 import AlmaFitGardien from "@/components/ai/alma/AlmaFitGardien";
 import { AlmaReciprocityWhisper } from "@/components/ai/alma/wiring/AlmaReciprocityWhisper";
+import { AlmaOwnerActiveSitterWhisper } from "@/components/ai/alma/wiring/AlmaOwnerActiveSitterWhisper";
 import ProfileSchemaOrg from "@/components/seo/ProfileSchemaOrg";
 import TrustTimeline from "@/components/profile/TrustTimeline";
 import { buildTrustTimeline } from "@/lib/trustTimeline";
