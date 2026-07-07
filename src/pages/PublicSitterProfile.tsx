@@ -1603,34 +1603,47 @@ export default function PublicSitterProfile() {
                 </TabsContent>
               )}
 
-              {/* Onglet Confiance */}
-              {((userBadges && userBadges.length > 0) || profile?.created_at) && (
-                <TabsContent value="confiance" className="pt-6">
-                  <div className="space-y-6">
-                    {userBadges && userBadges.length > 0 && (
-                      <>
-                        <SpecialBadgeHighlight userBadges={userBadges} />
-                        <BadgeRow badges={userBadges} />
-                      </>
-                    )}
-                    {id && <MissionBadgesReceived profileId={id} />}
-                    <TrustTimeline
-                      memberSince={profile?.created_at}
-                      reviews={reviews}
-                      badges={(userBadges || []).map((b: any) => ({
-                        badge_id: b.badge_id,
-                        created_at: b.created_at,
-                        count: b.count ?? 1,
-                      }))}
-                      completedSits={completedSits}
-                      lastActivity={sitterProfile?.last_seen_at ?? null}
-                      firstName={firstName}
-                    />
-                  </div>
-                </TabsContent>
-              )}
             </Tabs>
+
+            {/* Section Confiance toujours visible sur desktop (badges + timeline + missions).
+                Sortie de l'onglet pour rendre la réassurance accessible sans clic. */}
+            {((userBadges && userBadges.length > 0) || profile?.created_at) && (
+              <section
+                id="confiance"
+                aria-label="Confiance et vérifications"
+                className="mt-10 pt-8 border-t border-border space-y-6"
+              >
+                <header>
+                  <p className="text-xs uppercase tracking-[2px] text-muted-foreground font-body mb-1.5">
+                    Confiance et vérifications
+                  </p>
+                  <h2 className="text-xl font-heading font-semibold text-foreground">
+                    Ce qui rassure chez {firstName}
+                  </h2>
+                </header>
+                {userBadges && userBadges.length > 0 && (
+                  <>
+                    <SpecialBadgeHighlight userBadges={userBadges} />
+                    <BadgeRow badges={userBadges} />
+                  </>
+                )}
+                {id && <MissionBadgesReceived profileId={id} />}
+                <TrustTimeline
+                  memberSince={profile?.created_at}
+                  reviews={reviews}
+                  badges={(userBadges || []).map((b: any) => ({
+                    badge_id: b.badge_id,
+                    created_at: b.created_at,
+                    count: b.count ?? 1,
+                  }))}
+                  completedSits={completedSits}
+                  lastActivity={sitterProfile?.last_seen_at ?? null}
+                  firstName={firstName}
+                />
+              </section>
+            )}
           </div>
+
 
           {/* MOBILE : onglets sticky scrollables (forceMount pour SEO) */}
           <div className="md:hidden">
