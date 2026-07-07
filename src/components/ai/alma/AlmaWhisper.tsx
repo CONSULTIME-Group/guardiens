@@ -20,7 +20,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { AlmaAvatarLottie } from "./AlmaAvatarLottie";
+import { AlmaAvatar } from "./AlmaAvatar";
 import { useAlma } from "@/contexts/AlmaContext";
 import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
