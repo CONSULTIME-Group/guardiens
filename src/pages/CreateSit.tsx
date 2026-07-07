@@ -375,11 +375,17 @@ const CreateSit = () => {
         }
         if (draftRes?.data) {
           const d = draftRes.data;
+          const today = new Date().toISOString().slice(0, 10);
+          const rawStart: string | null = d.start_date || null;
+          const rawEnd: string | null = d.end_date || null;
+          const cleanStart = rawStart && rawStart >= today ? rawStart : "";
+          const cleanEnd = rawEnd && rawEnd >= today && (!cleanStart || rawEnd >= cleanStart) ? rawEnd : "";
+          const datesWerePast = (!!rawStart && !cleanStart) || (!!rawEnd && !cleanEnd);
           setDraftId(d.id);
           setTitle(d.title || "");
-          setStartDate(d.start_date || "");
-          setEndDate(d.end_date || "");
-          setFlexibleDates(d.flexible_dates || false);
+          setStartDate(cleanStart);
+          setEndDate(cleanEnd);
+          setFlexibleDates(d.flexible_dates || datesWerePast);
           setSpecificExpectations(d.specific_expectations || "");
           setOpenTo(d.open_to || []);
           setIsUrgent(d.is_urgent || false);
@@ -391,6 +397,12 @@ const CreateSit = () => {
           setCoverPhotoUrl(d.cover_photo_url || null);
           setSitCity((d as any).city || "");
           setSitCountry((d as any).country || "FR");
+          if (datesWerePast) {
+            toast({
+              title: "Dates à redéfinir",
+              description: "La date du brouillon était dépassée, à redéfinir.",
+            });
+          }
           if (draftIdParam) {
             const days = d.created_at
               ? Math.round((Date.now() - new Date(d.created_at).getTime()) / 86_400_000)
@@ -453,6 +465,19 @@ const CreateSit = () => {
 
   const saveDraft = async ({ silent = false }: { silent?: boolean } = {}) => {
     if (!user || !property) return null;
+    // Anti-brouillon fantôme : ne pas créer de brouillon vide en base.
+    // Si aucun draft existant ET aucun champ utilisateur rempli, on n'écrit rien.
+    const today = new Date().toISOString().slice(0, 10);
+    const safeStart = startDate && startDate >= today ? startDate : null;
+    const safeEnd = endDate && endDate >= today && (!safeStart || endDate >= safeStart) ? endDate : null;
+    const hasAnyContent = !!(
+      title.trim() || safeStart || safeEnd || flexibleDates || flexibleNotes.trim()
+      || specificExpectations.trim() || openTo.length > 0 || isUrgent
+      || sitEnvironments.length > 0 || minGardienSits > 0
+      || ownerMessage.trim() || dailyRoutine.trim() || coverPhotoUrl
+      || sitCity.trim()
+    );
+    if (!draftId && !hasAnyContent) return null;
     setSavingDraft(true);
     try {
       let expectations = specificExpectations;
@@ -463,9 +488,9 @@ const CreateSit = () => {
         user_id: user.id,
         property_id: property.id,
         title: title || "",
-        start_date: startDate || null,
-        end_date: endDate || null,
-        flexible_dates: flexibleDates,
+        start_date: safeStart,
+        end_date: safeEnd,
+        flexible_dates: flexibleDates || (!safeStart || !safeEnd),
         specific_expectations: expectations,
         open_to: openTo,
         is_urgent: isUrgent,
@@ -618,7 +643,7 @@ const CreateSit = () => {
 
       let sitId = draftId;
       if (draftId) {
-        const { error } = await supabase.from("sits").update(payload).eq("id", draftId);
+        const { error } = await supabase.from("sits").update(payload).eq("id", draftId).eq("status", "draft");
         if (error) throw error;
       } else {
         const { data: sit, error } = await supabase.from("sits").insert(payload).select("id").single();

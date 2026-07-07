@@ -43,13 +43,27 @@ const FIELDS: Array<keyof Draft> = [
   "daily_routine",
 ];
 
+function isFutureDate(v: unknown): boolean {
+  if (typeof v !== "string" || !v) return false;
+  const today = new Date().toISOString().slice(0, 10);
+  return v >= today;
+}
+
 function countFilled(draft: Draft): number {
   return FIELDS.reduce((n, k) => {
     const v = draft[k];
+    if (k === "start_date" || k === "end_date") return n + (isFutureDate(v) ? 1 : 0);
     if (Array.isArray(v)) return n + (v.length > 0 ? 1 : 0);
     if (typeof v === "string") return n + (v.trim().length > 0 ? 1 : 0);
     return n + (v ? 1 : 0);
   }, 0);
+}
+
+function hasStaleDate(draft: Draft): boolean {
+  const hasStart = typeof draft.start_date === "string" && !!draft.start_date;
+  const hasEnd = typeof draft.end_date === "string" && !!draft.end_date;
+  return (hasStart && !isFutureDate(draft.start_date))
+    || (hasEnd && !isFutureDate(draft.end_date));
 }
 
 function relativeTime(iso: string): string {
@@ -75,6 +89,7 @@ export default function DraftResumeCard({ draft, onDeleted }: Props) {
 
   const filled = useMemo(() => countFilled(draft), [draft]);
   const total = FIELDS.length;
+  const staleDate = useMemo(() => hasStaleDate(draft), [draft]);
   const modified = draft.updated_at || draft.created_at || null;
 
   const impressionRef = useRef<HTMLDivElement>(null);
@@ -148,6 +163,11 @@ export default function DraftResumeCard({ draft, onDeleted }: Props) {
             <p className="text-sm text-muted-foreground mt-1">
               Reprenez où vous en étiez. Vous êtes à {filled} champs sur {total} remplis.
             </p>
+            {staleDate && (
+              <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 text-xs font-medium px-2 py-0.5 mt-1.5">
+                Dates à mettre à jour
+              </span>
+            )}
             {modified && (
               <p className="text-xs text-muted-foreground/80 mt-1">
                 Modifié {relativeTime(modified)}

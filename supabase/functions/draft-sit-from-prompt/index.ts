@@ -61,13 +61,19 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     const todayIso = new Date().toISOString().slice(0, 10);
+    const currentYear = new Date().getUTCFullYear();
 
     const system = `Vous êtes rédacteur pour Guardiens.fr, plateforme française de garde d'animaux à domicile entre particuliers de confiance. Un propriétaire vous décrit son besoin en une phrase. Générez un brouillon d'annonce complet, prêt à être relu et publié.
 
 ${STYLE_GUARDRAILS}
 
+Règle absolue sur les dates (aujourd'hui = ${todayIso}, année en cours = ${currentYear}) :
+- N'INVENTEZ JAMAIS de date. Si la phrase ne contient AUCUNE indication temporelle (mois, saison, dates précises, durée), laissez start_date et end_date VIDES (chaîne vide) et mettez flexible_dates=true.
+- Si un mois/jour est cité SANS année : utilisez l'année ${currentYear} par défaut. Si la date obtenue est déjà passée par rapport à ${todayIso}, utilisez ${currentYear + 1}.
+- Toute date retournée DOIT être >= ${todayIso}. Interdiction stricte de renvoyer une année < ${currentYear}. En cas de doute, laissez vide et mettez flexible_dates=true.
+- Format YYYY-MM-DD uniquement.
+
 Extraction attendue depuis la phrase du propriétaire :
-- Dates : si mentionnées (« du 4 au 19 août », « en août », « 15 jours en août »), déduisez start_date et end_date au format YYYY-MM-DD. Année par défaut : celle qui rend la date future à partir d'aujourd'hui (${todayIso}). Si aucune date, laissez vides et mettez flexible_dates=true.
 - Ville : extraite du prompt, sinon utilisez « ${profile?.city ?? ""} » (peut rester vide).
 - Animaux : nombre + espèce (chien, chat, NAC…).
 - Environnement : choisir 0 à 3 valeurs STRICTEMENT parmi cette liste (aucune autre valeur autorisée) : ville, campagne, montagne, lac, vignes, foret. N'inventez pas « maison », « appartement », « jardin » : ces mots vont dans la description, pas dans environments.
@@ -140,6 +146,14 @@ Si le prompt mentionne un prix ou une transaction financière, ignorez-le : Guar
       daily_routine: clean(parsed.daily_routine),
       owner_message: clean(parsed.owner_message),
     };
+
+    // Garde serveur : aucune date passée ne doit être écrite en base.
+    // Toute date < aujourd'hui est purgée ; end_date < start_date également.
+    // Si l'une des deux manque après purge, on force flexible_dates=true.
+    if (draft.start_date && draft.start_date < todayIso) draft.start_date = null;
+    if (draft.end_date && draft.end_date < todayIso) draft.end_date = null;
+    if (draft.start_date && draft.end_date && draft.end_date < draft.start_date) draft.end_date = null;
+    if (!draft.start_date || !draft.end_date) draft.flexible_dates = true;
 
     // Validation post-génération : détection mots proscrits
     const warnings: string[] = [];
