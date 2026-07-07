@@ -613,6 +613,21 @@ export function AlmaAvatarAnimated({
     );
   }
 
+  // Morphologie du bichon selon le stade (chiot pour « nouvelle »).
+  const m = stageMorph(stage);
+
+  // Bouclettes procédurales autour du crâne (silhouette festonnée).
+  const headOuter = ellipseCurls(m.headCx, m.headCy, m.headRx + 0.5, m.headRy + 0.5, 18, 5.2);
+  const headHi = ellipseCurls(m.headCx, m.headCy - 2, m.headRx * 0.55, m.headRy * 0.5, 8, 2.6);
+  // Bouclettes autour du corps
+  const bodyOuter = ellipseCurls(m.bodyCy > 85 ? 50 : 50, m.bodyCy, m.bodyRx + 0.5, m.bodyRy + 0.5, 12, 4.6, 200, 140);
+
+  // Positions ancrées à la morphologie
+  const earLx = m.headCx + m.earSpread;   // oreille côté droit de l'écran
+  const earRx = m.headCx - m.earSpread;   // oreille côté gauche de l'écran
+  const tailCx = m.headCx + (m.bodyRx * 0.75); // queue relevée à l'arrière (côté droit)
+  const tailCy = m.bodyCy - m.bodyRy * 0.4;
+
   return (
     <span
       data-alma-animated=""
@@ -659,146 +674,160 @@ export function AlmaAvatarAnimated({
           </radialGradient>
         </defs>
 
-        {/* Ombre de contact au sol (respire avec le corps) */}
+        {/* Ombre de contact au sol */}
         <ellipse
           className="alma-part alma-shadow"
-          cx="50" cy="95" rx="30" ry="3.2"
+          cx="50" cy="96" rx={m.bodyRx + 2} ry="2.8"
           fill="var(--alma-shadow)"
         />
 
-        {/* CORPS : wrapper "respiration" (base) + wrapper "mood" (rebond/wiggle) */}
+        {/* CORPS : respiration (base) + mood (rebond/wiggle) */}
         <g className="alma-part alma-body-breath">
           <g className="alma-part alma-body-mood">
-            {/* Queue en arrière-plan : base slow-wag + mood fast-wag */}
+            {/* Queue relevée et frisée (typique bichon) */}
             <g className="alma-part alma-tail-base">
               <g className="alma-part alma-tail-mood">
-                <ellipse cx="14" cy="80" rx="6.5" ry="9" fill="var(--alma-fur)" />
-                <Curls positions={[[12, 74, 3.5], [16, 78, 3.5], [12, 86, 3.5], [10, 82, 3]]} />
-                <ellipse cx="14" cy="78" rx="2" ry="3" fill="var(--alma-fur-hi)" opacity="0.6" />
+                <ellipse cx={tailCx} cy={tailCy} rx="5" ry="7" fill="var(--alma-fur)" />
+                <Curls
+                  positions={[
+                    [tailCx - 2, tailCy - 4, 3.2],
+                    [tailCx + 2, tailCy - 2, 3.2],
+                    [tailCx + 3, tailCy + 2, 3.2],
+                    [tailCx - 2, tailCy + 3, 3],
+                  ]}
+                />
+                <ellipse cx={tailCx - 1} cy={tailCy - 1} rx="1.8" ry="2.6" fill="var(--alma-fur-hi)" opacity="0.6" />
               </g>
             </g>
 
-            {/* Silhouette corps */}
-            <ellipse cx="50" cy="82" rx="30" ry="14" fill={`url(#${gBody})`} />
-            <Curls positions={BODY_CURLS} />
+            {/* Silhouette corps arrondie */}
+            <ellipse cx="50" cy={m.bodyCy} rx={m.bodyRx} ry={m.bodyRy} fill={`url(#${gBody})`} />
+            <Curls positions={bodyOuter} />
             {/* Ombre sous corps */}
-            <ellipse cx="50" cy="90" rx="22" ry="3" fill="var(--alma-fur-shadow)" opacity="0.4" />
-            {/* Poitrail clair */}
-            <ellipse cx="50" cy="76" rx="14" ry="8" fill="#ffffff" opacity="0.65" />
-            {/* Pattes avant suggérées */}
-            <ellipse cx="42" cy="94" rx="5" ry="3" fill="var(--alma-fur)" />
-            <ellipse cx="58" cy="94" rx="5" ry="3" fill="var(--alma-fur)" />
-            <ellipse cx="42" cy="93.5" rx="3" ry="1.4" fill="var(--alma-fur-hi)" opacity="0.7" />
-            <ellipse cx="58" cy="93.5" rx="3" ry="1.4" fill="var(--alma-fur-hi)" opacity="0.7" />
+            <ellipse cx="50" cy={m.bodyCy + m.bodyRy * 0.55} rx={m.bodyRx * 0.72} ry="2.6" fill="var(--alma-fur-shadow)" opacity="0.4" />
+            {/* Poitrail blanc */}
+            <ellipse cx="50" cy={m.bodyCy - m.bodyRy * 0.4} rx={m.bodyRx * 0.55} ry={m.bodyRy * 0.6} fill="#ffffff" opacity="0.7" />
+            {/* Pattes avant */}
+            <ellipse cx={50 - m.bodyRx * 0.28} cy="94.5" rx="4.4" ry="2.8" fill="var(--alma-fur)" />
+            <ellipse cx={50 + m.bodyRx * 0.28} cy="94.5" rx="4.4" ry="2.8" fill="var(--alma-fur)" />
+            <ellipse cx={50 - m.bodyRx * 0.28} cy="94" rx="2.6" ry="1.3" fill="var(--alma-fur-hi)" opacity="0.7" />
+            <ellipse cx={50 + m.bodyRx * 0.28} cy="94" rx="2.6" ry="1.3" fill="var(--alma-fur-hi)" opacity="0.7" />
           </g>
         </g>
 
-        {/* Accessoire de cou (collier / bandana / écharpe) selon le stade */}
+        {/* Accessoire de cou */}
         <StageNeckAccessory stage={stage} />
 
-        {/* Oreilles tombantes (indépendantes, derrière la tête) */}
+        {/* Oreilles tombantes, frisées, larges (typique bichon) */}
         <g className="alma-part alma-ear-r">
-          <path
-            d="M22 30 q-12 6 -12 22 q0 12 10 16 q6 2 10 -2 q0 -18 -2 -34 z"
-            fill="var(--alma-fur)"
+          <ellipse cx={earRx} cy={m.earCy} rx={m.earRx} ry={m.earRy} fill="var(--alma-fur)" />
+          <Curls
+            positions={[
+              [earRx - 2, m.earCy - m.earRy * 0.4, 4],
+              [earRx + 1, m.earCy - m.earRy * 0.6, 3.6],
+              [earRx - 3, m.earCy, 4],
+              [earRx - 1, m.earCy + m.earRy * 0.4, 4],
+              [earRx + 2, m.earCy + m.earRy * 0.55, 3.5],
+              [earRx - 2, m.earCy + m.earRy * 0.75, 3.2],
+            ]}
           />
-          <Curls positions={EAR_R_CURLS} />
-          <path
-            d="M20 34 q-6 6 -6 18"
-            stroke="var(--alma-fur-shadow)" strokeWidth="1.2" fill="none" opacity="0.5"
-          />
+          <ellipse cx={earRx - 1} cy={m.earCy - m.earRy * 0.3} rx="1.8" ry="3" fill="var(--alma-fur-hi)" opacity="0.55" />
         </g>
         <g className="alma-part alma-ear-l">
-          <path
-            d="M78 30 q12 6 12 22 q0 12 -10 16 q-6 2 -10 -2 q0 -18 2 -34 z"
-            fill="var(--alma-fur)"
+          <ellipse cx={earLx} cy={m.earCy} rx={m.earRx} ry={m.earRy} fill="var(--alma-fur)" />
+          <Curls
+            positions={[
+              [earLx + 2, m.earCy - m.earRy * 0.4, 4],
+              [earLx - 1, m.earCy - m.earRy * 0.6, 3.6],
+              [earLx + 3, m.earCy, 4],
+              [earLx + 1, m.earCy + m.earRy * 0.4, 4],
+              [earLx - 2, m.earCy + m.earRy * 0.55, 3.5],
+              [earLx + 2, m.earCy + m.earRy * 0.75, 3.2],
+            ]}
           />
-          <Curls positions={EAR_L_CURLS} />
-          <path
-            d="M80 34 q6 6 6 18"
-            stroke="var(--alma-fur-shadow)" strokeWidth="1.2" fill="none" opacity="0.5"
-          />
+          <ellipse cx={earLx + 1} cy={m.earCy - m.earRy * 0.3} rx="1.8" ry="3" fill="var(--alma-fur-hi)" opacity="0.55" />
         </g>
 
-        {/* TÊTE : wrapper "sway" (base micro-bob) + wrapper "mood" (tilt) */}
+        {/* TÊTE : sway (base) + mood (tilt) */}
         <g className="alma-part alma-head-sway">
           <g className="alma-part alma-head-mood">
-            {/* Halo tête */}
-            <ellipse cx="50" cy="40" rx="27" ry="25" fill={`url(#${gHead})`} />
-            {/* Ombres douces internes */}
-            <Curls positions={HEAD_SHADOWS} fill="var(--alma-fur-shadow)" opacity={0.5} />
-            {/* Bouclettes du pourtour (silhouette festonnée) */}
-            <Curls positions={HEAD_OUTER_CURLS} />
-            {/* Highlights (volume duveteux) */}
-            <Curls positions={HEAD_HIGHLIGHTS} fill="var(--alma-fur-hi)" opacity={0.9} />
+            {/* Crâne rond duveteux */}
+            <ellipse cx={m.headCx} cy={m.headCy} rx={m.headRx} ry={m.headRy} fill={`url(#${gHead})`} />
+            {/* Silhouette festonnée : bouclettes du pourtour */}
+            <Curls positions={headOuter} />
+            {/* Highlights (mèches claires) */}
+            <Curls positions={headHi} fill="var(--alma-fur-hi)" opacity={0.85} />
+            {/* Toupet frisé sur le front */}
+            <circle cx={m.headCx - 3} cy={m.headCy - m.headRy * 0.75} r="3.2" fill="#ffffff" opacity="0.95" />
+            <circle cx={m.headCx + 3} cy={m.headCy - m.headRy * 0.75} r="3.2" fill="#ffffff" opacity="0.95" />
+            <circle cx={m.headCx} cy={m.headCy - m.headRy * 0.85} r="3.4" fill="#ffffff" opacity="0.95" />
 
-            {/* Toupet ondulé sur le front */}
-            <path
-              d="M40 22 q4 -4 10 -4 q6 0 10 4 q-3 4 -10 4 q-7 0 -10 -4 z"
-              fill="#ffffff"
-              opacity="0.9"
-            />
-            <circle cx="47" cy="20" r="2.4" fill="#ffffff" opacity="0.9" />
-            <circle cx="53" cy="20" r="2.4" fill="#ffffff" opacity="0.9" />
-
-            {/* Accessoire de tête (étincelle / couronne) selon le stade */}
+            {/* Accessoire de tête */}
             <StageHeadAccessory stage={stage} />
 
-
             {/* Museau blanc */}
-            <ellipse cx="50" cy="54" rx="13" ry="10.5" fill="#ffffff" opacity="0.9" />
-            <ellipse cx="50" cy="54" rx="13" ry="10.5" fill={`url(#${gMuzzle})`} opacity="0.5" />
+            <ellipse cx={m.headCx} cy={m.muzzleCy} rx={m.muzzleRx} ry={m.muzzleRy} fill="#ffffff" opacity="0.95" />
+            <ellipse cx={m.headCx} cy={m.muzzleCy} rx={m.muzzleRx} ry={m.muzzleRy} fill={`url(#${gMuzzle})`} opacity="0.45" />
 
             {/* Joues rosées */}
-            <circle cx="34" cy="52" r="3.4" fill="var(--alma-cheek)" />
-            <circle cx="66" cy="52" r="3.4" fill="var(--alma-cheek)" />
+            <circle cx={m.headCx - m.eyeDx - 3} cy={m.eyeY + 6} r="3" fill="var(--alma-cheek)" />
+            <circle cx={m.headCx + m.eyeDx + 3} cy={m.eyeY + 6} r="3" fill="var(--alma-cheek)" />
 
-            {/* Yeux : grands ronds foncés */}
+            {/* Yeux : grands ronds noirs expressifs */}
             <g className="alma-part alma-eyes">
-              <ellipse cx="40" cy="43" rx="4.4" ry="4.8" fill="var(--alma-mouth)" opacity="0.18" />
-              <ellipse cx="60" cy="43" rx="4.4" ry="4.8" fill="var(--alma-mouth)" opacity="0.18" />
-              <ellipse cx="40" cy="43" rx="3.7" ry="4.3" fill="var(--alma-eye)" />
-              <ellipse cx="60" cy="43" rx="3.7" ry="4.3" fill="var(--alma-eye)" />
+              {/* Halo doux autour de chaque œil */}
+              <ellipse cx={m.headCx - m.eyeDx} cy={m.eyeY} rx={m.eyeRx + 0.7} ry={m.eyeRy + 0.7} fill="var(--alma-mouth)" opacity="0.18" />
+              <ellipse cx={m.headCx + m.eyeDx} cy={m.eyeY} rx={m.eyeRx + 0.7} ry={m.eyeRy + 0.7} fill="var(--alma-mouth)" opacity="0.18" />
+              {/* Pupilles */}
+              <ellipse cx={m.headCx - m.eyeDx} cy={m.eyeY} rx={m.eyeRx} ry={m.eyeRy} fill="var(--alma-eye)" />
+              <ellipse cx={m.headCx + m.eyeDx} cy={m.eyeY} rx={m.eyeRx} ry={m.eyeRy} fill="var(--alma-eye)" />
               {/* Reflets principaux */}
-              <circle cx="41.4" cy="41.4" r="1.3" fill="var(--alma-eye-hi)" />
-              <circle cx="61.4" cy="41.4" r="1.3" fill="var(--alma-eye-hi)" />
+              <circle cx={m.headCx - m.eyeDx + 1.2} cy={m.eyeY - 1.4} r={m.eyeRx * 0.3} fill="var(--alma-eye-hi)" />
+              <circle cx={m.headCx + m.eyeDx + 1.2} cy={m.eyeY - 1.4} r={m.eyeRx * 0.3} fill="var(--alma-eye-hi)" />
               {/* Micro-reflets */}
-              <circle cx="38.8" cy="45" r="0.55" fill="var(--alma-eye-hi)" opacity="0.75" />
-              <circle cx="58.8" cy="45" r="0.55" fill="var(--alma-eye-hi)" opacity="0.75" />
+              <circle cx={m.headCx - m.eyeDx - 1.2} cy={m.eyeY + 1.8} r={m.eyeRx * 0.15} fill="var(--alma-eye-hi)" opacity="0.75" />
+              <circle cx={m.headCx + m.eyeDx - 1.2} cy={m.eyeY + 1.8} r={m.eyeRx * 0.15} fill="var(--alma-eye-hi)" opacity="0.75" />
             </g>
-            {/* Paupières indépendantes (clignements légèrement décalés) */}
+            {/* Paupières indépendantes */}
             <rect
               className="alma-part alma-eyelid alma-eyelid-l"
-              x="36" y="38.2" width="8" height="9.5" rx="4"
+              x={m.headCx - m.eyeDx - m.eyeRx - 0.5} y={m.eyeY - m.eyeRy - 0.5}
+              width={m.eyeRx * 2 + 1} height={m.eyeRy * 2 + 1}
+              rx={m.eyeRx}
               fill="var(--alma-fur-shadow)"
             />
             <rect
               className="alma-part alma-eyelid alma-eyelid-r"
-              x="56" y="38.2" width="8" height="9.5" rx="4"
+              x={m.headCx + m.eyeDx - m.eyeRx - 0.5} y={m.eyeY - m.eyeRy - 0.5}
+              width={m.eyeRx * 2 + 1} height={m.eyeRy * 2 + 1}
+              rx={m.eyeRx}
               fill="var(--alma-fur-shadow)"
             />
 
-            {/* Truffe */}
-            <ellipse cx="50" cy="52.8" rx="3.4" ry="2.6" fill="var(--alma-nose)" />
-            <ellipse cx="48.9" cy="51.9" rx="1.1" ry="0.75" fill="#ffffff" opacity="0.6" />
+            {/* Truffe noire en bouton */}
+            <ellipse cx={m.headCx} cy={m.noseCy} rx={m.noseRx} ry={m.noseRy} fill="var(--alma-nose)" />
+            <ellipse cx={m.headCx - 1} cy={m.noseCy - 0.7} rx="1" ry="0.7" fill="#ffffff" opacity="0.6" />
 
             {/* Sillon */}
-            <path d="M50 55.5 L50 58" stroke="var(--alma-mouth)" strokeWidth="1" strokeLinecap="round" />
-
-            {/* Sourire */}
             <path
-              d="M43 58.5 q3.5 4.5 7 4.5 q3.5 0 7 -4.5"
+              d={`M${m.headCx} ${m.noseCy + m.noseRy} L${m.headCx} ${m.mouthY - 0.5}`}
+              stroke="var(--alma-mouth)" strokeWidth="1" strokeLinecap="round"
+            />
+
+            {/* Sourire discret */}
+            <path
+              d={`M${m.headCx - m.mouthSpread} ${m.mouthY} q${m.mouthSpread * 0.55} ${m.mouthSpread * 0.65} ${m.mouthSpread} ${m.mouthSpread * 0.65} q${m.mouthSpread * 0.45} 0 ${m.mouthSpread} -${m.mouthSpread * 0.65}`}
               fill="none"
               stroke="var(--alma-mouth)"
-              strokeWidth="1.4"
+              strokeWidth="1.3"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
 
             {/* Langue (happy / playful) */}
             <g className="alma-part alma-tongue">
-              <ellipse cx="50" cy="60.5" rx="2.3" ry="1.9" fill="var(--alma-tongue)" />
-              <path d="M50 60.5 L50 62.5" stroke="#c26f7a" strokeWidth="0.5" />
+              <ellipse cx={m.headCx} cy={m.mouthY + 2.5} rx="2.2" ry="1.8" fill="var(--alma-tongue)" />
+              <path d={`M${m.headCx} ${m.mouthY + 2.5} L${m.headCx} ${m.mouthY + 4.5}`} stroke="#c26f7a" strokeWidth="0.5" />
             </g>
           </g>
         </g>
@@ -808,3 +837,4 @@ export function AlmaAvatarAnimated({
 }
 
 export default AlmaAvatarAnimated;
+
