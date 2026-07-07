@@ -284,22 +284,35 @@ export function WelcomeBackDigest({
 
   const handleDismiss = useCallback(() => {
     setDismissed(true);
+    if (claimedRef.current) {
+      releaseProactiveSurface("welcome_back");
+      claimedRef.current = false;
+    }
     try {
       trackEvent("alma_welcomeback_dismissed", { metadata: { variant } });
     } catch {
       /* silent */
     }
-  }, [variant]);
+  }, [variant, releaseProactiveSurface]);
 
-  // Kill switch : si l'utilisateur a choisi "silent", Alma ne parle jamais
-  // spontanément, même si un digest est disponible.
-  if (almaFrequency === "silent") return null;
-  if (dismissed || !variant || !signals) return null;
-  // Règle produit : Alma ne se présente jamais sans proposer d'action.
-  // Les variantes « first_visit » ne portent qu'un message d'accueil sans
-  // action concrète. Le concierge IA (SitDraftFromPrompt) et les NBA du
-  // dashboard prennent le relais, on reste silencieux ici.
-  if (variant === "owner_first_visit" || variant === "sitter_first_visit") return null;
+  // Détermine si on va effectivement rendre quelque chose ; sinon on libère
+  // le verrou pour laisser passer les whispers du scheduler.
+  const willRender =
+    almaFrequency !== "silent" &&
+    !dismissed &&
+    !!variant &&
+    !!signals &&
+    variant !== "owner_first_visit" &&
+    variant !== "sitter_first_visit";
+
+  useEffect(() => {
+    if (!willRender && claimedRef.current) {
+      releaseProactiveSurface("welcome_back");
+      claimedRef.current = false;
+    }
+  }, [willRender, releaseProactiveSurface]);
+
+  if (!willRender) return null;
 
   const copy = getCopy(variant, signals);
 
