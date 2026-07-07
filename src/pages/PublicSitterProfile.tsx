@@ -1649,6 +1649,12 @@ export default function PublicSitterProfile() {
                     Avis&nbsp;({reviewCount})
                   </TabsTrigger>
                 )}
+                {/* Confiance remonté en 2e position pratique après Avis pour rendre la réassurance visible sans clic. */}
+                {((userBadges && userBadges.length > 0) || profile?.created_at) && (
+                  <TabsTrigger value="confiance" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
+                    Confiance
+                  </TabsTrigger>
+                )}
                 <TabsTrigger value="pratique" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
                   Pratique
                 </TabsTrigger>
@@ -1657,12 +1663,8 @@ export default function PublicSitterProfile() {
                     Galerie
                   </TabsTrigger>
                 )}
-                {((userBadges && userBadges.length > 0) || profile?.created_at) && (
-                  <TabsTrigger value="confiance" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
-                    Confiance
-                  </TabsTrigger>
-                )}
               </TabsList>
+
 
               {/* Onglet À propos */}
               <TabsContent value="apropos" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 space-y-5">
