@@ -282,6 +282,7 @@ const HelperMiniCard = ({
 
   return (
     <article
+      role="listitem"
       className="
         group/card flex-shrink-0 w-[78vw] max-w-[20rem] sm:w-[20rem] snap-start
         rounded-[1.75rem] sm:rounded-[2rem] bg-card
