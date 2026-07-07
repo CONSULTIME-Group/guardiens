@@ -4,15 +4,15 @@
  * Alma n'a plus qu'un seul visage dans l'app : le SVG stage-aware de
  * <AlmaAvatarAnimated />. Ce fichier reste un wrapper de compatibilité
  * pour les nombreux points d'appel existants, il ne rend plus jamais le
- * PNG. Le stade utilisateur est récupéré automatiquement via
- * useAlmaEvolution pour que l'évolution soit visible partout.
+ * PNG. Le stade peut être passé explicitement (les surfaces qui affichent
+ * un halo ou un liseré de stade le fournissent depuis useAlmaEvolution).
  */
 import { cn } from "@/lib/utils";
-import { useAlmaEvolution } from "@/hooks/useAlmaEvolution";
 import {
   AlmaAvatarAnimated,
   type AlmaAnimatedMood,
 } from "./AlmaAvatarAnimated";
+import type { AlmaStage } from "@/hooks/useAlmaEvolution";
 
 export type AlmaMood =
   | "idle"
@@ -36,14 +36,13 @@ interface AlmaAvatarProps {
   breathe?: boolean;
   /** Humeur contextuelle. */
   mood?: AlmaMood;
-  /** Force un stade précis (sinon lecture via useAlmaEvolution). */
-  stage?: "nouvelle" | "eveillee" | "complice" | "fidele";
+  /** Stade d'évolution utilisateur (halo, liseré, intensité). */
+  stage?: AlmaStage;
   /** Affiche un halo coloré derrière l'avatar. */
   showHalo?: boolean;
 }
 
 function toAnimatedMood(mood: AlmaMood): AlmaAnimatedMood {
-  // "attention" (legacy) → "attentive"
   if (mood === "attention") return "attentive";
   return mood;
 }
@@ -57,14 +56,11 @@ export function AlmaAvatar({
   ...rest
 }: AlmaAvatarProps) {
   const ariaHidden = rest["aria-hidden"];
-  const { data } = useAlmaEvolution();
-  const effectiveStage = stage ?? data?.stage;
-
   return (
     <AlmaAvatarAnimated
       size={size}
       mood={toAnimatedMood(mood)}
-      stage={effectiveStage}
+      stage={stage}
       showHalo={showHalo}
       aria-hidden={ariaHidden}
       className={cn(className)}
