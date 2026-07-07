@@ -17,7 +17,16 @@ import { cn } from "@/lib/utils";
 import almaAvatarUrl from "@/assets/alma-avatar.png";
 
 type Size = 24 | 32 | 40 | 56 | 72 | 96;
-export type AlmaMood = "idle" | "happy" | "sleepy" | "attention";
+export type AlmaMood =
+  | "idle"
+  | "happy"
+  | "sleepy"
+  | "attention"
+  | "attentive"
+  | "thinking"
+  | "gentle"
+  | "playful";
+
 
 interface AlmaAvatarProps {
   size?: Size;
@@ -43,23 +52,35 @@ export function AlmaAvatar({
   const [failed, setFailed] = useState(false);
 
   // One-shot moods : replay lorsque la valeur (ré)apparaît.
+  const isOneShot =
+    mood === "happy" ||
+    mood === "attention" ||
+    mood === "attentive" ||
+    mood === "playful";
   const [oneShotKey, setOneShotKey] = useState(0);
   useEffect(() => {
-    if (mood === "happy" || mood === "attention") {
+    if (isOneShot) {
       setOneShotKey((k) => k + 1);
     }
-  }, [mood]);
+  }, [mood, isOneShot]);
 
   const moodClass =
     mood === "happy"
       ? "motion-safe:animate-alma-happy"
-      : mood === "attention"
+      : mood === "attention" || mood === "attentive"
       ? "motion-safe:animate-alma-attention"
+      : mood === "playful"
+      ? "motion-safe:animate-alma-playful"
+      : mood === "thinking"
+      ? "motion-safe:animate-alma-thinking"
+      : mood === "gentle"
+      ? "motion-safe:animate-alma-gentle"
       : mood === "sleepy"
       ? "opacity-70 motion-safe:animate-alma-breathe-slow"
       : breathe
       ? "motion-safe:animate-alma-breathe"
       : "";
+
 
   const commonClass = cn(
     "inline-block rounded-full object-cover select-none",
@@ -75,7 +96,8 @@ export function AlmaAvatar({
   if (failed) {
     return (
       <span
-        key={mood === "happy" || mood === "attention" ? oneShotKey : undefined}
+        key={isOneShot ? oneShotKey : undefined}
+
         role="img"
         aria-label="Alma"
         aria-hidden={ariaHidden}
@@ -87,7 +109,7 @@ export function AlmaAvatar({
 
   return (
     <img
-      key={mood === "happy" || mood === "attention" ? oneShotKey : undefined}
+      key={isOneShot ? oneShotKey : undefined}
       src={almaAvatarUrl}
       alt="Alma"
       width={size}
