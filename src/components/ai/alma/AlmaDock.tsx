@@ -287,6 +287,7 @@ export function AlmaDock() {
       void requestNextTip({
         surface: surfaceFromPath(location.pathname, activeRole),
         preferNudge: false,
+        onDemand: true,
         emptyMessage: "Rien de neuf pour l'instant, revenez un peu plus tard.",
       });
       setStagePopoverOpen(false);
