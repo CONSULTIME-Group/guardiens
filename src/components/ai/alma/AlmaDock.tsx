@@ -159,18 +159,27 @@ function surfaceFromPath(
   return "listings";
 }
 
+const FREQUENCY_CHOICES: { value: AlmaFrequency; label: string }[] = [
+  { value: "silent", label: "Silencieuse" },
+  { value: "low", label: "Peu bavarde" },
+  { value: "balanced", label: "Modéré (recommandé)" },
+  { value: "talkative", label: "Bavarde" },
+];
+
 export function AlmaDock() {
   const { currentWhisper, dismissCurrent, requestNextTip } = useAlma();
   const { frequency, setFrequency } = useAlmaFrequency();
+  const { hidden, setHidden } = useAlmaHidden();
   const { activeRole } = useAuth();
   const { data: evolution } = useAlmaEvolution();
   const isModalOpen = useIsRadixModalOpen();
   const location = useLocation();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const [expanded, setExpanded] = useState(false);
   const [userCollapsed, setUserCollapsed] = useState(false);
-  const [stagePopoverOpen, setStagePopoverOpen] = useState(false);
+
 
   // Auto-timer d'auto-dismiss pour le whisper courant.
   const timerRef = useRef<number | null>(null);
