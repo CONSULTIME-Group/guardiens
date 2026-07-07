@@ -43,6 +43,7 @@ import DraftResumeCard from "./DraftResumeCard";
 import SitDraftFromPrompt from "./SitDraftFromPrompt";
 import OwnerFirstNBAGardiens from "./OwnerFirstNBAGardiens";
 import { useOwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
+import { useOwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
 import ActivationScoreCard from "./owner/ActivationScoreCard";
 import NextActionsList from "./owner/NextActionsList";
 import AlmaSilentSitBubble from "@/components/ai/alma/AlmaSilentSitBubble";
