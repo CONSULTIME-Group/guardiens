@@ -658,6 +658,27 @@ export default function PublicSitterProfile() {
     );
   }
 
+  if (loadError === 'error') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-6">
+        <div className="text-center space-y-3 max-w-md">
+          <p className="text-lg font-semibold text-foreground">Impossible de charger ce profil</p>
+          <p className="text-sm text-muted-foreground">Un problème réseau est peut-être en cause. Vous pouvez réessayer dans un instant.</p>
+          <div className="flex items-center justify-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setLoadNonce((n) => n + 1)}
+              className="inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground text-sm font-medium px-4 py-2 hover:opacity-90"
+            >
+              Réessayer
+            </button>
+            <Link to="/" className="text-sm text-primary hover:underline">Retour à l'accueil</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!profile && !ownerProfile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
