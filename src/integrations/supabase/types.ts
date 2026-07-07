@@ -3761,6 +3761,7 @@ export type Database = {
           account_status: string
           alma_first_meeting_seen: boolean
           alma_frequency: Database["public"]["Enums"]["alma_frequency"]
+          alma_muted_categories: string[]
           animal_experience: string
           available_for_help: boolean | null
           avatar_url: string | null
@@ -3814,6 +3815,7 @@ export type Database = {
           account_status?: string
           alma_first_meeting_seen?: boolean
           alma_frequency?: Database["public"]["Enums"]["alma_frequency"]
+          alma_muted_categories?: string[]
           animal_experience?: string
           available_for_help?: boolean | null
           avatar_url?: string | null
@@ -3867,6 +3869,7 @@ export type Database = {
           account_status?: string
           alma_first_meeting_seen?: boolean
           alma_frequency?: Database["public"]["Enums"]["alma_frequency"]
+          alma_muted_categories?: string[]
           animal_experience?: string
           available_for_help?: boolean | null
           avatar_url?: string | null
@@ -6315,21 +6318,16 @@ export type Database = {
           whisper_type: string
         }[]
       }
-      get_alma_cultural_fact:
-        | {
-            Args: { p_context?: Json; p_surface: string; p_user_id: string }
-            Returns: Json
-          }
-        | {
-            Args: {
-              p_bypass_cooldown?: boolean
-              p_context?: Json
-              p_exclude_ids?: string[]
-              p_surface: string
-              p_user_id: string
-            }
-            Returns: Json
-          }
+      get_alma_cultural_fact: {
+        Args: {
+          p_bypass_cooldown?: boolean
+          p_context?: Json
+          p_exclude_ids?: string[]
+          p_surface: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       get_alma_usage_nudge: {
         Args: {
           p_bypass_cooldown?: boolean

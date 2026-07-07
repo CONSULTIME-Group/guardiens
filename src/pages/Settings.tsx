@@ -91,13 +91,12 @@ const Settings = () => {
   const [searchParams] = useSearchParams();
   const proSectionRef = useRef<HTMLDivElement | null>(null);
 
-  // Deep-link via ?section=security (et autres sections valides).
+  // Deep-link via ?section=xxx ou ?tab=xxx (aliases). Toutes les sections déclarées sont valides.
   useEffect(() => {
-    const param = searchParams.get("section") as SectionId | null;
-    const valid: SectionId[] = ["account", "security", "spaces", "notifications", "alerts"];
+    const param = (searchParams.get("section") || searchParams.get("tab")) as SectionId | null;
+    const valid: SectionId[] = SECTIONS.map((s) => s.id);
     if (param && valid.includes(param)) {
       setActiveSection(param);
-      // Scroll vers la sous-section Pro si demandé.
       if (searchParams.get("focus") === "pro") {
         setTimeout(() => proSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
       }
@@ -845,40 +844,170 @@ const ALMA_OPTIONS: { value: AlmaFrequency; label: string; description: string }
   },
 ];
 
+interface AlmaCategoryGroup {
+  label: string;
+  types: { id: string; label: string }[];
+}
+
+const ALMA_CATEGORY_GROUPS: AlmaCategoryGroup[] = [
+  {
+    label: "Animaux",
+    types: [
+      { id: "dog_behavior_tip", label: "Comportement du chien" },
+      { id: "cat_behavior_tip", label: "Comportement du chat" },
+      { id: "pet_care_tip", label: "Soins et bien-être" },
+      { id: "breed_did_you_know", label: "Le saviez-vous, races" },
+    ],
+  },
+  {
+    label: "Maison & saison",
+    types: [
+      { id: "home_care_tip", label: "Entretien de la maison" },
+      { id: "seasonal_advice", label: "Conseils de saison" },
+    ],
+  },
+  {
+    label: "Entraide & communauté",
+    types: [
+      { id: "mutual_aid_tip", label: "Petites missions" },
+      { id: "city_did_you_know", label: "Le saviez-vous, ville" },
+    ],
+  },
+  {
+    label: "Ton & ambiance",
+    types: [
+      { id: "animal_humor", label: "Humour animalier" },
+      { id: "founder_anecdote", label: "Anecdotes de fondateurs" },
+      { id: "social_stat", label: "Statistiques communautaires" },
+    ],
+  },
+];
+
 const AlmaFrequencySection = () => {
+  const { user } = useAuth();
   const { frequency, loading, setFrequency } = useAlmaFrequency();
+  const [muted, setMuted] = useState<Set<string>>(new Set());
+  const [mutedLoaded, setMutedLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("alma_muted_categories" as any)
+        .eq("id", user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      const arr = (data as any)?.alma_muted_categories;
+      if (Array.isArray(arr)) setMuted(new Set(arr as string[]));
+      setMutedLoaded(true);
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
+  const persistMuted = async (next: Set<string>) => {
+    if (!user?.id) return;
+    setMuted(next);
+    await supabase
+      .from("profiles")
+      .update({ alma_muted_categories: Array.from(next) } as any)
+      .eq("id", user.id);
+  };
+
+  const toggleCategory = (id: string, enabled: boolean) => {
+    const next = new Set(muted);
+    if (enabled) next.delete(id); else next.add(id);
+    void persistMuted(next);
+  };
+
+  const nudgeEnabled = !muted.has("usage_nudge");
+
   return (
-    <section>
-      <SectionHeader
-        icon={MessageCircle}
-        title="Fréquence d'Alma"
-        description="Réglez à quel point la narratrice Guardiens prend la parole dans votre parcours."
-      />
-      <div className="space-y-3" aria-busy={loading}>
-        {ALMA_OPTIONS.map((opt) => {
-          const active = frequency === opt.value;
-          return (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setFrequency(opt.value)}
-              aria-pressed={active}
-              className={`w-full text-left rounded-lg border p-4 transition-colors ${
-                active
-                  ? "border-primary bg-primary/5"
-                  : "border-border bg-card hover:bg-accent"
-              }`}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-semibold">{opt.label}</span>
-                {active && (
-                  <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" />
-                )}
+    <section className="space-y-8">
+      <div>
+        <SectionHeader
+          icon={MessageCircle}
+          title="Fréquence d'Alma"
+          description="Réglez à quel point la narratrice Guardiens prend la parole dans votre parcours."
+        />
+        <div className="space-y-3" aria-busy={loading}>
+          {ALMA_OPTIONS.map((opt) => {
+            const active = frequency === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setFrequency(opt.value)}
+                aria-pressed={active}
+                className={`w-full text-left rounded-lg border p-4 transition-colors ${
+                  active
+                    ? "border-primary bg-primary/5"
+                    : "border-border bg-card hover:bg-accent"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm font-semibold">{opt.label}</span>
+                  {active && (
+                    <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" />
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">{opt.description}</p>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div>
+        <SectionHeader
+          icon={MessageCircle}
+          title="Types de conseils"
+          description="Choisissez les catégories qu'Alma peut vous partager. Une catégorie décochée n'apparaîtra plus, ni spontanément, ni à la demande."
+        />
+        <div className="space-y-5" aria-busy={!mutedLoaded}>
+          {ALMA_CATEGORY_GROUPS.map((group) => (
+            <div key={group.label} className="rounded-lg border border-border bg-card p-4">
+              <p className="text-sm font-semibold mb-3">{group.label}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {group.types.map((t) => {
+                  const enabled = !muted.has(t.id);
+                  return (
+                    <label
+                      key={t.id}
+                      className="flex items-center gap-2 text-sm cursor-pointer select-none"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={enabled}
+                        onChange={(e) => toggleCategory(t.id, e.target.checked)}
+                        className="h-4 w-4 rounded border-border text-primary focus:ring-primary/40"
+                      />
+                      <span>{t.label}</span>
+                    </label>
+                  );
+                })}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">{opt.description}</p>
-            </button>
-          );
-        })}
+            </div>
+          ))}
+
+          <div className="rounded-lg border border-border bg-card p-4">
+            <label className="flex items-start gap-3 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={nudgeEnabled}
+                onChange={(e) => toggleCategory("usage_nudge", e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary/40"
+              />
+              <span>
+                <span className="text-sm font-semibold">Rappels d'utilisation</span>
+                <span className="block text-xs text-muted-foreground mt-0.5">
+                  Petites incitations d'Alma pour vous rappeler une action utile (compléter votre profil, publier une annonce…).
+                </span>
+              </span>
+            </label>
+          </div>
+        </div>
       </div>
     </section>
   );

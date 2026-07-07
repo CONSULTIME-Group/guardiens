@@ -96,7 +96,7 @@ export function getCopy(variant: WelcomeBackVariant, s: DigestSignals): CopyBloc
         title: "Du nouveau depuis votre dernière visite",
         body: `Vous avez ${parts.join(" et ")} à consulter.`,
         actionLabel: s.new_applications > 0 ? "Voir les candidatures" : "Ouvrir la messagerie",
-        actionHref: s.new_applications > 0 ? "/dashboard" : "/messages",
+        actionHref: s.new_applications > 0 ? "/dashboard#candidatures" : "/messages",
         actionId: s.new_applications > 0 ? "open_applications" : "open_messages",
       };
     }
@@ -104,17 +104,17 @@ export function getCopy(variant: WelcomeBackVariant, s: DigestSignals): CopyBloc
       return {
         title: "De nouveaux gardiens ont rejoint la communauté",
         body: `${s.new_intl_sitters} nouvelles personnes se sont inscrites depuis votre dernière visite. Votre annonce touche un vivier grandissant.`,
-        actionLabel: "Voir mon annonce",
-        actionHref: "/dashboard",
-        actionId: "view_my_sit",
+        actionLabel: "Voir les gardiens à l'international",
+        actionHref: "/gardiens?international=1",
+        actionId: "view_intl_sitters",
       };
     case "owner_empty_positive":
       return {
         title: "Tout est calme pour le moment",
-        body: "Rien de neuf ne veut pas dire rien qui vaille. Profitez-en pour peaufiner votre annonce, cela améliore vos chances.",
-        actionLabel: "Améliorer mon annonce",
-        actionHref: "/dashboard",
-        actionId: "improve_listing",
+        body: "Rien de neuf ne veut pas dire rien qui vaille. Réglez la voix d'Alma et le type de conseils que vous souhaitez recevoir.",
+        actionLabel: "Configurer Alma",
+        actionHref: "/parametres?tab=alma",
+        actionId: "configure_alma",
       };
     case "sitter_first_visit":
       return {

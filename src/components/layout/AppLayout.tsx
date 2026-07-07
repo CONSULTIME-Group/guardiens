@@ -54,15 +54,15 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
               <span className="text-foreground">uardiens</span>
             </Link>
           </div>
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <LanguageSwitcher compact />
             <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
               <AlmaTopbarButton />
             </Suspense>
-            <Suspense fallback={<div className="w-9 h-9" aria-hidden />}>
+            <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
               <MessageBell />
             </Suspense>
-            <Suspense fallback={<div className="w-9 h-9" aria-hidden />}>
+            <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
               <NotificationBell />
             </Suspense>
           </div>

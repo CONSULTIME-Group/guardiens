@@ -62,11 +62,13 @@ export default function AlmaTopbarButton({ className }: AlmaTopbarButtonProps) {
       }}
       className={cn(
         "inline-flex h-11 w-11 items-center justify-center rounded-full",
-        "text-muted-foreground hover:bg-muted hover:text-foreground transition",
+        "hover:bg-muted transition",
         className,
       )}
     >
-      <AlmaAvatar size={24} />
+      <span className="inline-flex items-center justify-center rounded-full ring-2 ring-primary/30">
+        <AlmaAvatar size={32} />
+      </span>
     </button>
   );
 }
