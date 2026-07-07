@@ -65,6 +65,8 @@ export default function SitDraftFromPrompt({ secondary = false }: SitDraftFromPr
         setLoading(false);
         return;
       }
+      setAlmaMood("happy");
+      window.setTimeout(() => setAlmaMood("idle"), 800);
       void trackEvent("owner_draft_from_prompt_generated", {
         metadata: {
           prompt_length: clean.length,
