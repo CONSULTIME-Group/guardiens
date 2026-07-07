@@ -1,0 +1,68 @@
+/**
+ * <AlmaAnimated /> — version animée d'Alma (Lottie plein corps).
+ *
+ * Comportement :
+ *  - `prefers-reduced-motion: reduce` → rend la tête premium statique.
+ *  - Fichier Lottie absent / erreur de chargement → repli sur la tête premium.
+ *  - Sinon → lit `/alma-animated.json` en boucle, autoplay.
+ *
+ * Le fichier Lottie doit être déposé dans `public/alma-animated.json`
+ * (servi à l'URL absolue `/alma-animated.json`).
+ */
+import { useEffect, useState } from "react";
+import { Player } from "@lottiefiles/react-lottie-player";
+import { AlmaAvatar } from "./AlmaAvatar";
+import { cn } from "@/lib/utils";
+
+interface AlmaAnimatedProps {
+  size?: number;
+  className?: string;
+}
+
+const LOTTIE_SRC = "/alma-animated.json";
+
+function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+  });
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handler = (e: MediaQueryListEvent) => setReduced(e.matches);
+    mq.addEventListener?.("change", handler);
+    return () => mq.removeEventListener?.("change", handler);
+  }, []);
+  return reduced;
+}
+
+export function AlmaAnimated({ size = 96, className }: AlmaAnimatedProps) {
+  const reduced = usePrefersReducedMotion();
+  const [failed, setFailed] = useState(false);
+
+  if (reduced || failed) {
+    return <AlmaAvatar size={size as 96} className={className} />;
+  }
+
+  return (
+    <div
+      role="img"
+      aria-label="Alma"
+      style={{ width: size, height: size }}
+      className={cn("inline-block", className)}
+    >
+      <Player
+        src={LOTTIE_SRC}
+        autoplay
+        loop
+        keepLastFrame
+        style={{ width: size, height: size }}
+        onEvent={(event) => {
+          if (event === "error") setFailed(true);
+        }}
+      />
+    </div>
+  );
+}
+
+export default AlmaAnimated;
