@@ -156,7 +156,7 @@ function AlmaWhisperCard({ whisper, onDismiss, onRequestNext }: AlmaWhisperCardP
         <div className="flex items-start gap-2 pr-10">
 
           <div className="text-primary shrink-0">
-            <AlmaAvatar size={24} />
+            <AlmaAvatar size={32} />
           </div>
           <div className="flex-1 min-w-0 space-y-2">
             <p className="text-[13px] leading-snug text-foreground/90 whitespace-pre-line">{whisper.message}</p>
