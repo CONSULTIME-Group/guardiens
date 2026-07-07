@@ -91,13 +91,12 @@ const Settings = () => {
   const [searchParams] = useSearchParams();
   const proSectionRef = useRef<HTMLDivElement | null>(null);
 
-  // Deep-link via ?section=security (et autres sections valides).
+  // Deep-link via ?section=xxx ou ?tab=xxx (aliases). Toutes les sections déclarées sont valides.
   useEffect(() => {
-    const param = searchParams.get("section") as SectionId | null;
-    const valid: SectionId[] = ["account", "security", "spaces", "notifications", "alerts"];
+    const param = (searchParams.get("section") || searchParams.get("tab")) as SectionId | null;
+    const valid: SectionId[] = SECTIONS.map((s) => s.id);
     if (param && valid.includes(param)) {
       setActiveSection(param);
-      // Scroll vers la sous-section Pro si demandé.
       if (searchParams.get("focus") === "pro") {
         setTimeout(() => proSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
       }
