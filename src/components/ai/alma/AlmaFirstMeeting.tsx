@@ -50,6 +50,7 @@ export function AlmaFirstMeeting({ role, onDone }: Props) {
   const navigate = useNavigate();
   const seenFiredRef = useRef(false);
   const copy = COPY[role];
+  const [mood, setMood] = useState<AlmaMood>("happy");
 
   useEffect(() => {
     if (seenFiredRef.current) return;
@@ -62,6 +63,11 @@ export function AlmaFirstMeeting({ role, onDone }: Props) {
       /* silent */
     }
   }, [role]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setMood("idle"), 800);
+    return () => clearTimeout(t);
+  }, []);
 
   const handlePrimary = () => {
     try {
