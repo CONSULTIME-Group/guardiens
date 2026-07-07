@@ -10,7 +10,7 @@
  * Voix persona : phrases courtes, "je", vouvoiement, aucun mot proscrit,
  * pas d'emoji, pas de tiret cadratin. CTA principal actionnable obligatoire.
  */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { AlmaAnimated } from "./AlmaAnimated";
