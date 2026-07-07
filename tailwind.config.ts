@@ -218,7 +218,10 @@ export default {
         "alma-thinking": "alma-thinking 2.4s ease-in-out infinite",
         "alma-gentle": "alma-gentle 5s ease-in-out infinite",
         "alma-playful": "alma-playful 0.7s ease-in-out 1",
-
+        "alma-idle-gesture": "alma-idle-gesture 6s ease-in-out infinite",
+        "alma-aura": "alma-aura 3.2s ease-in-out infinite",
+        "alma-aura-fast": "alma-aura 1.6s ease-in-out infinite",
+        "alma-thinking-dot": "alma-thinking-dot 1.2s ease-in-out infinite",
       },
     },
   },
