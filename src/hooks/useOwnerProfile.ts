@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/lib/logger";
+import { validateAvatarFile } from "@/lib/validateAvatarFile";
+import { compressImageFile } from "@/lib/compressImage";
 import { clearViewerOwnerCache } from "@/hooks/useViewerOwnerForAffinity";
 
 // Exported so the page can recompute missing fields against the LIVE preview state
@@ -127,17 +129,36 @@ export function useOwnerProfile() {
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [hasFirstActivity, setHasFirstActivity] = useState(false);
 
   const fetchData = useCallback(async (opts?: { silent?: boolean }) => {
     if (!user) return;
     if (!opts?.silent) setLoading(true);
+    setLoadError(null);
 
-    const [profileRes, propertyRes, ownerRes, sitterRes] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", user.id).single(),
-      supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
-      supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
-      supabase.from("sitter_profiles").select("competences").eq("user_id", user.id).maybeSingle(),
-    ]);
+    let profileRes: any;
+    let propertyRes: any;
+    let ownerRes: any;
+    let sitterRes: any;
+    try {
+      [profileRes, propertyRes, ownerRes, sitterRes] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", user.id).single(),
+        supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
+        supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
+        supabase.from("sitter_profiles").select("competences").eq("user_id", user.id).maybeSingle(),
+      ]);
+      if (profileRes.error) throw profileRes.error;
+      if (propertyRes.error) throw propertyRes.error;
+      if (ownerRes.error) throw ownerRes.error;
+      if (sitterRes.error) throw sitterRes.error;
+    } catch (err) {
+      logger.error("Failed to load owner profile", { error: String(err) });
+      setLoadError("Impossible de charger votre profil. Vérifiez votre connexion.");
+      if (!opts?.silent) setLoading(false);
+      return;
+    }
 
     const p = profileRes.data;
     const prop = propertyRes.data;
@@ -229,6 +250,31 @@ export function useOwnerProfile() {
     setCompletion(row?.profile_completion || 0);
   }, [user]);
   useEffect(() => { refreshCompletion(); }, [refreshCompletion]);
+
+  // Vérification email : lu depuis la session (email_confirmed_at).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!cancelled) setEmailVerified(!!authUser?.email_confirmed_at);
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
+
+  // Première activité proprio : au moins une annonce non-brouillon.
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      const { count } = await supabase
+        .from("sits")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .neq("status", "draft");
+      if (!cancelled) setHasFirstActivity((count ?? 0) > 0);
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
 
 
   const computeMissingFields = useCallback((d: OwnerProfileData, petsCount: number): { step: number; label: string }[] => {
@@ -431,11 +477,31 @@ export function useOwnerProfile() {
 
   const uploadPhoto = useCallback(async (file: File, bucket: string): Promise<string | null> => {
     if (!user) return null;
-    const ext = file.name.split(".").pop();
+
+    // Bucket avatars : validation stricte type/poids + compression avant upload.
+    let toUpload: File = file;
+    if (bucket === "avatars") {
+      const check = validateAvatarFile(file);
+      if (check.ok === false) {
+        toast({ variant: "destructive", title: "Photo refusée", description: check.reason });
+        return null;
+      }
+      try {
+        toUpload = await compressImageFile(file);
+      } catch (err) {
+        logger.error("Owner avatar compression failed", { error: String(err) });
+        toast({ variant: "destructive", title: "Erreur", description: "Impossible de traiter cette image." });
+        return null;
+      }
+    }
+
+    const ext = toUpload.name.split(".").pop() || "jpg";
     const path = bucket === "avatars"
       ? `${user.id}/avatar-${Date.now()}.${ext}`
       : `${user.id}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false });
+    const { error } = await supabase.storage
+      .from(bucket)
+      .upload(path, toUpload, { upsert: false, contentType: toUpload.type || undefined });
     if (error) { toast({ variant: "destructive", title: "Erreur", description: "Upload échoué." }); return null; }
     const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
     const publicUrl = urlData.publicUrl;
@@ -467,5 +533,9 @@ export function useOwnerProfile() {
     saveStep, addPet, updatePet, removePet, uploadPhoto,
     completion,
     missingFields: computeMissingFields(data, pets.length),
+    loadError,
+    reload: () => fetchData(),
+    emailVerified,
+    hasFirstActivity,
   };
 }

@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/lib/logger";
+import { validateAvatarFile } from "@/lib/validateAvatarFile";
+import { compressImageFile } from "@/lib/compressImage";
 
 // Exported so the page can recompute missing fields against the LIVE preview state
 // (mergedData = data + localData) instead of the stale server snapshot.
@@ -33,6 +35,9 @@ export interface SitterProfileData {
   last_name: string;
   city: string;
   postal_code: string;
+  // Pays (aligne avec profiles.country) : la règle « code postal requis »
+  // ne s'applique qu'en France, ailleurs `city` suffit (parité serveur RPC).
+  country: string;
   latitude?: number | null;
   longitude?: number | null;
   bio: string;
@@ -95,7 +100,7 @@ export interface PastAnimal {
 }
 
 const defaultData: SitterProfileData = {
-  first_name: "", last_name: "", city: "", postal_code: "", bio: "", avatar_url: "",
+  first_name: "", last_name: "", city: "", postal_code: "", country: "FR", bio: "", avatar_url: "",
   motivation: "",
   sitter_type: "", accompanied_by: "", smoker: false, availability_during: "", lifestyle: [],
   animal_types: [], experience_years: "", references_text: "",
@@ -118,15 +123,30 @@ export function useSitterProfile() {
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [hasFirstActivity, setHasFirstActivity] = useState(false);
 
   const fetchData = useCallback(async (opts?: { silent?: boolean }) => {
     if (!user) return;
     if (!opts?.silent) setLoading(true);
+    setLoadError(null);
 
-    const [profileRes, sitterRes] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", user.id).single(),
-      supabase.from("sitter_profiles").select("*").eq("user_id", user.id).maybeSingle(),
-    ]);
+    let profileRes: any;
+    let sitterRes: any;
+    try {
+      [profileRes, sitterRes] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", user.id).single(),
+        supabase.from("sitter_profiles").select("*").eq("user_id", user.id).maybeSingle(),
+      ]);
+      if (profileRes.error) throw profileRes.error;
+      if (sitterRes.error) throw sitterRes.error;
+    } catch (err) {
+      logger.error("Failed to load sitter profile", { error: String(err) });
+      setLoadError("Impossible de charger votre profil. Vérifiez votre connexion.");
+      if (!opts?.silent) setLoading(false);
+      return;
+    }
 
     const p = profileRes.data;
     const s = sitterRes.data;
@@ -136,6 +156,7 @@ export function useSitterProfile() {
       last_name: p?.last_name || "",
       city: p?.city || "",
       postal_code: p?.postal_code || "",
+      country: (p as any)?.country || "FR",
       latitude: (p as any)?.latitude ?? null,
       longitude: (p as any)?.longitude ?? null,
       bio: p?.bio || "",
@@ -269,6 +290,32 @@ export function useSitterProfile() {
   }, [user]);
   useEffect(() => { refreshCompletion(); }, [refreshCompletion]);
 
+  // Vérification email : lecture du vrai `email_confirmed_at` sur la session,
+  // au lieu du booléen codé en dur qui trompait TrustProfile.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!cancelled) setEmailVerified(!!authUser?.email_confirmed_at);
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
+
+  // Première activité gardien : au moins une candidature acceptée.
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      const { count } = await supabase
+        .from("applications")
+        .select("id", { count: "exact", head: true })
+        .eq("sitter_id", user.id)
+        .eq("status", "accepted");
+      if (!cancelled) setHasFirstActivity((count ?? 0) > 0);
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
+
 
   const computeMissingFields = useCallback((d: SitterProfileData): { step: number; label: string }[] => {
     return computeSitterMissingFields(d);
@@ -284,7 +331,7 @@ export function useSitterProfile() {
 
     try {
       // Save profile fields
-      const profileFields = ["first_name", "last_name", "city", "postal_code", "latitude", "longitude", "bio", "avatar_url", "skill_categories", "available_for_help"] as const;
+      const profileFields = ["first_name", "last_name", "city", "postal_code", "country", "latitude", "longitude", "bio", "avatar_url", "skill_categories", "available_for_help"] as const;
       const profileUpdate: any = {};
       profileFields.forEach(f => { if (f in stepData) profileUpdate[f] = (stepData as any)[f]; });
 
@@ -395,9 +442,29 @@ export function useSitterProfile() {
 
   const uploadAvatar = useCallback(async (file: File): Promise<string | null> => {
     if (!user) return null;
-    const ext = file.name.split(".").pop();
+
+    // 1) Validation client (type + poids) alignée sur le bucket `avatars`.
+    const check = validateAvatarFile(file);
+    if (check.ok === false) {
+      toast({ variant: "destructive", title: "Photo refusée", description: check.reason });
+      return null;
+    }
+
+    // 2) Compression (webp/jpg, max 1200px, ~300 ko). Convertit HEIC en JPG.
+    let toUpload: File;
+    try {
+      toUpload = await compressImageFile(file);
+    } catch (err) {
+      logger.error("Sitter avatar compression failed", { error: String(err) });
+      toast({ variant: "destructive", title: "Erreur", description: "Impossible de traiter cette image." });
+      return null;
+    }
+
+    const ext = toUpload.name.split(".").pop() || "jpg";
     const path = `${user.id}/avatar-${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: false });
+    const { error } = await supabase.storage
+      .from("avatars")
+      .upload(path, toUpload, { upsert: false, contentType: toUpload.type });
     if (error) {
       toast({ variant: "destructive", title: "Erreur", description: "Impossible de télécharger la photo." });
       return null;
@@ -428,5 +495,9 @@ export function useSitterProfile() {
     saveStep, addPastAnimal, removePastAnimal, uploadAvatar,
     completion,
     missingFields: computeMissingFields(data),
+    loadError,
+    reload: () => fetchData(),
+    emailVerified,
+    hasFirstActivity,
   };
 }

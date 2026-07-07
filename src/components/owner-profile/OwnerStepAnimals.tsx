@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { logger } from "@/lib/logger";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,6 +57,27 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editFormRef = useRef<HTMLDivElement>(null);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+
+  // Notes race : édition locale + debounce 700 ms → 1 UPDATE au lieu d'un par frappe.
+  const [noteDraft, setNoteDraft] = useState<Record<string, string>>({});
+  const noteTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  useEffect(() => () => {
+    Object.values(noteTimers.current).forEach(clearTimeout);
+  }, []);
+
+  const handleNoteChange = useCallback((pet: Pet, note: string) => {
+    if (!pet.id) return;
+    setNoteDraft((prev) => ({ ...prev, [pet.id!]: note }));
+    if (noteTimers.current[pet.id]) clearTimeout(noteTimers.current[pet.id]);
+    noteTimers.current[pet.id] = setTimeout(async () => {
+      try {
+        await onUpdatePet({ ...pet, owner_breed_note: note });
+      } catch (err) {
+        logger.error("Owner pet note debounced update failed", { error: String(err) });
+        toast.error("Échec de l'enregistrement de la note. Réessayez.");
+      }
+    }, 700);
+  }, [onUpdatePet]);
 
   const compressImage = (file: File, maxWidth = 1200, quality = 0.8): Promise<Blob> => {
     return new Promise((resolve, reject) => {
@@ -174,9 +195,9 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
                 <BreedProfileCard
                   species={pet.species}
                   breed={pet.breed}
-                  ownerNote={pet.owner_breed_note}
+                  ownerNote={pet.id && pet.id in noteDraft ? noteDraft[pet.id] : pet.owner_breed_note}
                   editable
-                  onNoteChange={(note) => onUpdatePet({ ...pet, owner_breed_note: note })}
+                  onNoteChange={(note) => handleNoteChange(pet, note)}
                 />
               )}
             </div>

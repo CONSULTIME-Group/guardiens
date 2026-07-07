@@ -1345,7 +1345,7 @@
       }
     },
     "criteria": {
-      "name_postal": "Prénom + code postal",
+      "name_postal": "Prénom + code postal (France) ou ville (hors France)",
       "avatar": "Photo de profil",
       "pet": "Au moins 1 animal renseigné",
       "housing_desc": "Logement décrit (≥ 50 caractères)",
@@ -1356,7 +1356,8 @@
       "skill": "Au moins 1 compétence",
       "lifestyle": "Au moins 1 mode de vie",
       "radius": "Rayon géographique défini",
-      "sitter_gallery_one": "Au moins 1 photo de galerie"
+      "sitter_gallery_one": "Au moins 1 photo de galerie",
+      "affinity": "Affinités renseignées (intérêts, langues, rythme de vie…)"
     },
     "hints": {
       "tab_identity": "Onglet Identité.",
@@ -1367,7 +1368,8 @@
       "tab_mobility": "Onglet Mobilité & Rayon.",
       "settings_verif": "Paramètres → Vérification.",
       "chars_50": "{{count}}/50 caractères.",
-      "add_avatar_identity": "Ajoutez une photo dans Identité."
+      "add_avatar_identity": "Ajoutez une photo dans Identité.",
+      "affinity_count": "{{count}}/5 renseignés (3 minimum pour le score max)."
     }
   }
 }

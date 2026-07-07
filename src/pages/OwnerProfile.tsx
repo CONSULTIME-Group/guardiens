@@ -71,6 +71,7 @@ const OwnerProfilePage = () => {
   const {
     data, pets, loading, saving, completion, missingFields, lastSyncedAt,
     saveStep, addPet, updatePet, removePet, uploadPhoto,
+    loadError, reload, emailVerified, hasFirstActivity,
   } = useOwnerProfile();
 
   const [localData, setLocalData] = useState<Partial<OwnerProfileData>>({});
@@ -208,15 +209,30 @@ const OwnerProfilePage = () => {
     return url;
   }, [uploadPhoto]);
 
-  // Source UNIQUE pour la jauge ET la sidebar : un seul set de critères pondérés.
+  // Source UNIQUE pour la jauge ET la sidebar. ALIGNÉ au SQL `calculate_profile_completion` (rôle owner) :
+  //   location_ok 10 + avatar 10 + bio 10 + owner_competences 10 + pet 20
+  //   + property_desc 10 + gallery 15 + identity 5 + affinity 10 = 100.
+  const isFrance = (mergedData.country || "FR") === "FR";
+  const locationOk = !!mergedData.first_name && (isFrance ? !!mergedData.postal_code : !!mergedData.city);
+
+  const affinityChecks = [
+    (mergedData.interests?.length ?? 0) >= 3,
+    (mergedData.languages?.length ?? 0) > 0,
+    !!mergedData.life_pace,
+    (mergedData.home_ambiance?.length ?? 0) > 0,
+    (mergedData.preferred_sitter_types?.length ?? 0) > 0,
+  ];
+  const affinityCount = affinityChecks.filter(Boolean).length;
+  const affinityPoints = affinityCount >= 3 ? 10 : affinityCount === 2 ? 6 : affinityCount === 1 ? 3 : 0;
+
   const scoredCriteria: ScoredCriterion[] = [
     { section: "identity", kind: "essential", label: tp("criteria.name_postal"), points: 10,
-      ok: !!(mergedData.first_name && mergedData.postal_code) },
-    { section: "identity", kind: "essential", label: tp("criteria.avatar"), points: 15,
+      ok: locationOk },
+    { section: "identity", kind: "essential", label: tp("criteria.avatar"), points: 10,
       ok: !!mergedData.avatar_url, hint: tp("hints.tab_identity") },
     { section: "animals", kind: "essential", label: tp("criteria.pet"), points: 20,
       ok: pets.length > 0, hint: tp("hints.tab_animals") },
-    { section: "housing", kind: "essential", label: tp("criteria.housing_desc"), points: 15,
+    { section: "housing", kind: "essential", label: tp("criteria.housing_desc"), points: 10,
       ok: (mergedData.description?.length ?? 0) >= 50, hint: tp("hints.chars_50", { count: mergedData.description?.length ?? 0 }) },
     { section: "gallery", kind: "essential", label: tp("criteria.gallery_one"), points: 15,
       ok: galleryCount > 0, hint: tp("hints.tab_gallery") },
@@ -224,13 +240,16 @@ const OwnerProfilePage = () => {
       ok: (mergedData.bio?.length ?? 0) >= 50, hint: tp("hints.chars_50", { count: mergedData.bio?.length ?? 0 }) },
     { section: "skills", kind: "bonus", label: tp("criteria.owner_skill"), points: 10,
       ok: (mergedData.owner_competences?.length ?? 0) > 0, hint: tp("hints.tab_skills") },
+    { section: "communication", kind: "bonus", label: tp("criteria.affinity"), points: 10,
+      ok: affinityCount >= 3, hint: tp("hints.affinity_count", { count: affinityCount }) },
     { section: "identity", kind: "bonus", label: tp("criteria.identity_verified"), points: 5,
       ok: !!user?.identityVerified, hint: tp("hints.settings_verif") },
   ];
 
   const ownerEssentials = scoredCriteria.filter(c => c.kind === "essential");
   const ownerBonuses = scoredCriteria.filter(c => c.kind === "bonus");
-  const liveScore = Math.min(100, scoredCriteria.reduce((s, c) => s + (c.ok ? c.points : 0), 0));
+  const partialAffinity = affinityCount >= 3 ? 0 : affinityPoints;
+  const liveScore = Math.min(100, scoredCriteria.reduce((s, c) => s + (c.ok ? c.points : 0), 0) + partialAffinity);
 
   const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => {
     const labels = missingLabelsFor(s.id, scoredCriteria);
@@ -258,6 +277,18 @@ const OwnerProfilePage = () => {
 
   if (loading) {
     return <ProfileSkeleton />;
+  }
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-card border border-border rounded-2xl p-6 text-center space-y-4">
+          <h2 className="font-heading text-xl font-semibold">Profil indisponible</h2>
+          <p className="text-sm text-muted-foreground">{loadError}</p>
+          <Button onClick={() => reload()}>Réessayer</Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -301,11 +332,11 @@ const OwnerProfilePage = () => {
             }
             trustSlot={
               <TrustProfile
-                emailVerified={true}
+                emailVerified={emailVerified}
                 identityVerified={!!user?.identityVerified}
                 hasAvatar={!!(mergedData.avatar_url || user?.avatarUrl)}
                 profileCompletion={liveScore}
-                hasFirstActivity={false}
+                hasFirstActivity={hasFirstActivity}
                 role="owner"
               />
             }
