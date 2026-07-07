@@ -196,186 +196,197 @@ const Sits = () => {
   const loadSits = useCallback(async () => {
     if (!user) return;
     setLoading(true);
+    setLoadError(null);
 
-    if (activeRole === "owner") {
-      // Charge la ville du proprio + sa galerie photos (source unique de photos owner)
-      const [{ data: ownerProfile }, { data: galleryRows }] = await Promise.all([
-        supabase.from("profiles").select("city").eq("id", user.id).maybeSingle(),
-        supabase
-          .from("owner_gallery")
-          .select("photo_url, position")
-          .eq("user_id", user.id)
-          .order("position", { ascending: true }),
-      ]);
-      const ownerCity = ownerProfile?.city || null;
-      const ownerGalleryPhotos = (galleryRows || [])
-        .map((g: any) => g.photo_url)
-        .filter(Boolean);
-      const firstGalleryPhoto = ownerGalleryPhotos[0] || null;
+    try {
+      if (activeRole === "owner") {
+        // Charge la ville du proprio + sa galerie photos (source unique de photos owner)
+        const [ownerProfileRes, galleryRes] = await Promise.all([
+          supabase.from("profiles").select("city").eq("id", user.id).maybeSingle(),
+          supabase
+            .from("owner_gallery")
+            .select("photo_url, position")
+            .eq("user_id", user.id)
+            .order("position", { ascending: true }),
+        ]);
+        if (ownerProfileRes.error) throw ownerProfileRes.error;
+        if (galleryRes.error) throw galleryRes.error;
 
-      const { data } = await supabase
-        .from("sits")
-        .select("*, properties(type, environment, photos, user_id)")
-        .eq("user_id", user.id)
-        .order("start_date", { ascending: false, nullsFirst: false });
+        const ownerCity = ownerProfileRes.data?.city || null;
+        const ownerGalleryPhotos = (galleryRes.data || [])
+          .map((g: any) => g.photo_url)
+          .filter(Boolean);
+        const firstGalleryPhoto = ownerGalleryPhotos[0] || null;
 
-      // Auto-expire sits client-side (published ET drafts jamais publies dont end_date est passee)
-      const toExpire = (data || []).filter((s: any) =>
-        s.end_date
-        && ["published", "draft"].includes(s.status)
-        && isBefore(parseISO(s.end_date), new Date())
-      );
-      if (toExpire.length > 0) {
-        for (const s of toExpire) {
-          await supabase.from("sits").update({
-            status: "cancelled" as any,
-            cancellation_reason: "expired",
-          }).eq("id", s.id);
+        // RPC unique : remplace le fan-out (sits + N × applications/pets/reviews).
+        const { data, error } = await supabase.rpc("get_owner_sits_enriched", {
+          p_owner: user.id,
+        });
+        if (error) throw error;
+
+        const rows: any[] = (data as any[]) || [];
+
+        // Auto-expire cote client (publiees ET brouillons dont end_date est passee).
+        const toExpire = rows.filter((s: any) =>
+          s.end_date
+          && ["published", "draft"].includes(s.status)
+          && isBefore(parseISO(s.end_date), new Date())
+        );
+        if (toExpire.length > 0) {
+          const ids = toExpire.map((s: any) => s.id);
+          const { error: expErr } = await supabase
+            .from("sits")
+            .update({ status: "cancelled" as any, cancellation_reason: "expired" })
+            .in("id", ids)
+            .eq("user_id", user.id);
+          if (expErr) {
+            // Non bloquant pour l'affichage : on log seulement.
+            console.warn("[Sits] auto-expire failed", expErr);
+          }
         }
-      }
 
-      const enriched = await Promise.all(
-        (data || []).map(async (sit: any) => {
-          const [appRes, sitterRes, petRes, reviewRes] = await Promise.all([
-            supabase.from("applications").select("id, sitter_id, status").eq("sit_id", sit.id),
-            supabase.from("applications")
-              .select("sitter_id, sitter:profiles!applications_sitter_id_fkey(first_name, avatar_url, city)")
-              .eq("sit_id", sit.id).eq("status", "accepted").maybeSingle(),
-            supabase.from("pets").select("name, species").eq("property_id", sit.property_id),
-            supabase.from("reviews").select("id").eq("sit_id", sit.id).eq("reviewer_id", user.id).maybeSingle(),
-          ]);
-
-          const wasExpired = !!toExpire.find((e: any) => e.id === sit.id);
-          const overlaidSit = {
+        const enriched = rows.map((sit: any) => {
+          const wasExpired = toExpire.some((e: any) => e.id === sit.id);
+          const overlaid = {
             ...sit,
             status: wasExpired ? "cancelled" : sit.status,
             cancellation_reason: wasExpired ? "expired" : sit.cancellation_reason,
           };
           return {
             ...sit,
-            status: overlaidSit.status,
-            cancellation_reason: overlaidSit.cancellation_reason,
-            effectiveStatus: getOwnerEffectiveStatus(overlaidSit),
-            applicationCount: appRes.data?.length || 0,
-            pendingApplicationCount: appRes.data?.filter((a: any) => a.status === "pending").length || 0,
-            acceptedSitter: sitterRes.data?.sitter ? sitterRes.data.sitter : null,
-            pets: petRes.data || [],
-            hasReviewed: !!reviewRes.data,
+            status: overlaid.status,
+            cancellation_reason: overlaid.cancellation_reason,
+            effectiveStatus: getOwnerEffectiveStatus(overlaid),
+            applicationCount: sit.application_count || 0,
+            pendingApplicationCount: sit.pending_application_count || 0,
+            acceptedSitter: sit.accepted_sitter || null,
+            pets: sit.pets || [],
+            hasReviewed: !!sit.has_reviewed,
             ownerCity,
             ownerGalleryFirstPhoto: firstGalleryPhoto,
           };
-        })
-      );
-      setSits(enriched);
-    } else {
-      // Sitter view
-      const { data } = await supabase
-        .from("applications")
-        .select("*, sit:sits(*, properties(type, environment, photos), owner:profiles!sits_user_id_fkey(first_name, avatar_url, city, id))")
-        .eq("sitter_id", user.id)
-        .order("created_at", { ascending: false });
-
-      const sitIds = data?.map((a: any) => a.sit?.id).filter(Boolean) || [];
-      let reviewedSitIds: string[] = [];
-      if (sitIds.length > 0) {
-        const { data: reviews } = await supabase
-          .from("reviews").select("sit_id").eq("reviewer_id", user.id).in("sit_id", sitIds);
-        reviewedSitIds = reviews?.map((r: any) => r.sit_id) || [];
-      }
-
-      const propertyIds = [...new Set(data?.map((a: any) => a.sit?.property_id).filter(Boolean) || [])];
-      let petsByProperty: Record<string, any[]> = {};
-      if (propertyIds.length > 0) {
-        const { data: pets } = await supabase
-          .from("pets").select("name, species, property_id").in("property_id", propertyIds);
-        pets?.forEach((p: any) => {
-          if (!petsByProperty[p.property_id]) petsByProperty[p.property_id] = [];
-          petsByProperty[p.property_id].push(p);
         });
-      }
+        setSits(enriched);
+      } else {
+        // Sitter view (inchangee)
+        const { data, error } = await supabase
+          .from("applications")
+          .select("*, sit:sits(*, properties(type, environment, photos), owner:profiles!sits_user_id_fkey(first_name, avatar_url, city, id))")
+          .eq("sitter_id", user.id)
+          .order("created_at", { ascending: false });
+        if (error) throw error;
 
-      // For all applications: conversation + last message + unread.
-      // Guide only for accepted/active sits.
-      const guideMap: Record<string, { id: string; published: boolean } | null> = {};
-      const convMap: Record<string, string | null> = {};
-      const lastMsgMap: Record<string, { content: string; created_at: string; from_me: boolean } | null> = {};
-      const unreadMap: Record<string, number> = {};
-
-      await Promise.all((data || []).map(async (a: any) => {
-        const sitId = a.sit?.id;
-        const ownerId = a.sit?.user_id;
-        if (!sitId || !ownerId) return;
-
-        const isAcceptedActive =
-          a.status === "accepted" && ["confirmed", "in_progress"].includes(a.sit?.status);
-
-        const [guideRes, convRes] = await Promise.all([
-          isAcceptedActive
-            ? supabase
-                .from("house_guides")
-                .select("id, published")
-                .eq("user_id", ownerId)
-                .eq("published", true)
-                .maybeSingle()
-            : Promise.resolve({ data: null } as any),
-          supabase
-            .from("conversations")
-            .select("id")
-            .eq("sit_id", sitId)
-            .eq("owner_id", ownerId)
-            .eq("sitter_id", user.id)
-            .maybeSingle(),
-        ]);
-
-        guideMap[sitId] = (guideRes as any).data || null;
-        const convId = convRes.data?.id || null;
-        convMap[sitId] = convId;
-
-        if (convId) {
-          const [lastRes, unreadRes] = await Promise.all([
-            supabase
-              .from("messages")
-              .select("content, created_at, sender_id, is_system")
-              .eq("conversation_id", convId)
-              .eq("is_system", false)
-              .order("created_at", { ascending: false })
-              .limit(1)
-              .maybeSingle(),
-            supabase
-              .from("messages")
-              .select("id", { count: "exact", head: true })
-              .eq("conversation_id", convId)
-              .is("read_at", null)
-              .neq("sender_id", user.id),
-          ]);
-          lastMsgMap[sitId] = lastRes.data
-            ? {
-                content: lastRes.data.content,
-                created_at: lastRes.data.created_at,
-                from_me: lastRes.data.sender_id === user.id,
-              }
-            : null;
-          unreadMap[sitId] = unreadRes.count || 0;
+        const sitIds = data?.map((a: any) => a.sit?.id).filter(Boolean) || [];
+        let reviewedSitIds: string[] = [];
+        if (sitIds.length > 0) {
+          const { data: reviews } = await supabase
+            .from("reviews").select("sit_id").eq("reviewer_id", user.id).in("sit_id", sitIds);
+          reviewedSitIds = reviews?.map((r: any) => r.sit_id) || [];
         }
-      }));
 
-      setSits(
-        data?.map((a: any) => ({
-          ...a.sit,
-          effectiveStatus: getEffectiveStatus(a.sit),
-          application_status: a.status,
-          application_id: a.id,
-          owner: a.sit?.owner || null,
-          hasReviewed: reviewedSitIds.includes(a.sit?.id),
-          pets: petsByProperty[a.sit?.property_id] || [],
-          houseGuide: guideMap[a.sit?.id] || null,
-          conversationId: convMap[a.sit?.id] || null,
-          lastMessage: lastMsgMap[a.sit?.id] || null,
-          unreadCount: unreadMap[a.sit?.id] || 0,
-        })) || []
+        const propertyIds = [...new Set(data?.map((a: any) => a.sit?.property_id).filter(Boolean) || [])];
+        let petsByProperty: Record<string, any[]> = {};
+        if (propertyIds.length > 0) {
+          const { data: pets } = await supabase
+            .from("pets").select("name, species, property_id").in("property_id", propertyIds);
+          pets?.forEach((p: any) => {
+            if (!petsByProperty[p.property_id]) petsByProperty[p.property_id] = [];
+            petsByProperty[p.property_id].push(p);
+          });
+        }
+
+        // For all applications: conversation + last message + unread.
+        // Guide only for accepted/active sits.
+        const guideMap: Record<string, { id: string; published: boolean } | null> = {};
+        const convMap: Record<string, string | null> = {};
+        const lastMsgMap: Record<string, { content: string; created_at: string; from_me: boolean } | null> = {};
+        const unreadMap: Record<string, number> = {};
+
+        await Promise.all((data || []).map(async (a: any) => {
+          const sitId = a.sit?.id;
+          const ownerId = a.sit?.user_id;
+          if (!sitId || !ownerId) return;
+
+          const isAcceptedActive =
+            a.status === "accepted" && ["confirmed", "in_progress"].includes(a.sit?.status);
+
+          const [guideRes, convRes] = await Promise.all([
+            isAcceptedActive
+              ? supabase
+                  .from("house_guides")
+                  .select("id, published")
+                  .eq("user_id", ownerId)
+                  .eq("published", true)
+                  .maybeSingle()
+              : Promise.resolve({ data: null } as any),
+            supabase
+              .from("conversations")
+              .select("id")
+              .eq("sit_id", sitId)
+              .eq("owner_id", ownerId)
+              .eq("sitter_id", user.id)
+              .maybeSingle(),
+          ]);
+
+          guideMap[sitId] = (guideRes as any).data || null;
+          const convId = convRes.data?.id || null;
+          convMap[sitId] = convId;
+
+          if (convId) {
+            const [lastRes, unreadRes] = await Promise.all([
+              supabase
+                .from("messages")
+                .select("content, created_at, sender_id, is_system")
+                .eq("conversation_id", convId)
+                .eq("is_system", false)
+                .order("created_at", { ascending: false })
+                .limit(1)
+                .maybeSingle(),
+              supabase
+                .from("messages")
+                .select("id", { count: "exact", head: true })
+                .eq("conversation_id", convId)
+                .is("read_at", null)
+                .neq("sender_id", user.id),
+            ]);
+            lastMsgMap[sitId] = lastRes.data
+              ? {
+                  content: lastRes.data.content,
+                  created_at: lastRes.data.created_at,
+                  from_me: lastRes.data.sender_id === user.id,
+                }
+              : null;
+            unreadMap[sitId] = unreadRes.count || 0;
+          }
+        }));
+
+        setSits(
+          data?.map((a: any) => ({
+            ...a.sit,
+            effectiveStatus: getEffectiveStatus(a.sit),
+            application_status: a.status,
+            application_id: a.id,
+            owner: a.sit?.owner || null,
+            hasReviewed: reviewedSitIds.includes(a.sit?.id),
+            pets: petsByProperty[a.sit?.property_id] || [],
+            houseGuide: guideMap[a.sit?.id] || null,
+            conversationId: convMap[a.sit?.id] || null,
+            lastMessage: lastMsgMap[a.sit?.id] || null,
+            unreadCount: unreadMap[a.sit?.id] || 0,
+          })) || []
+        );
+      }
+    } catch (err: any) {
+      console.error("[Sits] loadSits failed", err);
+      setSits([]);
+      setLoadError(
+        err?.message
+          ? "Impossible de charger vos annonces. Vérifiez votre connexion et réessayez."
+          : "Une erreur est survenue. Réessayez dans un instant.",
       );
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [user, activeRole]);
 
   useEffect(() => { loadSits(); }, [loadSits]);
