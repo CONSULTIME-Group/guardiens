@@ -290,6 +290,32 @@ export function useSitterProfile() {
   }, [user]);
   useEffect(() => { refreshCompletion(); }, [refreshCompletion]);
 
+  // Vérification email : lecture du vrai `email_confirmed_at` sur la session,
+  // au lieu du booléen codé en dur qui trompait TrustProfile.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!cancelled) setEmailVerified(!!authUser?.email_confirmed_at);
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
+
+  // Première activité gardien : au moins une candidature acceptée.
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      const { count } = await supabase
+        .from("applications")
+        .select("id", { count: "exact", head: true })
+        .eq("sitter_id", user.id)
+        .eq("status", "accepted");
+      if (!cancelled) setHasFirstActivity((count ?? 0) > 0);
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
+
 
   const computeMissingFields = useCallback((d: SitterProfileData): { step: number; label: string }[] => {
     return computeSitterMissingFields(d);
