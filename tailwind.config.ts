@@ -184,7 +184,19 @@ export default {
           "75%": { transform: "rotate(-4deg)" },
           "90%": { transform: "rotate(4deg)" },
         },
-
+        "alma-idle-gesture": {
+          "0%,70%,100%": { transform: "rotate(0deg) translateY(0)" },
+          "80%": { transform: "rotate(-4deg) translateY(-1px)" },
+          "90%": { transform: "rotate(3deg) translateY(0)" },
+        },
+        "alma-aura": {
+          "0%,100%": { transform: "scale(1)", opacity: "0.35" },
+          "50%": { transform: "scale(1.15)", opacity: "0.6" },
+        },
+        "alma-thinking-dot": {
+          "0%,80%,100%": { opacity: "0.25", transform: "translateY(0)" },
+          "40%": { opacity: "1", transform: "translateY(-2px)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -206,7 +218,10 @@ export default {
         "alma-thinking": "alma-thinking 2.4s ease-in-out infinite",
         "alma-gentle": "alma-gentle 5s ease-in-out infinite",
         "alma-playful": "alma-playful 0.7s ease-in-out 1",
-
+        "alma-idle-gesture": "alma-idle-gesture 6s ease-in-out infinite",
+        "alma-aura": "alma-aura 3.2s ease-in-out infinite",
+        "alma-aura-fast": "alma-aura 1.6s ease-in-out infinite",
+        "alma-thinking-dot": "alma-thinking-dot 1.2s ease-in-out infinite",
       },
     },
   },

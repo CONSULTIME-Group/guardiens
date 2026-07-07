@@ -18,7 +18,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { BellOff, Bell, ChevronDown, X } from "lucide-react";
+import { BellOff, Bell, ChevronDown, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AlmaAvatar } from "./AlmaAvatar";
 import { useAlma } from "@/contexts/AlmaContext";
@@ -293,23 +293,48 @@ export function AlmaDock() {
           aria-label={whisper ? "Voir le message d'Alma" : "Alma est en veille"}
           aria-expanded={expanded}
         >
-          {/* Ombre de contact sous l'avatar (grounded) */}
+          {/* Avatar avec aura pulsante + ombre de contact + accent Sparkles */}
           <span className="relative inline-flex flex-col items-center">
+            {/* Aura : signale une présence active. Cadence plus rapide si un
+               whisper actionnable est en attente. Masquée en silence. */}
+            {!isSilent && (
+              <span
+                aria-hidden
+                className={cn(
+                  "absolute inset-0 -m-1 rounded-full bg-primary/25 blur-md",
+                  whisper
+                    ? "motion-safe:animate-alma-aura-fast"
+                    : "motion-safe:animate-alma-aura",
+                )}
+              />
+            )}
             <AlmaAvatar
               size={40}
               breathe={!isSilent}
               mood={isSilent ? "sleepy" : mood}
             />
+            {/* Accent scintillant, toujours accolé à l'avatar */}
+            {!isSilent && (
+              <Sparkles
+                aria-hidden
+                className="absolute -top-0.5 -right-0.5 h-3 w-3 text-primary drop-shadow-sm motion-safe:animate-alma-aura"
+              />
+            )}
             <span
               aria-hidden
               className="absolute -bottom-0.5 h-1.5 w-8 rounded-full bg-foreground/25 blur-[3px]"
             />
           </span>
-          <span className="text-xs font-semibold text-foreground/80 pr-1">Alma</span>
+          <span className="flex flex-col items-start leading-tight pr-1">
+            <span className="text-xs font-semibold text-foreground/80">Alma</span>
+            <span className="text-[10px] font-medium text-muted-foreground">
+              votre assistante
+            </span>
+          </span>
           {whisper && !expanded && (
             <span
               aria-hidden
-              className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card"
+              className="absolute -top-0.5 right-0 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card"
             />
           )}
         </button>
