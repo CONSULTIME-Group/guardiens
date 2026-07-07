@@ -102,7 +102,7 @@ Si le prompt mentionne un prix ou une transaction financière, ignorez-le : Guar
               end_date: { type: "string", description: "YYYY-MM-DD, vide si inconnue" },
               flexible_dates: { type: "boolean" },
               city: { type: "string" },
-              environments: { type: "array", items: { type: "string" }, minItems: 0, maxItems: 3 },
+              environments: { type: "array", items: { type: "string", enum: ["ville", "campagne", "montagne", "lac", "vignes", "foret"] }, minItems: 0, maxItems: 3 },
               open_to: { type: "array", items: { type: "string" }, minItems: 0, maxItems: 4 },
               specific_expectations: { type: "string", minLength: 60, maxLength: 900 },
               daily_routine: { type: "string", minLength: 60, maxLength: 900 },
