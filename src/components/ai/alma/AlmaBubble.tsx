@@ -10,6 +10,7 @@ import { ReactNode } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AlmaAvatar } from "./AlmaAvatar";
+import type { AlmaStage } from "@/hooks/useAlmaEvolution";
 
 export type AlmaVariant = "default" | "dashboard" | "inline" | "sticky-footer";
 export type AlmaAudience = "owner" | "sitter";
@@ -24,7 +25,10 @@ export interface AlmaBubbleProps {
   actions?: ReactNode;
   onDismiss?: () => void;
   className?: string;
+  /** Stade utilisateur (halo / liseré). Optionnel. */
+  stage?: AlmaStage;
 }
+
 
 const VARIANT_STYLES: Record<AlmaVariant, string> = {
   default: "p-4 md:p-5",
@@ -50,9 +54,11 @@ export function AlmaBubble({
   actions,
   onDismiss,
   className,
+  stage,
 }: AlmaBubbleProps) {
   const loadingLabel = audience === "sitter" ? "Alma prépare…" : "Alma prépare…";
   const mood = loading ? "thinking" : success ? "happy" : "idle";
+
 
   return (
     <div
@@ -79,7 +85,7 @@ export function AlmaBubble({
 
       <div className={cn("flex items-start gap-3", onDismiss && "pr-10")}>
         <div className="flex flex-col items-center gap-1 shrink-0 text-primary">
-          <AlmaAvatar size={AVATAR_SIZE[variant]} mood={mood} breathe />
+          <AlmaAvatar size={AVATAR_SIZE[variant]} mood={mood} breathe stage={stage} />
           <span className="text-[10px] font-semibold uppercase tracking-wider text-primary/80">
             Alma
           </span>
