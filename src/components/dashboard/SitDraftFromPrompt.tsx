@@ -107,7 +107,7 @@ export default function SitDraftFromPrompt({ secondary = false }: SitDraftFromPr
     >
       <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 mb-3">
         <div className="shrink-0 self-start">
-          <AlmaAnimated size={72} />
+          <AlmaAnimated size={72} mood={almaMood} />
         </div>
         <div className="min-w-0">
           <h2
