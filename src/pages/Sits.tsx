@@ -397,7 +397,17 @@ const Sits = () => {
   };
 
   const handleRepublish = async (sitId: string) => {
-    const today = new Date().toISOString().split("T")[0];
+    const sit = sits.find((s) => s.id === sitId);
+    const todayIso = new Date().toISOString().split("T")[0];
+    // Garde A3 : ne pas republier une annonce dont les dates sont deja passees.
+    if (sit?.end_date && sit.end_date < todayIso) {
+      toast({
+        title: "Dates a mettre a jour",
+        description: "Les dates de cette annonce sont passees. Modifiez-les avant de republier.",
+      });
+      navigate(`/sits/${sitId}/edit`);
+      return;
+    }
     await supabase.from("sits").update({
       status: "published" as any,
       cancellation_reason: null,
@@ -406,38 +416,47 @@ const Sits = () => {
       unpublished_at: null,
       last_unpublished_reason: null,
     } as any).eq("id", sitId).eq("user_id", user!.id);
-    toast({ title: "Annonce republiée" });
+    toast({ title: "Annonce republiee" });
     loadSits();
   };
 
-  // Separate active from archived/expired
-  // Une annonce est considérée « archivée » si :
-  //  - elle a été annulée avec une raison archived/expired (auto-archivage)
-  //  - OU elle a été dépubliée par le propriétaire (status=draft + unpublished_at)
-  //  - OU elle est terminée (completed) : la garde est passée, sort des Actives
+  // Bucketing owner : En ligne / Brouillons / Passees
+  //  - En ligne  : publiees, confirmees, en cours (avec ou sans candidatures)
+  //  - Brouillons: vrais brouillons jamais publies (non expires) + dépubliées dont les dates ne sont PAS passees
+  //  - Passees   : expired, completed, cancelled (manuel), archived (manuel)
   const wasUnpublished = (s: any) =>
     s.status === "draft" && !!s.unpublished_at;
-  const isArchived = (s: any) => {
+
+  // Une annonce est "passee" (cycle termine) si :
+  //  - effectiveStatus in {expired, completed, archived}
+  //  - OU status=cancelled (annulation manuelle : cancellation_reason != archived/expired est deja couvert par effectiveStatus)
+  const isPast = (s: any) => {
     const es = s.effectiveStatus || s.status;
-    return (
-      es === "completed"
-      || (s.status === "cancelled" && (s.cancellation_reason === "archived" || s.cancellation_reason === "expired"))
-      || wasUnpublished(s)
-    );
+    return ["expired", "completed", "archived", "cancelled"].includes(es);
   };
-  const isExpired = (s: any) => s.cancellation_reason === "expired";
+  const isDraft = (s: any) => {
+    if (isPast(s)) return false;
+    const es = s.effectiveStatus || s.status;
+    // vrai brouillon jamais publie OU dépubliée non expiree (effectiveStatus='unpublished')
+    return es === "draft" || es === "unpublished";
+  };
+  const isActive = (s: any) => !isPast(s) && !isDraft(s);
+  // Alias legacy pour la vue sitter (elle utilise isArchived pour derouler activeSits).
+  const isArchived = isPast;
+  const isExpired = (s: any) => (s.effectiveStatus || s.status) === "expired";
 
   const activeSits = useMemo(() => sits.filter(s => !isArchived(s)), [sits]);
   
 
   // Comptages onglets sitter (vue inchangée)
+  // Une expiration/archivage owner-side est mappe vers "cancelled" cote sitter pour preserver le comportement.
   const tabCounts = useMemo(() => {
     const counts: Record<Tab, number> = { upcoming: 0, in_progress: 0, completed: 0, cancelled: 0 };
     if (isOwnerView) return counts;
     activeSits.forEach((s) => {
       const es = s.effectiveStatus || s.status;
       const appStatus = s.application_status;
-      if (appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled") counts.cancelled++;
+      if (appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled" || es === "expired" || es === "archived") counts.cancelled++;
       else if (es === "completed") counts.completed++;
       else if (es === "in_progress" && appStatus === "accepted") counts.in_progress++;
       else counts.upcoming++;
@@ -445,16 +464,13 @@ const Sits = () => {
     return counts;
   }, [activeSits, isOwnerView]);
 
-  // Comptages onglets owner, Actives / Brouillons / Archivées
-  // Brouillons = vrais brouillons jamais publiés (unpublished_at IS NULL)
-  // Archivées  = expirées, annulées-archivées, OU dépubliées (status=draft + unpublished_at)
+  // Comptages onglets owner : En ligne / Brouillons / Passees
   const ownerTabCounts = useMemo(() => {
-    const counts: Record<OwnerTab, number> = { active: 0, drafts: 0, archived: 0 };
+    const counts: Record<OwnerTab, number> = { active: 0, drafts: 0, past: 0 };
     if (!isOwnerView) return counts;
     sits.forEach((s) => {
-      const es = s.effectiveStatus || s.status;
-      if (isArchived(s)) counts.archived++;
-      else if (es === "draft") counts.drafts++;
+      if (isPast(s)) counts.past++;
+      else if (isDraft(s)) counts.drafts++;
       else counts.active++;
     });
     return counts;
@@ -464,15 +480,14 @@ const Sits = () => {
     let base: any[] = [];
     if (isOwnerView) {
       base = sits.filter((s) => {
-        const es = s.effectiveStatus || s.status;
         switch (activeOwnerTab) {
           case "drafts":
-            return es === "draft" && !isArchived(s);
-          case "archived":
-            return isArchived(s);
+            return isDraft(s);
+          case "past":
+            return isPast(s);
           case "active":
           default:
-            return !isArchived(s) && es !== "draft";
+            return isActive(s);
         }
       });
     } else {
