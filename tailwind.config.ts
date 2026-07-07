@@ -167,6 +167,24 @@ export default {
           "60%": { transform: "rotate(-6deg)" },
           "80%": { transform: "rotate(6deg)" },
         },
+        "alma-thinking": {
+          "0%,100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.04)" },
+        },
+        "alma-gentle": {
+          "0%,100%": { transform: "scale(1) translateY(0)" },
+          "50%": { transform: "scale(1.015) translateY(-1px)" },
+        },
+        "alma-playful": {
+          "0%,100%": { transform: "rotate(0deg)" },
+          "15%": { transform: "rotate(-10deg)" },
+          "30%": { transform: "rotate(10deg)" },
+          "45%": { transform: "rotate(-8deg)" },
+          "60%": { transform: "rotate(8deg)" },
+          "75%": { transform: "rotate(-4deg)" },
+          "90%": { transform: "rotate(4deg)" },
+        },
+
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
