@@ -783,6 +783,20 @@ const Sits = () => {
             </div>
           ))}
         </div>
+      ) : loadError ? (
+        <div
+          role="alert"
+          className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-center"
+        >
+          <AlertTriangle className="h-6 w-6 text-destructive mx-auto mb-2" aria-hidden="true" />
+          <h2 className="font-heading font-semibold text-base mb-1">
+            Chargement impossible
+          </h2>
+          <p className="text-sm text-muted-foreground mb-4">{loadError}</p>
+          <Button variant="outline" size="sm" onClick={() => loadSits()} className="gap-2">
+            <RefreshCw className="h-4 w-4" /> Réessayer
+          </Button>
+        </div>
       ) : filteredSits.length === 0 ? (
         <>
           {isOwnerView && activeOwnerTab === "active" && (
