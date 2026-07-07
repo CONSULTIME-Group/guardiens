@@ -152,7 +152,7 @@ const SitterFirstNBA = ({ sits }: Props) => {
 
       <div className="mt-4 text-center">
         <Link
-          to="/annonces"
+          to="/search"
           className="text-sm text-primary underline-offset-4 hover:underline"
           onClick={() =>
             void trackEvent("see_all_sits_clicked", { source: "sitter_first_nba" })
