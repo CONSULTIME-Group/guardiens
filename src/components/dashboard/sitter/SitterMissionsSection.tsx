@@ -140,8 +140,15 @@ const SitterMissionsSection = memo(({
       </div>
 
 
-      {/* ─── Onglet : Les miennes ─── */}
+      {/* ─── Panneau : Les miennes ─── */}
+      <div
+        role="tabpanel"
+        id="sitter-missions-panel-mine"
+        aria-labelledby="sitter-missions-tab-mine"
+        hidden={tab !== "mine"}
+      >
       {tab === "mine" && (
+
         myMissionsError ? (
           <ErrorState message={myMissionsError} />
         ) : sortedMine.length === 0 ? (
