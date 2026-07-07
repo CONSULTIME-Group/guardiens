@@ -112,8 +112,12 @@ export default function SitDraftFromPrompt({ secondary = false, primary = null }
     return (
       <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
         <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
-          <div className="shrink-0 self-start">
-            <AlmaAnimated size={72} mood="attention" />
+          <div className="shrink-0 self-start flex flex-col items-center">
+            <div className="relative">
+              <AlmaAnimated size={72} mood="attention" />
+              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-14 h-2.5 bg-foreground/10 rounded-full blur-sm pointer-events-none" />
+            </div>
+            <span className="mt-1 text-[10px] font-medium text-muted-foreground">Alma</span>
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="text-lg md:text-xl font-heading font-semibold text-foreground leading-tight">
@@ -152,8 +156,12 @@ export default function SitDraftFromPrompt({ secondary = false, primary = null }
       }
     >
       <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 mb-3">
-        <div className="shrink-0 self-start">
-          <AlmaAnimated size={72} mood={almaMood} />
+        <div className="shrink-0 self-start flex flex-col items-center">
+          <div className="relative">
+            <AlmaAnimated size={72} mood={almaMood} />
+            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-14 h-2.5 bg-foreground/10 rounded-full blur-sm pointer-events-none" />
+          </div>
+          <span className="mt-1 text-[10px] font-medium text-muted-foreground">Alma</span>
         </div>
         <div className="min-w-0">
           <h2
