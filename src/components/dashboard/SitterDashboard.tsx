@@ -542,6 +542,11 @@ const SitterDashboard = () => {
               />
             </div>
 
+            {/* Pouls de la communauté : chiffres réels et vivants. */}
+            <div className="px-4 sm:px-5 md:px-8 mt-4">
+              <CommunityPulseBanner userId={user?.id} />
+            </div>
+
             {!nextGuard && (
               <div className="px-4 sm:px-5 md:px-8 mt-4">
                 {!(level === 4 || level === "3B")
@@ -556,12 +561,16 @@ const SitterDashboard = () => {
             <div className="px-4 sm:px-5 md:px-8 mb-6">
               {DiscoverySections}
             </div>
+            <div className="px-4 sm:px-5 md:px-8 mb-6">
+              {ConseilsDiscoveryCard}
+            </div>
             <div className="px-4 sm:px-5 md:px-8 mt-4">
               <EmailDigestCard />
             </div>
             <div className="px-4 sm:px-5 md:px-8 mb-6">
-              {buildSecondaryAccordion({ withConseils: true })}
+              {buildSecondaryAccordion()}
             </div>
+
           </>
         )}
       </div>
