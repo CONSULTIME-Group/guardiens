@@ -123,15 +123,30 @@ export function useSitterProfile() {
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [hasFirstActivity, setHasFirstActivity] = useState(false);
 
   const fetchData = useCallback(async (opts?: { silent?: boolean }) => {
     if (!user) return;
     if (!opts?.silent) setLoading(true);
+    setLoadError(null);
 
-    const [profileRes, sitterRes] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", user.id).single(),
-      supabase.from("sitter_profiles").select("*").eq("user_id", user.id).maybeSingle(),
-    ]);
+    let profileRes: any;
+    let sitterRes: any;
+    try {
+      [profileRes, sitterRes] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", user.id).single(),
+        supabase.from("sitter_profiles").select("*").eq("user_id", user.id).maybeSingle(),
+      ]);
+      if (profileRes.error) throw profileRes.error;
+      if (sitterRes.error) throw sitterRes.error;
+    } catch (err) {
+      logger.error("Failed to load sitter profile", { error: String(err) });
+      setLoadError("Impossible de charger votre profil. Vérifiez votre connexion.");
+      if (!opts?.silent) setLoading(false);
+      return;
+    }
 
     const p = profileRes.data;
     const s = sitterRes.data;
