@@ -124,6 +124,9 @@ export function useAlmaEvolution() {
       const profileCompletion = user!.profileCompletion || 0;
       const identityVerified = user!.identityVerified;
 
+      const T = ALMA_THRESHOLDS;
+      const profileOk = profileCompletion >= T.profileCompletionMin;
+
       const hasEngagement =
         publishedSitsCount > 0 ||
         applicationsCount > 0 ||
@@ -132,11 +135,14 @@ export function useAlmaEvolution() {
         badgesCount > 0;
 
       const isFidele =
-        completedSitsCount >= 3 || badgesCount >= 3 || isEmergencySitter;
+        completedSitsCount >= T.completedSitsForFidele ||
+        missionsCount >= T.missionsForFidele ||
+        badgesCount >= T.badgesForFidele ||
+        isEmergencySitter;
 
+      // Identité valorisée mais NON bloquante : elle ne plafonne plus la progression.
       let stage: AlmaStage;
-      if (profileCompletion < 60) stage = "nouvelle";
-      else if (!identityVerified) stage = "eveillee"; // profil ok mais identité pas encore
+      if (!profileOk) stage = "nouvelle";
       else if (isFidele) stage = "fidele";
       else if (hasEngagement) stage = "complice";
       else stage = "eveillee";
@@ -146,34 +152,28 @@ export function useAlmaEvolution() {
       let nextActionLabel: string | null = null;
 
       if (stage === "nouvelle") {
-        nextMilestone = "Compléter votre profil à 60 % pour ouvrir l'étape suivante.";
-        nextActionHref = activeRole === "sitter" ? "/sitter-profile" : "/owner-profile";
+        nextMilestone = `Compléter votre profil à ${T.profileCompletionMin} % pour ouvrir l'étape suivante.`;
+        nextActionHref = activeRole === "owner" ? "/owner-profile" : "/profile";
         nextActionLabel = "Compléter mon profil";
       } else if (stage === "eveillee") {
-        if (!identityVerified) {
-          nextMilestone = "Vérifier votre identité pour rassurer la communauté.";
-          nextActionHref = "/settings#verification";
-          nextActionLabel = "Vérifier mon identité";
-        } else if (activeRole === "owner") {
-          nextMilestone = "Publier votre première annonce ou une petite mission.";
+        if (activeRole === "owner") {
+          nextMilestone = "Publier votre première annonce ou une petite mission pour devenir Complice.";
           nextActionHref = "/sits/create";
           nextActionLabel = "Publier une annonce";
         } else {
-          nextMilestone = "Postuler à votre première garde.";
+          nextMilestone = "Postuler à votre première garde pour devenir Complice.";
           nextActionHref = "/annonces";
           nextActionLabel = "Trouver une garde";
         }
       } else if (stage === "complice") {
         if (activeRole === "sitter") {
-          const remaining = Math.max(0, 3 - completedSitsCount);
           nextMilestone =
-            remaining > 0
-              ? `Réaliser ${remaining} garde${remaining > 1 ? "s" : ""} de plus pour devenir Fidèle.`
-              : "Continuer à recevoir des écussons pour devenir Fidèle.";
+            "Réaliser une garde, cumuler 3 missions d'entraide ou recevoir un écusson pour devenir Fidèle.";
           nextActionHref = "/annonces";
           nextActionLabel = "Trouver une garde";
         } else {
-          nextMilestone = "Publier une nouvelle annonce pour rester actif.";
+          nextMilestone =
+            "Réaliser une garde avec un gardien ou publier une nouvelle annonce pour devenir Fidèle.";
           nextActionHref = "/sits/create";
           nextActionLabel = "Créer une annonce";
         }
@@ -183,6 +183,7 @@ export function useAlmaEvolution() {
         nextActionHref = "/conseils";
         nextActionLabel = "Explorer les conseils";
       }
+
 
       return {
         stage,
