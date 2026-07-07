@@ -251,6 +251,31 @@ export function useOwnerProfile() {
   }, [user]);
   useEffect(() => { refreshCompletion(); }, [refreshCompletion]);
 
+  // Vérification email : lu depuis la session (email_confirmed_at).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!cancelled) setEmailVerified(!!authUser?.email_confirmed_at);
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
+
+  // Première activité proprio : au moins une annonce non-brouillon.
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      const { count } = await supabase
+        .from("sits")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .neq("status", "draft");
+      if (!cancelled) setHasFirstActivity((count ?? 0) > 0);
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
+
 
   const computeMissingFields = useCallback((d: OwnerProfileData, petsCount: number): { step: number; label: string }[] => {
     return computeOwnerMissingFields(d, petsCount);
