@@ -77,23 +77,23 @@ export function AlmaAvatarLottie({
     };
   }, [src, reduced]);
 
+  const [effectiveState, setEffectiveState] = useState<AlmaLottieState>(state);
+  useEffect(() => {
+    setEffectiveState(state);
+  }, [state]);
+
   // Segment switching
   useEffect(() => {
     const anim = lottieRef.current;
     if (!anim || !animationData) return;
-    const [from, to] = SEGMENTS[state];
-    const loop = state !== "success";
-    anim.setLoop(loop);
+    const [from, to] = SEGMENTS[effectiveState];
     anim.playSegments([from, to], true);
-  }, [state, animationData]);
+  }, [effectiveState, animationData]);
 
   const handleComplete = () => {
-    if (state !== "success") return;
-    const anim = lottieRef.current;
-    if (!anim) return;
-    const [from, to] = SEGMENTS.idle;
-    anim.setLoop(true);
-    anim.playSegments([from, to], true);
+    if (effectiveState === "success") {
+      setEffectiveState("idle");
+    }
   };
 
   const shouldFallback = reduced || failed;
