@@ -306,6 +306,11 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (current || queue.length === 0) return;
     if (!verboseMode && isProactiveMuted()) return;
+    // Verrou : si une surface plus prioritaire est active, on ne parle pas.
+    if (!verboseMode) {
+      const active = activeSurfaceRef.current;
+      if (active && SURFACE_WEIGHT[active] > SURFACE_WEIGHT.whisper) return;
+    }
 
     let next: AlmaWhisper | null;
     if (verboseMode) {
@@ -316,6 +321,16 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
       next = pickNext(queue, stateRef.current);
     }
     if (!next) return;
+
+    // Claim de la surface pour le whisper. En mode verbose, on force le claim
+    // sans se soucier du verrou (mais on l'écrit quand même pour cohérence).
+    if (!verboseMode) {
+      const claimed = claimProactiveSurface("whisper");
+      if (!claimed) return;
+    } else {
+      activeSurfaceRef.current = "whisper";
+      setActiveProactiveSurface("whisper");
+    }
 
     setCurrent(next);
     setQueue((q) => q.filter((w) => w.id !== next!.id));
