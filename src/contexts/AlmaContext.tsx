@@ -262,10 +262,30 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
     };
   }, [user?.id]);
 
+  const claimProactiveSurface = useCallback(
+    (kind: AlmaProactiveSurface): boolean => {
+      const current = activeSurfaceRef.current;
+      if (current && SURFACE_WEIGHT[kind] <= SURFACE_WEIGHT[current]) return false;
+      activeSurfaceRef.current = kind;
+      setActiveProactiveSurface(kind);
+      return true;
+    },
+    [],
+  );
+
+  const releaseProactiveSurface = useCallback((kind: AlmaProactiveSurface) => {
+    if (activeSurfaceRef.current !== kind) return;
+    activeSurfaceRef.current = null;
+    setActiveProactiveSurface(null);
+  }, []);
+
   const canEmit = useCallback(
     (type: AlmaWhisperType) => {
       if (verboseMode) return true;
       if (isProactiveMuted()) return false;
+      const active = activeSurfaceRef.current;
+      // Une surface plus prioritaire (first_meeting, welcome_back) bloque les whispers.
+      if (active && SURFACE_WEIGHT[active] > SURFACE_WEIGHT.whisper) return false;
       return canEmitPure(stateRef.current, type).ok;
     },
     [isProactiveMuted, verboseMode],
