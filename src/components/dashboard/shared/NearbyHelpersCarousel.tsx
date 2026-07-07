@@ -1,6 +1,6 @@
-import { memo, useState } from "react";
+import { memo, useState, useRef, useCallback, type KeyboardEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShieldCheck, ArrowRight, MapPin, MessageSquare, Loader2 } from "lucide-react";
+import { ShieldCheck, ArrowRight, MapPin, MessageSquare, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNearbyHelpers, type NearbyHelper } from "@/hooks/useNearbyHelpers";
