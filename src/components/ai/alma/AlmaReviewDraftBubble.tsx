@@ -36,6 +36,7 @@ export function AlmaReviewDraftBubble({
   const visible = hasRatings && commentShort && !!conversationId;
 
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const seenRef = useRef(false);
 
@@ -65,6 +66,8 @@ export function AlmaReviewDraftBubble({
         throw new Error(payload?.error || "Alma n'a pas pu générer de brouillon.");
       }
       onDraft(payload.draft);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 2000);
       trackEvent("alma_review_draft_generated", {
         metadata: { sit_id: sitId, role },
       });
@@ -94,6 +97,7 @@ export function AlmaReviewDraftBubble({
         audience={role}
         variant="inline"
         loading={loading}
+        success={success}
         onDismiss={() => setDismissed(true)}
         actions={
           <Button size="sm" onClick={handleGenerate} disabled={loading}>

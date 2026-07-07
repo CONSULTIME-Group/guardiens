@@ -9,7 +9,7 @@
 import { ReactNode } from "react";
 import { Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AlmaAvatar } from "./AlmaAvatar";
+import { AlmaAvatarLottie } from "./AlmaAvatarLottie";
 
 export type AlmaVariant = "default" | "dashboard" | "inline" | "sticky-footer";
 export type AlmaAudience = "owner" | "sitter";
@@ -19,6 +19,7 @@ export interface AlmaBubbleProps {
   variant?: AlmaVariant;
   title?: string;
   loading?: boolean;
+  success?: boolean;
   children: ReactNode;
   actions?: ReactNode;
   onDismiss?: () => void;
@@ -44,12 +45,14 @@ export function AlmaBubble({
   variant = "default",
   title,
   loading = false,
+  success = false,
   children,
   actions,
   onDismiss,
   className,
 }: AlmaBubbleProps) {
   const loadingLabel = audience === "sitter" ? "Alma prépare…" : "Alma prépare…";
+  const lottieState = loading ? "thinking" : success ? "success" : "idle";
 
   return (
     <div
@@ -76,7 +79,7 @@ export function AlmaBubble({
 
       <div className={cn("flex items-start gap-3", onDismiss && "pr-10")}>
         <div className="flex flex-col items-center gap-1 shrink-0 text-primary">
-          <AlmaAvatar size={AVATAR_SIZE[variant]} animateIn />
+          <AlmaAvatarLottie size={AVATAR_SIZE[variant]} state={lottieState} />
           <span className="text-[10px] font-semibold uppercase tracking-wider text-primary/80">
             Alma
           </span>
