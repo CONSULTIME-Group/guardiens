@@ -85,7 +85,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
         />
       )}
       <Suspense fallback={null}>
-        <AlmaWhisperOutlet />
+        <AlmaDock />
       </Suspense>
       {/* DuplicateAccountGuard mont\u00e9 globalement dans App.tsx */}
     </div>
