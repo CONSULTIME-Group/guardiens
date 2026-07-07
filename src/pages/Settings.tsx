@@ -31,6 +31,8 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { getPasswordStrength, validateStrongPassword } from "@/lib/passwordStrength";
 import { Link } from "react-router-dom";
 import { useAlmaFrequency, type AlmaFrequency } from "@/hooks/useAlmaFrequency";
+import { useAlmaHidden } from "@/hooks/useAlmaHidden";
+
 
 interface NotifPrefs {
   email_new_application: boolean;
