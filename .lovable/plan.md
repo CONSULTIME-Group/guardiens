@@ -1,111 +1,54 @@
-# Audit lecture seule — annonces expirées sans gardien
 
-Fichier unique concerné : `src/pages/Sits.tsx` (l. 52–470). Aucun autre fichier ne participe à la logique d'expiration : `supabase/functions/auto-transition-sits/index.ts` ne gère PAS l'expiration (uniquement `confirmed → in_progress → completed`). Il n'existe donc **aucune expiration côté serveur** ; toute la logique est client, exécutée à chaque `loadSits()`.
+# Audit lecture seule — Onglet « Mon profil »
 
-## 1. Cycle réel d'une annonce dont la date de fin est passée sans gardien accepté
+## Localisation
 
-Deux cas très différents selon le `status` initial en base.
+- **Route** : `/profile` → `src/pages/Profile.tsx` (shell qui lazy-load la bonne page selon `activeRole`).
+- **Scission owner/sitter (2 pages distinctes, hooks séparés)** :
+  - Sitter : `src/pages/SitterProfile.tsx` + hook `src/hooks/useSitterProfile.ts`
+  - Owner : `src/pages/OwnerProfile.tsx` + hook `src/hooks/useOwnerProfile.ts`
+- **Sections sitter** (`SECTIONS_BASE`) : identity, sitter, experience, mobility, gallery (opt.), experiences (opt.), skills — composants `StepIdentity`, `StepSitterProfile`, `StepExperience`, `StepMobility`, `StepPreferences`, `StepSkills`, `SitterGallery`, `ExternalExperiences` sous `src/components/profile/`.
+- **Sections owner** : identity, housing, animals, rules (opt.), communication (opt.), skills, gallery — composants sous `src/components/owner-profile/` + `OwnerHouseGuideForm` intégré dans la section communication.
+- **Sidebar unique** : `src/components/profile/ProfileSidebar.tsx` (mobile scroll horizontal, desktop sticky vertical) + `ScoreBreakdown`, `TrustProfile`, `ProfileProgressStrip` (barre sticky bas d'écran).
+- **Score serveur canonique** : `public.calculate_profile_completion` (`supabase/migrations/20260621084357_*.sql`), écrit dans `profiles.profile_completion`, appelé à chaque `saveStep`.
 
-### Cas A — annonce publiée qui a expiré (`status='published'`)
+Persistance en 4 tables : `profiles`, `sitter_profiles`, `owner_profiles`, `properties`, plus `past_animals`, `pets`, `sitter_gallery`, `owner_gallery`. Draft local en localStorage (`guardiens_(sitter|owner)_profile_draft_<user.id>`).
 
-Mutation client dans `loadSits` (l. 205–215) :
+---
 
-```
-toExpire = sits où status='published' ET end_date < now()
-UPDATE sits SET status='cancelled', cancellation_reason='expired'  (l. 210–213)
-```
+## Tableau des observations
 
-Puis l'enrichissement (l. 228–235) force localement `status='cancelled'`, `cancellation_reason='expired'`, et calcule `effectiveStatus` via `getEffectiveStatus`.
+| Zone / Élément | Problème observé | Sévérité | Correctif proposé |
+|---|---|---|---|
+| **Score client vs serveur** — `scoredCriteria` client (sitter et owner) somme à 100 max, sans **aucun** critère d'affinité. Le SQL `calculate_profile_completion` inclut lui 10 pts d'affinité (interests≥3, langues, life_pace, animal_types / preferred_sitter_types, home_ambiance). | Un profil « tout coché » côté sidebar affiche `liveScore=100%` alors que `profile_completion` serveur plafonne à 90 — le dashboard, les nudges Alma (`profile_incomplete`) et les listes triées par complétion voient une autre réalité. Aucun signal UI n'invite à remplir les champs d'affinité. | **Bloquant** | Ajouter dans `scoredCriteria` un critère « Affinité (intérêts, langues, rythme, animaux/ambiance) » de 10 pts avec renvoi vers la section correspondante (sitter → `sitter` ; owner → `identity`/`rules`). Aligner le barème client sur la RPC. |
+| **`missingFields` exposé mais mort** — `useSitterProfile`/`useOwnerProfile` retournent `missingFields` calculés par `computeSitterMissingFields`/`computeOwnerMissingFields` (motivation, last_name, references, availability_during, languages, meeting_preference, handover_preference…). | Ces listes sont plus larges que `scoredCriteria` (sidebar) et **jamais rendues** dans le JSX ; seuls des tests les utilisent (`useSitterProfile.mobility.test.tsx`). Deux sources de vérité divergentes cohabitent. | Moyen | Supprimer les `computeXxxMissingFields` ou les brancher dans le tooltip « Détail du score », en s'appuyant sur la même source que la jauge. |
+| **`postal_code` bloquant hors France** — client `scoredCriteria.name_postal` exige `first_name && postal_code`. | Un gardien / propriétaire à l'étranger (owner a bien un champ `country`, sitter n'en a pas du tout) ne pourra jamais gagner ces 10/15 pts. Le serveur, lui, accepte `city` seul si `country != 'FR'`. Score sidebar reste plafonné artificiellement. | Bloquant (owner) / Moyen (sitter) | Aligner sur `v_location_ok` du SQL : owner → tester `country === 'FR' ? postal_code : city`. Sitter : ajouter le champ `country` dans `SitterProfileData` + `sitter_profiles` (ou justifier « France uniquement » côté copy). |
+| **`TrustProfile.emailVerified={true}` codé en dur** dans `SitterProfile.tsx` (l. 375) et `OwnerProfile.tsx` (l. 304). | Le pilier « Email vérifié » est toujours coché sans lecture réelle de `auth.users.email_confirmed_at`. Faux positif pour les comptes non confirmés. | Moyen | Lire `email_confirmed_at` (via `session.user`) et passer un vrai booléen. |
+| **`TrustProfile.hasFirstActivity={false}` codé en dur** dans les deux pages. | Le pilier « Première annonce/garde » ne se coche jamais depuis la page profil : le trust score plafonne à 4/5 même pour un utilisateur actif. | Moyen | Interroger côté hook : owner → `sits` publié count>0 ; sitter → `sits` en `completed` (ou `applications.status='accepted'` avec sit terminé). |
+| **`saveStep` = 4 aller-retours DB à chaque save** — update table, puis `rpc calculate_profile_completion`, puis `fetchData({silent})`, puis `refreshCompletion`, puis `refreshProfile`. | Latence sensible (≥ 600 ms typique) sur chaque clic « Sauvegarder », y compris pour un simple toggle de chip. Coût réseau × N étapes. | Moyen | La RPC pourrait retourner le nouveau `profile_completion` et les valeurs qui changent, évitant `fetchData` complet. Alternative : optimistic UI sans refetch, refetch au retour sur la page. |
+| **N+1 sur les notes d'animal** — `OwnerStepAnimals.tsx` l. 179 : `onNoteChange={(note) => onUpdatePet({ ...pet, owner_breed_note: note })}` = un `UPDATE pets` **par frappe clavier**. | Écrit en DB à chaque lettre, sans debounce, sans toast d'échec en cas de RLS/réseau. Génère des dizaines de requêtes pour saisir une note. | Bloquant | Debounce (500-800 ms) ou passage en édition modale avec bouton « Enregistrer ». Ajouter `try/catch` visible. |
+| **Upload avatar sans validation client** — `handleAvatarChange` (sitter & owner) accepte `image/*` sans contrôler `file.size` ni `file.type`. Bucket `avatars` = 5 MB, `{image/jpeg,image/png,image/webp}`. | Un fichier HEIC (iPhone), un PNG 12 MB ou un `image/svg+xml` déclenche `storage.upload` → échec avec toast générique « Upload échoué » sans dire pourquoi. Pas de compression, pas de recadrage, pas de preview avant envoi. | Moyen | Validation pré-upload (`file.size ≤ 5*1024*1024`, `file.type in ALLOWED`), passage par `compressImage.ts` déjà présent dans le projet, ajout d'un composant de recadrage carré. Message d'erreur détaillé. |
+| **Sauvegarde avatar : 4 requêtes en cascade** — `uploadAvatar`/`uploadPhoto("avatars")` fait `storage.upload` + `profiles.update` + `rpc calculate_profile_completion` + `refreshCompletion` + `refreshProfile`. En cas d'échec `profiles.update`, l'image reste orpheline dans le bucket. | Fuite d'objets storage + coût. | Cosmétique | Encapsuler dans une fonction serveur (`upload_avatar_and_bind`) qui fait upload + update en transaction, ou nettoyer l'objet en cas d'échec `update`. |
+| **Refetch `sitter_profiles` sur la page owner** — `useOwnerProfile.fetchData` lit `sitter_profiles.competences` systématiquement (l. 139) pour pré-remplir les compétences owner. | Requête inutile pour tout owner qui a déjà ses `owner_profiles.competences`. Overfetch systématique. | Cosmétique | Ne charger `sitter_profiles` que si `owner_profiles.competences` est vide. |
+| **Backfill géoloc bruyant** — `useSitterProfile` l. 219-255 : `useEffect` dépendant de `data.postal_code`, `data.city`, `data.latitude`, `data.longitude`. | Si `city` est vide ou ne matche pas exactement l'API `geo.api.gouv.fr`, `match` peut renvoyer un `arr[0]` faux positif → coordonnées d'une autre commune persistées silencieusement. En cas d'échec API, aucune trace utilisateur. | Moyen | Ne prendre `arr[0]` que si `arr.length === 1`. Sinon exiger un match exact `nom` insensible aux accents. Logger via `logger.warn`. Ne pas exister côté owner (donc owner à code postal legacy = 0 lat/lng). |
+| **`fetchData` silencieux sans gestion d'erreur** — sitter (l. 122) et owner (l. 131) : aucun `try/catch`, aucun état d'erreur exposé. | Un plantage RLS ou réseau au fetch initial affiche… un profil vide indistinguable d'un nouveau compte, avec `data = defaultData`. L'utilisateur croit avoir tout perdu. | Bloquant | `try/catch` + état `loadError` + UI d'erreur distinct du skeleton, bouton « Réessayer » (identique au correctif fait sur `/sits`). |
+| **Onglets « optionnels » (`gallery`, `experiences`, `rules`, `communication`)** — `sectionComplete` renvoie `false` si `essentialsForSection.length === 0` (cas des sections 100% bonus), mais le rendu impose `s.optional ? false : sectionComplete(...)` → toujours `false`. | Les sections optionnelles restent visuellement « incomplètes » même quand tout est rempli (côté sitter). Côté owner, on a introduit un `optionalDone` basé sur les bonuses mais qui exclut `gallery` (essential côté owner) et fusionne mal. Incohérence entre les deux pages. | Moyen | Unifier la règle : `optionalDone = at least one bonus of that section is ok`. Appliquer côté sitter (`gallery`, `experiences`). |
+| **`emergency_sitter_profiles` non exposé** — la table existe (`useful-context` en fait mention) et l'UI a un `EmergencyBadge`, mais rien dans `SitterProfile` ne permet d'y basculer. | Fonction annoncée mais orpheline dans le profil. | Moyen | Ajouter une sous-section « Gardien secours » (toggle + tarif horaire) dans l'onglet `mobility` ou `sitter`. |
+| **Section « Skills » et `competences_disponible`** — champ persisté côté sitter et owner mais absent de la sidebar/jauge, absent des `missingFields`. | Fonction critique de « petites missions » réglable sans indication de complétion. | Cosmétique | Ajouter comme bonus 5 pts si `available_for_help === true`, hint « Activez pour recevoir des petites missions ». |
+| **Réactivité mobile — bouton `<span>` sous l'avatar** (StepIdentity l. 56-62, OwnerStepIdentity l. 105). | Le libellé « Modifier votre photo de profil » n'est pas cliquable ; seul l'avatar l'est. Peu accessible pour tap tactile. | Cosmétique | Wrapper le `<span>` dans le `<button>` ou ajouter un vrai bouton lié à `fileRef.current?.click()`. |
+| **Sticky bar mobile désactivée sur owner à 100%** — `OwnerProfile.tsx` l. 367 : `${(!dirty && !saving && !saved) ? (liveScore >= 100 ? "hidden" : "md:hidden") : ""}`. Sitter n'a pas ce garde-fou (l. 451). | Comportement asymétrique : la barre disparaît à 100% chez owner, reste visible chez sitter. | Cosmétique | Harmoniser (idéalement : la barre disparaît quand `liveScore>=100 && !dirty` pour les deux rôles). |
+| **`nextSection` linéaire sans skip** — bouton « Suivant » (l. 424 sitter, l. 340 owner) avance à `SECTIONS_META[currentIndex + 1]`, sans sauter les sections déjà complétées (contrairement au commentaire owner l. 255-257 qui l'annonce). | Un utilisateur qui revient éditer sa section 1 doit re-cliquer 6 fois pour retrouver Skills. | Cosmétique | Filtrer `nextSection` sur `!s.complete` (respecter le commentaire), ou renvoyer à la première section incomplète. |
+| **`useUnsavedChanges(dirty)` global** — bloque la navigation mais aussi la fermeture d'onglet. Aucun bouton « Effacer les brouillons » visible en dehors du `ScoreBreakdown.onReset` (rarement ouvert). | Utilisateur qui a un draft d'il y a 3 jours à cause d'un save échoué n'a pas de sortie évidente. | Cosmétique | Bouton « Ignorer les modifications » dans la sticky bar quand `dirty`, à côté de « Enregistrer ». |
+| **RLS / sécurité** — tous les `update` scopés `.eq('id', user.id)` ou `.eq('user_id', user.id)` + RLS. Draft localStorage scopé `user.id`. Bucket `avatars` public. | Rien de critique. Chemin `${user.id}/avatar-<ts>.ext` avec `upsert: false` → doublons possibles mais bénins. | Cosmétique | `upsert: true` avec un path fixe `${user.id}/avatar.<ext>` évite les objets orphelins. |
+| **Doubles requêtes `refreshCompletion` + `refreshProfile`** — `refreshProfile` (AuthContext) recharge déjà `profile_completion`, `refreshCompletion` re-le lit ensuite. | Requête dupliquée après chaque save. | Cosmétique | Retirer `refreshCompletion` post-save et lire `profileCompletion` depuis le contexte. |
+| **StepProgress orphelin** — `src/components/profile/StepProgress.tsx` définit un composant qui consomme `missingFields`, jamais monté (remplacé par ProfileSidebar). | Code mort. | Cosmétique | Supprimer le composant. |
 
-`getEffectiveStatus` (l. 95–112) :
-- ligne 96 : `if (sit.status === 'cancelled') return 'cancelled'` → **retourne `'cancelled'`, jamais `'expired'`** pour ce cas.
-- La branche `return 'expired'` (l. 99–101) n'est atteinte QUE si `status ∈ ['published','draft']`. Après la mutation ligne 210, cette branche est morte pour ce sit.
+---
 
-Résultat : la valeur `'expired'` définie dans `SIT_STATUS_CONFIG` (l. 52) n'est jamais réellement écrite en base et n'est renvoyée par `getEffectiveStatus` que pour des sits transitoires (avant mutation ou drafts jamais publiés). L'unique source de vérité de l'expiration est le duo `status='cancelled' + cancellation_reason='expired'`.
+## 3 correctifs prioritaires
 
-### Cas B — brouillon jamais publié dont l'end_date est passée (`status='draft'`)
+1. **Aligner le barème client sur la RPC serveur** : ajouter le critère d'affinité manquant côté `scoredCriteria` (sitter et owner) et corriger la règle `postal_code` pour les comptes non-FR. Objectif : une seule source de vérité, `liveScore ≡ profile_completion` à ±0 pt, cohérent avec les nudges `profile_incomplete` et le tri sur le dashboard.
+2. **Fiabiliser fetch et mutations** : `try/catch` sur `fetchData` (sitter + owner) avec état d'erreur distinct + bouton Réessayer ; debouncer `onNoteChange` sur `OwnerStepAnimals` (aujourd'hui = 1 requête par lettre) et ajouter validation client de l'avatar (type/poids ≤ 5 MB) avec message actionnable — mêmes principes que le correctif appliqué à `/sits`.
+3. **Réparer le TrustProfile** : lire réellement `email_confirmed_at` et calculer `hasFirstActivity` (annonce publiée / garde terminée). Sans ça, le pilier confiance est structurellement plafonné à 3-4/5, ce qui contredit le message de la page.
 
-- Aucune mutation : l'auto‑expire (l. 206) filtre uniquement `status='published'`. Le brouillon reste `status='draft'` en base.
-- `getEffectiveStatus` (l. 99) : `status='draft'` + `end_date<now` → **retourne `'expired'`**.
-- Divergence : `sit.status='draft'` mais `sit.effectiveStatus='expired'`.
-
-## 2. Bucketing d'onglets (owner)
-
-Prédicats (l. 396–406) :
-
-```
-wasUnpublished(s) = s.status==='draft' && !!s.unpublished_at
-isArchived(s)     = es==='completed'
-                  || (s.status==='cancelled' && cancellation_reason ∈ {'archived','expired'})
-                  || wasUnpublished(s)
-```
-
-Filtres onglets (l. 441–455) :
-
-```
-drafts   : es==='draft' && !isArchived
-archived : isArchived
-active   : !isArchived && es !== 'draft'
-```
-
-### Où atterrissent les annonces expirées ?
-
-- **Cas A (publiée→expirée)** : `status='cancelled'` + `cancellation_reason='expired'` → `isArchived=true` → onglet **Archivées** ✓. Le rendu (l. 753–761) force `effectiveStatus='expired'` uniquement dans cet onglet, donc le badge affiché est bien « Expirée ». **Hors onglet archived**, `effectiveStatus='cancelled'` → badge « Annulée » (label incorrect si affiché ailleurs, ex. recherche globale, cartes croisées).
-- **Cas B (draft jamais publié + end_date passée)** : `es='expired'`, `isArchived=false` (pas de `unpublished_at`, pas de `cancellation_reason`).
-  - `drafts` : `es==='draft'` faux → **exclu des Brouillons**.
-  - `archived` : faux → **exclu des Archivées**.
-  - `active` : `!isArchived && es!=='draft'` → vrai → **atterrit dans Actives** avec badge « Expirée ». Comptage `ownerTabCounts` (l. 429–439) : le sit tombe dans `else` (ni archived ni `es==='draft'`) → incrémente `counts.active`. Incohérent avec l'intention.
-
-## 3. Confusion `unpublished` / `draft` / `expired` / `cancelled+expired`
-
-- `SIT_STATUS_CONFIG` (l. 52–53) déclare les libellés `expired` et `unpublished`, mais **aucune de ces valeurs n'existe dans `sits.status` en base**. Ce sont des pseudo‑statuts calculés :
-  - `expired` = calculé par `getEffectiveStatus` OU forcé dans le rendu archived (l. 758–759).
-  - `unpublished` = calculé via `wasUnpublished` (`status='draft'` + `unpublished_at`), forcé dans le rendu archived (l. 756–757).
-- La conséquence directe : la même valeur `status='draft'` couvre deux réalités opposées — vrai brouillon (jamais publié) et annonce dépubliée (archivée). Le distingueur est `unpublished_at`. Toute vue qui lit `status='draft'` sans regarder `unpublished_at` classera à tort une dépubliée comme brouillon.
-- Pour l'expiration Cas A, la même ambiguïté existe : `status='cancelled'` couvre annulation manuelle, archivage manuel, et expiration automatique — le distingueur est `cancellation_reason`.
-
-### Pourquoi l'utilisateur peut voir une expirée « comme un brouillon »
-
-Le bucketing owner actuel **n'envoie pas** une expirée en onglet Brouillons stricto sensu. Mais deux failles produisent la perception :
-
-1. **Cas B (draft abandonné, end_date passée)** : le sit disparaît de l'onglet Brouillons alors même que `status='draft'` en base, et réapparaît dans Actives avec badge « Expirée ». L'owner qui cherche son ancien projet ne le trouve pas dans Brouillons → perçoit une incohérence de traitement. Symétriquement, si l'utilisateur regarde la donnée brute (ou une autre surface qui filtre sur `status='draft'` sans `getEffectiveStatus`), elle est classée « brouillon ».
-2. **Cas A hors onglet Archivées** : `effectiveStatus='cancelled'` renvoie badge « Annulée ». Nulle part on ne voit « Expirée » sauf dans l'onglet Archivées, ce qui masque l'état réel du cycle de vie.
-
-De plus, `handleRepublish` (l. 377–388) republie en `status='published'` sans reculer `end_date` ni `start_date` : republier une expirée dont les dates sont passées la remet immédiatement en cycle → re‑expiration au prochain `loadSits`. Effet secondaire visible : l'annonce « oscille » entre Archivées et Actives.
-
-## 4. État‑cible et correctif minimal (aucune modification appliquée)
-
-**Objectif** : une annonce dont l'end_date est passée sans gardien retenu doit être clairement « annonce passée / expirée », consultable et republicable, distincte des brouillons et des annulations manuelles.
-
-### Correctif minimal proposé (option la moins invasive)
-
-Garder le pattern existant `status='cancelled' + cancellation_reason='expired'` comme marqueur DB, mais rendre `'expired'` first‑class au niveau `effectiveStatus` et étendre l'auto‑expire aux drafts.
-
-1. **`getEffectiveStatus` (l. 95–112)** — Inverser l'ordre des tests : détecter `cancellation_reason==='expired'` AVANT le retour `'cancelled'`. Résultat : toute annonce expirée renvoie `'expired'` partout, plus seulement dans l'onglet Archivées.
-
-   ```
-   if (sit.cancellation_reason === 'expired') return 'expired';
-   if (sit.status === 'cancelled') return 'cancelled';
-   ```
-
-2. **Auto‑expire (l. 205–215)** — Étendre le filtre aux drafts jamais publiés dont l'end_date est passée : `status ∈ ['published','draft']`. La mutation devient uniforme (`status='cancelled', cancellation_reason='expired'`). Cas B disparaît : le draft‑expiré passe en Cas A et donc en Archivées.
-
-3. **Bucketing (l. 396–455)** — Aucun changement structurel requis grâce au (1) : `isArchived` détecte déjà `cancellation_reason='expired'`. La règle des Brouillons `es==='draft' && !isArchived` reste correcte. Le forçage manuel du label dans le rendu archived (l. 753–761) peut être supprimé (devient redondant avec (1)).
-
-4. **`handleRepublish` (l. 377–388)** — Bloquer ou avertir si `end_date < today` : proposer d'ouvrir l'éditeur pour redéfinir les dates avant de repasser en `published`. Évite la re‑expiration immédiate.
-
-### Alternative plus propre (hors scope minimal)
-
-Ajouter `'expired'` à l'enum `sits.status` en base et le poser directement par un cron serveur (extension de `auto-transition-sits`). Supprime la double sémantique de `status='cancelled'` et les pseudo‑statuts calculés. Requiert migration DB + refactor du bucketing et des politiques RLS existantes — à cadrer séparément.
-
-## Récap diagnostic
-
-| Symptôme observé | Cause racine | Localisation |
-| --- | --- | --- |
-| Expirée labellisée « Annulée » hors Archivées | `getEffectiveStatus` retourne `'cancelled'` avant de voir `cancellation_reason='expired'` | l. 96 vs l. 99 |
-| Draft expiré disparaît de Brouillons et apparaît en Actives | Auto‑expire ne cible pas `status='draft'` ; `getEffectiveStatus` remonte `'expired'` mais bucketing Brouillons compare à `'draft'` | l. 206 + l. 448 |
-| `expired`/`unpublished` sont des pseudo‑statuts | Aucune valeur DB, uniquement calculée dans le composant | l. 52–53, 756–759 |
-| Republier une expirée la re‑expire aussitôt | `handleRepublish` ne reset ni `start_date` ni `end_date` | l. 377–388 |
-| Auto‑expire côté client uniquement | Aucun cron/edge function ne gère l'expiration | `auto-transition-sits/index.ts` (absent) |
-
-Aucun fichier n'a été modifié.
+Aucune modification apportée.
