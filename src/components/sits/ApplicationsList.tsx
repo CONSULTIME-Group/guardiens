@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { logger } from "@/lib/logger";
 import { trackEvent } from "@/lib/analytics";
-import FounderBadge from "@/components/badges/FounderBadge";
+
 import AccordDeGarde from "@/components/gardes/AccordDeGarde";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -480,7 +480,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
               <Link to={`/gardiens/${app.sitter_id}`} className="text-base font-semibold text-foreground hover:underline">
                 {sitter?.first_name || "Gardien"}
               </Link>
-              {sitter?.is_founder && <FounderBadge size="sm" />}
+              
             </div>
             <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
               {sitter?.city && (

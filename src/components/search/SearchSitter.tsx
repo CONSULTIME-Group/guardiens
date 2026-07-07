@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
-import FounderBadge from "@/components/badges/FounderBadge";
+
 import ReportButton from "@/components/reports/ReportButton";
 import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
 import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutGrid, Map as MapIcon, Cat, Bird, SlidersHorizontal, ShieldCheck, Crosshair, Bell, BellRing, Loader2, Home, Wrench } from "lucide-react";
@@ -1784,7 +1784,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  <div className="flex-1 min-w-0">
  <div className="flex items-center gap-2 flex-wrap">
  <p className="text-base font-heading font-semibold text-foreground">{member.first_name || "Membre"}</p>
- {member.is_founder && <FounderBadge size="sm" />}
+ 
  {member.has_published_offre && (
  <span className="text-[10px] font-semibold uppercase tracking-wider bg-primary/15 text-primary rounded-full px-2 py-0.5">
   Offre active

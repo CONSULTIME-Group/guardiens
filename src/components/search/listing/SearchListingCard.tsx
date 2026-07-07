@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import FounderBadge from "@/components/badges/FounderBadge";
+
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import AffinityBadge from "@/components/matching/AffinityBadge";
@@ -145,9 +145,6 @@ const SearchListingCard = ({
               Ex.
             </span>
           )}
-          {item.owner?.is_founder && (
-            <div className="absolute top-1.5 right-1.5"><FounderBadge size="sm" /></div>
-          )}
         </div>
 
         <div className="flex flex-1 flex-col p-2.5">
@@ -270,7 +267,6 @@ const SearchListingCard = ({
           <h3 className="font-sans text-[15px] sm:text-[16px] font-medium leading-snug text-foreground line-clamp-2">
             {item.title || "Sans titre"}
           </h3>
-          {item.owner?.is_founder && <div className="shrink-0 pt-0.5"><FounderBadge size="sm" /></div>}
         </div>
 
         {/* Ligne 3 : meta compacte (animaux + dates), petite typo, gris */}
