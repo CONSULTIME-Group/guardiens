@@ -397,8 +397,8 @@ export default function PublicSitterProfile() {
       // Store in local variables before setState.
       // ⚠️ `public_profiles` (vue publique) ne contient PAS `hero_image_index` ,       // on doit donc le merger explicitement depuis `profiles` pour que la
       // sélection manuelle survive au reload.
-      const publicData = profileRes?.data ?? null;
-      const baseData = baseProfileRes?.data ?? null;
+      const publicData = (profileRes?.data as any) ?? null;
+      const baseData = (baseProfileRes?.data as any) ?? null;
       const fetchedPublicProfile = publicData
         ? { ...publicData, hero_image_index: baseData?.hero_image_index ?? null }
         : baseData;
