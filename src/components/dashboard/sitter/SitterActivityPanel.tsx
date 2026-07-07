@@ -29,6 +29,16 @@ const SitterActivityPanel = ({
 
   const nearbyCount = nearbyListings.filter((s) => !s.is_beyond).length;
 
+  const hasNoActivity = completedSits === 0 && pendingAppsCount === 0 && unreadCount === 0 && nearbyCount === 0;
+
+  if (hasNoActivity) {
+    return (
+      <div className="rounded-2xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
+        Profil visible par les propriétaires. Vous serez prévenu dès qu'une garde correspond à votre profil.
+      </div>
+    );
+  }
+
   const tiles = [
     {
       to: "#sitter-availability-toggle",

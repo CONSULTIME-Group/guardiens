@@ -497,6 +497,7 @@ const SitterDashboard = () => {
                 unreadCount={unreadCount}
                 pendingAppsCount={pendingAppsCount}
                 nearbyListings={nearbyListings}
+                completedSits={completedSits ?? 0}
               />
             </div>
 
