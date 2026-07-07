@@ -186,7 +186,34 @@ const STYLE = `
   [data-alma-animated][data-mood="sleepy"] .alma-body-breath { animation-duration: 7.5s; }
   [data-alma-animated][data-mood="sleepy"] .alma-eyelid     { transform: scaleY(0.7); animation: none; }
   [data-alma-animated][data-mood="sleepy"]                  { opacity: 0.88; }
+
+  /* ======== STADES (intensité progressive : plus le stade est avancé,
+     plus la respiration et la queue sont vives, plus le sourire est marqué) ======== */
+  [data-alma-animated][data-stage="nouvelle"] .alma-body-breath { animation-duration: 5.2s; }
+  [data-alma-animated][data-stage="nouvelle"] .alma-tail-base   { animation-duration: 4.2s; }
+
+  [data-alma-animated][data-stage="eveillee"] .alma-body-breath { animation-duration: 4.2s; }
+  [data-alma-animated][data-stage="eveillee"] .alma-tail-base   { animation-duration: 3.4s; }
+
+  [data-alma-animated][data-stage="complice"] .alma-body-breath { animation-duration: 3.4s; }
+  [data-alma-animated][data-stage="complice"] .alma-tail-base   { animation-duration: 2.6s; }
+  [data-alma-animated][data-stage="complice"] .alma-tail-mood   {
+    animation: alma-tail-wag 1.4s ease-in-out infinite;
+  }
+
+  [data-alma-animated][data-stage="fidele"]   .alma-body-breath { animation-duration: 2.8s; }
+  [data-alma-animated][data-stage="fidele"]   .alma-tail-base   { animation-duration: 2.0s; }
+  [data-alma-animated][data-stage="fidele"]   .alma-tail-mood   {
+    animation: alma-tail-wag 0.9s ease-in-out infinite;
+  }
+  [data-alma-animated][data-stage="fidele"]   .alma-ear-l       {
+    animation: alma-ear-perk-l 3.2s ease-in-out infinite;
+  }
+  [data-alma-animated][data-stage="fidele"]   .alma-ear-r       {
+    animation: alma-ear-perk-r 3.2s ease-in-out infinite;
+  }
 }
+
 
 /* Fallback statique : rien à faire, la pose de repos est déjà lisible */
 
