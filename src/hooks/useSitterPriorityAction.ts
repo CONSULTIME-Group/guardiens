@@ -132,9 +132,21 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
 
     // 4b. Annonces hors rayon : NE PAS dupliquer le message,
     // la section Découverte plus bas porte déjà « Annonces ailleurs en France ».
-    // On laisse le cockpit basculer sur disponibilité ou explore.
+    // On laisse le cockpit basculer sur entraide ou disponibilité.
 
-    // 5. Mode dispo OFF — sans ça aucune sollicitation directe
+    // 5. Pas d'annonce proche : entraide first
+    return {
+      variant: "entraide",
+      eyebrow: "À faire maintenant",
+      title: "Rendez un coup de main près de chez vous",
+      description:
+        "C'est ouvert à tous, sans abonnement, et c'est le meilleur moyen de vous faire connaître avant vos premières gardes.",
+      ctaLabel: "Voir les coups de main",
+      ctaTo: "/petites-missions",
+      urgency: "medium",
+    };
+
+    // 6. Mode dispo OFF — sans ça aucune sollicitation directe
     if (!isAvailable) {
       return {
         variant: "availability",
@@ -147,14 +159,15 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
       };
     }
 
-    // 6. Fallback — explorer
+    // 7. Fallback — tout est prêt
     return {
       variant: "explore",
-      eyebrow: "Tout est en ordre",
-      title: "Explorez les annonces de gardes près de chez vous.",
-      description: "De nouvelles opportunités sont publiées chaque jour.",
-      ctaLabel: "Parcourir les annonces",
-      ctaTo: "/search",
+      eyebrow: "Tout est prêt",
+      title: "Vous êtes visible par les propriétaires",
+      description:
+        "Dès qu'une garde correspond à votre profil, vous êtes prévenu. En attendant, l'entraide reste le meilleur moyen de rester actif.",
+      ctaLabel: "Voir les coups de main",
+      ctaTo: "/petites-missions",
       urgency: "low",
     };
   }, [input.nextGuard, input.profileCompletion, input.postalCode, input.nearbyListings, input.isAvailable]);
