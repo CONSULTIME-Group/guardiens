@@ -9,9 +9,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, renderHook, act, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AlmaProvider, useAlma } from "@/contexts/AlmaContext";
 import { AlmaFirstMeeting } from "@/components/ai/alma/AlmaFirstMeeting";
 import { WelcomeBackDigest } from "@/components/ai/alma/WelcomeBackDigest";
+
 
 // AuthContext : user connecté en mode sitter
 vi.mock("@/contexts/AuthContext", () => ({
