@@ -13,6 +13,7 @@ import {
   AlmaWhisper,
   AlmaWhisperType,
   FREQUENCY_CONFIG,
+  CULTURAL_FACT_LIMITS,
   AlmaFrequency,
   WHISPER_PRIORITY,
 } from "./whisper-types";
@@ -21,7 +22,10 @@ export interface SchedulerState {
   frequency: AlmaFrequency;
   emittedCount: number;
   lastEmittedAt: number | null;
-  sessionMuted: boolean; // true après 2 dismiss volontaires dans la session
+  /** Compteur dédié aux faits culturels P3 : cadence indépendante des actionnables. */
+  culturalEmittedCount: number;
+  culturalLastEmittedAt: number | null;
+  sessionMuted: boolean; // true après N dismiss volontaires (seuil selon fréquence)
   dismissedInSession: number;
   blacklistedTypes: Set<AlmaWhisperType>;
   lastDismissedAt: number | null;
@@ -29,7 +33,20 @@ export interface SchedulerState {
 }
 
 export const DISMISS_COOLDOWN_MS = 15 * 60 * 1000;
-export const SESSION_MUTE_THRESHOLD = 2;
+
+/**
+ * Seuil de mute automatique après fermetures volontaires successives.
+ * Modulé par la fréquence : plus l'utilisateur a demandé de présence, plus
+ * il faut de dismissals explicites avant de couper la session.
+ */
+export const SESSION_MUTE_THRESHOLD_BY_FREQUENCY: Record<AlmaFrequency, number> = {
+  silent: 1,
+  low: 2,
+  balanced: 4,
+  talkative: 6,
+};
+/** Rétro-compatibilité tests / imports existants. */
+export const SESSION_MUTE_THRESHOLD = SESSION_MUTE_THRESHOLD_BY_FREQUENCY.balanced;
 
 export function makeInitialState(
   frequency: AlmaFrequency = "balanced",
@@ -39,6 +56,8 @@ export function makeInitialState(
     frequency,
     emittedCount: 0,
     lastEmittedAt: null,
+    culturalEmittedCount: 0,
+    culturalLastEmittedAt: null,
     sessionMuted: false,
     dismissedInSession: 0,
     blacklistedTypes: new Set(blacklisted),
@@ -57,13 +76,19 @@ export function canEmit(
   type: AlmaWhisperType,
   now: number = Date.now(),
 ): CanEmitResult {
-  const cfg = FREQUENCY_CONFIG[state.frequency];
+  const isCultural = type === "cultural_fact";
+  const cfg = isCultural
+    ? CULTURAL_FACT_LIMITS[state.frequency]
+    : FREQUENCY_CONFIG[state.frequency];
   if (cfg.maxPerSession === 0) return { ok: false, reason: "silent" };
   if (state.sessionMuted) return { ok: false, reason: "muted" };
   if (state.blacklistedTypes.has(type)) return { ok: false, reason: "blacklisted" };
-  if (state.emittedCount >= cfg.maxPerSession) return { ok: false, reason: "quota" };
 
-  if (state.lastEmittedAt !== null && now - state.lastEmittedAt < cfg.cooldownMs) {
+  const count = isCultural ? state.culturalEmittedCount : state.emittedCount;
+  const last = isCultural ? state.culturalLastEmittedAt : state.lastEmittedAt;
+
+  if (count >= cfg.maxPerSession) return { ok: false, reason: "quota" };
+  if (last !== null && now - last < cfg.cooldownMs) {
     return { ok: false, reason: "cooldown" };
   }
   if (
@@ -75,6 +100,7 @@ export function canEmit(
   }
   return { ok: true };
 }
+
 
 export function pickNext(
   queue: AlmaWhisper[],
