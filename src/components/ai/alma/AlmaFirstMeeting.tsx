@@ -49,9 +49,19 @@ interface Props {
 
 export function AlmaFirstMeeting({ role, onDone }: Props) {
   const navigate = useNavigate();
+  const { claimProactiveSurface, releaseProactiveSurface } = useAlma();
   const seenFiredRef = useRef(false);
   const copy = COPY[role];
   const [mood, setMood] = useState<AlmaMood>("happy");
+
+  // Verrou : FirstMeeting claim la surface au montage, la garde jusqu'au démontage.
+  // Priorité maximale : déloge tout whisper ou WelcomeBack déjà en place.
+  useEffect(() => {
+    claimProactiveSurface("first_meeting");
+    return () => {
+      releaseProactiveSurface("first_meeting");
+    };
+  }, [claimProactiveSurface, releaseProactiveSurface]);
 
   useEffect(() => {
     if (seenFiredRef.current) return;
