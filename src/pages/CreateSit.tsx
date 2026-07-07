@@ -1047,7 +1047,28 @@ const CreateSit = () => {
 
           {/* Mot de l'hôte */}
           <div>
-            <Label htmlFor="owner-message" className="text-sm font-medium">Un mot de vous <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <Label htmlFor="owner-message" className="text-sm font-medium">Un mot de vous <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
+              {(() => {
+                const parts: string[] = [];
+                if (ownerBio) parts.push(ownerBio);
+                if (ownerProfile?.welcome_notes) parts.push(ownerProfile.welcome_notes);
+                const seed = parts.join("\n\n");
+                if (!seed) return null;
+                return (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (ownerMessage.trim() && !window.confirm("Remplacer le texte actuel par les éléments de votre profil ?")) return;
+                      setOwnerMessage(seed.slice(0, 800));
+                    }}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Reprendre depuis mon profil
+                  </button>
+                );
+              })()}
+            </div>
             <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">
               Un message personnel aux futurs gardiens, ce qu'ils trouveront en arrivant, ce que vous appréciez, une touche humaine.
             </p>
