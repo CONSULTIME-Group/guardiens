@@ -281,7 +281,9 @@ export function AlmaDock() {
   // et affiche un repli bienveillant si tout a déjà été vu.
   const askForTip = useCallback(
     (source: "popover" | "proposition") => {
-      trackEvent("alma_tip_requested_on_demand", { metadata: { source } });
+      trackEvent("alma_whisper_action_clicked", {
+        metadata: { whisper_type: "on_demand_tip", action_id: `on_demand_${source}` },
+      });
       void requestNextTip({
         surface: surfaceFromPath(location.pathname, activeRole),
         preferNudge: false,
