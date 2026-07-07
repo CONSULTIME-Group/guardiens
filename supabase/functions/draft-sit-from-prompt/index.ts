@@ -132,7 +132,9 @@ Si le prompt mentionne un prix ou une transaction financière, ignorez-le : Guar
       end_date: parsed.end_date && /^\d{4}-\d{2}-\d{2}$/.test(parsed.end_date) ? parsed.end_date : null,
       flexible_dates: !!parsed.flexible_dates,
       city: clean(parsed.city) || profile?.city || null,
-      environments: Array.isArray(parsed.environments) ? parsed.environments.map(clean).filter(Boolean).slice(0, 3) : [],
+      environments: Array.isArray(parsed.environments)
+        ? parsed.environments.map((v: unknown) => String(v ?? "").toLowerCase().trim()).filter((v: string) => (ALLOWED_ENVIRONMENTS as readonly string[]).includes(v)).slice(0, 3)
+        : [],
       open_to: Array.isArray(parsed.open_to) ? parsed.open_to.map(clean).filter(Boolean).slice(0, 4) : [],
       specific_expectations: clean(parsed.specific_expectations),
       daily_routine: clean(parsed.daily_routine),
