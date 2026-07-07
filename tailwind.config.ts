@@ -146,8 +146,12 @@ export default {
           "100%": { transform: "scale(1)", opacity: "1" },
         },
         "alma-breathe": {
-          "0%,100%": { transform: "scale(1)" },
-          "50%": { transform: "scale(1.03)" },
+          "0%,100%": { transform: "scale(1) rotate(-2deg)" },
+          "50%": { transform: "scale(1.03) rotate(2deg)" },
+        },
+        "alma-sway": {
+          "0%,100%": { transform: "rotate(-3deg) translateY(0)" },
+          "50%": { transform: "rotate(3deg) translateY(-2px)" },
         },
       },
       animation: {
