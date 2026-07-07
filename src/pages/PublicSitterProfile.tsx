@@ -1821,10 +1821,13 @@ export default function PublicSitterProfile() {
 
             {/* Onglet À propos */}
             <TabsContent value="apropos" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 pb-4 space-y-5">
-              {/* Description propriétaire */}
-              {ownerProfile?.description ? (
-                <div>
-                  <p className="text-sm text-foreground leading-relaxed font-body whitespace-pre-line">{ownerProfile.description}</p>
+              {/* Présentation propriétaire : priorité au mot d'accueil owner_profiles, repli sur la bio générale. */}
+              {ownerProfile?.welcome_notes ? (
+                <div className="space-y-2">
+                  <p className="text-sm text-foreground leading-relaxed font-body whitespace-pre-line">{ownerProfile.welcome_notes}</p>
+                  {bio && bio !== ownerProfile.welcome_notes && (
+                    <p className="text-sm text-foreground/70 leading-relaxed font-body whitespace-pre-line">{bio}</p>
+                  )}
                 </div>
               ) : bio ? (
                 <p className="text-sm text-foreground/75 leading-relaxed font-body whitespace-pre-line">{bio}</p>
