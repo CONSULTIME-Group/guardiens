@@ -445,7 +445,7 @@ export function useSitterProfile() {
 
     // 1) Validation client (type + poids) alignée sur le bucket `avatars`.
     const check = validateAvatarFile(file);
-    if (!check.ok) {
+    if (check.ok === false) {
       toast({ variant: "destructive", title: "Photo refusée", description: check.reason });
       return null;
     }
