@@ -115,18 +115,19 @@ const STYLE = `
   --alma-shadow: rgba(20, 15, 10, 0.22);
 }
 [data-alma-animated] .alma-part { transform-box: fill-box; transform-origin: center; }
-[data-alma-animated] .alma-head-sway  { transform-origin: 50% 68%; }
-[data-alma-animated] .alma-head-mood  { transform-origin: 50% 68%; }
+[data-alma-animated] .alma-head-sway  { transform-origin: 50% 78%; }
+[data-alma-animated] .alma-head-mood  { transform-origin: 50% 78%; }
 [data-alma-animated] .alma-body-breath{ transform-origin: 50% 92%; }
 [data-alma-animated] .alma-body-mood  { transform-origin: 50% 92%; }
-[data-alma-animated] .alma-ear-l      { transform-origin: 78% 12%; }
-[data-alma-animated] .alma-ear-r      { transform-origin: 22% 12%; }
-[data-alma-animated] .alma-tail-base  { transform-origin: 14% 92%; }
-[data-alma-animated] .alma-tail-mood  { transform-origin: 14% 92%; }
+[data-alma-animated] .alma-ear-l      { transform-origin: 50% 10%; }
+[data-alma-animated] .alma-ear-r      { transform-origin: 50% 10%; }
+[data-alma-animated] .alma-tail-base  { transform-origin: 90% 90%; }
+[data-alma-animated] .alma-tail-mood  { transform-origin: 90% 90%; }
 [data-alma-animated] .alma-eyes       { transform-origin: 50% 50%; }
 [data-alma-animated] .alma-eyelid     { transform-origin: 50% 0%; transform: scaleY(0); }
 [data-alma-animated] .alma-tongue     { transform-origin: 50% 0%; transform: scaleY(0); opacity: 0; }
 [data-alma-animated] .alma-shadow     { transform-origin: 50% 50%; }
+
 
 @media (prefers-reduced-motion: no-preference) {
   /* ======== BASE (toujours actif, toutes humeurs) ======== */
