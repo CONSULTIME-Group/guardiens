@@ -19,6 +19,7 @@ import SitterMobileStickyCTA from "./sitter/SitterMobileStickyCTA";
 import SitterStatusBar from "./sitter/SitterStatusBar";
 import SitterBadgesSection from "./sitter/SitterBadgesSection";
 import NearbyHelpersCarousel from "./shared/NearbyHelpersCarousel";
+import CommunityPulseBanner from "./shared/CommunityPulseBanner";
 import SitterEmergencyCardCompact from "./sitter/SitterEmergencyCardCompact";
 import SitterMissionsSection from "./sitter/SitterMissionsSection";
 import CommunityQuestionsSection from "./CommunityQuestionsSection";
@@ -216,54 +217,83 @@ const SitterDashboard = () => {
   // 3 strates secondaires regroupées dans UN seul Accordion pour densifier
   // le bas de dashboard et clarifier la hiérarchie (1 zone "à explorer"
   // au lieu de 3 cartes empilées). Toutes fermées par défaut.
-  const buildSecondaryAccordion = (opts: { withConseils: boolean }) => (
+  // Zone « À découvrir » visible (pas repliée) : conseils choisis, en cartes.
+  const ConseilsDiscoveryCard = (
+    <section aria-labelledby="discovery-conseils-heading" className="min-w-0">
+      <div className="flex items-center gap-2 mb-2">
+        <span className="inline-flex items-center rounded-full bg-info/10 text-info text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5">
+          À découvrir
+        </span>
+      </div>
+      <h2
+        id="discovery-conseils-heading"
+        className="font-heading text-lg sm:text-xl font-bold text-foreground leading-tight mb-3"
+      >
+        {articles.length > 0
+          ? "Lectures choisies pour vos premières gardes"
+          : "Explorez les ressources de la communauté"}
+      </h2>
+      {articles.length > 0 ? (
+        <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+          {articles.map((a: any) => (
+            <Link
+              key={a.id}
+              to={`/actualites/${a.slug}`}
+              className="group/card flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 ease-out cursor-pointer"
+            >
+              {a.cover_image_url ? (
+                <div className="w-full h-28 overflow-hidden">
+                  <img
+                    src={getOptimizedImageUrl(a.cover_image_url, 300, 75)}
+                    alt={a.title || "Article"}
+                    className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover/card:scale-105"
+                    width={300}
+                    height={112}
+                    loading="lazy"
+                  />
+                </div>
+              ) : (
+                <div className="w-full h-28 bg-accent flex items-center justify-center">
+                  <Newspaper className="h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
+                </div>
+              )}
+              <div className="p-3">
+                <h3 className="text-sm font-semibold line-clamp-2 transition-colors group-hover/card:text-primary">
+                  {a.title}
+                </h3>
+                <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{a.excerpt}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      ) : null}
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Link
+          to="/races"
+          className="inline-flex items-center rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:border-primary hover:text-primary transition-colors"
+        >
+          Fiches races
+        </Link>
+        <Link
+          to="/guides"
+          className="inline-flex items-center rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:border-primary hover:text-primary transition-colors"
+        >
+          Guides pratiques
+        </Link>
+        <Link
+          to="/actualites"
+          className="inline-flex items-center rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:border-primary hover:text-primary transition-colors"
+        >
+          Tous les conseils
+        </Link>
+      </div>
+    </section>
+  );
+
+  const buildSecondaryAccordion = () => (
     <section aria-label="Mon espace gardien, détails" className="rounded-2xl border border-border bg-card overflow-hidden">
       <Accordion type="single" collapsible defaultValue={completedSits > 0 ? "reputation" : undefined}>
-        {opts.withConseils && (
-        <AccordionItem value="conseils" className="border-b border-border last:border-0">
-          <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
-            <div className="flex flex-col items-start text-left">
-              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
-                Conseils
-              </p>
-              <p className="text-sm font-medium text-foreground">
-                {articles.length > 0
-                  ? "Lectures choisies pour vos premières gardes"
-                  : "Bientôt de nouveaux conseils"}
-              </p>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4 pt-1">
-            {articles.length > 0 ? (
-              <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-                {articles.map((a: any) => (
-                  <Link key={a.id} to={`/actualites/${a.slug}`} className="group/card flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 ease-out cursor-pointer">
-                    {a.cover_image_url ? (
-                      <div className="w-full h-28 overflow-hidden">
-                        <img src={getOptimizedImageUrl(a.cover_image_url, 300, 75)} alt={a.title || "Article"} className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover/card:scale-105" width={300} height={112} loading="lazy" />
-                      </div>
-                    ) : (
-                      <div className="w-full h-28 bg-accent flex items-center justify-center">
-                        <Newspaper className="h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
-                      </div>
-                    )}
-                    <div className="p-3">
-                      <h4 className="text-sm font-semibold line-clamp-2 transition-colors group-hover/card:text-primary">{a.title}</h4>
-                      <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{a.excerpt}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-2">
-                <p className="text-sm text-muted-foreground italic">
-                  De nouveaux conseils arrivent prochainement.
-                </p>
-              </div>
-            )}
-          </AccordionContent>
-        </AccordionItem>
-        )}
+
 
         <AccordionItem value="reputation" className="border-b border-border last:border-0">
           <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
@@ -432,6 +462,11 @@ const SitterDashboard = () => {
               />
             )}
 
+            {/* Pouls de la communauté : chiffres réels et vivants. */}
+            <div className="px-4 sm:px-5 md:px-8 mt-4">
+              <CommunityPulseBanner userId={user?.id} />
+            </div>
+
             {/* Bannière accès (garde le contexte tarif/onboarding) */}
             <div className="px-4 sm:px-5 md:px-8 mt-4">
               {!(level === 4 || level === "3B")
@@ -443,11 +478,18 @@ const SitterDashboard = () => {
               {ChecklistBlock}
             </div>
             <div className="px-4 sm:px-5 md:px-8 mt-4">
+              <NearbyHelpersCarousel hideHeader />
+            </div>
+            <div className="px-4 sm:px-5 md:px-8 mt-6">
+              {ConseilsDiscoveryCard}
+            </div>
+            <div className="px-4 sm:px-5 md:px-8 mt-4">
               <EmailDigestCard />
             </div>
             <div className="px-4 sm:px-5 md:px-8 mb-6">
-              {buildSecondaryAccordion({ withConseils: true })}
+              {buildSecondaryAccordion()}
             </div>
+
           </>
         ) : (
           <>
@@ -500,6 +542,11 @@ const SitterDashboard = () => {
               />
             </div>
 
+            {/* Pouls de la communauté : chiffres réels et vivants. */}
+            <div className="px-4 sm:px-5 md:px-8 mt-4">
+              <CommunityPulseBanner userId={user?.id} />
+            </div>
+
             {!nextGuard && (
               <div className="px-4 sm:px-5 md:px-8 mt-4">
                 {!(level === 4 || level === "3B")
@@ -514,12 +561,16 @@ const SitterDashboard = () => {
             <div className="px-4 sm:px-5 md:px-8 mb-6">
               {DiscoverySections}
             </div>
+            <div className="px-4 sm:px-5 md:px-8 mb-6">
+              {ConseilsDiscoveryCard}
+            </div>
             <div className="px-4 sm:px-5 md:px-8 mt-4">
               <EmailDigestCard />
             </div>
             <div className="px-4 sm:px-5 md:px-8 mb-6">
-              {buildSecondaryAccordion({ withConseils: true })}
+              {buildSecondaryAccordion()}
             </div>
+
           </>
         )}
       </div>
