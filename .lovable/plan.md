@@ -1,163 +1,124 @@
-## Audit lecture seule, dépôt d'annonce owner
 
-Aucune modification de code. Diagnostic + recommandations.
+# Audit LECTURE SEULE — Profils publics (gardien + propriétaire)
 
----
+## Localisation
 
-### Localisation
+- **Aucune page dédiée propriétaire.** Tout passe par `src/pages/PublicSitterProfile.tsx` (2322 l.) qui unifie gardien / proprio / entraide via `Tabs`.
+- Routes (`src/App.tsx`) :
+  - `/gardiens/:id` → `PublicSitterProfile` (L.315)
+  - `/proprietaires/:id` → `Navigate to /gardiens/:id?tab=proprio` (L.255-258)
+  - `/profil/:id` → `Navigate to /gardiens/:id` (L.249-252)
+  - `/annonces/:id` → `PublicSitDetail` (encart owner via `PublicSitView`)
+- Composants clés : `TrustScore.tsx`, `TrustTimeline.tsx`, `ProfileSchemaOrg.tsx`, `useProfileReputation.ts`, `supabase/functions/og-profile/index.ts`.
 
-| Rôle | Fichier | Lignes clés |
+## A. Profil public PROPRIÉTAIRE
+
+### A1. Pas de page dédiée, seulement `tab=proprio`
+Rendu conditionnel `PublicSitterProfile.tsx:1733-2141`. Si l'utilisateur n'a QUE `owner_profiles` (pas de sitter, pas d'entraide), `availableTabs === 1` et la barre d'onglets est masquée (L.1145) : plus aucun libellé ne dit « profil propriétaire ». Fonctionnel mais désorienté.
+
+### A2. Avec annonces publiées
+Rendu : avatar, prénom, ville, `identity_verified`, `is_founder`, note owner, bio owner, environments, compétences, badges, avis reçus, feedbacks entraide, animaux, galerie proprio, liste annonces (titre + dates + statut).
+
+**Restitution des annonces (onglet Gardes, L.2013-2067) :**
+- `sits` select L.514 = `id, title, start_date, end_date, status, created_at`.
+- Aucun `description`, `owner_message`, `environments`, `city`, `cover_photo` — donc les correctifs récents de la fiche annonce ne sont PAS reflétés sur le profil.
+- **Aucun lien cliquable** vers `/annonces/:id` : le visiteur ne peut pas ouvrir une annonce depuis le profil.
+
+### A3. Sans annonce publiée
+Empty states corrects : « Aucune garde publiée pour l'instant » (L.2065), animaux (L.1994), avis (L.1904), galerie masquée si vide (L.1796). Non cassé, mais très pauvre : seul l'encart présentation reste riche.
+
+### A4. Cohérence saisie → restitution (bug bloquant)
+`owner_profiles` select L.368-371 = `id, user_id, environments, competences, competences_disponible`. **`description` est absente du select** → `ownerProfile.description` est toujours `undefined`, le rendu retombe sur `profile.bio` (L.1810). Le mot rédigé dans « Mon profil propriétaire » n'apparaît JAMAIS sur le profil public.
+
+**Champs owner_profiles saisis mais jamais restitués publiquement** :
+`property_type`, `presence_expected`, `visits_allowed`, `overnight_guest`, `smoker_accepted`, `rules_notes`, `welcome_notes`, `news_frequency`, `news_format`, `meeting_preference`, `handover_preference`, `experience_required`, `specific_expectations`, `home_ambiance`, `languages`, `interests`, `life_pace`.
+
+## B. Profil public GARDIEN
+
+### B1. Ce que voit le visiteur
+Hero illustré (L.850-1109), avatar + statut_gardien (novice/confirmé/super, L.944), prénom + FounderBadge + ProBadge + FavoriteButton + note (L.981), ville + tarif indicatif, badges Identité vérifiée / Abonné / Fondateur / Gardien secours (L.1019-1048), TrustScore, AlmaFitGardien, 4 tuiles rapides, CTA Contacter, sous-onglets À propos / Avis / Pratique / Galerie / Confiance (L.1398-1557 desktop, **dupliqués L.1562-1688 mobile ~170 lignes**). Expériences externes, TrustTimeline, badges missions, ReplyTimeBadge.
+
+### B2. Champs sitter — écarts
+Tous les champs sitter_profiles pertinents sont rendus. Seul `accept_unsolicited_pitches` n'est pas exposé publiquement (usage serveur uniquement, normal).
+
+### B3. Profil incomplet / nouveau / sans avis
+Bien géré : « Nouveau profil » (L.1335), « n'a pas encore rédigé de présentation » (L.1453), onglets Avis / Galerie masqués si vides, stats « Pas encore noté ». `shouldNoindex=true` (L.735) exclut les profils pauvres des moteurs.
+
+## C. Transverse
+
+### C1. Confiance
+`identity_verified` lu depuis `public_profiles` (L.352). `completed_sits_count` maintenu par trigger DB. `statut_gardien` via view `profile_reputation`. TrustScore purement client (0-100). Le public reflète bien le vrai statut, sauf que la description owner masquée (A4) dégrade artificiellement la richesse perçue.
+
+### C2. Vie privée — fuites
+
+| Donnée | Chargée | Rendue | Risque |
+|---|---|---|---|
+| `last_name` | oui (L.353) | jamais | Chargement inutile, moyen |
+| `postal_code` | oui (L.353) | injecté en JSON-LD `PostalAddress` (L.795) | CP complet crawlable, moyen (RGPD) |
+| `public_profiles.*` | select("*") L.352 | large | À réduire |
+| `sitter_gallery.*` | select("*") L.364 | 2 colonnes utilisées | À réduire |
+| email, téléphone, adresse exacte | non chargés | — | OK |
+
+`PublicSitDetail.tsx` charge correctement un select restreint (L.92) et n'expose pas le CP en HTML visible.
+
+### C3. États
+- Loading : skeleton minimal (L.625-639) — pas de skeleton complet pour les tuiles.
+- 404 : `!profile && !ownerProfile` → écran simple (L.641-652).
+- **Erreur réseau : PAS de try/catch autour de `load()` → l'exception non catchée laisse `loading=false, profile=null` et affiche « Profil introuvable » pour un profil qui existe** (pattern déjà présent dans PublicSitDetail L.252-303, non repris ici).
+- Mobile ≤400px : classes responsive OK.
+
+### C4. Typographie / emojis
+- `font-mono` résiduel sur la date de la timeline (`TrustTimeline.tsx:99`) — incongruent.
+- Bandes déco avec `fontFamily: 'sans-serif'` inline (L.822, 826) au lieu du token CSS.
+- Aucun emoji dans le contenu visible (🐾 uniquement dans le SVG og-profile).
+
+### C5. Bugs, code mort, N+1
+- **20 requêtes supabase** réparties sur 3 useEffects, sans `useQuery` (pas de cache, re-fetch à chaque changement de tab).
+- `hydrateReviewers` (L.414, L.533) : risque N+1 selon implémentation batch.
+- Duplication desktop/mobile des sous-onglets gardien : ~170 lignes (L.1380-1689) → deux sources de vérité.
+- Onglet proprio : lightbox absente (hover CSS uniquement) alors que la galerie sitter en a une (L.597-604).
+- Annonces owner : select tronqué + pas de lien vers la fiche annonce.
+
+### C6. SEO / partage
+
+| Aspect | État | Verdict |
 |---|---|---|
-| Page de création | `src/pages/CreateSit.tsx` | 1550 L, orchestrateur complet |
-| Étapes formulaire | même fichier | 793 (Step 0), 1046 (Step 1), 1155 (Step 2) |
-| Concierge IA | `src/components/dashboard/SitDraftFromPrompt.tsx` + edge `supabase/functions/draft-sit-from-prompt/index.ts` | proposition de brouillon depuis 1 phrase |
-| Aperçu avant publication | `src/components/sits/owner/AnnouncementPreviewDialog.tsx` | 188 L |
-| Reprise de brouillon | `src/components/dashboard/DraftResumeCard.tsx` | dashboard owner |
-| Fiche publique (visiteur) | `src/pages/PublicSitDetail.tsx` + `src/components/sits/PublicSitView.tsx` | 788 L de rendu |
-| Fiche owner (post-publish, `/sits/:id`) | `src/pages/SitDetail.tsx` → `src/components/sits/views/OwnerSitView.tsx` + `SitImmersiveContent.tsx` | rendu immersif |
+| `<title>` dynamique | L.714-716 (≤60 chars) | OK |
+| `<meta description>` | L.726 (≤160 chars) | OK |
+| Canonical | passé via `PageMeta` (pas d'`<link canonical>` explicite Helmet) | À vérifier |
+| **og:image** | `profile.avatar_url` (L.833) — **edge function `og-profile` NON branchée** | Bloquant partage |
+| **`og-profile` edge function** | Retourne `image/svg+xml` (L.174) | **Bloquant : Facebook/LinkedIn/WhatsApp rejettent SVG** |
+| JSON-LD Person + Service + AggregateRating | `ProfileSchemaOrg.tsx` | Solide |
+| noindex profils pauvres | L.735 | Bonne pratique |
 
----
+## Tableau Zone | Problème | Sévérité | Correctif
 
-### 1. Deux styles d'écriture : diagnostic
+| # | Zone | Problème | Sévérité | Correctif proposé |
+|---|---|---|---|---|
+| 1 | Owner public | `owner_profiles.description` absent du SELECT (L.368-371) → jamais rendue | **Bloquant** | Ajouter `description` à la liste des colonnes |
+| 2 | Owner public | Annonces sans lien vers `/annonces/:id`, select `sits` tronqué (L.514) | Moyen | Ajouter `<Link>` sur chaque carte + `slug` au select |
+| 3 | Owner public | 17 champs owner_profiles saisis jamais restitués (règles, welcome_notes, life_pace, langues…) | Moyen | Sélectionner et rendre au moins welcome_notes, rules_notes, languages, life_pace |
+| 4 | Owner public | Onglet unique proprio → barre masquée, aucun titre de section | Moyen | Afficher `<h2>Profil Propriétaire</h2>` quand tab unique |
+| 5 | Owner public | Galerie proprio sans lightbox (hover CSS seul) | Cosmétique | Réutiliser l'état lightbox existant |
+| 6 | Sitter public | Duplication desktop/mobile des sous-onglets (~170 lignes) | Moyen | Extraire `<SitterTabContent>` partagé |
+| 7 | Transverse | Pas de try/catch autour de `load()` → « Profil introuvable » sur erreur réseau | **Bloquant** | try/catch + état `loadError` + bouton Réessayer (pattern PublicSitDetail) |
+| 8 | Transverse | 20 requêtes supabase sans cache, re-fetch au changement de tab | Moyen | Migrer vers `useQuery` avec `staleTime` |
+| 9 | Perf | N+1 potentiel dans `hydrateReviewers` | Moyen | Vérifier batch, sinon `.in()` unique |
+| 10 | Privacy | `last_name` chargé mais jamais rendu | Moyen | Retirer du select |
+| 11 | Privacy | `postal_code` complet dans JSON-LD `PostalAddress` (L.795) | Moyen (RGPD) | Passer seulement les 2 premiers chiffres ou omettre |
+| 12 | Privacy | `public_profiles.*` et `sitter_gallery.*` en `select("*")` | Moyen | Sélects explicites |
+| 13 | SEO/partage | `og-profile` retourne `image/svg+xml` — rejeté par FB/LinkedIn/WhatsApp | **Bloquant SEO** | Convertir en PNG (Resvg-wasm ou Deno canvas) |
+| 14 | SEO/partage | `og-profile` jamais appelé — og:image = avatar rond | Moyen | Brancher `og-profile?id=<id>` (conditionné à profil riche) |
+| 15 | Typo | `font-mono` résiduel dans TrustTimeline.tsx:99 | Cosmétique | Remplacer par `font-body` |
+| 16 | Typo | `fontFamily: 'sans-serif'` inline (L.822, 826) au lieu du token | Cosmétique | Utiliser var CSS |
+| 17 | UX | Annonces owner ne reprennent pas les corrections récentes (description, owner_message, environments, city) | Moyen | Lien vers fiche annonce (voir #2) |
 
-**C'est les DEUX, typographique + éditorial.**
+## Top 5 correctifs prioritaires
 
-**Typographique (rupture principale, spectaculaire) :**
-- `CreateSit.tsx:1018` — le textarea « Une journée type » est stylé `font-mono text-[13px]`, seule zone du formulaire en **monospace**. Tous les autres champs (titre, description, mot de vous) sont en Outfit sans-serif. Le propriétaire tape la routine « comme du code », puis voit son rendu en serif/sans → sensation d'incohérence garantie.
-- `SitDraftFromPrompt.tsx:74-79` — le titre du composant utilise `font-serif` (défaut Tailwind, pas `font-heading` = Playfair). Deux voies vers du serif coexistent, avec léger différentiel visuel.
-- **Aperçu vs publication** (poids typographique) :
-  - Preview (`AnnouncementPreviewDialog.tsx:151, 158, 165`) : corps en `text-sm`.
-  - Public (`PublicSitView.tsx:261, 293, 446`) : corps en `text-base` pour `specific_expectations` MAIS `text-lg` pour `daily_routine` et `property.description`. Trois tailles différentes pour trois blocs de texte adjacents → sensation de rendu « bricolé ».
-- Emojis dans les labels d'espèces (`CreateSit.tsx:87-91`, `AnnouncementPreviewDialog.tsx:41-45`) alors que la mémoire projet interdit emoji dans le contenu.
+1. **Ajouter `description` au SELECT `owner_profiles`** (`PublicSitterProfile.tsx:368-371`). Bug bloquant : la description propriétaire est systématiquement masquée. Une ligne de correctif.
+2. **`og-profile` : générer un PNG au lieu d'un SVG** (`supabase/functions/og-profile/index.ts:174`), puis **brancher l'URL comme `og:image`** dans `PublicSitterProfile.tsx:833`. Sans ça, tous les partages sociaux de profils sont dégradés.
+3. **try/catch global sur `load()`** dans `PublicSitterProfile` avec état d'erreur + bouton Réessayer. Sinon toute erreur réseau affiche à tort « Profil introuvable ».
+4. **Rendre les annonces owner cliquables + enrichir le select `sits`** (city, cover_photo, slug) et lier vers `/annonces/:id`. Permet de restituer les corrections récentes de fiche annonce sans dupliquer le rendu.
+5. **Nettoyage privacy** : retirer `last_name` du select profiles, réduire `postal_code` (2 premiers chiffres) dans le JSON-LD, remplacer les `select("*")` sur `public_profiles` et `sitter_gallery` par des sélections explicites.
 
-**Éditorial :**
-- La concierge IA génère 60 à 900 caractères par champ (`specific_expectations`, `daily_routine`, `owner_message`), toutes textes soignés en vouvoiement chaleureux. Les libellés/placeholders du formulaire sont eux en registre « produit » ultra concis. Le contraste entre un `owner_message` IA de 120 mots ciselé et le placeholder « Ex : on confie nos animaux à un membre de confiance… » crée l'impression que **l'annonce a été écrite par deux personnes**.
-- `PublicSitPitch.tsx` (bandeau anon) parle « logement offert / changement de décor / animaux à câliner » registre acquisition, tandis que le corps parle « proposé par [prénom] / vous pouvez postuler » registre transactionnel. Deux voix marketing coexistent sur la page publique.
-- Vouvoiement respecté globalement, aucune fuite tutoiement détectée.
-
-**Conclusion :** le problème perçu est **d'abord typographique** (`font-mono` sur la routine + trois tailles de corps de texte sur la fiche publique), **puis éditorial** (voix IA riche vs voix produit sèche). Prioriser le fix typo.
-
----
-
-### 2. Restitution de l'offre publiée : état
-
-Champs saisis dans `CreateSit` et leur restitution :
-
-| Champ saisi | Preview dialog | Public `/annonces/:id` | Owner `/sits/:id` |
-|---|---|---|---|
-| `title` | oui | oui | oui |
-| `start_date`/`end_date` | oui + flexibles | oui | oui |
-| `flexible_dates` | oui (mention italique) | non affiché explicitement | oui |
-| `city`/`country` | oui | partiellement (utilise owner.city, pas sit.city) | oui |
-| `specific_expectations` | oui | oui `text-base` | oui |
-| `daily_routine` | oui `text-sm` | oui `text-lg` | oui |
-| `owner_message` | oui `italic` | **BUG : masqué si `specific_expectations` rempli** (`PublicSitView.tsx:262, 270` : opérateur `\|\|`, un seul des deux s'affiche) | à vérifier |
-| `cover_photo_url` | oui | oui via SitHero | oui |
-| `open_to` | non affiché | oui (`.451`) | oui |
-| `environments` | oui (comma-separated) | **non affiché sur `PublicSitView`** (utilisé par `SitImmersiveContent` sitter uniquement) | oui |
-| `min_gardien_sits` | non affiché | non affiché | oui |
-| `max_applications` | non affiché | non affiché (compteur owner uniquement) | oui |
-| `is_urgent` | oui badge | oui badge | oui |
-| `pets` (depuis profil) | oui | oui riche | oui |
-
-**Bugs de mapping identifiés :**
-- **BLOQUANT UX** — `PublicSitView.tsx:262` : `{sit.specific_expectations || sit.owner_message}` avec OR logique. Le message personnel du propriétaire est **jamais visible** sur la fiche publique si la description est remplie. C'est le champ « touche humaine » qui disparaît.
-- **MOYEN** — `environments` saisi puis absent de `PublicSitView` (visible seulement dans le rendu sitter authentifié `SitImmersiveContent.tsx:68`). Le visiteur ne voit pas si l'annonce est à la campagne, en montagne, etc.
-- **MOYEN** — `open_to` (« Familles / Solo / Couples / Retraités ») non affiché dans la preview alors que présent en public. L'owner ne voit pas dans l'aperçu ce que le sitter verra.
-- **MOYEN** — `flexible_dates` sans indication visible sur `PublicSitView` (seulement dans preview et owner view).
-- **COSMÉTIQUE** — trois tailles de corps (`text-sm` preview, `text-base` puis `text-lg` public) donnent l'impression d'un rendu incomplet.
-- **COSMÉTIQUE** — la ville de la garde (`sit.city`) est ignorée en public au profit de `owner.city` (`PublicSitView.tsx:147`). Owner qui a saisi une résidence secondaire à Bruxelles verra Lyon (sa ville profil) en fiche.
-
----
-
-### 3. Réutilisation profil pour la rédaction
-
-**Réutilisé aujourd'hui :**
-- `properties` (type, environnement, équipements, pièces, photos) → affiché dans SummaryCard (`CreateSit.tsx:1227`) + photos utilisées comme galerie de l'annonce.
-- `pets` → affichés en résumé (`.1284`) + utilisés dans `buildSuggestedTitle` (`.579`) et le contexte passé à `ImproveListingButton` (`.960`).
-- `owner_gallery` → alimente `ownerPhotos`, sert au picker de cover photo.
-- `profiles.city` → sert de placeholder ville, transmise à la concierge IA.
-- `owner_profiles.environments` → pré-remplit `sitEnvironments` si vide (`.434`).
-- `owner_profiles.preferred_sitter_types`, `presence_expected`, `visits_allowed`, `overnight_guest`, `rules_notes`, `meeting_preference`, `handover_preference`, `welcome_notes`, `news_frequency`, `news_format` → **affichés en récap non éditable dans `<details>` à l'étape 2, mais jamais utilisés pour amorcer les champs éditables**.
-
-**Angles morts (non réutilisé pour aider à rédiger) :**
-1. **`profiles.bio`** — la biographie du propriétaire n'est jamais lue. C'est pourtant le meilleur input pour amorcer `owner_message` (« Un mot de vous »).
-2. **`owner_profile.welcome_notes`** — texte d'accueil déjà rédigé par l'owner, jamais utilisé comme brouillon d'`owner_message`.
-3. **`owner_profile.rules_notes` + `presence_expected` + `visits_allowed`** — matière première évidente pour amorcer `specific_expectations` (attentes gardien).
-4. **`pets.character`, `activity_level`, `walk_duration`, `alone_duration`, `medication`, `food`, `special_needs`** — données factuelles parfaites pour générer un `daily_routine` de base sans IA (matin/midi/soir déduits des durées).
-5. **`owner_profile.competences`** — jamais exposé.
-6. **Titre suggéré** — n'inclut pas l'environnement (« à la campagne ») ni la race si un seul chien. Amélioration possible sans IA.
-7. **Concierge IA** — l'edge `draft-sit-from-prompt` lit UNIQUEMENT `profile.city` et `first_name` (index.ts:57). Elle ignore la bio, les pets, la property, le owner_profile. Le brouillon est donc générique alors que la moitié du contexte est déjà en base. **Angle mort majeur.**
-8. **Photos animaux** — pas mises en avant dans le picker de cover, seulement photos de logement.
-
----
-
-### 4. Équilibre simple / rapide / complet
-
-- **3 étapes**, stepper sticky top (`CreateSit.tsx:136`). Bien.
-- **Champs bloquants réels pour publier** (`.548-557`) : profil ≥ 40 %, property existante, titre, dates cohérentes, description ≥ 150 caractères, ≥ 1 photo. Six blockers → raisonnable.
-- **Temps estimé première annonce** : 8-12 minutes en manuel avec description de 150 caractères ; 2-3 minutes via concierge IA + relecture. Correct.
-- **Sentiment de complétude/sérieux :** stepper + auto-save + label brouillon + aperçu + récap depuis profil → bon niveau. MAIS le récap profil est dans un `<details>` fermé par défaut à l'étape 2 (`.1221`), le propriétaire peut ne jamais le voir → l'aspect « votre profil enrichit l'annonce » est invisible.
-- **Frictions :**
-  - Le choix binaire home/away en step 0 (`.797-853`) est correct mais le clic « Ailleurs » redirige en 1,2 s sans annuler possible → confusion si mis-clic.
-  - Nudge profil < 60 % (`.781`) puis blocker < 40 % (`.549`) : deux seuils, deux messages → clarifier.
-  - Champ « Journée type » en monospace décourage (cf. §1).
-  - « Un mot de vous » = optionnel, placeholder plein d'idées, mais l'utilisateur qui le remplit ne le voit pas rendu en public (cf. bug §2).
-  - `max_applications` à 10 par défaut sans explication de l'impact.
-- **Simplification possible sans perdre la complétude :** Step 2 « Préférences » (expérience + max candidatures + récap profil) pourrait fusionner avec Step 1 → 2 étapes au lieu de 3. Le récap profil devrait passer en « aside sticky » persistant plutôt qu'en `<details>` fermé.
-
----
-
-### 5. Points non couverts au premier audit
-
-- **Cohérence photos** : owner peut avoir photos dans `owner_gallery` (galerie perso) ET `properties.photos` (logement). CreateSit picker n'utilise que `owner_gallery` (`.334`). Le rendu public affiche `property.photos` en priorité (`PublicSitView.tsx:143`). **Deux sources photo différentes entre saisie et rendu.**
-- **Aperçu avant publication** : disponible uniquement desktop (`CreateSit.tsx:1409` `hidden sm:inline-flex`). Owner mobile ne peut jamais voir l'aperçu → risque de mauvaise surprise post-publish.
-- **Modération** : `moderateContent` appelé sur `title + specific_expectations + owner_message + daily_routine` (`.604`). OK.
-- **Accessibilité** : labels associés (`htmlFor`), `sr-only`, focus visibles. Bon. MAIS le stepper est cliquable seulement pour les étapes passées (`.144`) — accessibilité clavier limitée.
-- **Mobile ≤ 400 px** : Step 0 correct (grid sm:grid-cols-2), CTA sticky bottom safe-area OK, DateSheet plein écran OK. Preview inaccessible (voir plus haut).
-- **Edge cases :**
-  - Owner sans `property` : nudge bloque à `!property` (`.550`). Mais le `saveDraft` retourne `null` si `!property` (`.455`) → si l'onboarding profil crée la property automatiquement, OK ; sinon owner bloqué sans issue visible.
-  - Owner sans `pets` : `buildSuggestedTitle` renvoie « animaux » générique, préview affiche section vide.
-  - Owner sans photo : blocker actif, redirige vers `/owner-profile` (`.556`).
-  - Owner en pays étranger : `sitCountry` par défaut FR, section pays dans un `<details>` fermé (`.1050`) → risque d'oubli. Mémoire projet note d'ailleurs qu'il faut ouvrir auto ce bloc hors FR — pas implémenté ici.
-  - Republish + reprise brouillon simultané (`?from=X&draftId=Y`) : `sourceSitRes` gagne, le brouillon est ignoré silencieusement. Pas de garde-fou UI.
-- **Cohérence texte** : `specific_expectations` est labellisé « Description de la garde » dans le form (`.956`) et rendu comme « annonce » (bloc fusionné avec le mot du propriétaire) en public. Nommage non cohérent.
-
----
-
-### Tableau récap
-
-| Zone | Problème observé | Sévérité | Correctif proposé |
-|---|---|---|---|
-| PublicSitView.tsx:262,270 | `owner_message` masqué si `specific_expectations` rempli (`\|\|`) | **BLOQUANT** | Rendre les deux blocs séparément, avec titres distincts (« Attentes » / « Un mot de [prénom] ») |
-| PublicSitView.tsx:147 | `sit.city` ignoré, `owner.city` utilisé | **MOYEN** | `sit.city ?? owner.city` |
-| PublicSitView | `environments` non affiché en public | **MOYEN** | Ajouter chips environnement dans « Le logement » |
-| CreateSit.tsx:1018 | Textarea `daily_routine` en `font-mono text-[13px]` | **MOYEN** | Retirer `font-mono`, aligner sur les autres textareas |
-| PublicSitView.tsx:261,293,446 | Corps de texte en 3 tailles différentes (base/lg/lg) | **MOYEN** | Uniformiser à `text-base leading-relaxed` |
-| draft-sit-from-prompt/index.ts:57 | Concierge IA ignore bio, pets, property, owner_profile | **MOYEN** | Charger et injecter bio + pets (nom/espèce/caractère/routine) + property (type/env) + welcome_notes dans le system prompt |
-| CreateSit.tsx:1221 | Récap profil fermé par défaut, invisible pour l'owner | **MOYEN** | Ouvrir par défaut, ou remonter en aside sticky avec compteur « 5 sections tirées de votre profil » |
-| CreateSit.tsx:1409 | Bouton Aperçu masqué mobile | **MOYEN** | Rendre visible en mobile aussi (icône seule + libellé accessible) |
-| CreateSit + owner_profile | `welcome_notes`, `rules_notes`, `bio` jamais utilisés pour amorcer les champs | **MOYEN** | Bouton « Reprendre depuis mon profil » sur `owner_message` et `specific_expectations` |
-| CreateSit.tsx:1050 | Bloc pays fermé par défaut alors qu'owner hors FR | **MOYEN** | Ouvrir auto si `sitCountry !== "FR"` (déjà noté en mémoire projet, à appliquer ici) |
-| AnnouncementPreviewDialog | Ne montre pas `open_to`, `flexible_dates` details, `environments` chips comme le public | **MOYEN** | Rapprocher le rendu preview du rendu public (composant partagé recommandé) |
-| CreateSit.tsx:334 vs PublicSitView:143 | Deux sources photos différentes (`owner_gallery` en saisie, `property.photos` en rendu) | **MOYEN** | Unifier la source ou afficher les deux dans la preview + doc claire |
-| CreateSit STEPS | 3 étapes dont Step 2 très légère (expérience + max + récap) | **COSMÉTIQUE** | Fusionner Step 1 + Step 2 en une seule « Détails & préférences » |
-| CreateSit.tsx:87-91, PreviewDialog:41 | Emojis dans labels d'espèces (violation mémoire projet) | **COSMÉTIQUE** | Retirer emojis, utiliser illustrations sur-mesure ou texte seul |
-| SitDraftFromPrompt.tsx:74 | `font-serif` (Tailwind défaut) au lieu de `font-heading` (Playfair) | **COSMÉTIQUE** | Utiliser `font-heading` pour cohérence |
-| CreateSit.tsx:956 | Champ « Description de la garde » mais rendu comme « annonce » | **COSMÉTIQUE** | Renommer libellé ou clarifier l'aide |
-
----
-
-### 5 correctifs prioritaires
-
-1. **Réparer le `owner_message` masqué en fiche publique** (`PublicSitView.tsx:262`) — remplacer le `||` par deux blocs distincts avec titres. C'est le fix le plus rentable : un champ optionnel que l'owner remplit avec soin et qui n'est jamais vu.
-
-2. **Retirer `font-mono` sur « Journée type »** (`CreateSit.tsx:1018`) et uniformiser les corps de texte de `PublicSitView` (`text-base leading-relaxed` partout). Fait disparaître la sensation « deux écritures ».
-
-3. **Enrichir la concierge IA avec le contexte profil** (`draft-sit-from-prompt/index.ts:57`) — charger `pets` + `property` + `owner_profile.welcome_notes` + `profiles.bio` et les injecter dans le system prompt. Le brouillon passera de générique à personnalisé, sans effort utilisateur supplémentaire. Effet : IA qui « connaît » vraiment le propriétaire, gain de qualité et de temps.
-
-4. **Ajouter des amorces profil sur les champs libres** — bouton « Reprendre depuis mon profil » sur `owner_message` (utilise `bio` + `welcome_notes`) et sur `specific_expectations` (utilise `rules_notes` + `presence_expected`). Aide à la rédaction sans IA, gratuite, rapide, cohérente.
-
-5. **Rendre l'aperçu accessible mobile + le rapprocher du rendu public** (`CreateSit.tsx:1409` + `AnnouncementPreviewDialog`) — sur mobile où se font 60 % des dépôts, l'owner doit voir ce qu'il publie. Un composant `SitCanonicalCard` partagé entre preview et public éliminerait aussi les écarts de mapping (open_to, environments, flexible_dates).
-
-*Fix bonus quasi-gratuit : `PublicSitView.tsx:147` → `sit.city ?? owner.city`. Une ligne, corrige le cas résidence secondaire / étranger.*
+Ce plan est un audit livrable, aucune modification de code n'a été effectuée.
