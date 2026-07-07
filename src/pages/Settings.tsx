@@ -824,23 +824,23 @@ const ThemeSection = () => {
 const ALMA_OPTIONS: { value: AlmaFrequency; label: string; description: string }[] = [
   {
     value: "silent",
-    label: "Aucun",
+    label: "Silencieuse",
     description: "Alma n'intervient jamais spontanément. Vous restez maître du tempo.",
   },
   {
     value: "low",
     label: "Peu bavarde",
-    description: "Alma se manifeste rarement (3 conseils max par session, espacés de 10 min).",
+    description: "Seulement l'essentiel. Uniquement des conseils utiles et contextuels, jamais d'anecdote ni d'humour.",
   },
   {
     value: "balanced",
-    label: "Modéré",
-    description: "Alma prend la parole aux moments clés (5 conseils max par session).",
+    label: "Modéré (recommandé)",
+    description: "Un conseil au maximum toutes les 3 minutes, conseils utiles et petites touches d'ambiance.",
   },
   {
     value: "talkative",
     label: "Bavarde",
-    description: "Alma vous accompagne à chaque changement de page (12 conseils max par session).",
+    description: "Un conseil possible toutes les minutes, toutes les familles de contenu.",
   },
 ];
 
