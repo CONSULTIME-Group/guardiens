@@ -183,7 +183,7 @@ export function buildInternationalDiscoveryWhisper(params: {
     ...base("sitter_international_discovery"),
     audience: "sitter",
     surface: "listings",
-    message: `Alma remarque, une annonce à ${params.city} vient d'apparaître. Ce n'est pas votre zone, mais votre chien pourrait aimer le soleil.`,
+    message: `Une annonce à ${params.city} vient d'apparaître. Ce n'est pas votre zone, mais votre compagnon pourrait apprécier le dépaysement.`,
     primaryAction: {
       label: "Voir les annonces internationales",
       onClick: params.onExplore,
