@@ -90,7 +90,14 @@ export interface RequestNextTipParams {
   preferNudge?: boolean;
   /** Message affiché si aucun conseil éligible. */
   emptyMessage?: string;
+  /**
+   * True quand la demande est initiée par un clic utilisateur (bouton "Un conseil ?").
+   * Contourne le cooldown 24h serveur et assouplit la dédup (autorise de renvoyer
+   * un fait déjà vu si rien de neuf n'est disponible). N'affecte pas le proactif.
+   */
+  onDemand?: boolean;
 }
+
 
 /**
  * Verrou global : une seule surface Alma « proactive » visible à la fois.
@@ -402,10 +409,12 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
   );
 
   const requestNextTip = useCallback<AlmaContextValue["requestNextTip"]>(
-    async ({ surface, context, role, state: userState, preferNudge = true, emptyMessage }) => {
+    async ({ surface, context, role, state: userState, preferNudge = true, emptyMessage, onDemand = false }) => {
       if (!user?.id) return;
       const audience: AlmaAudience = activeRole === "owner" ? "owner" : "sitter";
-      const excluded = loadSeenIds();
+      // En mode on_demand, on n'exclut RIEN côté client pour maximiser les chances
+      // de retour ; la RPC gère elle-même la dédup et le repli si besoin.
+      const excluded = onDemand ? [] : loadSeenIds();
 
       // 1) Essai usage_nudge en priorité si preferNudge et role/state fournis.
       if (preferNudge && role && userState) {
@@ -440,7 +449,9 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
           p_context: (context ?? {}) as any,
           p_bypass_cooldown: true,
           p_exclude_ids: excluded,
+          p_on_demand: onDemand,
         });
+
         if (data && (data as any).id) {
           const fact = data as any;
           const whisper = buildCulturalFactWhisper({

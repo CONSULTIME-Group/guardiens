@@ -6356,6 +6356,7 @@ export type Database = {
           p_bypass_cooldown?: boolean
           p_context?: Json
           p_exclude_ids?: string[]
+          p_on_demand?: boolean
           p_surface: string
           p_user_id: string
         }
