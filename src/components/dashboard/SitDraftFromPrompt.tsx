@@ -38,7 +38,7 @@ export interface SitDraftFromPromptProps {
 export default function SitDraftFromPrompt({ secondary = false, primary = null }: SitDraftFromPromptProps = {}) {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
-  const [almaMood, setAlmaMood] = useState<"idle" | "happy">("idle");
+  const [almaMood, setAlmaMood] = useState<"idle" | "happy" | "thinking" | "attentive">("attentive");
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
