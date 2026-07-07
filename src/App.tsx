@@ -281,32 +281,33 @@ const AppRoutes = () => (
       <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPassword /></PublicOnlyRoute>} />
       <Route path="/reset-password" element={<ResetPassword />} />
       
-      <Route path="/conseils" element={<AlmaTips />} />
+      <Route path="/conseils" element={<ContentRoute><AlmaTips /></ContentRoute>} />
       <Route path="/alma" element={<AppLayout><AlmaEvolution /></AppLayout>} />
-      <Route path="/actualites" element={<News />} />
-      <Route path="/actualites/inventaire-guardiens-france" element={<ArticleInventaire />} />
-      <Route path="/actualites/:slug" element={<ArticleDetail />} />
+      <Route path="/actualites" element={<ContentRoute><News /></ContentRoute>} />
+      <Route path="/actualites/inventaire-guardiens-france" element={<ContentRoute><ArticleInventaire /></ContentRoute>} />
+      <Route path="/actualites/:slug" element={<ContentRoute><ArticleDetail /></ContentRoute>} />
       <Route path="/auteurs/:slug" element={<AuthorPage />} />
       <Route path="/articles" element={<Navigate to="/actualites" replace />} />
       <Route path="/articles/:slug" element={<NavigateBlogSlug />} />
       <Route path="/blog" element={<Navigate to="/actualites" replace />} />
       <Route path="/blog/:slug" element={<NavigateBlogSlug />} />
       <Route path="/a-propos" element={<About />} />
-      <Route path="/observatoire-garde-animaux" element={<Observatoire />} />
+      <Route path="/observatoire-garde-animaux" element={<ContentRoute><Observatoire /></ContentRoute>} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/cgu" element={<Terms />} />
       <Route path="/cgs" element={<Cgs />} />
       <Route path="/confidentialite" element={<Privacy />} />
       <Route path="/mentions-legales" element={<MentionsLegales />} />
       <Route path="/faq" element={<FAQ />} />
-      <Route path="/guides" element={<GuidesListing />} />
-      <Route path="/guides/:slug" element={<GuideDetail />} />
+      <Route path="/guides" element={<ContentRoute><GuidesListing /></ContentRoute>} />
+      <Route path="/guides/:slug" element={<ContentRoute><GuideDetail /></ContentRoute>} />
       <Route path="/guide" element={<Navigate to="/guides" replace />} />
       <Route path="/guide/:slug" element={<NavigateGuideSlug />} />
-      <Route path="/house-sitting/:slug" element={<CityPage />} />
-      <Route path="/races" element={<BreedsListing />} />
-      <Route path="/races/:slug" element={<BreedPage />} />
-      <Route path="/departement/:slug" element={<DepartmentPage />} />
+      <Route path="/house-sitting/:slug" element={<ContentRoute><CityPage /></ContentRoute>} />
+      <Route path="/races" element={<ContentRoute><BreedsListing /></ContentRoute>} />
+      <Route path="/races/:slug" element={<ContentRoute><BreedPage /></ContentRoute>} />
+      <Route path="/departement/:slug" element={<ContentRoute><DepartmentPage /></ContentRoute>} />
+
       <Route path="/tarifs" element={<Pricing />} />
       <Route path="/test-accord" element={<div className="p-6 bg-background min-h-screen"><TestAccordLazy /></div>} />
       <Route path="/gardien-urgence" element={<EmergencySitter />} />
