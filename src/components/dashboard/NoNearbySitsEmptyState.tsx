@@ -109,12 +109,6 @@ const NoNearbySitsEmptyState = ({
 
   const secondary = [
     {
-      type: "missions" as const,
-      title: "Coup de main à proposer",
-      description: "Répondez à un besoin près de chez vous.",
-      to: "/petites-missions",
-    },
-    {
       type: "breeds" as const,
       title: "Fiches races",
       description: "75 races documentées.",
@@ -150,6 +144,30 @@ const NoNearbySitsEmptyState = ({
           {" "}dont aucune dans un rayon de {currentRadius} km autour de vous.
         </p>
 
+        <div className="mt-5 rounded-2xl border border-border bg-card p-4 sm:p-5">
+          <p className="text-sm font-semibold text-foreground">
+            Un coup de main à donner ?
+          </p>
+          <p className="text-sm text-muted-foreground mt-1">
+            En attendant une garde, rendez un coup de main près de chez vous. C'est ouvert à tous, sans abonnement.
+          </p>
+          <div className="mt-3">
+            <Button asChild>
+              <Link
+                to="/petites-missions"
+                onClick={() =>
+                  void trackEvent("dashboard_cta_clicked", {
+                    source: "dashboard_empty_state",
+                    metadata: { cta: "mutual_aid_empty_state", is_first_time: false, user_role: "sitter" },
+                  })
+                }
+              >
+                Voir les coups de main près de chez vous
+              </Link>
+            </Button>
+          </div>
+        </div>
+
         <div className="mt-4">
           {alertActive ? (
             <div className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground">
@@ -160,7 +178,7 @@ const NoNearbySitsEmptyState = ({
               </Link>
             </div>
           ) : (
-            <Button onClick={subscribe} disabled={saving || alertActive === null}>
+            <Button variant="outline" onClick={subscribe} disabled={saving || alertActive === null}>
               M'alerter dès qu'une annonce est publiée près de chez moi
             </Button>
           )}
@@ -171,7 +189,7 @@ const NoNearbySitsEmptyState = ({
         <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold mb-3">
           En attendant
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {secondary.map((card) => (
             <Link
               key={card.type}
