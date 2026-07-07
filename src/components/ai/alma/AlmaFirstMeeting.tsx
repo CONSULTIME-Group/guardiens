@@ -13,7 +13,6 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { AlmaAvatar } from "./AlmaAvatar";
 import { AlmaAnimated } from "./AlmaAnimated";
 import { trackEvent } from "@/lib/analytics";
 import { resolveAlmaCtaHref, type AlmaCtaAction } from "@/lib/alma/cta-actions";
