@@ -70,7 +70,7 @@ Extraction attendue depuis la phrase du propriétaire :
 - Dates : si mentionnées (« du 4 au 19 août », « en août », « 15 jours en août »), déduisez start_date et end_date au format YYYY-MM-DD. Année par défaut : celle qui rend la date future à partir d'aujourd'hui (${todayIso}). Si aucune date, laissez vides et mettez flexible_dates=true.
 - Ville : extraite du prompt, sinon utilisez « ${profile?.city ?? ""} » (peut rester vide).
 - Animaux : nombre + espèce (chien, chat, NAC…).
-- Environnement : appartement, maison, avec jardin, en ville, à la campagne (choisir 1 à 3).
+- Environnement : choisir 0 à 3 valeurs STRICTEMENT parmi cette liste (aucune autre valeur autorisée) : ville, campagne, montagne, lac, vignes, foret. N'inventez pas « maison », « appartement », « jardin » : ces mots vont dans la description, pas dans environments.
 - Préférences gardien : télétravail, présence continue, calme, sportif (choisir 1 à 3 dans open_to).
 
 Génération :
