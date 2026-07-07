@@ -17,18 +17,30 @@
  * Ne rend jamais AlmaAvatarLottie.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { BellOff, Bell, ChevronDown, Sparkles, X } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { ChevronDown, Sparkles, X, MoreHorizontal, Check, EyeOff, Lightbulb, Route } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AlmaAvatarAnimated } from "./AlmaAvatarAnimated";
 import { useAlma } from "@/contexts/AlmaContext";
-import { useAlmaFrequency } from "@/hooks/useAlmaFrequency";
+import { useAlmaFrequency, type AlmaFrequency } from "@/hooks/useAlmaFrequency";
+import { useAlmaHidden } from "@/hooks/useAlmaHidden";
 import { useAlmaEvolution, type AlmaStage } from "@/hooks/useAlmaEvolution";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import { trackEvent } from "@/lib/analytics";
 import { resolveAlmaCtaHref } from "@/lib/alma/cta-actions";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { AlmaWhisper as AlmaWhisperT, AlmaDismissReason } from "@/lib/alma/whisper-types";
+
 
 const STAGE_DOT_CLASS: Record<AlmaStage, string> = {
   nouvelle: "bg-muted-foreground/70",
