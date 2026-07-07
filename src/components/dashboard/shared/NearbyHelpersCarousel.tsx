@@ -452,8 +452,30 @@ const HelperMiniCard = ({
 const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boolean } = {}) => {
   const { user } = useAuth();
   const { data, isLoading } = useNearbyHelpers(user?.id);
+  const scrollerRef = useRef<HTMLDivElement>(null);
 
   const helpers = data?.helpers || [];
+
+  const scrollByCard = useCallback((dir: 1 | -1) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const firstCard = el.querySelector<HTMLElement>('[role="listitem"]');
+    const step = firstCard ? firstCard.offsetWidth + 12 : Math.round(el.clientWidth * 0.8);
+    el.scrollBy({ left: dir * step, behavior: "smooth" });
+  }, []);
+
+  const onScrollerKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        scrollByCard(1);
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        scrollByCard(-1);
+      }
+    },
+    [scrollByCard],
+  );
 
   if (isLoading) {
     return (
@@ -474,6 +496,8 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
   }
 
   const ctaHref = "/petites-missions/creer";
+  const radiusUsed = data?.radiusUsed ?? 0;
+  const hasGeo = !!data?.hasGeo;
 
 
   return (
@@ -481,20 +505,30 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
       {!hideHeader && (
         <div className="min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent mb-1.5">
-            Coup de main
+            Personnes disponibles
           </p>
           <h3
             id="nearby-helpers-heading"
             className="font-heading text-2xl sm:text-3xl font-semibold text-foreground leading-tight"
           >
-            Entraide près de chez vous
+            Prêts à rendre service près de chez vous
           </h3>
         </div>
       )}
 
-      {/* Explainer court : une phrase suffit, le reste se découvre en cliquant. */}
+      {/* Explainer court : clarifie que ce bloc liste des PERSONNES prêtes à
+          aider, différent de la section « Missions ouvertes » qui liste des
+          besoins et offres publiés. */}
       <p className="text-xs sm:text-sm text-foreground/75 leading-relaxed max-w-prose">
-        Des membres prêts à rendre un service ponctuel près de chez vous. Cliquez sur «&nbsp;Lui écrire&nbsp;» pour proposer un échange, c'est gratuit.
+        Les gens du coin prêts à donner un coup de main ponctuel. Cliquez sur «&nbsp;Lui écrire&nbsp;» pour proposer un échange, c'est gratuit.
+        {hasGeo && radiusUsed > 0 && (
+          <>
+            {" "}
+            <span className="text-muted-foreground">
+              Recommandations dans un rayon d'environ {radiusUsed}&nbsp;km.
+            </span>
+          </>
+        )}
       </p>
 
       {/* Compteur dual local · national, preuve sociale localisée */}
@@ -513,10 +547,18 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
         </div>
       )}
 
-      {/* Carrousel horizontal, sans filtres : la liste est déjà triée
-          savoir-faire d'abord puis proximité. */}
+      {/* Carrousel horizontal accessible : region focusable, navigation
+          clavier (flèches gauche/droite), boutons précédent/suivant visibles
+          et cibles tactiles ≥44px. */}
       <div className="relative -mx-1">
-        <div className="flex gap-3 overflow-x-auto pb-3 px-1 snap-x snap-mandatory scrollbar-hide scroll-smooth">
+        <div
+          ref={scrollerRef}
+          role="list"
+          aria-label="Personnes prêtes à rendre service près de chez vous"
+          tabIndex={0}
+          onKeyDown={onScrollerKeyDown}
+          className="flex gap-3 overflow-x-auto pb-3 px-1 snap-x snap-mandatory scrollbar-hide scroll-smooth rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
           {helpers.map((helper) => (
             <HelperMiniCard
               key={helper.id}
@@ -527,6 +569,29 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
         </div>
         <div className="pointer-events-none absolute inset-y-0 left-0 w-4 bg-gradient-to-r from-background to-transparent" aria-hidden="true" />
         <div className="pointer-events-none absolute inset-y-0 right-0 w-4 bg-gradient-to-l from-background to-transparent" aria-hidden="true" />
+
+        {helpers.length > 1 && (
+          <div className="mt-2 flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => scrollByCard(-1)}
+              aria-label="Voir les personnes précédentes"
+              aria-controls="nearby-helpers-heading"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-card text-foreground ring-1 ring-border shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollByCard(1)}
+              aria-label="Voir les personnes suivantes"
+              aria-controls="nearby-helpers-heading"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-card text-foreground ring-1 ring-border shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              <ChevronRight className="h-5 w-5" aria-hidden="true" />
+            </button>
+          </div>
+        )}
       </div>
 
 
