@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { FOUNDER_START, GRACE_END } from "@/lib/constants";
+import { isPricingActive } from "@/lib/pricing";
 import { logger } from "@/lib/logger";
 
 const LAUNCH_DATE = FOUNDER_START;
@@ -29,6 +30,13 @@ export const useSubscriptionAccess = () => {
     if (!user) {
       setStatus("never");
       setHasAccess(false);
+      setLoading(false);
+      return;
+    }
+
+    if (!isPricingActive()) {
+      setStatus(effectiveRole === "owner" ? "owner" : "founder_grace");
+      setHasAccess(true);
       setLoading(false);
       return;
     }
