@@ -2296,6 +2296,42 @@ export default function PublicSitterProfile() {
             )}
           </Tabs>
 
+          {/* Section Confiance propriétaire, toujours visible (miroir du gardien). */}
+          {(userBadges && userBadges.length > 0) || profile?.created_at ? (
+            <section
+              aria-label="Confiance et vérifications du propriétaire"
+              className="px-4 md:px-6 mt-8 pt-6 border-t border-border space-y-5"
+            >
+              <header>
+                <p className="text-xs uppercase tracking-[2px] text-muted-foreground font-body mb-1.5">
+                  Confiance et vérifications
+                </p>
+                <h2 className="text-lg font-heading font-semibold text-foreground">
+                  Ce qui rassure chez {firstName}
+                </h2>
+              </header>
+              {userBadges && userBadges.length > 0 && (
+                <>
+                  <SpecialBadgeHighlight userBadges={userBadges} />
+                  <BadgeRow badges={userBadges} size="compact" />
+                </>
+              )}
+              <TrustTimeline
+                memberSince={profile?.created_at}
+                reviews={ownerReviews as any}
+                badges={(userBadges || []).map((b: any) => ({
+                  badge_id: b.badge_id,
+                  created_at: b.created_at,
+                  count: b.count ?? 1,
+                }))}
+                completedSits={ownerSitsTotal}
+                lastActivity={null}
+                firstName={firstName}
+              />
+            </section>
+          ) : null}
+
+
           {/* CTA sticky bottom-16, au-dessus de la BottomNav h-16 */}
           {showCTA && (
             <div className="md:hidden fixed bottom-16 left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] shadow-lg">
