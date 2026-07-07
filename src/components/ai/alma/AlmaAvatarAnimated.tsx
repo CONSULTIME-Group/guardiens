@@ -46,20 +46,40 @@ export const ALMA_STAGE_ASSETS: Record<AlmaStage, string | null> = {
   fidele: null,
 };
 
-/** Classe Tailwind (halo lumineux) réutilisant les teintes de STAGE_DOT_CLASS. */
-const STAGE_HALO_CLASS: Record<AlmaStage, string> = {
-  nouvelle: "bg-muted-foreground/25",
-  eveillee: "bg-sky-500/30",
-  complice: "bg-primary/35",
-  fidele: "bg-amber-500/40",
+/**
+ * Facteur de croissance d'Alma par stade — réutilisable partout où l'avatar
+ * est affiché. Alma est un petit chien qui grandit avec l'utilisateur.
+ * Multiplier une taille de base par ce facteur donne la taille effective.
+ */
+export const ALMA_STAGE_SCALE: Record<AlmaStage, number> = {
+  nouvelle: 1,
+  eveillee: 1.18,
+  complice: 1.4,
+  fidele: 1.65,
 };
 
-/** Liseré fin autour du médaillon, selon le stade. */
-const STAGE_RING_CLASS: Record<AlmaStage, string> = {
-  nouvelle: "ring-muted-foreground/30",
-  eveillee: "ring-sky-500/40",
-  complice: "ring-primary/50",
-  fidele: "ring-amber-500/60",
+/** Halo lumineux plus marqué au fil des stades. */
+export const STAGE_HALO_CLASS: Record<AlmaStage, string> = {
+  nouvelle: "bg-muted-foreground/20",
+  eveillee: "bg-sky-500/35",
+  complice: "bg-primary/45",
+  fidele: "bg-amber-500/60",
+};
+
+/** Liseré autour du médaillon, teinte selon le stade. */
+export const STAGE_RING_CLASS: Record<AlmaStage, string> = {
+  nouvelle: "ring-muted-foreground/40",
+  eveillee: "ring-sky-500/50",
+  complice: "ring-primary/60",
+  fidele: "ring-amber-500/70",
+};
+
+/** Épaisseur du liseré — s'épaissit avec le stade pour une présence croissante. */
+export const STAGE_RING_WIDTH_CLASS: Record<AlmaStage, string> = {
+  nouvelle: "ring-1",
+  eveillee: "ring-2",
+  complice: "ring-2",
+  fidele: "ring-4",
 };
 
 interface Props {
