@@ -20,7 +20,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BellOff, Bell, ChevronDown, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AlmaAvatarAnimated, ALMA_STAGE_SCALE } from "./AlmaAvatarAnimated";
+import { AlmaAvatarAnimated } from "./AlmaAvatarAnimated";
 import { useAlma } from "@/contexts/AlmaContext";
 import { useAlmaFrequency } from "@/hooks/useAlmaFrequency";
 import { useAlmaEvolution, type AlmaStage } from "@/hooks/useAlmaEvolution";
