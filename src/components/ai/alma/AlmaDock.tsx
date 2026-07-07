@@ -289,9 +289,10 @@ export function AlmaDock() {
 
   const handleHide = useCallback(async () => {
     await setHidden(true);
-    trackEvent("alma_hidden_toggled", {
-      metadata: { hidden: true, source: "dock_menu" },
+    trackEvent("alma_frequency_changed" as any, {
+      metadata: { hidden: true, source: "dock_menu", action: "hide" },
     });
+
     toast({
       title: "Alma est masquée.",
       description: "Vous pouvez la réafficher dans Réglages, section Alma.",
@@ -326,8 +327,8 @@ export function AlmaDock() {
         onDemand: true,
         emptyMessage: "Rien de neuf pour l'instant, revenez un peu plus tard.",
       });
-      setStagePopoverOpen(false);
       setExpanded(true);
+
       setUserCollapsed(false);
     },
     [location.pathname, activeRole, requestNextTip],
