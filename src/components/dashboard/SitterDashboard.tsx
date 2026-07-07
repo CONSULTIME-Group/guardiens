@@ -19,6 +19,7 @@ import SitterMobileStickyCTA from "./sitter/SitterMobileStickyCTA";
 import SitterStatusBar from "./sitter/SitterStatusBar";
 import SitterBadgesSection from "./sitter/SitterBadgesSection";
 import NearbyHelpersCarousel from "./shared/NearbyHelpersCarousel";
+import CommunityPulseBanner from "./shared/CommunityPulseBanner";
 import SitterEmergencyCardCompact from "./sitter/SitterEmergencyCardCompact";
 import SitterMissionsSection from "./sitter/SitterMissionsSection";
 import CommunityQuestionsSection from "./CommunityQuestionsSection";
