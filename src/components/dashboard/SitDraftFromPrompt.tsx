@@ -38,7 +38,7 @@ export interface SitDraftFromPromptProps {
 export default function SitDraftFromPrompt({ secondary = false, primary = null }: SitDraftFromPromptProps = {}) {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
-  const [almaMood, setAlmaMood] = useState<"idle" | "happy">("idle");
+  const [almaMood, setAlmaMood] = useState<"idle" | "happy" | "thinking" | "attentive">("attentive");
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -63,6 +63,7 @@ export default function SitDraftFromPrompt({ secondary = false, primary = null }
     const clean = prompt.trim();
     if (clean.length < 10) return;
     setLoading(true);
+    setAlmaMood("thinking");
     try {
       const { data, error } = await supabase.functions.invoke("draft-sit-from-prompt", {
         body: { prompt: clean },
@@ -70,11 +71,12 @@ export default function SitDraftFromPrompt({ secondary = false, primary = null }
       if (error || !data?.draftId) {
         const msg = (data as any)?.error || error?.message || "Génération impossible pour le moment.";
         toast({ variant: "destructive", title: "Brouillon non généré", description: msg });
+        setAlmaMood("attentive");
         setLoading(false);
         return;
       }
       setAlmaMood("happy");
-      window.setTimeout(() => setAlmaMood("idle"), 800);
+      window.setTimeout(() => setAlmaMood("attentive"), 1200);
       void trackEvent("owner_draft_from_prompt_generated", {
         metadata: {
           prompt_length: clean.length,
@@ -101,6 +103,7 @@ export default function SitDraftFromPrompt({ secondary = false, primary = null }
         title: "Erreur inattendue",
         description: e instanceof Error ? e.message : "Réessayez dans un instant.",
       });
+      setAlmaMood("attentive");
       setLoading(false);
     }
   }, [prompt, navigate, toast]);

@@ -47,6 +47,7 @@ import { useOwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
 import ActivationScoreCard from "./owner/ActivationScoreCard";
 import NextActionsList from "./owner/NextActionsList";
 import AlmaSilentSitBubble from "@/components/ai/alma/AlmaSilentSitBubble";
+import { AlmaOwnerTrafficNoActionWhisper } from "@/components/ai/alma/wiring/AlmaOwnerTrafficNoActionWhisper";
 import {
   computeOwnerNextActions,
   computeOwnerActivationScore,
@@ -429,6 +430,10 @@ const OwnerDashboard = () => {
   return (
     <div className="space-y-6 md:space-y-8 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-8">
 {/* pb mobile = BottomNav (h-16=64px) + Sticky CTA (~72px) + safe-area iPhone notch. */}
+
+      {/* Alma trigger owner_traffic_no_action : annonce avec vues réelles mais 0 candidature. */}
+      <AlmaOwnerTrafficNoActionWhisper sits={sits} />
+
 
       {showAlmaFirstMeeting && (
         <div className="px-5 md:px-8 pt-2">

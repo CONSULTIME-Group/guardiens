@@ -2,8 +2,8 @@
  * Alma Pass 4 — bibliothèque de messages narratifs (12 triggers matching).
  *
  * Chaque helper construit un objet AlmaWhisper prêt à être queué via
- * AlmaContext.queueWhisper. Messages < 140 caractères, vouvoiement pour
- * l'audience owner, tutoiement pour l'audience sitter, jamais de tiret
+ * AlmaContext.queueWhisper. Messages < 140 caractères, vouvoiement absolu
+ * pour toutes les audiences (propriétaires et gardiens), jamais de tiret
  * cadratin, jamais de mot proscrit.
  */
 import { AlmaWhisper, AlmaWhisperType, WHISPER_PRIORITY } from "./whisper-types";
@@ -30,7 +30,7 @@ export function buildFreshSitWhisper(params: {
     ...base("sitter_fresh_sit_detected"),
     audience: "sitter",
     surface: "search",
-    message: `Alma te chuchote, cette annonce à ${params.city} vient d'être publiée il y a ${params.hoursAgo}h, encore aucun candidat.`,
+    message: `Cette annonce à ${params.city} vient d'être publiée il y a ${params.hoursAgo}h, aucun candidat pour le moment.`,
     primaryAction: { label: "Voir l'annonce", onClick: params.onView, actionId: "view_sit" },
   };
 }
@@ -70,7 +70,7 @@ export function buildPopularSitWhisper(params: {
     ...base("sitter_popular_sit_context"),
     audience: "sitter",
     surface: "sit_detail",
-    message: `Cette annonce a été vue ${params.viewCount} fois cette semaine, ${params.applicationsCount} candidats. Votre affinité ${params.affinityScore}% vous met dans le top.`,
+    message: `Cette annonce a été vue ${params.viewCount} fois cette semaine, ${params.applicationsCount} candidats. Votre affinité de ${params.affinityScore}% vous place dans le haut du panier.`,
     primaryAction: { label: "Postuler maintenant", onClick: params.onApply, actionId: "apply" },
   };
 }
@@ -96,7 +96,7 @@ export function buildActiveSitterWhisper(params: {
     ...base("owner_active_sitter_context"),
     audience: "owner",
     surface: "sitter_profile",
-    message: `${params.firstName} a fait ${params.completedSits} gardes récentes, dont ${params.longStays} de plus de 7 jours. Il connaît le métier.`,
+    message: `${params.firstName} a fait ${params.completedSits} gardes récentes, dont ${params.longStays} de plus de 7 jours. Un profil qui connaît le métier.`,
     primaryAction: {
       label: "L'inviter à candidater",
       onClick: params.onInvite,
@@ -114,7 +114,7 @@ export function buildReciprocalInterestWhisper(params: {
     ...base("owner_reciprocal_interest"),
     audience: "owner",
     surface: "sitter_profile",
-    message: `${params.firstName} a consulté votre annonce ${params.views} fois cette semaine. Il a l'air très intéressé.`,
+    message: `${params.firstName} a consulté votre annonce ${params.views} fois cette semaine. Un intérêt marqué.`,
     primaryAction: {
       label: "L'inviter à candidater",
       onClick: params.onInvite,
@@ -183,7 +183,7 @@ export function buildInternationalDiscoveryWhisper(params: {
     ...base("sitter_international_discovery"),
     audience: "sitter",
     surface: "listings",
-    message: `Alma remarque, une annonce à ${params.city} vient d'apparaître. Ce n'est pas votre zone, mais votre chien pourrait aimer le soleil.`,
+    message: `Une annonce à ${params.city} vient d'apparaître. Ce n'est pas votre zone, mais votre compagnon pourrait apprécier le dépaysement.`,
     primaryAction: {
       label: "Voir les annonces internationales",
       onClick: params.onExplore,
