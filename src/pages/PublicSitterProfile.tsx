@@ -632,9 +632,9 @@ export default function PublicSitterProfile() {
     const to = from + OWNER_SITS_PAGE_SIZE - 1;
     const { data, error } = await supabase
       .from('sits')
-      .select('id, title, start_date, end_date, status, created_at')
+      .select('id, slug, title, city, cover_photo_url, start_date, end_date, status, created_at')
       .eq('user_id', id)
-      .in('status', ['published', 'confirmed', 'completed'])
+      .in('status', ['published'])
       .order('created_at', { ascending: false })
       .range(from, to);
     if (error) console.error('[ownerSits loadMore]', error);
