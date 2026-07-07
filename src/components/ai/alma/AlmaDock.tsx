@@ -272,6 +272,28 @@ export function AlmaDock() {
   const mood = whisper?.primaryAction ? "attentive" : "idle";
   const proposition = !whisper && !isSilent ? buildProposition(evolution, activeRole) : null;
   const stage = evolution?.stage ?? null;
+  const avatarSize = stage
+    ? ({ nouvelle: 36, eveillee: 40, complice: 42, fidele: 44 } as const)[stage]
+    : 36;
+
+  // Action utilisateur : demande explicite d'un conseil. Contourne le quota
+  // de session proactif et le verrou de surface (initiée par l'utilisateur),
+  // et affiche un repli bienveillant si tout a déjà été vu.
+  const askForTip = useCallback(
+    (source: "popover" | "proposition") => {
+      trackEvent("alma_tip_requested_on_demand", { metadata: { source } });
+      void requestNextTip({
+        surface: surfaceFromPath(location.pathname, activeRole),
+        preferNudge: false,
+        emptyMessage: "Rien de neuf pour l'instant, revenez un peu plus tard.",
+      });
+      setStagePopoverOpen(false);
+      setExpanded(true);
+      setUserCollapsed(false);
+    },
+    [location.pathname, activeRole, requestNextTip],
+  );
+
 
   return (
     <div
