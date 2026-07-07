@@ -931,6 +931,29 @@ const AlmaFrequencySection = () => {
       <div>
         <SectionHeader
           icon={MessageCircle}
+          title="Afficher Alma"
+          description="Le dock d'Alma peut être complètement masqué. Vous pouvez le réafficher à tout moment ici."
+        />
+        <label className="flex items-start gap-3 rounded-lg border border-border bg-card p-4 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={!hidden}
+            onChange={(e) => setHidden(!e.target.checked)}
+            className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary/40"
+          />
+          <span>
+            <span className="text-sm font-semibold">Afficher Alma dans l'application</span>
+            <span className="block text-xs text-muted-foreground mt-0.5">
+              Décochez pour masquer complètement le dock. La fréquence ci-dessous reste conservée si vous réactivez l'affichage.
+            </span>
+          </span>
+        </label>
+      </div>
+
+      <div>
+
+        <SectionHeader
+          icon={MessageCircle}
           title="Fréquence d'Alma"
           description="Réglez à quel point la narratrice Guardiens prend la parole dans votre parcours."
         />
