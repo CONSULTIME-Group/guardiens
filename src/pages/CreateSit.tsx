@@ -453,6 +453,19 @@ const CreateSit = () => {
 
   const saveDraft = async ({ silent = false }: { silent?: boolean } = {}) => {
     if (!user || !property) return null;
+    // Anti-brouillon fantôme : ne pas créer de brouillon vide en base.
+    // Si aucun draft existant ET aucun champ utilisateur rempli, on n'écrit rien.
+    const today = new Date().toISOString().slice(0, 10);
+    const safeStart = startDate && startDate >= today ? startDate : null;
+    const safeEnd = endDate && endDate >= today && (!safeStart || endDate >= safeStart) ? endDate : null;
+    const hasAnyContent = !!(
+      title.trim() || safeStart || safeEnd || flexibleDates || flexibleNotes.trim()
+      || specificExpectations.trim() || openTo.length > 0 || isUrgent
+      || sitEnvironments.length > 0 || minGardienSits > 0
+      || ownerMessage.trim() || dailyRoutine.trim() || coverPhotoUrl
+      || sitCity.trim()
+    );
+    if (!draftId && !hasAnyContent) return null;
     setSavingDraft(true);
     try {
       let expectations = specificExpectations;
@@ -463,9 +476,9 @@ const CreateSit = () => {
         user_id: user.id,
         property_id: property.id,
         title: title || "",
-        start_date: startDate || null,
-        end_date: endDate || null,
-        flexible_dates: flexibleDates,
+        start_date: safeStart,
+        end_date: safeEnd,
+        flexible_dates: flexibleDates || (!safeStart || !safeEnd),
         specific_expectations: expectations,
         open_to: openTo,
         is_urgent: isUrgent,
