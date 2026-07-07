@@ -279,6 +279,18 @@ const OwnerProfilePage = () => {
     return <ProfileSkeleton />;
   }
 
+  if (loadError) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-card border border-border rounded-2xl p-6 text-center space-y-4">
+          <h2 className="font-heading text-xl font-semibold">Profil indisponible</h2>
+          <p className="text-sm text-muted-foreground">{loadError}</p>
+          <Button onClick={() => reload()}>Réessayer</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
