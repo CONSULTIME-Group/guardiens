@@ -60,7 +60,7 @@ function buildProposition(
     return {
       message: "Complétons votre profil pour qu'Alma vous accompagne mieux.",
       ctaLabel: "Compléter mon profil",
-      ctaTo: activeRole === "sitter" ? "/sitter-profile" : "/owner-profile",
+      ctaTo: activeRole === "sitter" ? "/profile" : "/owner-profile",
     };
   }
   if (!signals.identityVerified) {
