@@ -11,7 +11,7 @@
  */
 import { useEffect, useState } from "react";
 import { Player } from "@lottiefiles/react-lottie-player";
-import { AlmaAvatar } from "./AlmaAvatar";
+import almaFullUrl from "@/assets/alma-full.png";
 import { cn } from "@/lib/utils";
 
 interface AlmaAnimatedProps {
