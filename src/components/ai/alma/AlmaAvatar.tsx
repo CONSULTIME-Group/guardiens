@@ -10,12 +10,14 @@
  *  - hover : léger frétillement (`animate-alma-wiggle`)
  *  - `animateIn` : petit rebond d'apparition (`animate-alma-pop-in`)
  *  - `breathe` : souffle très subtil en boucle (`animate-alma-breathe`)
+ *  - `mood` : humeur contextuelle (`idle` | `happy` | `sleepy` | `attention`).
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import almaAvatarUrl from "@/assets/alma-avatar.png";
 
 type Size = 24 | 32 | 40 | 56 | 72 | 96;
+export type AlmaMood = "idle" | "happy" | "sleepy" | "attention";
 
 interface AlmaAvatarProps {
   size?: Size;
@@ -25,6 +27,8 @@ interface AlmaAvatarProps {
   animateIn?: boolean;
   /** Animation « souffle » lente en boucle (topbar). */
   breathe?: boolean;
+  /** Humeur contextuelle : « idle » par défaut. */
+  mood?: AlmaMood;
 }
 
 export function AlmaAvatar({
@@ -32,27 +36,50 @@ export function AlmaAvatar({
   className,
   animateIn = false,
   breathe = false,
+  mood = "idle",
   ...rest
 }: AlmaAvatarProps) {
   const ariaHidden = rest["aria-hidden"];
   const [failed, setFailed] = useState(false);
+
+  // One-shot moods : replay lorsque la valeur (ré)apparaît.
+  const [oneShotKey, setOneShotKey] = useState(0);
+  useEffect(() => {
+    if (mood === "happy" || mood === "attention") {
+      setOneShotKey((k) => k + 1);
+    }
+  }, [mood]);
+
+  const moodClass =
+    mood === "happy"
+      ? "motion-safe:animate-alma-happy"
+      : mood === "attention"
+      ? "motion-safe:animate-alma-attention"
+      : mood === "sleepy"
+      ? "opacity-70 motion-safe:animate-alma-breathe-slow"
+      : breathe
+      ? "motion-safe:animate-alma-breathe"
+      : "";
 
   const commonClass = cn(
     "inline-block rounded-full object-cover select-none",
     "transition-transform duration-200 ease-out",
     "motion-safe:hover:animate-alma-wiggle",
     animateIn && "motion-safe:animate-alma-pop-in",
-    breathe && "motion-safe:animate-alma-breathe",
+    moodClass,
     className,
   );
+
+  const styleWithOrigin = { width: size, height: size, transformOrigin: "bottom center" } as const;
 
   if (failed) {
     return (
       <span
+        key={mood === "happy" || mood === "attention" ? oneShotKey : undefined}
         role="img"
         aria-label="Alma"
         aria-hidden={ariaHidden}
-        style={{ width: size, height: size }}
+        style={styleWithOrigin}
         className={cn(commonClass, "bg-primary/15")}
       />
     );
@@ -60,6 +87,7 @@ export function AlmaAvatar({
 
   return (
     <img
+      key={mood === "happy" || mood === "attention" ? oneShotKey : undefined}
       src={almaAvatarUrl}
       alt="Alma"
       width={size}
@@ -70,7 +98,7 @@ export function AlmaAvatar({
       aria-label="Alma"
       aria-hidden={ariaHidden}
       onError={() => setFailed(true)}
-      style={{ width: size, height: size }}
+      style={styleWithOrigin}
       className={commonClass}
     />
   );

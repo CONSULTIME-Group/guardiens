@@ -30,6 +30,7 @@ export interface SitDraftFromPromptProps {
 export default function SitDraftFromPrompt({ secondary = false }: SitDraftFromPromptProps = {}) {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
+  const [almaMood, setAlmaMood] = useState<"idle" | "happy">("idle");
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -64,6 +65,8 @@ export default function SitDraftFromPrompt({ secondary = false }: SitDraftFromPr
         setLoading(false);
         return;
       }
+      setAlmaMood("happy");
+      window.setTimeout(() => setAlmaMood("idle"), 800);
       void trackEvent("owner_draft_from_prompt_generated", {
         metadata: {
           prompt_length: clean.length,
@@ -104,7 +107,7 @@ export default function SitDraftFromPrompt({ secondary = false }: SitDraftFromPr
     >
       <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 mb-3">
         <div className="shrink-0 self-start">
-          <AlmaAnimated size={72} />
+          <AlmaAnimated size={72} mood={almaMood} />
         </div>
         <div className="min-w-0">
           <h2
