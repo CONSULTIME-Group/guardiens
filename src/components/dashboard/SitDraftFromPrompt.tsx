@@ -110,8 +110,8 @@ export default function SitDraftFromPrompt({ secondary = false }: SitDraftFromPr
           <h2
             className={
               secondary
-                ? "text-base md:text-lg font-serif font-medium text-foreground leading-tight"
-                : "text-lg md:text-xl font-serif font-semibold text-foreground leading-tight"
+                ? "text-base md:text-lg font-heading font-medium text-foreground leading-tight"
+                : "text-lg md:text-xl font-heading font-semibold text-foreground leading-tight"
             }
           >
             {secondary
