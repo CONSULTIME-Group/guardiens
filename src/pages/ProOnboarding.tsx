@@ -269,7 +269,7 @@ export default function ProOnboarding() {
 
         <Card className="mb-6 border-accent/30 bg-accent/5">
           <CardContent className="p-4 text-sm space-y-1">
-            <p className="font-semibold text-foreground">Pros fondateurs</p>
+            <p className="font-semibold text-foreground">Premiers pros référencés</p>
             <p className="text-muted-foreground leading-relaxed">
               Les premiers pros inscrits bénéficient d'un accès privilégié à l'annuaire et à ses futures fonctionnalités (mise en avant, statistiques, prise de rendez-vous). Les conditions d'abonnement seront annoncées avant tout changement.
             </p>

@@ -48,7 +48,7 @@ export const PROPRIO_BADGE_IDS: string[] = [
 ]
 
 export const SPECIAL_BADGE_IDS: string[] = [
-  'fondateur', 'premiere_annonce', 'id_verifiee', 'gardien_urgence', 'courant_passe',
+  'premiere_annonce', 'id_verifiee', 'gardien_urgence', 'courant_passe',
 ]
 
 export const MISSION_BADGE_IDS: string[] = [
@@ -287,14 +287,7 @@ export const BADGE_DEFINITIONS: Record<string, BadgeDefinition> = {
   // SPÉCIAUX, métal fixe | admin ou automatique
   // ══════════════════════════════════════════════════════════
 
-  fondateur: {
-    label: "Pionnier Fondateur",
-    labelArc: "PIONNIER FONDATEUR",
-    category: 'special', expirable: false, fixedTier: 'gold',
-    tooltip: "Membre de la première heure ayant bâti les bases de Guardiens.",
-    bg: '#7A5200', iconColor: '#FFE27A',
-    svgIcon: `<path d="M20 10l2.4 7.3H30l-6.2 4.5 2.4 7.3-6.2-4.5-6.2 4.5 2.4-7.3L10 17.3h7.6z" fill="#FFE27A"/>`,
-  },
+
 
   gardien_urgence: {
     label: "Gardien d'urgence",

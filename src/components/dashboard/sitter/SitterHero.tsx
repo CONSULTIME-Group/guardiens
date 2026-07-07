@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { Eye } from "lucide-react";
-import FounderBadge from "@/components/badges/FounderBadge";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
@@ -10,6 +9,7 @@ interface SitterHeroProps {
   firstName?: string;
   /** Avatar gardien, affiché en hero pour identité visuelle (vitrine côté gardien). */
   avatarUrl?: string | null;
+  /** @deprecated conservé pour compat, plus rendu visuellement. */
   isFounder?: boolean;
   subtitle: string;
   isAvailable: boolean;
@@ -17,7 +17,7 @@ interface SitterHeroProps {
 }
 
 const SitterHero = ({
-  userId, firstName, avatarUrl, isFounder, subtitle, isAvailable, onToggleAvailability,
+  userId, firstName, avatarUrl, subtitle, isAvailable, onToggleAvailability,
 }: SitterHeroProps) => {
   const initial = firstName ? capitalize(firstName).charAt(0) : "?";
 
@@ -48,7 +48,6 @@ const SitterHero = ({
             <h1 className="text-xl sm:text-2xl md:text-4xl font-heading font-bold text-white leading-tight mb-1">
               Bonjour{firstName ? `, ${capitalize(firstName)}` : ""} !
             </h1>
-            {isFounder && <FounderBadge size="sm" />}
           </div>
           <p className="text-sm text-white/75 font-sans">{subtitle}</p>
         </div>

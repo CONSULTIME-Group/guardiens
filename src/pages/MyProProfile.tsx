@@ -258,39 +258,8 @@ export default function MyProProfile() {
 
 
           <TabsContent value="overview" className="mt-6 space-y-6">
-            {/* Programme Fondateurs — la pièce signature */}
-            <div className="relative overflow-hidden rounded-2xl border border-founder-border/60 bg-founder-soft p-6 sm:p-8 shadow-sm">
-              <div className="absolute -right-8 -top-8 opacity-[0.08] pointer-events-none">
-                <svg className="w-48 h-48 text-founder" fill="currentColor" viewBox="0 0 100 100">
-                  <path d="M50 5 L55 15 L65 10 L68 22 L80 20 L78 32 L90 35 L85 45 L95 50 L85 55 L90 65 L78 68 L80 80 L68 78 L65 90 L55 85 L50 95 L45 85 L35 90 L32 78 L20 80 L22 68 L10 65 L15 55 L5 50 L15 45 L10 35 L22 32 L20 20 L32 22 L35 10 L45 15 Z" />
-                </svg>
-              </div>
-              <div className="relative flex flex-col sm:flex-row gap-6 items-start">
-                <div className="flex-shrink-0">
-                  <div
-                    className="w-16 h-16 rounded-full bg-founder border-2 border-founder-border flex items-center justify-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.12),0_4px_14px_hsl(var(--founder)/0.35)]"
-                    aria-hidden
-                  >
-                    <span className="text-founder-foreground font-heading italic text-2xl select-none">G</span>
-                  </div>
-                </div>
-                <div className="space-y-3 min-w-0">
-                  <div className="flex items-center gap-3">
-                    <h2 className="text-[11px] uppercase tracking-[0.2em] text-founder font-semibold">
-                      Programme fondateurs
-                    </h2>
-                    <span className="h-px w-12 bg-founder-border" />
-                  </div>
-                  <p className="font-heading text-lg leading-relaxed text-foreground">
-                    Vous faites partie des premiers pros référencés sur Guardiens.{" "}
-                    <span className="text-foreground/90">Vous bénéficiez d'un accès privilégié à l'annuaire</span> pendant la phase bêta.
-                  </p>
-                  <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl">
-                    Les conditions d'abonnement vous seront communiquées avant tout changement, avec un tarif fondateur réservé en reconnaissance de votre confiance initiale.
-                  </p>
-                </div>
-              </div>
-            </div>
+
+
 
             {/* Cockpit : État + Catégorie */}
             <div className="grid sm:grid-cols-2 gap-4">

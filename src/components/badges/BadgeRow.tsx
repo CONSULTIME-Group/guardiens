@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { isBadgeActive } from './badge-definitions'
+import { BADGE_DEFINITIONS, isBadgeActive } from './badge-definitions'
 import { BadgeSceau } from './BadgeSceau'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
@@ -14,12 +14,16 @@ interface BadgeRowProps {
   maxVisible?: number
 }
 
-const PRIORITY_ORDER = ['fondateur', 'id_verifiee']
+const PRIORITY_ORDER = ['id_verifiee']
 
 export function BadgeRow({ badges, size = 'normal', maxVisible = 6 }: BadgeRowProps) {
   const [showAll, setShowAll] = useState(false)
 
-  const active = badges
+  // Filtre les badges dont la définition n'existe plus (ex. badge retiré
+  // du catalogue) pour ne jamais rendre de disque vide.
+  const known = badges.filter(b => BADGE_DEFINITIONS[b.badge_id])
+
+  const active = known
     .filter(b => isBadgeActive(b.badge_id, b.created_at))
     .sort((a, b) => {
       const aIdx = PRIORITY_ORDER.indexOf(a.badge_id)
@@ -30,7 +34,7 @@ export function BadgeRow({ badges, size = 'normal', maxVisible = 6 }: BadgeRowPr
       return b.count - a.count
     })
 
-  const expired = badges.filter(b => !isBadgeActive(b.badge_id, b.created_at))
+  const expired = known.filter(b => !isBadgeActive(b.badge_id, b.created_at))
 
   const visible = active.slice(0, maxVisible)
   const overflow = active.length - maxVisible

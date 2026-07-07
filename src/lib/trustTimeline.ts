@@ -56,7 +56,6 @@ const MAJOR_BADGES = new Set([
   "super_sitter",
   "verified",
   "super_voisin",
-  "founder",
   "pro_verified",
 ]);
 
@@ -64,7 +63,6 @@ const BADGE_LABELS: Record<string, string> = {
   super_sitter: "Devient Super Sitter",
   verified: "Identité vérifiée",
   super_voisin: "Reconnu de confiance",
-  founder: "Membre fondateur",
   pro_verified: "Pro vérifié",
 };
 
