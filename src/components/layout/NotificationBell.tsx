@@ -137,11 +137,11 @@ const NotificationBell = () => {
         <button
           type="button"
           aria-label={unreadCount > 0 ? `Notifications (${unreadCount} non lues)` : "Notifications"}
-          className="relative p-2 rounded-lg hover:bg-accent transition-colors"
+          className="relative inline-flex items-center justify-center w-11 h-11 rounded-full hover:bg-accent transition-colors"
         >
           <Bell className="h-5 w-5 text-muted-foreground" />
           {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold tabular-nums">
+            <span className="absolute top-1 right-1 bg-primary text-primary-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold tabular-nums z-10">
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           )}

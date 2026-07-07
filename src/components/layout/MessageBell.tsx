@@ -136,10 +136,10 @@ const MessageBell = () => {
       <Link
         to="/messages"
         aria-label="Messagerie (abonnement requis)"
-        className="relative inline-flex items-center justify-center w-9 h-9 rounded-full text-muted-foreground hover:bg-accent transition-colors"
+        className="relative inline-flex items-center justify-center w-11 h-11 rounded-full text-muted-foreground hover:bg-accent transition-colors"
       >
         <MessageSquare className="h-5 w-5" strokeWidth={1.8} />
-        <Lock className="absolute -bottom-0.5 -right-0.5 h-3 w-3 text-amber-500" />
+        <Lock className="absolute bottom-1 right-1 h-3 w-3 text-amber-500 z-10" />
       </Link>
     );
   }
@@ -152,11 +152,11 @@ const MessageBell = () => {
         <button
           type="button"
           aria-label={unreadCount > 0 ? `Messagerie, ${unreadCount} non lus` : "Messagerie"}
-          className="relative inline-flex items-center justify-center w-9 h-9 rounded-full text-foreground hover:bg-accent transition-colors"
+          className="relative inline-flex items-center justify-center w-11 h-11 rounded-full text-foreground hover:bg-accent transition-colors"
         >
           <MessageSquare className="h-5 w-5" strokeWidth={1.8} />
           {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-semibold flex items-center justify-center tabular-nums">
+            <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-semibold flex items-center justify-center tabular-nums z-10">
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           )}
