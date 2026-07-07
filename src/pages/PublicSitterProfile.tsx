@@ -1148,6 +1148,10 @@ export default function PublicSitterProfile() {
                     sitterId={id}
                     sitterFirstName={profile?.first_name ?? null}
                   />
+                  <AlmaOwnerActiveSitterWhisper
+                    sitterId={id}
+                    sitterFirstName={profile?.first_name ?? null}
+                  />
                 </div>
               )}
 
