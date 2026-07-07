@@ -53,12 +53,41 @@ Deno.serve(async (req) => {
       return json({ error: "Vous avez atteint la limite de 3 générations par heure. Réessayez plus tard." }, 429);
     }
 
-    // Contexte owner : ville par défaut si absente du prompt
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("city, first_name")
-      .eq("id", userId)
-      .maybeSingle();
+    // Contexte owner enrichi : profil, notes d'accueil, propriété, animaux
+    const [profileRes, ownerProfileRes, propertyRes] = await Promise.all([
+      supabase.from("profiles").select("city, first_name, bio").eq("id", userId).maybeSingle(),
+      supabase.from("owner_profiles").select("welcome_notes, rules_notes, presence_expected").eq("user_id", userId).maybeSingle(),
+      supabase.from("properties").select("id, type, environment").eq("user_id", userId).limit(1).maybeSingle(),
+    ]);
+    const profile = profileRes.data;
+    const ownerProfile = ownerProfileRes.data;
+    const propertyRow = propertyRes.data;
+
+    let pets: any[] = [];
+    if (propertyRow?.id) {
+      const { data: petsData } = await supabase
+        .from("pets")
+        .select("name, species, character, activity_level, walk_duration, alone_duration, food, special_needs")
+        .eq("property_id", propertyRow.id);
+      pets = petsData || [];
+    }
+
+    const petsCtx = pets.length > 0
+      ? pets.map((p) => {
+          const bits: string[] = [`${p.name} (${p.species})`];
+          if (p.character) bits.push(`caractère : ${p.character}`);
+          if (p.activity_level) bits.push(`activité : ${p.activity_level}`);
+          if (p.walk_duration) bits.push(`promenades : ${p.walk_duration}`);
+          if (p.alone_duration) bits.push(`solitude tolérée : ${p.alone_duration}`);
+          if (p.food) bits.push(`alimentation : ${p.food}`);
+          if (p.special_needs) bits.push(`besoins particuliers : ${p.special_needs}`);
+          return "- " + bits.join(", ");
+        }).join("\n")
+      : "(aucun animal renseigné dans le profil)";
+
+    const propertyCtx = propertyRow
+      ? `Type : ${propertyRow.type ?? "non renseigné"}${propertyRow.environment ? `, environnement : ${propertyRow.environment}` : ""}`
+      : "(logement non renseigné)";
 
     const todayIso = new Date().toISOString().slice(0, 10);
     const currentYear = new Date().getUTCFullYear();
@@ -73,18 +102,28 @@ Règle absolue sur les dates (aujourd'hui = ${todayIso}, année en cours = ${cur
 - Toute date retournée DOIT être >= ${todayIso}. Interdiction stricte de renvoyer une année < ${currentYear}. En cas de doute, laissez vide et mettez flexible_dates=true.
 - Format YYYY-MM-DD uniquement.
 
+Contexte propriétaire (à réutiliser, ne jamais inventer ce qui n'y est pas) :
+- Prénom : ${profile?.first_name ?? "non renseigné"}
+- Ville par défaut : ${profile?.city ?? "non renseignée"}
+- Bio du propriétaire : ${profile?.bio ? `« ${profile.bio.slice(0, 400)} »` : "(vide)"}
+- Notes d'accueil : ${ownerProfile?.welcome_notes ? `« ${ownerProfile.welcome_notes.slice(0, 400)} »` : "(vide)"}
+- Règles maison : ${ownerProfile?.rules_notes ? `« ${ownerProfile.rules_notes.slice(0, 300)} »` : "(vide)"}
+- Présence prévue : ${ownerProfile?.presence_expected ?? "(non renseignée)"}
+- Logement : ${propertyCtx}
+- Animaux à garder :
+${petsCtx}
+
 Extraction attendue depuis la phrase du propriétaire :
 - Ville : extraite du prompt, sinon utilisez « ${profile?.city ?? ""} » (peut rester vide).
-- Animaux : nombre + espèce (chien, chat, NAC…).
+- Animaux : privilégiez ceux du contexte ci-dessus s'ils existent, sinon ceux du prompt.
 - Environnement : choisir 0 à 3 valeurs STRICTEMENT parmi cette liste (aucune autre valeur autorisée) : ville, campagne, montagne, lac, vignes, foret. N'inventez pas « maison », « appartement », « jardin » : ces mots vont dans la description, pas dans environments.
 - Préférences gardien : télétravail, présence continue, calme, sportif (choisir 1 à 3 dans open_to).
 
-Génération :
+Génération (personnalisée à partir du contexte, sans inventer de données absentes) :
 - title : 40 à 70 caractères. Format « Garde de [animaux] à [ville], du [début] au [fin] » si dates connues, sinon « Garde de [animaux] à [ville] ».
-- description globale intégrée au champ specific_expectations (200 à 300 mots) : contexte, animaux, attentes gardien, environnement, rencontre.
-- daily_routine : 100 à 150 mots, routine quotidienne des animaux.
-- specific_expectations : 60 à 120 mots, attentes ciblées.
-- owner_message : 60 à 120 mots, chaleureux, vouvoiement, invitation à la rencontre.
+- specific_expectations : 60 à 120 mots, attentes ciblées, cohérentes avec les règles maison et la présence prévue si renseignées.
+- daily_routine : 100 à 150 mots, routine quotidienne DÉDUITE des routines réelles des animaux ci-dessus (promenades, solitude, alimentation, besoins particuliers). Ne pas inventer d'animaux ni de durées.
+- owner_message : 60 à 120 mots, ton cohérent avec la bio et les notes d'accueil du propriétaire, vouvoiement, invitation à la rencontre.
 
 Si le prompt mentionne un prix ou une transaction financière, ignorez-le : Guardiens est un échange sans transaction financière entre membres.`;
 
