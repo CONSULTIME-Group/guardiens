@@ -439,7 +439,7 @@ export function AlmaDock() {
               />
             )}
             <AlmaAvatarAnimated
-              size={40}
+              size={stage ? ({ nouvelle: 36, eveillee: 40, complice: 42, fidele: 44 } as const)[stage] : 36}
               mood={isSilent ? "sleepy" : (mood === "attentive" ? "attentive" : "idle")}
               stage={stage ?? undefined}
             />

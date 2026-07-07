@@ -14,7 +14,10 @@ import {
   useAlmaEvolution,
   type AlmaStage,
 } from "@/hooks/useAlmaEvolution";
-import { AlmaAvatarAnimated } from "@/components/ai/alma/AlmaAvatarAnimated";
+import {
+  AlmaAvatarAnimated,
+  ALMA_STAGE_SCALE,
+} from "@/components/ai/alma/AlmaAvatarAnimated";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -24,6 +27,8 @@ const STAGE_MOOD: Record<AlmaStage, "gentle" | "attentive" | "happy" | "playful"
   complice: "happy",
   fidele: "playful",
 };
+
+const PROGRESSION_BASE_SIZE = 80;
 
 export default function AlmaEvolution() {
   const { data, isLoading } = useAlmaEvolution();
@@ -41,7 +46,7 @@ export default function AlmaEvolution() {
         <header className="flex flex-col items-center gap-5 mb-10 text-center md:flex-row md:items-start md:text-left md:gap-6">
           <div className="relative shrink-0">
             <AlmaAvatarAnimated
-              size={192}
+              size={Math.min(220, Math.round(150 * ALMA_STAGE_SCALE[currentStage]))}
               mood={STAGE_MOOD[currentStage]}
               stage={currentStage}
               showHalo
@@ -60,6 +65,52 @@ export default function AlmaEvolution() {
             </p>
           </div>
         </header>
+
+        {/* Rangée de progression : Alma à chaque stade, taille et présence
+            croissantes. Le stade courant est mis en avant, les stades non
+            atteints sont atténués. L'utilisateur voit la trajectoire. */}
+        <section
+          aria-label="Progression d'Alma à travers les stades"
+          className="mb-8"
+        >
+          <div className="flex items-end justify-between gap-2 md:gap-4 rounded-2xl border bg-card p-4 md:p-6 overflow-x-auto">
+            {ALMA_STAGES.map((stage, index) => {
+              const isCurrent = stage === currentStage;
+              const isPast = index < currentIndex;
+              const isFuture = index > currentIndex;
+              const size = Math.round(PROGRESSION_BASE_SIZE * ALMA_STAGE_SCALE[stage]);
+              return (
+                <div
+                  key={stage}
+                  className={cn(
+                    "flex flex-col items-center gap-2 shrink-0 rounded-xl px-2 md:px-3 py-2 transition",
+                    isCurrent && "bg-primary/10 ring-2 ring-primary/40",
+                    isFuture && "opacity-45",
+                    isPast && "opacity-90",
+                  )}
+                  aria-current={isCurrent ? "step" : undefined}
+                >
+                  <AlmaAvatarAnimated
+                    size={size}
+                    mood={STAGE_MOOD[stage]}
+                    stage={stage}
+                    showHalo={isCurrent}
+                    aria-hidden
+                  />
+                  <p
+                    className={cn(
+                      "text-xs md:text-sm font-medium text-center",
+                      isCurrent ? "text-primary" : "text-muted-foreground",
+                    )}
+                  >
+                    {ALMA_STAGE_LABEL[stage]}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
 
 
         {data?.nextMilestone && (
