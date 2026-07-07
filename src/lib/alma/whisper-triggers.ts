@@ -96,7 +96,7 @@ export function buildActiveSitterWhisper(params: {
     ...base("owner_active_sitter_context"),
     audience: "owner",
     surface: "sitter_profile",
-    message: `${params.firstName} a fait ${params.completedSits} gardes récentes, dont ${params.longStays} de plus de 7 jours. Il connaît le métier.`,
+    message: `${params.firstName} a fait ${params.completedSits} gardes récentes, dont ${params.longStays} de plus de 7 jours. Un profil qui connaît le métier.`,
     primaryAction: {
       label: "L'inviter à candidater",
       onClick: params.onInvite,
