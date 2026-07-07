@@ -383,6 +383,118 @@ const EAR_L_CURLS: Array<[number, number, number]> = [
   [88, 40, 5], [90, 48, 5], [88, 56, 5], [84, 62, 4.5], [78, 62, 4],
 ];
 
+/**
+ * Accessoires portés autour du cou (collier, bandana, écharpe) — insérés
+ * ENTRE le corps et la tête pour rester lisibles. Rendu conditionnel par
+ * stade. Les couleurs utilisent les teintes de stade déjà définies
+ * (sky pour eveillee, primary pour complice, amber pour fidele).
+ *
+ * `aria-hidden` implicite : ces éléments SVG sont décoratifs, le parent
+ * <span> porte déjà `role="img"` / `aria-label="Alma"`.
+ */
+function StageNeckAccessory({ stage }: { stage?: AlmaStage }) {
+  if (!stage || stage === "nouvelle") return null;
+
+  if (stage === "eveillee") {
+    // Collier fin bleu ciel avec une petite pastille
+    return (
+      <g>
+        <path
+          d="M32 68 q18 8 36 0"
+          className="stroke-sky-500"
+          strokeWidth="1.6"
+          fill="none"
+          strokeLinecap="round"
+        />
+        <circle cx="50" cy="71.2" r="1.6" className="fill-sky-500" />
+      </g>
+    );
+  }
+
+  if (stage === "complice") {
+    // Bandana + petite médaille
+    return (
+      <g>
+        <path
+          d="M27 66 q23 10 46 0 l-4 8 q-19 6 -38 0 z"
+          className="fill-primary"
+        />
+        <path d="M46 73 l4 9 l4 -9 z" className="fill-primary" />
+        <circle cx="42" cy="70" r="0.9" fill="#ffffff" opacity="0.75" />
+        <circle cx="50" cy="72" r="0.9" fill="#ffffff" opacity="0.75" />
+        <circle cx="58" cy="70" r="0.9" fill="#ffffff" opacity="0.75" />
+        <circle
+          cx="50"
+          cy="78"
+          r="2.4"
+          className="fill-primary stroke-primary-foreground"
+          strokeWidth="0.6"
+        />
+      </g>
+    );
+  }
+
+  // fidele : écharpe ambre nouée
+  return (
+    <g>
+      <path
+        d="M26 66 q24 10 48 0 l-3 7 q-21 6 -42 0 z"
+        className="fill-amber-500"
+      />
+      <path d="M45 72 l5 10 l5 -10 z" className="fill-amber-500" />
+    </g>
+  );
+}
+
+/**
+ * Accessoires portés sur la tête (étincelle, couronne). Rendus DANS le
+ * groupe `alma-head-mood` pour suivre les mouvements de tête.
+ */
+function StageHeadAccessory({ stage }: { stage?: AlmaStage }) {
+  if (!stage || stage === "nouvelle") return null;
+
+  if (stage === "eveillee") {
+    // Petite étincelle discrète en haut à droite
+    return (
+      <path
+        d="M80 20 l1 -3 l1 3 l3 1 l-3 1 l-1 3 l-1 -3 l-3 -1 z"
+        className="fill-sky-500"
+      />
+    );
+  }
+
+  if (stage === "complice") {
+    // Étincelle plus marquée + halo joueur
+    return (
+      <g>
+        <circle cx="82" cy="22" r="2.2" className="fill-primary" opacity="0.35" />
+        <path
+          d="M82 18 l1.2 -3.4 l1.2 3.4 l3.4 1.2 l-3.4 1.2 l-1.2 3.4 l-1.2 -3.4 l-3.4 -1.2 z"
+          className="fill-primary"
+        />
+      </g>
+    );
+  }
+
+  // fidele : petite couronne posée sur le toupet + étoile flottante
+  return (
+    <g>
+      <path
+        d="M34 15 L42 6 L46 12 L50 3 L54 12 L58 6 L66 15 L64 19 L36 19 Z"
+        className="fill-amber-500"
+      />
+      <circle cx="42" cy="7" r="1.3" className="fill-amber-500" />
+      <circle cx="50" cy="4" r="1.3" className="fill-amber-500" />
+      <circle cx="58" cy="7" r="1.3" className="fill-amber-500" />
+      <rect x="36" y="17.5" width="28" height="1.8" className="fill-amber-500" opacity="0.85" />
+      <path
+        d="M84 22 l1.4 -4 l1.4 4 l4 1.4 l-4 1.4 l-1.4 4 l-1.4 -4 l-4 -1.4 z"
+        className="fill-amber-500"
+      />
+    </g>
+  );
+}
+
 export function AlmaAvatarAnimated({
   mood = "idle",
   size = 40,
