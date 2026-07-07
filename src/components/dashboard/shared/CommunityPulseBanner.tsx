@@ -9,7 +9,8 @@
  * Placement recommandé : haut du dashboard, sous l'action prioritaire.
  */
 import { memo } from "react";
-import { MapPin, Users, Home, PawPrint, HandHeart } from "lucide-react";
+import { Link } from "react-router-dom";
+import { MapPin, Users, Home, PawPrint, HandHeart, ArrowRight } from "lucide-react";
 import { useCommunityPulse } from "@/hooks/useCommunityPulse";
 import { useHelpersProximityCount } from "@/hooks/useHelpersProximityCount";
 import { cn } from "@/lib/utils";
@@ -134,6 +135,15 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
           </li>
         ))}
       </ul>
+      <div className="mt-3 flex justify-end">
+        <Link
+          to="/actualites/inventaire-guardiens-france"
+          className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+        >
+          Voir l'inventaire complet
+          <ArrowRight className="h-3 w-3" aria-hidden="true" />
+        </Link>
+      </div>
     </section>
   );
 });

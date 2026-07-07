@@ -371,6 +371,27 @@ export default function News() {
           ))}
         </div>
 
+        {/* Épinglé : inventaire vivant */}
+        {activeCategory === "all" && !urlSearch.trim() && currentPage === 1 && (
+          <Link
+            to="/actualites/inventaire-guardiens-france"
+            className="group block mb-6 md:mb-8 rounded-xl border border-primary/30 bg-primary/5 p-4 md:p-5 transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <div className="flex items-start gap-3">
+              <Badge className="bg-primary text-primary-foreground shrink-0 mt-0.5">Épinglé</Badge>
+              <div className="min-w-0 flex-1">
+                <h2 className="font-heading text-base md:text-lg font-bold text-foreground group-hover:text-primary transition-colors">
+                  L'inventaire vivant de Guardiens
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Villes couvertes, races documentées, lieux dog-friendly, professionnels : tous nos chiffres mis à jour en direct.
+                </p>
+              </div>
+              <ArrowRight className="h-4 w-4 text-primary shrink-0 mt-1 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+            </div>
+          </Link>
+        )}
+
         {/* Featured "Vie locale & Entraide" section */}
         {activeCategory === "all" && !urlSearch.trim() && vieLocaleArticles.length > 0 && !loading && (
           <div className="mb-6 md:mb-10 p-4 md:p-6 rounded-xl bg-warning-soft/40">
