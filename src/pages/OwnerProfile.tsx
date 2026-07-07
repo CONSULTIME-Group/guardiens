@@ -248,7 +248,8 @@ const OwnerProfilePage = () => {
 
   const ownerEssentials = scoredCriteria.filter(c => c.kind === "essential");
   const ownerBonuses = scoredCriteria.filter(c => c.kind === "bonus");
-  const liveScore = Math.min(100, scoredCriteria.reduce((s, c) => s + (c.ok ? c.points : 0), 0));
+  const partialAffinity = affinityCount >= 3 ? 0 : affinityPoints;
+  const liveScore = Math.min(100, scoredCriteria.reduce((s, c) => s + (c.ok ? c.points : 0), 0) + partialAffinity);
 
   const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => {
     const labels = missingLabelsFor(s.id, scoredCriteria);
