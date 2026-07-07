@@ -642,6 +642,9 @@ export function AlmaAvatarAnimated({
           </g>
         </g>
 
+        {/* Accessoire de cou (collier / bandana / écharpe) selon le stade */}
+        <StageNeckAccessory stage={stage} />
+
         {/* Oreilles tombantes (indépendantes, derrière la tête) */}
         <g className="alma-part alma-ear-r">
           <path
