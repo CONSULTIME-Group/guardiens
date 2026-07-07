@@ -77,8 +77,7 @@ type ProfileTab = 'gardien' | 'proprio' | 'entraide';
 interface OwnerProfileData {
   id: string;
   user_id: string;
-  description: string | null;
-  property_type: string | null;
+  welcome_notes: string | null;
   environments: string[];
   competences: string[] | null;
   competences_disponible: boolean | null;
