@@ -38,7 +38,6 @@ export default function AlmaTopbarButton({ className }: AlmaTopbarButtonProps) {
   // qu'il n'y a pas de session : sinon le bouton reste, c'est un accès à la
   // demande.
   if (!user?.id) return null;
-  if (frequency === "silent") return null;
 
   const surface = surfaceFromPath(location.pathname);
   const role: "owner" | "sitter" = activeRole === "owner" ? "owner" : "sitter";
@@ -67,7 +66,7 @@ export default function AlmaTopbarButton({ className }: AlmaTopbarButtonProps) {
       )}
     >
       <span className="inline-flex items-center justify-center rounded-full ring-2 ring-primary/30">
-        <AlmaAvatar size={32} breathe mood={frequency === "low" ? "sleepy" : "idle"} />
+        <AlmaAvatar size={32} breathe mood={frequency === "silent" || frequency === "low" ? "sleepy" : "idle"} />
       </span>
     </button>
   );

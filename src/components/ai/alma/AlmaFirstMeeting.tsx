@@ -10,10 +10,11 @@
  * Voix persona : phrases courtes, "je", vouvoiement, aucun mot proscrit,
  * pas d'emoji, pas de tiret cadratin. CTA principal actionnable obligatoire.
  */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { AlmaAnimated } from "./AlmaAnimated";
+import { type AlmaMood } from "./AlmaAvatar";
 import { trackEvent } from "@/lib/analytics";
 import { resolveAlmaCtaHref, type AlmaCtaAction } from "@/lib/alma/cta-actions";
 
@@ -49,6 +50,7 @@ export function AlmaFirstMeeting({ role, onDone }: Props) {
   const navigate = useNavigate();
   const seenFiredRef = useRef(false);
   const copy = COPY[role];
+  const [mood, setMood] = useState<AlmaMood>("happy");
 
   useEffect(() => {
     if (seenFiredRef.current) return;
@@ -61,6 +63,11 @@ export function AlmaFirstMeeting({ role, onDone }: Props) {
       /* silent */
     }
   }, [role]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setMood("idle"), 800);
+    return () => clearTimeout(t);
+  }, []);
 
   const handlePrimary = () => {
     try {
@@ -91,7 +98,7 @@ export function AlmaFirstMeeting({ role, onDone }: Props) {
       </button>
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 pr-10">
         <div className="shrink-0 inline-flex items-center justify-center rounded-full ring-2 ring-primary/30 bg-background">
-          <AlmaAnimated size={88} />
+          <AlmaAnimated size={88} mood={mood} />
         </div>
         <div className="flex-1 min-w-0 space-y-3 text-center sm:text-left">
           <div>
