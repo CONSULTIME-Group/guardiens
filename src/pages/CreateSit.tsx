@@ -775,8 +775,10 @@ const CreateSit = () => {
                 <>
                   Je pars de votre annonce
                   {sourceSitTitle ? <> « <strong>{sourceSitTitle}</strong> »</> : null}
-                  . J'ai retenu ce que vous vouliez ajuster :{" "}
-                  <em className="text-muted-foreground">« {republishPrompt.slice(0, 240) || "à préciser ci-dessous" } »</em>. Reprenez la main, corrigez ce qui doit l'être, vous relisez avant de publier.
+                  .{" "}
+                  {adaptingWithAlma
+                    ? <>Je réécris le brouillon à partir de vos ajustements, un instant…</>
+                    : <>J'ai retenu ce que vous vouliez ajuster : <em className="text-muted-foreground">« {republishPrompt.slice(0, 240) || "à préciser ci-dessous"} »</em>. Reprenez la main, corrigez ce qui doit l'être, vous relisez avant de publier.</>}
                 </>
               ) : (
                 <>
