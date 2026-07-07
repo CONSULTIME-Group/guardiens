@@ -307,7 +307,7 @@ const SitterProfile = () => {
       ok: (mergedData.geographic_radius ?? 0) > 0, hint: tp("hints.tab_mobility") },
     { section: "identity", kind: "bonus", label: tp("criteria.bio_50"), points: 10,
       ok: (mergedData.bio?.length ?? 0) >= 50, hint: tp("hints.chars_50", { count: mergedData.bio?.length ?? 0 }) },
-    { section: "sitter", kind: "bonus", label: tp("criteria.affinity"), points: affinityPoints,
+    { section: "sitter", kind: "bonus", label: tp("criteria.affinity"), points: 10,
       ok: affinityCount >= 3, hint: tp("hints.affinity_count", { count: affinityCount }) },
     { section: "gallery", kind: "bonus", label: tp("criteria.sitter_gallery_one"), points: 5,
       ok: hasGalleryPhoto, hint: tp("hints.tab_gallery") },
