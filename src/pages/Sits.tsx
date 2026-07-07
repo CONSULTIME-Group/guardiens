@@ -1275,7 +1275,7 @@ const QuickActions = ({
     );
   }
 
-  if (effectiveStatus === "expired" || effectiveStatus === "unpublished") {
+  if (effectiveStatus === "expired" || effectiveStatus === "unpublished" || effectiveStatus === "archived") {
     return (
       <>
         <button onClick={onRepublish} className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}>
