@@ -21,7 +21,7 @@ export interface OwnerPrimaryAction {
   draftId: string | null;
 }
 
-const PUBLISHED_STATUSES = ["published", "confirmed", "completed"];
+const PUBLISHED_STATUSES = ["published", "confirmed", "completed"] as const;
 
 export function useOwnerPrimaryAction(userId: string | undefined) {
   return useQuery<OwnerPrimaryAction>({
