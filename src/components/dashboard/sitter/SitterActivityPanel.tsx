@@ -10,6 +10,7 @@ interface SitterActivityPanelProps {
   unreadCount: number;
   pendingAppsCount: number;
   nearbyListings: any[];
+  completedSits: number;
   /** Conservé pour compat (ancien aside) mais ignoré : rendu toujours en strip horizontal. */
   variant?: "aside" | "inline" | "strip";
 }
@@ -20,13 +21,23 @@ interface SitterActivityPanelProps {
  * qui destructurait la page. 6 tuiles cliquables, responsive 2 → 3 → 6 cols.
  */
 const SitterActivityPanel = ({
-  isAvailable, profileCompletion, nextGuard, unreadCount, pendingAppsCount, nearbyListings,
+  isAvailable, profileCompletion, nextGuard, unreadCount, pendingAppsCount, nearbyListings, completedSits,
 }: SitterActivityPanelProps) => {
   const nextGuardLabel = nextGuard
     ? `${format(new Date(nextGuard.start_date), "d MMM", { locale: fr })} → ${format(new Date(nextGuard.end_date), "d MMM", { locale: fr })}`
     : "À venir";
 
   const nearbyCount = nearbyListings.filter((s) => !s.is_beyond).length;
+
+  const hasNoActivity = completedSits === 0 && pendingAppsCount === 0 && unreadCount === 0 && nearbyCount === 0;
+
+  if (hasNoActivity) {
+    return (
+      <div className="rounded-2xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
+        Profil visible par les propriétaires. Vous serez prévenu dès qu'une garde correspond à votre profil.
+      </div>
+    );
+  }
 
   const tiles = [
     {
