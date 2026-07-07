@@ -117,7 +117,7 @@ export function AlmaAvatarLottie({
           lottieRef={lottieRef}
           animationData={animationData}
           autoplay
-          loop
+          loop={effectiveState !== "success"}
           onComplete={handleComplete}
           style={{ width: size, height: size }}
         />
