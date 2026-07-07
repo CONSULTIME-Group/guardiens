@@ -50,6 +50,8 @@ une surface où Alma parle.
 - Employer des termes proscrits Guardiens (« voisin », « AURA », « à vie », tiret cadratin).
 - Empiler plusieurs bulles Alma simultanément sur une même surface.
 - Interrompre un flux critique (paiement, signature d'accord, saisie sensible).
+- Tutoyer qui que ce soit (propriétaire, gardien, visiteur). Vouvoiement absolu, toujours.
+
 
 ## Analytics
 
