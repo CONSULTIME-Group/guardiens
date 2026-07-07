@@ -209,6 +209,7 @@ export type EventType =
  | "alma_republish_bubble_seen"                // Bandeau Alma republication affiché (sit_id)
  | "alma_republish_mode_selected"              // Mode choisi dans la modale republish (mode: copy|adapt, sit_id)
  | "alma_republish_published"                  // Nouvelle annonce publiée à partir d'une republication (original_sit_id, new_sit_id, mode)
+ | "alma_republish_adapted"                    // Champs réécrits par Alma en mode adapt (source_sit_id)
   | "alma_welcome_email_sent"                   // Welcome email post-signup signé Alma envoyé
   | "alma_dashboard_first_meeting_seen"         // Dashboard ouvert avec ?welcome=alma (first meeting)
   // EntraideHub Pass 3 : cycle de vie + digest hebdo + badges profil ---------
