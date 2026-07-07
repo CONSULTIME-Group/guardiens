@@ -1,13 +1,13 @@
 // Edge function: og-profile
-// Generates a dynamic Open Graph image (1200x630 SVG converted to PNG fallback via SVG)
-// for sitter profiles. Used in <meta property="og:image" /> for social sharing.
+// Génère une image Open Graph PNG 1200×630 pour les profils publics gardien / propriétaire.
+// Utilisée dans <meta property="og:image" /> pour Facebook, X, LinkedIn, WhatsApp
+// (qui rejettent les SVG comme og:image, d'où la rasterisation via resvg-wasm).
 //
-// URL: https://<project>.functions.supabase.co/og-profile?id=<user_id>
-//
-// Returns: image/svg+xml (browsers + Twitter/Facebook crawlers handle SVG OG fine,
-// and SVG keeps cold-start fast — no canvas/native deps).
+// URL : https://<project>.functions.supabase.co/og-profile?id=<user_id>
+// Retourne : image/png (cache 24h edge, revalidation 7j).
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { Resvg, initWasm } from "https://esm.sh/@resvg/resvg-wasm@2.6.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,6 +16,15 @@ const corsHeaders = {
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+// --- WASM resvg (init 1x par cold start) ---
+let resvgInitialized = false;
+async function ensureResvg() {
+  if (resvgInitialized) return;
+  const wasm = await fetch("https://esm.sh/@resvg/resvg-wasm@2.6.2/index_bg.wasm").then((r) => r.arrayBuffer());
+  await initWasm(wasm);
+  resvgInitialized = true;
+}
 
 function escapeXml(s: string): string {
   return s
@@ -171,11 +180,16 @@ Deno.serve(async (req) => {
       verified: !!profile.identity_verified,
     });
 
-    return new Response(svg, {
+    // Rasterisation SVG → PNG 1200×630 (Facebook/LinkedIn/WhatsApp rejettent SVG comme og:image).
+    await ensureResvg();
+    const resvg = new Resvg(svg, { fitTo: { mode: "width", value: 1200 } });
+    const png = resvg.render().asPng();
+
+    return new Response(png, {
       status: 200,
       headers: {
         ...corsHeaders,
-        "Content-Type": "image/svg+xml; charset=utf-8",
+        "Content-Type": "image/png",
         "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
       },
     });

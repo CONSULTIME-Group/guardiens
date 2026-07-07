@@ -77,8 +77,7 @@ type ProfileTab = 'gardien' | 'proprio' | 'entraide';
 interface OwnerProfileData {
   id: string;
   user_id: string;
-  description: string | null;
-  property_type: string | null;
+  welcome_notes: string | null;
   environments: string[];
   competences: string[] | null;
   competences_disponible: boolean | null;
@@ -343,14 +342,25 @@ export default function PublicSitterProfile() {
     return () => clearTimeout(t);
   }, [loading, activeTab]);
 
+  const [loadError, setLoadError] = useState<null | 'error'>(null);
+  const [loadNonce, setLoadNonce] = useState(0);
   useEffect(() => {
     if (!id || id === "undefined" || id === "null") { setLoading(false); return; }
     const load = async () => {
       setLoading(true);
+      setLoadError(null);
+      try {
+      // Colonnes explicites : évite un select("*") qui exposerait/rapatrierait
+      // des colonnes non utilisées côté client (privacy + payload).
+      const PUBLIC_PROFILE_COLS =
+        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, cancellation_count, pro_status, pro_specialty, pro_tagline, pro_pricing_note, pro_business_name";
+      // `last_name` retiré du select — jamais rendu publiquement.
+      const BASE_PROFILE_COLS =
+        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index, pro_status, pro_specialty, pro_tagline, pro_pricing_note, pro_business_name";
       const [profileRes, baseProfileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes, extExpRes] =
         await Promise.all([
-          supabase.from("public_profiles").select("*").eq("id", id).maybeSingle(),
-          supabase.from("profiles").select("id, first_name, last_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index, pro_status, pro_specialty, pro_tagline, pro_pricing_note, pro_business_name").eq("id", id).maybeSingle(),
+          supabase.from("public_profiles").select(PUBLIC_PROFILE_COLS).eq("id", id).maybeSingle(),
+          supabase.from("profiles").select(BASE_PROFILE_COLS).eq("id", id).maybeSingle(),
           supabase.from("sitter_profiles").select("*").eq("user_id", id).maybeSingle(),
           supabase.from("badge_attributions").select("badge_id").eq("user_id", id),
           supabase
@@ -361,12 +371,16 @@ export default function PublicSitterProfile() {
             .eq("moderation_status", "valide")
             .neq("review_type", "annulation")
             .order("created_at", { ascending: false }),
-          supabase.from("sitter_gallery").select("*").eq("user_id", id).order("created_at", { ascending: false }),
+          supabase
+            .from("sitter_gallery")
+            .select("id, photo_url, caption, created_at")
+            .eq("user_id", id)
+            .order("created_at", { ascending: false }),
           supabase.from("emergency_sitter_profiles").select("is_active").eq("user_id", id).maybeSingle(),
           supabase.from("subscriptions").select("status").eq("user_id", id).eq("status", "active").limit(1),
           supabase
             .from("owner_profiles")
-            .select("id, user_id, environments, competences, competences_disponible")
+            .select("id, user_id, welcome_notes, environments, competences, competences_disponible")
             .eq("user_id", id)
             .maybeSingle(),
           supabase
@@ -383,8 +397,8 @@ export default function PublicSitterProfile() {
       // Store in local variables before setState.
       // ⚠️ `public_profiles` (vue publique) ne contient PAS `hero_image_index` ,       // on doit donc le merger explicitement depuis `profiles` pour que la
       // sélection manuelle survive au reload.
-      const publicData = profileRes?.data ?? null;
-      const baseData = baseProfileRes?.data ?? null;
+      const publicData = (profileRes?.data as any) ?? null;
+      const baseData = (baseProfileRes?.data as any) ?? null;
       const fetchedPublicProfile = publicData
         ? { ...publicData, hero_image_index: baseData?.hero_image_index ?? null }
         : baseData;
@@ -479,11 +493,16 @@ export default function PublicSitterProfile() {
 
       // debug removed
 
-      setLoading(false);
       window.prerenderReady = true;
+      } catch (e: any) {
+        console.error('[PublicSitterProfile] load failed', e);
+        setLoadError('error');
+      } finally {
+        setLoading(false);
+      }
     };
     load();
-  }, [id]);
+  }, [id, loadNonce]);
   useEffect(() => {
     if (activeTab !== 'proprio') return;
     if (!id || loading) return;
@@ -509,11 +528,12 @@ export default function PublicSitterProfile() {
         setPets(fetchedPets);
 
         // Query 2, Annonces publiées (pagination progressive : 50 par lot, "Voir plus" charge la suite)
+        // Ne liste QUE les annonces réellement publiées (pas les gardes confirmées/terminées internes).
         const { data: sitsData, error: sitsErr, count: sitsCount } = await supabase
           .from('sits')
-          .select('id, title, start_date, end_date, status, created_at', { count: 'exact' })
+          .select('id, slug, title, city, cover_photo_url, start_date, end_date, status, created_at', { count: 'exact' })
           .eq('user_id', id)
-          .in('status', ['published', 'confirmed', 'completed'])
+          .in('status', ['published'])
           .order('created_at', { ascending: false })
           .range(0, OWNER_SITS_PAGE_SIZE - 1);
         if (sitsErr) console.error('[sits]', sitsErr);
@@ -612,9 +632,9 @@ export default function PublicSitterProfile() {
     const to = from + OWNER_SITS_PAGE_SIZE - 1;
     const { data, error } = await supabase
       .from('sits')
-      .select('id, title, start_date, end_date, status, created_at')
+      .select('id, slug, title, city, cover_photo_url, start_date, end_date, status, created_at')
       .eq('user_id', id)
-      .in('status', ['published', 'confirmed', 'completed'])
+      .in('status', ['published'])
       .order('created_at', { ascending: false })
       .range(from, to);
     if (error) console.error('[ownerSits loadMore]', error);
@@ -632,6 +652,27 @@ export default function PublicSitterProfile() {
               <Skeleton className="h-10 w-48" />
               <Skeleton className="h-4 w-32" />
             </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError === 'error') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-6">
+        <div className="text-center space-y-3 max-w-md">
+          <p className="text-lg font-semibold text-foreground">Impossible de charger ce profil</p>
+          <p className="text-sm text-muted-foreground">Un problème réseau est peut-être en cause. Vous pouvez réessayer dans un instant.</p>
+          <div className="flex items-center justify-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setLoadNonce((n) => n + 1)}
+              className="inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground text-sm font-medium px-4 py-2 hover:opacity-90"
+            >
+              Réessayer
+            </button>
+            <Link to="/" className="text-sm text-primary hover:underline">Retour à l'accueil</Link>
           </div>
         </div>
       </div>
@@ -792,7 +833,8 @@ export default function PublicSitterProfile() {
         <ProfileSchemaOrg
           name={firstName}
           city={city || undefined}
-          postalCode={profile.postal_code || undefined}
+          /* RGPD : on n'expose que les deux premiers chiffres (département), pas le code postal complet. */
+          postalCode={profile.postal_code ? String(profile.postal_code).slice(0, 2) : undefined}
           avatarUrl={profile.avatar_url || undefined}
           bio={bio || motivation || undefined}
           avgRating={avgRating}
@@ -830,7 +872,14 @@ export default function PublicSitterProfile() {
         title={pageTitle}
         description={pageDesc}
         path={`/gardiens/${id}`}
-        image={profile?.avatar_url || undefined}
+        /* og:image :
+           - profils riches → visuel dédié 1200×630 (PNG) généré par l'edge function `og-profile`
+           - sinon → repli sur l'avatar (préserve un aperçu même sur profils pauvres). */
+        image={
+          isRichProfile && id
+            ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-profile?id=${id}`
+            : (profile?.avatar_url || undefined)
+        }
         type="website"
         noindex={shouldNoindex}
       />
@@ -1802,10 +1851,13 @@ export default function PublicSitterProfile() {
 
             {/* Onglet À propos */}
             <TabsContent value="apropos" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 pb-4 space-y-5">
-              {/* Description propriétaire */}
-              {ownerProfile?.description ? (
-                <div>
-                  <p className="text-sm text-foreground leading-relaxed font-body whitespace-pre-line">{ownerProfile.description}</p>
+              {/* Présentation propriétaire : priorité au mot d'accueil owner_profiles, repli sur la bio générale. */}
+              {ownerProfile?.welcome_notes ? (
+                <div className="space-y-2">
+                  <p className="text-sm text-foreground leading-relaxed font-body whitespace-pre-line">{ownerProfile.welcome_notes}</p>
+                  {bio && bio !== ownerProfile.welcome_notes && (
+                    <p className="text-sm text-foreground/70 leading-relaxed font-body whitespace-pre-line">{bio}</p>
+                  )}
                 </div>
               ) : bio ? (
                 <p className="text-sm text-foreground/75 leading-relaxed font-body whitespace-pre-line">{bio}</p>
@@ -2027,23 +2079,36 @@ export default function PublicSitterProfile() {
                     const s = statusMap[sit.status] ?? { label: sit.status, style: 'bg-muted text-foreground/40' };
                     const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
                     const isPast = ['completed', 'finished', 'cancelled', 'archived'].includes(sit.status);
+                    const sitHref = `/annonces/${sit.slug && String(sit.slug).trim().length > 0 ? sit.slug : sit.id}`;
                     return (
-                      <div
+                      <Link
                         key={sit.id}
-                        className={`flex items-center justify-between gap-4 bg-card border border-border rounded-xl px-4 py-3 ${isPast ? 'opacity-60' : ''}`}
+                        to={sitHref}
+                        className={`flex items-center gap-3 bg-card border border-border rounded-xl px-3 py-2.5 hover:border-primary/40 hover:bg-muted/30 transition-colors ${isPast ? 'opacity-60' : ''}`}
                       >
-                        <div className="min-w-0">
+                        {sit.cover_photo_url ? (
+                          <img
+                            src={sit.cover_photo_url}
+                            alt=""
+                            loading="lazy"
+                            className="w-14 h-14 rounded-lg object-cover shrink-0"
+                          />
+                        ) : (
+                          <div className="w-14 h-14 rounded-lg bg-muted shrink-0 flex items-center justify-center text-foreground/30">
+                            <Home className="h-5 w-5" aria-hidden="true" />
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
                           <p className="text-sm font-medium text-foreground font-body truncate">{sit.title || 'Garde'}</p>
-                          {(sit.start_date || sit.end_date) && (
-                            <p className="text-xs text-foreground/50 font-body mt-0.5">
-                              {sit.start_date && fmt(sit.start_date)}{sit.end_date && ` → ${fmt(sit.end_date)}`}
-                            </p>
-                          )}
+                          <p className="text-xs text-foreground/50 font-body mt-0.5 truncate">
+                            {sit.city ? `${sit.city} · ` : ''}
+                            {sit.start_date && fmt(sit.start_date)}{sit.end_date && ` → ${fmt(sit.end_date)}`}
+                          </p>
                         </div>
                         <span className={`text-xs font-medium px-2.5 py-1 rounded-full shrink-0 font-body whitespace-nowrap ${s.style}`}>
                           {s.label}
                         </span>
-                      </div>
+                      </Link>
                     );
                   })}
                   <div className="flex flex-col items-start gap-2 mt-2">
