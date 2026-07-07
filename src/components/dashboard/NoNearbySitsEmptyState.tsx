@@ -156,9 +156,9 @@ const NoNearbySitsEmptyState = ({
               <Link
                 to="/petites-missions"
                 onClick={() =>
-                  void trackEvent("sitter_mutual_aid_primary_cta_clicked", {
+                  void trackEvent("dashboard_cta_clicked", {
                     source: "dashboard_empty_state",
-                    metadata: { total_published: totalPublishedSits, radius_km: currentRadius },
+                    metadata: { cta: "mutual_aid_empty_state", is_first_time: false, user_role: "sitter" },
                   })
                 }
               >
