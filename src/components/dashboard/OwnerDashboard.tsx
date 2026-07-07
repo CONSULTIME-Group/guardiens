@@ -48,6 +48,7 @@ import ActivationScoreCard from "./owner/ActivationScoreCard";
 import NextActionsList from "./owner/NextActionsList";
 import AlmaSilentSitBubble from "@/components/ai/alma/AlmaSilentSitBubble";
 import { AlmaOwnerTrafficNoActionWhisper } from "@/components/ai/alma/wiring/AlmaOwnerTrafficNoActionWhisper";
+import { AlmaOwnerViewTrendWhisper } from "@/components/ai/alma/wiring/AlmaOwnerViewTrendWhisper";
 import {
   computeOwnerNextActions,
   computeOwnerActivationScore,
