@@ -35,7 +35,7 @@ export interface SitDraftFromPromptProps {
   primary?: OwnerPrimaryAction | null;
 }
 
-export default function SitDraftFromPrompt({ secondary = false }: SitDraftFromPromptProps = {}) {
+export default function SitDraftFromPrompt({ secondary = false, primary = null }: SitDraftFromPromptProps = {}) {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [almaMood, setAlmaMood] = useState<"idle" | "happy">("idle");
