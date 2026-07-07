@@ -24,6 +24,7 @@ import { CULTURAL_FACT_LIMITS, type AlmaAudience } from "@/lib/alma/whisper-type
 
 const SESSION_QUEUED_KEY = "alma_cultural_fact_queued";
 const SESSION_COUNT_KEY = "alma_cultural_fact_count";
+const SESSION_LAST_AT_KEY = "alma_cultural_fact_last_at";
 
 interface UseAlmaCulturalFactParams {
   surface: string;
