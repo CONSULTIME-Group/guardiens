@@ -434,6 +434,8 @@ const OwnerDashboard = () => {
 
       {/* Alma trigger owner_traffic_no_action : annonce avec vues réelles mais 0 candidature. */}
       <AlmaOwnerTrafficNoActionWhisper sits={sits} />
+      <AlmaOwnerViewTrendWhisper />
+
 
 
       {showAlmaFirstMeeting && (
