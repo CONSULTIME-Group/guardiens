@@ -130,8 +130,13 @@ function useIsRadixModalOpen(): boolean {
   return isOpen;
 }
 
-function surfaceFromPath(pathname: string): string {
-  if (pathname.startsWith("/dashboard")) return "owner_dashboard";
+function surfaceFromPath(
+  pathname: string,
+  activeRole?: "owner" | "sitter",
+): string {
+  if (pathname.startsWith("/dashboard")) {
+    return activeRole === "sitter" ? "sitter_dashboard" : "owner_dashboard";
+  }
   if (pathname === "/sits" || pathname === "/sits/") return "sits_list";
   if (pathname.startsWith("/sits/")) return "sit_detail";
   if (pathname === "/favoris") return "favorites";
@@ -339,7 +344,7 @@ export function AlmaDock() {
                       metadata: { whisper_type: whisper.type, action_id: "next_tip" },
                     });
                     void requestNextTip({
-                      surface: surfaceFromPath(location.pathname),
+                      surface: surfaceFromPath(location.pathname, activeRole),
                       preferNudge: false,
                     });
                   }}
