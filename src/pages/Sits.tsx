@@ -786,17 +786,9 @@ const Sits = () => {
       ) : (
         <div className="space-y-3">
           {filteredSits.map((sit: any) => {
-            // En onglet "archived", on force l'effectiveStatus pour le bon rendu de la card
-            const cardSit = isOwnerView && activeOwnerTab === "archived"
-              ? {
-                  ...sit,
-                  effectiveStatus: wasUnpublished(sit)
-                    ? "unpublished"
-                    : isExpired(sit)
-                      ? "expired"
-                      : "cancelled",
-                }
-              : sit;
+            // effectiveStatus deja calcule par getOwnerEffectiveStatus dans l'enrichissement.
+            // Dans l'onglet Passees, l'affichage suit directement effectiveStatus.
+            const cardSit = sit;
             return (
               <SitCard
                 key={sit.id + (sit.application_id || "")}
@@ -805,7 +797,7 @@ const Sits = () => {
                 onArchive={() => setArchiveConfirm(sit.id)}
                 onDelete={() => setDeleteConfirm(sit.id)}
                 onRepublish={() =>
-                  isOwnerView && activeOwnerTab === "archived"
+                  isOwnerView && activeOwnerTab === "past"
                     ? setRepublishDialog({ id: sit.id, title: sit.title })
                     : handleRepublish(sit.id)
                 }
