@@ -341,48 +341,98 @@ function Curls({
   );
 }
 
-// Silhouette festonnée : bouclettes denses sur le pourtour de la tête
-const HEAD_OUTER_CURLS: Array<[number, number, number]> = [
-  // Sommet du crâne
-  [30, 24, 5], [37, 19, 5.5], [44, 16, 6], [50, 15, 6.2], [56, 16, 6],
-  [63, 19, 5.5], [70, 24, 5],
-  // Côtés hauts
-  [26, 32, 5], [74, 32, 5],
-  // Joues
-  [24, 42, 5.5], [76, 42, 5.5],
-  [25, 52, 5.2], [75, 52, 5.2],
-  // Menton
-  [30, 62, 5], [37, 65, 5.5], [44, 67, 5.5], [50, 67.5, 5.5], [56, 67, 5.5],
-  [63, 65, 5.5], [70, 62, 5],
-];
+/**
+ * Génère des bouclettes réparties le long du périmètre d'une ellipse,
+ * pour la silhouette festonnée typique du bichon.
+ */
+function ellipseCurls(
+  cx: number,
+  cy: number,
+  rx: number,
+  ry: number,
+  count: number,
+  r: number,
+  startDeg = -90,
+  spanDeg = 360,
+): Array<[number, number, number]> {
+  const out: Array<[number, number, number]> = [];
+  const start = (startDeg * Math.PI) / 180;
+  const span = (spanDeg * Math.PI) / 180;
+  for (let i = 0; i < count; i++) {
+    const t = count === 1 ? 0.5 : i / (count - 1);
+    const a = start + span * t;
+    out.push([cx + Math.cos(a) * rx, cy + Math.sin(a) * ry, r]);
+  }
+  return out;
+}
 
-// Highlights (mèches claires)
-const HEAD_HIGHLIGHTS: Array<[number, number, number]> = [
-  [40, 22, 3.5], [50, 19, 4.2], [60, 22, 3.5],
-  [32, 34, 3],   [68, 34, 3],
-  [29, 46, 2.6], [71, 46, 2.6],
-];
+/**
+ * Morphologie par stade. « nouvelle » = chiot (tête plus grosse par
+ * rapport au corps, yeux plus grands, corps plus petit et rond). Les
+ * stades suivants s'adulisent progressivement.
+ */
+type Morph = {
+  headCx: number; headCy: number; headRx: number; headRy: number;
+  eyeY: number; eyeDx: number; eyeRx: number; eyeRy: number;
+  muzzleCy: number; muzzleRx: number; muzzleRy: number;
+  noseCy: number; noseRx: number; noseRy: number;
+  mouthY: number; mouthSpread: number;
+  bodyCy: number; bodyRx: number; bodyRy: number;
+  earCy: number; earRx: number; earRy: number; earSpread: number;
+  neckY: number;
+};
 
-// Ombres douces internes (volume)
-const HEAD_SHADOWS: Array<[number, number, number]> = [
-  [28, 50, 4], [72, 50, 4],
-  [38, 62, 3], [62, 62, 3],
-];
+function stageMorph(stage?: AlmaStage): Morph {
+  switch (stage) {
+    case "eveillee":
+      return {
+        headCx: 50, headCy: 40, headRx: 27, headRy: 25,
+        eyeY: 42, eyeDx: 10, eyeRx: 4.0, eyeRy: 4.4,
+        muzzleCy: 55, muzzleRx: 12, muzzleRy: 9.5,
+        noseCy: 53.5, noseRx: 3.0, noseRy: 2.3,
+        mouthY: 59, mouthSpread: 6.5,
+        bodyCy: 84, bodyRx: 26, bodyRy: 12,
+        earCy: 46, earRx: 9, earRy: 15, earSpread: 24,
+        neckY: 68,
+      };
+    case "complice":
+      return {
+        headCx: 50, headCy: 39, headRx: 26, headRy: 24,
+        eyeY: 41, eyeDx: 10.5, eyeRx: 3.8, eyeRy: 4.2,
+        muzzleCy: 54, muzzleRx: 12, muzzleRy: 9.5,
+        noseCy: 52.5, noseRx: 2.9, noseRy: 2.2,
+        mouthY: 58, mouthSpread: 7,
+        bodyCy: 83, bodyRx: 28, bodyRy: 13,
+        earCy: 46, earRx: 9, earRy: 16, earSpread: 25,
+        neckY: 67,
+      };
+    case "fidele":
+      return {
+        headCx: 50, headCy: 38, headRx: 25, headRy: 23,
+        eyeY: 40, eyeDx: 11, eyeRx: 3.6, eyeRy: 4.0,
+        muzzleCy: 53, muzzleRx: 12, muzzleRy: 9.5,
+        noseCy: 51.5, noseRx: 2.8, noseRy: 2.1,
+        mouthY: 57, mouthSpread: 7.5,
+        bodyCy: 82, bodyRx: 30, bodyRy: 14,
+        earCy: 46, earRx: 9, earRy: 17, earSpread: 26,
+        neckY: 66,
+      };
+    default:
+      // nouvelle → CHIOT : tête proéminente, yeux immenses, petit corps.
+      return {
+        headCx: 50, headCy: 43, headRx: 30, headRy: 28,
+        eyeY: 45, eyeDx: 9, eyeRx: 5.0, eyeRy: 5.4,
+        muzzleCy: 57, muzzleRx: 11, muzzleRy: 8.5,
+        noseCy: 55, noseRx: 3.2, noseRy: 2.5,
+        mouthY: 61, mouthSpread: 5.5,
+        bodyCy: 88, bodyRx: 20, bodyRy: 9,
+        earCy: 50, earRx: 8, earRy: 13, earSpread: 22,
+        neckY: 72,
+      };
+  }
+}
 
-// Contour duveteux du corps
-const BODY_CURLS: Array<[number, number, number]> = [
-  [22, 74, 4.5], [26, 82, 5], [30, 90, 4.5],
-  [70, 90, 4.5], [74, 82, 5], [78, 74, 4.5],
-  [38, 92, 4], [50, 93, 4.5], [62, 92, 4],
-];
 
-// Oreilles frisées
-const EAR_R_CURLS: Array<[number, number, number]> = [
-  [12, 40, 5], [10, 48, 5], [12, 56, 5], [16, 62, 4.5], [22, 62, 4],
-];
-const EAR_L_CURLS: Array<[number, number, number]> = [
-  [88, 40, 5], [90, 48, 5], [88, 56, 5], [84, 62, 4.5], [78, 62, 4],
-];
 
 /**
  * Accessoires portés autour du cou (collier, bandana, écharpe) — insérés
