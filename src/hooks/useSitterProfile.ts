@@ -156,6 +156,7 @@ export function useSitterProfile() {
       last_name: p?.last_name || "",
       city: p?.city || "",
       postal_code: p?.postal_code || "",
+      country: (p as any)?.country || "FR",
       latitude: (p as any)?.latitude ?? null,
       longitude: (p as any)?.longitude ?? null,
       bio: p?.bio || "",
