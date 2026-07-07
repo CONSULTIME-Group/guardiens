@@ -195,9 +195,9 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
                 <BreedProfileCard
                   species={pet.species}
                   breed={pet.breed}
-                  ownerNote={pet.owner_breed_note}
+                  ownerNote={pet.id && pet.id in noteDraft ? noteDraft[pet.id] : pet.owner_breed_note}
                   editable
-                  onNoteChange={(note) => onUpdatePet({ ...pet, owner_breed_note: note })}
+                  onNoteChange={(note) => handleNoteChange(pet, note)}
                 />
               )}
             </div>
