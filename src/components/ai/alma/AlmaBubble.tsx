@@ -9,7 +9,7 @@
 import { ReactNode } from "react";
 import { Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AlmaAvatarLottie } from "./AlmaAvatarLottie";
+import { AlmaAvatar } from "./AlmaAvatar";
 
 export type AlmaVariant = "default" | "dashboard" | "inline" | "sticky-footer";
 export type AlmaAudience = "owner" | "sitter";
