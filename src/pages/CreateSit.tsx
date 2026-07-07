@@ -618,7 +618,7 @@ const CreateSit = () => {
 
       let sitId = draftId;
       if (draftId) {
-        const { error } = await supabase.from("sits").update(payload).eq("id", draftId);
+        const { error } = await supabase.from("sits").update(payload).eq("id", draftId).eq("status", "draft");
         if (error) throw error;
       } else {
         const { data: sit, error } = await supabase.from("sits").insert(payload).select("id").single();
