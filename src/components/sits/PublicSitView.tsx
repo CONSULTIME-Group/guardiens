@@ -313,8 +313,22 @@ const PublicSitView = ({
                     )}
                   </p>
                   {property.description && (
-                    <div className="space-y-5 text-lg leading-relaxed text-foreground/85 whitespace-pre-line mb-6">
+                    <div className="space-y-5 text-base leading-relaxed text-foreground/85 whitespace-pre-line mb-6">
                       {property.description}
+                    </div>
+                  )}
+                  {Array.isArray(sit.environments) && sit.environments.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-xs font-bold tracking-[0.2em] uppercase mb-3 text-muted-foreground">
+                        Environnement
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {sit.environments.map((env) => (
+                          <span key={env} className="px-3 py-1.5 rounded-full bg-muted text-foreground border border-border text-sm capitalize">
+                            {env}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
                   {(Array.isArray(property.equipments) && property.equipments.length > 0 || property.accessible || property.car_required) && (
