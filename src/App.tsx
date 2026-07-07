@@ -271,6 +271,7 @@ const AppRoutes = () => (
       <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPassword /></PublicOnlyRoute>} />
       <Route path="/reset-password" element={<ResetPassword />} />
       
+      <Route path="/conseils" element={<AlmaTips />} />
       <Route path="/actualites" element={<News />} />
       <Route path="/actualites/inventaire-guardiens-france" element={<ArticleInventaire />} />
       <Route path="/actualites/:slug" element={<ArticleDetail />} />
