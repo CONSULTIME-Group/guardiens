@@ -7,7 +7,7 @@
  * dans la signature visible.
  */
 import { ReactNode } from "react";
-import { Loader2, X } from "lucide-react";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AlmaAvatar } from "./AlmaAvatar";
 
