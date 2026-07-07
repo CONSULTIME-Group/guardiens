@@ -58,9 +58,9 @@ const appStatusConfig: Record<string, { label: string; className: string }> = {
   pending: { label: "Envoyée", className: "bg-muted text-muted-foreground" },
   viewed: { label: "Consultée", className: "bg-secondary/10 text-secondary" },
   discussing: { label: "En discussion", className: "bg-accent text-foreground" },
-  accepted: { label: "Acceptée", className: "bg-emerald-50 text-emerald-700" },
-  rejected: { label: "Déclinée", className: "bg-destructive/10 text-destructive" },
-  cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive" },
+  accepted: { label: "Acceptée", className: "bg-success-soft text-success border border-success-border" },
+  rejected: { label: "Déclinée", className: "bg-destructive/10 text-destructive-text" },
+  cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive-text" },
   owner_found: { label: "Propriétaire a trouvé", className: "bg-muted text-muted-foreground border border-border" },
   owner_withdrew: { label: "Annonce retirée", className: "bg-muted text-muted-foreground border border-border" },
 };
