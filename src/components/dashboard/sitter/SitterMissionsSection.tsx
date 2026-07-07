@@ -308,7 +308,9 @@ const SitterMissionsSection = memo(({
           </>
         )
       )}
+      </div>
     </div>
+
   );
 });
 
