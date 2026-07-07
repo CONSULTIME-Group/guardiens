@@ -1,54 +1,92 @@
-
-# Audit lecture seule — Onglet « Mon profil »
-
 ## Localisation
 
-- **Route** : `/profile` → `src/pages/Profile.tsx` (shell qui lazy-load la bonne page selon `activeRole`).
-- **Scission owner/sitter (2 pages distinctes, hooks séparés)** :
-  - Sitter : `src/pages/SitterProfile.tsx` + hook `src/hooks/useSitterProfile.ts`
-  - Owner : `src/pages/OwnerProfile.tsx` + hook `src/hooks/useOwnerProfile.ts`
-- **Sections sitter** (`SECTIONS_BASE`) : identity, sitter, experience, mobility, gallery (opt.), experiences (opt.), skills — composants `StepIdentity`, `StepSitterProfile`, `StepExperience`, `StepMobility`, `StepPreferences`, `StepSkills`, `SitterGallery`, `ExternalExperiences` sous `src/components/profile/`.
-- **Sections owner** : identity, housing, animals, rules (opt.), communication (opt.), skills, gallery — composants sous `src/components/owner-profile/` + `OwnerHouseGuideForm` intégré dans la section communication.
-- **Sidebar unique** : `src/components/profile/ProfileSidebar.tsx` (mobile scroll horizontal, desktop sticky vertical) + `ScoreBreakdown`, `TrustProfile`, `ProfileProgressStrip` (barre sticky bas d'écran).
-- **Score serveur canonique** : `public.calculate_profile_completion` (`supabase/migrations/20260621084357_*.sql`), écrit dans `profiles.profile_completion`, appelé à chaque `saveStep`.
+| Zone | Fichier |
+|---|---|
+| Concierge IA (edge function) | `supabase/functions/draft-sit-from-prompt/index.ts` |
+| Bulle d'entrée « une phrase » | `src/components/dashboard/SitDraftFromPrompt.tsx` |
+| Reprise de brouillon (carte) | `src/components/dashboard/DraftResumeCard.tsx` |
+| Page création + publication | `src/pages/CreateSit.tsx` |
+| Composant date natif | `DateSheet` interne, `src/pages/CreateSit.tsx` L173-202 |
 
-Persistance en 4 tables : `profiles`, `sitter_profiles`, `owner_profiles`, `properties`, plus `past_animals`, `pets`, `sitter_gallery`, `owner_gallery`. Draft local en localStorage (`guardiens_(sitter|owner)_profile_draft_<user.id>`).
+Parcours à 3 étapes : `STEPS = ["essentiel", "garde", "preferences"]` (L104-108). Champs obligatoires pour publier calculés L520 : `property && title && startDate && endDate && !dateError && descriptionValid && hasPhoto && profileCompletion>=40`.
 
 ---
 
-## Tableau des observations
+## Bug prioritaire, dates inventées par Alma
 
-| Zone / Élément | Problème observé | Sévérité | Correctif proposé |
+### Cause racine (précise)
+
+Dans `draft-sit-from-prompt/index.ts` :
+
+1. **L63-70** : `todayIso` EST bien injecté dans le prompt, mais l'instruction ne cadre que le cas « date mentionnée sans année ». Le cas « aucune mention temporelle » n'est pas traité, et `start_date`/`end_date` ne figurent PAS dans `required` (L112). Résultat : Gemini remplit quand même le champ avec un pattern plausible tiré de son training (souvent 2024).
+2. **L131-132** : le seul filtre est le regex `^\d{4}-\d{2}-\d{2}$`. Aucune borne temporelle. `"2024-08-04"` passe.
+3. **L174-193** : insert direct dans `sits` avec `status='draft'`. Aucune contrainte DB sur `start_date >= today`.
+4. **`CreateSit.tsx` L380-381** : `setStartDate(d.start_date || "")` recopie sans filtre. La validation L504-509 existe mais bloque seulement la publication, pas la reprise ni l'auto-save.
+5. **`DraftResumeCard.tsx` L46-53** : `countFilled` compte une date passée comme un champ « rempli ». L'utilisateur voit « 7/8 champs » sur un brouillon corrompu.
+
+### Correctif minimal (edge function + validation en cascade)
+
+**A. Edge function `draft-sit-from-prompt/index.ts`**
+
+- Renforcer le system prompt (L65-83). Remplacer la ligne dates par :
+  > « Dates : n'inventez JAMAIS. Si aucune indication temporelle (mois, saison, dates, durée) n'est présente, laissez `start_date` et `end_date` vides et posez `flexible_dates=true`. Toute date retournée DOIT être ≥ `${todayIso}`. Si un mois est cité sans année, choisissez l'année qui rend la date ≥ `${todayIso}`. Année interdite : toute année < ${new Date().getUTCFullYear()}. »
+- Ajouter garde serveur après L132, avant l'insert :
+  ```
+  const isPast = (d) => d && d < todayIso;
+  if (isPast(draft.start_date)) { draft.start_date = null; warnings.push("Date de début non retenue, veuillez la redéfinir."); }
+  if (isPast(draft.end_date))   { draft.end_date   = null; warnings.push("Date de fin non retenue, veuillez la redéfinir."); }
+  if (draft.start_date && draft.end_date && draft.end_date < draft.start_date) {
+    draft.end_date = null; warnings.push("Date de fin incohérente, à redéfinir.");
+  }
+  if (!draft.start_date || !draft.end_date) draft.flexible_dates = true;
+  ```
+- Tracer `owner_draft_from_prompt_date_stripped` pour métriquer.
+
+**B. Client `CreateSit.tsx`, défense en profondeur**
+
+- L376-381 (chargement brouillon) : si `d.start_date < today` → `setStartDate("")` et toast « La date du brouillon était dépassée, veuillez la redéfinir ». Idem `end_date`.
+- L466-467 (`saveDraft`) : ne persister `startDate`/`endDate` que si `>= today`, sinon `null`. Empêche un brouillon existant de se réenregistrer avec ses valeurs passées.
+
+**C. `DraftResumeCard.tsx`**
+
+- Détecter `start_date < today` : ne pas compter comme « rempli » (`countFilled` L46-53) et afficher un badge « Dates à mettre à jour » sur la carte.
+
+Cette combinaison élimine le bug à la source (IA) et empêche toute reintroduction ultérieure (edge, client, reprise).
+
+---
+
+## Audit workflow owner, tableau des findings
+
+| Zone / Élément | Problème | Sévérité | Correctif proposé |
 |---|---|---|---|
-| **Score client vs serveur** — `scoredCriteria` client (sitter et owner) somme à 100 max, sans **aucun** critère d'affinité. Le SQL `calculate_profile_completion` inclut lui 10 pts d'affinité (interests≥3, langues, life_pace, animal_types / preferred_sitter_types, home_ambiance). | Un profil « tout coché » côté sidebar affiche `liveScore=100%` alors que `profile_completion` serveur plafonne à 90 — le dashboard, les nudges Alma (`profile_incomplete`) et les listes triées par complétion voient une autre réalité. Aucun signal UI n'invite à remplir les champs d'affinité. | **Bloquant** | Ajouter dans `scoredCriteria` un critère « Affinité (intérêts, langues, rythme, animaux/ambiance) » de 10 pts avec renvoi vers la section correspondante (sitter → `sitter` ; owner → `identity`/`rules`). Aligner le barème client sur la RPC. |
-| **`missingFields` exposé mais mort** — `useSitterProfile`/`useOwnerProfile` retournent `missingFields` calculés par `computeSitterMissingFields`/`computeOwnerMissingFields` (motivation, last_name, references, availability_during, languages, meeting_preference, handover_preference…). | Ces listes sont plus larges que `scoredCriteria` (sidebar) et **jamais rendues** dans le JSX ; seuls des tests les utilisent (`useSitterProfile.mobility.test.tsx`). Deux sources de vérité divergentes cohabitent. | Moyen | Supprimer les `computeXxxMissingFields` ou les brancher dans le tooltip « Détail du score », en s'appuyant sur la même source que la jauge. |
-| **`postal_code` bloquant hors France** — client `scoredCriteria.name_postal` exige `first_name && postal_code`. | Un gardien / propriétaire à l'étranger (owner a bien un champ `country`, sitter n'en a pas du tout) ne pourra jamais gagner ces 10/15 pts. Le serveur, lui, accepte `city` seul si `country != 'FR'`. Score sidebar reste plafonné artificiellement. | Bloquant (owner) / Moyen (sitter) | Aligner sur `v_location_ok` du SQL : owner → tester `country === 'FR' ? postal_code : city`. Sitter : ajouter le champ `country` dans `SitterProfileData` + `sitter_profiles` (ou justifier « France uniquement » côté copy). |
-| **`TrustProfile.emailVerified={true}` codé en dur** dans `SitterProfile.tsx` (l. 375) et `OwnerProfile.tsx` (l. 304). | Le pilier « Email vérifié » est toujours coché sans lecture réelle de `auth.users.email_confirmed_at`. Faux positif pour les comptes non confirmés. | Moyen | Lire `email_confirmed_at` (via `session.user`) et passer un vrai booléen. |
-| **`TrustProfile.hasFirstActivity={false}` codé en dur** dans les deux pages. | Le pilier « Première annonce/garde » ne se coche jamais depuis la page profil : le trust score plafonne à 4/5 même pour un utilisateur actif. | Moyen | Interroger côté hook : owner → `sits` publié count>0 ; sitter → `sits` en `completed` (ou `applications.status='accepted'` avec sit terminé). |
-| **`saveStep` = 4 aller-retours DB à chaque save** — update table, puis `rpc calculate_profile_completion`, puis `fetchData({silent})`, puis `refreshCompletion`, puis `refreshProfile`. | Latence sensible (≥ 600 ms typique) sur chaque clic « Sauvegarder », y compris pour un simple toggle de chip. Coût réseau × N étapes. | Moyen | La RPC pourrait retourner le nouveau `profile_completion` et les valeurs qui changent, évitant `fetchData` complet. Alternative : optimistic UI sans refetch, refetch au retour sur la page. |
-| **N+1 sur les notes d'animal** — `OwnerStepAnimals.tsx` l. 179 : `onNoteChange={(note) => onUpdatePet({ ...pet, owner_breed_note: note })}` = un `UPDATE pets` **par frappe clavier**. | Écrit en DB à chaque lettre, sans debounce, sans toast d'échec en cas de RLS/réseau. Génère des dizaines de requêtes pour saisir une note. | Bloquant | Debounce (500-800 ms) ou passage en édition modale avec bouton « Enregistrer ». Ajouter `try/catch` visible. |
-| **Upload avatar sans validation client** — `handleAvatarChange` (sitter & owner) accepte `image/*` sans contrôler `file.size` ni `file.type`. Bucket `avatars` = 5 MB, `{image/jpeg,image/png,image/webp}`. | Un fichier HEIC (iPhone), un PNG 12 MB ou un `image/svg+xml` déclenche `storage.upload` → échec avec toast générique « Upload échoué » sans dire pourquoi. Pas de compression, pas de recadrage, pas de preview avant envoi. | Moyen | Validation pré-upload (`file.size ≤ 5*1024*1024`, `file.type in ALLOWED`), passage par `compressImage.ts` déjà présent dans le projet, ajout d'un composant de recadrage carré. Message d'erreur détaillé. |
-| **Sauvegarde avatar : 4 requêtes en cascade** — `uploadAvatar`/`uploadPhoto("avatars")` fait `storage.upload` + `profiles.update` + `rpc calculate_profile_completion` + `refreshCompletion` + `refreshProfile`. En cas d'échec `profiles.update`, l'image reste orpheline dans le bucket. | Fuite d'objets storage + coût. | Cosmétique | Encapsuler dans une fonction serveur (`upload_avatar_and_bind`) qui fait upload + update en transaction, ou nettoyer l'objet en cas d'échec `update`. |
-| **Refetch `sitter_profiles` sur la page owner** — `useOwnerProfile.fetchData` lit `sitter_profiles.competences` systématiquement (l. 139) pour pré-remplir les compétences owner. | Requête inutile pour tout owner qui a déjà ses `owner_profiles.competences`. Overfetch systématique. | Cosmétique | Ne charger `sitter_profiles` que si `owner_profiles.competences` est vide. |
-| **Backfill géoloc bruyant** — `useSitterProfile` l. 219-255 : `useEffect` dépendant de `data.postal_code`, `data.city`, `data.latitude`, `data.longitude`. | Si `city` est vide ou ne matche pas exactement l'API `geo.api.gouv.fr`, `match` peut renvoyer un `arr[0]` faux positif → coordonnées d'une autre commune persistées silencieusement. En cas d'échec API, aucune trace utilisateur. | Moyen | Ne prendre `arr[0]` que si `arr.length === 1`. Sinon exiger un match exact `nom` insensible aux accents. Logger via `logger.warn`. Ne pas exister côté owner (donc owner à code postal legacy = 0 lat/lng). |
-| **`fetchData` silencieux sans gestion d'erreur** — sitter (l. 122) et owner (l. 131) : aucun `try/catch`, aucun état d'erreur exposé. | Un plantage RLS ou réseau au fetch initial affiche… un profil vide indistinguable d'un nouveau compte, avec `data = defaultData`. L'utilisateur croit avoir tout perdu. | Bloquant | `try/catch` + état `loadError` + UI d'erreur distinct du skeleton, bouton « Réessayer » (identique au correctif fait sur `/sits`). |
-| **Onglets « optionnels » (`gallery`, `experiences`, `rules`, `communication`)** — `sectionComplete` renvoie `false` si `essentialsForSection.length === 0` (cas des sections 100% bonus), mais le rendu impose `s.optional ? false : sectionComplete(...)` → toujours `false`. | Les sections optionnelles restent visuellement « incomplètes » même quand tout est rempli (côté sitter). Côté owner, on a introduit un `optionalDone` basé sur les bonuses mais qui exclut `gallery` (essential côté owner) et fusionne mal. Incohérence entre les deux pages. | Moyen | Unifier la règle : `optionalDone = at least one bonus of that section is ok`. Appliquer côté sitter (`gallery`, `experiences`). |
-| **`emergency_sitter_profiles` non exposé** — la table existe (`useful-context` en fait mention) et l'UI a un `EmergencyBadge`, mais rien dans `SitterProfile` ne permet d'y basculer. | Fonction annoncée mais orpheline dans le profil. | Moyen | Ajouter une sous-section « Gardien secours » (toggle + tarif horaire) dans l'onglet `mobility` ou `sitter`. |
-| **Section « Skills » et `competences_disponible`** — champ persisté côté sitter et owner mais absent de la sidebar/jauge, absent des `missingFields`. | Fonction critique de « petites missions » réglable sans indication de complétion. | Cosmétique | Ajouter comme bonus 5 pts si `available_for_help === true`, hint « Activez pour recevoir des petites missions ». |
-| **Réactivité mobile — bouton `<span>` sous l'avatar** (StepIdentity l. 56-62, OwnerStepIdentity l. 105). | Le libellé « Modifier votre photo de profil » n'est pas cliquable ; seul l'avatar l'est. Peu accessible pour tap tactile. | Cosmétique | Wrapper le `<span>` dans le `<button>` ou ajouter un vrai bouton lié à `fileRef.current?.click()`. |
-| **Sticky bar mobile désactivée sur owner à 100%** — `OwnerProfile.tsx` l. 367 : `${(!dirty && !saving && !saved) ? (liveScore >= 100 ? "hidden" : "md:hidden") : ""}`. Sitter n'a pas ce garde-fou (l. 451). | Comportement asymétrique : la barre disparaît à 100% chez owner, reste visible chez sitter. | Cosmétique | Harmoniser (idéalement : la barre disparaît quand `liveScore>=100 && !dirty` pour les deux rôles). |
-| **`nextSection` linéaire sans skip** — bouton « Suivant » (l. 424 sitter, l. 340 owner) avance à `SECTIONS_META[currentIndex + 1]`, sans sauter les sections déjà complétées (contrairement au commentaire owner l. 255-257 qui l'annonce). | Un utilisateur qui revient éditer sa section 1 doit re-cliquer 6 fois pour retrouver Skills. | Cosmétique | Filtrer `nextSection` sur `!s.complete` (respecter le commentaire), ou renvoyer à la première section incomplète. |
-| **`useUnsavedChanges(dirty)` global** — bloque la navigation mais aussi la fermeture d'onglet. Aucun bouton « Effacer les brouillons » visible en dehors du `ScoreBreakdown.onReset` (rarement ouvert). | Utilisateur qui a un draft d'il y a 3 jours à cause d'un save échoué n'a pas de sortie évidente. | Cosmétique | Bouton « Ignorer les modifications » dans la sticky bar quand `dirty`, à côté de « Enregistrer ». |
-| **RLS / sécurité** — tous les `update` scopés `.eq('id', user.id)` ou `.eq('user_id', user.id)` + RLS. Draft localStorage scopé `user.id`. Bucket `avatars` public. | Rien de critique. Chemin `${user.id}/avatar-<ts>.ext` avec `upsert: false` → doublons possibles mais bénins. | Cosmétique | `upsert: true` avec un path fixe `${user.id}/avatar.<ext>` évite les objets orphelins. |
-| **Doubles requêtes `refreshCompletion` + `refreshProfile`** — `refreshProfile` (AuthContext) recharge déjà `profile_completion`, `refreshCompletion` re-le lit ensuite. | Requête dupliquée après chaque save. | Cosmétique | Retirer `refreshCompletion` post-save et lire `profileCompletion` depuis le contexte. |
-| **StepProgress orphelin** — `src/components/profile/StepProgress.tsx` définit un composant qui consomme `missingFields`, jamais monté (remplacé par ProfileSidebar). | Code mort. | Cosmétique | Supprimer le composant. |
+| Edge `draft-sit-from-prompt` L112 | `start_date`/`end_date` non `required`, IA libre d'inventer | Bloquant | Voir correctif A ci-dessus |
+| Edge L131-132 | Validation dates = regex format uniquement, aucune borne | Bloquant | Ajouter guard « >= today » |
+| `CreateSit.tsx` L380 | Recopie brute d'un `start_date` passé sur reprise | Bloquant | Filtrer < today au load + toast |
+| `CreateSit.tsx` L444-452 | Auto-save persiste sans filtre les dates passées de l'IA | Bloquant | Sanitize dans payload `saveDraft` |
+| `CreateSit.tsx` L504-509 | Validation bloque la publication mais pas l'affichage, pas de mise à jour min du picker fin après changement début | Moyen | Le `min` du 2e picker est déjà `startDate || today` (L925), OK, mais le message ne s'affiche que sur `touched`, ajouter affichage inconditionnel si date passée pré-remplie par l'IA |
+| `CreateSit.tsx` L520 | `canPublish` regroupe 7 conditions sans indication ordonnée à l'utilisateur avant l'étape 2 | Moyen | Afficher les blockers dès l'étape 0 (déjà scroll to anchor L544 mais pas visible avant last step L1329) |
+| `CreateSit.tsx` L487 | Le premier auto-save d'un brouillon vierge crée un sit `draft` vide dès l'ouverture (title = "") | Moyen | Repousser l'insert au 1er champ non vide utilisateur (`hasUserEditedRef` existe L446 mais l'insert vide passe quand même si un des champs contrôlés change) |
+| `CreateSit.tsx` L579 | `moderateContent` bloque la publication, pas l'auto-save ni le brouillon IA | Moyen | Ajouter modération côté edge sur le blob généré, aligner |
+| `CreateSit.tsx` L621 | Publication d'un draft : `UPDATE` sans filtre `status='draft'`, risque de republier via URL sur un sit déjà publié | Moyen | Ajouter `.eq("status","draft")` sur l'UPDATE L621 |
+| `CreateSit.tsx` L513 | `hasPhoto` accepte photo de profil (`ownerPhotos[0]`) : une annonce publiée sans photo dédiée du logement passe | Moyen | Exiger `coverPhotoUrl` explicite, ou marquer clairement « photo du profil utilisée » |
+| `DraftResumeCard.tsx` L46-53 | `countFilled` compte date passée comme remplie, donne fausse impression de complétude | Bloquant | Voir correctif C |
+| `DraftResumeCard.tsx` L94-100 | Reprise navigue vers `?resume=` : cohérent avec L212 qui accepte `draftId` ou `resume`, OK | Cosmétique | RAS |
+| `DraftResumeCard.tsx` L134 | Fond `amber-50/40` codé en dur, hors design system | Cosmétique | Utiliser tokens sémantiques (`warning-subtle`) |
+| `SitDraftFromPrompt.tsx` L53-95 | Aucune vérif client de la limite 3/h (feedback tardif) | Cosmétique | Optionnel, afficher un compteur ou message pré-appel |
+| `SitDraftFromPrompt.tsx` L86 | Redirection systématique vers `/sits/create?draftId=` même si l'IA a mis 0 champ utile (fallback silencieux) | Moyen | Si `confidence < 0.4` ou 0 dates + 0 environments, afficher un dialog « Description trop vague, ajoutez X » avant d'ouvrir le brouillon |
+| Étape 0 « Où se déroulera la garde » L779-828 | La sélection « Ailleurs » redirige en 1,2 s (setTimeout L801), sans possibilité d'annuler | Cosmétique | Confirmer avant redirection ou lien direct sans setTimeout |
+| Étape 0, Photos | Aucune upload photo dans le flux : dépend de `ownerPhotos` du profil. Un owner sans photo profil bloque publier sans savoir où aller | Moyen | CTA explicite « Ajouter une photo → Profil » en bloqueur, avec deep-link |
+| Étape 2 preferences | Champ Animal / logement non éditables ici, viennent de `properties`/`pets` : incohérence avec brouillon IA qui pourrait proposer 2 chats alors que profil = 1 chien | Moyen | Afficher un badge « animaux tirés de votre profil » et lien vers /owner-profile |
+| Mobile ≤ 400px | `DateSheet` (Sheet bottom) OK. Stepper L136 tronque labels via `hidden sm:inline` OK. À vérifier : `publishBlockers` liste L1329 sur mobile étroit | À valider | Test manuel Playwright 360 px |
+| États | `saving/publishing` gérés. Erreur `saveDraft` silent par défaut L494, aucun feedback si autosave échoue en boucle | Moyen | Toast d'échec après 2 tentatives silencieuses successives |
+| Code mort | `hasUserEditedRef` set mais jamais lu | Cosmétique | Nettoyer ou brancher sur l'insert vide (cf. ligne CreateSit L487) |
 
 ---
 
-## 3 correctifs prioritaires
+## Top 3 correctifs prioritaires
 
-1. **Aligner le barème client sur la RPC serveur** : ajouter le critère d'affinité manquant côté `scoredCriteria` (sitter et owner) et corriger la règle `postal_code` pour les comptes non-FR. Objectif : une seule source de vérité, `liveScore ≡ profile_completion` à ±0 pt, cohérent avec les nudges `profile_incomplete` et le tri sur le dashboard.
-2. **Fiabiliser fetch et mutations** : `try/catch` sur `fetchData` (sitter + owner) avec état d'erreur distinct + bouton Réessayer ; debouncer `onNoteChange` sur `OwnerStepAnimals` (aujourd'hui = 1 requête par lettre) et ajouter validation client de l'avatar (type/poids ≤ 5 MB) avec message actionnable — mêmes principes que le correctif appliqué à `/sits`.
-3. **Réparer le TrustProfile** : lire réellement `email_confirmed_at` et calculer `hasFirstActivity` (annonce publiée / garde terminée). Sans ça, le pilier confiance est structurellement plafonné à 3-4/5, ce qui contredit le message de la page.
+1. **Bug dates IA** : renforcer prompt + guard `>= today` dans l'edge function, ET sanitize au chargement brouillon dans `CreateSit.tsx`, ET détection stale dans `DraftResumeCard.tsx`. Sans les 3 couches, le bug se réintroduit.
+2. **Insert vide au chargement** de `/sits/create` : ne créer le brouillon qu'au premier champ non vide effectif, sinon on pollue la table `sits` de brouillons fantômes et on fausse `DraftResumeCard`.
+3. **Republication accidentelle** : `UPDATE` de publication L621 sans filtre `status='draft'` — ajouter la contrainte, sinon une URL `?draftId=<sit_publié>` republierait sans garde-fou.
 
-Aucune modification apportée.
+Aucune modification de code effectuée.
