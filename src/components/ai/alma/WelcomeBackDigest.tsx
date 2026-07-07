@@ -10,11 +10,12 @@
  * Debounce : on n'appelle la RPC qu'une fois par visite de session (sessionStorage flag).
  * Vouvoiement partout (owner + sitter, règle projet).
  */
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAlma } from "@/contexts/AlmaContext";
 import { useAlmaFrequency } from "@/hooks/useAlmaFrequency";
 import { trackEvent } from "@/lib/analytics";
 import { AlmaBubble, type AlmaAudience } from "./AlmaBubble";
