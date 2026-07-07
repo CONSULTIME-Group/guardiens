@@ -1685,40 +1685,64 @@ export default function PublicSitterProfile() {
                 <PublicExperiences experiences={externalExperiences} />
               </TabsContent>
 
-              {/* Onglet Avis */}
+              {/* Onglet Avis, aplati : liste unique triée + filtre à puces (plus de sous-onglets imbriqués). */}
               {reviewCount > 0 && (
                 <TabsContent value="avis" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5">
-                  <Tabs defaultValue={gardeReviews.length > 0 ? "gardes" : "missions"} className="w-full">
-                    <TabsList className="mb-3">
-                      <TabsTrigger value="gardes">Gardes{gardeReviews.length > 0 ? ` (${gardeReviews.length})` : ''}</TabsTrigger>
-                      <TabsTrigger value="missions">Missions{missionReviews.length > 0 ? ` (${missionReviews.length})` : ''}</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="gardes" forceMount>
-                      {gardeReviews.length === 0 ? (
-                        <p className="text-sm text-muted-foreground italic py-2 font-body">Pas encore d'avis de garde.</p>
-                      ) : (
-                        <ReviewGrid
-                          reviews={gardeReviews}
-                          showAll={showAllGardeReviews}
-                          setShowAll={setShowAllGardeReviews}
-                          badgesBySitId={badgesBySitId}
-                        />
-                      )}
-                    </TabsContent>
-                    <TabsContent value="missions" forceMount>
-                      {missionReviews.length === 0 ? (
-                        <p className="text-sm text-muted-foreground italic py-2 font-body">Pas encore d'avis de mission.</p>
-                      ) : (
-                        <ReviewGrid
-                          reviews={missionReviews}
-                          showAll={showAllMissionReviewsTab}
-                          setShowAll={setShowAllMissionReviewsTab}
-                        />
-                      )}
-                    </TabsContent>
-                  </Tabs>
+                  {(() => {
+                    const filtered = reviewFilter === 'gardes'
+                      ? gardeReviews
+                      : reviewFilter === 'missions'
+                        ? missionReviews
+                        : [...reviews].sort((a: any, b: any) =>
+                            new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+                    const chips: Array<{ id: 'all' | 'gardes' | 'missions'; label: string; count: number }> = [
+                      { id: 'all', label: 'Tous', count: reviews.length },
+                      { id: 'gardes', label: 'Gardes', count: gardeReviews.length },
+                      { id: 'missions', label: 'Missions', count: missionReviews.length },
+                    ];
+                    return (
+                      <>
+                        <div className="flex flex-wrap gap-2 mb-3" role="tablist" aria-label="Filtrer les avis">
+                          {chips.map((c) => {
+                            const active = reviewFilter === c.id;
+                            return (
+                              <button
+                                key={c.id}
+                                type="button"
+                                role="tab"
+                                aria-selected={active}
+                                onClick={() => setReviewFilter(c.id)}
+                                className={[
+                                  'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-body transition-colors',
+                                  active
+                                    ? 'bg-primary text-primary-foreground border-primary'
+                                    : 'bg-card text-foreground/70 border-border hover:border-primary/40 hover:text-foreground',
+                                ].join(' ')}
+                              >
+                                {c.label}
+                                {c.count > 0 && (
+                                  <span className={active ? 'opacity-90' : 'text-muted-foreground'}>({c.count})</span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        {filtered.length === 0 ? (
+                          <p className="text-sm text-muted-foreground italic py-2 font-body">Aucun avis dans cette catégorie.</p>
+                        ) : (
+                          <ReviewGrid
+                            reviews={filtered}
+                            showAll={showAllGardeReviews}
+                            setShowAll={setShowAllGardeReviews}
+                            badgesBySitId={badgesBySitId}
+                          />
+                        )}
+                      </>
+                    );
+                  })()}
                 </TabsContent>
               )}
+
 
               {/* Onglet Pratique */}
               <TabsContent value="pratique" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5">
