@@ -36,6 +36,7 @@ export function AlmaReviewDraftBubble({
   const visible = hasRatings && commentShort && !!conversationId;
 
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const seenRef = useRef(false);
 
