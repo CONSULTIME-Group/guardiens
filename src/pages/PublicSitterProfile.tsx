@@ -494,11 +494,16 @@ export default function PublicSitterProfile() {
 
       // debug removed
 
-      setLoading(false);
       window.prerenderReady = true;
+      } catch (e: any) {
+        console.error('[PublicSitterProfile] load failed', e);
+        setLoadError('error');
+      } finally {
+        setLoading(false);
+      }
     };
     load();
-  }, [id]);
+  }, [id, loadNonce]);
   useEffect(() => {
     if (activeTab !== 'proprio') return;
     if (!id || loading) return;
