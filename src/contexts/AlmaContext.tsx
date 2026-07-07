@@ -489,8 +489,22 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
       frequency: state.frequency,
       verboseMode,
       requestNextTip,
+      activeProactiveSurface,
+      claimProactiveSurface,
+      releaseProactiveSurface,
     }),
-    [queueWhisper, dismissCurrent, canEmit, current, state.frequency, verboseMode, requestNextTip],
+    [
+      queueWhisper,
+      dismissCurrent,
+      canEmit,
+      current,
+      state.frequency,
+      verboseMode,
+      requestNextTip,
+      activeProactiveSurface,
+      claimProactiveSurface,
+      releaseProactiveSurface,
+    ],
   );
 
   return <AlmaCtx.Provider value={value}>{children}</AlmaCtx.Provider>;
