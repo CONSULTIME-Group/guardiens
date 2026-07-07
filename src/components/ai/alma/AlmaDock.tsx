@@ -506,8 +506,75 @@ export function AlmaDock() {
           )}
         </button>
 
+        {/* Point d'info du stade : bouton frère (pas imbriqué), positionné
+            en corner du bouton principal. Ouvre un popover avec le stade
+            courant, une phrase de progression et l'accès aux conseils. */}
+        {stage && (
+          <Popover open={stagePopoverOpen} onOpenChange={setStagePopoverOpen}>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                aria-label={`Votre stade avec Alma : ${STAGE_SHORT_LABEL[stage]}. Ouvrir les infos.`}
+                title={`Alma · ${STAGE_SHORT_LABEL[stage]}`}
+                className={cn(
+                  "absolute h-11 w-11 rounded-full flex items-center justify-center",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                )}
+                style={{
+                  left: 6 + avatarSize - 22,
+                  bottom: 6 + avatarSize - 22 - 4,
+                }}
+              >
+                <span
+                  aria-hidden
+                  className={cn(
+                    "h-3.5 w-3.5 rounded-full ring-2 ring-card transition hover:scale-110",
+                    STAGE_DOT_CLASS[stage],
+                  )}
+                />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              side="top"
+              align="end"
+              className="w-72 p-4"
+              sideOffset={12}
+            >
+              <div className="flex items-center gap-2 mb-1.5">
+                <span
+                  aria-hidden
+                  className={cn("h-2.5 w-2.5 rounded-full", STAGE_DOT_CLASS[stage])}
+                />
+                <p className="text-sm font-semibold text-foreground">
+                  Stade {STAGE_SHORT_LABEL[stage]}
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground leading-snug">
+                {evolution?.nextMilestone ??
+                  "Alma vous accompagne au fil de vos gestes dans la communauté."}
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => askForTip("popover")}
+                  className="min-h-11 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  Un conseil ?
+                </button>
+                <Link
+                  to="/alma"
+                  onClick={() => setStagePopoverOpen(false)}
+                  className="min-h-11 inline-flex items-center rounded-full px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition underline decoration-dotted underline-offset-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  Voir le détail
+                </Link>
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
 
         <div className="h-6 w-px bg-border/70" aria-hidden />
+
 
         <button
           type="button"
