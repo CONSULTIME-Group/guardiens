@@ -317,7 +317,9 @@ const SitterProfile = () => {
 
   const sitterEssentials = scoredCriteria.filter(c => c.kind === "essential");
   const sitterBonuses = scoredCriteria.filter(c => c.kind === "bonus");
-  const liveScore = Math.min(100, scoredCriteria.reduce((s, c) => s + (c.ok ? c.points : 0), 0));
+  // Bonus affinité partiel (parité serveur : 0/3/6 avant d'atteindre 10 à count>=3).
+  const partialAffinity = affinityCount >= 3 ? 0 : affinityPoints;
+  const liveScore = Math.min(100, scoredCriteria.reduce((s, c) => s + (c.ok ? c.points : 0), 0) + partialAffinity);
 
   const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => {
     const labels = missingLabelsFor(s.id, scoredCriteria);
