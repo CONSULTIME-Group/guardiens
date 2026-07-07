@@ -146,8 +146,12 @@ export default {
           "100%": { transform: "scale(1)", opacity: "1" },
         },
         "alma-breathe": {
-          "0%,100%": { transform: "scale(1)" },
-          "50%": { transform: "scale(1.03)" },
+          "0%,100%": { transform: "scale(1) rotate(-2deg)" },
+          "50%": { transform: "scale(1.03) rotate(2deg)" },
+        },
+        "alma-sway": {
+          "0%,100%": { transform: "rotate(-3deg) translateY(0)" },
+          "50%": { transform: "rotate(3deg) translateY(-2px)" },
         },
       },
       animation: {
@@ -163,6 +167,7 @@ export default {
         "alma-wiggle": "alma-wiggle 0.5s ease-in-out",
         "alma-pop-in": "alma-pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both",
         "alma-breathe": "alma-breathe 4s ease-in-out infinite",
+        "alma-sway": "alma-sway 2.5s ease-in-out infinite",
       },
     },
   },

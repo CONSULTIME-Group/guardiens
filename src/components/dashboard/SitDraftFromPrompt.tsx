@@ -10,7 +10,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2 } from "lucide-react";
-import { AlmaAvatar } from "@/components/ai/alma/AlmaAvatar";
+import { AlmaAnimated } from "@/components/ai/alma/AlmaAnimated";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -102,9 +102,9 @@ export default function SitDraftFromPrompt({ secondary = false }: SitDraftFromPr
           : "rounded-2xl border border-border bg-card p-5 md:p-6"
       }
     >
-      <div className="flex items-start gap-3 mb-3">
-        <div className="rounded-xl bg-primary/10 p-2 text-primary shrink-0">
-          <AlmaAvatar size={secondary ? 24 : 32} />
+      <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 mb-3">
+        <div className="shrink-0 self-start">
+          <AlmaAnimated size={72} />
         </div>
         <div className="min-w-0">
           <h2
