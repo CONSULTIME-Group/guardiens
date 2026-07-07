@@ -263,6 +263,8 @@ export function AlmaDock() {
   };
 
   const mood = whisper?.primaryAction ? "attentive" : "idle";
+  const proposition = !whisper && !isSilent ? buildProposition(evolution, activeRole) : null;
+  const stage = evolution?.stage ?? null;
 
   return (
     <div
