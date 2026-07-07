@@ -45,12 +45,14 @@ export function AlmaBubble({
   variant = "default",
   title,
   loading = false,
+  success = false,
   children,
   actions,
   onDismiss,
   className,
 }: AlmaBubbleProps) {
   const loadingLabel = audience === "sitter" ? "Alma prépare…" : "Alma prépare…";
+  const lottieState = loading ? "thinking" : success ? "success" : "idle";
 
   return (
     <div
