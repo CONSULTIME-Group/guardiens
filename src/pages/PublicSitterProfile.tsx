@@ -1049,12 +1049,23 @@ export default function PublicSitterProfile() {
                   <ReplyTimeBadge minutes={sitterProfile.reply_median_minutes} className="self-start mt-1" />
                 )}
 
-                {city && (
-                  <p className="text-sm sm:text-base text-foreground/80 flex items-center gap-1 font-medium min-w-0 max-w-full break-words">
-                    <MapPin className="w-3.5 h-3.5 shrink-0" />
-                    <span className="min-w-0 break-words">Gardien à {city}</span>
-                  </p>
-                )}
+                {city && (() => {
+                  // Sous-titre rôle-aware, cohérent quel que soit l'onglet actif.
+                  // Un dual-role affiche « Gardien et propriétaire à X » ;
+                  // sinon, on colle au rôle réel de la personne (pas juste au tab).
+                  const isDual = hasSitterProfile && hasOwnerProfile;
+                  const roleLabel = isDual
+                    ? 'Gardien et propriétaire'
+                    : (activeTab === 'proprio' || (!hasSitterProfile && hasOwnerProfile))
+                      ? 'Propriétaire'
+                      : 'Gardien';
+                  return (
+                    <p className="text-sm sm:text-base text-foreground/80 flex items-center gap-1 font-medium min-w-0 max-w-full break-words">
+                      <MapPin className="w-3.5 h-3.5 shrink-0" />
+                      <span className="min-w-0 break-words">{roleLabel} à {city}</span>
+                    </p>
+                  );
+                })()}
                 {(profile as any)?.pro_status === "verified" && (profile as any)?.pro_tagline && (
                   <p className="text-xs sm:text-sm text-foreground/75 italic mt-1 max-w-full break-words">
                     « {(profile as any).pro_tagline} »
