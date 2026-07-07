@@ -15,6 +15,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const RATE_LIMIT_PER_HOUR = 3;
 const PROSCRIBED = /(voisin(e|s|age)?|gratuit à vie|pour toujours|période d'essai|programme fondateur|auvergne-rhône-alpes|\bAURA\b)/i;
+const ALLOWED_ENVIRONMENTS = ["ville", "campagne", "montagne", "lac", "vignes", "foret"] as const;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS_HEADERS });
@@ -69,7 +70,7 @@ Extraction attendue depuis la phrase du propriétaire :
 - Dates : si mentionnées (« du 4 au 19 août », « en août », « 15 jours en août »), déduisez start_date et end_date au format YYYY-MM-DD. Année par défaut : celle qui rend la date future à partir d'aujourd'hui (${todayIso}). Si aucune date, laissez vides et mettez flexible_dates=true.
 - Ville : extraite du prompt, sinon utilisez « ${profile?.city ?? ""} » (peut rester vide).
 - Animaux : nombre + espèce (chien, chat, NAC…).
-- Environnement : appartement, maison, avec jardin, en ville, à la campagne (choisir 1 à 3).
+- Environnement : choisir 0 à 3 valeurs STRICTEMENT parmi cette liste (aucune autre valeur autorisée) : ville, campagne, montagne, lac, vignes, foret. N'inventez pas « maison », « appartement », « jardin » : ces mots vont dans la description, pas dans environments.
 - Préférences gardien : télétravail, présence continue, calme, sportif (choisir 1 à 3 dans open_to).
 
 Génération :
@@ -101,7 +102,7 @@ Si le prompt mentionne un prix ou une transaction financière, ignorez-le : Guar
               end_date: { type: "string", description: "YYYY-MM-DD, vide si inconnue" },
               flexible_dates: { type: "boolean" },
               city: { type: "string" },
-              environments: { type: "array", items: { type: "string" }, minItems: 0, maxItems: 3 },
+              environments: { type: "array", items: { type: "string", enum: ["ville", "campagne", "montagne", "lac", "vignes", "foret"] }, minItems: 0, maxItems: 3 },
               open_to: { type: "array", items: { type: "string" }, minItems: 0, maxItems: 4 },
               specific_expectations: { type: "string", minLength: 60, maxLength: 900 },
               daily_routine: { type: "string", minLength: 60, maxLength: 900 },
@@ -131,7 +132,9 @@ Si le prompt mentionne un prix ou une transaction financière, ignorez-le : Guar
       end_date: parsed.end_date && /^\d{4}-\d{2}-\d{2}$/.test(parsed.end_date) ? parsed.end_date : null,
       flexible_dates: !!parsed.flexible_dates,
       city: clean(parsed.city) || profile?.city || null,
-      environments: Array.isArray(parsed.environments) ? parsed.environments.map(clean).filter(Boolean).slice(0, 3) : [],
+      environments: Array.isArray(parsed.environments)
+        ? parsed.environments.map((v: unknown) => String(v ?? "").toLowerCase().trim()).filter((v: string) => (ALLOWED_ENVIRONMENTS as readonly string[]).includes(v)).slice(0, 3)
+        : [],
       open_to: Array.isArray(parsed.open_to) ? parsed.open_to.map(clean).filter(Boolean).slice(0, 4) : [],
       specific_expectations: clean(parsed.specific_expectations),
       daily_routine: clean(parsed.daily_routine),
