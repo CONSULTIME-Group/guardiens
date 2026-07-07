@@ -158,6 +158,7 @@ export function AlmaDock() {
 
   const [expanded, setExpanded] = useState(false);
   const [userCollapsed, setUserCollapsed] = useState(false);
+  const [stagePopoverOpen, setStagePopoverOpen] = useState(false);
 
   // Auto-timer d'auto-dismiss pour le whisper courant.
   const timerRef = useRef<number | null>(null);
