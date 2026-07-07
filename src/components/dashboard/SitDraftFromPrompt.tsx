@@ -63,6 +63,7 @@ export default function SitDraftFromPrompt({ secondary = false, primary = null }
     const clean = prompt.trim();
     if (clean.length < 10) return;
     setLoading(true);
+    setAlmaMood("thinking");
     try {
       const { data, error } = await supabase.functions.invoke("draft-sit-from-prompt", {
         body: { prompt: clean },
