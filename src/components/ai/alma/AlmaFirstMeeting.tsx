@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { AlmaAnimated } from "./AlmaAnimated";
+import { type AlmaMood } from "./AlmaAvatar";
 import { trackEvent } from "@/lib/analytics";
 import { resolveAlmaCtaHref, type AlmaCtaAction } from "@/lib/alma/cta-actions";
 
