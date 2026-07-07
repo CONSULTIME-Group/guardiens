@@ -260,17 +260,37 @@ const PublicSitView = ({
                             {owner.bio}
                           </p>
                         )}
-                        {(sit.specific_expectations || sit.owner_message) && (
+                        {sit.specific_expectations && (
                           <div className="mt-4 space-y-3 text-base leading-relaxed text-foreground/85 whitespace-pre-line">
-                            {sit.specific_expectations || sit.owner_message}
+                            {sit.specific_expectations}
+                          </div>
+                        )}
+                        {sit.owner_message && (
+                          <div className="mt-5 border-l-2 border-primary/40 pl-4 py-1 italic text-base leading-relaxed text-foreground/85 whitespace-pre-line">
+                            <p className="not-italic text-[10px] font-bold tracking-[0.18em] uppercase text-muted-foreground mb-1.5">
+                              {owner.first_name ? `Un mot de ${owner.first_name}` : "Un mot de l'hôte"}
+                            </p>
+                            {sit.owner_message}
                           </div>
                         )}
                       </div>
                     </div>
                   )}
                   {!owner && (sit.specific_expectations || sit.owner_message) && (
-                    <div className="space-y-3 text-base leading-relaxed text-foreground/85 whitespace-pre-line">
-                      {sit.specific_expectations || sit.owner_message}
+                    <div className="space-y-5">
+                      {sit.specific_expectations && (
+                        <div className="text-base leading-relaxed text-foreground/85 whitespace-pre-line">
+                          {sit.specific_expectations}
+                        </div>
+                      )}
+                      {sit.owner_message && (
+                        <div className="border-l-2 border-primary/40 pl-4 py-1 italic text-base leading-relaxed text-foreground/85 whitespace-pre-line">
+                          <p className="not-italic text-[10px] font-bold tracking-[0.18em] uppercase text-muted-foreground mb-1.5">
+                            Un mot de l'hôte
+                          </p>
+                          {sit.owner_message}
+                        </div>
+                      )}
                     </div>
                   )}
                 </section>
