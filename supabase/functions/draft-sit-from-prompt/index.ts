@@ -147,6 +147,14 @@ Si le prompt mentionne un prix ou une transaction financière, ignorez-le : Guar
       owner_message: clean(parsed.owner_message),
     };
 
+    // Garde serveur : aucune date passée ne doit être écrite en base.
+    // Toute date < aujourd'hui est purgée ; end_date < start_date également.
+    // Si l'une des deux manque après purge, on force flexible_dates=true.
+    if (draft.start_date && draft.start_date < todayIso) draft.start_date = null;
+    if (draft.end_date && draft.end_date < todayIso) draft.end_date = null;
+    if (draft.start_date && draft.end_date && draft.end_date < draft.start_date) draft.end_date = null;
+    if (!draft.start_date || !draft.end_date) draft.flexible_dates = true;
+
     // Validation post-génération : détection mots proscrits
     const warnings: string[] = [];
     const scanBlob = [draft.title, draft.specific_expectations, draft.daily_routine, draft.owner_message].join(" ");
