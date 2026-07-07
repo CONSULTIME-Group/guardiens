@@ -1330,7 +1330,7 @@
       }
     },
     "criteria": {
-      "name_postal": "First name + postal code",
+      "name_postal": "First name + postal code (France) or city (outside France)",
       "avatar": "Profile photo",
       "pet": "At least 1 pet listed",
       "housing_desc": "Home described (≥ 50 characters)",
@@ -1341,7 +1341,8 @@
       "skill": "At least 1 skill",
       "lifestyle": "At least 1 lifestyle",
       "radius": "Geographic radius defined",
-      "sitter_gallery_one": "At least 1 gallery photo"
+      "sitter_gallery_one": "At least 1 gallery photo",
+      "affinity": "Affinities set (interests, languages, life pace…)"
     },
     "hints": {
       "tab_identity": "Identity tab.",
@@ -1352,7 +1353,8 @@
       "tab_mobility": "Mobility & radius tab.",
       "settings_verif": "Settings → Verification.",
       "chars_50": "{{count}}/50 characters.",
-      "add_avatar_identity": "Add a photo in the Identity tab."
+      "add_avatar_identity": "Add a photo in the Identity tab.",
+      "affinity_count": "{{count}}/5 filled in (min 3 for full score)."
     }
   }
 }
