@@ -89,6 +89,7 @@ export default function DraftResumeCard({ draft, onDeleted }: Props) {
 
   const filled = useMemo(() => countFilled(draft), [draft]);
   const total = FIELDS.length;
+  const staleDate = useMemo(() => hasStaleDate(draft), [draft]);
   const modified = draft.updated_at || draft.created_at || null;
 
   const impressionRef = useRef<HTMLDivElement>(null);
