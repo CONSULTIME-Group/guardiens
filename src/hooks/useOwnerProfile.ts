@@ -477,11 +477,31 @@ export function useOwnerProfile() {
 
   const uploadPhoto = useCallback(async (file: File, bucket: string): Promise<string | null> => {
     if (!user) return null;
-    const ext = file.name.split(".").pop();
+
+    // Bucket avatars : validation stricte type/poids + compression avant upload.
+    let toUpload: File = file;
+    if (bucket === "avatars") {
+      const check = validateAvatarFile(file);
+      if (check.ok === false) {
+        toast({ variant: "destructive", title: "Photo refusée", description: check.reason });
+        return null;
+      }
+      try {
+        toUpload = await compressImageFile(file);
+      } catch (err) {
+        logger.error("Owner avatar compression failed", { error: String(err) });
+        toast({ variant: "destructive", title: "Erreur", description: "Impossible de traiter cette image." });
+        return null;
+      }
+    }
+
+    const ext = toUpload.name.split(".").pop() || "jpg";
     const path = bucket === "avatars"
       ? `${user.id}/avatar-${Date.now()}.${ext}`
       : `${user.id}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false });
+    const { error } = await supabase.storage
+      .from(bucket)
+      .upload(path, toUpload, { upsert: false, contentType: toUpload.type || undefined });
     if (error) { toast({ variant: "destructive", title: "Erreur", description: "Upload échoué." }); return null; }
     const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
     const publicUrl = urlData.publicUrl;
@@ -513,5 +533,9 @@ export function useOwnerProfile() {
     saveStep, addPet, updatePet, removePet, uploadPhoto,
     completion,
     missingFields: computeMissingFields(data, pets.length),
+    loadError,
+    reload: () => fetchData(),
+    emailVerified,
+    hasFirstActivity,
   };
 }
