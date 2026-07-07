@@ -223,7 +223,7 @@ export function AlmaDock() {
     );
   };
 
-  if (isModalOpen) return null;
+  
 
   // Résolution du CTA principal (route interne le cas échéant).
   const whisper: AlmaWhisperT | null = (() => {
@@ -296,6 +296,10 @@ export function AlmaDock() {
     },
     [location.pathname, activeRole, requestNextTip],
   );
+
+  if (isModalOpen) return null;
+
+
 
 
   return (
