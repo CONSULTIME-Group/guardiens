@@ -450,6 +450,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
           p_bypass_cooldown: true,
           p_exclude_ids: excluded,
           p_on_demand: onDemand,
+          p_frequency: stateRef.current.frequency,
         });
 
         if (data && (data as any).id) {
