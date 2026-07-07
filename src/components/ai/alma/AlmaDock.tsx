@@ -121,15 +121,19 @@ function useIsRadixModalOpen(): boolean {
   useEffect(() => {
     if (typeof document === "undefined") return;
     const compute = () => {
+      // On ne considère comme "modale bloquante" que les vraies dialog /
+      // alertdialog Radix. Les DropdownMenu / Popover (role="menu") ne
+      // doivent PAS démonter le dock, sinon le menu d'Alma se ferme
+      // instantanément à l'ouverture et ses items deviennent incliquables.
       const hasOpenDialog =
         document.querySelector('[role="dialog"][data-state="open"]') !== null ||
         document.querySelector('[role="alertdialog"][data-state="open"]') !== null;
       const hasOpenOverlay =
         document.querySelector('[data-radix-dialog-overlay][data-state="open"]') !== null ||
         document.querySelector('[data-radix-alert-dialog-overlay][data-state="open"]') !== null;
-      const bodyLocked = document.body.hasAttribute("data-scroll-locked");
-      setIsOpen(hasOpenDialog || hasOpenOverlay || bodyLocked);
+      setIsOpen(hasOpenDialog || hasOpenOverlay);
     };
+
     compute();
     const mo = new MutationObserver(compute);
     mo.observe(document.body, {
@@ -569,7 +573,7 @@ export function AlmaDock() {
         <div className="h-6 w-px bg-border/70" aria-hidden />
 
         {/* Menu unique : parcours, conseil, fréquence, masquer. */}
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
