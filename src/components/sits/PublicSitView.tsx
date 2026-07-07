@@ -480,7 +480,7 @@ const PublicSitView = ({
                   <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">
                     La routine quotidienne
                   </h2>
-                  <div className="space-y-5 text-lg leading-relaxed text-foreground/85 whitespace-pre-line">
+                  <div className="space-y-5 text-base leading-relaxed text-foreground/85 whitespace-pre-line">
                     {sit.daily_routine}
                   </div>
                 </section>
