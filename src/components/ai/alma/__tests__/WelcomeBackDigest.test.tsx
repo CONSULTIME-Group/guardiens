@@ -118,6 +118,6 @@ describe("WelcomeBackDigest - getCopy", () => {
   it("sitter_intl mentionne le nombre exact", () => {
     const copy = getCopy("sitter_intl", { ...empty, new_intl_sits: 7 });
     expect(copy.body).toContain("7");
-    expect(copy.actionHref).toBe("/annonces?international=1");
+    expect(copy.actionHref).toBe("/annonces/international");
   });
 });
