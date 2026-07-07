@@ -252,6 +252,7 @@ const CreateSit = () => {
   const [ownerPhotos, setOwnerPhotos] = useState<string[]>([]);
   const [profileCompletion, setProfileCompletion] = useState(0);
   const [ownerCity, setOwnerCity] = useState<string>("");
+  const [ownerBio, setOwnerBio] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [isRepublish, setIsRepublish] = useState(false);
@@ -320,7 +321,7 @@ const CreateSit = () => {
       const [propRes, ownerRes, profileRes, galleryRes] = await Promise.all([
         supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
         supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
-        supabase.from("profiles").select("profile_completion, city").eq("id", user.id).single(),
+        supabase.from("profiles").select("profile_completion, city, bio").eq("id", user.id).single(),
         supabase.from("owner_gallery").select("photo_url").eq("user_id", user.id).limit(4),
       ]);
 
@@ -331,6 +332,7 @@ const CreateSit = () => {
 
       setProfileCompletion(profileRes.data?.profile_completion || 0);
       setOwnerCity(profileRes.data?.city || "");
+      setOwnerBio((profileRes.data as any)?.bio || "");
       setOwnerPhotos((galleryRes.data || []).map((g: any) => g.photo_url));
 
       if (sourceSitRes?.data) {
@@ -952,22 +954,44 @@ const CreateSit = () => {
 
           {/* Description */}
           <div id="description-field" className="scroll-mt-24">
-            <div className="flex items-center justify-between gap-2 mb-1.5">
+            <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
               <Label htmlFor="description-textarea" className="text-sm font-medium">Description de la garde *</Label>
-              <ImproveListingButton
-                title={title}
-                description={specificExpectations}
-                context={{
-                  animaux: pets?.map(p => `${p.species}${p.breed ? ` (${p.breed})` : ""}`).join(", "),
-                  logement: property?.type,
-                  ville: sitCity || ownerCity || undefined,
-                  dates: startDate && endDate ? `${startDate} – ${endDate}` : undefined,
-                }}
-                onApply={(patch) => {
-                  if (patch.title) setTitle(patch.title);
-                  if (patch.description) setSpecificExpectations(patch.description);
-                }}
-              />
+              <div className="flex items-center gap-2">
+                {(() => {
+                  const parts: string[] = [];
+                  if (ownerProfile?.rules_notes) parts.push(`Règles de la maison : ${ownerProfile.rules_notes}`);
+                  if (ownerProfile?.presence_expected) parts.push(`Présence prévue : ${ownerProfile.presence_expected}`);
+                  if (ownerProfile?.visits_allowed) parts.push(`Visites pendant la garde : ${ownerProfile.visits_allowed}`);
+                  const seed = parts.join("\n\n");
+                  if (!seed) return null;
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (specificExpectations.trim() && !window.confirm("Remplacer le texte actuel par les éléments de votre profil ?")) return;
+                        setSpecificExpectations(seed);
+                      }}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Reprendre depuis mon profil
+                    </button>
+                  );
+                })()}
+                <ImproveListingButton
+                  title={title}
+                  description={specificExpectations}
+                  context={{
+                    animaux: pets?.map(p => `${p.species}${p.breed ? ` (${p.breed})` : ""}`).join(", "),
+                    logement: property?.type,
+                    ville: sitCity || ownerCity || undefined,
+                    dates: startDate && endDate ? `${startDate} – ${endDate}` : undefined,
+                  }}
+                  onApply={(patch) => {
+                    if (patch.title) setTitle(patch.title);
+                    if (patch.description) setSpecificExpectations(patch.description);
+                  }}
+                />
+              </div>
             </div>
             <Textarea
               id="description-textarea"
@@ -1015,7 +1039,7 @@ const CreateSit = () => {
               placeholder={"Ex :\nMatin, Sortie du chien 30 min, gamelles, ouverture du jardin.\nMidi, Visite rapide, fontaine à recharger.\nSoir, Promenade 30 min, repas, câlins obligatoires 🥰"}
               value={dailyRoutine}
               onChange={e => setDailyRoutine(e.target.value.slice(0, 1500))}
-              className="text-base font-mono text-[13px] min-h-[120px]"
+              className="text-base min-h-[120px]"
               rows={5}
             />
             <p className="text-[11px] text-muted-foreground mt-1 text-right">{dailyRoutine.length}/1500</p>
@@ -1023,7 +1047,28 @@ const CreateSit = () => {
 
           {/* Mot de l'hôte */}
           <div>
-            <Label htmlFor="owner-message" className="text-sm font-medium">Un mot de vous <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <Label htmlFor="owner-message" className="text-sm font-medium">Un mot de vous <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
+              {(() => {
+                const parts: string[] = [];
+                if (ownerBio) parts.push(ownerBio);
+                if (ownerProfile?.welcome_notes) parts.push(ownerProfile.welcome_notes);
+                const seed = parts.join("\n\n");
+                if (!seed) return null;
+                return (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (ownerMessage.trim() && !window.confirm("Remplacer le texte actuel par les éléments de votre profil ?")) return;
+                      setOwnerMessage(seed.slice(0, 800));
+                    }}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Reprendre depuis mon profil
+                  </button>
+                );
+              })()}
+            </div>
             <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">
               Un message personnel aux futurs gardiens, ce qu'ils trouveront en arrivant, ce que vous appréciez, une touche humaine.
             </p>
@@ -1406,7 +1451,7 @@ const CreateSit = () => {
               <Button
                 type="button"
                 variant="outline"
-                className="h-12 px-4 shrink-0 gap-2 hidden sm:inline-flex text-base"
+                className="h-12 px-4 shrink-0 gap-2 inline-flex text-base"
                 onClick={() => setPreviewOpen(true)}
                 disabled={!canPublish}
               >

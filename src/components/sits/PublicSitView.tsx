@@ -26,6 +26,9 @@ interface SitLike {
   accepting_applications?: boolean | null;
   specific_expectations?: string | null;
   owner_message?: string | null;
+  city?: string | null;
+  environments?: string[] | null;
+  flexible_dates?: boolean | null;
 }
 
 interface OwnerLike {
@@ -144,7 +147,7 @@ const PublicSitView = ({
   const petPhotos = pets
     .filter((p) => !!p.photo_url)
     .map((p) => ({ url: p.photo_url as string, name: p.name, species: speciesLabel[p.species] || p.species }));
-  const cityLabel = owner?.city || "France";
+  const cityLabel = sit.city || owner?.city || "France";
   const redirect = `/annonces/${sit.slug || sit.id}`;
   const title = sit.title ? sanitizeUserTitle(sit.title) : `Une mission de garde à ${cityLabel}`;
   const description = property?.description || "";
@@ -257,17 +260,37 @@ const PublicSitView = ({
                             {owner.bio}
                           </p>
                         )}
-                        {(sit.specific_expectations || sit.owner_message) && (
+                        {sit.specific_expectations && (
                           <div className="mt-4 space-y-3 text-base leading-relaxed text-foreground/85 whitespace-pre-line">
-                            {sit.specific_expectations || sit.owner_message}
+                            {sit.specific_expectations}
+                          </div>
+                        )}
+                        {sit.owner_message && (
+                          <div className="mt-5 border-l-2 border-primary/40 pl-4 py-1 italic text-base leading-relaxed text-foreground/85 whitespace-pre-line">
+                            <p className="not-italic text-[10px] font-bold tracking-[0.18em] uppercase text-muted-foreground mb-1.5">
+                              {owner.first_name ? `Un mot de ${owner.first_name}` : "Un mot de l'hôte"}
+                            </p>
+                            {sit.owner_message}
                           </div>
                         )}
                       </div>
                     </div>
                   )}
                   {!owner && (sit.specific_expectations || sit.owner_message) && (
-                    <div className="space-y-3 text-base leading-relaxed text-foreground/85 whitespace-pre-line">
-                      {sit.specific_expectations || sit.owner_message}
+                    <div className="space-y-5">
+                      {sit.specific_expectations && (
+                        <div className="text-base leading-relaxed text-foreground/85 whitespace-pre-line">
+                          {sit.specific_expectations}
+                        </div>
+                      )}
+                      {sit.owner_message && (
+                        <div className="border-l-2 border-primary/40 pl-4 py-1 italic text-base leading-relaxed text-foreground/85 whitespace-pre-line">
+                          <p className="not-italic text-[10px] font-bold tracking-[0.18em] uppercase text-muted-foreground mb-1.5">
+                            Un mot de l'hôte
+                          </p>
+                          {sit.owner_message}
+                        </div>
+                      )}
                     </div>
                   )}
                 </section>
@@ -290,8 +313,22 @@ const PublicSitView = ({
                     )}
                   </p>
                   {property.description && (
-                    <div className="space-y-5 text-lg leading-relaxed text-foreground/85 whitespace-pre-line mb-6">
+                    <div className="space-y-5 text-base leading-relaxed text-foreground/85 whitespace-pre-line mb-6">
                       {property.description}
+                    </div>
+                  )}
+                  {Array.isArray(sit.environments) && sit.environments.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-xs font-bold tracking-[0.2em] uppercase mb-3 text-muted-foreground">
+                        Environnement
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {sit.environments.map((env) => (
+                          <span key={env} className="px-3 py-1.5 rounded-full bg-muted text-foreground border border-border text-sm capitalize">
+                            {env}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
                   {(Array.isArray(property.equipments) && property.equipments.length > 0 || property.accessible || property.car_required) && (
@@ -443,7 +480,7 @@ const PublicSitView = ({
                   <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">
                     La routine quotidienne
                   </h2>
-                  <div className="space-y-5 text-lg leading-relaxed text-foreground/85 whitespace-pre-line">
+                  <div className="space-y-5 text-base leading-relaxed text-foreground/85 whitespace-pre-line">
                     {sit.daily_routine}
                   </div>
                 </section>
@@ -521,6 +558,9 @@ const PublicSitView = ({
                     Dates
                   </p>
                   <p className="text-base font-semibold text-foreground">{naturalDateLabel}</p>
+                  {sit.flexible_dates && (
+                    <p className="text-xs text-muted-foreground mt-1">Dates flexibles</p>
+                  )}
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
