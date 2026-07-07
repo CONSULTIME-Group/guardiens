@@ -98,17 +98,22 @@ export const FREQUENCY_CONFIG: Record<
 };
 
 /**
- * Quotas dédiés au compagnon culturel (P3) — indépendants du quota général :
- * on ne veut pas qu'un fait culturel consomme le budget d'un whisper
- * actionnable, et inversement. Volontairement plus permissif pour exploiter
- * la banque de 300+ faits.
+ * Quotas dédiés au compagnon culturel (P3) — indépendants du quota général.
+ * Modèle validé fondateur : le réglage de fréquence est le SEUL levier.
+ *  - silent    : rien.
+ *  - low       : pas de timer, déclenchement uniquement contextuel (le filtrage
+ *                de famille "utile" est appliqué côté RPC via p_frequency='low').
+ *  - balanced  : cooldown de session de 3 minutes entre deux messages.
+ *  - talkative : cooldown de session de 1 minute entre deux messages.
+ * La déduplication de session reste active à tous les niveaux.
  */
 export const CULTURAL_FACT_LIMITS: Record<
   AlmaFrequency,
   { maxPerSession: number; cooldownMs: number }
 > = {
   silent: { maxPerSession: 0, cooldownMs: Infinity },
-  low: { maxPerSession: 3, cooldownMs: 10 * 60 * 1000 },
-  balanced: { maxPerSession: 8, cooldownMs: 2 * 60 * 1000 },
-  talkative: { maxPerSession: 20, cooldownMs: 25 * 1000 },
+  low: { maxPerSession: 3, cooldownMs: 0 },
+  balanced: { maxPerSession: 12, cooldownMs: 3 * 60 * 1000 },
+  talkative: { maxPerSession: 30, cooldownMs: 60 * 1000 },
 };
+
