@@ -2,7 +2,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, Search, Calendar, MessageSquare, User, LogOut, Settings,
   PawPrint, Newspaper, Shield, Compass, Handshake, Menu, Star,
-  MoreHorizontal, Crown, Plus, Heart, LifeBuoy, Briefcase, UserCircle2,
+  MoreHorizontal, Crown, Plus, Heart, LifeBuoy, Briefcase, UserCircle2, Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -271,6 +271,7 @@ export const Sidebar = () => {
               <SidebarItem to="/petites-missions" icon={Handshake} label="Conseils & coups de main" badge={missionBadgeCount} />
 
               <GroupLabel label="Ressources" />
+              <SidebarItem to="/conseils" icon={Sparkles} label="Conseils d'Alma" />
               <SidebarItem to="/actualites" icon={Newspaper} label="Guides & Conseils" />
               <SidebarItem to="/guides" icon={Compass} label="Guides locaux" />
             </>
@@ -615,6 +616,7 @@ export const BottomNav = () => {
                   { to: "/sits", icon: Calendar, label: effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures", badge: sitsBadge },
                   { to: "/favoris", icon: Heart, label: "Mes favoris", badge: 0 },
                   { to: "/petites-missions", icon: Handshake, label: "Conseils & coups de main", badge: missionBadgeCount },
+                  { to: "/conseils", icon: Sparkles, label: "Conseils d'Alma", badge: 0 },
                   { to: "/actualites", icon: Newspaper, label: "Guides & Conseils", badge: 0 },
                   { to: "/guides", icon: Compass, label: "Guides locaux", badge: 0 },
                   ...(effectiveRole === "sitter" ? [{ to: "/mon-abonnement", icon: Star, label: "Mon abonnement", badge: 0 }] : []),

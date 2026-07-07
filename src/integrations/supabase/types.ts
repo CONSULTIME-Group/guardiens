@@ -5561,6 +5561,39 @@ export type Database = {
       }
     }
     Views: {
+      alma_public_tips: {
+        Row: {
+          content: string | null
+          context_filter: Json | null
+          fact_type: string | null
+          id: string | null
+          needs_pro_referral: boolean | null
+          seasonal_end_month: number | null
+          seasonal_start_month: number | null
+          source_url: string | null
+        }
+        Insert: {
+          content?: string | null
+          context_filter?: Json | null
+          fact_type?: string | null
+          id?: string | null
+          needs_pro_referral?: boolean | null
+          seasonal_end_month?: number | null
+          seasonal_start_month?: number | null
+          source_url?: string | null
+        }
+        Update: {
+          content?: string | null
+          context_filter?: Json | null
+          fact_type?: string | null
+          id?: string | null
+          needs_pro_referral?: boolean | null
+          seasonal_end_month?: number | null
+          seasonal_start_month?: number | null
+          source_url?: string | null
+        }
+        Relationships: []
+      }
       avis_publics: {
         Row: {
           animal_care_rating: number | null
