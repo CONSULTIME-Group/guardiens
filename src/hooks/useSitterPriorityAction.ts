@@ -19,7 +19,7 @@ import { useMemo } from "react";
  */
 
 export type SitterPriorityAction = {
-  variant: "next-guard" | "profile" | "skills" | "interests" | "postal" | "nearby" | "availability" | "explore";
+  variant: "next-guard" | "profile" | "skills" | "interests" | "postal" | "nearby" | "entraide" | "availability" | "explore";
   eyebrow: string;
   title: string;
   description: string;
