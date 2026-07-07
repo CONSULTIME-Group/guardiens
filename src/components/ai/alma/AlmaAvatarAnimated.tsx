@@ -690,6 +690,10 @@ export function AlmaAvatarAnimated({
             <circle cx="47" cy="20" r="2.4" fill="#ffffff" opacity="0.9" />
             <circle cx="53" cy="20" r="2.4" fill="#ffffff" opacity="0.9" />
 
+            {/* Accessoire de tête (étincelle / couronne) selon le stade */}
+            <StageHeadAccessory stage={stage} />
+
+
             {/* Museau blanc */}
             <ellipse cx="50" cy="54" rx="13" ry="10.5" fill="#ffffff" opacity="0.9" />
             <ellipse cx="50" cy="54" rx="13" ry="10.5" fill={`url(#${gMuzzle})`} opacity="0.5" />
