@@ -616,6 +616,7 @@ export const BottomNav = () => {
                   { to: "/sits", icon: Calendar, label: effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures", badge: sitsBadge },
                   { to: "/favoris", icon: Heart, label: "Mes favoris", badge: 0 },
                   { to: "/petites-missions", icon: Handshake, label: "Conseils & coups de main", badge: missionBadgeCount },
+                  { to: "/conseils", icon: Sparkles, label: "Conseils d'Alma", badge: 0 },
                   { to: "/actualites", icon: Newspaper, label: "Guides & Conseils", badge: 0 },
                   { to: "/guides", icon: Compass, label: "Guides locaux", badge: 0 },
                   ...(effectiveRole === "sitter" ? [{ to: "/mon-abonnement", icon: Star, label: "Mon abonnement", badge: 0 }] : []),
