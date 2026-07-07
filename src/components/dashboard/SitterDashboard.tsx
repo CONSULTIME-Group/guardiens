@@ -462,6 +462,11 @@ const SitterDashboard = () => {
               />
             )}
 
+            {/* Pouls de la communauté : chiffres réels et vivants. */}
+            <div className="px-4 sm:px-5 md:px-8 mt-4">
+              <CommunityPulseBanner userId={user?.id} />
+            </div>
+
             {/* Bannière accès (garde le contexte tarif/onboarding) */}
             <div className="px-4 sm:px-5 md:px-8 mt-4">
               {!(level === 4 || level === "3B")
@@ -473,11 +478,18 @@ const SitterDashboard = () => {
               {ChecklistBlock}
             </div>
             <div className="px-4 sm:px-5 md:px-8 mt-4">
+              <NearbyHelpersCarousel hideHeader />
+            </div>
+            <div className="px-4 sm:px-5 md:px-8 mt-6">
+              {ConseilsDiscoveryCard}
+            </div>
+            <div className="px-4 sm:px-5 md:px-8 mt-4">
               <EmailDigestCard />
             </div>
             <div className="px-4 sm:px-5 md:px-8 mb-6">
-              {buildSecondaryAccordion({ withConseils: true })}
+              {buildSecondaryAccordion()}
             </div>
+
           </>
         ) : (
           <>
