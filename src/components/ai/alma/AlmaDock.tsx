@@ -414,23 +414,23 @@ export function AlmaDock() {
             >
               {proposition.ctaLabel}
             </button>
-            {stage && (
-              <Link
-                to="/alma"
-                onClick={() => setExpanded(false)}
-                className="text-xs font-medium text-muted-foreground hover:text-foreground transition underline decoration-dotted underline-offset-2"
-              >
-                Voir mon parcours
-              </Link>
-            )}
+            <button
+              type="button"
+              onClick={() => askForTip("proposition")}
+              className="min-h-11 rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Un conseil ?
+            </button>
           </div>
         </div>
       )}
 
-      {/* Dock replié (avatar + label + contrôles) */}
+      {/* Dock replié (avatar + label + contrôles) — wrapper `relative`
+          nécessaire pour ancrer le point d'info du stade en dehors du bouton
+          principal (pas de bouton imbriqué). */}
       <div
         className={cn(
-          "pointer-events-auto flex items-center gap-2 rounded-full pl-1.5 pr-2 py-1.5",
+          "relative pointer-events-auto flex items-center gap-2 rounded-full pl-1.5 pr-2 py-1.5",
           "bg-card/95 backdrop-blur border border-border shadow-lg",
         )}
       >
