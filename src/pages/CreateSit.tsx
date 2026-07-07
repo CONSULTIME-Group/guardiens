@@ -954,23 +954,44 @@ const CreateSit = () => {
 
           {/* Description */}
           <div id="description-field" className="scroll-mt-24">
-            <div className="flex items-center justify-between gap-2 mb-1.5">
+            <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
               <Label htmlFor="description-textarea" className="text-sm font-medium">Description de la garde *</Label>
-              <ImproveListingButton
-                title={title}
-                description={specificExpectations}
-                context={{
-                  animaux: pets?.map(p => `${p.species}${p.breed ? ` (${p.breed})` : ""}`).join(", "),
-                  logement: property?.type,
-                  ville: sitCity || ownerCity || undefined,
-                  dates: startDate && endDate ? `${startDate} – ${endDate}` : undefined,
-                }}
-                onApply={(patch) => {
-                  if (patch.title) setTitle(patch.title);
-                  if (patch.description) setSpecificExpectations(patch.description);
-                }}
-              />
-            </div>
+              <div className="flex items-center gap-2">
+                {(() => {
+                  const parts: string[] = [];
+                  if (ownerProfile?.rules_notes) parts.push(`Règles de la maison : ${ownerProfile.rules_notes}`);
+                  if (ownerProfile?.presence_expected) parts.push(`Présence prévue : ${ownerProfile.presence_expected}`);
+                  if (ownerProfile?.visits_allowed) parts.push(`Visites pendant la garde : ${ownerProfile.visits_allowed}`);
+                  const seed = parts.join("\n\n");
+                  if (!seed) return null;
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (specificExpectations.trim() && !window.confirm("Remplacer le texte actuel par les éléments de votre profil ?")) return;
+                        setSpecificExpectations(seed);
+                      }}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Reprendre depuis mon profil
+                    </button>
+                  );
+                })()}
+                <ImproveListingButton
+                  title={title}
+                  description={specificExpectations}
+                  context={{
+                    animaux: pets?.map(p => `${p.species}${p.breed ? ` (${p.breed})` : ""}`).join(", "),
+                    logement: property?.type,
+                    ville: sitCity || ownerCity || undefined,
+                    dates: startDate && endDate ? `${startDate} – ${endDate}` : undefined,
+                  }}
+                  onApply={(patch) => {
+                    if (patch.title) setTitle(patch.title);
+                    if (patch.description) setSpecificExpectations(patch.description);
+                  }}
+                />
+              </div>
             <Textarea
               id="description-textarea"
               placeholder={`Décrivez ce qui est particulier à cette garde, en plus de ce qui est déjà dans votre profil (min. ${MIN_DESCRIPTION} caractères). Les annonces détaillées reçoivent 3 fois plus de candidatures.`}
