@@ -437,7 +437,8 @@ export function AlmaAvatarAnimated({
           draggable={false}
           className={cn(
             "relative block object-contain rounded-full",
-            stage && "ring-2 ring-offset-0",
+            stage && "ring-offset-0",
+            stage && STAGE_RING_WIDTH_CLASS[stage],
             stage && STAGE_RING_CLASS[stage],
           )}
           style={{ width: size, height: size }}
