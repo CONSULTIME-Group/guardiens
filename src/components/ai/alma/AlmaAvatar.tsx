@@ -93,36 +93,46 @@ export function AlmaAvatar({
 
   const styleWithOrigin = { width: size, height: size, transformOrigin: "bottom center" } as const;
 
+  // Geste idle discret (inclinaison lente) appliqué sur un wrapper afin de
+  // pouvoir cumuler avec `alma-breathe` porté par l'image elle-même.
+  const idleWrap = mood === "idle" || mood === "gentle";
+  const wrapClass = idleWrap
+    ? "inline-block motion-safe:animate-alma-idle-gesture"
+    : "inline-block";
+
   if (failed) {
     return (
-      <span
-        key={isOneShot ? oneShotKey : undefined}
-
-        role="img"
-        aria-label="Alma"
-        aria-hidden={ariaHidden}
-        style={styleWithOrigin}
-        className={cn(commonClass, "bg-primary/15")}
-      />
+      <span className={wrapClass} style={{ width: size, height: size }}>
+        <span
+          key={isOneShot ? oneShotKey : undefined}
+          role="img"
+          aria-label="Alma"
+          aria-hidden={ariaHidden}
+          style={styleWithOrigin}
+          className={cn(commonClass, "bg-primary/15")}
+        />
+      </span>
     );
   }
 
   return (
-    <img
-      key={isOneShot ? oneShotKey : undefined}
-      src={almaAvatarUrl}
-      alt="Alma"
-      width={size}
-      height={size}
-      loading="lazy"
-      decoding="async"
-      draggable={false}
-      aria-label="Alma"
-      aria-hidden={ariaHidden}
-      onError={() => setFailed(true)}
-      style={styleWithOrigin}
-      className={commonClass}
-    />
+    <span className={wrapClass} style={{ width: size, height: size, display: "inline-block" }}>
+      <img
+        key={isOneShot ? oneShotKey : undefined}
+        src={almaAvatarUrl}
+        alt="Alma"
+        width={size}
+        height={size}
+        loading="lazy"
+        decoding="async"
+        draggable={false}
+        aria-label="Alma"
+        aria-hidden={ariaHidden}
+        onError={() => setFailed(true)}
+        style={styleWithOrigin}
+        className={commonClass}
+      />
+    </span>
   );
 }
 
