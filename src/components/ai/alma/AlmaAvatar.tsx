@@ -109,7 +109,7 @@ export function AlmaAvatar({
 
   return (
     <img
-      key={mood === "happy" || mood === "attention" ? oneShotKey : undefined}
+      key={isOneShot ? oneShotKey : undefined}
       src={almaAvatarUrl}
       alt="Alma"
       width={size}
