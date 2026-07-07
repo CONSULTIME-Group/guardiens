@@ -109,12 +109,6 @@ const NoNearbySitsEmptyState = ({
 
   const secondary = [
     {
-      type: "missions" as const,
-      title: "Coup de main à proposer",
-      description: "Répondez à un besoin près de chez vous.",
-      to: "/petites-missions",
-    },
-    {
       type: "breeds" as const,
       title: "Fiches races",
       description: "75 races documentées.",
