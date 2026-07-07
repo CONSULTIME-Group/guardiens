@@ -260,6 +260,7 @@ const CreateSit = () => {
   const [draftId, setDraftId] = useState<string | null>(null);
   const [savingDraft, setSavingDraft] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [adaptingWithAlma, setAdaptingWithAlma] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [incompleteNudgeOpen, setIncompleteNudgeOpen] = useState(false);
   const incompleteNudgeSeenRef = useRef(false);
@@ -356,6 +357,52 @@ const CreateSit = () => {
             metadata: { source_sit_id: fromSitId, mode: republishMode || "copy" },
           });
         } catch {}
+
+        // Mode "adapt" : appelle l'edge function pour réécrire les champs texte
+        // à partir du prompt utilisateur. Le formulaire reste éditable pendant l'appel.
+        if (republishMode === "adapt" && republishPrompt.trim().length >= 10 && fromSitId) {
+          setAdaptingWithAlma(true);
+          try {
+            const { data: adapted, error: adaptErr } = await supabase.functions.invoke(
+              "adapt-sit-with-alma",
+              { body: { sourceSitId: fromSitId, prompt: republishPrompt.trim() } },
+            );
+            if (adaptErr || !adapted || (adapted as any).error) {
+              const msg = (adapted as any)?.error || adaptErr?.message || "Adaptation impossible pour le moment.";
+              toast({
+                variant: "destructive",
+                title: "Adaptation Alma indisponible",
+                description: msg + " Vous pouvez éditer manuellement.",
+              });
+            } else {
+              const a = adapted as any;
+              if (typeof a.title === "string" && a.title.length > 0) setTitle(a.title);
+              if (typeof a.specific_expectations === "string") setSpecificExpectations(a.specific_expectations);
+              if (typeof a.daily_routine === "string") setDailyRoutine(a.daily_routine);
+              if (typeof a.owner_message === "string") setOwnerMessage(a.owner_message);
+              if (Array.isArray(a.open_to)) setOpenTo(a.open_to);
+              if (Array.isArray(a.environments)) setSitEnvironments(a.environments);
+              try {
+                trackEvent("alma_republish_adapted", {
+                  source: "create_sit_page",
+                  metadata: { source_sit_id: fromSitId },
+                });
+              } catch {}
+              toast({
+                title: "Brouillon adapté",
+                description: "Alma a réécrit les champs à partir de vos ajustements. Relisez avant de publier.",
+              });
+            }
+          } catch (e) {
+            toast({
+              variant: "destructive",
+              title: "Adaptation Alma indisponible",
+              description: e instanceof Error ? e.message : "Réessayez dans un instant.",
+            });
+          } finally {
+            setAdaptingWithAlma(false);
+          }
+        }
       }
 
       if (!sourceSitRes?.data) {
@@ -728,8 +775,10 @@ const CreateSit = () => {
                 <>
                   Je pars de votre annonce
                   {sourceSitTitle ? <> « <strong>{sourceSitTitle}</strong> »</> : null}
-                  . J'ai retenu ce que vous vouliez ajuster :{" "}
-                  <em className="text-muted-foreground">« {republishPrompt.slice(0, 240) || "à préciser ci-dessous" } »</em>. Reprenez la main, corrigez ce qui doit l'être, vous relisez avant de publier.
+                  .{" "}
+                  {adaptingWithAlma
+                    ? <>Je réécris le brouillon à partir de vos ajustements, un instant…</>
+                    : <>J'ai retenu ce que vous vouliez ajuster : <em className="text-muted-foreground">« {republishPrompt.slice(0, 240) || "à préciser ci-dessous"} »</em>. Reprenez la main, corrigez ce qui doit l'être, vous relisez avant de publier.</>}
                 </>
               ) : (
                 <>
