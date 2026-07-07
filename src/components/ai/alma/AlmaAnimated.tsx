@@ -38,10 +38,35 @@ function usePrefersReducedMotion(): boolean {
 
 export function AlmaAnimated({ size = 96, className }: AlmaAnimatedProps) {
   const reduced = usePrefersReducedMotion();
-  const [failed, setFailed] = useState(false);
+  const [lottieFailed, setLottieFailed] = useState(false);
+  const [imgFailed, setImgFailed] = useState(false);
 
-  if (reduced || failed) {
-    return <AlmaAvatar size={size as 96} className={className} />;
+  if (reduced || lottieFailed) {
+    if (imgFailed) {
+      return (
+        <span
+          role="img"
+          aria-label="Alma"
+          style={{ width: size, height: size }}
+          className={cn("inline-block rounded-full bg-primary/15", className)}
+        />
+      );
+    }
+
+    return (
+      <img
+        src={almaFullUrl}
+        alt="Alma"
+        width={size}
+        height={size}
+        loading="lazy"
+        decoding="async"
+        draggable={false}
+        onError={() => setImgFailed(true)}
+        style={{ width: size, height: size }}
+        className={cn("inline-block object-contain", className)}
+      />
+    );
   }
 
   return (
@@ -58,7 +83,7 @@ export function AlmaAnimated({ size = 96, className }: AlmaAnimatedProps) {
         keepLastFrame
         style={{ width: size, height: size }}
         onEvent={(event) => {
-          if (event === "error") setFailed(true);
+          if (event === "error") setLottieFailed(true);
         }}
       />
     </div>
