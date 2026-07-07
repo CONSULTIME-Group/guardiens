@@ -52,10 +52,13 @@ export const ALMA_STAGE_ASSETS: Record<AlmaStage, string | null> = {
  * Multiplier une taille de base par ce facteur donne la taille effective.
  */
 export const ALMA_STAGE_SCALE: Record<AlmaStage, number> = {
+  // Croissance volontairement modérée : la distinction principale entre
+  // stades vient des accessoires (collier, bandana, couronne) et des effets
+  // (aura, liseré), pas du volume.
   nouvelle: 1,
-  eveillee: 1.18,
-  complice: 1.4,
-  fidele: 1.65,
+  eveillee: 1.08,
+  complice: 1.18,
+  fidele: 1.3,
 };
 
 /** Halo lumineux plus marqué au fil des stades. */
