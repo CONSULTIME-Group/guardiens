@@ -92,6 +92,19 @@ export interface RequestNextTipParams {
   emptyMessage?: string;
 }
 
+/**
+ * Verrou global : une seule surface Alma « proactive » visible à la fois.
+ * Poids plus élevé = priorité plus haute (peut déloger l'occupant courant).
+ * first_meeting (100) > welcome_back (50) > whisper (10). Le dock replié
+ * et la proposition permanente du dock ne sont PAS soumis au verrou.
+ */
+export type AlmaProactiveSurface = "first_meeting" | "welcome_back" | "whisper";
+const SURFACE_WEIGHT: Record<AlmaProactiveSurface, number> = {
+  first_meeting: 100,
+  welcome_back: 50,
+  whisper: 10,
+};
+
 interface AlmaContextValue {
   queueWhisper: (whisper: AlmaWhisper) => void;
   dismissCurrent: (reason: AlmaDismissReason) => void;
@@ -101,6 +114,12 @@ interface AlmaContextValue {
   verboseMode: boolean;
   /** Tire à la demande le prochain conseil éligible pour cette surface. */
   requestNextTip: (params: RequestNextTipParams) => Promise<void>;
+  /** Surface proactive actuellement affichée, ou null si aucune. */
+  activeProactiveSurface: AlmaProactiveSurface | null;
+  /** Tente de réserver la surface proactive. Retourne true si accordé. */
+  claimProactiveSurface: (kind: AlmaProactiveSurface) => boolean;
+  /** Libère la surface si elle est encore détenue par `kind`. */
+  releaseProactiveSurface: (kind: AlmaProactiveSurface) => void;
 }
 
 const NOOP_VALUE: AlmaContextValue = {
@@ -111,6 +130,9 @@ const NOOP_VALUE: AlmaContextValue = {
   frequency: "balanced",
   verboseMode: false,
   requestNextTip: async () => {},
+  activeProactiveSurface: null,
+  claimProactiveSurface: () => false,
+  releaseProactiveSurface: () => {},
 };
 
 const AlmaCtx = createContext<AlmaContextValue>(NOOP_VALUE);
@@ -136,6 +158,10 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<SchedulerState>(() => makeInitialState("balanced"));
   const [queue, setQueue] = useState<AlmaWhisper[]>([]);
   const [current, setCurrent] = useState<AlmaWhisper | null>(null);
+  const [activeProactiveSurface, setActiveProactiveSurface] =
+    useState<AlmaProactiveSurface | null>(null);
+  const activeSurfaceRef = useRef<AlmaProactiveSurface | null>(null);
+  activeSurfaceRef.current = activeProactiveSurface;
   const stateRef = useRef(state);
   stateRef.current = state;
   const lastInputFocusRef = useRef<number>(0);
@@ -236,10 +262,30 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
     };
   }, [user?.id]);
 
+  const claimProactiveSurface = useCallback(
+    (kind: AlmaProactiveSurface): boolean => {
+      const current = activeSurfaceRef.current;
+      if (current && SURFACE_WEIGHT[kind] <= SURFACE_WEIGHT[current]) return false;
+      activeSurfaceRef.current = kind;
+      setActiveProactiveSurface(kind);
+      return true;
+    },
+    [],
+  );
+
+  const releaseProactiveSurface = useCallback((kind: AlmaProactiveSurface) => {
+    if (activeSurfaceRef.current !== kind) return;
+    activeSurfaceRef.current = null;
+    setActiveProactiveSurface(null);
+  }, []);
+
   const canEmit = useCallback(
     (type: AlmaWhisperType) => {
       if (verboseMode) return true;
       if (isProactiveMuted()) return false;
+      const active = activeSurfaceRef.current;
+      // Une surface plus prioritaire (first_meeting, welcome_back) bloque les whispers.
+      if (active && SURFACE_WEIGHT[active] > SURFACE_WEIGHT.whisper) return false;
       return canEmitPure(stateRef.current, type).ok;
     },
     [isProactiveMuted, verboseMode],
@@ -260,6 +306,11 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (current || queue.length === 0) return;
     if (!verboseMode && isProactiveMuted()) return;
+    // Verrou : si une surface plus prioritaire est active, on ne parle pas.
+    if (!verboseMode) {
+      const active = activeSurfaceRef.current;
+      if (active && SURFACE_WEIGHT[active] > SURFACE_WEIGHT.whisper) return;
+    }
 
     let next: AlmaWhisper | null;
     if (verboseMode) {
@@ -270,6 +321,16 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
       next = pickNext(queue, stateRef.current);
     }
     if (!next) return;
+
+    // Claim de la surface pour le whisper. En mode verbose, on force le claim
+    // sans se soucier du verrou (mais on l'écrit quand même pour cohérence).
+    if (!verboseMode) {
+      const claimed = claimProactiveSurface("whisper");
+      if (!claimed) return;
+    } else {
+      activeSurfaceRef.current = "whisper";
+      setActiveProactiveSurface("whisper");
+    }
 
     setCurrent(next);
     setQueue((q) => q.filter((w) => w.id !== next!.id));
@@ -304,7 +365,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
           }
         });
     }
-  }, [current, queue, user?.id, isProactiveMuted, verboseMode]);
+  }, [current, queue, user?.id, isProactiveMuted, verboseMode, claimProactiveSurface]);
 
   const dismissCurrent = useCallback(
     (reason: AlmaDismissReason) => {
@@ -312,6 +373,11 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
       const w = current;
       setCurrent(null);
       setState((s) => onDismiss(s, reason));
+      // Libère le verrou de surface tenu par ce whisper.
+      if (activeSurfaceRef.current === "whisper") {
+        activeSurfaceRef.current = null;
+        setActiveProactiveSurface(null);
+      }
 
       trackEvent("alma_whisper_dismissed", {
         metadata: { whisper_type: w.type, reason },
@@ -423,8 +489,22 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
       frequency: state.frequency,
       verboseMode,
       requestNextTip,
+      activeProactiveSurface,
+      claimProactiveSurface,
+      releaseProactiveSurface,
     }),
-    [queueWhisper, dismissCurrent, canEmit, current, state.frequency, verboseMode, requestNextTip],
+    [
+      queueWhisper,
+      dismissCurrent,
+      canEmit,
+      current,
+      state.frequency,
+      verboseMode,
+      requestNextTip,
+      activeProactiveSurface,
+      claimProactiveSurface,
+      releaseProactiveSurface,
+    ],
   );
 
   return <AlmaCtx.Provider value={value}>{children}</AlmaCtx.Provider>;

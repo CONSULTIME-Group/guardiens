@@ -10,11 +10,12 @@
  * Debounce : on n'appelle la RPC qu'une fois par visite de session (sessionStorage flag).
  * Vouvoiement partout (owner + sitter, règle projet).
  */
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAlma } from "@/contexts/AlmaContext";
 import { useAlmaFrequency } from "@/hooks/useAlmaFrequency";
 import { trackEvent } from "@/lib/analytics";
 import { AlmaBubble, type AlmaAudience } from "./AlmaBubble";
@@ -179,13 +180,16 @@ export function WelcomeBackDigest({
 }: WelcomeBackDigestProps) {
   const { activeRole } = useAuth();
   const { frequency: almaFrequency } = useAlmaFrequency();
+  const { claimProactiveSurface, releaseProactiveSurface } = useAlma();
   const navigate = useNavigate();
   const audience: AlmaAudience = activeRole === "owner" ? "owner" : "sitter";
 
   const [signals, setSignals] = useState<DigestSignals | null>(signalsProp ?? null);
   const [dismissed, setDismissed] = useState(false);
+  const claimedRef = useRef(false);
 
-  // Fetch RPC une seule fois par session (debounce)
+  // Fetch RPC une seule fois par session (debounce). Le verrou de surface
+  // est posé AVANT l'await pour éviter la race avec DormantReturnWhisper.
   useEffect(() => {
     if (signalsProp) return;
     let cancelled = false;
@@ -198,6 +202,14 @@ export function WelcomeBackDigest({
     } catch {
       /* silent */
     }
+
+    // Claim immédiat : si FirstMeeting est déjà en place, on renonce.
+    const ok = claimProactiveSurface("welcome_back");
+    if (!ok) {
+      setDismissed(true);
+      return;
+    }
+    claimedRef.current = true;
 
     (async () => {
       try {
@@ -221,7 +233,17 @@ export function WelcomeBackDigest({
     return () => {
       cancelled = true;
     };
-  }, [signalsProp]);
+  }, [signalsProp, claimProactiveSurface]);
+
+  // Libère le verrou quand le composant se démonte.
+  useEffect(() => {
+    return () => {
+      if (claimedRef.current) {
+        releaseProactiveSurface("welcome_back");
+        claimedRef.current = false;
+      }
+    };
+  }, [releaseProactiveSurface]);
 
   const variant: WelcomeBackVariant | null = signals
     ? forcedVariant ?? pickVariant(audience, signals)
@@ -262,22 +284,35 @@ export function WelcomeBackDigest({
 
   const handleDismiss = useCallback(() => {
     setDismissed(true);
+    if (claimedRef.current) {
+      releaseProactiveSurface("welcome_back");
+      claimedRef.current = false;
+    }
     try {
       trackEvent("alma_welcomeback_dismissed", { metadata: { variant } });
     } catch {
       /* silent */
     }
-  }, [variant]);
+  }, [variant, releaseProactiveSurface]);
 
-  // Kill switch : si l'utilisateur a choisi "silent", Alma ne parle jamais
-  // spontanément, même si un digest est disponible.
-  if (almaFrequency === "silent") return null;
-  if (dismissed || !variant || !signals) return null;
-  // Règle produit : Alma ne se présente jamais sans proposer d'action.
-  // Les variantes « first_visit » ne portent qu'un message d'accueil sans
-  // action concrète. Le concierge IA (SitDraftFromPrompt) et les NBA du
-  // dashboard prennent le relais, on reste silencieux ici.
-  if (variant === "owner_first_visit" || variant === "sitter_first_visit") return null;
+  // Détermine si on va effectivement rendre quelque chose ; sinon on libère
+  // le verrou pour laisser passer les whispers du scheduler.
+  const willRender =
+    almaFrequency !== "silent" &&
+    !dismissed &&
+    !!variant &&
+    !!signals &&
+    variant !== "owner_first_visit" &&
+    variant !== "sitter_first_visit";
+
+  useEffect(() => {
+    if (!willRender && claimedRef.current) {
+      releaseProactiveSurface("welcome_back");
+      claimedRef.current = false;
+    }
+  }, [willRender, releaseProactiveSurface]);
+
+  if (!willRender) return null;
 
   const copy = getCopy(variant, signals);
 

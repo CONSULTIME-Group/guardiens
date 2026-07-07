@@ -16,7 +16,6 @@ import { buildLongAbsenceReturnWhisper } from "@/lib/alma/whisper-triggers";
 
 const DORMANT_DAYS = 14;
 const SESSION_FLAG = "alma_dormant_return_shown";
-const WELCOMEBACK_FLAG = "alma_welcomeback_shown";
 
 export function AlmaDormantReturnWhisper() {
   const { user, activeRole } = useAuth();
@@ -30,7 +29,6 @@ export function AlmaDormantReturnWhisper() {
     if (!canEmit("long_absence_return")) return;
     try {
       if (sessionStorage.getItem(SESSION_FLAG) === "1") return;
-      if (sessionStorage.getItem(WELCOMEBACK_FLAG) === "1") return;
     } catch {
       /* silent */
     }
