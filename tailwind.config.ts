@@ -153,6 +153,20 @@ export default {
           "0%,100%": { transform: "rotate(-3deg) translateY(0)" },
           "50%": { transform: "rotate(3deg) translateY(-2px)" },
         },
+        "alma-happy": {
+          "0%": { transform: "translateY(0) rotate(0deg)" },
+          "25%": { transform: "translateY(-6px) rotate(-6deg)" },
+          "50%": { transform: "translateY(-4px) rotate(6deg)" },
+          "75%": { transform: "translateY(-2px) rotate(-4deg)" },
+          "100%": { transform: "translateY(0) rotate(0deg)" },
+        },
+        "alma-attention": {
+          "0%,100%": { transform: "rotate(0deg)" },
+          "20%": { transform: "rotate(-8deg)" },
+          "40%": { transform: "rotate(8deg)" },
+          "60%": { transform: "rotate(-6deg)" },
+          "80%": { transform: "rotate(6deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
