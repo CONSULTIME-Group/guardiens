@@ -323,7 +323,13 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
           .update({ dismissed_reason: reason } as any)
           .eq("user_id", user.id)
           .eq("whisper_type", w.type)
-          .is("dismissed_reason", null);
+          .is("dismissed_reason", null)
+          .then(({ error }) => {
+            if (error) {
+              // eslint-disable-next-line no-console
+              console.error("[Alma] update alma_whisper_history a échoué", error);
+            }
+          });
       }
     },
     [current, user?.id],
