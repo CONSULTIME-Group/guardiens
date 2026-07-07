@@ -218,9 +218,11 @@ const Sits = () => {
         .eq("user_id", user.id)
         .order("start_date", { ascending: false, nullsFirst: false });
 
-      // Auto-expire sits client-side
+      // Auto-expire sits client-side (published ET drafts jamais publies dont end_date est passee)
       const toExpire = (data || []).filter((s: any) =>
-        s.end_date && ["published"].includes(s.status) && isBefore(parseISO(s.end_date), new Date())
+        s.end_date
+        && ["published", "draft"].includes(s.status)
+        && isBefore(parseISO(s.end_date), new Date())
       );
       if (toExpire.length > 0) {
         for (const s of toExpire) {
@@ -242,14 +244,17 @@ const Sits = () => {
             supabase.from("reviews").select("id").eq("sit_id", sit.id).eq("reviewer_id", user.id).maybeSingle(),
           ]);
 
+          const wasExpired = !!toExpire.find((e: any) => e.id === sit.id);
+          const overlaidSit = {
+            ...sit,
+            status: wasExpired ? "cancelled" : sit.status,
+            cancellation_reason: wasExpired ? "expired" : sit.cancellation_reason,
+          };
           return {
             ...sit,
-            status: toExpire.find((e: any) => e.id === sit.id) ? "cancelled" : sit.status,
-            cancellation_reason: toExpire.find((e: any) => e.id === sit.id) ? "expired" : sit.cancellation_reason,
-            effectiveStatus: getEffectiveStatus({
-              ...sit,
-              status: toExpire.find((e: any) => e.id === sit.id) ? "cancelled" : sit.status,
-            }),
+            status: overlaidSit.status,
+            cancellation_reason: overlaidSit.cancellation_reason,
+            effectiveStatus: getOwnerEffectiveStatus(overlaidSit),
             applicationCount: appRes.data?.length || 0,
             pendingApplicationCount: appRes.data?.filter((a: any) => a.status === "pending").length || 0,
             acceptedSitter: sitterRes.data?.sitter ? sitterRes.data.sitter : null,
