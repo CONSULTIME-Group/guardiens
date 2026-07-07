@@ -21,13 +21,7 @@ const AccessGateBanner = ({ level, profileCompletion, context = "guard", showIde
   const profilePath = (user?.role === "both" ? activeRole : user?.role) === "owner" ? "/owner-profile" : "/profile";
   if (level === 0) {
     return (
-      <div
-        className="rounded-lg p-5 space-y-3"
-        style={{
-          backgroundColor: "hsl(40 33% 96%)",
-          borderLeft: "3px solid hsl(153 42% 30%)",
-        }}
-      >
+      <div className="rounded-lg p-5 space-y-3 bg-background border-l-4 border-primary">
         <div className="flex items-start gap-3">
           <Lock className="h-5 w-5 text-primary mt-0.5 shrink-0" />
           <div className="space-y-2">
@@ -53,13 +47,7 @@ const AccessGateBanner = ({ level, profileCompletion, context = "guard", showIde
 
   if (level === 1) {
     return (
-      <div
-        className="rounded-lg p-5 space-y-3"
-        style={{
-          backgroundColor: "hsl(40 33% 96%)",
-          borderLeft: "3px solid hsl(153 42% 30%)",
-        }}
-      >
+      <div className="rounded-lg p-5 space-y-3 bg-background border-l-4 border-primary">
         <div className="flex items-start gap-3">
           <User className="h-5 w-5 text-primary mt-0.5 shrink-0" />
           <div className="space-y-3 w-full">
@@ -84,13 +72,7 @@ const AccessGateBanner = ({ level, profileCompletion, context = "guard", showIde
   // et il prend la forme d'une recommandation douce, jamais d'un blocage.
   if (level === 2 && showIdentityRecommendation) {
     return (
-      <div
-        className="rounded-lg p-4 space-y-2"
-        style={{
-          backgroundColor: "hsl(40 33% 96%)",
-          borderLeft: "3px solid hsl(153 42% 30%)",
-        }}
-      >
+      <div className="rounded-lg p-4 space-y-2 bg-background border-l-4 border-primary">
         <div className="flex items-start gap-3">
           <ShieldCheck className="h-5 w-5 text-primary mt-0.5 shrink-0" />
           <div className="space-y-2 w-full">
@@ -111,13 +93,7 @@ const AccessGateBanner = ({ level, profileCompletion, context = "guard", showIde
 
   if (level === "3A" && context === "guard") {
     return (
-      <div
-        className="rounded-lg p-5 space-y-3"
-        style={{
-          backgroundColor: "hsl(40 33% 96%)",
-          borderLeft: "3px solid hsl(153 42% 30%)",
-        }}
-      >
+      <div className="rounded-lg p-5 space-y-3 bg-background border-l-4 border-primary">
         <div className="flex items-start gap-3">
           <Star className="h-5 w-5 text-primary mt-0.5 shrink-0" />
           <div className="space-y-2">
