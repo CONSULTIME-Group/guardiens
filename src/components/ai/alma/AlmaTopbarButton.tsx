@@ -67,7 +67,7 @@ export default function AlmaTopbarButton({ className }: AlmaTopbarButtonProps) {
       )}
     >
       <span className="inline-flex items-center justify-center rounded-full ring-2 ring-primary/30">
-        <AlmaAvatar size={32} />
+        <AlmaAvatar size={32} breathe />
       </span>
     </button>
   );

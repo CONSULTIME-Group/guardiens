@@ -76,7 +76,7 @@ export function AlmaBubble({
 
       <div className={cn("flex items-start gap-3", onDismiss && "pr-10")}>
         <div className="flex flex-col items-center gap-1 shrink-0 text-primary">
-          <AlmaAvatar size={AVATAR_SIZE[variant]} />
+          <AlmaAvatar size={AVATAR_SIZE[variant]} animateIn />
           <span className="text-[10px] font-semibold uppercase tracking-wider text-primary/80">
             Alma
           </span>

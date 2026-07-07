@@ -1,76 +1,78 @@
 /**
- * Avatar SVG d'Alma, la narratrice IA de Guardiens.
- * Petit bichon frisé blanc, arrivée de Córdoba (Argentine).
- * Tête fluffy en nuage de puffs, yeux et truffe noirs, petit nœud coral.
+ * Avatar d'Alma, la narratrice de Guardiens.
+ * Rendu principal : image mascotte premium (bichon frisé).
+ * Fallback : cercle uni si l'image ne charge pas.
  *
  * Tailles supportées : 24 / 32 / 40 (compact) et 56 / 72 / 96 (grand format
  * réservé aux premiers contacts et dialogs d'accueil).
- * Contours renforcés (1.5 px, gris moyen) pour rester reconnaissable en petit.
+ *
+ * Animations (respectent prefers-reduced-motion via motion-safe:) :
+ *  - hover : léger frétillement (`animate-alma-wiggle`)
+ *  - `animateIn` : petit rebond d'apparition (`animate-alma-pop-in`)
+ *  - `breathe` : souffle très subtil en boucle (`animate-alma-breathe`)
  */
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import almaAvatarUrl from "@/assets/alma-avatar.png";
+
 type Size = 24 | 32 | 40 | 56 | 72 | 96;
 
 interface AlmaAvatarProps {
   size?: Size;
   className?: string;
   "aria-hidden"?: boolean;
+  /** Rebond d'entrée (utile quand l'avatar apparaît dans une bulle). */
+  animateIn?: boolean;
+  /** Animation « souffle » lente en boucle (topbar). */
+  breathe?: boolean;
 }
 
-export function AlmaAvatar({ size = 32, className, ...rest }: AlmaAvatarProps) {
+export function AlmaAvatar({
+  size = 32,
+  className,
+  animateIn = false,
+  breathe = false,
+  ...rest
+}: AlmaAvatarProps) {
   const ariaHidden = rest["aria-hidden"];
+  const [failed, setFailed] = useState(false);
+
+  const commonClass = cn(
+    "inline-block rounded-full object-cover select-none",
+    "transition-transform duration-200 ease-out",
+    "motion-safe:hover:animate-alma-wiggle",
+    animateIn && "motion-safe:animate-alma-pop-in",
+    breathe && "motion-safe:animate-alma-breathe",
+    className,
+  );
+
+  if (failed) {
+    return (
+      <span
+        role="img"
+        aria-label="Alma"
+        aria-hidden={ariaHidden}
+        style={{ width: size, height: size }}
+        className={cn(commonClass, "bg-primary/15")}
+      />
+    );
+  }
+
   return (
-    <svg
+    <img
+      src={almaAvatarUrl}
+      alt="Alma"
       width={size}
       height={size}
-      viewBox="0 0 48 48"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      role="img"
+      loading="lazy"
+      decoding="async"
+      draggable={false}
       aria-label="Alma"
       aria-hidden={ariaHidden}
-    >
-      <circle cx="24" cy="24" r="24" fill="#FFF6E9" />
-      <g fill="#FFFFFF" stroke="#8A7FA6" strokeWidth="1.5">
-        <ellipse cx="11" cy="29" rx="6.5" ry="9" />
-        <ellipse cx="37" cy="29" rx="6.5" ry="9" />
-      </g>
-      <g fill="#FFFFFF" stroke="#8A7FA6" strokeWidth="1.5">
-        <circle cx="16" cy="17" r="6" />
-        <circle cx="24" cy="13" r="6.5" />
-        <circle cx="32" cy="17" r="6" />
-        <circle cx="13" cy="25" r="6" />
-        <circle cx="35" cy="25" r="6" />
-        <circle cx="17" cy="33" r="6" />
-        <circle cx="31" cy="33" r="6" />
-        <circle cx="24" cy="27" r="13" />
-      </g>
-      <g>
-        <circle cx="19.5" cy="25" r="2.6" fill="#1F1F1F" />
-        <circle cx="28.5" cy="25" r="2.6" fill="#1F1F1F" />
-        <circle cx="20.4" cy="24.2" r="0.8" fill="#FFFFFF" />
-        <circle cx="29.4" cy="24.2" r="0.8" fill="#FFFFFF" />
-        <ellipse cx="24" cy="30" rx="2.8" ry="2.2" fill="#1F1F1F" />
-        <path
-          d="M24 32.1 C 22.6 33.9, 21 33.5, 20.4 32.5"
-          stroke="#1F1F1F"
-          strokeWidth="1.3"
-          fill="none"
-          strokeLinecap="round"
-        />
-        <path
-          d="M24 32.1 C 25.4 33.9, 27 33.5, 27.6 32.5"
-          stroke="#1F1F1F"
-          strokeWidth="1.3"
-          fill="none"
-          strokeLinecap="round"
-        />
-      </g>
-      <g fill="#F6A6A0" stroke="#C97169" strokeWidth="0.8">
-        <path d="M31.5 11 l4 -2 v4 z" />
-        <path d="M31.5 11 l4 2 v-4 z" />
-        <circle cx="31.5" cy="11" r="1.7" />
-      </g>
-    </svg>
+      onError={() => setFailed(true)}
+      style={{ width: size, height: size }}
+      className={commonClass}
+    />
   );
 }
 
