@@ -324,7 +324,12 @@ const SitterDashboard = () => {
             </div>
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4 pt-1">
-            <SitterEmergencyCardCompact hasEmergencyProfile={hasEmergencyProfile} />
+            <SitterEmergencyCardCompact
+              hasEmergencyProfile={hasEmergencyProfile}
+              completedSits={completedSits ?? 0}
+              avgRating={avgRating ?? 0}
+              reviewsCount={reviewsCount ?? 0}
+            />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
