@@ -131,11 +131,29 @@ export function pickNext(
   return top;
 }
 
-export function onEmit(state: SchedulerState, now: number = Date.now()): SchedulerState {
+export function onEmit(
+  state: SchedulerState,
+  typeOrNow?: AlmaWhisperType | number,
+  maybeNow?: number,
+): SchedulerState {
+  // Compat : ancienne signature `onEmit(state, now?)`.
+  let type: AlmaWhisperType | undefined;
+  let now: number;
+  if (typeof typeOrNow === "number") {
+    now = typeOrNow;
+  } else {
+    type = typeOrNow;
+    now = maybeNow ?? Date.now();
+  }
+  const isCultural = type === "cultural_fact";
   return {
     ...state,
-    emittedCount: state.emittedCount + 1,
-    lastEmittedAt: now,
+    emittedCount: isCultural ? state.emittedCount : state.emittedCount + 1,
+    lastEmittedAt: isCultural ? state.lastEmittedAt : now,
+    culturalEmittedCount: isCultural
+      ? state.culturalEmittedCount + 1
+      : state.culturalEmittedCount,
+    culturalLastEmittedAt: isCultural ? now : state.culturalLastEmittedAt,
   };
 }
 
@@ -146,11 +164,13 @@ export function onDismiss(
 ): SchedulerState {
   const isVoluntary = reason === "closed_manually";
   const nextDismissed = state.dismissedInSession + (isVoluntary ? 1 : 0);
+  const threshold = SESSION_MUTE_THRESHOLD_BY_FREQUENCY[state.frequency];
   return {
     ...state,
     lastDismissedAt: now,
     lastDismissReason: reason,
     dismissedInSession: nextDismissed,
-    sessionMuted: nextDismissed >= SESSION_MUTE_THRESHOLD,
+    sessionMuted: nextDismissed >= threshold,
   };
 }
+
