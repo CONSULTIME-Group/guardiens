@@ -128,6 +128,7 @@ const AdminArticlesRefreshPostPivot = lazy(() => import("./pages/admin/AdminArti
 const Parrainage = lazy(() => import("./pages/Parrainage"));
 const DevenirHomeSitter = lazy(() => import("./pages/DevenirHomeSitter"));
 const AlmaTips = lazy(() => import("./pages/AlmaTips"));
+const AlmaEvolution = lazy(() => import("./pages/AlmaEvolution"));
 
 const DepartmentPage = lazy(() => import("./pages/DepartmentPage"));
 const Pricing = lazy(() => import("./pages/Pricing"));
