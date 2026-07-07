@@ -233,6 +233,22 @@ const SitterSitView = ({
         showCtaForSitter={activeRole === "sitter"}
       />
 
+      {/* Whispers Alma — surfacés uniquement si données réelles */}
+      {activeRole === "sitter" && sit.status === "published" && !!currentUserId && (
+        <>
+          <AlmaPopularSitWhisper
+            sitId={sit.id}
+            applicationsCount={appCount}
+            ownerProfile={ownerProfile}
+            sitterProfile={sitterProfile}
+            pets={pets}
+            onApply={() => setApplyOpen(true)}
+          />
+          {owner?.id && <AlmaReactiveOwnerWhisper ownerId={owner.id} />}
+        </>
+      )}
+
+
 
       {/* Apply bar, affichée tout en haut, juste sous le header,
           pour que le CTA "Postuler" soit visible immédiatement sans scroll. */}
