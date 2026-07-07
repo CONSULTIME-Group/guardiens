@@ -992,6 +992,7 @@ const CreateSit = () => {
                   }}
                 />
               </div>
+            </div>
             <Textarea
               id="description-textarea"
               placeholder={`Décrivez ce qui est particulier à cette garde, en plus de ce qui est déjà dans votre profil (min. ${MIN_DESCRIPTION} caractères). Les annonces détaillées reçoivent 3 fois plus de candidatures.`}
