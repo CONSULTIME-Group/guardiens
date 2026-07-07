@@ -94,6 +94,8 @@ const getDuration = (start: string | null, end: string | null) => {
 const capitalize = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
 
 const getEffectiveStatus = (sit: any): string => {
+  // Rule A1: expiration a la priorite absolue sur le statut brut cancelled.
+  if (sit.cancellation_reason === "expired") return "expired";
   if (sit.status === "cancelled") return "cancelled";
   if (sit.status === "completed") return "completed";
   // Expired: end_date passed and not confirmed/completed
@@ -110,6 +112,18 @@ const getEffectiveStatus = (sit: any): string => {
     }
   }
   return sit.status;
+};
+
+// Owner-only: overlays d'affichage supplementaires (dépubliée, archivée manuelle)
+// La vue sitter continue d'utiliser getEffectiveStatus tel quel.
+const getOwnerEffectiveStatus = (sit: any): string => {
+  if (sit.cancellation_reason === "archived") return "archived";
+  if (sit.status === "draft" && sit.unpublished_at) {
+    // Dépubliée dont end_date est passee → traitée comme "expirée" (Passées).
+    if (sit.end_date && isBefore(parseISO(sit.end_date), new Date())) return "expired";
+    return "unpublished";
+  }
+  return getEffectiveStatus(sit);
 };
 
 const Sits = () => {
