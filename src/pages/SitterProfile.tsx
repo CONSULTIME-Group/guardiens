@@ -83,6 +83,7 @@ const SitterProfile = () => {
   const {
     data, pastAnimals, loading, saving, completion, missingFields, lastSyncedAt,
     saveStep, addPastAnimal, removePastAnimal, uploadAvatar,
+    loadError, reload, emailVerified, hasFirstActivity,
   } = useSitterProfile();
 
   const [localData, setLocalData] = useState<Partial<SitterProfileData>>({});
