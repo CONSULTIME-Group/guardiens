@@ -43,13 +43,27 @@ const FIELDS: Array<keyof Draft> = [
   "daily_routine",
 ];
 
+function isFutureDate(v: unknown): boolean {
+  if (typeof v !== "string" || !v) return false;
+  const today = new Date().toISOString().slice(0, 10);
+  return v >= today;
+}
+
 function countFilled(draft: Draft): number {
   return FIELDS.reduce((n, k) => {
     const v = draft[k];
+    if (k === "start_date" || k === "end_date") return n + (isFutureDate(v) ? 1 : 0);
     if (Array.isArray(v)) return n + (v.length > 0 ? 1 : 0);
     if (typeof v === "string") return n + (v.trim().length > 0 ? 1 : 0);
     return n + (v ? 1 : 0);
   }, 0);
+}
+
+function hasStaleDate(draft: Draft): boolean {
+  const hasStart = typeof draft.start_date === "string" && !!draft.start_date;
+  const hasEnd = typeof draft.end_date === "string" && !!draft.end_date;
+  return (hasStart && !isFutureDate(draft.start_date))
+    || (hasEnd && !isFutureDate(draft.end_date));
 }
 
 function relativeTime(iso: string): string {
