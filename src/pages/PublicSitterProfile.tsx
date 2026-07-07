@@ -872,7 +872,14 @@ export default function PublicSitterProfile() {
         title={pageTitle}
         description={pageDesc}
         path={`/gardiens/${id}`}
-        image={profile?.avatar_url || undefined}
+        /* og:image :
+           - profils riches → visuel dédié 1200×630 (PNG) généré par l'edge function `og-profile`
+           - sinon → repli sur l'avatar (préserve un aperçu même sur profils pauvres). */
+        image={
+          isRichProfile && id
+            ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-profile?id=${id}`
+            : (profile?.avatar_url || undefined)
+        }
         type="website"
         noindex={shouldNoindex}
       />
