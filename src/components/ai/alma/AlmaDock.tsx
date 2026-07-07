@@ -465,7 +465,7 @@ export function AlmaDock() {
               />
             )}
             <AlmaAvatarAnimated
-              size={stage ? ({ nouvelle: 36, eveillee: 40, complice: 42, fidele: 44 } as const)[stage] : 36}
+              size={avatarSize}
               mood={isSilent ? "sleepy" : (mood === "attentive" ? "attentive" : "idle")}
               stage={stage ?? undefined}
             />
@@ -476,21 +476,16 @@ export function AlmaDock() {
                 className="absolute -top-0.5 -right-0.5 h-3 w-3 text-primary drop-shadow-sm motion-safe:animate-alma-aura"
               />
             )}
-            {/* Écusson de stade — clic vers /alma. */}
+            {/* Pastille de stade décorative (le point cliquable est le
+                bouton frère du bouton principal, positionné par-dessus). */}
             {stage && (
-              <Link
-                to="/alma"
-                onClick={(e) => e.stopPropagation()}
-                aria-label={`Votre stade avec Alma : ${STAGE_SHORT_LABEL[stage]}. Voir mon parcours.`}
-                title={`Alma · ${STAGE_SHORT_LABEL[stage]}`}
+              <span
+                aria-hidden
                 className={cn(
                   "absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full ring-2 ring-card",
-                  "flex items-center justify-center transition hover:scale-110",
                   STAGE_DOT_CLASS[stage],
                 )}
-              >
-                <span className="sr-only">Parcours Alma</span>
-              </Link>
+              />
             )}
             <span
               aria-hidden
