@@ -77,21 +77,24 @@ export function canEmit(
   now: number = Date.now(),
 ): CanEmitResult {
   const isCultural = type === "cultural_fact";
+  const isP0 = WHISPER_PRIORITY[type] === "P0";
   const cfg = isCultural
     ? CULTURAL_FACT_LIMITS[state.frequency]
     : FREQUENCY_CONFIG[state.frequency];
-  if (cfg.maxPerSession === 0) return { ok: false, reason: "silent" };
-  if (state.sessionMuted) return { ok: false, reason: "muted" };
+  if (cfg.maxPerSession === 0 && !isP0) return { ok: false, reason: "silent" };
+  // Les whispers critiques P0 ignorent le mute de session et le cooldown ambiant.
+  if (state.sessionMuted && !isP0) return { ok: false, reason: "muted" };
   if (state.blacklistedTypes.has(type)) return { ok: false, reason: "blacklisted" };
 
   const count = isCultural ? state.culturalEmittedCount : state.emittedCount;
   const last = isCultural ? state.culturalLastEmittedAt : state.lastEmittedAt;
 
-  if (count >= cfg.maxPerSession) return { ok: false, reason: "quota" };
-  if (last !== null && now - last < cfg.cooldownMs) {
+  if (!isP0 && count >= cfg.maxPerSession) return { ok: false, reason: "quota" };
+  if (!isP0 && last !== null && now - last < cfg.cooldownMs) {
     return { ok: false, reason: "cooldown" };
   }
   if (
+    !isP0 &&
     state.lastDismissedAt !== null &&
     state.lastDismissReason === "closed_manually" &&
     now - state.lastDismissedAt < DISMISS_COOLDOWN_MS
@@ -100,6 +103,7 @@ export function canEmit(
   }
   return { ok: true };
 }
+
 
 
 export function pickNext(
