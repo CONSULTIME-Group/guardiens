@@ -344,7 +344,7 @@ export function AlmaDock() {
                       metadata: { whisper_type: whisper.type, action_id: "next_tip" },
                     });
                     void requestNextTip({
-                      surface: surfaceFromPath(location.pathname),
+                      surface: surfaceFromPath(location.pathname, activeRole),
                       preferNudge: false,
                     });
                   }}
