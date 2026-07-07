@@ -17,15 +17,91 @@
  * Ne rend jamais AlmaAvatarLottie.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BellOff, Bell, ChevronDown, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AlmaAvatarAnimated } from "./AlmaAvatarAnimated";
 import { useAlma } from "@/contexts/AlmaContext";
 import { useAlmaFrequency } from "@/hooks/useAlmaFrequency";
+import { useAlmaEvolution, type AlmaStage } from "@/hooks/useAlmaEvolution";
+import { useAuth } from "@/contexts/AuthContext";
 import { trackEvent } from "@/lib/analytics";
 import { resolveAlmaCtaHref } from "@/lib/alma/cta-actions";
 import type { AlmaWhisper as AlmaWhisperT, AlmaDismissReason } from "@/lib/alma/whisper-types";
+
+const STAGE_DOT_CLASS: Record<AlmaStage, string> = {
+  nouvelle: "bg-muted-foreground/70",
+  eveillee: "bg-sky-500",
+  complice: "bg-primary",
+  fidele: "bg-amber-500",
+};
+
+const STAGE_SHORT_LABEL: Record<AlmaStage, string> = {
+  nouvelle: "Nouvelle",
+  eveillee: "Éveillée",
+  complice: "Complice",
+  fidele: "Fidèle",
+};
+
+interface Proposition {
+  message: string;
+  ctaLabel: string;
+  ctaTo: string;
+}
+
+function buildProposition(
+  evolution: ReturnType<typeof useAlmaEvolution>["data"],
+  activeRole: "owner" | "sitter",
+): Proposition | null {
+  if (!evolution) return null;
+  const { signals } = evolution;
+
+  if (signals.profileCompletion < 60) {
+    return {
+      message: "Complétons votre profil pour qu'Alma vous accompagne mieux.",
+      ctaLabel: "Compléter mon profil",
+      ctaTo: activeRole === "sitter" ? "/sitter-profile" : "/owner-profile",
+    };
+  }
+  if (!signals.identityVerified) {
+    return {
+      message: "Vérifions votre identité pour rassurer la communauté.",
+      ctaLabel: "Vérifier mon identité",
+      ctaTo: "/settings#verification",
+    };
+  }
+  if (activeRole === "owner") {
+    if (signals.hasDraftSit) {
+      return {
+        message: "Reprenons votre brouillon d'annonce, il n'attend que vous.",
+        ctaLabel: "Reprendre le brouillon",
+        ctaTo: "/sits",
+      };
+    }
+    if (signals.publishedSitsCount === 0) {
+      return {
+        message: "Publions votre première annonce pour trouver une personne de confiance.",
+        ctaLabel: "Créer une annonce",
+        ctaTo: "/sits/create",
+      };
+    }
+  } else {
+    if (signals.applicationsCount === 0) {
+      return {
+        message: "Trouvons une garde qui vous ressemble près de chez vous.",
+        ctaLabel: "Voir les annonces",
+        ctaTo: "/annonces",
+      };
+    }
+  }
+  return {
+    message: "Vous êtes bien lancé. Envie d'un conseil du jour ?",
+    ctaLabel: "Explorer les conseils",
+    ctaTo: "/conseils",
+  };
+}
+
+
 
 function useIsRadixModalOpen(): boolean {
   const [isOpen, setIsOpen] = useState(false);
