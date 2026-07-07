@@ -236,6 +236,15 @@ const ParrainageRoute = () => {
   return <Parrainage />;
 };
 
+// Routes de contenu (ressources, SEO) : coquille AppLayout pour les
+// utilisateurs connectés, page publique inchangée pour les visiteurs.
+const ContentRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated } = useAuth();
+  if (isAuthenticated) return <AppLayout>{children}</AppLayout>;
+  return <>{children}</>;
+};
+
+
 
 
 const NavigateBlogSlug = () => {
