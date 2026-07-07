@@ -100,7 +100,7 @@ export interface PastAnimal {
 }
 
 const defaultData: SitterProfileData = {
-  first_name: "", last_name: "", city: "", postal_code: "", bio: "", avatar_url: "",
+  first_name: "", last_name: "", city: "", postal_code: "", country: "FR", bio: "", avatar_url: "",
   motivation: "",
   sitter_type: "", accompanied_by: "", smoker: false, availability_during: "", lifestyle: [],
   animal_types: [], experience_years: "", references_text: "",
