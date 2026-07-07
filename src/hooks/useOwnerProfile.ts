@@ -129,17 +129,36 @@ export function useOwnerProfile() {
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [hasFirstActivity, setHasFirstActivity] = useState(false);
 
   const fetchData = useCallback(async (opts?: { silent?: boolean }) => {
     if (!user) return;
     if (!opts?.silent) setLoading(true);
+    setLoadError(null);
 
-    const [profileRes, propertyRes, ownerRes, sitterRes] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", user.id).single(),
-      supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
-      supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
-      supabase.from("sitter_profiles").select("competences").eq("user_id", user.id).maybeSingle(),
-    ]);
+    let profileRes: any;
+    let propertyRes: any;
+    let ownerRes: any;
+    let sitterRes: any;
+    try {
+      [profileRes, propertyRes, ownerRes, sitterRes] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", user.id).single(),
+        supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
+        supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
+        supabase.from("sitter_profiles").select("competences").eq("user_id", user.id).maybeSingle(),
+      ]);
+      if (profileRes.error) throw profileRes.error;
+      if (propertyRes.error) throw propertyRes.error;
+      if (ownerRes.error) throw ownerRes.error;
+      if (sitterRes.error) throw sitterRes.error;
+    } catch (err) {
+      logger.error("Failed to load owner profile", { error: String(err) });
+      setLoadError("Impossible de charger votre profil. Vérifiez votre connexion.");
+      if (!opts?.silent) setLoading(false);
+      return;
+    }
 
     const p = profileRes.data;
     const prop = propertyRes.data;
