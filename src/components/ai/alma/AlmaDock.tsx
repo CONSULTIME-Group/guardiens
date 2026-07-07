@@ -27,6 +27,7 @@ import { useAlmaEvolution, type AlmaStage } from "@/hooks/useAlmaEvolution";
 import { useAuth } from "@/contexts/AuthContext";
 import { trackEvent } from "@/lib/analytics";
 import { resolveAlmaCtaHref } from "@/lib/alma/cta-actions";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { AlmaWhisper as AlmaWhisperT, AlmaDismissReason } from "@/lib/alma/whisper-types";
 
 const STAGE_DOT_CLASS: Record<AlmaStage, string> = {
