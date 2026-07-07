@@ -27,6 +27,7 @@ import { useAlmaEvolution, type AlmaStage } from "@/hooks/useAlmaEvolution";
 import { useAuth } from "@/contexts/AuthContext";
 import { trackEvent } from "@/lib/analytics";
 import { resolveAlmaCtaHref } from "@/lib/alma/cta-actions";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { AlmaWhisper as AlmaWhisperT, AlmaDismissReason } from "@/lib/alma/whisper-types";
 
 const STAGE_DOT_CLASS: Record<AlmaStage, string> = {
@@ -157,6 +158,7 @@ export function AlmaDock() {
 
   const [expanded, setExpanded] = useState(false);
   const [userCollapsed, setUserCollapsed] = useState(false);
+  const [stagePopoverOpen, setStagePopoverOpen] = useState(false);
 
   // Auto-timer d'auto-dismiss pour le whisper courant.
   const timerRef = useRef<number | null>(null);
@@ -270,6 +272,30 @@ export function AlmaDock() {
   const mood = whisper?.primaryAction ? "attentive" : "idle";
   const proposition = !whisper && !isSilent ? buildProposition(evolution, activeRole) : null;
   const stage = evolution?.stage ?? null;
+  const avatarSize = stage
+    ? ({ nouvelle: 36, eveillee: 40, complice: 42, fidele: 44 } as const)[stage]
+    : 36;
+
+  // Action utilisateur : demande explicite d'un conseil. Contourne le quota
+  // de session proactif et le verrou de surface (initiée par l'utilisateur),
+  // et affiche un repli bienveillant si tout a déjà été vu.
+  const askForTip = useCallback(
+    (source: "popover" | "proposition") => {
+      trackEvent("alma_whisper_action_clicked", {
+        metadata: { whisper_type: "on_demand_tip", action_id: `on_demand_${source}` },
+      });
+      void requestNextTip({
+        surface: surfaceFromPath(location.pathname, activeRole),
+        preferNudge: false,
+        emptyMessage: "Rien de neuf pour l'instant, revenez un peu plus tard.",
+      });
+      setStagePopoverOpen(false);
+      setExpanded(true);
+      setUserCollapsed(false);
+    },
+    [location.pathname, activeRole, requestNextTip],
+  );
+
 
   return (
     <div
@@ -388,23 +414,23 @@ export function AlmaDock() {
             >
               {proposition.ctaLabel}
             </button>
-            {stage && (
-              <Link
-                to="/alma"
-                onClick={() => setExpanded(false)}
-                className="text-xs font-medium text-muted-foreground hover:text-foreground transition underline decoration-dotted underline-offset-2"
-              >
-                Voir mon parcours
-              </Link>
-            )}
+            <button
+              type="button"
+              onClick={() => askForTip("proposition")}
+              className="min-h-11 rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Un conseil ?
+            </button>
           </div>
         </div>
       )}
 
-      {/* Dock replié (avatar + label + contrôles) */}
+      {/* Dock replié (avatar + label + contrôles) — wrapper `relative`
+          nécessaire pour ancrer le point d'info du stade en dehors du bouton
+          principal (pas de bouton imbriqué). */}
       <div
         className={cn(
-          "pointer-events-auto flex items-center gap-2 rounded-full pl-1.5 pr-2 py-1.5",
+          "relative pointer-events-auto flex items-center gap-2 rounded-full pl-1.5 pr-2 py-1.5",
           "bg-card/95 backdrop-blur border border-border shadow-lg",
         )}
       >
@@ -439,7 +465,7 @@ export function AlmaDock() {
               />
             )}
             <AlmaAvatarAnimated
-              size={stage ? ({ nouvelle: 36, eveillee: 40, complice: 42, fidele: 44 } as const)[stage] : 36}
+              size={avatarSize}
               mood={isSilent ? "sleepy" : (mood === "attentive" ? "attentive" : "idle")}
               stage={stage ?? undefined}
             />
@@ -450,21 +476,16 @@ export function AlmaDock() {
                 className="absolute -top-0.5 -right-0.5 h-3 w-3 text-primary drop-shadow-sm motion-safe:animate-alma-aura"
               />
             )}
-            {/* Écusson de stade — clic vers /alma. */}
+            {/* Pastille de stade décorative (le point cliquable est le
+                bouton frère du bouton principal, positionné par-dessus). */}
             {stage && (
-              <Link
-                to="/alma"
-                onClick={(e) => e.stopPropagation()}
-                aria-label={`Votre stade avec Alma : ${STAGE_SHORT_LABEL[stage]}. Voir mon parcours.`}
-                title={`Alma · ${STAGE_SHORT_LABEL[stage]}`}
+              <span
+                aria-hidden
                 className={cn(
                   "absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full ring-2 ring-card",
-                  "flex items-center justify-center transition hover:scale-110",
                   STAGE_DOT_CLASS[stage],
                 )}
-              >
-                <span className="sr-only">Parcours Alma</span>
-              </Link>
+              />
             )}
             <span
               aria-hidden
@@ -485,8 +506,75 @@ export function AlmaDock() {
           )}
         </button>
 
+        {/* Point d'info du stade : bouton frère (pas imbriqué), positionné
+            en corner du bouton principal. Ouvre un popover avec le stade
+            courant, une phrase de progression et l'accès aux conseils. */}
+        {stage && (
+          <Popover open={stagePopoverOpen} onOpenChange={setStagePopoverOpen}>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                aria-label={`Votre stade avec Alma : ${STAGE_SHORT_LABEL[stage]}. Ouvrir les infos.`}
+                title={`Alma · ${STAGE_SHORT_LABEL[stage]}`}
+                className={cn(
+                  "absolute h-11 w-11 rounded-full flex items-center justify-center",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                )}
+                style={{
+                  left: 6 + avatarSize - 22,
+                  bottom: 6 + avatarSize - 22 - 4,
+                }}
+              >
+                <span
+                  aria-hidden
+                  className={cn(
+                    "h-3.5 w-3.5 rounded-full ring-2 ring-card transition hover:scale-110",
+                    STAGE_DOT_CLASS[stage],
+                  )}
+                />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              side="top"
+              align="end"
+              className="w-72 p-4"
+              sideOffset={12}
+            >
+              <div className="flex items-center gap-2 mb-1.5">
+                <span
+                  aria-hidden
+                  className={cn("h-2.5 w-2.5 rounded-full", STAGE_DOT_CLASS[stage])}
+                />
+                <p className="text-sm font-semibold text-foreground">
+                  Stade {STAGE_SHORT_LABEL[stage]}
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground leading-snug">
+                {evolution?.nextMilestone ??
+                  "Alma vous accompagne au fil de vos gestes dans la communauté."}
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => askForTip("popover")}
+                  className="min-h-11 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  Un conseil ?
+                </button>
+                <Link
+                  to="/alma"
+                  onClick={() => setStagePopoverOpen(false)}
+                  className="min-h-11 inline-flex items-center rounded-full px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition underline decoration-dotted underline-offset-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  Voir le détail
+                </Link>
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
 
         <div className="h-6 w-px bg-border/70" aria-hidden />
+
 
         <button
           type="button"
