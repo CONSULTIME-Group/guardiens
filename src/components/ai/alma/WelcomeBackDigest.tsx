@@ -106,7 +106,7 @@ export function getCopy(variant: WelcomeBackVariant, s: DigestSignals): CopyBloc
         title: "De nouveaux gardiens ont rejoint la communauté",
         body: `${s.new_intl_sitters} nouvelles personnes se sont inscrites depuis votre dernière visite. Votre annonce touche un vivier grandissant.`,
         actionLabel: "Voir les gardiens à l'international",
-        actionHref: "/gardiens?international=1",
+        actionHref: "/annonces/international",
         actionId: "view_intl_sitters",
       };
     case "owner_empty_positive":
@@ -114,7 +114,7 @@ export function getCopy(variant: WelcomeBackVariant, s: DigestSignals): CopyBloc
         title: "Tout est calme pour le moment",
         body: "Rien de neuf ne veut pas dire rien qui vaille. Réglez la voix d'Alma et le type de conseils que vous souhaitez recevoir.",
         actionLabel: "Configurer Alma",
-        actionHref: "/parametres?tab=alma",
+        actionHref: "/settings",
         actionId: "configure_alma",
       };
     case "sitter_first_visit":
@@ -151,7 +151,7 @@ export function getCopy(variant: WelcomeBackVariant, s: DigestSignals): CopyBloc
         title: "Des maisons à l'étranger vous attendent",
         body: `${s.new_intl_sits} nouvelles gardes hors de France sont ouvertes. De belles occasions pour explorer.`,
         actionLabel: "Voir les gardes à l'étranger",
-        actionHref: "/annonces?international=1",
+        actionHref: "/annonces/international",
         actionId: "open_intl_sits",
       };
     case "sitter_empty_positive":
