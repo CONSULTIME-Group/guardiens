@@ -19,6 +19,7 @@ export interface AlmaBubbleProps {
   variant?: AlmaVariant;
   title?: string;
   loading?: boolean;
+  success?: boolean;
   children: ReactNode;
   actions?: ReactNode;
   onDismiss?: () => void;
