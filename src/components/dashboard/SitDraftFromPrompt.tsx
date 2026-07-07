@@ -43,6 +43,9 @@ export default function SitDraftFromPrompt({ secondary = false, primary = null }
   const [almaMood, setAlmaMood] = useState<"idle" | "happy" | "thinking" | "attentive">("attentive");
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { data: almaEvo } = useAlmaEvolution();
+  const almaStage = almaEvo?.stage;
+
   const { toast } = useToast();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const seenRef = useRef(false);
