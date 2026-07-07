@@ -74,9 +74,9 @@ const SitterActivityPanel = ({
     {
       to: "#discovery-annonces-heading",
       label: "Annonces autour",
-      value: String(nearbyListings.length),
+      value: String(nearbyCount),
       Icon: MapPin,
-      emphasis: nearbyListings.length > 0 ? "text-foreground" : "text-muted-foreground",
+      emphasis: nearbyCount > 0 ? "text-foreground" : "text-muted-foreground",
     },
   ];
 
