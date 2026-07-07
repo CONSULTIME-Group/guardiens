@@ -21,13 +21,7 @@ const AccessGateBanner = ({ level, profileCompletion, context = "guard", showIde
   const profilePath = (user?.role === "both" ? activeRole : user?.role) === "owner" ? "/owner-profile" : "/profile";
   if (level === 0) {
     return (
-      <div
-        className="rounded-lg p-5 space-y-3"
-        style={{
-          backgroundColor: "hsl(40 33% 96%)",
-          borderLeft: "3px solid hsl(153 42% 30%)",
-        }}
-      >
+      <div className="rounded-lg p-5 space-y-3 bg-background border-l-4 border-primary">
         <div className="flex items-start gap-3">
           <Lock className="h-5 w-5 text-primary mt-0.5 shrink-0" />
           <div className="space-y-2">
