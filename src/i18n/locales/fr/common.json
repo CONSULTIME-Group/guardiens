@@ -327,18 +327,9 @@
       "cta_owner": "Publier mon annonce, gratuitement",
       "cta_sitter": "Je veux garder"
     },
-    "founder": {
-      "window": "Programme Fondateur, fenêtre d'inscription en cours",
-      "days_one": "{{count}} jour",
-      "days_other": "{{count}} jours",
-      "before_sub": "avant l'abonnement gardien",
-      "join_title": "Inscrivez-vous dès maintenant pour rejoindre les Fondateurs",
-      "join_text": "Un sceau honorifique permanent sur votre profil, il ne sera plus jamais attribué une fois la fenêtre refermée.",
-      "cta": "Devenir Fondateur"
-    },
     "grace": {
-      "title": "Les Fondateurs ont jusqu'au {{date}}",
-      "text": "Les premiers membres bénéficient d'un accès gratuit, sans engagement. Le badge Fondateur reste affiché sur votre profil."
+      "title": "Accès offert jusqu'au {{date}}",
+      "text": "Les premiers membres bénéficient d'un accès gratuit, sans engagement."
     },
     "owner_card": {
       "badge": "Toujours gratuit",
@@ -646,7 +637,7 @@
     "h1": "Pros animaliers près de chez vous",
     "beta": "Bêta",
     "intro": "Vétérinaires, éducateurs, toiletteurs, ostéopathes, transporteurs, photographes : retrouvez les pros animaliers de confiance, en France entière.",
-    "beta_note": "Annuaire en phase bêta, les premières fiches arrivent. Vous êtes pro ? Inscription ouverte aux pros fondateurs, fiche validée sous 48 h.",
+    "beta_note": "Annuaire en phase bêta, les premières fiches arrivent. Vous êtes pro ? Inscription ouverte, fiche validée sous 48 h.",
     "register_cta": "Inscrire mon activité",
     "my_space": "Mon espace pro",
     "sitter_box_title": "Vous êtes gardien particulier déclaré en auto-entreprise ?",

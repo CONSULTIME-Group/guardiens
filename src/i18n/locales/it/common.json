@@ -327,18 +327,9 @@
       "cta_owner": "Pubblicare il mio annuncio, gratuitamente",
       "cta_sitter": "Voglio fare il custode"
     },
-    "founder": {
-      "window": "Programma Fondatore, finestra di iscrizione in corso",
-      "days_one": "{{count}} giorno",
-      "days_other": "{{count}} giorni",
-      "before_sub": "prima dell'abbonamento custode",
-      "join_title": "Si iscriva ora per unirsi ai Fondatori",
-      "join_text": "Un sigillo onorifico permanente sul Suo profilo; non sarà mai più assegnato una volta chiusa la finestra.",
-      "cta": "Diventare Fondatore"
-    },
     "grace": {
-      "title": "I Fondatori hanno tempo fino al {{date}}",
-      "text": "I primi membri mantengono l'accesso gratuito fino al {{date}}. Dopo tale data, per i custodi sarà necessario l'abbonamento a {{price}}. Il badge Fondatore rimarrà visibile sul Suo profilo."
+      "title": "Accesso gratuito fino al {{date}}",
+      "text": "I primi membri mantengono l'accesso gratuito, senza impegno."
     },
     "owner_card": {
       "badge": "Sempre gratuito",

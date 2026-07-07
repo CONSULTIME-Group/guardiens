@@ -4,7 +4,7 @@ export const SPECIES_LABEL: Record<string, string> = {
   farm_animal: "Animal de ferme", nac: "NAC",
 };
 
-export const PROPRIO_SPECIAL_IDS = ["fondateur", "id_verifiee", "courant_passe"];
+export const PROPRIO_SPECIAL_IDS = ["id_verifiee", "courant_passe"];
 
 export const capitalize = (s: string | null | undefined) => {
   if (!s) return "";

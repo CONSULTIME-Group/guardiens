@@ -200,9 +200,9 @@ const Landing = () => {
     return () => { cancelled = true; };
   }, [navigate]);
 
- // KPIs : valeurs réelles depuis public_stats + socle historique fondateurs
- // - Maisons : 37 maisons gardées en 5 ans par Jérémie & Elisa (cité dans le récit fondateur).
- // - Animaux : 234 animaux accompagnés sur la même période (cité dans le récit fondateur,
+ // KPIs : valeurs réelles depuis public_stats + socle historique équipe.
+ // - Maisons : 37 maisons gardées en 5 ans par Jérémie & Elisa (cité dans le récit d'origine).
+ // - Animaux : 234 animaux accompagnés sur la même période (cité dans le récit d'origine,
  // src/data/cityContent.ts). On part donc de 234 et on ajoute les nouveaux comptés en base.
  const FOUNDERS_HOUSES_OFFSET = 37;
  const FOUNDERS_ANIMALS_OFFSET = 234;

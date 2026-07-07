@@ -16,8 +16,7 @@ interface Member {
  *
  * Aucune citation textuelle n'est inventée à leur place : on se contente de
  * montrer qu'ils existent et de pointer vers leurs profils publics. Les
- * citations détaillées vivent dans la section témoignages anonymisés
- * (Programme Fondateurs).
+ * citations détaillées vivent dans la section témoignages anonymisés.
  */
 const FALLBACK_COUNT = 460;
 const STRIP_SIZE = 14;

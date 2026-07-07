@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import FounderBadge from "@/components/badges/FounderBadge";
+
 import ProBadge from "@/components/badges/ProBadge";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -1021,8 +1021,8 @@ export default function PublicSitterProfile() {
                   que soit l'illustration de fond.
                   - `max-w-full` + `min-w-0` empêchent tout débordement horizontal.
                   - La rangée interne passe en `flex-wrap` : si le prénom est très
-                    long, le bouton favori et le badge fondateur descendent à la
-                    ligne au lieu de chevaucher le texte.
+                    long, le bouton favori descend à la ligne au lieu de chevaucher
+                    le texte.
                   - `break-words` + `[overflow-wrap:anywhere]` cassent même les
                     prénoms composés sans espace (ex. "Marie-Christophe-Alexandre"). */}
               <div
@@ -1033,7 +1033,6 @@ export default function PublicSitterProfile() {
                   <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold text-foreground leading-tight capitalize break-words [overflow-wrap:anywhere] hyphens-auto min-w-0">
                     {firstName}
                   </h1>
-                  {profile?.is_founder && <FounderBadge size="sm" />}
                   <ProBadge status={(profile as any)?.pro_status} size="sm" />
                   {id && <FavoriteButton targetType="sitter" targetId={id} size="md" />}
                   {avgRating > 0 && reviewCount > 0 && (
@@ -1078,7 +1077,7 @@ export default function PublicSitterProfile() {
                 )}
               </div>
 
-              {(profile?.identity_verified || profile?.is_founder || emergencyActive || hasActiveSubscription) && (
+              {(profile?.identity_verified || emergencyActive || hasActiveSubscription) && (
                 <div className="flex items-center gap-2 flex-wrap">
                   {hasActiveSubscription && (
                     <span className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm">
@@ -1097,11 +1096,6 @@ export default function PublicSitterProfile() {
                     >
                       <Shield size={11} className="text-primary" /> ID vérifiée
                     </button>
-                  )}
-                  {profile?.is_founder && (
-                    <span className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm">
-                      <Star size={11} className="text-primary" /> Fondateur
-                    </span>
                   )}
                   {emergencyActive && (
                     <span className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm">

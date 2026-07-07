@@ -7,10 +7,6 @@ import {
 
 const FAQ_ITEMS = [
   {
-    q: "Mon badge Fondateur disparait-il si je ne m'abonne pas ?",
-    a: "Non. Le badge Fondateur est permanent a vie, quelle que soit votre situation.",
-  },
-  {
     q: "Puis-je resilier a tout moment ?",
     a: "Oui, sans frais ni preavis depuis votre espace abonnement.",
   },

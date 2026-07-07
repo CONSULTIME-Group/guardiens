@@ -877,7 +877,6 @@ const ALMA_CATEGORY_GROUPS: AlmaCategoryGroup[] = [
     label: "Ton & ambiance",
     types: [
       { id: "animal_humor", label: "Humour animalier" },
-      { id: "founder_anecdote", label: "Anecdotes de fondateurs" },
       { id: "social_stat", label: "Statistiques communautaires" },
     ],
   },

@@ -327,18 +327,9 @@
       "cta_owner": "Meine Anzeige kostenlos veröffentlichen",
       "cta_sitter": "Ich möchte betreuen"
     },
-    "founder": {
-      "window": "Gründer-Programm, Anmeldephase läuft",
-      "days_one": "{{count}} Tag",
-      "days_other": "{{count}} Tage",
-      "before_sub": "bis zum Betreuer-Abonnement",
-      "join_title": "Melden Sie sich jetzt an, um zu den Gründern zu gehören",
-      "join_text": "Ein dauerhaftes Ehren-Siegel auf Ihrem Profil, das nach Ablauf dieser Phase nie wieder vergeben wird.",
-      "cta": "Gründer werden"
-    },
     "grace": {
-      "title": "Gründer haben Zeit bis zum {{date}}",
-      "text": "Die ersten Mitglieder behalten ihren kostenlosen Zugang bis zum {{date}}. Danach wird für Betreuer das Abonnement für {{price}} erforderlich. Das Gründer-Badge bleibt auf Ihrem Profil sichtbar."
+      "title": "Zugang kostenlos bis {{date}}",
+      "text": "Die ersten Mitglieder behalten ihren kostenlosen Zugang, ohne Verpflichtung."
     },
     "owner_card": {
       "badge": "Immer kostenlos",
