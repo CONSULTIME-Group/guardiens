@@ -66,6 +66,8 @@ export function AlmaReviewDraftBubble({
         throw new Error(payload?.error || "Alma n'a pas pu générer de brouillon.");
       }
       onDraft(payload.draft);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 2000);
       trackEvent("alma_review_draft_generated", {
         metadata: { sit_id: sitId, role },
       });
