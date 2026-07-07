@@ -376,30 +376,31 @@ export function AlmaAvatarAnimated({
             opacity="0.85"
           />
 
-          {/* Museau court clair */}
-          <ellipse cx="50" cy="52" rx="11" ry="9" fill={`url(#${gMuzzle})`} />
+          {/* Museau court blanc pour contraste avec la truffe */}
+          <ellipse cx="50" cy="53" rx="12" ry="10" fill="#ffffff" opacity="0.85" />
+          <ellipse cx="50" cy="53" rx="12" ry="10" fill={`url(#${gMuzzle})`} opacity="0.55" />
           {/* Joues rosées très discrètes */}
-          <circle cx="36" cy="50" r="3" fill="var(--alma-cheek)" />
-          <circle cx="64" cy="50" r="3" fill="var(--alma-cheek)" />
+          <circle cx="35" cy="51" r="3.2" fill="var(--alma-cheek)" />
+          <circle cx="65" cy="51" r="3.2" fill="var(--alma-cheek)" />
 
           {/* Yeux : grands ronds foncés (bichon), reflets */}
           <g className="alma-part alma-eyes">
-            {/* Halo brun très léger pour cerner l'œil */}
-            <ellipse cx="41" cy="43" rx="3.6" ry="4" fill="var(--alma-mouth)" opacity="0.18" />
-            <ellipse cx="59" cy="43" rx="3.6" ry="4" fill="var(--alma-mouth)" opacity="0.18" />
-            {/* Iris foncé qui remplit l'œil (peu de sclère visible) */}
-            <ellipse cx="41" cy="43" rx="3" ry="3.6" fill="var(--alma-eye)" />
-            <ellipse cx="59" cy="43" rx="3" ry="3.6" fill="var(--alma-eye)" />
+            {/* Halo brun léger pour cerner l'œil */}
+            <ellipse cx="40" cy="43" rx="4.2" ry="4.6" fill="var(--alma-mouth)" opacity="0.18" />
+            <ellipse cx="60" cy="43" rx="4.2" ry="4.6" fill="var(--alma-mouth)" opacity="0.18" />
+            {/* Iris foncé qui remplit l'œil */}
+            <ellipse cx="40" cy="43" rx="3.6" ry="4.2" fill="var(--alma-eye)" />
+            <ellipse cx="60" cy="43" rx="3.6" ry="4.2" fill="var(--alma-eye)" />
             {/* Reflets principaux */}
-            <circle cx="42.1" cy="41.7" r="1" fill="var(--alma-eye-hi)" />
-            <circle cx="60.1" cy="41.7" r="1" fill="var(--alma-eye-hi)" />
+            <circle cx="41.3" cy="41.5" r="1.2" fill="var(--alma-eye-hi)" />
+            <circle cx="61.3" cy="41.5" r="1.2" fill="var(--alma-eye-hi)" />
             {/* Micro-reflets secondaires */}
-            <circle cx="40" cy="44.8" r="0.45" fill="var(--alma-eye-hi)" opacity="0.7" />
-            <circle cx="58" cy="44.8" r="0.45" fill="var(--alma-eye-hi)" opacity="0.7" />
+            <circle cx="38.8" cy="45" r="0.5" fill="var(--alma-eye-hi)" opacity="0.75" />
+            <circle cx="58.8" cy="45" r="0.5" fill="var(--alma-eye-hi)" opacity="0.75" />
           </g>
           {/* Paupières (clignement / sleepy) */}
-          <rect className="alma-part alma-eyelid" x="37.4" y="39" width="7.2" height="8" rx="3.6" fill="var(--alma-fur-shadow)" />
-          <rect className="alma-part alma-eyelid" x="55.4" y="39" width="7.2" height="8" rx="3.6" fill="var(--alma-fur-shadow)" />
+          <rect className="alma-part alma-eyelid" x="36" y="38.5" width="8" height="9" rx="4" fill="var(--alma-fur-shadow)" />
+          <rect className="alma-part alma-eyelid" x="56" y="38.5" width="8" height="9" rx="4" fill="var(--alma-fur-shadow)" />
 
           {/* Nez : truffe arrondie brillante */}
           <ellipse cx="50" cy="52.5" rx="3.2" ry="2.5" fill="var(--alma-nose)" />
