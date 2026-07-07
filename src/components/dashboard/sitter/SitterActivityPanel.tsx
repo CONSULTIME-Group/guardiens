@@ -26,6 +26,8 @@ const SitterActivityPanel = ({
     ? `${format(new Date(nextGuard.start_date), "d MMM", { locale: fr })} → ${format(new Date(nextGuard.end_date), "d MMM", { locale: fr })}`
     : "À venir";
 
+  const nearbyCount = nearbyListings.filter((s) => !s.is_beyond).length;
+
   const tiles = [
     {
       to: "#sitter-availability-toggle",
@@ -72,9 +74,9 @@ const SitterActivityPanel = ({
     {
       to: "#discovery-annonces-heading",
       label: "Annonces autour",
-      value: String(nearbyListings.length),
+      value: String(nearbyCount),
       Icon: MapPin,
-      emphasis: nearbyListings.length > 0 ? "text-foreground" : "text-muted-foreground",
+      emphasis: nearbyCount > 0 ? "text-foreground" : "text-muted-foreground",
     },
   ];
 
