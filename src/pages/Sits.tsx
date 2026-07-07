@@ -1343,13 +1343,13 @@ const ActionsMenu = ({
   sit: any; effectiveStatus: string;
   onArchive: () => void; onDelete: () => void; onRepublish: () => void;
 }) => {
-  const showMenu = ["confirmed", "in_progress", "published", "draft", "expired", "cancelled"].includes(effectiveStatus);
+  const showMenu = ["confirmed", "in_progress", "published", "draft", "expired", "cancelled", "unpublished", "archived"].includes(effectiveStatus);
   if (!showMenu) return null;
 
-  const canEdit = ["draft", "published"].includes(effectiveStatus);
-  const canRepublish = ["expired", "cancelled"].includes(effectiveStatus);
+  const canEdit = ["draft", "published", "unpublished"].includes(effectiveStatus);
+  const canRepublish = ["expired", "cancelled", "unpublished", "archived"].includes(effectiveStatus);
   const canArchive = ["published", "draft"].includes(effectiveStatus) && sit.applicationCount > 0;
-  const canDelete = ["published", "draft", "expired", "cancelled"].includes(effectiveStatus) && sit.applicationCount === 0;
+  const canDelete = ["published", "draft", "expired", "cancelled", "unpublished", "archived"].includes(effectiveStatus) && sit.applicationCount === 0;
 
   return (
     <DropdownMenu>
