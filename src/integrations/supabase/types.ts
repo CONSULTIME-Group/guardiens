@@ -6416,7 +6416,19 @@ export type Database = {
         Args: { _owner_id: string }
         Returns: Json
       }
+      get_owner_response_median_minutes: {
+        Args: { p_owner_id: string }
+        Returns: number
+      }
       get_owner_sits_enriched: { Args: { p_owner: string }; Returns: Json[] }
+      get_owner_sits_view_trend: {
+        Args: { p_user_id: string }
+        Returns: {
+          sit_id: string
+          views_last_week: number
+          views_this_week: number
+        }[]
+      }
       get_owner_top_3_sitters: {
         Args: { _owner_id: string }
         Returns: {
@@ -6464,6 +6476,7 @@ export type Database = {
         }[]
       }
       get_sit_context_for_alma: { Args: { _sit_id: string }; Returns: Json }
+      get_sit_view_count_week: { Args: { p_sit_id: string }; Returns: number }
       get_sit_views_count: {
         Args: { p_sit_ids: string[] }
         Returns: {
@@ -6475,6 +6488,13 @@ export type Database = {
       get_sitter_context_for_alma: {
         Args: { _owner_id: string; _sitter_id: string }
         Returns: Json
+      }
+      get_sitter_stay_stats: {
+        Args: { p_sitter_id: string }
+        Returns: {
+          completed_sits: number
+          long_stays: number
+        }[]
       }
       get_unread_messages_count: { Args: { _user_id: string }; Returns: number }
       get_user_email_for_notification: {

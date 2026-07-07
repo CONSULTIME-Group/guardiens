@@ -48,6 +48,7 @@ import ActivationScoreCard from "./owner/ActivationScoreCard";
 import NextActionsList from "./owner/NextActionsList";
 import AlmaSilentSitBubble from "@/components/ai/alma/AlmaSilentSitBubble";
 import { AlmaOwnerTrafficNoActionWhisper } from "@/components/ai/alma/wiring/AlmaOwnerTrafficNoActionWhisper";
+import { AlmaOwnerViewTrendWhisper } from "@/components/ai/alma/wiring/AlmaOwnerViewTrendWhisper";
 import {
   computeOwnerNextActions,
   computeOwnerActivationScore,
@@ -433,6 +434,8 @@ const OwnerDashboard = () => {
 
       {/* Alma trigger owner_traffic_no_action : annonce avec vues réelles mais 0 candidature. */}
       <AlmaOwnerTrafficNoActionWhisper sits={sits} />
+      <AlmaOwnerViewTrendWhisper />
+
 
 
       {showAlmaFirstMeeting && (

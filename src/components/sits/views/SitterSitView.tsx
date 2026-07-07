@@ -36,6 +36,8 @@ import { useSitDerived } from "./useSitDerived";
 import ReviewsTab from "./tabs/ReviewsTab";
 import SitImmersiveContent from "./SitImmersiveContent";
 import AffinitySection from "@/components/matching/AffinitySection";
+import { AlmaPopularSitWhisper } from "@/components/ai/alma/wiring/AlmaPopularSitWhisper";
+import { AlmaReactiveOwnerWhisper } from "@/components/ai/alma/wiring/AlmaReactiveOwnerWhisper";
 import type { SitData } from "./types";
 
 interface SitterSitViewProps {
@@ -230,6 +232,22 @@ const SitterSitView = ({
         targetId={sit.id}
         showCtaForSitter={activeRole === "sitter"}
       />
+
+      {/* Whispers Alma — surfacés uniquement si données réelles */}
+      {activeRole === "sitter" && sit.status === "published" && !!currentUserId && (
+        <>
+          <AlmaPopularSitWhisper
+            sitId={sit.id}
+            applicationsCount={appCount}
+            ownerProfile={ownerProfile}
+            sitterProfile={sitterProfile}
+            pets={pets}
+            onApply={() => setApplyOpen(true)}
+          />
+          {owner?.id && <AlmaReactiveOwnerWhisper ownerId={owner.id} />}
+        </>
+      )}
+
 
 
       {/* Apply bar, affichée tout en haut, juste sous le header,
