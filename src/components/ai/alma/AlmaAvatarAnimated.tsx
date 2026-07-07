@@ -364,6 +364,8 @@ export function AlmaAvatarAnimated({
   mood = "idle",
   size = 40,
   className,
+  stage,
+  showHalo = false,
   ...rest
 }: Props) {
   const ariaHidden = rest["aria-hidden"];
@@ -372,18 +374,79 @@ export function AlmaAvatarAnimated({
   const gBody = `alma-body-${uid}`;
   const gMuzzle = `alma-muzzle-${uid}`;
 
-  const style: CSSProperties = { width: size, height: size, display: "inline-block" };
+  const style: CSSProperties = {
+    width: size,
+    height: size,
+    display: "inline-block",
+    position: "relative",
+  };
+
+  // Illustration dédiée par stade si fournie (mapping ALMA_STAGE_ASSETS).
+  // Tant qu'aucune image n'est branchée, on rend le SVG animé avec les
+  // variations stade (aura, liseré, intensité).
+  const stageAsset = stage ? ALMA_STAGE_ASSETS[stage] : null;
+  if (stageAsset) {
+    return (
+      <span
+        data-alma-animated=""
+        data-mood={mood}
+        data-stage={stage}
+        aria-label={ariaHidden ? undefined : "Alma"}
+        role={ariaHidden ? undefined : "img"}
+        aria-hidden={ariaHidden}
+        className={cn(
+          "relative inline-flex items-center justify-center select-none",
+          className,
+        )}
+        style={style}
+      >
+        {showHalo && stage && (
+          <span
+            aria-hidden
+            className={cn(
+              "absolute inset-0 rounded-full blur-xl motion-safe:animate-alma-aura",
+              STAGE_HALO_CLASS[stage],
+            )}
+          />
+        )}
+        <img
+          src={stageAsset}
+          alt=""
+          width={size}
+          height={size}
+          draggable={false}
+          className={cn(
+            "relative block object-contain rounded-full",
+            stage && "ring-2 ring-offset-0",
+            stage && STAGE_RING_CLASS[stage],
+          )}
+          style={{ width: size, height: size }}
+        />
+      </span>
+    );
+  }
 
   return (
     <span
       data-alma-animated=""
       data-mood={mood}
+      data-stage={stage}
       aria-label={ariaHidden ? undefined : "Alma"}
       role={ariaHidden ? undefined : "img"}
       aria-hidden={ariaHidden}
       className={cn("select-none", className)}
       style={style}
     >
+      {showHalo && stage && (
+        <span
+          aria-hidden
+          className={cn(
+            "absolute inset-0 rounded-full blur-xl motion-safe:animate-alma-aura",
+            STAGE_HALO_CLASS[stage],
+          )}
+        />
+      )}
+
       <style>{STYLE}</style>
       <svg
         viewBox="0 0 100 100"
