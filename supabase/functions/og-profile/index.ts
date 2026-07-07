@@ -180,11 +180,16 @@ Deno.serve(async (req) => {
       verified: !!profile.identity_verified,
     });
 
-    return new Response(svg, {
+    // Rasterisation SVG → PNG 1200×630 (Facebook/LinkedIn/WhatsApp rejettent SVG comme og:image).
+    await ensureResvg();
+    const resvg = new Resvg(svg, { fitTo: { mode: "width", value: 1200 } });
+    const png = resvg.render().asPng();
+
+    return new Response(png, {
       status: 200,
       headers: {
         ...corsHeaders,
-        "Content-Type": "image/svg+xml; charset=utf-8",
+        "Content-Type": "image/png",
         "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
       },
     });
