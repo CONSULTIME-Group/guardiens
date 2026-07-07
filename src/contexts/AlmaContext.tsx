@@ -365,7 +365,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
           }
         });
     }
-  }, [current, queue, user?.id, isProactiveMuted, verboseMode, claimProactiveSurface]);
+  }, [current, queue, user?.id, isProactiveMuted, verboseMode, claimProactiveSurface, activeProactiveSurface]);
 
   const dismissCurrent = useCallback(
     (reason: AlmaDismissReason) => {
