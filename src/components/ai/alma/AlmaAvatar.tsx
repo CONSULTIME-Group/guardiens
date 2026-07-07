@@ -96,7 +96,8 @@ export function AlmaAvatar({
   if (failed) {
     return (
       <span
-        key={mood === "happy" || mood === "attention" ? oneShotKey : undefined}
+        key={isOneShot ? oneShotKey : undefined}
+
         role="img"
         aria-label="Alma"
         aria-hidden={ariaHidden}
