@@ -56,7 +56,9 @@ const SitterFirstNBA = ({ sits }: Props) => {
           id="sitter-first-nba-heading"
           className="font-heading text-xl sm:text-2xl font-bold text-foreground leading-tight"
         >
-          3 annonces qui vous correspondent
+          {sits.length === 1
+            ? "1 annonce qui vous correspond"
+            : `${sits.length} annonces qui vous correspondent`}
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
           Score d'affinité calculé à partir de vos préférences. Complétez votre profil pour améliorer vos correspondances.
