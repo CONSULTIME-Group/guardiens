@@ -217,9 +217,17 @@ const SitterMissionsSection = memo(({
           </>
         )
       )}
+      </div>
 
-      {/* ─── Onglet : Autour de vous ─── */}
+      {/* ─── Panneau : Autour de vous ─── */}
+      <div
+        role="tabpanel"
+        id="sitter-missions-panel-nearby"
+        aria-labelledby="sitter-missions-tab-nearby"
+        hidden={tab !== "nearby"}
+      >
       {tab === "nearby" && (
+
         nearbyMissionsError ? (
           <ErrorState message={nearbyMissionsError} />
         ) : nearbyMissions.length === 0 ? (
