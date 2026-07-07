@@ -99,7 +99,7 @@ const EmptyHelpersState = ({ hideHeader, userId }: { hideHeader: boolean; userId
         {variant === "primary" && (
           <>
             <p className="text-sm text-foreground/70 leading-relaxed mt-2 max-w-prose">
-              Personne n'est encore disponible pour un coup de main près de chez vous. Invitez un proche&nbsp;: vous gagnez un mois offert, lui aussi.
+              Personne n'est encore disponible pour un coup de main près de chez vous. Invitez un proche du coin pour agrandir le réseau d'échanges et de confiance.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Button asChild size="sm" variant="outline" className="rounded-xl">

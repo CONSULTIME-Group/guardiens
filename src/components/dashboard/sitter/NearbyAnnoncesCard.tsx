@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { format, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { AlertCircle, RefreshCw, Share2, Compass, Home } from "lucide-react";
-import { SITTER_PRICE_START } from "@/lib/pricing";
+
 
 /** Résout la meilleure photo de couverture disponible pour une annonce. */
 const resolveCover = (sit: any): string | null =>
@@ -108,7 +108,7 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
               </div>
               <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-border/60">
                 <p className="text-xs text-muted-foreground">
-                  Faites venir un propriétaire&nbsp;: votre filleul rejoint gratuitement jusqu'au {SITTER_PRICE_START}.
+                  Faites venir un propriétaire&nbsp;: votre filleul rejoint gratuitement, lui aussi.
                 </p>
                 <Link
                   to="/mon-abonnement#parrainage"
