@@ -180,13 +180,16 @@ export function WelcomeBackDigest({
 }: WelcomeBackDigestProps) {
   const { activeRole } = useAuth();
   const { frequency: almaFrequency } = useAlmaFrequency();
+  const { claimProactiveSurface, releaseProactiveSurface } = useAlma();
   const navigate = useNavigate();
   const audience: AlmaAudience = activeRole === "owner" ? "owner" : "sitter";
 
   const [signals, setSignals] = useState<DigestSignals | null>(signalsProp ?? null);
   const [dismissed, setDismissed] = useState(false);
+  const claimedRef = useRef(false);
 
-  // Fetch RPC une seule fois par session (debounce)
+  // Fetch RPC une seule fois par session (debounce). Le verrou de surface
+  // est posé AVANT l'await pour éviter la race avec DormantReturnWhisper.
   useEffect(() => {
     if (signalsProp) return;
     let cancelled = false;
@@ -199,6 +202,14 @@ export function WelcomeBackDigest({
     } catch {
       /* silent */
     }
+
+    // Claim immédiat : si FirstMeeting est déjà en place, on renonce.
+    const ok = claimProactiveSurface("welcome_back");
+    if (!ok) {
+      setDismissed(true);
+      return;
+    }
+    claimedRef.current = true;
 
     (async () => {
       try {
@@ -222,7 +233,17 @@ export function WelcomeBackDigest({
     return () => {
       cancelled = true;
     };
-  }, [signalsProp]);
+  }, [signalsProp, claimProactiveSurface]);
+
+  // Libère le verrou quand le composant se démonte.
+  useEffect(() => {
+    return () => {
+      if (claimedRef.current) {
+        releaseProactiveSurface("welcome_back");
+        claimedRef.current = false;
+      }
+    };
+  }, [releaseProactiveSurface]);
 
   const variant: WelcomeBackVariant | null = signals
     ? forcedVariant ?? pickVariant(audience, signals)
