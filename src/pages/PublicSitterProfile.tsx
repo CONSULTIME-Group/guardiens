@@ -1486,14 +1486,9 @@ export default function PublicSitterProfile() {
                     Galerie ({gallery.length})
                   </TabsTrigger>
                 )}
-                {((userBadges && userBadges.length > 0) || profile?.created_at) && (
-                  <TabsTrigger
-                    value="confiance"
-                    className="data-[state=active]:bg-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-body"
-                  >
-                    Confiance
-                  </TabsTrigger>
-                )}
+                {/* Onglet « Confiance » retiré du desktop : la section est désormais toujours
+                    visible en dessous des Tabs, plus besoin de cliquer pour voir les vérifications. */}
+
               </TabsList>
 
               {/* Onglet À propos */}
