@@ -309,10 +309,9 @@ export function AlmaDock() {
                 )}
               />
             )}
-            <AlmaAvatar
+            <AlmaAvatarAnimated
               size={40}
-              breathe={!isSilent}
-              mood={isSilent ? "sleepy" : mood}
+              mood={isSilent ? "sleepy" : (mood === "attentive" ? "attentive" : "idle")}
             />
             {/* Accent scintillant, toujours accolé à l'avatar */}
             {!isSilent && (
