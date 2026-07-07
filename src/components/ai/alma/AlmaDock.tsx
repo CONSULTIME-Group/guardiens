@@ -425,34 +425,34 @@ export function AlmaDock() {
         </div>
       )}
 
-      {/* Dock replié (avatar + label + contrôles) — wrapper `relative`
-          nécessaire pour ancrer le point d'info du stade en dehors du bouton
-          principal (pas de bouton imbriqué). */}
+      {/* Dock replié (avatar + label + contrôles) */}
       <div
         className={cn(
           "relative pointer-events-auto flex items-center gap-2 rounded-full pl-1.5 pr-2 py-1.5",
           "bg-card/95 backdrop-blur border border-border shadow-lg",
         )}
       >
-        <button
-          type="button"
-          onClick={() => {
-            setExpanded((v) => !v);
-            if (expanded) setUserCollapsed(true);
-            else setUserCollapsed(false);
-          }}
-          className="relative flex items-center gap-2 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          aria-label={
-            whisper
-              ? "Voir le message d'Alma"
-              : proposition
-              ? "Voir la proposition d'Alma"
-              : "Ouvrir Alma"
-          }
-          aria-expanded={expanded}
-        >
-          {/* Avatar avec aura pulsante + ombre de contact + accent Sparkles */}
-          <span className="relative inline-flex flex-col items-center">
+        {/* Wrapper relatif autour de l'avatar : la pastille de stade
+            et l'indicateur whisper sont positionnés par rapport à
+            cette zone, qui a exactement la taille de l'avatar. */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => {
+              setExpanded((v) => !v);
+              if (expanded) setUserCollapsed(true);
+              else setUserCollapsed(false);
+            }}
+            className="relative inline-flex flex-col items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label={
+              whisper
+                ? "Voir le message d'Alma"
+                : proposition
+                ? "Voir la proposition d'Alma"
+                : "Ouvrir Alma"
+            }
+            aria-expanded={expanded}
+          >
             {!isSilent && (
               <span
                 aria-hidden
@@ -469,112 +469,110 @@ export function AlmaDock() {
               mood={isSilent ? "sleepy" : (mood === "attentive" ? "attentive" : "idle")}
               stage={stage ?? undefined}
             />
-
             {!isSilent && (
               <Sparkles
                 aria-hidden
                 className="absolute -top-0.5 -right-0.5 h-3 w-3 text-primary drop-shadow-sm motion-safe:animate-alma-aura"
               />
             )}
-            {/* Pastille de stade décorative (le point cliquable est le
-                bouton frère du bouton principal, positionné par-dessus). */}
-            {stage && (
-              <span
-                aria-hidden
-                className={cn(
-                  "absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full ring-2 ring-card",
-                  STAGE_DOT_CLASS[stage],
-                )}
-              />
-            )}
             <span
               aria-hidden
               className="absolute -bottom-0.5 h-1.5 w-8 rounded-full bg-foreground/25 blur-[3px]"
             />
-          </span>
-          <span className="flex flex-col items-start leading-tight pr-1">
-            <span className="text-xs font-semibold text-foreground/80">Alma</span>
-            <span className="text-[10px] font-medium text-muted-foreground">
-              {stage ? STAGE_SHORT_LABEL[stage] : "votre assistante"}
-            </span>
-          </span>
+          </button>
+
+          {/* Indicateur "message en attente" : haut gauche, couleur
+              warning distincte du vert, taille légèrement supérieure. */}
           {whisper && !expanded && (
             <span
               aria-hidden
-              className="absolute -top-0.5 right-0 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card"
+              className="absolute -top-1 left-0 h-3 w-3 rounded-full bg-warning ring-2 ring-card"
             />
           )}
-        </button>
 
-        {/* Point d'info du stade : bouton frère (pas imbriqué), positionné
-            en corner du bouton principal. Ouvre un popover avec le stade
-            courant, une phrase de progression et l'accès aux conseils. */}
-        {stage && (
-          <Popover open={stagePopoverOpen} onOpenChange={setStagePopoverOpen}>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                aria-label={`Votre stade avec Alma : ${STAGE_SHORT_LABEL[stage]}. Ouvrir les infos.`}
-                title={`Alma · ${STAGE_SHORT_LABEL[stage]}`}
-                className={cn(
-                  "absolute h-11 w-11 rounded-full flex items-center justify-center",
-                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                )}
-                style={{
-                  left: 6 + avatarSize - 22,
-                  bottom: 6 + avatarSize - 22 - 4,
-                }}
-              >
-                <span
-                  aria-hidden
-                  className={cn(
-                    "h-3.5 w-3.5 rounded-full ring-2 ring-card transition hover:scale-110",
-                    STAGE_DOT_CLASS[stage],
-                  )}
-                />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent
-              side="top"
-              align="end"
-              className="w-72 p-4"
-              sideOffset={12}
-            >
-              <div className="flex items-center gap-2 mb-1.5">
-                <span
-                  aria-hidden
-                  className={cn("h-2.5 w-2.5 rounded-full", STAGE_DOT_CLASS[stage])}
-                />
-                <p className="text-sm font-semibold text-foreground">
-                  Stade {STAGE_SHORT_LABEL[stage]}
-                </p>
-              </div>
-              <p className="text-xs text-muted-foreground leading-snug">
-                {evolution?.nextMilestone ??
-                  "Alma vous accompagne au fil de vos gestes dans la communauté."}
-              </p>
-              <div className="mt-3 flex flex-wrap items-center gap-2">
+          {/* Pastille de stade UNIQUE : cliquable, ouvre le popover
+              de progression. Positionnée dans le coin bas-droite de
+              l'avatar avec des classes de positionnement. */}
+          {stage && (
+            <Popover open={stagePopoverOpen} onOpenChange={setStagePopoverOpen}>
+              <PopoverTrigger asChild>
                 <button
                   type="button"
-                  onClick={() => askForTip("popover")}
-                  className="min-h-11 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  aria-label={`Votre stade avec Alma : ${STAGE_SHORT_LABEL[stage]}. Ouvrir les infos.`}
+                  title={`Alma · ${STAGE_SHORT_LABEL[stage]}`}
+                  className={cn(
+                    "absolute -bottom-1 -right-1 min-h-11 min-w-11 rounded-full flex items-center justify-center",
+                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  )}
                 >
-                  Un conseil ?
+                  <span
+                    aria-hidden
+                    className={cn(
+                      "h-3.5 w-3.5 rounded-full ring-2 ring-card transition hover:scale-110",
+                      STAGE_DOT_CLASS[stage],
+                    )}
+                  />
                 </button>
-                <Link
-                  to="/alma"
-                  onClick={() => setStagePopoverOpen(false)}
-                  className="min-h-11 inline-flex items-center rounded-full px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition underline decoration-dotted underline-offset-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                >
-                  Voir le détail
-                </Link>
-              </div>
-            </PopoverContent>
-          </Popover>
-        )}
+              </PopoverTrigger>
+              <PopoverContent
+                side="top"
+                align="end"
+                className="w-72 p-4"
+                sideOffset={12}
+              >
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span
+                    aria-hidden
+                    className={cn("h-2.5 w-2.5 rounded-full", STAGE_DOT_CLASS[stage])}
+                  />
+                  <p className="text-sm font-semibold text-foreground">
+                    Stade {STAGE_SHORT_LABEL[stage]}
+                  </p>
+                </div>
+                <p className="text-xs text-muted-foreground leading-snug">
+                  {evolution?.nextMilestone ??
+                    "Alma vous accompagne au fil de vos gestes dans la communauté."}
+                </p>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => askForTip("popover")}
+                    className="min-h-11 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    Un conseil ?
+                  </button>
+                  <Link
+                    to="/alma"
+                    onClick={() => setStagePopoverOpen(false)}
+                    className="min-h-11 inline-flex items-center rounded-full px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition underline decoration-dotted underline-offset-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    Voir le détail
+                  </Link>
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
+        </div>
+
+        {/* Label Alma / stade */}
+        <button
+          type="button"
+          tabIndex={-1}
+          onClick={() => {
+            setExpanded((v) => !v);
+            if (expanded) setUserCollapsed(true);
+            else setUserCollapsed(false);
+          }}
+          className="flex flex-col items-start leading-tight pr-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          aria-hidden
+        >
+          <span className="text-xs font-semibold text-foreground/80">Alma</span>
+          <span className="text-[10px] font-medium text-muted-foreground">
+            {stage ? STAGE_SHORT_LABEL[stage] : "votre assistante"}
+          </span>
+        </button>
 
         <div className="h-6 w-px bg-border/70" aria-hidden />
-
 
         <button
           type="button"
