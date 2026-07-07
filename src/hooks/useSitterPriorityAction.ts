@@ -134,19 +134,7 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
     // la section Découverte plus bas porte déjà « Annonces ailleurs en France ».
     // On laisse le cockpit basculer sur entraide ou disponibilité.
 
-    // 5. Pas d'annonce proche : entraide first
-    return {
-      variant: "entraide",
-      eyebrow: "À faire maintenant",
-      title: "Rendez un coup de main près de chez vous",
-      description:
-        "C'est ouvert à tous, sans abonnement, et c'est le meilleur moyen de vous faire connaître avant vos premières gardes.",
-      ctaLabel: "Voir les coups de main",
-      ctaTo: "/petites-missions",
-      urgency: "medium",
-    };
-
-    // 6. Mode dispo OFF — sans ça aucune sollicitation directe
+    // 5. Mode dispo OFF — sans ça aucune sollicitation directe
     if (!isAvailable) {
       return {
         variant: "availability",
@@ -159,16 +147,16 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
       };
     }
 
-    // 7. Fallback — tout est prêt
+    // 6. Pas d'annonce proche : entraide first
     return {
-      variant: "explore",
-      eyebrow: "Tout est prêt",
-      title: "Vous êtes visible par les propriétaires",
+      variant: "entraide",
+      eyebrow: "À faire maintenant",
+      title: "Rendez un coup de main près de chez vous",
       description:
-        "Dès qu'une garde correspond à votre profil, vous êtes prévenu. En attendant, l'entraide reste le meilleur moyen de rester actif.",
+        "C'est ouvert à tous, sans abonnement, et c'est le meilleur moyen de vous faire connaître avant vos premières gardes.",
       ctaLabel: "Voir les coups de main",
       ctaTo: "/petites-missions",
-      urgency: "low",
+      urgency: "medium",
     };
   }, [input.nextGuard, input.profileCompletion, input.postalCode, input.nearbyListings, input.isAvailable, input.competencesCount, input.interestsCount]);
 }
