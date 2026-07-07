@@ -1,22 +1,19 @@
 /**
- * Avatar d'Alma, la narratrice de Guardiens.
- * Rendu principal : image mascotte premium (bichon frisé).
- * Fallback : cercle uni si l'image ne charge pas.
+ * <AlmaAvatar /> — façade historique.
  *
- * Tailles supportées : 24 / 32 / 40 (compact) et 56 / 72 / 96 (grand format
- * réservé aux premiers contacts et dialogs d'accueil).
- *
- * Animations (respectent prefers-reduced-motion via motion-safe:) :
- *  - hover : léger frétillement (`animate-alma-wiggle`)
- *  - `animateIn` : petit rebond d'apparition (`animate-alma-pop-in`)
- *  - `breathe` : souffle très subtil en boucle (`animate-alma-breathe`)
- *  - `mood` : humeur contextuelle (`idle` | `happy` | `sleepy` | `attention`).
+ * Alma n'a plus qu'un seul visage dans l'app : le SVG stage-aware de
+ * <AlmaAvatarAnimated />. Ce fichier reste un wrapper de compatibilité
+ * pour les nombreux points d'appel existants, il ne rend plus jamais le
+ * PNG. Le stade utilisateur est récupéré automatiquement via
+ * useAlmaEvolution pour que l'évolution soit visible partout.
  */
-import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import almaAvatarUrl from "@/assets/alma-avatar.png";
+import { useAlmaEvolution } from "@/hooks/useAlmaEvolution";
+import {
+  AlmaAvatarAnimated,
+  type AlmaAnimatedMood,
+} from "./AlmaAvatarAnimated";
 
-type Size = 24 | 32 | 40 | 56 | 72 | 96;
 export type AlmaMood =
   | "idle"
   | "happy"
@@ -27,112 +24,51 @@ export type AlmaMood =
   | "gentle"
   | "playful";
 
+type Size = 24 | 32 | 40 | 56 | 72 | 96;
 
 interface AlmaAvatarProps {
   size?: Size;
   className?: string;
   "aria-hidden"?: boolean;
-  /** Rebond d'entrée (utile quand l'avatar apparaît dans une bulle). */
+  /** Conservé pour compat : géré nativement par le SVG animé. */
   animateIn?: boolean;
-  /** Animation « souffle » lente en boucle (topbar). */
+  /** Conservé pour compat : géré nativement par le SVG animé. */
   breathe?: boolean;
-  /** Humeur contextuelle : « idle » par défaut. */
+  /** Humeur contextuelle. */
   mood?: AlmaMood;
+  /** Force un stade précis (sinon lecture via useAlmaEvolution). */
+  stage?: "nouvelle" | "eveillee" | "complice" | "fidele";
+  /** Affiche un halo coloré derrière l'avatar. */
+  showHalo?: boolean;
+}
+
+function toAnimatedMood(mood: AlmaMood): AlmaAnimatedMood {
+  // "attention" (legacy) → "attentive"
+  if (mood === "attention") return "attentive";
+  return mood;
 }
 
 export function AlmaAvatar({
   size = 32,
   className,
-  animateIn = false,
-  breathe = false,
   mood = "idle",
+  stage,
+  showHalo,
   ...rest
 }: AlmaAvatarProps) {
   const ariaHidden = rest["aria-hidden"];
-  const [failed, setFailed] = useState(false);
-
-  // One-shot moods : replay lorsque la valeur (ré)apparaît.
-  const isOneShot =
-    mood === "happy" ||
-    mood === "attention" ||
-    mood === "attentive" ||
-    mood === "playful";
-  const [oneShotKey, setOneShotKey] = useState(0);
-  useEffect(() => {
-    if (isOneShot) {
-      setOneShotKey((k) => k + 1);
-    }
-  }, [mood, isOneShot]);
-
-  const moodClass =
-    mood === "happy"
-      ? "motion-safe:animate-alma-happy"
-      : mood === "attention" || mood === "attentive"
-      ? "motion-safe:animate-alma-attention"
-      : mood === "playful"
-      ? "motion-safe:animate-alma-playful"
-      : mood === "thinking"
-      ? "motion-safe:animate-alma-thinking"
-      : mood === "gentle"
-      ? "motion-safe:animate-alma-gentle"
-      : mood === "sleepy"
-      ? "opacity-70 motion-safe:animate-alma-breathe-slow"
-      : breathe
-      ? "motion-safe:animate-alma-breathe"
-      : "";
-
-
-  const commonClass = cn(
-    "inline-block rounded-full object-cover select-none",
-    "transition-transform duration-200 ease-out",
-    "motion-safe:hover:animate-alma-wiggle",
-    animateIn && "motion-safe:animate-alma-pop-in",
-    moodClass,
-    className,
-  );
-
-  const styleWithOrigin = { width: size, height: size, transformOrigin: "bottom center" } as const;
-
-  // Geste idle discret (inclinaison lente) appliqué sur un wrapper afin de
-  // pouvoir cumuler avec `alma-breathe` porté par l'image elle-même.
-  const idleWrap = mood === "idle" || mood === "gentle";
-  const wrapClass = idleWrap
-    ? "inline-block motion-safe:animate-alma-idle-gesture"
-    : "inline-block";
-
-  if (failed) {
-    return (
-      <span className={wrapClass} style={{ width: size, height: size }}>
-        <span
-          key={isOneShot ? oneShotKey : undefined}
-          role="img"
-          aria-label="Alma"
-          aria-hidden={ariaHidden}
-          style={styleWithOrigin}
-          className={cn(commonClass, "bg-primary/15")}
-        />
-      </span>
-    );
-  }
+  const { data } = useAlmaEvolution();
+  const effectiveStage = stage ?? data?.stage;
 
   return (
-    <span className={wrapClass} style={{ width: size, height: size, display: "inline-block" }}>
-      <img
-        key={isOneShot ? oneShotKey : undefined}
-        src={almaAvatarUrl}
-        alt="Alma"
-        width={size}
-        height={size}
-        loading="lazy"
-        decoding="async"
-        draggable={false}
-        aria-label="Alma"
-        aria-hidden={ariaHidden}
-        onError={() => setFailed(true)}
-        style={styleWithOrigin}
-        className={commonClass}
-      />
-    </span>
+    <AlmaAvatarAnimated
+      size={size}
+      mood={toAnimatedMood(mood)}
+      stage={effectiveStage}
+      showHalo={showHalo}
+      aria-hidden={ariaHidden}
+      className={cn(className)}
+    />
   );
 }
 
