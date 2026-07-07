@@ -74,13 +74,25 @@ describe("Alma whisper scheduler", () => {
     expect(canEmit(s, "sitter_fresh_sit_detected", DISMISS_COOLDOWN_MS + 1).ok).toBe(true);
   });
 
-  it("2 dismiss volontaires dans la session activent le mode muted", () => {
+  it("le mute de session s'active après un nombre de dismiss modulé par la fréquence", () => {
+    // balanced : seuil 4 (moins agressif qu'avant, pour ne pas couper trop vite).
     let s = makeInitialState("balanced");
     s = onDismiss(s, "closed_manually", 0);
     s = onDismiss(s, "closed_manually", 1000);
+    expect(s.sessionMuted).toBe(false);
+    s = onDismiss(s, "closed_manually", 2000);
+    s = onDismiss(s, "closed_manually", 3000);
     expect(s.sessionMuted).toBe(true);
     expect(canEmit(s, "sitter_fresh_sit_detected", 999_999_999).reason).toBe("muted");
+
+    // talkative : seuil 6, plus permissif encore.
+    let t = makeInitialState("talkative");
+    for (let i = 0; i < 5; i++) t = onDismiss(t, "closed_manually", i * 1000);
+    expect(t.sessionMuted).toBe(false);
+    t = onDismiss(t, "closed_manually", 6000);
+    expect(t.sessionMuted).toBe(true);
   });
+
 
   it("timeout ne mute pas la session", () => {
     let s = makeInitialState("balanced");
