@@ -885,8 +885,10 @@ const ALMA_CATEGORY_GROUPS: AlmaCategoryGroup[] = [
 const AlmaFrequencySection = () => {
   const { user } = useAuth();
   const { frequency, loading, setFrequency } = useAlmaFrequency();
+  const { hidden, setHidden } = useAlmaHidden();
   const [muted, setMuted] = useState<Set<string>>(new Set());
   const [mutedLoaded, setMutedLoaded] = useState(false);
+
 
   useEffect(() => {
     if (!user?.id) return;
