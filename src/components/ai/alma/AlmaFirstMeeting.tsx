@@ -14,6 +14,7 @@ import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { AlmaAvatar } from "./AlmaAvatar";
+import { AlmaAnimated } from "./AlmaAnimated";
 import { trackEvent } from "@/lib/analytics";
 import { resolveAlmaCtaHref, type AlmaCtaAction } from "@/lib/alma/cta-actions";
 
@@ -91,7 +92,7 @@ export function AlmaFirstMeeting({ role, onDone }: Props) {
       </button>
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 pr-10">
         <div className="shrink-0 inline-flex items-center justify-center rounded-full ring-2 ring-primary/30 bg-background">
-          <AlmaAvatar size={72} animateIn />
+          <AlmaAnimated size={88} />
         </div>
         <div className="flex-1 min-w-0 space-y-3 text-center sm:text-left">
           <div>
