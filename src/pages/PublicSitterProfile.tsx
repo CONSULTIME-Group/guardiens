@@ -1796,49 +1796,124 @@ export default function PublicSitterProfile() {
       {activeTab === 'proprio' && (
         <div className="max-w-4xl mx-auto pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
 
-          {/* Hero compact propriétaire */}
-          <div className="px-4 pt-5 pb-4 border-b border-border/60">
-            <div className="flex items-center gap-3 max-w-xl">
-              <img
-                src={profile?.avatar_url || '/placeholder.svg'}
-                alt={firstName}
-                className="w-14 h-14 rounded-full object-cover border-2 border-background shadow-sm ring-2 ring-primary/30 shrink-0"
-              />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="font-heading text-lg font-bold text-foreground capitalize leading-tight">{firstName}</h2>
-                  {profile?.identity_verified && (
-                    <span className="inline-flex items-center gap-1 text-[11px] text-primary border border-primary/30 rounded-full px-2 py-0.5 bg-primary/5 font-body">
-                      <Shield size={10} aria-hidden="true" /> ID vérifiée
+          {/* ── Bandeau qualification propriétaire, miroir du bandeau gardien ──
+              Le hero premium est déjà rendu en tête, ne pas dupliquer. */}
+          {(() => {
+            const ownerAvg = ownerReviews.length > 0
+              ? ownerReviews.reduce((s, r) => s + (Number(r.overall_rating) || 0), 0) / ownerReviews.length
+              : 0;
+            const speciesSet = Array.from(new Set(pets.map((p: any) => p.species).filter(Boolean)));
+            const speciesLabel = speciesSet
+              .map((s: any) => ANIMAL_LABELS[s as string] || s)
+              .join(', ');
+            const envLabel = (ownerProfile?.environments ?? [])
+              .map((e) => ENV_LABELS[e] || e)
+              .join(', ');
+            const Empty = ({ label }: { label: string }) => (
+              <p className="text-sm text-muted-foreground/70 italic font-body">{label}</p>
+            );
+            return (
+              <section
+                aria-label="Informations clés du propriétaire"
+                className="px-4 md:px-6 pt-5 md:pt-6"
+              >
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2.5 md:gap-3">
+                  {/* Tuile 1 : Animaux */}
+                  <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
+                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
+                      <span className="truncate">Animaux</span>
+                    </div>
+                    {pets.length > 0 ? (
+                      <p className="text-xs sm:text-sm text-foreground font-body leading-snug line-clamp-2 break-words">
+                        <span className="font-semibold">{pets.length}</span>
+                        {speciesLabel ? <span className="text-muted-foreground"> · {speciesLabel}</span> : null}
+                      </p>
+                    ) : (
+                      <Empty label="Non renseigné" />
+                    )}
+                  </div>
+
+                  {/* Tuile 2 : Environnement */}
+                  <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
+                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
+                      <span className="truncate">Environnement</span>
+                    </div>
+                    {envLabel ? (
+                      <p className="text-xs sm:text-sm text-foreground font-body leading-snug line-clamp-2 break-words">
+                        {envLabel}
+                      </p>
+                    ) : city ? (
+                      <p className="text-xs sm:text-sm text-foreground/80 font-body leading-snug break-words">{city}</p>
+                    ) : (
+                      <Empty label="Non renseigné" />
+                    )}
+                  </div>
+
+                  {/* Tuile 3 : Ancienneté + gardes publiées */}
+                  <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
+                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
+                      <span className="truncate">Ancienneté</span>
+                    </div>
+                    {profile?.created_at ? (
+                      <p className="text-xs sm:text-sm text-foreground font-body leading-snug break-words">
+                        <span className="font-semibold">{anciennete(profile.created_at)}</span>
+                      </p>
+                    ) : (
+                      <Empty label="Non renseigné" />
+                    )}
+                    <span className="text-[10px] sm:text-[11px] text-muted-foreground font-body">
+                      {ownerSitsTotal > 0
+                        ? `${ownerSitsTotal} garde${ownerSitsTotal > 1 ? 's' : ''} publiée${ownerSitsTotal > 1 ? 's' : ''}`
+                        : 'Aucune garde publiée'}
                     </span>
-                  )}
-                  {profile?.is_founder && (
-                    <span className="inline-flex items-center gap-1 text-[11px] text-foreground/70 border border-border rounded-full px-2 py-0.5 bg-card font-body">
-                      <Star size={10} aria-hidden="true" /> Fondateur
-                    </span>
-                  )}
+                  </div>
+
+                  {/* Tuile 4 : Confiance (avis + écussons) */}
+                  <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
+                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
+                      <span className="truncate">Confiance</span>
+                    </div>
+                    {(ownerReviews.length > 0 || totalBadgeCount > 0 || profile?.identity_verified) ? (
+                      <>
+                        <div className="flex items-baseline flex-wrap gap-x-1.5 gap-y-0.5 text-xs sm:text-sm text-foreground font-body">
+                          {ownerReviews.length > 0 ? (
+                            <>
+                              <span className="font-semibold whitespace-nowrap">{ownerAvg.toFixed(1)}<span className="text-primary">★</span></span>
+                              <span className="text-muted-foreground text-[11px] sm:text-xs">({ownerReviews.length} avis)</span>
+                            </>
+                          ) : profile?.identity_verified ? (
+                            <span className="text-foreground/80 text-[11px] sm:text-xs">Identité vérifiée</span>
+                          ) : (
+                            <span className="text-muted-foreground text-[11px] sm:text-xs italic">Aucun avis</span>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-x-1 sm:gap-x-1.5 gap-y-0.5 text-[10px] sm:text-[11px] text-muted-foreground font-body">
+                          {totalBadgeCount > 0 && (
+                            <span className="whitespace-nowrap">{totalBadgeCount} écusson{totalBadgeCount > 1 ? 's' : ''}</span>
+                          )}
+                          {totalBadgeCount > 0 && profile?.identity_verified && ownerReviews.length > 0 && <span aria-hidden="true">·</span>}
+                          {profile?.identity_verified && ownerReviews.length > 0 && (
+                            <span className="whitespace-nowrap">ID vérifiée</span>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <Empty label="Nouveau profil" />
+                    )}
+                  </div>
                 </div>
-                {city && (
-                  <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5 font-body">
-                    <MapPin className="w-3 h-3 shrink-0" aria-hidden="true" />
-                    Propriétaire à {city}
-                  </p>
+
+                {/* Empty state éditorial owner sans annonce */}
+                {ownerSitsTotal === 0 && !ownerDataLoading && (
+                  <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/30 p-4 text-sm text-foreground/80 font-body leading-relaxed">
+                    <span className="font-medium text-foreground">{firstName} prépare sa première garde.</span>{' '}
+                    En attendant, découvrez ses animaux et son environnement ci-dessous.
+                  </div>
                 )}
-                {(() => {
-                  const ownerAvgHero = ownerReviews.length > 0
-                    ? ownerReviews.reduce((s, r) => s + (Number(r.overall_rating) || 0), 0) / ownerReviews.length
-                    : 0;
-                  return ownerAvgHero > 0 && (
-                    <p className="text-xs text-foreground/70 font-body mt-0.5">
-                      <span className="font-semibold">{ownerAvgHero.toFixed(1)}</span>
-                      <span className="text-primary ml-0.5">★</span>
-                      <span className="text-muted-foreground ml-1">({ownerReviews.length} avis)</span>
-                    </p>
-                  );
-                })()}
-              </div>
-            </div>
-          </div>
+              </section>
+            );
+          })()}
+
 
           {/* Sous-onglets sticky scrollables (forceMount SEO) */}
           <Tabs defaultValue="apropos" className="w-full">
