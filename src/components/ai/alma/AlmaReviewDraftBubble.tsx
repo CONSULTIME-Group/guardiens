@@ -97,6 +97,7 @@ export function AlmaReviewDraftBubble({
         audience={role}
         variant="inline"
         loading={loading}
+        success={success}
         onDismiss={() => setDismissed(true)}
         actions={
           <Button size="sm" onClick={handleGenerate} disabled={loading}>
