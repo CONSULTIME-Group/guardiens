@@ -1,7 +1,8 @@
 // send-sit-draft-reminder
-// Envoie un email J+1 aux owners ayant un sit en status='draft' créé la veille
+// Relance les owners ayant un sit en status='draft' créé il y a plus de 24h
 // et jamais publié. Anti-doublon via email_send_log (template_name + recipient).
 // Déclenchement : cron quotidien 10h Europe/Paris (à planifier via pg_cron).
+// Plafond : 25 envois max par run, les plus anciens d'abord.
 
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
 
