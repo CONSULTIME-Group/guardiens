@@ -24,6 +24,7 @@ import { CULTURAL_FACT_LIMITS, type AlmaAudience } from "@/lib/alma/whisper-type
 
 const SESSION_QUEUED_KEY = "alma_cultural_fact_queued";
 const SESSION_COUNT_KEY = "alma_cultural_fact_count";
+const SESSION_LAST_AT_KEY = "alma_cultural_fact_last_at";
 
 interface UseAlmaCulturalFactParams {
   surface: string;
@@ -48,12 +49,16 @@ export function useAlmaCulturalFact({
     if (firedRef.current) return;
 
     // Quota session par surface (évite un fact à chaque remount).
+    const cfg = CULTURAL_FACT_LIMITS[frequency];
+    if (cfg.maxPerSession === 0) return;
     try {
       const surfaceKey = `${SESSION_QUEUED_KEY}:${surface}`;
       if (sessionStorage.getItem(surfaceKey) === "1") return;
       const count = Number(sessionStorage.getItem(SESSION_COUNT_KEY) || "0");
-      const max = CULTURAL_FACT_LIMITS[frequency].maxPerSession;
-      if (count >= max) return;
+      if (count >= cfg.maxPerSession) return;
+      // Cadence de session : temps depuis le dernier fait culturel émis.
+      const lastAt = Number(sessionStorage.getItem(SESSION_LAST_AT_KEY) || "0");
+      if (cfg.cooldownMs > 0 && lastAt > 0 && Date.now() - lastAt < cfg.cooldownMs) return;
     } catch {
       /* silent */
     }
@@ -69,6 +74,7 @@ export function useAlmaCulturalFact({
             p_user_id: user.id,
             p_surface: surface,
             p_context: (context ?? {}) as any,
+            p_frequency: frequency,
           },
         );
         if (cancelled || error || !data) return;
@@ -109,6 +115,7 @@ export function useAlmaCulturalFact({
           sessionStorage.setItem(`${SESSION_QUEUED_KEY}:${surface}`, "1");
           const prev = Number(sessionStorage.getItem(SESSION_COUNT_KEY) || "0");
           sessionStorage.setItem(SESSION_COUNT_KEY, String(prev + 1));
+          sessionStorage.setItem(SESSION_LAST_AT_KEY, String(Date.now()));
         } catch { /* silent */ }
       } catch {
         /* silent */

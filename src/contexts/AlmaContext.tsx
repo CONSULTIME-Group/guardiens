@@ -341,7 +341,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
 
     setCurrent(next);
     setQueue((q) => q.filter((w) => w.id !== next!.id));
-    if (!verboseMode) setState((s) => onEmit(s));
+    if (!verboseMode) setState((s) => onEmit(s, next!.type));
 
     const factId = (next.metadata as any)?.fact_id;
     if (factId) pushSeenId(String(factId));
@@ -450,6 +450,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
           p_bypass_cooldown: true,
           p_exclude_ids: excluded,
           p_on_demand: onDemand,
+          p_frequency: stateRef.current.frequency,
         });
 
         if (data && (data as any).id) {

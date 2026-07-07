@@ -6356,6 +6356,7 @@ export type Database = {
           p_bypass_cooldown?: boolean
           p_context?: Json
           p_exclude_ids?: string[]
+          p_frequency?: string
           p_on_demand?: boolean
           p_surface: string
           p_user_id: string
@@ -6670,7 +6671,7 @@ export type Database = {
     }
     Enums: {
       activity_level: "calm" | "moderate" | "sportive"
-      alma_frequency: "silent" | "balanced" | "talkative"
+      alma_frequency: "silent" | "low" | "balanced" | "talkative"
       alone_duration: "never" | "2h" | "6h" | "all_day"
       analysis_request_status: "new" | "in_progress" | "done" | "archived"
       analysis_request_type: "city" | "breed" | "places" | "pros" | "other"
@@ -6917,7 +6918,7 @@ export const Constants = {
   public: {
     Enums: {
       activity_level: ["calm", "moderate", "sportive"],
-      alma_frequency: ["silent", "balanced", "talkative"],
+      alma_frequency: ["silent", "low", "balanced", "talkative"],
       alone_duration: ["never", "2h", "6h", "all_day"],
       analysis_request_status: ["new", "in_progress", "done", "archived"],
       analysis_request_type: ["city", "breed", "places", "pros", "other"],
