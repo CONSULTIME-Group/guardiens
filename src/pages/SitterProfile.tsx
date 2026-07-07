@@ -277,21 +277,38 @@ const SitterProfile = () => {
   }, [uploadAvatar]);
 
   // Source UNIQUE pour la jauge ET la sidebar : un seul set de critères pondérés.
-  // Chaque critère est rattaché à la section où l'utilisateur peut le compléter.
-  // Total = 100 par construction (essentiels 80 + bonus 20). Réplique du SQL.
+  // ALIGNÉ au SQL `calculate_profile_completion` (rôle sitter) :
+  //   location_ok 15 + avatar 15 + bio 10 + competences 15 + lifestyle 10
+  //   + radius 15 + gallery 5 + identity 5 + affinity 10 (0/3/6/10 selon count)
+  //   = 100.
+  // La règle location_ok respecte le pays : hors France, ville suffit.
+  const isFrance = (mergedData.country || "FR") === "FR";
+  const locationOk = !!mergedData.first_name && (isFrance ? !!mergedData.postal_code : !!mergedData.city);
+
+  const affinityChecks = [
+    (mergedData.interests?.length ?? 0) >= 3,
+    (mergedData.languages?.length ?? 0) > 0,
+    !!mergedData.life_pace,
+    (mergedData.animal_types?.length ?? 0) > 0,
+  ];
+  const affinityCount = affinityChecks.filter(Boolean).length;
+  const affinityPoints = affinityCount >= 3 ? 10 : affinityCount === 2 ? 6 : affinityCount === 1 ? 3 : 0;
+
   const scoredCriteria: ScoredCriterion[] = [
     { section: "identity", kind: "essential", label: tp("criteria.name_postal"), points: 15,
-      ok: !!(mergedData.first_name && mergedData.postal_code) },
-    { section: "identity", kind: "essential", label: tp("criteria.avatar"), points: 20,
+      ok: locationOk },
+    { section: "identity", kind: "essential", label: tp("criteria.avatar"), points: 15,
       ok: !!mergedData.avatar_url, hint: tp("hints.add_avatar_identity") },
     { section: "skills", kind: "essential", label: tp("criteria.skill"), points: 15,
       ok: (mergedData.competences?.length ?? 0) > 0, hint: tp("hints.tab_skills") },
-    { section: "sitter", kind: "essential", label: tp("criteria.lifestyle"), points: 15,
+    { section: "sitter", kind: "essential", label: tp("criteria.lifestyle"), points: 10,
       ok: (mergedData.lifestyle?.length ?? 0) > 0, hint: tp("hints.tab_sitter") },
     { section: "mobility", kind: "essential", label: tp("criteria.radius"), points: 15,
       ok: (mergedData.geographic_radius ?? 0) > 0, hint: tp("hints.tab_mobility") },
     { section: "identity", kind: "bonus", label: tp("criteria.bio_50"), points: 10,
       ok: (mergedData.bio?.length ?? 0) >= 50, hint: tp("hints.chars_50", { count: mergedData.bio?.length ?? 0 }) },
+    { section: "sitter", kind: "bonus", label: tp("criteria.affinity"), points: affinityPoints,
+      ok: affinityCount >= 3, hint: tp("hints.affinity_count", { count: affinityCount }) },
     { section: "gallery", kind: "bonus", label: tp("criteria.sitter_gallery_one"), points: 5,
       ok: hasGalleryPhoto, hint: tp("hints.tab_gallery") },
     { section: "identity", kind: "bonus", label: tp("criteria.identity_verified"), points: 5,
