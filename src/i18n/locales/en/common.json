@@ -327,18 +327,9 @@
       "cta_owner": "Publish my listing, for free",
       "cta_sitter": "I want to sit"
     },
-    "founder": {
-      "window": "Founder Programme, registration window in progress",
-      "days_one": "{{count}} day",
-      "days_other": "{{count}} days",
-      "before_sub": "before sitter subscription",
-      "join_title": "Register now to join the Founders",
-      "join_text": "A permanent honorary seal on your profile, it will never be awarded again once the window closes.",
-      "cta": "Become a Founder"
-    },
     "grace": {
-      "title": "Founders have until {{date}}",
-      "text": "The first members keep their free access until {{date}}. After this date, the {{price}} subscription will be required for caretaker / pet & home sitters. The Founder badge remains displayed on your profile."
+      "title": "Free access until {{date}}",
+      "text": "The first members keep their free access, with no commitment."
     },
     "owner_card": {
       "badge": "Always free",

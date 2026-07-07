@@ -327,18 +327,9 @@
       "cta_owner": "Publicar mi anuncio, gratuitamente",
       "cta_sitter": "Quiero ser cuidador"
     },
-    "founder": {
-      "window": "Programa Fundador, ventana de inscripción en curso",
-      "days_one": "{{count}} día",
-      "days_other": "{{count}} días",
-      "before_sub": "antes de la suscripción de cuidador",
-      "join_title": "Regístrese ahora para unirse a los Fundadores",
-      "join_text": "Un sello honorífico permanente en su perfil; no volverá a otorgarse una vez cerrada la ventana.",
-      "cta": "Convertirse en Fundador"
-    },
     "grace": {
-      "title": "Los Fundadores tienen hasta el {{date}}",
-      "text": "Los primeros miembros mantienen su acceso gratuito hasta el {{date}}. Después de esta fecha, será necesaria la suscripción de {{price}} para los cuidadores. La insignia de Fundador permanecerá visible en su perfil."
+      "title": "Acceso gratuito hasta el {{date}}",
+      "text": "Los primeros miembros mantienen su acceso gratuito, sin compromiso."
     },
     "owner_card": {
       "badge": "Siempre gratis",
