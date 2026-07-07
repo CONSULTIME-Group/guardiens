@@ -391,21 +391,76 @@ const Sits = () => {
 
   useEffect(() => { loadSits(); }, [loadSits]);
 
+  // Realtime : rafraichit la liste owner quand un sit ou une candidature change.
+  // La vue sitter garde son propre mecanisme (aucune souscription ici).
+  useEffect(() => {
+    if (!user || activeRole !== "owner") return;
+
+    let refetchTimer: number | null = null;
+    const scheduleRefetch = () => {
+      if (refetchTimer !== null) return;
+      refetchTimer = window.setTimeout(() => {
+        refetchTimer = null;
+        void loadSits();
+      }, 400);
+    };
+
+    const channel = supabase
+      .channel(`sits-owner-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "sits", filter: `user_id=eq.${user.id}` },
+        () => scheduleRefetch(),
+      )
+      .on(
+        "postgres_changes",
+        // RLS restreint deja aux applications sur les sits du owner.
+        { event: "*", schema: "public", table: "applications" },
+        () => scheduleRefetch(),
+      )
+      .subscribe();
+
+    return () => {
+      if (refetchTimer !== null) window.clearTimeout(refetchTimer);
+      void supabase.removeChannel(channel);
+    };
+  }, [user, activeRole, loadSits]);
+
   const handleArchive = async (sitId: string) => {
-    await supabase.from("sits").update({
-      status: "cancelled" as any,
-      cancellation_reason: "archived",
-    }).eq("id", sitId).eq("user_id", user!.id);
-    toast({ title: "Annonce archivée" });
-    setArchiveConfirm(null);
-    loadSits();
+    try {
+      const { error } = await supabase.from("sits").update({
+        status: "cancelled" as any,
+        cancellation_reason: "archived",
+      }).eq("id", sitId).eq("user_id", user!.id);
+      if (error) throw error;
+      toast({ title: "Annonce archivée" });
+      setArchiveConfirm(null);
+      loadSits();
+    } catch (err: any) {
+      console.error("[Sits] archive failed", err);
+      toast({
+        variant: "destructive",
+        title: "Impossible d'archiver",
+        description: "L'archivage a échoué. Réessayez dans un instant.",
+      });
+    }
   };
 
   const handleDelete = async (sitId: string) => {
-    await supabase.from("sits").delete().eq("id", sitId).eq("user_id", user!.id);
-    toast({ title: "Annonce supprimée" });
-    setDeleteConfirm(null);
-    loadSits();
+    try {
+      const { error } = await supabase.from("sits").delete().eq("id", sitId).eq("user_id", user!.id);
+      if (error) throw error;
+      toast({ title: "Annonce supprimée" });
+      setDeleteConfirm(null);
+      loadSits();
+    } catch (err: any) {
+      console.error("[Sits] delete failed", err);
+      toast({
+        variant: "destructive",
+        title: "Suppression impossible",
+        description: "La suppression a échoué. Réessayez dans un instant.",
+      });
+    }
   };
 
   const handleRepublish = async (sitId: string) => {
@@ -420,16 +475,26 @@ const Sits = () => {
       navigate(`/sits/${sitId}/edit`);
       return;
     }
-    await supabase.from("sits").update({
-      status: "published" as any,
-      cancellation_reason: null,
-      cancelled_at: null,
-      cancelled_by: null,
-      unpublished_at: null,
-      last_unpublished_reason: null,
-    } as any).eq("id", sitId).eq("user_id", user!.id);
-    toast({ title: "Annonce republiee" });
-    loadSits();
+    try {
+      const { error } = await supabase.from("sits").update({
+        status: "published" as any,
+        cancellation_reason: null,
+        cancelled_at: null,
+        cancelled_by: null,
+        unpublished_at: null,
+        last_unpublished_reason: null,
+      } as any).eq("id", sitId).eq("user_id", user!.id);
+      if (error) throw error;
+      toast({ title: "Annonce republiée" });
+      loadSits();
+    } catch (err: any) {
+      console.error("[Sits] republish failed", err);
+      toast({
+        variant: "destructive",
+        title: "Republication impossible",
+        description: "La republication a échoué. Réessayez dans un instant.",
+      });
+    }
   };
 
   // Bucketing owner : En ligne / Brouillons / Passees
