@@ -26,6 +26,9 @@ interface SitLike {
   accepting_applications?: boolean | null;
   specific_expectations?: string | null;
   owner_message?: string | null;
+  city?: string | null;
+  environments?: string[] | null;
+  flexible_dates?: boolean | null;
 }
 
 interface OwnerLike {
