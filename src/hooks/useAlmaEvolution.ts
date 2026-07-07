@@ -2,21 +2,30 @@
  * useAlmaEvolution — calcule le stade d'évolution de l'utilisateur courant
  * à partir de signaux RÉELS uniquement (jamais monétaire, jamais inventé).
  *
- * Stades :
- *  - "nouvelle" : profil < 60%
- *  - "eveillee" : profil >= 60% ET identité vérifiée
- *  - "complice" : au moins un acte d'engagement (annonce publiée, candidature,
- *                 petite mission publiée, garde réalisée, écusson reçu)
- *  - "fidele"   : engagement soutenu (>= 3 gardes réalisées OU >= 3 écussons
- *                 OU statut gardien d'urgence)
+ * Les seuils sont centralisés dans ALMA_THRESHOLDS pour être ajustés facilement.
+ * La vérification d'identité est un signal valorisé mais N'EST PLUS un plafond dur.
  *
- * Aucun stade dépendant d'un paiement ou d'un abonnement.
+ * Stades :
+ *  - "nouvelle" : par défaut, juste inscrit (profil sous le seuil).
+ *  - "eveillee" : profil complété au-dessus du seuil (par défaut 60 %).
+ *  - "complice" : profil complété ET au moins une action réelle
+ *                 (annonce publiée, candidature, mission d'entraide).
+ *  - "fidele"   : historique tangible, garde réalisée OU >= 3 missions d'entraide
+ *                 OU >= 1 écusson OU statut gardien d'urgence.
  */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
 export type AlmaStage = "nouvelle" | "eveillee" | "complice" | "fidele";
+
+/** Seuils centralisés, ajustables par produit sans toucher la logique. */
+export const ALMA_THRESHOLDS = {
+  profileCompletionMin: 60,
+  missionsForFidele: 3,
+  badgesForFidele: 1,
+  completedSitsForFidele: 1,
+} as const;
 
 export interface AlmaEvolution {
   stage: AlmaStage;
@@ -49,12 +58,13 @@ const STAGE_DESCRIPTION: Record<AlmaStage, string> = {
   nouvelle:
     "Alma vient de faire votre connaissance. Racontez-lui qui vous êtes pour qu'elle vous accompagne au mieux.",
   eveillee:
-    "Alma vous reconnaît. Votre profil est prêt et votre identité vérifiée, tout est en place pour passer à l'action.",
+    "Alma vous reconnaît. Votre profil est prêt, il ne manque plus qu'un premier geste vers la communauté.",
   complice:
-    "Alma vous a vu passer à l'action. Chaque nouveau geste renforce votre lien avec la communauté.",
+    "Alma vous a vu passer à l'action. Chaque nouveau geste renforce votre lien avec les gens du coin.",
   fidele:
     "Alma vous connaît bien. Vous incarnez l'esprit Guardiens et inspirez les autres membres du coin.",
 };
+
 
 export function useAlmaEvolution() {
   const { user, activeRole } = useAuth();
