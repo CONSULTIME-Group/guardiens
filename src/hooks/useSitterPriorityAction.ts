@@ -170,5 +170,5 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
       ctaTo: "/petites-missions",
       urgency: "low",
     };
-  }, [input.nextGuard, input.profileCompletion, input.postalCode, input.nearbyListings, input.isAvailable]);
+  }, [input.nextGuard, input.profileCompletion, input.postalCode, input.nearbyListings, input.isAvailable, input.competencesCount, input.interestsCount]);
 }
