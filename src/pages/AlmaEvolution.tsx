@@ -14,7 +14,10 @@ import {
   useAlmaEvolution,
   type AlmaStage,
 } from "@/hooks/useAlmaEvolution";
-import { AlmaAvatarAnimated } from "@/components/ai/alma/AlmaAvatarAnimated";
+import {
+  AlmaAvatarAnimated,
+  ALMA_STAGE_SCALE,
+} from "@/components/ai/alma/AlmaAvatarAnimated";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -24,6 +27,8 @@ const STAGE_MOOD: Record<AlmaStage, "gentle" | "attentive" | "happy" | "playful"
   complice: "happy",
   fidele: "playful",
 };
+
+const PROGRESSION_BASE_SIZE = 80;
 
 export default function AlmaEvolution() {
   const { data, isLoading } = useAlmaEvolution();
