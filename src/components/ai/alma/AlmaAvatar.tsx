@@ -17,7 +17,16 @@ import { cn } from "@/lib/utils";
 import almaAvatarUrl from "@/assets/alma-avatar.png";
 
 type Size = 24 | 32 | 40 | 56 | 72 | 96;
-export type AlmaMood = "idle" | "happy" | "sleepy" | "attention";
+export type AlmaMood =
+  | "idle"
+  | "happy"
+  | "sleepy"
+  | "attention"
+  | "attentive"
+  | "thinking"
+  | "gentle"
+  | "playful";
+
 
 interface AlmaAvatarProps {
   size?: Size;
