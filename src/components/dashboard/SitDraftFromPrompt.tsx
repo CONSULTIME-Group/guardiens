@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2 } from "lucide-react";
 import { AlmaAnimated } from "@/components/ai/alma/AlmaAnimated";
+import { useAlmaEvolution } from "@/hooks/useAlmaEvolution";
+
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
