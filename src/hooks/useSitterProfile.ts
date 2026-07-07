@@ -35,6 +35,9 @@ export interface SitterProfileData {
   last_name: string;
   city: string;
   postal_code: string;
+  // Pays (aligne avec profiles.country) : la règle « code postal requis »
+  // ne s'applique qu'en France, ailleurs `city` suffit (parité serveur RPC).
+  country: string;
   latitude?: number | null;
   longitude?: number | null;
   bio: string;
