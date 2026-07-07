@@ -93,7 +93,11 @@ export function AlmaBubble({
 
           {loading ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              <span className="inline-flex items-center gap-1" aria-hidden>
+                <span className="h-1.5 w-1.5 rounded-full bg-primary motion-safe:animate-alma-thinking-dot" style={{ animationDelay: "0ms" }} />
+                <span className="h-1.5 w-1.5 rounded-full bg-primary motion-safe:animate-alma-thinking-dot" style={{ animationDelay: "150ms" }} />
+                <span className="h-1.5 w-1.5 rounded-full bg-primary motion-safe:animate-alma-thinking-dot" style={{ animationDelay: "300ms" }} />
+              </span>
               <span>{loadingLabel}</span>
             </div>
           ) : (
