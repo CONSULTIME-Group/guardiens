@@ -49,16 +49,16 @@ Deno.serve(async (req) => {
   );
 
   const now = Date.now();
-  const minDate = new Date(now - 2 * 24 * 60 * 60 * 1000).toISOString();
-  const maxDate = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+  const cutoffDate = new Date(now - 24 * 60 * 60 * 1000).toISOString();
 
-  // Récupérer les drafts créés entre J-2 et J-1
+  // Récupérer les drafts créés il y a plus de 24h, les plus anciens d'abord
   const { data: drafts, error } = await supabase
     .from("sits")
     .select("id, user_id, title, start_date, end_date, specific_expectations, environments, city, owner_message, daily_routine, created_at")
     .eq("status", "draft")
-    .gte("created_at", minDate)
-    .lt("created_at", maxDate);
+    .lt("created_at", cutoffDate)
+    .order("created_at", { ascending: true })
+    .limit(100);
 
   if (error) {
     console.error("[sit-draft-reminder] fetch drafts failed", error);
