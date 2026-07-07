@@ -15,6 +15,7 @@ import { AlmaAnimated } from "@/components/ai/alma/AlmaAnimated";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent } from "@/lib/analytics";
+import type { OwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
 
 const PLACEHOLDER =
   "Exemple : Je pars 15 jours en août avec 2 chats à Lyon, je cherche quelqu'un de calme qui télétravaille.";
@@ -25,9 +26,16 @@ export interface SitDraftFromPromptProps {
    * visible au-dessus. On adapte le titre pour proposer une seconde absence.
    */
   secondary?: boolean;
+  /**
+   * Action primaire proprio (activation). Quand `create_first_sit`, on affiche
+   * une phrase courte d'Alma expliquant POURQUOI publier maintenant. Quand
+   * `publish_draft`, la carte bascule en mode « finalisez et publiez » avec
+   * un CTA direct vers le brouillon concerné.
+   */
+  primary?: OwnerPrimaryAction | null;
 }
 
-export default function SitDraftFromPrompt({ secondary = false }: SitDraftFromPromptProps = {}) {
+export default function SitDraftFromPrompt({ secondary = false, primary = null }: SitDraftFromPromptProps = {}) {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [almaMood, setAlmaMood] = useState<"idle" | "happy">("idle");
@@ -97,6 +105,44 @@ export default function SitDraftFromPrompt({ secondary = false }: SitDraftFromPr
     }
   }, [prompt, navigate, toast]);
 
+  // Mode « brouillon prêt à publier » : la carte devient un rappel direct
+  // avec CTA vers /sits/create?resume=<id>. Pas de champ prompt à re-remplir.
+  if (primary?.action === "publish_draft" && primary.draftId) {
+    const draftId = primary.draftId;
+    return (
+      <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
+          <div className="shrink-0 self-start">
+            <AlmaAnimated size={72} mood="attention" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-lg md:text-xl font-heading font-semibold text-foreground leading-tight">
+              Votre brouillon est prêt. Il ne manque que la publication.
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Sans publication, les gardiens de votre secteur ne peuvent pas se proposer. Reprenez votre brouillon, quelques minutes suffisent.
+            </p>
+            <div className="mt-4">
+              <Button
+                onClick={() => {
+                  void trackEvent("owner_primary_action_publish_draft_click", {
+                    metadata: { draft_id: draftId },
+                  });
+                  navigate(`/sits/create?resume=${draftId}`);
+                }}
+                className="rounded-xl"
+              >
+                Reprendre et publier
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const showCreateFirstAlma = primary?.action === "create_first_sit";
+
   return (
     <section
       className={
@@ -124,6 +170,11 @@ export default function SitDraftFromPrompt({ secondary = false }: SitDraftFromPr
           <p className="text-sm text-muted-foreground mt-1">
             Vous relisez et publiez en 2 minutes.
           </p>
+          {showCreateFirstAlma && (
+            <p className="text-sm text-foreground/90 mt-2 leading-relaxed">
+              Votre annonce est ce qui déclenche tout. Sans elle, les gardiens de votre secteur ne peuvent pas se proposer.
+            </p>
+          )}
         </div>
       </div>
 

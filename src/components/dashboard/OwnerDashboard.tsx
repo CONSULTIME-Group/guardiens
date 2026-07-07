@@ -43,6 +43,7 @@ import DraftResumeCard from "./DraftResumeCard";
 import SitDraftFromPrompt from "./SitDraftFromPrompt";
 import OwnerFirstNBAGardiens from "./OwnerFirstNBAGardiens";
 import { useOwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
+import { useOwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
 import ActivationScoreCard from "./owner/ActivationScoreCard";
 import NextActionsList from "./owner/NextActionsList";
 import AlmaSilentSitBubble from "@/components/ai/alma/AlmaSilentSitBubble";
@@ -144,12 +145,19 @@ const OwnerDashboard = () => {
     () => hasNoActiveSit(sits as any),
     [sits],
   );
+  // Activation goulot proprio : action unique tant qu'aucune annonce publiée.
+  const { data: primaryActionData } = useOwnerPrimaryAction(user?.id);
+  const primaryAction = primaryActionData ?? null;
+  const hasPrimaryAction = !!primaryAction?.action;
+
   // Alma étape 1 — usage_nudge P2, ciblé sur l'état de l'owner.
+  // Désactivé quand une action primaire est active : l'incitation « publier »
+  // est déjà rendue inline sur la carte, on n'ajoute pas de whisper concurrent.
   useAlmaUsageNudge({
     surface: "owner_dashboard",
     role: "owner",
     state: isNewOwner ? "new_owner" : noActiveSit ? "no_active_sit" : "any",
-    enabled: !showAlmaFirstMeeting,
+    enabled: !showAlmaFirstMeeting && !hasPrimaryAction,
   });
   /**
    * Alma proactive : le dashboard affiche SitDraftFromPrompt (si new owner),
@@ -476,8 +484,10 @@ const OwnerDashboard = () => {
         </div>
       </header>
 
-      {/* ═══ Draft en cours : carte de reprise prioritaire, en tête ═══ */}
-      {hasDraft && latestDraft && (
+      {/* ═══ Draft en cours : carte de reprise prioritaire, en tête ═══
+          Masquée quand l'action primaire est « publish_draft » : SitDraftFromPrompt
+          rend déjà la carte d'activation dédiée en mode publication. */}
+      {hasDraft && latestDraft && primaryAction?.action !== "publish_draft" && (
         <div className="px-5 md:px-8">
           <DraftResumeCard draft={latestDraft as any} />
         </div>
@@ -487,9 +497,12 @@ const OwnerDashboard = () => {
           Reste accessible en permanence même si un brouillon existe :
           l'owner peut vouloir décrire une autre absence sans écraser son
           draft en cours. Affichage secondaire (moins accentué) dans ce cas. */}
-      {showAlmaProactive && (
+      {(showAlmaProactive || hasPrimaryAction) && (
         <div className="px-5 md:px-8">
-          <SitDraftFromPrompt secondary={hasDraft} />
+          <SitDraftFromPrompt
+            secondary={hasDraft && primaryAction?.action !== "publish_draft"}
+            primary={primaryAction}
+          />
         </div>
       )}
 
@@ -497,7 +510,7 @@ const OwnerDashboard = () => {
           Précepte 2026 : 1 seule NBA above the fold. Pour un owner sans annonce
           active, SitDraftFromPrompt / DraftResumeCard est la NBA dominante ;
           on masque PriorityActionCard pour éviter les CTA "Publier" empilés. */}
-      {!hasDraft && !showAlmaProactive && (
+      {!hasDraft && !showAlmaProactive && !hasPrimaryAction && (
         <div className="px-5 md:px-8">
           <PriorityActionCard
             eyebrow={priorityAction.eyebrow}
