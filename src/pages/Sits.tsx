@@ -40,17 +40,18 @@ import { Helmet } from "react-helmet-async";
 import MobileStickyCTA from "@/components/dashboard/owner/MobileStickyCTA";
 import { RepublishAlmaDialog } from "@/components/ai/alma/RepublishAlmaDialog";
 
-/* ── Status configs ── */
+/* ── Status configs (tokens sémantiques uniquement, compat dark mode) ── */
 const statusConfig: Record<string, { label: string; className: string }> = {
   draft: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
   published: { label: "En attente", className: "bg-muted text-muted-foreground" },
-  published_with_apps: { label: "Candidature(s) reçue(s)", className: "bg-blue-50 text-blue-700 border border-blue-200" },
-  confirmed: { label: "Garde confirmée", className: "bg-emerald-50 text-emerald-700 border border-emerald-200" },
-  in_progress: { label: "En cours", className: "bg-emerald-50 text-emerald-700 border border-emerald-200" },
-  completed: { label: "Terminée", className: "bg-muted text-foreground" },
-  cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive" },
-  expired: { label: "Expirée", className: "bg-red-50 text-red-600 border border-red-100" },
+  published_with_apps: { label: "Candidature(s) reçue(s)", className: "bg-info-soft text-info border border-info-border" },
+  confirmed: { label: "Garde confirmée", className: "bg-success-soft text-success border border-success-border" },
+  in_progress: { label: "En cours", className: "bg-success-soft text-success border border-success-border" },
+  completed: { label: "Terminée", className: "bg-muted text-foreground border border-border" },
+  cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive-text" },
+  expired: { label: "Expirée", className: "bg-warning-soft text-warning-foreground border border-warning-border" },
   unpublished: { label: "Dépubliée", className: "bg-muted text-muted-foreground border border-border" },
+  archived: { label: "Archivée", className: "bg-muted text-muted-foreground border border-dashed border-border" },
 };
 
 const appStatusConfig: Record<string, { label: string; className: string }> = {
