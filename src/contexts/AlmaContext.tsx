@@ -296,7 +296,13 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
           surface: next.surface,
           session_id: sessionId(),
           metadata: next.metadata ?? null,
-        } as any);
+        } as any)
+        .then(({ error }) => {
+          if (error) {
+            // eslint-disable-next-line no-console
+            console.error("[Alma] insert alma_whisper_history a échoué", error);
+          }
+        });
     }
   }, [current, queue, user?.id, isProactiveMuted, verboseMode]);
 
