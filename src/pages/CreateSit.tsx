@@ -1406,7 +1406,7 @@ const CreateSit = () => {
               <Button
                 type="button"
                 variant="outline"
-                className="h-12 px-4 shrink-0 gap-2 hidden sm:inline-flex text-base"
+                className="h-12 px-4 shrink-0 gap-2 inline-flex text-base"
                 onClick={() => setPreviewOpen(true)}
                 disabled={!canPublish}
               >
