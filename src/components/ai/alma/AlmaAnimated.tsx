@@ -63,8 +63,11 @@ export function AlmaAnimated({ size = 96, className }: AlmaAnimatedProps) {
         decoding="async"
         draggable={false}
         onError={() => setImgFailed(true)}
-        style={{ width: size, height: size }}
-        className={cn("inline-block object-contain", className)}
+        style={{ width: size, height: size, transformOrigin: "bottom center" }}
+        className={cn(
+          "inline-block object-contain motion-safe:animate-alma-sway",
+          className,
+        )}
       />
     );
   }
