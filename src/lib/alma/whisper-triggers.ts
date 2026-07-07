@@ -2,8 +2,8 @@
  * Alma Pass 4 — bibliothèque de messages narratifs (12 triggers matching).
  *
  * Chaque helper construit un objet AlmaWhisper prêt à être queué via
- * AlmaContext.queueWhisper. Messages < 140 caractères, vouvoiement pour
- * l'audience owner, tutoiement pour l'audience sitter, jamais de tiret
+ * AlmaContext.queueWhisper. Messages < 140 caractères, vouvoiement absolu
+ * pour toutes les audiences (propriétaires et gardiens), jamais de tiret
  * cadratin, jamais de mot proscrit.
  */
 import { AlmaWhisper, AlmaWhisperType, WHISPER_PRIORITY } from "./whisper-types";
