@@ -30,7 +30,7 @@ export function buildFreshSitWhisper(params: {
     ...base("sitter_fresh_sit_detected"),
     audience: "sitter",
     surface: "search",
-    message: `Alma te chuchote, cette annonce à ${params.city} vient d'être publiée il y a ${params.hoursAgo}h, encore aucun candidat.`,
+    message: `Cette annonce à ${params.city} vient d'être publiée il y a ${params.hoursAgo}h, aucun candidat pour le moment.`,
     primaryAction: { label: "Voir l'annonce", onClick: params.onView, actionId: "view_sit" },
   };
 }
