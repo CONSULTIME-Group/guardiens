@@ -375,11 +375,17 @@ const CreateSit = () => {
         }
         if (draftRes?.data) {
           const d = draftRes.data;
+          const today = new Date().toISOString().slice(0, 10);
+          const rawStart: string | null = d.start_date || null;
+          const rawEnd: string | null = d.end_date || null;
+          const cleanStart = rawStart && rawStart >= today ? rawStart : "";
+          const cleanEnd = rawEnd && rawEnd >= today && (!cleanStart || rawEnd >= cleanStart) ? rawEnd : "";
+          const datesWerePast = (!!rawStart && !cleanStart) || (!!rawEnd && !cleanEnd);
           setDraftId(d.id);
           setTitle(d.title || "");
-          setStartDate(d.start_date || "");
-          setEndDate(d.end_date || "");
-          setFlexibleDates(d.flexible_dates || false);
+          setStartDate(cleanStart);
+          setEndDate(cleanEnd);
+          setFlexibleDates(d.flexible_dates || datesWerePast);
           setSpecificExpectations(d.specific_expectations || "");
           setOpenTo(d.open_to || []);
           setIsUrgent(d.is_urgent || false);
@@ -391,6 +397,12 @@ const CreateSit = () => {
           setCoverPhotoUrl(d.cover_photo_url || null);
           setSitCity((d as any).city || "");
           setSitCountry((d as any).country || "FR");
+          if (datesWerePast) {
+            toast({
+              title: "Dates à redéfinir",
+              description: "La date du brouillon était dépassée, à redéfinir.",
+            });
+          }
           if (draftIdParam) {
             const days = d.created_at
               ? Math.round((Date.now() - new Date(d.created_at).getTime()) / 86_400_000)
