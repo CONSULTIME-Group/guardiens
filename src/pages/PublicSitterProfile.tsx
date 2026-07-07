@@ -343,14 +343,25 @@ export default function PublicSitterProfile() {
     return () => clearTimeout(t);
   }, [loading, activeTab]);
 
+  const [loadError, setLoadError] = useState<null | 'error'>(null);
+  const [loadNonce, setLoadNonce] = useState(0);
   useEffect(() => {
     if (!id || id === "undefined" || id === "null") { setLoading(false); return; }
     const load = async () => {
       setLoading(true);
+      setLoadError(null);
+      try {
+      // Colonnes explicites : évite un select("*") qui exposerait/rapatrierait
+      // des colonnes non utilisées côté client (privacy + payload).
+      const PUBLIC_PROFILE_COLS =
+        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, cancellation_count, pro_status, pro_specialty, pro_tagline, pro_pricing_note, pro_business_name";
+      // `last_name` retiré du select — jamais rendu publiquement.
+      const BASE_PROFILE_COLS =
+        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index, pro_status, pro_specialty, pro_tagline, pro_pricing_note, pro_business_name";
       const [profileRes, baseProfileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes, extExpRes] =
         await Promise.all([
-          supabase.from("public_profiles").select("*").eq("id", id).maybeSingle(),
-          supabase.from("profiles").select("id, first_name, last_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index, pro_status, pro_specialty, pro_tagline, pro_pricing_note, pro_business_name").eq("id", id).maybeSingle(),
+          supabase.from("public_profiles").select(PUBLIC_PROFILE_COLS).eq("id", id).maybeSingle(),
+          supabase.from("profiles").select(BASE_PROFILE_COLS).eq("id", id).maybeSingle(),
           supabase.from("sitter_profiles").select("*").eq("user_id", id).maybeSingle(),
           supabase.from("badge_attributions").select("badge_id").eq("user_id", id),
           supabase
@@ -361,12 +372,16 @@ export default function PublicSitterProfile() {
             .eq("moderation_status", "valide")
             .neq("review_type", "annulation")
             .order("created_at", { ascending: false }),
-          supabase.from("sitter_gallery").select("*").eq("user_id", id).order("created_at", { ascending: false }),
+          supabase
+            .from("sitter_gallery")
+            .select("id, photo_url, caption, created_at")
+            .eq("user_id", id)
+            .order("created_at", { ascending: false }),
           supabase.from("emergency_sitter_profiles").select("is_active").eq("user_id", id).maybeSingle(),
           supabase.from("subscriptions").select("status").eq("user_id", id).eq("status", "active").limit(1),
           supabase
             .from("owner_profiles")
-            .select("id, user_id, environments, competences, competences_disponible")
+            .select("id, user_id, description, environments, competences, competences_disponible")
             .eq("user_id", id)
             .maybeSingle(),
           supabase
