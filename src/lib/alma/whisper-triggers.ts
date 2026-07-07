@@ -114,7 +114,7 @@ export function buildReciprocalInterestWhisper(params: {
     ...base("owner_reciprocal_interest"),
     audience: "owner",
     surface: "sitter_profile",
-    message: `${params.firstName} a consulté votre annonce ${params.views} fois cette semaine. Il a l'air très intéressé.`,
+    message: `${params.firstName} a consulté votre annonce ${params.views} fois cette semaine. Un intérêt marqué.`,
     primaryAction: {
       label: "L'inviter à candidater",
       onClick: params.onInvite,
