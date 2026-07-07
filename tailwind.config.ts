@@ -167,6 +167,7 @@ export default {
         "alma-wiggle": "alma-wiggle 0.5s ease-in-out",
         "alma-pop-in": "alma-pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both",
         "alma-breathe": "alma-breathe 4s ease-in-out infinite",
+        "alma-sway": "alma-sway 2.5s ease-in-out infinite",
       },
     },
   },
