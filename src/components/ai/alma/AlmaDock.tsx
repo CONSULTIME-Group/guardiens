@@ -335,6 +335,8 @@ export function AlmaDock() {
   );
 
   if (isModalOpen) return null;
+  if (hidden) return null;
+
 
 
 
