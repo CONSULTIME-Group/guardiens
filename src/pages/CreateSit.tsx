@@ -1015,7 +1015,7 @@ const CreateSit = () => {
               placeholder={"Ex :\nMatin, Sortie du chien 30 min, gamelles, ouverture du jardin.\nMidi, Visite rapide, fontaine à recharger.\nSoir, Promenade 30 min, repas, câlins obligatoires 🥰"}
               value={dailyRoutine}
               onChange={e => setDailyRoutine(e.target.value.slice(0, 1500))}
-              className="text-base font-mono text-[13px] min-h-[120px]"
+              className="text-base min-h-[120px]"
               rows={5}
             />
             <p className="text-[11px] text-muted-foreground mt-1 text-right">{dailyRoutine.length}/1500</p>
