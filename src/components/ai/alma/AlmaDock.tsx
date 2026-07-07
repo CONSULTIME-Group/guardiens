@@ -439,7 +439,7 @@ export function AlmaDock() {
               />
             )}
             <AlmaAvatarAnimated
-              size={40}
+              size={Math.min(44, Math.round(36 * (stage ? ALMA_STAGE_SCALE[stage] : 1)))}
               mood={isSilent ? "sleepy" : (mood === "attentive" ? "attentive" : "idle")}
               stage={stage ?? undefined}
             />
