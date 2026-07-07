@@ -145,12 +145,19 @@ const OwnerDashboard = () => {
     () => hasNoActiveSit(sits as any),
     [sits],
   );
+  // Activation goulot proprio : action unique tant qu'aucune annonce publiée.
+  const { data: primaryActionData } = useOwnerPrimaryAction(user?.id);
+  const primaryAction = primaryActionData ?? null;
+  const hasPrimaryAction = !!primaryAction?.action;
+
   // Alma étape 1 — usage_nudge P2, ciblé sur l'état de l'owner.
+  // Désactivé quand une action primaire est active : l'incitation « publier »
+  // est déjà rendue inline sur la carte, on n'ajoute pas de whisper concurrent.
   useAlmaUsageNudge({
     surface: "owner_dashboard",
     role: "owner",
     state: isNewOwner ? "new_owner" : noActiveSit ? "no_active_sit" : "any",
-    enabled: !showAlmaFirstMeeting,
+    enabled: !showAlmaFirstMeeting && !hasPrimaryAction,
   });
   /**
    * Alma proactive : le dashboard affiche SitDraftFromPrompt (si new owner),
