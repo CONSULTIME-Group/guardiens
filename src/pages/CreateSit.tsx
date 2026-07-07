@@ -320,7 +320,7 @@ const CreateSit = () => {
       const [propRes, ownerRes, profileRes, galleryRes] = await Promise.all([
         supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
         supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
-        supabase.from("profiles").select("profile_completion, city").eq("id", user.id).single(),
+        supabase.from("profiles").select("profile_completion, city, bio").eq("id", user.id).single(),
         supabase.from("owner_gallery").select("photo_url").eq("user_id", user.id).limit(4),
       ]);
 
