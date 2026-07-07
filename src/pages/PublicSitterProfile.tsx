@@ -142,6 +142,8 @@ export default function PublicSitterProfile() {
   const [showAllMissionsPublished, setShowAllMissionsPublished] = useState(false);
   const [showAllMissionsHelped, setShowAllMissionsHelped] = useState(false);
   const [showAllEntraideFeedbacks, setShowAllEntraideFeedbacks] = useState(false);
+  // Filtre chips pour l'onglet Avis, aplati (plus de sous-onglets Gardes/Missions imbriqués).
+  const [reviewFilter, setReviewFilter] = useState<'all' | 'gardes' | 'missions'>('all');
 
   const VISIBLE_COUNT = 3;
   const ShowMoreBtn = ({ items, showAll, setShowAll }: { items: any[]; showAll: boolean; setShowAll: (v: boolean) => void }) =>
