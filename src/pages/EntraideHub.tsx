@@ -145,6 +145,29 @@ const formatDateNeeded = (d: string | null) => {
   }
 };
 
+// Retourne une période lisible :
+//  - start + end : « Du 5 juil. au 12 sept. 2026 »
+//  - end seul    : « Jusqu'au 12 sept. 2026 »
+//  - start seul  : « Pour le 5 juil. 2026 »
+const formatMissionPeriod = (start: string | null, end: string | null) => {
+  const fmtShort = (iso: string) => {
+    try { return format(new Date(iso), "d MMM yyyy", { locale: fr }); } catch { return null; }
+  };
+  if (start && end) {
+    const s = fmtShort(start); const e = fmtShort(end);
+    if (s && e) return { prefix: "Du ", value: `${s} au ${e}` };
+  }
+  if (end) {
+    const e = fmtShort(end);
+    if (e) return { prefix: "Jusqu'au ", value: e };
+  }
+  if (start) {
+    const s = fmtShort(start);
+    if (s) return { prefix: "Pour le ", value: s };
+  }
+  return null;
+};
+
 const formatRelative = (iso: string) => {
   try {
     return formatDistanceToNow(new Date(iso), { addSuffix: true, locale: fr });
