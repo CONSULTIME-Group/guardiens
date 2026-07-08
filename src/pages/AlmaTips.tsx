@@ -275,7 +275,7 @@ export default function AlmaTips() {
     );
   };
 
-  const jsonLd = {
+  const collectionJsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: "Les conseils d'Alma",
@@ -288,6 +288,34 @@ export default function AlmaTips() {
       url: "https://guardiens.fr",
     },
   };
+
+  if (tips.length > 0) {
+    const items = tips.slice(0, 100).map((t, idx) => {
+      const breed = extractBreed(t.context_filter);
+      const name = breed
+        ? `${TYPE_LABEL[t.fact_type]} : ${breed.breed}`
+        : TYPE_LABEL[t.fact_type];
+      const work: Record<string, unknown> = {
+        "@type": "CreativeWork",
+        name,
+        text: t.content,
+      };
+      if (t.source_url) {
+        work.url = t.source_url;
+        work.citation = t.source_url;
+      }
+      return {
+        "@type": "ListItem",
+        position: idx + 1,
+        item: work,
+      };
+    });
+    collectionJsonLd.mainEntity = {
+      "@type": "ItemList",
+      numberOfItems: items.length,
+      itemListElement: items,
+    };
+  }
 
   return (
     <>
