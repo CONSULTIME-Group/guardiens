@@ -531,7 +531,7 @@ const Landing = () => {
       <RecentSitsItemListJsonLd limit={8} />
 
       {/* ═══════════════ NAVBAR ═══════════════ */}
-      <PublicHeader />
+      <PublicHeader authedVariant />
 
       {/* ═══════════════ MAIN LANDMARK (englobe tout le contenu) ═══════════════ */}
       <main id="main-content">
