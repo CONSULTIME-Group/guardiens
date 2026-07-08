@@ -656,7 +656,7 @@ const Messages = () => {
                     role="tab"
                     aria-selected={pill === p.value}
                     onClick={() => setPill(p.value)}
-                    className={`rounded-full px-2.5 py-0.5 text-[11px] leading-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                    className={`rounded-full px-2.5 py-0.5 text-xs leading-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                       pill === p.value
                         ? "bg-foreground text-background"
                         : "border border-border text-muted-foreground hover:border-primary"
