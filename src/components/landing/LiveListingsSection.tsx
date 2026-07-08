@@ -114,19 +114,19 @@ const LiveListingsSection: React.FC = () => {
       <div className="container max-w-6xl mx-auto px-4">
         <div className="text-center mb-12 md:mb-16">
           <p className="text-sm font-medium text-primary uppercase tracking-wider mb-3">
-            En direct de la communauté
+            {t("live_listings.community_eyebrow")}
           </p>
           <h2
             id="live-listings-heading"
             className="font-display text-3xl md:text-5xl font-semibold text-foreground mb-4"
           >
-            Annonces de garde en cours
+            {t("live_listings.section_title")}
           </h2>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-            Découvrez les propriétaires qui cherchent un gardien partout en France.
-            Consultez les annonces librement, inscrivez-vous gratuitement pour postuler.
+            {t("live_listings.section_lede")}
           </p>
         </div>
+
 
         <div className={`grid grid-cols-1 sm:grid-cols-2 gap-5 ${sits.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3 max-w-5xl mx-auto"}`}>
           {sits.map((s) => {
