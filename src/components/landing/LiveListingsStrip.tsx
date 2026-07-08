@@ -164,8 +164,9 @@ const LiveListingsStrip: React.FC = () => {
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
               </span>
               <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-primary font-semibold font-body">
-                En direct
+                {t("live_listings.eyebrow")}
               </p>
+
             </div>
             <h2 className="font-heading text-lg md:text-2xl font-semibold text-foreground leading-tight">
               {t("live_listings.title")}
