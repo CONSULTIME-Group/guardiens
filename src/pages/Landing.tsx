@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 // DemoListingShowcase retiré (cards « Bientôt disponible » anti-vente).
 // import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
-import LiveListingsSection from "@/components/landing/LiveListingsSection";
+
 import InventoryStrip from "@/components/landing/InventoryStrip";
 import InternationalStrip from "@/components/landing/InternationalStrip";
 import AffinityScoreShowcase from "@/components/landing/AffinityScoreShowcase";
