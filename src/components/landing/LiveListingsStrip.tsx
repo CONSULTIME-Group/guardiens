@@ -206,8 +206,9 @@ const LiveListingsStrip: React.FC = () => {
                 <div className="absolute top-3 left-3 flex flex-wrap items-center gap-2">
                   <span className="inline-flex items-center gap-1.5 bg-destructive text-destructive-foreground text-[11px] md:text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg">
                     <span className="h-1.5 w-1.5 rounded-full bg-destructive-foreground animate-pulse" aria-hidden />
-                    Urgent
+                    {t("live_listings.urgent")}
                   </span>
+
                   <span className="inline-flex items-center bg-amber-500 text-white text-[11px] md:text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg">
                     {t("live_listings.super_opportunity")}
                   </span>
