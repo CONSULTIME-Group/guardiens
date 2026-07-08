@@ -305,8 +305,9 @@ const LiveListingsStrip: React.FC = () => {
                     )}
                     {s.is_urgent && (
                       <span className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">
-                        Urgent
+                        {t("live_listings.urgent")}
                       </span>
+
                     )}
                     {geo && (
                       <span className="absolute bottom-2 left-2 bg-background/95 backdrop-blur text-foreground text-[11px] md:text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm max-w-[85%]">
