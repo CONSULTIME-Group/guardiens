@@ -179,14 +179,15 @@ const LiveListingsSection: React.FC = () => {
         <div className="text-center mt-12">
           <Button asChild size="lg" className="rounded-full">
             <Link to="/annonces">
-              Voir toutes les annonces
+              {t("live_listings.cta_all")}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
           <p className="text-xs text-muted-foreground mt-3">
-            Consultation libre · Inscription gratuite pour postuler
+            {t("live_listings.hint")}
           </p>
         </div>
+
       </div>
     </section>
   );
