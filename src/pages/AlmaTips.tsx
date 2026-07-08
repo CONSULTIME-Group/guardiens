@@ -321,15 +321,18 @@ export default function AlmaTips() {
           {/* Conseil du jour */}
           {dailyPick && (
             <section className="mb-10">
-              <h2 className="font-heading text-xl md:text-2xl font-semibold mb-4">
+              <h2 className="font-heading text-xl md:text-2xl font-semibold mb-2">
                 Le conseil du jour
               </h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                Aujourd'hui, je vous glisse ce repère.
+              </p>
               <div className="max-w-2xl">{renderTip(dailyPick)}</div>
             </section>
           )}
 
-          {/* Filtres + recherche */}
-          <section className="mb-6 space-y-4">
+          {/* Filtres + recherche (sticky) */}
+          <section className="sticky top-0 z-30 -mx-[5%] md:-mx-[8%] px-[5%] md:px-[8%] py-3 bg-background border-b border-border mb-6 space-y-3">
             <div className="flex flex-wrap gap-2">
               {CATEGORIES.map((c) => (
                 <Button
@@ -342,14 +345,19 @@ export default function AlmaTips() {
                 </Button>
               ))}
             </div>
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Rechercher un conseil"
-                className="pl-9"
-              />
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              <div className="relative w-full max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Rechercher un conseil"
+                  className="pl-9"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground" aria-live="polite">
+                {filtered.length} conseil{filtered.length > 1 ? "s" : ""}
+              </p>
             </div>
           </section>
 
@@ -366,9 +374,21 @@ export default function AlmaTips() {
                 Aucun conseil ne correspond à votre recherche pour l'instant.
               </p>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {filtered.map(renderTip)}
-              </div>
+              <>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {filtered.slice(0, visibleCount).map(renderTip)}
+                </div>
+                {filtered.length > visibleCount && (
+                  <div className="mt-6 flex justify-center">
+                    <Button
+                      variant="outline"
+                      onClick={() => setVisibleCount((v) => v + 24)}
+                    >
+                      Voir plus de conseils
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </section>
 
