@@ -988,10 +988,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 5, ANNONCES EN COURS (live) ═══════════════ */}
-      <RevealSection>
-        <LiveListingsSection />
-      </RevealSection>
+      {/* Section 5 (annonces live) retirée : doublon de LiveListingsStrip sous le hero. */}
 
       {/* ═══════════════ SECTION 5.5, CHIFFRES DU RÉSEAU (InventoryStrip) ═══════════════ */}
       <RevealSection>
