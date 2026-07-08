@@ -302,7 +302,7 @@ const SearchListingCard = ({
               <AffinityBadge
                 result={affinity}
                 size="sm"
-                variant="semantic"
+                variant="numeric"
                 trackingContext="search_listing"
                 trackingId={item.id}
               />
