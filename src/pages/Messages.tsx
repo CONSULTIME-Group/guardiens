@@ -689,6 +689,8 @@ const Messages = () => {
                   <EmptyState illustration="emptyMailbox" title="Aucun message" description="Vos conversations avec les gardiens et propriétaires apparaîtront ici." actionLabel="Découvrir les annonces" actionTo="/search" />
                 )}
               </div>
+            ) : effectiveRole === "sitter" ? (
+              <>{displayConversations.map(renderConvItem)}</>
             ) : (
               <>
                 {Array.from(groups.entries()).map(([sitId, g]) =>
