@@ -19,6 +19,7 @@ import InventoryStrip from "@/components/landing/InventoryStrip";
 import InternationalStrip from "@/components/landing/InternationalStrip";
 import AffinityScoreShowcase from "@/components/landing/AffinityScoreShowcase";
 import ProsShowcase from "@/components/landing/ProsShowcase";
+import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
 import RealMembersStrip from "@/components/landing/RealMembersStrip";
 import PublicHeader from "@/components/layout/PublicHeader";
