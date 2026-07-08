@@ -421,6 +421,12 @@ export default function AlmaTips() {
                 <Link to="/annonces">Voir les gardiens disponibles</Link>
               </Button>
             </div>
+            <p className="mt-4 text-sm text-muted-foreground">
+              Vous voulez garder des animaux ?{" "}
+              <Link to="/devenir-home-sitter" className="text-primary hover:underline font-medium">
+                Devenez gardien
+              </Link>
+            </p>
           </aside>
         </main>
 
