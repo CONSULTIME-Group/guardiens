@@ -1,6 +1,6 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
-  Home, Search, Calendar, MessageSquare, User, LogOut, Settings,
+  Home, Search, Calendar, MessageSquare, MessageCircle, User, LogOut, Settings,
   PawPrint, Newspaper, Shield, Compass, Handshake, Menu, Star,
   MoreHorizontal, Crown, Plus, Heart, LifeBuoy, Briefcase, UserCircle2, Sparkles,
   CreditCard,
@@ -224,6 +224,23 @@ export const Sidebar = () => {
         </div>
       </div>
 
+      {/* Primary action */}
+      <div className="px-3 pb-3">
+        <Button
+          className="w-full gap-2"
+          onClick={() =>
+            navigate(
+              effectiveRole === "owner"
+                ? "/sits/create"
+                : "/petites-missions/creer?type=offre"
+            )
+          }
+        >
+          <Plus className="h-4 w-4" />
+          {effectiveRole === "owner" ? "Publier une annonce" : "Proposer un coup de main"}
+        </Button>
+      </div>
+
       {/* Nav groups */}
       <nav className="flex-1 px-3 overflow-y-auto" aria-label="Navigation principale">
         {(() => {
@@ -243,11 +260,7 @@ export const Sidebar = () => {
               <GroupLabel label="Mon activité" />
               <SidebarItem to="/dashboard" icon={Home} label="Dashboard" />
               <SidebarItem to="/sits" icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures"} badge={sitsBadge} />
-
-              {/* Messagerie : déplacée dans la cloche du header (MessageBell)
-                  pour désencombrer la sidebar et la traiter comme un canal de
-                  notifications (popover) plutôt que comme une destination. */}
-
+              <SidebarItem to="/messages" icon={MessageCircle} label="Messages" badge={unreadCount} />
               <SidebarItem to={effectiveRole === "owner" ? "/owner-profile" : "/profile"} icon={User} label="Mon profil" />
               <SidebarItem to="/mes-avis" icon={Star} label="Mes avis" />
               <SidebarItem to="/favoris" icon={Heart} label="Mes favoris" />
@@ -615,6 +628,7 @@ export const BottomNav = () => {
                   { to: "/profile", icon: UserCircle2, label: "Mon profil", badge: 0 },
                   { to: "/search", icon: Search, label: effectiveRole === "owner" ? "Recherche gardiens" : "Recherche", badge: 0 },
                   { to: "/sits", icon: Calendar, label: effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures", badge: sitsBadge },
+                  { to: "/messages", icon: MessageCircle, label: "Messages", badge: unreadCount },
                   { to: "/favoris", icon: Heart, label: "Mes favoris", badge: 0 },
                   { to: "/petites-missions", icon: Handshake, label: "Entraide", badge: missionBadgeCount },
                   { to: "/conseils", icon: Sparkles, label: "Conseils d'Alma", badge: 0 },
