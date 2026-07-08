@@ -61,8 +61,10 @@
     <meta name="geo.placename" content="France" />
     <link rel="preload" href="/fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/playfair-latin.woff2" as="font" type="font/woff2" crossorigin />
-    <!-- hero-landing.webp est préchargé côté Landing.tsx uniquement pour éviter
-         un preload gaspillé sur toutes les autres routes. -->
+    <!-- Préchargement du hero de la landing avant l'exécution du JS : la
+         landing est l'entrée principale du site et le hero est l'élément LCP.
+         Le léger surcoût sur les autres routes est acceptable. -->
+    <link rel="preload" as="image" href="/hero-landing.webp" fetchpriority="high" />
 
     <link rel="preconnect" href="https://erhccyqevdyevpyctsjj.supabase.co" />
     <link rel="preconnect" href="https://erhccyqevdyevpyctsjj.supabase.co" crossorigin />
