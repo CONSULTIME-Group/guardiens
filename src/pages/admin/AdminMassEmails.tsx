@@ -24,6 +24,7 @@ import { fr } from "date-fns/locale";
 import { MassEmailFiltersPanel } from "@/components/admin/mass-email/MassEmailFilters";
 import type { MassEmailFilters, Segment } from "@/components/admin/mass-email/filters.types";
 import { SEGMENT_LABELS } from "@/components/admin/mass-email/filters.types";
+import ProximityCampaignCard from "@/components/admin/mass-email/ProximityCampaignCard";
 
 interface MassEmail {
   id: string;
@@ -258,6 +259,9 @@ const AdminMassEmails = () => {
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold text-foreground">Envois groupés</h1>
+
+      <ProximityCampaignCard />
+
 
       <div className="flex flex-wrap gap-2">
         {CAMPAIGN_PRESETS.map((p) => (
