@@ -6,7 +6,7 @@
   },
   "nav": {
     "listings": "Aktuelle Anzeigen",
-    "small_missions": "Kleine Hilfen",
+    "small_missions": "Kleine Einsätze",
     "pros": "Tierprofis",
     "guides": "Lokale Ratgeber",
     "pricing": "Tarife",
@@ -61,7 +61,8 @@
       "kpi_houses": "gehütete Häuser",
       "kpi_animals": "begleitete Tiere",
       "kpi_members": "Mitglieder",
-      "kpi_missions": "Hilfseinsätze"
+      "kpi_missions": "Hilfseinsätze",
+      "brand_tagline": "Ganz in Ihrer Nähe."
     },
     "toc": {
       "aria": "Inhaltsverzeichnis der Seite",
@@ -462,12 +463,12 @@
     }
   },
   "news": {
-    "title": "Ratgeber & Tipps",
+    "title": "Das Journal",
     "subtitle": "Tipps, Ratgeber und Tricks für Tierhalter und Tiersitter.",
     "meta_description": "House-Sitting-Tipps, praktische Ratgeber, Erfahrungsberichte und Neuigkeiten der Guardiens-Community. Alles, um eine Betreuung gut vorzubereiten.",
     "meta_title_default": "Ratgeber & Tipps zum House-Sitting",
     "meta_title_category": "{{cat}}, Ratgeber & Tipps",
-    "breadcrumb": "Ratgeber & Tipps",
+    "breadcrumb": "Das Journal",
     "search_placeholder": "Artikel suchen…",
     "search_aria": "In Artikeln suchen",
     "reset_filters": "Filter zurücksetzen",
@@ -1345,5 +1346,20 @@
       "chars_50": "{{count}}/50 Zeichen.",
       "add_avatar_identity": "Fügen Sie ein Foto im Tab Identität hinzu."
     }
+  },
+  "live_listings": {
+    "aria": "Jetzt verfügbare Einsätze",
+    "eyebrow": "Live",
+    "title": "Verfügbare Einsätze",
+    "see_all": "Alle ansehen",
+    "urgent": "Dringend",
+    "super_opportunity": "Top-Gelegenheit",
+    "discover": "Anzeige entdecken",
+    "community_eyebrow": "Live aus der Community",
+    "section_title": "Aktuell verfügbare Einsätze",
+    "section_lede": "Entdecken Sie Eigentümer, die überall in Frankreich einen Sitter suchen. Freie Einsicht, kostenlose Anmeldung zum Bewerben.",
+    "cta_all": "Alle Anzeigen ansehen",
+    "hint": "Freie Einsicht · Kostenlose Anmeldung zum Bewerben",
+    "at_name": "Bei {{name}}"
   }
 }

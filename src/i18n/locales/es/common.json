@@ -6,7 +6,7 @@
   },
   "nav": {
     "listings": "Anuncios en curso",
-    "small_missions": "Pequeños favores",
+    "small_missions": "Pequeñas misiones",
     "pros": "Prós de mascotas",
     "guides": "Guías locales",
     "pricing": "Tarifas",
@@ -61,7 +61,8 @@
       "kpi_houses": "casas cuidadas",
       "kpi_animals": "animales acompañados",
       "kpi_members": "inscritos",
-      "kpi_missions": "misiones de ayuda mutua"
+      "kpi_missions": "misiones de ayuda mutua",
+      "brand_tagline": "Cerca de casa."
     },
     "toc": {
       "aria": "Sumario de la página",
@@ -462,12 +463,12 @@
     }
   },
   "news": {
-    "title": "Guías y Consejos",
+    "title": "El diario",
     "subtitle": "Consejos, guías y trucos para propietarios y cuidadores de animales.",
     "meta_description": "Consejos de house-sitting, guías prácticas, testimonios y novedades de la comunidad Guardiens. Todo para preparar una guarda.",
     "meta_title_default": "Guías y consejos de house-sitting",
     "meta_title_category": "{{cat}}, Guías y Consejos",
-    "breadcrumb": "Guías y Consejos",
+    "breadcrumb": "El diario",
     "search_placeholder": "Buscar un artículo…",
     "search_aria": "Buscar en los artículos",
     "reset_filters": "Restablecer filtros",
@@ -1345,5 +1346,20 @@
       "chars_50": "{{count}}/50 caracteres.",
       "add_avatar_identity": "Añada una foto en la pestaña Identidad."
     }
+  },
+  "live_listings": {
+    "aria": "Anuncios disponibles ahora",
+    "eyebrow": "En directo",
+    "title": "Anuncios disponibles",
+    "see_all": "Ver todo",
+    "urgent": "Urgente",
+    "super_opportunity": "Gran oportunidad",
+    "discover": "Descubrir el anuncio",
+    "community_eyebrow": "En directo desde la comunidad",
+    "section_title": "Anuncios de guarda en curso",
+    "section_lede": "Descubra a los propietarios que buscan un cuidador en toda Francia. Consulte los anuncios libremente, regístrese gratis para postular.",
+    "cta_all": "Ver todos los anuncios",
+    "hint": "Consulta libre · Registro gratuito para postular",
+    "at_name": "En casa de {{name}}"
   }
 }
