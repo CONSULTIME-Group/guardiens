@@ -325,7 +325,7 @@ export default function AlmaTips() {
         path="/conseils"
         canonical="/conseils"
       />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
 
       <div className="min-h-screen bg-background flex flex-col">
         <PublicHeader />
