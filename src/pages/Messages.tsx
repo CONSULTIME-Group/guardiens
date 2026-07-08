@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Archive, Home, HeartHandshake, Lock, Loader2 } from "lucide-react";
+import { Archive, Home, HeartHandshake, Lock, Loader2, MessageCircle, ChevronDown } from "lucide-react";
 import EmptyState from "@/components/shared/EmptyState";
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
