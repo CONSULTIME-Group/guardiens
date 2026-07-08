@@ -710,7 +710,7 @@ const Landing = () => {
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                   {t("landing.usages.sitter.text")}
                 </p>
-                <Link to="/inscription?role=sitter" className="text-sm font-body text-primary font-medium hover:underline">
+                <Link to="/inscription?role=sitter" className="text-sm font-body text-muted-foreground font-medium hover:text-primary hover:underline">
                   {t("landing.usages.sitter.cta")}
                 </Link>
               </div>
