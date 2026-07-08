@@ -377,15 +377,30 @@ export default function AlmaTips() {
                 Le conseil du jour
               </h2>
               <div className="rounded-xl bg-muted/40 border border-border p-5 md:p-7">
-                <div className="flex items-start gap-4 mb-4">
+                <div className="flex items-start gap-4 mb-5">
                   <div className="shrink-0">
                     <AlmaAvatar size={40} breathe />
                   </div>
-                  <p className="text-sm md:text-base text-foreground/85 leading-relaxed">
+                  <p className="text-sm md:text-base text-foreground/85 leading-relaxed pt-2">
                     Aujourd'hui, je vous glisse ce repère.
                   </p>
                 </div>
-                <div className="max-w-2xl">{renderTip(dailyPick)}</div>
+                <div className="max-w-3xl">
+                  <p className="text-base text-foreground leading-relaxed whitespace-pre-line">
+                    {dailyPick.content}
+                  </p>
+                  {dailyPick.source_url && (
+                    <a
+                      href={dailyPick.source_url}
+                      target="_blank"
+                      rel="noopener"
+                      className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-3"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      Source : {extractDomain(dailyPick.source_url)}
+                    </a>
+                  )}
+                </div>
               </div>
             </section>
           )}
