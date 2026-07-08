@@ -57,12 +57,20 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
               )}
             </Button>
           ))}
-          <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
-            {t("nav.login")}
-          </Button>
-          <Button size="sm" onClick={() => navigate("/inscription")}>
-            {t("nav.register")}
-          </Button>
+          {isAuthenticated ? (
+            <Button size="sm" onClick={() => navigate("/dashboard")}>
+              Mon espace
+            </Button>
+          ) : (
+            <>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
+                {t("nav.login")}
+              </Button>
+              <Button size="sm" onClick={() => navigate("/inscription")}>
+                {t("nav.register")}
+              </Button>
+            </>
+          )}
           <LanguageSwitcher />
         </nav>
 
