@@ -68,7 +68,10 @@ const PageMeta = ({
   const currentLang = ((SUPPORTED_LANGS as readonly string[]).includes(i18n.language) ? i18n.language : "fr") as SupportedLang;
   const currentPath = normalizePathname(path || location.pathname);
   const currentUrl = buildAbsoluteUrl(currentPath);
-  const canonicalUrl = normalizeCanonical(canonical) ?? currentUrl;
+  const explicitCanonical = normalizeCanonical(canonical);
+  const canonicalUrl =
+    explicitCanonical ??
+    (currentLang !== "fr" ? addLangParam(currentUrl, currentLang) : currentUrl);
   const metaDescription = description.trim();
   const resolvedImage = image === DEFAULT_IMAGE ? getListingOgImageFromPath(currentPath) ?? image : image;
   const titleWithoutSuffix = title.replace(/\s*\|\s*Guardiens\s*$/i, "").replace(/\s*,\s*Guardiens\s*$/i, "");
