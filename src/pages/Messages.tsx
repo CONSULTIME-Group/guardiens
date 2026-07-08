@@ -586,12 +586,12 @@ const Messages = () => {
 
   const renderGroup = (key: string, title: string, convs: Conversation[], unreadCount: number, icon: React.ReactNode) => (
     <section key={key} aria-label={title}>
-      <h2 className="bg-muted/50 px-4 py-2 flex items-center gap-2 text-xs font-medium text-foreground m-0">
+      <h2 className="bg-muted/50 px-4 py-2 flex items-center gap-2 text-sm font-medium text-foreground m-0">
         <span aria-hidden="true">{icon}</span>
         <span className="truncate flex-1">{title}</span>
         {unreadCount > 0 && (
           <span
-            className="bg-primary text-primary-foreground rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold shrink-0"
+            className="bg-destructive text-destructive-foreground rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold shrink-0"
             aria-label={`${unreadCount} non lu${unreadCount > 1 ? "s" : ""}`}
           >
             {unreadCount}
