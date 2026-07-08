@@ -364,16 +364,23 @@ export default function AlmaTips() {
             </section>
           )}
 
-          {/* Conseil du jour */}
+          {/* Conseil du jour, hero éditorial */}
           {dailyPick && (
             <section className="mb-10">
-              <h2 className="font-heading text-xl md:text-2xl font-semibold mb-2">
+              <h2 className="font-heading text-xl md:text-2xl font-semibold mb-4">
                 Le conseil du jour
               </h2>
-              <p className="text-sm text-muted-foreground mb-4">
-                Aujourd'hui, je vous glisse ce repère.
-              </p>
-              <div className="max-w-2xl">{renderTip(dailyPick)}</div>
+              <div className="rounded-xl bg-muted/40 border border-border p-5 md:p-7">
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="shrink-0">
+                    <AlmaAvatar size={40} breathe />
+                  </div>
+                  <p className="text-sm md:text-base text-foreground/85 leading-relaxed">
+                    Aujourd'hui, je vous glisse ce repère.
+                  </p>
+                </div>
+                <div className="max-w-2xl">{renderTip(dailyPick)}</div>
+              </div>
             </section>
           )}
 
