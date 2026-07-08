@@ -209,18 +209,24 @@ export default function AlmaTips() {
   }, [category, query]);
 
   // Accent visuel par fact_type (tokens sémantiques uniquement).
-  const ACCENT: Record<
-    FactType,
-    { border: string; badge: string }
-  > = {
-    pet_care_tip:      { border: "border-l-primary",   badge: "bg-primary/10 text-primary border-primary/20" },
-    dog_behavior_tip:  { border: "border-l-primary",   badge: "bg-primary/10 text-primary border-primary/20" },
-    cat_behavior_tip:  { border: "border-l-primary",   badge: "bg-primary/10 text-primary border-primary/20" },
-    home_care_tip:     { border: "border-l-secondary", badge: "bg-secondary text-secondary-foreground border-secondary" },
-    seasonal_advice:   { border: "border-l-warning",   badge: "bg-warning/10 text-warning-foreground border-warning/30" },
-    breed_did_you_know:{ border: "border-l-info",      badge: "bg-info/10 text-info-foreground border-info/30" },
-    mutual_aid_tip:    { border: "border-l-accent",    badge: "bg-accent text-accent-foreground border-accent" },
-  };
+  function accentFor(factType: FactType) {
+    switch (factType) {
+      case "pet_care_tip":
+      case "dog_behavior_tip":
+      case "cat_behavior_tip":
+        return { border: "border-l-primary", badge: "bg-primary/10 text-primary border-primary/20" };
+      case "home_care_tip":
+        return { border: "border-l-secondary", badge: "bg-secondary text-secondary-foreground border-secondary" };
+      case "seasonal_advice":
+        return { border: "border-l-warning", badge: "bg-warning/10 text-warning-foreground border-warning/30" };
+      case "breed_did_you_know":
+        return { border: "border-l-accent", badge: "bg-accent text-accent-foreground border-accent" };
+      case "mutual_aid_tip":
+        return { border: "border-l-accent", badge: "bg-accent text-accent-foreground border-accent" };
+      default:
+        return { border: "border-l-muted", badge: "bg-muted text-muted-foreground border-muted" };
+    }
+  }
 
   const renderTip = (t: Tip) => {
     const breed = t.fact_type === "breed_did_you_know" ? extractBreed(t.context_filter) : null;
