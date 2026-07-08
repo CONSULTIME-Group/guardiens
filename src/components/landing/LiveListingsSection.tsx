@@ -167,7 +167,7 @@ const LiveListingsSection: React.FC = () => {
                     {s.title}
                   </h3>
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{s.first_name ? `Chez ${s.first_name}` : ""}</span>
+                    <span>{s.first_name ? t("live_listings.at_name", { name: s.first_name }) : ""}</span>
                     {dates && <span className="font-medium">{dates}</span>}
                   </div>
                 </div>
