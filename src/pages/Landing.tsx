@@ -23,7 +23,7 @@ import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
 import RealMembersStrip from "@/components/landing/RealMembersStrip";
 import PublicHeader from "@/components/layout/PublicHeader";
-import FreePeriodBanner from "@/components/marketing/FreePeriodBanner";
+
 import RecentSitsItemListJsonLd from "@/components/seo/RecentSitsItemListJsonLd";
 
 import PublicFooter from "@/components/layout/PublicFooter";
