@@ -73,7 +73,7 @@ const SitterFirstNBA = ({ sits }: Props) => {
           >
             <Link
               to={`/annonces/${sit.id}`}
-              className="block"
+              className="block group"
               onClick={() =>
                 void trackEvent("sitter_first_nba_card_clicked", {
                   source: "dashboard",
@@ -88,20 +88,15 @@ const SitterFirstNBA = ({ sits }: Props) => {
               {sit.cover_photo_url ? (
                 <div className="relative w-full aspect-[16/10] overflow-hidden bg-muted">
                   <img
-                    src={getOptimizedImageUrl(sit.cover_photo_url, 640, 70)}
-                    alt=""
-                    aria-hidden="true"
-                    loading="lazy"
-                    className="absolute inset-0 w-full h-full object-cover scale-110 blur-xl brightness-75"
-                  />
-                  <img
                     src={getOptimizedImageUrl(sit.cover_photo_url, 640, 82)}
                     alt={sit.title ?? "Annonce"}
-                    className="relative w-full h-full object-contain"
+                    className="w-full h-full object-cover object-[center_30%] group-hover:scale-105 transition-transform duration-500 ease-out"
                     loading="lazy"
                     width={640}
                     height={400}
+                    onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
                   />
+                  <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" aria-hidden="true" />
                 </div>
               ) : (
                 <div className="w-full aspect-[16/10] bg-primary/10" aria-hidden="true" />
