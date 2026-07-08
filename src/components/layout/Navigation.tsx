@@ -462,7 +462,7 @@ export const BottomNav = () => {
         />
         <div className="relative">
           <item.icon className="h-5 w-5 transition-transform duration-200" strokeWidth={isActive ? 2.2 : 1.8} />
-          {isGated && <Crown className="h-[9px] w-[9px] text-amber-500 absolute -top-1 -right-1.5" />}
+          {isGated && <Crown className="h-[9px] w-[9px] text-warning absolute -top-1 -right-1.5" />}
           {item.badge !== undefined && item.badge > 0 && (
             <span className="absolute -top-1.5 -right-2 bg-destructive text-destructive-foreground text-[9px] rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1 font-bold tabular-nums border-2 border-card">
               {item.badge > 99 ? "99+" : item.badge}
