@@ -534,8 +534,10 @@ const Landing = () => {
       <PublicHeader />
       <FreePeriodBanner />
 
+      {/* ═══════════════ MAIN LANDMARK (englobe tout le contenu) ═══════════════ */}
+      <main id="main-content">
       {/* ═══════════════ SECTION 1, HERO (épuré, 5 blocs) ═══════════════ */}
-      <section id="main-content" role="main" className="relative w-full min-h-screen flex items-center overflow-hidden">
+      <section className="relative w-full min-h-screen flex items-center overflow-hidden">
         <img
           src="/hero-landing.webp"
           alt="Golden retriever assis dans l'herbe d'un jardin ensoleillé, gueule ouverte."
