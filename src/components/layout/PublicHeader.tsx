@@ -16,16 +16,17 @@ const NAV_DEFS: ReadonlyArray<{ key: string; to: string; beta?: boolean }> = [
   { key: "news", to: "/actualites" },
 ];
 
-export default function PublicHeader() {
+export default function PublicHeader({ authedVariant = false }: { authedVariant?: boolean }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
 
-  // Utilisateur connecté : l'en-tête public est masqué, la coquille
-  // authentifiée (AppLayout) fournit déjà la navigation.
-  if (isAuthenticated) return null;
+  // Utilisateur connecté : l'en-tête public est masqué par défaut, la coquille
+  // authentifiée (AppLayout) fournit déjà la navigation. En mode authedVariant,
+  // on affiche quand même la barre (cas Landing hors AppLayout).
+  if (isAuthenticated && !authedVariant) return null;
 
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
 
@@ -56,33 +57,53 @@ export default function PublicHeader() {
               )}
             </Button>
           ))}
-          <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
-            {t("nav.login")}
-          </Button>
-          <Button size="sm" onClick={() => navigate("/inscription")}>
-            {t("nav.register")}
-          </Button>
+          {isAuthenticated ? (
+            <Button size="sm" onClick={() => navigate("/dashboard")}>
+              Mon espace
+            </Button>
+          ) : (
+            <>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
+                {t("nav.login")}
+              </Button>
+              <Button size="sm" onClick={() => navigate("/inscription")}>
+                {t("nav.register")}
+              </Button>
+            </>
+          )}
           <LanguageSwitcher />
         </nav>
 
         {/* Mobile: auth + burger */}
         <div className="flex sm:hidden items-center gap-1">
           <LanguageSwitcher compact />
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/login")}
-            className="min-h-11 px-2"
-          >
-            {t("nav.login")}
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => navigate("/inscription")}
-            className="min-h-11 px-3"
-          >
-            {t("nav.register")}
-          </Button>
+          {isAuthenticated ? (
+            <Button
+              size="sm"
+              onClick={() => navigate("/dashboard")}
+              className="min-h-11 px-3"
+            >
+              Mon espace
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/login")}
+                className="min-h-11 px-2"
+              >
+                {t("nav.login")}
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => navigate("/inscription")}
+                className="min-h-11 px-3"
+              >
+                {t("nav.register")}
+              </Button>
+            </>
+          )}
           <Button
             size="icon"
             variant="ghost"
@@ -120,9 +141,15 @@ export default function PublicHeader() {
             </Link>
           ))}
           <div className="pt-2 border-t border-border">
-            <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/inscription"); }}>
-              {t("nav.register")}
-            </Button>
+            {isAuthenticated ? (
+              <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/dashboard"); }}>
+                Mon espace
+              </Button>
+            ) : (
+              <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/inscription"); }}>
+                {t("nav.register")}
+              </Button>
+            )}
           </div>
         </nav>
       )}
