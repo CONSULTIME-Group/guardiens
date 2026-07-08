@@ -538,17 +538,29 @@ const Landing = () => {
       <main id="main-content">
       {/* ═══════════════ SECTION 1, HERO (épuré, 5 blocs) ═══════════════ */}
       <section className="relative w-full min-h-screen flex items-center overflow-hidden">
-        <img
-          src="/hero-landing.webp"
-          alt="Golden retriever assis dans l'herbe d'un jardin ensoleillé, gueule ouverte."
-          className="absolute inset-0 w-full h-full object-cover"
-          loading="eager"
-          {...({ fetchpriority: "high" } as any)}
-          width={1920}
-          height={1080}
-          sizes="100vw"
-          decoding="async"
-        />
+        <picture>
+          <source
+            type="image/avif"
+            srcSet="/hero-landing-640.avif 640w, /hero-landing-960.avif 960w, /hero-landing-1280.avif 1280w, /hero-landing-1920.avif 1920w"
+            sizes="100vw"
+          />
+          <source
+            type="image/webp"
+            srcSet="/hero-landing-640.webp 640w, /hero-landing-960.webp 960w, /hero-landing-1280.webp 1280w, /hero-landing-1920.webp 1920w"
+            sizes="100vw"
+          />
+          <img
+            src="/hero-landing.webp"
+            alt="Golden retriever assis dans l'herbe d'un jardin ensoleillé, gueule ouverte."
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="eager"
+            {...({ fetchpriority: "high" } as any)}
+            width={1920}
+            height={1080}
+            sizes="100vw"
+            decoding="async"
+          />
+        </picture>
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/65 to-black/50" />
         <div className="absolute inset-0 bg-foreground/10" aria-hidden />
 

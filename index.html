@@ -64,7 +64,7 @@
     <!-- Préchargement du hero de la landing avant l'exécution du JS : la
          landing est l'entrée principale du site et le hero est l'élément LCP.
          Le léger surcoût sur les autres routes est acceptable. -->
-    <link rel="preload" as="image" href="/hero-landing.webp" fetchpriority="high" />
+    <link rel="preload" as="image" type="image/avif" imagesrcset="/hero-landing-640.avif 640w, /hero-landing-960.avif 960w, /hero-landing-1280.avif 1280w, /hero-landing-1920.avif 1920w" imagesizes="100vw" fetchpriority="high" />
 
     <link rel="preconnect" href="https://erhccyqevdyevpyctsjj.supabase.co" />
     <link rel="preconnect" href="https://erhccyqevdyevpyctsjj.supabase.co" crossorigin />
