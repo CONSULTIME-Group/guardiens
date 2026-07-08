@@ -374,23 +374,35 @@ export default function News() {
 
         {/* Épinglé : inventaire vivant */}
         {activeCategory === "all" && !urlSearch.trim() && currentPage === 1 && (
-          <Link
-            to="/actualites/inventaire-guardiens-france"
-            className="group block mb-6 md:mb-8 rounded-xl border border-primary/30 bg-primary/5 p-4 md:p-5 transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            <div className="flex items-start gap-3">
-              <Badge className="bg-primary text-primary-foreground shrink-0 mt-0.5">Épinglé</Badge>
-              <div className="min-w-0 flex-1">
-                <h2 className="font-heading text-base md:text-lg font-bold text-foreground group-hover:text-primary transition-colors">
+          <article className="mb-8 md:mb-10 rounded-xl border border-primary/20 bg-primary/5 overflow-hidden transition-colors hover:bg-primary/[0.07]">
+            <div className="flex flex-col md:flex-row">
+              <div className="md:w-[45%] lg:w-[40%] aspect-[16/9] md:aspect-auto relative overflow-hidden">
+                <img
+                  src={inventoryCover}
+                  alt="Inventaire vivant de Guardiens, couverture"
+                  className="w-full h-full object-cover"
+                  loading="eager"
+                  width={800}
+                  height={450}
+                />
+              </div>
+              <div className="flex-1 p-5 md:p-8 flex flex-col justify-center gap-3">
+                <Badge className="w-fit bg-primary text-primary-foreground">Épinglé</Badge>
+                <h2 className="font-heading text-xl md:text-2xl font-bold text-foreground leading-tight">
                   L'inventaire vivant de Guardiens
                 </h2>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-muted-foreground text-sm md:text-base leading-relaxed">
                   Villes couvertes, races documentées, lieux dog-friendly, professionnels : tous nos chiffres mis à jour en direct.
                 </p>
+                <Button asChild className="w-fit gap-2 mt-1">
+                  <Link to="/actualites/inventaire-guardiens-france">
+                    Voir l'inventaire
+                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </Link>
+                </Button>
               </div>
-              <ArrowRight className="h-4 w-4 text-primary shrink-0 mt-1 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
             </div>
-          </Link>
+          </article>
         )}
 
         {/* Featured "Vie locale & Entraide" section */}
