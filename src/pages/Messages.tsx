@@ -795,7 +795,7 @@ const Messages = () => {
               aria-label="Défiler jusqu'aux derniers messages"
               className="absolute bottom-24 right-4 z-20 bg-card border border-border shadow-md rounded-full w-10 h-10 flex items-center justify-center text-muted-foreground hover:bg-accent transition-all"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+              <ChevronDown className="h-[18px] w-[18px]" aria-hidden="true" />
             </button>
           )}
 
