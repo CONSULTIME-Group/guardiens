@@ -542,7 +542,7 @@ const Messages = () => {
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
-                <span className={`text-sm truncate capitalize ${hasUnread ? "font-bold text-foreground" : "font-medium"}`}>
+                <span className={`text-base truncate capitalize ${hasUnread ? "font-bold text-foreground" : "font-medium"}`}>
                   {capitalize(conv.other_user?.first_name) || "Utilisateur"}
                 </span>
                 {appInfo && !isMission && (
@@ -551,20 +551,20 @@ const Messages = () => {
                   </span>
                 )}
               </div>
-              <span className="text-[11px] text-muted-foreground shrink-0">
+              <span className="text-xs text-muted-foreground shrink-0">
                 {conv.last_message ? formatListDate(conv.last_message.created_at) : ""}
               </span>
             </div>
             {roleLabel && (
-              <p className="text-xs text-muted-foreground truncate">{roleLabel}</p>
+              <p className="text-sm text-muted-foreground truncate">{roleLabel}</p>
             )}
             <div className="flex items-center justify-between gap-2 mt-0.5">
-              <p className={`text-xs truncate ${hasUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+              <p className={`text-sm truncate ${hasUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
                 {conv.last_message?.sender_id === user?.id ? "Vous : " : ""}
                 {conv.last_message?.content || "Photo"}
               </p>
               {hasUnread && (
-                <span className="bg-primary text-primary-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0 font-bold">
+                <span className="bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0 font-bold">
                   {conv.unread_count}
                 </span>
               )}
