@@ -646,7 +646,7 @@ const Landing = () => {
                 { href: "#matching", label: t("landing.toc.matching"), mobile: true },
                 { href: "#temoignages", label: t("landing.toc.testimonials"), mobile: true },
                 { href: "#notre-histoire", label: t("landing.toc.story"), mobile: false },
-                { href: "#pros", label: t("landing.toc.pros"), mobile: false },
+                { href: "#pros", label: t("landing.toc.pros"), mobile: false, hidden: !hasPros },
                 { href: "#guides-villes", label: t("landing.toc.cities"), mobile: false },
                 { href: "#faq", label: t("landing.toc.faq"), mobile: true },
               ];
