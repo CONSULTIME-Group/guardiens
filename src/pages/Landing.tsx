@@ -297,7 +297,7 @@ const Landing = () => {
  return (
  <div className="min-h-screen bg-background text-foreground">
   <PageMeta
-        title="Garde d'animaux à domicile près de chez vous | Guardiens"
+        title="Garde d'animaux à domicile et house-sitting près de chez vous | Guardiens"
         description="Confiez votre maison et vos animaux à un gardien vérifié près de chez vous. Rencontre avant chaque garde, sans commission, partout en France."
   path="/"
   image={HOME_OG_IMAGE}
@@ -372,7 +372,7 @@ const Landing = () => {
                 "@type": "WebPage",
                 "@id": "https://guardiens.fr/#webpage",
                 url: "https://guardiens.fr/",
-                name: "Home sitting & petites missions d'entraide locale | Guardiens",
+                name: "Garde d'animaux à domicile et house-sitting près de chez vous | Guardiens",
                 description:
                   "Home sitting et petites missions d'entraide entre gens du coin. Confiez votre maison, demandez un coup de main au quartier. Partout en France.",
                 inLanguage: "fr-FR",

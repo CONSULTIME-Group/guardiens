@@ -55,9 +55,12 @@ export default function LanguageSwitcher({
               key={code}
               onClick={() => void i18n.changeLanguage(code)}
               className={isActive ? "bg-accent font-semibold" : ""}
+              aria-label={`${m.native} (${code.toUpperCase()})`}
               aria-current={isActive ? "true" : undefined}
             >
-              <span className="mr-2" aria-hidden>{m.flag}</span>
+              <span className="mr-2 inline-flex h-6 w-7 items-center justify-center rounded bg-muted text-[10px] font-bold uppercase tracking-wider text-muted-foreground" aria-hidden>
+                {code}
+              </span>
               <span>{m.native}</span>
               <span className="ml-auto text-[10px] uppercase text-muted-foreground">
                 {code}
