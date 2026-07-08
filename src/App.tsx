@@ -246,6 +246,21 @@ const ContentRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Coquille publique complète (PublicHeader + PublicFooter) pour les visiteurs
+// non connectés sur les pages de contenu/SEO qui ne rendent PAS leur propre
+// PublicHeader. Pour les utilisateurs connectés : AppLayout (sidebar).
+const PublicShellRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated } = useAuth();
+  if (isAuthenticated) return <AppLayout>{children}</AppLayout>;
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
+      <PublicHeader />
+      <main className="flex-1 min-w-0">{children}</main>
+      <PublicFooter />
+    </div>
+  );
+};
+
 
 
 
