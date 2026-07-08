@@ -83,12 +83,37 @@ Deno.serve(async (req) => {
     dryRun = body?.dryRun === true
   } catch { /* cron */ }
 
-  const stats = { enrolled: 0, sent: 0, exited: 0, completed: 0, skipped: 0, errors: 0, capped: false }
-  // Hard cap per run to stay under the 150s edge timeout. Remaining journeys
-  // will be picked up by the next cron tick.
-  const MAX_SENDS_PER_RUN = 80
-  const SEND_DELAY_MS = 250 // ~4 req/s to stay under Resend rate limits
+  // Kick off the heavy work in the background so we always respond quickly and
+  // never hit the 150s IDLE_TIMEOUT. The cron caller doesn't consume the stats.
+  const work = runEvaluation(supabase, dryRun).catch((e) => {
+    console.error('[evaluate-journeys] background run failed', e)
+  })
 
+  if (dryRun) {
+    // Callers of dryRun (admin UI) want the actual stats synchronously.
+    const stats = await work
+    return new Response(JSON.stringify({ ok: true, dryRun, stats }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+
+  // @ts-ignore EdgeRuntime is provided by Supabase Edge runtime
+  try { EdgeRuntime.waitUntil(work) } catch { /* ignore in non-edge env */ }
+
+  return new Response(JSON.stringify({ ok: true, queued: true }), {
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  })
+})
+
+async function runEvaluation(
+  supabase: ReturnType<typeof createClient>,
+  dryRun: boolean,
+) {
+  const stats = { enrolled: 0, sent: 0, exited: 0, completed: 0, skipped: 0, errors: 0, capped: false }
+  // Hard cap per run + global deadline so we never spin near the edge timeout.
+  const MAX_SENDS_PER_RUN = 40
+  const SEND_DELAY_MS = 250
+  const DEADLINE_MS = Date.now() + 120_000 // stop after 2 min, well under 150s
 
   const { data: sequencesRaw } = await supabase
     .from('nurturing_sequences')
@@ -96,10 +121,7 @@ Deno.serve(async (req) => {
     .eq('active', true)
 
   const sequences = (sequencesRaw ?? []) as Sequence[]
-  if (!sequences.length) {
-    return new Response(JSON.stringify({ ok: true, stats, note: 'no active sequences' }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-  }
+  if (!sequences.length) return stats
 
   const { data: stepsRaw } = await supabase
     .from('nurturing_steps')
@@ -113,8 +135,8 @@ Deno.serve(async (req) => {
     stepsBySeq.set(s.sequence_id, arr)
   }
 
-  // 1. ENROLLMENT — dispatched per enrollment_rule
   for (const seq of sequences) {
+    if (Date.now() > DEADLINE_MS) { stats.capped = true; break }
     try {
       const enrolled = await enrollForSequence(supabase, seq, dryRun)
       stats.enrolled += enrolled
@@ -124,7 +146,6 @@ Deno.serve(async (req) => {
     }
   }
 
-  // 2. EVALUATE active journeys
   const { data: activeJourneys } = await supabase
     .from('user_journeys')
     .select('id, user_id, sequence_key, current_step, started_at, last_step_at')
@@ -135,6 +156,7 @@ Deno.serve(async (req) => {
 
   for (const j of activeJourneys ?? []) {
     if (stats.sent >= MAX_SENDS_PER_RUN) { stats.capped = true; break }
+    if (Date.now() > DEADLINE_MS) { stats.capped = true; break }
     try {
       const seq = seqByKey.get(j.sequence_key)
       if (!seq) continue
@@ -259,7 +281,6 @@ Deno.serve(async (req) => {
         try {
           const okBody = await sendRes.json()
           messageId = typeof okBody?.messageId === 'string' ? okBody.messageId : null
-          // Distinguish a real send from an idempotent/suppressed/blocked 200 response
           const notReallySent =
             okBody?.skipped === true ||
             okBody?.sent === false ||
@@ -272,9 +293,6 @@ Deno.serve(async (req) => {
           messageId = null
         }
 
-        // Fallback: if no messageId returned but the email was actually sent,
-        // recover it from email_send_log via the idempotency key so engagement
-        // events (open/click) can be correlated back to this journey step.
         if (actuallySent && !messageId) {
           const { data: logRow } = await supabase
             .from('email_send_log')
@@ -295,7 +313,6 @@ Deno.serve(async (req) => {
         message_id: messageId,
       })
 
-      // Always advance the cursor
       await supabase.from('user_journeys').update({
         current_step: nextStep.step_order,
         last_step_at: new Date().toISOString(),
@@ -312,10 +329,9 @@ Deno.serve(async (req) => {
     }
   }
 
-  return new Response(JSON.stringify({ ok: true, dryRun, stats }), {
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  })
-})
+  return stats
+}
+
 
 // ---------------------------------------------------------------------------
 // Enrollment dispatch
