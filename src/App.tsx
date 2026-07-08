@@ -327,7 +327,7 @@ const AppRoutes = () => (
       <Route path="/annonces/demo/:slug" element={<DemoSitDetail />} />
       <Route path="/annonces/:id" element={<PublicSitDetail />} />
       <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
-      <Route path="/pros" element={<AppLayout><ProsListing /></AppLayout>} />
+      <Route path="/pros" element={<ContentRoute><ProsListing /></ContentRoute>} />
       <Route path="/pros/inscription" element={<AppLayout><ProOnboarding /></AppLayout>} />
       <Route path="/pros/mon-espace" element={<AppLayout><MyProProfile /></AppLayout>} />
 
