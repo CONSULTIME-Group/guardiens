@@ -173,6 +173,8 @@ RevealSection.displayName = "RevealSection";
 const Landing = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { data: inventaire } = useInventaireCounts();
+  const hasPros = (inventaire?.pros_total ?? 0) > 0;
 
   const seasonal = getSeasonalBanner();
 
