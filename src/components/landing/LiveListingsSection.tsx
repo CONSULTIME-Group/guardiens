@@ -37,8 +37,10 @@ const initials = (name: string | null) =>
   name ? name.trim().charAt(0).toUpperCase() : "G";
 
 const LiveListingsSection: React.FC = () => {
+  const { t } = useTranslation();
   const [sits, setSits] = useState<LiveSit[]>([]);
   const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
     let cancelled = false;
