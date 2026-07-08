@@ -692,7 +692,9 @@ const SmallMissionDetail = () => {
   const statusMeta = STATUS_LABELS[mission.status] || STATUS_LABELS.open;
   const acceptedResponses = responses.filter(r => r.status === "accepted");
   const pendingResponses = responses.filter(r => r.status === "pending");
-  const isDatePassed = mission.date_needed && new Date(mission.date_needed) < new Date();
+  // Une OFFRE (disponibilité) n'a pas d'échéance : pas de bannière "date dépassée".
+  const isOfferMission = (mission as any).mission_type === "offre";
+  const isDatePassed = !isOfferMission && mission.date_needed && new Date(mission.date_needed) < new Date();
 
   const handleSharePublishedLink = async () => {
     const cleanUrl = window.location.href.split("?")[0];
