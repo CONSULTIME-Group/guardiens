@@ -24,6 +24,7 @@ import { fr } from "date-fns/locale";
 import { MassEmailFiltersPanel } from "@/components/admin/mass-email/MassEmailFilters";
 import type { MassEmailFilters, Segment } from "@/components/admin/mass-email/filters.types";
 import { SEGMENT_LABELS } from "@/components/admin/mass-email/filters.types";
+import ProximityCampaignCard from "@/components/admin/mass-email/ProximityCampaignCard";
 
 interface MassEmail {
   id: string;
