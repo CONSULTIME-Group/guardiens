@@ -6,7 +6,7 @@
   },
   "nav": {
     "listings": "Current listings",
-    "small_missions": "Small favours",
+    "small_missions": "Small missions",
     "pros": "Pet professionals",
     "guides": "Local guides",
     "pricing": "Pricing",
@@ -61,7 +61,8 @@
       "kpi_houses": "houses sat",
       "kpi_animals": "pets accompanied",
       "kpi_members": "registered",
-      "kpi_missions": "mutual aid missions"
+      "kpi_missions": "mutual aid missions",
+      "brand_tagline": "Close to home."
     },
     "toc": {
       "aria": "Page table of contents",
@@ -192,7 +193,7 @@
       "p5": "Guardiens is the pretext that was missing. On one side, small favours of mutual aid between local people: a vegetable garden watered in exchange for a meal, one skill for another, a small favour returned in kind. On the other, independently, house-sitting: your keys entrusted to someone you've looked in the eye.",
       "p6": "You will leave with peace of mind. You will return with a story. We didn't expect it to matter so much.",
       "p7": "That's why we built Guardiens, so you could live this too.",
-      "signature": ", Jérémie & Elisa"
+      "signature": "Jérémie & Elisa"
     },
     "cities": {
       "eyebrow": "Guides & cities",
@@ -462,12 +463,12 @@
     }
   },
   "news": {
-    "title": "Guides & Advice",
+    "title": "The Journal",
     "subtitle": "Tips, guides and advice for pet owners and sitters.",
     "meta_description": "House-sitting tips, practical guides, testimonials and news from the Guardiens community. Everything to prepare a sit.",
     "meta_title_default": "House-sitting guides & advice",
     "meta_title_category": "{{cat}}, Guides & Advice",
-    "breadcrumb": "Guides & Advice",
+    "breadcrumb": "The Journal",
     "search_placeholder": "Search an article…",
     "search_aria": "Search in articles",
     "reset_filters": "Reset filters",
@@ -1347,5 +1348,20 @@
       "add_avatar_identity": "Add a photo in the Identity tab.",
       "affinity_count": "{{count}}/5 filled in (min 3 for full score)."
     }
+  },
+  "live_listings": {
+    "aria": "Sits available right now",
+    "eyebrow": "Live",
+    "title": "Available sits",
+    "see_all": "View all",
+    "urgent": "Urgent",
+    "super_opportunity": "Great opportunity",
+    "discover": "Discover the listing",
+    "community_eyebrow": "Live from the community",
+    "section_title": "Sits available now",
+    "section_lede": "Discover owners looking for a sitter across France. Browse freely, sign up for free to apply.",
+    "cta_all": "View all listings",
+    "hint": "Free browsing · Free sign-up to apply",
+    "at_name": "At {{name}}'s"
   }
 }

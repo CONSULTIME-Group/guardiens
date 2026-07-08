@@ -147,7 +147,7 @@ export default function ArticleInventaire() {
       <main id="main-content" className="min-w-0">
         <PageBreadcrumb
           items={[
-            { label: "Actualités", href: "/actualites" },
+            { label: "Le journal", href: "/actualites" },
             { label: "Inventaire vivant" },
           ]}
         />

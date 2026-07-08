@@ -6,7 +6,7 @@
   },
   "nav": {
     "listings": "Annunci in corso",
-    "small_missions": "Piccoli aiuti",
+    "small_missions": "Piccole missioni",
     "pros": "Professionisti per animali",
     "guides": "Guide locali",
     "pricing": "Tariffe",
@@ -61,7 +61,8 @@
       "kpi_houses": "case custodite",
       "kpi_animals": "animali accuditi",
       "kpi_members": "iscritti",
-      "kpi_missions": "missioni di aiuto reciproco"
+      "kpi_missions": "missioni di aiuto reciproco",
+      "brand_tagline": "Vicino a casa vostra."
     },
     "toc": {
       "aria": "Sommario della pagina",
@@ -192,7 +193,7 @@
       "p5": "Guardiens è il pretesto che mancava. Da un lato, i piccoli aiuti tra vicini: un orto innaffiato in cambio di un pasto, una competenza contro un'altra, un aiuto reso in natura. Dall'altro, indipendentemente, l'home sitting: le Suo chiavi affidate a qualcuno che ha guardato negli occhi.",
       "p6": "Partirà con la mente leggera. Tornerà con una storia. Non ci aspettavamo che contasse così tanto.",
       "p7": "È per questo che abbiamo costruito Guardiens, affinché anche Lei possa vivere tutto questo.",
-      "signature": ", Jérémie & Elisa"
+      "signature": "Jérémie & Elisa"
     },
     "cities": {
       "eyebrow": "Guide & città",
@@ -462,12 +463,12 @@
     }
   },
   "news": {
-    "title": "Guide e Consigli",
+    "title": "Il giornale",
     "subtitle": "Consigli, guide e suggerimenti per proprietari e dog/cat sitter.",
     "meta_description": "Consigli di house-sitting, guide pratiche, testimonianze e novità della comunità Guardiens. Tutto per preparare una custodia.",
     "meta_title_default": "Guide e consigli house-sitting",
     "meta_title_category": "{{cat}}, Guide e Consigli",
-    "breadcrumb": "Guide e Consigli",
+    "breadcrumb": "Il giornale",
     "search_placeholder": "Cerca un articolo…",
     "search_aria": "Cerca negli articoli",
     "reset_filters": "Reimposta filtri",
@@ -1345,5 +1346,20 @@
       "chars_50": "{{count}}/50 caratteri.",
       "add_avatar_identity": "Aggiunga una foto nella scheda Identità."
     }
+  },
+  "live_listings": {
+    "aria": "Annunci disponibili ora",
+    "eyebrow": "In diretta",
+    "title": "Annunci disponibili",
+    "see_all": "Vedi tutti",
+    "urgent": "Urgente",
+    "super_opportunity": "Grande opportunità",
+    "discover": "Scopri l'annuncio",
+    "community_eyebrow": "In diretta dalla comunità",
+    "section_title": "Annunci di custodia in corso",
+    "section_lede": "Scoprite i proprietari che cercano un sitter in tutta la Francia. Consultate liberamente, iscrivetevi gratis per candidarvi.",
+    "cta_all": "Vedi tutti gli annunci",
+    "hint": "Consultazione libera · Iscrizione gratuita per candidarsi",
+    "at_name": "Da {{name}}"
   }
 }

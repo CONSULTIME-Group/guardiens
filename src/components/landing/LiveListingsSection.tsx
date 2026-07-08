@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
+
 
 const fallbackImageFor = (city: string | null): string | null => {
   if (!city) return null;
@@ -35,8 +37,10 @@ const initials = (name: string | null) =>
   name ? name.trim().charAt(0).toUpperCase() : "G";
 
 const LiveListingsSection: React.FC = () => {
+  const { t } = useTranslation();
   const [sits, setSits] = useState<LiveSit[]>([]);
   const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
     let cancelled = false;
@@ -110,19 +114,19 @@ const LiveListingsSection: React.FC = () => {
       <div className="container max-w-6xl mx-auto px-4">
         <div className="text-center mb-12 md:mb-16">
           <p className="text-sm font-medium text-primary uppercase tracking-wider mb-3">
-            En direct de la communauté
+            {t("live_listings.community_eyebrow")}
           </p>
           <h2
             id="live-listings-heading"
             className="font-display text-3xl md:text-5xl font-semibold text-foreground mb-4"
           >
-            Annonces de garde en cours
+            {t("live_listings.section_title")}
           </h2>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-            Découvrez les propriétaires qui cherchent un gardien partout en France.
-            Consultez les annonces librement, inscrivez-vous gratuitement pour postuler.
+            {t("live_listings.section_lede")}
           </p>
         </div>
+
 
         <div className={`grid grid-cols-1 sm:grid-cols-2 gap-5 ${sits.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3 max-w-5xl mx-auto"}`}>
           {sits.map((s) => {
@@ -163,7 +167,7 @@ const LiveListingsSection: React.FC = () => {
                     {s.title}
                   </h3>
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{s.first_name ? `Chez ${s.first_name}` : ""}</span>
+                    <span>{s.first_name ? t("live_listings.at_name", { name: s.first_name }) : ""}</span>
                     {dates && <span className="font-medium">{dates}</span>}
                   </div>
                 </div>
@@ -175,14 +179,15 @@ const LiveListingsSection: React.FC = () => {
         <div className="text-center mt-12">
           <Button asChild size="lg" className="rounded-full">
             <Link to="/annonces">
-              Voir toutes les annonces
+              {t("live_listings.cta_all")}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
           <p className="text-xs text-muted-foreground mt-3">
-            Consultation libre · Inscription gratuite pour postuler
+            {t("live_listings.hint")}
           </p>
         </div>
+
       </div>
     </section>
   );

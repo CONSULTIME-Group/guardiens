@@ -554,9 +554,13 @@ const Landing = () => {
               {t("landing.hero.eyebrow")}
             </p>
 
+            <p className="font-heading text-2xl md:text-3xl italic text-white/90 mb-3 animate-hero-fade-up animation-delay-400">
+              {t("landing.hero.brand_tagline")}
+            </p>
             <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6 animate-hero-fade-up animation-delay-400 max-w-3xl">
               {t("landing.hero.title_main")} <span className="text-white/80">{t("landing.hero.title_accent")}</span>
             </h1>
+
 
             <p className="font-body text-lg md:text-xl text-white/85 max-w-xl mb-4 leading-relaxed animate-hero-fade-up animation-delay-700">
               {t("landing.hero.lede")}
@@ -1364,7 +1368,7 @@ const Landing = () => {
                     >
                       <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
                       <span className="text-sm leading-relaxed">
-                        <strong>House-sitting à Lyon</strong>, Des gardiens vérifiés dans chaque arrondissement, du Vieux Lyon à la Croix-Rousse, en passant par la Part-Dieu et Confluence.
+                        <strong>House-sitting à Lyon</strong>. Des gardiens vérifiés dans chaque arrondissement, du Vieux Lyon à la Croix-Rousse, en passant par la Part-Dieu et Confluence.
                       </span>
                     </Link>
                   </li>
@@ -1375,7 +1379,7 @@ const Landing = () => {
                     >
                       <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
                       <span className="text-sm leading-relaxed">
-                        <strong>House-sitting à Annecy</strong>, Lac, montagne, résidences secondaires en Haute-Savoie. Des gardiens locaux qui connaissent le gel, les accès et les vétos.
+                        <strong>House-sitting à Annecy</strong>. Lac, montagne, résidences secondaires en Haute-Savoie. Des gardiens locaux qui connaissent le gel, les accès et les vétos.
                       </span>
                     </Link>
                   </li>
@@ -1386,7 +1390,7 @@ const Landing = () => {
                     >
                       <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
                       <span className="text-sm leading-relaxed">
-                        <strong>House-sitting à Grenoble</strong>, Au pied du Vercors, de la Chartreuse et de Belledonne. Des gardiens qui connaissent la cuvette et les sentiers de la Bastille.
+                        <strong>House-sitting à Grenoble</strong>. Au pied du Vercors, de la Chartreuse et de Belledonne. Des gardiens qui connaissent la cuvette et les sentiers de la Bastille.
                       </span>
                     </Link>
                   </li>
@@ -1397,7 +1401,7 @@ const Landing = () => {
                     >
                       <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
                       <span className="text-sm leading-relaxed">
-                        <strong>House-sitting à Villeurbanne</strong>, Aux portes de Lyon, Gratte-Ciel, Charpennes, Cusset. Des gardiens qui circulent facilement entre les deux villes.
+                        <strong>House-sitting à Villeurbanne</strong>. Aux portes de Lyon, Gratte-Ciel, Charpennes, Cusset. Des gardiens qui circulent facilement entre les deux villes.
                       </span>
                     </Link>
                   </li>
@@ -1408,7 +1412,7 @@ const Landing = () => {
                     >
                       <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
                       <span className="text-sm leading-relaxed">
-                        <strong>House-sitting à Chambéry</strong>, Capitale de la Savoie, entre lac du Bourget et massif des Bauges. Des gardiens à l'aise avec la montagne et l'hiver.
+                        <strong>House-sitting à Chambéry</strong>. Capitale de la Savoie, entre lac du Bourget et massif des Bauges. Des gardiens à l'aise avec la montagne et l'hiver.
                       </span>
                     </Link>
                   </li>
@@ -1419,7 +1423,7 @@ const Landing = () => {
                     >
                       <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
                       <span className="text-sm leading-relaxed">
-                        <strong>House-sitting à Valence</strong>, Porte du sud, entre Rhône et Vercors. Des gardiens proches des trajets vacances et des résidences secondaires drômoises.
+                        <strong>House-sitting à Valence</strong>. Porte du sud, entre Rhône et Vercors. Des gardiens proches des trajets vacances et des résidences secondaires drômoises.
                       </span>
                     </Link>
                   </li>
@@ -1430,7 +1434,7 @@ const Landing = () => {
                     >
                       <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
                       <span className="text-sm leading-relaxed">
-                        <strong>House-sitting à Écully</strong>, Ouest lyonnais résidentiel, maisons avec jardin et animaux. Des gardiens habitués aux propriétés calmes et familiales.
+                        <strong>House-sitting à Écully</strong>. Ouest lyonnais résidentiel, maisons avec jardin et animaux. Des gardiens habitués aux propriétés calmes et familiales.
                       </span>
                     </Link>
                   </li>
@@ -1441,7 +1445,7 @@ const Landing = () => {
                     >
                       <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
                       <span className="text-sm leading-relaxed">
-                        <strong>Partout en France</strong>, Du Pays basque à la Bretagne, en passant par les Alpes, la Provence et le Nord. Le réseau s'étend dans toutes les régions.
+                        <strong>Partout en France</strong>. Du Pays basque à la Bretagne, en passant par les Alpes, la Provence et le Nord. Le réseau s'étend dans toutes les régions.
                       </span>
                     </Link>
                   </li>

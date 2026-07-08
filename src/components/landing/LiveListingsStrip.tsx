@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
+
 
 interface LiveSit {
   id: string;
@@ -43,12 +45,14 @@ const isHighlighted = (s: LiveSit) => s.is_urgent && isForeign(s.country);
 
 /**
  * Aperçu live des annonces sous le Hero.
- * Carte "Super opportunité" (urgent + étranger) en grand format à gauche,
+ * Carte "{t("live_listings.super_opportunity")}" (urgent + étranger) en grand format à gauche,
  * 3 autres en pile à droite.
  */
 const LiveListingsStrip: React.FC = () => {
+  const { t } = useTranslation();
   const [sits, setSits] = useState<LiveSit[]>([]);
   const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
     let cancelled = false;
@@ -148,7 +152,7 @@ const LiveListingsStrip: React.FC = () => {
 
   return (
     <section
-      aria-label="Annonces de garde disponibles maintenant"
+      aria-label={t("live_listings.aria")}
       className="bg-gradient-to-b from-accent/20 to-background border-b border-border/40"
     >
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-7 md:py-10">
@@ -160,18 +164,19 @@ const LiveListingsStrip: React.FC = () => {
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
               </span>
               <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-primary font-semibold font-body">
-                En direct
+                {t("live_listings.eyebrow")}
               </p>
+
             </div>
             <h2 className="font-heading text-lg md:text-2xl font-semibold text-foreground leading-tight">
-              Annonces de garde dispo
+              {t("live_listings.title")}
             </h2>
           </div>
           <Link
             to="/annonces"
             className="text-xs md:text-sm text-primary font-semibold hover:underline whitespace-nowrap shrink-0 pb-1"
           >
-            Voir tout <span aria-hidden>→</span>
+            {t("live_listings.see_all")} <span aria-hidden>→</span>
           </Link>
         </div>
 
@@ -197,14 +202,15 @@ const LiveListingsStrip: React.FC = () => {
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
-                {/* Bandeau Super opportunité */}
+                {/* Bandeau {t("live_listings.super_opportunity")} */}
                 <div className="absolute top-3 left-3 flex flex-wrap items-center gap-2">
                   <span className="inline-flex items-center gap-1.5 bg-destructive text-destructive-foreground text-[11px] md:text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg">
                     <span className="h-1.5 w-1.5 rounded-full bg-destructive-foreground animate-pulse" aria-hidden />
-                    Urgent
+                    {t("live_listings.urgent")}
                   </span>
+
                   <span className="inline-flex items-center bg-amber-500 text-white text-[11px] md:text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg">
-                    Super opportunité
+                    {t("live_listings.super_opportunity")}
                   </span>
                 </div>
 
@@ -222,7 +228,7 @@ const LiveListingsStrip: React.FC = () => {
                     </p>
                   )}
                   <span className="mt-3 inline-flex items-center gap-1.5 bg-white/95 text-foreground text-xs md:text-sm font-semibold px-3 py-1.5 rounded-full">
-                    Découvrir l'annonce <span aria-hidden>→</span>
+                    {t("live_listings.discover")} <span aria-hidden>→</span>
                   </span>
                 </div>
               </div>
@@ -253,8 +259,9 @@ const LiveListingsStrip: React.FC = () => {
                       )}
                       {s.is_urgent && (
                         <span className="absolute top-1.5 left-1.5 bg-destructive text-destructive-foreground text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full">
-                          Urgent
+                          {t("live_listings.urgent")}
                         </span>
+
                       )}
                     </div>
                     <div className="p-2.5 md:p-3 flex-1 min-w-0 flex flex-col justify-center">
@@ -298,8 +305,9 @@ const LiveListingsStrip: React.FC = () => {
                     )}
                     {s.is_urgent && (
                       <span className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">
-                        Urgent
+                        {t("live_listings.urgent")}
                       </span>
+
                     )}
                     {geo && (
                       <span className="absolute bottom-2 left-2 bg-background/95 backdrop-blur text-foreground text-[11px] md:text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm max-w-[85%]">

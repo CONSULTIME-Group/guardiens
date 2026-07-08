@@ -450,7 +450,7 @@ export default function ArticleDetail() {
 
  <main id="main-content">
   <PageBreadcrumb items={[
- { label: t("article.news", "Actualités"), href: "/actualites" },
+ { label: t("article.news", "Le journal"), href: "/actualites" },
  { label: article.title },
  ]} />
 
