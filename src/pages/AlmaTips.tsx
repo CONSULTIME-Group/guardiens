@@ -120,6 +120,7 @@ export default function AlmaTips() {
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<Category>("all");
   const [query, setQuery] = useState("");
+  const [visibleCount, setVisibleCount] = useState(24);
 
   useEffect(() => {
     let cancelled = false;
