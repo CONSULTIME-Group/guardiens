@@ -1518,7 +1518,7 @@ const Landing = () => {
                 trackEvent("cta_sitter_clicked", { metadata: { location: "final_cta" } });
                 navigate("/inscription?role=sitter");
               }}
-              className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-transparent text-white border-2 border-white/40 hover:bg-white/10 transition-all duration-200"
+              className="font-body text-xs font-medium tracking-wide rounded-full px-6 py-2.5 bg-transparent text-white/85 border border-white/30 hover:bg-white/10 hover:text-white transition-all duration-200"
             >
               {t("landing.final.cta_sitter")}
             </button>
