@@ -285,36 +285,63 @@ export default function SitDraftFromPrompt({ secondary = false, primary = null }
         placeholder={PLACEHOLDER}
         rows={4}
         maxLength={1500}
-        disabled={loading}
+        disabled={loading || transcribing}
         className="resize-none"
         aria-label="Décrivez votre absence en une phrase"
       />
       <p className="text-xs text-muted-foreground mt-2">
-        Ajoutez dates, ville, animaux, préférences. Plus c'est précis, meilleur est le brouillon.
+        Ajoutez dates, ville, animaux, préférences. Plus c'est précis, meilleur est le brouillon. Vous pouvez aussi dicter votre absence à la voix.
       </p>
 
-      <div className="mt-3 flex items-center justify-between gap-3">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
         <span className="text-xs text-muted-foreground tabular-nums">
           {prompt.length}/1500
         </span>
-        <Button
-          onClick={handleGenerate}
-          disabled={loading || prompt.trim().length < 10}
-          className="rounded-xl"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
-              Alma prépare…
-            </>
-
-          ) : (
-            <>
-              <Sparkles className="h-4 w-4 mr-2" aria-hidden="true" />
-              Générer mon brouillon
-            </>
-          )}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant={recording ? "destructive" : "outline"}
+            onClick={recording ? stopRecording : startRecording}
+            disabled={loading || transcribing}
+            className="rounded-xl"
+            aria-label={recording ? "Arrêter la dictée vocale" : "Dicter à la voix"}
+            aria-pressed={recording}
+          >
+            {transcribing ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
+                Transcription…
+              </>
+            ) : recording ? (
+              <>
+                <Square className="h-4 w-4 mr-2" aria-hidden="true" />
+                Arrêter
+              </>
+            ) : (
+              <>
+                <Mic className="h-4 w-4 mr-2" aria-hidden="true" />
+                Dicter
+              </>
+            )}
+          </Button>
+          <Button
+            onClick={handleGenerate}
+            disabled={loading || transcribing || recording || prompt.trim().length < 10}
+            className="rounded-xl"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
+                Alma prépare…
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 mr-2" aria-hidden="true" />
+                Générer mon brouillon
+              </>
+            )}
+          </Button>
+        </div>
       </div>
     </section>
   );
