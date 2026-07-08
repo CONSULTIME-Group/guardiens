@@ -555,7 +555,7 @@ const Landing = () => {
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-12 md:py-24">
           <div className="max-w-2xl lg:max-w-3xl">
 
-            <p className="font-body text-xs text-white/70 tracking-[0.2em] uppercase mb-6 animate-hero-fade-up">
+            <p className="font-body text-xs text-white/85 tracking-[0.2em] uppercase mb-6 animate-hero-fade-up">
               {t("landing.hero.eyebrow")}
             </p>
 
