@@ -340,8 +340,8 @@ const EntraideHub = () => {
     // Chantier 8 : missions expirées en fin de liste quel que soit le tri
     const sorted = applyPrimary(arr);
     return [...sorted].sort((a, b) => {
-      const ea = isMissionExpired(a) ? 1 : 0;
-      const eb = isMissionExpired(b) ? 1 : 0;
+      const ea = isMissionPast(a) ? 1 : 0;
+      const eb = isMissionPast(b) ? 1 : 0;
       return ea - eb;
     });
   };
