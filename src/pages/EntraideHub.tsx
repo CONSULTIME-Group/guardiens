@@ -749,11 +749,13 @@ const EntraideHub = () => {
                   </div>
                 ) : visibleMissions.length > 0 ? (
                   <>
-                    <ul className="space-y-3">
-                      {visibleMissions.map((m) => {
+                    {(() => {
+                      const activeItems = visibleMissions.filter((m) => !isMissionPast(m));
+                      const pastItems = visibleMissions.filter((m) => isMissionPast(m));
+                      const renderCard = (m: MissionRow) => {
                         const code = getDeptCode(m.postal_code);
                         const dept = code ? DEPT_NAMES[code] : null;
-                        const dateLabel = formatDateNeeded(m.date_needed);
+                        const period = formatMissionPeriod(m.date_needed, m.end_date);
                         const isMine = currentUserId && m.user_id === currentUserId;
                         const authorName = m.profiles?.first_name || "Membre";
                         const initial = authorName.charAt(0).toUpperCase();
@@ -819,12 +821,12 @@ const EntraideHub = () => {
                                         Vous
                                       </span>
                                     )}
-                                    {expired && (
+                                    {expired && m.status !== "completed" && (
                                       <span
                                         className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-warning/15 text-warning-foreground uppercase tracking-wide border border-warning/30"
-                                        aria-label="Statut : date dépassée"
+                                        aria-label="Statut : période passée"
                                       >
-                                        Date dépassée
+                                        Passée
                                       </span>
                                     )}
                                   </div>
@@ -880,10 +882,10 @@ const EntraideHub = () => {
                                       <span className="truncate">{m.city}{dept ? `, ${dept}` : ""}</span>
                                     </>
                                   )}
-                                  {dateLabel && (
+                                  {period && (
                                     <>
                                       <span aria-hidden="true">·</span>
-                                      <span>Pour le {dateLabel}</span>
+                                      <span>{period.prefix}{period.value}</span>
                                     </>
                                   )}
                                   <span className="ml-auto">{formatRelative(m.created_at)}</span>
@@ -893,8 +895,35 @@ const EntraideHub = () => {
                             </Link>
                           </li>
                         );
-                      })}
-                    </ul>
+                      };
+                      return (
+                        <>
+                          {activeItems.length > 0 && (
+                            <ul className="space-y-3">
+                              {activeItems.map(renderCard)}
+                            </ul>
+                          )}
+                          {pastItems.length > 0 && (
+                            <section aria-labelledby="past-missions-title" className="mt-10">
+                              <div className="mb-4 flex items-baseline justify-between gap-3 border-t border-border pt-6">
+                                <h3
+                                  id="past-missions-title"
+                                  className="font-heading text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground"
+                                >
+                                  Passées et terminées
+                                </h3>
+                                <span className="text-[11px] text-muted-foreground">
+                                  {pastItems.length} publication{pastItems.length > 1 ? "s" : ""}
+                                </span>
+                              </div>
+                              <ul className="space-y-3 opacity-70">
+                                {pastItems.map(renderCard)}
+                              </ul>
+                            </section>
+                          )}
+                        </>
+                      );
+                    })()}
                     {filteredMissions.length > visibleCount ? (
                       <div className="mt-4 flex justify-center">
                         <Button
