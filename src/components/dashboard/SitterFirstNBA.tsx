@@ -86,19 +86,27 @@ const SitterFirstNBA = ({ sits }: Props) => {
               }
             >
               {sit.cover_photo_url ? (
-                <div className="w-full aspect-[16/10] overflow-hidden bg-muted">
+                <div className="relative w-full aspect-[16/10] overflow-hidden bg-muted">
                   <img
-                    src={getOptimizedImageUrl(sit.cover_photo_url, 480, 78)}
-                    alt={sit.title ?? "Annonce"}
-                    className="w-full h-full object-cover"
+                    src={getOptimizedImageUrl(sit.cover_photo_url, 640, 70)}
+                    alt=""
+                    aria-hidden="true"
                     loading="lazy"
-                    width={480}
-                    height={300}
+                    className="absolute inset-0 w-full h-full object-cover scale-110 blur-xl brightness-75"
+                  />
+                  <img
+                    src={getOptimizedImageUrl(sit.cover_photo_url, 640, 82)}
+                    alt={sit.title ?? "Annonce"}
+                    className="relative w-full h-full object-contain"
+                    loading="lazy"
+                    width={640}
+                    height={400}
                   />
                 </div>
               ) : (
                 <div className="w-full aspect-[16/10] bg-primary/10" aria-hidden="true" />
               )}
+
             </Link>
             <div className="p-4 flex-1 flex flex-col gap-2">
               <div className="flex items-start justify-between gap-2">
