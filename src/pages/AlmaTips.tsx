@@ -208,14 +208,32 @@ export default function AlmaTips() {
     setVisibleCount(24);
   }, [category, query]);
 
+  // Accent visuel par fact_type (tokens sémantiques uniquement).
+  const ACCENT: Record<
+    FactType,
+    { border: string; badge: string }
+  > = {
+    pet_care_tip:      { border: "border-l-primary",   badge: "bg-primary/10 text-primary border-primary/20" },
+    dog_behavior_tip:  { border: "border-l-primary",   badge: "bg-primary/10 text-primary border-primary/20" },
+    cat_behavior_tip:  { border: "border-l-primary",   badge: "bg-primary/10 text-primary border-primary/20" },
+    home_care_tip:     { border: "border-l-secondary", badge: "bg-secondary text-secondary-foreground border-secondary" },
+    seasonal_advice:   { border: "border-l-warning",   badge: "bg-warning/10 text-warning-foreground border-warning/30" },
+    breed_did_you_know:{ border: "border-l-info",      badge: "bg-info/10 text-info-foreground border-info/30" },
+    mutual_aid_tip:    { border: "border-l-accent",    badge: "bg-accent text-accent-foreground border-accent" },
+  };
+
   const renderTip = (t: Tip) => {
     const breed = t.fact_type === "breed_did_you_know" ? extractBreed(t.context_filter) : null;
     const raceSlug = breed ? breedArticles.get(breed.breed) : undefined;
+    const accent = ACCENT[t.fact_type] || { border: "border-l-muted", badge: "" };
     return (
-      <Card key={t.id} className="h-full">
+      <Card key={t.id} className={`h-full border-l-4 ${accent.border}`}>
         <CardContent className="p-5 flex flex-col gap-3 h-full">
           <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">
+            <Badge
+              variant="outline"
+              className={`text-[10px] uppercase tracking-wider ${accent.badge}`}
+            >
               {TYPE_LABEL[t.fact_type]}
             </Badge>
             {breed && (
