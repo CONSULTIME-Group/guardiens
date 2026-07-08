@@ -118,6 +118,84 @@ export default function SitDraftFromPrompt({ secondary = false, primary = null }
     }
   }, [prompt, navigate, toast]);
 
+  const stopStream = useCallback(() => {
+    mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
+    mediaStreamRef.current = null;
+    mediaRecorderRef.current = null;
+    chunksRef.current = [];
+  }, []);
+
+  const startRecording = useCallback(async () => {
+    if (recording || transcribing || loading) return;
+    if (typeof window === "undefined" || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      toast({ variant: "destructive", title: "Micro indisponible", description: "Votre navigateur ne prend pas en charge l'enregistrement audio." });
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+      const preferred = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"];
+      const mimeType = preferred.find((t) => MediaRecorder.isTypeSupported?.(t));
+      const rec = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      mediaRecorderRef.current = rec;
+      chunksRef.current = [];
+      rec.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunksRef.current.push(e.data); };
+      rec.onstop = async () => {
+        const type = rec.mimeType || "audio/webm";
+        const blob = new Blob(chunksRef.current, { type });
+        stopStream();
+        if (blob.size < 2048) {
+          toast({ variant: "destructive", title: "Enregistrement trop court", description: "Parlez au moins une seconde puis réessayez." });
+          return;
+        }
+        setTranscribing(true);
+        try {
+          const form = new FormData();
+          const ext = type.includes("mp4") ? "mp4" : type.includes("ogg") ? "ogg" : "webm";
+          form.append("file", blob, `voice.${ext}`);
+          const { data, error } = await supabase.functions.invoke("transcribe-audio", { body: form });
+          if (error || !data?.text) {
+            const msg = (data as any)?.error || error?.message || "Transcription impossible.";
+            toast({ variant: "destructive", title: "Transcription impossible", description: msg });
+            return;
+          }
+          const transcript = String(data.text).trim();
+          setPrompt((prev) => {
+            const combined = prev.trim().length > 0 ? `${prev.trim()} ${transcript}` : transcript;
+            return combined.slice(0, 1500);
+          });
+          void trackEvent("owner_draft_from_prompt_voice_used", {
+            metadata: { chars: transcript.length },
+          });
+          setTimeout(() => textareaRef.current?.focus(), 50);
+        } catch (e) {
+          toast({ variant: "destructive", title: "Erreur", description: e instanceof Error ? e.message : "Réessayez." });
+        } finally {
+          setTranscribing(false);
+        }
+      };
+      rec.start();
+      setRecording(true);
+    } catch (e) {
+      stopStream();
+      toast({
+        variant: "destructive",
+        title: "Micro refusé",
+        description: "Autorisez l'accès au microphone dans votre navigateur pour dicter votre annonce.",
+      });
+    }
+  }, [recording, transcribing, loading, stopStream, toast]);
+
+  const stopRecording = useCallback(() => {
+    if (!recording) return;
+    setRecording(false);
+    try { mediaRecorderRef.current?.stop(); } catch { stopStream(); }
+  }, [recording, stopStream]);
+
+  useEffect(() => {
+    return () => { stopStream(); };
+  }, [stopStream]);
+
   // Mode « brouillon prêt à publier » : la carte devient un rappel direct
   // avec CTA vers /sits/create?resume=<id>. Pas de champ prompt à re-remplir.
   if (primary?.action === "publish_draft" && primary.draftId) {
