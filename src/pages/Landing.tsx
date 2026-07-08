@@ -650,7 +650,7 @@ const Landing = () => {
                 { href: "#guides-villes", label: t("landing.toc.cities"), mobile: false },
                 { href: "#faq", label: t("landing.toc.faq"), mobile: true },
               ];
-              return items.map((item) => (
+              return items.filter((item) => !("hidden" in item) || !item.hidden).map((item) => (
                 <li key={item.href} className={item.mobile ? "shrink-0" : "shrink-0 hidden md:list-item"}>
                 <a
                   href={item.href}
