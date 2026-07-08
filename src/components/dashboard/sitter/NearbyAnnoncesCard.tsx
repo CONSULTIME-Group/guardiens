@@ -19,15 +19,9 @@ const SitThumb = ({ sit }: { sit: any }) => {
       <img
         src={src}
         alt=""
-        aria-hidden="true"
         loading="lazy"
-        className="absolute inset-0 w-full h-full object-cover scale-110 blur-md brightness-75"
-      />
-      <img
-        src={src}
-        alt=""
-        loading="lazy"
-        className="relative w-full h-full object-contain"
+        className="w-full h-full object-cover object-[center_30%]"
+        onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
       />
     </div>
   ) : (
