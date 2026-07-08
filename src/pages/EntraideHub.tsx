@@ -56,6 +56,7 @@ interface MissionRow {
   postal_code: string | null;
   created_at: string;
   date_needed: string | null;
+  end_date: string | null;
   duration_estimate: string | null;
   status: string;
   mission_type: "besoin" | "offre" | null;
