@@ -62,7 +62,8 @@
       "kpi_animals": "animali accuditi",
       "kpi_members": "iscritti",
       "kpi_missions": "missioni di aiuto reciproco",
-      "brand_tagline": "Vicino a casa vostra."
+      "brand_tagline": "Vicino a casa vostra.",
+      "reassurance": "Assistenti di zona ti aspettano vicino a te."
     },
     "toc": {
       "aria": "Sommario della pagina",
@@ -1360,6 +1361,10 @@
     "section_lede": "Scoprite i proprietari che cercano un sitter in tutta la Francia. Consultate liberamente, iscrivetevi gratis per candidarvi.",
     "cta_all": "Vedi tutti gli annunci",
     "hint": "Consultazione libera · Iscrizione gratuita per candidarsi",
-    "at_name": "Da {{name}}"
+    "at_name": "Da {{name}}",
+    "empty_title": "Sii il primo a pubblicare un annuncio vicino a te",
+    "empty_body": "Assistenti locali sono già iscritti e aspettano la tua richiesta.",
+    "empty_cta": "Pubblica il mio annuncio",
+    "loading": "Caricamento annunci"
   }
 }

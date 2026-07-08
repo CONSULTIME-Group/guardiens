@@ -62,7 +62,8 @@
       "kpi_animals": "pets accompanied",
       "kpi_members": "registered",
       "kpi_missions": "mutual aid missions",
-      "brand_tagline": "Close to home."
+      "brand_tagline": "Close to home.",
+      "reassurance": "Trusted local sitters are waiting near you."
     },
     "toc": {
       "aria": "Page table of contents",
@@ -1362,6 +1363,10 @@
     "section_lede": "Discover owners looking for a sitter across France. Browse freely, sign up for free to apply.",
     "cta_all": "View all listings",
     "hint": "Free browsing · Free sign-up to apply",
-    "at_name": "At {{name}}'s"
+    "at_name": "At {{name}}'s",
+    "empty_title": "Be the first to post a listing near you",
+    "empty_body": "Local sitters are already signed up and waiting for your request.",
+    "empty_cta": "Post my listing",
+    "loading": "Loading listings"
   }
 }
