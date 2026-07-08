@@ -31,6 +31,8 @@ import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import AuthConfirm from "./pages/AuthConfirm";
 import { AppLayout } from "@/components/layout/AppLayout";
+import PublicHeader from "@/components/layout/PublicHeader";
+import PublicFooter from "@/components/layout/PublicFooter";
 
 // ──── Lazy-loaded routes ────
 const FallbackSpinner = () => (
