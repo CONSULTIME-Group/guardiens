@@ -56,6 +56,7 @@ interface MissionRow {
   postal_code: string | null;
   created_at: string;
   date_needed: string | null;
+  end_date: string | null;
   duration_estimate: string | null;
   status: string;
   mission_type: "besoin" | "offre" | null;
@@ -142,6 +143,29 @@ const formatDateNeeded = (d: string | null) => {
   } catch {
     return null;
   }
+};
+
+// Retourne une période lisible :
+//  - start + end : « Du 5 juil. au 12 sept. 2026 »
+//  - end seul    : « Jusqu'au 12 sept. 2026 »
+//  - start seul  : « Pour le 5 juil. 2026 »
+const formatMissionPeriod = (start: string | null, end: string | null) => {
+  const fmtShort = (iso: string) => {
+    try { return format(new Date(iso), "d MMM yyyy", { locale: fr }); } catch { return null; }
+  };
+  if (start && end) {
+    const s = fmtShort(start); const e = fmtShort(end);
+    if (s && e) return { prefix: "Du ", value: `${s} au ${e}` };
+  }
+  if (end) {
+    const e = fmtShort(end);
+    if (e) return { prefix: "Jusqu'au ", value: e };
+  }
+  if (start) {
+    const s = fmtShort(start);
+    if (s) return { prefix: "Pour le ", value: s };
+  }
+  return null;
 };
 
 const formatRelative = (iso: string) => {
@@ -245,7 +269,7 @@ const EntraideHub = () => {
       const { data } = await supabase
         .from("small_missions")
         .select(
-          "id, title, description, category, city, postal_code, created_at, date_needed, duration_estimate, status, mission_type, user_id, photos, profiles:user_id(first_name, avatar_url)",
+          "id, title, description, category, city, postal_code, created_at, date_needed, end_date, duration_estimate, status, mission_type, user_id, photos, profiles:user_id(first_name, avatar_url)",
         )
         .in("status", ["open", "in_progress", "completed"] as any)
         .order("created_at", { ascending: false })
@@ -279,10 +303,17 @@ const EntraideHub = () => {
   /* Filtre proximité (CP + rayon) */
   const proximity = useMissionDistance(missions);
 
+  // Une mission est expirée seulement si sa date de FIN est passée.
+  // Si `end_date` existe, on l'utilise ; sinon on retombe sur `date_needed`.
   const isMissionExpired = (m: MissionRow) => {
-    if (!m.date_needed) return false;
-    try { return new Date(m.date_needed) < new Date(new Date().setHours(0, 0, 0, 0)); } catch { return false; }
+    const ref = m.end_date || m.date_needed;
+    if (!ref) return false;
+    try {
+      const today = new Date(new Date().setHours(0, 0, 0, 0));
+      return new Date(ref) < today;
+    } catch { return false; }
   };
+  const isMissionPast = (m: MissionRow) => m.status === "completed" || isMissionExpired(m);
 
   const sortMissions = (arr: MissionRow[]): MissionRow[] => {
     const applyPrimary = (list: MissionRow[]): MissionRow[] => {
@@ -309,8 +340,8 @@ const EntraideHub = () => {
     // Chantier 8 : missions expirées en fin de liste quel que soit le tri
     const sorted = applyPrimary(arr);
     return [...sorted].sort((a, b) => {
-      const ea = isMissionExpired(a) ? 1 : 0;
-      const eb = isMissionExpired(b) ? 1 : 0;
+      const ea = isMissionPast(a) ? 1 : 0;
+      const eb = isMissionPast(b) ? 1 : 0;
       return ea - eb;
     });
   };
@@ -718,11 +749,13 @@ const EntraideHub = () => {
                   </div>
                 ) : visibleMissions.length > 0 ? (
                   <>
-                    <ul className="space-y-3">
-                      {visibleMissions.map((m) => {
+                    {(() => {
+                      const activeItems = visibleMissions.filter((m) => !isMissionPast(m));
+                      const pastItems = visibleMissions.filter((m) => isMissionPast(m));
+                      const renderCard = (m: MissionRow) => {
                         const code = getDeptCode(m.postal_code);
                         const dept = code ? DEPT_NAMES[code] : null;
-                        const dateLabel = formatDateNeeded(m.date_needed);
+                        const period = formatMissionPeriod(m.date_needed, m.end_date);
                         const isMine = currentUserId && m.user_id === currentUserId;
                         const authorName = m.profiles?.first_name || "Membre";
                         const initial = authorName.charAt(0).toUpperCase();
@@ -788,12 +821,12 @@ const EntraideHub = () => {
                                         Vous
                                       </span>
                                     )}
-                                    {expired && (
+                                    {expired && m.status !== "completed" && (
                                       <span
                                         className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-warning/15 text-warning-foreground uppercase tracking-wide border border-warning/30"
-                                        aria-label="Statut : date dépassée"
+                                        aria-label="Statut : période passée"
                                       >
-                                        Date dépassée
+                                        Passée
                                       </span>
                                     )}
                                   </div>
@@ -849,10 +882,10 @@ const EntraideHub = () => {
                                       <span className="truncate">{m.city}{dept ? `, ${dept}` : ""}</span>
                                     </>
                                   )}
-                                  {dateLabel && (
+                                  {period && (
                                     <>
                                       <span aria-hidden="true">·</span>
-                                      <span>Pour le {dateLabel}</span>
+                                      <span>{period.prefix}{period.value}</span>
                                     </>
                                   )}
                                   <span className="ml-auto">{formatRelative(m.created_at)}</span>
@@ -862,8 +895,35 @@ const EntraideHub = () => {
                             </Link>
                           </li>
                         );
-                      })}
-                    </ul>
+                      };
+                      return (
+                        <>
+                          {activeItems.length > 0 && (
+                            <ul className="space-y-3">
+                              {activeItems.map(renderCard)}
+                            </ul>
+                          )}
+                          {pastItems.length > 0 && (
+                            <section aria-labelledby="past-missions-title" className="mt-10">
+                              <div className="mb-4 flex items-baseline justify-between gap-3 border-t border-border pt-6">
+                                <h3
+                                  id="past-missions-title"
+                                  className="font-heading text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground"
+                                >
+                                  Passées et terminées
+                                </h3>
+                                <span className="text-[11px] text-muted-foreground">
+                                  {pastItems.length} publication{pastItems.length > 1 ? "s" : ""}
+                                </span>
+                              </div>
+                              <ul className="space-y-3 opacity-70">
+                                {pastItems.map(renderCard)}
+                              </ul>
+                            </section>
+                          )}
+                        </>
+                      );
+                    })()}
                     {filteredMissions.length > visibleCount ? (
                       <div className="mt-4 flex justify-center">
                         <Button
