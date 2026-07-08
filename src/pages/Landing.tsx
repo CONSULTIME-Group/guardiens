@@ -530,9 +530,8 @@ const Landing = () => {
       {/* ItemList Schema.org des annonces récentes (Helmet, séparé du @graph). */}
       <RecentSitsItemListJsonLd limit={8} />
 
-      {/* ═══════════════ NAVBAR + BANDEAU GRATUITÉ ═══════════════ */}
+      {/* ═══════════════ NAVBAR ═══════════════ */}
       <PublicHeader />
-      <FreePeriodBanner />
 
       {/* ═══════════════ MAIN LANDMARK (englobe tout le contenu) ═══════════════ */}
       <main id="main-content">
