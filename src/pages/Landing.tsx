@@ -534,8 +534,10 @@ const Landing = () => {
       <PublicHeader />
       <FreePeriodBanner />
 
+      {/* ═══════════════ MAIN LANDMARK (englobe tout le contenu) ═══════════════ */}
+      <main id="main-content">
       {/* ═══════════════ SECTION 1, HERO (épuré, 5 blocs) ═══════════════ */}
-      <section id="main-content" role="main" className="relative w-full min-h-screen flex items-center overflow-hidden">
+      <section className="relative w-full min-h-screen flex items-center overflow-hidden">
         <img
           src="/hero-landing.webp"
           alt="Golden retriever assis dans l'herbe d'un jardin ensoleillé, gueule ouverte."
@@ -547,13 +549,13 @@ const Landing = () => {
           sizes="100vw"
           decoding="async"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/65 to-black/50" />
         <div className="absolute inset-0 bg-foreground/10" aria-hidden />
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-12 md:py-24">
           <div className="max-w-2xl lg:max-w-3xl">
 
-            <p className="font-body text-xs text-white/70 tracking-[0.2em] uppercase mb-6 animate-hero-fade-up">
+            <p className="font-body text-xs text-white/85 tracking-[0.2em] uppercase mb-6 animate-hero-fade-up">
               {t("landing.hero.eyebrow")}
             </p>
 
@@ -568,7 +570,7 @@ const Landing = () => {
             <p className="font-body text-lg md:text-xl text-white/85 max-w-xl mb-4 leading-relaxed animate-hero-fade-up animation-delay-700">
               {t("landing.hero.lede")}
             </p>
-            <p className="font-body text-base md:text-lg text-white/70 max-w-xl mb-10 leading-relaxed italic animate-hero-fade-up animation-delay-700">
+            <p className="font-body text-base md:text-lg text-white/85 max-w-xl mb-10 leading-relaxed italic animate-hero-fade-up animation-delay-700">
               {t("landing.hero.lede_italic")}
             </p>
 
@@ -1526,6 +1528,7 @@ const Landing = () => {
           </p>
         </RevealSection>
       </section>
+      </main>
 
       <PublicFooter />
 

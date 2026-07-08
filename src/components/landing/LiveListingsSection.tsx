@@ -118,7 +118,7 @@ const LiveListingsSection: React.FC = () => {
           </p>
           <h2
             id="live-listings-heading"
-            className="font-display text-3xl md:text-5xl font-semibold text-foreground mb-4"
+            className="font-heading text-3xl md:text-5xl font-semibold text-foreground mb-4"
           >
             {t("live_listings.section_title")}
           </h2>
@@ -151,7 +151,7 @@ const LiveListingsSection: React.FC = () => {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent/40 to-muted">
-                      <span className="text-4xl font-display text-muted-foreground/40">
+                      <span className="text-4xl font-heading text-muted-foreground/40">
                         {initials(s.first_name)}
                       </span>
                     </div>
@@ -163,7 +163,7 @@ const LiveListingsSection: React.FC = () => {
                   )}
                 </div>
                 <div className="p-4">
-                  <h3 className="font-display text-base font-semibold text-foreground line-clamp-2 mb-2 group-hover:text-primary transition-colors">
+                  <h3 className="font-heading text-base font-semibold text-foreground line-clamp-2 mb-2 group-hover:text-primary transition-colors">
                     {s.title}
                   </h3>
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
