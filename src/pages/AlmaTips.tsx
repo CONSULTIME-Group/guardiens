@@ -181,7 +181,11 @@ export default function AlmaTips() {
     [tips, currentMonth],
   );
 
-  const dailyPick = useMemo(() => pickDaily(tips), [tips]);
+  const dailyPick = useMemo(() => {
+    const seasonalIds = new Set(seasonal.map((s) => s.id));
+    const pool = tips.filter((t) => !seasonalIds.has(t.id));
+    return pickDaily(pool.length > 0 ? pool : tips);
+  }, [tips, seasonal]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -190,10 +194,19 @@ export default function AlmaTips() {
         const types = CATEGORY_META[category].types;
         if (!types.includes(t.fact_type)) return false;
       }
-      if (q && !t.content.toLowerCase().includes(q)) return false;
+      if (q) {
+        const hay: string[] = [t.content, TYPE_LABEL[t.fact_type] || ""];
+        const breed = extractBreed(t.context_filter)?.breed;
+        if (breed) hay.push(breed);
+        if (!hay.join(" \u0001 ").toLowerCase().includes(q)) return false;
+      }
       return true;
     });
   }, [tips, category, query]);
+
+  useEffect(() => {
+    setVisibleCount(24);
+  }, [category, query]);
 
   const renderTip = (t: Tip) => {
     const breed = t.fact_type === "breed_did_you_know" ? extractBreed(t.context_filter) : null;
