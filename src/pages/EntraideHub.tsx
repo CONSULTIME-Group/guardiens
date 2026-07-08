@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import PageMeta from "@/components/PageMeta";
+import PublicHeader from "@/components/layout/PublicHeader";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import CategoryPills from "@/components/community/CategoryPills";
 import QuestionCard from "@/components/community/QuestionCard";
