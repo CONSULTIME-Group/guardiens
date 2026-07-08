@@ -15,18 +15,28 @@ const resolveCover = (sit: any): string | null =>
 const SitThumb = ({ sit }: { sit: any }) => {
   const src = resolveCover(sit);
   return src ? (
-    <img
-      src={src}
-      alt=""
-      loading="lazy"
-      className="w-20 aspect-[4/3] rounded-xl object-cover shrink-0 ring-1 ring-border"
-    />
+    <div className="relative w-20 aspect-[4/3] rounded-xl overflow-hidden shrink-0 ring-1 ring-border bg-muted">
+      <img
+        src={src}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        className="absolute inset-0 w-full h-full object-cover scale-110 blur-md brightness-75"
+      />
+      <img
+        src={src}
+        alt=""
+        loading="lazy"
+        className="relative w-full h-full object-contain"
+      />
+    </div>
   ) : (
     <div className="w-20 aspect-[4/3] rounded-xl bg-muted flex items-center justify-center shrink-0 ring-1 ring-border">
       <Home className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
     </div>
   );
 };
+
 
 interface Props {
   nearbyListings: any[];
