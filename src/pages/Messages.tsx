@@ -374,13 +374,6 @@ const Messages = () => {
     loadMessages(activeConv.id);
   }, [activeConv?.id, loadMessages]);
 
-  useEffect(() => {
-    // Toujours vider l'input à chaque changement de conversation ,     // aucune suggestion ni pré-remplissage automatique n'est autorisée.
-    setNewMessage("");
-    if (!activeConv) return;
-    loadMessages(activeConv.id);
-  }, [activeConv?.id, loadMessages]);
-
   // Realtime
   useEffect(() => {
     if (!activeConv) return;
