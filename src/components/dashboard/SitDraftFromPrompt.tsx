@@ -9,7 +9,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, Mic, Square } from "lucide-react";
 import { AlmaAnimated } from "@/components/ai/alma/AlmaAnimated";
 import { useAlmaEvolution } from "@/hooks/useAlmaEvolution";
 
