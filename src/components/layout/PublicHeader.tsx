@@ -68,10 +68,29 @@ export default function PublicHeader() {
         {/* Mobile: auth + burger */}
         <div className="flex sm:hidden items-center gap-1">
           <LanguageSwitcher compact />
-          <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/login")}
+            className="min-h-11 px-2"
+          >
             {t("nav.login")}
           </Button>
-          <Button size="icon" variant="ghost" onClick={() => setOpen(!open)} aria-label={t("nav.menu")}>
+          <Button
+            size="sm"
+            onClick={() => navigate("/inscription")}
+            className="min-h-11 px-3"
+          >
+            {t("nav.register")}
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => setOpen(!open)}
+            aria-label={t("nav.menu")}
+            aria-expanded={open}
+            className="min-h-11 min-w-11"
+          >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
