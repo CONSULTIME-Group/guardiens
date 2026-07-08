@@ -49,8 +49,10 @@ const isHighlighted = (s: LiveSit) => s.is_urgent && isForeign(s.country);
  * 3 autres en pile à droite.
  */
 const LiveListingsStrip: React.FC = () => {
+  const { t } = useTranslation();
   const [sits, setSits] = useState<LiveSit[]>([]);
   const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
     let cancelled = false;
