@@ -62,7 +62,8 @@
       "kpi_animals": "begleitete Tiere",
       "kpi_members": "Mitglieder",
       "kpi_missions": "Hilfseinsätze",
-      "brand_tagline": "Ganz in Ihrer Nähe."
+      "brand_tagline": "Ganz in Ihrer Nähe.",
+      "reassurance": "Vertrauensvolle Betreuer aus deiner Nähe warten auf dich."
     },
     "toc": {
       "aria": "Inhaltsverzeichnis der Seite",
@@ -1360,6 +1361,10 @@
     "section_lede": "Entdecken Sie Eigentümer, die überall in Frankreich einen Sitter suchen. Freie Einsicht, kostenlose Anmeldung zum Bewerben.",
     "cta_all": "Alle Anzeigen ansehen",
     "hint": "Freie Einsicht · Kostenlose Anmeldung zum Bewerben",
-    "at_name": "Bei {{name}}"
+    "at_name": "Bei {{name}}",
+    "empty_title": "Sei die erste Person, die eine Anzeige in deiner Nähe veröffentlicht",
+    "empty_body": "Lokale Betreuer sind bereits angemeldet und warten auf deine Anfrage.",
+    "empty_cta": "Meine Anzeige veröffentlichen",
+    "loading": "Anzeigen werden geladen"
   }
 }

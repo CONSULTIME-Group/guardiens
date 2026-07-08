@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 // DemoListingShowcase retiré (cards « Bientôt disponible » anti-vente).
 // import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
-import LiveListingsSection from "@/components/landing/LiveListingsSection";
+
 import InventoryStrip from "@/components/landing/InventoryStrip";
 import InternationalStrip from "@/components/landing/InternationalStrip";
 import AffinityScoreShowcase from "@/components/landing/AffinityScoreShowcase";
@@ -23,7 +23,7 @@ import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
 import RealMembersStrip from "@/components/landing/RealMembersStrip";
 import PublicHeader from "@/components/layout/PublicHeader";
-import FreePeriodBanner from "@/components/marketing/FreePeriodBanner";
+
 import RecentSitsItemListJsonLd from "@/components/seo/RecentSitsItemListJsonLd";
 
 import PublicFooter from "@/components/layout/PublicFooter";
@@ -530,9 +530,8 @@ const Landing = () => {
       {/* ItemList Schema.org des annonces récentes (Helmet, séparé du @graph). */}
       <RecentSitsItemListJsonLd limit={8} />
 
-      {/* ═══════════════ NAVBAR + BANDEAU GRATUITÉ ═══════════════ */}
+      {/* ═══════════════ NAVBAR ═══════════════ */}
       <PublicHeader />
-      <FreePeriodBanner />
 
       {/* ═══════════════ MAIN LANDMARK (englobe tout le contenu) ═══════════════ */}
       <main id="main-content">
@@ -594,6 +593,10 @@ const Landing = () => {
                 {t("landing.hero.cta_sitter")}
               </button>
             </div>
+
+            <p className="font-body text-sm text-white/85 mt-4 animate-hero-fade-up animation-delay-1000">
+              {t("landing.hero.reassurance")}
+            </p>
 
             {(kpiMaisons > 0 || kpiAnimaux > 0 || kpiInscrits > 0 || kpiMissions > 0) && (
               <div className="flex flex-row flex-wrap justify-start gap-x-6 gap-y-3 mt-8 md:gap-x-12 md:gap-y-6 md:mt-14 animate-hero-fade-up animation-delay-1100">
@@ -707,7 +710,7 @@ const Landing = () => {
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                   {t("landing.usages.sitter.text")}
                 </p>
-                <Link to="/inscription?role=sitter" className="text-sm font-body text-primary font-medium hover:underline">
+                <Link to="/inscription?role=sitter" className="text-sm font-body text-muted-foreground font-medium hover:text-primary hover:underline">
                   {t("landing.usages.sitter.cta")}
                 </Link>
               </div>
@@ -985,10 +988,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 5, ANNONCES EN COURS (live) ═══════════════ */}
-      <RevealSection>
-        <LiveListingsSection />
-      </RevealSection>
+      {/* Section 5 (annonces live) retirée : doublon de LiveListingsStrip sous le hero. */}
 
       {/* ═══════════════ SECTION 5.5, CHIFFRES DU RÉSEAU (InventoryStrip) ═══════════════ */}
       <RevealSection>
@@ -1518,7 +1518,7 @@ const Landing = () => {
                 trackEvent("cta_sitter_clicked", { metadata: { location: "final_cta" } });
                 navigate("/inscription?role=sitter");
               }}
-              className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-transparent text-white border-2 border-white/40 hover:bg-white/10 transition-all duration-200"
+              className="font-body text-xs font-medium tracking-wide rounded-full px-6 py-2.5 bg-transparent text-white/85 border border-white/30 hover:bg-white/10 hover:text-white transition-all duration-200"
             >
               {t("landing.final.cta_sitter")}
             </button>

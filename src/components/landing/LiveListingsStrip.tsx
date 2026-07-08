@@ -129,7 +129,64 @@ const LiveListingsStrip: React.FC = () => {
     };
   }, []);
 
-  if (loading || sits.length < 1) return null;
+  if (loading) {
+    return (
+      <section
+        aria-label={t("live_listings.loading")}
+        aria-busy="true"
+        className="bg-gradient-to-b from-accent/20 to-background border-b border-border/40"
+      >
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-7 md:py-10">
+          <div className="mb-4 md:mb-6 space-y-2">
+            <div className="h-3 w-24 rounded-full bg-muted animate-pulse" />
+            <div className="h-6 w-72 max-w-full rounded-md bg-muted animate-pulse" />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-5">
+            <div className="lg:col-span-3 aspect-[16/10] md:aspect-[16/9] rounded-3xl bg-muted animate-pulse" />
+            <div className="lg:col-span-1 grid grid-cols-1 gap-3 md:gap-4">
+              <div className="h-24 md:h-32 rounded-2xl bg-muted animate-pulse" />
+              <div className="h-24 md:h-32 rounded-2xl bg-muted animate-pulse" />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (sits.length < 1) {
+    return (
+      <section
+        aria-label={t("live_listings.aria")}
+        className="bg-gradient-to-b from-accent/20 to-background border-b border-border/40"
+      >
+        <div className="max-w-3xl mx-auto px-4 md:px-6 py-10 md:py-14 text-center">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <span className="relative flex h-2 w-2 shrink-0" aria-hidden="true">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+            </span>
+            <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-primary font-semibold font-body">
+              {t("live_listings.eyebrow")}
+            </p>
+          </div>
+          <h2 className="font-heading text-xl md:text-2xl font-semibold text-foreground leading-tight mb-2">
+            {t("live_listings.empty_title")}
+          </h2>
+          <p className="font-body text-sm md:text-base text-muted-foreground max-w-lg mx-auto mb-6">
+            {t("live_listings.empty_body")}
+          </p>
+          <Link
+            to="/inscription?role=owner"
+            className="inline-flex items-center gap-1.5 rounded-full px-6 py-3 bg-primary text-primary-foreground text-sm font-semibold font-body hover:brightness-95 transition-all shadow-md shadow-primary/30"
+          >
+            {t("live_listings.empty_cta")} <span aria-hidden>→</span>
+          </Link>
+        </div>
+      </section>
+    );
+  }
+
+
 
   const resolvePhoto = (s: LiveSit) =>
     s.cover_photo_url || s.first_photo || s.gallery_photo || fallbackImageFor(s.sit_city, s.country);

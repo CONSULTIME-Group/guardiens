@@ -62,7 +62,8 @@
       "kpi_animals": "animaux accompagnés",
       "kpi_members": "inscrits",
       "kpi_missions": "missions d'entraide",
-      "brand_tagline": "Proches de chez vous."
+      "brand_tagline": "Proches de chez vous.",
+      "reassurance": "Des gardiens du coin vous attendent près de chez vous."
     },
     "toc": {
       "aria": "Sommaire de la page",
@@ -1377,6 +1378,10 @@
     "section_lede": "Découvrez les propriétaires qui cherchent un gardien partout en France. Consultez les annonces librement, inscrivez-vous gratuitement pour postuler.",
     "cta_all": "Voir toutes les annonces",
     "hint": "Consultation libre · Inscription gratuite pour postuler",
-    "at_name": "Chez {{name}}"
+    "at_name": "Chez {{name}}",
+    "empty_title": "Soyez le premier à publier une annonce près de chez vous",
+    "empty_body": "Des gardiens du coin sont déjà inscrits et attendent votre demande.",
+    "empty_cta": "Publier mon annonce",
+    "loading": "Chargement des annonces en cours"
   }
 }
