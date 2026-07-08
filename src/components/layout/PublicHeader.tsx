@@ -141,9 +141,15 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
             </Link>
           ))}
           <div className="pt-2 border-t border-border">
-            <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/inscription"); }}>
-              {t("nav.register")}
-            </Button>
+            {isAuthenticated ? (
+              <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/dashboard"); }}>
+                Mon espace
+              </Button>
+            ) : (
+              <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/inscription"); }}>
+                {t("nav.register")}
+              </Button>
+            )}
           </div>
         </nav>
       )}
