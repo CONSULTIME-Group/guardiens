@@ -229,6 +229,8 @@ export default function PublicListings() {
           <SearchSitter mode="public" />
         </Suspense>
 
+        <PastListingsSection />
+
         <InternationalShowcase />
 
         <section aria-labelledby="become-sitter-title" className="max-w-6xl mx-auto px-4 md:px-6 mt-10 md:mt-16 mb-10 md:mb-16">
