@@ -209,23 +209,29 @@ export default function AlmaTips() {
   }, [category, query]);
 
   // Accent visuel par fact_type (tokens sémantiques uniquement).
-  const ACCENT: Record<
-    FactType,
-    { border: string; badge: string }
-  > = {
-    pet_care_tip:      { border: "border-l-primary",   badge: "bg-primary/10 text-primary border-primary/20" },
-    dog_behavior_tip:  { border: "border-l-primary",   badge: "bg-primary/10 text-primary border-primary/20" },
-    cat_behavior_tip:  { border: "border-l-primary",   badge: "bg-primary/10 text-primary border-primary/20" },
-    home_care_tip:     { border: "border-l-secondary", badge: "bg-secondary text-secondary-foreground border-secondary" },
-    seasonal_advice:   { border: "border-l-warning",   badge: "bg-warning/10 text-warning-foreground border-warning/30" },
-    breed_did_you_know:{ border: "border-l-info",      badge: "bg-info/10 text-info-foreground border-info/30" },
-    mutual_aid_tip:    { border: "border-l-accent",    badge: "bg-accent text-accent-foreground border-accent" },
-  };
+  function accentFor(factType: FactType) {
+    switch (factType) {
+      case "pet_care_tip":
+      case "dog_behavior_tip":
+      case "cat_behavior_tip":
+        return { border: "border-l-primary", badge: "bg-primary/10 text-primary border-primary/20" };
+      case "home_care_tip":
+        return { border: "border-l-secondary", badge: "bg-secondary text-secondary-foreground border-secondary" };
+      case "seasonal_advice":
+        return { border: "border-l-warning", badge: "bg-warning/10 text-warning-foreground border-warning/30" };
+      case "breed_did_you_know":
+        return { border: "border-l-accent", badge: "bg-accent text-accent-foreground border-accent" };
+      case "mutual_aid_tip":
+        return { border: "border-l-accent", badge: "bg-accent text-accent-foreground border-accent" };
+      default:
+        return { border: "border-l-muted", badge: "bg-muted text-muted-foreground border-muted" };
+    }
+  }
 
   const renderTip = (t: Tip) => {
     const breed = t.fact_type === "breed_did_you_know" ? extractBreed(t.context_filter) : null;
     const raceSlug = breed ? breedArticles.get(breed.breed) : undefined;
-    const accent = ACCENT[t.fact_type] || { border: "border-l-muted", badge: "" };
+    const accent = accentFor(t.fact_type);
     return (
       <Card key={t.id} className={`h-full border-l-4 ${accent.border}`}>
         <CardContent className="p-5 flex flex-col gap-3 h-full">
@@ -371,15 +377,30 @@ export default function AlmaTips() {
                 Le conseil du jour
               </h2>
               <div className="rounded-xl bg-muted/40 border border-border p-5 md:p-7">
-                <div className="flex items-start gap-4 mb-4">
+                <div className="flex items-start gap-4 mb-5">
                   <div className="shrink-0">
                     <AlmaAvatar size={40} breathe />
                   </div>
-                  <p className="text-sm md:text-base text-foreground/85 leading-relaxed">
+                  <p className="text-sm md:text-base text-foreground/85 leading-relaxed pt-2">
                     Aujourd'hui, je vous glisse ce repère.
                   </p>
                 </div>
-                <div className="max-w-2xl">{renderTip(dailyPick)}</div>
+                <div className="max-w-3xl">
+                  <p className="text-base text-foreground leading-relaxed whitespace-pre-line">
+                    {dailyPick.content}
+                  </p>
+                  {dailyPick.source_url && (
+                    <a
+                      href={dailyPick.source_url}
+                      target="_blank"
+                      rel="noopener"
+                      className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-3"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      Source : {extractDomain(dailyPick.source_url)}
+                    </a>
+                  )}
+                </div>
               </div>
             </section>
           )}
