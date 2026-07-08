@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import ProsMap from "@/components/pros/ProsMap";
 import ProVerifiedBadge from "@/components/pros/ProVerifiedBadge";
 import { useAuth } from "@/contexts/AuthContext";
+import PublicHeader from "@/components/layout/PublicHeader";
 
 type ProRow = {
   id: string;
