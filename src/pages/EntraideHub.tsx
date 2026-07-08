@@ -303,9 +303,11 @@ const EntraideHub = () => {
   /* Filtre proximité (CP + rayon) */
   const proximity = useMissionDistance(missions);
 
-  // Une mission est expirée seulement si sa date de FIN est passée.
-  // Si `end_date` existe, on l'utilise ; sinon on retombe sur `date_needed`.
+  // Une OFFRE (disponibilité) n'expire jamais par date : elle ne devient passée
+  // que si son statut est explicitement clôturé (completed).
+  // Seuls les BESOINS ont une échéance (end_date, sinon date_needed).
   const isMissionExpired = (m: MissionRow) => {
+    if ((m.mission_type ?? "besoin") === "offre") return false;
     const ref = m.end_date || m.date_needed;
     if (!ref) return false;
     try {
