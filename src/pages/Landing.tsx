@@ -570,7 +570,7 @@ const Landing = () => {
             <p className="font-body text-lg md:text-xl text-white/85 max-w-xl mb-4 leading-relaxed animate-hero-fade-up animation-delay-700">
               {t("landing.hero.lede")}
             </p>
-            <p className="font-body text-base md:text-lg text-white/70 max-w-xl mb-10 leading-relaxed italic animate-hero-fade-up animation-delay-700">
+            <p className="font-body text-base md:text-lg text-white/85 max-w-xl mb-10 leading-relaxed italic animate-hero-fade-up animation-delay-700">
               {t("landing.hero.lede_italic")}
             </p>
 
