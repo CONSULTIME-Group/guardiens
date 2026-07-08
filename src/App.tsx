@@ -301,15 +301,15 @@ const AppRoutes = () => (
       <Route path="/conseils" element={<ContentRoute><AlmaTips /></ContentRoute>} />
       <Route path="/alma" element={<AppLayout><AlmaEvolution /></AppLayout>} />
       <Route path="/actualites" element={<ContentRoute><News /></ContentRoute>} />
-      <Route path="/actualites/inventaire-guardiens-france" element={<ContentRoute><ArticleInventaire /></ContentRoute>} />
-      <Route path="/actualites/:slug" element={<ContentRoute><ArticleDetail /></ContentRoute>} />
+      <Route path="/actualites/inventaire-guardiens-france" element={<PublicShellRoute><ArticleInventaire /></PublicShellRoute>} />
+      <Route path="/actualites/:slug" element={<PublicShellRoute><ArticleDetail /></PublicShellRoute>} />
       <Route path="/auteurs/:slug" element={<AuthorPage />} />
       <Route path="/articles" element={<Navigate to="/actualites" replace />} />
       <Route path="/articles/:slug" element={<NavigateBlogSlug />} />
       <Route path="/blog" element={<Navigate to="/actualites" replace />} />
       <Route path="/blog/:slug" element={<NavigateBlogSlug />} />
       <Route path="/a-propos" element={<About />} />
-      <Route path="/observatoire-garde-animaux" element={<ContentRoute><Observatoire /></ContentRoute>} />
+      <Route path="/observatoire-garde-animaux" element={<PublicShellRoute><Observatoire /></PublicShellRoute>} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/cgu" element={<Terms />} />
       <Route path="/cgs" element={<Cgs />} />
@@ -317,13 +317,13 @@ const AppRoutes = () => (
       <Route path="/mentions-legales" element={<MentionsLegales />} />
       <Route path="/faq" element={<FAQ />} />
       <Route path="/guides" element={<ContentRoute><GuidesListing /></ContentRoute>} />
-      <Route path="/guides/:slug" element={<ContentRoute><GuideDetail /></ContentRoute>} />
+      <Route path="/guides/:slug" element={<PublicShellRoute><GuideDetail /></PublicShellRoute>} />
       <Route path="/guide" element={<Navigate to="/guides" replace />} />
       <Route path="/guide/:slug" element={<NavigateGuideSlug />} />
-      <Route path="/house-sitting/:slug" element={<ContentRoute><CityPage /></ContentRoute>} />
-      <Route path="/races" element={<ContentRoute><BreedsListing /></ContentRoute>} />
-      <Route path="/races/:slug" element={<ContentRoute><BreedPage /></ContentRoute>} />
-      <Route path="/departement/:slug" element={<ContentRoute><DepartmentPage /></ContentRoute>} />
+      <Route path="/house-sitting/:slug" element={<PublicShellRoute><CityPage /></PublicShellRoute>} />
+      <Route path="/races" element={<PublicShellRoute><BreedsListing /></PublicShellRoute>} />
+      <Route path="/races/:slug" element={<PublicShellRoute><BreedPage /></PublicShellRoute>} />
+      <Route path="/departement/:slug" element={<PublicShellRoute><DepartmentPage /></PublicShellRoute>} />
 
       <Route path="/tarifs" element={<Pricing />} />
       <Route path="/test-accord" element={<div className="p-6 bg-background min-h-screen"><TestAccordLazy /></div>} />
