@@ -41,6 +41,8 @@ export default function SitDraftFromPrompt({ secondary = false, primary = null }
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [almaMood, setAlmaMood] = useState<"idle" | "happy" | "thinking" | "attentive">("attentive");
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { data: almaEvo } = useAlmaEvolution();
@@ -49,6 +51,9 @@ export default function SitDraftFromPrompt({ secondary = false, primary = null }
   const { toast } = useToast();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const seenRef = useRef(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
 
   useEffect(() => {
     if (!seenRef.current) {
