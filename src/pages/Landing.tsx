@@ -594,6 +594,10 @@ const Landing = () => {
               </button>
             </div>
 
+            <p className="font-body text-sm text-white/85 mt-4 animate-hero-fade-up animation-delay-1000">
+              {t("landing.hero.reassurance")}
+            </p>
+
             {(kpiMaisons > 0 || kpiAnimaux > 0 || kpiInscrits > 0 || kpiMissions > 0) && (
               <div className="flex flex-row flex-wrap justify-start gap-x-6 gap-y-3 mt-8 md:gap-x-12 md:gap-y-6 md:mt-14 animate-hero-fade-up animation-delay-1100">
                 {kpiMaisons > 0 && (
