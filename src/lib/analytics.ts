@@ -131,6 +131,7 @@ export type EventType =
   | "owner_draft_from_prompt_input_seen"        // Impression du composant "1 phrase" (1×/session)
   | "owner_draft_from_prompt_generated"         // Génération réussie (prompt_length, generated_length, confidence, draft_id)
   | "owner_draft_from_prompt_published"         // Publication d'un sit issu d'un draft généré par prompt (sit_id)
+  | "owner_draft_from_prompt_voice_used"        // Utilisation de la dictée vocale pour remplir le prompt (chars)
  | "owner_first_nba_gardiens_seen"             // Impression carte 3 gardiens (sitters_count, avg_affinity)
  | "owner_primary_action_publish_draft_click"  // Clic « Reprendre et publier » sur la carte d'activation
  | "owner_primary_action_seen"                 // Impression carte d'activation goulot (action, has_nearby)
