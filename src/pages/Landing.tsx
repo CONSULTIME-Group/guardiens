@@ -1527,7 +1527,7 @@ const Landing = () => {
             {t("landing.final.footnote")}
           </p>
         </RevealSection>
-      </section>
+      </main>
 
       <PublicFooter />
 
