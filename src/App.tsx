@@ -450,14 +450,11 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <ScrollToTop />
-              <PageViewTracker />
-              <FacebookReferralTracker />
               <OfflineBanner />
-              <NetworkErrorMonitor />
               <PreviewDiagnosticBanner />
               <DuplicateAccountGuard />
               <AppRoutes />
-              <FacebookReferralFeedback />
+              <DeferredTrackers />
               {/* Bannière cookies retirée : mesure d'audience GA4 exemptée CNIL
                   (anonymize_ip, pas de pub/signals). Voir src/lib/cookieConsent.ts. */}
             </BrowserRouter>
