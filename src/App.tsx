@@ -311,7 +311,7 @@ const AppRoutes = () => (
       <Route path="/tarifs" element={<Pricing />} />
       <Route path="/test-accord" element={<div className="p-6 bg-background min-h-screen"><TestAccordLazy /></div>} />
       <Route path="/gardien-urgence" element={<EmergencySitter />} />
-      <Route path="/petites-missions" element={<AppLayout><EntraideHub /></AppLayout>} />
+      <Route path="/petites-missions" element={<ContentRoute><EntraideHub /></ContentRoute>} />
       <Route path="/petites-missions/creer" element={<ProtectedRoute><CreateSmallMission /></ProtectedRoute>} />
       <Route path="/petites-missions/nouveau" element={<Navigate to="/petites-missions/creer" replace />} />
       <Route path="/petites-missions/lyon" element={<MissionsCityPage />} />
@@ -327,7 +327,7 @@ const AppRoutes = () => (
       <Route path="/annonces/demo/:slug" element={<DemoSitDetail />} />
       <Route path="/annonces/:id" element={<PublicSitDetail />} />
       <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
-      <Route path="/pros" element={<AppLayout><ProsListing /></AppLayout>} />
+      <Route path="/pros" element={<ContentRoute><ProsListing /></ContentRoute>} />
       <Route path="/pros/inscription" element={<AppLayout><ProOnboarding /></AppLayout>} />
       <Route path="/pros/mon-espace" element={<AppLayout><MyProProfile /></AppLayout>} />
 

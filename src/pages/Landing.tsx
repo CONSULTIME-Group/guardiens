@@ -19,6 +19,7 @@ import InventoryStrip from "@/components/landing/InventoryStrip";
 import InternationalStrip from "@/components/landing/InternationalStrip";
 import AffinityScoreShowcase from "@/components/landing/AffinityScoreShowcase";
 import ProsShowcase from "@/components/landing/ProsShowcase";
+import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
 import RealMembersStrip from "@/components/landing/RealMembersStrip";
 import PublicHeader from "@/components/layout/PublicHeader";
@@ -172,6 +173,8 @@ RevealSection.displayName = "RevealSection";
 const Landing = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { data: inventaire } = useInventaireCounts();
+  const hasPros = (inventaire?.pros_total ?? 0) > 0;
 
   const seasonal = getSeasonalBanner();
 
@@ -643,11 +646,11 @@ const Landing = () => {
                 { href: "#matching", label: t("landing.toc.matching"), mobile: true },
                 { href: "#temoignages", label: t("landing.toc.testimonials"), mobile: true },
                 { href: "#notre-histoire", label: t("landing.toc.story"), mobile: false },
-                { href: "#pros", label: t("landing.toc.pros"), mobile: false },
+                { href: "#pros", label: t("landing.toc.pros"), mobile: false, hidden: !hasPros },
                 { href: "#guides-villes", label: t("landing.toc.cities"), mobile: false },
                 { href: "#faq", label: t("landing.toc.faq"), mobile: true },
               ];
-              return items.map((item) => (
+              return items.filter((item) => !("hidden" in item) || !item.hidden).map((item) => (
                 <li key={item.href} className={item.mobile ? "shrink-0" : "shrink-0 hidden md:list-item"}>
                 <a
                   href={item.href}

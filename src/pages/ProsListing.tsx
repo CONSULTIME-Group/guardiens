@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import ProsMap from "@/components/pros/ProsMap";
 import ProVerifiedBadge from "@/components/pros/ProVerifiedBadge";
 import { useAuth } from "@/contexts/AuthContext";
+import PublicHeader from "@/components/layout/PublicHeader";
 
 type ProRow = {
   id: string;
@@ -83,6 +84,7 @@ export default function ProsListing() {
         <meta name="description" content={t("pros_listing.meta_description")} />
         <link rel="canonical" href="https://guardiens.fr/pros" />
       </Helmet>
+      <PublicHeader />
 
       <main className="container mx-auto px-4 py-6 md:py-10 max-w-6xl min-w-0">
         {/* En-tête épuré */}

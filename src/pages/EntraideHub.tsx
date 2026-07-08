@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import PageMeta from "@/components/PageMeta";
+import PublicHeader from "@/components/layout/PublicHeader";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import CategoryPills from "@/components/community/CategoryPills";
 import QuestionCard from "@/components/community/QuestionCard";
@@ -409,6 +410,7 @@ const EntraideHub = () => {
         path="/petites-missions"
       />
       <div className="min-h-screen bg-background">
+        <PublicHeader />
         <PageBreadcrumb items={[{ label: "Entraide" }]} />
 
         <section className="max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-28 sm:pt-6 sm:pb-8 min-w-0">
