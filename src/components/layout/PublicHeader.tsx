@@ -77,21 +77,33 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
         {/* Mobile: auth + burger */}
         <div className="flex sm:hidden items-center gap-1">
           <LanguageSwitcher compact />
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/login")}
-            className="min-h-11 px-2"
-          >
-            {t("nav.login")}
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => navigate("/inscription")}
-            className="min-h-11 px-3"
-          >
-            {t("nav.register")}
-          </Button>
+          {isAuthenticated ? (
+            <Button
+              size="sm"
+              onClick={() => navigate("/dashboard")}
+              className="min-h-11 px-3"
+            >
+              Mon espace
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/login")}
+                className="min-h-11 px-2"
+              >
+                {t("nav.login")}
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => navigate("/inscription")}
+                className="min-h-11 px-3"
+              >
+                {t("nav.register")}
+              </Button>
+            </>
+          )}
           <Button
             size="icon"
             variant="ghost"
