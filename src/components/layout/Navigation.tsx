@@ -41,15 +41,15 @@ const SidebarItem = ({
       cn(
         "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors relative",
         isActive
-          ? "bg-[hsl(var(--primary)/0.08)] text-[#2D6A4F] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-[3px] before:h-5 before:rounded-r before:bg-[#2D6A4F]"
-          : "text-[#9A958A] hover:bg-accent hover:text-foreground"
+          ? "bg-primary/8 text-primary before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-[3px] before:h-5 before:rounded-r before:bg-primary"
+          : "text-muted-foreground hover:bg-accent hover:text-foreground"
       )
     }
   >
     <Icon className="h-[18px] w-[18px]" strokeWidth={1.8} />
     <span className="flex-1 truncate">{label}</span>
     {beta && (
-      <span className="text-[9px] uppercase tracking-wider font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
+      <span className="text-[9px] uppercase tracking-wider font-bold bg-warning/15 text-warning-foreground px-1.5 py-0.5 rounded">
         Bêta
       </span>
     )}
@@ -262,18 +262,18 @@ export const Sidebar = () => {
                 >
                   <Search className="h-[18px] w-[18px]" strokeWidth={1.8} />
                   Recherche
-                  <Crown className="h-[11px] w-[11px] text-amber-500 ml-1" />
+                  <Crown className="h-[11px] w-[11px] text-warning ml-1" />
                 </button>
               ) : (
                 <SidebarItem to="/search" icon={Search} label={effectiveRole === "owner" ? "Recherche gardiens" : "Recherche"} />
               )}
 
               <SidebarItem to="/pros" icon={Briefcase} label="Pros animaliers" beta />
-              <SidebarItem to="/petites-missions" icon={Handshake} label="Conseils & coups de main" badge={missionBadgeCount} />
+              <SidebarItem to="/petites-missions" icon={Handshake} label="Entraide" badge={missionBadgeCount} />
 
               <GroupLabel label="Ressources" />
               <SidebarItem to="/conseils" icon={Sparkles} label="Conseils d'Alma" />
-              <SidebarItem to="/actualites" icon={Newspaper} label="Guides & Conseils" />
+              <SidebarItem to="/actualites" icon={Newspaper} label="Le journal" />
               <SidebarItem to="/guides" icon={Compass} label="Guides locaux" />
             </>
           );
@@ -283,7 +283,7 @@ export const Sidebar = () => {
       {/* Bottom section */}
       <div className="p-3 border-t border-border space-y-0.5">
         {effectiveRole === "sitter" && (
-          <SidebarItem to="/mon-abonnement" icon={Star} label="Mon abonnement" />
+          <SidebarItem to="/mon-abonnement" icon={CreditCard} label="Mon abonnement" />
         )}
         {isAdmin && (
           <SidebarItem to="/admin" icon={Shield} label="Espace admin" />
@@ -305,7 +305,7 @@ export const Sidebar = () => {
 
         <button
           onClick={logout}
-          className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-[#9A958A] hover:bg-accent hover:text-foreground transition-colors w-full"
+          className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors w-full"
         >
           <LogOut className="h-[18px] w-[18px]" strokeWidth={1.8} />
           Déconnexion
@@ -613,14 +613,14 @@ export const BottomNav = () => {
               <div className="space-y-1">
                 {[
                   { to: "/profile", icon: UserCircle2, label: "Mon profil", badge: 0 },
-                  { to: "/search", icon: Search, label: effectiveRole === "owner" ? "Recherche gardiens" : "Annonces en cours", badge: 0 },
+                  { to: "/search", icon: Search, label: effectiveRole === "owner" ? "Recherche gardiens" : "Recherche", badge: 0 },
                   { to: "/sits", icon: Calendar, label: effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures", badge: sitsBadge },
                   { to: "/favoris", icon: Heart, label: "Mes favoris", badge: 0 },
-                  { to: "/petites-missions", icon: Handshake, label: "Conseils & coups de main", badge: missionBadgeCount },
+                  { to: "/petites-missions", icon: Handshake, label: "Entraide", badge: missionBadgeCount },
                   { to: "/conseils", icon: Sparkles, label: "Conseils d'Alma", badge: 0 },
-                  { to: "/actualites", icon: Newspaper, label: "Guides & Conseils", badge: 0 },
+                  { to: "/actualites", icon: Newspaper, label: "Le journal", badge: 0 },
                   { to: "/guides", icon: Compass, label: "Guides locaux", badge: 0 },
-                  ...(effectiveRole === "sitter" ? [{ to: "/mon-abonnement", icon: Star, label: "Mon abonnement", badge: 0 }] : []),
+                  ...(effectiveRole === "sitter" ? [{ to: "/mon-abonnement", icon: CreditCard, label: "Mon abonnement", badge: 0 }] : []),
                   { to: "/settings", icon: Settings, label: "Paramètres", badge: 0 },
                   { to: "/contact", icon: LifeBuoy, label: "Aide & contact", badge: 0 },
                   ...(isAdmin ? [{ to: "/admin", icon: Shield, label: "Espace admin", badge: 0 }] : []),
@@ -633,7 +633,7 @@ export const BottomNav = () => {
                       cn(
                         "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors relative",
                         isActive
-                          ? "bg-[hsl(var(--primary)/0.08)] text-primary"
+                          ? "bg-primary/8 text-primary"
                           : "text-muted-foreground hover:bg-accent hover:text-foreground"
                       )
                     }
