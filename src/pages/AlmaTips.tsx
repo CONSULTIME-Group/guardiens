@@ -208,14 +208,32 @@ export default function AlmaTips() {
     setVisibleCount(24);
   }, [category, query]);
 
+  // Accent visuel par fact_type (tokens sémantiques uniquement).
+  const ACCENT: Record<
+    FactType,
+    { border: string; badge: string }
+  > = {
+    pet_care_tip:      { border: "border-l-primary",   badge: "bg-primary/10 text-primary border-primary/20" },
+    dog_behavior_tip:  { border: "border-l-primary",   badge: "bg-primary/10 text-primary border-primary/20" },
+    cat_behavior_tip:  { border: "border-l-primary",   badge: "bg-primary/10 text-primary border-primary/20" },
+    home_care_tip:     { border: "border-l-secondary", badge: "bg-secondary text-secondary-foreground border-secondary" },
+    seasonal_advice:   { border: "border-l-warning",   badge: "bg-warning/10 text-warning-foreground border-warning/30" },
+    breed_did_you_know:{ border: "border-l-info",      badge: "bg-info/10 text-info-foreground border-info/30" },
+    mutual_aid_tip:    { border: "border-l-accent",    badge: "bg-accent text-accent-foreground border-accent" },
+  };
+
   const renderTip = (t: Tip) => {
     const breed = t.fact_type === "breed_did_you_know" ? extractBreed(t.context_filter) : null;
     const raceSlug = breed ? breedArticles.get(breed.breed) : undefined;
+    const accent = ACCENT[t.fact_type] || { border: "border-l-muted", badge: "" };
     return (
-      <Card key={t.id} className="h-full">
+      <Card key={t.id} className={`h-full border-l-4 ${accent.border}`}>
         <CardContent className="p-5 flex flex-col gap-3 h-full">
           <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">
+            <Badge
+              variant="outline"
+              className={`text-[10px] uppercase tracking-wider ${accent.badge}`}
+            >
               {TYPE_LABEL[t.fact_type]}
             </Badge>
             {breed && (
@@ -257,7 +275,7 @@ export default function AlmaTips() {
     );
   };
 
-  const jsonLd = {
+  const collectionJsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: "Les conseils d'Alma",
@@ -271,6 +289,34 @@ export default function AlmaTips() {
     },
   };
 
+  if (tips.length > 0) {
+    const items = tips.slice(0, 100).map((t, idx) => {
+      const breed = extractBreed(t.context_filter);
+      const name = breed
+        ? `${TYPE_LABEL[t.fact_type]} : ${breed.breed}`
+        : TYPE_LABEL[t.fact_type];
+      const work: Record<string, unknown> = {
+        "@type": "CreativeWork",
+        name,
+        text: t.content,
+      };
+      if (t.source_url) {
+        work.url = t.source_url;
+        work.citation = t.source_url;
+      }
+      return {
+        "@type": "ListItem",
+        position: idx + 1,
+        item: work,
+      };
+    });
+    collectionJsonLd.mainEntity = {
+      "@type": "ItemList",
+      numberOfItems: items.length,
+      itemListElement: items,
+    };
+  }
+
   return (
     <>
       <PageMeta
@@ -279,7 +325,7 @@ export default function AlmaTips() {
         path="/conseils"
         canonical="/conseils"
       />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
 
       <div className="min-h-screen bg-background flex flex-col">
         <PublicHeader />
@@ -318,16 +364,23 @@ export default function AlmaTips() {
             </section>
           )}
 
-          {/* Conseil du jour */}
+          {/* Conseil du jour, hero éditorial */}
           {dailyPick && (
             <section className="mb-10">
-              <h2 className="font-heading text-xl md:text-2xl font-semibold mb-2">
+              <h2 className="font-heading text-xl md:text-2xl font-semibold mb-4">
                 Le conseil du jour
               </h2>
-              <p className="text-sm text-muted-foreground mb-4">
-                Aujourd'hui, je vous glisse ce repère.
-              </p>
-              <div className="max-w-2xl">{renderTip(dailyPick)}</div>
+              <div className="rounded-xl bg-muted/40 border border-border p-5 md:p-7">
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="shrink-0">
+                    <AlmaAvatar size={40} breathe />
+                  </div>
+                  <p className="text-sm md:text-base text-foreground/85 leading-relaxed">
+                    Aujourd'hui, je vous glisse ce repère.
+                  </p>
+                </div>
+                <div className="max-w-2xl">{renderTip(dailyPick)}</div>
+              </div>
             </section>
           )}
 
