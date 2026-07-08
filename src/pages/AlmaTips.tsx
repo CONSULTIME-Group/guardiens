@@ -231,7 +231,7 @@ export default function AlmaTips() {
   const renderTip = (t: Tip) => {
     const breed = t.fact_type === "breed_did_you_know" ? extractBreed(t.context_filter) : null;
     const raceSlug = breed ? breedArticles.get(breed.breed) : undefined;
-    const accent = ACCENT[t.fact_type] || { border: "border-l-muted", badge: "" };
+    const accent = accentFor(t.fact_type);
     return (
       <Card key={t.id} className={`h-full border-l-4 ${accent.border}`}>
         <CardContent className="p-5 flex flex-col gap-3 h-full">
