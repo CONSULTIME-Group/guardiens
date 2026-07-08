@@ -45,9 +45,10 @@ interface Tip {
   context_filter: Record<string, unknown> | null;
 }
 
-type Category = "all" | "dog" | "cat" | "home" | "season" | "breed" | "aid";
+type Category = "all" | "care" | "dog" | "cat" | "home" | "season" | "breed" | "aid";
 
 const CATEGORY_META: Record<Exclude<Category, "all">, { label: string; types: FactType[] }> = {
+  care: { label: "Soins", types: ["pet_care_tip"] },
   dog: { label: "Chien", types: ["dog_behavior_tip"] },
   cat: { label: "Chat", types: ["cat_behavior_tip"] },
   home: { label: "Maison", types: ["home_care_tip"] },
@@ -58,6 +59,7 @@ const CATEGORY_META: Record<Exclude<Category, "all">, { label: string; types: Fa
 
 const CATEGORIES: { key: Category; label: string }[] = [
   { key: "all", label: "Tout" },
+  { key: "care", label: "Soins" },
   { key: "dog", label: "Chien" },
   { key: "cat", label: "Chat" },
   { key: "home", label: "Maison" },
