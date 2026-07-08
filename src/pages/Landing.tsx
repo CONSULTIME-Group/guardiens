@@ -555,14 +555,14 @@ const Landing = () => {
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-12 md:py-24">
           <div className="max-w-2xl lg:max-w-3xl">
 
-            <p className="font-body text-xs text-white/85 tracking-[0.2em] uppercase mb-6 animate-hero-fade-up">
+            <p className="font-body text-xs text-white/85 tracking-[0.2em] uppercase mb-6">
               {t("landing.hero.eyebrow")}
             </p>
 
             <p className="font-heading text-2xl md:text-3xl italic text-white/90 mb-3 animate-hero-fade-up animation-delay-400">
               {t("landing.hero.brand_tagline")}
             </p>
-            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6 animate-hero-fade-up animation-delay-400 max-w-3xl">
+            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6 max-w-3xl">
               {t("landing.hero.title_main")} <span className="text-white/80">{t("landing.hero.title_accent")}</span>
             </h1>
 
