@@ -13,13 +13,10 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import SkipToContent from "@/components/layout/SkipToContent";
 import OfflineBanner from "@/components/layout/OfflineBanner";
-import NetworkErrorMonitor from "@/components/layout/NetworkErrorMonitor";
 import { PreviewDiagnosticBanner } from "@/components/PreviewDiagnosticBanner";
 import DuplicateAccountGuard from "@/components/auth/DuplicateAccountGuard";
 import ScrollToTop from "@/components/layout/ScrollToTop";
-import PageViewTracker from "@/components/analytics/PageViewTracker";
-import FacebookReferralTracker from "@/components/analytics/FacebookReferralTracker";
-import FacebookReferralFeedback from "@/components/analytics/FacebookReferralFeedback";
+import DeferredTrackers from "@/components/analytics/DeferredTrackers";
 // CookieConsent retiré (mesure d'audience exemptée CNIL)
 import { toast } from "sonner";
 import { reportError } from "@/lib/errorLogger";
