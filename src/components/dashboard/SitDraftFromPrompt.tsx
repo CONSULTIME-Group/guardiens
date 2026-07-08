@@ -297,7 +297,7 @@ export default function SitDraftFromPrompt({ secondary = false, primary = null }
         <span className="text-xs text-muted-foreground tabular-nums">
           {prompt.length}/1500
         </span>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <Button
             type="button"
             variant={recording ? "destructive" : "outline"}
