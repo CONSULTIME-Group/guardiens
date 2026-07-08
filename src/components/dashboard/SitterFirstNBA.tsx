@@ -97,6 +97,15 @@ const SitterFirstNBA = ({ sits }: Props) => {
                     onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
                   />
                   <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" aria-hidden="true" />
+                  <div className="absolute top-3 right-3 z-10 bg-background/85 backdrop-blur-sm rounded-full">
+                    <AffinityBadge
+                      result={sit.affinity}
+                      size="sm"
+                      variant="numeric"
+                      trackingContext="sitter_first_nba"
+                      trackingId={sit.id}
+                    />
+                  </div>
                 </div>
               ) : (
                 <div className="w-full aspect-[16/10] bg-primary/10" aria-hidden="true" />
@@ -104,22 +113,13 @@ const SitterFirstNBA = ({ sits }: Props) => {
 
             </Link>
             <div className="p-4 flex-1 flex flex-col gap-2">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground truncate">
-                    {sit.city ?? sit.title ?? "Annonce"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Du {fmt(sit.start_date)} au {fmt(sit.end_date)}
-                  </p>
-                </div>
-                <AffinityBadge
-                  result={sit.affinity}
-                  size="sm"
-                  variant="numeric"
-                  trackingContext="sitter_first_nba"
-                  trackingId={sit.id}
-                />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">
+                  {sit.city ?? sit.title ?? "Annonce"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Du {fmt(sit.start_date)} au {fmt(sit.end_date)}
+                </p>
               </div>
               {sit.owner_first_name && (
                 <p className="text-xs text-muted-foreground">
