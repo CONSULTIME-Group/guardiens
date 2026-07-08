@@ -1494,6 +1494,8 @@ const Landing = () => {
         </div>
       </section>
 
+      <AlmaTipsTeaser />
+
       {/* ═══════════════ SECTION 10, CTA FINAL (fusion Fondateur + double CTA) ═══════════════ */}
       <section id="commencer" className="py-10 md:py-20 bg-primary scroll-mt-24">
         <RevealSection className="max-w-2xl mx-auto px-6 text-center">
