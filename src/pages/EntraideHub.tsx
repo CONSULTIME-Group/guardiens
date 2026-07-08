@@ -303,10 +303,17 @@ const EntraideHub = () => {
   /* Filtre proximité (CP + rayon) */
   const proximity = useMissionDistance(missions);
 
+  // Une mission est expirée seulement si sa date de FIN est passée.
+  // Si `end_date` existe, on l'utilise ; sinon on retombe sur `date_needed`.
   const isMissionExpired = (m: MissionRow) => {
-    if (!m.date_needed) return false;
-    try { return new Date(m.date_needed) < new Date(new Date().setHours(0, 0, 0, 0)); } catch { return false; }
+    const ref = m.end_date || m.date_needed;
+    if (!ref) return false;
+    try {
+      const today = new Date(new Date().setHours(0, 0, 0, 0));
+      return new Date(ref) < today;
+    } catch { return false; }
   };
+  const isMissionPast = (m: MissionRow) => m.status === "completed" || isMissionExpired(m);
 
   const sortMissions = (arr: MissionRow[]): MissionRow[] => {
     const applyPrimary = (list: MissionRow[]): MissionRow[] => {
