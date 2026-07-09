@@ -576,7 +576,7 @@ const PublicSitView = ({
 
               {!accepting ? (
                 <Button className="w-full py-6 rounded-full font-bold text-base" disabled>
-                  Candidatures en cours d'analyse
+                  Candidatures fermées
                 </Button>
               ) : !isAuthenticated ? (
                 <>
