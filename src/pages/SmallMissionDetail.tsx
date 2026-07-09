@@ -227,8 +227,17 @@ const SmallMissionDetail = () => {
     if (!id) return;
     if (id.startsWith("demo-")) { navigate("/petites-missions", { replace: true }); return; }
 
-    const { data: m } = await supabase.from("small_missions").select("*").eq("id", id).single();
+    // Le paramètre d'URL peut être soit un UUID (legacy), soit un slug lisible.
+    const isUuidParam = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    const query = supabase.from("small_missions").select("*");
+    const { data: m } = await (isUuidParam ? query.eq("id", id) : query.eq("slug", id)).maybeSingle();
     if (!m) { setLoading(false); return; }
+
+    // Rétrocompat : si on est arrivé par UUID et qu'un slug existe, on redirige vers l'URL lisible.
+    if (isUuidParam && (m as any).slug) {
+      navigate(`/petites-missions/${(m as any).slug}${window.location.search}`, { replace: true });
+      return;
+    }
     setMission(m);
 
     // Parallélisation : tous ces appels sont indépendants une fois la mission chargée.
