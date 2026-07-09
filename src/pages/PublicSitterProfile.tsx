@@ -1224,7 +1224,7 @@ export default function PublicSitterProfile() {
                 'flex items-center gap-2 px-5 py-3.5',
                 'text-sm font-medium font-body',
                 'border-b-2 transition-all',
-                'focus-visible:outline-none',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
                 activeTab === 'gardien'
                   ? 'border-primary text-primary bg-primary/5'
                   : 'border-transparent text-foreground/60 hover:text-foreground hover:bg-muted/50',
@@ -1245,7 +1245,7 @@ export default function PublicSitterProfile() {
                 'flex items-center gap-2 px-5 py-3.5',
                 'text-sm font-medium font-body',
                 'border-b-2 transition-all',
-                'focus-visible:outline-none',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
                 activeTab === 'proprio'
                   ? 'border-primary text-primary bg-primary/5'
                   : 'border-transparent text-foreground/60 hover:text-foreground hover:bg-muted/50',
@@ -1263,7 +1263,7 @@ export default function PublicSitterProfile() {
                 'flex items-center gap-2 px-5 py-3.5',
                 'text-sm font-medium font-body',
                 'border-b-2 transition-all',
-                'focus-visible:outline-none',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
                 activeTab === 'entraide'
                   ? 'border-primary text-primary bg-primary/5'
                   : 'border-transparent text-foreground/60 hover:text-foreground hover:bg-muted/50',
