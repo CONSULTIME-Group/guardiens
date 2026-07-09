@@ -344,6 +344,7 @@ const AppRoutes = () => (
       <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
       <Route path="/pros" element={<ContentRoute><ProsListing /></ContentRoute>} />
       <Route path="/pros/inscription" element={<AppLayout><ProOnboarding /></AppLayout>} />
+      <Route path="/onboarding/affinity" element={<ProtectedRoute><OnboardingAffinity /></ProtectedRoute>} />
       <Route path="/pros/mon-espace" element={<AppLayout><MyProProfile /></AppLayout>} />
 
       <Route path="/pros/categorie/:catSlug" element={<AppLayout><ProCategoryListing /></AppLayout>} />
