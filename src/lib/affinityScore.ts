@@ -68,11 +68,11 @@ const MIN_DISPLAY_SCORE = 40;
 const W = {
   animals: 2,
   presence: 2,
-  pace: 1,
-  languages: 1,
-  interests: 1,
   ideal: 1,
-  ambiance: 1,
+  pace: 0.5,
+  languages: 0.5,
+  interests: 0.5,
+  ambiance: 0.5,
 } as const;
 
 /**
