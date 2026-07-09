@@ -68,6 +68,7 @@ import { template as missionAutoClosed } from './mission-auto-closed.tsx'
 import { template as missionNudgeFeedback } from './mission-nudge-feedback.tsx'
 import { template as missionNudgeNoResponse } from './mission-nudge-no-response.tsx'
 import { template as mutualAidWeeklyDigest } from './mutual-aid-weekly-digest.tsx'
+import { template as nearbyDailyDigest } from './nearby-daily-digest.tsx'
 
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
@@ -130,6 +131,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'mission-nudge-feedback': missionNudgeFeedback,
   'mission-nudge-no-response': missionNudgeNoResponse,
   'mutual-aid-weekly-digest': mutualAidWeeklyDigest,
+  'nearby-daily-digest': nearbyDailyDigest,
 }
 
 

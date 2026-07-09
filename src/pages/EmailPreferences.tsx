@@ -9,20 +9,34 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-type Prefs = { product_emails: boolean; digest_emails: boolean; alert_emails: boolean; new_mission_digest: boolean };
+type Prefs = {
+  product_emails: boolean;
+  digest_emails: boolean;
+  alert_emails: boolean;
+  new_mission_digest: boolean;
+  nearby_daily_digest: boolean;
+  nearby_daily_radius_km: 5 | 15 | 30;
+};
 
 const EmailPreferences = () => {
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [prefs, setPrefs] = useState<Prefs>({ product_emails: true, digest_emails: true, alert_emails: true, new_mission_digest: true });
+  const [prefs, setPrefs] = useState<Prefs>({
+    product_emails: true,
+    digest_emails: true,
+    alert_emails: true,
+    new_mission_digest: true,
+    nearby_daily_digest: true,
+    nearby_daily_radius_km: 15,
+  });
 
   useEffect(() => {
     if (!user) return;
     (async () => {
       const { data } = await supabase
         .from("email_preferences")
-        .select("product_emails, digest_emails, alert_emails, new_mission_digest")
+        .select("product_emails, digest_emails, alert_emails, new_mission_digest, nearby_daily_digest, nearby_daily_radius_km")
         .eq("user_id", user.id)
         .maybeSingle();
       if (data) setPrefs({
@@ -30,6 +44,8 @@ const EmailPreferences = () => {
         digest_emails: data.digest_emails ?? true,
         alert_emails: data.alert_emails ?? true,
         new_mission_digest: (data as any).new_mission_digest ?? true,
+        nearby_daily_digest: (data as any).nearby_daily_digest ?? true,
+        nearby_daily_radius_km: ((data as any).nearby_daily_radius_km ?? 15) as 5 | 15 | 30,
       });
       setLoading(false);
     })();
@@ -44,6 +60,8 @@ const EmailPreferences = () => {
       p_digest: prefs.digest_emails,
       p_alert: prefs.alert_emails,
       p_new_mission_digest: prefs.new_mission_digest,
+      p_nearby_daily_digest: prefs.nearby_daily_digest,
+      p_nearby_daily_radius_km: prefs.nearby_daily_radius_km,
     } as any);
     setSaving(false);
     if (error) toast.error("Impossible d'enregistrer vos préférences");
@@ -142,6 +160,48 @@ const EmailPreferences = () => {
                 />
               </CardHeader>
             </Card>
+
+            <Card>
+              <CardHeader className="gap-3">
+                <div className="flex flex-row items-start justify-between gap-4">
+                  <div>
+                    <CardTitle className="text-base">Récap quotidien près de chez vous</CardTitle>
+                    <CardDescription>
+                      Un email par jour maximum, envoyé à 13h, qui récapitule les nouvelles
+                      annonces (gardes et coups de main) publiées dans les dernières 24h
+                      autour de chez vous. Pas d'email si rien de nouveau.
+                    </CardDescription>
+                  </div>
+                  <Switch
+                    checked={prefs.nearby_daily_digest}
+                    onCheckedChange={(v) => setPrefs((p) => ({ ...p, nearby_daily_digest: v }))}
+                  />
+                </div>
+                {prefs.nearby_daily_digest && (
+                  <div className="pt-2">
+                    <p className="text-sm text-muted-foreground mb-2">Rayon autour de chez vous</p>
+                    <div className="flex gap-2">
+                      {[5, 15, 30].map((km) => (
+                        <button
+                          key={km}
+                          type="button"
+                          onClick={() => setPrefs((p) => ({ ...p, nearby_daily_radius_km: km as 5 | 15 | 30 }))}
+                          className={`px-4 py-2 rounded-md text-sm border transition ${
+                            prefs.nearby_daily_radius_km === km
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-background text-foreground border-input hover:bg-muted"
+                          }`}
+                        >
+                          {km} km
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardHeader>
+            </Card>
+
+
 
 
             <div className="flex justify-end">
