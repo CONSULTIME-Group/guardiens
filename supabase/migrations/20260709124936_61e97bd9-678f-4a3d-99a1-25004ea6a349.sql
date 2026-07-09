@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS sitter_profiles_public_read ON public.sitter_profiles;
