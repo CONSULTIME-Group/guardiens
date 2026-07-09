@@ -44,7 +44,7 @@ const EntraideSection = ({ userId }: EntraideSectionProps) => {
           .order("created_at", { ascending: false }),
         supabase
           .from("small_missions")
-          .select("id, title, category, mission_type, city, photos")
+          .select("id, slug, title, category, mission_type, city, photos")
           .eq("user_id", userId)
           .eq("status", "open")
           .order("created_at", { ascending: false })
