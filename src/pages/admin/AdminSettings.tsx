@@ -2,14 +2,20 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Settings, Globe, Database, ExternalLink, CheckCircle2, AlertCircle } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Settings, Globe, Database, ExternalLink, CheckCircle2, AlertCircle, Flag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { invalidateFeatureFlag } from "@/hooks/useFeatureFlag";
+import { toast } from "sonner";
 
 const FOUNDER_DATE = "2026-09-30";
+const MANDATORY_ONBOARDING_FLAG = "mandatory_affinity_onboarding";
 
 const AdminSettings = () => {
- const [stats, setStats] = useState({ totalUsers: 0, totalSits: 0, totalReviews: 0 });
- const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ totalUsers: 0, totalSits: 0, totalReviews: 0 });
+  const [loading, setLoading] = useState(true);
+  const [mandatoryOnboarding, setMandatoryOnboarding] = useState<boolean | null>(null);
+  const [togglingFlag, setTogglingFlag] = useState(false);
 
  useEffect(() => {
  const fetchStats = async () => {
