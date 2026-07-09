@@ -111,6 +111,7 @@ export function useAvailableHelpers(currentUserId: string | undefined, enabled: 
           return {
             ...h,
             competences: competenceMap.get(h.id) || [],
+            special_animal_skills: specialSkillsMap.get(h.id) || [],
             review_avg: rev ? rev.total / rev.count : 0,
             review_count: rev?.count || 0,
             sits_count: sitsMap.get(h.id) || 0,
