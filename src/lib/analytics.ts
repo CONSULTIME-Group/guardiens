@@ -20,6 +20,9 @@ export type EventType =
   | "onboarding_step_completed"   // Étape terminée (metadata.step: 0|1|2)
   | "onboarding_completed"        // Profil 100% activé
   | "onboarding_dismissed"        // Modale fermée avant la fin
+  | "onboarding_shown"            // Étape /onboarding/affinity affichée (role, needs_sitter, needs_owner)
+  | "onboarding_role_selected"    // Rôle choisi dans l'étape d'affinité (role)
+  | "onboarding_abandoned"        // Étape /onboarding/affinity quittée sans finir (role, via?)
   | "first_action"                // Première vraie action (metadata.kind)
   | "cta_click"
   | "cta_proprio_clicked"
