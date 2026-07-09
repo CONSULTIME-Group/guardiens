@@ -5365,6 +5365,7 @@ export type Database = {
           pet_species: string | null
           photos: string[]
           postal_code: string
+          slug: string
           status: Database["public"]["Enums"]["small_mission_status"]
           title: string
           updated_at: string
@@ -5390,6 +5391,7 @@ export type Database = {
           pet_species?: string | null
           photos?: string[]
           postal_code?: string
+          slug: string
           status?: Database["public"]["Enums"]["small_mission_status"]
           title?: string
           updated_at?: string
@@ -5415,6 +5417,7 @@ export type Database = {
           pet_species?: string | null
           photos?: string[]
           postal_code?: string
+          slug?: string
           status?: Database["public"]["Enums"]["small_mission_status"]
           title?: string
           updated_at?: string
@@ -6676,6 +6679,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      slugify: { Args: { input: string }; Returns: string }
       slugify_city: { Args: { input: string }; Returns: string }
       trigger_indexnow_push: {
         Args: { _path: string; _source: string }
