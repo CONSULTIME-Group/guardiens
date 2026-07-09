@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { fr, enUS, es, it, de } from "date-fns/locale";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 
 
@@ -23,8 +23,10 @@ interface LiveSit {
   user_id: string;
 }
 
-const fmt = (d: string | null) =>
-  d ? format(new Date(d), "d MMM", { locale: fr }) : "";
+const LOCALE_MAP: Record<string, Locale> = { fr, en: enUS, es, it, de };
+type Locale = typeof fr;
+const fmt = (d: string | null, locale: Locale) =>
+  d ? format(new Date(d), "d MMM", { locale }) : "";
 
 const fallbackImageFor = (city: string | null, country: string | null): string | null => {
   const c = (city || "").toUpperCase();
