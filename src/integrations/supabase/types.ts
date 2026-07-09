@@ -1997,6 +1997,7 @@ export type Database = {
       }
       feature_flags: {
         Row: {
+          applies_since: string | null
           description: string | null
           enabled: boolean
           key: string
@@ -2004,6 +2005,7 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          applies_since?: string | null
           description?: string | null
           enabled?: boolean
           key: string
@@ -2011,6 +2013,7 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          applies_since?: string | null
           description?: string | null
           enabled?: boolean
           key?: string

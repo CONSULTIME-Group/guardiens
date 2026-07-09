@@ -1,0 +1,2 @@
+ALTER TABLE public.feature_flags ADD COLUMN IF NOT EXISTS applies_since timestamptz;
+UPDATE public.feature_flags SET applies_since = now() WHERE key = 'mandatory_affinity_onboarding' AND applies_since IS NULL;
