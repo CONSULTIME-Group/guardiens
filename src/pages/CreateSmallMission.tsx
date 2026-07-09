@@ -231,7 +231,7 @@ const CreateSmallMission = () => {
       photos,
       latitude: coords?.lat ?? null,
       longitude: coords?.lng ?? null,
-    } as any).select("id").maybeSingle();
+    } as any).select("id, slug").maybeSingle();
 
     setSubmitting(false);
     if (error) {
