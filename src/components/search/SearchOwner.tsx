@@ -911,9 +911,38 @@ const SearchOwner = () => {
           <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:hidden" />
         </div>
 
-        {/* Zone mode selector retiré du toolbar : redondant avec le Select rayon (desktop),
-            la pill Rayon (mobile) et le bouton "Élargir à France entière" de l'empty state.
-            Le changement de mode zone reste accessible via l'empty state et l'OutOfZoneBanner. */}
+        {/* Sélecteur de zone : rayon / département / France entière.
+            Toujours visible pour permettre d'élargir sans passer par l'empty state. */}
+        <div
+          role="group"
+          aria-label="Périmètre de recherche"
+          className="flex items-center gap-1.5 flex-wrap pt-1"
+        >
+          {zoneChips.map((z) => {
+            const active = zoneMode === z.key;
+            return (
+              <button
+                key={z.key}
+                type="button"
+                onClick={() => setZoneMode(z.key)}
+                disabled={z.disabled}
+                aria-pressed={active}
+                className={`min-h-9 rounded-full border px-3 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 disabled:cursor-not-allowed ${
+                  active
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-card text-muted-foreground border-border hover:border-primary"
+                }`}
+              >
+                {z.label}
+                {z.count > 0 && (
+                  <span className={`ml-1 text-[10px] ${active ? "text-primary-foreground/80" : "text-muted-foreground/70"}`}>
+                    ({z.count})
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
 
 
         {/* Sort bar + view toggle (sticky avec les pills pour cohérence visuelle) */}
