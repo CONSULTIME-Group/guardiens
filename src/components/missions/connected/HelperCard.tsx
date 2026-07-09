@@ -112,19 +112,43 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile, matchesMyNeed = false
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-1.5">
-          {displayedSkills.map((key: string) => {
-            if (!SKILL_PILL_META[key]) return null;
-            return (
-              <span key={key} className="rounded-full border border-primary/20 bg-primary/10 text-primary px-2.5 py-0.5 text-xs">
-                {tp(`mission_categories.${key === "competences" ? "skills" : key}`)}
-              </span>
-            );
-          })}
-          {extraCount > 0 && (
-            <span className="text-xs text-muted-foreground px-2 py-0.5">+{extraCount}</span>
-          )}
-        </div>
+        {hasConcrete ? (
+          <div className="flex flex-wrap gap-1.5">
+            {concreteVisible.map((label) => {
+              const isSpecial = specialConcrete.includes(label);
+              return (
+                <span
+                  key={label}
+                  title={isSpecial ? `Expertise : ${label}` : label}
+                  className={
+                    isSpecial
+                      ? "rounded-full border border-accent/40 bg-accent/20 text-accent-foreground px-2.5 py-0.5 text-xs font-medium max-w-full truncate"
+                      : "rounded-full border border-primary/20 bg-primary/10 text-primary px-2.5 py-0.5 text-xs max-w-full truncate"
+                  }
+                >
+                  {label}
+                </span>
+              );
+            })}
+            {concreteExtra > 0 && (
+              <span className="text-xs text-muted-foreground px-2 py-0.5">+{concreteExtra}</span>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-1.5">
+            {displayedSkills.map((key: string) => {
+              if (!SKILL_PILL_META[key]) return null;
+              return (
+                <span key={key} className="rounded-full border border-primary/20 bg-primary/10 text-primary px-2.5 py-0.5 text-xs">
+                  {tp(`mission_categories.${key === "competences" ? "skills" : key}`)}
+                </span>
+              );
+            })}
+            {extraCount > 0 && (
+              <span className="text-xs text-muted-foreground px-2 py-0.5">+{extraCount}</span>
+            )}
+          </div>
+        )}
 
         {specialSkills.length > 0 && (
           <div>
