@@ -1133,6 +1133,16 @@ export default function PublicSitterProfile() {
                 </div>
               )}
 
+              {/* Teaser affinité pour visiteurs non connectés */}
+              {activeTab === 'gardien' && !auth.user?.id && sitterProfile && (
+                <div className="self-stretch mt-2">
+                  <AffinityTeaser
+                    role="owner"
+                    targetLabel={profile?.first_name || "ce gardien"}
+                  />
+                </div>
+              )}
+
               {/* Alma Pass 2 — Chantier 2 : bulle fit gardien pour owner avec au moins une annonce publiée */}
               {activeTab === 'gardien' && id && sitterProfile && (
                 <div className="self-stretch mt-3">
