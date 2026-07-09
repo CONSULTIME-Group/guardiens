@@ -247,7 +247,8 @@ const CreateSmallMission = () => {
     submittedRef.current = true;
     try { trackEvent("mission_composer_submitted", { metadata: { mission_id: inserted?.id, category, mission_type: missionType } }); } catch {}
     toast({ title: tp("toast_published_title"), description: tp("toast_published_desc"), duration: 3000 });
-    navigate(inserted?.id ? `/petites-missions/${inserted.id}?published=1` : "/petites-missions");
+    const insertedAny = inserted as any;
+    navigate(insertedAny?.id ? `/petites-missions/${insertedAny.slug || insertedAny.id}?published=1` : "/petites-missions");
   };
 
   return (
