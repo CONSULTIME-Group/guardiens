@@ -68,13 +68,13 @@ const OwnerStepRules = ({ data, onChange }: Props) => {
 
       <div className="space-y-2">
         <Label id={sitterTypesId}>Profil de gardien privilégié</Label>
-        <p className="text-xs text-muted-foreground">Optionnel. Aide à proposer des gardiens qui collent à votre quotidien.</p>
+        <p className="text-xs text-muted-foreground">Contribue à votre score d'affinité avec les gardiens.</p>
         <ChipSelect ariaLabelledBy={sitterTypesId} options={SITTER_TYPES} selected={data.preferred_sitter_types} onChange={v => onChange({ preferred_sitter_types: v })} />
       </div>
 
       <div className="space-y-2">
         <Label id={ambianceId}>Ambiance du foyer</Label>
-        <p className="text-xs text-muted-foreground">Optionnel. Quelques tags pour que le gardien se projette.</p>
+        <p className="text-xs text-muted-foreground">Contribue à votre score d'affinité avec les gardiens.</p>
         <ChipSelect ariaLabelledBy={ambianceId} options={HOME_AMBIANCE_OPTIONS} selected={data.home_ambiance} onChange={v => onChange({ home_ambiance: v })} />
       </div>
 

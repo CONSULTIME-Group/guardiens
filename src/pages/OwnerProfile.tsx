@@ -225,6 +225,12 @@ const OwnerProfilePage = () => {
   const affinityCount = affinityChecks.filter(Boolean).length;
   const affinityPoints = affinityCount >= 3 ? 10 : affinityCount === 2 ? 6 : affinityCount === 1 ? 3 : 0;
 
+  // Affinité côté Identité : intérêts, langues, rythme de vie (édités dans Identity).
+  const identityAffinityOk =
+    affinityChecks[0] && affinityChecks[1] && affinityChecks[2];
+  // Affinité côté Attentes & règles : ambiance du foyer, gardien idéal (édités dans Rules).
+  const rulesAffinityOk = affinityChecks[3] && affinityChecks[4];
+
   const scoredCriteria: ScoredCriterion[] = [
     { section: "identity", kind: "essential", label: tp("criteria.name_postal"), points: 10,
       ok: locationOk },
@@ -240,8 +246,15 @@ const OwnerProfilePage = () => {
       ok: (mergedData.bio?.length ?? 0) >= 50, hint: tp("hints.chars_50", { count: mergedData.bio?.length ?? 0 }) },
     { section: "skills", kind: "bonus", label: tp("criteria.owner_skill"), points: 10,
       ok: (mergedData.owner_competences?.length ?? 0) > 0, hint: tp("hints.tab_skills") },
-    { section: "communication", kind: "bonus", label: tp("criteria.affinity"), points: 10,
+    // Ligne de scoring d'affinité, source unique des points (barème inchangé, aligné SQL).
+    // section "_score" volontairement hors SECTIONS_META : non affichée en sidebar,
+    // les deux lignes ci-dessous (0 point) portent l'attribution par section.
+    { section: "_score", kind: "bonus", label: tp("criteria.affinity"), points: 10,
       ok: affinityCount >= 3, hint: tp("hints.affinity_count", { count: affinityCount }) },
+    { section: "identity", kind: "bonus", label: tp("criteria.affinity_identity"), points: 0,
+      ok: identityAffinityOk, hint: tp("hints.tab_identity") },
+    { section: "rules", kind: "bonus", label: tp("criteria.affinity_rules"), points: 0,
+      ok: rulesAffinityOk },
     { section: "identity", kind: "bonus", label: tp("criteria.identity_verified"), points: 5,
       ok: !!user?.identityVerified, hint: tp("hints.settings_verif") },
   ];

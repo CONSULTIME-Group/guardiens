@@ -1335,7 +1335,9 @@
       "lifestyle": "At least 1 lifestyle",
       "radius": "Geographic radius defined",
       "sitter_gallery_one": "At least 1 gallery photo",
-      "affinity": "Affinities set (interests, languages, life pace…)"
+      "affinity": "Affinities set (interests, languages, pace, home vibe, ideal sitter)",
+      "affinity_identity": "Your affinities (interests, languages, life pace)",
+      "affinity_rules": "Your affinities with sitters (home vibe, ideal sitter)"
     },
     "hints": {
       "tab_identity": "Identity tab.",

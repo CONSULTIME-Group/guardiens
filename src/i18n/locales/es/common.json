@@ -1334,7 +1334,10 @@
       "skill": "Al menos 1 competencia",
       "lifestyle": "Al menos 1 estilo de vida",
       "radius": "Radio geográfico definido",
-      "sitter_gallery_one": "Al menos 1 foto de galería"
+      "sitter_gallery_one": "Al menos 1 foto de galería",
+      "affinity": "Afinidades rellenadas (intereses, idiomas, ritmo, ambiente, cuidador ideal)",
+      "affinity_identity": "Sus afinidades (intereses, idiomas, ritmo de vida)",
+      "affinity_rules": "Sus afinidades con los cuidadores (ambiente del hogar, cuidador ideal)"
     },
     "hints": {
       "tab_identity": "Pestaña Identidad.",

@@ -1334,7 +1334,10 @@
       "skill": "Almeno 1 competenza",
       "lifestyle": "Almeno 1 stile di vita",
       "radius": "Raggio geografico definito",
-      "sitter_gallery_one": "Almeno 1 foto di galleria"
+      "sitter_gallery_one": "Almeno 1 foto di galleria",
+      "affinity": "Affinità compilate (interessi, lingue, ritmo, atmosfera, sitter ideale)",
+      "affinity_identity": "Le sue affinità (interessi, lingue, ritmo di vita)",
+      "affinity_rules": "Le sue affinità con i sitter (atmosfera della casa, sitter ideale)"
     },
     "hints": {
       "tab_identity": "Scheda Identità.",
