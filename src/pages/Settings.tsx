@@ -318,33 +318,29 @@ const Settings = () => {
     setDeleting(true);
     setDeleteStatus(null);
     try {
-      const { error } = await supabase
-        .from("account_deletion_requests")
-        .upsert({ user_id: user.id, status: "pending" }, { onConflict: "user_id" });
-      if (error) throw error;
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({ bio: "[Compte en cours de suppression]" })
-        .eq("id", user.id);
-      if (profileError) throw profileError;
-      const successMsg = "Demande enregistrée. Vous avez 7 jours pour l'annuler depuis cette page.";
+      const { data, error } = await supabase.functions.invoke("self-delete-account", { body: {} });
+      if (error || (data as any)?.error) {
+        throw new Error((data as any)?.error || error?.message || "Suppression impossible");
+      }
+      const successMsg = "Compte supprimé. Vous allez être déconnecté.";
       setDeleteStatus({ type: "success", message: successMsg });
       toast.success(successMsg);
       setDeleteConfirm("");
-      setTimeout(() => {
-        setDeleteOpen(false);
-        setDeleteStatus(null);
-      }, 2500);
+      setTimeout(async () => {
+        await supabase.auth.signOut();
+        window.location.href = "/";
+      }, 1500);
     } catch (e: any) {
       const errorMsg = e?.message
-        ? `Échec de la demande : ${e.message}`
-        : "Échec de la demande de suppression. Veuillez réessayer dans un instant.";
+        ? `Échec de la suppression : ${e.message}`
+        : "Échec de la suppression. Veuillez réessayer dans un instant.";
       setDeleteStatus({ type: "error", message: errorMsg });
       toast.error(errorMsg);
     } finally {
       setDeleting(false);
     }
   };
+
 
   if (loading) {
     return <div className="p-6 md:p-10 text-center text-muted-foreground py-20">Chargement...</div>;
