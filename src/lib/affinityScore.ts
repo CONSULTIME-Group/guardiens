@@ -207,7 +207,7 @@ export function computeAffinityResultFull(
     return { score: 0, matched: [], total: 0, displayed: false, hiddenReason: "disqualified" };
   }
 
-  // Dénominateur FIXE : poids max théorique de TOUS les critères (9).
+  // Dénominateur FIXE : poids max théorique de TOUS les critères (7).
   // Les critères non renseignés des deux côtés = 0 point, donc un profil incomplet
   // tombe naturellement à un score plus bas. Évite le biais "80% partout" lié
   // à un dénominateur dynamique sur 3-4 critères seulement.
