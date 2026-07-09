@@ -284,6 +284,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
           },
           sitterBadges,
           sitterProfiles,
+          sitterAffinityProfiles,
           trustedSitterCount,
           propertyType,
           propertyEnvironment,
