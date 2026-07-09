@@ -94,6 +94,16 @@ const AppCard = memo(({ app, sitterProfiles, sitterAffinityProfiles }: { app: Ap
           ) : (
             <span className="text-xs font-sans text-muted-foreground italic">Nouveau</span>
           )}
+          {sitter?.id && sitterAffinityProfiles?.[sitter.id] ? (
+            <OwnerToSitterAffinity
+              sitterProfile={sitterAffinityProfiles[sitter.id]}
+              context="owner_dashboard_applications"
+              targetId={sitter.id}
+              size="sm"
+              showCta={false}
+              scope="list"
+            />
+          ) : null}
         </div>
         <div className="flex gap-2 mt-3 flex-wrap">
           {sitter?.id ? (
