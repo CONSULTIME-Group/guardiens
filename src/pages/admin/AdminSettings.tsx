@@ -14,6 +14,21 @@ import { toast } from "sonner";
 const FOUNDER_DATE = "2026-09-30";
 const MANDATORY_ONBOARDING_FLAG = "mandatory_affinity_onboarding";
 
+/** Convertit un ISO UTC en valeur affichable par `<input type="datetime-local">` (heure locale). */
+function toLocalInputValue(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** Convertit une valeur `datetime-local` en ISO UTC pour la base. */
+function fromLocalInputValue(local: string): string | null {
+  if (!local) return null;
+  const d = new Date(local);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
 const AdminSettings = () => {
   const [stats, setStats] = useState({ totalUsers: 0, totalSits: 0, totalReviews: 0 });
   const [loading, setLoading] = useState(true);
