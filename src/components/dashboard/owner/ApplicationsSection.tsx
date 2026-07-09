@@ -7,12 +7,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import DashSection from "./DashSection";
 import { capitalize } from "./helpers";
 import type { AppRow, SitterInfo } from "./types";
+import type { AffinitySitterInput } from "@/lib/affinityScore";
 import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
+import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 
 interface ApplicationsSectionProps {
   recentApps: AppRow[];
   sitterProfiles: Record<string, SitterInfo>;
   sitterBadges: Record<string, { badge_key: string; count: number }[]>;
+  sitterAffinityProfiles?: Record<string, AffinitySitterInput>;
   loading?: boolean;
 }
 
