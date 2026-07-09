@@ -146,6 +146,7 @@ const PublicSitView = ({
   onApply,
 }: Props) => {
   const [openPet, setOpenPet] = useState<PetLike | null>(null);
+  const { sitter: viewerSitter } = useViewerSitterForAffinity();
   const photos: string[] = (property?.photos || []).filter(Boolean);
   const petPhotos = pets
     .filter((p) => !!p.photo_url)
