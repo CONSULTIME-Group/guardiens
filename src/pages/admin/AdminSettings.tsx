@@ -207,9 +207,37 @@ const AdminSettings = () => {
  </div>
  <Badge variant="outline" className="text-xs border-warning text-warning">Temporaire</Badge>
  </div>
- </div>
- </CardContent>
- </Card>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Feature flags */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Flag className="h-4 w-4" />
+            Réglages instantanés
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-sm font-medium">Étape d'onboarding obligatoire (affinité)</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Après l'inscription, force les nouveaux membres à renseigner les animaux acceptés, la présence attendue et le type de gardien avant d'accéder au tableau de bord. Bascule sans redéploiement.
+              </p>
+            </div>
+            <Switch
+              checked={mandatoryOnboarding === true}
+              disabled={mandatoryOnboarding === null || togglingFlag}
+              onCheckedChange={toggleMandatoryOnboarding}
+              aria-label="Activer l'étape d'onboarding obligatoire"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+
 
  {/* External services */}
  <Card>
