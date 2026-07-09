@@ -504,7 +504,7 @@ const Settings = () => {
           <DialogHeader>
             <DialogTitle className="text-destructive">Supprimer mon compte</DialogTitle>
             <DialogDescription className="text-sm leading-relaxed">
-              En confirmant, vous demandez la suppression de votre compte. Vos données personnelles seront effacées sous <strong>7 jours</strong>. Vos avis publics resteront visibles de manière anonyme. Cette action peut être annulée pendant 7 jours.
+              En confirmant, vous supprimez <strong>immédiatement et définitivement</strong> votre compte, votre profil et toutes vos données personnelles associées. Vos avis publics resteront visibles de manière anonyme. Cette action est <strong>irréversible</strong>.
             </DialogDescription>
           </DialogHeader>
           {activeCommitmentsCount !== null && activeCommitmentsCount > 0 && (
